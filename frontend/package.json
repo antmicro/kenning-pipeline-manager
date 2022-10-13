@@ -7,8 +7,9 @@
     "build": "vue-cli-service build"
   },
   "dependencies": {
+    "baklavajs": "^1.10.1",
     "vue": "^2.7.7",
-    "baklavajs": "^1.10.1"
+    "vue-router": "^2.8.1"
   },
   "devDependencies": {
     "@vue/cli-service": "^5.0.8"
