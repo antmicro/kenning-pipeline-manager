@@ -2,7 +2,7 @@ import socket
 import select
 import logging
 from enum import Enum
-from typing import Optional
+from typing import NamedTuple, Union
 
 log = logging.getLogger()
 logging.basicConfig(level=logging.NOTSET)
@@ -85,6 +85,23 @@ class Status(Enum):
     SERVER_DISCONNECTED = 8
 
 
+class OutputTuple(NamedTuple):
+    status: Status
+    data: Union[tuple[MessageType, bytes], Exception, None]
+    """
+    Simple structure that should be used to return information when
+    invoking a function from PMServer.
+
+    Parameters
+    ----------
+    status : Status
+        Status of the server when returning from a function.
+    data : Union[tuple(MessageType, bytes), Exception, None]
+        Any additional information that should be passed,
+        along with the status.
+    """
+
+
 class PMServer(object):
     """
     TCP server that communicates with a single client.
@@ -126,13 +143,13 @@ class PMServer(object):
         self.client_socket = None
         self.collected_data = bytes()
 
-    def initialize_server(self) -> tuple[Status, None]:
+    def initialize_server(self) -> OutputTuple:
         """
         Initializes the server socket.
 
         Returns
         -------
-        (Status, None) :
+        OutputTuple :
             Where Status states whether the initialization was successful.
         """
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -144,12 +161,12 @@ class PMServer(object):
         self.server_socket.bind((self.host, self.port))
         self.server_socket.setblocking(False)
         self.server_socket.listen(1)
-        return Status.SERVER_INITIALIZED, None
+        return OutputTuple(Status.SERVER_INITIALIZED, None)
 
     def wait_for_client(
             self,
             timeout: float = 0
-            ) -> tuple[Status, None]:
+            ) -> OutputTuple:
         """
         Listens on the server socket for a client to connect.
 
@@ -162,7 +179,7 @@ class PMServer(object):
 
         Returns
         -------
-        (Status, None) :
+        OutputTuple :
             Where Status states whether a client was connected.
         """
         log.info(f'Server is listening on {self.host}:{self.port}')
@@ -170,32 +187,32 @@ class PMServer(object):
         if ready:
             code = self.accept_client()
             return code
-        return Status.NOTHING, None
+        return OutputTuple(Status.NOTHING, None)
 
-    def accept_client(self) -> tuple[Status, None]:
+    def accept_client(self) -> OutputTuple:
         """
         Accepts a client that has connected to the server socket.
 
         Returns
         -------
-        (Status, None) :
+        OutputTuple :
             Where Status states whether the initialization was successful.
         """
         socket, addr = self.server_socket.accept()
         if self.client_socket is not None:
             log.info('Different client already connected')
             socket.close()
-            return Status.CLIENT_IGNORED, None
+            return OutputTuple(Status.CLIENT_IGNORED, None)
         else:
             log.info('Client connected')
             self.client_socket = socket
             self.client_socket.setblocking(False)
-        return Status.CLIENT_CONNECTED, None
+        return OutputTuple(Status.CLIENT_CONNECTED, None)
 
     def wait_for_response(
             self,
             timeout: float = 0
-            ) -> tuple[Status, Optional[tuple[MessageType, Optional[bytes]]]]:
+            ) -> OutputTuple:
         """
         Waits for a message from the client socket.
 
@@ -207,28 +224,28 @@ class PMServer(object):
 
         Returns
         -------
-        (Status, Optional[(MessageType, Optional[bytes])]) :
+        OutputTuple :
             Where Status states whether there is data to be read and the
-            second argument is either a None or a message received from the
+            data argument is either a None or a message received from the
             client.
         """
         ready, _, _ = select.select([self.client_socket], [], [], timeout)
         if ready:
             return self.receive_data()
 
-        return Status.NOTHING, None
+        return OutputTuple(Status.NOTHING, None)
 
     def receive_data(
             self
-            ) -> tuple[Status, Optional[tuple[MessageType, Optional[bytes]]]]:
+            ) -> OutputTuple:
         """
         Tries to read data from the client.
 
         Returns
         -------
-        (Status, Optional[(MessageType, Optional[bytes])]) :
+        OutputTuple :
             Where Status states whether there is data to be read and the
-            second argument is either a None or a message received from the
+            data argument is either a None or a message received from the
             client.
         """
         data = self.client_socket.recv(self.packet_size)
@@ -236,13 +253,13 @@ class PMServer(object):
             log.info('Client disconnected from the server')
             self.client_socket.close()
             self.client_socket = None
-            return Status.CLIENT_DISCONNECTED, None
+            return OutputTuple(Status.CLIENT_DISCONNECTED, None)
         return self.parse_received(data)
 
     def parse_received(
             self,
             data: bytes
-            ) -> tuple[Status, Optional[tuple[MessageType, Optional[bytes]]]]:
+            ) -> OutputTuple:
         """
         Collects received bytes and checks whether collected a full message.
         All bytes that are received from the client socket using `recv` should
@@ -259,15 +276,16 @@ class PMServer(object):
 
         Returns
         -------
-        (Status, Optional[(MessageType, Optional[bytes])]) :
+        OutputTuple :
             Where Status states whether there is data to be read and the
-            second argument is either a None or a message received from the
+            data argument is either a None or a message received from the
             client.
         """
         self.collected_data += data
 
+        # Checking whether a header of the message was received
         if len(self.collected_data) < 6:
-            return Status.NOTHING, None
+            return OutputTuple(Status.NOTHING, None)
 
         content_size = int.from_bytes(
             self.collected_data[:4],
@@ -275,22 +293,24 @@ class PMServer(object):
             signed=False
         )
 
+        # Checking whether a full message was received.
         if len(self.collected_data) - 4 < content_size:
-            return Status.NOTHING, None
+            return OutputTuple(Status.NOTHING, None)
 
+        # Collecting the message and removing the bytes from the buffer.
         message = self.collected_data[4:4 + content_size]
         self.collected_data = self.collected_data[4 + content_size:]
 
         message_type = MessageType.from_bytes(message[:2])
         message_content = message[2:]
 
-        return Status.DATA_READY, (message_type, message_content)
+        return OutputTuple(Status.DATA_READY, (message_type, message_content))
 
     def send_request(
             self,
             mtype: MessageType,
             data: bytes = bytes()
-            ) -> tuple[Status, Optional[Exception]]:
+            ) -> OutputTuple:
         """
         Sends a request of a specified type and content.
 
@@ -302,9 +322,9 @@ class PMServer(object):
 
         Returns
         -------
-        (Status, Optional[Exception]) :
+        OutputTuple :
             Where Status states whether sending the request was successful and
-            the second argument is either a None or an exception that was
+            the data argument is either a None or an exception that was
             raised while sending the message.
         """
         return self._send_message(mtype.to_bytes() + data)
@@ -312,7 +332,7 @@ class PMServer(object):
     def _send_message(
             self,
             data: bytes
-            ) -> tuple[Status, Optional[Exception]]:
+            ) -> OutputTuple:
         """
         An internal function that adds a length block to the request and sends
         it to the client socket.
@@ -324,28 +344,28 @@ class PMServer(object):
 
         Returns
         -------
-        (Status, Optional[Exception]) :
+        OutputTuple :
             Where Status states whether sending the request was successful and
-            the second argument is either a None or an exception that was
+            the data argument is either a None or an exception that was
             raised while sending the message.
         """
         length = (len(data)).to_bytes(4, byteorder='big', signed=False)
         message = length + data
         try:
             self.client_socket.sendall(message)
-            return Status.DATA_SENT, None
+            return OutputTuple(Status.DATA_SENT, None)
         except Exception as ex:
             log.exception('Something went wrong when sending a message. Disconnecting')  # noqa: E501
             self.disconnect()
-            return Status.ERROR, ex
+            return OutputTuple(Status.ERROR, ex)
 
-    def disconnect(self) -> tuple[Status, None]:
+    def disconnect(self) -> OutputTuple:
         """
         Disconnects both server socket and client socket.
 
         Returns
         -------
-        (Status, None) :
+        OutputTuple :
             Where Status states whether disconnecting was successful.
         """
         if self.server_socket:
@@ -355,4 +375,4 @@ class PMServer(object):
             self.client_socket.close()
             self.client_socket = None
 
-        return Status.SERVER_DISCONNECTED, None
+        return OutputTuple(Status.SERVER_DISCONNECTED, None)
