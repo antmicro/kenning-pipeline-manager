@@ -3,6 +3,7 @@ import App from './App.vue'
 
 import { BaklavaVuePlugin } from '@baklavajs/plugin-renderer-vue'
 import '@baklavajs/plugin-renderer-vue/dist/styles.css'
+// import '../styles/editor.scss'
 
 Vue.use(BaklavaVuePlugin)
 

@@ -2,23 +2,10 @@
 
 The aim of this project is to create a web editor for managing and visualizing pipelines.
 
-## How to run
-### Install dependencies
-```bash=
-npm install
-# or
-yarn install
-```
-### Start developement server
-```bash=
-npm run serve
-# or
-yarn run serve
-```
+## Build
 
-### Build for production
-```bash=
-npm run build
-# or
-yarn run build
-```
+To build the frontend application run `./build` in the root directory.
+
+## Run
+
+To run the server application run `./run` in the root directory. It creates a symbolic link `frontend` to the build frontend application in the `backend` catalogue and then starts a flask server. Building first is required.
