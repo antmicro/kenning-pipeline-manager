@@ -1,10 +1,28 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request, jsonify
+from flask_cors import CORS
+
+import json
+from typing import Union
+from werkzeug.datastructures import FileStorage
+from jsonschema import validate, ValidationError
+from server import PMServer, MessageType, Status
+
 app = Flask(
     __name__,
     static_url_path='',
     static_folder='./frontend',
     template_folder='./frontend'
 )
+
+# TODO: Change it later to our application exclusively
+CORS(app, resources={r'/*': {'origins': '*'}})
+
+host = '127.0.0.1'
+port = 9000
+server = None
+
+schema = None
+schema_filename = './dataflow_schema.json'
 
 
 @app.route('/', methods=['GET'])
@@ -14,6 +32,78 @@ def index():
     works as a single page application.
     """
     return render_template('/index.html')
+
+
+def load_specification(specification: Union[bytes, FileStorage]) -> bool:
+    global schema
+
+    if not schema:
+        with open(schema_filename, 'r') as f:
+            schema = json.load(f)
+
+    try:
+        if isinstance(specification, bytes):
+            specification = json.loads(specification)
+        elif isinstance(specification, FileStorage):
+            specification = json.load(specification)
+        validate(instance=specification, schema=schema)
+    except ValidationError:
+        app.logger.exception('Specification is invalid')
+        return False
+    except Exception:
+        app.logger.exception('Specification is not a valid JSON')
+        return False
+
+    return specification
+
+
+@app.route('/loadspec', methods=['POST'])
+def loadspec():
+    specification = request.files['specfile']
+    specification = load_specification(specification)
+
+    # TODO: Return more descriptive error codes
+    if specification is False:
+        return jsonify(False)
+    return specification
+
+
+@app.route("/connect")
+def connect():
+    global server
+
+    server = PMServer(host, port)
+    server.initialize_server()
+    out = server.wait_for_client(10)
+
+    # TODO: Return more descriptive error codes
+    return jsonify(out.status == Status.CLIENT_CONNECTED)
+
+
+@app.route("/request_spec")
+def request_spec():
+    global server
+    out = server.send_request(MessageType.SPECIFICATION)
+
+    if out.status != Status.DATA_SENT:
+        return jsonify(False)
+
+    # TODO: Check for the client disconnecting and return more
+    # descriptive error codes
+    status = Status.NOTHING
+    while status == Status.NOTHING:
+        out = server.wait_for_response()
+        status = out.status
+
+    if status == Status.DATA_READY:
+        mess_type, specification = out.data
+
+        specification = load_specification(specification)
+
+        if specification:
+            return specification
+        return jsonify(False)
+    return jsonify(False)
 
 
 @app.errorhandler(404)
