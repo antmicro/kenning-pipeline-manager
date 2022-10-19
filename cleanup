@@ -1,0 +1,4 @@
+#!/bin/sh
+
+rm backend/frontend
+rm -rf frontend/dist
