@@ -1,0 +1,14 @@
+image: $CI_IMAGE
+
+variables:
+    GIT_STRATEGY: clone
+    GIT_SUBMODULE_STRATEGY: recursive
+
+stages:
+    - lint
+
+flake8:
+    stage: lint
+    script:
+        - flake8 .
+    allow_failure: false
