@@ -1,0 +1,254 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "description": "JSON that serves as an input for the application",
+    "type": "object",
+    "properties": {
+        "metadata": {
+            "description": "Styling of the nodes",
+            "type": "object"
+        },
+        "nodes": {
+            "description": "Definition of the available nodes",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "description": "Name displayed in a node",
+                        "type": "string"
+                    },
+                    "type": {
+                        "description": "Type that defines styling of a node",
+                        "type": "string"
+                    },
+                    "category": {
+                        "description": "Category of a node in a context menu",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "inputs": {
+                        "description": "Definition of the inputs of the node",
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "description": "Name of the input socket displayed in the node",
+                                    "type": "string"
+                                },
+                                "type": {
+                                    "description": "Type that defines styling of the input socket. It is also used for validation purposes",
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "name",
+                                "type"
+                            ],
+                            "additionalProperties": false
+                        }
+                    },
+                    "outputs": {
+                        "description": "Definition of the outputs of the node",
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "description": "Name of the output socket displayed in the node",
+                                    "type": "string"
+                                },
+                                "type": {
+                                    "description": "Type that defines styling of the output socket. It is also used for validation purposes",
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "name",
+                                "type"
+                            ],
+                            "additionalProperties": false
+                        }
+                    },
+                    "properties": {
+                        "description": "Definition of the properties of the node",
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "description": "Name of the property. Can be displayed for some types of properties",
+                                    "type": "string"
+                                },
+                                "type": {
+                                    "description": "Type of the property",
+                                    "enum": [
+                                        "text",
+                                        "number",
+                                        "integer",
+                                        "select",
+                                        "checkbox",
+                                        "slider"
+                                    ]
+                                },
+                                "default": {
+                                    "description": "Default value of the property"
+                                },
+                                "min": {
+                                    "description": "Minimum value of a range for slider, number and integer type",
+                                    "type": "number"
+                                },
+                                "max": {
+                                    "description": "Maxiumum value of a range for slider, number and integer type",
+                                    "type": "number"
+                                },
+                                "values": {
+                                    "description": "Range of values for the select type",
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                }
+                            },
+                            "required": [
+                                "name",
+                                "type"
+                            ],
+                            "additionalProperties": false,
+                            "allOf": [
+                                {
+                                    "if": {
+                                        "type": "object",
+                                        "properties": {
+                                            "type": {
+                                                "const": "slider"
+                                            }
+                                        },
+                                        "required": [
+                                            "type"
+                                        ]
+                                    },
+                                    "then": {
+                                        "properties": {
+                                            "default": {
+                                                "type": "number"
+                                            }
+                                        },
+                                        "required": [
+                                            "min",
+                                            "max"
+                                        ]
+                                    }
+                                },
+                                {
+                                    "if": {
+                                        "type": "object",
+                                        "properties": {
+                                            "type": {
+                                                "const": "checkbox"
+                                            }
+                                        },
+                                        "required": [
+                                            "type"
+                                        ]
+                                    },
+                                    "then": {
+                                        "properties": {
+                                            "default": {
+                                                "type": "boolean"
+                                            }
+                                        },
+                                        "required": [
+                                            "default"
+                                        ]
+                                    }
+                                },
+                                {
+                                    "if": {
+                                        "type": "object",
+                                        "properties": {
+                                            "type": {
+                                                "const": "select"
+                                            }
+                                        },
+                                        "required": [
+                                            "type"
+                                        ]
+                                    },
+                                    "then": {
+                                        "properties": {
+                                            "default": {
+                                                "type": "string"
+                                            }
+                                        },
+                                        "required": [
+                                            "values"
+                                        ]
+                                    }
+                                },
+                                {
+                                    "if": {
+                                        "type": "object",
+                                        "properties": {
+                                            "type": {
+                                                "enum": [
+                                                    "integer",
+                                                    "number"
+                                                ]
+                                            }
+                                        },
+                                        "required": [
+                                            "type"
+                                        ]
+                                    },
+                                    "then": {
+                                        "properties": {
+                                            "default": {
+                                                "type": "number"
+                                            }
+                                        }
+                                    }
+                                },
+                                {
+                                    "if": {
+                                        "type": "object",
+                                        "properties": {
+                                            "type": {
+                                                "const": "text"
+                                            }
+                                        },
+                                        "required": [
+                                            "type"
+                                        ]
+                                    },
+                                    "then": {
+                                        "properties": {
+                                            "default": {
+                                                "type": "string"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                },
+                "required": [
+                    "name",
+                    "type",
+                    "category",
+                    "inputs",
+                    "outputs",
+                    "properties"
+                ],
+                "additionalProperties": false
+            }
+        }
+    },
+    "required": [
+        "nodes"
+    ],
+    "additionalProperties": false
+}
