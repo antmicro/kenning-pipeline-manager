@@ -44,7 +44,6 @@ export default {
                 const myNode = NodeFactory(node["name"], node["name"], node["inputs"], node["properties"], node["outputs"]);
                 this.editor.registerNodeType(node["name"], myNode, node["category"]);
             });
-            this.nodeInterfaceTypes.addType("Dataset", "#c0e4eb").addType("ModelWrapper", "#c0e4eb").addType("Runtime", "#c0e4eb");
         }
     }
 };

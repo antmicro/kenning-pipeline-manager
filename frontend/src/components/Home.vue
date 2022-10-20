@@ -53,7 +53,7 @@ export default {
                 body: formData
             };
 
-            fetch('http://127.0.0.1:5000/loadspec', requestOptions)
+            fetch('http://127.0.0.1:5000/load_spec', requestOptions)
                 .then(response => response.json())
                 .then(data => {
                     this.dataflowSpecification = data;

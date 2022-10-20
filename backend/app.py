@@ -57,8 +57,8 @@ def load_specification(specification: Union[bytes, FileStorage]) -> bool:
     return specification
 
 
-@app.route('/loadspec', methods=['POST'])
-def loadspec():
+@app.route('/load_spec', methods=['POST'])
+def load_spec():
     specification = request.files['specfile']
     specification = load_specification(specification)
 
