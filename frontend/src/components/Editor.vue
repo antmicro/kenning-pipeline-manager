@@ -11,7 +11,7 @@ import { Editor } from "@baklavajs/core";
 import { ViewPlugin } from "@baklavajs/plugin-renderer-vue";
 import { OptionPlugin } from "@baklavajs/plugin-options-vue";
 import { InterfaceTypePlugin } from "@baklavajs/plugin-interface-types";
-import { NodeFactory } from "./NodeFactory.js"
+import { NodeFactory } from "../NodeFactory.js"
 
 export default {
     props: [

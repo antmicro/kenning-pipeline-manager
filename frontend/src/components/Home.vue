@@ -1,11 +1,11 @@
 <template>
     <div id="container">
-        <div  v-show="!specificationLoaded">
+        <div v-show="!specificationLoaded">
             <label for="spec-file">Load file: </label>
             <input
                 type="file"
                 id="spec-file"
-                @change="load"
+                @change="load_spec"
             >
         </div>
         <Editor v-show="specificationLoaded" :dataflowSpecification="dataflowSpecification"/>
@@ -26,7 +26,7 @@ export default {
         }
     },
     methods: {
-        load() {
+        load_spec() {
             let file = document.getElementById('spec-file').files[0];
             if (!file) return;
 
