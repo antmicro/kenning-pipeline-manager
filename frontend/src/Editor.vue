@@ -14,26 +14,32 @@ import { InterfaceTypePlugin } from "@baklavajs/plugin-interface-types";
 import { NodeFactory } from "./NodeFactory.js"
 
 export default {
+    props: [
+        'dataflowSpecification'
+    ],
     data() {
         return {
             editor: new Editor(),
             viewPlugin: new ViewPlugin(),
-            nodeInterfaceTypes: new InterfaceTypePlugin()
+            nodeInterfaceTypes: new InterfaceTypePlugin(),
+            optionPlugin: new OptionPlugin()
         };
     },
     created() {
         this.editor.use(this.viewPlugin);
         this.editor.use(this.nodeInterfaceTypes);
-        this.editor.use(new OptionPlugin());
+        this.editor.use(this.optionPlugin);
     },
-    mounted() {
-        this.$root.$on("updateEdtior", (spec) => {
-            console.log(spec.nodes);
-            this.update(spec.nodes);
-        });
+    watch: {
+        dataflowSpecification() {
+            this.updateEditor();
+        }
     },
     methods: {
-        update(nodes) {
+        updateEditor() {
+            if (!this.dataflowSpecification) return;
+
+            const nodes = this.dataflowSpecification["nodes"];
             nodes.forEach(node => {
                 const myNode = NodeFactory(node["name"], node["name"], node["inputs"], node["properties"], node["outputs"]);
                 this.editor.registerNodeType(node["name"], myNode, node["category"]);

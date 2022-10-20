@@ -1,6 +1,6 @@
 <template>
     <div id="container">
-        <div>
+        <div  v-show="!specificationLoaded">
             <label for="spec-file">Load file: </label>
             <input
                 type="file"
@@ -8,7 +8,7 @@
                 @change="load"
             >
         </div>
-        <Editor />
+        <Editor v-show="specificationLoaded" :dataflowSpecification="dataflowSpecification"/>
     </div>
 </template>
 
@@ -18,6 +18,12 @@ import Editor from "./Editor.vue";
 export default {
    components: {
         Editor
+    },
+    data() {
+        return {
+            specificationLoaded: false,
+            dataflowSpecification: null
+        }
     },
     methods: {
         load() {
@@ -35,8 +41,9 @@ export default {
             fetch('http://127.0.0.1:5000/loadspec', requestOptions)
                 .then(response => response.json())
                 .then(data => {
-                    this.$root.$emit('updateEdtior', data)
-                })
+                    this.dataflowSpecification = data;
+                    this.specificationLoaded = true;
+                });
         }
     }
 }
