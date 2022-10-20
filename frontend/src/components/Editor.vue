@@ -1,6 +1,6 @@
 <template>
     <div id="container">
-        <div style="height: 100vh; width: 100vw">
+        <div style="height: 80vh; width: 100vw">
             <baklava-editor :plugin="viewPlugin" />
         </div>
     </div>

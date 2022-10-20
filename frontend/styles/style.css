@@ -1,3 +1,12 @@
 body {
     margin: 0px;
 }
+
+label, input {
+    width: 10%;
+    display: block;
+}
+input {
+    border-style: solid;
+    border-width: 1px;
+}
