@@ -4,6 +4,7 @@ import RouterVue from './router/router'
 
 import { BaklavaVuePlugin } from '@baklavajs/plugin-renderer-vue'
 import '@baklavajs/plugin-renderer-vue/dist/styles.css'
+import '../styles/style.css'
 // import '../styles/editor.scss'
 
 Vue.use(BaklavaVuePlugin)
