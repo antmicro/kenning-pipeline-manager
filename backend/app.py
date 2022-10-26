@@ -72,9 +72,13 @@ def load_spec():
 def connect():
     global server
 
-    server = PMServer(host, port)
+    if not server:
+        server = PMServer(host, port)
+    else:
+        server.disconnect()
+
     server.initialize_server()
-    out = server.wait_for_client(10)
+    out = server.wait_for_client()
 
     # TODO: Return more descriptive error codes
     return jsonify(out.status == Status.CLIENT_CONNECTED)
@@ -83,7 +87,7 @@ def connect():
 @app.route("/request_spec")
 def request_spec():
     global server
-    out = server.send_request(MessageType.SPECIFICATION)
+    out = server.send_message(MessageType.SPECIFICATION)
 
     if out.status != Status.DATA_SENT:
         return jsonify(False)

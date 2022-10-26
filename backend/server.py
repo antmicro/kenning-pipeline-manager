@@ -306,24 +306,24 @@ class PMServer(object):
 
         return OutputTuple(Status.DATA_READY, (message_type, message_content))
 
-    def send_request(
+    def send_message(
             self,
             mtype: MessageType,
             data: bytes = bytes()
             ) -> OutputTuple:
         """
-        Sends a request of a specified type and content.
+        Sends a message of a specified type and content.
 
         ----------
         mtype : MessageType
-            Type of the request.
+            Type of the message.
         data : bytes, optional
-            Content of the request.
+            Content of the message.
 
         Returns
         -------
         OutputTuple :
-            Where Status states whether sending the request was successful and
+            Where Status states whether sending the message was successful and
             the data argument is either a None or an exception that was
             raised while sending the message.
         """
@@ -334,18 +334,18 @@ class PMServer(object):
             data: bytes
             ) -> OutputTuple:
         """
-        An internal function that adds a length block to the request and sends
+        An internal function that adds a length block to the message and sends
         it to the client socket.
 
         Parameters
         ----------
         data : bytes
-            Content of the request.
+            Content of the message.
 
         Returns
         -------
         OutputTuple :
-            Where Status states whether sending the request was successful and
+            Where Status states whether sending the message was successful and
             the data argument is either a None or an exception that was
             raised while sending the message.
         """
