@@ -2,7 +2,7 @@ import socket
 import select
 import logging
 from enum import Enum
-from typing import NamedTuple, Union
+from typing import NamedTuple, Union, Optional
 
 log = logging.getLogger()
 logging.basicConfig(level=logging.NOTSET)
@@ -161,11 +161,12 @@ class PMServer(object):
         self.server_socket.bind((self.host, self.port))
         self.server_socket.setblocking(False)
         self.server_socket.listen(1)
+        log.info('Server was initialized')
         return OutputTuple(Status.SERVER_INITIALIZED, None)
 
     def wait_for_client(
             self,
-            timeout: float = 0
+            timeout: Optional[float] = None
             ) -> OutputTuple:
         """
         Listens on the server socket for a client to connect.
@@ -174,7 +175,7 @@ class PMServer(object):
         ----------
         timeout : float
             Time that the server socket is going to wait for
-            a client to connect. If it is zero then the server socket
+            a client to connect. If it is None then the server socket
             blocks indefinitely.
 
         Returns
@@ -211,7 +212,7 @@ class PMServer(object):
 
     def wait_for_response(
             self,
-            timeout: float = 0
+            timeout: Optional[float] = None
             ) -> OutputTuple:
         """
         Waits for a message from the client socket.
@@ -220,7 +221,7 @@ class PMServer(object):
         ----------
         timeout : float
             Time that the server is going to wait for a client's message.
-            If it is zero then the server socket blocks indefinitely.
+            If it is none then the server socket blocks indefinitely.
 
         Returns
         -------
@@ -371,8 +372,10 @@ class PMServer(object):
         if self.server_socket:
             self.server_socket.close()
             self.server_socket = None
+            log.info('Server was disconnected')
         if self.client_socket:
             self.client_socket.close()
             self.client_socket = None
+            log.info('Client was disconnected')
 
         return OutputTuple(Status.SERVER_DISCONNECTED, None)
