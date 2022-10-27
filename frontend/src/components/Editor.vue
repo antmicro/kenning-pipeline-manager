@@ -2,6 +2,13 @@
     <div id="container">
         <div style="height: 80vh; width: 100vw">
             <baklava-editor :plugin="viewPlugin" />
+            <button @click="save_dataflow">Save</button>
+            <label for="load-dataflow-button">Load dataflow: </label>
+                <input
+                    type="file"
+                    id="load-dataflow-button"
+                    @change="load_dataflow"
+                >
         </div>
     </div>
 </template>
@@ -44,6 +51,32 @@ export default {
                 const myNode = NodeFactory(node["name"], node["name"], node["inputs"], node["properties"], node["outputs"]);
                 this.editor.registerNodeType(node["name"], myNode, node["category"]);
             });
+        },
+        save_dataflow() {
+            const blob = new Blob([JSON.stringify(this.editor.save())], { type: 'application/json' });
+            const temp = document.createElement('temp');
+            temp.href = window.URL.createObjectURL(blob);
+            temp.download = 'save';
+            temp.click();
+        },
+        load_dataflow() {
+            let file = document.getElementById('load-dataflow-button').files[0];
+            if (!file) return;
+
+            let formData = new FormData();
+            formData.append('dataflow', file);
+
+            let requestOptions = {
+                method: 'POST',
+                body: formData
+            };
+
+            fetch('http://127.0.0.1:5000/load_dataflow', requestOptions)
+                .then(response => response.json())
+                .then(data => {
+                    this.editor.load(data);
+                    
+                });
         }
     }
 };
