@@ -57,6 +57,22 @@ def load_specification(specification: Union[bytes, FileStorage]) -> bool:
     return specification
 
 
+@app.route('/load_dataflow', methods=['POST'])
+def load_dataflow():
+    # TODO: Return more descriptive error codes
+
+    try:
+        specification = request.files['dataflow']
+        specification = json.load(specification)
+    except Exception:
+        app.logger.exception('Dataflow is not a save')
+        return jsonify(False)
+
+    if specification is False:
+        return jsonify(False)
+    return specification
+
+
 @app.route('/load_spec', methods=['POST'])
 def load_spec():
     specification = request.files['specfile']
