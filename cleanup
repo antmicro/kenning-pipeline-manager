@@ -1,4 +1,9 @@
 #!/bin/sh
 
-rm backend/frontend
-rm -rf frontend/dist
+if [ -L "./backend/frontend" ]; then
+    rm "./backend/frontend"
+fi
+if [ -d "./frontend/dist" ]; then
+    rm -rf "./frontend/dist"
+fi
+
