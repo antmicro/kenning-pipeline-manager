@@ -17,10 +17,12 @@ app = Flask(
 # TODO: Change it later to our application exclusively
 CORS(app, resources={r'/*': {'origins': '*'}})
 
+# TCP Server specification
 host = '127.0.0.1'
 port = 9000
 server = None
 
+# Schema to validate against
 schema = None
 schema_filename = './dataflow_schema.json'
 
@@ -34,7 +36,24 @@ def index():
     return render_template('/index.html')
 
 
-def load_specification(specification: Union[bytes, FileStorage]) -> bool:
+def load_specification(
+        specification: Union[bytes, FileStorage]
+        ) -> Union[bool, dict]:
+    """
+    Loads specification that is given as an arguement and then validates
+    it using a saved schema.
+
+    Parameters
+    ----------
+    specification : Union[bytes, FileStorage]
+        Specification given in bytes or FileStorage.
+
+    Returns
+    -------
+    Union[bool, dict]
+        Returns bool if loading or validating was unsuccessful. Otherwise
+        a valid specification is returned.
+    """
     global schema
 
     if not schema:
@@ -59,8 +78,14 @@ def load_specification(specification: Union[bytes, FileStorage]) -> bool:
 
 @app.route('/load_dataflow', methods=['POST'])
 def load_dataflow():
-    # TODO: Return more descriptive error codes
+    """
+    POST endpoint that should be used to load and validate a dataflow
+    given in a form as a file attached with a name `dataflow`.
 
+    Returns
+    -------
+    TODO: Return more descriptive error codes
+    """
     try:
         specification = request.files['dataflow']
         specification = json.load(specification)
@@ -75,17 +100,37 @@ def load_dataflow():
 
 @app.route('/load_spec', methods=['POST'])
 def load_spec():
+    """
+    POST endpoint that should be used to load a dataflow specification
+    given in a form as a file attached with a name `specfile`.
+
+    Returns
+    -------
+    # TODO: Return more descriptive error codes
+    """
     specification = request.files['specfile']
     specification = load_specification(specification)
 
-    # TODO: Return more descriptive error codes
     if specification is False:
         return jsonify(False)
     return specification
 
 
-@app.route("/connect")
+@app.route('/connect', methods=['GET'])
 def connect():
+    """
+    Endpoint used to start two-way communication TCP server that listens on
+    a host and port specified by `host` and `port`.
+
+    It returns once a client is connected to it.
+
+    If a connection already exists and a new request is made to this endpoint
+    the connection is closed and a new one is initialized.
+
+    Returns
+    -------
+    # TODO: Return more descriptive error codes
+    """
     global server
 
     if not server:
@@ -96,20 +141,28 @@ def connect():
     server.initialize_server()
     out = server.wait_for_client()
 
-    # TODO: Return more descriptive error codes
     return jsonify(out.status == Status.CLIENT_CONNECTED)
 
 
-@app.route("/request_spec")
+@app.route('/request_spec', methods=['GET'])
 def request_spec():
+    """
+    GET endpoint that should be used to request a dataflow specification
+    from an external application.
+
+    A communication has to be established first with a `connect`
+    endpoint first.
+
+    Returns
+    -------
+    # TODO: Return more descriptive error codes
+    """
     global server
     out = server.send_message(MessageType.SPECIFICATION)
 
     if out.status != Status.DATA_SENT:
         return jsonify(False)
 
-    # TODO: Check for the client disconnecting and return more
-    # descriptive error codes
     status = Status.NOTHING
     while status == Status.NOTHING:
         out = server.wait_for_response()
@@ -138,6 +191,6 @@ def default_handler(e):
     return render_template('/index.html')
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     # for now we have only one thread so the global state can't be corrupted
     app.run(threaded=False)
