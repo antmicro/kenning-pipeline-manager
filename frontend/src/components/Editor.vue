@@ -57,6 +57,7 @@ export default {
             const temp = document.createElement('temp');
             temp.href = window.URL.createObjectURL(blob);
             temp.download = 'save';
+            console.log(JSON.stringify(this.editor.save()))
             temp.click();
         },
         load_dataflow() {
@@ -72,10 +73,14 @@ export default {
             };
 
             fetch('http://127.0.0.1:5000/load_dataflow', requestOptions)
-                .then(response => response.json())
-                .then(data => {
-                    this.editor.load(data);
-                    
+                .then(response => response.text().then(data => ({status: response.status, data: data})))
+                .then(obj => {
+                    if (obj.status == 200) {
+                        this.editor.load(JSON.parse(obj.data));
+                    }
+                    else if (obj.status == 400) {
+                        alert(obj.data);
+                    }
                 });
         }
     }

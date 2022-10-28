@@ -54,25 +54,40 @@ export default {
             };
 
             fetch('http://127.0.0.1:5000/load_specification', requestOptions)
-                .then(response => response.json())
-                .then(data => {
-                    this.dataflowSpecification = data;
-                    this.specificationLoaded = true;
+                .then(response => response.text().then(data => ({status: response.status, data: data})))
+                .then(obj => {
+                    if (obj.status == 200) {
+                        this.dataflowSpecification = JSON.parse(obj.data);
+                        this.specificationLoaded = true;
+                    }
+                    else if (obj.status == 400) {
+                        alert(obj.data);
+                    }
                 });
         },
         open_tcp() {
             fetch('http://127.0.0.1:5000/connect')
-                .then(response => response.json())
-                .then(data => {
-                    this.clientConnected = data;
+                .then(response => response.text().then(data => ({status: response.status, data: data})))
+                .then(obj => {
+                    if (obj.status == 200) {
+                        this.clientConnected = true;
+                    }
+                    else if (obj.status == 400) {
+                        alert(obj.data);
+                    }
                 });
         },
         request_specification() {
             fetch('http://127.0.0.1:5000/request_specification')
-                .then(response => response.json())
-                .then(data => {
-                    this.dataflowSpecification = data;
-                    this.specificationLoaded = true;
+                .then(response => response.text().then(data => ({status: response.status, data: data})))
+                .then(obj => {
+                    if (obj.status == 200) {
+                        this.dataflowSpecification = JSON.parse(obj.data);
+                        this.specificationLoaded = true;
+                    }
+                    else if (obj.status == 400) {
+                        alert(obj.data);
+                    }
                 });
         }
     }

@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request
 from flask_cors import CORS
 
 import json
@@ -38,7 +38,7 @@ def index():
 
 def _load_specification(
         specification: Union[bytes, FileStorage]
-        ) -> Union[bool, dict]:
+        ) -> tuple[bool, Union[dict, str]]:
     """
     Loads specification that is given as an arguement and then validates
     it using a saved schema.
@@ -50,9 +50,10 @@ def _load_specification(
 
     Returns
     -------
-    Union[bool, dict]
-        Returns bool if loading or validating was unsuccessful. Otherwise
-        a valid specification is returned.
+    tuple[bool, Union[dict, Exception]]
+        Returns a tuple where the first element states whether the loading
+        was succesful. If it was then the second element is
+        a dataflow specification. Otherwise it is an exception message.
     """
     global schema
 
@@ -68,34 +69,37 @@ def _load_specification(
         validate(instance=specification, schema=schema)
     except ValidationError:
         app.logger.exception('Specification is invalid')
-        return False
-    except Exception:
+        return False, 'Specification is invalid'
+    except json.JSONDecodeError:
         app.logger.exception('Specification is not a valid JSON')
-        return False
+        return False, 'Specification is not a valid JSON'
 
-    return specification
+    return True, specification
 
 
 @app.route('/load_dataflow', methods=['POST'])
 def load_dataflow():
     """
-    POST endpoint that should be used to load and validate a dataflow
+    POST endpoint that should be used to load a dataflow
     given in a form as a file attached with a name `dataflow`.
 
-    Returns
-    -------
-    TODO: Return more descriptive error codes
+    Responses
+    ---------
+    200:
+        Request was successful and the response contains
+        the loaded dataflow.
+    400:
+        There was some error during the request handling.
+        Response contains error message.
     """
     try:
         specification = request.files['dataflow']
         specification = json.load(specification)
     except Exception:
-        app.logger.exception('Dataflow is not a save')
-        return jsonify(False)
+        app.logger.exception('Dataflow is not a valid safe')
+        return 'Dataflow is not a valid safe', 400
 
-    if specification is False:
-        return jsonify(False)
-    return specification
+    return specification, 200
 
 
 @app.route('/load_specification', methods=['POST'])
@@ -104,16 +108,21 @@ def load_specification():
     POST endpoint that should be used to load a dataflow specification
     given in a form as a file attached with a name `specfile`.
 
-    Returns
-    -------
-    # TODO: Return more descriptive error codes
+    Responses
+    ---------
+    200:
+        Request was successful and the response contains
+        the specification.
+    400:
+        There was some error during the request handling.
+        Response contains error message.
     """
     specification = request.files['specfile']
-    specification = _load_specification(specification)
+    success, specification = _load_specification(specification)
 
-    if specification is False:
-        return jsonify(False)
-    return specification
+    if success:
+        return specification, 200
+    return specification, 400
 
 
 @app.route('/connect', methods=['GET'])
@@ -122,14 +131,17 @@ def connect():
     Endpoint used to start two-way communication TCP server that listens on
     a host and port specified by `host` and `port`.
 
-    It returns once a client is connected to it.
+    It returns once an external application is connected to it.
 
     If a connection already exists and a new request is made to this endpoint
     the connection is closed and a new one is initialized.
 
-    Returns
-    -------
-    # TODO: Return more descriptive error codes
+    Responses
+    ---------
+    200:
+        Request was successful and an external application was connected.
+    400:
+        External application did not connect.
     """
     global server
 
@@ -141,7 +153,9 @@ def connect():
     server.initialize_server()
     out = server.wait_for_client()
 
-    return jsonify(out.status == Status.CLIENT_CONNECTED)
+    if out.status == Status.CLIENT_CONNECTED:
+        return 'Client connected', 200
+    return 'Client did not connect', 400
 
 
 @app.route('/request_specification', methods=['GET'])
@@ -153,15 +167,24 @@ def request_specification():
     A communication has to be established first with a `connect`
     endpoint first.
 
-    Returns
-    -------
-    # TODO: Return more descriptive error codes
+    Responses
+    ---------
+    200:
+        Request was successful and the response contains
+        the specification from an external application.
+    400:
+        There was some error during the request handling.
+        Response contains error message.
     """
     global server
+
+    if not server:
+        return 'TCP server not initialized', 400
+
     out = server.send_message(MessageType.SPECIFICATION)
 
     if out.status != Status.DATA_SENT:
-        return jsonify(False)
+        return 'Error while sending a message to an externall aplication', 400
 
     status = Status.NOTHING
     while status == Status.NOTHING:
@@ -170,12 +193,17 @@ def request_specification():
 
     if status == Status.DATA_READY:
         mess_type, specification = out.data
+        if mess_type != MessageType.OK:
+            return 'Invalid message type from the client', 400
 
-        specification = _load_specification(specification)
+        success, specification = _load_specification(specification)
 
-        if specification:
-            return specification
-    return jsonify(False)
+        if success:
+            return specification, 200
+        return specification, 400
+    if status == Status.CLIENT_DISCONNECTED:
+        return 'Client is disconnected', 400
+    return 'Unknown error', 400
 
 
 @app.errorhandler(404)
