@@ -175,7 +175,6 @@ def request_specification():
 
         if specification:
             return specification
-        return jsonify(False)
     return jsonify(False)
 
 
@@ -193,4 +192,4 @@ def default_handler(e):
 
 if __name__ == '__main__':
     # for now we have only one thread so the global state can't be corrupted
-    app.run(threaded=False)
+    app.run(threaded=False, port=5000)
