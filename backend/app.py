@@ -36,7 +36,7 @@ def index():
     return render_template('/index.html')
 
 
-def load_specification(
+def _load_specification(
         specification: Union[bytes, FileStorage]
         ) -> Union[bool, dict]:
     """
@@ -98,8 +98,8 @@ def load_dataflow():
     return specification
 
 
-@app.route('/load_spec', methods=['POST'])
-def load_spec():
+@app.route('/load_specification', methods=['POST'])
+def load_specification():
     """
     POST endpoint that should be used to load a dataflow specification
     given in a form as a file attached with a name `specfile`.
@@ -109,7 +109,7 @@ def load_spec():
     # TODO: Return more descriptive error codes
     """
     specification = request.files['specfile']
-    specification = load_specification(specification)
+    specification = _load_specification(specification)
 
     if specification is False:
         return jsonify(False)
@@ -144,8 +144,8 @@ def connect():
     return jsonify(out.status == Status.CLIENT_CONNECTED)
 
 
-@app.route('/request_spec', methods=['GET'])
-def request_spec():
+@app.route('/request_specification', methods=['GET'])
+def request_specification():
     """
     GET endpoint that should be used to request a dataflow specification
     from an external application.
@@ -171,7 +171,7 @@ def request_spec():
     if status == Status.DATA_READY:
         mess_type, specification = out.data
 
-        specification = load_specification(specification)
+        specification = _load_specification(specification)
 
         if specification:
             return specification

@@ -6,7 +6,7 @@
                 <input
                     type="file"
                     id="load-spec-button"
-                    @change="load_spec"
+                    @change="load_specification"
                 >
             </div>
             <input v-show="!clientConnected"
@@ -19,7 +19,7 @@
                 value="Request specification"
                 type="button"
                 id="request-spec-button"
-                @click="request_spec"
+                @click="request_specification"
             >
         </div>
         <Editor v-show="specificationLoaded" :dataflowSpecification="dataflowSpecification"/>
@@ -41,7 +41,7 @@ export default {
         }
     },
     methods: {
-        load_spec() {
+        load_specification() {
             let file = document.getElementById('load-spec-button').files[0];
             if (!file) return;
 
@@ -53,7 +53,7 @@ export default {
                 body: formData
             };
 
-            fetch('http://127.0.0.1:5000/load_spec', requestOptions)
+            fetch('http://127.0.0.1:5000/load_specification', requestOptions)
                 .then(response => response.json())
                 .then(data => {
                     this.dataflowSpecification = data;
@@ -67,8 +67,8 @@ export default {
                     this.clientConnected = data;
                 });
         },
-        request_spec() {
-            fetch('http://127.0.0.1:5000/request_spec')
+        request_specification() {
+            fetch('http://127.0.0.1:5000/request_specification')
                 .then(response => response.json())
                 .then(data => {
                     this.dataflowSpecification = data;
