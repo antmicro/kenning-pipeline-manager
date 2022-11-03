@@ -110,10 +110,7 @@
                                 },
                                 "values": {
                                     "description": "Range of values for the select type",
-                                    "type": "array",
-                                    "items": {
-                                        "type": "string"
-                                    }
+                                    "type": "array"
                                 }
                             },
                             "required": [
@@ -182,11 +179,6 @@
                                         ]
                                     },
                                     "then": {
-                                        "properties": {
-                                            "default": {
-                                                "type": ["string", "null"]
-                                            }
-                                        },
                                         "required": [
                                             "values"
                                         ]
