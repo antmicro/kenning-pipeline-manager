@@ -93,6 +93,10 @@
                                         "slider"
                                     ]
                                 },
+                                "description": {
+                                    "description": "Description of the property. Can be displayed to the user",
+                                    "type": "string"
+                                },
                                 "default": {
                                     "description": "Default value of the property"
                                 },
@@ -133,7 +137,7 @@
                                     "then": {
                                         "properties": {
                                             "default": {
-                                                "type": "number"
+                                                "type": ["number", "null"]
                                             }
                                         },
                                         "required": [
@@ -157,7 +161,7 @@
                                     "then": {
                                         "properties": {
                                             "default": {
-                                                "type": "boolean"
+                                                "type": ["boolean", "null"]
                                             }
                                         },
                                         "required": [
@@ -180,7 +184,7 @@
                                     "then": {
                                         "properties": {
                                             "default": {
-                                                "type": "string"
+                                                "type": ["string", "null"]
                                             }
                                         },
                                         "required": [
@@ -206,7 +210,7 @@
                                     "then": {
                                         "properties": {
                                             "default": {
-                                                "type": "number"
+                                                "type": ["number", "null"]
                                             }
                                         }
                                     }
@@ -226,7 +230,7 @@
                                     "then": {
                                         "properties": {
                                             "default": {
-                                                "type": "string"
+                                                "type": ["string", "null"]
                                             }
                                         }
                                     }
