@@ -31,6 +31,9 @@ export function NodeFactory(name, displayName, inputs, properties, outputs) {
                 newNode.addOption(propName, "SliderOption", propDef,
                     undefined, { min: keywords["min"], max: keywords["max"] });
                 break;
+            case "list":
+                newNode.addOption(propName, "ListOption", undefined, undefined, { dtype: keywords["dtype"] });
+                break;
             default:
                 console.error(propType, "- input type is not recognized.")
         }

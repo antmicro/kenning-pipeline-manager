@@ -19,6 +19,7 @@ import { ViewPlugin } from "@baklavajs/plugin-renderer-vue";
 import { OptionPlugin } from "@baklavajs/plugin-options-vue";
 import { InterfaceTypePlugin } from "@baklavajs/plugin-interface-types";
 import { NodeFactory } from "../NodeFactory.js"
+import ListOption from "../ListOption.vue"
 
 export default {
     props: [
@@ -36,6 +37,7 @@ export default {
         this.editor.use(this.viewPlugin);
         this.editor.use(this.nodeInterfaceTypes);
         this.editor.use(this.optionPlugin);
+        this.viewPlugin.registerOption("ListOption", ListOption);
     },
     watch: {
         dataflowSpecification() {
