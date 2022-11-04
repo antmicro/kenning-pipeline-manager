@@ -24,7 +24,7 @@ server = None
 
 # Schema to validate against
 schema = None
-schema_filename = './dataflow_schema.json'
+schema_filename = './dataflow_spec_schema.json'
 
 
 @app.route('/', methods=['GET'])

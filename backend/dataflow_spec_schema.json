@@ -90,7 +90,8 @@
                                         "integer",
                                         "select",
                                         "checkbox",
-                                        "slider"
+                                        "slider",
+                                        "list"
                                     ]
                                 },
                                 "description": {
@@ -111,6 +112,16 @@
                                 "values": {
                                     "description": "Range of values for the select type",
                                     "type": "array"
+                                },
+                                "dtype": {
+                                    "description": "Data types of elements in a list type",
+                                    "type": "string",
+                                    "enum": [
+                                        "integer",
+                                        "number",
+                                        "string",
+                                        "boolean"
+                                    ]
                                 }
                             },
                             "required": [
