@@ -50,7 +50,7 @@ def _load_specification(
 
     Returns
     -------
-    tuple[bool, Union[dict, Exception]]
+    tuple[bool, Union[dict, str]]
         Returns a tuple where the first element states whether the loading
         was succesful. If it was then the second element is
         a dataflow specification. Otherwise it is an exception message.
