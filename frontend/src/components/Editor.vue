@@ -18,8 +18,8 @@ import { Editor } from "@baklavajs/core";
 import { ViewPlugin } from "@baklavajs/plugin-renderer-vue";
 import { OptionPlugin } from "@baklavajs/plugin-options-vue";
 import { InterfaceTypePlugin } from "@baklavajs/plugin-interface-types";
-import { NodeFactory } from "../NodeFactory.js"
-import ListOption from "../ListOption.vue"
+import { NodeFactory } from "../core/NodeFactory.js"
+import ListOption from "../options/ListOption.vue"
 
 export default {
     props: [
