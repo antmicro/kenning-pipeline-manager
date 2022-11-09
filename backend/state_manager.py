@@ -7,10 +7,10 @@ import resources
 
 class PMStateManager:
     def __init__(
-        self,
-        tcp_server_port: str = '127.0.0.1',
-        tcp_server_host: int = 9000,
-    ) -> None:
+            self,
+            tcp_server_port: str = '127.0.0.1',
+            tcp_server_host: int = 9000,
+            ) -> None:
         """
         Creates a state manager
 
@@ -31,10 +31,10 @@ class PMStateManager:
         self.schema_filename = 'dataflow_spec_schema.json'
 
     def initialize(
-        self,
-        tcp_server_port: str,
-        tcp_server_host: int,
-    ) -> None:
+            self,
+            tcp_server_port: str,
+            tcp_server_host: int,
+            ) -> None:
         """
         Reinitialize the configuration of the state
 
