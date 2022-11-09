@@ -56,11 +56,11 @@ export default {
         },
         save_dataflow() {
             const blob = new Blob([JSON.stringify(this.editor.save())], { type: 'application/json' });
-            const temp = document.createElement('temp');
+            const temp = document.createElement('a');
             temp.href = window.URL.createObjectURL(blob);
             temp.download = 'save';
-            console.log(JSON.stringify(this.editor.save()))
             temp.click();
+            console.log(JSON.stringify(this.editor.save()))
         },
         load_dataflow() {
             let file = document.getElementById('load-dataflow-button').files[0];
