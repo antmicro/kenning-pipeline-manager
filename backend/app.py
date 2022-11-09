@@ -1,11 +1,15 @@
 from flask import Flask, render_template, request
 from flask_cors import CORS
 
+import sys
 import json
+import argparse
 from typing import Union
 from werkzeug.datastructures import FileStorage
 from jsonschema import validate, ValidationError
-from server import PMServer, MessageType, Status
+
+from server import MessageType, Status
+from state_manager import PMStateManager
 
 app = Flask(
     __name__,
@@ -14,17 +18,12 @@ app = Flask(
     template_folder='./frontend'
 )
 
+
 # TODO: Change it later to our application exclusively
 CORS(app, resources={r'/*': {'origins': '*'}})
 
-# TCP Server specification
-host = '127.0.0.1'
-port = 9000
-server = None
 
-# Schema to validate against
-schema = None
-schema_filename = './dataflow_spec_schema.json'
+state_manager = PMStateManager()
 
 
 @app.route('/', methods=['GET'])
@@ -55,17 +54,13 @@ def _load_specification(
         was succesful. If it was then the second element is
         a dataflow specification. Otherwise it is an exception message.
     """
-    global schema
-
-    if not schema:
-        with open(schema_filename, 'r') as f:
-            schema = json.load(f)
-
     try:
         if isinstance(specification, bytes):
             specification = json.loads(specification)
         elif isinstance(specification, FileStorage):
             specification = json.load(specification)
+
+        schema = state_manager.get_schema()
         validate(instance=specification, schema=schema)
     except ValidationError:
         app.logger.exception('Specification is invalid')
@@ -143,15 +138,11 @@ def connect():
     400:
         External application did not connect.
     """
-    global server
+    tcp_server = state_manager.get_tcp_server()
 
-    if not server:
-        server = PMServer(host, port)
-    else:
-        server.disconnect()
-
-    server.initialize_server()
-    out = server.wait_for_client()
+    tcp_server.disconnect()
+    tcp_server.initialize_server()
+    out = tcp_server.wait_for_client()
 
     if out.status == Status.CLIENT_CONNECTED:
         return 'Client connected', 200
@@ -176,19 +167,19 @@ def request_specification():
         There was some error during the request handling.
         Response contains error message.
     """
-    global server
+    tcp_server = state_manager.get_tcp_server()
 
-    if not server:
+    if not tcp_server:
         return 'TCP server not initialized', 400
 
-    out = server.send_message(MessageType.SPECIFICATION)
+    out = tcp_server.send_message(MessageType.SPECIFICATION)
 
     if out.status != Status.DATA_SENT:
         return 'Error while sending a message to an externall aplication', 400
 
     status = Status.NOTHING
     while status == Status.NOTHING:
-        out = server.wait_for_response()
+        out = tcp_server.wait_for_response()
         status = out.status
 
     if status == Status.DATA_READY:
@@ -218,6 +209,38 @@ def default_handler(e):
     return render_template('/index.html')
 
 
-if __name__ == '__main__':
+def main(argv):
+    parser = argparse.ArgumentParser(argv[0])
+    parser.add_argument(
+        '--tcp-server-host',
+        type=str,
+        help='The address of the Pipeline Manager TCP Server',
+        default='127.0.0.1'
+    )
+    parser.add_argument(
+        '--tcp-server-port',
+        type=int,
+        help='The port of the Pipeline Manager TCP Server',
+        default=9000
+    )
+    parser.add_argument(
+        '--backend-port',
+        type=int,
+        help='The port of the backend of Pipeline Manager',
+        default=5000
+    )
+    args, _ = parser.parse_known_args(argv[1:])
+
+    state_manager.initialize(
+        args.tcp_server_port,
+        args.tcp_server_host
+    )
     # for now we have only one thread so the global state can't be corrupted
-    app.run(threaded=False, port=5000)
+    app.run(
+        threaded=False,
+        port=args.backend_port
+    )
+
+
+if __name__ == '__main__':
+    main(sys.argv)
