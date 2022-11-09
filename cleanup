@@ -1,9 +1,6 @@
 #!/bin/sh
 
-if [ -L "./backend/frontend" ]; then
-    rm "./backend/frontend"
-fi
-if [ -d "./frontend/dist" ]; then
-    rm -rf "./frontend/dist"
+if [ -d "./pipeline_manager/frontend/dist" ]; then
+    rm -rf "./pipeline_manager/frontend/dist"
 fi
 

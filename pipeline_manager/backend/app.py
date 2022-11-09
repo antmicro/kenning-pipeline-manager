@@ -8,17 +8,18 @@ from typing import Union
 from werkzeug.datastructures import FileStorage
 from jsonschema import validate, ValidationError
 from http import HTTPStatus
+from importlib.resources import path
 
-from server import MessageType, Status
-from state_manager import global_state_manager
+from pipeline_manager.backend.server import MessageType, Status
+from pipeline_manager.backend.state_manager import global_state_manager
+from pipeline_manager import frontend
 
 app = Flask(
     __name__,
     static_url_path='',
-    static_folder='./frontend',
-    template_folder='./frontend'
+    static_folder=str(path(frontend, 'dist')),
+    template_folder=str(path(frontend, 'dist'))
 )
-
 
 # TODO: Change it later to our application exclusively
 CORS(app, resources={r'/*': {'origins': '*'}})

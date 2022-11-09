@@ -1,8 +1,8 @@
 import json
 from importlib.resources import open_text
 
-from server import PMServer
-import resources
+from pipeline_manager.backend.server import PMServer
+from pipeline_manager.resources import schemas
 
 
 class PMStateManager:
@@ -80,7 +80,7 @@ class PMStateManager:
         """
         if not self.schema:
             with open_text(
-                resources,
+                schemas,
                 self.schema_filename
             ) as f:
                 self.schema = json.load(f)
