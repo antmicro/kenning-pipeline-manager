@@ -7,6 +7,7 @@ import argparse
 from typing import Union
 from werkzeug.datastructures import FileStorage
 from jsonschema import validate, ValidationError
+from http import HTTPStatus
 
 from server import MessageType, Status
 from state_manager import global_state_manager
@@ -28,6 +29,12 @@ def index():
     """
     Default GET enpoint that returns a simple frontend html file which
     works as a single page application.
+
+    Responses
+    ---------
+    HTTPStatus.OK
+        Request was successful and the response contains
+        entry HTML for the frontend application
     """
     return render_template('/index.html')
 
@@ -77,10 +84,10 @@ def load_dataflow():
 
     Responses
     ---------
-    200:
+    HTTPStatus.OK
         Request was successful and the response contains
         the loaded dataflow.
-    400:
+    HTTPStatus.BAD_REQUEST
         There was some error during the request handling.
         Response contains error message.
     """
@@ -89,9 +96,9 @@ def load_dataflow():
         specification = json.load(specification)
     except Exception:
         app.logger.exception('Dataflow is not a valid safe')
-        return 'Dataflow is not a valid safe', 400
+        return 'Dataflow is not a valid safe', HTTPStatus.BAD_REQUEST
 
-    return specification, 200
+    return specification, HTTPStatus.OK
 
 
 @app.route('/load_specification', methods=['POST'])
@@ -102,10 +109,10 @@ def load_specification():
 
     Responses
     ---------
-    200:
+    HTTPStatus.OK
         Request was successful and the response contains
         the specification.
-    400:
+    HTTPStatus.BAD_REQUEST
         There was some error during the request handling.
         Response contains error message.
     """
@@ -113,8 +120,8 @@ def load_specification():
     success, specification = _load_specification(specification)
 
     if success:
-        return specification, 200
-    return specification, 400
+        return specification, HTTPStatus.OK
+    return specification, HTTPStatus.BAD_REQUEST
 
 
 @app.route('/connect', methods=['GET'])
@@ -130,9 +137,9 @@ def connect():
 
     Responses
     ---------
-    200:
+    HTTPStatus.OK
         Request was successful and an external application was connected.
-    400:
+    HTTPStatus.BAD_REQUEST
         External application did not connect.
     """
     tcp_server = global_state_manager.get_tcp_server()
@@ -142,8 +149,8 @@ def connect():
     out = tcp_server.wait_for_client()
 
     if out.status == Status.CLIENT_CONNECTED:
-        return 'Client connected', 200
-    return 'Client did not connect', 400
+        return 'Client connected', HTTPStatus.OK
+    return 'Client did not connect', HTTPStatus.BAD_REQUEST
 
 
 @app.route('/request_specification', methods=['GET'])
@@ -157,22 +164,22 @@ def request_specification():
 
     Responses
     ---------
-    200:
+    HTTPStatus.OK
         Request was successful and the response contains
         the specification from an external application.
-    400:
+    HTTPStatus.BAD_REQUEST
         There was some error during the request handling.
         Response contains error message.
     """
     tcp_server = global_state_manager.get_tcp_server()
 
     if not tcp_server:
-        return 'TCP server not initialized', 400
+        return 'TCP server not initialized', HTTPStatus.BAD_REQUEST
 
     out = tcp_server.send_message(MessageType.SPECIFICATION)
 
     if out.status != Status.DATA_SENT:
-        return 'Error while sending a message to an externall aplication', 400
+        return 'Error while sending a message to an externall aplication', HTTPStatus.BAD_REQUEST  # noqa: E501
 
     status = Status.NOTHING
     while status == Status.NOTHING:
@@ -182,16 +189,16 @@ def request_specification():
     if status == Status.DATA_READY:
         mess_type, specification = out.data
         if mess_type != MessageType.OK:
-            return 'Invalid message type from the client', 400
+            return 'Invalid message type from the client', HTTPStatus.BAD_REQUEST  # noqa: E501
 
         success, specification = _load_specification(specification)
 
         if success:
-            return specification, 200
-        return specification, 400
+            return specification, HTTPStatus.OK
+        return specification, HTTPStatus.BAD_REQUEST
     if status == Status.CLIENT_DISCONNECTED:
-        return 'Client is disconnected', 400
-    return 'Unknown error', 400
+        return 'Client is disconnected', HTTPStatus.BAD_REQUEST
+    return 'Unknown error', HTTPStatus.BAD_REQUEST
 
 
 @app.errorhandler(404)
@@ -202,6 +209,11 @@ def default_handler(e):
     Because it is a single page application the routing is managed by the
     frontend side. Every requests to the backend returns the same html page and
     only then the route is handled by the browser.
+
+    Responses
+    ---------
+    HTTPStatus.OK
+        The response contains entry HTML for the frontend application
     """
     return render_template('/index.html')
 
