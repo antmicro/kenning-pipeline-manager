@@ -6,6 +6,12 @@ import resources
 
 
 class PMStateManager:
+    """
+    Global state manager that should be used work with the application state.
+
+    This class should not be imported directly, but rather
+    `global_state_manager` object should be imported to use this class.
+    """
     def __init__(
             self,
             tcp_server_port: str = '127.0.0.1',
