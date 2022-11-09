@@ -4,5 +4,4 @@ cd backend
 if [ ! -L "./frontend" ]; then
     ln -s ../frontend/dist frontend
 fi
-flask run
-
+python3 app.py
