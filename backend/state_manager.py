@@ -8,11 +8,23 @@ import resources
 class PMStateManager:
     def __init__(
         self,
-        tcp_port: str = '127.0.0.1',
-        tcp_host: int = 9000,
+        tcp_server_port: str = '127.0.0.1',
+        tcp_server_host: int = 9000,
     ) -> None:
-        self.tcp_port = tcp_port
-        self.tcp_host = tcp_host
+        """
+        Creates a state manager
+
+        Parameters
+        ----------
+        tcp_server_port : str
+            Application port that is going to be used for the
+            TCP server socket.
+        tcp_server_host : int
+            IPv4 of the server that is going to be used for the
+            TCP server socket.
+        """
+        self.tcp_server_port = tcp_server_port
+        self.tcp_server_host = tcp_server_host
         self.server = None
 
         self.schema = None
@@ -20,18 +32,46 @@ class PMStateManager:
 
     def initialize(
         self,
-        tcp_port: str,
-        tcp_host: int,
+        tcp_server_port: str,
+        tcp_server_host: int,
     ) -> None:
-        self.tcp_port = tcp_port
-        self.tcp_host = tcp_host
+        """
+        Reinitialize the configuration of the state
+
+        Parameters
+        ----------
+        tcp_server_port : str
+            Application port that is going to be used for the
+            TCP server socket.
+        tcp_server_host : int
+            IPv4 of the server that is going to be used for the
+            TCP server socket.
+        """
+        self.tcp_server_port = tcp_server_port
+        self.tcp_server_host = tcp_server_host
 
     def get_tcp_server(self) -> PMServer:
+        """
+        Returns initialized PMServer
+
+        Returns
+        -------
+        PMServer
+            Initialied PMServer
+        """
         if not self.server:
-            self.server = PMServer(self.tcp_host, self.tcp_port)
+            self.server = PMServer(self.tcp_server_host, self.tcp_server_port)
         return self.server
 
     def get_schema(self) -> dict:
+        """
+        Returns dataflow specification schema
+
+        Returns
+        -------
+        dict
+            Dataflow specification schema
+        """
         if not self.schema:
             with open_text(
                 resources,
@@ -39,3 +79,7 @@ class PMStateManager:
             ) as f:
                 self.schema = json.load(f)
         return self.schema
+
+
+# Singleton-like object that should be imported
+global_state_manager = PMStateManager()

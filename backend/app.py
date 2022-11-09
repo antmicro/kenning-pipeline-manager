@@ -9,7 +9,7 @@ from werkzeug.datastructures import FileStorage
 from jsonschema import validate, ValidationError
 
 from server import MessageType, Status
-from state_manager import PMStateManager
+from state_manager import global_state_manager
 
 app = Flask(
     __name__,
@@ -21,9 +21,6 @@ app = Flask(
 
 # TODO: Change it later to our application exclusively
 CORS(app, resources={r'/*': {'origins': '*'}})
-
-
-state_manager = PMStateManager()
 
 
 @app.route('/', methods=['GET'])
@@ -60,7 +57,7 @@ def _load_specification(
         elif isinstance(specification, FileStorage):
             specification = json.load(specification)
 
-        schema = state_manager.get_schema()
+        schema = global_state_manager.get_schema()
         validate(instance=specification, schema=schema)
     except ValidationError:
         app.logger.exception('Specification is invalid')
@@ -138,7 +135,7 @@ def connect():
     400:
         External application did not connect.
     """
-    tcp_server = state_manager.get_tcp_server()
+    tcp_server = global_state_manager.get_tcp_server()
 
     tcp_server.disconnect()
     tcp_server.initialize_server()
@@ -167,7 +164,7 @@ def request_specification():
         There was some error during the request handling.
         Response contains error message.
     """
-    tcp_server = state_manager.get_tcp_server()
+    tcp_server = global_state_manager.get_tcp_server()
 
     if not tcp_server:
         return 'TCP server not initialized', 400
@@ -231,7 +228,7 @@ def main(argv):
     )
     args, _ = parser.parse_known_args(argv[1:])
 
-    state_manager.initialize(
+    global_state_manager.initialize(
         args.tcp_server_port,
         args.tcp_server_host
     )
