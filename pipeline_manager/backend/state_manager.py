@@ -1,7 +1,7 @@
 import json
 from importlib.resources import open_text
 
-from pipeline_manager.backend.server import PMServer
+from kenning_pipeline_manager_backend_communication.communication_backend import CommunicationBackend  # noqa: E501
 from pipeline_manager.resources import schemas
 
 
@@ -56,17 +56,20 @@ class PMStateManager:
         self.tcp_server_port = tcp_server_port
         self.tcp_server_host = tcp_server_host
 
-    def get_tcp_server(self) -> PMServer:
+    def get_tcp_server(self) -> CommunicationBackend:
         """
-        Returns initialized PMServer
+        Returns initialized CommunicationBackend
 
         Returns
         -------
-        PMServer
-            Initialied PMServer
+        CommunicationBackend
+            Initialied CommunicationBackend
         """
         if not self.server:
-            self.server = PMServer(self.tcp_server_host, self.tcp_server_port)
+            self.server = CommunicationBackend(
+                self.tcp_server_host,
+                self.tcp_server_port
+            )
         return self.server
 
     def get_schema(self) -> dict:
