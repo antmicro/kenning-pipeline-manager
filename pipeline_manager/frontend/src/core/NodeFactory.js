@@ -17,8 +17,12 @@ export function NodeFactory(name, displayName, inputs, properties, outputs) {
                 newNode.addOption(propName, "IntegerOption", propDef);
                 break;
             case "select":
+                const items = keywords["values"].map(element => ({
+                    "text": element.toString(),
+                    "value": element
+                }))
                 newNode.addOption(propName, "SelectOption", propDef,
-                    undefined, { items: keywords["values"] });
+                    undefined, { items: items });
                 break;
             case "checkbox":
                 newNode.addOption(propName, "CheckboxOption", propDef);
@@ -26,6 +30,9 @@ export function NodeFactory(name, displayName, inputs, properties, outputs) {
             case "slider":
                 newNode.addOption(propName, "SliderOption", propDef,
                     undefined, { min: keywords["min"], max: keywords["max"] });
+                break;
+            case "list":
+                newNode.addOption(propName, "ListOption", undefined, undefined, { dtype: keywords["dtype"] });
                 break;
             default:
                 console.error(propType, "- input type is not recognized.")

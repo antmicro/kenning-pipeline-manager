@@ -1,9 +1,9 @@
-export const dataflow_example = {
+{
     "nodes": [
-    	{
+        {
             "name": "PetDataset",
             "type": "Dataset",
-            "description": "Pet dataset with 37 dogs and cats classes",
+            "category": "Dataset",
             "properties": [
                 {
                     "name": "type",
@@ -21,15 +21,19 @@ export const dataflow_example = {
                     "default": false
                 },
                 {
-                    "name": "classify_by",
-                    "type": "select",
-                    "values": ["species", "breeds"]
+                    "name": "range",
+                    "type": "slider",
+                    "min": -5,
+                    "max": 5
                 },
                 {
-                    "name": "image_memory_layout",
-                    "type": "select",
-                    "default": "NHWC",
-                    "values": ["NHWC", "NCHW"]
+                    "name": "option",
+                    "type": "number",
+                    "default": 0
+                },
+                {
+                    "name": "Model name",
+                    "type": "text"
                 }
             ],
             "inputs": [],
@@ -47,7 +51,7 @@ export const dataflow_example = {
         {
             "name": "MobileNetModelWrapper",
             "type": "ModelWrapper",
-            "description": "MobileNetV2",
+            "category": "ModelWrapper",
             "properties": [
                 {
                     "name": "task",

@@ -8,4 +8,4 @@ To build the frontend application run `./build` in the root directory.
 
 ## Run
 
-To run the server application run `./run` in the root directory. It creates a symbolic link `frontend` to the build frontend application in the `backend` catalogue and then starts a flask server. Building first is required.
+To run the server application run `./run` in the root directory. Building first is required.
