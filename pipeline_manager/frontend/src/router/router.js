@@ -11,9 +11,9 @@ const RouterVue = new Router({
         {
             path: '/',
             name: 'home',
-            component: Home
-        }
-    ]
+            component: Home,
+        },
+    ],
 });
 
 export default RouterVue;
