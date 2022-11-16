@@ -23,6 +23,9 @@ import ListOption from "../options/ListOption.vue"
 
 export default {
     props: [
+        /**
+         * Dataflow specification of the current environment.
+         */
         'dataflowSpecification'
     ],
     data() {
@@ -45,6 +48,10 @@ export default {
         }
     },
     methods: {
+        /**
+         * It is called when `dataflowSpecification` property is updated.
+         * It creates a new environment for the editor.
+         */
         updateEditor() {
             if (!this.dataflowSpecification) return;
 
@@ -54,6 +61,10 @@ export default {
                 this.editor.registerNodeType(node["name"], myNode, node["category"]);
             });
         },
+        /**
+         * Event handler that that saves a current dataflow to a `save.json` file.
+         * It is also displayed in the console log.
+         */
         save_dataflow() {
             const blob = new Blob([JSON.stringify(this.editor.save())], { type: 'application/json' });
             const temp = document.createElement('a');
@@ -62,6 +73,11 @@ export default {
             temp.click();
             console.log(JSON.stringify(this.editor.save()))
         },
+        /**
+         * Event handler that Loads a dataflow from a file and asks the backend to validate it.
+         * It the validation is successful it is loaded as the current dataflow.
+         * Otherwise the user is alerted with a feedback message. 
+         */
         load_dataflow() {
             let file = document.getElementById('load-dataflow-button').files[0];
             if (!file) return;

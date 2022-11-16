@@ -18,7 +18,7 @@ export default {
         'name',
         /**
          * Property given by a parent component that conveys additional information
-         * like `dtype` argument.  
+         * like `dtype` argument.
          */
         'option'
     ],
@@ -27,6 +27,9 @@ export default {
             dtype: 'string'
         }
     },
+    /**
+     * If `dtype` was passed it is used. Otherwise `string` type is used.
+     */
     mounted() {
         this.dtype = this.option.dtype || 'string';
         this.option.events.updated.addListener(this, () => {

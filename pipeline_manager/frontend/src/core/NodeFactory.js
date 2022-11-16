@@ -1,5 +1,16 @@
 import { Node } from "@baklavajs/core"
-
+/**
+ * Class factory that creates a class for a custom Node that is described by the arguments.
+ * It can be later registered so that the user can use it and save the editor.
+ * `inputs`, `properties` and `outputs` formats are described in the documentation.
+ * 
+ * @param {string} name Name of the block that is stored when saving
+ * @param {string} displayName Name of the block displayed to the user
+ * @param {*} inputs List of inputs of the block.
+ * @param {*} properties List of properties of the block
+ * @param {*} outputs List of outputs of the block
+ * @returns Node based class
+ */
 export function NodeFactory(name, displayName, inputs, properties, outputs) {
     return class extends Node {
 
@@ -48,6 +59,13 @@ export function NodeFactory(name, displayName, inputs, properties, outputs) {
             outputs.forEach(o => this.addOutputInterface(o["name"], { "type": o["type"] }));
         }
 
+        /**
+         * Called for every node when editor saves its content.
+         * In addition to saving a node two properties are added.
+         * `isInput` states whether a socket is an input or an output.
+         * `type` is a type of the socket that was passed when creating the node.
+         * @returns Saved node's state
+         */
         save() {
             const state = super.save();
             state.interfaces.forEach(([name, intfState]) => {
