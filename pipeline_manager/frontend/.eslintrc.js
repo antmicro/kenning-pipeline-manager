@@ -17,6 +17,7 @@ module.exports = {
     'vue',
   ],
   rules: {
-    indent: ["error", 4]
+    indent: ["error", 4],
+    "import/no-extraneous-dependencies": 0,
   },
 };
