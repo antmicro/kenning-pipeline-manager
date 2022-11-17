@@ -27,69 +27,91 @@
 </template>
 
 <script>
-import Editor from "./Editor.vue";
+import Editor from './Editor.vue';
 
 export default {
-   components: {
-        Editor
+    components: {
+        Editor,
     },
     data() {
         return {
             specificationLoaded: false,
             clientConnected: false,
-            dataflowSpecification: null
-        }
+            dataflowSpecification: null,
+        };
     },
     methods: {
+        /**
+         * Event handler that loads a specification passed by the user
+         * and asks the backend to validate it.
+         * If the validation is successful it is passed to the editor that
+         * renders a new environment.
+         * Otherwise user is alerted with a feedback message.
+         */
         load_specification() {
-            let file = document.getElementById('load-spec-button').files[0];
+            const file = document.getElementById('load-spec-button').files[0];
             if (!file) return;
 
-            let formData = new FormData();
+            const formData = new FormData();
             formData.append('specfile', file);
 
-            let requestOptions = {
+            const requestOptions = {
                 method: 'POST',
-                body: formData
+                body: formData,
             };
 
             fetch('http://127.0.0.1:5000/load_specification', requestOptions)
-                .then(response => response.text().then(data => ({status: response.status, data: data})))
-                .then(obj => {
-                    if (obj.status == 200) {
+                .then((response) => response.text().then(
+                    (data) => ({ response: response, data }),
+                ))
+                .then((obj) => {
+                    if (obj.response.ok) {
                         this.dataflowSpecification = JSON.parse(obj.data);
                         this.specificationLoaded = true;
-                    }
-                    else if (obj.status == 400) {
+                    } else {
+                        /* eslint-disable no-alert */
                         alert(obj.data);
                     }
                 });
         },
+        /**
+         * Event handler that asks the backend to open a TCP socket that can be connected to.
+         * If the client did not connect the user is alertd with a feedback message.
+         */
         open_tcp() {
             fetch('http://127.0.0.1:5000/connect')
-                .then(response => response.text().then(data => ({status: response.status, data: data})))
-                .then(obj => {
-                    if (obj.status == 200) {
+                .then((response) => response.text().then(
+                    (data) => ({ response: response, data }),
+                ))
+                .then((obj) => {
+                    if (obj.response.ok) {
                         this.clientConnected = true;
-                    }
-                    else if (obj.status == 400) {
+                    } else {
+                        /* eslint-disable no-alert */
                         alert(obj.data);
                     }
                 });
         },
+        /**
+         * Event handler that asks the backend to send a dataflow specification.
+         * If the backend did not manage to send it the user is alerted with a feedback message.
+         * Otherwise the specification is passed to the editor that renders a new environment.
+         */
         request_specification() {
             fetch('http://127.0.0.1:5000/request_specification')
-                .then(response => response.text().then(data => ({status: response.status, data: data})))
-                .then(obj => {
-                    if (obj.status == 200) {
+                .then((response) => response.text().then(
+                    (data) => ({ response: response, data }),
+                ))
+                .then((obj) => {
+                    if (obj.response.ok) {
                         this.dataflowSpecification = JSON.parse(obj.data);
                         this.specificationLoaded = true;
-                    }
-                    else if (obj.status == 400) {
+                    } else {
+                        /* eslint-disable no-alert */
                         alert(obj.data);
                     }
                 });
-        }
-    }
-}
+        },
+    },
+};
 </script>

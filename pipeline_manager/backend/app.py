@@ -4,15 +4,19 @@ from flask_cors import CORS
 import sys
 import json
 import argparse
+import logging
 from typing import Union
 from werkzeug.datastructures import FileStorage
 from jsonschema import validate, ValidationError
 from http import HTTPStatus
 from importlib.resources import path
 
-from pipeline_manager.backend.server import MessageType, Status
+from kenning_pipeline_manager_backend_communication.misc_structures import MessageType, Status  # noqa: E501
 from pipeline_manager.backend.state_manager import global_state_manager
 from pipeline_manager import frontend
+
+logging.basicConfig(level=logging.NOTSET)
+
 
 app = Flask(
     __name__,
@@ -184,7 +188,7 @@ def request_specification():
 
     status = Status.NOTHING
     while status == Status.NOTHING:
-        out = tcp_server.wait_for_response()
+        out = tcp_server.wait_for_message()
         status = out.status
 
     if status == Status.DATA_READY:
