@@ -99,12 +99,12 @@ export default {
 
             fetch('http://127.0.0.1:5000/load_dataflow', requestOptions)
                 .then((response) => response.text().then(
-                    (data) => ({ status: response.status, data }),
+                    (data) => ({ response: response, data }),
                 ))
                 .then((obj) => {
-                    if (obj.status === 200) {
+                    if (obj.response.ok) {
                         this.editor.load(JSON.parse(obj.data));
-                    } else if (obj.status === 400) {
+                    } else {
                         /* eslint-disable no-alert */
                         alert(obj.data);
                     }

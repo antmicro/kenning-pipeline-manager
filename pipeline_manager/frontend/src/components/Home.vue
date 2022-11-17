@@ -62,13 +62,13 @@ export default {
 
             fetch('http://127.0.0.1:5000/load_specification', requestOptions)
                 .then((response) => response.text().then(
-                    (data) => ({ status: response.status, data }),
+                    (data) => ({ response: response, data }),
                 ))
                 .then((obj) => {
-                    if (obj.status === 200) {
+                    if (obj.response.ok) {
                         this.dataflowSpecification = JSON.parse(obj.data);
                         this.specificationLoaded = true;
-                    } else if (obj.status === 400) {
+                    } else {
                         /* eslint-disable no-alert */
                         alert(obj.data);
                     }
@@ -81,12 +81,12 @@ export default {
         open_tcp() {
             fetch('http://127.0.0.1:5000/connect')
                 .then((response) => response.text().then(
-                    (data) => ({ status: response.status, data }),
+                    (data) => ({ response: response, data }),
                 ))
                 .then((obj) => {
-                    if (obj.status === 200) {
+                    if (obj.response.ok) {
                         this.clientConnected = true;
-                    } else if (obj.status === 400) {
+                    } else {
                         /* eslint-disable no-alert */
                         alert(obj.data);
                     }
@@ -100,13 +100,13 @@ export default {
         request_specification() {
             fetch('http://127.0.0.1:5000/request_specification')
                 .then((response) => response.text().then(
-                    (data) => ({ status: response.status, data }),
+                    (data) => ({ response: response, data }),
                 ))
                 .then((obj) => {
-                    if (obj.status === 200) {
+                    if (obj.response.ok) {
                         this.dataflowSpecification = JSON.parse(obj.data);
                         this.specificationLoaded = true;
-                    } else if (obj.status === 400) {
+                    } else {
                         /* eslint-disable no-alert */
                         alert(obj.data);
                     }
