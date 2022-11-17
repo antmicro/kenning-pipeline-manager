@@ -18,6 +18,7 @@ module.exports = {
   ],
   rules: {
     indent: ["error", 4],
-    "import/no-extraneous-dependencies": 0,
+    'import/no-extraneous-dependencies': 0,
+    'vue/multi-word-component-names': 0,
   },
 };
