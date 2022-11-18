@@ -2,7 +2,7 @@
     <div id="container">
         <div style="height: 80vh; width: 100vw">
             <baklava-editor :plugin="viewPlugin" />
-            <button @click="save_dataflow">Save</button>
+            <button @click="save_dataflow">Save dataflow</button>
             <label for="load-dataflow-button">Load dataflow: </label>
                 <input
                     type="file"
@@ -99,7 +99,7 @@ export default {
 
             fetch('http://127.0.0.1:5000/load_dataflow', requestOptions)
                 .then((response) => response.text().then(
-                    (data) => ({ response: response, data }),
+                    (data) => ({ response, data }),
                 ))
                 .then((obj) => {
                     if (obj.response.ok) {

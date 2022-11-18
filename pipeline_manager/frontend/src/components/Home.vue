@@ -2,7 +2,7 @@
     <div id="container">
         <div>
             <div v-show="!specificationLoaded">
-                <label for="load-spec-button">Load file: </label>
+                <label for="load-spec-button">Load specification: </label>
                 <input
                     type="file"
                     id="load-spec-button"
@@ -62,7 +62,7 @@ export default {
 
             fetch('http://127.0.0.1:5000/load_specification', requestOptions)
                 .then((response) => response.text().then(
-                    (data) => ({ response: response, data }),
+                    (data) => ({ response, data }),
                 ))
                 .then((obj) => {
                     if (obj.response.ok) {
@@ -81,7 +81,7 @@ export default {
         open_tcp() {
             fetch('http://127.0.0.1:5000/connect')
                 .then((response) => response.text().then(
-                    (data) => ({ response: response, data }),
+                    (data) => ({ response, data }),
                 ))
                 .then((obj) => {
                     if (obj.response.ok) {
@@ -100,7 +100,7 @@ export default {
         request_specification() {
             fetch('http://127.0.0.1:5000/request_specification')
                 .then((response) => response.text().then(
-                    (data) => ({ response: response, data }),
+                    (data) => ({ response, data }),
                 ))
                 .then((obj) => {
                     if (obj.response.ok) {
