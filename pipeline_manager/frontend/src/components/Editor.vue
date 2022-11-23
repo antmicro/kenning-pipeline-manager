@@ -9,6 +9,8 @@
                     id="load-dataflow-button"
                     @change="load_dataflow"
                 >
+            <button @click="request_validation">Validate dataflow</button>
+            <button @click="request_run">Run dataflow</button>
         </div>
     </div>
 </template>
@@ -108,6 +110,58 @@ export default {
                         /* eslint-disable no-alert */
                         alert(obj.data);
                     }
+                });
+        },
+        /**
+         * Event handler that loads a current dataflow from the editor and sends a request
+         * to the backend to validate the dataflow.
+         * The user is alerted with a feedback message.
+         */
+        request_validation() {
+            const dataflow = JSON.stringify(this.editor.save());
+            if (!dataflow) return;
+
+            const formData = new FormData();
+            formData.append('dataflow', dataflow);
+
+            const requestOptions = {
+                method: 'POST',
+                body: formData,
+            };
+
+            fetch('http://127.0.0.1:5000/dataflow_action_request/validate', requestOptions)
+                .then((response) => response.text().then(
+                    (data) => ({ response, data }),
+                ))
+                .then((obj) => {
+                    /* eslint-disable no-alert */
+                    alert(obj.data);
+                });
+        },
+        /**
+         * Event handler that loads a current dataflow from the editor and sends a request
+         * to the backend to run the dataflow.
+         * The user is alerted with a feedback message.
+         */
+        request_run() {
+            const dataflow = JSON.stringify(this.editor.save());
+            if (!dataflow) return;
+
+            const formData = new FormData();
+            formData.append('dataflow', dataflow);
+
+            const requestOptions = {
+                method: 'POST',
+                body: formData,
+            };
+
+            fetch('http://127.0.0.1:5000/dataflow_action_request/run', requestOptions)
+                .then((response) => response.text().then(
+                    (data) => ({ response, data }),
+                ))
+                .then((obj) => {
+                    /* eslint-disable no-alert */
+                    alert(obj.data);
                 });
         },
     },
