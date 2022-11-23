@@ -161,7 +161,7 @@ def connect():
 @app.route('/request_specification', methods=['GET'])
 def request_specification():
     """
-    GET endpoint that should be used to request a dataflow specification
+    GET endpoint that should is used to request a dataflow specification
     from an external application.
 
     A communication has to be established first with a `connect`
@@ -201,6 +201,67 @@ def request_specification():
         if success:
             return specification, HTTPStatus.OK
         return specification, HTTPStatus.BAD_REQUEST
+    if status == Status.CLIENT_DISCONNECTED:
+        return 'Client is disconnected', HTTPStatus.BAD_REQUEST
+    return 'Unknown error', HTTPStatus.BAD_REQUEST
+
+
+@app.route('/dataflow_action_request/<request_type>', methods=['POST'])
+def dataflow_action_request(request_type: str):
+    """
+    POST endpoint that is used to request a certain action on
+    a dataflow that is sent in a form under name `dataflow`.
+
+    Parameters
+    ----------
+    request_type : str
+        Type of the action that is performed on the attached dataflow.
+        For now supported actions are `run` and `validate`
+
+    Responses
+    ---------
+    HTTPStatus.OK
+        Request was successful and the response contains
+        feedback message
+    HTTPStatus.BAD_REQUEST
+        There was some error during the request handling.
+        Response contains error message.
+    """
+    dataflow = request.form.get('dataflow')
+    tcp_server = global_state_manager.get_tcp_server()
+
+    if not tcp_server:
+        return 'TCP server not initialized', HTTPStatus.BAD_REQUEST
+
+    if request_type == 'validate':
+        out = tcp_server.send_message(
+            MessageType.VALIDATE,
+            dataflow.encode(encoding='UTF-8')
+        )
+    elif request_type == 'run':
+        out = tcp_server.send_message(
+            MessageType.RUN,
+            dataflow.encode(encoding='UTF-8')
+        )
+    else:
+        return 'No request type specified', HTTPStatus.BAD_REQUEST
+
+    if out.status != Status.DATA_SENT:
+        return 'Error while sending a message to an externall aplication', HTTPStatus.BAD_REQUEST  # noqa: E501
+
+    status = Status.NOTHING
+    while status == Status.NOTHING:
+        out = tcp_server.wait_for_message()
+        status = out.status
+
+    if status == Status.DATA_READY:
+        mess_type, message = out.data
+
+        if mess_type == MessageType.OK:
+            return message, HTTPStatus.OK
+        if mess_type == MessageType.ERROR:
+            return message, HTTPStatus.BAD_REQUEST
+
     if status == Status.CLIENT_DISCONNECTED:
         return 'Client is disconnected', HTTPStatus.BAD_REQUEST
     return 'Unknown error', HTTPStatus.BAD_REQUEST
