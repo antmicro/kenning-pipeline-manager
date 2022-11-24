@@ -28,6 +28,7 @@
 
 <script>
 import Editor from './Editor.vue';
+import { backendApiUrl } from '../core/utils';
 
 export default {
     components: {
@@ -60,7 +61,7 @@ export default {
                 body: formData,
             };
 
-            fetch('http://127.0.0.1:5000/load_specification', requestOptions)
+            fetch(`${backendApiUrl}/load_specification`, requestOptions)
                 .then((response) => response.text().then(
                     (data) => ({ response, data }),
                 ))
@@ -79,7 +80,7 @@ export default {
          * If the client did not connect the user is alertd with a feedback message.
          */
         open_tcp() {
-            fetch('http://127.0.0.1:5000/connect')
+            fetch(`${backendApiUrl}/connect`)
                 .then((response) => response.text().then(
                     (data) => ({ response, data }),
                 ))
@@ -98,7 +99,7 @@ export default {
          * Otherwise the specification is passed to the editor that renders a new environment.
          */
         request_specification() {
-            fetch('http://127.0.0.1:5000/request_specification')
+            fetch(`${backendApiUrl}/request_specification`)
                 .then((response) => response.text().then(
                     (data) => ({ response, data }),
                 ))

@@ -22,6 +22,7 @@ import { OptionPlugin } from '@baklavajs/plugin-options-vue';
 import { InterfaceTypePlugin } from '@baklavajs/plugin-interface-types';
 import NodeFactory from '../core/NodeFactory';
 import ListOption from '../options/ListOption.vue';
+import { backendApiUrl } from '../core/utils';
 
 export default {
     props: [
@@ -99,7 +100,7 @@ export default {
                 body: formData,
             };
 
-            fetch('http://127.0.0.1:5000/load_dataflow', requestOptions)
+            fetch(`${backendApiUrl}/load_dataflow`, requestOptions)
                 .then((response) => response.text().then(
                     (data) => ({ response, data }),
                 ))
@@ -129,7 +130,7 @@ export default {
                 body: formData,
             };
 
-            fetch('http://127.0.0.1:5000/dataflow_action_request/validate', requestOptions)
+            fetch(`${backendApiUrl}/dataflow_action_request/validate`, requestOptions)
                 .then((response) => response.text().then(
                     (data) => ({ response, data }),
                 ))
@@ -155,7 +156,7 @@ export default {
                 body: formData,
             };
 
-            fetch('http://127.0.0.1:5000/dataflow_action_request/run', requestOptions)
+            fetch(`${backendApiUrl}/dataflow_action_request/run`, requestOptions)
                 .then((response) => response.text().then(
                     (data) => ({ response, data }),
                 ))
