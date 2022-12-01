@@ -17,12 +17,13 @@ from pipeline_manager import frontend
 
 logging.basicConfig(level=logging.NOTSET)
 
+dist_path = os.path.join(os.path.dirname(frontend.__file__), 'dist')
 
 app = Flask(
     __name__,
     static_url_path='',
-    static_folder=str(path(frontend, 'dist')),
-    template_folder=str(path(frontend, 'dist'))
+    static_folder=dist_path,
+    template_folder=dist_path
 )
 
 # TODO: Change it later to our application exclusively
