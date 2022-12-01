@@ -299,6 +299,12 @@ def main(argv):
         default=9000
     )
     parser.add_argument(
+        '--backend-host',
+        type=str,
+        help='The adress of the backend of Pipeline Manager',
+        default='127.0.0.1'
+    )
+    parser.add_argument(
         '--backend-port',
         type=int,
         help='The port of the backend of Pipeline Manager',
@@ -306,14 +312,15 @@ def main(argv):
     )
     args, _ = parser.parse_known_args(argv[1:])
 
-    global_state_manager.initialize(
+    global_state_manager.reinitialize(
         args.tcp_server_port,
         args.tcp_server_host
     )
     # for now we have only one thread so the global state can't be corrupted
     app.run(
         threaded=False,
-        port=args.backend_port
+        port=args.backend_port,
+        host=args.backend_host
     )
 
 

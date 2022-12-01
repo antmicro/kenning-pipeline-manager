@@ -14,18 +14,18 @@ class PMStateManager:
     """
     def __init__(
             self,
-            tcp_server_port: str = '127.0.0.1',
-            tcp_server_host: int = 9000,
+            tcp_server_port: int = 9000,
+            tcp_server_host: str = '127.0.0.1',
             ) -> None:
         """
         Creates a state manager
 
         Parameters
         ----------
-        tcp_server_port : str
+        tcp_server_port : int
             Application port that is going to be used for the
             TCP server socket.
-        tcp_server_host : int
+        tcp_server_host : str
             IPv4 of the server that is going to be used for the
             TCP server socket.
         """
@@ -36,25 +36,29 @@ class PMStateManager:
         self.schema = None
         self.schema_filename = 'dataflow_spec_schema.json'
 
-    def initialize(
+    def reinitialize(
             self,
-            tcp_server_port: str,
-            tcp_server_host: int,
+            tcp_server_port: int,
+            tcp_server_host: str,
             ) -> None:
         """
         Reinitialize the configuration of the state
 
         Parameters
         ----------
-        tcp_server_port : str
+        tcp_server_port : int
             Application port that is going to be used for the
             TCP server socket.
-        tcp_server_host : int
+        tcp_server_host : str
             IPv4 of the server that is going to be used for the
             TCP server socket.
         """
         self.tcp_server_port = tcp_server_port
         self.tcp_server_host = tcp_server_host
+
+        if self.server:
+            self.server.disconnect()
+        self.server = None
 
     def get_tcp_server(self) -> CommunicationBackend:
         """
