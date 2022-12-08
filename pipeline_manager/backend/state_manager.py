@@ -2,6 +2,7 @@ import json
 from importlib.resources import open_text
 
 from kenning_pipeline_manager_backend_communication.communication_backend import CommunicationBackend  # noqa: E501
+
 from pipeline_manager.resources import schemas
 
 

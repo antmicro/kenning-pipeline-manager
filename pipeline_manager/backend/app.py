@@ -1,19 +1,19 @@
+import argparse
+import json
+import logging
+import os
+import sys
+from http import HTTPStatus
+from typing import Union
+
 from flask import Flask, render_template, request
 from flask_cors import CORS
-
-import sys
-import json
-import argparse
-import logging
-from typing import Union
-from werkzeug.datastructures import FileStorage
-from jsonschema import validate, ValidationError
-from http import HTTPStatus
-from importlib.resources import path
-
+from jsonschema import ValidationError, validate
 from kenning_pipeline_manager_backend_communication.misc_structures import MessageType, Status  # noqa: E501
-from pipeline_manager.backend.state_manager import global_state_manager
+from werkzeug.datastructures import FileStorage
+
 from pipeline_manager import frontend
+from pipeline_manager.backend.state_manager import global_state_manager
 
 logging.basicConfig(level=logging.NOTSET)
 
