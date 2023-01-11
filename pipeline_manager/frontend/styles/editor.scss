@@ -1,6 +1,37 @@
+// To be able to import those scss files
+// package.json of @baklavajs/plugin-renderer-vue has to be altered by adding entry:
+// "./dist/styles.css": "./dist/styles.css"
+// To the "exports" dictionary.
+
 @import "@baklavajs/plugin-renderer-vue/dist/styles/variables.scss";
 
-$color-node-background: #332d37;
-$color-node-foreground: #f7f7f7;
+// Controls
+$color-primary: #e74a3c;
+$color-error: red;
+$color-control-dark-background: #2C2C2C;
+$color-control-dark-foreground: white;
+$color-control-dark-hover: #4C4C4C;
+$color-control-dark-active: #6C6C6C;
+$border-radius-control: 3px;
+
+
+// Nodes
+$color-node-background: #3f3f3fcc;
+$color-node-foreground: white;
+$color-node-selected: $color-primary;
+$color-node-title-background: black;
+$color-node-title-foreground: white;
+$border-radius-node: 4px;
+
+// Connections
+$color-connection-default: #f7f7f7;
+$color-connection-allowed: green;
+$color-connection-forbidden: red;
+
+// Background pattern
+$color-pattern-default: #332d37;
+$color-pattern-line: #131313;
+$color-pattern-black: #000000;
+
 
 @import "@baklavajs/plugin-renderer-vue/dist/styles/styles.scss";

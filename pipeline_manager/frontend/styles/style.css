@@ -26,11 +26,11 @@ input[type=button], input[type=submit], label {
     font-size: 20px;
     font-family: "Times New Roman", Times, serif;
 
-    width: 200px;
+    width: 250px;
     padding: 6px 12px;
     margin: 2px;
 
-    border: 3px solid #c0e4eb;
+    border: 2px solid #c0e4eb;
     background-color: #f7f7f7;
 
     cursor: pointer;
@@ -38,7 +38,7 @@ input[type=button], input[type=submit], label {
 }
 
 html, body, #app, #container {
-    height: 100%;
+    height: 100vh;
     margin: 0;
     background-color: #332d37;
 }
