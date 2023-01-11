@@ -71,6 +71,7 @@ export default {
             if (!this.dataflowSpecification) return;
 
             const { nodes } = this.dataflowSpecification;
+            const { metadata } = this.dataflowSpecification;
             nodes.forEach((node) => {
                 const myNode = NodeFactory(
                     node.name,
@@ -81,6 +82,12 @@ export default {
                 );
                 this.editor.registerNodeType(node.name, myNode, node.category);
             });
+
+            if ('interfaces' in metadata) {
+                for (const [name, color] of Object.entries(metadata['interfaces'])) {
+                    this.nodeInterfaceTypes.addType(name, color);
+                }
+            }
         },
         /**
          * Event handler that that saves a current dataflow to a `save.json` file.
