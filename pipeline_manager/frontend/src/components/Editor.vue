@@ -1,17 +1,29 @@
 <template>
-    <div id="container">
-        <div style="height: 80vh; width: 100vw">
-            <baklava-editor :plugin="viewPlugin" />
-            <button @click="save_dataflow">Save dataflow</button>
-            <label for="load-dataflow-button">Load dataflow: </label>
+    <div class="outer">
+        <div>
+            <label for="load-dataflow-button">Load dataflow</label>
                 <input
                     type="file"
                     id="load-dataflow-button"
                     @change="load_dataflow"
                 >
-            <button @click="request_validation">Validate dataflow</button>
-            <button @click="request_run">Run dataflow</button>
+            <input
+                type="button"
+                value="Save dataflow"
+                @click="save_dataflow"
+            >
+            <input
+                type="button"
+                value="Validate dataflow"
+                @click="request_validation"
+            >
+            <input
+                type="button"
+                value="Run dataflow"
+                @click="request_run"
+            >
         </div>
+        <baklava-editor class="inner-editor" :plugin="viewPlugin"/>
     </div>
 </template>
 

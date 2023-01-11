@@ -1,8 +1,8 @@
 <template>
-    <div id="container">
+    <div id="container" class="outer">
         <div>
             <div v-show="!specificationLoaded">
-                <label for="load-spec-button">Load specification: </label>
+                <label for="load-spec-button">Load specification</label>
                 <input
                     type="file"
                     id="load-spec-button"
@@ -12,13 +12,11 @@
             <input v-show="!clientConnected"
                 value="Open TCP connection"
                 type="button"
-                id="tcp-button"
                 @click="open_tcp"
             >
             <input v-show="clientConnected && !specificationLoaded"
                 value="Request specification"
                 type="button"
-                id="request-spec-button"
                 @click="request_specification"
             >
         </div>
