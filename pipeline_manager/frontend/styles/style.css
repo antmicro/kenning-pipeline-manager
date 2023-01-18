@@ -1,4 +1,6 @@
-
+* {
+    font-family: 'Lato', sans-serif;
+}
 
 label, input {
     width: 10%;
@@ -24,14 +26,14 @@ input[type=button], input[type=submit], label {
 
     text-align: center;
     font-size: 20px;
-    font-family: "Lato";
 
     width: 250px;
     padding: 6px 12px;
     margin: 2px;
 
-    border: 2px solid #c0e4eb;
-    background-color: #f7f7f7;
+    border: 2px solid #000000;
+    background-color: #2a2b31;
+    color: #dfdfdf;
 
     cursor: pointer;
     margin: 5px 5px 5px 5px
@@ -54,5 +56,5 @@ html, body, #app, #container {
 
 .inner-editor {
     flex-grow: 1;
-    border-top: 2px solid black;
+    border-top: 2px solid #000000;
 }
