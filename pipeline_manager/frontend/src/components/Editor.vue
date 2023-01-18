@@ -84,9 +84,9 @@ export default {
             });
 
             if ('interfaces' in metadata) {
-                for (const [name, color] of Object.entries(metadata['interfaces'])) {
+                metadata.interfaces.forEach((name, color) => {
                     this.nodeInterfaceTypes.addType(name, color);
-                }
+                });
             }
         },
         /**
