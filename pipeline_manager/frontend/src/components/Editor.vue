@@ -20,13 +20,18 @@
             >
             <input
                 type="button"
+                value="Export dataflow"
+                @click="request_dataflow_action('export')"
+            >
+            <input
+                type="button"
                 value="Validate dataflow"
-                @click="request_validation"
+                @click="request_dataflow_action('validate')"
             >
             <input
                 type="button"
                 value="Run dataflow"
-                @click="request_run"
+                @click="request_dataflow_action('run')"
             >
         </div>
         <baklava-editor class="inner-editor" :plugin="viewPlugin"/>
@@ -140,10 +145,10 @@ export default {
         },
         /**
          * Event handler that loads a current dataflow from the editor and sends a request
-         * to the backend to validate the dataflow.
+         * to the backend based on the action argument.
          * The user is alerted with a feedback message.
          */
-        request_validation() {
+        request_dataflow_action(action) {
             const dataflow = JSON.stringify(this.editor.save());
             if (!dataflow) return;
 
@@ -155,7 +160,7 @@ export default {
                 body: formData,
             };
 
-            fetch(`${backendApiUrl}/dataflow_action_request/validate`, requestOptions)
+            fetch(`${backendApiUrl}/dataflow_action_request/${action}`, requestOptions)
                 .then((response) => response.text().then(
                     (data) => ({ response, data }),
                 ))
@@ -165,31 +170,12 @@ export default {
                 });
         },
         /**
-         * Event handler that loads a current dataflow from the editor and sends a request
-         * to the backend to run the dataflow.
-         * The user is alerted with a feedback message.
+         * Event handler that loads a file and asks the backend to delegate this operation
+         * to the external application to parse it into the Pipeline Manager format
+         * so that it can be loaded into the editor.
+         * It the validation is successful it is loaded as the current dataflow.
+         * Otherwise the user is alerted with a feedback message.
          */
-        request_run() {
-            const dataflow = JSON.stringify(this.editor.save());
-            if (!dataflow) return;
-
-            const formData = new FormData();
-            formData.append('dataflow', dataflow);
-
-            const requestOptions = {
-                method: 'POST',
-                body: formData,
-            };
-
-            fetch(`${backendApiUrl}/dataflow_action_request/run`, requestOptions)
-                .then((response) => response.text().then(
-                    (data) => ({ response, data }),
-                ))
-                .then((obj) => {
-                    /* eslint-disable no-alert */
-                    alert(obj.data);
-                });
-        },
         import_dataflow() {
             const file = document.getElementById('request-dataflow-button').files[0];
             if (!file) return;

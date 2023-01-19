@@ -260,7 +260,7 @@ def dataflow_action_request(request_type: str):
     ----------
     request_type : str
         Type of the action that is performed on the attached dataflow.
-        For now supported actions are `run` and `validate`
+        For now supported actions are `run`, `validate` and `export`
 
     Responses
     ---------
@@ -286,6 +286,11 @@ def dataflow_action_request(request_type: str):
         out = tcp_server.send_message(
             MessageType.RUN,
             dataflow.encode(encoding='UTF-8')
+        )
+    elif request_type == 'export':
+        out = tcp_server.send_message(
+            MessageType.EXPORT,
+            dataflow.encode(encoding='UTF')
         )
     else:
         return 'No request type specified', HTTPStatus.BAD_REQUEST
