@@ -82,11 +82,54 @@ def _load_specification(
     return True, specification
 
 
+@app.route('/import_dataflow', methods=['POST'])
+def import_dataflow():
+    """
+    POST endpoint that should be used to request importing a dataflow in
+    external application format. This endpoint requests the connected external
+    application to parse it into the Pipeline Manager format and send it
+    to the Pipeline Manager.
+
+    Responses
+    ---------
+    HTTPStatus.OK
+        Request was successful and the response contains
+        the parsed dataflow.
+    HTTPStatus.BAD_REQUEST
+        There was some error during the request handling.
+        Response contains error message.
+    """
+    tcp_server = global_state_manager.get_tcp_server()
+    if not tcp_server:
+        return 'TCP server not initialized', HTTPStatus.BAD_REQUEST
+
+    dataflow = request.files['external_application_dataflow'].read()
+    out = tcp_server.send_message(MessageType.IMPORT, dataflow)
+
+    if out.status != Status.DATA_SENT:
+        return 'Error while sending a message to an externall aplication', HTTPStatus.BAD_REQUEST  # noqa: E501
+
+    status = Status.NOTHING
+    while status == Status.NOTHING:
+        out = tcp_server.wait_for_message()
+        status = out.status
+
+    if status == Status.DATA_READY:
+        mess_type, dataflow = out.data
+        if mess_type != MessageType.OK:
+            return 'Invalid message type from the client', HTTPStatus.BAD_REQUEST  # noqa: E501
+
+        return json.loads(dataflow), HTTPStatus.OK
+    if status == Status.CLIENT_DISCONNECTED:
+        return 'Client is disconnected', HTTPStatus.BAD_REQUEST
+    return 'Unknown error', HTTPStatus.BAD_REQUEST
+
+
 @app.route('/load_dataflow', methods=['POST'])
 def load_dataflow():
     """
-    POST endpoint that should be used to load a dataflow
-    given in a form as a file attached with a name `dataflow`.
+    POST endpoint that should be used to load a dataflow in Pipeline Manager
+    format given in a form as a file attached with a name `dataflow`.
 
     Responses
     ---------
@@ -98,13 +141,13 @@ def load_dataflow():
         Response contains error message.
     """
     try:
-        specification = request.files['dataflow']
-        specification = json.load(specification)
+        dataflow = request.files['dataflow']
+        dataflow = json.load(dataflow)
     except Exception:
         app.logger.exception('Dataflow is not a valid safe')
         return 'Dataflow is not a valid safe', HTTPStatus.BAD_REQUEST
 
-    return specification, HTTPStatus.OK
+    return dataflow, HTTPStatus.OK
 
 
 @app.route('/load_specification', methods=['POST'])

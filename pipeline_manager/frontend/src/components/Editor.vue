@@ -7,6 +7,12 @@
                     id="load-dataflow-button"
                     @change="load_dataflow"
                 >
+            <label for="request-dataflow-button">Import dataflow</label>
+                <input
+                    type="file"
+                    id="request-dataflow-button"
+                    @change="import_dataflow"
+                >
             <input
                 type="button"
                 value="Save dataflow"
@@ -182,6 +188,31 @@ export default {
                 .then((obj) => {
                     /* eslint-disable no-alert */
                     alert(obj.data);
+                });
+        },
+        import_dataflow() {
+            const file = document.getElementById('request-dataflow-button').files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('external_application_dataflow', file);
+
+            const requestOptions = {
+                method: 'POST',
+                body: formData,
+            };
+
+            fetch(`${backendApiUrl}/import_dataflow`, requestOptions)
+                .then((response) => response.text().then(
+                    (data) => ({ response, data }),
+                ))
+                .then((obj) => {
+                    if (obj.response.ok) {
+                        this.editor.load(JSON.parse(obj.data));
+                    } else {
+                        /* eslint-disable no-alert */
+                        alert(obj.data);
+                    }
                 });
         },
     },
