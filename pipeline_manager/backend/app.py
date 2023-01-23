@@ -38,7 +38,7 @@ def index():
 
     Responses
     ---------
-    HTTPStatus.OK
+    HTTPStatus.OK :
         Request was successful and the response contains
         entry HTML for the frontend application
     """
@@ -59,7 +59,7 @@ def _load_specification(
 
     Returns
     -------
-    tuple[bool, Union[dict, str]]
+    tuple[bool, Union[dict, str]] :
         Returns a tuple where the first element states whether the loading
         was succesful. If it was then the second element is
         a dataflow specification. Otherwise it is an exception message.
@@ -92,10 +92,10 @@ def import_dataflow():
 
     Responses
     ---------
-    HTTPStatus.OK
+    HTTPStatus.OK :
         Request was successful and the response contains
         the parsed dataflow.
-    HTTPStatus.BAD_REQUEST
+    HTTPStatus.BAD_REQUEST :
         There was some error during the request handling.
         Response contains error message.
     """
@@ -133,10 +133,10 @@ def load_dataflow():
 
     Responses
     ---------
-    HTTPStatus.OK
+    HTTPStatus.OK :
         Request was successful and the response contains
         the loaded dataflow.
-    HTTPStatus.BAD_REQUEST
+    HTTPStatus.BAD_REQUEST :
         There was some error during the request handling.
         Response contains error message.
     """
@@ -158,10 +158,10 @@ def load_specification():
 
     Responses
     ---------
-    HTTPStatus.OK
+    HTTPStatus.OK :
         Request was successful and the response contains
         the specification.
-    HTTPStatus.BAD_REQUEST
+    HTTPStatus.BAD_REQUEST :
         There was some error during the request handling.
         Response contains error message.
     """
@@ -186,9 +186,9 @@ def connect():
 
     Responses
     ---------
-    HTTPStatus.OK
+    HTTPStatus.OK :
         Request was successful and an external application was connected.
-    HTTPStatus.BAD_REQUEST
+    HTTPStatus.BAD_REQUEST :
         External application did not connect.
     """
     tcp_server = global_state_manager.get_tcp_server()
@@ -213,10 +213,10 @@ def request_specification():
 
     Responses
     ---------
-    HTTPStatus.OK
+    HTTPStatus.OK :
         Request was successful and the response contains
         the specification from an external application.
-    HTTPStatus.BAD_REQUEST
+    HTTPStatus.BAD_REQUEST :
         There was some error during the request handling.
         Response contains error message.
     """
@@ -264,10 +264,10 @@ def dataflow_action_request(request_type: str):
 
     Responses
     ---------
-    HTTPStatus.OK
+    HTTPStatus.OK :
         Request was successful and the response contains
         feedback message
-    HTTPStatus.BAD_REQUEST
+    HTTPStatus.BAD_REQUEST :
         There was some error during the request handling.
         Response contains error message.
     """
@@ -327,7 +327,7 @@ def default_handler(e):
 
     Responses
     ---------
-    HTTPStatus.OK
+    HTTPStatus.OK :
         The response contains entry HTML for the frontend application
     """
     return render_template('/index.html')
