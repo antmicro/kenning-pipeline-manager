@@ -9,7 +9,7 @@ from typing import Union
 from flask import Flask, render_template, request
 from flask_cors import CORS
 from jsonschema import ValidationError, validate
-from kenning_pipeline_manager_backend_communication.misc_structures import MessageType, Status  # noqa: E501
+from pipeline_manager_backend_communication.misc_structures import MessageType, Status  # noqa: E501
 from werkzeug.datastructures import FileStorage
 
 from pipeline_manager import frontend

@@ -9,4 +9,4 @@ MarkupSafe==2.1.1
 pyrsistent==0.18.1
 six==1.16.0
 Werkzeug==2.2.2
-kenning_pipeline_manager_backend_communication==0.1
+git+https://github.com/antmicro/kenning-pipeline-manager-backend-communication.git
