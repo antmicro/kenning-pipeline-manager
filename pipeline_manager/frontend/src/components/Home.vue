@@ -20,7 +20,10 @@
                 @click="request_specification"
             >
         </div>
-        <Editor v-show="specificationLoaded" :dataflowSpecification="dataflowSpecification"/>
+        <Editor v-show="specificationLoaded"
+            :dataflowSpecification="dataflowSpecification"
+            :clientConnected="clientConnected"
+        />
     </div>
 </template>
 

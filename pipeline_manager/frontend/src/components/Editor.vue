@@ -7,8 +7,9 @@
                     id="load-dataflow-button"
                     @change="load_dataflow"
                 >
-            <label for="request-dataflow-button">Import dataflow</label>
+            <label for="request-dataflow-button" v-show="clientConnected">Import dataflow</label>
                 <input
+                    v-show="clientConnected"
                     type="file"
                     id="request-dataflow-button"
                     @change="import_dataflow"
@@ -19,16 +20,19 @@
                 @click="save_dataflow"
             >
             <input
+                v-show="clientConnected"
                 type="button"
                 value="Export dataflow"
                 @click="request_dataflow_action('export')"
             >
             <input
+                v-show="clientConnected"
                 type="button"
                 value="Validate dataflow"
                 @click="request_dataflow_action('validate')"
             >
             <input
+                v-show="clientConnected"
                 type="button"
                 value="Run dataflow"
                 @click="request_dataflow_action('run')"
@@ -53,6 +57,7 @@ export default {
          * Dataflow specification of the current environment.
          */
         'dataflowSpecification',
+        'clientConnected'
     ],
     data() {
         return {
