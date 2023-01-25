@@ -5,6 +5,7 @@
             class="dark-input"
             @change="update"
             :placeholder="name"
+            :value="getValue()"
         >
     </div>
 </template>
@@ -21,6 +22,10 @@ export default {
          * like `dtype` argument.
          */
         'option',
+        /**
+         * Value of the input
+         */
+        'value',
     ],
     data() {
         return {
@@ -71,6 +76,17 @@ export default {
                 }
             });
             this.$emit('input', parsed);
+        },
+        /**
+         * Function used to parse the value of the option so that it can be displayed.
+         * Example ["1", "2"] is parsed into "1 2".
+         * If there is no value then an empty string is returned.
+         */
+        getValue() {
+            if (this.value != null) {
+                return this.value.join(' ');
+            }
+            return '';
         },
     },
 };

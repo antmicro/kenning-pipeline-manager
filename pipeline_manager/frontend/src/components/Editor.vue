@@ -57,7 +57,7 @@ export default {
          * Dataflow specification of the current environment.
          */
         'dataflowSpecification',
-        'clientConnected'
+        'clientConnected',
     ],
     data() {
         return {
