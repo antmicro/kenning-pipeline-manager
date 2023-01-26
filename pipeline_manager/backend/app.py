@@ -31,7 +31,7 @@ app = Flask(
 )
 
 # TODO: Change it later to our application exclusively
-CORS(app, resources={r'/*': {'origins': '*'}})
+CORS(app)
 
 
 @app.route('/', methods=['GET'])
