@@ -6,9 +6,24 @@ variables:
 
 stages:
     - lint
+    - build
 
 flake8:
     stage: lint
     script:
         - flake8 .
+    allow_failure: false
+
+eslint:
+    stage: lint
+    script:
+        - cd pipeline_manager/frontend
+        - npm install --only=dev
+        - npm run lint
+    allow_failure: false
+
+build-project:
+    stage: build
+    script:
+        - ./build
     allow_failure: false
