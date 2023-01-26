@@ -2,34 +2,34 @@ import { Editor } from '@baklavajs/core';
 import { ViewPlugin } from '@baklavajs/plugin-renderer-vue';
 import { OptionPlugin } from '@baklavajs/plugin-options-vue';
 import { InterfaceTypePlugin } from '@baklavajs/plugin-interface-types';
-import NodeFactory from '../core/NodeFactory';
+import NodeFactory from './NodeFactory';
 import ListOption from '../options/ListOption.vue';
 
 export default class EditorManager {
     editor = new Editor();
+
     viewPlugin = new ViewPlugin();
+
     nodeInterfaceTypes = new InterfaceTypePlugin();
+
     optionPlugin = new OptionPlugin();
 
-    constructor() {
-        this.initializeEditor()
-        this.viewPlugin.registerOption('ListOption', ListOption);
-    }
+    usedSpecification = null;
 
-    initializeEditor() {
+    constructor() {
         this.editor.use(this.viewPlugin);
         this.editor.use(this.nodeInterfaceTypes);
         this.editor.use(this.optionPlugin);
+        this.viewPlugin.registerOption('ListOption', ListOption);
     }
 
     updateEditorSpecification(dataflowSpecification) {
         if (!dataflowSpecification) return;
 
-        this.editor = new Editor();
-        this.initializeEditor();
-
+        this.usedSpecification = dataflowSpecification;
         const { nodes } = dataflowSpecification;
         const { metadata } = dataflowSpecification;
+
         nodes.forEach((node) => {
             const myNode = NodeFactory(
                 node.name,
@@ -42,7 +42,7 @@ export default class EditorManager {
         });
 
         if ('interfaces' in metadata) {
-            metadata.interfaces.forEach((name, color) => {
+            Object.keys(metadata.interfaces).forEach((name, color) => {
                 this.nodeInterfaceTypes.addType(name, color);
             });
         }
