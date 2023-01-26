@@ -15,12 +15,12 @@ SPDX-License-Identifier: Apache-2.0
                     @change="load_specification"
                 >
             </div>
-            <input v-show="!clientConnected"
+            <input v-show="!externalApplicationConnected"
                 value="Open TCP connection"
                 type="button"
                 @click="open_tcp"
             >
-            <input v-show="clientConnected && !specificationLoaded"
+            <input v-show="externalApplicationConnected && !specificationLoaded"
                 value="Request specification"
                 type="button"
                 @click="request_specification"
@@ -28,7 +28,7 @@ SPDX-License-Identifier: Apache-2.0
         </div>
         <Editor v-show="specificationLoaded"
             :dataflowSpecification="dataflowSpecification"
-            :clientConnected="clientConnected"
+            :externalApplicationConnected="externalApplicationConnected"
         />
     </div>
 </template>
@@ -44,7 +44,7 @@ export default {
     data() {
         return {
             specificationLoaded: false,
-            clientConnected: false,
+            externalApplicationConnected: false,
             dataflowSpecification: null,
         };
     },
@@ -84,7 +84,7 @@ export default {
         },
         /**
          * Event handler that asks the backend to open a TCP socket that can be connected to.
-         * If the client did not connect the user is alertd with a feedback message.
+         * If the external application did not connect the user is alertd with a feedback message.
          */
         open_tcp() {
             fetch(`${backendApiUrl}/connect`)
@@ -93,7 +93,7 @@ export default {
                 ))
                 .then((obj) => {
                     if (obj.response.ok) {
-                        this.clientConnected = true;
+                        this.externalApplicationConnected = true;
                     } else {
                         /* eslint-disable no-alert */
                         alert(obj.data);
@@ -114,9 +114,15 @@ export default {
                     if (obj.response.ok) {
                         this.dataflowSpecification = JSON.parse(obj.data);
                         this.specificationLoaded = true;
-                    } else {
-                        /* eslint-disable no-alert */
+                    } 
+                    // Service Unavailable, which means that the external application was disconnected
+                    else if (obj.response.status == 503) {
                         alert(obj.data);
+                        this.externalApplicationConnected = false;
+                    }
+                    else {
+                        /* eslint-disable no-alert */
+                        alert(obj.data);    
                     }
                 });
         },

@@ -13,9 +13,9 @@ SPDX-License-Identifier: Apache-2.0
                     id="load-dataflow-button"
                     @change="load_dataflow"
                 >
-            <label for="request-dataflow-button" v-show="clientConnected">Import dataflow</label>
+            <label for="request-dataflow-button" v-show="externalApplicationConnected">Import dataflow</label>
                 <input
-                    v-show="clientConnected"
+                    v-show="externalApplicationConnected"
                     type="file"
                     id="request-dataflow-button"
                     @change="import_dataflow"
@@ -26,19 +26,19 @@ SPDX-License-Identifier: Apache-2.0
                 @click="save_dataflow"
             >
             <input
-                v-show="clientConnected"
+                v-show="externalApplicationConnected"
                 type="button"
                 value="Export dataflow"
                 @click="request_dataflow_action('export')"
             >
             <input
-                v-show="clientConnected"
+                v-show="externalApplicationConnected"
                 type="button"
                 value="Validate dataflow"
                 @click="request_dataflow_action('validate')"
             >
             <input
-                v-show="clientConnected"
+                v-show="externalApplicationConnected"
                 type="button"
                 value="Run dataflow"
                 @click="request_dataflow_action('run')"
@@ -63,7 +63,7 @@ export default {
          * Dataflow specification of the current environment.
          */
         'dataflowSpecification',
-        'clientConnected',
+        'externalApplicationConnected',
     ],
     data() {
         return {
@@ -121,8 +121,6 @@ export default {
             temp.href = window.URL.createObjectURL(blob);
             temp.download = 'save';
             temp.click();
-            /* eslint-disable no-console */
-            console.log(JSON.stringify(this.editor.save()));
         },
         /**
          * Event handler that Loads a dataflow from a file and asks the backend to validate it.
