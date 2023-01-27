@@ -1,5 +1,9 @@
 #!/bin/sh
 
+# Copyright (c) 2022-2023 Antmicro <www.antmicro.com>
+#
+# SPDX-License-Identifier: Apache-2.0
+
 cd pipeline_manager/frontend && npm install
 sed -i 's/".\/dist\/styles.css": ".\/dist\/styles.css"$/".\/dist\/styles.css": ".\/dist\/styles.css",\n    ".\/dist\/styles\/*": ".\/dist\/styles\/*"/' node_modules/@baklavajs/plugin-renderer-vue/package.json
 npm run build

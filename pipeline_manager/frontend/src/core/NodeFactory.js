@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2022-2023 Antmicro <www.antmicro.com>
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { Node } from '@baklavajs/core';
 /**
  * Class factory that creates a class for a custom Node that is described by the arguments.
