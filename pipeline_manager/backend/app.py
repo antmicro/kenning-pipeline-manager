@@ -103,7 +103,7 @@ def import_dataflow():
         There was some error during the request handling.
         Response contains error message.
     HTTPStatus.SERVICE_UNAVAILABLE :
-        Client was disconnected.
+        External application was disconnected.
     """
     tcp_server = global_state_manager.get_tcp_server()
     if not tcp_server:
@@ -113,7 +113,7 @@ def import_dataflow():
     out = tcp_server.send_message(MessageType.IMPORT, dataflow)
 
     if out.status != Status.DATA_SENT:
-        return 'Error while sending a message to an externall aplication', HTTPStatus.BAD_REQUEST  # noqa: E501
+        return 'Error while sending a message to the external application', HTTPStatus.BAD_REQUEST  # noqa: E501
 
     status = Status.NOTHING
     while status == Status.NOTHING:
@@ -123,11 +123,11 @@ def import_dataflow():
     if status == Status.DATA_READY:
         mess_type, dataflow = out.data
         if mess_type != MessageType.OK:
-            return 'Invalid message type from the client', HTTPStatus.BAD_REQUEST  # noqa: E501
+            return 'Invalid message type from the external application', HTTPStatus.BAD_REQUEST  # noqa: E501
 
         return json.loads(dataflow), HTTPStatus.OK
     if status == Status.CLIENT_DISCONNECTED:
-        return 'Client is disconnected', HTTPStatus.SERVICE_UNAVAILABLE
+        return 'External application is disconnected', HTTPStatus.SERVICE_UNAVAILABLE
     return 'Unknown error', HTTPStatus.BAD_REQUEST
 
 
@@ -204,8 +204,8 @@ def connect():
     out = tcp_server.wait_for_client()
 
     if out.status == Status.CLIENT_CONNECTED:
-        return 'Client connected', HTTPStatus.OK
-    return 'Client did not connect', HTTPStatus.BAD_REQUEST
+        return 'External application connected', HTTPStatus.OK
+    return 'External application did not connect', HTTPStatus.BAD_REQUEST
 
 
 @app.route('/request_specification', methods=['GET'])
@@ -226,7 +226,7 @@ def request_specification():
         There was some error during the request handling.
         Response contains error message.
     HTTPStatus.SERVICE_UNAVAILABLE :
-        Client was disconnected.
+        External application was disconnected.
     """
     tcp_server = global_state_manager.get_tcp_server()
 
@@ -236,7 +236,7 @@ def request_specification():
     out = tcp_server.send_message(MessageType.SPECIFICATION)
 
     if out.status != Status.DATA_SENT:
-        return 'Error while sending a message to an externall aplication', HTTPStatus.BAD_REQUEST  # noqa: E501
+        return 'Error while sending a message to the external application', HTTPStatus.BAD_REQUEST  # noqa: E501
 
     status = Status.NOTHING
     while status == Status.NOTHING:
@@ -246,7 +246,7 @@ def request_specification():
     if status == Status.DATA_READY:
         mess_type, specification = out.data
         if mess_type != MessageType.OK:
-            return 'Invalid message type from the client', HTTPStatus.BAD_REQUEST  # noqa: E501
+            return 'Invalid message type from the external application', HTTPStatus.BAD_REQUEST  # noqa: E501
 
         success, specification = _load_specification(specification)
 
@@ -254,7 +254,7 @@ def request_specification():
             return specification, HTTPStatus.OK
         return specification, HTTPStatus.BAD_REQUEST
     if status == Status.CLIENT_DISCONNECTED:
-        return 'Client is disconnected', HTTPStatus.SERVICE_UNAVAILABLE
+        return 'External application is disconnected', HTTPStatus.SERVICE_UNAVAILABLE
     return 'Unknown error', HTTPStatus.BAD_REQUEST
 
 
@@ -279,7 +279,7 @@ def dataflow_action_request(request_type: str):
         There was some error during the request handling.
         Response contains error message.
     HTTPStatus.SERVICE_UNAVAILABLE :
-        Client was disconnected.
+        External application was disconnected.
     """
     dataflow = request.form.get('dataflow')
     tcp_server = global_state_manager.get_tcp_server()
@@ -306,7 +306,7 @@ def dataflow_action_request(request_type: str):
         return 'No request type specified', HTTPStatus.BAD_REQUEST
 
     if out.status != Status.DATA_SENT:
-        return 'Error while sending a message to an externall aplication', HTTPStatus.BAD_REQUEST  # noqa: E501
+        return 'Error while sending a message to the external application', HTTPStatus.BAD_REQUEST  # noqa: E501
 
     status = Status.NOTHING
     while status == Status.NOTHING:
@@ -322,7 +322,7 @@ def dataflow_action_request(request_type: str):
             return message, HTTPStatus.BAD_REQUEST
 
     if status == Status.CLIENT_DISCONNECTED:
-        return 'Client is disconnected', HTTPStatus.SERVICE_UNAVAILABLE
+        return 'External application is disconnected', HTTPStatus.SERVICE_UNAVAILABLE
     return 'Unknown error', HTTPStatus.BAD_REQUEST
 
 
