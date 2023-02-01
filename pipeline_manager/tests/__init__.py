@@ -3,5 +3,5 @@
 # SPDX-License-Identifier: Apache-2.0
 
 """
-Module containing tests for Pipeline Manager.
+Base module of the pipeline manager.
 """
