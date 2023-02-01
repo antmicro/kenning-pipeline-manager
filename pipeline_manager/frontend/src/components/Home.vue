@@ -77,19 +77,28 @@ SPDX-License-Identifier: Apache-2.0
             >
         </div>
         <baklava-editor class="inner-editor" :plugin="this.editorManager.viewPlugin"/>
+        <AlertBar v-model="alertVisible" v-show="alertVisible" :alert-text="alertText" :loading="loading"/>
     </div>
 </template>
 
 <script>
 import { backendApiUrl } from '../core/utils';
 import EditorManager from '../core/EditorManager';
+import AlertBar from './AlertBar.vue'
 
 export default {
+    components: {
+        AlertBar
+    },
     data() {
         return {
+            editorManager: new EditorManager(),
             specificationLoaded: false,
             externalApplicationConnected: false,
-            editorManager: new EditorManager(),
+
+            alertVisible: false,
+            alertText: '',
+            loading: false
         };
     },
     methods: {
@@ -117,13 +126,14 @@ export default {
                     (data) => ({ response, data }),
                 ))
                 .then((obj) => {
+                    let message = 'Specification loaded';
                     if (obj.response.ok) {
                         this.editorManager.updateEditorSpecification(JSON.parse(obj.data));
                         this.specificationLoaded = true;
                     } else {
-                        /* eslint-disable no-alert */
-                        alert(obj.data);
+                        message = obj.data;
                     }
+                    this.display_alert(message);
                 });
         },
         /**
@@ -138,10 +148,8 @@ export default {
                 .then((obj) => {
                     if (obj.response.ok) {
                         this.externalApplicationConnected = true;
-                    } else {
-                        /* eslint-disable no-alert */
-                        alert(obj.data);
                     }
+                    this.display_alert(obj.data);
                 });
         },
         /**
@@ -155,16 +163,17 @@ export default {
                     (data) => ({ response, data }),
                 ))
                 .then((obj) => {
+                    let message = 'Specification loaded';
                     if (obj.response.ok) {
                         this.editorManager.updateEditorSpecification(JSON.parse(obj.data));
                         this.specificationLoaded = true;
                     } else if (obj.response.status === 503) {
-                        alert(obj.data);
+                        message = obj.data;
                         this.externalApplicationConnected = false;
                     } else {
-                        /* eslint-disable no-alert */
-                        alert(obj.data);
+                        message = obj.data;
                     }
+                    this.display_alert(message);
                 });
         },
         /**
@@ -177,6 +186,7 @@ export default {
             temp.href = window.URL.createObjectURL(blob);
             temp.download = 'save';
             temp.click();
+            this.display_alert('Dataflow saved');
         },
         /**
          * Event handler that Loads a dataflow from a file and asks the backend to validate it.
@@ -200,12 +210,13 @@ export default {
                     (data) => ({ response, data }),
                 ))
                 .then((obj) => {
+                    let message = 'Dataflow loaded';
                     if (obj.response.ok) {
                         this.editorManager.loadDataflow(JSON.parse(obj.data));
                     } else {
-                        /* eslint-disable no-alert */
-                        alert(obj.data);
+                        message = obj.data;
                     }
+                    this.display_alert(message);
                 });
         },
         /**
@@ -225,12 +236,16 @@ export default {
                 body: formData,
             };
 
+            if (action == 'run') {
+                this.display_alert('Running dataflow', true);
+            }
+
             fetch(`${backendApiUrl}/dataflow_action_request/${action}`, requestOptions)
                 .then((response) => response.text().then(
                     (data) => ({ response, data }),
                 ))
                 .then((obj) => {
-                    alert(obj.data);
+                    this.display_alert(obj.data);
                     if (obj.response.status === 503) {
                         // Service Unavailable, which means
                         // that the external application was disconnected
@@ -262,19 +277,25 @@ export default {
                     (data) => ({ response, data }),
                 ))
                 .then((obj) => {
+                    let message = 'Imported dataflow';
                     if (obj.response.ok) {
                         this.editorManager.loadDataflow(JSON.parse(obj.data));
                     } else if (obj.response.status === 503) {
                         // Service Unavailable, which means
                         // that the external application was disconnected
-                        alert(obj.data);
+                        message = obj.data;
                         this.externalApplicationConnected = false;
                     } else {
-                        /* eslint-disable no-alert */
-                        alert(obj.data);
+                        message = obj.data;
                     }
+                    this.display_alert(message);
                 });
         },
+        display_alert(alert_text, loading = false) {
+            this.alertText = alert_text;
+            this.alertVisible = true;
+            this.loading = loading;
+        }
     },
 };
 </script>
