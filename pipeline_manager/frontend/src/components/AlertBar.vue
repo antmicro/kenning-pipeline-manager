@@ -11,14 +11,14 @@ import LoadingBar from './LoadingBar.vue';
 
 export default {
     components: {
-        LoadingBar
+        LoadingBar,
     },
     props: [
-        "value",
-        "alertText",
-        "loading"
+        'value',
+        'alertText',
+        'loading',
     ],
-}
+};
 </script>
 
 <style>

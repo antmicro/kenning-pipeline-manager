@@ -42,18 +42,18 @@
 
 @keyframes pulse-animation {
     0% {
-		transform: scale(0.75);
-		box-shadow: 0 0 0 0 #000000;
-	}
+        transform: scale(0.75);
+        box-shadow: 0 0 0 0 #000000;
+    }
 
-	50% {
-		transform: scale(1);
-		box-shadow: 0 0 0 5px #928f94;
-	}
+    50% {
+        transform: scale(1);
+        box-shadow: 0 0 0 5px #928f94;
+    }
 
-	100% {
-		transform: scale(0.75);
-		box-shadow: 0 0 0 0 #000000;
-	}
+    100% {
+        transform: scale(0.75);
+        box-shadow: 0 0 0 0 #000000;
+    }
 }
 </style>

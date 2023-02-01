@@ -77,18 +77,23 @@ SPDX-License-Identifier: Apache-2.0
             >
         </div>
         <baklava-editor class="inner-editor" :plugin="this.editorManager.viewPlugin"/>
-        <AlertBar v-model="alertVisible" v-show="alertVisible" :alert-text="alertText" :loading="loading"/>
+        <AlertBar
+            v-model="alertVisible"
+            v-show="alertVisible"
+            :alert-text="alertText"
+            :loading="loading"
+        />
     </div>
 </template>
 
 <script>
 import { backendApiUrl } from '../core/utils';
 import EditorManager from '../core/EditorManager';
-import AlertBar from './AlertBar.vue'
+import AlertBar from './AlertBar.vue';
 
 export default {
     components: {
-        AlertBar
+        AlertBar,
     },
     data() {
         return {
@@ -98,7 +103,7 @@ export default {
 
             alertVisible: false,
             alertText: '',
-            loading: false
+            loading: false,
         };
     },
     methods: {
@@ -236,7 +241,7 @@ export default {
                 body: formData,
             };
 
-            if (action == 'run') {
+            if (action === 'run') {
                 this.display_alert('Running dataflow', true);
             }
 
@@ -291,11 +296,11 @@ export default {
                     this.display_alert(message);
                 });
         },
-        display_alert(alert_text, loading = false) {
-            this.alertText = alert_text;
+        display_alert(alertText, loading = false) {
+            this.alertText = alertText;
             this.alertVisible = true;
             this.loading = loading;
-        }
+        },
     },
 };
 </script>
