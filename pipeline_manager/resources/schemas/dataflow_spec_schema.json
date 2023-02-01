@@ -255,7 +255,7 @@
         }
     },
     "required": [
-        "nodes"
+        "nodes", "metadata"
     ],
     "additionalProperties": false
 }
