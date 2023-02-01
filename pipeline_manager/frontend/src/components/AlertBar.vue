@@ -1,3 +1,9 @@
+<!--
+Copyright (c) 2022-2023 Antmicro <www.antmicro.com>
+
+SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
     <div class="alert-bar">
         <button @click="$emit('input', false)" class="dismiss">Close</button> <br/>
