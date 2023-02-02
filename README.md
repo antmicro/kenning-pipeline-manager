@@ -26,5 +26,5 @@ Building first is required.
 By default, server runs on `http://127.0.0.1:5000`.
 After opening the browser with given link, you can:
 
-* Use sample specification under `./pipeline_manager/examples/sample-specification.json` to check the visualization and editing of pipelines
+* Use sample specification under `./pipeline_manager/examples/sample_specification.json` to check the visualization and editing of pipelines
 * Connect the third-party app (e.g. [Kenning](https://github.com/antmicro/kenning)), edit its pipeline, validate it and run it.
