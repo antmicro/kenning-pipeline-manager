@@ -1,0 +1,177 @@
+{
+    "nodes": [
+        {
+            "type": "PetDataset",
+            "id": "node_16753442994540",
+            "name": "PetDataset",
+            "options": [
+                [
+                    "type",
+                    "Cats"
+                ],
+                [
+                    "batch_size",
+                    8
+                ],
+                [
+                    "download_dataset",
+                    false
+                ],
+                [
+                    "range",
+                    null
+                ],
+                [
+                    "option",
+                    0
+                ],
+                [
+                    "Model name",
+                    null
+                ]
+            ],
+            "state": {},
+            "interfaces": [
+                [
+                    "Dataset",
+                    {
+                        "id": "ni_16753442994551",
+                        "value": null,
+                        "isInput": false,
+                        "type": "Dataset"
+                    }
+                ],
+                [
+                    "Runtime",
+                    {
+                        "id": "ni_16753442994562",
+                        "value": null,
+                        "isInput": false,
+                        "type": "Runtime"
+                    }
+                ]
+            ],
+            "position": {
+                "x": 279,
+                "y": 122
+            },
+            "width": 200,
+            "twoColumn": false,
+            "customClasses": ""
+        },
+        {
+            "type": "MobileNetModelWrapper",
+            "id": "node_16753443016633",
+            "name": "MobileNetModelWrapper",
+            "options": [
+                [
+                    "task",
+                    "detection"
+                ],
+                [
+                    "Quantization details",
+                    null
+                ]
+            ],
+            "state": {},
+            "interfaces": [
+                [
+                    "Dataset",
+                    {
+                        "id": "ni_16753443016644",
+                        "value": null,
+                        "isInput": true,
+                        "type": "Dataset"
+                    }
+                ],
+                [
+                    "ModelWrapper",
+                    {
+                        "id": "ni_16753443016645",
+                        "value": null,
+                        "isInput": false,
+                        "type": "ModelWrapper"
+                    }
+                ]
+            ],
+            "position": {
+                "x": 921,
+                "y": 115
+            },
+            "width": 200,
+            "twoColumn": false,
+            "customClasses": ""
+        },
+        {
+            "type": "PetDataset",
+            "id": "node_16753443075669",
+            "name": "PetDataset",
+            "options": [
+                [
+                    "type",
+                    null
+                ],
+                [
+                    "batch_size",
+                    1
+                ],
+                [
+                    "download_dataset",
+                    true
+                ],
+                [
+                    "range",
+                    4.715302491103202
+                ],
+                [
+                    "option",
+                    0.6
+                ],
+                [
+                    "Model name",
+                    "test name abc"
+                ]
+            ],
+            "state": {},
+            "interfaces": [
+                [
+                    "Dataset",
+                    {
+                        "id": "ni_167534430756610",
+                        "value": null,
+                        "isInput": false,
+                        "type": "Dataset"
+                    }
+                ],
+                [
+                    "Runtime",
+                    {
+                        "id": "ni_167534430756611",
+                        "value": null,
+                        "isInput": false,
+                        "type": "Runtime"
+                    }
+                ]
+            ],
+            "position": {
+                "x": 913,
+                "y": 361
+            },
+            "width": 200,
+            "twoColumn": false,
+            "customClasses": ""
+        }
+    ],
+    "connections": [
+        {
+            "id": "16753443042758",
+            "from": "ni_16753442994551",
+            "to": "ni_16753443016644"
+        }
+    ],
+    "panning": {
+        "x": 39,
+        "y": 27
+    },
+    "scaling": 1
+}
