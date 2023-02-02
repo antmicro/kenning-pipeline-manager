@@ -36,7 +36,7 @@ export default {
 .alert-box {
     text-align: center;
     color: #dfdfdf;
-    margin-bottom: 15px;
+    margin: 10px;
 }
 
 .alert-bar {
