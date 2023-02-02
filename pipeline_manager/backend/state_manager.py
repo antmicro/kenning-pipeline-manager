@@ -72,7 +72,7 @@ class PMStateManager:
         Returns
         -------
         CommunicationBackend
-            Initialied CommunicationBackend
+            Initialized CommunicationBackend
         """
         if not self.server:
             self.server = CommunicationBackend(
