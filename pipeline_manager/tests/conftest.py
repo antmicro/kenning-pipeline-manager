@@ -10,11 +10,14 @@ from pipeline_manager.resources import schemas
 
 
 @pytest.fixture
-def sample_specification() -> dict:
-    sample_specification = json.loads(
-        files(examples)
-        .joinpath('sample_specification.json').read_text()
-    )
+def sample_specification_path() -> Path:
+    sample_specification_path = files(examples).joinpath('sample_specification.json')  # noqa: E501
+    return sample_specification_path
+
+
+@pytest.fixture
+def sample_specification(sample_specification_path) -> dict:
+    sample_specification = json.loads(sample_specification_path.read_text())
     return sample_specification
 
 
