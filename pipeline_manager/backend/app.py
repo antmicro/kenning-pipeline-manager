@@ -79,7 +79,7 @@ def _load_specification(
     except ValidationError:
         app.logger.exception('Specification is invalid')
         return False, 'Specification is invalid'
-    except json.JSONDecodeError:
+    except (json.JSONDecodeError, UnicodeDecodeError):
         app.logger.exception('Specification is not a valid JSON')
         return False, 'Specification is not a valid JSON'
 
