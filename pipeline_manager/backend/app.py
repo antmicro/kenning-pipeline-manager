@@ -153,8 +153,8 @@ def load_dataflow():
         dataflow = request.files['dataflow']
         dataflow = json.load(dataflow)
     except Exception:
-        app.logger.exception('Dataflow is not a valid safe')
-        return 'Dataflow is not a valid safe', HTTPStatus.BAD_REQUEST
+        app.logger.exception('Dataflow is not a valid save')
+        return 'Dataflow is not a valid save', HTTPStatus.BAD_REQUEST
 
     return dataflow, HTTPStatus.OK
 
