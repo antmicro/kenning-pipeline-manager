@@ -7,6 +7,7 @@ variables:
 stages:
     - lint
     - build
+    - test
 
 flake8:
     stage: lint
@@ -26,4 +27,10 @@ build-project:
     stage: build
     script:
         - ./build
+    allow_failure: false
+
+pytest:
+    stage: test
+    script:
+        - python3 -m pytest
     allow_failure: false
