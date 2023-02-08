@@ -194,10 +194,10 @@ export default {
          */
         save_dataflow() {
             const blob = new Blob([JSON.stringify(this.editorManager.saveDataflow())], { type: 'application/json' });
-            const temp = document.createElement('a');
-            temp.href = window.URL.createObjectURL(blob);
-            temp.download = 'save';
-            temp.click();
+            const link_element = document.createElement('a');
+            link_element.href = window.URL.createObjectURL(blob);
+            link_element.download = 'save';
+            link_element.click();
             this.display_alert('Dataflow saved');
         },
         /**
