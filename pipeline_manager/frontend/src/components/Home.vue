@@ -90,7 +90,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { backendApiUrl } from '../core/utils';
+import { backendApiUrl, HTTPCodes } from '../core/utils';
 import EditorManager from '../core/EditorManager';
 import AlertBar from './AlertBar.vue';
 
@@ -176,13 +176,13 @@ export default {
                 ))
                 .then((obj) => {
                     let message = 'Specification loaded';
-                    if (obj.response.ok) {
+                    if (obj.response.status === HTTPCodes.OK) {
                         this.editorManager.updateEditorSpecification(JSON.parse(obj.data));
                         this.specificationLoaded = true;
-                    } else if (obj.response.status === 503) {
+                    } else if (obj.response.status === HTTPCodes.ServiceUnavailable) {
                         message = obj.data;
                         this.externalApplicationConnected = false;
-                    } else {
+                    } else if (obj.response.status === HTTPCodes.BadRequest) {
                         message = obj.data;
                     }
                     this.display_alert(message);
@@ -227,9 +227,9 @@ export default {
                 ))
                 .then((obj) => {
                     let message = 'Dataflow loaded';
-                    if (obj.response.ok) {
+                    if (obj.response.status === HTTPCodes.OK) {
                         this.editorManager.loadDataflow(JSON.parse(obj.data));
-                    } else {
+                    } else if (obj.response.status === HTTPCodes.BadRequest) {
                         message = obj.data;
                     }
                     this.display_alert(message);
@@ -266,7 +266,7 @@ export default {
                 ))
                 .then((obj) => {
                     this.display_alert(obj.data);
-                    if (obj.response.status === 503) {
+                    if (obj.response.status === HTTPCodes.ServiceUnavailable) {
                         // Service Unavailable, which means
                         // that the external application was disconnected
                         this.externalApplicationConnected = false;
@@ -302,14 +302,14 @@ export default {
                 ))
                 .then((obj) => {
                     let message = 'Imported dataflow';
-                    if (obj.response.ok) {
+                    if (obj.response.status === HTTPCodes.OK) {
                         this.editorManager.loadDataflow(JSON.parse(obj.data));
-                    } else if (obj.response.status === 503) {
+                    } else if (obj.response.status === HTTPCodes.ServiceUnavailable) {
                         // Service Unavailable, which means
                         // that the external application was disconnected
                         message = obj.data;
                         this.externalApplicationConnected = false;
-                    } else {
+                    } else if (obj.response.status === HTTPCodes.BadRequest) {
                         message = obj.data;
                     }
                     this.display_alert(message);
