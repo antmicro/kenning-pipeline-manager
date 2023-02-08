@@ -128,7 +128,7 @@ export default {
                 method: 'POST',
                 body: formData,
                 headers: {
-                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Origin': backendApiUrl,
                     'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
                 },
             };
@@ -216,7 +216,7 @@ export default {
                 method: 'POST',
                 body: formData,
                 headers: {
-                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Origin': backendApiUrl,
                     'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
                 },
             };
@@ -251,7 +251,7 @@ export default {
                 method: 'POST',
                 body: formData,
                 headers: {
-                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Origin': backendApiUrl,
                     'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
                 },
             };
@@ -291,7 +291,7 @@ export default {
                 method: 'POST',
                 body: formData,
                 headers: {
-                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Origin': backendApiUrl,
                     'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
                 },
             };
