@@ -4,9 +4,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import Vue from 'vue';
-
+// This will be set dynamically
 /* eslint-disable import/prefer-default-export */
-export const backendApiUrl = (Vue.config.devtools)
-    ? `${window.location.protocol}//${window.location.hostname}:5000`
-    : `${window.location.protocol}//${window.location.host}`;
+export const backendApiUrl = 'http://127.0.0.1:5000';
+
+export const HTTPCodes = {
+    OK: 200,
+    BadRequest: 400,
+    ServiceUnavailable: 503,
+};

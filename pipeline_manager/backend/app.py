@@ -31,7 +31,7 @@ app = Flask(
 )
 
 # TODO: Change it later to our application exclusively
-CORS(app, resources={r'/*': {'origins': '*'}})
+CORS(app)
 
 
 @app.route('/', methods=['GET'])
@@ -79,7 +79,7 @@ def _load_specification(
     except ValidationError:
         app.logger.exception('Specification is invalid')
         return False, 'Specification is invalid'
-    except json.JSONDecodeError:
+    except (json.JSONDecodeError, UnicodeDecodeError):
         app.logger.exception('Specification is not a valid JSON')
         return False, 'Specification is not a valid JSON'
 
@@ -102,6 +102,8 @@ def import_dataflow():
     HTTPStatus.BAD_REQUEST :
         There was some error during the request handling.
         Response contains error message.
+    HTTPStatus.SERVICE_UNAVAILABLE :
+        Client was disconnected.
     """
     tcp_server = global_state_manager.get_tcp_server()
     if not tcp_server:
@@ -125,7 +127,7 @@ def import_dataflow():
 
         return json.loads(dataflow), HTTPStatus.OK
     if status == Status.CLIENT_DISCONNECTED:
-        return 'Client is disconnected', HTTPStatus.BAD_REQUEST
+        return 'Client is disconnected', HTTPStatus.SERVICE_UNAVAILABLE
     return 'Unknown error', HTTPStatus.BAD_REQUEST
 
 
@@ -223,6 +225,8 @@ def request_specification():
     HTTPStatus.BAD_REQUEST :
         There was some error during the request handling.
         Response contains error message.
+    HTTPStatus.SERVICE_UNAVAILABLE :
+        Client was disconnected.
     """
     tcp_server = global_state_manager.get_tcp_server()
 
@@ -250,7 +254,7 @@ def request_specification():
             return specification, HTTPStatus.OK
         return specification, HTTPStatus.BAD_REQUEST
     if status == Status.CLIENT_DISCONNECTED:
-        return 'Client is disconnected', HTTPStatus.BAD_REQUEST
+        return 'Client is disconnected', HTTPStatus.SERVICE_UNAVAILABLE
     return 'Unknown error', HTTPStatus.BAD_REQUEST
 
 
@@ -274,6 +278,8 @@ def dataflow_action_request(request_type: str):
     HTTPStatus.BAD_REQUEST :
         There was some error during the request handling.
         Response contains error message.
+    HTTPStatus.SERVICE_UNAVAILABLE :
+        Client was disconnected.
     """
     dataflow = request.form.get('dataflow')
     tcp_server = global_state_manager.get_tcp_server()
@@ -316,7 +322,7 @@ def dataflow_action_request(request_type: str):
             return message, HTTPStatus.BAD_REQUEST
 
     if status == Status.CLIENT_DISCONNECTED:
-        return 'Client is disconnected', HTTPStatus.BAD_REQUEST
+        return 'Client is disconnected', HTTPStatus.SERVICE_UNAVAILABLE
     return 'Unknown error', HTTPStatus.BAD_REQUEST
 
 

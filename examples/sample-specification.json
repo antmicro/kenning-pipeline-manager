@@ -1,4 +1,9 @@
 {
+    "metadata": {
+        "interfaces": {
+            "Dataset": "#FF0000"
+        }
+    },
     "nodes": [
         {
             "name": "PetDataset",
