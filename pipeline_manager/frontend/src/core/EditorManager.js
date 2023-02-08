@@ -8,8 +8,11 @@ import { Editor } from '@baklavajs/core';
 import { ViewPlugin } from '@baklavajs/plugin-renderer-vue';
 import { OptionPlugin } from '@baklavajs/plugin-options-vue';
 import { InterfaceTypePlugin } from '@baklavajs/plugin-interface-types';
+import Ajv from 'ajv';
+
 import NodeFactory from './NodeFactory';
 import ListOption from '../options/ListOption.vue';
+import specificationSchema from '../../../resources/schemas/dataflow_spec_schema.json';
 
 export default class EditorManager {
     editor = new Editor();
@@ -21,6 +24,8 @@ export default class EditorManager {
     optionPlugin = new OptionPlugin();
 
     usedSpecification = null;
+
+    ajv = new Ajv();
 
     constructor() {
         this.editor.use(this.viewPlugin);
@@ -60,5 +65,14 @@ export default class EditorManager {
 
     loadDataflow(dataflow) {
         this.editor.load(dataflow);
+    }
+
+    validateSpecification(specification) {
+        const validate = this.ajv.compile(specificationSchema);
+        const valid = validate(specification);
+        if (valid) {
+            return null;
+        }
+        return validate.errors;
     }
 }
