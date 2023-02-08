@@ -15,19 +15,19 @@ SPDX-License-Identifier: Apache-2.0
                 v-show="!specificationLoaded"
                 type="file"
                 id="load-spec-button"
-                @change="load_specification"
+                @change="loadSpecification"
             >
             <input
                 v-show="!externalApplicationConnected"
                 type="button"
                 value="Open TCP connection"
-                @click="open_tcp"
+                @click="openTCP"
             >
             <input
                 v-show="!specificationLoaded"
                 type="button"
                 value="Request specification"
-                @click="request_specification"
+                @click="requestSpecification"
             >
         </div>
         <div>
@@ -39,7 +39,7 @@ SPDX-License-Identifier: Apache-2.0
                 v-show="specificationLoaded"
                 type="file"
                 id="load-dataflow-button"
-                @change="load_dataflow"
+                @change="loadDataflow"
             >
             <label
                 for="request-dataflow-button"
@@ -49,31 +49,31 @@ SPDX-License-Identifier: Apache-2.0
                 v-show="specificationLoaded"
                 type="file"
                 id="request-dataflow-button"
-                @change="import_dataflow"
+                @change="importDataflow"
             >
             <input
                 v-show="specificationLoaded"
                 type="button"
                 value="Save dataflow"
-                @click="save_dataflow"
+                @click="saveDataflow"
             >
             <input
                 v-show="externalApplicationConnected"
                 type="button"
                 value="Export dataflow"
-                @click="request_dataflow_action('export')"
+                @click="requestDataflowAction('export')"
             >
             <input
                 v-show="externalApplicationConnected"
                 type="button"
                 value="Validate dataflow"
-                @click="request_dataflow_action('validate')"
+                @click="requestDataflowAction('validate')"
             >
             <input
                 v-show="externalApplicationConnected"
                 type="button"
                 value="Run dataflow"
-                @click="request_dataflow_action('run')"
+                @click="requestDataflowAction('run')"
             >
         </div>
         <baklava-editor
@@ -117,7 +117,7 @@ export default {
          * renders a new environment.
          * Otherwise user is alerted with a feedback message.
          */
-        load_specification() {
+        loadSpecification() {
             const file = document.getElementById('load-spec-button').files[0];
             if (!file) return;
 
@@ -152,7 +152,7 @@ export default {
          * Event handler that asks the backend to open a TCP socket that can be connected to.
          * If the external application did not connect the user is alertd with a feedback message.
          */
-        open_tcp() {
+        openTCP() {
             fetch(`${backendApiUrl}/connect`)
                 .then((response) => response.text().then(
                     (data) => ({ response, data }),
@@ -161,7 +161,7 @@ export default {
                     if (obj.response.ok) {
                         this.externalApplicationConnected = true;
                     }
-                    this.display_alert(obj.data);
+                    this.displayAlert(obj.data);
                 });
         },
         /**
@@ -169,7 +169,7 @@ export default {
          * If the backend did not manage to send it the user is alerted with a feedback message.
          * Otherwise the specification is passed to the editor that renders a new environment.
          */
-        request_specification() {
+        requestSpecification() {
             fetch(`${backendApiUrl}/request_specification`)
                 .then((response) => response.text().then(
                     (data) => ({ response, data }),
@@ -185,27 +185,27 @@ export default {
                     } else if (obj.response.status === HTTPCodes.BadRequest) {
                         message = obj.data;
                     }
-                    this.display_alert(message);
+                    this.displayAlert(message);
                 });
         },
         /**
          * Event handler that that saves a current dataflow to a `save.json` file.
          * It is also displayed in the console log.
          */
-        save_dataflow() {
+        saveDataflow() {
             const blob = new Blob([JSON.stringify(this.editorManager.saveDataflow())], { type: 'application/json' });
-            const link_element = document.createElement('a');
-            link_element.href = window.URL.createObjectURL(blob);
-            link_element.download = 'save';
-            link_element.click();
-            this.display_alert('Dataflow saved');
+            const linkElement = document.createElement('a');
+            linkElement.href = window.URL.createObjectURL(blob);
+            linkElement.download = 'save';
+            linkElement.click();
+            this.displayAlert('Dataflow saved');
         },
         /**
          * Event handler that Loads a dataflow from a file and asks the backend to validate it.
          * It the validation is successful it is loaded as the current dataflow.
          * Otherwise the user is alerted with a feedback message.
          */
-        load_dataflow() {
+        loadDataflow() {
             const file = document.getElementById('load-dataflow-button').files[0];
             if (!file) return;
 
@@ -232,7 +232,7 @@ export default {
                     } else if (obj.response.status === HTTPCodes.BadRequest) {
                         message = obj.data;
                     }
-                    this.display_alert(message);
+                    this.displayAlert(message);
                 });
         },
         /**
@@ -240,7 +240,7 @@ export default {
          * to the backend based on the action argument.
          * The user is alerted with a feedback message.
          */
-        request_dataflow_action(action) {
+        requestDataflowAction(action) {
             const dataflow = JSON.stringify(this.editorManager.saveDataflow());
             if (!dataflow) return;
 
@@ -257,7 +257,7 @@ export default {
             };
 
             if (action === 'run') {
-                this.display_alert('Running dataflow', true);
+                this.displayAlert('Running dataflow', true);
             }
 
             fetch(`${backendApiUrl}/dataflow_action_request/${action}`, requestOptions)
@@ -265,7 +265,7 @@ export default {
                     (data) => ({ response, data }),
                 ))
                 .then((obj) => {
-                    this.display_alert(obj.data);
+                    this.displayAlert(obj.data);
                     if (obj.response.status === HTTPCodes.ServiceUnavailable) {
                         // Service Unavailable, which means
                         // that the external application was disconnected
@@ -280,7 +280,7 @@ export default {
          * It the validation is successful it is loaded as the current dataflow.
          * Otherwise the user is alerted with a feedback message.
          */
-        import_dataflow() {
+        importDataflow() {
             const file = document.getElementById('request-dataflow-button').files[0];
             if (!file) return;
 
@@ -312,10 +312,10 @@ export default {
                     } else if (obj.response.status === HTTPCodes.BadRequest) {
                         message = obj.data;
                     }
-                    this.display_alert(message);
+                    this.displayAlert(message);
                 });
         },
-        display_alert(alertText, loading = false) {
+        displayAlert(alertText, loading = false) {
             this.alertText = alertText;
             this.alertVisible = true;
             this.loading = loading;
