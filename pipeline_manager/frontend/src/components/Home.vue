@@ -76,7 +76,10 @@ SPDX-License-Identifier: Apache-2.0
                 @click="request_dataflow_action('run')"
             >
         </div>
-        <baklava-editor class="inner-editor" :plugin="this.editorManager.viewPlugin"/>
+        <baklava-editor
+            class="inner-editor"
+            :plugin="this.editorManager.viewPlugin"
+        />
         <AlertBar
             v-model="alertVisible"
             v-show="alertVisible"
@@ -124,6 +127,10 @@ export default {
             const requestOptions = {
                 method: 'POST',
                 body: formData,
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
+                },
             };
 
             fetch(`${backendApiUrl}/load_specification`, requestOptions)
@@ -208,6 +215,10 @@ export default {
             const requestOptions = {
                 method: 'POST',
                 body: formData,
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
+                },
             };
 
             fetch(`${backendApiUrl}/load_dataflow`, requestOptions)
@@ -239,6 +250,10 @@ export default {
             const requestOptions = {
                 method: 'POST',
                 body: formData,
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
+                },
             };
 
             if (action === 'run') {
@@ -275,6 +290,10 @@ export default {
             const requestOptions = {
                 method: 'POST',
                 body: formData,
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
+                },
             };
 
             fetch(`${backendApiUrl}/import_dataflow`, requestOptions)

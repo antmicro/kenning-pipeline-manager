@@ -11,7 +11,6 @@ import Home from '../components/Home.vue';
 Vue.use(Router);
 
 const RouterVue = new Router({
-    mode: 'history',
     base: process.env.BASE_URL,
     routes: [
         {
