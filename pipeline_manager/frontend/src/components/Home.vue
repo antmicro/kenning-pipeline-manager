@@ -112,7 +112,7 @@ export default {
     methods: {
         /**
          * Event handler that loads a specification passed by the user
-         * and asks the backend to validate it.
+         * and asks the validates it.
          * If the validation is successful it is passed to the editor that
          * renders a new environment.
          * Otherwise user is alerted with a feedback message.
@@ -140,9 +140,40 @@ export default {
                 if (returnMessage === null) {
                     this.editorManager.updateEditorSpecification(specification);
                     this.specificationLoaded = true;
-                    returnMessage = 'Loaded sucessfuly';
+                    returnMessage = 'Loaded successfully';
                 }
                 this.displayAlert(returnMessage);
+            };
+
+            fileReader.readAsText(file);
+        },
+        /**
+         * Event handler that Loads a dataflow from a file.
+         * It the loading is successful it is loaded as the current dataflow.
+         * Otherwise the user is alerted with a feedback message.
+         */
+        loadDataflow() {
+            const file = document.getElementById('load-dataflow-button').files[0];
+            if (!file) return;
+
+            const fileReader = new FileReader();
+
+            fileReader.onload = () => {
+                let dataflow = null;
+                try {
+                    dataflow = JSON.parse(fileReader.result);
+                } catch (exception) {
+                    if (exception instanceof SyntaxError) {
+                        this.displayAlert(`Not a proper JSON file.\n${exception}`);
+                    } else {
+                        this.displayAlert(`Unknown error.\n${exception}`);
+                    }
+                    return;
+                }
+
+                // TODO: Create schema for dataflows, as baklavajs does not provide any.
+                this.editorManager.loadDataflow(dataflow);
+                this.displayAlert('Dataflow loaded successfully');
             };
 
             fileReader.readAsText(file);
@@ -186,38 +217,6 @@ export default {
             } else if (response.status === HTTPCodes.ServiceUnavailable) {
                 message = data;
                 this.externalApplicationConnected = false;
-            } else if (response.status === HTTPCodes.BadRequest) {
-                message = data;
-            }
-            this.displayAlert(message);
-        },
-        /**
-         * Event handler that Loads a dataflow from a file and asks the backend to validate it.
-         * It the validation is successful it is loaded as the current dataflow.
-         * Otherwise the user is alerted with a feedback message.
-         */
-        async loadDataflow() {
-            const file = document.getElementById('load-dataflow-button').files[0];
-            if (!file) return;
-
-            const formData = new FormData();
-            formData.append('dataflow', file);
-
-            const requestOptions = {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'Access-Control-Allow-Origin': backendApiUrl,
-                    'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
-                },
-            };
-
-            const response = await fetch(`${backendApiUrl}/load_dataflow`, requestOptions);
-            const data = await response.text();
-            let message = 'Dataflow loaded';
-
-            if (response.status === HTTPCodes.OK) {
-                this.editorManager.loadDataflow(JSON.parse(data));
             } else if (response.status === HTTPCodes.BadRequest) {
                 message = data;
             }
