@@ -121,76 +121,34 @@ export default {
             const file = document.getElementById('load-spec-button').files[0];
             if (!file) return;
 
-            const formData = new FormData();
-            formData.append('specfile', file);
+            const fileReader = new FileReader();
 
-            const requestOptions = {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'Access-Control-Allow-Origin': backendApiUrl,
-                    'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
-                },
+            fileReader.onload = () => {
+                let specification = null;
+                try {
+                    specification = JSON.parse(fileReader.result);
+                } catch (exception) {
+                    if (exception instanceof SyntaxError) {
+                        this.displayAlert(`Not a proper JSON file.\n${exception}`);
+                    } else {
+                        this.displayAlert(`Unknown error.\n${exception}`);
+                    }
+                    return;
+                }
+
+                let returnMessage = this.editorManager.validateSpecification(specification);
+                if (returnMessage === null) {
+                    this.editorManager.updateEditorSpecification(specification);
+                    this.specificationLoaded = true;
+                    returnMessage = 'Loaded sucessfuly';
+                }
+                this.displayAlert(returnMessage);
             };
 
-            fetch(`${backendApiUrl}/load_specification`, requestOptions)
-                .then((response) => response.text().then(
-                    (data) => ({ response, data }),
-                ))
-                .then((obj) => {
-                    let message = 'Specification loaded';
-                    if (obj.response.ok) {
-                        this.editorManager.updateEditorSpecification(JSON.parse(obj.data));
-                        this.specificationLoaded = true;
-                    } else {
-                        message = obj.data;
-                    }
-                    this.display_alert(message);
-                });
-        },
-        /**
-         * Event handler that asks the backend to open a TCP socket that can be connected to.
-         * If the external application did not connect the user is alertd with a feedback message.
-         */
-        openTCP() {
-            fetch(`${backendApiUrl}/connect`)
-                .then((response) => response.text().then(
-                    (data) => ({ response, data }),
-                ))
-                .then((obj) => {
-                    if (obj.response.ok) {
-                        this.externalApplicationConnected = true;
-                    }
-                    this.displayAlert(obj.data);
-                });
-        },
-        /**
-         * Event handler that asks the backend to send a dataflow specification.
-         * If the backend did not manage to send it the user is alerted with a feedback message.
-         * Otherwise the specification is passed to the editor that renders a new environment.
-         */
-        requestSpecification() {
-            fetch(`${backendApiUrl}/request_specification`)
-                .then((response) => response.text().then(
-                    (data) => ({ response, data }),
-                ))
-                .then((obj) => {
-                    let message = 'Specification loaded';
-                    if (obj.response.status === HTTPCodes.OK) {
-                        this.editorManager.updateEditorSpecification(JSON.parse(obj.data));
-                        this.specificationLoaded = true;
-                    } else if (obj.response.status === HTTPCodes.ServiceUnavailable) {
-                        message = obj.data;
-                        this.externalApplicationConnected = false;
-                    } else if (obj.response.status === HTTPCodes.BadRequest) {
-                        message = obj.data;
-                    }
-                    this.displayAlert(message);
-                });
+            fileReader.readAsText(file);
         },
         /**
          * Event handler that that saves a current dataflow to a `save.json` file.
-         * It is also displayed in the console log.
          */
         saveDataflow() {
             const blob = new Blob([JSON.stringify(this.editorManager.saveDataflow())], { type: 'application/json' });
@@ -201,11 +159,44 @@ export default {
             this.displayAlert('Dataflow saved');
         },
         /**
+         * Event handler that asks the backend to open a TCP socket that can be connected to.
+         * If the external application did not connect the user is alertd with a feedback message.
+         */
+        async openTCP() {
+            const response = await fetch(`${backendApiUrl}/connect`);
+            const data = await response.text();
+            if (response.ok) {
+                this.externalApplicationConnected = true;
+            }
+            this.displayAlert(data);
+        },
+        /**
+         * Event handler that asks the backend to send a dataflow specification.
+         * If the backend did not manage to send it the user is alerted with a feedback message.
+         * Otherwise the specification is passed to the editor that renders a new environment.
+         */
+        async requestSpecification() {
+            const response = await fetch(`${backendApiUrl}/request_specification`);
+            const data = await response.text();
+            let message = 'Specification loaded';
+
+            if (response.status === HTTPCodes.OK) {
+                this.editorManager.updateEditorSpecification(JSON.parse(data));
+                this.specificationLoaded = true;
+            } else if (response.status === HTTPCodes.ServiceUnavailable) {
+                message = data;
+                this.externalApplicationConnected = false;
+            } else if (response.status === HTTPCodes.BadRequest) {
+                message = data;
+            }
+            this.displayAlert(message);
+        },
+        /**
          * Event handler that Loads a dataflow from a file and asks the backend to validate it.
          * It the validation is successful it is loaded as the current dataflow.
          * Otherwise the user is alerted with a feedback message.
          */
-        loadDataflow() {
+        async loadDataflow() {
             const file = document.getElementById('load-dataflow-button').files[0];
             if (!file) return;
 
@@ -221,26 +212,23 @@ export default {
                 },
             };
 
-            fetch(`${backendApiUrl}/load_dataflow`, requestOptions)
-                .then((response) => response.text().then(
-                    (data) => ({ response, data }),
-                ))
-                .then((obj) => {
-                    let message = 'Dataflow loaded';
-                    if (obj.response.status === HTTPCodes.OK) {
-                        this.editorManager.loadDataflow(JSON.parse(obj.data));
-                    } else if (obj.response.status === HTTPCodes.BadRequest) {
-                        message = obj.data;
-                    }
-                    this.displayAlert(message);
-                });
+            const response = await fetch(`${backendApiUrl}/load_dataflow`, requestOptions);
+            const data = await response.text();
+            let message = 'Dataflow loaded';
+
+            if (response.status === HTTPCodes.OK) {
+                this.editorManager.loadDataflow(JSON.parse(data));
+            } else if (response.status === HTTPCodes.BadRequest) {
+                message = data;
+            }
+            this.displayAlert(message);
         },
         /**
          * Event handler that loads a current dataflow from the editor and sends a request
          * to the backend based on the action argument.
          * The user is alerted with a feedback message.
          */
-        requestDataflowAction(action) {
+        async requestDataflowAction(action) {
             const dataflow = JSON.stringify(this.editorManager.saveDataflow());
             if (!dataflow) return;
 
@@ -260,18 +248,15 @@ export default {
                 this.displayAlert('Running dataflow', true);
             }
 
-            fetch(`${backendApiUrl}/dataflow_action_request/${action}`, requestOptions)
-                .then((response) => response.text().then(
-                    (data) => ({ response, data }),
-                ))
-                .then((obj) => {
-                    this.displayAlert(obj.data);
-                    if (obj.response.status === HTTPCodes.ServiceUnavailable) {
-                        // Service Unavailable, which means
-                        // that the external application was disconnected
-                        this.externalApplicationConnected = false;
-                    }
-                });
+            const response = await fetch(`${backendApiUrl}/dataflow_action_request/${action}`, requestOptions);
+            const data = await response.text();
+
+            this.displayAlert(data);
+            if (response.status === HTTPCodes.ServiceUnavailable) {
+                // Service Unavailable, which means
+                // that the external application was disconnected
+                this.externalApplicationConnected = false;
+            }
         },
         /**
          * Event handler that loads a file and asks the backend to delegate this operation
@@ -280,7 +265,7 @@ export default {
          * It the validation is successful it is loaded as the current dataflow.
          * Otherwise the user is alerted with a feedback message.
          */
-        importDataflow() {
+        async importDataflow() {
             const file = document.getElementById('request-dataflow-button').files[0];
             if (!file) return;
 
@@ -296,24 +281,21 @@ export default {
                 },
             };
 
-            fetch(`${backendApiUrl}/import_dataflow`, requestOptions)
-                .then((response) => response.text().then(
-                    (data) => ({ response, data }),
-                ))
-                .then((obj) => {
-                    let message = 'Imported dataflow';
-                    if (obj.response.status === HTTPCodes.OK) {
-                        this.editorManager.loadDataflow(JSON.parse(obj.data));
-                    } else if (obj.response.status === HTTPCodes.ServiceUnavailable) {
-                        // Service Unavailable, which means
-                        // that the external application was disconnected
-                        message = obj.data;
-                        this.externalApplicationConnected = false;
-                    } else if (obj.response.status === HTTPCodes.BadRequest) {
-                        message = obj.data;
-                    }
-                    this.displayAlert(message);
-                });
+            const response = await fetch(`${backendApiUrl}/import_dataflow`, requestOptions);
+            const data = await response.text();
+            let message = 'Imported dataflow';
+
+            if (response.status === HTTPCodes.OK) {
+                this.editorManager.loadDataflow(JSON.parse(data));
+            } else if (response.status === HTTPCodes.ServiceUnavailable) {
+                // Service Unavailable, which means
+                // that the external application was disconnected
+                message = data;
+                this.externalApplicationConnected = false;
+            } else if (response.status === HTTPCodes.BadRequest) {
+                message = data;
+            }
+            this.displayAlert(message);
         },
         displayAlert(alertText, loading = false) {
             this.alertText = alertText;
