@@ -9,7 +9,8 @@ SPDX-License-Identifier: Apache-2.0
         <div>
             <label
                 for="load-spec-button"
-                v-show="!specificationLoaded">Load specification
+                v-show="!specificationLoaded">
+                Load specification
             </label>
             <input
                 v-show="!specificationLoaded"
@@ -33,7 +34,8 @@ SPDX-License-Identifier: Apache-2.0
         <div>
             <label
                 for="load-dataflow-button"
-                v-show="specificationLoaded">Load dataflow
+                v-show="specificationLoaded">
+                Load dataflow
             </label>
             <input
                 v-show="specificationLoaded"
@@ -76,37 +78,32 @@ SPDX-License-Identifier: Apache-2.0
                 @click="requestDataflowAction('run')"
             >
         </div>
+        <DelegatePanel></DelegatePanel>
         <baklava-editor
             class="inner-editor"
             :plugin="this.editorManager.viewPlugin"
         />
         <AlertBar
-            v-model="alertVisible"
-            v-show="alertVisible"
-            :alert-text="alertText"
-            :loading="loading"
+            ref="alertBar"
         />
     </div>
 </template>
 
 <script>
-import { backendApiUrl, HTTPCodes } from '../core/utils';
 import EditorManager from '../core/EditorManager';
 import AlertBar from './AlertBar.vue';
+import DelegatePanel from './DelegatePanel.vue';
 
 export default {
     components: {
         AlertBar,
+        DelegatePanel
     },
     data() {
         return {
             editorManager: new EditorManager(),
             specificationLoaded: false,
             externalApplicationConnected: false,
-
-            alertVisible: false,
-            alertText: '',
-            loading: false,
         };
     },
     methods: {
@@ -129,9 +126,9 @@ export default {
                     specification = JSON.parse(fileReader.result);
                 } catch (exception) {
                     if (exception instanceof SyntaxError) {
-                        this.displayAlert(`Not a proper JSON file.\n${exception}`);
+                        this.$refs.alertBar.displayAlert(`Not a proper JSON file.\n${exception}`);
                     } else {
-                        this.displayAlert(`Unknown error.\n${exception}`);
+                        this.$refs.alertBar.displayAlert(`Unknown error.\n${exception}`);
                     }
                     return;
                 }
@@ -142,7 +139,7 @@ export default {
                     this.specificationLoaded = true;
                     returnMessage = 'Loaded successfully';
                 }
-                this.displayAlert(returnMessage);
+                this.$refs.alertBar.displayAlert(returnMessage);
             };
 
             fileReader.readAsText(file);
@@ -164,16 +161,16 @@ export default {
                     dataflow = JSON.parse(fileReader.result);
                 } catch (exception) {
                     if (exception instanceof SyntaxError) {
-                        this.displayAlert(`Not a proper JSON file.\n${exception}`);
+                        this.$refs.alertBar.displayAlert(`Not a proper JSON file.\n${exception}`);
                     } else {
-                        this.displayAlert(`Unknown error.\n${exception}`);
+                        this.$refs.alertBar.displayAlert(`Unknown error.\n${exception}`);
                     }
                     return;
                 }
 
                 // TODO: Create schema for dataflows, as baklavajs does not provide any.
                 this.editorManager.loadDataflow(dataflow);
-                this.displayAlert('Dataflow loaded successfully');
+                this.$refs.alertBar.displayAlert('Dataflow loaded successfully');
             };
 
             fileReader.readAsText(file);
@@ -187,7 +184,7 @@ export default {
             linkElement.href = window.URL.createObjectURL(blob);
             linkElement.download = 'save';
             linkElement.click();
-            this.displayAlert('Dataflow saved');
+            this.$refs.alertBar.displayAlert('Dataflow saved');
         },
         /**
          * Event handler that asks the backend to open a TCP socket that can be connected to.
@@ -296,10 +293,6 @@ export default {
             }
             this.displayAlert(message);
         },
-        displayAlert(alertText, loading = false) {
-            this.alertText = alertText;
-            this.alertVisible = true;
-            this.loading = loading;
         },
     },
 };
