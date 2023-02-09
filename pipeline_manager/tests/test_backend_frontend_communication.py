@@ -1,6 +1,8 @@
-from pipeline_manager.backend.app import app as flask_app
-import pytest
 from http import HTTPStatus
+
+import pytest
+
+from pipeline_manager.backend.app import app as flask_app
 
 
 @pytest.fixture
@@ -13,7 +15,8 @@ def http_client():
 # ---------------
 def test_import_dataflow(http_client):
     response = http_client.post('/import_dataflow')
-    assert b'External application is disconnected' in response.data
+    assert b'External application is disconnected' in response.data and \
+        response.status_code == HTTPStatus.SERVICE_UNAVAILABLE
 # ---------------
 
 
@@ -70,7 +73,8 @@ def test_load_invalid_specification(http_client, sample_dataflow_path):
 # ---------------
 def test_request_specification(http_client):
     response = http_client.get('/request_specification')
-    assert b'External application is disconnected' in response.data
+    assert b'External application is disconnected' in response.data and \
+        response.status_code == HTTPStatus.SERVICE_UNAVAILABLE
 # ---------------
 
 
@@ -78,15 +82,18 @@ def test_request_specification(http_client):
 # ---------------
 def test_run_dataflow_request(http_client):
     response = http_client.post('/dataflow_action_request/run')
-    assert b'External application is disconnected' in response.data
+    assert b'External application is disconnected' in response.data and \
+        response.status_code == HTTPStatus.SERVICE_UNAVAILABLE
 
 
 def test_validate_dataflow_request(http_client):
     response = http_client.post('/dataflow_action_request/validate')
-    assert b'External application is disconnected' in response.data
+    assert b'External application is disconnected' in response.data and \
+        response.status_code == HTTPStatus.SERVICE_UNAVAILABLE
 
 
 def test_export_dataflow_request(http_client):
     response = http_client.post('/dataflow_action_request/export')
-    assert b'External application is disconnected' in response.data
+    assert b'External application is disconnected' in response.data and \
+        response.status_code == HTTPStatus.SERVICE_UNAVAILABLE
 # ---------------
