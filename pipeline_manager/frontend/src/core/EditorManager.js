@@ -15,6 +15,8 @@ import ListOption from '../options/ListOption.vue';
 import specificationSchema from '../../../resources/schemas/dataflow_spec_schema.json';
 
 export default class EditorManager {
+    static instance;
+
     editor = new Editor();
 
     viewPlugin = new ViewPlugin();
@@ -23,7 +25,7 @@ export default class EditorManager {
 
     optionPlugin = new OptionPlugin();
 
-    usedSpecification = null;
+    specificationLoaded = false;
 
     ajv = new Ajv();
 
@@ -37,7 +39,7 @@ export default class EditorManager {
     updateEditorSpecification(dataflowSpecification) {
         if (!dataflowSpecification) return;
 
-        this.usedSpecification = dataflowSpecification;
+        this.specificationLoaded = true;
         const { nodes } = dataflowSpecification;
         const { metadata } = dataflowSpecification;
 
@@ -65,6 +67,13 @@ export default class EditorManager {
 
     loadDataflow(dataflow) {
         this.editor.load(dataflow);
+    }
+
+    static getEditorManagerInstance() {
+        if (!this.instance) {
+            this.instance = new EditorManager();
+        }
+        return this.instance;
     }
 
     validateSpecification(specification) {
