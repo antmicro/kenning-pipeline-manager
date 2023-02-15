@@ -8,4 +8,5 @@ import Vue from 'vue';
 
 /* Bus used to emit messages to the user.
    Can be accessed globally. */
+/* eslint-disable import/prefer-default-export */
 export const alertBus = new Vue();

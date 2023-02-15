@@ -26,7 +26,7 @@ export default {
     components: {
         EditorPanel,
         DelegatePanel,
-        AlertBar
+        AlertBar,
     },
     data() {
         return {

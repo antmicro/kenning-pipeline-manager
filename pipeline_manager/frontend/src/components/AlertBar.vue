@@ -14,7 +14,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import LoadingBar from './LoadingBar.vue';
-import { alertBus } from '../core/bus'
+import { alertBus } from '../core/bus';
 
 export default {
     components: {
@@ -28,7 +28,7 @@ export default {
         };
     },
     created() {
-        alertBus.$on('displayAlert', (alertText, loading = false ) => {
+        alertBus.$on('displayAlert', (alertText, loading = false) => {
             this.displayAlert(alertText, loading);
         });
     },

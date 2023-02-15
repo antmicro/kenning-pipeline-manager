@@ -47,21 +47,21 @@
 <script>
 import EditorManager from '../core/EditorManager';
 import { backendApiUrl, HTTPCodes } from '../core/utils';
-import { alertBus } from '../core/bus'
+import { alertBus } from '../core/bus';
 
 export default {
     data() {
         return {
             editorManager: EditorManager.getEditorManagerInstance(),
-            externalApplicationConnected: false
-        }
+            externalApplicationConnected: false,
+        };
     },
     methods: {
-                /**
+        /**
          * Event handler that asks the backend to open a TCP socket that can be connected to.
          * If the external application did not connect the user is alertd with a feedback message.
          */
-         async openTCP() {
+        async openTCP() {
             const response = await fetch(`${backendApiUrl}/connect`);
             const data = await response.text();
             if (response.ok) {
@@ -164,5 +164,5 @@ export default {
             alertBus.$emit('displayAlert', message);
         },
     },
-}
+};
 </script>

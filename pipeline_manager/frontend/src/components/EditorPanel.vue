@@ -4,7 +4,7 @@ Copyright (c) 2022-2023 Antmicro <www.antmicro.com>
 SPDX-License-Identifier: Apache-2.0
 -->
 
-<template>  
+<template>
 <div>
     <div v-show="!editorManager.specificationLoaded">
         <label
@@ -25,13 +25,11 @@ SPDX-License-Identifier: Apache-2.0
             Load dataflow
         </label>
         <input
-            
             type="file"
             id="load-dataflow-button"
             @change="loadDataflow"
         >
         <input
-            
             type="button"
             value="Save dataflow"
             @click="saveDataflow"
@@ -42,7 +40,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import EditorManager from '../core/EditorManager';
-import { alertBus } from '../core/bus'
+import { alertBus } from '../core/bus';
 
 export default {
     data() {
