@@ -5,7 +5,8 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "lint": "eslint --ext .js,.vue src/"
+    "lint": "eslint --ext .js,.vue src/",
+    "clean": "rm -rf node_modules"
   },
   "dependencies": {
     "ajv": "^8.12.0",
