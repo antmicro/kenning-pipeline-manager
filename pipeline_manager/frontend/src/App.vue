@@ -9,19 +9,8 @@ SPDX-License-Identifier: Apache-2.0
         <div>
             <router-view/>
         </div>
-        <AlertBar/>
     </div>
 </template>
-
-<script>
-import AlertBar from './components/AlertBar.vue';
-
-export default {
-    components: {
-        AlertBar
-    }
-}
-</script>
 
 <!-- eslint-disable -->
 <style>

@@ -43,10 +43,12 @@ SPDX-License-Identifier: Apache-2.0
             class="inner-editor"
             :plugin="this.editorManager.viewPlugin"
         />
+        <AlertBar/>
     </div>
 </template>
 
 <script>
+import AlertBar from './AlertBar.vue';
 import EditorManager from '../core/EditorManager';
 import DelegatePanel from './DelegatePanel.vue';
 import { alertBus } from '../core/bus'
@@ -54,6 +56,7 @@ import { alertBus } from '../core/bus'
 export default {
     components: {
         DelegatePanel,
+        AlertBar
     },
     data() {
         return {

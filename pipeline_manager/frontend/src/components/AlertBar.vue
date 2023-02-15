@@ -31,7 +31,6 @@ export default {
         alertBus.$on('displayAlert', (alertText, loading = false ) => {
             this.displayAlert(alertText, loading);
         });
-        alertBus.$emit('displayAlert', 'halo');
     },
     methods: {
         displayAlert(alertText, loading = false) {
