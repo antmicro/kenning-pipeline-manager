@@ -1,5 +1,5 @@
 <template>
-<div class="inner-row">
+<div class="inner-row" v-show="backendAvailable">
     <div v-show="!externalApplicationConnected">
         <input
             type="button"
@@ -51,6 +51,7 @@ export default {
         return {
             editorManager: EditorManager.getEditorManagerInstance(),
             externalApplicationConnected: false,
+            backendAvailable: (backendApiUrl !== null),
         };
     },
     methods: {
