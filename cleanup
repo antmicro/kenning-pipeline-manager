@@ -4,7 +4,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-if [ -d "./pipeline_manager/frontend/dist" ]; then
-    rm -rf "./pipeline_manager/frontend/dist"
+cd pipeline_manager/frontend && npm run clean
+if [ -d "./dist" ]; then
+    rm -rf "./dist"
 fi
-
