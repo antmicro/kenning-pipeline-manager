@@ -28,3 +28,7 @@ After opening the browser with given link, you can:
 
 * Use sample specification under `./pipeline_manager/examples/sample_specification.json` to check the visualization and editing of pipelines
 * Connect the third-party app (e.g. [Kenning](https://github.com/antmicro/kenning)), edit its pipeline, validate it and run it.
+
+## Clean
+
+To remove installed npm dependencies and built project run `./cleanup` in the root directory.
