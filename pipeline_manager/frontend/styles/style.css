@@ -61,7 +61,6 @@ html, body, #app, #container {
     flex-grow: 1;
 }
 
-.inner-editor {
-    flex-grow: 1;
-    border-top: 2px solid #000000;
+.inner-row {
+    display: flex;
 }
