@@ -10,7 +10,6 @@ SPDX-License-Identifier: Apache-2.0
         <DelegatePanel/>
         <baklava-editor
             class="inner-editor"
-            v-show="this.editorManager.specificationLoaded"
             :plugin="this.editorManager.viewPlugin"
         />
         <AlertBar/>
