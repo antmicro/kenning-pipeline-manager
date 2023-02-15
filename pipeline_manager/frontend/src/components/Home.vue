@@ -43,20 +43,16 @@ SPDX-License-Identifier: Apache-2.0
             class="inner-editor"
             :plugin="this.editorManager.viewPlugin"
         />
-        <AlertBar
-            ref="alertBar"
-        />
     </div>
 </template>
 
 <script>
 import EditorManager from '../core/EditorManager';
-import AlertBar from './AlertBar.vue';
 import DelegatePanel from './DelegatePanel.vue';
+import { alertBus } from '../core/bus'
 
 export default {
     components: {
-        AlertBar,
         DelegatePanel,
     },
     data() {
@@ -84,9 +80,9 @@ export default {
                     specification = JSON.parse(fileReader.result);
                 } catch (exception) {
                     if (exception instanceof SyntaxError) {
-                        this.$refs.alertBar.displayAlert(`Not a proper JSON file.\n${exception}`);
+                        alertBus.$emit('displayAlert', `Not a proper JSON file.\n${exception}`);
                     } else {
-                        this.$refs.alertBar.displayAlert(`Unknown error.\n${exception}`);
+                        alertBus.$emit('displayAlert', `Unknown error.\n${exception}`);
                     }
                     return;
                 }
@@ -96,7 +92,7 @@ export default {
                     this.editorManager.updateEditorSpecification(specification);
                     returnMessage = 'Loaded successfully';
                 }
-                this.$refs.alertBar.displayAlert(returnMessage);
+                alertBus.$emit('displayAlert', returnMessage);
             };
 
             fileReader.readAsText(file);
@@ -118,16 +114,16 @@ export default {
                     dataflow = JSON.parse(fileReader.result);
                 } catch (exception) {
                     if (exception instanceof SyntaxError) {
-                        this.$refs.alertBar.displayAlert(`Not a proper JSON file.\n${exception}`);
+                        alertBus.$emit('displayAlert', `Not a proper JSON file.\n${exception}`);
                     } else {
-                        this.$refs.alertBar.displayAlert(`Unknown error.\n${exception}`);
+                        alertBus.$emit('displayAlert', `Unknown error.\n${exception}`);
                     }
                     return;
                 }
 
                 // TODO: Create schema for dataflows, as baklavajs does not provide any.
                 this.editorManager.loadDataflow(dataflow);
-                this.$refs.alertBar.displayAlert('Dataflow loaded successfully');
+                alertBus.$emit('displayAlert', 'Dataflow loaded successfully');
             };
 
             fileReader.readAsText(file);
@@ -141,7 +137,7 @@ export default {
             linkElement.href = window.URL.createObjectURL(blob);
             linkElement.download = 'save';
             linkElement.click();
-            this.$refs.alertBar.displayAlert('Dataflow saved');
+            alertBus.$emit('displayAlert', 'Dataflow saved');
         },
     },
 };

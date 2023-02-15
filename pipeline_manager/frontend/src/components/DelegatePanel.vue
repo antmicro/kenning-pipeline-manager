@@ -7,16 +7,18 @@
         @click="openTCP"
     >
     <input
-        v-show="!editorManager.specificationLoaded"
+        v-show="!editorManager.specificationLoaded && externalApplicationConnected"
         type="button"
         value="Request specification"
         @click="requestSpecification"
     >
     <label
+        v-show="externalApplicationConnected"
         for="request-dataflow-button">
         Import dataflow
     </label>
     <input
+        v-show="externalApplicationConnected"
         type="file"
         id="request-dataflow-button"
         @change="importDataflow"
@@ -45,6 +47,7 @@
 <script>
 import EditorManager from '../core/EditorManager';
 import { backendApiUrl, HTTPCodes } from '../core/utils';
+import { alertBus } from '../core/bus'
 
 export default {
     data() {
@@ -64,7 +67,7 @@ export default {
             if (response.ok) {
                 this.externalApplicationConnected = true;
             }
-            // this.displayAlert(data);
+            alertBus.$emit('displayAlert', data);
         },
         /**
          * Event handler that asks the backend to send a dataflow specification.
@@ -84,7 +87,7 @@ export default {
             } else if (response.status === HTTPCodes.BadRequest) {
                 message = data;
             }
-            // this.displayAlert(message);
+            alertBus.$emit('displayAlert', message);
         },
         /**
          * Event handler that loads a current dataflow from the editor and sends a request
@@ -108,13 +111,13 @@ export default {
             };
 
             if (action === 'run') {
-                // this.displayAlert('Running dataflow', true);
+                alertBus.$emit('displayAlert', 'Running dataflow', true);
             }
 
             const response = await fetch(`${backendApiUrl}/dataflow_action_request/${action}`, requestOptions);
             const data = await response.text();
 
-            // this.displayAlert(data);
+            alertBus.$emit('displayAlert', data);
             if (response.status === HTTPCodes.ServiceUnavailable) {
                 // Service Unavailable, which means
                 // that the external application was disconnected
@@ -158,7 +161,7 @@ export default {
             } else if (response.status === HTTPCodes.BadRequest) {
                 message = data;
             }
-            // this.displayAlert(message);
+            alertBus.$emit('displayAlert', message);
         },
     },
 }
