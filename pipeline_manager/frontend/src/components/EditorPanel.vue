@@ -5,11 +5,9 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-<div>
+<div class="inner-row">
     <div v-show="!editorManager.specificationLoaded">
-        <label
-            for="load-spec-button"
-            >
+        <label for="load-spec-button">
             Load specification
         </label>
         <input
@@ -19,10 +17,8 @@ SPDX-License-Identifier: Apache-2.0
         >
     </div>
     <div v-show="editorManager.specificationLoaded">
-        <label
-            for="load-dataflow-button"
-            >
-            Load dataflow
+        <label for="load-dataflow-button">
+        Load dataflow
         </label>
         <input
             type="file"

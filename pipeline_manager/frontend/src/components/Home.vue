@@ -10,6 +10,7 @@ SPDX-License-Identifier: Apache-2.0
         <DelegatePanel/>
         <baklava-editor
             class="inner-editor"
+            v-show="this.editorManager.specificationLoaded"
             :plugin="this.editorManager.viewPlugin"
         />
         <AlertBar/>
@@ -35,3 +36,9 @@ export default {
     },
 };
 </script>
+
+<style>
+.inner-editor {
+    border-top: 2px solid #000000;
+}
+</style>

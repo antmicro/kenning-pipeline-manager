@@ -1,46 +1,43 @@
 <template>
-<div>
-    <input
-        v-show="!externalApplicationConnected"
-        type="button"
-        value="Open TCP connection"
-        @click="openTCP"
-    >
-    <input
-        v-show="!editorManager.specificationLoaded && externalApplicationConnected"
-        type="button"
-        value="Request specification"
-        @click="requestSpecification"
-    >
-    <label
-        v-show="externalApplicationConnected"
-        for="request-dataflow-button">
-        Import dataflow
-    </label>
-    <input
-        v-show="externalApplicationConnected"
-        type="file"
-        id="request-dataflow-button"
-        @change="importDataflow"
-    >
-    <input
-        v-show="externalApplicationConnected"
-        type="button"
-        value="Export dataflow"
-        @click="requestDataflowAction('export')"
-    >
-    <input
-        v-show="externalApplicationConnected"
-        type="button"
-        value="Validate dataflow"
-        @click="requestDataflowAction('validate')"
-    >
-    <input
-        v-show="externalApplicationConnected"
-        type="button"
-        value="Run dataflow"
-        @click="requestDataflowAction('run')"
-    >
+<div class="inner-row">
+    <div v-show="!externalApplicationConnected">
+        <input
+            type="button"
+            value="Open TCP connection"
+            @click="openTCP"
+        >
+    </div>
+    <div v-show="externalApplicationConnected">
+        <input
+            v-show="!editorManager.specificationLoaded "
+            type="button"
+            value="Request specification"
+            @click="requestSpecification"
+        >
+        <label for="request-dataflow-button">
+            Import dataflow
+        </label>
+        <input
+            type="file"
+            id="request-dataflow-button"
+            @change="importDataflow"
+        >
+        <input
+            type="button"
+            value="Export dataflow"
+            @click="requestDataflowAction('export')"
+        >
+        <input
+            type="button"
+            value="Validate dataflow"
+            @click="requestDataflowAction('validate')"
+        >
+        <input
+            type="button"
+            value="Run dataflow"
+            @click="requestDataflowAction('run')"
+        >
+    </div>
 </div>
 </template>
 
