@@ -18,16 +18,23 @@ sudo pip install -r requirements.txt
 
 To build the frontend application run `./build` in the root directory.
 
-## Run
+## Running pipeline manager.
+
+**NOTE**: Building application first is required.
+
+The application can be run both as a static HTML and as a dynamic application with Flask backend.
+
+### Static application
+
+To run the application statically open `./pipeline_manager/frontend/dist/index.html` in a preferred browser.
+Part of the functionality that requires the backend to work is disabled.
+After opening the browser you can use sample specification under `./examples/sample-specification.json` to check the visualization and editing of pipelines.
+
+### Dynamic application
 
 To run the server application run `./run` in the root directory.
-Building first is required.
-
 By default, server runs on `http://127.0.0.1:5000`.
-After opening the browser with given link, you can:
-
-* Use sample specification under `./pipeline_manager/examples/sample_specification.json` to check the visualization and editing of pipelines
-* Connect the third-party app (e.g. [Kenning](https://github.com/antmicro/kenning)), edit its pipeline, validate it and run it.
+In addition to using the sample specification you can also connect the third-party app (e.g. [Kenning](https://github.com/antmicro/kenning)), edit its pipeline, validate it and run it.
 
 ## Clean
 
