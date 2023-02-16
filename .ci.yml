@@ -19,7 +19,7 @@ eslint:
     stage: lint
     script:
         - cd pipeline_manager/frontend
-        - npm install --only=dev
+        - npm install
         - npm run lint
     allow_failure: false
 
