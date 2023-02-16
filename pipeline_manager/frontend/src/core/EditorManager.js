@@ -17,27 +17,40 @@ import specificationSchema from '../../../resources/schemas/dataflow_spec_schema
 export default class EditorManager {
     static instance;
 
-    editor = new Editor();
+    editor = null;
 
-    viewPlugin = new ViewPlugin();
+    nodeInterfaceTypes = null;
+    
+    viewPlugin = null;
 
-    nodeInterfaceTypes = new InterfaceTypePlugin();
-
-    optionPlugin = new OptionPlugin();
+    optionPlugin = null;
 
     specificationLoaded = false;
 
     ajv = new Ajv();
 
     constructor() {
+        this.initializeEditor();
+    }
+
+    initializeEditor() {
+        this.editor = new Editor();
+        this.nodeInterfaceTypes = new InterfaceTypePlugin();
+        this.viewPlugin = new ViewPlugin();
+        this.optionPlugin = new OptionPlugin();
+
         this.editor.use(this.viewPlugin);
         this.editor.use(this.nodeInterfaceTypes);
         this.editor.use(this.optionPlugin);
+
         this.viewPlugin.registerOption('ListOption', ListOption);
     }
 
     updateEditorSpecification(dataflowSpecification) {
         if (!dataflowSpecification) return;
+        if (this.specificationLoaded) {
+            this.initializeEditor();
+        }
 
         this.specificationLoaded = true;
         const { nodes } = dataflowSpecification;

@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
 <div class="inner-row">
-    <div v-show="!editorManager.specificationLoaded">
+    <div>
         <label for="load-spec-button">
             Load specification
         </label>

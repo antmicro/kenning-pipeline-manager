@@ -9,7 +9,6 @@
     </div>
     <div v-show="externalApplicationConnected">
         <input
-            v-show="!editorManager.specificationLoaded "
             type="button"
             value="Request specification"
             @click="requestSpecification"
