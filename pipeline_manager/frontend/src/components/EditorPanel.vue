@@ -71,12 +71,13 @@ export default {
                     return;
                 }
 
-                let returnMessage = this.editorManager.validateSpecification(specification);
-                if (returnMessage === null) {
+                let errors = this.editorManager.validateSpecification(specification);
+                if (Array.isArray(errors) && errors.length) {
+                    alertBus.$emit('displayAlert', errors);
+                } else {
                     this.editorManager.updateEditorSpecification(specification);
-                    returnMessage = 'Loaded successfully';
+                    alertBus.$emit('displayAlert', 'Loaded successfully');
                 }
-                alertBus.$emit('displayAlert', returnMessage);
             };
 
             fileReader.readAsText(file);
@@ -105,9 +106,12 @@ export default {
                     return;
                 }
 
-                // TODO: Create schema for dataflows, as baklavajs does not provide any.
-                this.editorManager.loadDataflow(dataflow);
-                alertBus.$emit('displayAlert', 'Dataflow loaded successfully');
+                let errors = this.editorManager.loadDataflow(dataflow);
+                if (Array.isArray(errors) && errors.length) {
+                    alertBus.$emit('displayAlert', errors);
+                } else {
+                    alertBus.$emit('displayAlert', 'Dataflow loaded successfully');
+                }
             };
 
             fileReader.readAsText(file);

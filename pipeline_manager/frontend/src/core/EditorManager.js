@@ -53,8 +53,7 @@ export default class EditorManager {
         }
 
         this.specificationLoaded = true;
-        const { nodes } = dataflowSpecification;
-        const { metadata } = dataflowSpecification;
+        const { nodes, metadata } = dataflowSpecification;
 
         nodes.forEach((node) => {
             const myNode = NodeFactory(
@@ -79,7 +78,8 @@ export default class EditorManager {
     }
 
     loadDataflow(dataflow) {
-        this.editor.load(dataflow);
+        const errors = this.editor.load(dataflow);
+        return errors;
     }
 
     static getEditorManagerInstance() {
@@ -93,7 +93,7 @@ export default class EditorManager {
         const validate = this.ajv.compile(specificationSchema);
         const valid = validate(specification);
         if (valid) {
-            return null;
+            return [];
         }
         return validate.errors;
     }

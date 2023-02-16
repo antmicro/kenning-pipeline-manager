@@ -149,7 +149,10 @@ export default {
             let message = 'Imported dataflow';
 
             if (response.status === HTTPCodes.OK) {
-                this.editorManager.loadDataflow(JSON.parse(data));
+                let errors = this.editorManager.loadDataflow(JSON.parse(data));
+                if (Array.isArray(errors) && errors.length) {
+                    message = errors;
+                }
             } else if (response.status === HTTPCodes.ServiceUnavailable) {
                 // Service Unavailable, which means
                 // that the external application was disconnected
