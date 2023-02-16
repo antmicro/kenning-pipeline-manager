@@ -20,7 +20,7 @@ export default class EditorManager {
     editor = null;
 
     nodeInterfaceTypes = null;
-    
+
     viewPlugin = null;
 
     optionPlugin = null;
@@ -33,6 +33,10 @@ export default class EditorManager {
         this.initializeEditor();
     }
 
+    /**
+     * Reinitializes current editor and its plugins.
+     * It is used to reset the environment.
+     */
     initializeEditor() {
         this.editor = new Editor();
         this.nodeInterfaceTypes = new InterfaceTypePlugin();
@@ -46,6 +50,15 @@ export default class EditorManager {
         this.viewPlugin.registerOption('ListOption', ListOption);
     }
 
+    /**
+     * Loads the dataflow specification passed in `dataflowSpecification`.
+     * The specification describes what nodes are available in the editor.
+     *
+     * If the current editor already has a specification loaded then the editor
+     * and its plugins are reinitialized and then the specification is loaded.
+     *
+     * @param dataflowSpecification Specification to load
+     */
     updateEditorSpecification(dataflowSpecification) {
         if (!dataflowSpecification) return;
         if (this.specificationLoaded) {
@@ -73,15 +86,35 @@ export default class EditorManager {
         }
     }
 
+    /**
+     * Serializes and returns current dataflow.
+     *
+     * @returns Serialized dataflow.
+     */
     saveDataflow() {
         return this.editor.save();
     }
 
+    /**
+     * Loads the dataflow passed in `dataflow` and renders it.
+     * If the dataflow is not compatible with the currently loaded specification,
+     * then some of the dataflow may be not loaded.
+     *
+     * @param dataflow Dataflow to load
+     * @returns An array of errors that occured during the dataflow loading.
+     * If the array is empty, the loading was successful.
+     */
     loadDataflow(dataflow) {
         const errors = this.editor.load(dataflow);
         return errors;
     }
 
+    /**
+     * Static function used to get the instance of the EditorManager in a singleton manner.
+     * If there is no existing instance of the EditorManager then a new one is created.
+     *
+     * @returns Instance of EditorManager.
+     */
     static getEditorManagerInstance() {
         if (!this.instance) {
             this.instance = new EditorManager();
@@ -89,6 +122,12 @@ export default class EditorManager {
         return this.instance;
     }
 
+    /**
+     * Validates specification passed in `specification` using jsonSchema.
+     *
+     * @param specification Specification to validate
+     * @returns An array of errors. If the array is empty, the validation was successful.
+     */
     validateSpecification(specification) {
         const validate = this.ajv.compile(specificationSchema);
         const valid = validate(specification);

@@ -71,7 +71,7 @@ export default {
                     return;
                 }
 
-                let errors = this.editorManager.validateSpecification(specification);
+                const errors = this.editorManager.validateSpecification(specification);
                 if (Array.isArray(errors) && errors.length) {
                     alertBus.$emit('displayAlert', errors);
                 } else {
@@ -106,7 +106,7 @@ export default {
                     return;
                 }
 
-                let errors = this.editorManager.loadDataflow(dataflow);
+                const errors = this.editorManager.loadDataflow(dataflow);
                 if (Array.isArray(errors) && errors.length) {
                     alertBus.$emit('displayAlert', errors);
                 } else {

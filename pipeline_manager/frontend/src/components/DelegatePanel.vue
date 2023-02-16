@@ -149,7 +149,7 @@ export default {
             let message = 'Imported dataflow';
 
             if (response.status === HTTPCodes.OK) {
-                let errors = this.editorManager.loadDataflow(JSON.parse(data));
+                const errors = this.editorManager.loadDataflow(JSON.parse(data));
                 if (Array.isArray(errors) && errors.length) {
                     message = errors;
                 }
