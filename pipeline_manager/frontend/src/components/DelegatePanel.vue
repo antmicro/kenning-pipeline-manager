@@ -1,10 +1,6 @@
 <template>
     <div class="inner-row" v-show="backendAvailable">
-        <div v-show="!externalApplicationConnected">
-            <input type="button" value="Open TCP connection" @click="openTCP" />
-        </div>
         <div v-show="externalApplicationConnected">
-            <input type="button" value="Request specification" @click="requestSpecification" />
             <label for="request-dataflow-button"> Import dataflow </label>
             <input type="file" id="request-dataflow-button" @change="importDataflow" />
             <input type="button" value="Export dataflow" @click="requestDataflowAction('export')" />
@@ -30,6 +26,30 @@ export default {
             externalApplicationConnected: false,
             backendAvailable: backendApiUrl !== null,
         };
+    },
+    async mounted() {
+        alertBus.$emit('displayAlert', 'Waiting for the application to connect...', true);
+        
+        const connect_response = await fetch(`${backendApiUrl}/connect`);
+        let message = await connect_response.text();
+
+        if (connect_response.ok) {
+            this.externalApplicationConnected = true;
+
+            const specification_response = await fetch(`${backendApiUrl}/request_specification`);
+            const data = await specification_response.text();
+
+            if (specification_response.status === HTTPCodes.OK) {
+                this.editorManager.updateEditorSpecification(JSON.parse(data));
+                message = 'Specification loaded';
+            } else if (specification_response.status === HTTPCodes.ServiceUnavailable) {
+                this.externalApplicationConnected = false;
+                message = data;
+            } else if (specification_response.status === HTTPCodes.BadRequest) {
+                message = data;
+            }
+        }
+        alertBus.$emit('displayAlert', message);
     },
     methods: {
         /**
