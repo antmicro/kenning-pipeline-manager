@@ -16,17 +16,25 @@ export default class ExternalApplicationManager {
 
     editorManager = EditorManager.getEditorManagerInstance();
 
+    idStatusInterval = null;
+
+    timeoutStatusInterval = 1000;
+
     /**
      * Event handler that asks the backend to open a TCP socket that can be connected to.
      * If the external application did not connect the user is alertd with a feedback message.
      */
     async openTCP() {
+        this.stopStatusInterval();
+
         const response = await fetchGET('connect');
         const data = await response.text();
         if (response.ok) {
             this.externalApplicationConnected = true;
         }
         alertBus.$emit('displayAlert', data);
+
+        this.startStatusInterval();
     }
 
     /**
@@ -35,6 +43,8 @@ export default class ExternalApplicationManager {
      * Otherwise the specification is passed to the editor that renders a new environment.
      */
     async requestSpecification() {
+        this.stopStatusInterval();
+
         const response = await fetchGET('request_specification');
         const data = await response.text();
         let message = 'Specification loaded';
@@ -48,6 +58,8 @@ export default class ExternalApplicationManager {
             message = data;
         }
         alertBus.$emit('displayAlert', message);
+
+        this.startStatusInterval();
     }
 
     /**
@@ -56,6 +68,8 @@ export default class ExternalApplicationManager {
      * The user is alerted with a feedback message.
      */
     async requestDataflowAction(action) {
+        this.stopStatusInterval();
+
         const dataflow = JSON.stringify(this.editorManager.saveDataflow());
         if (!dataflow) return;
 
@@ -78,6 +92,8 @@ export default class ExternalApplicationManager {
             // that the external application was disconnected
             this.externalApplicationConnected = false;
         }
+        
+        this.startStatusInterval();
     }
 
     /**
@@ -88,6 +104,8 @@ export default class ExternalApplicationManager {
      * Otherwise the user is alerted with a feedback message.
      */
     async importDataflow() {
+        this.stopStatusInterval();
+
         const file = document.getElementById('request-dataflow-button').files[0];
         if (!file) return;
 
@@ -113,6 +131,28 @@ export default class ExternalApplicationManager {
             message = data;
         }
         alertBus.$emit('displayAlert', message);
+        
+        this.startStatusInterval();
+    }
+
+    async printStatus() {
+        const response = await fetchGET('get_status');
+        if (response.status == HTTPCodes.ServiceUnavailable) {
+            this.initializeConnection();
+        }
+    }
+
+    startStatusInterval() {
+        if (this.idStatusInterval === null) {
+            this.idStatusInterval = setInterval(() => this.printStatus(), this.timeoutStatusInterval);
+        }
+    }
+
+    stopStatusInterval() {
+        if (this.idStatusInterval !== null) {
+            clearInterval(this.idStatusInterval);
+            this.idStatusInterval = null;
+        }
     }
 
     /**
