@@ -86,6 +86,29 @@ def _load_specification(
     return True, specification
 
 
+@app.route('/get_status', methods=['GET'])
+def get_status():
+    """
+    GET endpoint that returns connection status.
+
+    Responses
+    ---------
+    HTTPStatus.OK :
+        Request was successful and the response contains
+        the parsed dataflow.
+    HTTPStatus.SERVICE_UNAVAILABLE :
+        Client was disconnected.
+    """
+    tcp_server = global_state_manager.get_tcp_server()
+
+    out = tcp_server.wait_for_message(0, 0)
+
+    if out.status == Status.CLIENT_DISCONNECTED:
+        return 'TCP server not initialized', HTTPStatus.SERVICE_UNAVAILABLE
+    else:
+        return 'TCP server initialized', HTTPStatus.OK
+
+
 @app.route('/import_dataflow', methods=['POST'])
 def import_dataflow():
     """
