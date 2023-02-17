@@ -116,10 +116,10 @@ export default class EditorManager {
      * @returns Instance of EditorManager.
      */
     static getEditorManagerInstance() {
-        if (!this.instance) {
-            this.instance = new EditorManager();
+        if (!EditorManager.instance) {
+            EditorManager.instance = new EditorManager();
         }
-        return this.instance;
+        return EditorManager.instance;
     }
 
     /**
