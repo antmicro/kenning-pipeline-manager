@@ -1,171 +1,30 @@
 <template>
-    <div class="inner-row" v-show="backendAvailable">
-        <div v-show="externalApplicationConnected">
+    <div class="inner-row" v-show="externalApplicationManager.backendAvailable">
+        <div v-show="externalApplicationManager.externalApplicationConnected">
             <label for="request-dataflow-button"> Import dataflow </label>
-            <input type="file" id="request-dataflow-button" @change="importDataflow" />
-            <input type="button" value="Export dataflow" @click="requestDataflowAction('export')" />
+            <input type="file" id="request-dataflow-button" @change="externalApplicationManager.importDataflow" />
+            <input type="button" value="Export dataflow" @click="externalApplicationManager.requestDataflowAction('export')" />
             <input
                 type="button"
                 value="Validate dataflow"
-                @click="requestDataflowAction('validate')"
+                @click="externalApplicationManager.requestDataflowAction('validate')"
             />
-            <input type="button" value="Run dataflow" @click="requestDataflowAction('run')" />
+            <input type="button" value="Run dataflow" @click="externalApplicationManager.requestDataflowAction('run')" />
         </div>
     </div>
 </template>
 
 <script>
-import EditorManager from '../core/EditorManager';
-import { backendApiUrl, HTTPCodes } from '../core/utils';
-import { alertBus } from '../core/bus';
+import ExternalApplicationManager from '../core/ExternalApplicationManager';
 
 export default {
     data() {
         return {
-            editorManager: EditorManager.getEditorManagerInstance(),
-            externalApplicationConnected: false,
-            backendAvailable: backendApiUrl !== null,
+            externalApplicationManager: new ExternalApplicationManager(),
         };
     },
-    async mounted() {
-        alertBus.$emit('displayAlert', 'Waiting for the application to connect...', true);
-        
-        const connect_response = await fetch(`${backendApiUrl}/connect`);
-        let message = await connect_response.text();
-
-        if (connect_response.ok) {
-            this.externalApplicationConnected = true;
-
-            const specification_response = await fetch(`${backendApiUrl}/request_specification`);
-            const data = await specification_response.text();
-
-            if (specification_response.status === HTTPCodes.OK) {
-                this.editorManager.updateEditorSpecification(JSON.parse(data));
-                message = 'Specification loaded';
-            } else if (specification_response.status === HTTPCodes.ServiceUnavailable) {
-                this.externalApplicationConnected = false;
-                message = data;
-            } else if (specification_response.status === HTTPCodes.BadRequest) {
-                message = data;
-            }
-        }
-        alertBus.$emit('displayAlert', message);
-    },
-    methods: {
-        /**
-         * Event handler that asks the backend to open a TCP socket that can be connected to.
-         * If the external application did not connect the user is alertd with a feedback message.
-         */
-        async openTCP() {
-            const response = await fetch(`${backendApiUrl}/connect`);
-            const data = await response.text();
-            if (response.ok) {
-                this.externalApplicationConnected = true;
-            }
-            alertBus.$emit('displayAlert', data);
-        },
-        /**
-         * Event handler that asks the backend to send a dataflow specification.
-         * If the backend did not manage to send it the user is alerted with a feedback message.
-         * Otherwise the specification is passed to the editor that renders a new environment.
-         */
-        async requestSpecification() {
-            const response = await fetch(`${backendApiUrl}/request_specification`);
-            const data = await response.text();
-            let message = 'Specification loaded';
-
-            if (response.status === HTTPCodes.OK) {
-                this.editorManager.updateEditorSpecification(JSON.parse(data));
-            } else if (response.status === HTTPCodes.ServiceUnavailable) {
-                message = data;
-                this.externalApplicationConnected = false;
-            } else if (response.status === HTTPCodes.BadRequest) {
-                message = data;
-            }
-            alertBus.$emit('displayAlert', message);
-        },
-        /**
-         * Event handler that loads a current dataflow from the editor and sends a request
-         * to the backend based on the action argument.
-         * The user is alerted with a feedback message.
-         */
-        async requestDataflowAction(action) {
-            const dataflow = JSON.stringify(this.editorManager.saveDataflow());
-            if (!dataflow) return;
-
-            const formData = new FormData();
-            formData.append('dataflow', dataflow);
-
-            const requestOptions = {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'Access-Control-Allow-Origin': backendApiUrl,
-                    'Access-Control-Allow-Headers':
-                        'Origin, X-Requested-With, Content-Type, Accept',
-                },
-            };
-
-            if (action === 'run') {
-                alertBus.$emit('displayAlert', 'Running dataflow', true);
-            }
-
-            const response = await fetch(
-                `${backendApiUrl}/dataflow_action_request/${action}`,
-                requestOptions,
-            );
-            const data = await response.text();
-
-            alertBus.$emit('displayAlert', data);
-            if (response.status === HTTPCodes.ServiceUnavailable) {
-                // Service Unavailable, which means
-                // that the external application was disconnected
-                this.externalApplicationConnected = false;
-            }
-        },
-        /**
-         * Event handler that loads a file and asks the backend to delegate this operation
-         * to the external application to parse it into the Pipeline Manager format
-         * so that it can be loaded into the editor.
-         * It the validation is successful it is loaded as the current dataflow.
-         * Otherwise the user is alerted with a feedback message.
-         */
-        async importDataflow() {
-            const file = document.getElementById('request-dataflow-button').files[0];
-            if (!file) return;
-
-            const formData = new FormData();
-            formData.append('external_application_dataflow', file);
-
-            const requestOptions = {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'Access-Control-Allow-Origin': backendApiUrl,
-                    'Access-Control-Allow-Headers':
-                        'Origin, X-Requested-With, Content-Type, Accept',
-                },
-            };
-
-            const response = await fetch(`${backendApiUrl}/import_dataflow`, requestOptions);
-            const data = await response.text();
-            let message = 'Imported dataflow';
-
-            if (response.status === HTTPCodes.OK) {
-                const errors = this.editorManager.loadDataflow(JSON.parse(data));
-                if (Array.isArray(errors) && errors.length) {
-                    message = errors;
-                }
-            } else if (response.status === HTTPCodes.ServiceUnavailable) {
-                // Service Unavailable, which means
-                // that the external application was disconnected
-                message = data;
-                this.externalApplicationConnected = false;
-            } else if (response.status === HTTPCodes.BadRequest) {
-                message = data;
-            }
-            alertBus.$emit('displayAlert', message);
-        },
-    },
+    mounted() {
+        this.externalApplicationManager.initializeConnection();
+    }
 };
 </script>
