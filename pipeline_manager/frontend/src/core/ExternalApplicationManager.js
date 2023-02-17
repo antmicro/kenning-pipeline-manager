@@ -5,6 +5,7 @@
  */
 
 import { backendApiUrl, HTTPCodes } from './utils';
+import { fetchGET, fetchPOST } from './fetchRequests';
 import { alertBus } from './bus';
 import EditorManager from './EditorManager';
 
@@ -20,7 +21,7 @@ export default class ExternalApplicationManager {
      * If the external application did not connect the user is alertd with a feedback message.
      */
     async openTCP() {
-        const response = await fetch(`${backendApiUrl}/connect`);
+        const response = await fetchGET('connect');
         const data = await response.text();
         if (response.ok) {
             this.externalApplicationConnected = true;
@@ -34,7 +35,7 @@ export default class ExternalApplicationManager {
      * Otherwise the specification is passed to the editor that renders a new environment.
      */
     async requestSpecification() {
-        const response = await fetch(`${backendApiUrl}/request_specification`);
+        const response = await fetchGET('request_specification');
         const data = await response.text();
         let message = 'Specification loaded';
 
@@ -58,26 +59,16 @@ export default class ExternalApplicationManager {
         const dataflow = JSON.stringify(this.editorManager.saveDataflow());
         if (!dataflow) return;
 
-        const formData = new FormData();
-        formData.append('dataflow', dataflow);
-
-        const requestOptions = {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'Access-Control-Allow-Origin': backendApiUrl,
-                'Access-Control-Allow-Headers':
-                    'Origin, X-Requested-With, Content-Type, Accept',
-            },
-        };
-
         if (action === 'run') {
             alertBus.$emit('displayAlert', 'Running dataflow', true);
         }
 
-        const response = await fetch(
-            `${backendApiUrl}/dataflow_action_request/${action}`,
-            requestOptions,
+        const formData = new FormData();
+        formData.append('dataflow', dataflow);
+
+        const response = await fetchPOST(
+            `dataflow_action_request/${action}`,
+            formData
         );
         const data = await response.text();
 
@@ -103,18 +94,9 @@ export default class ExternalApplicationManager {
         const formData = new FormData();
         formData.append('external_application_dataflow', file);
 
-        const requestOptions = {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'Access-Control-Allow-Origin': backendApiUrl,
-                'Access-Control-Allow-Headers':
-                    'Origin, X-Requested-With, Content-Type, Accept',
-            },
-        };
-
-        const response = await fetch(`${backendApiUrl}/import_dataflow`, requestOptions);
+        const response = await fetchPOST('import_dataflow', formData);
         const data = await response.text();
+
         let message = 'Imported dataflow';
 
         if (response.status === HTTPCodes.OK) {
@@ -133,28 +115,18 @@ export default class ExternalApplicationManager {
         alertBus.$emit('displayAlert', message);
     }
 
+    /**
+     * Function used to initialize connection with the external application and request
+     * specification. Should be called after DOM is created.
+     */
     async initializeConnection() {
+        this.externalApplicationConnected = false;
         alertBus.$emit('displayAlert', 'Waiting for the application to connect...', true);
 
-        const connectResponse = await fetch(`${backendApiUrl}/connect`);
-        let message = await connectResponse.text();
+        await this.openTCP();
 
-        if (connectResponse.ok) {
-            this.externalApplicationConnected = true;
-
-            const specificationResponse = await fetch(`${backendApiUrl}/request_specification`);
-            const data = await specificationResponse.text();
-
-            if (specificationResponse.status === HTTPCodes.OK) {
-                this.editorManager.updateEditorSpecification(JSON.parse(data));
-                message = 'Specification loaded';
-            } else if (specificationResponse.status === HTTPCodes.ServiceUnavailable) {
-                this.externalApplicationConnected = false;
-                message = data;
-            } else if (specificationResponse.status === HTTPCodes.BadRequest) {
-                message = data;
-            }
+        if (this.externalApplicationConnected) {
+            await this.requestSpecification();
         }
-        alertBus.$emit('displayAlert', message);
     }
 }
