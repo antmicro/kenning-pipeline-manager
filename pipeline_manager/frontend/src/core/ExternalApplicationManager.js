@@ -92,7 +92,7 @@ export default class ExternalApplicationManager {
             // that the external application was disconnected
             this.externalApplicationConnected = false;
         }
-        
+
         this.startStatusInterval();
     }
 
@@ -131,20 +131,23 @@ export default class ExternalApplicationManager {
             message = data;
         }
         alertBus.$emit('displayAlert', message);
-        
+
         this.startStatusInterval();
     }
 
     async printStatus() {
         const response = await fetchGET('get_status');
-        if (response.status == HTTPCodes.ServiceUnavailable) {
+        if (response.status === HTTPCodes.ServiceUnavailable) {
             this.initializeConnection();
         }
     }
 
     startStatusInterval() {
         if (this.idStatusInterval === null) {
-            this.idStatusInterval = setInterval(() => this.printStatus(), this.timeoutStatusInterval);
+            this.idStatusInterval = setInterval(
+                () => this.printStatus(),
+                this.timeoutStatusInterval,
+            );
         }
     }
 

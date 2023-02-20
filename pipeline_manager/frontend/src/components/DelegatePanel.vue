@@ -32,7 +32,7 @@ export default {
         },
         importDataflow() {
             this.externalApplicationManager.importDataflow();
-        }
-    }
+        },
+    },
 };
 </script>
