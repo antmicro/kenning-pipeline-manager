@@ -119,6 +119,11 @@ export default class ExternalApplicationManager {
         alertBus.$emit('displayAlert', message);
     }
 
+    /**
+     * Function that is used by setInterval() to periodically check the status
+     * of the TCP connection. If the connection is not alive, then `initializeConnection`
+     * is invoked.
+     */
     async checkStatus() {
         const response = await fetchGET('get_status');
         if (response.status === HTTPCodes.ServiceUnavailable) {
@@ -126,12 +131,20 @@ export default class ExternalApplicationManager {
         }
     }
 
-    async invokeFetchAction(action, ...args) {
+    /**
+     * Wraps fetch functions and stops status checking before creating a fetch request.
+     * After processing the request, the status checking is restored.
+     * This function should be used to call any action with fetch request in it.
+     */
+    async invokeFetchAction(fetchCall, ...args) {
         this.stopStatusInterval();
-        await action.apply(this, args);
+        await fetchCall.apply(this, args);
         this.startStatusInterval();
     }
 
+    /**
+     * Starts status checking if it is not started.
+     */
     startStatusInterval() {
         if (this.idStatusInterval === null) {
             this.idStatusInterval = setInterval(
@@ -141,6 +154,9 @@ export default class ExternalApplicationManager {
         }
     }
 
+    /**
+     * Stops status checking if it is running.
+     */
     stopStatusInterval() {
         if (this.idStatusInterval !== null) {
             clearInterval(this.idStatusInterval);
