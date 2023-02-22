@@ -11,6 +11,15 @@ def http_client():
     return flask_app.test_client()
 
 
+# /get_status
+# ---------------
+def test_get_status(http_client):
+    response = http_client.get('/get_status')
+    assert b'Client not connected' in response.data and \
+        response.status_code == HTTPStatus.SERVICE_UNAVAILABLE
+# ---------------
+
+
 # /import_dataflow
 # ---------------
 def test_import_dataflow(http_client):
