@@ -101,12 +101,10 @@ def get_status():
     """
     tcp_server = global_state_manager.get_tcp_server()
 
-    out = tcp_server.wait_for_message(0, 0)
-
-    if out.status == Status.CLIENT_DISCONNECTED:
-        return 'TCP server not initialized', HTTPStatus.SERVICE_UNAVAILABLE
+    if tcp_server.connected:
+        return 'Client connected', HTTPStatus.OK
     else:
-        return 'TCP server initialized', HTTPStatus.OK
+        return 'Client not connected', HTTPStatus.SERVICE_UNAVAILABLE
 
 
 @app.route('/import_dataflow', methods=['POST'])
@@ -141,11 +139,9 @@ def import_dataflow():
     if out.status != Status.DATA_SENT:
         return 'Error while sending a message to the external application', HTTPStatus.BAD_REQUEST  # noqa: E501
 
-    status = Status.NOTHING
-    while status == Status.NOTHING:
-        out = tcp_server.wait_for_message()
-        status = out.status
+    out = tcp_server.wait_for_message()
 
+    status = out.status
     if status == Status.DATA_READY:
         mess_type, dataflow = out.data
         if mess_type != MessageType.OK:
@@ -267,11 +263,9 @@ def request_specification():
     if out.status != Status.DATA_SENT:
         return 'Error while sending a message to the external application', HTTPStatus.BAD_REQUEST  # noqa: E501
 
-    status = Status.NOTHING
-    while status == Status.NOTHING:
-        out = tcp_server.wait_for_message()
-        status = out.status
+    out = tcp_server.wait_for_message()
 
+    status = out.status
     if status == Status.DATA_READY:
         mess_type, specification = out.data
         if mess_type != MessageType.OK:
@@ -340,11 +334,9 @@ def dataflow_action_request(request_type: str):
     if out.status != Status.DATA_SENT:
         return 'Error while sending a message to the external application', HTTPStatus.BAD_REQUEST  # noqa: E501
 
-    status = Status.NOTHING
-    while status == Status.NOTHING:
-        out = tcp_server.wait_for_message()
-        status = out.status
+    out = tcp_server.wait_for_message()
 
+    status = out.status
     if status == Status.DATA_READY:
         mess_type, message = out.data
 
