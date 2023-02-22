@@ -28,10 +28,15 @@ export default {
     },
     methods: {
         requestDataflowAction(action) {
-            this.externalApplicationManager.requestDataflowAction(action);
+            this.externalApplicationManager.invokeFetchAction(
+                this.externalApplicationManager.requestDataflowAction,
+                action,
+            );
         },
         importDataflow() {
-            this.externalApplicationManager.importDataflow();
+            this.externalApplicationManager.invokeFetchAction(
+                this.externalApplicationManager.importDataflow,
+            );
         },
     },
 };
