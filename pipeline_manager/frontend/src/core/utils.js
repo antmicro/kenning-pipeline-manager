@@ -5,9 +5,10 @@
  */
 
 /* eslint-disable import/prefer-default-export */
-export const backendApiUrl = (window.location.protocol === 'file:')
-    ? null
-    : `${window.location.protocol}//${window.location.host}`;
+export const backendApiUrl =
+    window.location.protocol === 'file:'
+        ? null
+        : `${window.location.protocol}//${window.location.host}`;
 
 export const HTTPCodes = {
     OK: 200,

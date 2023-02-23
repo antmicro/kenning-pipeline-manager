@@ -23,7 +23,7 @@ SPDX-License-Identifier: Apache-2.0
     display: inline-block;
     height: 25px;
     width: 25px;
-    background-color: #F56D41;
+    background-color: #f56d41;
     animation-duration: 1.2s;
     animation-iteration-count: infinite;
     animation-name: pulse-animation;
@@ -35,7 +35,7 @@ SPDX-License-Identifier: Apache-2.0
 }
 
 .loading-delay2 {
-    animation-delay: 0.30s;
+    animation-delay: 0.3s;
 }
 
 .loading-delay3 {
@@ -43,7 +43,7 @@ SPDX-License-Identifier: Apache-2.0
 }
 
 .loading-delay4 {
-    animation-delay: 0.60s;
+    animation-delay: 0.6s;
 }
 
 @keyframes pulse-animation {

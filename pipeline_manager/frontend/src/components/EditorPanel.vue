@@ -5,33 +5,17 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-<div class="inner-row">
-    <div>
-        <label for="load-spec-button">
-            Load specification
-        </label>
-        <input
-            type="file"
-            id="load-spec-button"
-            @change="loadSpecification"
-        >
+    <div class="inner-row">
+        <div>
+            <label for="load-spec-button"> Load specification </label>
+            <input type="file" id="load-spec-button" @change="loadSpecification" />
+        </div>
+        <div v-show="editorManager.specificationLoaded">
+            <label for="load-dataflow-button"> Load dataflow </label>
+            <input type="file" id="load-dataflow-button" @change="loadDataflow" />
+            <input type="button" value="Save dataflow" @click="saveDataflow" />
+        </div>
     </div>
-    <div v-show="editorManager.specificationLoaded">
-        <label for="load-dataflow-button">
-        Load dataflow
-        </label>
-        <input
-            type="file"
-            id="load-dataflow-button"
-            @change="loadDataflow"
-        >
-        <input
-            type="button"
-            value="Save dataflow"
-            @click="saveDataflow"
-        >
-    </div>
-</div>
 </template>
 
 <script>
@@ -120,7 +104,9 @@ export default {
          * Event handler that that saves a current dataflow to a `save.json` file.
          */
         saveDataflow() {
-            const blob = new Blob([JSON.stringify(this.editorManager.saveDataflow())], { type: 'application/json' });
+            const blob = new Blob([JSON.stringify(this.editorManager.saveDataflow())], {
+                type: 'application/json',
+            });
             const linkElement = document.createElement('a');
             linkElement.href = window.URL.createObjectURL(blob);
             linkElement.download = 'save';

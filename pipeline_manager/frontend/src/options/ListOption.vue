@@ -12,7 +12,7 @@ SPDX-License-Identifier: Apache-2.0
             @change="update"
             :placeholder="name"
             :value="getValue()"
-        >
+        />
     </div>
 </template>
 
@@ -69,16 +69,16 @@ export default {
             const splitted = env.target.value.trim().split(/\s+/);
             const parsed = splitted.map((e) => {
                 switch (this.dtype) {
-                case 'string':
-                    return e.toString();
-                case 'integer':
-                    return parseInt(e, 10);
-                case 'number':
-                    return parseFloat(e);
-                case 'boolean':
-                    return Boolean(e);
-                default:
-                    return e;
+                    case 'string':
+                        return e.toString();
+                    case 'integer':
+                        return parseInt(e, 10);
+                    case 'number':
+                        return parseFloat(e);
+                    case 'boolean':
+                        return Boolean(e);
+                    default:
+                        return e;
                 }
             });
             this.$emit('input', parsed);

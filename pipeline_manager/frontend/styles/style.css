@@ -8,7 +8,8 @@
     font-family: 'Lato', sans-serif;
 }
 
-label, input {
+label,
+input {
     width: 10%;
     display: block;
 }
@@ -23,11 +24,13 @@ input {
     width: 300px !important;
 }
 
-input[type=file] {
+input[type='file'] {
     display: none;
 }
 
-input[type=button], input[type=submit], label {
+input[type='button'],
+input[type='submit'],
+label {
     display: inline-block;
     box-sizing: content-box;
 
@@ -43,10 +46,13 @@ input[type=button], input[type=submit], label {
     color: #dfdfdf;
 
     cursor: pointer;
-    margin: 5px 5px 5px 5px
+    margin: 5px 5px 5px 5px;
 }
 
-html, body, #app, #container {
+html,
+body,
+#app,
+#container {
     height: 100vh;
     margin: 0;
     background-color: #332d37;

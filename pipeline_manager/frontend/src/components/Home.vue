@@ -6,13 +6,10 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
     <div id="container" class="outer">
-        <EditorPanel/>
-        <DelegatePanel/>
-        <baklava-editor
-            class="inner-editor"
-            :plugin="this.editorManager.viewPlugin"
-        />
-        <AlertBar/>
+        <EditorPanel />
+        <DelegatePanel />
+        <baklava-editor class="inner-editor" :plugin="this.editorManager.viewPlugin" />
+        <AlertBar />
     </div>
 </template>
 

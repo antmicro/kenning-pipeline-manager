@@ -1,43 +1,21 @@
 <template>
-<div class="inner-row" v-show="backendAvailable">
-    <div v-show="!externalApplicationConnected">
-        <input
-            type="button"
-            value="Open TCP connection"
-            @click="openTCP"
-        >
+    <div class="inner-row" v-show="backendAvailable">
+        <div v-show="!externalApplicationConnected">
+            <input type="button" value="Open TCP connection" @click="openTCP" />
+        </div>
+        <div v-show="externalApplicationConnected">
+            <input type="button" value="Request specification" @click="requestSpecification" />
+            <label for="request-dataflow-button"> Import dataflow </label>
+            <input type="file" id="request-dataflow-button" @change="importDataflow" />
+            <input type="button" value="Export dataflow" @click="requestDataflowAction('export')" />
+            <input
+                type="button"
+                value="Validate dataflow"
+                @click="requestDataflowAction('validate')"
+            />
+            <input type="button" value="Run dataflow" @click="requestDataflowAction('run')" />
+        </div>
     </div>
-    <div v-show="externalApplicationConnected">
-        <input
-            type="button"
-            value="Request specification"
-            @click="requestSpecification"
-        >
-        <label for="request-dataflow-button">
-            Import dataflow
-        </label>
-        <input
-            type="file"
-            id="request-dataflow-button"
-            @change="importDataflow"
-        >
-        <input
-            type="button"
-            value="Export dataflow"
-            @click="requestDataflowAction('export')"
-        >
-        <input
-            type="button"
-            value="Validate dataflow"
-            @click="requestDataflowAction('validate')"
-        >
-        <input
-            type="button"
-            value="Run dataflow"
-            @click="requestDataflowAction('run')"
-        >
-    </div>
-</div>
 </template>
 
 <script>
@@ -50,7 +28,7 @@ export default {
         return {
             editorManager: EditorManager.getEditorManagerInstance(),
             externalApplicationConnected: false,
-            backendAvailable: (backendApiUrl !== null),
+            backendAvailable: backendApiUrl !== null,
         };
     },
     methods: {
@@ -103,7 +81,8 @@ export default {
                 body: formData,
                 headers: {
                     'Access-Control-Allow-Origin': backendApiUrl,
-                    'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
+                    'Access-Control-Allow-Headers':
+                        'Origin, X-Requested-With, Content-Type, Accept',
                 },
             };
 
@@ -111,7 +90,10 @@ export default {
                 alertBus.$emit('displayAlert', 'Running dataflow', true);
             }
 
-            const response = await fetch(`${backendApiUrl}/dataflow_action_request/${action}`, requestOptions);
+            const response = await fetch(
+                `${backendApiUrl}/dataflow_action_request/${action}`,
+                requestOptions,
+            );
             const data = await response.text();
 
             alertBus.$emit('displayAlert', data);
@@ -140,7 +122,8 @@ export default {
                 body: formData,
                 headers: {
                     'Access-Control-Allow-Origin': backendApiUrl,
-                    'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
+                    'Access-Control-Allow-Headers':
+                        'Origin, X-Requested-With, Content-Type, Accept',
                 },
             };
 

@@ -9,15 +9,15 @@
 // "./dist/styles.css": "./dist/styles.css"
 // To the "exports" dictionary.
 
-@import "@baklavajs/plugin-renderer-vue/dist/styles/variables.scss";
+@import '@baklavajs/plugin-renderer-vue/dist/styles/variables.scss';
 
 // Controls
 $color-primary: #e74a3c;
 $color-error: red;
-$color-control-dark-background: #2C2C2C;
+$color-control-dark-background: #2c2c2c;
 $color-control-dark-foreground: #f7f7f7;
-$color-control-dark-hover: #4C4C4C;
-$color-control-dark-active: #6C6C6C;
+$color-control-dark-hover: #4c4c4c;
+$color-control-dark-active: #6c6c6c;
 $border-radius-control: 10px;
 
 // Nodes
@@ -38,4 +38,4 @@ $color-pattern-default: #332d37;
 $color-pattern-line: #131313;
 $color-pattern-black: #000000;
 
-@import "@baklavajs/plugin-renderer-vue/dist/styles/styles.scss";
+@import '@baklavajs/plugin-renderer-vue/dist/styles/styles.scss';

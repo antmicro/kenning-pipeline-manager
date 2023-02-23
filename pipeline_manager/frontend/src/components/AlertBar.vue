@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
     <div class="alert-bar" v-show="displayed">
-        <button @click="displayed = false" class="dismiss">Close</button> <br/>
+        <button @click="displayed = false" class="dismiss">Close</button> <br />
         <div class="alert-box">{{ alertText }}</div>
         <LoadingBar v-show="loading"></LoadingBar>
     </div>
@@ -45,7 +45,7 @@ export default {
 <style>
 .dismiss {
     color: #dfdfdf;
-    background-color: #F56D41;
+    background-color: #f56d41;
 }
 
 .alert-box {
@@ -58,5 +58,4 @@ export default {
     width: 100vw;
     border-top: 2px solid #000000;
 }
-
 </style>
