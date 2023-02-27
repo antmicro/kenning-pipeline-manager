@@ -21,9 +21,9 @@ export default class EditorManager {
 
     nodeInterfaceTypes = null;
 
-    viewPlugin = null;
+    viewPlugin = new ViewPlugin();
 
-    optionPlugin = null;
+    optionPlugin = new OptionPlugin();
 
     specificationLoaded = false;
 
@@ -31,6 +31,7 @@ export default class EditorManager {
 
     constructor() {
         this.initializeEditor();
+        this.viewPlugin.registerOption('ListOption', ListOption);
     }
 
     /**
@@ -40,14 +41,10 @@ export default class EditorManager {
     initializeEditor() {
         this.editor = new Editor();
         this.nodeInterfaceTypes = new InterfaceTypePlugin();
-        this.viewPlugin = new ViewPlugin();
-        this.optionPlugin = new OptionPlugin();
 
         this.editor.use(this.viewPlugin);
         this.editor.use(this.nodeInterfaceTypes);
         this.editor.use(this.optionPlugin);
-
-        this.viewPlugin.registerOption('ListOption', ListOption);
     }
 
     /**
