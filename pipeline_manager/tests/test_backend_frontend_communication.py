@@ -1,125 +1,11 @@
-import json
 import multiprocessing
-import time
 from http import HTTPStatus
 from typing import Any, NamedTuple
 
 import pytest
 
-from pipeline_manager_backend_communication.communication_backend import CommunicationBackend  # noqa: E501
-from pipeline_manager_backend_communication.misc_structures import MessageType, Status  # noqa: E501
+from pipeline_manager.utils.mock_application import MockApplicationClient
 from pipeline_manager.backend.app import app as flask_app
-
-
-class MockApplicationClient(object):
-    """
-    Mock Application class that is used to communicate with backend TCP server
-    and test its endpoints.
-
-    This application is not meant to perform any sophisticated processing.
-    """
-    def __init__(
-            self,
-            host: str,
-            port: int,
-            sample_specification: dict,
-            sample_dataflow: dict) -> None:
-        """
-        Parameters
-        ----------
-        host : str
-            IPv4 of the TCP server socket to connect to.
-        port : int
-            Application port of the TCP server socket
-        sample_specification : dict
-            Sample specification that is used to handle
-            SPECIFICATION messages type.
-        sample_dataflow : dict
-            Sample dataflow that is used to handle
-            IMPORT messages type.
-        """
-        self.host = host
-        self.port = port
-        self.sample_specification = sample_specification
-        self.sample_dataflow = sample_dataflow
-
-        self.connecting_time_offset = 0.1
-        self.client = CommunicationBackend(host, port)
-
-    def try_connecting(self) -> None:
-        """
-        Function that tries to connect to TCP server.
-
-        If it fails to connect because the TCP server socker is closed
-        it retries to connect every `self.connecting_time_offset` seconds
-        until success.
-        """
-        while True:
-            try:
-                out = self.client.initialize_client()
-                if out.status == Status.CLIENT_CONNECTED:
-                    return
-            except ConnectionRefusedError:
-                time.sleep(self.connecting_time_offset)
-
-    def answer_valid(self) -> None:
-        """
-        Waits for an incoming message, reads it and based on the
-        `MessageType` sends an appropriate message.
-
-        It is used to simulate a regular application that waits for requests.
-        """
-        status, message = self.client.wait_for_message()
-        if status == Status.DATA_READY:
-            message_type, data = message
-            if message_type == MessageType.VALIDATE:
-                self.client.send_message(
-                    MessageType.OK,
-                    'Validation was successful'.encode(encoding='UTF-8')
-                )
-            elif message_type == MessageType.SPECIFICATION:
-                self.client.send_message(
-                    MessageType.OK,
-                    json.dumps(
-                        self.sample_specification
-                    ).encode(encoding='UTF-8')
-                )
-            elif message_type == MessageType.RUN:
-                self.client.send_message(
-                    MessageType.OK,
-                    'Run was successful'.encode(encoding='UTF-8')
-                )
-            elif message_type == MessageType.IMPORT:
-                self.client.send_message(
-                    MessageType.OK,
-                    json.dumps(
-                        self.sample_dataflow
-                    ).encode(encoding='UTF-8')
-                )
-            elif message_type == MessageType.EXPORT:
-                self.client.send_message(
-                    MessageType.OK,
-                    'Export was successful'.encode(encoding='UTF-8')
-                )
-
-    def answer_empty(self) -> None:
-        """
-        Waits for an incoming message, reads it and answers with
-        an empty message of type `MessageType.OK`.
-        """
-        status, message = self.client.wait_for_message()
-        if status == Status.DATA_READY:
-            message_type, data = message
-            self.client.send_message(
-                MessageType.OK,
-                bytes()
-            )
-
-    def disconnect(self) -> None:
-        """
-        Disconnects the application from the TCP server.
-        """
-        self.client.disconnect()
 
 
 @pytest.fixture
@@ -141,6 +27,23 @@ def application_client(sample_specification, sample_dataflow):
 
 
 class SingularRequest(NamedTuple):
+    """
+    NamedTuple used to create fixtures that represent singular requests.
+
+    Parameters
+    ----------
+    endpoint : str
+        Endpoint of the backend that is being tested.
+    method : str
+        HTTP request method that should be used in lowercase. Currently
+        only `post` and `get` are used.
+    expected_code : HTTPStatus
+        Expected HTTP code of the response.
+    expected_data : Any
+        Expected data of the response. If None then it is not checked.
+    post_data : Any
+        Data that should be embedded with a POST request.
+    """
     endpoint: str
     method: str
     expected_code: HTTPStatus
@@ -203,7 +106,7 @@ def dataflow_import(sample_dataflow_path):
 
 
 @pytest.fixture
-def get_status(sample_dataflow_path):
+def get_status():
     return SingularRequest(
         '/get_status',
         'get',
@@ -229,6 +132,15 @@ def test_singular_request_connected_valid(
         application_client,
         singular_request,
         request):
+    """
+    Tests a scenario with a single request to an endpoint after connecting
+    with the external application.
+
+    It creates two asynchronous processes, one for the backend and one for the
+    external application.
+
+    The expected behaviour is described by `singular_request` fixture.
+    """
     singular_request = request.getfixturevalue(singular_request)
 
     def connect_and_request(http_client, responses):
