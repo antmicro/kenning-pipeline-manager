@@ -130,7 +130,7 @@ def import_dataflow():
     if not tcp_server:
         return 'TCP server not initialized', HTTPStatus.BAD_REQUEST
 
-    if not tcp_server.client_socket:
+    if not tcp_server.connected:
         return 'External application is disconnected', HTTPStatus.SERVICE_UNAVAILABLE  # noqa: E501
 
     dataflow = request.files['external_application_dataflow'].read()
@@ -255,7 +255,7 @@ def request_specification():
     if not tcp_server:
         return 'TCP server not initialized', HTTPStatus.BAD_REQUEST
 
-    if not tcp_server.client_socket:
+    if not tcp_server.connected:
         return 'External application is disconnected', HTTPStatus.SERVICE_UNAVAILABLE  # noqa: E501
 
     out = tcp_server.send_message(MessageType.SPECIFICATION)
@@ -309,7 +309,7 @@ def dataflow_action_request(request_type: str):
     if not tcp_server:
         return 'TCP server not initialized', HTTPStatus.BAD_REQUEST
 
-    if not tcp_server.client_socket:
+    if not tcp_server.connected:
         return 'External application is disconnected', HTTPStatus.SERVICE_UNAVAILABLE  # noqa: E501
     dataflow = request.form.get('dataflow')
 
