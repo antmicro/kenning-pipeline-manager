@@ -1,9 +1,69 @@
 from http import HTTPStatus
+import multiprocessing
+import time
+import json
+from typing import NamedTuple, Any
 
 import pytest
 
+from pipeline_manager_backend_communication.misc_structures import MessageType, Status  # noqa: E501
+from pipeline_manager_backend_communication.communication_backend import CommunicationBackend
 from pipeline_manager.backend.app import app as flask_app
 
+
+class MockApplicationClient(object):
+    def __init__(self, host, port, sample_specification, sample_dataflow):
+        self.host = host
+        self.port = port
+        self.sample_specification = sample_specification
+        self.sample_dataflow = sample_dataflow
+
+        self.client = CommunicationBackend(host, port)
+
+    def connect(self):
+        self.client.initialize_client()
+
+    def answer_valid(self):
+        status, message = self.client.wait_for_message()
+        if status == Status.DATA_READY:
+            message_type, data = message
+            if message_type == MessageType.VALIDATE:
+                self.client.send_message(
+                    MessageType.OK,
+                    'Validation was successful'.encode(encoding='UTF-8')
+                )
+            elif message_type == MessageType.SPECIFICATION:
+                self.client.send_message(
+                    MessageType.OK,
+                    json.dumps(self.sample_specification).encode(encoding='UTF-8')
+                )
+            elif message_type == MessageType.RUN:
+                self.client.send_message(
+                    MessageType.OK,
+                    'Run was successful'.encode(encoding='UTF-8')
+                )
+            elif message_type == MessageType.IMPORT:
+                self.client.send_message(
+                    MessageType.OK,
+                    json.dumps(self.sample_dataflow).encode(encoding='UTF-8')
+                )
+            elif message_type == MessageType.EXPORT:
+                self.client.send_message(
+                    MessageType.OK,
+                    'Export was successful'.encode(encoding='UTF-8')
+                )
+
+    def answer_empty(self):
+        status, message = self.client.wait_for_message()
+        if status == Status.DATA_READY:
+            message_type, data = message
+            self.client.send_message(
+                MessageType.OK,
+                bytes()
+            )
+
+    def disconnect(self):
+        self.client.disconnect()
 
 @pytest.fixture
 def http_client():
