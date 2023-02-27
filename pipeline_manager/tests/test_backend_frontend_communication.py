@@ -123,7 +123,7 @@ def dataflow_run(sample_dataflow):
 
 
 @pytest.fixture
-def dataflow_validation(sample_dataflow):
+def dataflow_validate(sample_dataflow):
     return SingularRequest(
         '/dataflow_action_request/validate',
         'post',
@@ -156,15 +156,28 @@ def dataflow_import(sample_dataflow_path):
         )
 
 
+@pytest.fixture
+def get_status(sample_dataflow_path):
+    return SingularRequest(
+        '/get_status',
+        'get',
+        HTTPStatus.OK,
+        b'Client connected'
+    )
+
+
 # Multi-request tests
 # ---------------
-@pytest.mark.parametrize('singular_request', [
-    "request_specification",
-    "dataflow_run",
-    "dataflow_validation",
-    "dataflow_export",
-    "dataflow_import"
-])
+@pytest.mark.parametrize(
+    'singular_request', [
+        'request_specification',
+        'dataflow_run',
+        'dataflow_validate',
+        'dataflow_export',
+        'dataflow_import',
+        'get_status'
+    ]
+)
 def test_singular_request_connected_valid(
         http_client,
         application_client,
