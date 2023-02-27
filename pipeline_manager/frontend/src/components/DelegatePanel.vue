@@ -27,14 +27,14 @@ export default {
         this.externalApplicationManager.initializeConnection();
     },
     methods: {
-        requestDataflowAction(action) {
-            this.externalApplicationManager.invokeFetchAction(
+        async requestDataflowAction(action) {
+            await this.externalApplicationManager.invokeFetchAction(
                 this.externalApplicationManager.requestDataflowAction,
                 action,
             );
         },
-        importDataflow() {
-            this.externalApplicationManager.invokeFetchAction(
+        async importDataflow() {
+            await this.externalApplicationManager.invokeFetchAction(
                 this.externalApplicationManager.importDataflow,
             );
         },
