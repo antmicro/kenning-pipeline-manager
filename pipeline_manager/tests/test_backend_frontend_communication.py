@@ -13,7 +13,7 @@ def http_client():
 
 # /get_status
 # ---------------
-def test_get_status(http_client):
+def test_get_status_disconnected(http_client):
     response = http_client.get('/get_status')
     assert b'Client not connected' in response.data and \
         response.status_code == HTTPStatus.SERVICE_UNAVAILABLE
@@ -22,7 +22,7 @@ def test_get_status(http_client):
 
 # /import_dataflow
 # ---------------
-def test_import_dataflow(http_client):
+def test_import_dataflow_disconnected(http_client):
     response = http_client.post('/import_dataflow')
     assert b'External application is disconnected' in response.data and \
         response.status_code == HTTPStatus.SERVICE_UNAVAILABLE
@@ -80,28 +80,27 @@ def test_load_invalid_specification(http_client, sample_dataflow_path):
 
 # /request_specification
 # ---------------
-def test_request_specification(http_client):
+def test_request_specification_disconnected(http_client):
     response = http_client.get('/request_specification')
     assert b'External application is disconnected' in response.data and \
         response.status_code == HTTPStatus.SERVICE_UNAVAILABLE
-# ---------------
 
 
 # /dataflow_action_request/<action>
 # ---------------
-def test_run_dataflow_request(http_client):
+def test_run_dataflow_request_disconnected(http_client):
     response = http_client.post('/dataflow_action_request/run')
     assert b'External application is disconnected' in response.data and \
         response.status_code == HTTPStatus.SERVICE_UNAVAILABLE
 
 
-def test_validate_dataflow_request(http_client):
+def test_validate_dataflow_request_disconnected(http_client):
     response = http_client.post('/dataflow_action_request/validate')
     assert b'External application is disconnected' in response.data and \
         response.status_code == HTTPStatus.SERVICE_UNAVAILABLE
 
 
-def test_export_dataflow_request(http_client):
+def test_export_dataflow_request_disconnected(http_client):
     response = http_client.post('/dataflow_action_request/export')
     assert b'External application is disconnected' in response.data and \
         response.status_code == HTTPStatus.SERVICE_UNAVAILABLE
