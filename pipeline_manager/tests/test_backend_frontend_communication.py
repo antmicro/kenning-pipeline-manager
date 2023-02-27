@@ -7,7 +7,7 @@ from typing import NamedTuple, Any
 import pytest
 
 from pipeline_manager_backend_communication.misc_structures import MessageType, Status  # noqa: E501
-from pipeline_manager_backend_communication.communication_backend import CommunicationBackend
+from pipeline_manager_backend_communication.communication_backend import CommunicationBackend  # noqa: E501
 from pipeline_manager.backend.app import app as flask_app
 
 
@@ -35,7 +35,9 @@ class MockApplicationClient(object):
             elif message_type == MessageType.SPECIFICATION:
                 self.client.send_message(
                     MessageType.OK,
-                    json.dumps(self.sample_specification).encode(encoding='UTF-8')
+                    json.dumps(
+                        self.sample_specification
+                    ).encode(encoding='UTF-8')
                 )
             elif message_type == MessageType.RUN:
                 self.client.send_message(
@@ -45,7 +47,9 @@ class MockApplicationClient(object):
             elif message_type == MessageType.IMPORT:
                 self.client.send_message(
                     MessageType.OK,
-                    json.dumps(self.sample_dataflow).encode(encoding='UTF-8')
+                    json.dumps(
+                        self.sample_dataflow
+                    ).encode(encoding='UTF-8')
                 )
             elif message_type == MessageType.EXPORT:
                 self.client.send_message(
@@ -65,10 +69,138 @@ class MockApplicationClient(object):
     def disconnect(self):
         self.client.disconnect()
 
+
 @pytest.fixture
 def http_client():
     flask_app.testing = True
     return flask_app.test_client()
+
+
+@pytest.fixture
+def application_client(sample_specification, sample_dataflow):
+    application_client = MockApplicationClient(
+        '127.0.0.1',
+        9000,
+        sample_specification,
+        sample_dataflow
+    )
+    yield application_client
+    application_client.disconnect()
+
+
+class SingularRequest(NamedTuple):
+    endpoint: str
+    method: str
+    expected_code: HTTPStatus
+    expected_data: Any = None
+    post_data: Any = None
+
+
+@pytest.fixture
+def request_specification():
+    return SingularRequest(
+        '/request_specification',
+        'get',
+        HTTPStatus.OK
+    )
+
+
+@pytest.fixture
+def dataflow_run(sample_dataflow):
+    return SingularRequest(
+        '/dataflow_action_request/run',
+        'post',
+        HTTPStatus.OK,
+        b'Run was successful',
+        {'dataflow': sample_dataflow}
+    )
+
+
+@pytest.fixture
+def dataflow_validation(sample_dataflow):
+    return SingularRequest(
+        '/dataflow_action_request/validate',
+        'post',
+        HTTPStatus.OK,
+        b'Validation was successful',
+        {'dataflow': sample_dataflow}
+    )
+
+
+@pytest.fixture
+def dataflow_export(sample_dataflow):
+    return SingularRequest(
+        '/dataflow_action_request/export',
+        'post',
+        HTTPStatus.OK,
+        b'Export was successful',
+        {'dataflow': sample_dataflow}
+    )
+
+
+@pytest.fixture
+def dataflow_import(sample_dataflow_path):
+    with open(sample_dataflow_path, 'rb') as f:
+        yield SingularRequest(
+            '/import_dataflow',
+            'post',
+            HTTPStatus.OK,
+            None,
+            {'external_application_dataflow': f}
+        )
+
+
+# Multi-request tests
+# ---------------
+@pytest.mark.parametrize('singular_request', [
+    "request_specification",
+    "dataflow_run",
+    "dataflow_validation",
+    "dataflow_export",
+    "dataflow_import"
+])
+def test_singular_request_connected_valid(
+        http_client,
+        application_client,
+        singular_request,
+        request):
+    singular_request = request.getfixturevalue(singular_request)
+
+    def connect_and_request(http_client, responses):
+        response = http_client.get('/connect')
+        responses.append((response.status_code, response.data))
+
+        if singular_request.method == 'get':
+            response = http_client.get(singular_request.endpoint)
+        elif singular_request.method == 'post':
+            response = http_client.post(
+                singular_request.endpoint,
+                data=singular_request.post_data
+            )
+        responses.append((response.status_code, response.data))
+
+    responses = (multiprocessing.Manager()).list()
+    process = multiprocessing.Process(
+        target=connect_and_request,
+        args=(http_client, responses)
+    )
+    process.start()
+    time.sleep(1)
+
+    application_client.connect()
+    application_client.answer_valid()
+
+    process.join()
+
+    status_code, data = responses[0]
+    assert b'External application connected' in data and \
+        status_code == HTTPStatus.OK
+
+    status_code, data = responses[1]
+    assert status_code == singular_request.expected_code
+    if singular_request.expected_data is not None:
+        assert singular_request.expected_data in data
+# ---------------
 
 
 # /get_status
