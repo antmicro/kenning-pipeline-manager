@@ -20,8 +20,14 @@ class MockApplicationClient(object):
 
         self.client = CommunicationBackend(host, port)
 
-    def connect(self):
-        self.client.initialize_client()
+    def try_connecting(self):
+        while True:
+            try:
+                out = self.client.initialize_client()
+                if out.status == Status.CLIENT_CONNECTED:
+                    return
+            except ConnectionRefusedError:
+                time.sleep(0.1)
 
     def answer_valid(self):
         status, message = self.client.wait_for_message()
@@ -185,9 +191,8 @@ def test_singular_request_connected_valid(
         args=(http_client, responses)
     )
     process.start()
-    time.sleep(1)
 
-    application_client.connect()
+    application_client.try_connecting()
     application_client.answer_valid()
 
     process.join()
