@@ -1,13 +1,13 @@
-from importlib.resources import files
 import json
-from pathlib import Path
 import tempfile
+from importlib.resources import files
+from pathlib import Path
 
 import pytest
 
 from pipeline_manager import examples
-from pipeline_manager.resources import schemas
 from pipeline_manager.backend.state_manager import global_state_manager
+from pipeline_manager.resources import schemas
 
 
 @pytest.fixture

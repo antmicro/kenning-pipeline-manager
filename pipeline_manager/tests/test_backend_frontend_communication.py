@@ -1,13 +1,13 @@
-from http import HTTPStatus
+import json
 import multiprocessing
 import time
-import json
-from typing import NamedTuple, Any
+from http import HTTPStatus
+from typing import Any, NamedTuple
 
 import pytest
 
-from pipeline_manager_backend_communication.misc_structures import MessageType, Status  # noqa: E501
 from pipeline_manager_backend_communication.communication_backend import CommunicationBackend  # noqa: E501
+from pipeline_manager_backend_communication.misc_structures import MessageType, Status  # noqa: E501
 from pipeline_manager.backend.app import app as flask_app
 
 
