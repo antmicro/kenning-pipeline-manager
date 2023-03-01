@@ -9,7 +9,7 @@
 // "./dist/styles.css": "./dist/styles.css"
 // To the "exports" dictionary.
 
-@import '../node_modules/@baklavajs/plugin-renderer-vue/dist/styles/variables.scss';
+@import '@baklavajs/plugin-renderer-vue/dist/styles/variables.scss';
 
 // Controls
 $color-primary: #e74a3c;
@@ -38,4 +38,4 @@ $color-pattern-default: #332d37;
 $color-pattern-line: #131313;
 $color-pattern-black: #000000;
 
-@import '../node_modules/@baklavajs/plugin-renderer-vue/dist/styles/styles.scss';
+@import '@baklavajs/plugin-renderer-vue/dist/styles/styles.scss';
