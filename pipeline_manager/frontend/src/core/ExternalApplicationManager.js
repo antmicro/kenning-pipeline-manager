@@ -12,7 +12,7 @@ import EditorManager from './EditorManager';
 export default class ExternalApplicationManager {
     externalApplicationConnected = false;
 
-    backendAvailable = (backendApiUrl !== null);
+    backendAvailable = backendApiUrl !== null;
 
     editorManager = EditorManager.getEditorManagerInstance();
 
@@ -70,10 +70,7 @@ export default class ExternalApplicationManager {
         const formData = new FormData();
         formData.append('dataflow', dataflow);
 
-        const response = await fetchPOST(
-            `dataflow_action_request/${action}`,
-            formData
-        );
+        const response = await fetchPOST(`dataflow_action_request/${action}`, formData);
         const data = await response.text();
 
         alertBus.$emit('displayAlert', data);

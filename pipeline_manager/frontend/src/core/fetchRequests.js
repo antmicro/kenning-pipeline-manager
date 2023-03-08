@@ -13,8 +13,7 @@ export async function fetchGET(endpoint) {
         method: 'GET',
         headers: {
             'Access-Control-Allow-Origin': backendApiUrl,
-            'Access-Control-Allow-Headers':
-                'Origin, X-Requested-With, Content-Type, Accept',
+            'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
         },
     };
     return fetch(`${backendApiUrl}/${endpoint}`, requestOptions);
@@ -26,8 +25,7 @@ export async function fetchPOST(endpoint, data) {
         body: data,
         headers: {
             'Access-Control-Allow-Origin': backendApiUrl,
-            'Access-Control-Allow-Headers':
-                'Origin, X-Requested-With, Content-Type, Accept',
+            'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
         },
     };
     return fetch(`${backendApiUrl}/${endpoint}`, requestOptions);
