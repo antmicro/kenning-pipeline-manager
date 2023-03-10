@@ -13,7 +13,6 @@ flake8:
     stage: lint
     script:
         - flake8 .
-    allow_failure: false
 
 eslint:
     stage: lint
@@ -21,16 +20,13 @@ eslint:
         - cd pipeline_manager/frontend
         - npm install
         - npm run lint
-    allow_failure: false
 
 build-project:
     stage: build
     script:
         - ./build
-    allow_failure: false
 
 pytest:
     stage: test
     script:
         - python3 -m pytest
-    allow_failure: false
