@@ -24,7 +24,9 @@ export default {
         };
     },
     mounted() {
-        this.externalApplicationManager.initializeConnection();
+        if (this.externalApplicationManager.backendAvailable) {
+            this.externalApplicationManager.initializeConnection();
+        }
     },
     methods: {
         async requestDataflowAction(action) {
