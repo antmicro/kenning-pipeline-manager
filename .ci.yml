@@ -7,7 +7,7 @@ variables:
 stages:
     - lint
     - build
-    - test
+    - deploy
 
 flake8:
     stage: lint
@@ -21,12 +21,30 @@ eslint:
         - npm install
         - npm run lint
 
-build-project:
+build:
     stage: build
     script:
         - ./build
+        - tar cf $CI_DOCS_ARCHIVE -C pipeline_manager/frontend/dist/ .
+    artifacts:
+        paths:
+            - $CI_DOCS_ARCHIVE
 
 pytest:
-    stage: test
+    stage: build
     script:
         - python3 -m pytest
+
+deploy:
+    image: $CI_DOCS_DOCKER_IMAGE
+    stage: deploy
+    dependencies:
+        - build
+    variables:
+        GIT_STRATEGY: none
+    tags:
+        - docs
+    script: echo 'Deploying pipeline manager page'
+    artifacts:
+        paths:
+            - $CI_DOCS_ARCHIVE
