@@ -6,7 +6,8 @@
 
 /* eslint-disable import/prefer-default-export */
 export const backendApiUrl =
-    window.location.protocol === 'file:'
+    window.location.protocol === 'file:' ||
+    (process.env.VUE_APP_STATIC !== undefined && process.env.VUE_APP_STATIC === 'true')
         ? null
         : `${window.location.protocol}//${window.location.host}`;
 
