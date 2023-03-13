@@ -77,7 +77,7 @@ export default class EditorManager {
         });
 
         if ('interfaces' in metadata) {
-            Object.keys(metadata.interfaces).forEach((name, color) => {
+            Object.entries(metadata.interfaces).forEach(([name, color]) => {
                 this.nodeInterfaceTypes.addType(name, color);
             });
         }
