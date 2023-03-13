@@ -27,7 +27,7 @@ def application_client(sample_specification, sample_dataflow):
     application_client.disconnect()
 
 
-class SingularRequest(NamedTuple):
+class SingleRequest(NamedTuple):
     """
     NamedTuple used to create fixtures that represent singular requests.
 
@@ -54,7 +54,7 @@ class SingularRequest(NamedTuple):
 
 @pytest.fixture
 def request_specification():
-    return SingularRequest(
+    return SingleRequest(
         '/request_specification',
         'get',
         HTTPStatus.OK
@@ -63,7 +63,7 @@ def request_specification():
 
 @pytest.fixture
 def dataflow_run(sample_dataflow):
-    return SingularRequest(
+    return SingleRequest(
         '/dataflow_action_request/run',
         'post',
         HTTPStatus.OK,
@@ -74,7 +74,7 @@ def dataflow_run(sample_dataflow):
 
 @pytest.fixture
 def dataflow_validate(sample_dataflow):
-    return SingularRequest(
+    return SingleRequest(
         '/dataflow_action_request/validate',
         'post',
         HTTPStatus.OK,
@@ -85,7 +85,7 @@ def dataflow_validate(sample_dataflow):
 
 @pytest.fixture
 def dataflow_export(sample_dataflow):
-    return SingularRequest(
+    return SingleRequest(
         '/dataflow_action_request/export',
         'post',
         HTTPStatus.OK,
@@ -97,7 +97,7 @@ def dataflow_export(sample_dataflow):
 @pytest.fixture
 def dataflow_import(sample_dataflow_path):
     with open(sample_dataflow_path, 'rb') as f:
-        yield SingularRequest(
+        yield SingleRequest(
             '/import_dataflow',
             'post',
             HTTPStatus.OK,
@@ -108,7 +108,7 @@ def dataflow_import(sample_dataflow_path):
 
 @pytest.fixture
 def get_status():
-    return SingularRequest(
+    return SingleRequest(
         '/get_status',
         'get',
         HTTPStatus.OK,
