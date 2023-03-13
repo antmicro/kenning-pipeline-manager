@@ -313,22 +313,19 @@ def dataflow_action_request(request_type: str):
         return 'External application is disconnected', HTTPStatus.SERVICE_UNAVAILABLE  # noqa: E501
     dataflow = request.form.get('dataflow')
 
-    if request_type == 'validate':
+    request_type_to_message_type = {
+        'validate': MessageType.VALIDATE,
+        'run': MessageType.RUN,
+        'export': MessageType.EXPORT
+    }
+
+    try:
+        message_type = request_type_to_message_type[request_type]
         out = tcp_server.send_message(
-            MessageType.VALIDATE,
+            message_type,
             dataflow.encode(encoding='UTF-8')
         )
-    elif request_type == 'run':
-        out = tcp_server.send_message(
-            MessageType.RUN,
-            dataflow.encode(encoding='UTF-8')
-        )
-    elif request_type == 'export':
-        out = tcp_server.send_message(
-            MessageType.EXPORT,
-            dataflow.encode(encoding='UTF')
-        )
-    else:
+    except KeyError:
         return 'No request type specified', HTTPStatus.BAD_REQUEST
 
     if out.status != Status.DATA_SENT:
