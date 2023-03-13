@@ -24,7 +24,7 @@ eslint:
 build:
     stage: build
     script:
-        - ./build
+        - ./build static-html
         - tar cf $CI_DOCS_ARCHIVE -C pipeline_manager/frontend/dist/ .
     artifacts:
         paths:

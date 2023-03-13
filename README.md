@@ -16,7 +16,8 @@ sudo pip install -r requirements.txt
 
 ## Build
 
-To build the frontend application run `./build` in the root directory.
+To build the frontend application to work with an external application (like Kenning) run `./build server-app` in the root directory.
+To build the frontend as a static application run `./build static-html` in the root directory.
 
 ## Running pipeline manager.
 

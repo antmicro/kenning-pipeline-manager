@@ -4,7 +4,8 @@
     "private": true,
     "scripts": {
         "serve": "vue-cli-service serve",
-        "build": "vue-cli-service build",
+        "build-server-app": "vue-cli-service build",
+        "build-static-html": "vue-cli-service --mode static build",
         "lint": "eslint --ext .js,.vue src/",
         "format": "prettier --write .",
         "clean": "rm -rf node_modules"

@@ -4,5 +4,25 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-cd pipeline_manager/frontend && npm install
-npm run build
+display_help() {
+    echo "Invalid parameters. Supported build options are:"
+    echo
+    echo "./build static-html - build as a static application that can run without any backend server."
+    echo "./build server-app  - build the application to run in with a backend server and an external application"
+}
+
+if ! [ $# -eq 1 ]; then
+    display_help
+    exit 1
+fi
+
+if [ "$1" = "static-html" ]; then
+    cd pipeline_manager/frontend && npm install
+    npm run build-static-html
+elif [ "$1" = "server-app" ]; then
+    cd pipeline_manager/frontend && npm install
+    npm run build-server-app
+else
+    display_help
+    exit 1
+fi
