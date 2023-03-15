@@ -7,6 +7,7 @@ import time
 import pytest
 
 from pipeline_manager.utils.mock_application import MockApplicationClient
+from pipeline_manager.backend.state_manager import global_state_manager
 from pipeline_manager.backend.app import app as flask_app
 
 
@@ -20,7 +21,7 @@ def http_client():
 def application_client(sample_specification, sample_dataflow):
     application_client = MockApplicationClient(
         '127.0.0.1',
-        9000,
+        56565,
         sample_specification,
         sample_dataflow
     )
@@ -28,6 +29,8 @@ def application_client(sample_specification, sample_dataflow):
     application_client.disconnect()
 
 
+# Requests Fixtures
+# ---------------
 class SingleRequest(NamedTuple):
     """
     NamedTuple used to create fixtures that represent singular requests.
@@ -145,6 +148,7 @@ def get_status_disconnected():
         HTTPStatus.SERVICE_UNAVAILABLE,
         b'Client not connected'
     )
+# ---------------
 
 
 # Multi-request tests
@@ -172,6 +176,11 @@ def test_connecting_multiple_times(
     ]
 
     def connect_and_request(http_client, responses):
+        global_state_manager.reinitialize(
+            application_client.port,
+            application_client.host
+        )
+
         for req in requests:
             response = http_client.get(req.endpoint)
             responses.append((response.status_code, response.data))
@@ -231,6 +240,11 @@ def test_singular_request_connected_valid(
     singular_request = request.getfixturevalue(singular_request)
 
     def connect_and_request(http_client, responses):
+        global_state_manager.reinitialize(
+            application_client.port,
+            application_client.host
+        )
+
         for req in [connect_success, singular_request]:
             if req.method == 'get':
                 response = http_client.get(req.endpoint)
