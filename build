@@ -8,7 +8,7 @@ display_help() {
     echo "Invalid parameters. Supported build options are:"
     echo
     echo "./build static-html - build as a static application that can run without any backend server."
-    echo "./build server-app  - build the application to run in with a backend server and an external application"
+    echo "./build server-app  - build the application to run with a backend server and an external application"
 }
 
 if ! [ $# -eq 1 ]; then

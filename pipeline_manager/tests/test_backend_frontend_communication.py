@@ -33,7 +33,7 @@ def application_client(sample_specification, sample_dataflow):
 # ---------------
 class SingleRequest(NamedTuple):
     """
-    NamedTuple used to create fixtures that represent singular requests.
+    NamedTuple used to create fixtures that represent single requests.
 
     Parameters
     ----------
@@ -213,7 +213,7 @@ def test_connecting_multiple_times(
 
 
 @pytest.mark.parametrize(
-    'singular_request', [
+    'single_request', [
         'request_specification_success',
         'dataflow_run',
         'dataflow_validate',
@@ -222,11 +222,11 @@ def test_connecting_multiple_times(
         'get_status_connected'
     ]
 )
-def test_singular_request_connected_valid(
+def test_single_request_connected_valid(
         http_client,
         application_client,
         connect_success,
-        singular_request,
+        single_request,
         request):
     """
     Tests a scenario with a single request to an endpoint after connecting
@@ -235,9 +235,9 @@ def test_singular_request_connected_valid(
     It creates two asynchronous processes, one for the backend and one for the
     external application.
 
-    The expected behaviour is described by `singular_request` fixture.
+    The expected behaviour is described by `single_request` fixture.
     """
-    singular_request = request.getfixturevalue(singular_request)
+    single_request = request.getfixturevalue(single_request)
 
     def connect_and_request(http_client, responses):
         global_state_manager.reinitialize(
@@ -245,7 +245,7 @@ def test_singular_request_connected_valid(
             application_client.host
         )
 
-        for req in [connect_success, singular_request]:
+        for req in [connect_success, single_request]:
             if req.method == 'get':
                 response = http_client.get(req.endpoint)
             elif req.method == 'post':
@@ -272,9 +272,9 @@ def test_singular_request_connected_valid(
             connect_success.expected_code == status_code)
 
     status_code, data = responses[1]
-    assert status_code == singular_request.expected_code
-    if singular_request.expected_data is not None:
-        assert singular_request.expected_data == data
+    assert status_code == single_request.expected_code
+    if single_request.expected_data is not None:
+        assert single_request.expected_data == data
 # ---------------
 
 
