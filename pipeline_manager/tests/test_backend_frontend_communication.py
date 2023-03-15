@@ -1,5 +1,6 @@
 import multiprocessing
 from http import HTTPStatus
+import json
 from typing import Any, NamedTuple
 import time
 
@@ -53,11 +54,31 @@ class SingleRequest(NamedTuple):
 
 
 @pytest.fixture
-def request_specification():
+def connect_success():
+    return SingleRequest(
+        '/connect',
+        'get',
+        HTTPStatus.OK,
+        b'External application connected'
+    )
+
+
+@pytest.fixture
+def request_specification_success():
     return SingleRequest(
         '/request_specification',
         'get',
         HTTPStatus.OK
+    )
+
+
+@pytest.fixture
+def request_specification_unavailable():
+    return SingleRequest(
+        '/request_specification',
+        'get',
+        HTTPStatus.SERVICE_UNAVAILABLE,
+        b'External application is disconnected'
     )
 
 
@@ -107,7 +128,7 @@ def dataflow_import(sample_dataflow_path):
 
 
 @pytest.fixture
-def get_status():
+def get_status_connected():
     return SingleRequest(
         '/get_status',
         'get',
@@ -116,25 +137,43 @@ def get_status():
     )
 
 
+@pytest.fixture
+def get_status_disconnected():
+    return SingleRequest(
+        '/get_status',
+        'get',
+        HTTPStatus.SERVICE_UNAVAILABLE,
+        b'Client not connected'
+    )
+
+
 # Multi-request tests
 # ---------------
-def test_connecting_multiple_times(http_client, application_client):
+def test_connecting_multiple_times(
+        http_client,
+        application_client,
+        sample_specification,
+        connect_success,
+        request_specification_success,
+        request_specification_unavailable,
+        get_status_connected,
+        get_status_disconnected):
     """
     Test a scenario where a client connects, disconnects
     and then connects once again.
     """
-    def connect_and_request(http_client, responses):
-        endpoints = [
-            '/connect',
-            '/request_specification',
-            '/get_status',
-            '/connect',
-            '/get_status',
-            '/request_specification'
-        ]
+    requests = [
+        connect_success,
+        get_status_disconnected,
+        request_specification_unavailable,
+        connect_success,
+        get_status_connected,
+        request_specification_success
+    ]
 
-        for endpoint in endpoints:
-            response = http_client.get(endpoint)
+    def connect_and_request(http_client, responses):
+        for req in requests:
+            response = http_client.get(req.endpoint)
             responses.append((response.status_code, response.data))
 
     responses = (multiprocessing.Manager()).list()
@@ -152,39 +191,32 @@ def test_connecting_multiple_times(http_client, application_client):
 
     process.join()
 
-    expected_messages = [
-        b'External application connected',
-        b'External application is disconnected',
-        b'Client not connected',
-        b'External application connected',
-        b'Client connected'
-    ]
-    expected_codes = [
-        HTTPStatus.OK,
-        HTTPStatus.SERVICE_UNAVAILABLE,
-        HTTPStatus.SERVICE_UNAVAILABLE,
-        HTTPStatus.OK,
-        HTTPStatus.OK,
-    ]
-
-    for message, code, response in zip(expected_messages, expected_codes, responses):  # noqa: E501
+    for req, response in zip(requests, responses):
         status_code, data = response
-        assert message == data and status_code == code
+
+        assert status_code == req.expected_code
+        if req.expected_data is not None:
+            assert req.expected_data == data
+
+    status_code, data = responses[-1]
+    assert (json.loads(data) == sample_specification and
+            HTTPStatus.OK == status_code)
 
 
 @pytest.mark.parametrize(
     'singular_request', [
-        'request_specification',
+        'request_specification_success',
         'dataflow_run',
         'dataflow_validate',
         'dataflow_export',
         'dataflow_import',
-        'get_status'
+        'get_status_connected'
     ]
 )
 def test_singular_request_connected_valid(
         http_client,
         application_client,
+        connect_success,
         singular_request,
         request):
     """
@@ -199,17 +231,15 @@ def test_singular_request_connected_valid(
     singular_request = request.getfixturevalue(singular_request)
 
     def connect_and_request(http_client, responses):
-        response = http_client.get('/connect')
-        responses.append((response.status_code, response.data))
-
-        if singular_request.method == 'get':
-            response = http_client.get(singular_request.endpoint)
-        elif singular_request.method == 'post':
-            response = http_client.post(
-                singular_request.endpoint,
-                data=singular_request.post_data
-            )
-        responses.append((response.status_code, response.data))
+        for req in [connect_success, singular_request]:
+            if req.method == 'get':
+                response = http_client.get(req.endpoint)
+            elif req.method == 'post':
+                response = http_client.post(
+                    req.endpoint,
+                    data=req.post_data
+                )
+            responses.append((response.status_code, response.data))
 
     responses = (multiprocessing.Manager()).list()
     process = multiprocessing.Process(
@@ -224,8 +254,8 @@ def test_singular_request_connected_valid(
     process.join()
 
     status_code, data = responses[0]
-    assert b'External application connected' == data and \
-        status_code == HTTPStatus.OK
+    assert (connect_success.expected_data == data and
+            connect_success.expected_code == status_code)
 
     status_code, data = responses[1]
     assert status_code == singular_request.expected_code
