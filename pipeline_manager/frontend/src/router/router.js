@@ -17,6 +17,9 @@ const RouterVue = new Router({
             path: '/',
             name: 'home',
             component: Home,
+            meta: {
+                title: 'Pipeline Manager',
+            },
         },
     ],
 });
