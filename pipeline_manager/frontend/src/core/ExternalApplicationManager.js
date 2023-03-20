@@ -44,7 +44,25 @@ export default class ExternalApplicationManager {
         let message = 'Specification loaded';
 
         if (response.status === HTTPCodes.OK) {
-            this.editorManager.updateEditorSpecification(JSON.parse(data));
+            let specification = null;
+            try {
+                specification = JSON.parse(data);
+            } catch (exception) {
+                if (exception instanceof SyntaxError) {
+                    alertBus.$emit('displayAlert', `Not a proper JSON file.\n${exception}`);
+                } else {
+                    alertBus.$emit('displayAlert', `Unknown error.\n${exception}`);
+                }
+                return;
+            }
+
+            const errors = this.editorManager.validateSpecification(specification);
+            if (Array.isArray(errors) && errors.length) {
+                alertBus.$emit('displayAlert', errors);
+            } else {
+                this.editorManager.updateEditorSpecification(specification);
+                alertBus.$emit('displayAlert', 'Loaded successfully');
+            }
         } else if (response.status === HTTPCodes.ServiceUnavailable) {
             message = data;
             this.externalApplicationConnected = false;
