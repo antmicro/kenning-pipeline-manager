@@ -8,13 +8,10 @@ import logging
 import os
 import sys
 from http import HTTPStatus
-from typing import Union
 
 from flask import Flask, render_template, request
 from flask_cors import CORS
-from jsonschema import ValidationError, validate
 from pipeline_manager_backend_communication.misc_structures import MessageType, Status  # noqa: E501
-from werkzeug.datastructures import FileStorage
 
 from pipeline_manager import frontend
 from pipeline_manager.backend.state_manager import global_state_manager
@@ -57,10 +54,9 @@ def get_status():
     Responses
     ---------
     HTTPStatus.OK :
-        Request was successful and the response contains
-        the parsed dataflow.
+        External application is connected.
     HTTPStatus.SERVICE_UNAVAILABLE :
-        Client was disconnected.
+        External application is disconnected.
     """
     tcp_server = global_state_manager.get_tcp_server()
 
@@ -76,22 +72,22 @@ def import_dataflow():
     POST endpoint that should be used to request importing a dataflow in
     external application format. This endpoint requests the connected external
     application to parse it into the Pipeline Manager format and send it
-    to the Pipeline Manager.
+    to Pipeline Manager.
+
+    The dataflow to be parsed should be put in the request body as a
+    `external_application_dataflow` file.
 
     Responses
     ---------
     HTTPStatus.OK :
-        Request was successful and the response contains
-        the parsed dataflow.
-    HTTPStatus.BAD_REQUEST :
-        There was some error during the request handling.
-        Response contains error message.
+        Request was successful and the response contains a dictionary with
+        keys `type` and `content` that convey the original Pipeline Manager
+        message.
     HTTPStatus.SERVICE_UNAVAILABLE :
-        External application was disconnected.
+        External application was disconnected or an error was raised during
+        the request handling. Response contains error message.
     """
     tcp_server = global_state_manager.get_tcp_server()
-    if not tcp_server:
-        return 'TCP server not initialized', HTTPStatus.BAD_REQUEST
 
     if not tcp_server.connected:
         return 'External application is disconnected', HTTPStatus.SERVICE_UNAVAILABLE  # noqa: E501
@@ -100,20 +96,17 @@ def import_dataflow():
     out = tcp_server.send_message(MessageType.IMPORT, dataflow)
 
     if out.status != Status.DATA_SENT:
-        return 'Error while sending a message to the external application', HTTPStatus.BAD_REQUEST  # noqa: E501
+        return 'Error while sending a message to the external application', HTTPStatus.SERVICE_UNAVAILABLE  # noqa: E501
 
     out = tcp_server.wait_for_message()
 
     status = out.status
     if status == Status.DATA_READY:
         mess_type, dataflow = out.data
-        if mess_type != MessageType.OK:
-            return 'Invalid message type from the external application', HTTPStatus.BAD_REQUEST  # noqa: E501
-
-        return json.loads(dataflow), HTTPStatus.OK
+        return {'type': mess_type.value, 'content': json.loads(dataflow)}, HTTPStatus.OK  # noqa: E501
     if status == Status.CLIENT_DISCONNECTED:
         return 'External application is disconnected', HTTPStatus.SERVICE_UNAVAILABLE  # noqa: E501
-    return 'Unknown error', HTTPStatus.BAD_REQUEST
+    return 'Unknown error', HTTPStatus.SERVICE_UNAVAILABLE
 
 
 @app.route('/connect', methods=['GET'])
@@ -131,7 +124,7 @@ def connect():
     ---------
     HTTPStatus.OK :
         Request was successful and an external application was connected.
-    HTTPStatus.BAD_REQUEST :
+    HTTPStatus.SERVICE_UNAVAILABLE :
         External application did not connect.
     """
     tcp_server = global_state_manager.get_tcp_server()
@@ -142,7 +135,7 @@ def connect():
 
     if out.status == Status.CLIENT_CONNECTED:
         return 'External application connected', HTTPStatus.OK
-    return 'External application did not connect', HTTPStatus.BAD_REQUEST
+    return 'External application did not connect', HTTPStatus.SERVICE_UNAVAILABLE  # noqa: E501
 
 
 @app.route('/request_specification', methods=['GET'])
@@ -157,18 +150,14 @@ def request_specification():
     Responses
     ---------
     HTTPStatus.OK :
-        Request was successful and the response contains
-        the specification from an external application.
-    HTTPStatus.BAD_REQUEST :
-        There was some error during the request handling.
-        Response contains error message.
+        Request was successful and the response contains a dictionary with
+        keys `type` and `content` that convey the original Pipeline Manager
+        message.
     HTTPStatus.SERVICE_UNAVAILABLE :
-        External application was disconnected.
+        External application was disconnected or an error was raised during
+        the request handling. Response contains error message.
     """
     tcp_server = global_state_manager.get_tcp_server()
-
-    if not tcp_server:
-        return 'TCP server not initialized', HTTPStatus.BAD_REQUEST
 
     if not tcp_server.connected:
         return 'External application is disconnected', HTTPStatus.SERVICE_UNAVAILABLE  # noqa: E501
@@ -176,20 +165,17 @@ def request_specification():
     out = tcp_server.send_message(MessageType.SPECIFICATION)
 
     if out.status != Status.DATA_SENT:
-        return 'Error while sending a message to the external application', HTTPStatus.BAD_REQUEST  # noqa: E501
+        return 'Error while sending a message to the external application', HTTPStatus.SERVICE_UNAVAILABLE  # noqa: E501
 
     out = tcp_server.wait_for_message()
 
     status = out.status
     if status == Status.DATA_READY:
         mess_type, specification = out.data
-        if mess_type != MessageType.OK:
-            return 'Invalid message type from the external application', HTTPStatus.BAD_REQUEST  # noqa: E501
-
-        return specification, HTTPStatus.OK
+        return {'type': mess_type.value, 'content': json.loads(specification)}, HTTPStatus.OK  # noqa: E501
     if status == Status.CLIENT_DISCONNECTED:
         return 'External application is disconnected', HTTPStatus.SERVICE_UNAVAILABLE  # noqa: E501
-    return 'Unknown error', HTTPStatus.BAD_REQUEST
+    return 'Unknown error', HTTPStatus.SERVICE_UNAVAILABLE
 
 
 @app.route('/dataflow_action_request/<request_type>', methods=['POST'])
@@ -207,18 +193,14 @@ def dataflow_action_request(request_type: str):
     Responses
     ---------
     HTTPStatus.OK :
-        Request was successful and the response contains
-        feedback message
-    HTTPStatus.BAD_REQUEST :
-        There was some error during the request handling.
-        Response contains error message.
+        Request was successful and the response contains a dictionary with
+        keys `type` and `content` that convey the original Pipeline Manager
+        message.
     HTTPStatus.SERVICE_UNAVAILABLE :
-        External application was disconnected.
+        External application was disconnected or an error was raised during
+        the request handling. Response contains error message.
     """
     tcp_server = global_state_manager.get_tcp_server()
-
-    if not tcp_server:
-        return 'TCP server not initialized', HTTPStatus.BAD_REQUEST
 
     if not tcp_server.connected:
         return 'External application is disconnected', HTTPStatus.SERVICE_UNAVAILABLE  # noqa: E501
@@ -237,25 +219,20 @@ def dataflow_action_request(request_type: str):
             dataflow.encode(encoding='UTF-8')
         )
     except KeyError:
-        return 'No request type specified', HTTPStatus.BAD_REQUEST
+        return 'No request type specified', HTTPStatus.SERVICE_UNAVAILABLE
 
     if out.status != Status.DATA_SENT:
-        return 'Error while sending a message to the external application', HTTPStatus.BAD_REQUEST  # noqa: E501
+        return 'Error while sending a message to the external application', HTTPStatus.SERVICE_UNAVAILABLE  # noqa: E501
 
     out = tcp_server.wait_for_message()
 
     status = out.status
     if status == Status.DATA_READY:
         mess_type, message = out.data
-
-        if mess_type == MessageType.OK:
-            return message, HTTPStatus.OK
-        if mess_type == MessageType.ERROR:
-            return message, HTTPStatus.BAD_REQUEST
-
+        return {'type': mess_type.value, 'content': message}, HTTPStatus.OK  # noqa: E501
     if status == Status.CLIENT_DISCONNECTED:
         return 'External application is disconnected', HTTPStatus.SERVICE_UNAVAILABLE  # noqa: E501
-    return 'Unknown error', HTTPStatus.BAD_REQUEST
+    return 'Unknown error', HTTPStatus.SERVICE_UNAVAILABLE
 
 
 @app.errorhandler(404)

@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { backendApiUrl, HTTPCodes } from './utils';
+import { backendApiUrl, HTTPCodes, MessageTypes } from './utils';
 import { fetchGET, fetchPOST } from './fetchRequests';
 import { alertBus } from './bus';
 import EditorManager from './EditorManager';
@@ -40,35 +40,28 @@ export default class ExternalApplicationManager {
      */
     async requestSpecification() {
         const response = await fetchGET('request_specification');
-        const data = await response.text();
-        let message = 'Specification loaded';
+        let message = 'Unknown error';
 
         if (response.status === HTTPCodes.OK) {
-            let specification = null;
-            try {
-                specification = JSON.parse(data);
-            } catch (exception) {
-                if (exception instanceof SyntaxError) {
-                    alertBus.$emit('displayAlert', `Not a proper JSON file.\n${exception}`);
-                } else {
-                    alertBus.$emit('displayAlert', `Unknown error.\n${exception}`);
-                }
-                return;
-            }
+            const data = await response.json();
 
-            const errors = this.editorManager.validateSpecification(specification);
-            if (Array.isArray(errors) && errors.length) {
-                alertBus.$emit('displayAlert', errors);
-            } else {
-                this.editorManager.updateEditorSpecification(specification);
-                alertBus.$emit('displayAlert', 'Loaded successfully');
+            if (data.type === MessageTypes.OK) {
+                const specification = data.content;
+
+                const errors = this.editorManager.validateSpecification(specification);
+                if (Array.isArray(errors) && errors.length) {
+                    message = errors;
+                } else {
+                    this.editorManager.updateEditorSpecification(specification);
+                    message = 'Specification loaded successfully';
+                }
+            } else if (data.type === MessageTypes.ERROR) {
+                message = data.content;
             }
         } else if (response.status === HTTPCodes.ServiceUnavailable) {
-            message = data;
-            this.externalApplicationConnected = false;
-        } else if (response.status === HTTPCodes.BadRequest) {
-            message = data;
+            message = await response.text();
         }
+
         alertBus.$emit('displayAlert', message);
     }
 
@@ -89,13 +82,14 @@ export default class ExternalApplicationManager {
         formData.append('dataflow', dataflow);
 
         const response = await fetchPOST(`dataflow_action_request/${action}`, formData);
-        const data = await response.text();
 
-        alertBus.$emit('displayAlert', data);
+        if (response.status === HTTPCodes.OK) {
+            const data = await response.json();
+            alertBus.$emit('displayAlert', data.content);
+        }
         if (response.status === HTTPCodes.ServiceUnavailable) {
-            // Service Unavailable, which means
-            // that the external application was disconnected
-            this.externalApplicationConnected = false;
+            const data = await response.text();
+            alertBus.$emit('displayAlert', data);
         }
     }
 
@@ -114,23 +108,24 @@ export default class ExternalApplicationManager {
         formData.append('external_application_dataflow', file);
 
         const response = await fetchPOST('import_dataflow', formData);
-        const data = await response.text();
-
         let message = 'Imported dataflow';
 
         if (response.status === HTTPCodes.OK) {
-            const errors = this.editorManager.loadDataflow(JSON.parse(data));
-            if (Array.isArray(errors) && errors.length) {
-                message = errors;
+            const data = await response.json();
+
+            if (data.type === MessageTypes.OK) {
+                const errors = this.editorManager.loadDataflow(data.content);
+                if (Array.isArray(errors) && errors.length) {
+                    message = errors;
+                }
+            } else if (data.type === MessageTypes.ERROR) {
+                message = data.content;
             }
         } else if (response.status === HTTPCodes.ServiceUnavailable) {
-            // Service Unavailable, which means
-            // that the external application was disconnected
-            message = data;
-            this.externalApplicationConnected = false;
-        } else if (response.status === HTTPCodes.BadRequest) {
-            message = data;
+            const data = await response.text();
+            message = data.content;
         }
+
         alertBus.$emit('displayAlert', message);
     }
 

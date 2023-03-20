@@ -25,4 +25,4 @@ export const MessageTypes = {
     RUN: 4,
     IMPORT: 5,
     EXPORT: 6,
-}
+};
