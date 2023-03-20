@@ -1,0 +1,99 @@
+{
+    "metadata": {
+        "interfaces": {
+            "Dataset": "#FF0000"
+        }
+    },
+    "nodes": [
+        {
+            "name": "RunBehaviour",
+            "type": "RunBehaviour",
+            "category": "Descriptions",
+            "properties": [
+                {
+                    "name": "Duration",
+                    "type": "slider",
+                    "min": 0,
+                    "max": 5,
+                    "default": 0
+                },
+                {
+                    "name": "MessageType",
+                    "type": "select",
+                    "values": ["ERROR", "OK"],
+                    "default": "OK"
+                },
+                {
+                    "name": "Message",
+                    "type": "text",
+                    "default": "Everything went fine!"
+                }
+            ],
+            "inputs": [],
+            "outputs": [
+                {
+                    "name": "Effect",
+                    "type": "Effect"
+                }
+            ]
+        },
+        {
+            "name": "ValidationBehaviour",
+            "type": "ValidationBehaviour",
+            "category": "Descriptions",
+            "properties": [
+                {
+                    "name": "Duration",
+                    "type": "slider",
+                    "min": 0,
+                    "max": 5,
+                    "default": 0
+                },
+                {
+                    "name": "MessageType",
+                    "type": "select",
+                    "values": ["ERROR", "OK"],
+                    "default": "OK"
+                },
+                {
+                    "name": "Message",
+                    "type": "text",
+                    "default": "Everything went fine!"
+                }
+            ],
+            "inputs": [],
+            "outputs": [
+                {
+                    "name": "Effect",
+                    "type": "Effect"
+                }
+            ]
+        },
+        {
+            "name": "Disconnect",
+            "type": "Disconnect",
+            "category": "Effects",
+            "properties": [
+                {
+                    "name": "Time offset",
+                    "type": "slider",
+                    "min": 0,
+                    "max": 10,
+                    "default": 0
+                },
+                {
+                    "name": "Should disconnect",
+                    "type": "checkbox",
+                    "default": false
+                }
+            ],
+            "inputs": [
+                {
+                    "name": "Effect",
+                    "type": "Effect"
+                }
+            ],
+            "outputs": []
+        }
+    ]
+}
