@@ -1,0 +1,329 @@
+{
+    "nodes": [
+        {
+            "type": "Filter2D",
+            "id": "node_168064109167511",
+            "name": "Filter2D",
+            "options": [
+                [
+                    "iterations",
+                    1
+                ],
+                [
+                    "border type",
+                    "constant"
+                ]
+            ],
+            "state": {},
+            "interfaces": [
+                [
+                    "image",
+                    {
+                        "id": "ni_168064109167612",
+                        "value": null,
+                        "isInput": true,
+                        "type": "Image"
+                    }
+                ],
+                [
+                    "kernel",
+                    {
+                        "id": "ni_168064109167613",
+                        "value": null,
+                        "isInput": true,
+                        "type": "Image"
+                    }
+                ],
+                [
+                    "output",
+                    {
+                        "id": "ni_168064109167714",
+                        "value": null,
+                        "isInput": false,
+                        "type": "Image"
+                    }
+                ]
+            ],
+            "position": {
+                "x": 544,
+                "y": 77
+            },
+            "width": 200,
+            "twoColumn": false,
+            "customClasses": ""
+        },
+        {
+            "type": "LoadVideo",
+            "id": "node_168064220761015",
+            "name": "LoadVideo",
+            "options": [
+                [
+                    "filename",
+                    "input.mp4"
+                ]
+            ],
+            "state": {},
+            "interfaces": [
+                [
+                    "frames",
+                    {
+                        "id": "ni_168064220761016",
+                        "value": null,
+                        "isInput": false,
+                        "type": "Image"
+                    }
+                ]
+            ],
+            "position": {
+                "x": -60,
+                "y": -36
+            },
+            "width": 200,
+            "twoColumn": false,
+            "customClasses": ""
+        },
+        {
+            "type": "GaussianKernel",
+            "id": "node_168064222522321",
+            "name": "GaussianKernel",
+            "options": [
+                [
+                    "size",
+                    5
+                ],
+                [
+                    "sigma",
+                    1
+                ]
+            ],
+            "state": {},
+            "interfaces": [
+                [
+                    "kernel",
+                    {
+                        "id": "ni_168064222522422",
+                        "value": null,
+                        "isInput": false,
+                        "type": "Image"
+                    }
+                ]
+            ],
+            "position": {
+                "x": -65,
+                "y": 295
+            },
+            "width": 200,
+            "twoColumn": false,
+            "customClasses": ""
+        },
+        {
+            "type": "Threshold",
+            "id": "node_168064225320530",
+            "name": "Threshold",
+            "options": [
+                [
+                    "threshold_value",
+                    1
+                ],
+                [
+                    "threshold_type",
+                    "Otsu"
+                ]
+            ],
+            "state": {},
+            "interfaces": [
+                [
+                    "image",
+                    {
+                        "id": "ni_168064225320531",
+                        "value": null,
+                        "isInput": true,
+                        "type": "Image"
+                    }
+                ],
+                [
+                    "output",
+                    {
+                        "id": "ni_168064225320532",
+                        "value": null,
+                        "isInput": false,
+                        "type": "BinaryImage"
+                    }
+                ]
+            ],
+            "position": {
+                "x": 999,
+                "y": 100
+            },
+            "width": 200,
+            "twoColumn": false,
+            "customClasses": ""
+        },
+        {
+            "type": "StructuringElement",
+            "id": "node_168064227787336",
+            "name": "StructuringElement",
+            "options": [
+                [
+                    "size",
+                    5
+                ],
+                [
+                    "shape",
+                    "Cross"
+                ]
+            ],
+            "state": {},
+            "interfaces": [
+                [
+                    "kernel",
+                    {
+                        "id": "ni_168064227787437",
+                        "value": null,
+                        "isInput": false,
+                        "type": "BinaryImage"
+                    }
+                ]
+            ],
+            "position": {
+                "x": 1010,
+                "y": 409
+            },
+            "width": 200,
+            "twoColumn": false,
+            "customClasses": ""
+        },
+        {
+            "type": "Morphological operation",
+            "id": "node_168064228786538",
+            "name": "Morphological operation",
+            "options": [
+                [
+                    "iterations",
+                    1
+                ],
+                [
+                    "border type",
+                    "constant"
+                ],
+                [
+                    "operation type",
+                    "dilation"
+                ]
+            ],
+            "state": {},
+            "interfaces": [
+                [
+                    "image",
+                    {
+                        "id": "ni_168064228786539",
+                        "value": null,
+                        "isInput": true,
+                        "type": "BinaryImage"
+                    }
+                ],
+                [
+                    "kernel",
+                    {
+                        "id": "ni_168064228786540",
+                        "value": null,
+                        "isInput": true,
+                        "type": "BinaryImage"
+                    }
+                ],
+                [
+                    "output",
+                    {
+                        "id": "ni_168064228786641",
+                        "value": null,
+                        "isInput": false,
+                        "type": "BinaryImage"
+                    }
+                ]
+            ],
+            "position": {
+                "x": 1422,
+                "y": 54
+            },
+            "width": 200,
+            "twoColumn": false,
+            "customClasses": ""
+        },
+        {
+            "type": "SaveVideo",
+            "id": "node_168064231007448",
+            "name": "SaveVideo",
+            "options": [
+                [
+                    "filename",
+                    "output.mp4"
+                ]
+            ],
+            "state": {},
+            "interfaces": [
+                [
+                    "color",
+                    {
+                        "id": "ni_168064231007449",
+                        "value": null,
+                        "isInput": true,
+                        "type": "Image"
+                    }
+                ],
+                [
+                    "binary",
+                    {
+                        "id": "ni_168064231007450",
+                        "value": null,
+                        "isInput": true,
+                        "type": "BinaryImage"
+                    }
+                ]
+            ],
+            "position": {
+                "x": 1773,
+                "y": 76
+            },
+            "width": 200,
+            "twoColumn": false,
+            "customClasses": ""
+        }
+    ],
+    "connections": [
+        {
+            "id": "168064222082820",
+            "from": "ni_168064220761016",
+            "to": "ni_168064109167612"
+        },
+        {
+            "id": "168064222926625",
+            "from": "ni_168064222522422",
+            "to": "ni_168064109167613"
+        },
+        {
+            "id": "168064225938335",
+            "from": "ni_168064109167714",
+            "to": "ni_168064225320531"
+        },
+        {
+            "id": "168064230015344",
+            "from": "ni_168064225320532",
+            "to": "ni_168064228786539"
+        },
+        {
+            "id": "168064230253147",
+            "from": "ni_168064227787437",
+            "to": "ni_168064228786540"
+        },
+        {
+            "id": "168064231874053",
+            "from": "ni_168064228786641",
+            "to": "ni_168064231007450"
+        }
+    ],
+    "panning": {
+        "x": 83.81456605363859,
+        "y": 271.1382297011724
+    },
+    "scaling": 0.8808971653295204
+}

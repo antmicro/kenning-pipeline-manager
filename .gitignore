@@ -166,3 +166,4 @@ cython_debug/
 #.idea/
 
 **/.env.*.local
+docs/source/generated

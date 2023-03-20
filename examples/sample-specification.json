@@ -1,0 +1,120 @@
+{
+    "nodes": [
+        {
+            "name": "LoadVideo",
+            "type": "filesystem",
+            "category": "Filesystem",
+            "properties": [
+                {"name": "filename", "type": "text", "default": ""}
+            ],
+            "inputs": [],
+            "outputs": [{"name": "frames", "type": "Image"}]
+        },
+        {
+            "name": "SaveVideo",
+            "type": "filesystem",
+            "category": "Filesystem",
+            "properties": [
+                {"name": "filename", "type": "text", "default": ""}
+            ],
+            "inputs": [
+                {"name": "color", "type": "Image"},
+                {"name": "binary", "type": "BinaryImage"}
+            ],
+            "outputs": []
+        },
+        {
+            "name": "GaussianKernel",
+            "type": "kernel",
+            "category": "Generators",
+            "properties": [
+                {"name": "size", "type": "integer", "default": 5},
+                {"name": "sigma", "type": "number", "default": 1.0}
+            ],
+            "inputs": [],
+            "outputs": [{"name": "kernel", "type": "Image"}]
+        },
+        {
+            "name": "StructuringElement",
+            "type": "kernel",
+            "category": "Generators",
+            "properties": [
+                {"name": "size", "type": "integer", "default": 5},
+                {
+                    "name": "shape",
+                    "type": "select",
+                    "values": ["Rectangle", "Cross", "Ellipse"],
+                    "default": "Cross"
+                }
+            ],
+            "inputs": [],
+            "outputs": [{"name": "kernel", "type": "BinaryImage"}]
+        },
+        {
+            "name": "Filter2D",
+            "type": "processing",
+            "category": "Processing",
+            "properties": [
+                {"name": "iterations", "type": "integer", "default": 1},
+                {
+                    "name": "border type",
+                    "type": "select",
+                    "values": ["constant", "replicate", "wrap", "reflect"],
+                    "default": "constant"
+                }
+            ],
+            "inputs": [
+                {"name": "image", "type": "Image"},
+                {"name": "kernel", "type": "Image"}
+            ],
+            "outputs": [{"name": "output", "type": "Image"}]
+        },
+        {
+            "name": "Threshold",
+            "type": "processing",
+            "category": "Processing",
+            "properties": [
+                {"name": "threshold_value", "type": "integer", "default": 1},
+                {
+                    "name": "threshold_type",
+                    "type": "select",
+                    "values": ["Binary", "Truncate", "Otsu"],
+                    "default": "constant"
+                }
+            ],
+            "inputs": [{"name": "image", "type": "Image"}],
+            "outputs": [{"name": "output", "type": "BinaryImage"}]
+        },
+        {
+            "name": "Morphological operation",
+            "type": "processing",
+            "category": "Processing",
+            "properties": [
+                {"name": "iterations", "type": "integer", "default": 1},
+                {
+                    "name": "border type",
+                    "type": "select",
+                    "values": ["constant", "replicate", "wrap", "reflect"],
+                    "default": "constant"
+                },
+                {
+                    "name": "operation type",
+                    "type": "select",
+                    "values": ["dilation", "erosion", "closing", "opening"],
+                    "default": "dilation"
+                }
+            ],
+            "inputs": [
+                {"name": "image", "type": "BinaryImage"},
+                {"name": "kernel", "type": "BinaryImage"}
+            ],
+            "outputs": [{"name": "output", "type": "BinaryImage"}]
+        }
+    ],
+    "metadata": {
+        "interfaces": {
+            "Image": "#FF0000",
+            "BinaryImage": "#00FF00"
+        }
+    }
+}
