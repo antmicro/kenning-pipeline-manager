@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { backendApiUrl, HTTPCodes, MessageTypes } from './utils';
+import { backendApiUrl, HTTPCodes, PMMessageType } from './utils';
 import { fetchGET, fetchPOST } from './fetchRequests';
 import { alertBus } from './bus';
 import EditorManager from './EditorManager';
@@ -45,7 +45,7 @@ export default class ExternalApplicationManager {
         if (response.status === HTTPCodes.OK) {
             const data = await response.json();
 
-            if (data.type === MessageTypes.OK) {
+            if (data.type === PMMessageType.OK) {
                 const specification = data.content;
 
                 const errors = this.editorManager.validateSpecification(specification);
@@ -55,7 +55,7 @@ export default class ExternalApplicationManager {
                     this.editorManager.updateEditorSpecification(specification);
                     message = 'Specification loaded successfully';
                 }
-            } else if (data.type === MessageTypes.ERROR) {
+            } else if (data.type === PMMessageType.ERROR) {
                 message = data.content;
             }
         } else if (response.status === HTTPCodes.ServiceUnavailable) {
@@ -113,12 +113,12 @@ export default class ExternalApplicationManager {
         if (response.status === HTTPCodes.OK) {
             const data = await response.json();
 
-            if (data.type === MessageTypes.OK) {
+            if (data.type === PMMessageType.OK) {
                 const errors = this.editorManager.loadDataflow(data.content);
                 if (Array.isArray(errors) && errors.length) {
                     message = errors;
                 }
-            } else if (data.type === MessageTypes.ERROR) {
+            } else if (data.type === PMMessageType.ERROR) {
                 message = data.content;
             }
         } else if (response.status === HTTPCodes.ServiceUnavailable) {

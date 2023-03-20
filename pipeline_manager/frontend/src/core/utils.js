@@ -17,7 +17,7 @@ export const HTTPCodes = {
     ServiceUnavailable: 503,
 };
 
-export const MessageTypes = {
+export const PMMessageType = {
     OK: 0,
     ERROR: 1,
     VALIDATE: 2,
