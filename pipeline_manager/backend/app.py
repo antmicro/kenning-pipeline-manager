@@ -66,6 +66,18 @@ def get_status():
         return 'Client not connected', HTTPStatus.SERVICE_UNAVAILABLE
 
 
+def response_wrapper(output_message, parse_content=True):
+    if output_message.status == Status.DATA_READY:
+        mess_type, content = output_message.data
+
+        if parse_content:
+            content = json.loads(content)
+        return {'type': mess_type.value, 'content': content}, HTTPStatus.OK  # noqa: E501
+    if output_message.status == Status.CLIENT_DISCONNECTED:
+        return 'External application is disconnected', HTTPStatus.SERVICE_UNAVAILABLE  # noqa: E501
+    return 'Unknown error', HTTPStatus.SERVICE_UNAVAILABLE
+
+
 @app.route('/import_dataflow', methods=['POST'])
 def import_dataflow():
     """
@@ -99,14 +111,7 @@ def import_dataflow():
         return 'Error while sending a message to the external application', HTTPStatus.SERVICE_UNAVAILABLE  # noqa: E501
 
     out = tcp_server.wait_for_message()
-
-    status = out.status
-    if status == Status.DATA_READY:
-        mess_type, dataflow = out.data
-        return {'type': mess_type.value, 'content': json.loads(dataflow)}, HTTPStatus.OK  # noqa: E501
-    if status == Status.CLIENT_DISCONNECTED:
-        return 'External application is disconnected', HTTPStatus.SERVICE_UNAVAILABLE  # noqa: E501
-    return 'Unknown error', HTTPStatus.SERVICE_UNAVAILABLE
+    return response_wrapper(out)
 
 
 @app.route('/connect', methods=['GET'])
@@ -168,14 +173,7 @@ def request_specification():
         return 'Error while sending a message to the external application', HTTPStatus.SERVICE_UNAVAILABLE  # noqa: E501
 
     out = tcp_server.wait_for_message()
-
-    status = out.status
-    if status == Status.DATA_READY:
-        mess_type, specification = out.data
-        return {'type': mess_type.value, 'content': json.loads(specification)}, HTTPStatus.OK  # noqa: E501
-    if status == Status.CLIENT_DISCONNECTED:
-        return 'External application is disconnected', HTTPStatus.SERVICE_UNAVAILABLE  # noqa: E501
-    return 'Unknown error', HTTPStatus.SERVICE_UNAVAILABLE
+    return response_wrapper(out)
 
 
 @app.route('/dataflow_action_request/<request_type>', methods=['POST'])
@@ -225,14 +223,7 @@ def dataflow_action_request(request_type: str):
         return 'Error while sending a message to the external application', HTTPStatus.SERVICE_UNAVAILABLE  # noqa: E501
 
     out = tcp_server.wait_for_message()
-
-    status = out.status
-    if status == Status.DATA_READY:
-        mess_type, message = out.data
-        return {'type': mess_type.value, 'content': message}, HTTPStatus.OK  # noqa: E501
-    if status == Status.CLIENT_DISCONNECTED:
-        return 'External application is disconnected', HTTPStatus.SERVICE_UNAVAILABLE  # noqa: E501
-    return 'Unknown error', HTTPStatus.SERVICE_UNAVAILABLE
+    return response_wrapper(out, False)
 
 
 @app.errorhandler(404)
