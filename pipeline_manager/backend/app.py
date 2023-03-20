@@ -49,43 +49,6 @@ def index():
     return render_template('/index.html')
 
 
-def _load_specification(
-        specification: Union[bytes, FileStorage]
-        ) -> tuple[bool, Union[dict, str]]:
-    """
-    Loads specification that is given as an arguement and then validates
-    it using a saved schema.
-
-    Parameters
-    ----------
-    specification : Union[bytes, FileStorage]
-        Specification given in bytes or FileStorage.
-
-    Returns
-    -------
-    tuple[bool, Union[dict, str]] :
-        Returns a tuple where the first element states whether the loading
-        was succesful. If it was then the second element is
-        a dataflow specification. Otherwise it is an exception message.
-    """
-    try:
-        if isinstance(specification, bytes):
-            specification = json.loads(specification)
-        elif isinstance(specification, FileStorage):
-            specification = json.load(specification)
-
-        schema = global_state_manager.get_schema()
-        validate(instance=specification, schema=schema)
-    except ValidationError:
-        app.logger.exception('Specification is invalid')
-        return False, 'Specification is invalid'
-    except (json.JSONDecodeError, UnicodeDecodeError):
-        app.logger.exception('Specification is not a valid JSON')
-        return False, 'Specification is not a valid JSON'
-
-    return True, specification
-
-
 @app.route('/get_status', methods=['GET'])
 def get_status():
     """
@@ -151,54 +114,6 @@ def import_dataflow():
     if status == Status.CLIENT_DISCONNECTED:
         return 'External application is disconnected', HTTPStatus.SERVICE_UNAVAILABLE  # noqa: E501
     return 'Unknown error', HTTPStatus.BAD_REQUEST
-
-
-@app.route('/load_dataflow', methods=['POST'])
-def load_dataflow():
-    """
-    POST endpoint that should be used to load a dataflow in Pipeline Manager
-    format given in a form as a file attached with a name `dataflow`.
-
-    Responses
-    ---------
-    HTTPStatus.OK :
-        Request was successful and the response contains
-        the loaded dataflow.
-    HTTPStatus.BAD_REQUEST :
-        There was some error during the request handling.
-        Response contains error message.
-    """
-    try:
-        dataflow = request.files['dataflow']
-        dataflow = json.load(dataflow)
-    except Exception:
-        app.logger.exception('Dataflow is not a valid save')
-        return 'Dataflow is not a valid save', HTTPStatus.BAD_REQUEST
-
-    return dataflow, HTTPStatus.OK
-
-
-@app.route('/load_specification', methods=['POST'])
-def load_specification():
-    """
-    POST endpoint that should be used to load a dataflow specification
-    given in a form as a file attached with a name `specfile`.
-
-    Responses
-    ---------
-    HTTPStatus.OK :
-        Request was successful and the response contains
-        the specification.
-    HTTPStatus.BAD_REQUEST :
-        There was some error during the request handling.
-        Response contains error message.
-    """
-    specification = request.files['specfile']
-    success, specification = _load_specification(specification)
-
-    if success:
-        return specification, HTTPStatus.OK
-    return specification, HTTPStatus.BAD_REQUEST
 
 
 @app.route('/connect', methods=['GET'])
@@ -271,11 +186,7 @@ def request_specification():
         if mess_type != MessageType.OK:
             return 'Invalid message type from the external application', HTTPStatus.BAD_REQUEST  # noqa: E501
 
-        success, specification = _load_specification(specification)
-
-        if success:
-            return specification, HTTPStatus.OK
-        return specification, HTTPStatus.BAD_REQUEST
+        return specification, HTTPStatus.OK
     if status == Status.CLIENT_DISCONNECTED:
         return 'External application is disconnected', HTTPStatus.SERVICE_UNAVAILABLE  # noqa: E501
     return 'Unknown error', HTTPStatus.BAD_REQUEST
