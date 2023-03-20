@@ -16,3 +16,13 @@ export const HTTPCodes = {
     BadRequest: 400,
     ServiceUnavailable: 503,
 };
+
+export const MessageTypes = {
+    OK: 0,
+    ERROR: 1,
+    VALIDATE: 2,
+    SPECIFICATION: 3,
+    RUN: 4,
+    IMPORT: 5,
+    EXPORT: 6,
+}
