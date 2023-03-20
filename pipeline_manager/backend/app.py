@@ -7,11 +7,12 @@ import json
 import logging
 import os
 import sys
+from typing import Tuple
 from http import HTTPStatus
 
 from flask import Flask, render_template, request
 from flask_cors import CORS
-from pipeline_manager_backend_communication.misc_structures import MessageType, Status  # noqa: E501
+from pipeline_manager_backend_communication.misc_structures import MessageType, Status, OutputTuple  # noqa: E501
 
 from pipeline_manager import frontend
 from pipeline_manager.backend.state_manager import global_state_manager
@@ -61,17 +62,36 @@ def get_status():
     tcp_server = global_state_manager.get_tcp_server()
 
     if tcp_server.connected:
-        return 'Client connected', HTTPStatus.OK
+        return 'External application connected', HTTPStatus.OK
     else:
-        return 'Client not connected', HTTPStatus.SERVICE_UNAVAILABLE
+        return 'External application is disconnected', HTTPStatus.SERVICE_UNAVAILABLE  # noqa: E501
 
 
-def response_wrapper(output_message, parse_content=True):
+def response_wrapper(output_message: OutputTuple) -> Tuple:
+    """
+    Helper function used to create HTTP responses based on the flow
+    of the communication with the external application.
+
+    Parameters
+    ----------
+    output_message : OutputTuple
+        Output of `wait_for_message()` function. It is used to used to create
+        a HTTP response based on the content and status of the output.
+
+    Returns
+    -------
+    Tuple :
+        HTTP response being a tuple, where the first element is the body
+        of the message, and the second is the HTTP code.
+    """
     if output_message.status == Status.DATA_READY:
         mess_type, content = output_message.data
 
-        if parse_content:
+        try:
             content = json.loads(content)
+        except json.JSONDecodeError:
+            content = content.decode('UTF-8')
+
         return {'type': mess_type.value, 'content': content}, HTTPStatus.OK  # noqa: E501
     if output_message.status == Status.CLIENT_DISCONNECTED:
         return 'External application is disconnected', HTTPStatus.SERVICE_UNAVAILABLE  # noqa: E501
@@ -223,7 +243,7 @@ def dataflow_action_request(request_type: str):
         return 'Error while sending a message to the external application', HTTPStatus.SERVICE_UNAVAILABLE  # noqa: E501
 
     out = tcp_server.wait_for_message()
-    return response_wrapper(out, False)
+    return response_wrapper(out)
 
 
 @app.errorhandler(404)
