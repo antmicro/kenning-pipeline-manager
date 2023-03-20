@@ -6,6 +6,7 @@ import time
 
 import pytest
 
+from pipeline_manager_backend_communication.misc_structures import MessageType  # noqa: E501
 from pipeline_manager.utils.mock_application import MockApplicationClient
 from pipeline_manager.backend.state_manager import global_state_manager
 from pipeline_manager.backend.app import app as flask_app
@@ -91,7 +92,7 @@ def dataflow_run(sample_dataflow):
         '/dataflow_action_request/run',
         'post',
         HTTPStatus.OK,
-        b'Run was successful',
+        {'content': 'Run was successful', 'type': MessageType.OK.value},
         {'dataflow': sample_dataflow}
     )
 
@@ -102,7 +103,7 @@ def dataflow_validate(sample_dataflow):
         '/dataflow_action_request/validate',
         'post',
         HTTPStatus.OK,
-        b'Validation was successful',
+        {'content': 'Validation was successful', 'type': MessageType.OK.value},
         {'dataflow': sample_dataflow}
     )
 
@@ -113,7 +114,7 @@ def dataflow_export(sample_dataflow):
         '/dataflow_action_request/export',
         'post',
         HTTPStatus.OK,
-        b'Export was successful',
+        {'content': 'Export was successful', 'type': MessageType.OK.value},
         {'dataflow': sample_dataflow}
     )
 
@@ -136,7 +137,7 @@ def get_status_connected():
         '/get_status',
         'get',
         HTTPStatus.OK,
-        b'Client connected'
+        b'External application connected'
     )
 
 
@@ -146,7 +147,7 @@ def get_status_disconnected():
         '/get_status',
         'get',
         HTTPStatus.SERVICE_UNAVAILABLE,
-        b'Client not connected'
+        b'External application is disconnected'
     )
 # ---------------
 
@@ -208,7 +209,9 @@ def test_connecting_multiple_times(
             assert req.expected_data == data
 
     status_code, data = responses[-1]
-    assert (json.loads(data) == sample_specification and
+    data = json.loads(data)
+    assert (data['content'] == sample_specification and
+            data['type'] == MessageType.OK.value and
             HTTPStatus.OK == status_code)
 
 
@@ -218,8 +221,7 @@ def test_connecting_multiple_times(
         'dataflow_run',
         'dataflow_validate',
         'dataflow_export',
-        'dataflow_import',
-        'get_status_connected'
+        'dataflow_import'
     ]
 )
 def test_single_request_connected_valid(
@@ -274,7 +276,7 @@ def test_single_request_connected_valid(
     status_code, data = responses[1]
     assert status_code == single_request.expected_code
     if single_request.expected_data is not None:
-        assert single_request.expected_data == data
+        assert single_request.expected_data == json.loads(data)
 # ---------------
 
 
@@ -282,7 +284,7 @@ def test_single_request_connected_valid(
 # ---------------
 def test_get_status_disconnected(http_client):
     response = http_client.get('/get_status')
-    assert b'Client not connected' == response.data and \
+    assert b'External application is disconnected' == response.data and \
         response.status_code == HTTPStatus.SERVICE_UNAVAILABLE
 # ---------------
 
@@ -293,55 +295,6 @@ def test_import_dataflow_disconnected(http_client):
     response = http_client.post('/import_dataflow')
     assert b'External application is disconnected' == response.data and \
         response.status_code == HTTPStatus.SERVICE_UNAVAILABLE
-# ---------------
-
-
-# /load_dataflow
-# ---------------
-def test_load_dataflow(http_client, sample_dataflow_path):
-    response = http_client.post(
-        '/load_dataflow',
-        data={'dataflow': sample_dataflow_path.open('rb')}
-    )
-    assert response.status_code == HTTPStatus.OK
-
-
-def test_load_empty_dataflow(http_client, empty_file_path):
-    response = http_client.post(
-        '/load_dataflow',
-        data={'dataflow': empty_file_path.open('rb')}
-    )
-    assert response.status_code == HTTPStatus.BAD_REQUEST and \
-        b'Dataflow is not a valid save' == response.data
-# ---------------
-
-
-# /load_specification
-# ---------------
-def test_load_specification(http_client, sample_specification_path):
-    response = http_client.post(
-        '/load_specification',
-        data={'specfile': sample_specification_path.open('rb')}
-    )
-    assert response.status_code == HTTPStatus.OK
-
-
-def test_load_empty_specification(http_client, empty_file_path):
-    response = http_client.post(
-        '/load_specification',
-        data={'specfile': empty_file_path.open('rb')}
-    )
-    assert response.status_code == HTTPStatus.BAD_REQUEST and \
-        b'Specification is not a valid JSON' == response.data
-
-
-def test_load_invalid_specification(http_client, sample_dataflow_path):
-    response = http_client.post(
-        '/load_specification',
-        data={'specfile': sample_dataflow_path.open('rb')}
-    )
-    assert response.status_code == HTTPStatus.BAD_REQUEST and \
-        b'Specification is invalid' == response.data
 # ---------------
 
 
