@@ -1,6 +1,6 @@
 # Pipeline manager
 
-Copyright (c) 2022-2023 [Antmicro](https://www.antmicro.com>)
+Copyright (c) 2022-2023 [Antmicro](https://www.antmicro.com)
 
 The aim of this project is to create a web editor for managing and visualizing processing pipelines.
 
