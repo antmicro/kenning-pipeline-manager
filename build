@@ -1,26 +1,31 @@
-#!/bin/sh
+#!/bin/bash
 
 # Copyright (c) 2022-2023 Antmicro <www.antmicro.com>
 #
 # SPDX-License-Identifier: Apache-2.0
 
+BASE_DIR=$(dirname "$0")
+
 display_help() {
     echo "Invalid parameters. Supported build options are:"
     echo
-    echo "./build static-html - build as a static application that can run without any backend server."
+    echo "./build static-html [<specification-path>] - build as a static application that can run without any backend server, with optional default specification."
     echo "./build server-app  - build the application to run with a backend server and an external application"
 }
 
-if ! [ $# -eq 1 ]; then
+if ! [[ $# -ge 1 && $# -le 2 ]]; then
     display_help
     exit 1
 fi
 
 if [ "$1" = "static-html" ]; then
-    cd pipeline_manager/frontend && npm install
+    if [ "$#" -eq 2 ]; then
+        echo VUE_APP_SPECIFICATION_PATH=$(realpath $2) > pipeline_manager/frontend/.env.static.local
+    fi
+    cd $BASE_DIR/pipeline_manager/frontend && npm install
     npm run build-static-html
 elif [ "$1" = "server-app" ]; then
-    cd pipeline_manager/frontend && npm install
+    cd $BASE_DIR/pipeline_manager/frontend && npm install
     npm run build-server-app
 else
     display_help
