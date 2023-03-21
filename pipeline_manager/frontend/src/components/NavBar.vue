@@ -37,7 +37,6 @@ export default {
             backendAvailable: backendApiUrl !== null, // get backend URL
             isNotificationPanelOpen: false, // check notification panel state (open or close)
             isBackendStatusOpen: false, // // check backend panel state (open or close)
-            backendStatus: 'connected', // state of backend connection 'connected' or 'disconnected'
         };
     },
     mounted() {
@@ -228,18 +227,6 @@ export default {
                 </div>
 
                 <div>
-                    <Arrow />
-                    <div class="tooltip">
-                        <span>Undo</span>
-                    </div>
-                </div>
-                <div>
-                    <Arrow rotate="right" />
-                    <div class="tooltip">
-                        <span>Redo</span>
-                    </div>
-                </div>
-                <div>
                     <button @click="() => requestDataflowAction('run')"><Run /></button>
                     <div class="tooltip">
                         <span>Run</span>
@@ -264,12 +251,16 @@ export default {
                     <div class="backend-status">
                         <div>
                             <span>Client status:</span>
-                            <span v-if="backendStatus === 'connected'" :class="backendStatus"
+                            <span
+                                v-if="this.externalApplicationManager.externalApplicationConnected"
+                                class="connected"
                                 >Connected</span
                             >
-                            <span v-else :class="backendStatus">Disconnected</span>
+                            <span v-else class="disconnected">Disconnected</span>
                         </div>
-                        <button v-if="backendStatus === 'connected'">Disconnect</button>
+                        <button v-if="this.externalApplicationManager.externalApplicationConnected">
+                            Disconnect
+                        </button>
                         <button v-else>Connect</button>
                     </div>
                 </div>
