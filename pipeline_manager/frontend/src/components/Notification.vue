@@ -15,13 +15,14 @@ SPDX-License-Identifier: Apache-2.0
             <span v-if="type === 'error'" :class="type">Error</span>
             <span>{{ message }}</span>
         </div>
-        <button><Cross color="white" /></button>
+        <button @click="remove"><Cross color="white" /></button>
     </div>
 </template>
 
 <script>
 import Cross from '../icons/Cross.vue';
 import NotificationBadge from './NotificationBadge.vue';
+import { notificationStore } from '../core/stores';
 
 export default {
     components: {
@@ -42,6 +43,16 @@ export default {
         border: {
             type: String,
             default: 'none',
+        },
+
+        index: {
+            type: Number,
+            default: 0,
+        },
+    },
+    methods: {
+        remove() {
+            notificationStore.removeOne(this.index);
         },
     },
 };
