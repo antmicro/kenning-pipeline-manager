@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
     <div class="inner-row">
         <div>
             <label for="load-spec-button"> Load specification </label>
-            <input type="file" id="load-spec-button" @change="loadSpecification" />
+            <input type="file" id="load-spec-button" @change="loadSpecificationCallback" />
         </div>
         <div v-show="editorManager.specificationLoaded">
             <label for="load-dataflow-button"> Load dataflow </label>
@@ -30,13 +30,26 @@ export default {
     },
     methods: {
         /**
+         * Loads nodes' specification from JSON structure.
+         */
+        loadSpecification(specification) {
+            const errors = this.editorManager.validateSpecification(specification);
+            if (Array.isArray(errors) && errors.length) {
+                alertBus.$emit('displayAlert', errors);
+            } else {
+                this.editorManager.updateEditorSpecification(specification);
+                alertBus.$emit('displayAlert', 'Loaded successfully');
+            }
+        },
+
+        /**
          * Event handler that loads a specification passed by the user
          * and asks the validates it.
          * If the validation is successful it is passed to the editor that
          * renders a new environment.
          * Otherwise user is alerted with a feedback message.
          */
-        loadSpecification() {
+        loadSpecificationCallback() {
             const file = document.getElementById('load-spec-button').files[0];
             if (!file) return;
 
@@ -54,14 +67,7 @@ export default {
                     }
                     return;
                 }
-
-                const errors = this.editorManager.validateSpecification(specification);
-                if (Array.isArray(errors) && errors.length) {
-                    alertBus.$emit('displayAlert', errors);
-                } else {
-                    this.editorManager.updateEditorSpecification(specification);
-                    alertBus.$emit('displayAlert', 'Loaded successfully');
-                }
+                this.loadSpecification(specification);
             };
 
             fileReader.readAsText(file);
@@ -113,6 +119,12 @@ export default {
             linkElement.click();
             alertBus.$emit('displayAlert', 'Dataflow saved');
         },
+    },
+    mounted() {
+        if (process.env.VUE_APP_SPECIFICATION_PATH !== undefined) {
+            const specification = require(process.env.VUE_APP_SPECIFICATION_PATH); // eslint-disable-line global-require,max-len,import/no-dynamic-require
+            this.loadSpecification(specification);
+        }
     },
 };
 </script>
