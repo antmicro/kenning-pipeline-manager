@@ -25,7 +25,7 @@ module.exports = defineConfig({
             entry: 'src/main.js',
             template: 'index.html',
             filename: 'index.html',
-            title: 'Pipeline Manager'
-        }
-    }
+            title: 'Pipeline Manager',
+        },
+    },
 });
