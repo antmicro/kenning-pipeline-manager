@@ -1,4 +1,5 @@
 import { createToastInterface, POSITION } from 'vue-toastification';
+import { notificationStore } from './stores';
 import Notification from '../components/Notification.vue';
 
 const toast = createToastInterface({
@@ -19,4 +20,5 @@ export const showToast = (type, message) => {
     };
 
     toast(content);
+    notificationStore.add({ type, message });
 };

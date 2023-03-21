@@ -15,6 +15,7 @@ import DropdownItem from './DropdownItem.vue';
 import EditorManager from '../core/EditorManager';
 import { backendApiUrl } from '../core/utils';
 import { showToast } from '../core/notifications';
+import { notificationStore } from '../core/stores';
 import ExternalApplicationManager from '../core/ExternalApplicationManager';
 
 export default {
