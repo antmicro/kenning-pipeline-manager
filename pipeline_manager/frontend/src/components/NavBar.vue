@@ -13,7 +13,8 @@ import Backend from '../icons/Backend.vue';
 import Bell from '../icons/Bell.vue';
 import DropdownItem from './DropdownItem.vue';
 import EditorManager from '../core/EditorManager';
-import { alertBus } from '../core/bus';
+import { backendApiUrl } from '../core/utils';
+import { showToast } from '../core/notifications';
 import ExternalApplicationManager from '../core/ExternalApplicationManager';
 
 export default {
@@ -70,9 +71,9 @@ export default {
                     specification = JSON.parse(fileReader.result);
                 } catch (exception) {
                     if (exception instanceof SyntaxError) {
-                        alertBus.$emit('displayAlert', `Not a proper JSON file.\n${exception}`);
+                        showToast('error', `Not a proper JSON file.\n${exception}`);
                     } else {
-                        alertBus.$emit('displayAlert', `Unknown error.\n${exception}`);
+                        showToast('error', `Unknown error.\n${exception}`);
                     }
                     return;
                 }
@@ -168,34 +169,22 @@ export default {
                     dataflow = JSON.parse(fileReader.result);
                 } catch (exception) {
                     if (exception instanceof SyntaxError) {
-                        this.showToast('error', `Not a proper JSON file.\n${exception}`);
+                        showToast('error', `Not a proper JSON file.\n${exception}`);
                     } else {
-                        this.showToast('error', `Unknown error.\n${exception}`);
+                        showToast('error', `Unknown error.\n${exception}`);
                     }
                     return;
                 }
 
                 const errors = this.editorManager.loadDataflow(dataflow);
                 if (Array.isArray(errors) && errors.length) {
-                    this.showToast('error', errors);
+                    showToast('error', errors);
                 } else {
-                    this.showToast('info', 'Dataflow loaded successfully');
+                    showToast('info', 'Dataflow loaded successfully');
                 }
             };
 
             fileReader.readAsText(file);
-        },
-
-        showToast(type, message) {
-            const content = {
-                component: Notification,
-                props: {
-                    type,
-                    message,
-                },
-            };
-
-            this.$toast(content);
         },
 
         /**
@@ -209,7 +198,7 @@ export default {
             linkElement.href = window.URL.createObjectURL(blob);
             linkElement.download = 'save';
             linkElement.click();
-            this.showToast('info', 'Dataflow saved');
+            showToast('info', 'Dataflow saved');
         },
 
         async requestDataflowAction(action) {

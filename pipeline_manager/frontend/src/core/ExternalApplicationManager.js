@@ -6,7 +6,7 @@
 
 import { backendApiUrl, HTTPCodes, PMMessageType } from './utils';
 import { fetchGET, fetchPOST } from './fetchRequests';
-import { alertBus } from './bus';
+import { showToast } from './notifications';
 import EditorManager from './EditorManager';
 
 export default class ExternalApplicationManager {
@@ -40,7 +40,7 @@ export default class ExternalApplicationManager {
         const connected = response.status === HTTPCodes.OK;
 
         if (!connected) {
-            alertBus.$emit('displayAlert', data);
+           showToast('error', data);
         }
         this.externalApplicationConnected = connected;
     }
@@ -89,7 +89,7 @@ export default class ExternalApplicationManager {
         if (!dataflow) return;
 
         if (action === 'run') {
-            alertBus.$emit('displayAlert', 'Running dataflow', true);
+            showToast('info', 'Running dataflow');
         }
 
         const formData = new FormData();
@@ -99,12 +99,12 @@ export default class ExternalApplicationManager {
 
         if (response.status === HTTPCodes.OK) {
             const data = await response.json();
-            alertBus.$emit('displayAlert', data.content);
+            showToast('info', data.content);
         }
         if (response.status === HTTPCodes.ServiceUnavailable) {
             // The connection was closed
             const data = await response.text();
-            alertBus.$emit('displayAlert', data);
+            showToast('error', data);
             this.externalApplicationConnected = false;
             await this.invokeFetchAction(this.initializeConnection, false);
         }
@@ -138,15 +138,15 @@ export default class ExternalApplicationManager {
             } else if (data.type === PMMessageType.ERROR) {
                 message = data.content;
             }
+            showToast('info', message);
         } else if (response.status === HTTPCodes.ServiceUnavailable) {
             // The connection was closed
             const data = await response.text();
             message = data.content;
             this.externalApplicationConnected = false;
             await this.invokeFetchAction(this.initializeConnection, false);
+            showToast('info', message);
         }
-
-        alertBus.$emit('displayAlert', message);
     }
 
     /**
@@ -212,7 +212,7 @@ export default class ExternalApplicationManager {
         }
 
         if (!this.externalApplicationConnected) {
-            alertBus.$emit('displayAlert', 'Waiting for the application to connect...', true);
+            showToast('info', 'Waiting for the application to connect...');
             await this.openTCP();
         }
         if (this.externalApplicationConnected) {
