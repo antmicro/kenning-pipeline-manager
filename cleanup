@@ -4,7 +4,10 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-cd pipeline_manager/frontend && npm run clean
+BASE_DIR=$(dirname "$0")
+
+cd $BASE_DIR/pipeline_manager/frontend && npm run clean
 if [ -d "./dist" ]; then
     rm -rf "./dist"
+    rm .env.static.local
 fi
