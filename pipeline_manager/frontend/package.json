@@ -19,7 +19,8 @@
         "prettier-eslint": "^15.0.1",
         "prettier-eslint-cli": "^7.1.0",
         "vue": "^2.7.7",
-        "vue-router": "^2.8.1"
+        "vue-router": "^2.8.1",
+        "vue-toastification": "^1.7.14"
     },
     "devDependencies": {
         "@vue/cli-service": "^5.0.8",
