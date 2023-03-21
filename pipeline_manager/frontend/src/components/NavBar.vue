@@ -31,9 +31,26 @@ export default {
             editorManager: EditorManager.getEditorManagerInstance(),
             externalApplicationConnected: false,
             backendAvailable: backendApiUrl !== null,
+            isNotificationPanelOpen: false,
         };
     },
     methods: {
+        // Open or show notificationPanel with slide animation
+        toogleNavigationPanel() {
+            this.isNotificationPanelOpen = !this.isNotificationPanelOpen;
+
+            const negativeNotificationPanelWidth = '-495px'; // width of notification panel (negative because we want hide it on close)
+            const resetNotificationPanelTransition = '0px'; // reset notification panel transition to show it
+
+            const notificationPanel = document.querySelector('.notifications');
+            if (notificationPanel) {
+                notificationPanel.style.transform = `translateX(${
+                    this.isNotificationPanelOpen
+                        ? negativeNotificationPanelWidth
+                        : resetNotificationPanelTransition
+                })`;
+            }
+        },
         /**
          * Event handler that Loads a dataflow from a file.
          * It the loading is successful it is loaded as the current dataflow.
@@ -220,7 +237,9 @@ export default {
                 </div>
             </div>
             <div>
-                <Bell />
+                <button @click="toogleNavigationPanel">
+                    <Bell />
+                </button>
                 <div class="tooltip last">
                     <span>Notifications</span>
                 </div>

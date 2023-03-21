@@ -7,34 +7,22 @@ SPDX-License-Identifier: Apache-2.0
 <template>
     <div class="notifications">
         <div class="info">
-            <span>Notifications (3)</span>
+            <span>Notifications</span>
             <button>
                 <Cross />
                 Clear all
             </button>
         </div>
-        <div class="panel">
-            <Notification message="Client connected" type="info" />
-            <Notification
-                message="Node type TensorFlowPetDataset MobileNetV2 is not registered"
-                type="warning"
-            />
-            <Notification
-                message="Node type TensorFlowPetDataset MobileNetV2 is not registered"
-                type="error"
-            />
-        </div>
+        <div class="panel" />
     </div>
 </template>
 
 <script>
 import Cross from '../icons/Cross.vue';
-import Notification from './Notification.vue';
 
 export default {
     components: {
         Cross,
-        Notification,
     },
 };
 </script>
@@ -43,6 +31,7 @@ export default {
 @import '../../styles/variables';
 
 .notifications {
+    /* Set height to 100 view port minus height of navigation bar and paddings */
     height: calc(100vh - 120px);
     width: 435px;
     background-color: $gray-600;
