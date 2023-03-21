@@ -214,87 +214,107 @@ export default {
 </script>
 
 <template>
-    <div class="container">
-        <div>
-            <div class="logo">
-                <Logo />
-                <Arrow color="white" rotate="left" scale="small" />
-                <div class="dropdown-wrapper">
-                    <DropdownItem id="'load-dataflow-button'" text="Load" :onClick="loadDataflow" />
-                    <DropdownItem type="'button'" text="Save" :onClick="saveDataflow" />
-                    <hr />
-                    <DropdownItem
-                        text="Load visualization graph"
-                        id="request-dataflow-button"
-                        :onClick="importDataflow"
-                    />
-                    <DropdownItem
-                        text="Save visualization graph"
-                        type="'button'"
-                        :onClick="() => requestDataflowAction('export')"
-                    />
-                </div>
-            </div>
-
+    <div class="wrapper">
+        <div class="container">
             <div>
-                <Arrow />
-                <div class="tooltip">
-                    <span>Undo</span>
-                </div>
-            </div>
-            <div>
-                <Arrow rotate="right" />
-                <div class="tooltip">
-                    <span>Redo</span>
-                </div>
-            </div>
-            <div>
-                <button @click="() => requestDataflowAction('run')"><Run /></button>
-                <div class="tooltip">
-                    <span>Run</span>
-                </div>
-            </div>
-            <div>
-                <button @click="() => requestDataflowAction('validate')"><Validate /></button>
-                <div class="tooltip">
-                    <span>Validate</span>
-                </div>
-            </div>
-        </div>
-        <span> Running dataflow </span>
-        <div>
-            <div ref="backend">
-                <button @click="toogleBackendStatusInfo">
-                    <Backend />
-                </button>
-                <div class="tooltip">
-                    <span>Backend status</span>
-                </div>
-                <div class="backend-status">
-                    <div>
-                        <span>Client status:</span>
-                        <span v-if="backendStatus === 'connected'" :class="backendStatus"
-                            >Connected</span
-                        >
-                        <span v-else :class="backendStatus">Disconnected</span>
+                <div class="logo">
+                    <Logo />
+                    <Arrow color="white" rotate="left" scale="small" />
+                    <div class="dropdown-wrapper">
+                        <DropdownItem
+                            id="'load-dataflow-button'"
+                            text="Load"
+                            :onClick="loadDataflow"
+                        />
+                        <DropdownItem type="'button'" text="Save" :onClick="saveDataflow" />
+                        <hr />
+                        <DropdownItem
+                            text="Load visualization graph"
+                            id="request-dataflow-button"
+                            :onClick="importDataflow"
+                        />
+                        <DropdownItem
+                            text="Save visualization graph"
+                            type="'button'"
+                            :onClick="() => requestDataflowAction('export')"
+                        />
                     </div>
-                    <button v-if="backendStatus === 'connected'">Disconnect</button>
-                    <button v-else>Connect</button>
+                </div>
+
+                <div>
+                    <Arrow />
+                    <div class="tooltip">
+                        <span>Undo</span>
+                    </div>
+                </div>
+                <div>
+                    <Arrow rotate="right" />
+                    <div class="tooltip">
+                        <span>Redo</span>
+                    </div>
+                </div>
+                <div>
+                    <button @click="() => requestDataflowAction('run')"><Run /></button>
+                    <div class="tooltip">
+                        <span>Run</span>
+                    </div>
+                </div>
+                <div>
+                    <button @click="() => requestDataflowAction('validate')"><Validate /></button>
+                    <div class="tooltip">
+                        <span>Validate</span>
+                    </div>
                 </div>
             </div>
-            <div ref="notifications">
-                <button @click="toogleNavigationPanel">
-                    <Bell />
-                </button>
-                <div class="tooltip last">
-                    <span>Notifications</span>
+            <span> Running dataflow </span>
+            <div>
+                <div ref="backend">
+                    <button @click="toogleBackendStatusInfo">
+                        <Backend />
+                    </button>
+                    <div class="tooltip">
+                        <span>Backend status</span>
+                    </div>
+                    <div class="backend-status">
+                        <div>
+                            <span>Client status:</span>
+                            <span v-if="backendStatus === 'connected'" :class="backendStatus"
+                                >Connected</span
+                            >
+                            <span v-else :class="backendStatus">Disconnected</span>
+                        </div>
+                        <button v-if="backendStatus === 'connected'">Disconnect</button>
+                        <button v-else>Connect</button>
+                    </div>
+                </div>
+                <div ref="notifications">
+                    <button @click="toogleNavigationPanel">
+                        <Bell />
+                    </button>
+                    <div class="tooltip last">
+                        <span>Notifications</span>
+                    </div>
                 </div>
             </div>
         </div>
+        <div class="progress-bar" />
     </div>
 </template>
 
 <style lang="scss" scoped>
+.wrapper {
+    position: relative;
+    z-index: 1;
+
+    & > .progress-bar {
+        position: absolute;
+        height: 5px;
+        bottom: 0;
+        transform: translateY(100%);
+        background-color: $green;
+    }
+}
+
 .container {
     display: flex;
     justify-content: space-between;
