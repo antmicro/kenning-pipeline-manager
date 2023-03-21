@@ -32,10 +32,12 @@ export default {
             externalApplicationConnected: false,
             backendAvailable: backendApiUrl !== null,
             isNotificationPanelOpen: false,
+            isBackendStatusOpen: false,
+            backendStatus: 'connected', // state of backend connection 'connected' or 'disconnected'
         };
     },
     methods: {
-        // Open or show notificationPanel with slide animation
+        // Open or hide notificationPanel with slide animation
         toogleNavigationPanel() {
             this.isNotificationPanelOpen = !this.isNotificationPanelOpen;
 
@@ -49,6 +51,37 @@ export default {
                         ? negativeNotificationPanelWidth
                         : resetNotificationPanelTransition
                 })`;
+
+                if (this.isNotificationPanelOpen) {
+                    this.$refs.notifications.classList.add('open');
+                    this.$refs.backend.classList.add('open');
+                } else {
+                    this.$refs.notifications.classList.remove('open');
+                    this.$refs.backend.classList.remove('open');
+                }
+            }
+        },
+
+        // Open or hide backendStatus info
+        toogleBackendStatusInfo() {
+            this.isBackendStatusOpen = !this.isBackendStatusOpen;
+
+            const showBackendStatusPanel = '-89%, 0'; // show backend panel and align it to right border of icon
+            const hideBackendStatusPanel = '-89%, -180px'; // hide backend panel
+
+            const backendStatus = document.querySelector('.backend-status');
+            if (backendStatus) {
+                backendStatus.style.transform = `translate(${
+                    this.isBackendStatusOpen ? showBackendStatusPanel : hideBackendStatusPanel
+                })`;
+
+                if (this.isBackendStatusOpen) {
+                    this.$refs.notifications.classList.add('open');
+                    this.$refs.backend.classList.add('open');
+                } else {
+                    this.$refs.notifications.classList.remove('open');
+                    this.$refs.backend.classList.remove('open');
+                }
             }
         },
         /**
@@ -230,13 +263,26 @@ export default {
         </div>
         <span> Running dataflow </span>
         <div>
-            <div>
-                <Backend />
+            <div ref="backend">
+                <button @click="toogleBackendStatusInfo">
+                    <Backend />
+                </button>
                 <div class="tooltip">
                     <span>Backend status</span>
                 </div>
+                <div class="backend-status">
+                    <div>
+                        <span>Client status:</span>
+                        <span v-if="backendStatus === 'connected'" :class="backendStatus"
+                            >Connected</span
+                        >
+                        <span v-else :class="backendStatus">Disconnected</span>
+                    </div>
+                    <button v-if="backendStatus === 'connected'">Disconnect</button>
+                    <button v-else>Connect</button>
+                </div>
             </div>
-            <div>
+            <div ref="notifications">
                 <button @click="toogleNavigationPanel">
                     <Bell />
                 </button>
@@ -285,6 +331,39 @@ export default {
                 border: 1px solid $gray-500;
             }
 
+            & > .backend-status {
+                @extend .dropdown-wrapper;
+                width: 220px;
+                height: 80px;
+                display: flex;
+                transform: translate(-89%, -180px);
+                padding: $spacing-l;
+                font-size: $fs-small;
+                justify-content: space-between;
+                border: none;
+                transition: transform 1s;
+
+                & > div {
+                    display: flex;
+                    justify-content: space-between;
+
+                    & > .disconnected {
+                        color: $red;
+                    }
+
+                    & > .connected {
+                        color: $green;
+                    }
+                }
+
+                & > button {
+                    background-color: $gray-500;
+                    padding: $spacing-m;
+                    border-radius: 15px;
+                    color: $white;
+                }
+            }
+
             & > .tooltip {
                 @extend .dropdown-wrapper;
                 border-radius: 15px;
@@ -300,8 +379,7 @@ export default {
             &.logo:hover > svg:last-of-type {
                 rotate: 90deg;
             }
-
-            &:hover > .dropdown-wrapper {
+            &:not(.open):hover > .tooltip {
                 display: flex;
             }
         }
