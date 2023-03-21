@@ -7,8 +7,8 @@ SPDX-License-Identifier: Apache-2.0
 <template>
     <div>
         <label v-if="type === 'file'" :for="id"> {{ text }} </label>
-        <input v-if="type === 'file'" :id="id" type="file" @click="onClick" />
-        <input v-else :id="id" type="button" @click="onClick" :value="text" />
+        <input v-if="type === 'file'" :id="id" type="file" @change="eventFunction" />
+        <input v-else :id="id" type="button" @click="eventFunction" :value="text" />
     </div>
 </template>
 
@@ -26,7 +26,7 @@ export default {
             type: String,
             default: 'file',
         },
-        onClick: {
+        eventFunction: {
             type: Function,
             required: true,
         },

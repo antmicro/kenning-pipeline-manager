@@ -57,5 +57,8 @@ export default {
 .alert-bar {
     width: 100vw;
     border-top: 2px solid #000000;
+    position: absolute;
+    bottom: 0;
+    background-color: #332d37;
 }
 </style>

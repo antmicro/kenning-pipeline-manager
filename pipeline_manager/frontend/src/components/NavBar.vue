@@ -14,7 +14,8 @@ import Bell from '../icons/Bell.vue';
 import DropdownItem from './DropdownItem.vue';
 import EditorManager from '../core/EditorManager';
 import { alertBus } from '../core/bus';
-import { backendApiUrl, HTTPCodes } from '../core/utils';
+import { backendApiUrl } from '../core/utils';
+import ExternalApplicationManager from '../core/ExternalApplicationManager';
 
 export default {
     components: {
@@ -29,14 +30,51 @@ export default {
     data() {
         return {
             editorManager: EditorManager.getEditorManagerInstance(),
-            externalApplicationConnected: false,
+            externalApplicationManager: new ExternalApplicationManager(),
             backendAvailable: backendApiUrl !== null,
             isNotificationPanelOpen: false,
             isBackendStatusOpen: false,
             backendStatus: 'connected', // state of backend connection 'connected' or 'disconnected'
         };
     },
+    mounted() {
+        if (this.externalApplicationManager.backendAvailable) {
+            this.externalApplicationManager.initializeConnection();
+        }
+    },
+
     methods: {
+        loadSpecification() {
+            const file = document.getElementById('load-spec-button').files[0];
+            if (!file) return;
+
+            const fileReader = new FileReader();
+
+            fileReader.onload = () => {
+                let specification = null;
+                try {
+                    specification = JSON.parse(fileReader.result);
+                } catch (exception) {
+                    if (exception instanceof SyntaxError) {
+                        alertBus.$emit('displayAlert', `Not a proper JSON file.\n${exception}`);
+                    } else {
+                        alertBus.$emit('displayAlert', `Unknown error.\n${exception}`);
+                    }
+                    return;
+                }
+
+                const errors = this.editorManager.validateSpecification(specification);
+                if (Array.isArray(errors) && errors.length) {
+                    alertBus.$emit('displayAlert', errors);
+                } else {
+                    this.editorManager.updateEditorSpecification(specification);
+                    alertBus.$emit('displayAlert', 'Loaded successfully');
+                }
+            };
+
+            fileReader.readAsText(file);
+        },
+
         // Open or hide notificationPanel with slide animation
         toogleNavigationPanel() {
             this.isNotificationPanelOpen = !this.isNotificationPanelOpen;
@@ -127,87 +165,16 @@ export default {
             linkElement.click();
             alertBus.$emit('displayAlert', 'Dataflow saved');
         },
-        /**
-         * Event handler that loads a file and asks the backend to delegate this operation
-         * to the external application to parse it into the Pipeline Manager format
-         * so that it can be loaded into the editor.
-         * It the validation is successful it is loaded as the current dataflow.
-         * Otherwise the user is alerted with a feedback message.
-         */
-        async importDataflow() {
-            const file = document.getElementById('request-dataflow-button').files[0];
-            if (!file) return;
-
-            const formData = new FormData();
-            formData.append('external_application_dataflow', file);
-
-            const requestOptions = {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'Access-Control-Allow-Origin': backendApiUrl,
-                    'Access-Control-Allow-Headers':
-                        'Origin, X-Requested-With, Content-Type, Accept',
-                },
-            };
-
-            const response = await fetch(`${backendApiUrl}/import_dataflow`, requestOptions);
-            const data = await response.text();
-            let message = 'Imported dataflow';
-
-            if (response.status === HTTPCodes.OK) {
-                const errors = this.editorManager.loadDataflow(JSON.parse(data));
-                if (Array.isArray(errors) && errors.length) {
-                    message = errors;
-                }
-            } else if (response.status === HTTPCodes.ServiceUnavailable) {
-                // Service Unavailable, which means
-                // that the external application was disconnected
-                message = data;
-                this.externalApplicationConnected = false;
-            } else if (response.status === HTTPCodes.BadRequest) {
-                message = data;
-            }
-            alertBus.$emit('displayAlert', message);
-        },
-        /**
-         * Event handler that loads a current dataflow from the editor and sends a request
-         * to the backend based on the action argument.
-         * The user is alerted with a feedback message.
-         */
         async requestDataflowAction(action) {
-            const dataflow = JSON.stringify(this.editorManager.saveDataflow());
-            if (!dataflow) return;
-
-            const formData = new FormData();
-            formData.append('dataflow', dataflow);
-
-            const requestOptions = {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'Access-Control-Allow-Origin': backendApiUrl,
-                    'Access-Control-Allow-Headers':
-                        'Origin, X-Requested-With, Content-Type, Accept',
-                },
-            };
-
-            if (action === 'run') {
-                alertBus.$emit('displayAlert', 'Running dataflow', true);
-            }
-
-            const response = await fetch(
-                `${backendApiUrl}/dataflow_action_request/${action}`,
-                requestOptions,
+            await this.externalApplicationManager.invokeFetchAction(
+                this.externalApplicationManager.requestDataflowAction,
+                action,
             );
-            const data = await response.text();
-
-            alertBus.$emit('displayAlert', data);
-            if (response.status === HTTPCodes.ServiceUnavailable) {
-                // Service Unavailable, which means
-                // that the external application was disconnected
-                this.externalApplicationConnected = false;
-            }
+        },
+        async importDataflow() {
+            await this.externalApplicationManager.invokeFetchAction(
+                this.externalApplicationManager.importDataflow,
+            );
         },
     },
 };
@@ -222,22 +189,29 @@ export default {
                     <Arrow color="white" rotate="left" scale="small" />
                     <div class="dropdown-wrapper">
                         <DropdownItem
-                            id="'load-dataflow-button'"
+                            text="Load specification"
+                            id="load-spec-button"
+                            :eventFunction="loadSpecification"
+                        />
+                        <DropdownItem
+                            id="load-dataflow-button"
                             text="Load"
-                            :onClick="loadDataflow"
+                            :eventFunction="loadDataflow"
                         />
-                        <DropdownItem type="'button'" text="Save" :onClick="saveDataflow" />
-                        <hr />
-                        <DropdownItem
-                            text="Load visualization graph"
-                            id="request-dataflow-button"
-                            :onClick="importDataflow"
-                        />
-                        <DropdownItem
-                            text="Save visualization graph"
-                            type="'button'"
-                            :onClick="() => requestDataflowAction('export')"
-                        />
+                        <DropdownItem type="'button'" text="Save" :eventFunction="saveDataflow" />
+                        <div v-if="this.externalApplicationManager.externalApplicationConnected">
+                            <hr />
+                            <DropdownItem
+                                text="Load visualization graph"
+                                id="request-dataflow-button"
+                                :eventFunction="importDataflow"
+                            />
+                            <DropdownItem
+                                text="Save visualization graph"
+                                type="'button'"
+                                :eventFunction="() => requestDataflowAction('export')"
+                            />
+                        </div>
                     </div>
                 </div>
 
