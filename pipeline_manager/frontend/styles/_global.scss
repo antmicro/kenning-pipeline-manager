@@ -14,7 +14,7 @@ body,
 #container {
     height: 100vh;
     margin: 0;
-    background-color: #332d37;
+    background-color: $black;
     overflow: hidden;
 }
 
@@ -41,21 +41,4 @@ button {
     cursor: pointer;
     user-select: unset;
     padding: 0;
-}
-
-svg:hover > path {
-    fill: $white;
-}
-
-div:hover > svg:hover > path {
-    fill: $white;
-}
-
-.outer {
-    width: 100vw;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    flex-grow: 1;
 }

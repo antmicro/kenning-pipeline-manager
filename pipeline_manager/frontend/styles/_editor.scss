@@ -12,30 +12,96 @@
 @import '@baklavajs/plugin-renderer-vue/dist/styles/variables.scss';
 
 // Controls
-$color-primary: #e74a3c;
-$color-error: red;
-$color-control-dark-background: #2c2c2c;
-$color-control-dark-foreground: #f7f7f7;
-$color-control-dark-hover: #4c4c4c;
-$color-control-dark-active: #6c6c6c;
+$color-primary: $green;
+$color-error: $red;
+$color-control-dark-background: $gray-500;
+$color-control-dark-foreground: $white;
+$color-control-dark-hover: $gray-400;
+$color-control-dark-active: $gray-200;
 $border-radius-control: 10px;
 
 // Nodes
-$color-node-background: #3f3f3f;
-$color-node-foreground: #f7f7f7;
+$color-node-background: $gray-600;
+$color-node-foreground: $white;
 $color-node-selected: $color-primary;
-$color-node-title-background: black;
-$color-node-title-foreground: #f7f7f7;
-$border-radius-node: 10px;
+$color-node-title-background: $gray-500;
+$color-node-title-foreground: $white;
+$border-radius-node: 15px;
 
 // Connections
-$color-connection-default: #f7f7f7;
-$color-connection-allowed: green;
-$color-connection-forbidden: red;
+$color-connection-default: $white;
+$color-connection-allowed: $green;
+$color-connection-forbidden: $red;
 
 // Background pattern
-$color-pattern-default: #332d37;
-$color-pattern-line: #131313;
-$color-pattern-black: #000000;
+$color-pattern-default: $black;
+$color-pattern-line: $gray-500;
+$color-pattern-black: $gray-500;
 
 @import '@baklavajs/plugin-renderer-vue/dist/styles/styles.scss';
+
+.node {
+    min-width: 300px !important;
+    opacity: 0.9;
+}
+
+.node > .__title {
+    height: 60px;
+    display: flex;
+    align-items: center;
+    padding-left: $spacing-l;
+    width: 100%;
+}
+
+.node-editor {
+    font-size: 14px;
+}
+
+.node-editor .background {
+    background-image: linear-gradient($gray-700 2px, transparent 2px),
+        linear-gradient(90deg, $gray-700 2px, transparent 2px);
+}
+
+.dark-slider > .__slider {
+    background-color: $green;
+}
+
+.node-interface .__port {
+    background-color: $green !important;
+}
+
+.dark-checkbox .__checkmark-container > svg > path {
+    display: none;
+}
+
+.dark-context-menu {
+    background-color: $gray-600;
+    border-radius: unset;
+    min-width: 135px;
+}
+
+.dark-context-menu > .item {
+    padding: $spacing-m;
+}
+
+.dark-context-menu > .item:not(.--header):not(.--active):not(.--disabled):hover {
+    background-color: $gray-600;
+}
+
+.dark-context-menu > .item:not(.--header):not(.--active):not(.--disabled):hover > .flex-fill {
+    color: $green;
+}
+
+.dark-context-menu > .item:not(.--header):not(.--active):not(.--disabled):hover > .ml-3 svg path {
+    fill: $green;
+}
+
+.dark-context-menu > .item > .ml-3 > svg {
+    height: 7px;
+    transform: scale(80);
+    scale: 0.02;
+}
+
+.dark-context-menu > .item > .ml-3 > svg > path {
+    d: path('M99.4,111.6l64.2,69.2L99.4,250h54.5l64.2-69.2l-64.2-69.2H99.4z') !important;
+}
