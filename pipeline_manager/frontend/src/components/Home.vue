@@ -32,9 +32,3 @@ export default {
     },
 };
 </script>
-
-<style lang="scss">
-.inner-editor {
-    border-top: 2px solid #000000;
-}
-</style>
