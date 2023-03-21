@@ -168,23 +168,36 @@ export default {
                     dataflow = JSON.parse(fileReader.result);
                 } catch (exception) {
                     if (exception instanceof SyntaxError) {
-                        alertBus.$emit('displayAlert', `Not a proper JSON file.\n${exception}`);
+                        this.showToast('error', `Not a proper JSON file.\n${exception}`);
                     } else {
-                        alertBus.$emit('displayAlert', `Unknown error.\n${exception}`);
+                        this.showToast('error', `Unknown error.\n${exception}`);
                     }
                     return;
                 }
 
                 const errors = this.editorManager.loadDataflow(dataflow);
                 if (Array.isArray(errors) && errors.length) {
-                    alertBus.$emit('displayAlert', errors);
+                    this.showToast('error', errors);
                 } else {
-                    alertBus.$emit('displayAlert', 'Dataflow loaded successfully');
+                    this.showToast('info', 'Dataflow loaded successfully');
                 }
             };
 
             fileReader.readAsText(file);
         },
+
+        showToast(type, message) {
+            const content = {
+                component: Notification,
+                props: {
+                    type,
+                    message,
+                },
+            };
+
+            this.$toast(content);
+        },
+
         /**
          * Event handler that that saves a current dataflow to a `save.json` file.
          */
@@ -196,7 +209,7 @@ export default {
             linkElement.href = window.URL.createObjectURL(blob);
             linkElement.download = 'save';
             linkElement.click();
-            alertBus.$emit('displayAlert', 'Dataflow saved');
+            this.showToast('info', 'Dataflow saved');
         },
 
         async requestDataflowAction(action) {
