@@ -29,21 +29,32 @@ export default {
     },
     data() {
         return {
-            editorManager: EditorManager.getEditorManagerInstance(),
+            editorManager: EditorManager.getEditorManagerInstance(), // create instance of baklava
+            /* create instance of external manager to control
+            connection, dataflow and spectification
+            */
             externalApplicationManager: new ExternalApplicationManager(),
-            backendAvailable: backendApiUrl !== null,
-            isNotificationPanelOpen: false,
-            isBackendStatusOpen: false,
+            backendAvailable: backendApiUrl !== null, // get backend URL
+            isNotificationPanelOpen: false, // check notification panel state (open or close)
+            isBackendStatusOpen: false, // // check backend panel state (open or close)
             backendStatus: 'connected', // state of backend connection 'connected' or 'disconnected'
         };
     },
     mounted() {
+        // Create connection on page load
         if (this.externalApplicationManager.backendAvailable) {
             this.externalApplicationManager.initializeConnection();
         }
     },
 
     methods: {
+        /**
+         * Event handler that loads a specification passed by the user
+         * and asks the validates it.
+         * If the validation is successful it is passed to the editor that
+         * renders a new environment.
+         * Otherwise user is alerted with a feedback message.
+         */
         loadSpecification() {
             const file = document.getElementById('load-spec-button').files[0];
             if (!file) return;
@@ -165,6 +176,7 @@ export default {
             linkElement.click();
             alertBus.$emit('displayAlert', 'Dataflow saved');
         },
+
         async requestDataflowAction(action) {
             await this.externalApplicationManager.invokeFetchAction(
                 this.externalApplicationManager.requestDataflowAction,
