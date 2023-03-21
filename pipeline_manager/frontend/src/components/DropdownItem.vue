@@ -35,8 +35,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../styles/variables.scss';
-
 div {
     display: flex;
     justify-content: space-between;

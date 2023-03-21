@@ -28,8 +28,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../styles/variables';
-
 .notifications {
     /* Set height to 100 view port minus height of navigation bar and paddings */
     height: calc(100vh - 120px);

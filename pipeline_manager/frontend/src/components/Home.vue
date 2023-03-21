@@ -34,8 +34,6 @@ export default {
 </script>
 
 <style lang="scss">
-@import '../../styles/variables.scss';
-
 .inner-editor {
     border-top: 2px solid #000000;
 }

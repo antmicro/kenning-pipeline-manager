@@ -249,8 +249,6 @@ export default {
 </template>
 
 <style lang="scss" scoped>
-@import '../../styles/variables.scss';
-
 .container {
     display: flex;
     justify-content: space-between;

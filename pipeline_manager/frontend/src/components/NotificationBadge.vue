@@ -31,8 +31,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../styles/variables.scss';
-
 div {
     width: 35px;
     height: 35px;
