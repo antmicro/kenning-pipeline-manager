@@ -399,6 +399,11 @@ export default {
             &.logo:hover > svg:last-of-type {
                 rotate: 90deg;
             }
+
+            &.logo:hover > .dropdown-wrapper {
+                display: flex;
+            }
+
             &:not(.open):hover > .tooltip {
                 display: flex;
             }
