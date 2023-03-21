@@ -106,10 +106,16 @@ export default {
 
                 if (this.isNotificationPanelOpen) {
                     this.$refs.notifications.classList.add('open');
-                    this.$refs.backend.classList.add('open');
+
+                    if (this.$refs.backend) {
+                        this.$refs.backend.classList.add('open');
+                    }
                 } else {
                     this.$refs.notifications.classList.remove('open');
-                    this.$refs.backend.classList.remove('open');
+
+                    if (this.$refs.backend) {
+                        this.$refs.backend.classList.remove('open');
+                    }
                 }
             }
         },
@@ -132,10 +138,14 @@ export default {
                 })`;
 
                 if (this.isBackendStatusOpen) {
-                    this.$refs.notifications.classList.add('open');
+                    if (this.$refs.notifications) {
+                        this.$refs.notifications.classList.add('open');
+                    }
                     this.$refs.backend.classList.add('open');
                 } else {
-                    this.$refs.notifications.classList.remove('open');
+                    if (this.$refs.notifications) {
+                        this.$refs.notifications.classList.remove('open');
+                    }
                     this.$refs.backend.classList.remove('open');
                 }
             }
@@ -208,6 +218,7 @@ export default {
                     <Arrow color="white" rotate="left" scale="small" />
                     <div class="dropdown-wrapper">
                         <DropdownItem
+                            v-if="this.backendAvailable"
                             text="Load specification"
                             id="load-spec-button"
                             :eventFunction="loadSpecification"
@@ -249,7 +260,7 @@ export default {
             </div>
             <span> Running dataflow </span>
             <div>
-                <div ref="backend">
+                <div v-if="!this.backendAvailable" ref="backend">
                     <button @click="toogleBackendStatusInfo">
                         <Backend />
                     </button>
