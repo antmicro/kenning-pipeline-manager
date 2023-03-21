@@ -220,7 +220,7 @@ export default {
                             />
                             <DropdownItem
                                 text="Save visualization graph"
-                                type="'button'"
+                                type="button"
                                 :eventFunction="() => requestDataflowAction('export')"
                             />
                         </div>
