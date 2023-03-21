@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-    <div class="notification-container">
+    <div :class="border" class="notification-container">
         <div class="notification-badge">
             <NotificationBadge :type="type" />
         </div>
@@ -38,6 +38,11 @@ export default {
             type: String,
             required: true,
         },
+
+        border: {
+            type: String,
+            default: 'none',
+        },
     },
 };
 </script>
@@ -53,9 +58,12 @@ export default {
   */
     width: calc(100% - 2 * $spacing-xl);
     height: 90px;
-    border: 1px solid $gray-200;
     border-radius: 15px;
-    padding: 0 $spacing-m;
+    padding: $spacing-m;
+
+    &.border {
+        border: 1px solid $gray-200;
+    }
 
     & > .notification-badge {
         flex-basis: 35px;
