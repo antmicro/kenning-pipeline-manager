@@ -5,9 +5,10 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-    <div id="container" class="outer">
-        <EditorPanel />
-        <DelegatePanel />
+    <div id="container">
+        <!-- <EditorPanel /> -->
+        <!-- <DelegatePanel /> -->
+        <NavBar />
         <baklava-editor class="inner-editor" :plugin="this.editorManager.viewPlugin" />
         <AlertBar />
     </div>
@@ -15,14 +16,16 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import AlertBar from './AlertBar.vue';
-import DelegatePanel from './DelegatePanel.vue';
-import EditorPanel from './EditorPanel.vue';
+// import DelegatePanel from './DelegatePanel.vue';
+import NavBar from './NavBar.vue';
+// import EditorPanel from './EditorPanel.vue';
 import EditorManager from '../core/EditorManager';
 
 export default {
     components: {
-        EditorPanel,
-        DelegatePanel,
+        // EditorPanel,
+        // DelegatePanel,
+        NavBar,
         AlertBar,
     },
     data() {
