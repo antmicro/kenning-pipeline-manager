@@ -24,6 +24,11 @@ export default {
     components: {
         Cross,
     },
+    data() {
+        return {
+            notificationStore,
+        };
+    },
 };
 </script>
 
