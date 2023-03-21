@@ -87,6 +87,10 @@ export default {
 
         // Open or hide notificationPanel with slide animation
         toogleNavigationPanel() {
+            if (this.isBackendStatusOpen) {
+                this.toogleBackendStatusInfo();
+            }
+
             this.isNotificationPanelOpen = !this.isNotificationPanelOpen;
 
             const negativeNotificationPanelWidth = '-495px'; // width of notification panel (negative because we want hide it on close)
@@ -112,6 +116,10 @@ export default {
 
         // Open or hide backendStatus info
         toogleBackendStatusInfo() {
+            if (this.isNotificationPanelOpen) {
+                this.toogleNavigationPanel();
+            }
+
             this.isBackendStatusOpen = !this.isBackendStatusOpen;
 
             const showBackendStatusPanel = '-89%, 0'; // show backend panel and align it to right border of icon
