@@ -22,24 +22,31 @@ input[type='file'] {
 }
 
 input[type='button'],
-input[type='submit'],
 label {
-    display: inline-block;
-    box-sizing: content-box;
+    margin: 0;
+    padding: 0;
+    text-align: left;
+    user-select: unset;
+}
 
-    text-align: center;
-    font-size: 20px;
+hr {
+    margin: 0;
+}
 
-    width: 250px;
-    padding: 6px 12px;
-    margin: 2px;
-
-    border: 2px solid #000000;
-    background-color: #2a2b31;
-    color: #dfdfdf;
-
+button {
+    background-color: unset;
+    border: unset;
     cursor: pointer;
-    margin: 5px 5px 5px 5px;
+    user-select: unset;
+    padding: 0;
+}
+
+svg:hover > path {
+    fill: $white;
+}
+
+div:hover > svg:hover > path {
+    fill: $white;
 }
 
 .outer {
