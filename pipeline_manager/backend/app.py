@@ -22,7 +22,7 @@ logging.basicConfig(level=logging.NOTSET)
 dist_path = os.path.join(os.path.dirname(frontend.__file__), 'dist')
 
 app = Flask(
-    __name__,
+    'Pipeline Manager',
     static_url_path='',
     static_folder=dist_path,
     template_folder=dist_path
