@@ -17,7 +17,6 @@ from pipeline_manager_backend_communication.misc_structures import MessageType, 
 from pipeline_manager import frontend
 from pipeline_manager.backend.state_manager import global_state_manager
 
-logging.basicConfig(level=logging.NOTSET)
 
 dist_path = os.path.join(os.path.dirname(frontend.__file__), 'dist')
 
@@ -28,7 +27,15 @@ app = Flask(
     template_folder=dist_path
 )
 
-# TODO: Change it later to our application exclusively
+
+class GetStatusFilter(logging.Filter):
+    def filter(self, record):
+        return '/get_status' not in record.getMessage()
+
+
+logging.basicConfig(level=logging.NOTSET)
+logging.getLogger("werkzeug").addFilter(GetStatusFilter())
+
 CORS(app)
 
 
@@ -302,7 +309,7 @@ def main(argv):
     tcp_server = global_state_manager.get_tcp_server()
 
     tcp_server.initialize_server()
-    logging.log(logging.INFO, 'Connect the application to run Pipeline Manager')
+    logging.log(logging.INFO, 'Connect the application to run start.')
     out = tcp_server.wait_for_client()
 
     if out.status != Status.CLIENT_CONNECTED:
