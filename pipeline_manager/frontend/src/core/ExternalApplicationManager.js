@@ -8,6 +8,7 @@ import { backendApiUrl, HTTPCodes, PMMessageType } from './utils';
 import { fetchGET, fetchPOST } from './fetchRequests';
 import { showToast } from './notifications';
 import EditorManager from './EditorManager';
+import { alertBus } from './bus';
 
 export default class ExternalApplicationManager {
     externalApplicationConnected = false;
