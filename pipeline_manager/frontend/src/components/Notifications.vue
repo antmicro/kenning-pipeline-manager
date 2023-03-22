@@ -7,27 +7,49 @@ SPDX-License-Identifier: Apache-2.0
 <template>
     <div class="notifications">
         <div class="info">
-            <span>Notifications</span>
-            <button>
+            <span>Notifications ({{ notificationStore.notifications.length }})</span>
+            <button @click="this.removeAll">
                 <Cross />
                 Clear all
             </button>
         </div>
-        <div class="panel" />
+        <div class="panel">
+            <ul>
+                <li
+                    v-for="(notification, index) in notificationStore.notifications"
+                    v-bind:key="index"
+                >
+                    <Notification
+                        :type="notification.type"
+                        :message="notification.message"
+                        :index="index"
+                        border="border"
+                    />
+                </li>
+            </ul>
+        </div>
     </div>
 </template>
 
 <script>
 import Cross from '../icons/Cross.vue';
+import Notification from './Notification.vue';
+import { notificationStore } from '../core/stores';
 
 export default {
     components: {
         Cross,
+        Notification,
     },
     data() {
         return {
             notificationStore,
         };
+    },
+    methods: {
+        removeAll() {
+            notificationStore.remove();
+        },
     },
 };
 </script>

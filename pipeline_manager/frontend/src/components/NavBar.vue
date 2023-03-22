@@ -37,6 +37,7 @@ export default {
             externalApplicationManager: new ExternalApplicationManager(),
             isNotificationPanelOpen: false, // check notification panel state (open or close)
             isBackendStatusOpen: false, // // check backend panel state (open or close)
+            notificationStore,
         };
     },
     methods: {

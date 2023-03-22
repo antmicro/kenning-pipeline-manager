@@ -50,6 +50,11 @@ export default {
             default: 0,
         },
     },
+    data() {
+        return {
+            notificationStore,
+        };
+    },
     methods: {
         remove() {
             notificationStore.removeOne(this.index);
