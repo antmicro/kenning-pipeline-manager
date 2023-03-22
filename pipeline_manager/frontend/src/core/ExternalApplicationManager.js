@@ -8,7 +8,6 @@ import { backendApiUrl, HTTPCodes, PMMessageType } from './utils';
 import { fetchGET, fetchPOST } from './fetchRequests';
 import { showToast } from './notifications';
 import EditorManager from './EditorManager';
-import { alertBus } from './bus';
 
 export default class ExternalApplicationManager {
     externalApplicationConnected = false;
@@ -64,18 +63,20 @@ export default class ExternalApplicationManager {
                 const errors = this.editorManager.validateSpecification(specification);
                 if (Array.isArray(errors) && errors.length) {
                     message = errors;
+                    message.forEach((err) => showToast('error', err));
                 } else {
                     this.editorManager.updateEditorSpecification(specification);
                     message = 'Specification loaded successfully';
+                    showToast('info', message);
                 }
             } else if (data.type === PMMessageType.ERROR) {
                 message = data.content;
+                showToast('error', message);
             }
         } else if (response.status === HTTPCodes.ServiceUnavailable) {
             message = await response.text();
+            showToast('error', message);
         }
-
-        alertBus.$emit('displayAlert', message);
     }
 
     /**
@@ -135,9 +136,12 @@ export default class ExternalApplicationManager {
                 const errors = this.editorManager.loadDataflow(data.content);
                 if (Array.isArray(errors) && errors.length) {
                     message = errors;
+                    message.forEach((err) => showToast('error', err));
                 }
+                showToast('info', message);
             } else if (data.type === PMMessageType.ERROR) {
                 message = data.content;
+                showToast('error', message);
             }
             showToast('info', message);
         } else if (response.status === HTTPCodes.ServiceUnavailable) {
@@ -146,7 +150,7 @@ export default class ExternalApplicationManager {
             message = data.content;
             this.externalApplicationConnected = false;
             await this.invokeFetchAction(this.initializeConnection, false);
-            showToast('info', message);
+            showToast('error', message);
         }
     }
 
