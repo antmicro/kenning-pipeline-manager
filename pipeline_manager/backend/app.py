@@ -299,21 +299,27 @@ def main(argv):
         help='The port of the backend of Pipeline Manager',
         default=5000
     )
+    parser.add_argument(
+        '--skip-connecting',
+        action='store_true',
+        help='Specifies whether Pipeline Manager should wait '
+        'for an external application to connect before running the backend',
+    )
     args, _ = parser.parse_known_args(argv[1:])
 
     global_state_manager.reinitialize(
         args.tcp_server_port,
         args.tcp_server_host
     )
+    if not args.skip_connecting:
+        tcp_server = global_state_manager.get_tcp_server()
 
-    tcp_server = global_state_manager.get_tcp_server()
+        tcp_server.initialize_server()
+        logging.log(logging.INFO, 'Connect the application to run start.')
+        out = tcp_server.wait_for_client()
 
-    tcp_server.initialize_server()
-    logging.log(logging.INFO, 'Connect the application to run start.')
-    out = tcp_server.wait_for_client()
-
-    if out.status != Status.CLIENT_CONNECTED:
-        logging.log(logging.WARNING, 'External application did not connect')
+        if out.status != Status.CLIENT_CONNECTED:
+            logging.log(logging.WARNING, 'External application did not connect')  # noqa: E501
 
     # for now we have only one thread so the global state can't be corrupted
     app.run(
