@@ -18,6 +18,11 @@
                     "default": 0
                 },
                 {
+                    "name": "Disconnect",
+                    "type": "checkbox",
+                    "default": false
+                },
+                {
                     "name": "MessageType",
                     "type": "select",
                     "values": ["ERROR", "OK"],
@@ -48,6 +53,11 @@
                     "min": 0,
                     "max": 5,
                     "default": 0
+                },
+                {
+                    "name": "Disconnect",
+                    "type": "checkbox",
+                    "default": false
                 },
                 {
                     "name": "MessageType",

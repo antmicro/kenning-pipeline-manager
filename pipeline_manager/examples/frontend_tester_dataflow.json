@@ -1,1 +1,92 @@
-{"nodes":[{"type":"RunBehaviour","id":"node_16793248628950","name":"RunBehaviour","options":[["Duration",1.5],["MessageType","OK"],["Message","Disconnecting soon!"]],"state":{},"interfaces":[["Effect",{"id":"ni_16793248628951","value":null,"isInput":false,"type":"Effect"}]],"position":{"x":990,"y":142},"width":200,"twoColumn":false,"customClasses":""},{"type":"Disconnect","id":"node_16793248639182","name":"Disconnect","options":[["Time offset",2],["Should disconnect",true]],"state":{},"interfaces":[["Effect",{"id":"ni_16793248639193","value":null,"isInput":true,"type":"Effect"}]],"position":{"x":1386,"y":158},"width":200,"twoColumn":false,"customClasses":""}],"connections":[{"id":"16793248653826","from":"ni_16793248628951","to":"ni_16793248639193"}],"panning":{"x":0,"y":0},"scaling":1}
+{
+    "nodes": [
+        {
+            "type": "RunBehaviour",
+            "id": "node_16793248628950",
+            "name": "RunBehaviour",
+            "options": [
+                [
+                    "Duration",
+                    1.5
+                ],
+                [
+                    "Disconnecting",
+                    false
+                ],
+                [
+                    "MessageType",
+                    "OK"
+                ],
+                [
+                    "Message",
+                    "Disconnecting soon!"
+                ]
+            ],
+            "state": {},
+            "interfaces": [
+                [
+                    "Effect",
+                    {
+                        "id": "ni_16793248628951",
+                        "value": null,
+                        "isInput": false,
+                        "type": "Effect"
+                    }
+                ]
+            ],
+            "position": {
+                "x": 990,
+                "y": 142
+            },
+            "width": 200,
+            "twoColumn": false,
+            "customClasses": ""
+        },
+        {
+            "type": "Disconnect",
+            "id": "node_16793248639182",
+            "name": "Disconnect",
+            "options": [
+                [
+                    "Time offset",
+                    2
+                ],
+                [
+                    "Should disconnect",
+                    true
+                ]
+            ],
+            "state": {},
+            "interfaces": [
+                [
+                    "Effect",
+                    {
+                        "id": "ni_16793248639193",
+                        "value": null,
+                        "isInput": true,
+                        "type": "Effect"
+                    }
+                ]
+            ],
+            "position": {
+                "x": 1386,
+                "y": 158
+            },
+            "width": 200,
+            "twoColumn": false,
+            "customClasses": ""
+        }
+    ],
+    "connections": [
+        {
+            "id": "16793248653826",
+            "from": "ni_16793248628951",
+            "to": "ni_16793248639193"
+        }
+    ],
+    "panning": {
+        "x": 0,
+        "y": 0
+    },
+    "scaling": 1
+}
