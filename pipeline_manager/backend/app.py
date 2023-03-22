@@ -93,7 +93,7 @@ def response_wrapper(output_message: OutputTuple) -> Tuple:
             content = content.decode('UTF-8')
 
         return {'type': mess_type.value, 'content': content}, HTTPStatus.OK  # noqa: E501
-    if output_message.status == Status.CLIENT_DISCONNECTED:
+    if output_message.status == Status.CONNECTION_CLOSED:
         return 'External application is disconnected', HTTPStatus.SERVICE_UNAVAILABLE  # noqa: E501
     return 'Unknown error', HTTPStatus.SERVICE_UNAVAILABLE
 
