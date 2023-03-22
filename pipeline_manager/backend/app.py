@@ -295,6 +295,16 @@ def main(argv):
         args.tcp_server_port,
         args.tcp_server_host
     )
+
+    tcp_server = global_state_manager.get_tcp_server()
+
+    tcp_server.initialize_server()
+    logging.log(logging.INFO, 'Connect the application to run Pipeline Manager')
+    out = tcp_server.wait_for_client()
+
+    if out.status != Status.CLIENT_CONNECTED:
+        logging.log(logging.WARNING, 'External application did not connect')
+
     # for now we have only one thread so the global state can't be corrupted
     app.run(
         threaded=False,
