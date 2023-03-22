@@ -48,13 +48,26 @@ export default {
 
     methods: {
         /**
+         * Loads nodes' specification from JSON structure.
+         */
+        loadSpecification(specification) {
+            const errors = this.editorManager.validateSpecification(specification);
+            if (Array.isArray(errors) && errors.length) {
+                alertBus.$emit('displayAlert', errors);
+            } else {
+                this.editorManager.updateEditorSpecification(specification);
+                alertBus.$emit('displayAlert', 'Loaded successfully');
+            }
+        },
+
+        /**
          * Event handler that loads a specification passed by the user
          * and asks the validates it.
          * If the validation is successful it is passed to the editor that
          * renders a new environment.
          * Otherwise user is alerted with a feedback message.
          */
-        loadSpecification() {
+        loadSpecificationCallback() {
             const file = document.getElementById('load-spec-button').files[0];
             if (!file) return;
 
@@ -72,14 +85,7 @@ export default {
                     }
                     return;
                 }
-
-                const errors = this.editorManager.validateSpecification(specification);
-                if (Array.isArray(errors) && errors.length) {
-                    alertBus.$emit('displayAlert', errors);
-                } else {
-                    this.editorManager.updateEditorSpecification(specification);
-                    alertBus.$emit('displayAlert', 'Loaded successfully');
-                }
+                this.loadSpecification(specification);
             };
 
             fileReader.readAsText(file);
@@ -158,7 +164,9 @@ export default {
         loadDataflow() {
             const file = document.getElementById('load-dataflow-button').files[0];
             if (!file) return;
+
             const fileReader = new FileReader();
+
             fileReader.onload = () => {
                 let dataflow = null;
                 try {
@@ -171,6 +179,7 @@ export default {
                     }
                     return;
                 }
+
                 const errors = this.editorManager.loadDataflow(dataflow);
                 if (Array.isArray(errors) && errors.length) {
                     alertBus.$emit('displayAlert', errors);
@@ -178,6 +187,7 @@ export default {
                     alertBus.$emit('displayAlert', 'Dataflow loaded successfully');
                 }
             };
+
             fileReader.readAsText(file);
         },
         /**
@@ -221,7 +231,7 @@ export default {
                             v-if="this.backendAvailable"
                             text="Load specification"
                             id="load-spec-button"
-                            :eventFunction="loadSpecification"
+                            :eventFunction="loadSpecificationCallback"
                         />
                         <DropdownItem
                             id="load-dataflow-button"
