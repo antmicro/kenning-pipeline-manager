@@ -212,7 +212,9 @@ export default {
     mounted() {
         // Create connection on page load
         if (this.externalApplicationManager.backendAvailable) {
-            this.externalApplicationManager.initializeConnection();
+            this.externalApplicationManager.invokeFetchAction(
+                this.externalApplicationManager.initializeConnection,
+            );
         }
         if (process.env.VUE_APP_SPECIFICATION_PATH !== undefined) {
             const specification = require(process.env.VUE_APP_SPECIFICATION_PATH); // eslint-disable-line global-require,max-len,import/no-dynamic-require

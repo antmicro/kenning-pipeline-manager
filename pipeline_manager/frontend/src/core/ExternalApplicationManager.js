@@ -21,16 +21,28 @@ export default class ExternalApplicationManager {
     timeoutStatusInterval = 500;
 
     /**
+     * Function that fetches state of the connection and updates
+     * `this.externalApplicationConnected` property.
+     */
+    async updateConnectionStatus() {
+        const response = await fetchGET('get_status');
+        this.externalApplicationConnected = response.status === HTTPCodes.OK;
+    }
+
+    /**
      * Event handler that asks the backend to open a TCP socket that can be connected to.
      * If the external application did not connect the user is alertd with a feedback message.
+     * This function updates `this.externalApplicationConnected` property
      */
     async openTCP() {
         const response = await fetchGET('connect');
         const data = await response.text();
-        if (response.ok) {
-            this.externalApplicationConnected = true;
+        const connected = response.status === HTTPCodes.OK;
+
+        if (!connected) {
+            alertBus.$emit('displayAlert', data);
         }
-        alertBus.$emit('displayAlert', data);
+        this.externalApplicationConnected = connected;
     }
 
     /**
@@ -69,6 +81,8 @@ export default class ExternalApplicationManager {
      * Event handler that loads a current dataflow from the editor and sends a request
      * to the backend based on the action argument.
      * The user is alerted with a feedback message.
+     *
+     * @param action Type of the requested action.
      */
     async requestDataflowAction(action) {
         const dataflow = JSON.stringify(this.editorManager.saveDataflow());
@@ -88,8 +102,11 @@ export default class ExternalApplicationManager {
             alertBus.$emit('displayAlert', data.content);
         }
         if (response.status === HTTPCodes.ServiceUnavailable) {
+            // The connection was closed
             const data = await response.text();
             alertBus.$emit('displayAlert', data);
+            this.externalApplicationConnected = false;
+            await this.invokeFetchAction(this.initializeConnection, false);
         }
     }
 
@@ -122,8 +139,11 @@ export default class ExternalApplicationManager {
                 message = data.content;
             }
         } else if (response.status === HTTPCodes.ServiceUnavailable) {
+            // The connection was closed
             const data = await response.text();
             message = data.content;
+            this.externalApplicationConnected = false;
+            await this.invokeFetchAction(this.initializeConnection, false);
         }
 
         alertBus.$emit('displayAlert', message);
@@ -134,10 +154,10 @@ export default class ExternalApplicationManager {
      * of the TCP connection. If the connection is not alive, then `initializeConnection`
      * is invoked.
      */
-    async checkStatus() {
-        const response = await fetchGET('get_status');
-        if (response.status === HTTPCodes.ServiceUnavailable) {
-            await this.invokeFetchAction(this.initializeConnection);
+    async checkConnectionStatus() {
+        await this.updateConnectionStatus();
+        if (!this.externalApplicationConnected) {
+            await this.invokeFetchAction(this.initializeConnection, false);
         }
     }
 
@@ -153,19 +173,19 @@ export default class ExternalApplicationManager {
     }
 
     /**
-     * Starts status checking if it is not started.
+     * Starts status checking.
      */
     startStatusInterval() {
         if (this.idStatusInterval === null) {
             this.idStatusInterval = setInterval(
-                () => this.checkStatus(),
+                () => this.checkConnectionStatus(),
                 this.timeoutStatusInterval,
             );
         }
     }
 
     /**
-     * Stops status checking if it is running.
+     * Stops status checking.
      */
     stopStatusInterval() {
         if (this.idStatusInterval !== null) {
@@ -177,14 +197,26 @@ export default class ExternalApplicationManager {
     /**
      * Function used to initialize connection with the external application and request
      * specification. Should be called after DOM is created.
+     *
+     * It checks whether a connection is established.
+     * If it is then it just requests a specification.
+     * If it is not then it opens a TCP port, wait for the application to connect and then
+     * requests specification.
+     *
+     * @param checkConnection True if should check connection status beforehand. Used to reduce
+     * the number of requests if the status of the connection is known.
      */
-    async initializeConnection() {
-        this.externalApplicationConnected = false;
-        alertBus.$emit('displayAlert', 'Waiting for the application to connect...', true);
+    async initializeConnection(checkConnection = true) {
+        if (checkConnection) {
+            await this.updateConnectionStatus();
+        }
 
-        await this.invokeFetchAction(this.openTCP);
+        if (!this.externalApplicationConnected) {
+            alertBus.$emit('displayAlert', 'Waiting for the application to connect...', true);
+            await this.openTCP();
+        }
         if (this.externalApplicationConnected) {
-            await this.invokeFetchAction(this.requestSpecification);
+            await this.requestSpecification();
         }
     }
 }
