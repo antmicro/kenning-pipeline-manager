@@ -143,20 +143,23 @@ def connect():
     It returns once an external application is connected to it.
 
     If a connection already exists and a new request is made to this endpoint
-    the connection is closed and a new one is initialized.
+    this function does not process anything.
 
     Responses
     ---------
     HTTPStatus.OK :
-        Request was successful and an external application was connected.
+        Request was successful and an external application is connected.
     HTTPStatus.SERVICE_UNAVAILABLE :
         External application did not connect.
     """
     tcp_server = global_state_manager.get_tcp_server()
 
-    tcp_server.disconnect()
-    tcp_server.initialize_server()
-    out = tcp_server.wait_for_client()
+    if tcp_server.connected:
+        return 'External application already connected', HTTPStatus.OK
+    else:
+        tcp_server.disconnect()
+        tcp_server.initialize_server()
+        out = tcp_server.wait_for_client()
 
     if out.status == Status.CLIENT_CONNECTED:
         return 'External application connected', HTTPStatus.OK
