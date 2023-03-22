@@ -90,7 +90,6 @@ def main(argv):
 
     client = CommunicationBackend(args.host, args.port)
     client.initialize_client()
-    logging.log(logging.INFO, 'Sending specification.')
 
     specification_name = 'frontend_tester_specification.json'
     with open_text(examples, specification_name) as f:
@@ -111,19 +110,22 @@ def main(argv):
                 try:
                     name = 'RunBehaviour' if message_type == MessageType.RUN else 'ValidationBehaviour'  # noqa: E501
                     properties = get_node_properties(name, data)
-                    effects = get_effects(name, data)
-                    time.sleep(properties['Duration'])
+                    if properties['Disconnect']:
+                        client.disconnect()
+                    else:
+                        effects = get_effects(name, data)
+                        time.sleep(properties['Duration'])
 
-                    client.send_message(
-                        text_to_message_type[properties['MessageType']],
-                        properties['Message'].encode(encoding='UTF-8')
-                    )
-                    for effect in effects:
-                        if effect['name'] == 'Disconnect':
-                            if effect['properties']['Should disconnect']:
-                                time.sleep(effect['properties']['Time offset'])
-                                logging.log(logging.INFO, 'Disconnecting!')
-                                client.disconnect()
+                        client.send_message(
+                            text_to_message_type[properties['MessageType']],
+                            properties['Message'].encode(encoding='UTF-8')
+                        )
+                        for effect in effects:
+                            if effect['name'] == 'Disconnect':
+                                if effect['properties']['Should disconnect']:
+                                    time.sleep(effect['properties']['Time offset'])  # noqa: E501
+                                    logging.log(logging.INFO, 'Disconnecting!')
+                                    client.disconnect()
                 except Exception:
                     client.send_message(
                         MessageType.ERROR,
