@@ -14,7 +14,6 @@ import Bell from '../icons/Bell.vue';
 import DropdownItem from './DropdownItem.vue';
 import EditorManager from '../core/EditorManager';
 import { alertBus } from '../core/bus';
-import { backendApiUrl } from '../core/utils';
 import ExternalApplicationManager from '../core/ExternalApplicationManager';
 
 export default {
@@ -38,13 +37,6 @@ export default {
             isBackendStatusOpen: false, // // check backend panel state (open or close)
         };
     },
-    mounted() {
-        // Create connection on page load
-        if (this.externalApplicationManager.backendAvailable) {
-            this.externalApplicationManager.initializeConnection();
-        }
-    },
-
     methods: {
         /**
          * Loads nodes' specification from JSON structure.
@@ -216,6 +208,16 @@ export default {
                 this.externalApplicationManager.importDataflow,
             );
         },
+    },
+    mounted() {
+        // Create connection on page load
+        if (this.externalApplicationManager.backendAvailable) {
+            this.externalApplicationManager.initializeConnection();
+        }
+        if (process.env.VUE_APP_SPECIFICATION_PATH !== undefined) {
+            const specification = require(process.env.VUE_APP_SPECIFICATION_PATH); // eslint-disable-line global-require,max-len,import/no-dynamic-require
+            this.loadSpecification(specification);
+        }
     },
 };
 </script>
