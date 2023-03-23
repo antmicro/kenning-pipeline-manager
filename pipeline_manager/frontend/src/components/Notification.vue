@@ -47,6 +47,10 @@ export default {
     display: flex;
     align-items: center;
     gap: $spacing-l;
+    /* This calculation need to
+     get width of space between paddings
+     in notification panel
+  */
     width: calc(100% - 2 * $spacing-xl);
     height: 90px;
     border: 1px solid $gray-200;

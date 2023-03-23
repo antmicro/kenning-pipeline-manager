@@ -362,6 +362,9 @@ export default {
                 width: 220px;
                 height: 80px;
                 display: flex;
+                /* Hide backend panel and position it
+                  to right border of backend icon
+                */
                 transform: translate(-89%, -180px);
                 padding: $spacing-l;
                 font-size: $fs-small;

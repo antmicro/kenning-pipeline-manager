@@ -35,7 +35,11 @@ export default {
     background-color: $gray-600;
     opacity: 0.9;
     position: absolute;
+    /* Height of navigation bar*/
     top: 60px;
+    /* As defeault notification panel is hidden (minus value)
+      panel width (435px) + 2 * padding (30px) = 495px
+    */
     right: -495px;
     z-index: 5;
     padding: $spacing-xxl;
