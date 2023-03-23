@@ -262,20 +262,18 @@ export default {
                     </div>
                 </div>
 
-                <div v-if="this.externalApplicationManager.backendAvailable" ref="backend">
-                    <div>
-                        <button @click="() => requestDataflowAction('run')"><Run /></button>
-                        <div class="tooltip">
-                            <span>Run</span>
-                        </div>
+                <div v-if="this.externalApplicationManager.backendAvailable">
+                    <button @click="() => requestDataflowAction('run')"><Run /></button>
+                    <div class="tooltip">
+                        <span>Run</span>
                     </div>
-                    <div>
-                        <button @click="() => requestDataflowAction('validate')">
-                            <Validate />
-                        </button>
-                        <div class="tooltip">
-                            <span>Validate</span>
-                        </div>
+                </div>
+                <div v-if="this.externalApplicationManager.backendAvailable">
+                    <button @click="() => requestDataflowAction('validate')">
+                        <Validate />
+                    </button>
+                    <div class="tooltip">
+                        <span>Validate</span>
                     </div>
                 </div>
             </div>
