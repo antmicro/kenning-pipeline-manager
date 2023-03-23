@@ -228,26 +228,30 @@ export default {
                     <Arrow color="white" rotate="left" scale="small" />
                     <div class="dropdown-wrapper">
                         <DropdownItem
-                            v-if="this.backendAvailable"
+                            v-if="!this.backendAvailable"
                             text="Load specification"
                             id="load-spec-button"
                             :eventFunction="loadSpecificationCallback"
                         />
                         <DropdownItem
                             id="load-dataflow-button"
-                            text="Load"
+                            text="Load graph file"
                             :eventFunction="loadDataflow"
                         />
-                        <DropdownItem type="'button'" text="Save" :eventFunction="saveDataflow" />
+                        <DropdownItem
+                            type="'button'"
+                            text="Save graph file"
+                            :eventFunction="saveDataflow"
+                        />
                         <div v-if="this.externalApplicationManager.externalApplicationConnected">
                             <hr />
                             <DropdownItem
-                                text="Load visualization graph"
+                                text="Load file"
                                 id="request-dataflow-button"
                                 :eventFunction="importDataflow"
                             />
                             <DropdownItem
-                                text="Save visualization graph"
+                                text="Save file"
                                 type="button"
                                 :eventFunction="() => requestDataflowAction('export')"
                             />
@@ -270,7 +274,7 @@ export default {
             </div>
             <span> Running dataflow </span>
             <div>
-                <div v-if="!this.backendAvailable" ref="backend">
+                <div v-if="this.backendAvailable" ref="backend">
                     <button @click="toogleBackendStatusInfo">
                         <Backend />
                     </button>
