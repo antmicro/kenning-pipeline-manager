@@ -15,7 +15,7 @@ export const showToast = (type, message) => {
         component: Notification,
         props: {
             type,
-            message,
+            message: `${message}`,
         },
     };
 

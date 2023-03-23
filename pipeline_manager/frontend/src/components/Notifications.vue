@@ -21,7 +21,7 @@ SPDX-License-Identifier: Apache-2.0
                 >
                     <Notification
                         :type="notification.type"
-                        :message="notification.message"
+                        :message="`${notification.message}`"
                         :index="index"
                         border="border"
                     />
