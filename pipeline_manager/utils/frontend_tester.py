@@ -4,11 +4,24 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
+"""
+Module used to test frontend part of Pipeline Manager.
+
+It simulates behaviour of a regular external application, by allowing
+to choose how it responds to different requests and message types.
+
+Run in the root directory:
+```bash
+python -m pipeline_manager.utils.frontend_tester
+```
+"""
+
 import argparse
 from importlib.resources import open_text
 import json
 import logging
 import time
+from typing import Dict, List
 import sys
 
 from pipeline_manager import examples
@@ -20,9 +33,26 @@ from pipeline_manager_backend_communication.misc_structures import MessageType, 
 logging.basicConfig(level=logging.NOTSET)
 
 
-def get_node_properties(name, pipeline):
-    pipeline = json.loads(pipeline)
-    nodes = pipeline['nodes']
+def get_node_properties(name: str, dataflow: Dict) -> Dict:
+    """
+    Function that reads properties of a `name` node in `dataflow`.
+    It is assumed for now that we have only such node in the `dataflow`.
+
+    Parameters
+    ----------
+    name : str
+        Properties of the `name` node are going to be read and returned
+        as a dictionary.
+    dataflow : Dict
+        Dataflow that was sent by Pipeline Manager.
+
+    Returns
+    -------
+    Dict
+        Dictionary that has all properties of a `name` node.
+    """
+    dataflow = json.loads(dataflow)
+    nodes = dataflow['nodes']
     description_node = None
 
     for node in nodes:
@@ -38,10 +68,26 @@ def get_node_properties(name, pipeline):
     return properties
 
 
-def get_effects(name, pipeline):
-    pipeline = json.loads(pipeline)
-    nodes = pipeline['nodes']
-    connections = pipeline['connections']
+def get_effects(name: str, dataflow: Dict) -> List:
+    """
+    Function that returns all connected nodes to a `name`
+    node in the dataflow.
+
+    Parameters
+    ----------
+    name : str
+        Nodes connected to the `name` node are returned.
+    dataflow : Dict
+        Dataflow that was sent by Pipeline Manager.
+
+    Returns
+    -------
+    List
+        List of nodes connected to `name` node.
+    """
+    dataflow = json.loads(dataflow)
+    nodes = dataflow['nodes']
+    connections = dataflow['connections']
     socket_id = None
 
     for node in nodes:
@@ -109,7 +155,10 @@ def main(argv):
                     message_type == MessageType.VALIDATE):
                 try:
                     name = 'RunBehaviour' if message_type == MessageType.RUN else 'ValidationBehaviour'  # noqa: E501
+                    logging.log(logging.INFO, f'Responding to {message_type} message')  # noqa: E501
+
                     properties = get_node_properties(name, data)
+                    print(properties)
                     if properties['Disconnect']:
                         client.disconnect()
                     else:
@@ -120,13 +169,15 @@ def main(argv):
                             text_to_message_type[properties['MessageType']],
                             properties['Message'].encode(encoding='UTF-8')
                         )
+
                         for effect in effects:
                             if effect['name'] == 'Disconnect':
                                 if effect['properties']['Should disconnect']:
                                     time.sleep(effect['properties']['Time offset'])  # noqa: E501
                                     logging.log(logging.INFO, 'Disconnecting!')
                                     client.disconnect()
-                except Exception:
+                except Exception as ex:
+                    print(ex)
                     client.send_message(
                         MessageType.ERROR,
                         'No description provided'.encode(encoding='UTF-8')
