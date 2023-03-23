@@ -47,10 +47,10 @@ export default {
         loadSpecification(specification) {
             const errors = this.editorManager.validateSpecification(specification);
             if (Array.isArray(errors) && errors.length) {
-                alertBus.$emit('displayAlert', errors);
+                errors.forEach((err) => showToast('error', err));
             } else {
                 this.editorManager.updateEditorSpecification(specification);
-                alertBus.$emit('displayAlert', 'Loaded successfully');
+                showToast('info', 'Loaded successfully');
             }
         },
 
