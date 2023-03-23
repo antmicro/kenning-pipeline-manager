@@ -34,7 +34,6 @@ export default {
             connection, dataflow and spectification
             */
             externalApplicationManager: new ExternalApplicationManager(),
-            backendAvailable: backendApiUrl !== null, // get backend URL
             isNotificationPanelOpen: false, // check notification panel state (open or close)
             isBackendStatusOpen: false, // // check backend panel state (open or close)
         };
@@ -205,12 +204,14 @@ export default {
         },
 
         async requestDataflowAction(action) {
+            if (!this.externalApplicationManager.backendAvailable) return;
             await this.externalApplicationManager.invokeFetchAction(
                 this.externalApplicationManager.requestDataflowAction,
                 action,
             );
         },
         async importDataflow() {
+            if (!this.externalApplicationManager.backendAvailable) return;
             await this.externalApplicationManager.invokeFetchAction(
                 this.externalApplicationManager.importDataflow,
             );
@@ -228,7 +229,7 @@ export default {
                     <Arrow color="white" rotate="left" scale="small" />
                     <div class="dropdown-wrapper">
                         <DropdownItem
-                            v-if="!this.backendAvailable"
+                            v-if="!this.externalApplicationManager.backendAvailable"
                             text="Load specification"
                             id="load-spec-button"
                             :eventFunction="loadSpecificationCallback"
@@ -259,22 +260,26 @@ export default {
                     </div>
                 </div>
 
-                <div>
-                    <button @click="() => requestDataflowAction('run')"><Run /></button>
-                    <div class="tooltip">
-                        <span>Run</span>
+                <div v-if="this.externalApplicationManager.backendAvailable" ref="backend">
+                    <div>
+                        <button @click="() => requestDataflowAction('run')"><Run /></button>
+                        <div class="tooltip">
+                            <span>Run</span>
+                        </div>
                     </div>
-                </div>
-                <div>
-                    <button @click="() => requestDataflowAction('validate')"><Validate /></button>
-                    <div class="tooltip">
-                        <span>Validate</span>
+                    <div>
+                        <button @click="() => requestDataflowAction('validate')">
+                            <Validate />
+                        </button>
+                        <div class="tooltip">
+                            <span>Validate</span>
+                        </div>
                     </div>
                 </div>
             </div>
-            <span> Running dataflow </span>
+            <span> Pipeline Manager </span>
             <div>
-                <div v-if="this.backendAvailable" ref="backend">
+                <div v-if="this.externalApplicationManager.backendAvailable" ref="backend">
                     <button @click="toogleBackendStatusInfo">
                         <Backend />
                     </button>
