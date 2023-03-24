@@ -97,16 +97,20 @@ export default class EditorManager {
 
     /**
      * Loads the dataflow passed in `dataflow` and renders it.
-     * If the dataflow is not compatible with the currently loaded specification,
-     * then some of the dataflow may be not loaded.
+     * If the dataflow is not compatible with the currently loaded specification or is not
+     * in the dataflow format, then some of the dataflow may be not loaded and an
+     * error is returned.
      *
      * @param dataflow Dataflow to load
      * @returns An array of errors that occured during the dataflow loading.
      * If the array is empty, the loading was successful.
      */
     loadDataflow(dataflow) {
-        const errors = this.editor.load(dataflow);
-        return errors;
+        try {
+            return this.editor.load(dataflow);
+        } catch {
+            return ['Unrecognized format. Make sure that the passed dataflow is correct.'];
+        }
     }
 
     /**
