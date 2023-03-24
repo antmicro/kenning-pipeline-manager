@@ -290,7 +290,11 @@ export default {
             <div>
                 <div v-if="this.externalApplicationManager.backendAvailable" ref="backend">
                     <button @click="toogleBackendStatusInfo">
-                        <Backend />
+                        <Backend
+                            v-if="this.externalApplicationManager.externalApplicationConnected"
+                            color="connected"
+                        />
+                        <Backend v-else color="disconnected" />
                     </button>
                     <div class="tooltip">
                         <span>Backend status</span>
@@ -313,7 +317,11 @@ export default {
                 </div>
                 <div ref="notifications">
                     <button @click="toogleNavigationPanel">
-                        <Bell />
+                        <Bell
+                            v-if="this.notificationStore.notifications.length > 0"
+                            color="green"
+                        />
+                        <Bell v-else />
                     </button>
                     <div class="tooltip last">
                         <span>Notifications</span>
