@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from pipeline_manager import examples
+import examples
 from pipeline_manager.resources import schemas
 
 
@@ -13,7 +13,7 @@ from pipeline_manager.resources import schemas
 def sample_specification_path() -> Path:
     """
     Fixture that returns path to `sample_specification.json`
-    in `pipeline_manager/examples` directory.
+    in `examples` directory.
 
     Returns
     -------
@@ -44,7 +44,7 @@ def sample_specification(sample_specification_path) -> dict:
 def sample_dataflow_path() -> Path:
     """
     Fixture that returns path to `sample_dataflow.json`
-    in `pipeline_manager/examples` directory.
+    in `examples` directory.
 
     Returns
     -------
@@ -75,7 +75,7 @@ def sample_dataflow(sample_dataflow_path: Path) -> dict:
 def specification_schema_path() -> Path:
     """
     Fixture that returns path to `dataflow_spec_schema.json`
-    in `pipeline_manager/examples` directory.
+    in `examples` directory.
 
     Returns
     -------

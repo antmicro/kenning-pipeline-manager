@@ -12,7 +12,7 @@ to choose how it responds to different requests and message types.
 
 Run in the root directory:
 ```bash
-python -m pipeline_manager.utils.frontend_tester
+python -m pipeline_manager.frontend_tester.tester_client
 ```
 """
 
@@ -24,7 +24,7 @@ import time
 from typing import Dict, List
 import sys
 
-from pipeline_manager import examples
+from pipeline_manager import frontend_tester
 
 from pipeline_manager_backend_communication.communication_backend import CommunicationBackend  # noqa: E501
 from pipeline_manager_backend_communication.misc_structures import MessageType, Status  # noqa: E501
@@ -138,7 +138,7 @@ def main(argv):
     client.initialize_client()
 
     specification_name = 'frontend_tester_specification.json'
-    with open_text(examples, specification_name) as f:
+    with open_text(frontend_tester, specification_name) as f:
         specification = json.load(f)
 
     text_to_message_type = {
@@ -158,7 +158,6 @@ def main(argv):
                     logging.log(logging.INFO, f'Responding to {message_type} message')  # noqa: E501
 
                     properties = get_node_properties(name, data)
-                    print(properties)
                     if properties['Disconnect']:
                         client.disconnect()
                     else:
@@ -176,8 +175,7 @@ def main(argv):
                                     time.sleep(effect['properties']['Time offset'])  # noqa: E501
                                     logging.log(logging.INFO, 'Disconnecting!')
                                     client.disconnect()
-                except Exception as ex:
-                    print(ex)
+                except Exception:
                     client.send_message(
                         MessageType.ERROR,
                         'No description provided'.encode(encoding='UTF-8')
