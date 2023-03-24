@@ -80,6 +80,38 @@
             ]
         },
         {
+            "name": "ExportBehaviour",
+            "type": "ExportBehaviour",
+            "category": "Descriptions",
+            "properties": [
+                {
+                    "name": "Duration",
+                    "type": "slider",
+                    "min": 0,
+                    "max": 5,
+                    "default": 0
+                },
+                {
+                    "name": "Disconnect",
+                    "type": "checkbox",
+                    "default": false
+                },
+                {
+                    "name": "MessageType",
+                    "type": "select",
+                    "values": ["ERROR", "OK"],
+                    "default": "OK"
+                },
+                {
+                    "name": "Message",
+                    "type": "text",
+                    "default": "Everything went fine!"
+                }
+            ],
+            "inputs": [],
+            "outputs": []
+        },
+        {
             "name": "Disconnect",
             "type": "Disconnect",
             "category": "Effects",
