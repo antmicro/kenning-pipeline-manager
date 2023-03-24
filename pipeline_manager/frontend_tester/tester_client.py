@@ -14,6 +14,18 @@ Run in the root directory:
 ```bash
 python -m pipeline_manager.frontend_tester.tester_client
 ```
+
+It support all MessageTypes.
+
+* MessageType.VALIDATION, MessageType.RUN and MessageType.EXPORT - Frontend
+tester checks appropriate nodes in the dataflow, that are customizable and can
+be adjusted to change the behaviour of the application.
+
+* MessageType.SPECIFICATION - Frontend tester sends OK response that contains
+its specification
+
+* MessageType.IMPORT - Frontend tester sends OK response that contains the
+data sent to it. It simply returns a received file.
 """
 
 import argparse
