@@ -48,7 +48,7 @@ def get_node_properties(name: str, dataflow: Dict) -> Dict:
 
     Returns
     -------
-    Dict
+    Dict :
         Dictionary that has all properties of a `name` node.
     """
     dataflow = json.loads(dataflow)
@@ -82,7 +82,7 @@ def get_effects(name: str, dataflow: Dict) -> List:
 
     Returns
     -------
-    List
+    List :
         List of nodes connected to `name` node.
     """
     dataflow = json.loads(dataflow)
