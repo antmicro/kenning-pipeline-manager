@@ -21,6 +21,7 @@ from importlib.resources import open_text
 import json
 import logging
 import time
+from pathlib import Path
 from typing import Dict, List
 import sys
 
@@ -132,6 +133,12 @@ def main(argv):
         help='The port of the Pipeline Manager Server',
         default=9000
     )
+    parser.add_argument(
+        '--output-path',
+        type=Path,
+        help='Path were exported dataflows are saved',
+        default='output.json'
+    )
     args, _ = parser.parse_known_args(argv[1:])
 
     client = CommunicationBackend(args.host, args.port)
@@ -146,52 +153,71 @@ def main(argv):
         'ERROR': MessageType.ERROR
     }
 
+    message_type_to_node_name = {
+        MessageType.RUN: 'RunBehaviour',
+        MessageType.VALIDATE: 'ValidateBehaviour',
+        MessageType.EXPORT: 'ExportBehaviour'
+    }
+
     while client.connected:
         status, message = client.wait_for_message()
         if status == Status.DATA_READY:
             message_type, data = message
+            logging.log(logging.INFO, f'Responding to {message_type} message')
 
-            if (message_type == MessageType.RUN or
-                    message_type == MessageType.VALIDATE):
-                try:
-                    name = 'RunBehaviour' if message_type == MessageType.RUN else 'ValidationBehaviour'  # noqa: E501
-                    logging.log(logging.INFO, f'Responding to {message_type} message')  # noqa: E501
-
-                    properties = get_node_properties(name, data)
-                    if properties['Disconnect']:
-                        client.disconnect()
-                    else:
-                        effects = get_effects(name, data)
-                        time.sleep(properties['Duration'])
-
-                        client.send_message(
-                            text_to_message_type[properties['MessageType']],
-                            properties['Message'].encode(encoding='UTF-8')
-                        )
-
-                        for effect in effects:
-                            if effect['name'] == 'Disconnect':
-                                if effect['properties']['Should disconnect']:
-                                    time.sleep(effect['properties']['Time offset'])  # noqa: E501
-                                    logging.log(logging.INFO, 'Disconnecting!')
-                                    client.disconnect()
-                except Exception:
-                    client.send_message(
-                        MessageType.ERROR,
-                        'No description provided'.encode(encoding='UTF-8')
-                    )
-            elif message_type == MessageType.SPECIFICATION:
+            if message_type == MessageType.SPECIFICATION:
                 logging.log(logging.INFO, 'Sending specification.')
                 client.send_message(
                     MessageType.OK,
                     json.dumps(specification).encode(encoding='UTF-8')
                 )
-            elif (message_type == MessageType.EXPORT or
-                    message_type == MessageType.IMPORT):
-                logging.log(logging.INFO, 'Import and Export message types are not supported')  # noqa: E501
+            elif message_type == MessageType.IMPORT:
+                client.send_message(
+                    MessageType.OK,
+                    data
+                )
+            elif message_type in message_type_to_node_name.keys():
+                try:
+                    name = message_type_to_node_name[message_type]
+                    properties = get_node_properties(name, data)
+                except Exception:
+                    client.send_message(
+                        MessageType.ERROR,
+                        f'No description for {str(message_type)} provided'.encode(encoding='UTF-8')  # noqa: E501
+                    )
+                    continue
+                if properties['Disconnect']:
+                    client.disconnect()
+                    continue
+
+                time.sleep(properties['Duration'])
+
+                if message_type == MessageType.EXPORT:
+                    with open(args.output_path, 'w') as f:
+                        json.dump(json.loads(data), f, indent=4)
+                    logging.log(logging.INFO, f'Exported dataflow stored in {args.output_path}')  # noqa: E501
+                    client.send_message(
+                        text_to_message_type[properties['MessageType']],
+                        properties['Message'].encode(encoding='UTF-8')
+                    )
+                elif message_type in [MessageType.RUN, MessageType.VALIDATE]:
+                    client.send_message(
+                        text_to_message_type[properties['MessageType']],
+                        properties['Message'].encode(encoding='UTF-8')
+                    )
+
+                    effects = get_effects(name, data)
+
+                    for effect in effects:
+                        if effect['name'] == 'Disconnect':
+                            if effect['properties']['Should disconnect']:
+                                time.sleep(effect['properties']['Time offset'])  # noqa: E501
+                                logging.log(logging.INFO, 'Disconnecting!')
+                                client.disconnect()
+            else:
                 client.send_message(
                     MessageType.ERROR,
-                    'Not implemented (yet)'.encode(encoding='UTF-8')
+                    f'Unknown message type: {str(message_type)}'.encode(encoding='UTF-8')  # noqa: E501
                 )
 
 
