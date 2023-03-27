@@ -47,6 +47,10 @@ export default {
     fill: $white;
 }
 
+.green {
+    fill: $green;
+}
+
 /* Rotate */
 .left {
     rotate: 270deg;
@@ -54,6 +58,10 @@ export default {
 
 .right {
     rotate: 180deg;
+}
+
+.up {
+    rotate: 90deg;
 }
 
 /* Scale */
