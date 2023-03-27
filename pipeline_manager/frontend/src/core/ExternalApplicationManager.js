@@ -109,26 +109,25 @@ export default class ExternalApplicationManager {
         let data = await response.json();
 
         if (action === 'run') {
+            /* eslint-disable no-await-in-loop */
             while (data.type === PMMessageType.PROGRESS) {
                 const progress = data.content;
                 // Information about the progress
-                showToast('info', `Running dataflow. Progress - ${progress}%`)
+                showToast('info', `Running dataflow. Progress - ${progress}%`);
 
                 response = await fetchGET(`receive_message`);
                 if (response.status === HTTPCodes.OK) {
                     data = await response.json();
-                }
-                else if (response.status === HTTPCodes.ServiceUnavailable) {
+                } else if (response.status === HTTPCodes.ServiceUnavailable) {
                     data = await response.text();
                     showToast('error', data);
                     return;
                 }
             }
         }
-        if (data.type == PMMessageType.OK) {
+        if (data.type === PMMessageType.OK) {
             showToast('info', data.content);
-        }
-        else if (data.type == PMMessageType.ERROR) {
+        } else if (data.type === PMMessageType.ERROR) {
             showToast('error', data.content);
         }
     }
@@ -158,8 +157,7 @@ export default class ExternalApplicationManager {
                 if (Array.isArray(errors) && errors.length) {
                     message = errors;
                     message.forEach((err) => showToast('error', err));
-                }
-                else {
+                } else {
                     showToast('info', message);
                 }
             } else if (data.type === PMMessageType.ERROR) {
