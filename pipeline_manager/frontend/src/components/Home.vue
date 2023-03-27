@@ -21,12 +21,14 @@ import NavBar from './NavBar.vue';
 import EditorManager from '../core/EditorManager';
 import Notifications from './Notifications.vue';
 import EditorView from '../custom/Editor.vue';
+import TerminalPanel from './TerminalPanel.vue';
 
 export default {
     components: {
         NavBar,
         Notifications,
         EditorView,
+        TerminalPanel,
     },
     data() {
         return {
