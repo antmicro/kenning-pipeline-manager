@@ -201,8 +201,19 @@ def main(argv):
                 if properties['Disconnect']:
                     client.disconnect()
                     continue
-
-                time.sleep(properties['Duration'])
+                if message_type in [MessageType.EXPORT, MessageType.VALIDATE]:
+                    time.sleep(properties['Duration'])
+                elif message_type == MessageType.RUN:
+                    steps = properties['ProgressMessages']
+                    time_offset = properties['Duration'] / steps
+                    for i in range(1, steps + 1):
+                        progress = str(i / steps * 100)
+                        logging.log(logging.INFO, f'Progress: {progress}')
+                        client.send_message(
+                            MessageType.PROGRESS,
+                            progress.encode('UTF-8')
+                        )
+                        time.sleep(time_offset)
 
                 if message_type == MessageType.EXPORT:
                     with open(args.output_path, 'w') as f:
