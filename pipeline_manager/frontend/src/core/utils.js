@@ -25,4 +25,5 @@ export const PMMessageType = {
     RUN: 4,
     IMPORT: 5,
     EXPORT: 6,
+    PROGRESS: 7,
 };
