@@ -33,7 +33,6 @@ class GetStatusFilter(logging.Filter):
         return '/get_status' not in record.getMessage()
 
 
-logging.basicConfig(level=logging.NOTSET)
 logging.getLogger("werkzeug").addFilter(GetStatusFilter())
 
 CORS(app)
@@ -273,6 +272,20 @@ def default_handler(e):
     return render_template('/index.html')
 
 
+def string_to_verbosity(level: str):
+    """
+    Maps verbosity string to corresponding logging enum.
+    """
+    levelconversion = {
+        'DEBUG': logging.DEBUG,
+        'INFO': logging.INFO,
+        'WARNING': logging.WARNING,
+        'ERROR': logging.ERROR,
+        'CRITICAL': logging.CRITICAL
+    }
+    return levelconversion[level]
+
+
 def main(argv):
     parser = argparse.ArgumentParser(argv[0])
     parser.add_argument(
@@ -305,7 +318,15 @@ def main(argv):
         help='Specifies whether Pipeline Manager should wait '
         'for an external application to connect before running the backend',
     )
+    parser.add_argument(
+        '--verbosity',
+        help='Verbosity level',
+        choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
+        default='WARNING',
+        type=str
+    )
     args, _ = parser.parse_known_args(argv[1:])
+    logging.basicConfig(level=string_to_verbosity(args.verbosity))
 
     global_state_manager.reinitialize(
         args.tcp_server_port,
