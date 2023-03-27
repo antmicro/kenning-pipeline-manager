@@ -7,7 +7,7 @@ import json
 import logging
 import os
 import sys
-from typing import Tuple
+from typing import Tuple, Any
 from http import HTTPStatus
 
 from flask import Flask, render_template, request
@@ -73,7 +73,7 @@ def get_status():
         return 'External application is disconnected', HTTPStatus.SERVICE_UNAVAILABLE  # noqa: E501
 
 
-def response_wrapper(output_message: OutputTuple) -> Tuple:
+def response_wrapper(output_message: OutputTuple) -> Tuple[Any, HTTPStatus]:
     """
     Helper function used to create HTTP responses based on the flow
     of the communication with the external application.
@@ -136,6 +136,17 @@ def import_dataflow():
     if out.status != Status.DATA_SENT:
         return 'Error while sending a message to the external application', HTTPStatus.SERVICE_UNAVAILABLE  # noqa: E501
 
+    out = tcp_server.wait_for_message()
+    return response_wrapper(out)
+
+
+@app.route('/receive_message', methods=['GET'])
+def receive_message():
+    """
+    General purpose endpoint that returns a single message from the application
+    created by `response_wrapper`.
+    """
+    tcp_server = global_state_manager.get_tcp_server()
     out = tcp_server.wait_for_message()
     return response_wrapper(out)
 
