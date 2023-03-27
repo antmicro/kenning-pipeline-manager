@@ -97,22 +97,39 @@ export default class ExternalApplicationManager {
         const formData = new FormData();
         formData.append('dataflow', dataflow);
 
-        const response = await fetchPOST(`dataflow_action_request/${action}`, formData);
-
-        if (response.status === HTTPCodes.OK) {
-            const data = await response.json();
-            if (data.type === PMMessageType.ERROR) {
-                showToast('error', data.content);
-            } else if (data.type === PMMessageType.OK) {
-                showToast('info', data.content);
-            }
-        }
+        let response = await fetchPOST(`dataflow_action_request/${action}`, formData);
         if (response.status === HTTPCodes.ServiceUnavailable) {
             // The connection was closed
             const data = await response.text();
             showToast('error', data);
-            this.externalApplicationConnected = false;
-            await this.invokeFetchAction(this.initializeConnection, false);
+            return;
+        }
+
+        // Status is HTTPCodes.OK so a message from the application is received.
+        let data = await response.json();
+
+        if (action === 'run') {
+            while (data.type === PMMessageType.PROGRESS) {
+                const progress = data.content;
+                // Information about the progress
+                showToast('info', `Running dataflow. Progress - ${progress}%`)
+
+                response = await fetchGET(`receive_message`);
+                if (response.status === HTTPCodes.OK) {
+                    data = await response.json();
+                }
+                else if (response.status === HTTPCodes.ServiceUnavailable) {
+                    data = await response.text();
+                    showToast('error', data);
+                    return;
+                }
+            }
+        }
+        if (data.type == PMMessageType.OK) {
+            showToast('info', data.content);
+        }
+        else if (data.type == PMMessageType.ERROR) {
+            showToast('error', data.content);
         }
     }
 
@@ -142,19 +159,16 @@ export default class ExternalApplicationManager {
                     message = errors;
                     message.forEach((err) => showToast('error', err));
                 }
-                showToast('info', message);
+                else {
+                    showToast('info', message);
+                }
             } else if (data.type === PMMessageType.ERROR) {
                 message = data.content;
                 showToast('error', message);
             }
-            showToast('info', message);
         } else if (response.status === HTTPCodes.ServiceUnavailable) {
-            // The connection was closed
             const data = await response.text();
-            message = data.content;
-            this.externalApplicationConnected = false;
-            await this.invokeFetchAction(this.initializeConnection, false);
-            showToast('error', message);
+            showToast('error', data);
         }
     }
 
