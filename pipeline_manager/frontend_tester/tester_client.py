@@ -167,7 +167,7 @@ def main(argv):
 
     message_type_to_node_name = {
         MessageType.RUN: 'RunBehaviour',
-        MessageType.VALIDATE: 'ValidateBehaviour',
+        MessageType.VALIDATE: 'ValidationBehaviour',
         MessageType.EXPORT: 'ExportBehaviour'
     }
 
