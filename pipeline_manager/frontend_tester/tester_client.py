@@ -40,7 +40,7 @@ import sys
 from pipeline_manager import frontend_tester
 
 from pipeline_manager_backend_communication.communication_backend import CommunicationBackend  # noqa: E501
-from pipeline_manager_backend_communication.misc_structures import MessageType, Status  # noqa: E501
+from pipeline_manager_backend_communication.misc_structures import MessageType  # noqa: E501
 
 
 logging.basicConfig(level=logging.NOTSET)
@@ -131,6 +131,100 @@ def get_effects(name: str, dataflow: Dict) -> List:
     return parsed_nodes
 
 
+def text_to_message_type(text):
+    return {
+        'OK': MessageType.OK,
+        'ERROR': MessageType.ERROR
+    }[text]
+
+
+def import_response(message_type, data, client):
+    client.send_message(
+        MessageType.OK,
+        data
+    )
+
+
+def specification_response(message_type, data, client, specification):
+    logging.log(logging.INFO, 'Sending specification.')
+    client.send_message(
+        MessageType.OK,
+        json.dumps(specification).encode(encoding='UTF-8')
+    )
+
+
+def run_validate_response(message_type, data, client):
+    message_type_to_node_name = {
+        MessageType.RUN: 'RunBehaviour',
+        MessageType.VALIDATE: 'ValidationBehaviour',
+    }
+
+    try:
+        name = message_type_to_node_name[message_type]
+        properties = get_node_properties(name, data)
+    except Exception:
+        client.send_message(
+            MessageType.ERROR,
+            f'No description for {str(message_type)} provided'.encode(encoding='UTF-8')  # noqa: E501
+        )
+        return
+    if properties['Disconnect']:
+        client.disconnect()
+        return
+
+    if message_type == MessageType.RUN:
+        steps = properties['ProgressMessages']
+        time_offset = properties['Duration'] / steps
+        for i in range(1, steps + 1):
+            progress = str(i / steps * 100)
+            logging.log(logging.INFO, f'Progress: {progress}')
+            client.send_message(
+                MessageType.PROGRESS,
+                progress.encode('UTF-8')
+            )
+            time.sleep(time_offset)
+    else:
+        time.sleep(properties['Duration'])
+
+    client.send_message(
+        text_to_message_type(properties['MessageType']),
+        properties['Message'].encode(encoding='UTF-8')
+    )
+
+    effects = get_effects(name, data)
+    for effect in effects:
+        if effect['name'] == 'Disconnect':
+            if effect['properties']['Should disconnect']:
+                time.sleep(effect['properties']['Time offset'])
+                logging.log(logging.INFO, 'Disconnecting!')
+                client.disconnect()
+
+
+def export_response(message_type, data, client, output_path):
+    name = 'ExportBehaviour'
+    try:
+        properties = get_node_properties(name, data)
+    except Exception:
+        client.send_message(
+            MessageType.ERROR,
+            f'No description for {str(message_type)} provided'.encode(encoding='UTF-8')  # noqa: E501
+        )
+        return
+    if properties['Disconnect']:
+        client.disconnect()
+        return
+
+    time.sleep(properties['Duration'])
+
+    with open(output_path, 'w') as f:
+        json.dump(json.loads(data), f, indent=4)
+    logging.log(logging.INFO, f'Exported dataflow stored in {output_path}')
+    client.send_message(
+        text_to_message_type[properties['MessageType']],
+        properties['Message'].encode(encoding='UTF-8')
+    )
+
+
 def main(argv):
     parser = argparse.ArgumentParser(argv[0])
     parser.add_argument(
@@ -160,88 +254,14 @@ def main(argv):
     with open_text(frontend_tester, specification_name) as f:
         specification = json.load(f)
 
-    text_to_message_type = {
-        'OK': MessageType.OK,
-        'ERROR': MessageType.ERROR
-    }
-
-    message_type_to_node_name = {
-        MessageType.RUN: 'RunBehaviour',
-        MessageType.VALIDATE: 'ValidationBehaviour',
-        MessageType.EXPORT: 'ExportBehaviour'
-    }
+    client.register_callback(MessageType.IMPORT, import_response)
+    client.register_callback(MessageType.SPECIFICATION, specification_response, specification)  # noqa: E501
+    client.register_callback(MessageType.RUN, run_validate_response)
+    client.register_callback(MessageType.VALIDATE, run_validate_response)
+    client.register_callback(MessageType.EXPORT, export_response, args.output_path)  # noqa: E501
 
     while client.connected:
-        status, message = client.wait_for_message()
-        if status == Status.DATA_READY:
-            message_type, data = message
-            logging.log(logging.INFO, f'Responding to {message_type} message')
-
-            if message_type == MessageType.SPECIFICATION:
-                logging.log(logging.INFO, 'Sending specification.')
-                client.send_message(
-                    MessageType.OK,
-                    json.dumps(specification).encode(encoding='UTF-8')
-                )
-            elif message_type == MessageType.IMPORT:
-                client.send_message(
-                    MessageType.OK,
-                    data
-                )
-            elif message_type in message_type_to_node_name.keys():
-                try:
-                    name = message_type_to_node_name[message_type]
-                    properties = get_node_properties(name, data)
-                except Exception:
-                    client.send_message(
-                        MessageType.ERROR,
-                        f'No description for {str(message_type)} provided'.encode(encoding='UTF-8')  # noqa: E501
-                    )
-                    continue
-                if properties['Disconnect']:
-                    client.disconnect()
-                    continue
-                if message_type in [MessageType.EXPORT, MessageType.VALIDATE]:
-                    time.sleep(properties['Duration'])
-                elif message_type == MessageType.RUN:
-                    steps = properties['ProgressMessages']
-                    time_offset = properties['Duration'] / steps
-                    for i in range(1, steps + 1):
-                        progress = str(i / steps * 100)
-                        logging.log(logging.INFO, f'Progress: {progress}')
-                        client.send_message(
-                            MessageType.PROGRESS,
-                            progress.encode('UTF-8')
-                        )
-                        time.sleep(time_offset)
-
-                if message_type == MessageType.EXPORT:
-                    with open(args.output_path, 'w') as f:
-                        json.dump(json.loads(data), f, indent=4)
-                    logging.log(logging.INFO, f'Exported dataflow stored in {args.output_path}')  # noqa: E501
-                    client.send_message(
-                        text_to_message_type[properties['MessageType']],
-                        properties['Message'].encode(encoding='UTF-8')
-                    )
-                elif message_type in [MessageType.RUN, MessageType.VALIDATE]:
-                    client.send_message(
-                        text_to_message_type[properties['MessageType']],
-                        properties['Message'].encode(encoding='UTF-8')
-                    )
-
-                    effects = get_effects(name, data)
-
-                    for effect in effects:
-                        if effect['name'] == 'Disconnect':
-                            if effect['properties']['Should disconnect']:
-                                time.sleep(effect['properties']['Time offset'])  # noqa: E501
-                                logging.log(logging.INFO, 'Disconnecting!')
-                                client.disconnect()
-            else:
-                client.send_message(
-                    MessageType.ERROR,
-                    f'Unknown message type: {str(message_type)}'.encode(encoding='UTF-8')  # noqa: E501
-                )
+        _, _ = client.wait_for_message()
 
 
 if __name__ == '__main__':
