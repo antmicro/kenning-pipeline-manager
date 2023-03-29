@@ -27,3 +27,8 @@ export const PMMessageType = {
     EXPORT: 6,
     PROGRESS: 7,
 };
+
+export const TerminalType = {
+    EXTERNAL: 'external',
+    PIPELINE: 'pipeline',
+};
