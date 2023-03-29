@@ -10,6 +10,7 @@ import { OptionPlugin } from '@baklavajs/plugin-options-vue';
 import { InterfaceTypePlugin } from '@baklavajs/plugin-interface-types';
 import Ajv from 'ajv';
 
+import CustomNode from '../components/CustomNode.vue';
 import NodeFactory from './NodeFactory';
 import ListOption from '../options/ListOption.vue';
 import specificationSchema from '../../../resources/schemas/dataflow_spec_schema.json';
@@ -44,7 +45,7 @@ export default class EditorManager {
         this.optionPlugin = new OptionPlugin();
 
         this.viewPlugin.registerOption('ListOption', ListOption);
-
+        this.viewPlugin.components.node = CustomNode;
         this.editor.use(this.viewPlugin);
         this.editor.use(this.nodeInterfaceTypes);
         this.editor.use(this.optionPlugin);
