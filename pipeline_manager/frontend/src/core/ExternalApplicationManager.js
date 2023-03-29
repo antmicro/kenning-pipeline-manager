@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+/* eslint-disable eqeqeq */
+
 import { backendApiUrl, HTTPCodes, PMMessageType } from './utils';
 import { fetchGET, fetchPOST } from './fetchRequests';
 import { showToast } from './notifications';
@@ -40,7 +42,7 @@ export default class ExternalApplicationManager {
         const connected = response.status === HTTPCodes.OK;
 
         if (!connected) {
-           showToast('error', data);
+            showToast('error', data);
         }
         this.externalApplicationConnected = connected;
     }
