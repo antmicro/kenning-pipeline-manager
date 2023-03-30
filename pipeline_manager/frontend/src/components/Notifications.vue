@@ -44,7 +44,6 @@ export default {
     z-index: 5;
     padding: $spacing-xxl;
     overflow-y: scroll;
-    transition: transform 1s;
 
     & > .info {
         display: flex;

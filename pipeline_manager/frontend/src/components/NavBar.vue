@@ -95,11 +95,13 @@ export default {
 
             const notificationPanel = document.querySelector('.notifications');
             if (notificationPanel) {
-                notificationPanel.style.transform = `translateX(${
-                    this.isNotificationPanelOpen
-                        ? negativeNotificationPanelWidth
-                        : resetNotificationPanelTransition
-                })`;
+                if (this.isNotificationPanelOpen) {
+                    notificationPanel.style.transition = 'transform 0.4s';
+                    notificationPanel.style.transform = `translateX(${negativeNotificationPanelWidth})`;
+                } else {
+                    notificationPanel.style.transition = 'transform 0.2s';
+                    notificationPanel.style.transform = `translateX(${resetNotificationPanelTransition})`;
+                }
 
                 if (this.isNotificationPanelOpen) {
                     this.$refs.notifications.classList.add('open');
@@ -130,16 +132,18 @@ export default {
 
             const backendStatus = document.querySelector('.backend-status');
             if (backendStatus) {
-                backendStatus.style.transform = `translate(${
-                    this.isBackendStatusOpen ? showBackendStatusPanel : hideBackendStatusPanel
-                })`;
-
                 if (this.isBackendStatusOpen) {
+                    backendStatus.style.transition = 'transform 0.4s';
+                    backendStatus.style.transform = `translate(${showBackendStatusPanel})`;
+
                     if (this.$refs.notifications) {
                         this.$refs.notifications.classList.add('open');
                     }
                     this.$refs.backend.classList.add('open');
                 } else {
+                    backendStatus.style.transition = 'transform 0.2s';
+                    backendStatus.style.transform = `translate(${hideBackendStatusPanel})`;
+
                     if (this.$refs.notifications) {
                         this.$refs.notifications.classList.remove('open');
                     }
