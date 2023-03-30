@@ -16,7 +16,7 @@ from pipeline_manager_backend_communication.misc_structures import MessageType, 
 
 from pipeline_manager import frontend
 from pipeline_manager.backend.state_manager import global_state_manager
-
+from pipeline_manager.utils.logger import string_to_verbosity
 
 dist_path = os.path.join(os.path.dirname(frontend.__file__), 'dist')
 
@@ -281,20 +281,6 @@ def default_handler(e):
         The response contains entry HTML for the frontend application
     """
     return render_template('/index.html')
-
-
-def string_to_verbosity(level: str):
-    """
-    Maps verbosity string to corresponding logging enum.
-    """
-    levelconversion = {
-        'DEBUG': logging.DEBUG,
-        'INFO': logging.INFO,
-        'WARNING': logging.WARNING,
-        'ERROR': logging.ERROR,
-        'CRITICAL': logging.CRITICAL
-    }
-    return levelconversion[level]
 
 
 def main(argv):

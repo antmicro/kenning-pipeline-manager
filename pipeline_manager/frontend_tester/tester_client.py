@@ -38,12 +38,10 @@ from typing import Dict, List
 import sys
 
 from pipeline_manager import frontend_tester
+from pipeline_manager.utils.logger import string_to_verbosity
 
 from pipeline_manager_backend_communication.communication_backend import CommunicationBackend  # noqa: E501
 from pipeline_manager_backend_communication.misc_structures import MessageType  # noqa: E501
-
-
-logging.basicConfig(level=logging.NOTSET)
 
 
 def get_node_properties(name: str, dataflow: Dict) -> Dict:
@@ -245,7 +243,15 @@ def main(argv):
         help='Path were exported dataflows are saved',
         default='output.json'
     )
-    args, _ = parser.parse_known_args(argv[1:])
+    parser.add_argument(
+        '--verbosity',
+        help='Verbosity level',
+        choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
+        default='DEBUG',
+        type=str
+    )
+    args, _ = parser.parse_known_args(argv[1:])    
+    logging.basicConfig(level=string_to_verbosity(args.verbosity))
 
     client = CommunicationBackend(args.host, args.port)
     client.initialize_client()
