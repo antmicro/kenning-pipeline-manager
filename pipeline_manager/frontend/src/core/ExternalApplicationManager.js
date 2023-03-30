@@ -101,7 +101,11 @@ export default class ExternalApplicationManager {
 
         if (response.status === HTTPCodes.OK) {
             const data = await response.json();
-            showToast('info', data.content);
+            if (data.type == PMMessageType.ERROR) {
+                showToast('error', data.content);
+            } else if (data.type == PMMessageType.OK) {
+                showToast('info', data.content);
+            }
         }
         if (response.status === HTTPCodes.ServiceUnavailable) {
             // The connection was closed
