@@ -123,35 +123,90 @@ def get_effects(name: str, dataflow: Dict) -> List:
                 'name': node['name'],
                 'properties': {
                     option[0]: option[1] for option in node['options']
-                }
+                },
             }
         )
     return parsed_nodes
 
 
-def text_to_message_type(text):
-    return {
-        'OK': MessageType.OK,
-        'ERROR': MessageType.ERROR
-    }[text]
+def _text_to_message_type(text: str) -> MessageType:
+    """
+    Helper function that maps text representation to MessageType.
+
+    Parameters
+    ----------
+    text : str
+        Text representation of a message type
+
+    Returns
+    -------
+    MessageType :
+        Mapped text representation
+    """
+    return {'OK': MessageType.OK, 'ERROR': MessageType.ERROR}[text]
 
 
-def import_response(message_type, data, client):
-    client.send_message(
-        MessageType.OK,
-        data
-    )
+def import_response(
+    message_type: MessageType, data: bytes, client: CommunicationBackend
+) -> None:
+    """
+    Callback that responses to Import request.
+
+    Parameters
+    ----------
+    message_type : MessageType
+        Message type of the request.
+    data : bytes
+        Content of the request.
+    client : CommunicationBackend
+        Client connected to Pipeline Manager
+    """
+    client.send_message(MessageType.OK, data)
 
 
-def specification_response(message_type, data, client, specification):
+def specification_response(
+    message_type: MessageType,
+    data: bytes,
+    client: CommunicationBackend,
+    specification: Dict,
+) -> None:
+    """
+    Callback that responses to Specification request.
+
+    Parameters
+    ----------
+    message_type : MessageType
+        Message type of the request.
+    data : bytes
+        Content of the request.
+    client : CommunicationBackend
+        Client connected to Pipeline Manager
+    specification : Dict
+        Specification that is send back to Pipeline Manager
+    """
     logging.log(logging.INFO, 'Sending specification.')
     client.send_message(
-        MessageType.OK,
-        json.dumps(specification).encode(encoding='UTF-8')
+        MessageType.OK, json.dumps(specification).encode(encoding='UTF-8')
     )
 
 
-def run_validate_response(message_type, data, client):
+def run_validate_response(
+    message_type: MessageType,
+    data: bytes,
+    client: CommunicationBackend,
+) -> None:
+    """
+    Callback that responses to Run and Validation requests.
+
+    Parameters
+    ----------
+    message_type : MessageType
+        Message type of the request.
+    data : bytes
+        Content of the request.
+    client : CommunicationBackend
+        Client connected to Pipeline Manager
+    """
     message_type_to_node_name = {
         MessageType.RUN: 'RunBehaviour',
         MessageType.VALIDATE: 'ValidationBehaviour',
@@ -163,7 +218,9 @@ def run_validate_response(message_type, data, client):
     except Exception:
         client.send_message(
             MessageType.ERROR,
-            f'No description for {str(message_type)} provided'.encode(encoding='UTF-8')  # noqa: E501
+            f'No description for {str(message_type)} provided'.encode(
+                encoding='UTF-8'
+            )
         )
         return
     if properties['Disconnect']:
@@ -176,17 +233,14 @@ def run_validate_response(message_type, data, client):
         for i in range(1, steps + 1):
             progress = str(i / steps * 100)
             logging.log(logging.INFO, f'Progress: {progress}')
-            client.send_message(
-                MessageType.PROGRESS,
-                progress.encode('UTF-8')
-            )
+            client.send_message(MessageType.PROGRESS, progress.encode('UTF-8'))
             time.sleep(time_offset)
     else:
         time.sleep(properties['Duration'])
 
     client.send_message(
-        text_to_message_type(properties['MessageType']),
-        properties['Message'].encode(encoding='UTF-8')
+        _text_to_message_type(properties['MessageType']),
+        properties['Message'].encode(encoding='UTF-8'),
     )
 
     effects = get_effects(name, data)
@@ -198,14 +252,35 @@ def run_validate_response(message_type, data, client):
                 client.disconnect()
 
 
-def export_response(message_type, data, client, output_path):
+def export_response(
+    message_type: MessageType,
+    data: bytes,
+    client: CommunicationBackend,
+    output_path: Path,
+) -> None:
+    """
+    Callback that responses to Export requests.
+
+    Parameters
+    ----------
+    message_type : MessageType
+        Message type of the request.
+    data : bytes
+        Content of the request.
+    client : CommunicationBackend
+        Client connected to Pipeline Manager
+    output_path : Path
+        Path where the exported dataflow is saved.
+    """
     name = 'ExportBehaviour'
     try:
         properties = get_node_properties(name, data)
     except Exception:
         client.send_message(
             MessageType.ERROR,
-            f'No description for {str(message_type)} provided'.encode(encoding='UTF-8')  # noqa: E501
+            f'No description for {str(message_type)} provided'.encode(
+                encoding='UTF-8'
+            ),
         )
         return
     if properties['Disconnect']:
@@ -218,8 +293,8 @@ def export_response(message_type, data, client, output_path):
         json.dump(json.loads(data), f, indent=4)
     logging.log(logging.INFO, f'Exported dataflow stored in {output_path}')
     client.send_message(
-        text_to_message_type[properties['MessageType']],
-        properties['Message'].encode(encoding='UTF-8')
+        _text_to_message_type[properties['MessageType']],
+        properties['Message'].encode(encoding='UTF-8'),
     )
 
 
@@ -229,28 +304,28 @@ def main(argv):
         '--host',
         type=str,
         help='The address of the Pipeline Manager Server',
-        default='127.0.0.1'
+        default='127.0.0.1',
     )
     parser.add_argument(
         '--port',
         type=int,
         help='The port of the Pipeline Manager Server',
-        default=9000
+        default=9000,
     )
     parser.add_argument(
         '--output-path',
         type=Path,
         help='Path were exported dataflows are saved',
-        default='output.json'
+        default='output.json',
     )
     parser.add_argument(
         '--verbosity',
         help='Verbosity level',
         choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
         default='DEBUG',
-        type=str
+        type=str,
     )
-    args, _ = parser.parse_known_args(argv[1:])    
+    args, _ = parser.parse_known_args(argv[1:])
     logging.basicConfig(level=string_to_verbosity(args.verbosity))
 
     client = CommunicationBackend(args.host, args.port)
@@ -261,10 +336,14 @@ def main(argv):
         specification = json.load(f)
 
     client.register_callback(MessageType.IMPORT, import_response)
-    client.register_callback(MessageType.SPECIFICATION, specification_response, specification)  # noqa: E501
+    client.register_callback(
+        MessageType.SPECIFICATION, specification_response, specification
+    )
     client.register_callback(MessageType.RUN, run_validate_response)
     client.register_callback(MessageType.VALIDATE, run_validate_response)
-    client.register_callback(MessageType.EXPORT, export_response, args.output_path)  # noqa: E501
+    client.register_callback(
+        MessageType.EXPORT, export_response, args.output_path
+    )
 
     while client.connected:
         _, _ = client.wait_for_message()
