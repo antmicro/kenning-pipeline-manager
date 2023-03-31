@@ -11,6 +11,7 @@ import { InterfaceTypePlugin } from '@baklavajs/plugin-interface-types';
 import Ajv from 'ajv';
 
 import CustomNode from '../components/CustomNode.vue';
+import ContextMenu from '../components/ContextMenu.vue';
 import NodeFactory from './NodeFactory';
 import ListOption from '../options/ListOption.vue';
 import specificationSchema from '../../../resources/schemas/dataflow_spec_schema.json';
@@ -46,6 +47,7 @@ export default class EditorManager {
 
         this.viewPlugin.registerOption('ListOption', ListOption);
         this.viewPlugin.components.node = CustomNode;
+        this.viewPlugin.components.contextMenu = ContextMenu;
         this.editor.use(this.viewPlugin);
         this.editor.use(this.nodeInterfaceTypes);
         this.editor.use(this.optionPlugin);
