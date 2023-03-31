@@ -79,8 +79,12 @@ export default {
 
     & > .command-results {
         flex: 1;
-        padding: $spacing-l;
+        padding: $spacing-xxl;
         overflow-y: scroll;
+
+        & {
+            margin-right: $spacing-m;
+        }
     }
 }
 

@@ -138,9 +138,9 @@ export default {
     min-height: 35px;
     background-color: $gray-600;
     /* Calculation to prevent panel overflow */
-    width: calc(100% - 2 * #{$spacing-l});
+    width: calc(100% - 2 * #{$spacing-xxl});
     display: flex;
-    padding: 0 $spacing-l;
+    padding: 0 $spacing-xxl;
     align-items: center;
     justify-content: space-between;
 
