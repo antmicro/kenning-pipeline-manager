@@ -1,6 +1,7 @@
 <template>
-    <div class="terminal-wrapper">
+    <div ref="terminalWrapper" class="terminal-wrapper">
         <div class="container">
+            <div ref="resizer" class="resizer" />
             <div class="tab">
                 <button class="tab-item" @click="toggleExternalTerminal">
                     <span ref="externalSpan">Kenning</span>
@@ -35,6 +36,7 @@
 import Terminal from './Terminal.vue';
 import Arrow from '../icons/Arrow.vue';
 import { TerminalType } from '../core/utils';
+import { mouseDownHandler } from '../core/events';
 
 export default {
     components: {
@@ -48,27 +50,55 @@ export default {
             TerminalType,
         };
     },
+    mounted() {
+        this.$refs.resizer.addEventListener('mousedown', mouseDownHandler);
+    },
     methods: {
         toggleExternalTerminal() {
+            // Get height of terminal panel before change
+            const terminalWrapperHeight = this.$refs.terminalWrapper.clientHeight;
+
+            // 360px height for commands + 35px for termianl tabs = 395px
+            const minTerminalPanelHeight = 395;
+
             this.isExternalTerminalOpen = !this.isExternalTerminalOpen;
             this.isPipelineManagerTerminalOpen = false;
 
             if (this.isExternalTerminalOpen) {
+                this.$refs.terminalWrapper.style.height =
+                    terminalWrapperHeight > minTerminalPanelHeight
+                        ? `${terminalWrapperHeight}px`
+                        : `${minTerminalPanelHeight}px`;
+                this.$refs.resizer.style.pointerEvents = 'all';
                 this.$refs.externalSpan.classList.add('active');
                 this.$refs.pipelineSpan.classList.remove('active');
             } else {
+                this.$refs.resizer.style.pointerEvents = 'none';
+                this.$refs.terminalWrapper.style.height = 'unset';
                 this.$refs.externalSpan.classList.remove('active');
                 this.$refs.pipelineSpan.classList.remove('active');
             }
         },
         togglePipelineManagerTerminal() {
+            // Get height of terminal panel before change
+            const terminalWrapperHeight = this.$refs.terminalWrapper.clientHeight;
+            // 360px height for commands + 35px for termianl tabs = 395px
+            const minTerminalPanelHeight = 395;
+
             this.isPipelineManagerTerminalOpen = !this.isPipelineManagerTerminalOpen;
             this.isExternalTerminalOpen = false;
 
             if (this.isPipelineManagerTerminalOpen) {
+                this.$refs.terminalWrapper.style.height =
+                    terminalWrapperHeight > minTerminalPanelHeight
+                        ? `${terminalWrapperHeight}px`
+                        : `${minTerminalPanelHeight}px`;
+                this.$refs.resizer.style.pointerEvents = 'all';
                 this.$refs.externalSpan.classList.remove('active');
                 this.$refs.pipelineSpan.classList.add('active');
             } else {
+                this.$refs.resizer.style.pointerEvents = 'none';
+                this.$refs.terminalWrapper.style.height = 'unset';
                 this.$refs.externalSpan.classList.remove('active');
                 this.$refs.pipelineSpan.classList.remove('active');
             }
@@ -80,6 +110,8 @@ export default {
                 this.isExternalTerminalOpen = false;
                 this.isPipelineManagerTerminalOpen = false;
 
+                this.$refs.resizer.style.pointerEvents = 'none';
+                this.$refs.terminalWrapper.style.height = 'unset';
                 this.$refs.externalSpan.classList.remove('active');
                 this.$refs.pipelineSpan.classList.remove('active');
             }
@@ -91,14 +123,19 @@ export default {
 <style lang="scss" scoped>
 .terminal-wrapper {
     position: absolute;
+    min-height: 35px;
+    border-top: 1px solid $gray-500;
     bottom: 0;
     width: 100%;
-    display: block;
     transition: transform 1s;
+    display: flex;
+    flex-direction: column;
 }
 
 .container {
+    position: relative;
     height: 35px;
+    min-height: 35px;
     background-color: $gray-600;
     /* Calculation to prevent panel overflow */
     width: calc(100% - 2 * #{$spacing-l});
@@ -106,6 +143,15 @@ export default {
     padding: 0 $spacing-l;
     align-items: center;
     justify-content: space-between;
+
+    & > .resizer {
+        position: absolute;
+        height: 5px;
+        width: 100%;
+        top: 0;
+        cursor: row-resize;
+        pointer-events: none;
+    }
 
     & > .tab {
         display: flex;

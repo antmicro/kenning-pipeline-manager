@@ -52,6 +52,8 @@ export default {
                 pipelineTerminalStore.add({ command, result: command });
             }
 
+            e.target.elements.command.value = '';
+
             nextTick(() => {
                 if (commands) {
                     const { scrollHeight } = commands;
@@ -69,10 +71,11 @@ export default {
 
 <style lang="scss" scoped>
 .terminal-container {
-    height: 360px;
+    min-height: 360px;
     background-color: $gray-600;
     display: flex;
     flex-direction: column;
+    flex: 1;
 
     & > .command-results {
         flex: 1;
