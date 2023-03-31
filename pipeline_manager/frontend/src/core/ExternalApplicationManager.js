@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-/* eslint-disable eqeqeq */
-
 import { backendApiUrl, HTTPCodes, PMMessageType } from './utils';
 import { fetchGET, fetchPOST } from './fetchRequests';
 import { showToast } from './notifications';
@@ -103,9 +101,9 @@ export default class ExternalApplicationManager {
 
         if (response.status === HTTPCodes.OK) {
             const data = await response.json();
-            if (data.type == PMMessageType.ERROR) {
+            if (data.type === PMMessageType.ERROR) {
                 showToast('error', data.content);
-            } else if (data.type == PMMessageType.OK) {
+            } else if (data.type === PMMessageType.OK) {
                 showToast('info', data.content);
             }
         }
