@@ -70,7 +70,7 @@ export default {
     right: -495px;
     z-index: 5;
     padding: $spacing-xxl;
-    overflow-y: scroll;
+    overflow-y: auto;
 
     & > .info {
         display: flex;
