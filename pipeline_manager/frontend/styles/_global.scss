@@ -51,3 +51,20 @@ button {
     user-select: unset;
     padding: 0;
 }
+
+:root {
+    scrollbar-color: $gray-200 $gray-500 !important;
+}
+
+::-webkit-scrollbar {
+    width: 5px;
+}
+
+::-webkit-scrollbar-track {
+    background: $gray-500;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: $gray-200;
+    border-radius: 5px;
+}
