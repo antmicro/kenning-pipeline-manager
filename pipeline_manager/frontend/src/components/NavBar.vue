@@ -154,11 +154,22 @@ export default {
             }
         },
         /**
+         * Loads nodes' specification from JSON structure.
+         */
+        loadDataflow(dataflow) {
+            const errors = this.editorManager.loadDataflow(dataflow);
+            if (Array.isArray(errors) && errors.length) {
+                errors.forEach((err) => showToast('error', err));
+            } else {
+                showToast('info', 'Dataflow loaded successfully');
+            }
+        },
+        /**
          * Event handler that Loads a dataflow from a file.
          * It the loading is successful it is loaded as the current dataflow.
          * Otherwise the user is alerted with a feedback message.
          */
-        loadDataflow() {
+        loadDataflowCallback() {
             const file = document.getElementById('load-dataflow-button').files[0];
             if (!file) return;
 
@@ -177,17 +188,11 @@ export default {
                     return;
                 }
 
-                const errors = this.editorManager.loadDataflow(dataflow);
-                if (Array.isArray(errors) && errors.length) {
-                    showToast('error', errors);
-                } else {
-                    showToast('info', 'Dataflow loaded successfully');
-                }
+                this.loadDataflow(dataflow);
             };
 
             fileReader.readAsText(file);
         },
-
         /**
          * Event handler that that saves a current dataflow to a `save.json` file.
          */
@@ -227,6 +232,10 @@ export default {
             const specification = require(process.env.VUE_APP_SPECIFICATION_PATH); // eslint-disable-line global-require,max-len,import/no-dynamic-require
             this.loadSpecification(specification);
         }
+        if (process.env.VUE_APP_DATAFLOW_PATH !== undefined) {
+            const dataflow = require(process.env.VUE_APP_DATAFLOW_PATH); // eslint-disable-line global-require,max-len,import/no-dynamic-require
+            this.loadDataflow(dataflow);
+        }
     },
 };
 </script>
@@ -248,7 +257,7 @@ export default {
                         <DropdownItem
                             id="load-dataflow-button"
                             text="Load graph file"
-                            :eventFunction="loadDataflow"
+                            :eventFunction="loadDataflowCallback"
                         />
                         <DropdownItem
                             type="'button'"
