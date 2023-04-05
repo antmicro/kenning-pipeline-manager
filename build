@@ -9,18 +9,21 @@ BASE_DIR=$(dirname "$0")
 display_help() {
     echo "Invalid parameters. Supported build options are:"
     echo
-    echo "./build static-html [<specification-path>] - build as a static application that can run without any backend server, with optional default specification."
+    echo "./build static-html [<specification-path> [<dataflow-path>]] - build as a static application that can run without any backend server, with optional default specification and optional default dataflow."
     echo "./build server-app  - build the application to run with a backend server and an external application"
 }
 
-if ! [[ $# -ge 1 && $# -le 2 ]]; then
+if ! [[ $# -ge 1 && $# -le 3 ]]; then
     display_help
     exit 1
 fi
 
 if [ "$1" = "static-html" ]; then
-    if [ "$#" -eq 2 ]; then
-        echo VUE_APP_SPECIFICATION_PATH=$(realpath $2) > pipeline_manager/frontend/.env.static.local
+    if [ "$#" -ge 2 ]; then
+        echo VUE_APP_SPECIFICATION_PATH=$(realpath $2) > $BASE_DIR/pipeline_manager/frontend/.env.static.local
+        if [ "$#" -eq 3 ]; then
+            echo VUE_APP_DATAFLOW_PATH=$(realpath $3) >> $BASE_DIR/pipeline_manager/frontend/.env.static.local
+        fi
     fi
     cd $BASE_DIR/pipeline_manager/frontend && npm install
     npm run build-static-html
