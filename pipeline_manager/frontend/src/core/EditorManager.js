@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Editor } from '@baklavajs/core';
 import { ViewPlugin } from '@baklavajs/plugin-renderer-vue';
 import { OptionPlugin } from '@baklavajs/plugin-options-vue';
 import { InterfaceTypePlugin } from '@baklavajs/plugin-interface-types';
@@ -15,6 +14,7 @@ import ContextMenu from '../components/ContextMenu.vue';
 import NodeFactory from './NodeFactory';
 import ListOption from '../options/ListOption.vue';
 import specificationSchema from '../../../resources/schemas/dataflow_spec_schema.json';
+import PipelineManagerEditor from './Editor';
 
 export default class EditorManager {
     static instance;
@@ -40,7 +40,7 @@ export default class EditorManager {
      * It is used to reset the environment.
      */
     initializeEditor() {
-        this.editor = new Editor();
+        this.editor = new PipelineManagerEditor();
         this.nodeInterfaceTypes = new InterfaceTypePlugin();
         this.viewPlugin = new ViewPlugin();
         this.optionPlugin = new OptionPlugin();
