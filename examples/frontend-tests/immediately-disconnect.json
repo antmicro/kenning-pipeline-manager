@@ -1,0 +1,52 @@
+{
+  "nodes": [
+    {
+      "type": "RunBehaviour",
+      "id": "node_16807659019980",
+      "name": "RunBehaviour",
+      "options": [
+        [
+          "Duration",
+          0
+        ],
+        [
+          "Disconnect",
+          true
+        ],
+        [
+          "MessageType",
+          "OK"
+        ],
+        [
+          "Message",
+          "Everything went fine!"
+        ]
+      ],
+      "state": {},
+      "interfaces": [
+        [
+          "Effect",
+          {
+            "id": "ni_16807659019991",
+            "value": null,
+            "isInput": false,
+            "type": "Effect"
+          }
+        ]
+      ],
+      "position": {
+        "x": 258,
+        "y": 135
+      },
+      "width": 200,
+      "twoColumn": false,
+      "customClasses": ""
+    }
+  ],
+  "connections": [],
+  "panning": {
+    "x": 0,
+    "y": 0
+  },
+  "scaling": 1
+}

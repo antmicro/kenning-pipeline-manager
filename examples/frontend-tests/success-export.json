@@ -1,0 +1,42 @@
+{
+  "nodes": [
+    {
+      "type": "ExportBehaviour",
+      "id": "node_168076808526610",
+      "name": "ExportBehaviour",
+      "options": [
+        [
+          "Duration",
+          0
+        ],
+        [
+          "Disconnect",
+          false
+        ],
+        [
+          "MessageType",
+          "OK"
+        ],
+        [
+          "Message",
+          "Success export"
+        ]
+      ],
+      "state": {},
+      "interfaces": [],
+      "position": {
+        "x": 454,
+        "y": 318
+      },
+      "width": 200,
+      "twoColumn": false,
+      "customClasses": ""
+    }
+  ],
+  "connections": [],
+  "panning": {
+    "x": 0,
+    "y": 0
+  },
+  "scaling": 1
+}

@@ -1,0 +1,92 @@
+{
+  "nodes": [
+    {
+      "type": "RunBehaviour",
+      "id": "node_168076500598632",
+      "name": "RunBehaviour",
+      "options": [
+        [
+          "Duration",
+          1
+        ],
+        [
+          "Disconnect",
+          false
+        ],
+        [
+          "MessageType",
+          "OK"
+        ],
+        [
+          "Message",
+          "Success message disconnect after 1s"
+        ]
+      ],
+      "state": {},
+      "interfaces": [
+        [
+          "Effect",
+          {
+            "id": "ni_168076500598633",
+            "value": null,
+            "isInput": false,
+            "type": "Effect"
+          }
+        ]
+      ],
+      "position": {
+        "x": 187,
+        "y": 324
+      },
+      "width": 200,
+      "twoColumn": false,
+      "customClasses": ""
+    },
+    {
+      "type": "Disconnect",
+      "id": "node_168076500879534",
+      "name": "Disconnect",
+      "options": [
+        [
+          "Time offset",
+          1
+        ],
+        [
+          "Should disconnect",
+          true
+        ]
+      ],
+      "state": {},
+      "interfaces": [
+        [
+          "Effect",
+          {
+            "id": "ni_168076500879635",
+            "value": null,
+            "isInput": true,
+            "type": "Effect"
+          }
+        ]
+      ],
+      "position": {
+        "x": 847,
+        "y": 418
+      },
+      "width": 200,
+      "twoColumn": false,
+      "customClasses": ""
+    }
+  ],
+  "connections": [
+    {
+      "id": "168076501217238",
+      "from": "ni_168076500598633",
+      "to": "ni_168076500879635"
+    }
+  ],
+  "panning": {
+    "x": 0,
+    "y": 0
+  },
+  "scaling": 1
+}
