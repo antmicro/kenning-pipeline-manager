@@ -11,16 +11,7 @@ SPDX-License-Identifier: Apache-2.0
             @mousedown.self.stop="startDrag"
             @contextmenu.self.prevent="openContextMenu"
         >
-            <span v-if="!renaming">{{ data.name }}</span>
-            <input
-                v-else
-                type="text"
-                class="dark-input"
-                v-model="tempName"
-                placeholder="Node Name"
-                v-click-outside="doneRenaming"
-                @keydown.enter="doneRenaming"
-            />
+            <span>{{ data.name }}</span>
 
             <component
                 :is="plugin.components.contextMenu"
@@ -80,6 +71,16 @@ import { Components } from '@baklavajs/plugin-renderer-vue';
 export default {
     // CustomNode inherits from the original baklavajs Node
     extends: Components.Node,
+    data() {
+        return {
+            contextMenu: {
+                show: false,
+                x: 0,
+                y: 0,
+                items: [{ value: 'delete', label: 'Delete' }],
+            },
+        };
+    },
     methods: {
         /**
          * The function decides whether a name for the option should be displayed.
@@ -99,6 +100,15 @@ export default {
                 case 'ListOption':
                 default:
                     return true;
+            }
+        },
+        onContextMenu(action) {
+            switch (action) {
+                case 'delete':
+                    this.plugin.editor.removeNode(this.data);
+                    break;
+                default:
+                    break;
             }
         },
     },
