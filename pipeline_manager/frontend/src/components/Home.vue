@@ -8,7 +8,11 @@ SPDX-License-Identifier: Apache-2.0
     <div id="container">
         <NavBar />
         <Notifications />
-        <baklava-editor class="inner-editor" :plugin="this.editorManager.viewPlugin" />
+        <baklava-editor
+            class="inner-editor"
+            :plugin="this.editorManager.viewPlugin"
+            :style="`--scale: ${this.scale}`"
+        />
     </div>
 </template>
 
@@ -26,6 +30,11 @@ export default {
         return {
             editorManager: EditorManager.getEditorManagerInstance(),
         };
+    },
+    computed: {
+        scale() {
+            return this.editorManager.viewPlugin.scaling;
+        },
     },
 };
 </script>

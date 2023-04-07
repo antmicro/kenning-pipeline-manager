@@ -57,6 +57,11 @@ $color-pattern-black: $gray-500;
     font-size: 14px;
 }
 
+.node.--selected {
+    z-index: 5;
+    box-shadow: 0 0 0 calc(1px / var(--scale)) $green;
+}
+
 .node-editor .background {
     background-image: linear-gradient($gray-700 2px, transparent 2px),
         linear-gradient(90deg, $gray-700 2px, transparent 2px);
