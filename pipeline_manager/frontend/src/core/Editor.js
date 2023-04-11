@@ -4,8 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Editor } from '@baklavajs/core';
-import { DummyConnection } from '@baklavajs/core';
+import { Editor, DummyConnection } from '@baklavajs/core';
 
 export default class PipelineManagerEditor extends Editor {
     /**
@@ -21,9 +20,11 @@ export default class PipelineManagerEditor extends Editor {
 
         if (from.isInput && !to.isInput) {
             // reverse connection
+            /* eslint-disable no-param-reassign */
             const tmp = from;
             from = to;
             to = tmp;
+            /* eslint-enable no-param-reassign */
         }
 
         if (from.isInput || !to.isInput) {
