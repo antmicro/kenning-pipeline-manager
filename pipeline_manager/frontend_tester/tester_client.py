@@ -29,7 +29,6 @@ data sent to it. It simply returns a received file.
 """
 
 import argparse
-from importlib.resources import open_text
 import json
 import logging
 import time
@@ -325,14 +324,24 @@ def main(argv):
         default='DEBUG',
         type=str,
     )
+    parser.add_argument(
+        '--specification-path',
+        type=Path,
+        help='Path to specification JSON file',
+        default=None
+    )
     args, _ = parser.parse_known_args(argv[1:])
     logging.basicConfig(level=string_to_verbosity(args.verbosity))
 
     client = CommunicationBackend(args.host, args.port)
     client.initialize_client()
 
-    specification_name = 'frontend_tester_specification.json'
-    with open_text(frontend_tester, specification_name) as f:
+    if args.specification_path is None:
+        spec_path = Path(frontend_tester.__file__).parent
+        spec_path = spec_path / 'frontend_tester_specification.json'
+    else:
+        spec_path = args.specification_path
+    with open(spec_path) as f:
         specification = json.load(f)
 
     client.register_callback(MessageType.IMPORT, import_response)
