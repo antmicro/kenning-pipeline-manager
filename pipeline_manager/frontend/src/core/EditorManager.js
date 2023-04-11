@@ -71,7 +71,10 @@ export default class EditorManager {
             const x2 = Number(path[3]);
             const y2 = Number(path[4]);
             const nodeHtml = document.getElementById(c.$el.getAttribute('data-from-node'));
-            const BottomY = nodeHtml.offsetTop + nodeHtml.offsetHeight;
+            const scale = nodeHtml.getBoundingClientRect().height / nodeHtml.offsetHeight;
+            const BottomY =
+                (nodeHtml.offsetTop + nodeHtml.offsetHeight) * scale +
+                nodeHtml.parentNode.offsetTop;
 
             /*
             Find level how deep away from the node should the connection loop back. Each output
