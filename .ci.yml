@@ -21,30 +21,40 @@ eslint:
         - npm install
         - npm run lint
 
-build:
+build-server-app:
     stage: build
     script:
-        - ./build static-html
-        - tar cf $CI_DOCS_ARCHIVE -C pipeline_manager/frontend/dist/ .
-    artifacts:
-        paths:
-            - $CI_DOCS_ARCHIVE
+        - ./build server-app
 
 pytest:
     stage: build
     script:
         - python3 -m pytest
 
+build-docs-and-static-html:
+    stage: build
+    script:
+        - cd docs
+        - make html latexpdf
+        - cp build/latex/*.pdf build/html/
+        - tar cf $CI_DOCS_ARCHIVE -C build/html/ .
+        - mv $CI_DOCS_ARCHIVE ..
+    artifacts:
+        paths:
+            - docs/build/html
+            - docs/build/latex/*.pdf
+            - $CI_DOCS_ARCHIVE
+
 deploy:
     image: $CI_DOCS_DOCKER_IMAGE
     stage: deploy
     dependencies:
-        - build
+        - build-docs-and-static-html
     variables:
         GIT_STRATEGY: none
     tags:
         - docs
-    script: echo 'Deploying pipeline manager page'
+    script: echo 'Deploying docs'
     artifacts:
         paths:
             - $CI_DOCS_ARCHIVE
