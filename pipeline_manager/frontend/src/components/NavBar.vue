@@ -41,6 +41,12 @@ export default {
     },
     methods: {
         /**
+         * Resets progress of the loading bar.
+         */
+        resetLoadingBar() {
+            document.querySelector('.progress-bar').style.width = '0%';
+        },
+        /**
          * Loads nodes' specification from JSON structure.
          */
         loadSpecification(specification) {
@@ -170,6 +176,8 @@ export default {
          * Otherwise the user is alerted with a feedback message.
          */
         loadDataflowCallback() {
+            this.resetLoadingBar();
+
             const file = document.getElementById('load-dataflow-button').files[0];
             if (!file) return;
 
@@ -197,6 +205,8 @@ export default {
          * Event handler that that saves a current dataflow to a `save.json` file.
          */
         saveDataflow() {
+            this.resetLoadingBar();
+
             const blob = new Blob([JSON.stringify(this.editorManager.saveDataflow())], {
                 type: 'application/json',
             });
