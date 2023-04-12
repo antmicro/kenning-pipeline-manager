@@ -109,11 +109,14 @@ export default class ExternalApplicationManager {
         let data = await response.json();
 
         if (action === 'run') {
+            const progressBar = document.querySelector('.progress-bar');
+            progressBar.style.width = '0%';
+
             /* eslint-disable no-await-in-loop */
             while (data.type === PMMessageType.PROGRESS) {
-                const progress = data.content;
                 // Information about the progress
-                showToast('info', `Running dataflow. Progress - ${progress}%`);
+                const progress = data.content;
+                progressBar.style.width = `${progress}%`;
 
                 response = await fetchGET(`receive_message`);
                 if (response.status === HTTPCodes.OK) {
