@@ -20,7 +20,7 @@ def sample_specification_path() -> Path:
     Path :
         Path to the specification
     """
-    sample_specification_path = files(examples).joinpath('sample_specification.json')  # noqa: E501
+    sample_specification_path = files(examples).joinpath('sample-specification.json')  # noqa: E501
     return Path(sample_specification_path)
 
 
@@ -51,7 +51,7 @@ def sample_dataflow_path() -> Path:
     Path :
         Path to the dataflow
     """
-    sample_dataflow_path = files(examples).joinpath('sample_dataflow.json')
+    sample_dataflow_path = files(examples).joinpath('sample-dataflow.json')
     return Path(sample_dataflow_path)
 
 
