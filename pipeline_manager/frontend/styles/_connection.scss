@@ -1,0 +1,8 @@
+.connection  {
+    pointer-events: visibleStroke;
+
+    &:hover {
+        stroke-width: 4px;
+        stroke: $green;
+    }
+}
