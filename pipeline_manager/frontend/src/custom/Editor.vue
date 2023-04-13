@@ -74,6 +74,7 @@ Inherits from baklavajs-plugin-rendered-vue/src/components/Editor.vue
         </div>
 
         <component
+            v-if="!plugin.editor.readonly"
             :is="plugin.components.contextMenu"
             highlightConnections
             v-model="contextMenu.show"
@@ -84,24 +85,24 @@ Inherits from baklavajs-plugin-rendered-vue/src/components/Editor.vue
             @click="onContextMenuClick"
         ></component>
 
-        <component :is="plugin.components.sidebar"></component>
-
-        <component
-            v-if="plugin.enableMinimap"
-            :is="plugin.components.minimap"
-            :nodes="nodes"
-            :connections="connections"
-        ></component>
-
         <slot></slot>
     </div>
 </template>
 
 <script>
 import { Editor } from '@baklavajs/plugin-renderer-vue';
+import { computed } from 'vue';
 
 export default {
     extends: Editor,
+
+    props: ['plugin'],
+
+    provide() {
+        return {
+            plugin: computed(() => this.plugin),
+        };
+    },
 
     data() {
         return {
