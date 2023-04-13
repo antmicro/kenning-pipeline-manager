@@ -102,7 +102,8 @@
                                         "select",
                                         "checkbox",
                                         "slider",
-                                        "list"
+                                        "list",
+                                        "constant"
                                     ]
                                 },
                                 "description": {
@@ -148,10 +149,7 @@
                                             "type": {
                                                 "const": "slider"
                                             }
-                                        },
-                                        "required": [
-                                            "type"
-                                        ]
+                                        }
                                     },
                                     "then": {
                                         "properties": {
@@ -172,10 +170,7 @@
                                             "type": {
                                                 "const": "checkbox"
                                             }
-                                        },
-                                        "required": [
-                                            "type"
-                                        ]
+                                        }
                                     },
                                     "then": {
                                         "properties": {
@@ -195,10 +190,7 @@
                                             "type": {
                                                 "const": "select"
                                             }
-                                        },
-                                        "required": [
-                                            "type"
-                                        ]
+                                        }
                                     },
                                     "then": {
                                         "required": [
@@ -216,10 +208,7 @@
                                                     "number"
                                                 ]
                                             }
-                                        },
-                                        "required": [
-                                            "type"
-                                        ]
+                                        }
                                     },
                                     "then": {
                                         "properties": {
@@ -236,10 +225,7 @@
                                             "type": {
                                                 "const": "text"
                                             }
-                                        },
-                                        "required": [
-                                            "type"
-                                        ]
+                                        }
                                     },
                                     "then": {
                                         "properties": {
@@ -247,6 +233,21 @@
                                                 "type": ["string", "null"]
                                             }
                                         }
+                                    }
+                                },
+                                {
+                                    "if": {
+                                        "type": "object",
+                                        "properties": {
+                                            "type": {
+                                                "const": "constant"
+                                            }
+                                        }
+                                    },
+                                    "then": {
+                                        "required": [
+                                            "default"
+                                        ]
                                     }
                                 }
                             ]
