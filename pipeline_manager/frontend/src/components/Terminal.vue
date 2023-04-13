@@ -12,14 +12,10 @@
                 </li>
             </ul>
         </div>
-        <form @submit.prevent="executeCommand" novalidate="true">
-            <input name="command" placeholder="Write command..." />
-        </form>
     </div>
 </template>
 
 <script>
-import { nextTick } from 'vue';
 import { externalTerminalStore, pipelineTerminalStore } from '../core/stores';
 import TerminalCommand from './TerminalCommand.vue';
 import { TerminalType } from '../core/utils';
@@ -40,31 +36,6 @@ export default {
             externalTerminalStore,
             pipelineTerminalStore,
         };
-    },
-    methods: {
-        executeCommand(e) {
-            const { commands } = this.$refs;
-            const command = e.target.elements.command.value;
-
-            if (this.terminal === this.TerminalType.EXTERNAL) {
-                externalTerminalStore.add({ command, result: command });
-            } else {
-                pipelineTerminalStore.add({ command, result: command });
-            }
-
-            e.target.elements.command.value = '';
-
-            nextTick(() => {
-                if (commands) {
-                    const { scrollHeight } = commands;
-
-                    commands.scrollTo({
-                        top: scrollHeight,
-                        behavior: 'smooth',
-                    });
-                }
-            });
-        },
     },
 };
 </script>

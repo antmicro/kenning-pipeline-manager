@@ -13,6 +13,7 @@ SPDX-License-Identifier: Apache-2.0
             :plugin="this.editorManager.viewPlugin"
             :style="`--scale: ${this.scale}`"
         />
+        <TerminalPanel />
     </div>
 </template>
 

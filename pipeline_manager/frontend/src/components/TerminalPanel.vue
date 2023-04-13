@@ -3,17 +3,14 @@
         <div class="container">
             <div ref="resizer" class="resizer" />
             <div class="tab">
-                <button class="tab-item" @click="toggleExternalTerminal">
-                    <span ref="externalSpan">Kenning</span>
-                </button>
                 <button class="tab-item" @click="togglePipelineManagerTerminal">
-                    <span ref="pipelineSpan">Pipeline Manger</span>
+                    <span ref="pipelineSpan">Terminal</span>
                 </button>
             </div>
 
             <button @click="toggleTerminal">
                 <Arrow
-                    v-if="!this.isExternalTerminalOpen && !this.isPipelineManagerTerminalOpen"
+                    v-if="!this.isPipelineManagerTerminalOpen"
                     color="white"
                     scale="small"
                     rotate="up"
@@ -21,14 +18,7 @@
                 <Arrow v-else color="white" scale="small" rotate="left" />
             </button>
         </div>
-        <Terminal
-            v-if="this.isExternalTerminalOpen && !this.isPipelineManagerTerminalOpen"
-            :terminal="this.TerminalType.EXTERNAL"
-        />
-        <Terminal
-            v-if="!this.isExternalTerminalOpen && this.isPipelineManagerTerminalOpen"
-            :terminal="this.TerminalType.PIPELINE"
-        />
+        <Terminal v-if="this.isPipelineManagerTerminalOpen" :terminal="TerminalType.PIPELINE" />
     </div>
 </template>
 
@@ -45,7 +35,6 @@ export default {
     },
     data() {
         return {
-            isExternalTerminalOpen: false, // toggle state of external terminal
             isPipelineManagerTerminalOpen: false, // toggle state of pipeline terminal
             TerminalType,
         };
@@ -54,31 +43,6 @@ export default {
         this.$refs.resizer.addEventListener('mousedown', mouseDownHandler);
     },
     methods: {
-        toggleExternalTerminal() {
-            // Get height of terminal panel before change
-            const terminalWrapperHeight = this.$refs.terminalWrapper.clientHeight;
-
-            // 360px height for commands + 35px for termianl tabs = 395px
-            const minTerminalPanelHeight = 395;
-
-            this.isExternalTerminalOpen = !this.isExternalTerminalOpen;
-            this.isPipelineManagerTerminalOpen = false;
-
-            if (this.isExternalTerminalOpen) {
-                this.$refs.terminalWrapper.style.height =
-                    terminalWrapperHeight > minTerminalPanelHeight
-                        ? `${terminalWrapperHeight}px`
-                        : `${minTerminalPanelHeight}px`;
-                this.$refs.resizer.style.pointerEvents = 'all';
-                this.$refs.externalSpan.classList.add('active');
-                this.$refs.pipelineSpan.classList.remove('active');
-            } else {
-                this.$refs.resizer.style.pointerEvents = 'none';
-                this.$refs.terminalWrapper.style.height = 'unset';
-                this.$refs.externalSpan.classList.remove('active');
-                this.$refs.pipelineSpan.classList.remove('active');
-            }
-        },
         togglePipelineManagerTerminal() {
             // Get height of terminal panel before change
             const terminalWrapperHeight = this.$refs.terminalWrapper.clientHeight;
@@ -86,7 +50,6 @@ export default {
             const minTerminalPanelHeight = 395;
 
             this.isPipelineManagerTerminalOpen = !this.isPipelineManagerTerminalOpen;
-            this.isExternalTerminalOpen = false;
 
             if (this.isPipelineManagerTerminalOpen) {
                 this.$refs.terminalWrapper.style.height =
@@ -94,25 +57,21 @@ export default {
                         ? `${terminalWrapperHeight}px`
                         : `${minTerminalPanelHeight}px`;
                 this.$refs.resizer.style.pointerEvents = 'all';
-                this.$refs.externalSpan.classList.remove('active');
                 this.$refs.pipelineSpan.classList.add('active');
             } else {
                 this.$refs.resizer.style.pointerEvents = 'none';
                 this.$refs.terminalWrapper.style.height = 'unset';
-                this.$refs.externalSpan.classList.remove('active');
                 this.$refs.pipelineSpan.classList.remove('active');
             }
         },
         toggleTerminal() {
-            if (!this.isExternalTerminalOpen && !this.isPipelineManagerTerminalOpen) {
-                this.toggleExternalTerminal();
+            if (!this.isPipelineManagerTerminalOpen) {
+                this.togglePipelineManagerTerminal();
             } else {
-                this.isExternalTerminalOpen = false;
                 this.isPipelineManagerTerminalOpen = false;
 
                 this.$refs.resizer.style.pointerEvents = 'none';
                 this.$refs.terminalWrapper.style.height = 'unset';
-                this.$refs.externalSpan.classList.remove('active');
                 this.$refs.pipelineSpan.classList.remove('active');
             }
         },
