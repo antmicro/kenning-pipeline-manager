@@ -20,7 +20,7 @@ SPDX-License-Identifier: Apache-2.0
 import NavBar from './NavBar.vue';
 import EditorManager from '../core/EditorManager';
 import Notifications from './Notifications.vue';
-import EditorView from './Editor.vue';
+import EditorView from '../custom/Editor.vue';
 
 export default {
     components: {
