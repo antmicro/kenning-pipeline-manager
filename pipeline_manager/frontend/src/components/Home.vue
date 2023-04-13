@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
     <div id="container">
         <NavBar />
         <Notifications />
-        <baklava-editor
+        <EditorView
             class="inner-editor"
             :plugin="this.editorManager.viewPlugin"
             :style="`--scale: ${this.scale}`"
@@ -20,11 +20,13 @@ SPDX-License-Identifier: Apache-2.0
 import NavBar from './NavBar.vue';
 import EditorManager from '../core/EditorManager';
 import Notifications from './Notifications.vue';
+import EditorView from './Editor.vue';
 
 export default {
     components: {
         NavBar,
         Notifications,
+        EditorView,
     },
     data() {
         return {

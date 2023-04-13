@@ -25,6 +25,7 @@ Inherits from baklavajs-plugin-renderer-vue/src/components/connection/Connection
         :data-to="connection.to.id"
         :data-from-node="connection.from.parent.id"
         :data-to-node="connection.to.parent.id"
+        :is-highlighted="isHighlighted"
     ></component>
 </template>
 
@@ -34,6 +35,13 @@ import LoopbackConnection from './LoopbackConnection.vue';
 
 export default {
     extends: Components.ConnectionWrapper,
+
+    props: {
+        isHighlighted: {
+            type: Boolean,
+            default: false
+        }
+    },
 
     computed: {
         isLoopback() {
