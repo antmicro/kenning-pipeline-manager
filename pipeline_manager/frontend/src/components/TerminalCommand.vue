@@ -1,29 +1,26 @@
 <template>
     <div class="command-container">
-        <Arrow scale="small" rotate="right" color="green" />
-        <span class="command">{{ command }}</span>
-        <span class="result">
-            {{ result }}
-        </span>
+        <NotificationBadge :type="this.type" size="small" />
+        <span class="result">{{ this.message }}</span>
     </div>
 </template>
 
 <script>
-import Arrow from '../icons/Arrow.vue';
+import NotificationBadge from './NotificationBadge.vue';
 
 export default {
     props: {
-        command: {
+        type: {
             type: String,
             required: true,
         },
-        result: {
+        message: {
             type: String,
             required: true,
         },
     },
     components: {
-        Arrow,
+        NotificationBadge,
     },
 };
 </script>
@@ -32,19 +29,13 @@ export default {
 .command-container {
     width: 100%;
     display: grid;
-    grid-template-columns: 25px 1fr;
-    grid-template-areas:
-        'icon command'
-        'result result';
+    grid-template-columns: 50px 1fr;
     grid-row-gap: $spacing-m;
+}
 
-    & > .command {
-        grid-area: command;
-    }
-
-    & > .result {
-        grid-area: result;
-    }
+div,
+span {
+    align-self: center;
 }
 
 span {

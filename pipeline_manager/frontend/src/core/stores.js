@@ -28,33 +28,3 @@ export const notificationStore = reactive({
         this.notifications = newNotifications;
     },
 });
-
-export const externalTerminalStore = reactive({
-    commands: JSON.parse(localStorage.getItem('commands-external')) || [],
-    add(command) {
-        const newCommands = [...this.commands, command];
-
-        localStorage.setItem('commands-external', JSON.stringify(newCommands));
-        this.commands = newCommands;
-    },
-
-    remove() {
-        localStorage.removeItem('commands-external');
-        this.commands = [];
-    },
-});
-
-export const pipelineTerminalStore = reactive({
-    commands: JSON.parse(localStorage.getItem('commands-pipeline')) || [],
-    add(command) {
-        const newCommands = [...this.commands, command];
-
-        localStorage.setItem('commands-pipeline', JSON.stringify(newCommands));
-        this.commands = newCommands;
-    },
-
-    remove() {
-        localStorage.removeItem('commands-pipeline');
-        this.commands = [];
-    },
-});

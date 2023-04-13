@@ -1,14 +1,12 @@
 <template>
     <div class="terminal-container">
         <div class="command-results" ref="commands">
-            <ul v-if="this.terminal === this.TerminalType.EXTERNAL">
-                <li v-for="(command, index) in externalTerminalStore.commands" v-bind:key="index">
-                    <TerminalCommand :command="command.command" :result="command.result" />
-                </li>
-            </ul>
-            <ul v-else>
-                <li v-for="(command, index) in pipelineTerminalStore.commands" v-bind:key="index">
-                    <TerminalCommand :command="command.command" :result="command.result" />
+            <ul>
+                <li
+                    v-for="(notification, index) in notificationStore.notifications"
+                    v-bind:key="index"
+                >
+                    <TerminalCommand :type="notification.type" :message="notification.message" />
                 </li>
             </ul>
         </div>
@@ -16,7 +14,9 @@
 </template>
 
 <script>
-import { externalTerminalStore, pipelineTerminalStore } from '../core/stores';
+// import { externalTerminalStore, pipelineTerminalStore } from '../core/stores';
+import { notificationStore } from '../core/stores';
+
 import TerminalCommand from './TerminalCommand.vue';
 import { TerminalType } from '../core/utils';
 
@@ -33,8 +33,7 @@ export default {
     data() {
         return {
             TerminalType,
-            externalTerminalStore,
-            pipelineTerminalStore,
+            notificationStore,
         };
     },
 };
