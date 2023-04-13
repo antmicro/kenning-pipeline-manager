@@ -9,14 +9,18 @@ import { OptionPlugin } from '@baklavajs/plugin-options-vue';
 import { InterfaceTypePlugin } from '@baklavajs/plugin-interface-types';
 import Ajv from 'ajv';
 
+import PipelineManagerEditor from '../custom/Editor';
 import CustomNode from '../custom/CustomNode.vue';
+import CustomInterface from '../custom/CustomInterface.vue';
+import CustomOption from '../custom/CustomOption.vue';
 import ContextMenu from '../custom/ContextMenu.vue';
 import PipelineManagerConnection from '../custom/connection/PipelineManagerConnection.vue';
 
+import { showToast } from './notifications';
 import NodeFactory from './NodeFactory';
 import ListOption from '../options/ListOption.vue';
+import InputOption from '../options/InputOption.vue';
 import specificationSchema from '../../../resources/schemas/dataflow_spec_schema.json';
-import PipelineManagerEditor from '../custom/Editor';
 
 export default class EditorManager {
     static instance;
@@ -43,17 +47,25 @@ export default class EditorManager {
      */
     initializeEditor() {
         this.editor = new PipelineManagerEditor();
+
         this.nodeInterfaceTypes = new InterfaceTypePlugin();
         this.viewPlugin = new ViewPlugin();
         this.optionPlugin = new OptionPlugin();
 
-        this.viewPlugin.registerOption('ListOption', ListOption);
         this.viewPlugin.components.node = CustomNode;
         this.viewPlugin.components.contextMenu = ContextMenu;
         this.viewPlugin.components.connection = PipelineManagerConnection;
+        this.viewPlugin.components.nodeInterface = CustomInterface;
+        this.viewPlugin.components.nodeOption = CustomOption;
+
         this.editor.use(this.viewPlugin);
+        this.viewPlugin.registerOption('ListOption', ListOption);
+        this.viewPlugin.registerOption('CustomInputOption', InputOption);
+
         this.editor.use(this.nodeInterfaceTypes);
         this.editor.use(this.optionPlugin);
+
+        this.specificationLoaded = false;
     }
 
     /**
@@ -73,7 +85,6 @@ export default class EditorManager {
 
         this.specificationLoaded = true;
         const { nodes, metadata } = dataflowSpecification;
-
         nodes.forEach((node) => {
             const myNode = NodeFactory(
                 node.name,
@@ -90,7 +101,10 @@ export default class EditorManager {
                 this.nodeInterfaceTypes.addType(name, color);
             });
         }
-
+        this.editor.readonly = 'readonly' in metadata ? metadata.readonly : false;
+        if (this.editor.readonly) {
+            showToast('info', 'The specification is read-only. Only dataflow loading is allowed.');
+        }
         if ('allowLoopbacks' in metadata) {
             this.editor.allowLoopbacks = metadata.allowLoopbacks;
         }
@@ -148,6 +162,7 @@ export default class EditorManager {
         if (valid) {
             return [];
         }
-        return validate.errors;
+        const errors = validate.errors.map(({ message }) => message);
+        return errors;
     }
 }
