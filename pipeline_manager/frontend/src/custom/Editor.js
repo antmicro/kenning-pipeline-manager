@@ -17,6 +17,8 @@
 import { Editor, DummyConnection } from '@baklavajs/core';
 
 export default class PipelineManagerEditor extends Editor {
+    readonly = false;
+
     allowLoopbacks = false;
 
     /**
