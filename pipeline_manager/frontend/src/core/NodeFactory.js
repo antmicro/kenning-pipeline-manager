@@ -36,7 +36,10 @@ export default function NodeFactory(name, displayName, inputs, properties, outpu
                 const propDef = p.default;
                 switch (propType) {
                     case 'text':
-                        this.addOption(propName, 'InputOption', propDef);
+                        this.addOption(propName, 'CustomInputOption', propDef);
+                        break;
+                    case 'constant':
+                        this.addOption(propName, 'TextOption', propDef);
                         break;
                     case 'number':
                         this.addOption(propName, 'NumberOption', propDef);
