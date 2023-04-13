@@ -12,6 +12,7 @@ import Ajv from 'ajv';
 import CustomNode from '../custom/CustomNode.vue';
 import ContextMenu from '../custom/ContextMenu.vue';
 import PipelineManagerConnection from '../custom/connection/PipelineManagerConnection.vue';
+
 import NodeFactory from './NodeFactory';
 import ListOption from '../options/ListOption.vue';
 import specificationSchema from '../../../resources/schemas/dataflow_spec_schema.json';

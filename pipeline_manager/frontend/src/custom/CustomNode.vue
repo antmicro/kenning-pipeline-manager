@@ -8,8 +8,8 @@ SPDX-License-Identifier: Apache-2.0
     <div :id="data.id" :class="classes" :style="styles">
         <div
             class="__title"
-            @mousedown.self.stop="startDrag"
-            @contextmenu.self.prevent="openContextMenu"
+            @mousedown.self.stop="startDragWrapper"
+            @contextmenu.self.prevent="openContextMenuWrapper"
         >
             <span>{{ data.name }}</span>
 
@@ -38,7 +38,7 @@ SPDX-License-Identifier: Apache-2.0
             <!-- Options -->
             <div class="__options">
                 <template v-for="[name, option] in data.options">
-                    {{ getOptionName(option['optionComponent']) ? name : '' }}
+                    {{ getOptionName(option['optionComponent']) ? `${name}:` : '' }}
                     <component
                         :is="plugin.components.nodeOption"
                         :key="name"
@@ -46,7 +46,6 @@ SPDX-License-Identifier: Apache-2.0
                         :option="option"
                         :componentName="option.optionComponent"
                         :node="data"
-                        @openSidebar="openSidebar(name)"
                     ></component>
                 </template>
             </div>
@@ -98,10 +97,16 @@ export default {
                 case 'InputOption':
                 case 'SelectOption':
                 case 'ListOption':
+                case 'TextOption':
                 default:
                     return true;
             }
         },
+        /**
+         * Executes chosen action in the context menu based on its name.
+         *
+         * @param action Action chosen in the context menu
+         */
         onContextMenu(action) {
             switch (action) {
                 case 'delete':
@@ -109,6 +114,26 @@ export default {
                     break;
                 default:
                     break;
+            }
+        },
+        /**
+         * Wrapper that prevents node moving if the editor is in read-only mode.
+         *
+         * @param ev Event
+         */
+        startDragWrapper(ev) {
+            if (!this.plugin.editor.readonly) {
+                this.startDrag(ev);
+            }
+        },
+        /**
+         * Wrapper that prevents opening the context menu if the editor is in read-only mode.
+         *
+         * @param ev Event
+         */
+        openContextMenuWrapper(ev) {
+            if (!this.plugin.editor.readonly) {
+                this.openContextMenu(ev);
             }
         },
     },
