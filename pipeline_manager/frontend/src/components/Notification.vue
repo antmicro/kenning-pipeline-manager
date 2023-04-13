@@ -13,7 +13,7 @@ SPDX-License-Identifier: Apache-2.0
             <span v-if="type === 'info'" :class="type">Info</span>
             <span v-if="type === 'warning'" :class="type">Warning</span>
             <span v-if="type === 'error'" :class="type">Error</span>
-            <span>{{ message }}</span>
+            <span class="message">{{ message }}</span>
         </div>
         <button @click="remove"><Cross color="white" /></button>
     </div>
@@ -72,7 +72,6 @@ export default {
      get width of space between paddings
      in notification panel
   */
-    width: calc(100% - 2 * $spacing-xl);
     height: 90px;
     border-radius: 15px;
     padding: $spacing-m;
@@ -90,6 +89,14 @@ export default {
         flex-direction: column;
         flex-grow: 1;
         font-size: $fs-small;
+        width: 100%;
+
+        & > .message {
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            -webkit-box-orient: vertical;
+        }
 
         & > .info {
             color: $green;
