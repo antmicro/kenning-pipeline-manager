@@ -2,11 +2,8 @@
     <div class="terminal-container">
         <div class="command-results" ref="commands">
             <ul>
-                <li
-                    v-for="(notification, index) in notificationStore.notifications"
-                    v-bind:key="index"
-                >
-                    <TerminalCommand :type="notification.type" :message="notification.message" />
+                <li v-for="(log, index) in terminalStore.logs" v-bind:key="index">
+                    <TerminalCommand :message="log" />
                 </li>
             </ul>
         </div>
@@ -14,26 +11,16 @@
 </template>
 
 <script>
-// import { externalTerminalStore, pipelineTerminalStore } from '../core/stores';
-import { notificationStore } from '../core/stores';
-
 import TerminalCommand from './TerminalCommand.vue';
-import { TerminalType } from '../core/utils';
+import { terminalStore } from '../core/stores';
 
 export default {
-    props: {
-        terminal: {
-            type: String,
-            required: true,
-        },
-    },
     components: {
         TerminalCommand,
     },
     data() {
         return {
-            TerminalType,
-            notificationStore,
+            terminalStore,
         };
     },
 };

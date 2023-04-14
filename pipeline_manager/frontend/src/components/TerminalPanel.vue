@@ -8,7 +8,7 @@
                 </button>
             </div>
 
-            <button @click="toggleTerminal">
+            <button @click="togglePipelineManagerTerminal">
                 <Arrow
                     v-if="!this.isPipelineManagerTerminalOpen"
                     color="white"
@@ -18,14 +18,13 @@
                 <Arrow v-else color="white" scale="small" rotate="left" />
             </button>
         </div>
-        <Terminal v-if="this.isPipelineManagerTerminalOpen" :terminal="TerminalType.PIPELINE" />
+        <Terminal v-if="this.isPipelineManagerTerminalOpen" />
     </div>
 </template>
 
 <script>
 import Terminal from './Terminal.vue';
 import Arrow from '../icons/Arrow.vue';
-import { TerminalType } from '../core/utils';
 import { mouseDownHandler } from '../core/events';
 
 export default {
@@ -36,7 +35,6 @@ export default {
     data() {
         return {
             isPipelineManagerTerminalOpen: false, // toggle state of pipeline terminal
-            TerminalType,
         };
     },
     mounted() {
@@ -59,17 +57,6 @@ export default {
                 this.$refs.resizer.style.pointerEvents = 'all';
                 this.$refs.pipelineSpan.classList.add('active');
             } else {
-                this.$refs.resizer.style.pointerEvents = 'none';
-                this.$refs.terminalWrapper.style.height = 'unset';
-                this.$refs.pipelineSpan.classList.remove('active');
-            }
-        },
-        toggleTerminal() {
-            if (!this.isPipelineManagerTerminalOpen) {
-                this.togglePipelineManagerTerminal();
-            } else {
-                this.isPipelineManagerTerminalOpen = false;
-
                 this.$refs.resizer.style.pointerEvents = 'none';
                 this.$refs.terminalWrapper.style.height = 'unset';
                 this.$refs.pipelineSpan.classList.remove('active');
