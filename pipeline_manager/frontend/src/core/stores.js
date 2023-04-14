@@ -28,3 +28,13 @@ export const notificationStore = reactive({
         this.notifications = newNotifications;
     },
 });
+
+export const terminalStore = reactive({
+    logs: JSON.parse(localStorage.getItem('logs')) || [],
+    add(log) {
+        const newNotifications = [...this.logs, log];
+
+        localStorage.setItem('logs', JSON.stringify(newNotifications));
+        this.logs = newNotifications;
+    },
+});
