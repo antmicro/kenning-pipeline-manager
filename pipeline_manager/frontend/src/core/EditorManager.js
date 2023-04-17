@@ -11,6 +11,7 @@ import Ajv from 'ajv';
 
 import CustomNode from '../components/CustomNode.vue';
 import ContextMenu from '../components/ContextMenu.vue';
+import PipelineManagerConnection from '../components/connection/PipelineManagerConnection.vue';
 import NodeFactory from './NodeFactory';
 import ListOption from '../options/ListOption.vue';
 import specificationSchema from '../../../resources/schemas/dataflow_spec_schema.json';
@@ -48,92 +49,10 @@ export default class EditorManager {
         this.viewPlugin.registerOption('ListOption', ListOption);
         this.viewPlugin.components.node = CustomNode;
         this.viewPlugin.components.contextMenu = ContextMenu;
+        this.viewPlugin.components.connection = PipelineManagerConnection;
         this.editor.use(this.viewPlugin);
         this.editor.use(this.nodeInterfaceTypes);
         this.editor.use(this.optionPlugin);
-
-        this.viewPlugin.hooks.renderConnection.tap(this, (c) => {
-            if (
-                !c.$el.getAttribute('data-from-node') ||
-                c.$el.getAttribute('data-from-node') !== c.$el.getAttribute('data-to-node')
-            ) {
-                // do not make changes to render if it's temporary connection or it's not loopback
-                return c;
-            }
-            const regex =
-                /M (\d+\.?\d*) (\d+\.?\d*) C (?:\d+\.?\d* \d+\.?\d*, ){2}(\d+\.?\d*) (\d+\.?\d*)["]/;
-            const path = regex.exec(c.$el.outerHTML);
-            if (!path || path.length !== 5) {
-                return c;
-            }
-            const x1 = Number(path[1]);
-            const y1 = Number(path[2]);
-            const x2 = Number(path[3]);
-            const y2 = Number(path[4]);
-            const nodeHtml = document.getElementById(c.$el.getAttribute('data-from-node'));
-            const scale = nodeHtml.getBoundingClientRect().height / nodeHtml.offsetHeight;
-            const BottomY =
-                (nodeHtml.offsetTop + nodeHtml.offsetHeight) * scale +
-                nodeHtml.parentNode.offsetTop;
-
-            /*
-            Find level how deep away from the node should the connection loop back. Each output
-            interface has it own layer so that the connection representing data coming from the
-            same output are grouped together, splitting only when close to inputs, while two
-            different outputs have different paths altogether.
-            */
-            const outInterfaceHtml = document.getElementById(c.$el.getAttribute('data-from'));
-            const childArray = Array.from(outInterfaceHtml.parentNode.childNodes);
-            const connLevel =
-                childArray.reverse().findIndex((n) => n.id === outInterfaceHtml.id) + 1;
-
-            const shift = 30 * scale;
-            const slope = 1;
-            const y = BottomY + connLevel * shift;
-
-            const rightCx = x1 - connLevel * shift;
-            const rightCy = (y + y1) / 2;
-            const rightRx = Math.sqrt(
-                Math.abs(
-                    (x1 - rightCx) * (x1 - rightCx) + ((x1 - rightCx) * (y - rightCy)) / slope,
-                ),
-            );
-            const rightRy = Math.sqrt(
-                Math.abs((y - rightCy) * (y - rightCy) + (x1 - rightCx) * (y - rightCy) * slope),
-            );
-
-            const bottomCx = (x1 + x2) / 2;
-            const bottomCy = BottomY;
-            const bottomRx = Math.sqrt(
-                Math.abs(
-                    (x1 - bottomCx) * (x1 - bottomCx) + ((x1 - bottomCx) * (y - bottomCy)) / slope,
-                ),
-            );
-            const bottomRy = Math.sqrt(
-                Math.abs(
-                    (y - bottomCy) * (y - bottomCy) + (x1 - bottomCx) * (y - bottomCy) * slope,
-                ),
-            );
-
-            const leftCx = x2 + connLevel * shift;
-            const leftCy = (y + y2) / 2;
-            const leftRx = Math.sqrt(
-                Math.abs((x2 - leftCx) * (x2 - leftCx) + ((x2 - leftCx) * (y - leftCy)) / -slope),
-            );
-            const leftRy = Math.sqrt(
-                Math.abs((y - leftCy) * (y - leftCy) + (x2 - leftCx) * (y - leftCy) * -slope),
-            );
-
-            c.$el.setAttribute(
-                'd',
-                `M ${x1} ${y1}
-                A ${rightRx} ${rightRy} 0 0 1 ${x1} ${y}
-                A ${bottomRx} ${bottomRy} 0 0 1 ${x2} ${y}
-                A ${leftRx} ${leftRy} 0 0 1 ${x2} ${y2}`,
-            );
-
-            return c;
-        });
     }
 
     /**
