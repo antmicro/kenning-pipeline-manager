@@ -5,6 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <script>
+import { toPng } from 'html-to-image';
 import Logo from '../icons/Logo.vue';
 import Arrow from '../icons/Arrow.vue';
 import Run from '../icons/Run.vue';
@@ -230,6 +231,29 @@ export default {
                 this.externalApplicationManager.importDataflow,
             );
         },
+
+        exportToPng() {
+            // Get editor with data flow
+            const nodeEditor = document.querySelector('.inner-editor');
+
+            toPng(nodeEditor)
+                .then((dataUrl) => {
+                    const downloadLink = document.createElement('a');
+                    downloadLink.download = 'dataflow.png';
+                    downloadLink.href = dataUrl;
+                    downloadLink.dataset.downloadurl = [
+                        dataUrl,
+                        downloadLink.download,
+                        downloadLink.href,
+                    ].join(':');
+                    document.body.appendChild(downloadLink);
+                    downloadLink.click();
+                    document.body.removeChild(downloadLink);
+                })
+                .catch((error) => {
+                    showToast('error', `Export to PNG failed: ${error}`);
+                });
+        },
     },
     mounted() {
         // Create connection on page load
@@ -273,6 +297,11 @@ export default {
                             type="'button'"
                             text="Save graph file"
                             :eventFunction="saveDataflow"
+                        />
+                        <DropdownItem
+                            type="'button'"
+                            text="Export graph to PNG"
+                            :eventFunction="exportToPng"
                         />
                         <div v-if="this.externalApplicationManager.externalApplicationConnected">
                             <hr />
