@@ -113,8 +113,7 @@
     ],
     "metadata": {
         "interfaces": {
-            "Image": "#FF0000",
-            "BinaryImage": "#00FF00"
+            "BinaryImage": "#FF00FF"
         }
     }
 }
