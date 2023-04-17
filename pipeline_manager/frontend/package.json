@@ -15,6 +15,7 @@
         "baklavajs": "^1.10.2",
         "eslint-config-prettier": "^8.6.0",
         "eslint-plugin-prettier": "^4.2.1",
+        "html-to-image": "^1.11.11",
         "prettier": "^2.8.4",
         "prettier-eslint": "^15.0.1",
         "prettier-eslint-cli": "^7.1.0",
