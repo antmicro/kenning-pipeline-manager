@@ -1,0 +1,98 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+
+  BackendLinting:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v3
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.9
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Install flake8
+        run: pip install -U flake8
+      - name: Run flake8
+        run: flake8 pipeline_manager
+
+  FrontendLinting:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v3
+      - name: Setup npm
+        uses: actions/setup-node@v3
+        with:
+          node-version: 19
+      - name: Lint frontend
+        run: |
+          cd pipeline_manager/frontend
+          npm install
+          npm run lint
+
+  BuildServerApp:
+      runs-on: ubuntu-latest
+      steps:
+        - name: Checkout sources
+          uses: actions/checkout@v3
+        - name: Setup npm
+          uses: actions/setup-node@v3
+          with:
+            node-version: 19
+        - name: Setup Python
+          uses: actions/setup-python@v4
+          with:
+            python-version: 3.9
+        - name: Install dependencies
+          run: pip install -r requirements.txt
+        - name: Build server-app
+          run: ./build server-app
+
+  DeployDocs:
+    runs-on: ubuntu-latest
+    steps:
+        - name: Checkout sources
+          uses: actions/checkout@v3
+        - name: Setup npm
+          uses: actions/setup-node@v3
+          with:
+            node-version: 19
+        - name: Setup Python
+          uses: actions/setup-python@v4
+          with:
+            python-version: 3.9
+        - name: Install dependencies
+          run: pip install -r requirements.txt
+        - name: Install docs dependencies
+          run: pip install -r docs/requirements.txt
+        - name: Build docs and static demo
+          run: |
+            cd docs
+            make html
+            make linkcheck
+        - uses: actions/upload-artifact@v3
+          with:
+            name: gh-page
+            path: docs/build/html
+        - name: Deploy to Github Pages
+          if: github.event_name == 'push'
+          run: |
+            cd docs/build/html
+            touch .nojekyll
+            git init
+            cp ../../../.git/config ./.git/config
+            git add .
+            git config --local user.email "push@gha"
+            git config --local user.name "GHA"
+            git commit -am "update ${{ github.sha }}"
+            git push -u origin +HEAD:gh-pages
+            rm -rf .git
