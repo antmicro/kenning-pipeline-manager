@@ -26,15 +26,22 @@ The `size` and `type` are stored in big-endian.
 
 #### 0 - OK
 
-Message of `type` OK is used to indicate a success and optionally includes an answer to a previous request.
+Message of `type` `OK` is used to indicate a success and optionally includes an answer to a previous request.
 Its `content` may vary depending on the request type.
 
 #### 1 - ERROR
 
-Message of `type` ERROR is used to indicate a failure and optionally includes an answer to a previous request.
+Message of `type` `ERROR` is used to indicate a failure and optionally includes an answer to a previous request.
 Its `content` may vary depending on the answered request.
 
 ### Request messages - sent by {{project}}
+
+#### 7 - PROGRESS
+
+Message of `type` `PROGRESS` is an optional type used to inform {{project}} about the status of a running dataflow.
+`PROGRESS` message type can only be used once a message of type `RUN` is received and can be sent multiple times before sending a final response message of type either `ERROR` or `OK` that indicates the end of the run.
+The progress information is conveyed in `content` using a number ranging `0 - 100` encoded in UTF-8 that signals the percentage of completion of the run.
+See [RUN](#RUN) for more information.
 
 #### 2 - VALIDATE
 
