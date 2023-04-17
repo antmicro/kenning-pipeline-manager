@@ -293,7 +293,7 @@ def export_response(
         json.dump(json.loads(data), f, indent=4)
     logging.log(logging.INFO, f'Exported dataflow stored in {output_path}')
     client.send_message(
-        _text_to_message_type[properties['MessageType']],
+        _text_to_message_type(properties['MessageType']),
         properties['Message'].encode(encoding='UTF-8'),
     )
 
