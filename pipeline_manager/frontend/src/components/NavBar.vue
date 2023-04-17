@@ -328,10 +328,6 @@ export default {
                             >
                             <span v-else class="disconnected">Disconnected</span>
                         </div>
-                        <button v-if="this.externalApplicationManager.externalApplicationConnected">
-                            Disconnect
-                        </button>
-                        <button v-else>Connect</button>
                     </div>
                 </div>
                 <div ref="notifications">
@@ -405,7 +401,7 @@ export default {
             & > .backend-status {
                 @extend .dropdown-wrapper;
                 width: 220px;
-                height: 80px;
+                height: 30px;
                 display: flex;
                 /* Hide backend panel and position it
                   to right border of backend icon
@@ -428,13 +424,6 @@ export default {
                     & > .connected {
                         color: $green;
                     }
-                }
-
-                & > button {
-                    background-color: $gray-500;
-                    padding: $spacing-m;
-                    border-radius: 15px;
-                    color: $white;
                 }
             }
 
