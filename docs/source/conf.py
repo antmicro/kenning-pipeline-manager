@@ -52,7 +52,6 @@ html_show_sphinx = False
     html_theme_options,
     html_context
 ) = antmicro_html(
-    pdf_url=f"{basic_filename}.pdf",
     gh_slug='antmicro/kenning-pipeline-manager'
 )
 
