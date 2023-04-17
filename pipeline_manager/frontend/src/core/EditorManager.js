@@ -87,7 +87,7 @@ export default class EditorManager {
             const connLevel =
                 childArray.reverse().findIndex((n) => n.id === outInterfaceHtml.id) + 1;
 
-            const shift = 30;
+            const shift = 30 * scale;
             const slope = 1;
             const y = BottomY + connLevel * shift;
 
