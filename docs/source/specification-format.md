@@ -22,8 +22,14 @@ Contains following optional properties:
 
 * `interfaces`  - dictionary which defines styling of interfaces the nodes.
   Colors can be specified by a hexadecimal value or by name.
-* `allowLoopbacks` - boolean value whether connections with endpoints at the same node are allowed.
-  Default is `false`.
+* `allowLoopbacks` - boolean value that determines whether connections with endpoints at the same node are allowed.
+  Default value is `false`.
+* `readonly` - boolean value determining whether the editor is in readonly mode.
+  In readonly mode the user cannot create or remove nodes and connections.
+  The nodes are locked and cannot be moved.
+  Modification of any properties is disabled.
+  The user is only allowed to load existing dataflows.
+  Default value is `false`.
 
 An example:
 
@@ -31,9 +37,10 @@ An example:
 "metadata": {
     "interfaces": {
         "Dataset": "#FF0000"
-    }
-},
-"allowLoopbacks": false
+    },
+    "allowLoopbacks": false,
+    "readonly": true
+}
 ```
 
 ### Node
@@ -120,9 +127,11 @@ Every project object has two required base properties:
 * `name` - name of the property.
 * `type` - type of the property.
 
-There are seven possible values for the `type` property.
+There are eight possible values for the `type` property.
 * `text` - property is a string.
   A text field is displayed to the user.
+* `constant` - property is a string.
+  A non modifiable text field displayed to the user.
 * `number` - property is a float.
   A number field is displayed to the user.
 * `integer` - property is an int.
