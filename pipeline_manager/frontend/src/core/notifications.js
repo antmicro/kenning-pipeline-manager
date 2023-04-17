@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2022-2023 Antmicro <www.antmicro.com>
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { createToastInterface, POSITION } from 'vue-toastification';
 import { notificationStore } from './stores';
 import Notification from '../components/Notification.vue';
