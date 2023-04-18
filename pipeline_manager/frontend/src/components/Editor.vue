@@ -27,12 +27,15 @@
                     ></component>
                 </slot>
             </g>
-            <component
-                :is="plugin.components.connection"
-                v-if="highlightConnection"
-                :connection="highlightConnection"
-                is-highlighted
-            ></component>
+            <g v-for="connection in highlightConnections" :key="connection.id + counter.toString()">
+                <slot name="highlightConnections" :connection="connection">
+                    <component
+                        :is="plugin.components.connection"
+                        :connection="connection"
+                        is-highlighted
+                    ></component>
+                </slot>
+            </g>
             <component
                 :is="plugin.components.tempConnection"
                 v-if="temporaryConnection"
@@ -81,33 +84,25 @@ import { Editor } from '@baklavajs/plugin-renderer-vue';
 export default {
     extends: Editor,
 
-    data: {
-        highlightConnection: undefined
-    },
-
-    methods: {
-        addHighlight(connection) {
-            if(!!this.highlightConnection) {
-                this.connections.push(this.highlightConnection);
-            }
-            const index = this.connections.indexOf(connection);
-            this.connections.splice(index, 1);
-            this.highlightConnection = connection;
-        },
-
-        removeHighlight(connection) {
-            if(this.highlightConnection === connection) {
-                this.connections.push(this.highlightConnection);
-                this.highlightConnection = undefined;
-            }
+    data() {
+        return {
+            highlightConnections: []
         }
     },
 
-    computed: {
-        unfocusedConnections() {
-            return this.connections.filter(
-                conn => conn !== this.highlightConnection
-            );
+    methods: {
+        moveConnectionBetweenArrays(conn, arrFrom, arrTo) {
+            const index = arrFrom.indexOf(conn);
+            arrFrom.splice(index, 1);
+            arrTo.push(conn);
+        },
+
+        addHighlight(connection) {
+            this.moveConnectionBetweenArrays(connection, this.connections, this.highlightConnections);
+        },
+
+        removeHighlight(connection) {
+            this.moveConnectionBetweenArrays(connection, this.highlightConnections, this.connections);
         }
     }
 }
