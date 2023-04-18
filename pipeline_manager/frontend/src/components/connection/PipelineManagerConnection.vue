@@ -32,6 +32,7 @@ Inherits from baklavajs-plugin-renderer-vue/src/components/connection/Connection
 <script>
 import { Components } from '@baklavajs/plugin-renderer-vue';
 import LoopbackConnection from './LoopbackConnection.vue';
+import ConnectionView from './ConnectionView.vue';
 
 export default {
     extends: Components.ConnectionWrapper,
@@ -59,7 +60,7 @@ export default {
             if (this.isLoopback) {
                 return LoopbackConnection;
             }
-            return Components.Connection;
+            return ConnectionView;
         },
     },
 };

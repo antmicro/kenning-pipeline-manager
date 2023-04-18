@@ -15,14 +15,17 @@ Inherits from baklavajs-plugin-renderer-vue/src/components/connection/Connection
 -->
 
 <template>
-    <path :d="d" :class="classes"></path>
+    <path
+        :d="d"
+        :class="cssClasses"
+    ></path>
 </template>
 
 <script>
-import { Components } from '@baklavajs/plugin-renderer-vue';
+import ConnectionView from './ConnectionView.vue';
 
 export default {
-    extends: Components.Connection,
+    extends: ConnectionView,
 
     props: {
         slope: {
