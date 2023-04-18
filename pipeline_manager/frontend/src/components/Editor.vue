@@ -31,7 +31,7 @@ SPDX-License-Identifier: Apache-2.0
             @mousemove="changeHovereConnections($event)"
             @mouseleave="changeHovereConnections($event)"
         >
-            <g v-for="connection in connections" :key="connection.id + counter.toString()">
+            <g v-for="connection in standardConnections" :key="connection.id + counter.toString()">
                 <slot name="connections" :connection="connection">
                     <component
                         :is="plugin.components.connection"
@@ -104,28 +104,39 @@ export default {
     },
 
     methods: {
-        moveConnectionBetweenArrays(conn, arrFrom, arrTo) {
-            const index = arrFrom.indexOf(conn);
-            arrFrom.splice(index, 1);
-            arrTo.push(conn);
-        },
-
         addHighlight(connection) {
-            this.moveConnectionBetweenArrays(connection, this.connections, this.highlightConnections);
+            if(!this.highlightConnections.includes(connection)) {
+                this.highlightConnections.push(connection);
+            }
         },
 
         removeHighlight(connection) {
-            this.moveConnectionBetweenArrays(connection, this.highlightConnections, this.connections);
+            const index = this.highlightConnections.indexOf(connection);
+            if(index >= 0) {
+                this.highlightConnections.splice(index, 1);
+            }
         },
 
         changeHovereConnections(ev) {
             const connectionsHtml = this.$children.filter(el => el.$el.getAttribute("class") === "connection");
             const hoveredHtml = connectionsHtml.filter(el => el.containsPoint(ev.clientX, ev.clientY));
-            const hovered = this.connections.concat(this.highlightConnections).filter(
+            const hovered = this.connections.filter(
                 conn => hoveredHtml.filter(el => el.connection === conn).length > 0
             )
-            this.connections.filter(conn => hovered.includes(conn)).forEach(this.addHighlight);
+            this.standardConnections.filter(conn => hovered.includes(conn)).forEach(this.addHighlight);
             this.highlightConnections.filter(conn => !hovered.includes(conn)).forEach(this.removeHighlight);
+        }
+    },
+
+    watch: {
+        connections(newConnections) {
+            this.highlightConnections = this.highlightConnections.filter(conn => newConnections.includes(conn));
+        }
+    },
+
+    computed: {
+        standardConnections() {
+            return this.connections
         }
     }
 }
