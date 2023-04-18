@@ -40,15 +40,21 @@ export default {
     props: {
         isHighlighted: {
             type: Boolean,
-            default: false
-        }
+            default: false,
+        },
     },
 
     methods: {
+        /**
+         * Check whether the connection path contains the x, y point
+         *
+         * @param x X coordinate of input point
+         * @param y Y coordinate of input point
+         */
         containsPoint(x, y) {
             const elements = document.elementsFromPoint(x, y);
             return elements.includes(this.$children[0].$el);
-        }
+        },
     },
 
     computed: {

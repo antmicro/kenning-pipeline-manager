@@ -15,10 +15,7 @@ Inherits from baklavajs-plugin-renderer-vue/src/components/connection/Connection
 -->
 
 <template>
-    <path
-        :d="d"
-        :class="cssClasses"
-    ></path>
+    <path :d="d" :class="cssClasses"></path>
 </template>
 
 <script>

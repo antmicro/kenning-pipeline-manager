@@ -4,7 +4,6 @@ Copyright (c) 2022-2023 Antmicro <www.antmicro.com>
 SPDX-License-Identifier: Apache-2.0
 -->
 
-
 <template>
     <div
         tabindex="-1"
@@ -40,6 +39,7 @@ SPDX-License-Identifier: Apache-2.0
                 </slot>
             </g>
             <g v-for="connection in highlightConnections" :key="connection.id + counter.toString()">
+                highlightConnections
                 <slot name="highlightConnections" :connection="connection">
                     <component
                         :is="plugin.components.connection"
@@ -69,6 +69,7 @@ SPDX-License-Identifier: Apache-2.0
 
         <component
             :is="plugin.components.contextMenu"
+            highlightConnections
             v-model="contextMenu.show"
             :x="contextMenu.x"
             :y="contextMenu.y"
@@ -92,52 +93,80 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { Editor } from '@baklavajs/plugin-renderer-vue';
-import { toHash } from 'ajv/dist/compile/util';
 
 export default {
     extends: Editor,
 
     data() {
         return {
-            highlightConnections: []
-        }
+            highlightConnections: [],
+        };
     },
 
     methods: {
+        /**
+         * Highlights the connection. Doesn't change anything if
+         * connection is already highlighted
+         *
+         * @param connection Connection to highlight
+         */
         addHighlight(connection) {
-            if(!this.highlightConnections.includes(connection)) {
+            if (!this.highlightConnections.includes(connection)) {
                 this.highlightConnections.push(connection);
             }
         },
 
+        /**
+         * Removes the highlight for input connection. Doesn't do anything
+         * if connection was not highlighted
+         *
+         * @param connection Connection to return to standard state
+         */
         removeHighlight(connection) {
             const index = this.highlightConnections.indexOf(connection);
-            if(index >= 0) {
+            if (index >= 0) {
                 this.highlightConnections.splice(index, 1);
             }
         },
 
+        /**
+         * On mouse movement checks all drawn connections whether mouse is
+         * hovered over them. Adds highlight to all hovered connections,
+         * removed highlight for the rest.
+         *
+         * @param ev Event specifying current mouse position
+         */
         changeHovereConnections(ev) {
-            const connectionsHtml = this.$children.filter(el => el.$el.getAttribute("class") === "connection");
-            const hoveredHtml = connectionsHtml.filter(el => el.containsPoint(ev.clientX, ev.clientY));
+            const connectionsHtml = this.$children.filter(
+                (el) => el.$el.getAttribute('class') === 'connection',
+            );
+            const hoveredHtml = connectionsHtml.filter((el) =>
+                el.containsPoint(ev.clientX, ev.clientY),
+            );
             const hovered = this.connections.filter(
-                conn => hoveredHtml.filter(el => el.connection === conn).length > 0
-            )
-            this.standardConnections.filter(conn => hovered.includes(conn)).forEach(this.addHighlight);
-            this.highlightConnections.filter(conn => !hovered.includes(conn)).forEach(this.removeHighlight);
-        }
+                (conn) => hoveredHtml.filter((el) => el.connection === conn).length > 0,
+            );
+            this.standardConnections
+                .filter((conn) => hovered.includes(conn))
+                .forEach(this.addHighlight);
+            this.highlightConnections
+                .filter((conn) => !hovered.includes(conn))
+                .forEach(this.removeHighlight);
+        },
     },
 
     watch: {
         connections(newConnections) {
-            this.highlightConnections = this.highlightConnections.filter(conn => newConnections.includes(conn));
-        }
+            this.highlightConnections = this.highlightConnections.filter((conn) =>
+                newConnections.includes(conn),
+            );
+        },
     },
 
     computed: {
         standardConnections() {
-            return this.connections
-        }
-    }
-}
+            return this.connections;
+        },
+    },
+};
 </script>
