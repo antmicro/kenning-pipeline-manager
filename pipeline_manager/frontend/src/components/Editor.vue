@@ -18,7 +18,12 @@
     >
         <div class="background" :style="backgroundStyle"></div>
 
-        <svg class="connections-container">
+        <svg
+            class="connections-container"
+            @mouseenter="changeHovereConnections($event)"
+            @mousemove="changeHovereConnections($event)"
+            @mouseleave="changeHovereConnections($event)"
+        >
             <g v-for="connection in connections" :key="connection.id + counter.toString()">
                 <slot name="connections" :connection="connection">
                     <component
@@ -80,6 +85,7 @@
 
 <script>
 import { Editor } from '@baklavajs/plugin-renderer-vue';
+import { toHash } from 'ajv/dist/compile/util';
 
 export default {
     extends: Editor,
@@ -103,6 +109,16 @@ export default {
 
         removeHighlight(connection) {
             this.moveConnectionBetweenArrays(connection, this.highlightConnections, this.connections);
+        },
+
+        changeHovereConnections(ev) {
+            const connectionsHtml = this.$children.filter(el => el.$el.getAttribute("class") === "connection");
+            const hoveredHtml = connectionsHtml.filter(el => el.containsPoint(ev.clientX, ev.clientY));
+            const hovered = this.connections.concat(this.highlightConnections).filter(
+                conn => hoveredHtml.filter(el => el.connection === conn).length > 0
+            )
+            this.connections.filter(conn => hovered.includes(conn)).forEach(this.addHighlight);
+            this.highlightConnections.filter(conn => !hovered.includes(conn)).forEach(this.removeHighlight);
         }
     }
 }

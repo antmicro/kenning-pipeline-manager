@@ -43,6 +43,13 @@ export default {
         }
     },
 
+    methods: {
+        containsPoint(x, y) {
+            const elements = document.elementsFromPoint(x, y);
+            return elements.includes(this.$children[0].$el);
+        }
+    },
+
     computed: {
         isLoopback() {
             return this.connection.from.parent.id === this.connection.to.parent.id;
