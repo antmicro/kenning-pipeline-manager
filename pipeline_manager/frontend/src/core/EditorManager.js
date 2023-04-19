@@ -9,13 +9,13 @@ import { OptionPlugin } from '@baklavajs/plugin-options-vue';
 import { InterfaceTypePlugin } from '@baklavajs/plugin-interface-types';
 import Ajv from 'ajv';
 
-import CustomNode from '../components/CustomNode.vue';
-import ContextMenu from '../components/ContextMenu.vue';
-import PipelineManagerConnection from '../components/connection/PipelineManagerConnection.vue';
+import CustomNode from '../custom/CustomNode.vue';
+import ContextMenu from '../custom/ContextMenu.vue';
+import PipelineManagerConnection from '../custom/connection/PipelineManagerConnection.vue';
 import NodeFactory from './NodeFactory';
 import ListOption from '../options/ListOption.vue';
 import specificationSchema from '../../../resources/schemas/dataflow_spec_schema.json';
-import PipelineManagerEditor from './Editor';
+import PipelineManagerEditor from '../custom/Editor';
 
 export default class EditorManager {
     static instance;
