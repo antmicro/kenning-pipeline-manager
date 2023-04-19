@@ -17,6 +17,8 @@
 import { Editor, DummyConnection } from '@baklavajs/core';
 
 export default class PipelineManagerEditor extends Editor {
+    allowLoopbacks = false;
+
     /**
      * Checks, whether a connection between two node interfaces would be valid.
      * @param from The starting node interface (must be an output interface)
@@ -39,6 +41,12 @@ export default class PipelineManagerEditor extends Editor {
 
         if (from.isInput || !to.isInput) {
             // connections are only allowed from input to output interface
+            return false;
+        }
+
+        if (from.parent === to.parent && !this.allowLoopbacks) {
+            // Connection starting and ending at the same node are only allowed if corresponding
+            // option is set to true
             return false;
         }
 

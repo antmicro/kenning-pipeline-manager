@@ -89,6 +89,10 @@ export default class EditorManager {
                 this.nodeInterfaceTypes.addType(name, color);
             });
         }
+
+        if ('allowLoopbacks' in metadata) {
+            this.editor.allowLoopbacks = metadata.allowLoopbacks;
+        }
     }
 
     /**
