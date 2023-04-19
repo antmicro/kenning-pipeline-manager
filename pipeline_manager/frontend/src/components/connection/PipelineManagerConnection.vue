@@ -17,7 +17,6 @@ SPDX-License-Identifier: Apache-2.0
         :data-to="connection.to.id"
         :data-from-node="connection.from.parent.id"
         :data-to-node="connection.to.parent.id"
-        v-bind="additionalProperties"
     ></component>
 </template>
 
@@ -38,20 +37,6 @@ export default {
                 return LoopbackConnection;
             }
             return Components.Connection;
-        },
-
-        additionalProperties() {
-            if (!this.isLoopback) {
-                return {};
-            }
-            return {
-                nodeId: this.connection.from.parent.id,
-                connLayer:
-                    Array.from(this.connection.from.parent.interfaces.values())
-                        .filter((conn) => !conn.isInput)
-                        .reverse()
-                        .indexOf(this.connection.from) + 1,
-            };
         },
     },
 };

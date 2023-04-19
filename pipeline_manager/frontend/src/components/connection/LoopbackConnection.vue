@@ -15,12 +15,6 @@ export default {
     extends: Components.Connection,
 
     props: {
-        nodeId: {
-            type: String,
-        },
-        connLayer: {
-            type: Number,
-        },
         slope: {
             type: Number,
             default: 1,
@@ -87,6 +81,19 @@ export default {
             A ${rightRx} ${rightRy} 0 0 1 ${tx1} ${y}
             A ${bottomRx} ${bottomRy} 0 0 1 ${tx2} ${y}
             A ${leftRx} ${leftRy} 0 0 1 ${tx2} ${ty2}`;
+        },
+
+        nodeId() {
+            return this.connection.from.parent.id;
+        },
+
+        connLayer() {
+            return (
+                Array.from(this.connection.from.parent.interfaces.values())
+                    .filter((conn) => !conn.isInput)
+                    .reverse()
+                    .indexOf(this.connection.from) + 1
+            );
         },
     },
 };
