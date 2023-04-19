@@ -16,7 +16,7 @@ SPDX-License-Identifier: Apache-2.0
     </div>
 </template>
 
-<script lang="ts">
+<script>
 export default {
     props: [
         /**
