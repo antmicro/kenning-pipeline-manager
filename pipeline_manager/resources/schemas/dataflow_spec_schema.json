@@ -3,8 +3,20 @@
     "type": "object",
     "properties": {
         "metadata": {
-            "description": "Styling of the nodes",
-            "type": "object"
+            "description": "Additional options for editor",
+            "type": "object",
+            "properties": {
+                "interfaces": {
+                    "type": "object",
+                    "description": "Styling of the nodes"
+                },
+                "allowLoopbacks": {
+                    "type": "boolean",
+                    "description": "Flag allowing connections with endpoints at the same node",
+                    "default": false
+                }
+            },
+            "additionalProperties": false
         },
         "nodes": {
             "description": "Definition of the available nodes",
