@@ -14,6 +14,11 @@
                     "type": "boolean",
                     "description": "Flag allowing connections with endpoints at the same node",
                     "default": false
+                },
+                "readonly": {
+                    "type": "boolean",
+                    "description": "Flag determining whether the editor is in readonly mode",
+                    "default": false
                 }
             },
             "additionalProperties": false
