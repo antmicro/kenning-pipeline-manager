@@ -4,6 +4,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+/*
+ * Custom pipeline editor - Implements logic for adding, removing, editing nodes and
+ * conections between them.
+ * Inherits from baklavajs-core/src/editor.ts
+ */
+
 import { Editor, DummyConnection } from '@baklavajs/core';
 
 export default class PipelineManagerEditor extends Editor {

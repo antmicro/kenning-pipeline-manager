@@ -4,6 +4,12 @@ Copyright (c) 2022-2023 Antmicro <www.antmicro.com>
 SPDX-License-Identifier: Apache-2.0
 -->
 
+<!--
+Subcomponent of BaklavaJS connection representing loopback connections - going
+from output to the input of the same node.
+Inherits from baklavajs-plugin-renderer-vue/src/components/connection/ConnectionView.vue
+-->
+
 <template>
     <path :d="d" :class="classes"></path>
 </template>
