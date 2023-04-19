@@ -10,16 +10,20 @@ To be able to load any dataflow a specification defining nodes in this dataflow 
 The specification has to be a JSON file.
 There are two main attributes.
 
-* `metadata` - object of type [Metadata](#metadata) that specifices editor styling and metadata.
+* `metadata` - object of type [Metadata](#metadata) that specifies editor styling and metadata.
 * `nodes` - array that specifies valid nodes.
-Every element is of type [Node](#node).
+  Every element is of type [Node](#node).
 
 ### Metadata
 
-This object specifies editor styling and metadata.
+This object specifies additional editor options
 
-It contains `interfaces` dictionary which defines styling of interfaces the nodes.
-Colors can be specified by a hexadecimal value or by name.
+Contains following optional properties:
+
+* `interfaces`  - dictionary which defines styling of interfaces the nodes.
+  Colors can be specified by a hexadecimal value or by name.
+* `allowLoopbacks` - boolean value whether connections with endpoints at the same node are allowed.
+  Default is `false`.
 
 An example:
 
@@ -28,7 +32,8 @@ An example:
     "interfaces": {
         "Dataset": "#FF0000"
     }
-}
+},
+"allowLoopbacks": false
 ```
 
 ### Node
