@@ -26,9 +26,9 @@ SPDX-License-Identifier: Apache-2.0
 
         <svg
             class="connections-container"
-            @mouseenter="changeHovereConnections($event)"
-            @mousemove="changeHovereConnections($event)"
-            @mouseleave="changeHovereConnections($event)"
+            @mouseenter="changeHoveredConnections($event)"
+            @mousemove="changeHoveredConnections($event)"
+            @mouseleave="changeHoveredConnections($event)"
         >
             <g v-for="connection in standardConnections" :key="connection.id + counter.toString()">
                 <slot name="connections" :connection="connection">
@@ -39,7 +39,6 @@ SPDX-License-Identifier: Apache-2.0
                 </slot>
             </g>
             <g v-for="connection in highlightConnections" :key="connection.id + counter.toString()">
-                highlightConnections
                 <slot name="highlightConnections" :connection="connection">
                     <component
                         :is="plugin.components.connection"
@@ -136,7 +135,7 @@ export default {
          *
          * @param ev Event specifying current mouse position
          */
-        changeHovereConnections(ev) {
+        changeHoveredConnections(ev) {
             const connectionsHtml = this.$children.filter(
                 (el) => el.$el.getAttribute('class') === 'connection',
             );
@@ -165,7 +164,7 @@ export default {
 
     computed: {
         standardConnections() {
-            return this.connections;
+            return this.connections.filter((conn) => !this.highlightConnections.includes(conn));
         },
     },
 };
