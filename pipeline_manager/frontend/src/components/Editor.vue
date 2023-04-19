@@ -4,6 +4,13 @@ Copyright (c) 2022-2023 Antmicro <www.antmicro.com>
 SPDX-License-Identifier: Apache-2.0
 -->
 
+<!--
+Defines the main editor component - canvas in which the pipeline is drawn and
+edited by a user
+
+Inherits from baklavajs-plugin-rendered-vue/src/components/Editor.vue
+-->
+
 <template>
     <div
         tabindex="-1"
