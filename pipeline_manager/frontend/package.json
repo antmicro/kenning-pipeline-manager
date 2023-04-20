@@ -19,6 +19,7 @@
         "prettier": "^2.8.4",
         "prettier-eslint": "^15.0.1",
         "prettier-eslint-cli": "^7.1.0",
+        "v-click-outside": "^3.2.0",
         "vue": "^2.7.7",
         "vue-router": "^2.8.1",
         "vue-toastification": "^1.7.14"
