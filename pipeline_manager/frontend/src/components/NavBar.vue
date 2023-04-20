@@ -164,6 +164,35 @@ export default {
             }
         },
 
+        clickOutsideBackend(event) {
+            let currentElement = event.target;
+
+            while (currentElement != null) {
+                if (currentElement === this.$refs.backendButton) {
+                    return;
+                }
+
+                currentElement = currentElement.parentElement;
+            }
+
+            if (this.isBackendStatusOpen) {
+                this.isBackendStatusOpen = false;
+
+                const hideBackendStatusPanel = '-89%, -180px'; // hide backend panel
+
+                const backendStatus = document.querySelector('.backend-status');
+                if (backendStatus) {
+                    backendStatus.style.transition = 'transform 0.2s';
+                    backendStatus.style.transform = `translate(${hideBackendStatusPanel})`;
+
+                    if (this.$refs.notifications) {
+                        this.$refs.notifications.classList.remove('open');
+                    }
+                    this.$refs.backend.classList.remove('open');
+                }
+            }
+        },
+
         // Open or hide backendStatus info
         toogleBackendStatusInfo() {
             if (this.isNotificationPanelOpen) {
@@ -373,7 +402,7 @@ export default {
             <span> Pipeline Manager </span>
             <div>
                 <div v-if="this.externalApplicationManager.backendAvailable" ref="backend">
-                    <button @click="toogleBackendStatusInfo">
+                    <button ref="backendButton" @click="toogleBackendStatusInfo">
                         <Backend
                             v-if="this.externalApplicationManager.externalApplicationConnected"
                             color="connected"
@@ -383,7 +412,7 @@ export default {
                     <div class="tooltip">
                         <span>Backend status</span>
                     </div>
-                    <div class="backend-status">
+                    <div v-click-outside="clickOutsideBackend" class="backend-status">
                         <div>
                             <span>Client status:</span>
                             <span
