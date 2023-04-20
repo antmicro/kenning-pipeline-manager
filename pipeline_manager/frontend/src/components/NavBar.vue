@@ -6,6 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { toPng } from 'html-to-image';
+import vClickOutside from 'v-click-outside';
 import Logo from '../icons/Logo.vue';
 import Arrow from '../icons/Arrow.vue';
 import Run from '../icons/Run.vue';
@@ -17,6 +18,7 @@ import EditorManager from '../core/EditorManager';
 import { showToast } from '../core/notifications';
 import { notificationStore } from '../core/stores';
 import ExternalApplicationManager from '../core/ExternalApplicationManager';
+import Notifications from './Notifications.vue';
 
 export default {
     components: {
@@ -27,6 +29,10 @@ export default {
         Backend,
         Bell,
         DropdownItem,
+        Notifications,
+    },
+    directives: {
+        clickOutside: vClickOutside.directive,
     },
     data() {
         return {
@@ -119,6 +125,36 @@ export default {
                         this.$refs.backend.classList.add('open');
                     }
                 } else {
+                    this.$refs.notifications.classList.remove('open');
+
+                    if (this.$refs.backend) {
+                        this.$refs.backend.classList.remove('open');
+                    }
+                }
+            }
+        },
+
+        clickOutsideNotification(event) {
+            let currentElement = event.target;
+
+            while (currentElement != null) {
+                if (currentElement === this.$refs.notificationButton) {
+                    return;
+                }
+
+                currentElement = currentElement.parentElement;
+            }
+
+            if (this.isNotificationPanelOpen) {
+                this.isNotificationPanelOpen = false;
+
+                const resetNotificationPanelTransition = '0px'; // reset notification panel transition to show it
+
+                const notificationPanel = document.querySelector('.notifications');
+                if (notificationPanel) {
+                    notificationPanel.style.transition = 'transform 0.2s';
+                    notificationPanel.style.transform = `translateX(${resetNotificationPanelTransition})`;
+
                     this.$refs.notifications.classList.remove('open');
 
                     if (this.$refs.backend) {
@@ -360,7 +396,7 @@ export default {
                     </div>
                 </div>
                 <div ref="notifications">
-                    <button @click="toogleNavigationPanel">
+                    <button ref="notificationButton" @click="toogleNavigationPanel">
                         <Bell
                             v-if="this.notificationStore.notifications.length > 0"
                             color="green"
@@ -374,6 +410,7 @@ export default {
             </div>
         </div>
         <div class="progress-bar" />
+        <Notifications v-click-outside="clickOutsideNotification" />
     </div>
 </template>
 
