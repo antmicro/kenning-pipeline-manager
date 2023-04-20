@@ -7,7 +7,6 @@ SPDX-License-Identifier: Apache-2.0
 <template>
     <div id="container">
         <NavBar />
-        <Notifications />
         <EditorView
             class="inner-editor"
             :plugin="this.editorManager.viewPlugin"
@@ -20,14 +19,12 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import NavBar from './NavBar.vue';
 import EditorManager from '../core/EditorManager';
-import Notifications from './Notifications.vue';
 import EditorView from '../custom/Editor.vue';
 import TerminalPanel from './TerminalPanel.vue';
 
 export default {
     components: {
         NavBar,
-        Notifications,
         EditorView,
         TerminalPanel,
     },
