@@ -153,8 +153,9 @@ export default {
          * @param ev Event specifying current mouse position
          */
         changeHoveredConnections(ev) {
-            const connectionsHtml = this.$children.filter(
-                (el) => el.$el.getAttribute('class') === 'connection',
+            const connectionContainer = document.getElementsByClassName('connections-container')[0];
+            const connectionsHtml = this.$children.filter((el) =>
+                connectionContainer.contains(el.$el),
             );
             const hoveredHtml = connectionsHtml.filter((el) =>
                 el.containsPoint(ev.clientX, ev.clientY),

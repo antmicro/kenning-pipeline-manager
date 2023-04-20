@@ -53,7 +53,7 @@ export default {
          */
         containsPoint(x, y) {
             const elements = document.elementsFromPoint(x, y);
-            return elements.includes(this.$children[0].$el);
+            return elements.includes(this.$el.firstChild);
         },
     },
 
