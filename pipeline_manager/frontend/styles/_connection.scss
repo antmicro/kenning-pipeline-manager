@@ -6,3 +6,9 @@
         stroke: $green;
     }
 }
+
+.connection-wrapper  {
+    @extend .connection;
+    stroke: transparent;
+    stroke-width: 10px;
+}
