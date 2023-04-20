@@ -8,15 +8,20 @@
                 </button>
             </div>
 
-            <button @click="togglePipelineManagerTerminal">
-                <Arrow
-                    v-if="!this.isPipelineManagerTerminalOpen"
-                    color="white"
-                    scale="small"
-                    rotate="up"
-                />
-                <Arrow v-else color="white" scale="small" rotate="left" />
-            </button>
+            <div class="button-wrapper">
+                <button @click="clearTermianlOutput">
+                    <span>Clear terminal</span>
+                </button>
+                <button @click="togglePipelineManagerTerminal">
+                    <Arrow
+                        v-if="!this.isPipelineManagerTerminalOpen"
+                        color="white"
+                        scale="small"
+                        rotate="up"
+                    />
+                    <Arrow v-else color="white" scale="small" rotate="left" />
+                </button>
+            </div>
         </div>
         <Terminal v-if="this.isPipelineManagerTerminalOpen" />
     </div>
@@ -26,6 +31,7 @@
 import Terminal from './Terminal.vue';
 import Arrow from '../icons/Arrow.vue';
 import { mouseDownHandler } from '../core/events';
+import { terminalStore } from '../core/stores';
 
 export default {
     components: {
@@ -61,6 +67,9 @@ export default {
                 this.$refs.terminalWrapper.style.height = 'unset';
                 this.$refs.pipelineSpan.classList.remove('active');
             }
+        },
+        clearTermianlOutput() {
+            terminalStore.remove();
         },
     },
 };
@@ -99,22 +108,29 @@ export default {
         pointer-events: none;
     }
 
+    & > .button-wrapper {
+        display: flex;
+        align-items: center;
+        gap: $spacing-m;
+    }
+
     & > .tab {
         display: flex;
         gap: 40px;
-
-        & > .tab-item {
-            color: $white;
-
-            & > span {
-                font-size: $fs-small;
-                user-select: none;
-            }
-
-            & > span.active {
-                color: $green;
-            }
-        }
     }
+}
+
+span {
+    color: $white;
+    font-size: $fs-small;
+    user-select: none;
+}
+
+span.active {
+    color: $green;
+}
+
+button {
+    display: flex;
 }
 </style>

@@ -37,4 +37,9 @@ export const terminalStore = reactive({
         localStorage.setItem('logs', JSON.stringify(newNotifications));
         this.logs = newNotifications;
     },
+
+    remove() {
+        localStorage.removeItem('logs');
+        this.logs = [];
+    },
 });
