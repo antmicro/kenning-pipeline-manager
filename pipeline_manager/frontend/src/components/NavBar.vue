@@ -20,6 +20,59 @@ import { notificationStore } from '../core/stores';
 import ExternalApplicationManager from '../core/ExternalApplicationManager';
 import Notifications from './Notifications.vue';
 
+const openNotificationPanel = (notifications, backend) => {
+    const negativeNotificationPanelWidth = '-495px'; // width of notification panel (negative because we want hide it on close)
+    const notificationPanel = document.querySelector('.notifications');
+
+    notificationPanel.style.transition = 'transform 0.4s';
+    notificationPanel.style.transform = `translateX(${negativeNotificationPanelWidth})`;
+
+    notifications.classList.add('open');
+
+    if (backend) {
+        backend.classList.add('open');
+    }
+};
+
+const closeNotificationPanel = (notifications, backend) => {
+    const resetNotificationPanelTransition = '0px'; // reset notification panel transition to show it
+    const notificationPanel = document.querySelector('.notifications');
+
+    notificationPanel.style.transition = 'transform 0.2s';
+    notificationPanel.style.transform = `translateX(${resetNotificationPanelTransition})`;
+    notifications.classList.remove('open');
+
+    if (backend) {
+        backend.classList.remove('open');
+    }
+};
+
+const openBackendStatusPanel = (backend, notifications) => {
+    const showBackendStatusPanel = '-89%, 0'; // show backend panel and align it to right border of icon
+    const backendStatus = document.querySelector('.backend-status');
+
+    backendStatus.style.transition = 'transform 0.4s';
+    backendStatus.style.transform = `translate(${showBackendStatusPanel})`;
+
+    if (notifications) {
+        notifications.classList.add('open');
+    }
+    backend.classList.add('open');
+};
+
+const closeBackendStatusPanel = (backend, notifications) => {
+    const hideBackendStatusPanel = '-89%, -180px'; // hide backend panel
+    const backendStatus = document.querySelector('.backend-status');
+
+    backendStatus.style.transition = 'transform 0.2s';
+    backendStatus.style.transform = `translate(${hideBackendStatusPanel})`;
+
+    if (notifications) {
+        notifications.classList.remove('open');
+    }
+    backend.classList.remove('open');
+};
+
 export default {
     components: {
         Logo,
@@ -99,42 +152,26 @@ export default {
 
         // Open or hide notificationPanel with slide animation
         toogleNavigationPanel() {
+            const { notifications, backend } = this.$refs;
+
             if (this.isBackendStatusOpen) {
                 this.toogleBackendStatusInfo();
             }
 
             this.isNotificationPanelOpen = !this.isNotificationPanelOpen;
 
-            const negativeNotificationPanelWidth = '-495px'; // width of notification panel (negative because we want hide it on close)
-            const resetNotificationPanelTransition = '0px'; // reset notification panel transition to show it
-
             const notificationPanel = document.querySelector('.notifications');
             if (notificationPanel) {
                 if (this.isNotificationPanelOpen) {
-                    notificationPanel.style.transition = 'transform 0.4s';
-                    notificationPanel.style.transform = `translateX(${negativeNotificationPanelWidth})`;
+                    openNotificationPanel(notifications, backend);
                 } else {
-                    notificationPanel.style.transition = 'transform 0.2s';
-                    notificationPanel.style.transform = `translateX(${resetNotificationPanelTransition})`;
-                }
-
-                if (this.isNotificationPanelOpen) {
-                    this.$refs.notifications.classList.add('open');
-
-                    if (this.$refs.backend) {
-                        this.$refs.backend.classList.add('open');
-                    }
-                } else {
-                    this.$refs.notifications.classList.remove('open');
-
-                    if (this.$refs.backend) {
-                        this.$refs.backend.classList.remove('open');
-                    }
+                    closeNotificationPanel(notifications, backend);
                 }
             }
         },
 
         clickOutsideNotification(event) {
+            const { notifications, backend } = this.$refs;
             let currentElement = event.target;
 
             while (currentElement != null) {
@@ -146,25 +183,12 @@ export default {
             }
 
             if (this.isNotificationPanelOpen) {
-                this.isNotificationPanelOpen = false;
-
-                const resetNotificationPanelTransition = '0px'; // reset notification panel transition to show it
-
-                const notificationPanel = document.querySelector('.notifications');
-                if (notificationPanel) {
-                    notificationPanel.style.transition = 'transform 0.2s';
-                    notificationPanel.style.transform = `translateX(${resetNotificationPanelTransition})`;
-
-                    this.$refs.notifications.classList.remove('open');
-
-                    if (this.$refs.backend) {
-                        this.$refs.backend.classList.remove('open');
-                    }
-                }
+                closeNotificationPanel(notifications, backend);
             }
         },
 
         clickOutsideBackend(event) {
+            const { notifications, backend } = this.$refs;
             let currentElement = event.target;
 
             while (currentElement != null) {
@@ -176,52 +200,25 @@ export default {
             }
 
             if (this.isBackendStatusOpen) {
-                this.isBackendStatusOpen = false;
-
-                const hideBackendStatusPanel = '-89%, -180px'; // hide backend panel
-
-                const backendStatus = document.querySelector('.backend-status');
-                if (backendStatus) {
-                    backendStatus.style.transition = 'transform 0.2s';
-                    backendStatus.style.transform = `translate(${hideBackendStatusPanel})`;
-
-                    if (this.$refs.notifications) {
-                        this.$refs.notifications.classList.remove('open');
-                    }
-                    this.$refs.backend.classList.remove('open');
-                }
+                closeBackendStatusPanel(backend, notifications);
             }
         },
 
         // Open or hide backendStatus info
         toogleBackendStatusInfo() {
+            const { notifications, backend } = this.$refs;
             if (this.isNotificationPanelOpen) {
                 this.toogleNavigationPanel();
             }
 
             this.isBackendStatusOpen = !this.isBackendStatusOpen;
 
-            const showBackendStatusPanel = '-89%, 0'; // show backend panel and align it to right border of icon
-            const hideBackendStatusPanel = '-89%, -180px'; // hide backend panel
-
             const backendStatus = document.querySelector('.backend-status');
             if (backendStatus) {
                 if (this.isBackendStatusOpen) {
-                    backendStatus.style.transition = 'transform 0.4s';
-                    backendStatus.style.transform = `translate(${showBackendStatusPanel})`;
-
-                    if (this.$refs.notifications) {
-                        this.$refs.notifications.classList.add('open');
-                    }
-                    this.$refs.backend.classList.add('open');
+                    openBackendStatusPanel(backend, notifications);
                 } else {
-                    backendStatus.style.transition = 'transform 0.2s';
-                    backendStatus.style.transform = `translate(${hideBackendStatusPanel})`;
-
-                    if (this.$refs.notifications) {
-                        this.$refs.notifications.classList.remove('open');
-                    }
-                    this.$refs.backend.classList.remove('open');
+                    closeBackendStatusPanel(backend, notifications);
                 }
             }
         },
