@@ -319,7 +319,7 @@ def main(argv):
         '--verbosity',
         help='Verbosity level',
         choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
-        default='WARNING',
+        default='INFO',
         type=str
     )
     args, _ = parser.parse_known_args(argv[1:])
@@ -330,6 +330,7 @@ def main(argv):
         args.tcp_server_host
     )
     if not args.skip_connecting:
+        logging.info(f'Waiting for connection from third-party application on {args.tcp_server_host}, port {args.tcp_server_port}')  # noqa: E501
         tcp_server = global_state_manager.get_tcp_server()
 
         tcp_server.initialize_server()
