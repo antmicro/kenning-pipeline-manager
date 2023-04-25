@@ -43,6 +43,7 @@ $color-pattern-black: $gray-500;
 .node {
     min-width: 300px !important;
     opacity: 0.9;
+    display: table;
 }
 
 .node > .__title {
