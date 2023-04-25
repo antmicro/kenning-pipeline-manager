@@ -20,59 +20,6 @@ import { notificationStore } from '../core/stores';
 import ExternalApplicationManager from '../core/ExternalApplicationManager';
 import Notifications from './Notifications.vue';
 
-const openNotificationPanel = (notifications, backend) => {
-    const negativeNotificationPanelWidth = '-495px'; // width of notification panel (negative because we want hide it on close)
-    const notificationPanel = document.querySelector('.notifications');
-
-    notificationPanel.style.transition = 'transform 0.4s';
-    notificationPanel.style.transform = `translateX(${negativeNotificationPanelWidth})`;
-
-    notifications.classList.add('open');
-
-    if (backend) {
-        backend.classList.add('open');
-    }
-};
-
-const closeNotificationPanel = (notifications, backend) => {
-    const resetNotificationPanelTransition = '0px'; // reset notification panel transition to show it
-    const notificationPanel = document.querySelector('.notifications');
-
-    notificationPanel.style.transition = 'transform 0.2s';
-    notificationPanel.style.transform = `translateX(${resetNotificationPanelTransition})`;
-    notifications.classList.remove('open');
-
-    if (backend) {
-        backend.classList.remove('open');
-    }
-};
-
-const openBackendStatusPanel = (backend, notifications) => {
-    const showBackendStatusPanel = '-89%, 0'; // show backend panel and align it to right border of icon
-    const backendStatus = document.querySelector('.backend-status');
-
-    backendStatus.style.transition = 'transform 0.4s';
-    backendStatus.style.transform = `translate(${showBackendStatusPanel})`;
-
-    if (notifications) {
-        notifications.classList.add('open');
-    }
-    backend.classList.add('open');
-};
-
-const closeBackendStatusPanel = (backend, notifications) => {
-    const hideBackendStatusPanel = '-89%, -180px'; // hide backend panel
-    const backendStatus = document.querySelector('.backend-status');
-
-    backendStatus.style.transition = 'transform 0.2s';
-    backendStatus.style.transform = `translate(${hideBackendStatusPanel})`;
-
-    if (notifications) {
-        notifications.classList.remove('open');
-    }
-    backend.classList.remove('open');
-};
-
 export default {
     components: {
         Logo,
@@ -151,77 +98,96 @@ export default {
         },
 
         // Open or hide notificationPanel with slide animation
-        toogleNavigationPanel() {
-            const { notifications, backend } = this.$refs;
+        displayNotificationPanel(isOpen) {
+            const negativeNotificationPanelWidth = '-495px'; // width of notification panel (negative because we want hide it on close)
+            const notificationPanel = document.querySelector('.notifications');
+            const resetNotificationPanelTransition = '0px'; // reset notification panel transition to show it
+
+            const { notifications } = this.$refs;
 
             if (this.isBackendStatusOpen) {
-                this.toogleBackendStatusInfo();
+                this.displayBackendPanel(false);
             }
 
-            this.isNotificationPanelOpen = !this.isNotificationPanelOpen;
+            this.isNotificationPanelOpen = isOpen;
 
-            const notificationPanel = document.querySelector('.notifications');
             if (notificationPanel) {
-                if (this.isNotificationPanelOpen) {
-                    openNotificationPanel(notifications, backend);
-                } else {
-                    closeNotificationPanel(notifications, backend);
-                }
+                notificationPanel.style.transition = `transform ${
+                    this.isNotificationPanelOpen ? '0.4' : '0.2'
+                }s`;
+
+                notificationPanel.style.transform = `translateX(${
+                    this.isNotificationPanelOpen
+                        ? negativeNotificationPanelWidth
+                        : resetNotificationPanelTransition
+                })`;
+
+                notifications.classList.toggle('open', this.isNotificationPanelOpen);
             }
         },
 
         clickOutsideNotification(event) {
-            const { notifications, backend } = this.$refs;
+            if (!this.isNotificationPanelOpen) return;
+
+            const { notificationButton } = this.$refs;
+
             let currentElement = event.target;
 
             while (currentElement != null) {
-                if (currentElement === this.$refs.notificationButton) {
+                if (currentElement === notificationButton) {
                     return;
                 }
 
                 currentElement = currentElement.parentElement;
             }
 
-            if (this.isNotificationPanelOpen) {
-                closeNotificationPanel(notifications, backend);
-            }
-        },
-
-        clickOutsideBackend(event) {
-            const { notifications, backend } = this.$refs;
-            let currentElement = event.target;
-
-            while (currentElement != null) {
-                if (currentElement === this.$refs.backendButton) {
-                    return;
-                }
-
-                currentElement = currentElement.parentElement;
-            }
-
-            if (this.isBackendStatusOpen) {
-                closeBackendStatusPanel(backend, notifications);
-            }
+            this.displayNotificationPanel(false);
         },
 
         // Open or hide backendStatus info
-        toogleBackendStatusInfo() {
-            const { notifications, backend } = this.$refs;
+        displayBackendPanel(isOpen) {
+            const showBackendStatusPanel = '-89%, 0'; // show backend panel and align it to right border of icon
+            const hideBackendStatusPanel = '-89%, -180px'; // hide backend panel
+            const backendStatus = document.querySelector('.backend-status');
+
+            const { backend } = this.$refs;
+
             if (this.isNotificationPanelOpen) {
-                this.toogleNavigationPanel();
+                this.displayNotificationPanel(false);
             }
 
-            this.isBackendStatusOpen = !this.isBackendStatusOpen;
+            this.isBackendStatusOpen = isOpen;
 
-            const backendStatus = document.querySelector('.backend-status');
             if (backendStatus) {
-                if (this.isBackendStatusOpen) {
-                    openBackendStatusPanel(backend, notifications);
-                } else {
-                    closeBackendStatusPanel(backend, notifications);
-                }
+                backendStatus.style.transition = `transform ${
+                    this.isBackendStatusOpen ? '0.4' : '0.2'
+                }s`;
+
+                backendStatus.style.transform = `translate(${
+                    this.isBackendStatusOpen ? showBackendStatusPanel : hideBackendStatusPanel
+                })`;
+
+                backend.classList.toggle('open', this.isBackendStatusOpen);
             }
         },
+        clickOutsideBackend(event) {
+            if (!this.isBackendStatusOpen) return;
+
+            const { backendButton } = this.$refs;
+
+            let currentElement = event.target;
+
+            while (currentElement != null) {
+                if (currentElement === backendButton) {
+                    return;
+                }
+
+                currentElement = currentElement.parentElement;
+            }
+
+            this.displayBackendPanel(false);
+        },
+
         /**
          * Loads nodes' specification from JSON structure.
          */
@@ -399,7 +365,10 @@ export default {
             <span> Pipeline Manager </span>
             <div>
                 <div v-if="this.externalApplicationManager.backendAvailable" ref="backend">
-                    <button ref="backendButton" @click="toogleBackendStatusInfo">
+                    <button
+                        ref="backendButton"
+                        @click="() => displayBackendPanel(!this.isBackendStatusOpen)"
+                    >
                         <Backend
                             v-if="this.externalApplicationManager.externalApplicationConnected"
                             color="connected"
@@ -422,7 +391,10 @@ export default {
                     </div>
                 </div>
                 <div ref="notifications">
-                    <button ref="notificationButton" @click="toogleNavigationPanel">
+                    <button
+                        ref="notificationButton"
+                        @click="() => displayNotificationPanel(!this.isNotificationPanelOpen)"
+                    >
                         <Bell
                             v-if="this.notificationStore.notifications.length > 0"
                             color="green"
