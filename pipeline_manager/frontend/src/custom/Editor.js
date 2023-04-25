@@ -52,8 +52,8 @@ export default class PipelineManagerEditor extends Editor {
             return false;
         }
 
-        // prevent duplicate connections
-        if (this.connections.some((c) => c.from === from && c.to === to)) {
+        // prevent connections going to already taken input
+        if (this.connections.some((c) => c.to === to)) {
             return false;
         }
 
