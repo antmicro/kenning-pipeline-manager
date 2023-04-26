@@ -63,9 +63,8 @@ export default {
             }
 
             const nodeHtml = document.getElementById(this.nodeId);
-            const bottomY =
-                (nodeHtml.offsetTop + nodeHtml.offsetHeight + this.plugin.panning.y) *
-                this.plugin.scaling;
+            const nodeBottom = nodeHtml ? nodeHtml.offsetTop + nodeHtml.offsetHeight : 0;
+            const bottomY = (nodeBottom + this.plugin.panning.y) * this.plugin.scaling;
             const shift = this.shift * this.plugin.scaling;
             const y = bottomY + this.connLayer * shift;
 
