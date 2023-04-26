@@ -1,0 +1,248 @@
+{
+  "nodes": [
+    {
+      "type": "Node",
+      "id": "node_16825039046080",
+      "name": "Node",
+      "options": [],
+      "state": {},
+      "interfaces": [
+        [
+          "In 1",
+          {
+            "id": "ni_16825039046081",
+            "value": null,
+            "isInput": true,
+            "type": "Connector"
+          }
+        ],
+        [
+          "In 2",
+          {
+            "id": "ni_16825039046082",
+            "value": null,
+            "isInput": true,
+            "type": "Connector"
+          }
+        ],
+        [
+          "In 3",
+          {
+            "id": "ni_16825039046083",
+            "value": null,
+            "isInput": true,
+            "type": "Connector"
+          }
+        ],
+        [
+          "In 4",
+          {
+            "id": "ni_16825039046084",
+            "value": null,
+            "isInput": true,
+            "type": "Connector"
+          }
+        ],
+        [
+          "In 5",
+          {
+            "id": "ni_16825039046085",
+            "value": null,
+            "isInput": true,
+            "type": "Connector"
+          }
+        ],
+        [
+          "Out 1",
+          {
+            "id": "ni_16825039046086",
+            "value": null,
+            "isInput": false,
+            "type": "Connector"
+          }
+        ],
+        [
+          "Out 2",
+          {
+            "id": "ni_16825039046097",
+            "value": null,
+            "isInput": false,
+            "type": "Connector"
+          }
+        ],
+        [
+          "Out 3",
+          {
+            "id": "ni_16825039046098",
+            "value": null,
+            "isInput": false,
+            "type": "Connector"
+          }
+        ],
+        [
+          "Out 4",
+          {
+            "id": "ni_16825039046099",
+            "value": null,
+            "isInput": false,
+            "type": "Connector"
+          }
+        ],
+        [
+          "Out 5",
+          {
+            "id": "ni_168250390460910",
+            "value": null,
+            "isInput": false,
+            "type": "Connector"
+          }
+        ]
+      ],
+      "position": {
+        "x": 240,
+        "y": 248
+      },
+      "width": 200,
+      "twoColumn": false,
+      "customClasses": ""
+    },
+    {
+      "type": "Node",
+      "id": "node_168250392602921",
+      "name": "Node",
+      "options": [],
+      "state": {},
+      "interfaces": [
+        [
+          "In 1",
+          {
+            "id": "ni_168250392602922",
+            "value": null,
+            "isInput": true,
+            "type": "Connector"
+          }
+        ],
+        [
+          "In 2",
+          {
+            "id": "ni_168250392602923",
+            "value": null,
+            "isInput": true,
+            "type": "Connector"
+          }
+        ],
+        [
+          "In 3",
+          {
+            "id": "ni_168250392602924",
+            "value": null,
+            "isInput": true,
+            "type": "Connector"
+          }
+        ],
+        [
+          "In 4",
+          {
+            "id": "ni_168250392602925",
+            "value": null,
+            "isInput": true,
+            "type": "Connector"
+          }
+        ],
+        [
+          "In 5",
+          {
+            "id": "ni_168250392602926",
+            "value": null,
+            "isInput": true,
+            "type": "Connector"
+          }
+        ],
+        [
+          "Out 1",
+          {
+            "id": "ni_168250392602927",
+            "value": null,
+            "isInput": false,
+            "type": "Connector"
+          }
+        ],
+        [
+          "Out 2",
+          {
+            "id": "ni_168250392603028",
+            "value": null,
+            "isInput": false,
+            "type": "Connector"
+          }
+        ],
+        [
+          "Out 3",
+          {
+            "id": "ni_168250392603029",
+            "value": null,
+            "isInput": false,
+            "type": "Connector"
+          }
+        ],
+        [
+          "Out 4",
+          {
+            "id": "ni_168250392603030",
+            "value": null,
+            "isInput": false,
+            "type": "Connector"
+          }
+        ],
+        [
+          "Out 5",
+          {
+            "id": "ni_168250392603031",
+            "value": null,
+            "isInput": false,
+            "type": "Connector"
+          }
+        ]
+      ],
+      "position": {
+        "x": 1144,
+        "y": 513
+      },
+      "width": 200,
+      "twoColumn": false,
+      "customClasses": ""
+    }
+  ],
+  "connections": [
+    {
+      "id": "168250391647817",
+      "from": "ni_16825039046097",
+      "to": "ni_16825039046082"
+    },
+    {
+      "id": "168250393161535",
+      "from": "ni_16825039046086",
+      "to": "ni_168250392602922"
+    },
+    {
+      "id": "168250399372351",
+      "from": "ni_16825039046098",
+      "to": "ni_16825039046083"
+    },
+    {
+      "id": "168250401728954",
+      "from": "ni_16825039046098",
+      "to": "ni_16825039046084"
+    },
+    {
+      "id": "168250402498757",
+      "from": "ni_16825039046099",
+      "to": "ni_16825039046085"
+    }
+  ],
+  "panning": {
+    "x": -160.49380395881656,
+    "y": -203.94719956786543
+  },
+  "scaling": 1.274180273716609
+}
