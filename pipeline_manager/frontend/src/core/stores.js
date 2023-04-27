@@ -38,6 +38,41 @@ export const terminalStore = reactive({
         this.logs = newNotifications;
     },
 
+    /**
+     * Adds a parsed notification. If there are messages, then it returns a following message:
+     *
+     * Title:
+     *     message_first_line
+     *     message_second_line
+     *     ...
+     *     message_last_line
+     *
+     * Otherwise, if messages are empty, then it returns a following message:
+     *
+     * Title.
+     *
+     * @param {string} title title of the message
+     * @param {Array[string] | string | undefined} messages messages of the message
+     */
+    addParsed(title, messages) {
+        let parsedMessage = title;
+        if (messages) {
+            if (typeof messages === 'string' || messages instanceof String) {
+                messages = [messages]; // eslint-disable-line no-param-reassign
+            }
+            parsedMessage += ':';
+
+            messages.forEach((message) => {
+                parsedMessage += '\n';
+                parsedMessage += '    ';
+                parsedMessage += message;
+            });
+        } else {
+            parsedMessage += '.';
+        }
+        this.add(parsedMessage);
+    },
+
     remove() {
         localStorage.removeItem('logs');
         this.logs = [];
