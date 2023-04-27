@@ -21,11 +21,24 @@ export const showToast = (type, message) => {
         component: Notification,
         props: {
             type,
-            message: `${message}`,
+            message,
         },
     };
 
     toast(content);
     notificationStore.add({ type, message });
-    terminalStore.add(message);
+};
+
+/**
+ * Helper function that displays the title of the message as a toast notification and
+ * a full message in terminal with a proper title.
+ *
+ * @param {string} type Type of the toast notification
+ * @param {string} title Title of the message used both for toast and terminal notification.
+ * Preferably without any punctuation marks at the end
+ * @param {Array[string] | string | undefined} messages messages that are displayed in the terminal
+ */
+export const terminalLog = (type, title, messages) => {
+    showToast(type, title);
+    terminalStore.addParsed(title, messages);
 };
