@@ -1,6 +1,6 @@
 <template>
     <div class="command-container">
-        <span>{{ message }}</span>
+        <pre><span>{{ message }}</span></pre>
     </div>
 </template>
 
