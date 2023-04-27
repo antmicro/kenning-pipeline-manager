@@ -153,6 +153,7 @@ export default {
          * @param ev Event specifying current mouse position
          */
         changeHoveredConnections(ev) {
+            // Get all connection DOM elements that have mouse hovered over them
             const connectionContainer = document.getElementsByClassName('connections-container')[0];
             const connectionsHtml = this.$children.filter((el) =>
                 connectionContainer.contains(el.$el),
@@ -160,14 +161,21 @@ export default {
             const hoveredHtml = connectionsHtml.filter((el) =>
                 el.containsPoint(ev.clientX, ev.clientY),
             );
+            // Convert DOM elements to BaklavaJS connections
             const hovered = this.connections.filter(
                 (conn) => hoveredHtml.filter((el) => el.connection === conn).length > 0,
             );
+            // Applies highlight to all connections that share the input interface with a
+            // connection mouse is hovered over
+            const highlighted = this.standardConnections
+                .concat(this.highlightConnections)
+                .filter((conn) => hovered.filter((hov) => hov.from === conn.from).length > 0);
+
             this.standardConnections
-                .filter((conn) => hovered.includes(conn))
+                .filter((conn) => highlighted.includes(conn))
                 .forEach(this.addHighlight);
             this.highlightConnections
-                .filter((conn) => !hovered.includes(conn))
+                .filter((conn) => !highlighted.includes(conn))
                 .forEach(this.removeHighlight);
         },
     },
