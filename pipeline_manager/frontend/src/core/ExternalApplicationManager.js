@@ -6,7 +6,7 @@
 
 import { backendApiUrl, HTTPCodes, PMMessageType } from './utils';
 import { fetchGET, fetchPOST } from './fetchRequests';
-import { showToast } from './notifications';
+import { showToast, terminalLog } from './notifications';
 import EditorManager from './EditorManager';
 
 export default class ExternalApplicationManager {
@@ -62,8 +62,7 @@ export default class ExternalApplicationManager {
 
                 const errors = this.editorManager.validateSpecification(specification);
                 if (Array.isArray(errors) && errors.length) {
-                    message = errors;
-                    message.forEach((err) => showToast('error', err));
+                    terminalLog('error', 'Specification is invalid', errors);
                 } else {
                     this.editorManager.updateEditorSpecification(specification);
                     message = 'Specification loaded successfully';
@@ -124,14 +123,16 @@ export default class ExternalApplicationManager {
                 } else if (response.status === HTTPCodes.ServiceUnavailable) {
                     data = await response.text();
                     showToast('error', data);
+                    progressBar.style.width = '0%';
                     return;
                 }
             }
+            progressBar.style.width = '0%';
         }
         if (data.type === PMMessageType.OK) {
             showToast('info', data.content);
         } else if (data.type === PMMessageType.ERROR) {
-            showToast('error', data.content);
+            terminalLog('error', 'Error occured', data.content);
         }
     }
 
@@ -158,8 +159,7 @@ export default class ExternalApplicationManager {
             if (data.type === PMMessageType.OK) {
                 const errors = this.editorManager.loadDataflow(data.content);
                 if (Array.isArray(errors) && errors.length) {
-                    message = errors;
-                    message.forEach((err) => showToast('error', err));
+                    terminalLog('error', 'Dataflow is invalid', errors);
                 } else {
                     showToast('info', message);
                 }

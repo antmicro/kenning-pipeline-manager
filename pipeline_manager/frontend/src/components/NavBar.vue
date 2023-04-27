@@ -15,7 +15,7 @@ import Backend from '../icons/Backend.vue';
 import Bell from '../icons/Bell.vue';
 import DropdownItem from './DropdownItem.vue';
 import EditorManager from '../core/EditorManager';
-import { showToast } from '../core/notifications';
+import { showToast, terminalLog } from '../core/notifications';
 import { notificationStore } from '../core/stores';
 import ExternalApplicationManager from '../core/ExternalApplicationManager';
 import Notifications from './Notifications.vue';
@@ -48,18 +48,12 @@ export default {
     },
     methods: {
         /**
-         * Resets progress of the loading bar.
-         */
-        resetLoadingBar() {
-            document.querySelector('.progress-bar').style.width = '0%';
-        },
-        /**
          * Loads nodes' specification from JSON structure.
          */
         loadSpecification(specification) {
             const errors = this.editorManager.validateSpecification(specification);
             if (Array.isArray(errors) && errors.length) {
-                errors.forEach((err) => showToast('error', err));
+                terminalLog('error', 'Specification is invalid', errors);
             } else {
                 this.editorManager.updateEditorSpecification(specification);
                 showToast('info', 'Loaded successfully');
@@ -85,9 +79,9 @@ export default {
                     specification = JSON.parse(fileReader.result);
                 } catch (exception) {
                     if (exception instanceof SyntaxError) {
-                        showToast('error', `Not a proper JSON file.\n${exception}`);
+                        terminalLog('error', 'Not a proper JSON file', exception.toString());
                     } else {
-                        showToast('error', `Unknown error.\n${exception}`);
+                        terminalLog('error', 'Unknown error', exception.toString());
                     }
                     return;
                 }
@@ -194,7 +188,7 @@ export default {
         loadDataflow(dataflow) {
             const errors = this.editorManager.loadDataflow(dataflow);
             if (Array.isArray(errors) && errors.length) {
-                errors.forEach((err) => showToast('error', err));
+                terminalLog('error', 'Dataflow is invalid', errors);
             } else {
                 showToast('info', 'Dataflow loaded successfully');
             }
@@ -205,8 +199,6 @@ export default {
          * Otherwise the user is alerted with a feedback message.
          */
         loadDataflowCallback() {
-            this.resetLoadingBar();
-
             const file = document.getElementById('load-dataflow-button').files[0];
             if (!file) return;
 
@@ -218,9 +210,9 @@ export default {
                     dataflow = JSON.parse(fileReader.result);
                 } catch (exception) {
                     if (exception instanceof SyntaxError) {
-                        showToast('error', `Not a proper JSON file.\n${exception}`);
+                        terminalLog('error', 'Not a proper JSON file', exception.toString());
                     } else {
-                        showToast('error', `Unknown error.\n${exception}`);
+                        terminalLog('error', 'Unknown error', exception.toString());
                     }
                     return;
                 }
@@ -234,8 +226,6 @@ export default {
          * Event handler that that saves a current dataflow to a `save.json` file.
          */
         saveDataflow() {
-            this.resetLoadingBar();
-
             const blob = new Blob([JSON.stringify(this.editorManager.saveDataflow())], {
                 type: 'application/json',
             });
