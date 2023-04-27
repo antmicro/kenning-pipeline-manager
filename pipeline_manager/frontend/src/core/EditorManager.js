@@ -7,7 +7,7 @@
 import { ViewPlugin } from '@baklavajs/plugin-renderer-vue';
 import { OptionPlugin } from '@baklavajs/plugin-options-vue';
 import { InterfaceTypePlugin } from '@baklavajs/plugin-interface-types';
-import Ajv from 'ajv';
+import Ajv, { stringify } from 'ajv';
 
 import PipelineManagerEditor from '../custom/Editor';
 import CustomNode from '../custom/CustomNode.vue';
@@ -162,7 +162,18 @@ export default class EditorManager {
         if (valid) {
             return [];
         }
-        const errors = validate.errors.map(({ message }) => message);
+
+        // Parsing errors messages to a human readable string
+        const errors = validate.errors.map((error) => {
+            const path = `specification${error.instancePath}`;
+            switch (error.keyword) {
+                case 'enum':
+                    return `${path} ${error.message} - ${stringify(error.params.allowedValues)}`;
+                default:
+                    return `${path} ${error.message}`;
+            }
+        });
+
         return errors;
     }
 }
