@@ -4,14 +4,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import Vue from 'vue';
-import Router from 'vue-router';
+import { createRouter, createWebHistory } from 'vue-router';
 import Home from '../components/Home.vue';
 
-Vue.use(Router);
-
-const RouterVue = new Router({
-    base: process.env.BASE_URL,
+const RouterVue = createRouter({
+    history: createWebHistory(),
     routes: [
         {
             path: '/',
