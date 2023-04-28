@@ -16,29 +16,34 @@ Inherits from baklavajs-plugin-renderer-vue/src/components/connection/Connection
 
 <template>
     <g>
-        <path :d="d" class="connection-wrapper"></path>
-        <path :d="d" :class="cssClasses"></path>
+        <path :d="loopbackd" class="connection-wrapper baklava-connection"></path>
+        <path :d="loopbackd" class="baklava-connection" :class="cssClasses"></path>
     </g>
 </template>
 
 <script>
+import { defineComponent, computed } from 'vue';
+import { useGraph, useViewModel } from 'baklavajs';
 import ConnectionView from './ConnectionView.vue';
 
-export default {
+export default defineComponent({
     extends: ConnectionView,
-
     props: {
         slope: {
-            type: Number,
             default: 1,
+            type: Number,
         },
         shift: {
             type: Number,
             default: 30,
         },
     },
+    setup(props) {
+        const { d, cssClasses } = ConnectionView.setup(props);
 
-    methods: {
+        const { graph } = useGraph();
+        const { viewModel } = useViewModel();
+
         /**
          * Function that calculates the x and y radius of an ellipse given center point and
          * a slope at a specified point
@@ -50,63 +55,62 @@ export default {
          * @param slope dy/dx value on a (x, y) point
          * @returns Array of two elements: radius parallel to x axis and y axis respectively
          */
-        calculateEllipseR(x, y, cx, cy, slope) {
+        const calculateEllipseR = (x, y, cx, cy, slope) => {
             const rx = Math.sqrt(Math.abs((x - cx) * (x - cx) + ((x - cx) * (y - cy)) / slope));
             const ry = Math.sqrt(Math.abs((y - cy) * (y - cy) + (y - cy) * (x - cx) * slope));
             return [rx, ry];
-        },
-    },
+        };
 
-    computed: {
-        d() {
-            const [tx1, ty1] = this.transform(this.x1, this.y1);
-            const [tx2, ty2] = this.transform(this.x2, this.y2);
-            if (this.plugin.useStraightConnections) {
+        const nodeId = computed(() => props.connection.to.nodeId);
+
+        const nodeObject = computed(() => graph.value.findNodeById(nodeId.value));
+
+        const transform = (x, y) => {
+            const tx = (x + graph.value.panning.x) * graph.value.scaling;
+            const ty = (y + graph.value.panning.y) * graph.value.scaling;
+            return [tx, ty];
+        };
+
+        const connLayer = computed(
+            () =>
+                Object.values(nodeObject.value.outputs)
+                    .filter((conn) => conn.port)
+                    .reverse()
+                    .indexOf(props.connection.from) + 1,
+        );
+
+        const loopbackd = computed(() => {
+            const [tx1, ty1] = transform(props.x1, props.y1);
+            const [tx2, ty2] = transform(props.x2, props.y2);
+            if (viewModel.value.settings.useStraightConnections) {
                 return `M ${tx1} ${ty1} L ${tx2} ${ty2}`;
             }
 
-            const nodeHtml = document.getElementById(this.nodeId);
+            const nodeHtml = document.getElementById(nodeId.value);
             const nodeBottom = nodeHtml ? nodeHtml.offsetTop + nodeHtml.offsetHeight : 0;
-            const bottomY = (nodeBottom + this.plugin.panning.y) * this.plugin.scaling;
-            const shift = this.shift * this.plugin.scaling;
-            const y = bottomY + this.connLayer * shift;
+            const bottomY = (nodeBottom + graph.value.panning.y) * graph.value.scaling;
+            const shift = props.shift * graph.value.scaling;
+            const y = bottomY + connLayer.value * shift;
 
-            const rightCx = tx1 - this.connLayer * shift;
+            const rightCx = tx1 - connLayer.value * shift;
             const rightCy = (y + ty1) / 2;
-            const [rightRx, rightRy] = this.calculateEllipseR(tx1, y, rightCx, rightCy, this.slope);
+            const [rightRx, rightRy] = calculateEllipseR(tx1, y, rightCx, rightCy, props.slope);
 
             const bottomCx = (tx1 + tx2) / 2;
             const bottomCy = bottomY;
-            const [bottomRx, bottomRy] = this.calculateEllipseR(
-                tx1,
-                y,
-                bottomCx,
-                bottomCy,
-                this.slope,
-            );
+            const [bottomRx, bottomRy] = calculateEllipseR(tx1, y, bottomCx, bottomCy, props.slope);
 
-            const leftCx = tx2 + this.connLayer * shift;
+            const leftCx = tx2 + connLayer.value * shift;
             const leftCy = (y + ty2) / 2;
-            const [leftRx, leftRy] = this.calculateEllipseR(tx2, y, leftCx, leftCy, -this.slope);
+            const [leftRx, leftRy] = calculateEllipseR(tx2, y, leftCx, leftCy, -props.slope);
 
             return `M ${tx1} ${ty1}
             A ${rightRx} ${rightRy} 0 0 1 ${tx1} ${y}
             A ${bottomRx} ${bottomRy} 0 0 1 ${tx2} ${y}
             A ${leftRx} ${leftRy} 0 0 1 ${tx2} ${ty2}`;
-        },
+        });
 
-        nodeId() {
-            return this.connection.from.parent.id;
-        },
-
-        connLayer() {
-            return (
-                Array.from(this.connection.from.parent.interfaces.values())
-                    .filter((conn) => !conn.isInput)
-                    .reverse()
-                    .indexOf(this.connection.from) + 1
-            );
-        },
+        return { loopbackd, cssClasses };
     },
-};
+});
 </script>

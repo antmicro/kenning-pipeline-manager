@@ -5,137 +5,170 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-    <div :id="data.id" :class="classes" :style="styles">
-        <div
-            class="__title"
-            @mousedown.self.stop="startDragWrapper"
-            @contextmenu.self.prevent="openContextMenuWrapper"
-        >
-            <span>{{ data.name }}</span>
-
-            <component
-                :is="plugin.components.contextMenu"
-                v-model="contextMenu.show"
-                :x="contextMenu.x"
-                :y="contextMenu.y"
-                :items="contextMenu.items"
-                @click="onContextMenu"
-            ></component>
+    <div
+        :id="node.id"
+        ref="el"
+        class="baklava-node"
+        :class="classes"
+        :style="styles"
+        :data-node-type="node.type"
+        @pointerdown="select"
+    >
+        <div class="__title" @pointerdown.self.stop="startDrag">
+            <div class="__title-label">
+                {{ node.title }}
+            </div>
+            <div class="__menu">
+                <vertical-dots class="--clickable" @click="openContextMenu" />
+                <context-menu
+                    v-model="showContextMenu"
+                    :x="0"
+                    :y="0"
+                    :items="contextMenuItems"
+                    @click="onContextMenuClick"
+                />
+            </div>
         </div>
 
         <div class="__content">
             <!-- Outputs -->
             <div class="__outputs">
-                <component
-                    :is="plugin.components.nodeInterface"
-                    v-for="(output, name) in data.outputInterfaces"
+                <CustomInterface
+                    v-for="output in displayedOutputs"
                     :key="output.id"
-                    :name="name"
-                    :data="output"
-                ></component>
-            </div>
-
-            <!-- Options -->
-            <div class="__options">
-                <template v-for="[name, option] in data.options">
-                    {{ getOptionName(option['optionComponent']) ? `${name}:` : '' }}
-                    <component
-                        :is="plugin.components.nodeOption"
-                        :key="name"
-                        :name="name"
-                        :option="option"
-                        :componentName="option.optionComponent"
-                        :node="data"
-                    ></component>
-                </template>
+                    :node="node"
+                    :intf="output"
+                />
             </div>
 
             <!-- Inputs -->
             <div class="__inputs">
-                <component
-                    :is="plugin.components.nodeInterface"
-                    v-for="(input, name) in data.inputInterfaces"
-                    :key="input.id"
-                    :name="name"
-                    :data="input"
-                ></component>
+                <div v-for="input in displayedInputs">
+                    {{ getOptionName(input.componentName) ? `${input.name}:` : '' }}
+                    <CustomInterface :key="input.id" :node="node" :intf="input" />
+                </div>
             </div>
         </div>
     </div>
 </template>
 
-<script>
-import { Components } from '@baklavajs/plugin-renderer-vue';
+<script setup>
+import { ref, computed, toRef, onUpdated, onMounted } from 'vue';
+import {
+    useDragMove,
+    useViewModel,
+    AbstractNode,
+    Components,
+    GRAPH_NODE_TYPE_PREFIX,
+    useGraph,
+} from 'baklavajs';
 
-export default {
-    // CustomNode inherits from the original baklavajs Node
-    extends: Components.Node,
-    data() {
-        return {
-            contextMenu: {
-                show: false,
-                x: 0,
-                y: 0,
-                items: [{ value: 'delete', label: 'Delete' }],
-            },
-        };
-    },
-    methods: {
-        /**
-         * The function decides whether a name for the option should be displayed.
-         *
-         * @param optionType Name of the option component
-         * @returns True if the name should be displayed, false otherwise.
-         */
-        getOptionName(optionType) {
-            switch (optionType) {
-                case 'NumberOption':
-                case 'IntegerOption':
-                case 'CheckboxOption':
-                case 'SliderOption':
-                    return false;
-                case 'InputOption':
-                case 'SelectOption':
-                case 'ListOption':
-                case 'TextOption':
-                default:
-                    return true;
-            }
-        },
-        /**
-         * Executes chosen action in the context menu based on its name.
-         *
-         * @param action Action chosen in the context menu
-         */
-        onContextMenu(action) {
-            switch (action) {
-                case 'delete':
-                    this.plugin.editor.removeNode(this.data);
-                    break;
-                default:
-                    break;
-            }
-        },
-        /**
-         * Wrapper that prevents node moving if the editor is in read-only mode.
-         *
-         * @param ev Event
-         */
-        startDragWrapper(ev) {
-            if (!this.plugin.editor.readonly) {
-                this.startDrag(ev);
-            }
-        },
-        /**
-         * Wrapper that prevents opening the context menu if the editor is in read-only mode.
-         *
-         * @param ev Event
-         */
-        openContextMenuWrapper(ev) {
-            if (!this.plugin.editor.readonly) {
-                this.openContextMenu(ev);
-            }
-        },
-    },
+import CustomInterface from './CustomInterface.vue';
+import VerticalDots from '../components/VerticalDots.vue';
+
+const { ContextMenu } = Components;
+
+// Baklavajs implementation
+
+const props = defineProps({
+    node: AbstractNode,
+    selected: Boolean,
+});
+
+const emit = defineEmits(['select']);
+
+const { viewModel } = useViewModel();
+const { graph, switchGraph } = useGraph();
+const dragMove = useDragMove(toRef(props.node, 'position'));
+
+const el = ref(null);
+
+const showContextMenu = ref(false);
+const contextMenuItems = computed(() => {
+    const items = [{ value: 'delete', label: 'Delete' }];
+
+    if (props.node.type.startsWith(GRAPH_NODE_TYPE_PREFIX)) {
+        items.push({ value: 'editSubgraph', label: 'Edit Subgraph' });
+    }
+
+    return items;
+});
+
+const classes = computed(() => ({
+    '--selected': props.selected,
+    '--dragging': dragMove.dragging.value,
+    '--two-column': !!props.node.twoColumn,
+}));
+
+const styles = computed(() => ({
+    top: `${props.node.position?.y ?? 0}px`,
+    left: `${props.node.position?.x ?? 0}px`,
+    width: `${props.node.width ?? 200}px`,
+}));
+
+const displayedInputs = computed(() => Object.values(props.node.inputs).filter((ni) => !ni.hidden));
+const displayedOutputs = computed(() =>
+    Object.values(props.node.outputs).filter((ni) => !ni.hidden),
+);
+
+const select = () => {
+    emit('select');
+};
+
+const stopDrag = () => {
+    dragMove.onPointerUp();
+    document.removeEventListener('pointermove', dragMove.onPointerMove);
+    document.removeEventListener('pointerup', stopDrag);
+};
+
+const startDrag = (ev) => {
+    dragMove.onPointerDown(ev);
+    document.addEventListener('pointermove', dragMove.onPointerMove);
+    document.addEventListener('pointerup', stopDrag);
+    select();
+};
+
+const openContextMenu = () => {
+    showContextMenu.value = true;
+};
+
+/* eslint-disable default-case */
+const onContextMenuClick = async (action) => {
+    switch (action) {
+        case 'delete':
+            graph.value.removeNode(props.node);
+            break;
+        case 'editSubgraph':
+            switchGraph(props.node.template);
+            break;
+    }
+};
+
+const onRender = () => {
+    if (el.value) {
+        viewModel.value.hooks.renderNode.execute({ node: props.node, el: el.value });
+    }
+};
+
+onMounted(onRender);
+onUpdated(onRender);
+
+// ----------
+
+const getOptionName = (optionType) => {
+    switch (optionType) {
+        case 'NumberInterface':
+        case 'IntegerInterface':
+        case 'CheckboxInterface':
+        case 'SliderInterface':
+        case 'NodeInterface':
+            return false;
+        case 'InputInterface':
+        case 'SelectInterface':
+        case 'ListInterface':
+        case 'TextInterface':
+        default:
+            return true;
+    }
 };
 </script>

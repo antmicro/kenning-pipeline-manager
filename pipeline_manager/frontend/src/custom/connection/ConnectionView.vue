@@ -12,22 +12,23 @@ Inherits from baklavajs-plugin-renderer-vue/src/components/connection/Connection
 
 <template>
     <g>
-        <path :d="d" class="connection-wrapper"></path>
-        <path :d="d" :class="cssClasses"></path>
+        <path :d="d" class="connection-wrapper baklava-connection"></path>
+        <path :d="d" class="baklava-connection" :class="cssClasses"></path>
     </g>
 </template>
 
 <script>
-import { Components } from '@baklavajs/plugin-renderer-vue';
+import { defineComponent, computed } from 'vue';
+import { Components } from 'baklavajs';
 
-export default {
+export default defineComponent({
     extends: Components.Connection,
-    props: ['isHighlighted'],
+    props: { isHighlighted: { default: false }, connection: { required: true } },
+    setup(props) {
+        const { d, classes } = Components.Connection.setup(props);
+        const cssClasses = computed(() => ({ ...classes, '--hover': props.isHighlighted }));
 
-    computed: {
-        cssClasses() {
-            return { ...this.classes, '--hover': this.isHighlighted };
-        },
+        return { cssClasses, d };
     },
-};
+});
 </script>

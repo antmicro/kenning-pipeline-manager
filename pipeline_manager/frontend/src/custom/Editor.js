@@ -14,53 +14,10 @@
  * Inherits from baklavajs-core/src/editor.ts
  */
 
-import { Editor, DummyConnection } from '@baklavajs/core';
+import { Editor } from 'baklavajs';
 
 export default class PipelineManagerEditor extends Editor {
     readonly = false;
 
     allowLoopbacks = false;
-
-    /**
-     * Checks, whether a connection between two node interfaces would be valid.
-     * @param from The starting node interface (must be an output interface)
-     * @param to The target node interface (must be an input interface)
-     * @returns Whether the connection is allowed or not.
-     */
-    checkConnection(from, to) {
-        if (!from || !to) {
-            return false;
-        }
-
-        if (from.isInput && !to.isInput) {
-            // reverse connection
-            /* eslint-disable no-param-reassign */
-            const tmp = from;
-            from = to;
-            to = tmp;
-            /* eslint-enable no-param-reassign */
-        }
-
-        if (from.isInput || !to.isInput) {
-            // connections are only allowed from input to output interface
-            return false;
-        }
-
-        if (from.parent === to.parent && !this.allowLoopbacks) {
-            // Connection starting and ending at the same node are only allowed if corresponding
-            // option is set to true
-            return false;
-        }
-
-        // prevent connections going to already taken input
-        if (this.connections.some((c) => c.to === to)) {
-            return false;
-        }
-
-        if (this.events.checkConnection.emit({ from, to })) {
-            return false;
-        }
-
-        return new DummyConnection(from, to);
-    }
 }

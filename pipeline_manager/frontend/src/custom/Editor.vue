@@ -22,176 +22,160 @@ Sidebar and Minimap components are removed whatsoever as they are not used.
 
 <template>
     <div
+        ref="el"
         tabindex="-1"
-        :class="[
-            'node-editor',
-            {
-                'ignore-mouse': !!temporaryConnection,
-                '--temporary-connection': !!temporaryConnection,
-            },
-        ]"
-        @mousemove.self="mouseMoveHandler"
-        @mousedown="mouseDown"
-        @mouseup="mouseUp"
+        class="baklava-editor"
+        :class="{
+            'baklava-ignore-mouse': !!temporaryConnection || dragging,
+            '--temporary-connection': !!temporaryConnection,
+        }"
+        @pointermove.self="onPointerMove"
+        @pointerdown="onPointerDown"
+        @pointerup="onPointerUp"
         @wheel.self="mouseWheel"
         @keydown="keyDown"
         @keyup="keyUp"
-        @contextmenu.self.prevent="openContextMenu"
     >
-        <div class="background" :style="backgroundStyle"></div>
+        <slot name="background">
+            <background />
+        </slot>
+
+        <slot name="palette">
+            <node-palette />
+        </slot>
 
         <svg
             class="connections-container"
-            @mouseenter="changeHoveredConnections($event)"
-            @mousemove="changeHoveredConnections($event)"
-            @mouseleave="changeHoveredConnections($event)"
+            @mouseenter="changeHoveredConnections"
+            @mousemove="changeHoveredConnections"
+            @mouseleave="clearHighlight"
         >
-            <g v-for="connection in standardConnections" :key="connection.id + counter.toString()">
-                <slot name="connections" :connection="connection">
-                    <component
-                        :is="plugin.components.connection"
-                        :connection="connection"
-                    ></component>
-                </slot>
+            <g v-for="connection in connections" :key="connection.id + counter.toString()">
+                <PipelineManagerConnection
+                    :connection="connection"
+                    ref="connRefs"
+                    :isHighlighted="highlightConnections.includes(connection)"
+                />
             </g>
-            <g v-for="connection in highlightConnections" :key="connection.id + counter.toString()">
-                <slot name="highlightConnections" :connection="connection">
-                    <component
-                        :is="plugin.components.connection"
-                        :connection="connection"
-                        is-highlighted
-                    ></component>
-                </slot>
-            </g>
-            <component
-                :is="plugin.components.tempConnection"
-                v-if="temporaryConnection"
-                :connection="temporaryConnection"
-            ></component>
+            <slot name="temporaryConnection" :temporary-connection="temporaryConnection">
+                <temporary-connection
+                    v-if="temporaryConnection"
+                    :connection="temporaryConnection"
+                />
+            </slot>
         </svg>
 
-        <div class="node-container" :style="styles">
-            <component
-                :is="plugin.components.node"
-                v-for="node in nodes"
-                :key="node.id + counter.toString()"
-                :data="node"
-                :selected="selectedNodes.includes(node)"
-                @select="selectNode(node, $event)"
-            >
-            </component>
+        <div class="node-container" :style="nodeContainerStyle">
+            <transition-group name="fade">
+                <CustomNode
+                    v-for="node in nodes"
+                    :key="node.id + counter.toString()"
+                    :node="node"
+                    :selected="selectedNodes.includes(node)"
+                    @select="selectNode(node)"
+                />
+            </transition-group>
         </div>
-
-        <component
-            v-if="!plugin.editor.readonly"
-            :is="plugin.components.contextMenu"
-            highlightConnections
-            v-model="contextMenu.show"
-            :x="contextMenu.x"
-            :y="contextMenu.y"
-            :items="contextMenu.items"
-            flippable
-            @click="onContextMenuClick"
-        ></component>
-
-        <slot></slot>
     </div>
 </template>
 
 <script>
-import { Editor } from '@baklavajs/plugin-renderer-vue';
-import { computed } from 'vue';
+import { EditorComponent } from 'baklavajs';
+import { defineComponent, ref } from 'vue';
+import CustomNode from './CustomNode.vue';
+import PipelineManagerConnection from './connection/PipelineManagerConnection.vue';
 
-export default {
-    extends: Editor,
-
-    props: ['plugin'],
-
-    provide() {
-        return {
-            plugin: computed(() => this.plugin),
-        };
+export default defineComponent({
+    extends: EditorComponent,
+    components: {
+        CustomNode,
+        PipelineManagerConnection,
     },
+    setup(props) {
+        const {
+            el,
+            counter,
+            nodes,
+            connections,
+            selectedNodes,
+            nodeContainerStyle,
+            onPointerMove,
+            onPointerDown,
+            onPointerUp,
+            keyDown,
+            keyUp,
+            selectNode,
+            temporaryConnection,
+            mouseWheel,
+            dragging,
+        } = EditorComponent.setup(props);
 
-    data() {
-        return {
-            highlightConnections: [],
+        const connRefs = ref([]);
+
+        const highlightConnections = ref([]);
+
+        const clearHighlight = () => {
+            highlightConnections.value.splice(0, highlightConnections.value.length);
         };
-    },
 
-    methods: {
-        /**
-         * Highlights the connection. Doesn't change anything if
-         * connection is already highlighted
-         *
-         * @param connection Connection to highlight
-         */
-        addHighlight(connection) {
-            if (!this.highlightConnections.includes(connection)) {
-                this.highlightConnections.push(connection);
+        const addHighlight = (connection) => {
+            if (!highlightConnections.value.includes(connection)) {
+                highlightConnections.value.push(connection);
             }
-        },
+        };
 
-        /**
-         * Removes the highlight for input connection. Doesn't do anything
-         * if connection was not highlighted
-         *
-         * @param connection Connection to return to standard state
-         */
-        removeHighlight(connection) {
-            const index = this.highlightConnections.indexOf(connection);
+        const removeHighlight = (connection) => {
+            const index = highlightConnections.value.indexOf(connection);
             if (index >= 0) {
-                this.highlightConnections.splice(index, 1);
+                highlightConnections.value.splice(index, 1);
             }
-        },
+        };
 
-        /**
-         * On mouse movement checks all drawn connections whether mouse is
-         * hovered over them. Adds highlight to all hovered connections,
-         * removed highlight for the rest.
-         *
-         * @param ev Event specifying current mouse position
-         */
-        changeHoveredConnections(ev) {
+        const changeHoveredConnections = (ev) => {
             // Get all connection DOM elements that have mouse hovered over them
-            const connectionContainer = document.getElementsByClassName('connections-container')[0];
-            const connectionsHtml = this.$children.filter((el) =>
-                connectionContainer.contains(el.$el),
+            const hoveredHtml = connRefs.value.filter((conn) =>
+                conn.containsPoint(ev.clientX, ev.clientY),
             );
-            const hoveredHtml = connectionsHtml.filter((el) =>
-                el.containsPoint(ev.clientX, ev.clientY),
-            );
+
             // Convert DOM elements to BaklavaJS connections
-            const hovered = this.connections.filter(
-                (conn) => hoveredHtml.filter((el) => el.connection === conn).length > 0,
+            const hovered = connections.value.filter(
+                (conn) => hoveredHtml.filter((htmlEl) => htmlEl.connection === conn).length > 0,
             );
-            // Applies highlight to all connections that share the input interface with a
-            // connection mouse is hovered over
-            const highlighted = this.standardConnections
-                .concat(this.highlightConnections)
-                .filter((conn) => hovered.filter((hov) => hov.from === conn.from).length > 0);
 
-            this.standardConnections
-                .filter((conn) => highlighted.includes(conn))
-                .forEach(this.addHighlight);
-            this.highlightConnections
-                .filter((conn) => !highlighted.includes(conn))
-                .forEach(this.removeHighlight);
-        },
-    },
-
-    watch: {
-        connections(newConnections) {
-            this.highlightConnections = this.highlightConnections.filter((conn) =>
-                newConnections.includes(conn),
+            const highlighted = connections.value.filter(
+                (conn) => hovered.filter((hov) => hov.from === conn.from).length > 0,
             );
-        },
-    },
 
-    computed: {
-        standardConnections() {
-            return this.connections.filter((conn) => !this.highlightConnections.includes(conn));
-        },
+            connections.value.forEach((conn) => {
+                if (highlighted.includes(conn)) {
+                    addHighlight(conn);
+                } else {
+                    removeHighlight(conn);
+                }
+            });
+        };
+
+        return {
+            el,
+            counter,
+            nodes,
+            connections,
+            selectedNodes,
+            nodeContainerStyle,
+            onPointerMove,
+            onPointerDown,
+            onPointerUp,
+            keyDown,
+            keyUp,
+            selectNode,
+            temporaryConnection,
+            mouseWheel,
+            dragging,
+            changeHoveredConnections,
+            highlightConnections,
+            connRefs,
+            clearHighlight,
+        };
     },
-};
+});
 </script>

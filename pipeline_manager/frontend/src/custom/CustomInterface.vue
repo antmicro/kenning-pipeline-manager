@@ -5,51 +5,69 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-    <div :id="data.id" :class="classes">
-        <div class="__port" @mouseover="startHoverWrapper" @mouseout="endHoverWrapper"></div>
-        <span
-            v-if="data.connectionCount > 0 || !data.option || !getOptionComponent(data.option)"
-            class="align-middle"
-        >
-            {{ displayName }}
-        </span>
+    <div :id="intf.id" ref="el" class="baklava-node-interface" :class="classes">
+        <div
+            v-if="intf.port"
+            class="__port"
+            @pointerover="startHoverWrapper"
+            @pointerout="endHoverWrapper"
+        />
         <component
-            v-else
-            :is="getOptionComponent(data.option)"
-            :option="data"
-            :value="value"
-            @input="data.value = $event"
-            :name="displayName"
-        ></component>
+            :is="intf.component"
+            v-if="showComponent"
+            v-model="intf.value"
+            :node="node"
+            :intf="intf"
+            @open-sidebar="openSidebar"
+        />
+        <span v-else class="align-middle">
+            {{ intf.name }}
+        </span>
     </div>
 </template>
 
 <script>
-import { Components } from '@baklavajs/plugin-renderer-vue';
+import { defineComponent } from 'vue';
+import { Components, useViewModel } from 'baklavajs';
 
-export default {
+export default defineComponent({
     extends: Components.NodeInterface,
-    methods: {
-        /**
-         * Wrapper for startHover function.
-         * It checks whether the interface is in read-only mode.
-         * If it is then it disables event handling.
-         */
-        startHoverWrapper() {
-            if (!this.plugin.editor.readonly) {
-                this.startHover();
+    setup(props) {
+        const { el, isConnected, classes, showComponent, startHover, endHover, openSidebar } =
+            Components.NodeInterface.setup(props);
+
+        const { viewModel } = useViewModel();
+
+        if (viewModel.value.editor.readonly) {
+            const token = Symbol(null);
+            props.intf.events.beforeSetValue.subscribe(token, (_, prevent) => {
+                prevent();
+            });
+        }
+
+        const startHoverWrapper = () => {
+            if (!viewModel.value.editor.readonly) {
+                startHover();
             }
-        },
-        /**
-         * Wrapper for endHover function.
-         * It checks whether the interface is in read-only mode.
-         * If it is then it disables event handling.
-         */
-        endHoverWrapper() {
-            if (!this.plugin.editor.readonly) {
-                this.endHover();
+        };
+
+        const endHoverWrapper = () => {
+            if (!viewModel.value.editor.readonly) {
+                endHover();
             }
-        },
+        };
+
+        return {
+            el,
+            isConnected,
+            classes,
+            showComponent,
+            startHover,
+            endHover,
+            openSidebar,
+            startHoverWrapper,
+            endHoverWrapper,
+        };
     },
-};
+});
 </script>

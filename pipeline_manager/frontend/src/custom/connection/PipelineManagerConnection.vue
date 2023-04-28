@@ -14,6 +14,7 @@ Inherits from baklavajs-plugin-renderer-vue/src/components/connection/Connection
 
 <template>
     <component
+        ref="conn"
         :is="connectionType"
         :x1="d.x1"
         :y1="d.y1"
@@ -21,53 +22,56 @@ Inherits from baklavajs-plugin-renderer-vue/src/components/connection/Connection
         :y2="d.y2"
         :state="state"
         :connection="connection"
-        :data-from="connection.from.id"
-        :data-to="connection.to.id"
-        :data-from-node="connection.from.parent.id"
-        :data-to-node="connection.to.parent.id"
-        :is-highlighted="isHighlighted"
+        :isHighlighted="isHighlighted"
     ></component>
 </template>
 
 <script>
-import { Components } from '@baklavajs/plugin-renderer-vue';
+import { defineComponent, computed, ref } from 'vue';
+import { Components, useGraph } from 'baklavajs';
 import LoopbackConnection from './LoopbackConnection.vue';
 import ConnectionView from './ConnectionView.vue';
 
-export default {
+export default defineComponent({
     extends: Components.ConnectionWrapper,
+    props: { isHighlighted: { default: false } },
+    setup(props) {
+        const { graph } = useGraph();
 
-    props: {
-        isHighlighted: {
-            type: Boolean,
-            default: false,
-        },
-    },
+        const conn = ref(null);
 
-    methods: {
+        const fromNodePosition = computed(
+            () => graph.value.findNodeById(props.connection.from.nodeId)?.position,
+        );
+        const toNodePosition = computed(
+            () => graph.value.findNodeById(props.connection.to.nodeId)?.position,
+        );
+
         /**
          * Check whether the connection path contains the x, y point
          *
          * @param x X coordinate of input point
          * @param y Y coordinate of input point
          */
-        containsPoint(x, y) {
+        const containsPoint = (x, y) => {
             const elements = document.elementsFromPoint(x, y);
-            return elements.includes(this.$el.firstChild);
-        },
-    },
+            return elements.includes(conn.value.$el.firstChild);
+        };
 
-    computed: {
-        isLoopback() {
-            return this.connection.from.parent.id === this.connection.to.parent.id;
-        },
-
-        connectionType() {
-            if (this.isLoopback) {
+        const isLoopback = computed(() => fromNodePosition.value === toNodePosition.value);
+        const connectionType = computed(() => {
+            if (isLoopback.value) {
                 return LoopbackConnection;
             }
             return ConnectionView;
-        },
+        });
+
+        return {
+            ...Components.ConnectionWrapper.setup(props),
+            connectionType,
+            containsPoint,
+            conn,
+        };
     },
-};
+});
 </script>
