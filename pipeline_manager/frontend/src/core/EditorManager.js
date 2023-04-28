@@ -9,15 +9,9 @@ import Ajv, { stringify } from 'ajv';
 import { useBaklava, DummyConnection, BaklavaInterfaceTypes } from 'baklavajs';
 
 import PipelineManagerEditor from '../custom/Editor';
-// import CustomInterface from '../custom/CustomInterface.vue';
-// import CustomOption from '../custom/CustomOption.vue';
-// import ContextMenu from '../custom/ContextMenu.vue';
-// import PipelineManagerConnection from '../custom/connection/PipelineManagerConnection.vue';
 
 import { showToast } from './notifications';
 import { NodeFactory, readInterfaceTypes } from './NodeFactory';
-// import ListOption from '../options/ListOption.vue';
-// import InputOption from '../options/InputOption.vue';
 import specificationSchema from '../../../resources/schemas/dataflow_spec_schema.json';
 
 export default class EditorManager {
@@ -184,6 +178,7 @@ export default class EditorManager {
      * @param specification Specification to validate
      * @returns An array of errors. If the array is empty, the validation was successful.
      */
+    /* eslint-disable class-methods-use-this */
     validateSpecification(specification) {
         const ajv = new Ajv();
 

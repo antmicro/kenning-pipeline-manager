@@ -33,6 +33,7 @@ import { Components, useViewModel } from 'baklavajs';
 export default defineComponent({
     extends: Components.NodeInterface,
     setup(props) {
+        /* eslint-disable object-curly-newline */
         const { el, isConnected, classes, showComponent, startHover, endHover, openSidebar } =
             Components.NodeInterface.setup(props);
 

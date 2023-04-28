@@ -57,8 +57,8 @@ export default defineComponent({
              * @param v value of the new input.
              *
              */
-            set: (v) => {
-                const splitted = v.trim().split(/\s+/);
+            set: (val) => {
+                const splitted = val.trim().split(/\s+/);
                 const parsed = splitted.map((e) => {
                     switch (dtype) {
                         case 'string':

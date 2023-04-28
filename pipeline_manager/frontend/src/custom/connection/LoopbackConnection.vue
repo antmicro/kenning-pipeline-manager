@@ -39,7 +39,7 @@ export default defineComponent({
         },
     },
     setup(props) {
-        const { d, cssClasses } = ConnectionView.setup(props);
+        const { cssClasses } = ConnectionView.setup(props);
 
         const { graph } = useGraph();
         const { viewModel } = useViewModel();

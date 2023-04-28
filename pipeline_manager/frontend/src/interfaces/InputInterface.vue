@@ -36,8 +36,8 @@ export default defineComponent({
 
         const v = computed({
             get: () => props.modelValue,
-            set: (v) => {
-                emit('update:modelValue', v);
+            set: (val) => {
+                emit('update:modelValue', val);
                 el.value.value = props.intf.value;
             },
         });

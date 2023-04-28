@@ -3,7 +3,6 @@ Copyright (c) 2022-2023 Antmicro <www.antmicro.com>
 
 SPDX-License-Identifier: Apache-2.0
 -->
-
 <template>
     <div
         :id="node.id"
@@ -43,6 +42,7 @@ SPDX-License-Identifier: Apache-2.0
 
             <!-- Inputs -->
             <div class="__inputs">
+                <!-- eslint-disable vue/require-v-for-key -->
                 <div v-for="input in displayedInputs">
                     {{ getOptionName(input.componentName) ? `${input.name}:` : '' }}
                     <CustomInterface :key="input.id" :node="node" :intf="input" />
@@ -53,6 +53,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script setup>
+/* eslint-disable object-curly-newline */
 import { ref, computed, toRef, onUpdated, onMounted } from 'vue';
 import {
     useDragMove,
