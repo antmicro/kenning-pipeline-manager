@@ -4,10 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { BaklavaVuePlugin } from '@baklavajs/plugin-renderer-vue';
 import Toast, { POSITION } from 'vue-toastification';
 
-import Vue from 'vue';
+import { createApp } from 'vue';
 import App from './App.vue';
 import RouterVue from './router/router';
 import '../styles/style.scss';
@@ -20,18 +19,8 @@ const options = {
     closeButton: false,
 };
 
-Vue.use(BaklavaVuePlugin);
-Vue.use(Toast, options);
+const app = createApp(App);
+app.use(RouterVue);
+app.use(Toast, options);
 
-Vue.config.productionTip = false;
-Vue.config.devtools = false;
-
-/* eslint-disable no-console */
-Vue.prototype.log = console.log;
-
-/* eslint-disable no-new */
-new Vue({
-    el: '#app',
-    router: RouterVue,
-    render: (h) => h(App),
-});
+app.mount('#app');
