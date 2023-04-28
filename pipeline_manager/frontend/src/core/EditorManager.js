@@ -4,68 +4,86 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ViewPlugin } from '@baklavajs/plugin-renderer-vue';
-import { OptionPlugin } from '@baklavajs/plugin-options-vue';
-import { InterfaceTypePlugin } from '@baklavajs/plugin-interface-types';
 import Ajv, { stringify } from 'ajv';
 
+import { useBaklava, DummyConnection, BaklavaInterfaceTypes } from 'baklavajs';
+
 import PipelineManagerEditor from '../custom/Editor';
-import CustomNode from '../custom/CustomNode.vue';
-import CustomInterface from '../custom/CustomInterface.vue';
-import CustomOption from '../custom/CustomOption.vue';
-import ContextMenu from '../custom/ContextMenu.vue';
-import PipelineManagerConnection from '../custom/connection/PipelineManagerConnection.vue';
+// import CustomInterface from '../custom/CustomInterface.vue';
+// import CustomOption from '../custom/CustomOption.vue';
+// import ContextMenu from '../custom/ContextMenu.vue';
+// import PipelineManagerConnection from '../custom/connection/PipelineManagerConnection.vue';
 
 import { showToast } from './notifications';
-import NodeFactory from './NodeFactory';
-import ListOption from '../options/ListOption.vue';
-import InputOption from '../options/InputOption.vue';
+import { NodeFactory, readInterfaceTypes } from './NodeFactory';
+// import ListOption from '../options/ListOption.vue';
+// import InputOption from '../options/InputOption.vue';
 import specificationSchema from '../../../resources/schemas/dataflow_spec_schema.json';
 
 export default class EditorManager {
     static instance;
 
-    editor = null;
+    editor = new PipelineManagerEditor();
 
-    nodeInterfaceTypes = null;
+    baklavaView = useBaklava(this.editor);
 
-    viewPlugin = null;
-
-    optionPlugin = null;
+    nodeInterfaceTypes = new BaklavaInterfaceTypes(this.editor, {
+        viewPlugin: this.baklavaView,
+    });
 
     specificationLoaded = false;
 
-    ajv = new Ajv();
-
+    /* eslint-disable no-underscore-dangle */
+    /* eslint-disable no-param-reassign */
     constructor() {
-        this.initializeEditor();
-    }
+        const graphInstance = this.editor._graph;
+        graphInstance.checkConnection = (from, to) => {
+            if (!from || !to) {
+                return { connectionAllowed: false };
+            }
 
-    /**
-     * Reinitializes current editor and its plugins.
-     * It is used to reset the environment.
-     */
-    initializeEditor() {
-        this.editor = new PipelineManagerEditor();
+            const fromNode = graphInstance.findNodeById(from.nodeId);
+            const toNode = graphInstance.findNodeById(to.nodeId);
+            if (fromNode && toNode && fromNode === toNode && !graphInstance.editor.allowLoopbacks) {
+                // connections must be between two separate nodes.
+                return { connectionAllowed: false };
+            }
 
-        this.nodeInterfaceTypes = new InterfaceTypePlugin();
-        this.viewPlugin = new ViewPlugin();
-        this.optionPlugin = new OptionPlugin();
+            if (from.isInput && !to.isInput) {
+                // reverse connection
+                const tmp = from;
+                from = to;
+                to = tmp;
+            }
 
-        this.viewPlugin.components.node = CustomNode;
-        this.viewPlugin.components.contextMenu = ContextMenu;
-        this.viewPlugin.components.connection = PipelineManagerConnection;
-        this.viewPlugin.components.nodeInterface = CustomInterface;
-        this.viewPlugin.components.nodeOption = CustomOption;
+            if (from.isInput || !to.isInput) {
+                // connections are only allowed from input to output interface
+                return { connectionAllowed: false };
+            }
 
-        this.editor.use(this.viewPlugin);
-        this.viewPlugin.registerOption('ListOption', ListOption);
-        this.viewPlugin.registerOption('CustomInputOption', InputOption);
+            // prevent duplicate connections
+            if (graphInstance.connections.some((c) => c.to === to)) {
+                return { connectionAllowed: false };
+            }
 
-        this.editor.use(this.nodeInterfaceTypes);
-        this.editor.use(this.optionPlugin);
+            if (graphInstance.events.checkConnection.emit({ from, to }).prevented) {
+                return { connectionAllowed: false };
+            }
 
-        this.specificationLoaded = false;
+            const hookResults = graphInstance.hooks.checkConnection.execute({ from, to });
+            if (hookResults.some((hr) => !hr.connectionAllowed)) {
+                return { connectionAllowed: false };
+            }
+
+            const connectionsInDanger = Array.from(
+                new Set(hookResults.flatMap((hr) => hr.connectionsInDanger)),
+            );
+            return {
+                connectionAllowed: true,
+                dummyConnection: new DummyConnection(from, to),
+                connectionsInDanger,
+            };
+        };
     }
 
     /**
@@ -80,11 +98,25 @@ export default class EditorManager {
     updateEditorSpecification(dataflowSpecification) {
         if (!dataflowSpecification) return;
         if (this.specificationLoaded) {
-            this.initializeEditor();
+            const graphInstance = this.editor._graph;
+
+            for (let i = graphInstance.connections.length - 1; i >= 0; i -= 1) {
+                graphInstance.removeConnection(graphInstance.connections[i]);
+            }
+            for (let i = graphInstance.nodes.length - 1; i >= 0; i -= 1) {
+                graphInstance.removeNode(graphInstance.nodes[i]);
+            }
+
+            this.editor.nodeTypes.forEach((_, nodeKey) => {
+                this.editor.unregisterNodeType(nodeKey);
+            });
         }
 
-        this.specificationLoaded = true;
         const { nodes, metadata } = dataflowSpecification;
+
+        const interfaceTypes = readInterfaceTypes(nodes, metadata);
+        this.nodeInterfaceTypes.addTypes(...Object.values(interfaceTypes));
+
         nodes.forEach((node) => {
             const myNode = NodeFactory(
                 node.name,
@@ -92,22 +124,18 @@ export default class EditorManager {
                 node.inputs,
                 node.properties,
                 node.outputs,
+                interfaceTypes,
             );
-            this.editor.registerNodeType(node.name, myNode, node.category);
+            this.editor.registerNodeType(myNode, { title: node.name, category: node.category });
         });
 
-        if ('interfaces' in metadata) {
-            Object.entries(metadata.interfaces).forEach(([name, color]) => {
-                this.nodeInterfaceTypes.addType(name, color);
-            });
-        }
         this.editor.readonly = 'readonly' in metadata ? metadata.readonly : false;
         if (this.editor.readonly) {
             showToast('info', 'The specification is read-only. Only dataflow loading is allowed.');
         }
-        if ('allowLoopbacks' in metadata) {
-            this.editor.allowLoopbacks = metadata.allowLoopbacks;
-        }
+        this.editor.allowLoopbacks = 'allowLoopbacks' in metadata ? metadata.allowLoopbacks : false;
+
+        this.specificationLoaded = true;
     }
 
     /**
@@ -157,7 +185,9 @@ export default class EditorManager {
      * @returns An array of errors. If the array is empty, the validation was successful.
      */
     validateSpecification(specification) {
-        const validate = this.ajv.compile(specificationSchema);
+        const ajv = new Ajv();
+
+        const validate = ajv.compile(specificationSchema);
         const valid = validate(specification);
         if (valid) {
             return [];
@@ -173,7 +203,6 @@ export default class EditorManager {
                     return `${path} ${error.message}`;
             }
         });
-
         return errors;
     }
 }
