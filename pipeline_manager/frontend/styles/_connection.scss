@@ -1,4 +1,4 @@
-.connection  {
+.baklava-connection {
     pointer-events: visibleStroke;
 
     &.--hover {
@@ -7,8 +7,8 @@
     }
 }
 
-.connection-wrapper  {
-    @extend .connection;
+.connection-wrapper {
+    @extend .baklava-connection;
     stroke: transparent;
     stroke-width: 10px;
 }

@@ -4,49 +4,42 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-// To be able to import those scss files
-// package.json of @baklavajs/plugin-renderer-vue has to be altered by adding entry:
-// "./dist/styles.css": "./dist/styles.css"
-// To the "exports" dictionary.
+:root {
+    // Controls
+    --baklava-control-color-primary: #{$green};
+    --baklava-control-color-error: #{$red};
+    --baklava-control-color-background: #{$gray-500};
+    --baklava-control-color-foreground: #{$white};
+    --baklava-control-color-hover: #{$gray-400};
+    --baklava-control-color-active: #{$gray-200};
+    --baklava-control-border-radius: 10px;
 
-@import '@baklavajs/plugin-renderer-vue/dist/styles/variables.scss';
+    // Nodes
+    --baklava-node-color-background: #{$gray-600};
+    --baklava-node-color-foreground: #{$white};
+    --baklava-node-color-selected: --baklava-control-color-primary;
+    --baklava-node-title-color-background: #{$gray-500};
+    --baklava-node-title-color-foreground: #{$white};
+    --baklava-node-border-radius: 15px;
 
-// Controls
-$color-primary: $green;
-$color-error: $red;
-$color-control-dark-background: $gray-500;
-$color-control-dark-foreground: $white;
-$color-control-dark-hover: $gray-400;
-$color-control-dark-active: $gray-200;
-$border-radius-control: 10px;
+    // Connections
+    --baklava-color-connection-default: #{$white};
+    --baklava-color-connection-allowed: #{$green};
+    --baklava-color-connection-forbidden: #{$red};
 
-// Nodes
-$color-node-background: $gray-600;
-$color-node-foreground: $white;
-$color-node-selected: $color-primary;
-$color-node-title-background: $gray-500;
-$color-node-title-foreground: $white;
-$border-radius-node: 15px;
+    // Background pattern
+    --baklava-editor-background-pattern-default: #{$black};
+    --baklava-editor-background-pattern-line: #{$gray-500};
+    --baklava-editor-background-pattern-black: #{$gray-500};
+}
 
-// Connections
-$color-connection-default: $white;
-$color-connection-allowed: $green;
-$color-connection-forbidden: $red;
-
-// Background pattern
-$color-pattern-default: $black;
-$color-pattern-line: $gray-500;
-$color-pattern-black: $gray-500;
-
-@import '@baklavajs/plugin-renderer-vue/dist/styles/styles.scss';
-
-.node {
+.baklava-node {
     min-width: 300px !important;
     opacity: 0.9;
     display: table;
 }
 
-.node > .__title {
+.baklava-node > .__title {
     height: 60px;
     display: flex;
     align-items: center;
@@ -54,31 +47,33 @@ $color-pattern-black: $gray-500;
     width: 100%;
 }
 
-.node-editor {
+.baklava-editor {
     font-size: 14px;
 }
 
-.node.--selected {
+.baklava-node.--selected {
     z-index: 5;
     box-shadow: 0 0 0 calc(1px / var(--scale)) $green;
 }
 
-.node-editor .background {
+.baklava-editor .background {
     background-image: linear-gradient($gray-700 2px, transparent 2px),
         linear-gradient(90deg, $gray-700 2px, transparent 2px);
 }
 
-.dark-slider > .__slider {
+.baklava-slider > .__slider {
     background-color: $green;
 }
 
-.node-interface .__port {
+.baklava-node-interface .__port {
     background-color: $green;
 }
 
-.dark-checkbox .__checkmark-container > svg > path {
+.baklava-checkbox .__checkmark-container > svg > path {
     display: none;
 }
+
+// Obsolete
 
 .dark-context-menu {
     background-color: $gray-600;
@@ -110,4 +105,13 @@ $color-pattern-black: $gray-500;
 
 .dark-context-menu > .item > .ml-3 > svg > path {
     d: path('M99.4,111.6l64.2,69.2L99.4,250h54.5l64.2-69.2l-64.2-69.2H99.4z') !important;
+}
+
+// Node pallette
+
+.baklava-node-palette {
+    top: 0px;
+    height: 100%;
+    width: auto;
+    left: 200px;
 }
