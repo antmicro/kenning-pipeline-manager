@@ -7,11 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 <template>
     <div id="container">
         <NavBar />
-        <EditorView
-            class="inner-editor"
-            :plugin="this.editorManager.viewPlugin"
-            :style="`--scale: ${this.scale}`"
-        />
+        <Editor class="inner-editor" :view-model="editorManager.baklavaView" />
         <TerminalPanel />
     </div>
 </template>
@@ -19,19 +15,20 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import NavBar from './NavBar.vue';
 import EditorManager from '../core/EditorManager';
-import EditorView from '../custom/Editor.vue';
 import TerminalPanel from './TerminalPanel.vue';
+import Editor from '../custom/Editor.vue';
+import '@baklavajs/themes/dist/classic.css';
 
 export default {
     components: {
         NavBar,
-        EditorView,
+        Editor,
         TerminalPanel,
     },
     data() {
-        return {
-            editorManager: EditorManager.getEditorManagerInstance(),
-        };
+        const editorManager = EditorManager.getEditorManagerInstance();
+
+        return { editorManager };
     },
     computed: {
         scale() {
