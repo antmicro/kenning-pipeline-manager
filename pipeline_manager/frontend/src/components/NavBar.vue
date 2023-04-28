@@ -19,6 +19,7 @@ import Backend from '../icons/Backend.vue';
 import Bell from '../icons/Bell.vue';
 import Cube from '../icons/Cube.vue';
 import DropdownItem from './DropdownItem.vue';
+import Cogwheel from '../icons/Cogwheel.vue';
 import EditorManager from '../core/EditorManager';
 import NotificationHandler from '../core/notifications';
 import { notificationStore } from '../core/stores';
@@ -36,6 +37,7 @@ export default {
         DropdownItem,
         Notifications,
         Cube,
+        Cogwheel,
     },
     data() {
         return {
@@ -215,6 +217,10 @@ export default {
             }
 
             this.displayBackendPanel(false);
+        },
+
+        displaySettingsTab(event) {
+
         },
 
         /**
@@ -414,6 +420,17 @@ export default {
             </div>
             <span> Pipeline Manager </span>
             <div>
+                <div ref="settings">
+                    <button
+                        ref="settingsButton"
+                        @click="() => displaySettingsTab()"
+                    >
+                        <Cogwheel />
+                    </button>
+                    <div class="tooltip">
+                        <span>Settings</span>
+                    </div>
+                </div>
                 <div v-if="this.externalApplicationManager.backendAvailable" ref="backend">
                     <button
                         ref="backendButton"
