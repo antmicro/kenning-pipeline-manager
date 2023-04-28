@@ -25,6 +25,7 @@ import NotificationHandler from '../core/notifications';
 import { notificationStore } from '../core/stores';
 import ExternalApplicationManager from '../core/ExternalApplicationManager';
 import Notifications from './Notifications.vue';
+import Settings from './Settings.vue';
 
 export default {
     components: {
@@ -36,8 +37,8 @@ export default {
         Bell,
         DropdownItem,
         Notifications,
-        Cube,
         Cogwheel,
+        Cube,
     },
     data() {
         return {
@@ -49,6 +50,7 @@ export default {
             isNotificationPanelOpen: false, // check notification panel state (open or close)
             isPalettePanelOpen: true, // check palette panel state (open or close)
             isBackendStatusOpen: false, // check backend panel state (open or close)
+            isSettingsPanelOpen: false, // check settings panel state (open or close)
             notificationStore,
         };
     },
@@ -219,7 +221,30 @@ export default {
             this.displayBackendPanel(false);
         },
 
-        displaySettingsTab(event) {
+        displaySettingsTab(isOpen) {
+            const showSettings = '-495px';
+            const resetSettings = '0px';
+            const settingsPanel = document.querySelector('.settings-panel');
+            const { settings } = this.$refs;
+
+            this.isSettingsPanelOpen = isOpen;
+
+            if (settingsPanel) {
+                settingsPanel.style.transition = `transform ${
+                    this.isSettingsPanelOpen ? '0.4' : '0.2'
+                }s`;
+
+                settingsPanel.style.transform = `translateX(${
+                    this.isSettingsPanelOpen
+                        ? showSettings
+                        : resetSettings
+                })`;
+
+                settings.classList.toggle('open', this.isSettingsPanelOpen);
+            }
+        },
+
+        clickOutsideSettings(event) {
 
         },
 
@@ -423,7 +448,7 @@ export default {
                 <div ref="settings">
                     <button
                         ref="settingsButton"
-                        @click="() => displaySettingsTab()"
+                        @click="() => displaySettingsTab(!this.isSettingsPanelOpen)"
                     >
                         <Cogwheel />
                     </button>
@@ -476,6 +501,7 @@ export default {
         </div>
         <div class="progress-bar" />
         <Notifications v-click-outside="clickOutsideNotification" />
+        <Settings v-click-outside="clickOutsideSettings" :editor="editorManager" />
     </div>
 </template>
 
