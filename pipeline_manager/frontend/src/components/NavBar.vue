@@ -501,7 +501,7 @@ export default {
         </div>
         <div class="progress-bar" />
         <Notifications v-click-outside="clickOutsideNotification" />
-        <Settings v-click-outside="clickOutsideSettings" :editor="editorManager" />
+        <Settings v-click-outside="clickOutsideSettings" :baklavaView="editorManager.baklavaView" />
     </div>
 </template>
 

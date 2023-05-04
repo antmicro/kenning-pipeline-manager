@@ -6,13 +6,31 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
     <div class="settings-panel">
-
+        <component
+            :is="connectionStyleOption.component"
+            :intf="connectionStyleOption"
+        ></component>
     </div>
 </template>
 
 <script>
+// import { NodeOption } from '@baklavajs/core';
+import { SelectInterface } from 'baklavajs';
+
 export default {
-    props: ["editor"]
+    props: [ 'baklavaView' ],
+
+    computed: {
+        connectionStyleOption() {
+            const items = [
+                {'text': 'Curved', 'value': 'curved'},
+                {'text': 'Orthogonal', 'value': 'orthogonal'}
+            ]
+            const option = new SelectInterface('Connection style', this.baklavaView.connectionRenderer.style, items).setPort(false);
+            option.events.setValue.subscribe(this, (v) => { this.baklavaView.connectionRenderer.style = v; });
+            return option;
+        }
+    }
 }
 </script>
 
