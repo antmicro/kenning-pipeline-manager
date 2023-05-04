@@ -154,8 +154,11 @@ export default class EditorManager {
     loadDataflow(dataflow) {
         try {
             return this.editor.load(dataflow);
-        } catch {
-            return ['Unrecognized format. Make sure that the passed dataflow is correct.'];
+        } catch (err) {
+            return [
+                'Unrecognized format. Make sure that the passed dataflow is correct.',
+                err.toString(),
+            ];
         }
     }
 

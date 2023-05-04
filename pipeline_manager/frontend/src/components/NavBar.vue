@@ -56,7 +56,7 @@ export default {
                 terminalLog('error', 'Specification is invalid', errors);
             } else {
                 this.editorManager.updateEditorSpecification(specification);
-                showToast('info', 'Loaded successfully');
+                showToast('info', 'Specification loaded successfully');
             }
         },
 
