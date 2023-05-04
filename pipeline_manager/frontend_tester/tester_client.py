@@ -39,19 +39,23 @@ import sys
 from pipeline_manager import frontend_tester
 from pipeline_manager.utils.logger import string_to_verbosity
 
-from pipeline_manager_backend_communication.communication_backend import CommunicationBackend  # noqa: E501
-from pipeline_manager_backend_communication.misc_structures import MessageType  # noqa: E501
+from pipeline_manager_backend_communication.communication_backend import (
+    CommunicationBackend,
+)  # noqa: E501
+from pipeline_manager_backend_communication.misc_structures import (
+    MessageType,
+)  # noqa: E501
 
 
-def get_node_properties(name: str, dataflow: Dict) -> Dict:
+def get_node_properties(title: str, dataflow: Dict) -> Dict:
     """
-    Function that reads properties of a `name` node in `dataflow`.
+    Function that reads properties of a `title` node in `dataflow`.
     It is assumed for now that we have only such node in the `dataflow`.
 
     Parameters
     ----------
-    name : str
-        Properties of the `name` node are going to be read and returned
+    title : str
+        Properties of the `title` node are going to be read and returned
         as a dictionary.
     dataflow : Dict
         Dataflow that was sent by Pipeline Manager.
@@ -59,69 +63,74 @@ def get_node_properties(name: str, dataflow: Dict) -> Dict:
     Returns
     -------
     Dict :
-        Dictionary that has all properties of a `name` node.
+        Dictionary that has all properties of a `title` node.
     """
     dataflow = json.loads(dataflow)
-    nodes = dataflow['nodes']
+    nodes = dataflow["graph"]["nodes"]
     description_node = None
 
     for node in nodes:
-        if node['name'] == name:
+        if node["title"] == title:
             description_node = node
             break
 
     properties = {}
-    for option in description_node['options']:
-        name, value = option
-        properties[name] = value
+    for title, state in description_node["inputs"].items():
+        if "value" in state.keys():
+            properties[title] = state["value"]
 
     return properties
 
 
-def get_effects(name: str, dataflow: Dict) -> List:
+def get_effects(title: str, dataflow: Dict) -> List:
     """
-    Function that returns all connected nodes to a `name`
+    Function that returns all connected nodes to a `title`
     node in the dataflow.
 
     Parameters
     ----------
-    name : str
-        Nodes connected to the `name` node are returned.
+    title : str
+        Nodes connected to the `title` node are returned.
     dataflow : Dict
         Dataflow that was sent by Pipeline Manager.
 
     Returns
     -------
     List :
-        List of nodes connected to `name` node.
+        List of nodes connected to `title` node.
     """
     dataflow = json.loads(dataflow)
-    nodes = dataflow['nodes']
-    connections = dataflow['connections']
+    nodes = dataflow["graph"]["nodes"]
+    connections = dataflow["graph"]["connections"]
     socket_id = None
 
     for node in nodes:
-        if node['name'] == name:
-            socket_id = node['interfaces'][0][1]['id']
+        if node["title"] == title:
+            socket_id = node["outputs"]["Effect"]["id"]
             break
 
     connected_nodes_id = []
     for connection in connections:
-        if connection['from'] == socket_id:
-            connected_nodes_id.append(connection['to'])
+        if connection["from"] == socket_id:
+            connected_nodes_id.append(connection["to"])
 
     connected_nodes = []
     for node in nodes:
-        if node['interfaces'][0][1]['id'] in connected_nodes_id:
-            connected_nodes.append(node)
+        try:
+            if node["inputs"]["Effect"]["id"] in connected_nodes_id:
+                connected_nodes.append(node)
+        except KeyError:
+            pass
 
     parsed_nodes = []
     for node in connected_nodes:
         parsed_nodes.append(
             {
-                'name': node['name'],
-                'properties': {
-                    option[0]: option[1] for option in node['options']
+                "title": node["title"],
+                "properties": {
+                    name: input["value"]
+                    for name, input in node["inputs"].items()
+                    if "value" in input
                 },
             }
         )
@@ -142,7 +151,7 @@ def _text_to_message_type(text: str) -> MessageType:
     MessageType :
         Mapped text representation
     """
-    return {'OK': MessageType.OK, 'ERROR': MessageType.ERROR}[text]
+    return {"OK": MessageType.OK, "ERROR": MessageType.ERROR}[text]
 
 
 def import_response(
@@ -183,9 +192,9 @@ def specification_response(
     specification : Dict
         Specification that is send back to Pipeline Manager
     """
-    logging.log(logging.INFO, 'Sending specification.')
+    logging.log(logging.INFO, "Sending specification.")
     client.send_message(
-        MessageType.OK, json.dumps(specification).encode(encoding='UTF-8')
+        MessageType.OK, json.dumps(specification).encode(encoding="UTF-8")
     )
 
 
@@ -206,48 +215,46 @@ def run_validate_response(
     client : CommunicationBackend
         Client connected to Pipeline Manager
     """
-    message_type_to_node_name = {
-        MessageType.RUN: 'RunBehaviour',
-        MessageType.VALIDATE: 'ValidationBehaviour',
+    message_type_to_node_title = {
+        MessageType.RUN: "RunBehaviour",
+        MessageType.VALIDATE: "ValidationBehaviour",
     }
 
     try:
-        name = message_type_to_node_name[message_type]
-        properties = get_node_properties(name, data)
+        title = message_type_to_node_title[message_type]
+        properties = get_node_properties(title, data)
     except Exception:
         client.send_message(
             MessageType.ERROR,
-            f'No description for {str(message_type)} provided'.encode(
-                encoding='UTF-8'
-            )
+            f"No description for {str(message_type)} provided".encode(encoding="UTF-8"),
         )
         return
-    if properties['Disconnect']:
+    if properties["Disconnect"]:
         client.disconnect()
         return
 
     if message_type == MessageType.RUN:
-        steps = properties['ProgressMessages']
-        time_offset = properties['Duration'] / steps
+        steps = properties["ProgressMessages"]
+        time_offset = properties["Duration"] / steps
         for i in range(1, steps + 1):
             progress = str(i / steps * 100)
-            logging.log(logging.INFO, f'Progress: {progress}')
-            client.send_message(MessageType.PROGRESS, progress.encode('UTF-8'))
+            logging.log(logging.INFO, f"Progress: {progress}")
+            client.send_message(MessageType.PROGRESS, progress.encode("UTF-8"))
             time.sleep(time_offset)
     else:
-        time.sleep(properties['Duration'])
+        time.sleep(properties["Duration"])
 
     client.send_message(
-        _text_to_message_type(properties['MessageType']),
-        properties['Message'].encode(encoding='UTF-8'),
+        _text_to_message_type(properties["MessageType"]),
+        properties["Message"].encode(encoding="UTF-8"),
     )
 
-    effects = get_effects(name, data)
+    effects = get_effects(title, data)
     for effect in effects:
-        if effect['name'] == 'Disconnect':
-            if effect['properties']['Should disconnect']:
-                time.sleep(effect['properties']['Time offset'])
-                logging.log(logging.INFO, 'Disconnecting!')
+        if effect["title"] == "Disconnect":
+            if effect["properties"]["Should disconnect"]:
+                time.sleep(effect["properties"]["Time offset"])
+                logging.log(logging.INFO, "Disconnecting!")
                 client.disconnect()
 
 
@@ -271,64 +278,62 @@ def export_response(
     output_path : Path
         Path where the exported dataflow is saved.
     """
-    name = 'ExportBehaviour'
+    title = "ExportBehaviour"
     try:
-        properties = get_node_properties(name, data)
+        properties = get_node_properties(title, data)
     except Exception:
         client.send_message(
             MessageType.ERROR,
-            f'No description for {str(message_type)} provided'.encode(
-                encoding='UTF-8'
-            ),
+            f"No description for {str(message_type)} provided".encode(encoding="UTF-8"),
         )
         return
-    if properties['Disconnect']:
+    if properties["Disconnect"]:
         client.disconnect()
         return
 
-    time.sleep(properties['Duration'])
+    time.sleep(properties["Duration"])
 
-    with open(output_path, 'w') as f:
+    with open(output_path, "w") as f:
         json.dump(json.loads(data), f, indent=4)
-    logging.log(logging.INFO, f'Exported dataflow stored in {output_path}')
+    logging.log(logging.INFO, f"Exported dataflow stored in {output_path}")
     client.send_message(
-        _text_to_message_type(properties['MessageType']),
-        properties['Message'].encode(encoding='UTF-8'),
+        _text_to_message_type(properties["MessageType"]),
+        properties["Message"].encode(encoding="UTF-8"),
     )
 
 
 def main(argv):
     parser = argparse.ArgumentParser(argv[0])
     parser.add_argument(
-        '--host',
+        "--host",
         type=str,
-        help='The address of the Pipeline Manager Server',
-        default='127.0.0.1',
+        help="The address of the Pipeline Manager Server",
+        default="127.0.0.1",
     )
     parser.add_argument(
-        '--port',
+        "--port",
         type=int,
-        help='The port of the Pipeline Manager Server',
+        help="The port of the Pipeline Manager Server",
         default=9000,
     )
     parser.add_argument(
-        '--output-path',
+        "--output-path",
         type=Path,
-        help='Path were exported dataflows are saved',
-        default='output.json',
+        help="Path were exported dataflows are saved",
+        default="output.json",
     )
     parser.add_argument(
-        '--verbosity',
-        help='Verbosity level',
-        choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
-        default='DEBUG',
+        "--verbosity",
+        help="Verbosity level",
+        choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+        default="DEBUG",
         type=str,
     )
     parser.add_argument(
-        '--specification-path',
+        "--specification-path",
         type=Path,
-        help='Path to specification JSON file',
-        default=None
+        help="Path to specification JSON file",
+        default=None,
     )
     args, _ = parser.parse_known_args(argv[1:])
     logging.basicConfig(level=string_to_verbosity(args.verbosity))
@@ -338,7 +343,7 @@ def main(argv):
 
     if args.specification_path is None:
         spec_path = Path(frontend_tester.__file__).parent
-        spec_path = spec_path / 'frontend_tester_specification.json'
+        spec_path = spec_path / "frontend_tester_specification.json"
     else:
         spec_path = args.specification_path
     with open(spec_path) as f:
@@ -350,13 +355,11 @@ def main(argv):
     )
     client.register_callback(MessageType.RUN, run_validate_response)
     client.register_callback(MessageType.VALIDATE, run_validate_response)
-    client.register_callback(
-        MessageType.EXPORT, export_response, args.output_path
-    )
+    client.register_callback(MessageType.EXPORT, export_response, args.output_path)
 
     while client.connected:
         _, _ = client.wait_for_message()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main(sys.argv)
