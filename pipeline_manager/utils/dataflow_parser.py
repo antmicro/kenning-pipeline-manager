@@ -119,7 +119,7 @@ def get_id(size: Optional[int] = 10) -> str:
 def to_new(nodes: list[Node], connections: list[Connection]) -> dict:
     """
     Generates a valid save in a dataflow format version-2 from
-    given arguments. 
+    given arguments.
 
     Parameters
     ----------
@@ -143,9 +143,10 @@ def to_new(nodes: list[Node], connections: list[Connection]) -> dict:
                     "id": node.id,
                     "title": node.name,
                     "position": {"x": node.pos_x, "y": node.pos_y},
-                    "inputs": {
+                    "inputs": {input.name: {"id": input.id} for input in node.inputs},
+                    "properties": {
                         parameter.name: {"id": parameter.id, "value": parameter.value}
-                        for parameter in node.parameters + node.inputs
+                        for parameter in node.parameters
                     },
                     "outputs": {
                         parameter.name: {

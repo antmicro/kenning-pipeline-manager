@@ -141,14 +141,65 @@ function parseInputs(inputs, interfaceTypes) {
  * @returns Node based class
  */
 export function NodeFactory(name, displayName, inputs, properties, outputs, interfaceTypes) {
-    return defineNode({
+    const node = defineNode({
         type: name,
 
         title: displayName,
 
         outputs: parseOutputs(outputs, interfaceTypes),
         inputs: { ...parseProperties(properties), ...parseInputs(inputs, interfaceTypes) },
+
+        /* eslint-disable no-param-reassign */
+        onCreate() {
+            this.parentSave = this.save;
+            this.parentLoad = this.load;
+
+            this.save = () => {
+                const savedState = this.parentSave();
+
+                const newProperties = {};
+                const newInputs = {};
+
+                Object.entries(savedState.inputs).forEach((input) => {
+                    const [inpName, inpState] = input;
+
+                    Object.entries(this.inputs).forEach((nodeInterface) => {
+                        const [, intfState] = nodeInterface;
+
+                        if (inpState.id === intfState.id) {
+                            if (intfState.port) {
+                                newInputs[inpName] = {
+                                    id: inpState.id,
+                                };
+                            } else {
+                                newProperties[inpName] = {
+                                    id: inpState.id,
+                                    value: inpState.value === undefined ? null : inpState.value,
+                                };
+                            }
+                        }
+                    });
+                });
+
+                savedState.inputs = newInputs;
+                savedState.properties = newProperties;
+
+                return savedState;
+            };
+
+            this.load = (state) => {
+                Object.entries(state.properties).forEach((prop) => {
+                    const [propName, propState] = prop;
+                    state.inputs[propName] = propState;
+                });
+
+                delete state.properties;
+                this.parentLoad(state);
+            };
+        },
     });
+
+    return node;
 }
 
 /**

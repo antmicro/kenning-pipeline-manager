@@ -75,9 +75,8 @@ def get_node_properties(title: str, dataflow: Dict) -> Dict:
             break
 
     properties = {}
-    for title, state in description_node["inputs"].items():
-        if "value" in state.keys():
-            properties[title] = state["value"]
+    for title, state in description_node["properties"].items():
+        properties[title] = state["value"]
 
     return properties
 
@@ -128,9 +127,8 @@ def get_effects(title: str, dataflow: Dict) -> List:
             {
                 "title": node["title"],
                 "properties": {
-                    name: input["value"]
-                    for name, input in node["inputs"].items()
-                    if "value" in input
+                    name: properties["value"]
+                    for name, properties in node["properties"].items()
                 },
             }
         )
