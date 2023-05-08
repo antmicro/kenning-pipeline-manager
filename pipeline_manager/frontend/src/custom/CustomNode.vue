@@ -158,18 +158,18 @@ onUpdated(onRender);
 
 const getOptionName = (optionType) => {
     switch (optionType) {
+        case 'InputInterface':
+        case 'SelectInterface':
+        case 'ListInterface':
+        case 'TextInterface':
+            return true;
         case 'NumberInterface':
         case 'IntegerInterface':
         case 'CheckboxInterface':
         case 'SliderInterface':
         case 'NodeInterface':
-            return false;
-        case 'InputInterface':
-        case 'SelectInterface':
-        case 'ListInterface':
-        case 'TextInterface':
         default:
-            return true;
+            return false;
     }
 };
 </script>

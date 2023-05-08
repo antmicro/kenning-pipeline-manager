@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { toPng } from 'html-to-image';
-import vClickOutside from 'v-click-outside';
+import vClickOutside from 'click-outside-vue3';
 import Logo from '../icons/Logo.vue';
 import Arrow from '../icons/Arrow.vue';
 import Run from '../icons/Run.vue';
