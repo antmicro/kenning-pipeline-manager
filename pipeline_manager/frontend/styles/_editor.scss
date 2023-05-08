@@ -73,37 +73,35 @@
     display: none;
 }
 
-// Obsolete
-
-.dark-context-menu {
+.baklava-context-menu {
     background-color: $gray-600;
     border-radius: unset;
     min-width: 135px;
 }
 
-.dark-context-menu > .item {
+.baklava-context-menu > .item {
     padding: $spacing-m;
 }
 
-.dark-context-menu > .item:not(.--header):not(.--active):not(.--disabled):hover {
+.baklava-context-menu > .item:not(.--header):not(.--active):not(.--disabled):hover {
     background-color: $gray-600;
 }
 
-.dark-context-menu > .item:not(.--header):not(.--active):not(.--disabled):hover > .flex-fill {
+.baklava-context-menu > .item:not(.--header):not(.--active):not(.--disabled):hover > .flex-fill {
     color: $green;
 }
 
-.dark-context-menu > .item:not(.--header):not(.--active):not(.--disabled):hover > .ml-3 svg path {
+.baklava-context-menu > .item:not(.--header):not(.--active):not(.--disabled):hover > .ml-3 svg path {
     fill: $green;
 }
 
-.dark-context-menu > .item > .ml-3 > svg {
+.baklava-context-menu > .item > .ml-3 > svg {
     height: 7px;
     transform: scale(80);
     scale: 0.02;
 }
 
-.dark-context-menu > .item > .ml-3 > svg > path {
+.baklava-context-menu > .item > .ml-3 > svg > path {
     d: path('M99.4,111.6l64.2,69.2L99.4,250h54.5l64.2-69.2l-64.2-69.2H99.4z') !important;
 }
 
