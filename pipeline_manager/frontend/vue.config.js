@@ -20,6 +20,7 @@ module.exports = defineConfig({
         },
     },
     configureWebpack: {
+        devtool: 'eval-source-map',
         resolve: {
             alias: {
                 '@baklavajs': path.resolve(__dirname, 'node_modules/@baklavajs/'),
