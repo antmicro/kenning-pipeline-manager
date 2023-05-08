@@ -11,7 +11,7 @@ const RouterVue = createRouter({
     history: createWebHistory(),
     routes: [
         {
-            path: '/',
+            path: '/:catchAll(.*)',
             name: 'home',
             component: Home,
             meta: {
