@@ -19,6 +19,11 @@
                     "type": "boolean",
                     "description": "Flag determining whether the editor is in readonly mode",
                     "default": false
+                },
+                "twoColumn": {
+                    "type": "boolean",
+                    "description": "Flag determining whether displaying nodes as two columns",
+                    "default": false
                 }
             },
             "additionalProperties": false

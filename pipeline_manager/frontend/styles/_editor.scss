@@ -47,6 +47,11 @@
     width: 100%;
 }
 
+.baklava-node.--two-column > .__content > .__properties {
+    grid-row: 2;
+    grid-column: 1 / span 2;
+}
+
 .baklava-editor {
     font-size: 14px;
 }

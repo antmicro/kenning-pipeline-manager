@@ -138,9 +138,18 @@ function parseInputs(inputs, interfaceTypes) {
  * @param {*} properties List of properties of the block
  * @param {*} outputs List of outputs of the block
  * @param {*} interfaceTypes ReadInterfaceTypes of the specification
+ * @param {boolean} twoColumn type of layout of the nodes
  * @returns Node based class
  */
-export function NodeFactory(name, displayName, inputs, properties, outputs, interfaceTypes) {
+export function NodeFactory(
+    name,
+    displayName,
+    inputs,
+    properties,
+    outputs,
+    interfaceTypes,
+    twoColumn,
+) {
     const node = defineNode({
         type: name,
 
@@ -196,6 +205,8 @@ export function NodeFactory(name, displayName, inputs, properties, outputs, inte
                 delete state.properties;
                 this.parentLoad(state);
             };
+
+            this.twoColumn = twoColumn;
         },
     });
 

@@ -50,11 +50,19 @@ from moving or deleting the nodes.
                 />
             </div>
 
+            <!-- Properties -->
+            <div class="__properties">
+                <!-- eslint-disable vue/require-v-for-key -->
+                <div v-for="input in displayedProperties">
+                    {{ getOptionName(input.componentName) ? `${input.name}:` : '' }}
+                    <CustomInterface :key="input.id" :node="node" :intf="input" />
+                </div>
+            </div>
+
             <!-- Inputs -->
             <div class="__inputs">
                 <!-- eslint-disable vue/require-v-for-key -->
-                <div v-for="input in displayedInputs">
-                    {{ getOptionName(input.componentName) ? `${input.name}:` : '' }}
+                <div v-for="input in displayedInputSockets">
                     <CustomInterface :key="input.id" :node="node" :intf="input" />
                 </div>
             </div>
@@ -211,4 +219,11 @@ const openContextMenuWrapper = (ev) => {
         openContextMenu(ev);
     }
 };
+
+const displayedInputSockets = computed(() =>
+    Object.values(displayedInputs.value).filter((ni) => ni.port),
+);
+const displayedProperties = computed(() =>
+    Object.values(displayedInputs.value).filter((ni) => !ni.port),
+);
 </script>

@@ -59,6 +59,7 @@ export default class EditorManager {
                 node.properties,
                 node.outputs,
                 interfaceTypes,
+                'twoColumn' in metadata ? metadata.twoColumn : false,
             );
             this.editor.registerNodeType(myNode, { title: node.name, category: node.category });
         });

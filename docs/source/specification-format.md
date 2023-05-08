@@ -30,6 +30,9 @@ Contains following optional properties:
   Modification of any properties is disabled.
   The user is only allowed to load existing dataflows.
   Default value is `false`.
+* `twoColumn` - boolean value determining layout of the nodes.
+  If set to true then input and output sockets are rendered on top of the node and properties are rendered below.
+  Default value is `false`.
 
 An example:
 
