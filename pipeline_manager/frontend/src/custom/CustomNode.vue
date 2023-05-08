@@ -13,12 +13,12 @@ SPDX-License-Identifier: Apache-2.0
         :data-node-type="node.type"
         @pointerdown="select"
     >
-        <div class="__title" @pointerdown.self.stop="startDrag">
+        <div class="__title" @pointerdown.self.stop="startDragWrapper">
             <div class="__title-label">
                 {{ node.title }}
             </div>
             <div class="__menu">
-                <vertical-dots class="--clickable" @click="openContextMenu" />
+                <vertical-dots class="--clickable" @click="openContextMenuWrapper" />
                 <context-menu
                     v-model="showContextMenu"
                     :x="0"
@@ -156,6 +156,13 @@ onUpdated(onRender);
 
 // ----------
 
+/**
+ * The function decides whether a name for the option should be displayed.
+ *
+ * @param optionType Name of the option component
+ * @returns True if the name should be displayed, false otherwise.
+ */
+
 const getOptionName = (optionType) => {
     switch (optionType) {
         case 'InputInterface':
@@ -170,6 +177,28 @@ const getOptionName = (optionType) => {
         case 'NodeInterface':
         default:
             return false;
+    }
+};
+
+/**
+ * Wrapper that prevents node moving if the editor is in read-only mode.
+ *
+ * @param ev Event
+ */
+const startDragWrapper = (ev) => {
+    if (!viewModel.value.editor.readonly) {
+        startDrag(ev);
+    }
+};
+
+/**
+ * Wrapper that prevents opening the context menu if the editor is in read-only mode.
+ *
+ * @param ev Event
+ */
+const openContextMenuWrapper = (ev) => {
+    if (!viewModel.value.editor.readonly) {
+        openContextMenu(ev);
     }
 };
 </script>
