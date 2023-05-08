@@ -6,7 +6,7 @@
 Script that convert old dataflow format save file to a new one.
 Usage of the script:
 
-* python -m pipeline_manager.utils.dataflow_parser old_format_dataflow.json --output new_format_dataflow.json
+* python -m pipeline_manager.utils.dataflow_parser old_format_dataflow.json --output new_format_dataflow.json  # noqa: E501
 """
 
 
@@ -63,7 +63,9 @@ def from_old(dataflow: dict) -> tuple[list[Node], list[Connection]]:
 
     parsed_connections = []
     for conn in connections:
-        parsed_connections.append(Connection(conn["id"], conn["from"], conn["to"]))
+        parsed_connections.append(
+            Connection(conn["id"], conn["from"], conn["to"])
+        )
 
     parsed_nodes = []
     for node in nodes:
@@ -77,9 +79,13 @@ def from_old(dataflow: dict) -> tuple[list[Node], list[Connection]]:
         for interface in node["interfaces"]:
             name, state = interface
             if state["isInput"]:
-                inputs.append(Interface(name, state["id"], ""))
+                inputs.append(
+                    Interface(name, state["id"], "")
+                )
             else:
-                outputs.append(Interface(name, state["id"], ""))
+                outputs.append(
+                    Interface(name, state["id"], "")
+                )
 
         parsed_nodes.append(
             Node(
@@ -143,9 +149,14 @@ def to_new(nodes: list[Node], connections: list[Connection]) -> dict:
                     "id": node.id,
                     "title": node.name,
                     "position": {"x": node.pos_x, "y": node.pos_y},
-                    "inputs": {input.name: {"id": input.id} for input in node.inputs},
+                    "inputs": {
+                        input.name: {"id": input.id}
+                        for input in node.inputs
+                    },
                     "properties": {
-                        parameter.name: {"id": parameter.id, "value": parameter.value}
+                        parameter.name: {
+                            "id": parameter.id, "value": parameter.value
+                        }
                         for parameter in node.parameters
                     },
                     "outputs": {

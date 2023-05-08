@@ -224,7 +224,7 @@ def run_validate_response(
     except Exception:
         client.send_message(
             MessageType.ERROR,
-            f"No description for {str(message_type)} provided".encode(encoding="UTF-8"),
+            f"No description for {str(message_type)} provided".encode(encoding="UTF-8"),  # noqa: E501
         )
         return
     if properties["Disconnect"]:
@@ -282,7 +282,7 @@ def export_response(
     except Exception:
         client.send_message(
             MessageType.ERROR,
-            f"No description for {str(message_type)} provided".encode(encoding="UTF-8"),
+            f"No description for {str(message_type)} provided".encode(encoding="UTF-8"),  # noqa: E501
         )
         return
     if properties["Disconnect"]:
@@ -353,7 +353,11 @@ def main(argv):
     )
     client.register_callback(MessageType.RUN, run_validate_response)
     client.register_callback(MessageType.VALIDATE, run_validate_response)
-    client.register_callback(MessageType.EXPORT, export_response, args.output_path)
+    client.register_callback(
+        MessageType.EXPORT,
+        export_response,
+        args.output_path
+    )
 
     while client.connected:
         _, _ = client.wait_for_message()
