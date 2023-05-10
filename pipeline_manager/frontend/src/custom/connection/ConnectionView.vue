@@ -11,23 +11,38 @@ Inherits from baklavajs/renderer-vue/src/connection/ConnectionView.vue
 
 <template>
     <g>
-        <path :d="d" class="connection-wrapper baklava-connection"></path>
-        <path :d="d" class="baklava-connection" :class="cssClasses"></path>
+        <path :d="newD" class="connection-wrapper baklava-connection"></path>
+        <path :d="newD" class="baklava-connection" :class="cssClasses"></path>
     </g>
 </template>
 
 <script>
 import { defineComponent, computed } from 'vue';
-import { Components } from 'baklavajs';
+import { Components, useGraph, useViewModel } from 'baklavajs';
 
 export default defineComponent({
     extends: Components.Connection,
     props: { isHighlighted: { default: false }, connection: { required: true } },
     setup(props) {
         const { d, classes } = Components.Connection.setup(props);
-        const cssClasses = computed(() => ({ ...classes, '--hover': props.isHighlighted }));
+        const { graph } = useGraph();
+        const { viewModel } = useViewModel();
 
-        return { cssClasses, d };
+        const cssClasses = computed(() => ({ ...classes.value, '--hover': props.isHighlighted }));
+
+        const transform = (x, y) => {
+            const tx = (x + graph.value.panning.x) * graph.value.scaling;
+            const ty = (y + graph.value.panning.y) * graph.value.scaling;
+            return [tx, ty];
+        };
+
+        const newD = computed(() => {
+            const [tx1, ty1] = transform(props.x1, props.y1);
+            const [tx2, ty2] = transform(props.x2, props.y2);
+            return viewModel.value.connectionRenderer.render(tx1, ty1, tx2, ty2, props.connection);
+        });
+
+        return { cssClasses, newD };
     },
 });
 </script>
