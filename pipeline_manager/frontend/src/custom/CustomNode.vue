@@ -16,7 +16,7 @@ from moving or deleting the nodes.
 <template>
     <div
         :id="node.id"
-        ref="el"
+        ref="nodeRef"
         class="baklava-node"
         :class="classes"
         :style="styles"
@@ -92,7 +92,7 @@ const { viewModel } = useViewModel();
 const { graph, switchGraph } = useGraph();
 const dragMove = useDragMove(toRef(props.node, 'position'));
 
-const el = ref(null);
+const nodeRef = ref(null);
 
 const showContextMenu = ref(false);
 const contextMenuItems = computed(() => {
@@ -156,8 +156,8 @@ const onContextMenuClick = async (action) => {
 };
 
 const onRender = () => {
-    if (el.value) {
-        viewModel.value.hooks.renderNode.execute({ node: props.node, el: el.value });
+    if (nodeRef.value) {
+        viewModel.value.hooks.renderNode.execute({ node: props.node, el: nodeRef.value });
     }
 };
 
