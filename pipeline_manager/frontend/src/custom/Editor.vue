@@ -23,6 +23,7 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
             'baklava-ignore-mouse': !!temporaryConnection || dragging,
             '--temporary-connection': !!temporaryConnection,
         }"
+        :style="`--scale: ${this.scale}`"
         @pointermove.self="onPointerMove"
         @pointerdown="onPointerDown"
         @pointerup="onPointerUp"
@@ -74,8 +75,8 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
 </template>
 
 <script>
-import { EditorComponent } from 'baklavajs';
-import { defineComponent, ref } from 'vue';
+import { EditorComponent, useGraph } from 'baklavajs';
+import { defineComponent, ref, computed } from 'vue';
 import CustomNode from './CustomNode.vue';
 import PipelineManagerConnection from './connection/PipelineManagerConnection.vue';
 
@@ -105,6 +106,7 @@ export default defineComponent({
         } = EditorComponent.setup(props);
 
         const connRefs = ref([]);
+        const { graph } = useGraph();
 
         const highlightConnections = ref([]);
 
@@ -149,6 +151,8 @@ export default defineComponent({
             });
         };
 
+        const scale = computed(() => graph.value.scaling);
+
         return {
             el,
             counter,
@@ -169,6 +173,8 @@ export default defineComponent({
             highlightConnections,
             connRefs,
             clearHighlight,
+            readonly,
+            scale,
         };
     },
 });
