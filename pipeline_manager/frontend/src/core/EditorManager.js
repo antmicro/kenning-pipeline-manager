@@ -27,6 +27,8 @@ export default class EditorManager {
 
     specificationLoaded = false;
 
+    interfacesStyleId = 'interfaces-style';
+
     /**
      * Loads the dataflow specification passed in `dataflowSpecification`.
      * The specification describes what nodes are available in the editor.
@@ -40,24 +42,14 @@ export default class EditorManager {
     updateEditorSpecification(dataflowSpecification) {
         if (!dataflowSpecification) return;
         if (this.specificationLoaded) {
-            const graphInstance = this.editor._graph;
-
-            for (let i = graphInstance.connections.length - 1; i >= 0; i -= 1) {
-                graphInstance.removeConnection(graphInstance.connections[i]);
-            }
-            for (let i = graphInstance.nodes.length - 1; i >= 0; i -= 1) {
-                graphInstance.removeNode(graphInstance.nodes[i]);
-            }
-
-            this.editor.nodeTypes.forEach((_, nodeKey) => {
-                this.editor.unregisterNodeType(nodeKey);
-            });
+            this.cleanEditor();
         }
 
         const { nodes, metadata } = dataflowSpecification;
 
-        const interfaceTypes = readInterfaceTypes(nodes, metadata);
+        const interfaceTypes = readInterfaceTypes(nodes);
         this.nodeInterfaceTypes.addTypes(...Object.values(interfaceTypes));
+        this.updateInterfacesStyle(metadata);
 
         nodes.forEach((node) => {
             const myNode = NodeFactory(
@@ -78,6 +70,64 @@ export default class EditorManager {
         this.editor.allowLoopbacks = 'allowLoopbacks' in metadata ? metadata.allowLoopbacks : false;
 
         this.specificationLoaded = true;
+    }
+
+    /**
+     * Removes interfaces stylesheet registered using id `interfacesStyleId`.
+     * It is used to cleanup the editor enviornment when chaning a specification.
+     */
+    removeInterfacesStyle() {
+        const styleSheet = document.getElementById(this.interfacesStyleId);
+        if (styleSheet !== null) {
+            document.head.removeChild(styleSheet);
+        }
+    }
+
+    /**
+     * Updates global stylesheet with coloring specified in the metadata argument.
+     * The stylesheet is registered with id `interfacesStyleId`.
+     *
+     * @param metadata metadata of the specification
+     */
+    updateInterfacesStyle(metadata) {
+        if ('interfaces' in metadata) {
+            const styleSheet = document.createElement('style');
+            let styles = '';
+
+            Object.entries(metadata.interfaces).forEach(([name, color]) => {
+                styles += `.baklava-node-interface[data-interface-type="${name}"] .__port { background-color: ${color}; }`;
+            });
+
+            styleSheet.innerText = styles;
+            styleSheet.type = 'text/css';
+            styleSheet.id = this.interfacesStyleId;
+
+            document.head.appendChild(styleSheet);
+        }
+    }
+
+    /**
+     * Cleans up the editor.
+     *
+     * Removes all nodes and connections from the editor and unregisters all
+     * nodes. Its important that registered interface types are not removed, as there
+     * is no support for that in baklavajs, but it should not result in any malfunction.
+     */
+    cleanEditor() {
+        const graphInstance = this.editor._graph;
+
+        for (let i = graphInstance.connections.length - 1; i >= 0; i -= 1) {
+            graphInstance.removeConnection(graphInstance.connections[i]);
+        }
+        for (let i = graphInstance.nodes.length - 1; i >= 0; i -= 1) {
+            graphInstance.removeNode(graphInstance.nodes[i]);
+        }
+
+        this.editor.nodeTypes.forEach((_, nodeKey) => {
+            this.editor.unregisterNodeType(nodeKey);
+        });
+
+        this.removeInterfacesStyle();
     }
 
     /**

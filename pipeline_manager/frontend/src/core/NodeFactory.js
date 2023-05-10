@@ -203,17 +203,15 @@ export function NodeFactory(name, displayName, inputs, properties, outputs, inte
 }
 
 /**
- * Function that reads all nodes in the specification and registers their inputs' and outputs'
- * types so that a simple validation based on those types can be performed.
- *
- * It also updates styles of the application so that the specified interfaces are coloured.
+ * Function that reads all nodes in the specification and creates `NodeInterfaceType` objects for
+ * their inputs' and outputs' types so that a simple validation based on those
+ * types can be performed.
  *
  * The read interface types are stored in `interfaceTypes` object which is returned by this function
  * @param {*} nodes nodes of the specification
- * @param {*} metadata metadata of the specification
  * @returns read interface types
  */
-export function readInterfaceTypes(nodes, metadata) {
+export function readInterfaceTypes(nodes) {
     const interfaceTypes = {};
 
     nodes.forEach((node) => {
@@ -223,20 +221,6 @@ export function readInterfaceTypes(nodes, metadata) {
             }
         });
     });
-
-    if ('interfaces' in metadata) {
-        const styleSheet = document.createElement('style');
-        let styles = '';
-
-        Object.entries(metadata.interfaces).forEach(([name, color]) => {
-            styles += `.baklava-node-interface[data-interface-type="${name}"] .__port {
-                background-color: ${color};
-            }`;
-        });
-
-        styleSheet.innerText = styles;
-        document.head.appendChild(styleSheet);
-    }
 
     return interfaceTypes;
 }
