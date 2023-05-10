@@ -52,12 +52,12 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
                     :isHighlighted="highlightConnections.includes(connection)"
                 />
             </g>
-            <slot name="temporaryConnection" :temporary-connection="temporaryConnection">
-                <temporary-connection
-                    v-if="temporaryConnection"
-                    :connection="temporaryConnection"
-                />
-            </slot>
+            <TemporaryConnection
+                name="temporaryConnection"
+                :temporary-connection="temporaryConnection"
+                v-if="temporaryConnection"
+                :connection="temporaryConnection"
+            />
         </svg>
 
         <div class="node-container" :style="nodeContainerStyle">
@@ -79,12 +79,14 @@ import { EditorComponent, useGraph } from 'baklavajs';
 import { defineComponent, ref, computed } from 'vue';
 import CustomNode from './CustomNode.vue';
 import PipelineManagerConnection from './connection/PipelineManagerConnection.vue';
+import TemporaryConnection from './connection/TemporaryConnection.vue';
 
 export default defineComponent({
     extends: EditorComponent,
     components: {
         CustomNode,
         PipelineManagerConnection,
+        TemporaryConnection,
     },
     setup(props) {
         const {
