@@ -4,6 +4,13 @@ Copyright (c) 2022-2023 Antmicro <www.antmicro.com>
 SPDX-License-Identifier: Apache-2.0
 -->
 
+<!--
+Interface that is used to display inputs, outputs and properties of a node.
+
+The custom implementations introduces wrapper functions that prevent the user
+from creating and deleting connections or altering nodes' values if the editor is read-only.
+-->
+
 <template>
     <div :id="intf.id" ref="el" class="baklava-node-interface" :class="classes">
         <div

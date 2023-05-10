@@ -6,8 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <!--
 Component defining connection between two different nodes
-
-Inherits from baklavajs-plugin-renderer-vue/src/components/connection/ConnectionView.vue
+Inherits from baklavajs/renderer-vue/src/connection/ConnectionView.vue
 -->
 
 <template>

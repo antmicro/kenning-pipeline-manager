@@ -2,14 +2,11 @@
 Copyright (c) 2022-2023 Antmicro <www.antmicro.com>
 
 SPDX-License-Identifier: Apache-2.0
-
-Wraps the connection, defines it's type and parameters.
-Inherits from baklavajs-plugin-renderer-vue/src/components/connection/ConnectionView.vue
 -->
 
 <!--
 Wraps the connection, defines it's type and parameters.
-Inherits from baklavajs-plugin-renderer-vue/src/components/connection/ConnectionView.vue
+Inherits from baklavajs/renderer-vue/src/connection/ConnectionView.vue
 -->
 
 <template>

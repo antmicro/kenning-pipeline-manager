@@ -8,16 +8,10 @@ SPDX-License-Identifier: Apache-2.0
 Defines the main editor component - canvas in which the pipeline is drawn and
 edited by a user
 
-Inherits from baklavajs-plugin-rendered-vue/src/components/Editor.vue
-
-`v-if` directive is added to ContextMenu component so that it is not displayed if the editor
-is in `readonly` mode.
-
-Prop `plugin` (that is an instance of ViewPlugin class) is made reactive, so that
-all descendants of this component get a valid reference to it.
-It is done using computed() function.
+Inherits from baklavajs/rendered-vue/src/editor/Editor.vue
 
 Sidebar and Minimap components are removed whatsoever as they are not used.
+Hovered connections are calculated and rendered with an appropriate `isHighlighted` value.
 -->
 
 <template>

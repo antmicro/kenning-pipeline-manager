@@ -4,6 +4,12 @@ Copyright (c) 2022-2023 Antmicro <www.antmicro.com>
 SPDX-License-Identifier: Apache-2.0
 -->
 
+<!--
+Original source: https://github.com/tabler/tabler-icons
+This component is used by baklavajs Node Component and has to be reimplemented
+as it is not exported in the baklavajs sources.
+-->
+
 <template>
     <svg
         xmlns="http://www.w3.org/2000/svg"

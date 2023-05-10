@@ -3,6 +3,16 @@ Copyright (c) 2022-2023 Antmicro <www.antmicro.com>
 
 SPDX-License-Identifier: Apache-2.0
 -->
+
+<!--
+The baklavajs functionality was fully copied to this component, as the original
+implementation uses `<script setup>` which does not work well with `extends` feature.
+
+Aside from the original source code, the custom node implements displaying name tags
+for properties that do not display them, support for readonly mode that prevents the user
+from moving or deleting the nodes.
+ -->
+
 <template>
     <div
         :id="node.id"
