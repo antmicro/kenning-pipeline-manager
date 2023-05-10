@@ -13,6 +13,7 @@ import PipelineManagerEditor from '../custom/Editor';
 import { showToast } from './notifications';
 import { NodeFactory, readInterfaceTypes } from './NodeFactory';
 import specificationSchema from '../../../resources/schemas/dataflow_spec_schema.json';
+import ConnectionRenderer from './ConnectionRenderer';
 
 export default class EditorManager {
     static instance;
@@ -28,6 +29,10 @@ export default class EditorManager {
     specificationLoaded = false;
 
     interfacesStyleId = 'interfaces-style';
+
+    constructor() {
+        this.baklavaView.connectionRenderer = new ConnectionRenderer(this.baklavaView);
+    }
 
     /**
      * Loads the dataflow specification passed in `dataflowSpecification`.
@@ -69,7 +74,9 @@ export default class EditorManager {
             showToast('info', 'The specification is read-only. Only dataflow loading is allowed.');
         }
         this.editor.allowLoopbacks = 'allowLoopbacks' in metadata ? metadata.allowLoopbacks : false;
-
+        if ('connectionStyle' in metadata) {
+            this.baklavaView.connectionRenderer.style = metadata.connectionStyle;
+        }
         this.specificationLoaded = true;
     }
 
