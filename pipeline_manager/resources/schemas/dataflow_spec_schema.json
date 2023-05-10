@@ -24,6 +24,11 @@
                     "type": "boolean",
                     "description": "Flag determining whether displaying nodes as two columns",
                     "default": false
+                },
+                "connectionStyle": {
+                    "enum": ["curved", "orthogonal"],
+                    "description": "Defines connection style",
+                    "default": "curved"
                 }
             },
             "additionalProperties": false
