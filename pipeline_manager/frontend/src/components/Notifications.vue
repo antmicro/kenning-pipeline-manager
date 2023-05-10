@@ -4,6 +4,10 @@ Copyright (c) 2022-2023 Antmicro <www.antmicro.com>
 SPDX-License-Identifier: Apache-2.0
 -->
 
+<!--
+List of notitications that creates a `Notification` component for each message registered.
+-->
+
 <template>
     <div class="notifications">
         <div class="info">

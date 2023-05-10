@@ -4,6 +4,11 @@ Copyright (c) 2022-2023 Antmicro <www.antmicro.com>
 SPDX-License-Identifier: Apache-2.0
 -->
 
+<!--
+Navigation bar of the application.
+Displays user interface and main details about the Pipeline Manager status.
+-->
+
 <script>
 import { toPng } from 'html-to-image';
 import vClickOutside from 'click-outside-vue3';

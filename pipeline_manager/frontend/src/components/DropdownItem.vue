@@ -4,6 +4,11 @@ Copyright (c) 2022-2023 Antmicro <www.antmicro.com>
 SPDX-License-Identifier: Apache-2.0
 -->
 
+<!--
+Represents a single input option in a dropdown menu.
+The input can callback different actions depending on the type of the component.
+-->
+
 <template>
     <div>
         <label v-if="type === 'file'" :for="id"> {{ text }} </label>

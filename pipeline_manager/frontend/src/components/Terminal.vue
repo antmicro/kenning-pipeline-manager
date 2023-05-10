@@ -4,6 +4,10 @@ Copyright (c) 2022-2023 Antmicro <www.antmicro.com>
 SPDX-License-Identifier: Apache-2.0
 -->
 
+<!--
+List of terminal messages that creates a `TerminalCommand` component for each message registered.
+-->
+
 <template>
     <div class="terminal-container">
         <div class="command-results" ref="commands">

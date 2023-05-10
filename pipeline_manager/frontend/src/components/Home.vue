@@ -4,6 +4,10 @@ Copyright (c) 2022-2023 Antmicro <www.antmicro.com>
 SPDX-License-Identifier: Apache-2.0
 -->
 
+<!--
+The entrypoint of the application.
+-->
+
 <template>
     <div id="container">
         <NavBar />
@@ -29,11 +33,6 @@ export default {
         const editorManager = EditorManager.getEditorManagerInstance();
 
         return { editorManager };
-    },
-    computed: {
-        scale() {
-            return this.editorManager.viewPlugin.scaling;
-        },
     },
 };
 </script>

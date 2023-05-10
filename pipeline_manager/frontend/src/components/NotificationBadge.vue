@@ -4,6 +4,11 @@ Copyright (c) 2022-2023 Antmicro <www.antmicro.com>
 SPDX-License-Identifier: Apache-2.0
 -->
 
+<!--
+Badge that is displayed next to the notification.
+Can be either an exclamation mark or an x mark
+-->
+
 <template>
     <div :class="type">
         <ExclamationMark v-if="type === 'info'" />
