@@ -28,7 +28,7 @@ export default {
 
 <style lang="scss" scoped>
 .terminal-container {
-    min-height: 360px;
+    min-height: 0px;
     background-color: $gray-600;
     display: flex;
     flex-direction: column;
@@ -36,7 +36,7 @@ export default {
 
     & > .command-results {
         flex: 1;
-        padding: $spacing-xxl;
+        padding: 0 $spacing-xxl;
         overflow-y: scroll;
 
         & {

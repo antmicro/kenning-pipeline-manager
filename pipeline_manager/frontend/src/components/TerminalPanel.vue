@@ -98,6 +98,7 @@ export default {
     padding: 0 $spacing-xxl;
     align-items: center;
     justify-content: space-between;
+    user-select: none;
 
     & > .resizer {
         position: absolute;
