@@ -1,52 +1,46 @@
 {
-  "nodes": [
-    {
-      "type": "RunBehaviour",
-      "id": "node_16807661729482",
-      "name": "RunBehaviour",
-      "options": [
-        [
-          "Duration",
-          1
+    "graphTemplates": [],
+    "graph": {
+        "id": "0811047808",
+        "nodes": [
+            {
+                "type": "RunBehaviour",
+                "id": "node_16807661729482",
+                "title": "RunBehaviour",
+                "position": {
+                    "x": 174,
+                    "y": 282
+                },
+                "inputs": {},
+                "properties": {
+                    "Duration": {
+                        "id": "3345586731",
+                        "value": 1
+                    },
+                    "Disconnect": {
+                        "id": "3025126841",
+                        "value": false
+                    },
+                    "MessageType": {
+                        "id": "0822224447",
+                        "value": "ERROR"
+                    },
+                    "Message": {
+                        "id": "0638018076",
+                        "value": "Error message after 1s"
+                    }
+                },
+                "outputs": {
+                    "Effect": {
+                        "id": "ni_16807661729493"
+                    }
+                },
+                "width": 200,
+                "twoColumn": false
+            }
         ],
-        [
-          "Disconnect",
-          false
-        ],
-        [
-          "MessageType",
-          "ERROR"
-        ],
-        [
-          "Message",
-          "Error message after 1s"
-        ]
-      ],
-      "state": {},
-      "interfaces": [
-        [
-          "Effect",
-          {
-            "id": "ni_16807661729493",
-            "value": null,
-            "isInput": false,
-            "type": "Effect"
-          }
-        ]
-      ],
-      "position": {
-        "x": 174,
-        "y": 282
-      },
-      "width": 200,
-      "twoColumn": false,
-      "customClasses": ""
+        "connections": [],
+        "inputs": [],
+        "outputs": []
     }
-  ],
-  "connections": [],
-  "panning": {
-    "x": 0,
-    "y": 0
-  },
-  "scaling": 1
 }

@@ -1,42 +1,42 @@
 {
-  "nodes": [
-    {
-      "type": "ExportBehaviour",
-      "id": "node_168076808526610",
-      "name": "ExportBehaviour",
-      "options": [
-        [
-          "Duration",
-          0
+    "graphTemplates": [],
+    "graph": {
+        "id": "2671332237",
+        "nodes": [
+            {
+                "type": "ExportBehaviour",
+                "id": "node_168076808526610",
+                "title": "ExportBehaviour",
+                "position": {
+                    "x": 454,
+                    "y": 318
+                },
+                "inputs": {},
+                "properties": {
+                    "Duration": {
+                        "id": "8215737084",
+                        "value": 0
+                    },
+                    "Disconnect": {
+                        "id": "0262676451",
+                        "value": false
+                    },
+                    "MessageType": {
+                        "id": "4213276720",
+                        "value": "OK"
+                    },
+                    "Message": {
+                        "id": "5160414148",
+                        "value": "Success export"
+                    }
+                },
+                "outputs": {},
+                "width": 200,
+                "twoColumn": false
+            }
         ],
-        [
-          "Disconnect",
-          false
-        ],
-        [
-          "MessageType",
-          "OK"
-        ],
-        [
-          "Message",
-          "Success export"
-        ]
-      ],
-      "state": {},
-      "interfaces": [],
-      "position": {
-        "x": 454,
-        "y": 318
-      },
-      "width": 200,
-      "twoColumn": false,
-      "customClasses": ""
+        "connections": [],
+        "inputs": [],
+        "outputs": []
     }
-  ],
-  "connections": [],
-  "panning": {
-    "x": 0,
-    "y": 0
-  },
-  "scaling": 1
 }

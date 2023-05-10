@@ -1,52 +1,46 @@
 {
-  "nodes": [
-    {
-      "type": "ValidationBehaviour",
-      "id": "node_168076830521213",
-      "name": "ValidationBehaviour",
-      "options": [
-        [
-          "Duration",
-          0
+    "graphTemplates": [],
+    "graph": {
+        "id": "6483250637",
+        "nodes": [
+            {
+                "type": "ValidationBehaviour",
+                "id": "node_168076830521213",
+                "title": "ValidationBehaviour",
+                "position": {
+                    "x": 166,
+                    "y": 309
+                },
+                "inputs": {},
+                "properties": {
+                    "Duration": {
+                        "id": "7174846741",
+                        "value": 0
+                    },
+                    "Disconnect": {
+                        "id": "3033246400",
+                        "value": false
+                    },
+                    "MessageType": {
+                        "id": "3802014373",
+                        "value": "OK"
+                    },
+                    "Message": {
+                        "id": "1446000571",
+                        "value": "Success validation"
+                    }
+                },
+                "outputs": {
+                    "Effect": {
+                        "id": "ni_168076830521314"
+                    }
+                },
+                "width": 200,
+                "twoColumn": false
+            }
         ],
-        [
-          "Disconnect",
-          false
-        ],
-        [
-          "MessageType",
-          "OK"
-        ],
-        [
-          "Message",
-          "Success validation"
-        ]
-      ],
-      "state": {},
-      "interfaces": [
-        [
-          "Effect",
-          {
-            "id": "ni_168076830521314",
-            "value": null,
-            "isInput": false,
-            "type": "Effect"
-          }
-        ]
-      ],
-      "position": {
-        "x": 166,
-        "y": 309
-      },
-      "width": 200,
-      "twoColumn": false,
-      "customClasses": ""
+        "connections": [],
+        "inputs": [],
+        "outputs": []
     }
-  ],
-  "connections": [],
-  "panning": {
-    "x": -7,
-    "y": 1
-  },
-  "scaling": 1
 }

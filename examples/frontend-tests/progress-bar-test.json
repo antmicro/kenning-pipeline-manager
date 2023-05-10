@@ -1,56 +1,50 @@
 {
-  "nodes": [
-    {
-      "type": "RunBehaviour",
-      "id": "node_16807661729482",
-      "name": "RunBehaviour",
-      "options": [
-        [
-          "Duration",
-          5
+    "graphTemplates": [],
+    "graph": {
+        "id": "5347058261",
+        "nodes": [
+            {
+                "type": "RunBehaviour",
+                "id": "node_16807661729482",
+                "title": "RunBehaviour",
+                "position": {
+                    "x": 174,
+                    "y": 282
+                },
+                "inputs": {},
+                "properties": {
+                    "Duration": {
+                        "id": "4115265524",
+                        "value": 5
+                    },
+                    "Disconnect": {
+                        "id": "7272682362",
+                        "value": false
+                    },
+                    "MessageType": {
+                        "id": "1100140703",
+                        "value": "OK"
+                    },
+                    "ProgressMessages": {
+                        "id": "8754535436",
+                        "value": 100
+                    },
+                    "Message": {
+                        "id": "7170717331",
+                        "value": "Process finished successfully"
+                    }
+                },
+                "outputs": {
+                    "Effect": {
+                        "id": "ni_16807661729493"
+                    }
+                },
+                "width": 200,
+                "twoColumn": false
+            }
         ],
-        [
-          "Disconnect",
-          false
-        ],
-        [
-          "MessageType",
-          "OK"
-        ],
-        [
-          "ProgressMessages",
-          100
-        ],
-        [
-          "Message",
-          "Process finished successfully"
-        ]
-      ],
-      "state": {},
-      "interfaces": [
-        [
-          "Effect",
-          {
-            "id": "ni_16807661729493",
-            "value": null,
-            "isInput": false,
-            "type": "Effect"
-          }
-        ]
-      ],
-      "position": {
-        "x": 174,
-        "y": 282
-      },
-      "width": 200,
-      "twoColumn": false,
-      "customClasses": ""
+        "connections": [],
+        "inputs": [],
+        "outputs": []
     }
-  ],
-  "connections": [],
-  "panning": {
-    "x": 0,
-    "y": 0
-  },
-  "scaling": 1
 }
