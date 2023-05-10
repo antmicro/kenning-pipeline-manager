@@ -33,6 +33,9 @@ Contains following optional properties:
 * `twoColumn` - boolean value determining layout of the nodes.
   If set to true then input and output sockets are rendered on top of the node and properties are rendered below.
   Default value is `false`.
+* `connectionStyle` - string value that determines the style of connection.
+  Can choose one out of the two options: `curved` or `orthogonal`.
+  Default value is `curved`
 
 An example:
 
@@ -42,7 +45,8 @@ An example:
         "Dataset": "#FF0000"
     },
     "allowLoopbacks": false,
-    "readonly": true
+    "readonly": true,
+    "connectionStyle": "orthogonal"
 }
 ```
 
