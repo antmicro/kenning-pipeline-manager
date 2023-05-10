@@ -10,9 +10,8 @@ Inherits from baklavajs/renderer-vue/src/connection/ConnectionView.vue
 -->
 
 <template>
-    <component
+    <ConnectionView
         ref="conn"
-        :is="connectionType"
         :x1="d.x1"
         :y1="d.y1"
         :x2="d.x2"
@@ -20,29 +19,20 @@ Inherits from baklavajs/renderer-vue/src/connection/ConnectionView.vue
         :state="state"
         :connection="connection"
         :isHighlighted="isHighlighted"
-    ></component>
+    ></ConnectionView>
 </template>
 
 <script>
-import { defineComponent, computed, ref } from 'vue';
-import { Components, useGraph } from 'baklavajs';
-import LoopbackConnection from './LoopbackConnection.vue';
+import { defineComponent, ref } from 'vue';
+import { Components } from 'baklavajs';
 import ConnectionView from './ConnectionView.vue';
 
 export default defineComponent({
     extends: Components.ConnectionWrapper,
     props: { isHighlighted: { default: false } },
+    components: { ConnectionView },
     setup(props) {
-        const { graph } = useGraph();
-
         const conn = ref(null);
-
-        const fromNodePosition = computed(
-            () => graph.value.findNodeById(props.connection.from.nodeId)?.position,
-        );
-        const toNodePosition = computed(
-            () => graph.value.findNodeById(props.connection.to.nodeId)?.position,
-        );
 
         /**
          * Check whether the connection path contains the x, y point
@@ -55,17 +45,8 @@ export default defineComponent({
             return elements.includes(conn.value.$el.firstChild);
         };
 
-        const isLoopback = computed(() => fromNodePosition.value === toNodePosition.value);
-        const connectionType = computed(() => {
-            if (isLoopback.value) {
-                return LoopbackConnection;
-            }
-            return ConnectionView;
-        });
-
         return {
             ...Components.ConnectionWrapper.setup(props),
-            connectionType,
             containsPoint,
             conn,
         };
