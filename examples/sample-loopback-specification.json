@@ -1,6 +1,7 @@
 {
     "metadata": {
-        "allowLoopbacks": true
+        "allowLoopbacks": true,
+        "connectionStyle": "curved"
     },
     "nodes": [
         {
