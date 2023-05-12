@@ -35,7 +35,7 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
             <background />
         </slot>
 
-        <slot name="palette">
+        <slot name="palette" v-if="!readonly">
             <node-palette />
         </slot>
 
@@ -109,6 +109,8 @@ export default defineComponent({
         const { graph } = useGraph();
 
         const highlightConnections = ref([]);
+
+        const readonly = computed(() => props.viewModel.editor.readonly);
 
         const clearHighlight = () => {
             highlightConnections.value.splice(0, highlightConnections.value.length);
