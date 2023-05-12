@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 """
-Script that convert old dataflow format save file to a new one.
+Script that convert old dataflow format (Vue2-based) to a new one (Vue3-based).
 Usage of the script:
 
 * python -m pipeline_manager.utils.dataflow_parser old_format_dataflow.json --output new_format_dataflow.json  # noqa: E501
@@ -45,13 +45,15 @@ class Node(NamedTuple):
 
 def from_old(dataflow: dict) -> tuple[list[Node], list[Connection]]:
     """
-    Parses dataflow saved in format version-1 so that it can be converted
-    into a version-2.
+    Parses dataflow saved in format compatible with project built with Vue2
+    so that it can be converted into a dataflow compatible
+    with version of the project for Vue3
 
     Parameters
     ----------
     dataflow : dict
-        Saved dataflow in format version-1.
+        Saved dataflow in format compatible with project
+        in version built with Vue2
 
     Returns
     -------
@@ -124,8 +126,8 @@ def get_id(size: Optional[int] = 10) -> str:
 
 def to_new(nodes: list[Node], connections: list[Connection]) -> dict:
     """
-    Generates a valid save in a dataflow format version-2 from
-    given arguments.
+    Generates a valid JSON structure compatible with Vue3-based release
+    of the project from Vue2-based release of the project.
 
     Parameters
     ----------
