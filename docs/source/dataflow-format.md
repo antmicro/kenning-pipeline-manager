@@ -8,7 +8,7 @@ Its state can be serialized and saved as a JSON file.
 The root of the dataflow format consists of two main attributes.
 
 * `graph` - object of type [Graph](#graph) that describes the main graph displayed to the user after load.
-* `graphTemplates` - list of graph-nodes that are available to the user. Should be set to an empty list.
+* `graphTemplates` - list of graph-nodes that are available to the user.
 
 ### Graph
 The graph format has five main attributes.
@@ -31,19 +31,19 @@ Each node has ten attributes:
 * `type` - type of the node.
 * `id` - unique value assigned to the node.
 * `title` - name of the node that is rendered to the user.
-* `properties` - dictionary describing parametrized values of the node.
+* `properties` - dictionary describing parameterized values of the node.
   Every element is of type [Property](#property)
 * `inputs` - dictionary describing inputs of the node.
   Every element is of type [Interface](#interface)
 * `outputs` - dictionary describing outputs of the node.
   Every element is of type [Interface](#interface)
 * `width` - width of the node in the editor.
-* `twoColumn` - boolean value. 
+* `twoColumn` - boolean value.
   True if nodes should be divided into two columns, one consisting of parameters and input sockets and one consisting of output sockets.
 
 ##### Property
 
-Each property is described by an object with two attributs:
+Each property is described by an object with two attributes:
 
 * `id` - unique value assigned to the property.
 * `value` - actual value of the property
@@ -66,7 +66,7 @@ Node having two parameters: `example_text` of value `example_value` and `example
 Each input and output is described by an object with one attribute:
 
 * `id` - unique value assigned to the property.
-  It is used to desrcribe connections in the dataflow
+  It is used to describe connections in the dataflow
 
 #### Connection
 
