@@ -46,7 +46,7 @@ function getShift(connection, graph, scaling, symmetric = false) {
  * @returns Y coordinate of a bottom of a node, adjusted for canvas transformation
  */
 function nodeBottomPoint(connection, scaling, panning) {
-    const nodeId = connection.from.nodeId;
+    const { nodeId } = connection.from;
     const nodeHtml = document.getElementById(nodeId);
     const nodeBottom = nodeHtml ? nodeHtml.offsetTop + nodeHtml.offsetHeight : 0;
     return (nodeBottom + panning.y) * scaling;

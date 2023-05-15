@@ -24,7 +24,7 @@ export default defineComponent({
     extends: Components.Connection,
     props: { isHighlighted: { default: false }, connection: { required: true } },
     setup(props) {
-        const { d, classes } = Components.Connection.setup(props);
+        const { classes } = Components.Connection.setup(props);
         const { graph } = useGraph();
         const { viewModel } = useViewModel();
 
