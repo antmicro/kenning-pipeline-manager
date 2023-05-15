@@ -22,6 +22,8 @@ The graph format has five main attributes.
   Should be set to an empty list.
 * `outputs` - used for multi-graph dataflows.
   Should be set to an empty list.
+* `panning` - object of type [Panning](#panning) that defines the position of the top-left corner in the rendered editor.
+* `scaling` - floating-point number that defines the zoom level in the editor.
 
 #### Node
 
@@ -76,6 +78,15 @@ It has three attributes:
 * `id` - unique value assigned to the connection.
 * `from` - id of the output socket of the connection.
 * `to` - id of the input socket of the connection.
+
+#### Panning
+
+This object describes the position of the top-left corner of the rendered editor in the browser.
+Defines the camera position in the editor space.
+Two attributes are used:
+
+* `x` - x coordinate of the corner.
+* `y` - y coordinate of the corner.
 
 ## Example dataflow
 

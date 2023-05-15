@@ -71,4 +71,21 @@ export default class PipelineManagerEditor extends Editor {
             };
         };
     }
+
+    save() {
+        const state = super.save();
+        state.graph.panning = this._graph.panning;
+        state.graph.scaling = this._graph.scaling;
+        return state;
+    }
+
+    load(state) {
+        super.load(state);
+        if (state.graph.panning !== undefined) {
+            this._graph.panning = state.graph.panning;
+        }
+        if (state.graph.scaling !== undefined) {
+            this._graph.scaling = state.graph.scaling;
+        }
+    }
 }
