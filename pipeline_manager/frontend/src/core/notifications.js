@@ -6,6 +6,7 @@
 
 import { createToastInterface, POSITION } from 'vue-toastification';
 import { notificationStore, terminalStore } from './stores';
+import EditorManager from './EditorManager';
 import Notification from '../components/Notification.vue';
 
 const toast = createToastInterface({
@@ -25,7 +26,9 @@ export const showToast = (type, message) => {
         },
     };
 
-    toast(content);
+    if (!EditorManager.getEditorManagerInstance().editor.readonly) {
+        toast(content);
+    }
     notificationStore.add({ type, message });
 };
 
