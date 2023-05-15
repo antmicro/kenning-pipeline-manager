@@ -19,7 +19,7 @@ import Backend from '../icons/Backend.vue';
 import Bell from '../icons/Bell.vue';
 import DropdownItem from './DropdownItem.vue';
 import EditorManager from '../core/EditorManager';
-import { showToast, terminalLog } from '../core/notifications';
+import NotificationHandler from '../core/notifications';
 import { notificationStore } from '../core/stores';
 import ExternalApplicationManager from '../core/ExternalApplicationManager';
 import Notifications from './Notifications.vue';
@@ -54,10 +54,10 @@ export default {
         loadSpecification(specification) {
             const errors = this.editorManager.validateSpecification(specification);
             if (Array.isArray(errors) && errors.length) {
-                terminalLog('error', 'Specification is invalid', errors);
+                NotificationHandler.terminalLog('error', 'Specification is invalid', errors);
             } else {
                 this.editorManager.updateEditorSpecification(specification);
-                showToast('info', 'Specification loaded successfully');
+                NotificationHandler.showToast('info', 'Specification loaded successfully');
             }
         },
 
@@ -80,9 +80,17 @@ export default {
                     specification = JSON.parse(fileReader.result);
                 } catch (exception) {
                     if (exception instanceof SyntaxError) {
-                        terminalLog('error', 'Not a proper JSON file', exception.toString());
+                        NotificationHandler.terminalLog(
+                            'error',
+                            'Not a proper JSON file',
+                            exception.toString(),
+                        );
                     } else {
-                        terminalLog('error', 'Unknown error', exception.toString());
+                        NotificationHandler.terminalLog(
+                            'error',
+                            'Unknown error',
+                            exception.toString(),
+                        );
                     }
                     return;
                 }
@@ -189,9 +197,9 @@ export default {
         loadDataflow(dataflow) {
             const errors = this.editorManager.loadDataflow(dataflow);
             if (Array.isArray(errors) && errors.length) {
-                terminalLog('error', 'Dataflow is invalid', errors);
+                NotificationHandler.terminalLog('error', 'Dataflow is invalid', errors);
             } else {
-                showToast('info', 'Dataflow loaded successfully');
+                NotificationHandler.showToast('info', 'Dataflow loaded successfully');
             }
         },
         /**
@@ -211,9 +219,17 @@ export default {
                     dataflow = JSON.parse(fileReader.result);
                 } catch (exception) {
                     if (exception instanceof SyntaxError) {
-                        terminalLog('error', 'Not a proper JSON file', exception.toString());
+                        NotificationHandler.terminalLog(
+                            'error',
+                            'Not a proper JSON file',
+                            exception.toString(),
+                        );
                     } else {
-                        terminalLog('error', 'Unknown error', exception.toString());
+                        NotificationHandler.terminalLog(
+                            'error',
+                            'Unknown error',
+                            exception.toString(),
+                        );
                     }
                     return;
                 }
@@ -234,7 +250,7 @@ export default {
             linkElement.href = window.URL.createObjectURL(blob);
             linkElement.download = 'save';
             linkElement.click();
-            showToast('info', 'Dataflow saved');
+            NotificationHandler.showToast('info', 'Dataflow saved');
         },
 
         async requestDataflowAction(action) {
@@ -270,7 +286,7 @@ export default {
                     document.body.removeChild(downloadLink);
                 })
                 .catch((error) => {
-                    showToast('error', `Export to PNG failed: ${error}`);
+                    NotificationHandler.showToast('error', `Export to PNG failed: ${error}`);
                 });
         },
     },

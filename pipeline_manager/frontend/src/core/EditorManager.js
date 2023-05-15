@@ -10,7 +10,7 @@ import { useBaklava, BaklavaInterfaceTypes } from 'baklavajs';
 
 import PipelineManagerEditor from '../custom/Editor';
 
-import { showToast } from './notifications';
+import NotificationHandler from './notifications';
 import { NodeFactory, readInterfaceTypes } from './NodeFactory';
 import specificationSchema from '../../../resources/schemas/dataflow_spec_schema.json';
 import ConnectionRenderer from './ConnectionRenderer';
@@ -70,8 +70,12 @@ export default class EditorManager {
         });
 
         this.editor.readonly = 'readonly' in metadata ? metadata.readonly : false;
+        NotificationHandler.setShowNotification(this.editor.readonly);
         if (this.editor.readonly) {
-            showToast('info', 'The specification is read-only. Only dataflow loading is allowed.');
+            NotificationHandler.showToast(
+                'info',
+                'The specification is read-only. Only dataflow loading is allowed.',
+            );
         }
         this.editor.allowLoopbacks = 'allowLoopbacks' in metadata ? metadata.allowLoopbacks : false;
         if ('connectionStyle' in metadata) {

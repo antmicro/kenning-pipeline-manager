@@ -6,7 +6,7 @@
 
 import { backendApiUrl, HTTPCodes, PMMessageType } from './utils';
 import { fetchGET, fetchPOST } from './fetchRequests';
-import { showToast, terminalLog } from './notifications';
+import NotificationHandler from './notifications';
 import EditorManager from './EditorManager';
 
 export default class ExternalApplicationManager {
@@ -40,7 +40,7 @@ export default class ExternalApplicationManager {
         const connected = response.status === HTTPCodes.OK;
 
         if (!connected) {
-            showToast('error', data);
+            NotificationHandler.showToast('error', data);
         }
         this.externalApplicationConnected = connected;
     }
@@ -62,19 +62,19 @@ export default class ExternalApplicationManager {
 
                 const errors = this.editorManager.validateSpecification(specification);
                 if (Array.isArray(errors) && errors.length) {
-                    terminalLog('error', 'Specification is invalid', errors);
+                    NotificationHandler.terminalLog('error', 'Specification is invalid', errors);
                 } else {
                     this.editorManager.updateEditorSpecification(specification);
                     message = 'Specification loaded successfully';
-                    showToast('info', message);
+                    NotificationHandler.showToast('info', message);
                 }
             } else if (data.type === PMMessageType.ERROR) {
                 message = data.content;
-                showToast('error', message);
+                NotificationHandler.showToast('error', message);
             }
         } else if (response.status === HTTPCodes.ServiceUnavailable) {
             message = await response.text();
-            showToast('error', message);
+            NotificationHandler.showToast('error', message);
         }
     }
 
@@ -90,7 +90,7 @@ export default class ExternalApplicationManager {
         if (!dataflow) return;
 
         if (action === 'run') {
-            showToast('info', 'Running dataflow');
+            NotificationHandler.showToast('info', 'Running dataflow');
         }
 
         const formData = new FormData();
@@ -100,7 +100,7 @@ export default class ExternalApplicationManager {
         if (response.status === HTTPCodes.ServiceUnavailable) {
             // The connection was closed
             const data = await response.text();
-            showToast('error', data);
+            NotificationHandler.showToast('error', data);
             return;
         }
 
@@ -122,7 +122,7 @@ export default class ExternalApplicationManager {
                     data = await response.json();
                 } else if (response.status === HTTPCodes.ServiceUnavailable) {
                     data = await response.text();
-                    showToast('error', data);
+                    NotificationHandler.showToast('error', data);
                     progressBar.style.width = '0%';
                     return;
                 }
@@ -130,9 +130,9 @@ export default class ExternalApplicationManager {
             progressBar.style.width = '0%';
         }
         if (data.type === PMMessageType.OK) {
-            showToast('info', data.content);
+            NotificationHandler.showToast('info', data.content);
         } else if (data.type === PMMessageType.ERROR) {
-            terminalLog('error', 'Error occured', data.content);
+            NotificationHandler.terminalLog('error', 'Error occured', data.content);
         }
     }
 
@@ -159,17 +159,17 @@ export default class ExternalApplicationManager {
             if (data.type === PMMessageType.OK) {
                 const errors = this.editorManager.loadDataflow(data.content);
                 if (Array.isArray(errors) && errors.length) {
-                    terminalLog('error', 'Dataflow is invalid', errors);
+                    NotificationHandler.terminalLog('error', 'Dataflow is invalid', errors);
                 } else {
-                    showToast('info', message);
+                    NotificationHandler.showToast('info', message);
                 }
             } else if (data.type === PMMessageType.ERROR) {
                 message = data.content;
-                showToast('error', message);
+                NotificationHandler.showToast('error', message);
             }
         } else if (response.status === HTTPCodes.ServiceUnavailable) {
             const data = await response.text();
-            showToast('error', data);
+            NotificationHandler.showToast('error', data);
         }
     }
 
@@ -236,7 +236,7 @@ export default class ExternalApplicationManager {
         }
 
         if (!this.externalApplicationConnected) {
-            showToast('info', 'Waiting for the application to connect...');
+            NotificationHandler.showToast('info', 'Waiting for the application to connect...');
             await this.openTCP();
         }
         if (this.externalApplicationConnected) {
