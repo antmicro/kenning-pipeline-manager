@@ -10,9 +10,9 @@ The entrypoint of the application.
 
 <template>
     <div id="container">
-        <NavBar />
+        <NavBar v-if="!readonly" />
         <Editor class="inner-editor" :view-model="editorManager.baklavaView" />
-        <TerminalPanel />
+        <TerminalPanel v-if="!readonly" />
     </div>
 </template>
 
@@ -33,6 +33,11 @@ export default {
         const editorManager = EditorManager.getEditorManagerInstance();
 
         return { editorManager };
+    },
+    computed: {
+        readonly() {
+            return this.editorManager.editor.readonly;
+        },
     },
 };
 </script>
