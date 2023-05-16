@@ -31,7 +31,7 @@ export default class NotificationHandler {
             },
         };
 
-        if (!NotificationHandler.showNotifications) {
+        if (NotificationHandler.showNotifications) {
             toast(content);
         }
         notificationStore.add({ type, message });

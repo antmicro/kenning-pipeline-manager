@@ -70,7 +70,8 @@ export default class EditorManager {
         });
 
         this.editor.readonly = 'readonly' in metadata ? metadata.readonly : false;
-        NotificationHandler.setShowNotification(this.editor.readonly);
+        this.editor.hideHud = 'hideHud' in metadata ? metadata.hideHud : false;
+        NotificationHandler.setShowNotification(!this.editor.hideHud);
         if (this.editor.readonly) {
             NotificationHandler.showToast(
                 'info',

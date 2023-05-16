@@ -10,9 +10,9 @@ The entrypoint of the application.
 
 <template>
     <div id="container">
-        <NavBar v-if="!readonly" />
+        <NavBar v-if="!hideHud" />
         <Editor class="inner-editor" :view-model="editorManager.baklavaView" />
-        <TerminalPanel v-if="!readonly" />
+        <TerminalPanel v-if="!hideHud" />
     </div>
 </template>
 
@@ -35,8 +35,8 @@ export default {
         return { editorManager };
     },
     computed: {
-        readonly() {
-            return this.editorManager.editor.readonly;
+        hideHud() {
+            return this.editorManager.editor.hideHud;
         },
     },
 };

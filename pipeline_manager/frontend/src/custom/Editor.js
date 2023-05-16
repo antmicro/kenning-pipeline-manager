@@ -16,6 +16,8 @@ import { Editor, DummyConnection } from 'baklavajs';
 export default class PipelineManagerEditor extends Editor {
     readonly = false;
 
+    hideHud = false;
+
     allowLoopbacks = false;
 
     /* eslint-disable no-param-reassign */
