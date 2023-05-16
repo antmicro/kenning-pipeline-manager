@@ -36,6 +36,8 @@ Contains following optional properties:
 * `connectionStyle` - string value that determines the style of connection.
   Can choose one out of the two options: `curved` or `orthogonal`.
   Default value is `curved`
+* `hideHud` - boolean value determining whether UI elements should be hidden. Components affected by this flag are: popup notifications, navigation bar and terminal window.
+  Default value is `false`
 
 An example:
 
@@ -46,7 +48,8 @@ An example:
     },
     "allowLoopbacks": false,
     "readonly": true,
-    "connectionStyle": "orthogonal"
+    "connectionStyle": "orthogonal",
+    "hideHud": true
 }
 ```
 
