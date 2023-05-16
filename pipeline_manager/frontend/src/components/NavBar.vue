@@ -297,6 +297,8 @@ export default {
                 this.externalApplicationManager.initializeConnection,
             );
         }
+        //Remove notifications during loadup of default settings
+        NotificationHandler.setShowNotification(false);
         if (process.env.VUE_APP_SPECIFICATION_PATH !== undefined) {
             const specification = require(process.env.VUE_APP_SPECIFICATION_PATH); // eslint-disable-line global-require,max-len,import/no-dynamic-require
             this.loadSpecification(specification);
@@ -305,6 +307,7 @@ export default {
             const dataflow = require(process.env.VUE_APP_DATAFLOW_PATH); // eslint-disable-line global-require,max-len,import/no-dynamic-require
             this.loadDataflow(dataflow);
         }
+        NotificationHandler.setShowNotification(true);
     },
 };
 </script>
