@@ -29,6 +29,11 @@
                     "enum": ["curved", "orthogonal"],
                     "description": "Defines connection style",
                     "default": "curved"
+                },
+                "hideHud": {
+                    "type": "boolean",
+                    "description": "Hides HUD elements, such as popup notifications, navbar or terminal",
+                    "default": false
                 }
             },
             "additionalProperties": false
