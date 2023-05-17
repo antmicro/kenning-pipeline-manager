@@ -25,7 +25,7 @@ from moving or deleting the nodes.
     >
         <div class="__title" @pointerdown.self.stop="startDragWrapper">
             <div class="__title-label">
-                {{ node.title }}
+                {{ nodeTitle }}
             </div>
             <div class="__menu">
                 <vertical-dots class="--clickable" @click="openContextMenuWrapper" />
@@ -129,6 +129,13 @@ const displayedInputs = computed(() => Object.values(props.node.inputs).filter((
 const displayedOutputs = computed(() =>
     Object.values(props.node.outputs).filter((ni) => !ni.hidden),
 );
+
+const nodeTitle = computed(() => {
+    if (props.node.title === props.node.type || props.node.title === "") {
+        return props.node.type
+    }
+    return `${props.node.title} (${props.node.type})`
+})
 
 const select = () => {
     emit('select');
