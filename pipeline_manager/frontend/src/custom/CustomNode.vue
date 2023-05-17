@@ -24,9 +24,18 @@ from moving or deleting the nodes.
         @pointerdown="select"
     >
         <div class="__title" @pointerdown.self.stop="startDragWrapper">
-            <div class="__title-label">
+            <div v-if="!renaming" class="__title-label">
                 {{ nodeTitle }}
             </div>
+            <input
+                v-else
+                type="text"
+                class="dark-input"
+                v-model="tempName"
+                placeholder="Node Name"
+                v-click-outside="doneRenaming"
+                @keydown.enter="doneRenaming"
+            />
             <div class="__menu">
                 <vertical-dots class="--clickable" @click="openContextMenuWrapper" />
                 <context-menu
@@ -101,10 +110,15 @@ const { graph, switchGraph } = useGraph();
 const dragMove = useDragMove(toRef(props.node, 'position'));
 
 const nodeRef = ref(null);
+const renaming = ref(false);
+const tempName = ref('');
 
 const showContextMenu = ref(false);
 const contextMenuItems = computed(() => {
-    const items = [{ value: 'delete', label: 'Delete' }];
+    const items = [
+        { value: 'delete', label: 'Delete' },
+        { value: 'rename', label: 'Rename' },
+    ];
 
     if (props.node.type.startsWith(GRAPH_NODE_TYPE_PREFIX)) {
         items.push({ value: 'editSubgraph', label: 'Edit Subgraph' });
@@ -131,11 +145,11 @@ const displayedOutputs = computed(() =>
 );
 
 const nodeTitle = computed(() => {
-    if (props.node.title === props.node.type || props.node.title === "") {
-        return props.node.type
+    if (props.node.title === props.node.type || props.node.title === '') {
+        return props.node.type;
     }
-    return `${props.node.title} (${props.node.type})`
-})
+    return `${props.node.title} (${props.node.type})`;
+});
 
 const select = () => {
     emit('select');
@@ -164,10 +178,19 @@ const onContextMenuClick = async (action) => {
         case 'delete':
             graph.value.removeNode(props.node);
             break;
+        case 'rename':
+            tempName.value = props.node.title;
+            renaming.value = true;
+            break;
         case 'editSubgraph':
             switchGraph(props.node.template);
             break;
     }
+};
+
+const doneRenaming = () => {
+    graph.value.findNodeById(props.node.id).title = tempName.value;
+    renaming.value = false;
 };
 
 const onRender = () => {
