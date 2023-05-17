@@ -47,15 +47,15 @@ from pipeline_manager_backend_communication.misc_structures import (
 )  # noqa: E501
 
 
-def get_node_properties(title: str, dataflow: Dict) -> Dict:
+def get_node_properties(node_type: str, dataflow: Dict) -> Dict:
     """
-    Function that reads properties of a `title` node in `dataflow`.
+    Function that reads properties of a `type` node in `dataflow`.
     It is assumed for now that we have only such node in the `dataflow`.
 
     Parameters
     ----------
-    title : str
-        Properties of the `title` node are going to be read and returned
+    node_type : str
+        Properties of the `type` node are going to be read and returned
         as a dictionary.
     dataflow : Dict
         Dataflow that was sent by Pipeline Manager.
@@ -63,14 +63,14 @@ def get_node_properties(title: str, dataflow: Dict) -> Dict:
     Returns
     -------
     Dict :
-        Dictionary that has all properties of a `title` node.
+        Dictionary that has all properties of a `type` node.
     """
     dataflow = json.loads(dataflow)
     nodes = dataflow["graph"]["nodes"]
     description_node = None
 
     for node in nodes:
-        if node["title"] == title:
+        if node["type"] == node_type:
             description_node = node
             break
 
@@ -81,22 +81,22 @@ def get_node_properties(title: str, dataflow: Dict) -> Dict:
     return properties
 
 
-def get_effects(title: str, dataflow: Dict) -> List:
+def get_effects(node_type: str, dataflow: Dict) -> List:
     """
-    Function that returns all connected nodes to a `title`
+    Function that returns all connected nodes to a `type`
     node in the dataflow.
 
     Parameters
     ----------
-    title : str
-        Nodes connected to the `title` node are returned.
+    node_type : str
+        Nodes connected to the `type` node are returned.
     dataflow : Dict
         Dataflow that was sent by Pipeline Manager.
 
     Returns
     -------
     List :
-        List of nodes connected to `title` node.
+        List of nodes connected to `type` node.
     """
     dataflow = json.loads(dataflow)
     nodes = dataflow["graph"]["nodes"]
@@ -104,7 +104,7 @@ def get_effects(title: str, dataflow: Dict) -> List:
     socket_id = None
 
     for node in nodes:
-        if node["title"] == title:
+        if node["type"] == node_type:
             socket_id = node["outputs"]["Effect"]["id"]
             break
 
@@ -125,7 +125,7 @@ def get_effects(title: str, dataflow: Dict) -> List:
     for node in connected_nodes:
         parsed_nodes.append(
             {
-                "title": node["title"],
+                "type": node["type"],
                 "properties": {
                     name: properties["value"]
                     for name, properties in node["properties"].items()
@@ -249,7 +249,7 @@ def run_validate_response(
 
     effects = get_effects(title, data)
     for effect in effects:
-        if effect["title"] == "Disconnect":
+        if effect["type"] == "Disconnect":
             if effect["properties"]["Should disconnect"]:
                 time.sleep(effect["properties"]["Time offset"])
                 logging.log(logging.INFO, "Disconnecting!")
@@ -276,9 +276,9 @@ def export_response(
     output_path : Path
         Path where the exported dataflow is saved.
     """
-    title = "ExportBehaviour"
+    node_type = "ExportBehaviour"
     try:
-        properties = get_node_properties(title, data)
+        properties = get_node_properties(node_type, data)
     except Exception:
         client.send_message(
             MessageType.ERROR,
