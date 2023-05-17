@@ -30,9 +30,9 @@ The graph format has five main attributes.
 An object that describes a single node in the editor.
 Each node has ten attributes:
 
-* `type` - type of the node.
+* `type` - type of the node, as defined in specification.
 * `id` - unique value assigned to the node.
-* `title` - name of the node that is rendered to the user.
+* `name` - optional field defining name of the node that is rendered to the user. If set, `name (type)` will be displayed, otherwise title of the node will be just `type`.
 * `properties` - dictionary describing parameterized values of the node.
   Every element is of type [Property](#property)
 * `inputs` - dictionary describing inputs of the node.
@@ -102,7 +102,7 @@ The example dataflow for a specification defined in [Specification format](speci
             {
                 "type": "Filter2D",
                 "id": "node_168064109167511",
-                "title": "Filter2D",
+                "name": "Filter",
                 "position": {
                     "x": 544,
                     "y": 77
@@ -136,7 +136,6 @@ The example dataflow for a specification defined in [Specification format](speci
             {
                 "type": "LoadVideo",
                 "id": "node_168064220761015",
-                "title": "LoadVideo",
                 "position": {
                     "x": -60,
                     "y": -36
@@ -159,7 +158,6 @@ The example dataflow for a specification defined in [Specification format](speci
             {
                 "type": "GaussianKernel",
                 "id": "node_168064222522321",
-                "title": "GaussianKernel",
                 "position": {
                     "x": -65,
                     "y": 295
@@ -186,7 +184,6 @@ The example dataflow for a specification defined in [Specification format](speci
             {
                 "type": "Threshold",
                 "id": "node_168064225320530",
-                "title": "Threshold",
                 "position": {
                     "x": 999,
                     "y": 100
@@ -217,7 +214,7 @@ The example dataflow for a specification defined in [Specification format](speci
             {
                 "type": "StructuringElement",
                 "id": "node_168064227787336",
-                "title": "StructuringElement",
+                "name": "Structuring Element",
                 "position": {
                     "x": 1010,
                     "y": 409
@@ -244,7 +241,6 @@ The example dataflow for a specification defined in [Specification format](speci
             {
                 "type": "Morphological operation",
                 "id": "node_168064228786538",
-                "title": "Morphological operation",
                 "position": {
                     "x": 1422,
                     "y": 54
@@ -282,7 +278,7 @@ The example dataflow for a specification defined in [Specification format](speci
             {
                 "type": "SaveVideo",
                 "id": "node_168064231007448",
-                "title": "SaveVideo",
+                "name": "Save Video",
                 "position": {
                     "x": 1773,
                     "y": 76
