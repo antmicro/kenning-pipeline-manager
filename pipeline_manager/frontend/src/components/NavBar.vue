@@ -11,7 +11,6 @@ Displays user interface and main details about the Pipeline Manager status.
 
 <script>
 import { toPng } from 'html-to-image';
-import vClickOutside from 'click-outside-vue3';
 import Logo from '../icons/Logo.vue';
 import Arrow from '../icons/Arrow.vue';
 import Run from '../icons/Run.vue';
@@ -35,9 +34,6 @@ export default {
         Bell,
         DropdownItem,
         Notifications,
-    },
-    directives: {
-        clickOutside: vClickOutside.directive,
     },
     data() {
         return {
