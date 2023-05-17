@@ -5,6 +5,7 @@
  */
 
 import Toast, { POSITION } from 'vue-toastification';
+import vClickOutside from 'click-outside-vue3';
 
 import { createApp } from 'vue';
 import App from './App.vue';
@@ -20,6 +21,7 @@ const options = {
 };
 
 const app = createApp(App);
+app.use(vClickOutside);
 app.use(RouterVue);
 app.use(Toast, options);
 
