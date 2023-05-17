@@ -139,19 +139,56 @@ export default class EditorManager {
     }
 
     /**
-     * Serializes and returns current dataflow.
+     * Translates from Pipeline Manager dataflow to Baklava format
+     *
+     * @param dataflow Dataflow in Pipeline Manager format
+     * @returns Dataflow ready to be loaded into Baklava Editor
+     */
+    static dataflowFromPipelineManagerToBaklava(dataflow) {
+        /* eslint-disable no-param-reassign */
+        dataflow.graph.nodes.forEach((node) => {
+            if ('name' in node) {
+                node.title = node.name;
+            } else {
+                node.title = '';
+            }
+            delete node.name;
+        });
+        return dataflow;
+        /* eslint-enable no-param-reassign */
+    }
+
+    /**
+     * Translates from Baklava format to Pipeline Manager
+     *
+     * @param dataflow Dataflow in Baklava Format
+     * @returns Dataflow ready to be exported from Baklava editor
+     */
+    static dataflowFromBaklavaToPipelineManager(dataflow) {
+        /* eslint-disable no-param-reassign */
+        dataflow.graph.nodes.forEach((node) => {
+            node.name = node.title;
+            delete node.title;
+        });
+        return dataflow;
+        /* eslint-enable no-param-reassign */
+    }
+
+    /**
+     * Serializes and returns current dataflow in Pipeline Manager format.
      *
      * @returns Serialized dataflow.
      */
     saveDataflow() {
-        return this.editor.save();
+        return EditorManager.dataflowFromBaklavaToPipelineManager(this.editor.save());
     }
 
     /**
      * Loads the dataflow passed in `dataflow` and renders it.
      * If the dataflow is not compatible with the currently loaded specification or is not
      * in the dataflow format, then some of the dataflow may be not loaded and an
-     * error is returned.
+     * error is returned. Dataflow should be passed in PipelineManager format (translation
+     * to Baklava format is done )
      *
      * @param dataflow Dataflow to load
      * @returns An array of errors that occured during the dataflow loading.
@@ -159,7 +196,7 @@ export default class EditorManager {
      */
     loadDataflow(dataflow) {
         try {
-            return this.editor.load(dataflow);
+            return this.editor.load(EditorManager.dataflowFromPipelineManagerToBaklava(dataflow));
         } catch (err) {
             return [
                 'Unrecognized format. Make sure that the passed dataflow is correct.',
