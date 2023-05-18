@@ -16,10 +16,20 @@ const toast = createToastInterface({
 });
 
 export default class NotificationHandler {
-    static showNotifications = true;
+    static NotificationHandler = true;
+
+    static defaultShowOption = true;
 
     static setShowNotification(show) {
         NotificationHandler.showNotifications = show;
+    }
+
+    static setShowOption(showOption) {
+        NotificationHandler.defaultShowOption = showOption;
+    }
+
+    static restoreShowNotification() {
+        NotificationHandler.showNotifications = NotificationHandler.defaultShowOption;
     }
 
     static showToast(type, message) {
