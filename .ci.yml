@@ -35,6 +35,7 @@ build-docs-and-static-html:
     stage: build
     script:
         - cd docs
+        - echo -en "\nhtml_js_files = [ '$ANNOTANT' ]" >> source/conf.py
         - make html latexpdf
         - cp build/latex/*.pdf build/html/
         - tar cf $CI_DOCS_ARCHIVE -C build/html/ .
