@@ -71,7 +71,7 @@ export default class EditorManager {
 
         this.editor.readonly = 'readonly' in metadata ? metadata.readonly : false;
         this.editor.hideHud = 'hideHud' in metadata ? metadata.hideHud : false;
-        NotificationHandler.setShowNotification(!this.editor.hideHud);
+        NotificationHandler.setShowOption(!this.editor.hideHud);
         if (this.editor.readonly) {
             NotificationHandler.showToast(
                 'info',
