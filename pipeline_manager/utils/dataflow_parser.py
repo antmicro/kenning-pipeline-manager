@@ -33,7 +33,6 @@ class Connection(NamedTuple):
 class Node(NamedTuple):
     type: str
     id: str
-    name: str
     parameters: list[Interface]
     inputs: list[Interface]
     outputs: list[Interface]
@@ -41,6 +40,7 @@ class Node(NamedTuple):
     pos_y: int
     width: int
     twoColumn: bool
+    name: Optional[str] = None
 
 
 def from_old(dataflow: dict) -> tuple[list[Node], list[Connection]]:
@@ -89,20 +89,21 @@ def from_old(dataflow: dict) -> tuple[list[Node], list[Connection]]:
                     Interface(name, state["id"], "")
                 )
 
-        parsed_nodes.append(
-            Node(
-                node["type"],
-                node["id"],
-                node["name"],
-                parameters,
-                inputs,
-                outputs,
-                node["position"]["x"],
-                node["position"]["y"],
-                node["width"],
-                node["twoColumn"],
-            )
+        parsed_node = Node(
+            node["type"],
+            node["id"],
+            parameters,
+            inputs,
+            outputs,
+            node["position"]["x"],
+            node["position"]["y"],
+            node["width"],
+            node["twoColumn"],
         )
+        if node["name"] != node["type"]:
+            parsed_node.name = node["name"]
+
+        parsed_nodes.append(parsed_node)
 
     return parsed_nodes, parsed_connections
 
@@ -141,37 +142,43 @@ def to_new(nodes: list[Node], connections: list[Connection]) -> dict:
     dict
         Converted dataflow save in version-2
     """
+    # Add mandatory node parameters
+    node_list = [
+        {
+            "type": node.type,
+            "id": node.id,
+            "position": {"x": node.pos_x, "y": node.pos_y},
+            "inputs": {
+                input.name: {"id": input.id}
+                for input in node.inputs
+            },
+            "properties": {
+                parameter.name: {
+                    "id": parameter.id, "value": parameter.value
+                }
+                for parameter in node.parameters
+            },
+            "outputs": {
+                parameter.name: {
+                    "id": parameter.id,
+                }
+                for parameter in node.outputs
+            },
+            "width": node.width,
+            "twoColumn": node.twoColumn,
+        }
+        for node in nodes
+    ]
+    # Add optional fields
+    for node_json, node in zip(node_list, nodes):
+        if node.name:
+            node_json["name"] = node.name
+
     return {
         "graphTemplates": [],
         "graph": {
             "id": get_id(),
-            "nodes": [
-                {
-                    "type": node.type,
-                    "id": node.id,
-                    "title": node.name,
-                    "position": {"x": node.pos_x, "y": node.pos_y},
-                    "inputs": {
-                        input.name: {"id": input.id}
-                        for input in node.inputs
-                    },
-                    "properties": {
-                        parameter.name: {
-                            "id": parameter.id, "value": parameter.value
-                        }
-                        for parameter in node.parameters
-                    },
-                    "outputs": {
-                        parameter.name: {
-                            "id": parameter.id,
-                        }
-                        for parameter in node.outputs
-                    },
-                    "width": node.width,
-                    "twoColumn": node.twoColumn,
-                }
-                for node in nodes
-            ],
+            "nodes": node_list,
             "connections": [
                 {"id": conn.id, "from": conn.from_node, "to": conn.to_node}
                 for conn in connections
