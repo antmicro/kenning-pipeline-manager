@@ -48,7 +48,6 @@ export default {
     opacity: 0.9;
     position: absolute;
     right: -495px;
-    overflow-y: auto;
     padding: $spacing-l;
 
     & > .setting-header {
