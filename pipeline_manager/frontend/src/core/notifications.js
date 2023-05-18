@@ -4,6 +4,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+/**
+ * Handles incoming notifications from Pipeline Manager: creates toast
+ * notifications (popup), adds them to store for notifications panel,
+ * logs appropriate notification to terminal window
+ */
+
 import { createToastInterface, POSITION } from 'vue-toastification';
 import { notificationStore, terminalStore } from './stores';
 import Notification from '../components/Notification.vue';
@@ -20,14 +26,31 @@ export default class NotificationHandler {
 
     static defaultShowOption = true;
 
+    /**
+     * Sets the showNotification flag. If set to false, no popup
+     * notifications are shown
+     *
+     * @param show new value for showNotification
+     */
     static setShowNotification(show) {
         NotificationHandler.showNotifications = show;
     }
 
+    /**
+     * Sets the default showNotification flag value.
+     * Does not change whether the notifications are actually set or not,
+     * this should be done in `setShowNotification` or `restoreShowNotification`
+     * methods
+     *
+     * @param showOption default value for showNotification flag
+     */
     static setShowOption(showOption) {
         NotificationHandler.defaultShowOption = showOption;
     }
 
+    /**
+     * Restores show notification flag to it's default value
+     */
     static restoreShowNotification() {
         NotificationHandler.showNotifications = NotificationHandler.defaultShowOption;
     }
