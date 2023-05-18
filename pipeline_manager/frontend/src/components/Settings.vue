@@ -6,10 +6,15 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
     <div class="settings-panel">
-        <component
-            :is="connectionStyleOption.component"
-            :intf="connectionStyleOption"
-        ></component>
+        <div class="setting-header">
+            <span>Settings</span>
+        </div>
+        <div class="panel">
+            <component
+                :is="connectionStyleOption.component"
+                :intf="connectionStyleOption"
+            ></component>
+        </div>
     </div>
 </template>
 
@@ -44,5 +49,23 @@ export default {
     position: absolute;
     right: -495px;
     overflow-y: auto;
+    padding: $spacing-l;
+
+    & > .setting-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: $spacing-l;
+
+        & > span {
+            color: $white;
+            font-size: $fs-large;
+        }
+    }
+
+    & > .panel {
+        display: grid;
+        grid-row-gap: $spacing-l;
+    }
 }
 </style>
