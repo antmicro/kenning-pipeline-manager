@@ -49,7 +49,7 @@ An example:
     "allowLoopbacks": false,
     "readonly": true,
     "connectionStyle": "orthogonal",
-    "hideHud": true
+    "hideHud": false
 }
 ```
 
