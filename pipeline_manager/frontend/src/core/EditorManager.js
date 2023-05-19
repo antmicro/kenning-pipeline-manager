@@ -144,48 +144,12 @@ export default class EditorManager {
     }
 
     /**
-     * Translates from Pipeline Manager dataflow to Baklava format
-     *
-     * @param dataflow Dataflow in Pipeline Manager format
-     * @returns Dataflow ready to be loaded into Baklava Editor
-     */
-    static dataflowFromPipelineManagerToBaklava(dataflow) {
-        /* eslint-disable no-param-reassign */
-        dataflow.graph.nodes.forEach((node) => {
-            if ('name' in node) {
-                node.title = node.name;
-            } else {
-                node.title = '';
-            }
-            delete node.name;
-        });
-        return dataflow;
-        /* eslint-enable no-param-reassign */
-    }
-
-    /**
-     * Translates from Baklava format to Pipeline Manager
-     *
-     * @param dataflow Dataflow in Baklava Format
-     * @returns Dataflow ready to be exported from Baklava editor
-     */
-    static dataflowFromBaklavaToPipelineManager(dataflow) {
-        /* eslint-disable no-param-reassign */
-        dataflow.graph.nodes.forEach((node) => {
-            node.name = node.title;
-            delete node.title;
-        });
-        return dataflow;
-        /* eslint-enable no-param-reassign */
-    }
-
-    /**
      * Serializes and returns current dataflow in Pipeline Manager format.
      *
      * @returns Serialized dataflow.
      */
     saveDataflow() {
-        return EditorManager.dataflowFromBaklavaToPipelineManager(this.editor.save());
+        return this.editor.save();
     }
 
     /**
@@ -201,7 +165,7 @@ export default class EditorManager {
      */
     loadDataflow(dataflow) {
         try {
-            return this.editor.load(EditorManager.dataflowFromPipelineManagerToBaklava(dataflow));
+            return this.editor.load(dataflow);
         } catch (err) {
             return [
                 'Unrecognized format. Make sure that the passed dataflow is correct.',

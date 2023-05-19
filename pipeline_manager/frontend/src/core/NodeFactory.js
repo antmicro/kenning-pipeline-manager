@@ -193,6 +193,9 @@ export function NodeFactory(
                 savedState.inputs = newInputs;
                 savedState.properties = newProperties;
 
+                savedState.name = savedState.title;
+                delete savedState.title;
+
                 return savedState;
             };
 
@@ -203,6 +206,14 @@ export function NodeFactory(
                 });
 
                 delete state.properties;
+
+                if ('name' in state) {
+                    state.title = state.name;
+                } else {
+                    state.title = '';
+                }
+                delete state.name;
+
                 this.parentLoad(state);
             };
 
