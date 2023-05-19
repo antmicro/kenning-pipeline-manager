@@ -60,8 +60,9 @@ export default {
 
 <style lang="scss" scoped>
 .notifications {
-    /* Set height to 100 view port minus height of navigation bar and paddings */
-    height: calc(100vh - 120px);
+    /* Set height to 100 view port minus height of navigation bar and paddings
+    and minus the terminal panel */
+    height: calc(100vh - 120px - 35px);
     width: 435px;
     background-color: $gray-600;
     opacity: 0.9;
@@ -72,7 +73,7 @@ export default {
       panel width (435px) + 2 * padding (30px) = 495px
     */
     right: -495px;
-    z-index: 5;
+    z-index: 2;
     padding: $spacing-xxl;
     overflow-y: auto;
 

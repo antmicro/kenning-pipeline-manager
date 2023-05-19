@@ -430,7 +430,6 @@ export default {
 <style lang="scss" scoped>
 .wrapper {
     position: relative;
-    z-index: 2;
 
     & > .progress-bar {
         position: absolute;
@@ -471,7 +470,7 @@ export default {
                 top: 100%;
                 width: fit-content;
                 left: -20px;
-                z-index: 1;
+                z-index: 4;
                 display: none;
                 background-color: $gray-600;
                 border: 1px solid $gray-500;

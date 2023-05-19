@@ -114,8 +114,9 @@
 
 .baklava-node-palette {
     top: 0px;
-    height: 100%;
+    // default baklavjs height - terminal panel height
+    height: calc(100% - 60px - 35px);
     width: auto;
-    padding: 1rem;
+    padding: 0px 1rem;
     z-index: 1;
 }

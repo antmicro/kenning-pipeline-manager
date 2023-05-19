@@ -87,7 +87,7 @@ export default {
 
 <style lang="scss" scoped>
 .terminal-wrapper {
-    z-index: 2;
+    z-index: 3;
     position: absolute;
     min-height: 35px;
     border-top: 1px solid $gray-500;
