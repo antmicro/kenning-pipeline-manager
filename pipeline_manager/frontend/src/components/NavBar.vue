@@ -270,8 +270,10 @@ export default {
         exportToPng() {
             // Get editor with data flow
             const nodeEditor = document.querySelector('.inner-editor');
+            // Exclude node palette
+            const filter = (node) => !node.classList?.contains('baklava-node-palette');
 
-            toPng(nodeEditor)
+            toPng(nodeEditor, { filter })
                 .then((dataUrl) => {
                     const downloadLink = document.createElement('a');
                     downloadLink.download = 'dataflow.png';
