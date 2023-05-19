@@ -10,16 +10,18 @@ SPDX-License-Identifier: Apache-2.0
             <span>Settings</span>
         </div>
         <div class="panel">
-            <component
-                :is="connectionStyleOption.component"
-                :intf="connectionStyleOption"
-            ></component>
+            <div v-for="option in settingOptions" :key="option.id">
+                <div class="option-label">{{ displayOptionName(option) ? `${option.name}:` : ''}}</div>
+                <component
+                    :is="option.component"
+                    :intf="option"
+                ></component>
+            </div>
         </div>
     </div>
 </template>
 
 <script>
-// import { NodeOption } from '@baklavajs/core';
 import { SelectInterface } from 'baklavajs';
 
 export default {
@@ -33,7 +35,33 @@ export default {
             ]
             const option = new SelectInterface('Connection style', this.baklavaView.connectionRenderer.style, items).setPort(false);
             option.events.setValue.subscribe(this, (v) => { this.baklavaView.connectionRenderer.style = v; });
+            option.componentName = 'SelectInterface';
             return option;
+        },
+
+        settingOptions() {
+            return [
+                this.connectionStyleOption
+            ]
+        }
+    },
+
+    methods: {
+        displayOptionName(option) {
+            switch (option.componentName) {
+                case 'InputInterface':
+                case 'SelectInterface':
+                case 'ListInterface':
+                case 'TextInterface':
+                    return true;
+                case 'NumberInterface':
+                case 'IntegerInterface':
+                case 'CheckboxInterface':
+                case 'SliderInterface':
+                case 'NodeInterface':
+                default:
+                    return false;
+            }
         }
     }
 }
@@ -41,7 +69,7 @@ export default {
 
 <style lang="scss">
 .settings-panel {
-    height: 100px;
+    // height: 100px;
     width: 435px;
     top: 60px;
     background-color: $gray-600;
@@ -65,6 +93,14 @@ export default {
     & > .panel {
         display: grid;
         grid-row-gap: $spacing-l;
+
+        & > div {
+            & > .option-label {
+                padding-bottom: $spacing-s;
+                color: $white;
+                font-size: $fs-medium;
+            }
+        }
     }
 }
 </style>
