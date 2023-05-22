@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-export default class LayoutEngine {
+export default class LayoutManager {
 
     computeLayout(dataflow) {
         const graph = this.dataflowToGraph(dataflow);
