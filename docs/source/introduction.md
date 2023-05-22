@@ -1,12 +1,12 @@
 # Introduction
 
-{{project}} is a data-based web application for creating, visualizing and managing pipelines of various applications.
+{{project}} is a data-based web application for creating, visualizing and managing pipelines for various applications.
 
 This documentation contains the following chapters:
 
-* [{{project}}](project-readme) - a quickstart for the project.
-* [Frontend features](frontend-features) - description of frontend features and testing of the frontend.
-* [Specification format](specification-format) - description of node specification format.
-* [Dataflow format](dataflow-format) - description of graph description format.
-* [Communication with an external application](external-app-communication) - description of integrating {{project}} with the external application.
-* [Demonstration of the frontend](demo) - shows the work of the {{project}} frontend.
+* [{{project}}](project-readme) - a quickstart guide for the project
+* [Front-end features](frontend-features) - description of front-end features and front end testing
+* [Specification format](specification-format) - description of the node specification format
+* [Dataflow format](dataflow-format) - graph description format overview
+* [Communication with an external application](external-app-communication) - external application integration overview
+* [Front end demo](demo) - {{project}}'s front end demonstration.

@@ -38,69 +38,68 @@ Its `content` may vary depending on the answered request.
 
 #### 7 - PROGRESS
 
-Message of `type` `PROGRESS` is an optional type used to inform {{project}} about the status of a running dataflow.
+Message of optional `type` `PROGRESS` is used to inform {{project}} about the status of a running dataflow. The
 `PROGRESS` message type can only be used once a message of type `RUN` is received and can be sent multiple times before sending a final response message of type either `ERROR` or `OK` that indicates the end of the run.
 The progress information is conveyed in `content` using a number ranging `0 - 100` encoded in UTF-8 that signals the percentage of completion of the run.
 See [RUN](#RUN) for more information.
 
 #### 2 - VALIDATE
 
-Message of `type` `VALIDATE` requests validating dataflow that is in the `content`.
-This request expects a return message of `type` `OK` if the validation was successful or `ERROR` otherwise.
-Optionally, a feedback message can be put in the `content` encoded in UTF-8.
+Message of `type` `VALIDATE` requests validation for a dataflow present in `content`.
+This request expects a return message of `type` `OK` if the validation is successful or `ERROR` otherwise.
+Optionally, a feedback message encoded in UTF-8 can be included in `content`.
 The feedback will be displayed to the user.
 
 #### 3 - SPECIFICATION
 
-Message of `type` `SPECIFICATION` requests sending back to the {{project}} specification that is in format defined in [Specification format](specification-format).
-Specification sent is used to create a new environment in the editor.
-This request expects a return messages of `type` `OK` if a specification is sent or `ERROR` otherwise.
-If the return message is of `type` `OK` then it must have a specification of nodes encoded in UTF-8 in the `content`.
-If the return message is of `type` `ERROR` then it can optionally have a feedback message in the `content`.
+Message of `type` `SPECIFICATION` requests for a specification in the format defined in [Specification format](specification-format) to be sent back to the {{project}}.
+The provided specification is used to create a new environment in the editor.
+This request expects a return message of `type` `OK` if a specification is sent or `ERROR` otherwise.
+If the return message is of `type` `OK` then a specification of nodes encoded in UTF-8 in `content` is present.
+If the return message is of `type` `ERROR`, it can optionally include a feedback message in `content`.
 
 #### 4 - RUN
 
-Message of `type` `RUN` requests running a dataflow that is in the `content`.
-The executed method depends on the implementation on the client side.
-This request expects a return messages of `type` `OK` if the run was successful or `ERROR` otherwise.
-Optionally, a feedback message can be put in the `content` encoded in UTF-8.
+Message of `type` `RUN` requests running a dataflow present in `content`.
+Method execution depends on the implementation on the client side.
+This request expects a return messages of `type` `OK` if the run is successful or `ERROR` otherwise.
+Optionally, a feedback message encoded in UTF-8 can be included in `content`.
 The feedback will be displayed to the user.
 
 #### 5 - IMPORT
 
-Message of `type` `IMPORT` requests parsing a graph that is in the `content` into a {{project}} format that can be loaded by the editor.
-The format of the loaded graph depends on the client application.
-The client should parse the graph structure in supported format and convert it to [Dataflow format](dataflow-format).
+Message of `type` `IMPORT` requests a graph from `content` to be parsed into a {{project}} format that can be loaded by the editor.
+The loaded graph format depends on the client application.
+The client should parse the graph structure in a supported format and convert it to the [Dataflow format](dataflow-format).
 
-This request expects a return messages of `type` `OK` if the parsing was successful or `ERROR` otherwise.
-If the request was successful, the parsed dataflow should be sent within `content`.
+This request expects a return messages of `type` `OK` if the parsing is successful or `ERROR` otherwise.
+If the request is successful, the parsed dataflow should be sent within `content`.
 
 #### 6 - EXPORT
 
-Message of `type` `EXPORT` requests saving the current dataflow in the editor to the filesystem in a format supported by the client application.
+Message of `type` `EXPORT` requests the dataflow present in the editor to be saved to the filesystem in a format supported by the client application.
 
-In the `content` of the `EXPORT` message, there is a dataflow specification in UTF-8 encoding.
-It is in format specified in [Dataflow format](dataflow-format).
+In the `content` of the `EXPORT` message, there is a dataflow specification encoded in UTF-8, in the format specified in [Dataflow format](dataflow-format).
 
-This request expects a return message of `type` `OK` if the saving process was successful or `ERROR` otherwise.
-Optionally a feedback message can be put in the `content` encoded in UTF-8.
+This request expects a return message of `type` `OK` if the saving process is successful or `ERROR` otherwise.
+Optionally, a feedback message encoded in UTF-8 can be included in `content`.
 The feedback will be displayed to the user.
 
 ## Implementing a python-based client for {{project}}
 
-To integrate an application with {{project}} it needs to implement the communication described above.
-The client has to be able to read requests coming from {{project}} and send proper responses.
+The communication described above is necessary to integrate an application with {{project}}.
+The client needs to be able to read requests coming from {{project}} and send proper responses.
 
-If the application is written in Python, it can use [kenning-pipeline-manager-backend-communication](https://github.com/antmicro/kenning-pipeline-manager-backend-communication) library.
-It implements a simple to use interface that is able to communicate with {{project}} along with helper structures and enumerations.
+For applications is written in Python, you can use the [kenning-pipeline-manager-backend-communication](https://github.com/antmicro/kenning-pipeline-manager-backend-communication) library.
+It implements an easy-to-use interface that is able to communicate with {{project}} along with helper structures and enumerations.
 
-Main structures that are provided by the `pipeline-manager-backend-communication` library are:
+The main structures provided by the `pipeline-manager-backend-communication` library are:
 
-* `CommunicationBackend` - class that implements functionality to receive and send messages.
-* `MessageType` - enum that is used to easily distinguish message types.
-* `Status` - enum that describes current state of the client.
+* `CommunicationBackend` - class that implements the functionality for receiving and sending messages.
+* `MessageType` - enum used to easily distinguish message types.
+* `Status` - enum that describes the current state of the client.
 
-The following code is an example of how to receive requests and send responses to {{project}}.
+The following code is an example of how to receive requests and send responses to {{project}}:
 
 ```python
 host = '127.0.0.1'
@@ -168,14 +167,14 @@ while True:
                 )
 ```
 
-The remaining part of the implemenation is sending an appropriate responses based on the [message type](#message-types) of the request.
+Sending appropriate responses based on request [message types](#message-types) is what now remains for the implementation to be complete.
 
-`MessageType` enum provides all available message types.
-In the highlighted part of the code, it is checked whether a validation request was sent.
+The `MessageType` enum provides all available message types.
+The highlighted part of the code checks whether a validation request was sent.
 
 ```{note}
-`validation_successful` is just a demonstration method, it needs to be replaced with the actual validation function for the project.
+`validation_successful` is just a demonstration method, it needs to be replaced with an actual validation function for the project.
 ```
 
-The `data` contains the dataflow that has to be validated according to the documentation.
-A response message of type `OK` or `ERROR` can be sent to the {{project}} using a `send_message` function with an additional textual message that is be displayed to the user.
+`data` contains the dataflow to be validated by the third-party application.
+A response message of type `OK` or `ERROR` can be sent to the {{project}} using a `send_message` function with an additional textual message that to be displayed to the user.

@@ -1,65 +1,65 @@
-# Frontend features
+# Front-end features
 
-## Manipulating the graph
+## Graph manipulation
 
 ![Node menu](img/node-menu.png)
 
-To add a new node in the editor, right-click in the editor's canvas and select the preferred node.
-It is also possible to select an existing node to copy and paste them with `Copy Nodes` and `Paste Nodes`.
+To add a new node in the editor, right-click in the editor area and select your preferred node.
+You can also select existing nodes and copy and paste them using `Copy Nodes` and `Paste Nodes`.
 
-It is possible to remove the node either by right-clicking on node and clicking `Delete`.
-The node can be also removed with `Delete` key after selecting it.
+It is possible to remove a node either by right-clicking a node and clicking `Delete` or by pressing the `Delete` key after selecting it.
 
-Scrool allows to zoom in and zoom out the view, left-click on canvas allow to move around the canvas.
+Scroll lets you to zoom in and out. 
+Left-clicking and dragging the editor background allows you to move around the editor area.
 
-Left-clicking on node allows to select and drag node from one place to another.
+Left-clicking on a node lets you to select and drag the node within the editor area.
 
-To create a connection, left-click on connector and connect it to other connector (of a matching type, see [Specification format](specification-format)).
-To remove a connection, left-click on input connector for a given connection.
+To create a connection, left-click a node's connector and connect it to a connector (of a matching type, see [Specification format](specification-format)) on another node.
+To remove a connection, left-click its input connector.
 
 ## Notifications
 
 ![Notifications](img/notifications.png)
 
-Pipeline manager provides notifications describing the errors occuring in:
+{{project}} provides notifications describing errors occuring in:
 
-* The frontend, such as invalid input specification, or invalid dataflow
-* The backend (see [Communication with an external application](external-app-communication))
+* The front end, such as invalid input specification, or invalid dataflow
+* The back end (see [Communication with an external application](external-app-communication))
 
-It allows to display various messages to the user during development or execution of the pipeline.
+During pipeline development or execution, notifications can display various messages to the user.
 
 ## Loading files
 
-![Frontend menu](img/frontend-menu.png)
+![Front end menu](img/frontend-menu.png)
 
-Depending on the mode of the application (`static-html` or `server-app`), the following options will be available in the {{project}} menu:
+Depending the application's mode (`static-html` or `server-app`), the following options will be available in the {{project}} menu:
 
-* `Load specification` - allows to load the specification file describing the nodes that can appear in the graph (see [Specification format](specification-format))
+* `Load specification` - lets the user load a specification file describing the nodes that can appear in the graph (see [Specification format](specification-format))
   ```{note}
-  It appears only in `static-html` build mode, where specification is not delivered by a third-party app.
+  It appears only in the `static-html` build mode, where a specification is not delivered by a third-party app.
   ```
-* `Load graph file` - allows to load graph specification in the internal format of {{project}} (see [Dataflow specification](dataflow-format))
-* `Load file` - loads file describing the graph in the native format supported by third-party application using {{project}} for visualization.
+* `Load graph file` - lets the user load a graph specification in {{project}}'s internal format (see [Dataflow specification](dataflow-format)).
+* `Load file` - lets the user load a file describing a graph in the native format supported by the third-party application using {{project}} for visualization.
   ```{note}
-  It appears only in `server-app` build mode, since third-party app performs conversion from its native format to [Dataflow format](dataflow-format)
+  It appears only in the `server-app` build mode, since the third-party app performs conversion from its native format to the [Dataflow format](dataflow-format)
   ```
-* `Save file` - saves the current graph in the native format supported by third-party application using {{project}} for visualization.
+* `Save file` - saves the current graph in a native format supported by the third-party application using {{project}} for visualization.
   ```{note}
-  It appears only in `server-app` build mode, since third-party app performs conversion from received [Dataflow format](dataflow-format) from the editor to its native format.
+  It appears only in the `server-app` build mode, since the third-party app performs conversion from the [Dataflow format](dataflow-format) received from the editor to its native format.
   ```
 
 ## Working with the server
 
 ![Run and Validate](img/frontend-run-validation.png) ![Server status](img/frontend-server-status.png)
 
-When {{project}} works in `server-app` mode, it is connected to an external application allowing to run the graph, validate the graph, save and load files in the application's native format.
+When {{project}} works in the `server-app` mode, it is connected to an external application, making it possible to run or validate a graph as well as save and load files in the application's native format.
 
-The command executed by the `Play` icon depends on the implementation of the application - in [Kenning](https://github.com/antmicro/kenning) it either compiles and evaluate the model, or run the Kenning Flow application.
+The command executed by the `Play` icon depends on the implementation of the application - for [Kenning](https://github.com/antmicro/kenning), it either compiles and evaluates the model, or runs the Kenning Flow application.
 
-The second icon allows to validate the graph before running - it allows the third-party application to run more thorough tests of the visualized pipeline before running it.
+The second icon lets the user validate a graph before running it by allowing the third-party application to run more thorough tests of the visualized pipeline.
 
-The third icon shows the status of the third-party application (red color means disconnected, green color means connected).
+The third icon displays the status of the third-party application (red means disconnected, green means connected).
 
-## Testing the frontend features
+## Testing the front-end features
 
-The best way to test the frontend features is to use the `pipeline_manager.frontend_tester.tester_client`, [Example of third-party server](example-server).
+The best way to test the front-end features is to use the `pipeline_manager.frontend_tester.tester_client`, [Third-party server example](example-server).

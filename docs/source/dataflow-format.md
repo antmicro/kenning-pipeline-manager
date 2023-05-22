@@ -1,17 +1,18 @@
 # Dataflow format
 
-Dataflow is the name of the graph that is rendered.
+A rendered graph with all its nodes, their properties, values, and connections is called a dataflow.
 Its state can be serialized and saved as a JSON file.
 
 ## Format description
 
 The root of the dataflow format consists of two main attributes.
 
-* `graph` - object of type [Graph](#graph) that describes the main graph displayed to the user after load.
-* `graphTemplates` - list of graph-nodes that are available to the user.
+* `graph` - object of type [Graph](#graph) that describes the main graph displayed to the user.
+* `graphTemplates` - list of graph-nodes available to the user.
 
 ### Graph
-The graph format has five main attributes.
+
+The graph format has five main attributes:
 
 * `id` - unique value that identifies the graph.
 * `nodes` - array that specifies all nodes in the dataflow.
@@ -30,25 +31,25 @@ The graph format has five main attributes.
 An object that describes a single node in the editor.
 Each node has ten attributes:
 
-* `type` - type of the node, as defined in specification.
+* `type` - node type, as defined in the specification.
 * `id` - unique value assigned to the node.
-* `name` - optional field defining name of the node that is rendered to the user. If set, `name (type)` will be displayed, otherwise title of the node will be just `type`.
-* `properties` - dictionary describing parameterized values of the node.
+* `name` - optional field defining a node's name rendered to the user. If set, `name (type)` will be displayed, otherwise just the `type` will be rendered.
+* `properties` - dictionary describing the node's parameterized values.
   Every element is of type [Property](#property)
-* `inputs` - dictionary describing inputs of the node.
+* `inputs` - dictionary describing the node's inputs.
   Every element is of type [Interface](#interface)
-* `outputs` - dictionary describing outputs of the node.
+* `outputs` - dictionary describing the node's outputs.
   Every element is of type [Interface](#interface)
-* `width` - width of the node in the editor.
+* `width` - the node's width in the editor.
 * `twoColumn` - boolean value.
-  True if nodes should be divided into two columns, one consisting of parameters and input sockets and one consisting of output sockets.
+  If set to `true`, then input and output sockets are both rendered in the top part of the node and properties are displayed below.
 
 ##### Property
 
 Each property is described by an object with two attributes:
 
-* `id` - unique value assigned to the property.
-* `value` - actual value of the property
+* `id` - unique value assigned to the property
+* `value` - actual value of the property.
 
 Node having two parameters: `example_text` of value `example_value` and `example_number` of value `123` would have the following `options` value:
 
@@ -68,16 +69,16 @@ Node having two parameters: `example_text` of value `example_value` and `example
 Each input and output is described by an object with one attribute:
 
 * `id` - unique value assigned to the property.
-  It is used to describe connections in the dataflow
+  It is used to describe connections in the dataflow.
 
 #### Connection
 
 Object that describes a singular connection.
 It has three attributes:
 
-* `id` - unique value assigned to the connection.
-* `from` - id of the output socket of the connection.
-* `to` - id of the input socket of the connection.
+* `id` - unique value assigned to the connection
+* `from` - the connection's output socket id
+* `to` - the connection's input socket id.
 
 #### Panning
 
@@ -85,12 +86,12 @@ This object describes the position of the top-left corner of the rendered editor
 Defines the camera position in the editor space.
 Two attributes are used:
 
-* `x` - x coordinate of the corner.
+* `x` - x coordinate of the corner
 * `y` - y coordinate of the corner.
 
 ## Example dataflow
 
-The example dataflow for a specification defined in [Specification format](specification-format) is defined below:
+The example dataflow for a specification defined in [Specification format](specification-format) is defined as below:
 
 { emphasize-lines="6-39,215-217,220-222,225-227" }
 ```json
@@ -341,12 +342,12 @@ The example dataflow for a specification defined in [Specification format](speci
 ```
 
 The highlighted bits of code represent all code fragments relevant to the `Filter2D` node.
-In `nodes` list there is a full specification of the state of the `Filter2D` node:
+In the `nodes` list, there is a full specification of the state of the `Filter2D` node:
 
-* It's unique `id`
-* It's `type`
-* It's parameters (stored in `parameters`), e.g. `border_type` equal to `constant`
-* It's interfaces, with unique `id` representing each input and output
-* Rendering data, such as `position` or `width`
+* Its unique `id`
+* Its `type`
+* Its parameters (stored in `parameters`), e.g. `border_type` equal to `constant`
+* Its interfaces, with unique `id` representing each input and output
+* Rendering data, such as `position` or `width`.
 
-Later, in `connections` there are triples representing to which interfaces the interfaces of `Filter2D` are connected.
+Later, in `connections`, you can see triples representing to which interfaces the interfaces of `Filter2D` are connected.

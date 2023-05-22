@@ -1,39 +1,36 @@
 # Specification format
 
 {{project}} requires a JSON specification that defines the working environment.
-It specifies all nodes, properties, available connections and any metadata for the editor.
-It can be either passed by a file or fetched from an [external application](external-app-communication).
+It specifies all nodes, properties, available connections, and metadata for the editor.
+It can be either provided from a file or fetched from an [external application](external-app-communication).
 
-To be able to load any dataflow a specification defining nodes in this dataflow needs to be loaded in the frontend.
+Such a specification defining the nodes needs to be loaded through the front end in order for you to be able to load any dataflow.
+
 ## Format description
 
-The specification has to be a JSON file.
+The specification needs to be provided in a JSON file.
 There are two main attributes.
 
-* `metadata` - object of type [Metadata](#metadata) that specifies editor styling and metadata.
-* `nodes` - array that specifies valid nodes.
-  Every element is of type [Node](#node).
+* `metadata` - object of type [Metadata](#metadata) that specifies editor styling and metadata
+* `nodes` - array that specifies valid nodes, where every element is of type [Node](#node).
 
 ### Metadata
 
-This object specifies additional editor options
+This object specifies additional editor options and contains the following optional properties:
 
-Contains following optional properties:
-
-* `interfaces`  - dictionary which defines styling of interfaces the nodes.
+* `interfaces`  - dictionary which defines interface styling in the nodes.
   Colors can be specified by a hexadecimal value or by name.
 * `allowLoopbacks` - boolean value that determines whether connections with endpoints at the same node are allowed.
   Default value is `false`.
-* `readonly` - boolean value determining whether the editor is in readonly mode.
-  In readonly mode the user cannot create or remove nodes and connections.
-  The nodes are locked and cannot be moved.
-  Modification of any properties is disabled.
+* `readonly` - boolean value determining whether the editor is in read-only mode.
+  In read-only mode, the user cannot create or remove nodes and connections.
+  Modification of any properties is also disabled.
   The user is only allowed to load existing dataflows.
   Default value is `false`.
-* `twoColumn` - boolean value determining layout of the nodes.
-  If set to true then input and output sockets are rendered on top of the node and properties are rendered below.
+* `twoColumn` - boolean value determining the layout of the nodes.
+  If set to `true`, then input and output sockets are both rendered in the top part of the node and properties are displayed below.
   Default value is `false`.
-* `connectionStyle` - string value that determines the style of connection.
+* `connectionStyle` - string value that determines the connection style.
   Can choose one out of the two options: `curved` or `orthogonal`.
   Default value is `curved`
 * `hideHud` - boolean value determining whether UI elements should be hidden. Components affected by this flag are: popup notifications, navigation bar and terminal window.
@@ -55,17 +52,17 @@ An example:
 
 ### Node
 
-An object that specifies a single node.
-Every input object has six required properties.
+This object specifies a single node.
+Every input object requires six properties:
 
-* `name` - name that is displayed in the editor.
-* `type` - value that is used for styling.
-* `category` - context menu category that is displayed in the editor.
-* `inputs` - array with elements of type [Input](#input).
-* `outputs` - array with elements of type [Output](#output).
+* `name` - name displayed in the editor
+* `type` - value used for styling
+* `category` - context menu category displayed in the editor
+* `inputs` - array with elements of type [Input](#input)
+* `outputs` - array with elements of type [Output](#output)
 * `properties` - array with elements of type [Property](#property).
 
-Example node looks as follows:
+Here is an example of a node:
 
 ```json
 {
@@ -107,27 +104,25 @@ Example node looks as follows:
 #### Input
 
 An object that specifies a single input.
-Every input object has two required properties.
+Every input object has two required properties:
 
-* `name` - name of the input that is displayed in the editor.
-* `type` - type of the input.
-  It is used for styling and validation purposes.
+* `name` - name of the input displayed in the editor
+* `type` - type of the input used for styling and validation purposes.
 
 ```{note}
-Only inputs and outputs of the same type can be connected.
+You can only connect inputs and outputs of the same type.
 ```
 
 #### Output
 
 An object that specifies a single output.
-Every output object has two required properties.
+Every output object has two required properties:
 
-* `name` - name of the output that is displayed in the editor.
-* `type` - type of the output.
-  It is used for styling and validation purposes.
+* `name` - name of the output displayed in the editor
+* `type` - type of the output used for styling and validation purposes.
 
 ```{note}
-Only inputs and outputs of the same type can be connected.
+You can only connect inputs and outputs of the same type.
 ```
 
 #### Property
@@ -141,34 +136,35 @@ There are eight possible values for the `type` property.
 * `text` - property is a string.
   A text field is displayed to the user.
 * `constant` - property is a string.
-  A non modifiable text field displayed to the user.
+  A non-modifiable text field is displayed to the user.
 * `number` - property is a float.
   A number field is displayed to the user.
 * `integer` - property is an int.
-  A number field that accepts only integers is displayed to the user.
-* `select` - property is a string with a range defined.
+  A number field that only accepts integers is displayed to the user.
+* `select` - property is a string with a defined range.
   It requires a `values` property.
 * `checkbox` - property is a bool.
   It requires a `default` property.
-* `slider` - property is a float with a range specified.
+* `slider` - property is a float with a specified range.
   It requires `min` and `max` properties.
 * `list` - property is a list of arguments of the same type, which can be specified using `dtype`.
+
 
 Additional properties:
 
 * `min` - specifies the left end of a range.
 * `max` - specifies the right end of a range.
-* `default` - specifies the default value that is selected.
+* `default` - specifies a default selected value.
   Its type depends on the `type` chosen.
-* `values` - specifies a range of possible values for a `select` option.
-* `dtype` - specifies data type of elements in a `list` option.
+* `values` - specifies a range of possible values for `select`.
+* `dtype` - specifies data type of elements in a `list`.
   Supported values are `string`, `number`, `integer`, `boolean`.
 * `description` - description of the property.
-  In some cases it is displayed to the user.
+  In some cases, it can be displayed to the user.
 
 ## Example
 
-Let's check a sample specification containing some hypothetical definition of nodes for image processing.
+Below, you can see a sample specification containing a hypothetical definition of nodes for image processing purposes:
 
 ```json
 {
@@ -293,10 +289,10 @@ Let's check a sample specification containing some hypothetical definition of no
 }
 ```
 
-Thanks to the flexibility of the specification format, any combination of properties, inputs and outputs can be used to create a custom node.
-It is also readable and divided into disjoint parts so the process of automated specification generation can be implemented into an external application.
-See [External App Communication](external-app-communication) section to find out more.
+Thanks to the flexibility of the specification format, you can use any combination of properties, inputs, and outputs to create a custom node.
+It is also readable and divided into distinct parts, so you can implement a process of automated specification generation into an external application.
+See the [External App Communication](external-app-communication) section to find out more.
 
-Example node created from above specification:
+A sample node created from the specification above:
 
-![Example node created from specification](img/example_specification.png)
+![Sample node created from specification](img/example_specification.png)
