@@ -5,9 +5,9 @@
  */
 export default class LayoutManager {
 
-    computeLayout(dataflow) {
+    async computeLayout(dataflow) {
         const graph = this.dataflowToGraph(dataflow);
-        const layout = this._computeLayout(graph);
+        const layout = await this._computeLayout(graph);
         return this.graphToDataflow(layout, dataflow);
     }
 
@@ -35,7 +35,7 @@ export default class LayoutManager {
         return {nodes, connections};
     }
 
-    _computeLayout(graph) {
+    async _computeLayout(graph) {
         // Placeholder
         const {nodes, connections} = graph;
         return {connections, nodes: nodes.map(node => ({
