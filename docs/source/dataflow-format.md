@@ -12,7 +12,7 @@ The root of the dataflow format consists of two main attributes.
 
 ### Graph
 
-The graph format has five main attributes:
+The graph format has following attributes:
 
 * `id` - unique value that identifies the graph.
 * `nodes` - array that specifies all nodes in the dataflow.
@@ -29,7 +29,7 @@ The graph format has five main attributes:
 #### Node
 
 An object that describes a single node in the editor.
-Each node has ten attributes:
+Each node has:
 
 * `type` - node type, as defined in the specification.
 * `id` - unique value assigned to the node.
