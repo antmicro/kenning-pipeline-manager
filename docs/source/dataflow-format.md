@@ -8,7 +8,9 @@ Its state can be serialized and saved as a JSON file.
 The root of the dataflow format consists of two main attributes.
 
 * `graph` - object of type [Graph](#graph) that describes the main graph displayed to the user.
-* `graphTemplates` - list of graph-nodes available to the user.
+* `graphTemplates` - list of subgraph nodes available to the user.
+  Subgraph nodes are used to group multiple nodes in a subgraph and visualize them as a single node.
+
 
 ### Graph
 
