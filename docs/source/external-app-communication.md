@@ -24,66 +24,66 @@ The `size` and `type` are stored in big-endian.
 
 ### Response messages - sent by the external application
 
-#### 0 - OK
+#### OK
 
-Message of `type` `OK` is used to indicate a success and optionally includes an answer to a previous request.
+Message of `type` `OK` (0) is used to indicate a success and optionally includes an answer to a previous request.
 Its `content` may vary depending on the request type.
 
-#### 1 - ERROR
+#### ERROR
 
-Message of `type` `ERROR` is used to indicate a failure and optionally includes an answer to a previous request.
+Message of `type` `ERROR` (1) is used to indicate a failure and optionally includes an answer to a previous request.
 Its `content` may vary depending on the answered request.
 
 ### Request messages - sent by {{project}}
 
-#### 7 - PROGRESS
+#### VALIDATE
 
-Message of optional `type` `PROGRESS` is used to inform {{project}} about the status of a running dataflow. The
-`PROGRESS` message type can only be used once a message of type `RUN` is received and can be sent multiple times before sending a final response message of type either `ERROR` or `OK` that indicates the end of the run.
-The progress information is conveyed in `content` using a number ranging `0 - 100` encoded in UTF-8 that signals the percentage of completion of the run.
-See [RUN](#RUN) for more information.
-
-#### 2 - VALIDATE
-
-Message of `type` `VALIDATE` requests validation for a dataflow present in `content`.
+Message of `type` `VALIDATE` (2) requests validation for a dataflow present in `content`.
 This request expects a return message of `type` `OK` if the validation is successful or `ERROR` otherwise.
 Optionally, a feedback message encoded in UTF-8 can be included in `content`.
 The feedback will be displayed to the user.
 
-#### 3 - SPECIFICATION
+#### SPECIFICATION
 
-Message of `type` `SPECIFICATION` requests for a specification in the format defined in [Specification format](specification-format) to be sent back to the {{project}}.
+Message of `type` `SPECIFICATION` (3) requests for a specification in the format defined in [Specification format](specification-format) to be sent back to the {{project}}.
 The provided specification is used to create a new environment in the editor.
 This request expects a return message of `type` `OK` if a specification is sent or `ERROR` otherwise.
 If the return message is of `type` `OK` then a specification of nodes encoded in UTF-8 in `content` is present.
 If the return message is of `type` `ERROR`, it can optionally include a feedback message in `content`.
 
-#### 4 - RUN
+#### RUN
 
-Message of `type` `RUN` requests running a dataflow present in `content`.
+Message of `type` `RUN` (4) requests running a dataflow present in `content`.
 Method execution depends on the implementation on the client side.
 This request expects a return messages of `type` `OK` if the run is successful or `ERROR` otherwise.
 Optionally, a feedback message encoded in UTF-8 can be included in `content`.
 The feedback will be displayed to the user.
 
-#### 5 - IMPORT
+#### IMPORT
 
-Message of `type` `IMPORT` requests a graph from `content` to be parsed into a {{project}} format that can be loaded by the editor.
+Message of `type` `IMPORT` (5) requests a graph from `content` to be parsed into a {{project}} format that can be loaded by the editor.
 The loaded graph format depends on the client application.
 The client should parse the graph structure in a supported format and convert it to the [Dataflow format](dataflow-format).
 
 This request expects a return messages of `type` `OK` if the parsing is successful or `ERROR` otherwise.
 If the request is successful, the parsed dataflow should be sent within `content`.
 
-#### 6 - EXPORT
+#### EXPORT
 
-Message of `type` `EXPORT` requests the dataflow present in the editor to be saved to the filesystem in a format supported by the client application.
+Message of `type` `EXPORT` (6) requests the dataflow present in the editor to be saved to the filesystem in a format supported by the client application.
 
 In the `content` of the `EXPORT` message, there is a dataflow specification encoded in UTF-8, in the format specified in [Dataflow format](dataflow-format).
 
 This request expects a return message of `type` `OK` if the saving process is successful or `ERROR` otherwise.
 Optionally, a feedback message encoded in UTF-8 can be included in `content`.
 The feedback will be displayed to the user.
+
+#### PROGRESS
+
+Message of optional `type` `PROGRESS` (7) is used to inform {{project}} about the status of a running dataflow. The
+`PROGRESS` message type can only be used once a message of type `RUN` is received and can be sent multiple times before sending a final response message of type either `ERROR` or `OK` that indicates the end of the run.
+The progress information is conveyed in `content` using a number ranging `0 - 100` encoded in UTF-8 that signals the percentage of completion of the run.
+See [RUN](#run) for more information.
 
 ## Implementing a python-based client for {{project}}
 
