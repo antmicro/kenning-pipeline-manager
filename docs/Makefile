@@ -23,7 +23,7 @@ $(BUILDDIR)/html/static-demo:
 	echo "Building static page for demo..."
 	cd $(PROJ_DIR)
 	mkdir -p $(BUILDDIR)/html/static-demo
-	$(PROJ_DIR)/build static-html $(PROJ_DIR)/examples/sample-specification.json
+	$(PROJ_DIR)/build static-html $(PROJ_DIR)/examples/sample-specification.json $(PROJ_DIR)/examples/sample-dataflow.json
 	cp -r $(PROJ_DIR)/pipeline_manager/frontend/dist/* $(BUILDDIR)/html/static-demo
 	cd -
 	echo "Building static page for demo... DONE"
