@@ -3,7 +3,18 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
+
 export default class LayoutManager {
+
+    layoutEngine = undefined;
+
+    availableEngines = {
+        // TODO
+    }
+
+    registerEngine(engine) {
+        this.layoutEngine = new this.availableEngines[engine]();
+    }
 
     async computeLayout(dataflow) {
         const graph = this.dataflowToGraph(dataflow);
@@ -36,14 +47,7 @@ export default class LayoutManager {
     }
 
     async _computeLayout(graph) {
-        // Placeholder
-        const {nodes, connections} = graph;
-        return {connections, nodes: nodes.map(node => ({
-            id: node.id,
-            width: node.width,
-            hight: node.height,
-            position: {x: 0, y: 0}
-        }))}
+        return await this.layoutEngine.calculate(graph)
     }
 
     graphToDataflow(graph, dataflow) {
