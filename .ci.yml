@@ -31,6 +31,13 @@ pytest:
     script:
         - python3 -m pytest
 
+check-links:
+    stage: build
+    script:
+        - cd docs
+        - make linkcheck
+    allow_failure: true
+
 build-docs-and-static-html:
     stage: build
     script:
