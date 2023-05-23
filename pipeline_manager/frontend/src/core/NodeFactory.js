@@ -103,9 +103,11 @@ function parseOutputs(outputs, interfaceTypes) {
     const tempOutputs = {};
 
     outputs.forEach((o) => {
+        if (o.direction !== 'output') return;
         tempOutputs[o.name] = () => {
             const intf = new NodeInterface(o.name).use(setType, interfaceTypes[o.type]);
             intf.componentName = 'NodeInterface';
+            intf.maxConnectionsCount = o.maxConnectionsCount;
             return intf;
         };
     });
@@ -117,9 +119,11 @@ function parseInputs(inputs, interfaceTypes) {
     const tempInputs = {};
 
     inputs.forEach((i) => {
+        if (i.direction !== 'input') return;
         tempInputs[i.name] = () => {
             const intf = new NodeInterface(i.name).use(setType, interfaceTypes[i.type]);
             intf.componentName = 'NodeInterface';
+            intf.maxConnectionsCount = i.maxConnectionsCount;
             return intf;
         };
     });
@@ -134,29 +138,20 @@ function parseInputs(inputs, interfaceTypes) {
  *
  * @param {string} name Name of the block that is stored when saving
  * @param {string} displayName Name of the block displayed to the user
- * @param {*} inputs List of inputs of the block.
+ * @param {*} interfaces List of interfaces in the block (input, output and inout)
  * @param {*} properties List of properties of the block
- * @param {*} outputs List of outputs of the block
  * @param {*} interfaceTypes ReadInterfaceTypes of the specification
  * @param {boolean} twoColumn type of layout of the nodes
  * @returns Node based class
  */
-export function NodeFactory(
-    name,
-    displayName,
-    inputs,
-    properties,
-    outputs,
-    interfaceTypes,
-    twoColumn,
-) {
+export function NodeFactory(name, displayName, interfaces, properties, interfaceTypes, twoColumn) {
     const node = defineNode({
         type: name,
 
         title: displayName,
 
-        outputs: parseOutputs(outputs, interfaceTypes),
-        inputs: { ...parseProperties(properties), ...parseInputs(inputs, interfaceTypes) },
+        outputs: parseOutputs(interfaces, interfaceTypes),
+        inputs: { ...parseProperties(properties), ...parseInputs(interfaces, interfaceTypes) },
 
         /* eslint-disable no-param-reassign */
         onCreate() {
@@ -237,7 +232,7 @@ export function readInterfaceTypes(nodes) {
     const interfaceTypes = {};
 
     nodes.forEach((node) => {
-        [...node.inputs, ...node.outputs].forEach((io) => {
+        [...node.interfaces].forEach((io) => {
             if (!Object.prototype.hasOwnProperty.call(interfaceTypes, io.type)) {
                 interfaceTypes[io.type] = new NodeInterfaceType(io.type);
             }

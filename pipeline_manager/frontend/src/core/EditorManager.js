@@ -60,9 +60,8 @@ export default class EditorManager {
             const myNode = NodeFactory(
                 node.name,
                 node.name,
-                node.inputs,
+                node.interfaces,
                 node.properties,
-                node.outputs,
                 interfaceTypes,
                 'twoColumn' in metadata ? metadata.twoColumn : false,
             );
