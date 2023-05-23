@@ -39,11 +39,11 @@
                     "default": "Everything went fine!"
                 }
             ],
-            "inputs": [],
-            "outputs": [
+            "interfaces": [
                 {
                     "name": "Effect",
-                    "type": "Effect"
+                    "type": "Effect",
+                    "direction": "output"
                 }
             ]
         },
@@ -76,11 +76,11 @@
                     "default": "Everything went fine!"
                 }
             ],
-            "inputs": [],
-            "outputs": [
+            "interfaces": [
                 {
                     "name": "Effect",
-                    "type": "Effect"
+                    "type": "Effect",
+                    "direction": "output"
                 }
             ]
         },
@@ -113,8 +113,7 @@
                     "default": "Everything went fine!"
                 }
             ],
-            "inputs": [],
-            "outputs": []
+            "interfaces": []
         },
         {
             "name": "Disconnect",
@@ -134,13 +133,13 @@
                     "default": false
                 }
             ],
-            "inputs": [
+            "interfaces": [
                 {
                     "name": "Effect",
-                    "type": "Effect"
+                    "type": "Effect",
+                    "direction": "input"
                 }
-            ],
-            "outputs": []
+            ]
         }
     ]
 }
