@@ -59,8 +59,8 @@
                             "null"
                         ]
                     },
-                    "inputs": {
-                        "description": "Definition of the inputs of the node",
+                    "interfaces": {
+                        "description": "Definition of available interfaces of the node",
                         "type": "array",
                         "items": {
                             "type": "object",
@@ -72,33 +72,24 @@
                                 "type": {
                                     "description": "Type that defines styling of the input socket. It is also used for validation purposes",
                                     "type": "string"
-                                }
-                            },
-                            "required": [
-                                "name",
-                                "type"
-                            ],
-                            "additionalProperties": false
-                        }
-                    },
-                    "outputs": {
-                        "description": "Definition of the outputs of the node",
-                        "type": "array",
-                        "items": {
-                            "type": "object",
-                            "properties": {
-                                "name": {
-                                    "description": "Name of the output socket displayed in the node",
-                                    "type": "string"
                                 },
-                                "type": {
-                                    "description": "Type that defines styling of the output socket. It is also used for validation purposes",
-                                    "type": "string"
+                                "direction": {
+                                    "description": "Tells whether the connector is input, output, or both",
+                                    "enum": [
+                                        "input",
+                                        "output"
+                                    ]
+                                },
+                                "maxConnectionsCount": {
+                                    "description": "Tells how many connections can be established with given interface, <= 0 value for unlimited",
+                                    "type": "number",
+                                    "default": 1
                                 }
                             },
                             "required": [
                                 "name",
-                                "type"
+                                "type",
+                                "direction"
                             ],
                             "additionalProperties": false
                         }
@@ -278,8 +269,7 @@
                     "name",
                     "type",
                     "category",
-                    "inputs",
-                    "outputs",
+                    "interfaces",
                     "properties"
                 ],
                 "additionalProperties": false
