@@ -37,6 +37,7 @@ export default class PipelineManagerEditor extends Editor {
                 return { connectionAllowed: false };
             }
 
+            // TODO add handling inout ports
             if (from.isInput && !to.isInput) {
                 // reverse connection
                 const tmp = from;
@@ -50,7 +51,28 @@ export default class PipelineManagerEditor extends Editor {
             }
 
             // prevent duplicate connections
-            if (graphInstance.connections.some((c) => c.to === to)) {
+            if (graphInstance.connections.some((c) => c.from === from && c.to === to)) {
+                return { connectionAllowed: false };
+            }
+
+            // the default behavior for outputs is to provide any number of
+            // output connections
+            if (
+                from.maxConnectionsCount > 0 &&
+                from.connectionCount + 1 > from.maxConnectionsCount
+            ) {
+                return { connectionAllowed: false };
+            }
+
+            // the default behavior for inputs is to allow only one connection
+            if (
+                (to.maxConnectionsCount === 0 || to.maxConnectionsCount === undefined) &&
+                to.connectionCount > 0
+            ) {
+                return { connectionAllowed: false };
+            }
+
+            if (to.maxConnectionsCount > 0 && to.connectionCount + 1 > to.maxConnectionsCount) {
                 return { connectionAllowed: false };
             }
 
