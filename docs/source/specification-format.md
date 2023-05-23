@@ -55,11 +55,11 @@ An example:
 This object specifies a single node.
 Every input object requires six properties:
 
-* `name` - name displayed in the editor
-* `type` - value used for styling
-* `category` - context menu category displayed in the editor
-* `inputs` - array with elements of type [Input](#input)
-* `outputs` - array with elements of type [Output](#output)
+* `name` - name displayed in the editor.
+* `type` - value used for styling.
+* `category` - context menu category displayed in the editor.
+* `interfaces` - array representing inputs, outputs and bidirectional ports for node.
+  The entries are of type [Interface](#interface).
 * `properties` - array with elements of type [Property](#property).
 
 Here is an example of a node:
@@ -82,47 +82,44 @@ Here is an example of a node:
             "default": "constant"
         }
     ],
-    "inputs": [
+    "interfaces": [
         {
             "name": "image",
-            "type": "Image"
+            "type": "Image",
+            "direction": "input"
         },
         {
             "name": "kernel",
-            "type": "Image"
-        }
-    ],
-    "outputs": [
+            "type": "Image",
+            "direction": "input"
+        },
         {
             "name": "output",
-            "type": "Image"
+            "type": "Image",
+            "direction": "output"
         }
     ]
 }
 ```
 
-#### Input
+#### Interface
 
-An object that specifies a single input.
-Every input object has two required properties:
+An object that specifies a single input, output or inout interface of node.
+Every interface object has following properties:
 
 * `name` - name of the input displayed in the editor
 * `type` - type of the input used for styling and validation purposes.
+* `direction` - type of the interface in terms of direction, it can be:
+
+    * `input` - interface accepts input data,
+    * `output` - interface returns output data.
+* `maxConnectionsCount` (optional) - specifies the maximum allowed number of connections for a given port.
+  Value less than 0 means no limit for connections for a given interface.
+  Value equal to 0 means default behavior - one allowed connection to inputs, many allowed connections from outputs.
+  The default value is 0.
 
 ```{note}
-You can only connect inputs and outputs of the same type.
-```
-
-#### Output
-
-An object that specifies a single output.
-Every output object has two required properties:
-
-* `name` - name of the output displayed in the editor
-* `type` - type of the output used for styling and validation purposes.
-
-```{note}
-You can only connect inputs and outputs of the same type.
+Only interfaces of the same `type` can be connected together.
 ```
 
 #### Property
