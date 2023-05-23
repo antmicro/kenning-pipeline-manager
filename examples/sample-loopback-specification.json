@@ -9,48 +9,56 @@
             "type": "Type",
             "category": "Nodes",
             "properties": [],
-            "inputs": [
+            "interfaces": [
                 {
                     "name": "In 1",
-                    "type": "Connector"
+                    "type": "Connector",
+                    "direction": "input"
                 },
                 {
                     "name": "In 2",
-                    "type": "Connector"
+                    "type": "Connector",
+                    "direction": "input"
                 },
                 {
                     "name": "In 3",
-                    "type": "Connector"
+                    "type": "Connector",
+                    "direction": "input"
                 },
                 {
                     "name": "In 4",
-                    "type": "Connector"
+                    "type": "Connector",
+                    "direction": "input"
                 },
                 {
                     "name": "In 5",
-                    "type": "Connector"
-                }
-            ],
-            "outputs": [
+                    "type": "Connector",
+                    "direction": "input"
+                },
                 {
                     "name": "Out 1",
-                    "type": "Connector"
+                    "type": "Connector",
+                    "direction": "output"
                 },
                 {
                     "name": "Out 2",
-                    "type": "Connector"
+                    "type": "Connector",
+                    "direction": "output"
                 },
                 {
                     "name": "Out 3",
-                    "type": "Connector"
+                    "type": "Connector",
+                    "direction": "output"
                 },
                 {
                     "name": "Out 4",
-                    "type": "Connector"
+                    "type": "Connector",
+                    "direction": "output"
                 },
                 {
                     "name": "Out 5",
-                    "type": "Connector"
+                    "type": "Connector",
+                    "direction": "output"
                 }
             ]
         }
