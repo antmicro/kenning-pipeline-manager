@@ -11,7 +11,7 @@
  * Inherits from baklavajs/core/src/editor.ts
  */
 
-import { Editor, DummyConnection } from 'baklavajs';
+import { Editor, DummyConnection, GraphTemplate, createGraphNodeType } from 'baklavajs';
 
 export default class PipelineManagerEditor extends Editor {
     readonly = false;
@@ -141,5 +141,19 @@ export default class PipelineManagerEditor extends Editor {
 
     getNodeIconPath(nodeName) {
         return this.nodeIcons.get(nodeName) || undefined;
+    }
+
+    addGraphTemplate(template, category) {
+        if (this.events.beforeAddGraphTemplate.emit(template).prevented) {
+            return;
+        }
+        this._graphTemplates.push(template);
+        this.graphTemplateEvents.addTarget(template.events);
+        this.graphTemplateHooks.addTarget(template.hooks);
+
+        const nt = createGraphNodeType(template);
+        this.registerNodeType(nt, { category: category, title: template.name });
+
+        this.events.addGraphTemplate.emit(template);
     }
 }
