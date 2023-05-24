@@ -33,7 +33,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { computed, defineComponent, inject, ref, reactive } from 'vue';
+import { computed, defineComponent, inject, ref, reactive } from 'vue'; // eslint-disable-line object-curly-newline
 import { usePointer } from '@vueuse/core';
 import { useViewModel, useTransform } from 'baklavajs';
 import PaletteEntry from './PaletteEntry.vue';
@@ -119,7 +119,7 @@ export default defineComponent({
                 iconPath,
             };
             const onDragEnd = () => {
-                const instance = reactive(new nodeInformation.type());
+                const instance = reactive(new nodeInformation.type()); // eslint-disable-line new-cap,max-len
                 viewModel.value.displayedGraph.addNode(instance);
 
                 const rect = editorEl.value.getBoundingClientRect();
@@ -133,7 +133,14 @@ export default defineComponent({
             document.addEventListener('pointerup', onDragEnd);
         };
 
-        return { draggedNode, categories, draggedNodeStyles, onDragStart, mouseX, mouseY };
+        return {
+            draggedNode,
+            categories,
+            draggedNodeStyles,
+            onDragStart,
+            mouseX,
+            mouseY,
+        };
     },
 });
 </script>
