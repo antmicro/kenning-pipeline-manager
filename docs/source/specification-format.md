@@ -58,6 +58,8 @@ Every input object requires six properties:
 * `name` - name displayed in the editor.
 * `type` - value used for styling.
 * `category` - context menu category displayed in the editor.
+* `icon` - name of a svg icon that is going to be displayed next to the name of th node.
+  The icon has to be placed in `pipeline_manager/nodeIcons` directiory.
 * `interfaces` - array representing inputs, outputs and bidirectional ports for node.
   The entries are of type [Interface](#interface).
 * `properties` - array with elements of type [Property](#property).
@@ -69,6 +71,7 @@ Here is an example of a node:
     "name": "Filter2D",
     "type": "filters",
     "category": "Filters",
+    "icon": "filter.svg",
     "properties": [
         {
             "name": "iterations",
