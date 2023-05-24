@@ -108,6 +108,7 @@ function parseOutputs(outputs, interfaceTypes) {
             const intf = new NodeInterface(o.name).use(setType, interfaceTypes[o.type]);
             intf.componentName = 'NodeInterface';
             intf.maxConnectionsCount = o.maxConnectionsCount;
+            intf.direction = o.direction;
             return intf;
         };
     });
@@ -119,11 +120,14 @@ function parseInputs(inputs, interfaceTypes) {
     const tempInputs = {};
 
     inputs.forEach((i) => {
-        if (i.direction !== 'input') return;
+        // TODO storing inouts currently in the same list as inputs (since they are already
+        // handling other things than inputs, such as paramters)
+        if (i.direction !== 'input' && i.direction !== 'inout') return;
         tempInputs[i.name] = () => {
             const intf = new NodeInterface(i.name).use(setType, interfaceTypes[i.type]);
             intf.componentName = 'NodeInterface';
             intf.maxConnectionsCount = i.maxConnectionsCount;
+            intf.direction = i.direction;
             return intf;
         };
     });
