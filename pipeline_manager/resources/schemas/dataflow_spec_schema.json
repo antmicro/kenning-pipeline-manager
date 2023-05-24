@@ -81,7 +81,8 @@
                                     "description": "Tells whether the connector is input, output, or both",
                                     "enum": [
                                         "input",
-                                        "output"
+                                        "output",
+                                        "inout"
                                     ]
                                 },
                                 "maxConnectionsCount": {
