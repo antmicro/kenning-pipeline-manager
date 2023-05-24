@@ -47,15 +47,16 @@
     width: 100%;
 
     & > * {
+        flex-grow: 1;
         padding: 0px 5px;
     }
 
-    *:first-child {
+    & > .__title-icon {
         flex-grow: 0;
     }
 
-    *:nth-child(2) {
-        flex-grow: 1;
+    & > .__menu {
+        flex-grow: 0;
     }
 }
 
