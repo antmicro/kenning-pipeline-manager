@@ -11,18 +11,23 @@ SPDX-License-Identifier: Apache-2.0
                 {{ c.name }}
             </h1>
             <PaletteEntry
-                v-for="(ni, nt) in c.nodeTypes"
+                v-for="(ni, nt, index) in c.nodeTypes"
                 :key="nt"
                 :type="nt"
                 :title="ni.title"
-                @pointerdown="onDragStart(nt, ni)"
+                :iconPath="c.nodeIconPaths[index]"
+                @pointerdown="onDragStart(nt, ni, c.nodeIconPaths[index])"
             />
         </section>
     </div>
     <!-- eslint-disable vue/no-multiple-template-root -->
     <transition name="fade">
         <div v-if="draggedNode" class="baklava-dragged-node" :style="draggedNodeStyles">
-            <PaletteEntry :type="draggedNode.type" :title="draggedNode.nodeInformation.title" />
+            <PaletteEntry
+                :type="draggedNode.type"
+                :title="draggedNode.nodeInformation.title"
+                :iconPath="draggedNode.iconPath"
+            />
         </div>
     </transition>
 </template>
@@ -33,14 +38,13 @@ import { usePointer } from '@vueuse/core';
 import { useViewModel, useTransform } from 'baklavajs';
 import PaletteEntry from './PaletteEntry.vue';
 import checkRecursion from './checkRecursion';
-
-const SUBGRAPH_OUTPUT_NODE_TYPE = '__baklava_SubgraphOutputNode';
-const SUBGRAPH_INPUT_NODE_TYPE = '__baklava_SubgraphInputNode';
+import { SUBGRAPH_INPUT_NODE_TYPE, SUBGRAPH_OUTPUT_NODE_TYPE } from './subgraphInterface';
 
 export default defineComponent({
     components: { PaletteEntry },
     setup() {
         const { viewModel } = useViewModel();
+        const { editor } = viewModel.value;
         const { x: mouseX, y: mouseY } = usePointer();
         const { transform } = useTransform();
 
@@ -48,24 +52,17 @@ export default defineComponent({
 
         const draggedNode = ref(null);
         const categories = computed(() => {
-            const nodeTypeEntries = Array.from(viewModel.value.editor.nodeTypes.entries());
-
+            const nodeTypeEntries = Array.from(editor.nodeTypes.entries());
             const categoryNames = new Set(nodeTypeEntries.map(([, ni]) => ni.category));
 
             const tempCategories = [];
             categoryNames.forEach((c) => {
                 let nodeTypesInCategory = nodeTypeEntries.filter(([, ni]) => ni.category === c);
-
                 if (viewModel.value.displayedGraph.template) {
                     // don't show the graph nodes that directly or indirectly contain
                     // the current subgraph to prevent recursion
                     nodeTypesInCategory = nodeTypesInCategory.filter(
-                        ([nt]) =>
-                            !checkRecursion(
-                                viewModel.value.editor,
-                                viewModel.value.displayedGraph,
-                                nt,
-                            ),
+                        ([nt]) => !checkRecursion(editor, viewModel.value.displayedGraph, nt),
                     );
                 } else {
                     // if we are not in a subgraph, don't show subgraph input & output nodes
@@ -75,10 +72,17 @@ export default defineComponent({
                     );
                 }
 
+                const nodesIconPath = nodeTypesInCategory.map((n) => {
+                    const [nodeType] = n;
+                    const iconPath = editor.getNodeIconPath(nodeType);
+                    return iconPath;
+                });
+
                 if (nodeTypesInCategory.length > 0) {
                     tempCategories.push({
                         name: c,
                         nodeTypes: Object.fromEntries(nodeTypesInCategory),
+                        nodeIconPaths: nodesIconPath,
                     });
                 }
             });
@@ -108,10 +112,11 @@ export default defineComponent({
             };
         });
 
-        const onDragStart = (type, nodeInformation) => {
+        const onDragStart = (type, nodeInformation, iconPath) => {
             draggedNode.value = {
                 type,
                 nodeInformation,
+                iconPath,
             };
             const onDragEnd = () => {
                 const instance = reactive(new nodeInformation.type());

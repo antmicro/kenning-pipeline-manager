@@ -24,6 +24,7 @@ from moving or deleting the nodes.
         @pointerdown="select"
     >
         <div class="__title" @pointerdown.self.stop="startDragWrapper">
+            <img class="__title-icon" :src="svg" />
             <div v-if="!renaming" class="__title-label">
                 {{ nodeTitle }}
             </div>
@@ -256,4 +257,7 @@ const displayedInputSockets = computed(() =>
 const displayedProperties = computed(() =>
     Object.values(displayedInputs.value).filter((ni) => !ni.port),
 );
+
+const iconPath = viewModel.value.editor.getNodeIconPath(props.node.type);
+const svg = iconPath !== undefined ? require(`../../nodeIcons/${iconPath}`) : null;
 </script>

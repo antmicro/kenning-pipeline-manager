@@ -45,6 +45,18 @@
     align-items: center;
     padding-left: $spacing-l;
     width: 100%;
+
+    & > * {
+        padding: 0px 5px;
+    }
+
+    *:first-child {
+        flex-grow: 0;
+    }
+
+    *:nth-child(2) {
+        flex-grow: 1;
+    }
 }
 
 .baklava-node.--two-column > .__content > .__properties {
@@ -52,7 +64,7 @@
     grid-column: 1 / span 2;
 }
 
-.baklava-editor {
+.baklava-node > .__title > .baklava-node > .__title > .baklava-editor {
     font-size: 14px;
 }
 
@@ -96,7 +108,11 @@
     color: $green;
 }
 
-.baklava-context-menu > .item:not(.--header):not(.--active):not(.--disabled):hover > .ml-3 svg path {
+.baklava-context-menu
+    > .item:not(.--header):not(.--active):not(.--disabled):hover
+    > .ml-3
+    svg
+    path {
     fill: $green;
 }
 
