@@ -59,6 +59,10 @@
                             "null"
                         ]
                     },
+                    "icon": {
+                        "description": "Icon of a node",
+                        "type": "string"
+                    },
                     "interfaces": {
                         "description": "Definition of available interfaces of the node",
                         "type": "array",
