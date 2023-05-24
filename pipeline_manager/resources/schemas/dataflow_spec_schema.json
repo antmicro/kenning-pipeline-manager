@@ -122,7 +122,7 @@
                         "type": "string"
                     },
                     "category": {
-                        "description": "Category of a node in a context menu",
+                        "description": "Category of a node in a side bar",
                         "type": [
                             "string",
                             "null"
@@ -361,6 +361,154 @@
                     "interfaces",
                     "properties"
                 ],
+                "additionalProperties": false
+            }
+        },
+        "subgraphs": {
+            "description": "Definition of available subgraphs",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "description": "Default name displayed as title",
+                        "type": "string"
+                    },
+                    "type": {
+                        "description": "Type that defines styling of a node",
+                        "type": "string"
+                    },
+                    "category": {
+                        "description": "Category of a node in a side bar",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "nodes": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "type": {
+                                    "description": "Type of a node",
+                                    "type": "string"
+                                },
+                                "id": {
+                                    "description": "ID of a node in subgraph",
+                                    "type": "string"
+                                },
+                                "title": {
+                                    "description": "Displayed title of a node",
+                                    "type": "string"
+                                },
+                                "inputs": {
+                                    "description": "Input interfaces. Keys are name of interface, while values are object with a single ID property",
+                                    "type": "object"
+                                },
+                                "outputs": {
+                                    "description": "Output interfaces. Keys are name of interface, while values are object with a single ID property",
+                                    "type": "object"
+                                },
+                                "properties": {
+                                    "description": "Value of node properties",
+                                    "type": "object"
+                                },
+                                "position": {
+                                    "description": "Position of a node in an editor",
+                                    "type": "object",
+                                    "properties": {
+                                        "x": {
+                                            "description": "X coordinate of node position",
+                                            "type": "number"
+                                        },
+                                        "y": {
+                                            "description": "Y coordinate of node position",
+                                            "type": "number"
+                                        }
+                                    }
+                                },
+                                "width": {
+                                    "description": "Displayed width of a node",
+                                    "type": "number"
+                                },
+                                "twoColumn": {
+                                    "description": "Whether in/out interfaces should be displayed next to each other",
+                                    "type": "boolean"
+                                }
+                            },
+                            "additionalProperties": false
+                        }
+                    },
+                    "connections": {
+                        "description": "Connections within the subgraph",
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "from": {
+                                    "description": "ID of starting point interface",
+                                    "type": "string"
+                                },
+                                "to": {
+                                    "description": "ID of ending point interface",
+                                    "type": "string"
+                                },
+                                "id": {
+                                    "description": "ID of connection",
+                                    "type": "string"
+                                }
+                            },
+                            "additionalProperties": false,
+                            "required": [
+                                "from",
+                                "to",
+                                "id"
+                            ]
+                        }
+                    },
+                    "interfaces": {
+                        "description": "Definition of available interfaces of the node",
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "description": "Name of the input socket displayed in the node",
+                                    "type": "string"
+                                },
+                                "type": {
+                                    "description": "Type that defines styling of the input socket. It is also used for validation purposes",
+                                    "type": "string"
+                                },
+                                "direction": {
+                                    "description": "Tells whether the connector is input, output, or both",
+                                    "enum": [
+                                        "input",
+                                        "output",
+                                        "inout"
+                                    ]
+                                },
+                                "maxConnectionsCount": {
+                                    "description": "Tells how many connections can be established with given interface, <= 0 value for unlimited",
+                                    "type": "number",
+                                    "default": 1
+                                },
+                                "nodeInterface": {
+                                    "description": "",
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "name",
+                                "type",
+                                "direction",
+                                "nodeInterface"
+                            ],
+                            "additionalProperties": false
+                        }
+                    }
+                },
                 "additionalProperties": false
             }
         }
