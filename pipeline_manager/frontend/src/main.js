@@ -20,6 +20,10 @@ const options = {
     closeButton: false,
 };
 
+if (process.env.VUE_APP_NODE_ICONS_PATH !== undefined) {
+    require.context(process.env.VUE_APP_NODE_ICONS_PATH, false, /\.svg$/);
+}
+
 const app = createApp(App);
 app.use(vClickOutside);
 app.use(RouterVue);
