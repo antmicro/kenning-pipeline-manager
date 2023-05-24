@@ -24,7 +24,7 @@ from moving or deleting the nodes.
         @pointerdown="select"
     >
         <div class="__title" @pointerdown.self.stop="startDragWrapper">
-            <img class="__title-icon" :src="svg" />
+            <img class="__title-icon" v-if="nodeIcon !== undefined" :src="nodeIcon" />
             <div v-if="!renaming" class="__title-label">
                 {{ nodeTitle }}
             </div>
@@ -259,5 +259,5 @@ const displayedProperties = computed(() =>
 );
 
 const iconPath = viewModel.value.editor.getNodeIconPath(props.node.type);
-const svg = iconPath !== undefined ? require(`../../nodeIcons/${iconPath}`) : null;
+const nodeIcon = iconPath !== undefined ? require(`../../../nodeIcons/${iconPath}`) : undefined; // eslint-disable-line global-require,max-len,import/no-dynamic-require
 </script>
