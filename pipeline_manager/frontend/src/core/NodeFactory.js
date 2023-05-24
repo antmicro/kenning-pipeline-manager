@@ -14,7 +14,9 @@ import {
     defineNode,
     setType,
     NodeInterfaceType,
+    GraphTemplate,
 } from 'baklavajs';
+import { v4 as uuidv4 } from "uuid";
 
 import InputInterface from '../interfaces/InputInterface';
 import ListInterface from '../interfaces/ListInterface';
@@ -313,4 +315,27 @@ export function readInterfaceTypes(nodes, metadata) {
     });
 
     return interfaceTypes;
+}
+
+export function SubgraphFactory(nodes, connections, interfaces, name, editor) {
+    const inputs = interfaces.filter(interf => interf.direction == 'input').map(interf => ({
+        id: uuidv4(),
+        nodeInterfaceId: interf.nodeInterface,
+        name: interf.name
+    }))
+    const outputs = interfaces.filter(interf => interf.direction == 'output').map(interf => ({
+        id: uuidv4(),
+        nodeInterfaceId: interf.nodeInterface,
+        name: interf.name
+    }))
+
+    const state = {
+        id: uuidv4(),
+        nodes: nodes,
+        connections: connections,
+        inputs: inputs,
+        outputs: outputs,
+        name: name
+    };
+    return new GraphTemplate(state, editor);
 }

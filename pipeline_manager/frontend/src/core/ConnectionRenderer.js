@@ -113,7 +113,6 @@ export default class ConnectionRenderer {
     styleMap = null;
 
     constructor(viewModel) {
-        const graph = viewModel.displayedGraph;
         this.styleMap = new Map();
         this.styleMap.set('curved', {
             render(x1, y1, x2, y2, connection) {
@@ -156,6 +155,7 @@ export default class ConnectionRenderer {
                 return undefined;
             },
             renderLoopback(x1, y1, x2, y2, connection) {
+                const graph = viewModel.displayedGraph;
                 const nc = new NormalizedConnection(x1, y1, x2, y2, connection);
                 const sideMargin = 30 * graph.scaling;
 
@@ -207,6 +207,7 @@ export default class ConnectionRenderer {
         });
         this.styleMap.set('orthogonal', {
             render(x1, y1, x2, y2, connection) {
+                const graph = viewModel.displayedGraph;
                 const nc = new NormalizedConnection(x1, y1, x2, y2, connection);
                 const minMargin = 30 * graph.scaling;
                 const middlePoint = (nc.x1 + nc.x2) / 2;
@@ -236,6 +237,7 @@ export default class ConnectionRenderer {
                 return `M ${nc.x1} ${nc.y1} H ${middlePoint} V ${nc.y2} H ${nc.x2}`;
             },
             renderLoopback(x1, y1, x2, y2, connection) {
+                const graph = viewModel.displayedGraph;
                 const nc = new NormalizedConnection(x1, y1, x2, y2, connection);
                 const shift = getShift(nc.from, nc.to, graph, graph.scaling) + 30 * graph.scaling;
                 const bottomY = nodeBottomPoint(connection, graph.scaling, graph.panning);

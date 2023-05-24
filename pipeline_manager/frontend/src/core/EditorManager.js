@@ -6,12 +6,12 @@
 
 import Ajv, { stringify } from 'ajv';
 
-import { useBaklava, BaklavaInterfaceTypes } from 'baklavajs';
+import { useBaklava, BaklavaInterfaceTypes, useGraph } from 'baklavajs';
 
 import PipelineManagerEditor from '../custom/Editor';
 
 import NotificationHandler from './notifications';
-import { NodeFactory, readInterfaceTypes } from './NodeFactory';
+import { NodeFactory, readInterfaceTypes, SubgraphFactory } from './NodeFactory';
 import specificationSchema from '../../../resources/schemas/dataflow_spec_schema.json';
 import ConnectionRenderer from './ConnectionRenderer';
 
@@ -31,6 +31,8 @@ export default class EditorManager {
     currentSpecification = undefined;
 
     interfacesStyleId = 'interfaces-style';
+
+    switchGraph = undefined;
 
     constructor() {
         this.baklavaView.connectionRenderer = new ConnectionRenderer(this.baklavaView);
@@ -57,11 +59,7 @@ export default class EditorManager {
             this.cleanEditor();
         }
 
-        if (!overriding) {
-            this.currentSpecification = JSON.parse(JSON.stringify(dataflowSpecification));
-        }
-
-        const { nodes, metadata } = dataflowSpecification;
+        const { subgraphs, nodes, metadata } = dataflowSpecification;
 
         const interfaceTypes = readInterfaceTypes(nodes, metadata);
         this.nodeInterfaceTypes.addTypes(...Object.values(interfaceTypes));
@@ -97,6 +95,16 @@ export default class EditorManager {
             }
         });
 
+        subgraphs.forEach((subgraph) => {
+            const mySubgraph = SubgraphFactory(
+                subgraph.nodes,
+                subgraph.connections,
+                subgraph.interfaces,
+                subgraph.name,
+                this.editor
+            );
+            this.editor.addGraphTemplate(mySubgraph, subgraph.category);
+        });
         this.editor.readonly = metadata.readonly ?? false;
         this.editor.hideHud = metadata.hideHud ?? false;
         NotificationHandler.setShowOption(!this.editor.hideHud);
@@ -299,5 +307,17 @@ export default class EditorManager {
      */
     validateMetadata(jsonmetadata) {
         return this.validateJSONWithSchema(jsonmetadata, specificationSchema.properties.metadata);
+    }
+
+    isInsideSubgraph() {
+        return this.baklavaView.displayedGraph !== this.editor.graph
+    }
+
+    returnFromSubgraph() {
+        if(this.switchGraph == undefined) {
+            const { switchGraph } = useGraph();
+            this.switchGraph = switchGraph;
+        }
+        this.switchGraph(this.editor.graph);
     }
 }
