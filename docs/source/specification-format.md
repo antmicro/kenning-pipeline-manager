@@ -117,6 +117,7 @@ Every interface object has following properties:
 
     * `input` - interface accepts input data,
     * `output` - interface returns output data.
+    * `inout` - interface can both produce outputs and receive inputs.
 * `maxConnectionsCount` (optional) - specifies the maximum allowed number of connections for a given port.
   Value less than 0 means no limit for connections for a given interface.
   Value equal to 0 means default behavior - one allowed connection to inputs, many allowed connections from outputs.
