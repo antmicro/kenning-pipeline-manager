@@ -39,7 +39,7 @@ export default class PipelineManagerEditor extends Editor {
                 return { connectionAllowed: false };
             }
 
-            // TODO add handling inout ports
+            // TODO improve handling of inout ports
             if (from.isInput && !to.isInput) {
                 // reverse connection
                 const tmp = from;
@@ -47,8 +47,13 @@ export default class PipelineManagerEditor extends Editor {
                 to = tmp;
             }
 
-            if (from.isInput || !to.isInput) {
-                // connections are only allowed from input to output interface
+            if (from.isInput && !from.direction === 'inout') {
+                // connections are only allowed from input to output or inout interface
+                return { connectionAllowed: false };
+            }
+
+            if (!to.isInput) {
+                // we can connect only to input
                 return { connectionAllowed: false };
             }
 
