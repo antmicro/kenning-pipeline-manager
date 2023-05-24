@@ -36,7 +36,7 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
         </slot>
 
         <slot name="palette" v-if="!readonly">
-            <node-palette />
+            <NodePalette />
         </slot>
 
         <svg
@@ -80,6 +80,7 @@ import { defineComponent, ref, computed } from 'vue';
 import CustomNode from './CustomNode.vue';
 import PipelineManagerConnection from './connection/PipelineManagerConnection.vue';
 import TemporaryConnection from './connection/TemporaryConnection.vue';
+import NodePalette from './nodepalette/NodePalette.vue';
 
 export default defineComponent({
     extends: EditorComponent,
@@ -87,6 +88,7 @@ export default defineComponent({
         CustomNode,
         PipelineManagerConnection,
         TemporaryConnection,
+        NodePalette,
     },
     setup(props) {
         const {
