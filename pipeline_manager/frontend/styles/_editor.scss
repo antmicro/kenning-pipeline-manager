@@ -53,6 +53,8 @@
 
     & > .__title-icon {
         flex-grow: 0;
+        height: max-content;
+        width: max-content;
     }
 
     & > .__menu {
@@ -136,4 +138,14 @@
     width: auto;
     padding: 0px 1rem;
     z-index: 1;
+}
+
+.baklava-node.--palette {
+    & .__title {
+        padding-left: $spacing-l;
+        & > .__title-icon {
+            height: max-content;
+            width: max-content;
+        }
+    }
 }
