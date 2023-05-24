@@ -66,6 +66,9 @@ export default class EditorManager {
                 'twoColumn' in metadata ? metadata.twoColumn : false,
             );
             this.editor.registerNodeType(myNode, { title: node.name, category: node.category });
+            if ('icon' in node) {
+                this.editor.nodeIcons.set(node.name, node.icon);
+            }
         });
 
         this.editor.readonly = 'readonly' in metadata ? metadata.readonly : false;

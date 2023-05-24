@@ -20,6 +20,8 @@ export default class PipelineManagerEditor extends Editor {
 
     allowLoopbacks = false;
 
+    nodeIcons = new Map();
+
     /* eslint-disable no-param-reassign */
     /* eslint-disable no-underscore-dangle */
     constructor() {
@@ -111,5 +113,9 @@ export default class PipelineManagerEditor extends Editor {
         if (state.graph.scaling !== undefined) {
             this._graph.scaling = state.graph.scaling;
         }
+    }
+
+    getNodeIconPath(nodeType) {
+        return this.nodeIcons.get(nodeType) || undefined;
     }
 }
