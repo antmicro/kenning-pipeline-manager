@@ -51,6 +51,10 @@ export default {
     fill: $green;
 }
 
+.black {
+    fill: $black;
+}
+
 /* Rotate */
 .left {
     rotate: 270deg;
@@ -67,5 +71,9 @@ export default {
 /* Scale */
 .small {
     scale: 0.33;
+}
+
+.medium {
+    scale: 0.5;
 }
 </style>
