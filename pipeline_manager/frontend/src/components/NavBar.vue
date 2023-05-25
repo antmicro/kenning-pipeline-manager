@@ -453,6 +453,14 @@ export default {
                         <span>Validate</span>
                     </div>
                 </div>
+                <div v-if="this.editorManager.isInsideSubgraph()">
+                    <button @click="() => this.editorManager.returnFromSubgraph()">
+                        <Arrow color="white" rotate="left" />
+                    </button>
+                    <div class="tooltip">
+                        <span>Return from subgraph editor</span>
+                    </div>
+                </div>
             </div>
             <span> Pipeline Manager </span>
             <div>

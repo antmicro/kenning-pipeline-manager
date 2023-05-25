@@ -56,7 +56,7 @@ export default {
 }
 
 /* Rotate */
-.left {
+.down {
     rotate: 270deg;
 }
 
