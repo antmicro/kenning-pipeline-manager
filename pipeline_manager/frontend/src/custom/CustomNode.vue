@@ -76,6 +76,14 @@ from moving or deleting the nodes.
                     <CustomInterface :key="input.id" :node="node" :intf="input" />
                 </div>
             </div>
+
+            <!-- Inouts -->
+            <div class="__inouts">
+                <!-- eslint-disable vue/require-v-for-key -->
+                <div v-for="input in displayedInoutSockets">
+                    <CustomInterface :key="input.id" :node="node" :intf="input" />
+                </div>
+            </div>
         </div>
     </div>
 </template>
@@ -252,7 +260,10 @@ const openContextMenuWrapper = (ev) => {
 };
 
 const displayedInputSockets = computed(() =>
-    Object.values(displayedInputs.value).filter((ni) => ni.port),
+    Object.values(displayedInputs.value).filter((ni) => ni.direction === 'input'),
+);
+const displayedInoutSockets = computed(() =>
+    Object.values(displayedInputs.value).filter((ni) => ni.direction === 'inout'),
 );
 const displayedProperties = computed(() =>
     Object.values(displayedInputs.value).filter((ni) => !ni.port),

@@ -14,11 +14,14 @@ from creating and deleting connections or altering nodes' values if the editor i
 <template>
     <div :id="intf.id" ref="el" class="baklava-node-interface" :class="classes">
         <div
-            v-if="intf.port"
             class="__port"
+            v-if="intf.port"
             @pointerover="startHoverWrapper"
             @pointerout="endHoverWrapper"
-        />
+        >
+            <Arrow v-if="displayArrow" color="black" scale="medium" rotate="right" />
+        </div>
+
         <component
             :is="intf.component"
             v-if="showComponent"
@@ -36,9 +39,13 @@ from creating and deleting connections or altering nodes' values if the editor i
 <script>
 import { defineComponent } from 'vue';
 import { Components, useViewModel } from 'baklavajs';
+import Arrow from '../icons/Arrow.vue';
 
 export default defineComponent({
     extends: Components.NodeInterface,
+    components: {
+        Arrow,
+    },
     setup(props) {
         /* eslint-disable object-curly-newline */
         const { el, isConnected, classes, showComponent, startHover, endHover, openSidebar } =
@@ -65,6 +72,8 @@ export default defineComponent({
             }
         };
 
+        const displayArrow = props.intf.port && props.intf.direction !== 'inout';
+
         return {
             el,
             isConnected,
@@ -75,6 +84,7 @@ export default defineComponent({
             openSidebar,
             startHoverWrapper,
             endHoverWrapper,
+            displayArrow,
         };
     },
 });
