@@ -47,7 +47,7 @@ export default class PipelineManagerEditor extends Editor {
                 to = tmp;
             }
 
-            if (from.isInput && !from.direction === 'inout') {
+            if (from.isInput && from.direction !== 'inout') {
                 // connections are only allowed from input to output or inout interface
                 return { connectionAllowed: false };
             }
