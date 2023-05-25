@@ -112,6 +112,9 @@ const { viewModel } = useViewModel();
 const { graph, switchGraph } = useGraph();
 const dragMove = useDragMove(toRef(props.node, 'position'));
 
+// If type start with this prefix, it is not displayed as node title
+const IGNORE_TYPE_PREFIX = "__"
+
 const nodeRef = ref(null);
 const renaming = ref(false);
 const tempName = ref('');
@@ -151,6 +154,10 @@ const displayedOutputs = computed(() =>
 );
 
 const nodeTitle = computed(() => {
+
+    if (props.node.type.startsWith(IGNORE_TYPE_PREFIX)) {
+        return props.node.title;
+    }
     if (props.node.title === props.node.type || props.node.title === '') {
         return props.node.type;
     }
