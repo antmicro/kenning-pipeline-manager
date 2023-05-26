@@ -32,8 +32,6 @@ export default class EditorManager {
 
     interfacesStyleId = 'interfaces-style';
 
-    switchGraph = undefined;
-
     constructor() {
         this.baklavaView.connectionRenderer = new ConnectionRenderer(this.baklavaView);
 
@@ -101,6 +99,7 @@ export default class EditorManager {
                 subgraph.connections,
                 subgraph.interfaces,
                 subgraph.name,
+                subgraph.type,
                 this.editor
             );
             this.editor.addGraphTemplate(mySubgraph, subgraph.category, subgraph.type);
