@@ -170,6 +170,10 @@ export default class PipelineManagerEditor extends Editor {
         // subgraphs are stored in state.graphTemplates, there is no need to store it
         // in nodes itself
         state.graph.nodes.forEach(node => {
+            if(node.type.startsWith(GRAPH_NODE_TYPE_PREFIX)) {
+                node.type = node.type.slice(GRAPH_NODE_TYPE_PREFIX.length);
+                node.subgraph = node.graphState;
+            }
             delete node.graphState
         })
 
@@ -178,13 +182,13 @@ export default class PipelineManagerEditor extends Editor {
 
     load(state) {
         state.graph.nodes.forEach(node => {
-            if(node.type.startsWith(GRAPH_NODE_TYPE_PREFIX)) {
-                const templateID = node.type.slice(GRAPH_NODE_TYPE_PREFIX.length);
-                const fittingTemplate = state.graphTemplates.filter(template => template.id == templateID)
+            if(node.subgraph !== undefined) {
+                const fittingTemplate = state.graphTemplates.filter(template => template.id == node.subgraph)
                 if (fittingTemplate.length != 1) {
-                    throw new Error(`Expected exactly one template with ID ${templateID}, got ${fittingTemplate.length}`)
+                    throw new Error(`Expected exactly one template with ID ${node.type}, got ${fittingTemplate.length}`)
                 }
                 node.graphState = structuredClone(fittingTemplate[0]);
+                node.type = `${GRAPH_NODE_TYPE_PREFIX}${node.type}`
             }
         })
 
