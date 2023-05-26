@@ -28,17 +28,16 @@ export default class PipelineManagerEditor extends Editor {
 
     /* eslint-disable no-param-reassign */
     /* eslint-disable no-underscore-dangle */
-    constructor() {
-        super();
-        const graphInstance = this._graph;
-        graphInstance.checkConnection = (from, to) => {
+
+    registerGraph(graph) {
+        graph.checkConnection = function (from, to) {
             if (!from || !to) {
                 return { connectionAllowed: false };
             }
 
-            const fromNode = graphInstance.findNodeById(from.nodeId);
-            const toNode = graphInstance.findNodeById(to.nodeId);
-            if (fromNode && toNode && fromNode === toNode && !graphInstance.editor.allowLoopbacks) {
+            const fromNode = this.findNodeById(from.nodeId);
+            const toNode = this.findNodeById(to.nodeId);
+            if (fromNode && toNode && fromNode === toNode && !this.editor.allowLoopbacks) {
                 // connections must be between two separate nodes.
                 return { connectionAllowed: false };
             }
@@ -65,7 +64,7 @@ export default class PipelineManagerEditor extends Editor {
             }
 
             // prevent duplicate connections
-            if (graphInstance.connections.some((c) => c.from === from && c.to === to)) {
+            if (this.connections.some((c) => c.from === from && c.to === to)) {
                 return { connectionAllowed: false };
             }
 
@@ -90,11 +89,11 @@ export default class PipelineManagerEditor extends Editor {
                 return { connectionAllowed: false };
             }
 
-            if (graphInstance.events.checkConnection.emit({ from, to }).prevented) {
+            if (this.events.checkConnection.emit({ from, to }).prevented) {
                 return { connectionAllowed: false };
             }
 
-            const hookResults = graphInstance.hooks.checkConnection.execute({ from, to });
+            const hookResults = this.hooks.checkConnection.execute({ from, to });
             if (hookResults.some((hr) => !hr.connectionAllowed)) {
                 return { connectionAllowed: false };
             }
