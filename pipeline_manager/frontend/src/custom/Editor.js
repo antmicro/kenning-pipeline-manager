@@ -11,7 +11,7 @@
  * Inherits from baklavajs/core/src/editor.ts
  */
 
-import { Editor, DummyConnection, createGraphNodeType, useGraph } from 'baklavajs';
+import { Editor, DummyConnection, createGraphNodeType, useGraph, GRAPH_NODE_TYPE_PREFIX } from 'baklavajs';
 
 export default class PipelineManagerEditor extends Editor {
     readonly = false;
@@ -166,10 +166,28 @@ export default class PipelineManagerEditor extends Editor {
         const state = super.save();
         state.graph.panning = this._graph.panning;
         state.graph.scaling = this._graph.scaling;
+
+        // subgraphs are stored in state.graphTemplates, there is no need to store it
+        // in nodes itself
+        state.graph.nodes.forEach(node => {
+            delete node.graphState
+        })
+
         return state;
     }
 
     load(state) {
+        state.graph.nodes.forEach(node => {
+            if(node.type.startsWith(GRAPH_NODE_TYPE_PREFIX)) {
+                const templateID = node.type.slice(GRAPH_NODE_TYPE_PREFIX.length);
+                const fittingTemplate = state.graphTemplates.filter(template => template.id == templateID)
+                if (fittingTemplate.length != 1) {
+                    throw new Error(`Expected exactly one template with ID ${templateID}, got ${fittingTemplate.length}`)
+                }
+                node.graphState = structuredClone(fittingTemplate[0]);
+            }
+        })
+
         super.load(state);
         if (state.graph.panning !== undefined) {
             this._graph.panning = state.graph.panning;
