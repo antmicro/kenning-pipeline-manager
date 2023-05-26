@@ -103,7 +103,7 @@ export default class EditorManager {
                 subgraph.name,
                 this.editor
             );
-            this.editor.addGraphTemplate(mySubgraph, subgraph.category);
+            this.editor.addGraphTemplate(mySubgraph, subgraph.category, subgraph.type);
         });
         this.editor.readonly = metadata.readonly ?? false;
         this.editor.hideHud = metadata.hideHud ?? false;

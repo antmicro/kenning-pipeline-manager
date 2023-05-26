@@ -214,8 +214,15 @@ export default class PipelineManagerEditor extends Editor {
         return this.nodeIcons.get(nodeName) || undefined;
     }
 
-    addGraphTemplate(template, category) {
+    getNodeIconPath(nodeType) {
+        return this.nodeIcons.get(nodeType) || undefined;
+    }
+
+    addGraphTemplate(template, category, type) {
         if (this.events.beforeAddGraphTemplate.emit(template).prevented) {
+            return;
+        }
+        if (this.nodeTypes.has(`${GRAPH_NODE_TYPE_PREFIX}${template.id}`)) {
             return;
         }
         this._graphTemplates.push(template);
@@ -223,7 +230,13 @@ export default class PipelineManagerEditor extends Editor {
         this.graphTemplateHooks.addTarget(template.hooks);
 
         const nt = createGraphNodeType(template);
-        this.registerNodeType(nt, { category: category, title: template.name });
+        class stuff extends nt {
+            constructor() {
+                super()
+                this.type = `${GRAPH_NODE_TYPE_PREFIX}${type}`
+            }
+        }
+        this.registerNodeType(stuff, { category: category, title: template.name });
 
         this.events.addGraphTemplate.emit(template);
     }
