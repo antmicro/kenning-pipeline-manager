@@ -11,7 +11,7 @@
  * Inherits from baklavajs/core/src/editor.ts
  */
 
-import { Editor, DummyConnection, GraphTemplate, createGraphNodeType } from 'baklavajs';
+import { Editor, DummyConnection, createGraphNodeType, useGraph } from 'baklavajs';
 
 export default class PipelineManagerEditor extends Editor {
     readonly = false;
@@ -106,6 +106,60 @@ export default class PipelineManagerEditor extends Editor {
                 connectionsInDanger,
             };
         };
+
+        graph.updateTemplate = function() {
+            const interfaceConnections = [];
+            const SUBGRAPH_INPUT_NODE_TYPE = "__baklava_SubgraphInputNode";
+            const SUBGRAPH_OUTPUT_NODE_TYPE = "__baklava_SubgraphOutputNode";
+
+            const inputs = [];
+            const inputNodes = this.nodes.filter((n) => n.type === SUBGRAPH_INPUT_NODE_TYPE);
+            for (const n of inputNodes) {
+                const connections = this.connections.filter((c) => c.from === n.outputs.placeholder);
+                connections.forEach((c) => {
+                    inputs.push({
+                        id: n.graphInterfaceId,
+                        name: n.inputs.name.value,
+                        nodeInterfaceId: c.to.id,
+                    });
+                });
+                interfaceConnections.push(...connections);
+            }
+
+            const outputs = [];
+            const outputNodes = this.nodes.filter((n) => n.type === SUBGRAPH_OUTPUT_NODE_TYPE);
+            for (const n of outputNodes) {
+                const connections = this.connections.filter((c) => c.to === n.inputs.placeholder);
+                connections.forEach((c) => {
+                    outputs.push({
+                        id: n.graphInterfaceId,
+                        name: n.inputs.name.value,
+                        nodeInterfaceId: c.from.id,
+                    });
+                });
+                interfaceConnections.push(...connections);
+            }
+
+            const innerConnections = this.connections.filter((c) => !interfaceConnections.includes(c));
+            const nodes = this.nodes.filter(
+                (n) => n.type !== SUBGRAPH_INPUT_NODE_TYPE && n.type !== SUBGRAPH_OUTPUT_NODE_TYPE,
+            );
+
+            this.template.update({
+                inputs,
+                outputs,
+                connections: innerConnections.map((c) => ({ id: c.id, from: c.from.id, to: c.to.id })),
+                nodes: nodes.map((n) => n.save()),
+                // will be ignored in the update method but still providing them to make TypeScript happy
+                // panning: graph.panning,
+                // scaling: graph.scaling,
+            });
+
+            this.template.panning = this.panning;
+            this.template.scaling = this.scaling;
+        };
+        
+        super.registerGraph(graph);
     }
 
     save() {
@@ -154,5 +208,16 @@ export default class PipelineManagerEditor extends Editor {
         this.registerNodeType(nt, { category: category, title: template.name });
 
         this.events.addGraphTemplate.emit(template);
+    }
+
+    switchToMainGraph(displayedGraph) {
+        // SwitchGraph must be defined after viewPlugin and editor are initialized in EditorManager
+        if(this.switchGraph == undefined) {
+            const { switchGraph } = useGraph();
+            this.switchGraph = switchGraph;
+        }
+        // this.saveSubgraphTemplate(displayedGraph)
+        displayedGraph.updateTemplate();
+        this.switchGraph(this.graph);
     }
 }

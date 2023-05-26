@@ -6,7 +6,7 @@
 
 import Ajv, { stringify } from 'ajv';
 
-import { useBaklava, BaklavaInterfaceTypes, useGraph } from 'baklavajs';
+import { useBaklava, BaklavaInterfaceTypes } from 'baklavajs';
 
 import PipelineManagerEditor from '../custom/Editor';
 
@@ -314,10 +314,6 @@ export default class EditorManager {
     }
 
     returnFromSubgraph() {
-        if(this.switchGraph == undefined) {
-            const { switchGraph } = useGraph();
-            this.switchGraph = switchGraph;
-        }
-        this.switchGraph(this.editor.graph);
+        this.editor.switchToMainGraph(this.baklavaView.displayedGraph);
     }
 }
