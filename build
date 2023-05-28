@@ -1,36 +1,68 @@
-#!/bin/bash
+#!/usr/bin/env python
 
 # Copyright (c) 2022-2023 Antmicro <www.antmicro.com>
 #
 # SPDX-License-Identifier: Apache-2.0
 
-BASE_DIR=$(dirname "$0")
+import argparse
+import os
+import subprocess
 
-display_help() {
-    echo "Invalid parameters. Supported build options are:"
-    echo
-    echo "./build static-html [<specification-path> [<dataflow-path>]] - build as a static application that can run without any backend server, with optional default specification and optional default dataflow."
-    echo "./build server-app  - build the application to run with a backend server and an external application"
-}
 
-if ! [[ $# -ge 1 && $# -le 3 ]]; then
-    display_help
-    exit 1
-fi
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(
+        description='Tool for building the frontend application'
+    )
+    parser.add_argument(
+        '--assets-directory',
+        help='Path to directory with assets'
+    )
+    subparsers = parser.add_subparsers(
+        title='build_type',
+        help='Build type of the frontend application',
+        dest='build_type',
+        required=True
+    )
+    static_app_args = subparsers.add_parser(
+        'static-html',
+        help='Builds a static HTML page'
+    )
+    static_app_args.add_argument(
+        'specification',
+        help='Path to specification file',
+        nargs='?'
+    )
+    static_app_args.add_argument(
+        'dataflow',
+        help='Path to dataflow file',
+        nargs='?'
+    )
+    server_app_args = subparsers.add_parser(
+        'server-app',
+        help='Builds frontend for a server-based application',
+    )
 
-if [ "$1" = "static-html" ]; then
-    if [ "$#" -ge 2 ]; then
-        echo VUE_APP_SPECIFICATION_PATH=$(realpath $2) > $BASE_DIR/pipeline_manager/frontend/.env.static.local
-        if [ "$#" -eq 3 ]; then
-            echo VUE_APP_DATAFLOW_PATH=$(realpath $3) >> $BASE_DIR/pipeline_manager/frontend/.env.static.local
-        fi
-    fi
-    cd $BASE_DIR/pipeline_manager/frontend && npm install
-    npm run build-static-html
-elif [ "$1" = "server-app" ]; then
-    cd $BASE_DIR/pipeline_manager/frontend && npm install
-    npm run build-server-app
-else
-    display_help
-    exit 1
-fi
+    args = parser.parse_args()
+
+    scriptpath = os.path.dirname(os.path.realpath(__file__))
+
+    frontend_path = os.path.join(scriptpath, 'pipeline_manager/frontend')
+
+    if args.assets_directory:
+        args.assets_directory = os.path.realpath(args.assets_directory)
+
+    if args.build_type == 'static-html' and args.specification:
+        args.specification = os.path.realpath(args.specification)
+        config_path = os.path.join(frontend_path, '.env.static.local')
+        with open(config_path, 'w') as config:
+            config.write(f'VUE_APP_SPECIFICATION_PATH={args.specification}\n')
+            if args.dataflow:
+                args.dataflow = os.path.realpath(args.dataflow)
+                config.write(f'VUE_APP_DATAFLOW_PATH={args.dataflow}\n')
+
+    subprocess.run(['npm', 'install'], cwd=frontend_path)
+
+    if args.build_type == 'static-html':
+        subprocess.run(['npm', 'run', 'build-static-html'], cwd=frontend_path)
+    if args.build_type == 'server-app':
+        subprocess.run(['npm', 'run', 'build-server-app'], cwd=frontend_path)
