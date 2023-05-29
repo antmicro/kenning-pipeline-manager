@@ -165,31 +165,30 @@ export function NodeFactory(name, displayName, interfaces, properties, interface
             this.save = () => {
                 const savedState = this.parentSave();
 
-                const newProperties = {};
-                const newInputs = {};
+                const newProperties = [];
+                const newInterfaces = [];
 
-                Object.entries(savedState.inputs).forEach((input) => {
-                    const [inpName, inpState] = input;
+                Object.entries({ ...this.inputs, ...this.outputs }).forEach((io) => {
+                    const [ioName, ioState] = io;
 
-                    Object.entries(this.inputs).forEach((nodeInterface) => {
-                        const [, intfState] = nodeInterface;
-
-                        if (inpState.id === intfState.id) {
-                            if (intfState.port) {
-                                newInputs[inpName] = {
-                                    id: inpState.id,
-                                };
-                            } else {
-                                newProperties[inpName] = {
-                                    id: inpState.id,
-                                    value: inpState.value === undefined ? null : inpState.value,
-                                };
-                            }
-                        }
-                    });
+                    if (ioState.port) {
+                        newInterfaces.push({
+                            name: ioName,
+                            id: ioState.id,
+                            direction: ioState.direction,
+                        });
+                    } else {
+                        newProperties.push({
+                            name: ioName,
+                            id: ioState.id,
+                            value: ioState.value === undefined ? null : ioState.value,
+                        });
+                    }
                 });
 
-                savedState.inputs = newInputs;
+                delete savedState.inputs;
+                delete savedState.outputs;
+                savedState.interfaces = newInterfaces;
                 savedState.properties = newProperties;
 
                 savedState.name = savedState.title;
@@ -199,12 +198,23 @@ export function NodeFactory(name, displayName, interfaces, properties, interface
             };
 
             this.load = (state) => {
-                Object.entries(state.properties).forEach((prop) => {
-                    const [propName, propState] = prop;
-                    state.inputs[propName] = propState;
+                state.inputs = {};
+                state.outputs = {};
+
+                state.interfaces.forEach((intf) => {
+                    if (intf.direction === 'input' || intf.direction === 'inout') {
+                        state.inputs[intf.name] = { id: intf.id };
+                    } else if (intf.direction === 'output') {
+                        state.outputs[intf.name] = { id: intf.id };
+                    }
+                });
+
+                state.properties.forEach((prop) => {
+                    state.inputs[prop.name] = { id: prop.id, value: prop.value };
                 });
 
                 delete state.properties;
+                delete state.interfaces;
 
                 if ('name' in state) {
                     state.title = state.name;
