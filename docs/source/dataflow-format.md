@@ -36,11 +36,9 @@ Each node has:
 * `type` - node type, as defined in the specification.
 * `id` - unique value assigned to the node.
 * `name` - optional field defining a node's name rendered to the user. If set, `name (type)` will be displayed, otherwise just the `type` will be rendered.
-* `properties` - dictionary describing the node's parameterized values.
+* `properties` - list describing the node's parameterized values.
   Every element is of type [Property](#property)
-* `inputs` - dictionary describing the node's inputs.
-  Every element is of type [Interface](#interface)
-* `outputs` - dictionary describing the node's outputs.
+* `interfaces` - list describing the node's interfaces.
   Every element is of type [Interface](#interface)
 * `width` - the node's width in the editor.
 * `twoColumn` - boolean value.
@@ -48,30 +46,39 @@ Each node has:
 
 ##### Property
 
-Each property is described by an object with two attributes:
+Each property is described by an object with three attributes:
 
 * `id` - unique value assigned to the property
+* `name` - name of the property
 * `value` - actual value of the property.
 
 Node having two parameters: `example_text` of value `example_value` and `example_number` of value `123` would have the following `options` value:
 
 ```json
-{
-    "example_text": {
+[   
+    {
+        "id": 1,
+        "name": "example_text",
         "value": "example_value"
     },
-    "example_number": {
+    {
+        "id": 2,
+        "name": "example_number",
         "value": 123
     }
-}
+]
 ```
 
 ##### Interface
 
-Each input and output is described by an object with one attribute:
+Each input, output and inout is described by an object with three attributes:
 
 * `id` - unique value assigned to the property.
   It is used to describe connections in the dataflow.
+* `name` - name of the interface
+* `direction` - value determining the type of the interfaces.
+  Can be either `input`, `output` or `inout`.
+
 
 #### Connection
 
@@ -95,46 +102,51 @@ Two attributes are used:
 
 The example dataflow for a specification defined in [Specification format](specification-format) is defined as below:
 
-{ emphasize-lines="6-39,215-217,220-222,225-227" }
+{ emphasize-lines="5-44,243-245,248-250,253-255" }
 ```json
 {
-    "graphTemplates": [],
     "graph": {
-        "id": "5347868844",
+        "id": "2035108300",
         "nodes": [
             {
                 "type": "Filter2D",
                 "id": "node_168064109167511",
-                "name": "Filter",
                 "position": {
                     "x": 544,
                     "y": 77
                 },
-                "inputs": {
-                    "image": {
-                        "id": "ni_168064109167612"
+                "width": 200,
+                "twoColumn": false,
+                "interfaces": [
+                    {
+                        "name": "image",
+                        "id": "ni_168064109167612",
+                        "direction": "input"
                     },
-                    "kernel": {
-                        "id": "ni_168064109167613"
+                    {
+                        "name": "kernel",
+                        "id": "ni_168064109167613",
+                        "direction": "input"
+                    },
+                    {
+                        "name": "output",
+                        "id": "ni_168064109167714",
+                        "direction": "output"
                     }
-                },
-                "properties": {
-                    "iterations": {
-                        "id": "1868105035",
+                ],
+                "properties": [
+                    {
+                        "name": "iterations",
+                        "id": "8434027854",
                         "value": 1
                     },
-                    "border type": {
-                        "id": "8101260841",
+                    {
+                        "name": "border type",
+                        "id": "7165552813",
                         "value": "constant"
                     }
-                },
-                "outputs": {
-                    "output": {
-                        "id": "ni_168064109167714"
-                    }
-                },
-                "width": 200,
-                "twoColumn": false
+                ],
+                "name": "Filter"
             },
             {
                 "type": "LoadVideo",
@@ -143,20 +155,23 @@ The example dataflow for a specification defined in [Specification format](speci
                     "x": -60,
                     "y": -36
                 },
-                "inputs": {},
-                "properties": {
-                    "filename": {
-                        "id": "1638420580",
+                "width": 200,
+                "twoColumn": false,
+                "interfaces": [
+                    {
+                        "name": "frames",
+                        "id": "ni_168064220761016",
+                        "direction": "output"
+                    }
+                ],
+                "properties": [
+                    {
+                        "name": "filename",
+                        "id": "8887517324",
                         "value": "input.mp4"
                     }
-                },
-                "outputs": {
-                    "frames": {
-                        "id": "ni_168064220761016"
-                    }
-                },
-                "width": 200,
-                "twoColumn": false
+                ],
+                "name": ""
             },
             {
                 "type": "GaussianKernel",
@@ -165,24 +180,28 @@ The example dataflow for a specification defined in [Specification format](speci
                     "x": -65,
                     "y": 295
                 },
-                "inputs": {},
-                "properties": {
-                    "size": {
-                        "id": "5411776763",
+                "width": 200,
+                "twoColumn": false,
+                "interfaces": [
+                    {
+                        "name": "kernel",
+                        "id": "ni_168064222522422",
+                        "direction": "output"
+                    }
+                ],
+                "properties": [
+                    {
+                        "name": "size",
+                        "id": "1247863780",
                         "value": 5
                     },
-                    "sigma": {
-                        "id": "5864187267",
+                    {
+                        "name": "sigma",
+                        "id": "0187870808",
                         "value": 1
                     }
-                },
-                "outputs": {
-                    "kernel": {
-                        "id": "ni_168064222522422"
-                    }
-                },
-                "width": 200,
-                "twoColumn": false
+                ],
+                "name": ""
             },
             {
                 "type": "Threshold",
@@ -191,55 +210,63 @@ The example dataflow for a specification defined in [Specification format](speci
                     "x": 999,
                     "y": 100
                 },
-                "inputs": {
-                    "image": {
-                        "id": "ni_168064225320531"
+                "width": 200,
+                "twoColumn": false,
+                "interfaces": [
+                    {
+                        "name": "image",
+                        "id": "ni_168064225320531",
+                        "direction": "input"
+                    },
+                    {
+                        "name": "output",
+                        "id": "ni_168064225320532",
+                        "direction": "output"
                     }
-                },
-                "properties": {
-                    "threshold_value": {
-                        "id": "0606318132",
+                ],
+                "properties": [
+                    {
+                        "name": "threshold_value",
+                        "id": "8770324282",
                         "value": 1
                     },
-                    "threshold_type": {
-                        "id": "2005334003",
+                    {
+                        "name": "threshold_type",
+                        "id": "8305532648",
                         "value": "Otsu"
                     }
-                },
-                "outputs": {
-                    "output": {
-                        "id": "ni_168064225320532"
-                    }
-                },
-                "width": 200,
-                "twoColumn": false
+                ],
+                "name": ""
             },
             {
                 "type": "StructuringElement",
                 "id": "node_168064227787336",
-                "name": "Structuring Element",
                 "position": {
                     "x": 1010,
                     "y": 409
                 },
-                "inputs": {},
-                "properties": {
-                    "size": {
-                        "id": "8000013823",
+                "width": 200,
+                "twoColumn": false,
+                "interfaces": [
+                    {
+                        "name": "kernel",
+                        "id": "ni_168064227787437",
+                        "direction": "output"
+                    }
+                ],
+                "properties": [
+                    {
+                        "name": "size",
+                        "id": "1587558664",
                         "value": 5
                     },
-                    "shape": {
-                        "id": "6880788646",
+                    {
+                        "name": "shape",
+                        "id": "1375086555",
                         "value": "Cross"
                     }
-                },
-                "outputs": {
-                    "kernel": {
-                        "id": "ni_168064227787437"
-                    }
-                },
-                "width": 200,
-                "twoColumn": false
+                ],
+                "name": "Structuring Element"
             },
             {
                 "type": "Morphological operation",
@@ -248,61 +275,73 @@ The example dataflow for a specification defined in [Specification format](speci
                     "x": 1422,
                     "y": 54
                 },
-                "inputs": {
-                    "image": {
-                        "id": "ni_168064228786539"
+                "width": 200,
+                "twoColumn": false,
+                "interfaces": [
+                    {
+                        "name": "image",
+                        "id": "ni_168064228786539",
+                        "direction": "input"
                     },
-                    "kernel": {
-                        "id": "ni_168064228786540"
+                    {
+                        "name": "kernel",
+                        "id": "ni_168064228786540",
+                        "direction": "input"
+                    },
+                    {
+                        "name": "output",
+                        "id": "ni_168064228786641",
+                        "direction": "output"
                     }
-                },
-                "properties": {
-                    "iterations": {
-                        "id": "4338663076",
+                ],
+                "properties": [
+                    {
+                        "name": "iterations",
+                        "id": "0605526715",
                         "value": 1
                     },
-                    "border type": {
-                        "id": "0111662888",
+                    {
+                        "name": "border type",
+                        "id": "2810748353",
                         "value": "constant"
                     },
-                    "operation type": {
-                        "id": "5012783747",
+                    {
+                        "name": "operation type",
+                        "id": "8413506138",
                         "value": "dilation"
                     }
-                },
-                "outputs": {
-                    "output": {
-                        "id": "ni_168064228786641"
-                    }
-                },
-                "width": 200,
-                "twoColumn": false
+                ],
+                "name": ""
             },
             {
                 "type": "SaveVideo",
                 "id": "node_168064231007448",
-                "name": "Save Video",
                 "position": {
                     "x": 1773,
                     "y": 76
                 },
-                "inputs": {
-                    "color": {
-                        "id": "ni_168064231007449"
+                "width": 200,
+                "twoColumn": false,
+                "interfaces": [
+                    {
+                        "name": "color",
+                        "id": "ni_168064231007449",
+                        "direction": "input"
                     },
-                    "binary": {
-                        "id": "ni_168064231007450"
+                    {
+                        "name": "binary",
+                        "id": "ni_168064231007450",
+                        "direction": "input"
                     }
-                },
-                "properties": {
-                    "filename": {
-                        "id": "8383848111",
+                ],
+                "properties": [
+                    {
+                        "name": "filename",
+                        "id": "3087244218",
                         "value": "output.mp4"
                     }
-                },
-                "outputs": {},
-                "width": 200,
-                "twoColumn": false
+                ],
+                "name": "Save Video"
             }
         ],
         "connections": [
@@ -338,8 +377,14 @@ The example dataflow for a specification defined in [Specification format](speci
             }
         ],
         "inputs": [],
-        "outputs": []
-    }
+        "outputs": [],
+        "panning": {
+            "x": 0,
+            "y": 0
+        },
+        "scaling": 1
+    },
+    "graphTemplates": []
 }
 ```
 
