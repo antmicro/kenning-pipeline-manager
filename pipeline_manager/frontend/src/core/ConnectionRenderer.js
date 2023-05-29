@@ -24,14 +24,16 @@
  * set to true, it will index from -(N-1)/2 to (N-1)/2
  * @returns Value the connection should shift from it's default position
  */
-function getShift(connection, graph, scaling, symmetric = false) {
+
+/* eslint-disable max-classes-per-file */
+function getShift(ncFrom, ncTo, graph, scaling, symmetric = false) {
     const shiftDistance = 15;
-    const fromNode = graph.findNodeById(connection.from.nodeId);
+    const fromNode = graph.findNodeById(ncFrom.nodeId);
 
     const outputInterfaceList = Object.values(fromNode.outputs);
-    const index = outputInterfaceList.includes(connection.from)
-        ? outputInterfaceList.reverse().indexOf(connection.from)
-        : outputInterfaceList.reverse().indexOf(connection.to);
+    const index = outputInterfaceList.includes(ncFrom)
+        ? outputInterfaceList.reverse().indexOf(ncFrom)
+        : outputInterfaceList.reverse().indexOf(ncTo);
     const shiftIndex = symmetric ? index - (outputInterfaceList.length - 1) / 2 : index;
     return shiftDistance * shiftIndex * scaling;
 }
@@ -69,6 +71,31 @@ function calculateEllipseR(x, y, cx, cy, slope) {
     return [rx, ry];
 }
 
+class NormalizedConnection {
+    /**
+     * Class that makes sure that the connection is in correct order, which means that from and to
+     * sockets and their coordinates are properly set.
+     */
+    constructor(x1, y1, x2, y2, connection) {
+        this.x1 = x1;
+        this.y1 = y1;
+        this.x2 = x2;
+        this.y2 = y2;
+        this.from = connection.from;
+        if (connection.to) {
+            this.to = connection.to;
+            if (
+                (this.from.direction === 'input' && this.to.direction === 'output') ||
+                (this.from.direction === 'input' && this.to.direction === 'inout') ||
+                (this.from.direction === 'inout' && this.to.direction === 'output')
+            ) {
+                [this.x1, this.x2, this.y1, this.y2] = [this.x2, this.x1, this.y2, this.y1];
+                [this.from, this.to] = [this.to, this.from];
+            }
+        }
+    }
+}
+
 export default class ConnectionRenderer {
     style = 'curved';
 
@@ -84,41 +111,61 @@ export default class ConnectionRenderer {
             },
 
             renderLoopback(x1, y1, x2, y2, connection) {
-                const shift = getShift(connection, graph, graph.scaling) + 30 * graph.scaling;
+                const nc = new NormalizedConnection(x1, y1, x2, y2, connection);
+                const shift = getShift(nc.from, nc.to, graph, graph.scaling) + 30 * graph.scaling;
                 const bottomY = nodeBottomPoint(connection, graph.scaling, graph.panning);
                 const y = bottomY + shift;
 
-                const rightCx = x1 - shift;
-                const rightCy = (y + y1) / 2;
-                const [rightRx, rightRy] = calculateEllipseR(x1, y, rightCx, rightCy, 1);
+                const rightCx = nc.x1 - shift;
+                const rightCy = (y + nc.y1) / 2;
+                const [rightRx, rightRy] = calculateEllipseR(nc.x1, y, rightCx, rightCy, 1);
 
-                const bottomCx = (x1 + x2) / 2;
+                const bottomCx = (nc.x1 + nc.x2) / 2;
                 const bottomCy = bottomY;
-                const [bottomRx, bottomRy] = calculateEllipseR(x1, y, bottomCx, bottomCy, 1);
+                const [bottomRx, bottomRy] = calculateEllipseR(nc.x1, y, bottomCx, bottomCy, 1);
 
-                const leftCx = x2 + shift;
-                const leftCy = (y + y2) / 2;
-                const [leftRx, leftRy] = calculateEllipseR(x2, y, leftCx, leftCy, -1);
+                const leftCx = nc.x2 + shift;
+                const leftCy = (y + nc.y2) / 2;
+                const [leftRx, leftRy] = calculateEllipseR(nc.x2, y, leftCx, leftCy, -1);
 
-                return `M ${x1} ${y1}
-                A ${rightRx} ${rightRy} 0 0 1 ${x1} ${y}
-                A ${bottomRx} ${bottomRy} 0 0 1 ${x2} ${y}
-                A ${leftRx} ${leftRy} 0 0 1 ${x2} ${y2}`;
+                return `M ${nc.x1} ${nc.y1}
+                A ${rightRx} ${rightRy} 0 0 1 ${nc.x1} ${y}
+                A ${bottomRx} ${bottomRy} 0 0 1 ${nc.x2} ${y}
+                A ${leftRx} ${leftRy} 0 0 1 ${nc.x2} ${nc.y2}`;
             },
         });
         this.styleMap.set('orthogonal', {
             render(x1, y1, x2, y2, connection) {
-                const shift = getShift(connection, graph, graph.scaling, true);
-                return `M ${x1} ${y1} H ${(x1 + x2) / 2 + shift} V ${y2} H ${x2}`;
+                const nc = new NormalizedConnection(x1, y1, x2, y2, connection);
+                const shift = getShift(nc.from, nc.to, graph, graph.scaling, true);
+                const minMargin = 30;
+                const middlePoint = (nc.x1 + nc.x2) / 2;
+
+                if (connection.to) {
+                    if (nc.from.direction === 'output') {
+                        return `M ${nc.x1} ${nc.y1} H ${
+                            shift + Math.max(nc.x1 + minMargin, middlePoint)
+                        } V ${nc.y2} H ${nc.x2}`;
+                    }
+
+                    if (nc.to.direction === 'input' || nc.from.direction === 'inout') {
+                        return `M ${nc.x1} ${nc.y1} H ${
+                            shift + Math.min(nc.x1 - minMargin, nc.x2 - minMargin, middlePoint)
+                        } V ${nc.y2} H ${nc.x2}`;
+                    }
+                }
+                return `M ${nc.x1} ${nc.y1} H ${shift + middlePoint} V ${nc.y2} H ${nc.x2}`;
             },
 
             renderLoopback(x1, y1, x2, y2, connection) {
-                const shift = getShift(connection, graph, graph.scaling) + 30 * graph.scaling;
+                const nc = new NormalizedConnection(x1, y1, x2, y2, connection);
+                const shift = getShift(nc.from, nc.to, graph, graph.scaling) + 30 * graph.scaling;
                 const bottomY = nodeBottomPoint(connection, graph.scaling, graph.panning);
                 const y = bottomY + shift;
-                return `M ${x1} ${y1}
+
+                return `M ${nc.x1} ${nc.y1}
                 h ${shift}
-                V ${y} H ${x2 - shift} V ${y2} H ${x2}`;
+                V ${y} H ${nc.x2 - shift} V ${nc.y2} H ${nc.x2}`;
             },
         });
     }
