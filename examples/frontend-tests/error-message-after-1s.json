@@ -10,32 +10,37 @@
                     "x": 174,
                     "y": 282
                 },
-                "inputs": {},
-                "properties": {
-                    "Duration": {
+                "properties": [
+                    {
+                        "name": "Duration",
                         "id": "3345586731",
                         "value": 1
                     },
-                    "Disconnect": {
+                    {
+                        "name": "Disconnect",
                         "id": "3025126841",
                         "value": false
                     },
-                    "MessageType": {
+                    {
+                        "name": "MessageType",
                         "id": "0822224447",
                         "value": "ERROR"
                     },
-                    "Message": {
+                    {
+                        "name": "Message",
                         "id": "0638018076",
                         "value": "Error message after 1s"
                     }
-                },
-                "outputs": {
-                    "Effect": {
-                        "id": "ni_16807661729493"
-                    }
-                },
+                ],
                 "width": 200,
-                "twoColumn": false
+                "twoColumn": false,
+                "interfaces": [
+                    {
+                        "name": "Effect",
+                        "id": "ni_16807661729493",
+                        "direction": "output"
+                    }
+                ]
             }
         ],
         "connections": [],

@@ -10,32 +10,37 @@
                     "x": 187,
                     "y": 324
                 },
-                "inputs": {},
-                "properties": {
-                    "Duration": {
+                "properties": [
+                    {
+                        "name": "Duration",
                         "id": "2713078824",
                         "value": 1
                     },
-                    "Disconnect": {
+                    {
+                        "name": "Disconnect",
                         "id": "1144735461",
                         "value": false
                     },
-                    "MessageType": {
+                    {
+                        "name": "MessageType",
                         "id": "5561432280",
                         "value": "OK"
                     },
-                    "Message": {
+                    {
+                        "name": "Message",
                         "id": "7523568556",
                         "value": "Success message disconnect after 1s"
                     }
-                },
-                "outputs": {
-                    "Effect": {
-                        "id": "ni_168076500598633"
-                    }
-                },
+                ],
                 "width": 200,
-                "twoColumn": false
+                "twoColumn": false,
+                "interfaces": [
+                    {
+                        "name": "Effect",
+                        "id": "ni_168076500598633",
+                        "direction": "output"
+                    }
+                ]
             },
             {
                 "type": "Disconnect",
@@ -44,24 +49,27 @@
                     "x": 847,
                     "y": 418
                 },
-                "inputs": {
-                    "Effect": {
-                        "id": "ni_168076500879635"
-                    }
-                },
-                "properties": {
-                    "Time offset": {
+                "properties": [
+                    {
+                        "name": "Time offset",
                         "id": "7117012620",
                         "value": 1
                     },
-                    "Should disconnect": {
+                    {
+                        "name": "Should disconnect",
                         "id": "1568710230",
                         "value": true
                     }
-                },
-                "outputs": {},
+                ],
                 "width": 200,
-                "twoColumn": false
+                "twoColumn": false,
+                "interfaces": [
+                    {
+                        "name": "Effect",
+                        "id": "ni_168076500879635",
+                        "direction": "input"
+                    }
+                ]
             }
         ],
         "connections": [

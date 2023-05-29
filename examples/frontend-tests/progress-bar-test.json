@@ -10,36 +10,42 @@
                     "x": 174,
                     "y": 282
                 },
-                "inputs": {},
-                "properties": {
-                    "Duration": {
+                "properties": [
+                    {
+                        "name": "Duration",
                         "id": "4115265524",
                         "value": 5
                     },
-                    "Disconnect": {
+                    {
+                        "name": "Disconnect",
                         "id": "7272682362",
                         "value": false
                     },
-                    "MessageType": {
+                    {
+                        "name": "MessageType",
                         "id": "1100140703",
                         "value": "OK"
                     },
-                    "ProgressMessages": {
+                    {
+                        "name": "ProgressMessages",
                         "id": "8754535436",
                         "value": 100
                     },
-                    "Message": {
+                    {
+                        "name": "Message",
                         "id": "7170717331",
                         "value": "Process finished successfully"
                     }
-                },
-                "outputs": {
-                    "Effect": {
-                        "id": "ni_16807661729493"
-                    }
-                },
+                ],
                 "width": 200,
-                "twoColumn": false
+                "twoColumn": false,
+                "interfaces": [
+                    {
+                        "name": "Effect",
+                        "id": "ni_16807661729493",
+                        "direction": "output"
+                    }
+                ]
             }
         ],
         "connections": [],

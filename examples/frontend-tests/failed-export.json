@@ -10,28 +10,31 @@
                     "x": 454,
                     "y": 318
                 },
-                "inputs": {},
-                "properties": {
-                    "Duration": {
+                "properties": [
+                    {
+                        "name": "Duration",
                         "id": "3603572430",
                         "value": 0
                     },
-                    "Disconnect": {
+                    {
+                        "name": "Disconnect",
                         "id": "5853480376",
                         "value": false
                     },
-                    "MessageType": {
+                    {
+                        "name": "MessageType",
                         "id": "1823723801",
                         "value": "ERROR"
                     },
-                    "Message": {
+                    {
+                        "name": "Message",
                         "id": "1522066507",
                         "value": "Failed export"
                     }
-                },
-                "outputs": {},
+                ],
                 "width": 200,
-                "twoColumn": false
+                "twoColumn": false,
+                "interfaces": []
             }
         ],
         "connections": [],

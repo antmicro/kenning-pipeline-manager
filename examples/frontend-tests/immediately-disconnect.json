@@ -10,32 +10,37 @@
                     "x": 258,
                     "y": 135
                 },
-                "inputs": {},
-                "properties": {
-                    "Duration": {
+                "properties": [
+                    {
+                        "name": "Duration",
                         "id": "5512252078",
                         "value": 0
                     },
-                    "Disconnect": {
+                    {
+                        "name": "Disconnect",
                         "id": "2440631142",
                         "value": true
                     },
-                    "MessageType": {
+                    {
+                        "name": "MessageType",
                         "id": "4536853375",
                         "value": "OK"
                     },
-                    "Message": {
+                    {
+                        "name": "Message",
                         "id": "5028571688",
                         "value": "Everything went fine!"
                     }
-                },
-                "outputs": {
-                    "Effect": {
-                        "id": "ni_16807659019991"
-                    }
-                },
+                ],
                 "width": 200,
-                "twoColumn": false
+                "twoColumn": false,
+                "interfaces": [
+                    {
+                        "name": "Effect",
+                        "id": "ni_16807659019991",
+                        "direction": "output"
+                    }
+                ]
             }
         ],
         "connections": [],
