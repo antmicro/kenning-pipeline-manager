@@ -39,6 +39,7 @@ Pipeline Manager can be built in two different ways as:
 * regular web application that is designated to communicate and cooperate with an external application (like [Kenning](https://github.com/antmicro/kenning)).
 
 ### Static HTML application
+
 To build Pipeline Manager as a static HTML application run  in the root directory:
 
 ```bash
@@ -55,14 +56,27 @@ firefox ./pipeline_manager/frontend/dist/index.html
 After running Pipeline Manager you can use sample specification under `./examples/sample_specification.json` to check the visualization and editing of pipelines.
 Additionaly `./examples/sample_dataflow.json` can be used to see how dataflows are stored.
 
-It is also possible to add a default specification JSON to the generated HTML.
+It is possible to add a default specification JSON to the generated HTML.
 It just needs to be provided as the second argument of the `./build` script:
 
 ```bash
 ./build static-html <path-to-specification-json>
 ```
 
+It is also possible to add a default dataflow that will be loaded on the start of the application, e.g.:
+
+```bash
+./build static-html <path-to-specification> <path-to-dataflow>
+```
+
+To be able to use some additional assets, like icons for nodes, run:
+
+```bash
+./build --assets-directory <path-to-assets-dir> <path-to-specification> <path-to-dataflow>
+```
+
 ### Web application
+
 To build Pipeline Manager to work with an external application (like Kenning) run in the root directory:
 
 ```bash
