@@ -19,7 +19,6 @@ const options = {
     icon: false,
     closeButton: false,
 };
-require.context('../../nodeIcons', false, /\.svg$/);
 
 const app = createApp(App);
 app.use(vClickOutside);

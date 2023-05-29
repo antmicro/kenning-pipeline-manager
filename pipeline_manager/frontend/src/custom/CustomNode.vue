@@ -259,5 +259,5 @@ const displayedProperties = computed(() =>
 );
 
 const iconPath = viewModel.value.editor.getNodeIconPath(props.node.type);
-const nodeIcon = iconPath !== undefined ? require(`../../../nodeIcons/${iconPath}`) : undefined; // eslint-disable-line global-require,max-len,import/no-dynamic-require
+const nodeIcon = iconPath !== undefined ? `./assets/${iconPath}` : undefined; // eslint-disable-line global-require,max-len,import/no-dynamic-require
 </script>

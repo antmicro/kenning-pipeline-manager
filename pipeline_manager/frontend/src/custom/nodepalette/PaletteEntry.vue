@@ -34,10 +34,7 @@ export default defineComponent({
         },
     },
     setup(props) {
-        const nodeIcon =
-            props.iconPath !== undefined
-                ? require(`../../../../nodeIcons/${props.iconPath}`) // eslint-disable-line global-require,max-len,import/no-dynamic-require
-                : undefined;
+        const nodeIcon = props.iconPath !== undefined ? `./assets/${props.iconPath}` : undefined;
         return { nodeIcon };
     },
 });
