@@ -1,0 +1,29 @@
+{
+    "nodes": [
+        {
+            "name": "TestInout",
+            "type": "filesystem",
+            "category": "Test",
+            "properties": [
+                {"name": "property-1", "type": "text", "default": ""},
+                {"name": "property-2", "type": "text", "default": ""}
+            ],
+            "interfaces": [
+                {"name": "output-1", "type": "TypeOne", "direction": "output"},
+                {"name": "output-2", "type": "TypeTwo", "direction": "output"},
+                {"name": "input-1", "type": "TypeOne", "direction": "input"},
+                {"name": "input-2", "type": "TypeTwo", "direction": "input"},
+                {"name": "inout-1", "type": "TypeOne", "direction": "inout"},
+                {"name": "inout-2", "type": "TypeTwo", "direction": "inout"}
+            ]
+        }
+    ],
+    "metadata": {
+        "interfaces": {
+            "TypeOne": "#FF00FF",
+            "TypeTwo": "#0000FF"
+        },
+        "connectionStyle": "orthogonal",
+        "allowLoopbacks": true
+    }
+}
