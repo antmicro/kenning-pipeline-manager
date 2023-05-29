@@ -1,127 +1,165 @@
 {
-  "graphTemplates": [],
   "graph": {
-    "id": "7640442628",
-    "nodes": [
-      {
-        "type": "Node",
-        "id": "node_16825039046080",
-        "position": {
-          "x": 240,
-          "y": 248
-        },
-        "inputs": {
-          "In 1": {
-            "id": "ni_16825039046081"
+      "id": "98a51a3d-654b-4cd6-8c36-1cfdb90abb58",
+      "nodes": [
+          {
+              "type": "Node",
+              "id": "35dca9a9-dab0-40d4-a2fc-640cd71ff25d",
+              "position": {
+                  "x": 797,
+                  "y": 123
+              },
+              "width": 200,
+              "twoColumn": false,
+              "interfaces": [
+                  {
+                      "name": "In 1",
+                      "id": "f192dd6d-9d08-4c36-989f-aa0565e34644",
+                      "direction": "input"
+                  },
+                  {
+                      "name": "In 2",
+                      "id": "c4335fee-28fc-4d2e-abb8-2c79bdc6d749",
+                      "direction": "input"
+                  },
+                  {
+                      "name": "In 3",
+                      "id": "317c11a4-0e52-4db0-bb08-7c51161e48e7",
+                      "direction": "input"
+                  },
+                  {
+                      "name": "In 4",
+                      "id": "2180e57b-7aab-4a61-99ab-d504725eae62",
+                      "direction": "input"
+                  },
+                  {
+                      "name": "In 5",
+                      "id": "8bc21352-ca25-4e48-b55e-5b040b2a8d9e",
+                      "direction": "input"
+                  },
+                  {
+                      "name": "Out 1",
+                      "id": "979dc8d6-8e3b-4b92-84a6-6a1da8da4f97",
+                      "direction": "output"
+                  },
+                  {
+                      "name": "Out 2",
+                      "id": "346a6baa-e834-4cdd-be6a-b7ce1de3d492",
+                      "direction": "output"
+                  },
+                  {
+                      "name": "Out 3",
+                      "id": "b169664a-0e86-476c-bec2-16b01c977844",
+                      "direction": "output"
+                  },
+                  {
+                      "name": "Out 4",
+                      "id": "36a86df0-cbf0-4550-bbb4-81a78b68eb19",
+                      "direction": "output"
+                  },
+                  {
+                      "name": "Out 5",
+                      "id": "d311dc55-8df6-41cc-a59b-828dfa03e49a",
+                      "direction": "output"
+                  }
+              ],
+              "properties": [],
+              "name": "Node"
           },
-          "In 2": {
-            "id": "ni_16825039046082"
-          },
-          "In 3": {
-            "id": "ni_16825039046083"
-          },
-          "In 4": {
-            "id": "ni_16825039046084"
-          },
-          "In 5": {
-            "id": "ni_16825039046085"
+          {
+              "type": "Node",
+              "id": "2be5774e-6bc3-4d09-9f19-96828100db84",
+              "position": {
+                  "x": 1452,
+                  "y": 225
+              },
+              "width": 200,
+              "twoColumn": false,
+              "interfaces": [
+                  {
+                      "name": "In 1",
+                      "id": "612a13f6-78a8-4365-902d-4893e21a2c40",
+                      "direction": "input"
+                  },
+                  {
+                      "name": "In 2",
+                      "id": "8fd7f22a-97f9-4944-90c3-f7d83e4d765d",
+                      "direction": "input"
+                  },
+                  {
+                      "name": "In 3",
+                      "id": "4e026484-8823-4f82-9387-c9f70a5d3245",
+                      "direction": "input"
+                  },
+                  {
+                      "name": "In 4",
+                      "id": "e49dcdce-80d9-461a-b8c5-2f4b0a88ea3d",
+                      "direction": "input"
+                  },
+                  {
+                      "name": "In 5",
+                      "id": "c2bf8f56-4ad1-4e24-bda7-2cf93e628439",
+                      "direction": "input"
+                  },
+                  {
+                      "name": "Out 1",
+                      "id": "7d6f6f86-1b8e-42fc-b647-05eb60736ab6",
+                      "direction": "output"
+                  },
+                  {
+                      "name": "Out 2",
+                      "id": "56e081cc-5c6a-40e8-b563-049ebdc37037",
+                      "direction": "output"
+                  },
+                  {
+                      "name": "Out 3",
+                      "id": "53d4a49a-54c3-4036-98ef-87048c8d10e6",
+                      "direction": "output"
+                  },
+                  {
+                      "name": "Out 4",
+                      "id": "d1c24b41-980a-4df6-b1c7-226acaf5b49c",
+                      "direction": "output"
+                  },
+                  {
+                      "name": "Out 5",
+                      "id": "1e69fa55-5b8f-4010-b590-0c1d7cb43d09",
+                      "direction": "output"
+                  }
+              ],
+              "properties": [],
+              "name": "Node"
           }
-        },
-        "properties": {},
-        "outputs": {
-          "Out 1": {
-            "id": "ni_16825039046086"
+      ],
+      "connections": [
+          {
+              "id": "5bab8337-8227-4b0c-8ed2-427242d66fb3",
+              "from": "346a6baa-e834-4cdd-be6a-b7ce1de3d492",
+              "to": "c4335fee-28fc-4d2e-abb8-2c79bdc6d749"
           },
-          "Out 2": {
-            "id": "ni_16825039046097"
+          {
+              "id": "bafcb379-0899-42ae-bfb6-6c30c5e524c2",
+              "from": "b169664a-0e86-476c-bec2-16b01c977844",
+              "to": "317c11a4-0e52-4db0-bb08-7c51161e48e7"
           },
-          "Out 3": {
-            "id": "ni_16825039046098"
+          {
+              "id": "a1124d8c-bace-41c8-9a5a-6ca31825c390",
+              "from": "36a86df0-cbf0-4550-bbb4-81a78b68eb19",
+              "to": "2180e57b-7aab-4a61-99ab-d504725eae62"
           },
-          "Out 4": {
-            "id": "ni_16825039046099"
-          },
-          "Out 5": {
-            "id": "ni_168250390460910"
+          {
+              "id": "cadb440c-a346-4a7a-9248-a2d2de188e63",
+              "from": "979dc8d6-8e3b-4b92-84a6-6a1da8da4f97",
+              "to": "4e026484-8823-4f82-9387-c9f70a5d3245"
           }
-        },
-        "width": 200,
-        "twoColumn": false
+      ],
+      "inputs": [],
+      "outputs": [],
+      "panning": {
+          "x": 151.2062355324075,
+          "y": -18.316984953703695
       },
-      {
-        "type": "Node",
-        "id": "node_168250392602921",
-        "position": {
-          "x": 1144,
-          "y": 513
-        },
-        "inputs": {
-          "In 1": {
-            "id": "ni_168250392602922"
-          },
-          "In 2": {
-            "id": "ni_168250392602923"
-          },
-          "In 3": {
-            "id": "ni_168250392602924"
-          },
-          "In 4": {
-            "id": "ni_168250392602925"
-          },
-          "In 5": {
-            "id": "ni_168250392602926"
-          }
-        },
-        "properties": {},
-        "outputs": {
-          "Out 1": {
-            "id": "ni_168250392602927"
-          },
-          "Out 2": {
-            "id": "ni_168250392603028"
-          },
-          "Out 3": {
-            "id": "ni_168250392603029"
-          },
-          "Out 4": {
-            "id": "ni_168250392603030"
-          },
-          "Out 5": {
-            "id": "ni_168250392603031"
-          }
-        },
-        "width": 200,
-        "twoColumn": false
-      }
-    ],
-    "connections": [
-      {
-        "id": "168250391647817",
-        "from": "ni_16825039046097",
-        "to": "ni_16825039046082"
-      },
-      {
-        "id": "168250393161535",
-        "from": "ni_16825039046086",
-        "to": "ni_168250392602922"
-      },
-      {
-        "id": "168250399372351",
-        "from": "ni_16825039046098",
-        "to": "ni_16825039046083"
-      },
-      {
-        "id": "168250401728954",
-        "from": "ni_16825039046098",
-        "to": "ni_16825039046084"
-      },
-      {
-        "id": "168250402498757",
-        "from": "ni_16825039046099",
-        "to": "ni_16825039046085"
-      }
-    ],
-    "inputs": [],
-    "outputs": []
-  }
+      "scaling": 0.884736
+  },
+  "graphTemplates": []
 }
