@@ -75,8 +75,8 @@ def get_node_properties(node_type: str, dataflow: Dict) -> Dict:
             break
 
     properties = {}
-    for title, state in description_node["properties"].items():
-        properties[title] = state["value"]
+    for prop in description_node["properties"]:
+        properties[prop['name']] = prop["value"]
 
     return properties
 
@@ -105,8 +105,10 @@ def get_effects(node_type: str, dataflow: Dict) -> List:
 
     for node in nodes:
         if node["type"] == node_type:
-            socket_id = node["outputs"]["Effect"]["id"]
-            break
+            for io in node['interfaces']:
+                if io['direction'] == 'output':
+                    socket_id = io['id']
+                    break
 
     connected_nodes_id = []
     for connection in connections:
@@ -116,8 +118,10 @@ def get_effects(node_type: str, dataflow: Dict) -> List:
     connected_nodes = []
     for node in nodes:
         try:
-            if node["inputs"]["Effect"]["id"] in connected_nodes_id:
-                connected_nodes.append(node)
+            for io in node['interfaces']:
+                if io['name'] == 'effect':
+                    if io['id'] in connected_nodes_id:
+                        connected_nodes.append(node)
         except KeyError:
             pass
 
@@ -127,8 +131,8 @@ def get_effects(node_type: str, dataflow: Dict) -> List:
             {
                 "type": node["type"],
                 "properties": {
-                    name: properties["value"]
-                    for name, properties in node["properties"].items()
+                    prop['name']: prop["value"]
+                    for prop in node["properties"]
                 },
             }
         )
