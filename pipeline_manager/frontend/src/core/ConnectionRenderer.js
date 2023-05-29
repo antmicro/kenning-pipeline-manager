@@ -18,7 +18,9 @@
  * in the same node. The value of the shift is constant distance times the index of an
  * interface, adjusted for any canvas transformation
  *
- * @param connection BaklavaJS-defined connection
+ * @param ncFrom starting node reference
+ * @param ncTo ending node reference
+ * @param graph the graph definition
  * @param scaling number from viewPlugin defining the scaling of canvas
  * @param symmetric As default, the connections can be indexed from 0 to N-1. If this flag is
  * set to true, it will index from -(N-1)/2 to (N-1)/2
