@@ -39,9 +39,12 @@ export default class PipelineManagerEditor extends Editor {
                 return { connectionAllowed: false };
             }
 
-            // TODO improve handling of inout ports
-            if (from.isInput && !to.isInput) {
-                // reverse connection
+            // reverse connection so that 'from' is input and 'to' is output
+            if (
+                (from.direction === 'input' && to.direction === 'output') ||
+                (from.direction === 'input' && to.direction === 'inout') ||
+                (from.direction === 'inout' && to.direction === 'output')
+            ) {
                 const tmp = from;
                 from = to;
                 to = tmp;
