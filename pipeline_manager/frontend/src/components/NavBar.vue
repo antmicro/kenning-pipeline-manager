@@ -435,6 +435,7 @@ export default {
         position: absolute;
         height: 5px;
         bottom: 0;
+        z-index: 5;
         transform: translateY(100%);
         background-color: $green;
     }
