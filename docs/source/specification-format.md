@@ -58,8 +58,9 @@ Every input object requires six properties:
 * `name` - name displayed in the editor.
 * `type` - value used for styling.
 * `category` - context menu category displayed in the editor.
-* `icon` - name of a svg icon that is going to be displayed next to the name of th node.
-  The icon has to be placed in `pipeline_manager/nodeIcons` directiory.
+* `icon` - name of an SVG icon that is going to be displayed next to the name of the node.
+  The icon has to be placed in the `assets` directory in the built frontend.
+  The path in `icon` should be the path within the `assets` directory.
 * `interfaces` - array representing inputs, outputs and bidirectional ports for node.
   The entries are of type [Interface](#interface).
 * `properties` - array with elements of type [Property](#property).

@@ -10,6 +10,14 @@ In the root of the project, run:
 ./build server-app
 ```
 
+``````{note}
+If the specification requires additional assets (e.g. icons), provide them with `--assets-directory <path-to-assets>` flag, for example:
+
+```bash
+./build --assets-directory examples/sample-assets server-app
+```
+``````
+
 Now, start the {{project}} server application:
 
 ```bash
