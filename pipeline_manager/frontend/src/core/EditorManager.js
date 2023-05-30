@@ -6,7 +6,7 @@
 
 import Ajv, { stringify } from 'ajv';
 
-import { useBaklava, BaklavaInterfaceTypes } from 'baklavajs';
+import { useBaklava, BaklavaInterfaceTypes, GRAPH_NODE_TYPE_PREFIX } from 'baklavajs';
 
 import PipelineManagerEditor from '../custom/Editor';
 
@@ -38,6 +38,17 @@ export default class EditorManager {
         // need to be set here as settings try to use this value before specification is loaded
         this.baklavaView.ignorableLayers = [];
         this.baklavaView.collapseSidebar = true;
+
+        this.baklavaView.hooks.renderNode.subscribe("EditorManager", (node) => {
+            if(node.node.type.startsWith(GRAPH_NODE_TYPE_PREFIX)) {
+                Object.values(node.node.inputs).forEach(intf =>
+                    intf.direction = "input"
+                )
+                Object.values(node.node.outputs).forEach(intf =>
+                    intf.direction = "output"
+                )
+            }
+        })
     }
 
     /**
@@ -204,6 +215,7 @@ export default class EditorManager {
      * If the array is empty, the loading was successful.
      */
     loadDataflow(dataflow) {
+        this.editor.view = this.baklavaView;
         try {
             if ('metadata' in dataflow && this.currentSpecification !== undefined) {
                 const errors = this.validateMetadata(dataflow.metadata);
