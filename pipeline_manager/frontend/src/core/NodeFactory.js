@@ -147,6 +147,42 @@ function parseInputs(inputs, interfaceTypes) {
     return tempInputs;
 }
 
+function parseNodeState(state) {
+    if (state.inputs === undefined) {
+        state.inputs = {};
+        state.outputs = {};
+    }
+
+    if (state.interfaces !== undefined) {
+        state.interfaces.forEach((intf) => {
+            if (intf.direction === 'input' || intf.direction === 'inout') {
+                state.inputs[intf.name] = { id: intf.id };
+            } else if (intf.direction === 'output') {
+                state.outputs[intf.name] = { id: intf.id };
+            }
+        });
+
+        delete state.interfaces;
+    }
+    
+    
+    if (state.properties !== undefined) {
+        state.properties.forEach((prop) => {
+            state.inputs[prop.name] = { id: prop.id, value: prop.value };
+        });
+        delete state.properties;
+    }
+
+    if ('name' in state) {
+        state.title = state.name;
+    } else {
+        state.title = '';
+    }
+    delete state.name;
+
+    return state
+}
+
 /**
  * Class factory that creates a class for a custom Node that is described by the arguments.
  * It can be later registered so that the user can use it and save the editor.
@@ -241,37 +277,7 @@ export function NodeFactory(
 
             this.load = (state) => {
                 const interfacestorage = state.interfaces;
-                if (state.interfaces !== undefined) {
-
-                    state.inputs = {};
-                    state.outputs = {};
-
-                    state.interfaces.forEach((intf) => {
-                        if (intf.direction === 'input' || intf.direction === 'inout') {
-                            state.inputs[intf.name] = { id: intf.id };
-                        } else if (intf.direction === 'output') {
-                            state.outputs[intf.name] = { id: intf.id };
-                        }
-                    });
-                    delete state.interfaces;
-                }
-                
-                if (state.properties !== undefined) {
-                    state.properties.forEach((prop) => {
-                        state.inputs[prop.name] = { id: prop.id, value: prop.value };
-                    });
-                    delete state.properties;
-                }
-
-                if ('name' in state) {
-                    state.title = state.name;
-                } else {
-                    state.title = '';
-                }
-                delete state.name;
-
-                this.parentLoad(state);
-
+                this.parentLoad(parseNodeState(state));
                 interfacestorage.forEach((intf) => {
                     if ('connectionSide' in intf) {
                         if (intf.direction === 'input' || intf.direction === 'inout') {
@@ -334,7 +340,7 @@ export function SubgraphFactory(nodes, connections, interfaces, name, type, edit
 
     const state = {
         id: type,
-        nodes: nodes,
+        nodes: nodes.map(parseNodeState),
         connections: connections,
         inputs: inputs,
         outputs: outputs,
