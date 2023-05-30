@@ -326,6 +326,18 @@ export function readInterfaceTypes(nodes, metadata) {
     return interfaceTypes;
 }
 
+/**
+ * Function creating the subgraph template as defined in specification
+ * 
+ * @param nodes Nodes of the subgraph
+ * @param connections Connections inside the subgraph 
+ * @param interfaces Inputs and outputs 
+ * @param name Default name that will be displayed in editor
+ * @param type Type of the subgraph. Used to define which template should be used
+ * when new subgraph node is create
+ * @param editor PipelineManagerEditor instance
+ * @returns 
+ */
 export function SubgraphFactory(nodes, connections, interfaces, name, type, editor) {
     const inputs = interfaces.filter(interf => interf.direction == 'input').map(interf => ({
         id: uuidv4(),

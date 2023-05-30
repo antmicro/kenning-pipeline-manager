@@ -323,10 +323,39 @@ export default class EditorManager {
         return this.validateJSONWithSchema(jsonmetadata, specificationSchema.properties.metadata);
     }
 
+    /**
+     * Validates specification passed in `specification` using jsonSchema.
+     *
+     * @param specification Specification to validate
+     * @returns An array of errors. If the array is empty, the validation was successful.
+     */
+    /* eslint-disable class-methods-use-this */
+    validateSpecification(specification) {
+        return this.validateJSONWithSchema(specification, specificationSchema);
+    }
+
+    /**
+     * Validates metadata in JSON format using schema from specificationSchema.
+     *
+     * @param jsonmetadata metadata in JSON format to validate
+     * @return An array of errors. If the array is empty, the validation was successful.
+     */
+    validateMetadata(jsonmetadata) {
+        return this.validateJSONWithSchema(jsonmetadata, specificationSchema.properties.metadata);
+    }
+
+    /**
+     * Checks whether currently edited pipeline is one of the subgraphs
+     * 
+     * @returns True if editor is editing subgraph instance, false otherwise
+     */
     isInsideSubgraph() {
         return this.baklavaView.displayedGraph !== this.editor.graph
     }
 
+    /**
+     * Switches the editor state to main graph
+     */
     returnFromSubgraph() {
         this.editor.switchToMainGraph(this.baklavaView.displayedGraph);
     }
