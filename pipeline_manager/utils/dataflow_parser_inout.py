@@ -1,0 +1,58 @@
+import json
+import argparse
+from pathlib import Path
+import sys
+
+"""
+Version: 2
+Script that convert old dataflow format (Vue3-based) to a new one supporting inouts
+Usage of the script:
+
+* python -m pipeline_manager.utils.dataflow_parser_inout old_format_dataflow.json --output new_format_dataflow.json  # noqa: E501
+"""
+
+
+def main(argv):
+    parser = argparse.ArgumentParser(argv[0])
+    parser.add_argument("dataflow", type=Path)
+    parser.add_argument("--output", type=Path, default="parsed.json")
+
+    args, _ = parser.parse_known_args(argv[1:])
+
+    with open(args.dataflow) as f:
+        loaded = json.load(f)
+        graph = loaded['graph']
+
+    for node in graph['nodes']:
+        node['interfaces'] = []
+        for name, state in node['inputs'].items():
+            node['interfaces'].append({
+                'name': name,
+                'id': state['id'],
+                'direction': 'input'
+            })
+
+        for name, state in node['outputs'].items():
+            node['interfaces'].append({
+                'name': name,
+                'id': state['id'],
+                'direction': 'output'
+            })
+
+        newProperties = []
+        for name, state in node['properties'].items():
+            newProperties.append({
+                'name': name,
+                'id': state['id'],
+                'value': state['value']
+            })
+        node['properties'] = newProperties
+        del node['inputs']
+        del node['outputs']
+
+    with open(args.output, 'w') as f:
+        json.dump(loaded, f)
+
+
+if __name__ == "__main__":
+    main(sys.argv)

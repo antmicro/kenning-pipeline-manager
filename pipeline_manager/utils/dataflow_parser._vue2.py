@@ -3,10 +3,11 @@
 # SPDX-License-Identifier: Apache-2.0
 
 """
+Version: 1
 Script that convert old dataflow format (Vue2-based) to a new one (Vue3-based).
 Usage of the script:
 
-* python -m pipeline_manager.utils.dataflow_parser old_format_dataflow.json --output new_format_dataflow.json  # noqa: E501
+* python -m pipeline_manager.utils.dataflow_parser_vue2 old_format_dataflow.json --output new_format_dataflow.json  # noqa: E501
 """
 
 
