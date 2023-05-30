@@ -149,8 +149,8 @@ export default class PipelineManagerEditor extends Editor {
             this.template.update({
                 inputs,
                 outputs,
+                nodes,
                 connections: innerConnections.map((c) => ({ id: c.id, from: c.from.id, to: c.to.id })),
-                nodes: nodes.map((n) => n.save()),
             });
 
             this.template.panning = this.panning;
