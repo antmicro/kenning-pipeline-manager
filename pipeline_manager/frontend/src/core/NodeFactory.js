@@ -240,25 +240,28 @@ export function NodeFactory(
             };
 
             this.load = (state) => {
-                state.inputs = {};
-                state.outputs = {};
-
-                state.interfaces.forEach((intf) => {
-                    if (intf.direction === 'input' || intf.direction === 'inout') {
-                        state.inputs[intf.name] = { id: intf.id };
-                    } else if (intf.direction === 'output') {
-                        state.outputs[intf.name] = { id: intf.id };
-                    }
-                });
-
-                state.properties.forEach((prop) => {
-                    state.inputs[prop.name] = { id: prop.id, value: prop.value };
-                });
-
                 const interfacestorage = state.interfaces;
+                if (state.interfaces !== undefined) {
 
-                delete state.properties;
-                delete state.interfaces;
+                    state.inputs = {};
+                    state.outputs = {};
+
+                    state.interfaces.forEach((intf) => {
+                        if (intf.direction === 'input' || intf.direction === 'inout') {
+                            state.inputs[intf.name] = { id: intf.id };
+                        } else if (intf.direction === 'output') {
+                            state.outputs[intf.name] = { id: intf.id };
+                        }
+                    });
+                    delete state.interfaces;
+                }
+                
+                if (state.properties !== undefined) {
+                    state.properties.forEach((prop) => {
+                        state.inputs[prop.name] = { id: prop.id, value: prop.value };
+                    });
+                    delete state.properties;
+                }
 
                 if ('name' in state) {
                     state.title = state.name;
