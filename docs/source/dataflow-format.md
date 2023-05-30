@@ -8,14 +8,13 @@ Its state can be serialized and saved as a JSON file.
 The root of the dataflow format consists of two main attributes.
 
 * `graph` - object of type [Graph](#graph) that describes the main graph displayed to the user.
-* `graphTemplates` - list of subgraph nodes available to the user.
-  Subgraph nodes are used to group multiple nodes in a subgraph and visualize them as a single node.
 * `metadata` - structure of type [Metadata](specification-format-metadata).
   It is used to override metadata settings from the [Specification format](specification-format).
   In general, values from dataflow's `metadata` override settings from specification.
   For simple types, such as strings or integers, values are changed.
   For arrays and dictionaries, the values are updated (values of existing keys are replaced with new ones, and the new values in arrays are appended to the existing entries).
-
+* `graphTemplateInstances` - List of subgraphs represented by subgraph nodes. Each subgraph has
+the same format as the main graph
 
 ### Graph
 
@@ -48,6 +47,7 @@ Each node has:
 * `width` - the node's width in the editor.
 * `twoColumn` - boolean value.
   If set to `true`, then input and output sockets are both rendered in the top part of the node and properties are displayed below.
+* `subgraph` - Optional field defining the ID of subgraph that this node represents
 
 ##### Property
 
@@ -85,6 +85,10 @@ Each input, output and inout is described by an object with three attributes:
   Can be either `input`, `output` or `inout`.
 * `connectionSide` - tells on which side of the node the interface should be placed.
 
+##### Subgraph nodes
+
+If node contains `subgraph` field, it is considered as subgraph node. In this case `subgraph` field should
+be the same as ID of one of the graphs defined in `graphTemplateInstances`. Each instance should be represented by only one subgraph node.
 
 #### Connection
 

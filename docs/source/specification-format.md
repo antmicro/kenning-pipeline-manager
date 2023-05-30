@@ -13,6 +13,7 @@ There are two main attributes.
 
 * `metadata` - object of type [Metadata](#metadata) that specifies editor styling and metadata
 * `nodes` - array that specifies valid nodes, where every element is of type [Node](#node).
+* `subgraphs` - Array of dataflow-like objects defining subgraph nodes
 
 (specification-format-metadata)=
 ### Metadata
@@ -234,6 +235,16 @@ Additional properties:
   Supported values are `string`, `number`, `integer`, `boolean`.
 * `description` - description of the property.
   In some cases, it can be displayed to the user.
+
+### Subgraphs
+
+Each object defines node representing defined subgraph. Fields `name`, `type`, `category`, `icon` are
+defined the same way as in standard nodes. Apart from those, subgraph node contains additional properties:
+* `nodes` - List of nodes in a subgraph, specified in [dataflow format](dataflow-format)
+* `connections` - List of connections in a subgraph, specified in [dataflow format](dataflow-format)
+* `interface` - Apart from properties defined in [Node interface](#interface), contains:
+  * `nodeInterface` - ID of an interface of a node defined in subgraph to which this particular
+  interface is tied to.
 
 ## Example
 
