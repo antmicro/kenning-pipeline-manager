@@ -95,9 +95,8 @@ export default class PipelineManagerEditor extends Editor {
                 return { connectionAllowed: false };
             }
 
-            const connectionsInDanger = Array.from(
-                new Set(hookResults.flatMap((hr) => hr.connectionsInDanger)),
-            );
+            // List of connections that are removed once the dummyConnection is created
+            const connectionsInDanger = [];
             return {
                 connectionAllowed: true,
                 dummyConnection: new DummyConnection(from, to),
