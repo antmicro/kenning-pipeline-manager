@@ -12,14 +12,14 @@ from creating and deleting connections or altering nodes' values if the editor i
 -->
 
 <template>
-    <div :id="intf.id" ref="el" class="baklava-node-interface" :class="classes">
+    <div :id="intf.id" ref="el" class="baklava-node-interface" :class="newClasses">
         <div
             class="__port"
             v-if="intf.port"
             @pointerover="startHoverWrapper"
             @pointerout="endHoverWrapper"
         >
-            <Arrow v-if="displayArrow" color="black" scale="medium" rotate="right" />
+            <Arrow v-if="displayArrow" color="black" scale="medium" :rotate="arrowRotation" />
         </div>
 
         <component
@@ -37,7 +37,7 @@ from creating and deleting connections or altering nodes' values if the editor i
 </template>
 
 <script>
-import { defineComponent } from 'vue';
+import { defineComponent, computed } from 'vue';
 import { Components, useViewModel } from 'baklavajs';
 import Arrow from '../icons/Arrow.vue';
 
@@ -47,7 +47,7 @@ export default defineComponent({
         Arrow,
     },
     setup(props) {
-        /* eslint-disable object-curly-newline */
+        /* eslint-disable object-curly-newline,no-unused-vars */
         const { el, isConnected, classes, showComponent, startHover, endHover, openSidebar } =
             Components.NodeInterface.setup(props);
 
@@ -73,11 +73,36 @@ export default defineComponent({
         };
 
         const displayArrow = props.intf.port && props.intf.direction !== 'inout';
+        const arrowRotation = computed(() => {
+            if (props.intf.direction === 'input') {
+                if (props.intf.connectionSide === 'left') {
+                    return 'right';
+                }
+                if (props.intf.connectionSide === 'right') {
+                    return 'down';
+                }
+            }
+            if (props.intf.direction === 'output') {
+                if (props.intf.connectionSide === 'left') {
+                    return 'down';
+                }
+                if (props.intf.connectionSide === 'right') {
+                    return 'right';
+                }
+            }
+            return 'down';
+        });
+
+        const newClasses = computed(() => ({
+            '--input': props.intf.connectionSide === 'left',
+            '--output': props.intf.connectionSide === 'right',
+            '--connected': isConnected.value,
+        }));
 
         return {
             el,
             isConnected,
-            classes,
+            newClasses,
             showComponent,
             startHover,
             endHover,
@@ -85,6 +110,7 @@ export default defineComponent({
             startHoverWrapper,
             endHoverWrapper,
             displayArrow,
+            arrowRotation,
         };
     },
 });

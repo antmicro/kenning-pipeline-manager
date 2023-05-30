@@ -50,16 +50,6 @@ from moving or deleting the nodes.
         </div>
 
         <div class="__content">
-            <!-- Outputs -->
-            <div class="__outputs">
-                <CustomInterface
-                    v-for="output in displayedOutputs"
-                    :key="output.id"
-                    :node="node"
-                    :intf="output"
-                />
-            </div>
-
             <!-- Properties -->
             <div class="__properties">
                 <!-- eslint-disable vue/require-v-for-key -->
@@ -69,20 +59,25 @@ from moving or deleting the nodes.
                 </div>
             </div>
 
+            <!-- Outputs -->
+            <div class="__outputs">
+                <CustomInterface
+                    v-for="output in displayedRightSockets"
+                    :key="output.id"
+                    :node="node"
+                    :intf="output"
+                />
+            </div>
+
             <!-- Inputs -->
             <div class="__inputs">
                 <!-- eslint-disable vue/require-v-for-key -->
-                <div v-for="input in displayedInputSockets">
-                    <CustomInterface :key="input.id" :node="node" :intf="input" />
-                </div>
-            </div>
-
-            <!-- Inouts -->
-            <div class="__inouts">
-                <!-- eslint-disable vue/require-v-for-key -->
-                <div v-for="input in displayedInoutSockets">
-                    <CustomInterface :key="input.id" :node="node" :intf="input" />
-                </div>
+                <CustomInterface
+                    v-for="input in displayedLeftSockets"
+                    :key="input.id"
+                    :node="node"
+                    :intf="input"
+                />
             </div>
         </div>
     </div>
@@ -259,14 +254,18 @@ const openContextMenuWrapper = (ev) => {
     }
 };
 
-const displayedInputSockets = computed(() =>
-    Object.values(displayedInputs.value).filter((ni) => ni.direction === 'input'),
+const displayedLeftSockets = computed(() =>
+    Object.values([...displayedInputs.value, ...displayedOutputs.value]).filter(
+        (intf) => intf.connectionSide === 'left' && intf.port,
+    ),
 );
-const displayedInoutSockets = computed(() =>
-    Object.values(displayedInputs.value).filter((ni) => ni.direction === 'inout'),
+const displayedRightSockets = computed(() =>
+    Object.values([...displayedInputs.value, ...displayedOutputs.value]).filter(
+        (intf) => intf.connectionSide === 'right' && intf.port,
+    ),
 );
 const displayedProperties = computed(() =>
-    Object.values(displayedInputs.value).filter((ni) => !ni.port),
+    Object.values(displayedInputs.value).filter((intf) => !intf.port),
 );
 
 const iconPath = viewModel.value.editor.getNodeIconPath(props.node.type);
