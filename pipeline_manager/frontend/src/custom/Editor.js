@@ -320,7 +320,6 @@ export default class PipelineManagerEditor extends Editor {
 
             save() {
                 const state = super.save();
-                console.log(state);
                 const inputInterfaces = Object.entries(state.inputs).map(([key, value]) => ({
                     id: value.id,
                     name: key,
@@ -336,14 +335,14 @@ export default class PipelineManagerEditor extends Editor {
 
             load(state) {
                 const inputs = {};
-                state
-                    .interfaces.filter((intf) => intf.direction === 'input')
+                state.interfaces
+                    .filter((intf) => intf.direction === 'input')
                     .forEach((intf) => {
                         inputs[intf.name] = { id: intf.id };
                     });
                 const outputs = { _calculationResults: { id: uuidv4 } };
-                state
-                    .interfaces.filter((intf) => intf.direction === 'output')
+                state.interfaces
+                    .filter((intf) => intf.direction === 'output')
                     .forEach((intf) => {
                         outputs[intf.name] = { id: intf.id };
                     });
