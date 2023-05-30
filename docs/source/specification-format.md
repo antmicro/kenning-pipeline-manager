@@ -59,8 +59,14 @@ Every input object requires six properties:
 * `type` - value used for styling.
 * `category` - context menu category displayed in the editor.
 * `icon` - name of an SVG icon that is going to be displayed next to the name of the node.
-  The icon has to be placed in the `assets` directory in the built frontend.
-  The path in `icon` should be the path within the `assets` directory.
+  The icons have to be placed in the `assets` directory in the built frontend (default is `pipeline_manager/frontend/dist/assets`).
+  The path in `icon` should be the path within the `assets` directory, e.g. `filter.svg` for `pipeline_manager/frontend/dist/assets/filter.svg`.
+  ``````{note}
+  The `assets` directory can be created and filled manually or added by `build` script with `--assets-directory <path-to-directory-with-icons>`, e.g.:
+  ```bash
+  ./build --assets-directory examples/sample-assets static-html static-html examples/sample-specification.json
+  ```
+  ``````
 * `interfaces` - array representing inputs, outputs and bidirectional ports for node.
   The entries are of type [Interface](#interface).
 * `properties` - array with elements of type [Property](#property).
