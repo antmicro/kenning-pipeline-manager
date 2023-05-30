@@ -85,6 +85,13 @@
                                         "inout"
                                     ]
                                 },
+                                "connectionSide": {
+                                    "description": "Determines the side on which the socket is rendered",
+                                    "enum": [
+                                        "left",
+                                        "right"
+                                    ]
+                                },
                                 "maxConnectionsCount": {
                                     "description": "Tells how many connections can be established with given interface, <= 0 value for unlimited",
                                     "type": "number",
