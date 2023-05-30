@@ -402,17 +402,13 @@
                                     "description": "Displayed title of a node",
                                     "type": "string"
                                 },
-                                "inputs": {
-                                    "description": "Input interfaces. Keys are name of interface, while values are object with a single ID property",
-                                    "type": "object"
-                                },
-                                "outputs": {
-                                    "description": "Output interfaces. Keys are name of interface, while values are object with a single ID property",
-                                    "type": "object"
+                                "interfaces": {
+                                    "description": "Input/output interfaces. Keys are name of interface, while values are object with a single ID property",
+                                    "type": "array"
                                 },
                                 "properties": {
                                     "description": "Value of node properties",
-                                    "type": "object"
+                                    "type": "array"
                                 },
                                 "position": {
                                     "description": "Position of a node in an editor",
