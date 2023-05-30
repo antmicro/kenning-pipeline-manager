@@ -107,67 +107,154 @@ export default class ConnectionRenderer {
         const graph = viewModel.displayedGraph;
         this.styleMap = new Map();
         this.styleMap.set('curved', {
-            render(x1, y1, x2, y2) {
-                const dx = 0.3 * Math.abs(x1 - x2);
-                return `M ${x1} ${y1} C ${x1 + dx} ${y1}, ${x2 - dx} ${y2}, ${x2} ${y2}`;
-            },
+            render(x1, y1, x2, y2, connection) {
+                const nc = new NormalizedConnection(x1, y1, x2, y2, connection);
+                const dx = 0.3 * Math.abs(nc.x1 - nc.x2);
 
+                if (nc.to) {
+                    if (nc.from.connectionSide === 'right' && nc.to.connectionSide === 'left') {
+                        return `M ${nc.x1} ${nc.y1} C ${nc.x1 + dx} ${nc.y1}, ${nc.x2 - dx} ${
+                            nc.y2
+                        }, ${nc.x2} ${nc.y2}`;
+                    }
+                    if (nc.from.connectionSide === 'left' && nc.to.connectionSide === 'right') {
+                        return `M ${nc.x1} ${nc.y1} C ${nc.x1 - dx} ${nc.y1}, ${nc.x2 + dx} ${
+                            nc.y2
+                        }, ${nc.x2} ${nc.y2}`;
+                    }
+                    if (nc.from.connectionSide === 'right' && nc.to.connectionSide === 'right') {
+                        const rightmost = Math.max(nc.x1 + dx, nc.x2 + dx);
+                        return `M ${nc.x1} ${nc.y1} C ${rightmost} ${nc.y1}, ${rightmost} ${nc.y2}, ${nc.x2} ${nc.y2}`;
+                    }
+                    if (nc.from.connectionSide === 'left' && nc.to.connectionSide === 'left') {
+                        const leftmost = Math.min(nc.x1 - dx, nc.x2 - dx);
+                        return `M ${nc.x1} ${nc.y1} C ${leftmost} ${nc.y1}, ${leftmost} ${nc.y2}, ${nc.x2} ${nc.y2}`;
+                    }
+                }
+
+                if (nc.from.connectionSide === 'right') {
+                    return `M ${nc.x1} ${nc.y1} C ${nc.x1 + dx} ${nc.y1}, ${nc.x2 - dx} ${nc.y2}, ${
+                        nc.x2
+                    } ${nc.y2}`;
+                }
+                if (nc.from.connectionSide === 'left') {
+                    return `M ${nc.x1} ${nc.y1} C ${nc.x1 - dx} ${nc.y1}, ${nc.x2 + dx} ${nc.y2}, ${
+                        nc.x2
+                    } ${nc.y2}`;
+                }
+
+                // unreachable, added to make eslint happy
+                return undefined;
+            },
             renderLoopback(x1, y1, x2, y2, connection) {
                 const nc = new NormalizedConnection(x1, y1, x2, y2, connection);
+                const sideMargin = 30 * graph.scaling;
+
+                if (nc.from.connectionSide === 'left' && nc.to.connectionSide === 'left') {
+                    const leftRx = sideMargin;
+                    const leftRy = Math.abs(nc.y1 - nc.y2) / 2;
+                    return `M ${nc.x1} ${nc.y1}
+                    A ${leftRx} ${leftRy} 0 0 1 ${nc.x2} ${nc.y2}`;
+                }
+                if (nc.from.connectionSide === 'right' && nc.to.connectionSide === 'right') {
+                    const leftRx = sideMargin;
+                    const leftRy = Math.abs(nc.y1 - nc.y2) / 2;
+                    return `M ${nc.x1} ${nc.y1}
+                    A ${leftRx} ${leftRy} 0 0 0 ${nc.x2} ${nc.y2}`;
+                }
+
                 const shift = getShift(nc.from, nc.to, graph, graph.scaling) + 30 * graph.scaling;
+
+                const leftx = nc.from.connectionSide === 'left' ? nc.x1 : nc.x2;
+                const rightx = nc.to.connectionSide === 'right' ? nc.x2 : nc.x1;
+
+                const lefty = nc.from.connectionSide === 'left' ? nc.y1 : nc.y2;
+                const righty = nc.to.connectionSide === 'right' ? nc.y2 : nc.y1;
+
                 const bottomY = nodeBottomPoint(connection, graph.scaling, graph.panning);
                 const y = bottomY + shift;
 
-                const rightCx = nc.x1 - shift;
-                const rightCy = (y + nc.y1) / 2;
-                const [rightRx, rightRy] = calculateEllipseR(nc.x1, y, rightCx, rightCy, 1);
+                const rightCx = rightx - shift;
+                const rightCy = (y + righty) / 2;
+                const [rightRx, rightRy] = calculateEllipseR(rightx, y, rightCx, rightCy, 1);
 
-                const bottomCx = (nc.x1 + nc.x2) / 2;
+                const bottomCx = (rightx + leftx) / 2;
                 const bottomCy = bottomY;
-                const [bottomRx, bottomRy] = calculateEllipseR(nc.x1, y, bottomCx, bottomCy, 1);
+                const [bottomRx, bottomRy] = calculateEllipseR(rightx, y, bottomCx, bottomCy, 1);
 
-                const leftCx = nc.x2 + shift;
-                const leftCy = (y + nc.y2) / 2;
-                const [leftRx, leftRy] = calculateEllipseR(nc.x2, y, leftCx, leftCy, -1);
+                const leftCx = leftx + shift;
+                const leftCy = (y + lefty) / 2;
+                const [leftRx, leftRy] = calculateEllipseR(leftx, y, leftCx, leftCy, -1);
 
-                return `M ${nc.x1} ${nc.y1}
-                A ${rightRx} ${rightRy} 0 0 1 ${nc.x1} ${y}
-                A ${bottomRx} ${bottomRy} 0 0 1 ${nc.x2} ${y}
-                A ${leftRx} ${leftRy} 0 0 1 ${nc.x2} ${nc.y2}`;
+                return `M ${rightx} ${righty}
+                A ${rightRx} ${rightRy} 0 0 1 ${rightx} ${y}
+                A ${bottomRx} ${bottomRy} 0 0 1 ${leftx} ${y}
+                A ${leftRx} ${leftRy} 0 0 1 ${leftx} ${lefty}`;
             },
         });
         this.styleMap.set('orthogonal', {
             render(x1, y1, x2, y2, connection) {
                 const nc = new NormalizedConnection(x1, y1, x2, y2, connection);
-                const shift = getShift(nc.from, nc.to, graph, graph.scaling, true);
-                const minMargin = 30;
+                const minMargin = 30 * graph.scaling;
                 const middlePoint = (nc.x1 + nc.x2) / 2;
-
                 if (connection.to) {
-                    if (nc.from.direction === 'output') {
-                        return `M ${nc.x1} ${nc.y1} H ${
-                            shift + Math.max(nc.x1 + minMargin, middlePoint)
-                        } V ${nc.y2} H ${nc.x2}`;
+                    if (nc.from.connectionSide === 'right' && nc.to.connectionSide === 'left') {
+                        return `M ${nc.x1} ${nc.y1} H ${Math.max(
+                            nc.x1 + minMargin,
+                            middlePoint,
+                        )} V ${nc.y2} H ${nc.x2}`;
                     }
-
-                    if (nc.to.direction === 'input' || nc.from.direction === 'inout') {
-                        return `M ${nc.x1} ${nc.y1} H ${
-                            shift + Math.min(nc.x1 - minMargin, nc.x2 - minMargin, middlePoint)
-                        } V ${nc.y2} H ${nc.x2}`;
+                    if (nc.from.connectionSide === 'left' && nc.to.connectionSide === 'right') {
+                        return `M ${nc.x2} ${nc.y2} H ${Math.max(
+                            nc.x2 + minMargin,
+                            middlePoint,
+                        )} V ${nc.y1} H ${nc.x1}`;
+                    }
+                    if (nc.from.connectionSide === 'right' && nc.to.connectionSide === 'right') {
+                        return `M ${nc.x1} ${nc.y1} H ${Math.max(
+                            nc.x1 + minMargin,
+                            nc.x2 + minMargin,
+                            middlePoint,
+                        )} V ${nc.y2} H ${nc.x2}`;
+                    }
+                    if (nc.from.connectionSide === 'left' && nc.to.connectionSide === 'left') {
+                        return `M ${nc.x1} ${nc.y1} H ${Math.min(
+                            nc.x1 - minMargin,
+                            nc.x2 - minMargin,
+                            middlePoint,
+                        )} V ${nc.y2} H ${nc.x2}`;
                     }
                 }
-                return `M ${nc.x1} ${nc.y1} H ${shift + middlePoint} V ${nc.y2} H ${nc.x2}`;
+                return `M ${nc.x1} ${nc.y1} H ${middlePoint} V ${nc.y2} H ${nc.x2}`;
             },
-
             renderLoopback(x1, y1, x2, y2, connection) {
                 const nc = new NormalizedConnection(x1, y1, x2, y2, connection);
                 const shift = getShift(nc.from, nc.to, graph, graph.scaling) + 30 * graph.scaling;
                 const bottomY = nodeBottomPoint(connection, graph.scaling, graph.panning);
                 const y = bottomY + shift;
 
-                return `M ${nc.x1} ${nc.y1}
-                h ${shift}
-                V ${y} H ${nc.x2 - shift} V ${nc.y2} H ${nc.x2}`;
+                if (nc.from.connectionSide === 'right' && nc.to.connectionSide === 'left') {
+                    return `M ${nc.x1} ${nc.y1}
+                    h ${shift}
+                    V ${y} H ${nc.x2 - shift} V ${nc.y2} H ${nc.x2}`;
+                }
+                if (nc.from.connectionSide === 'left' && nc.to.connectionSide === 'right') {
+                    return `M ${nc.x2} ${nc.y2}
+                    h ${shift}
+                    V ${y} H ${nc.x1 - shift} V ${nc.y1} H ${nc.x1}`;
+                }
+                if (nc.from.connectionSide === 'right' && nc.to.connectionSide === 'right') {
+                    return `M ${nc.x2} ${nc.y2}
+                    h ${shift}
+                    V ${nc.y1} H ${nc.x1}`;
+                }
+                if (nc.from.connectionSide === 'left' && nc.to.connectionSide === 'left') {
+                    return `M ${nc.x2} ${nc.y2}
+                    h ${-shift}
+                    V ${nc.y1} H ${nc.x1}`;
+                }
+                // unreachable, added to make eslint happy
+                return undefined;
             },
         });
     }
