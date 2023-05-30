@@ -11,8 +11,17 @@
  * Inherits from baklavajs/core/src/editor.ts
  */
 
-import { Editor, DummyConnection, createGraphNodeType, useGraph, GraphTemplate, GRAPH_NODE_TYPE_PREFIX } from 'baklavajs';
-import { v4 as uuidv4 } from "uuid";
+/* eslint-disable max-classes-per-file */
+
+import {
+    Editor,
+    DummyConnection,
+    createGraphNodeType,
+    useGraph,
+    GraphTemplate,
+    GRAPH_NODE_TYPE_PREFIX,
+} from 'baklavajs';
+import { v4 as uuidv4 } from 'uuid';
 
 export default class PipelineManagerEditor extends Editor {
     readonly = false;
@@ -108,15 +117,17 @@ export default class PipelineManagerEditor extends Editor {
             };
         };
 
-        graph.updateTemplate = function() {
+        graph.updateTemplate = function () {
             const interfaceConnections = [];
-            const SUBGRAPH_INPUT_NODE_TYPE = "__baklava_SubgraphInputNode";
-            const SUBGRAPH_OUTPUT_NODE_TYPE = "__baklava_SubgraphOutputNode";
+            const SUBGRAPH_INPUT_NODE_TYPE = '__baklava_SubgraphInputNode';
+            const SUBGRAPH_OUTPUT_NODE_TYPE = '__baklava_SubgraphOutputNode';
 
             const inputs = [];
             const inputNodes = this.nodes.filter((n) => n.type === SUBGRAPH_INPUT_NODE_TYPE);
-            for (const n of inputNodes) {
-                const connections = this.connections.filter((c) => c.from === n.outputs.placeholder);
+            inputNodes.forEach((n) => {
+                const connections = this.connections.filter(
+                    (c) => c.from === n.outputs.placeholder,
+                );
                 connections.forEach((c) => {
                     inputs.push({
                         id: n.graphInterfaceId,
@@ -125,11 +136,11 @@ export default class PipelineManagerEditor extends Editor {
                     });
                 });
                 interfaceConnections.push(...connections);
-            }
+            });
 
             const outputs = [];
             const outputNodes = this.nodes.filter((n) => n.type === SUBGRAPH_OUTPUT_NODE_TYPE);
-            for (const n of outputNodes) {
+            outputNodes.forEach((n) => {
                 const connections = this.connections.filter((c) => c.to === n.inputs.placeholder);
                 connections.forEach((c) => {
                     outputs.push({
@@ -139,9 +150,11 @@ export default class PipelineManagerEditor extends Editor {
                     });
                 });
                 interfaceConnections.push(...connections);
-            }
+            });
 
-            const innerConnections = this.connections.filter((c) => !interfaceConnections.includes(c));
+            const innerConnections = this.connections.filter(
+                (c) => !interfaceConnections.includes(c),
+            );
             const nodes = this.nodes.filter(
                 (n) => n.type !== SUBGRAPH_INPUT_NODE_TYPE && n.type !== SUBGRAPH_OUTPUT_NODE_TYPE,
             );
@@ -150,14 +163,18 @@ export default class PipelineManagerEditor extends Editor {
                 inputs,
                 outputs,
                 nodes,
-                connections: innerConnections.map((c) => ({ id: c.id, from: c.from.id, to: c.to.id })),
+                connections: innerConnections.map((c) => ({
+                    id: c.id,
+                    from: c.from.id,
+                    to: c.to.id,
+                })),
             });
 
             this.template.panning = this.panning;
             this.template.scaling = this.scaling;
         };
 
-        graph.addNode = function(node) {
+        graph.addNode = function (node) {
             if (this.events.beforeAddNode.emit(node).prevented) {
                 return;
             }
@@ -165,16 +182,16 @@ export default class PipelineManagerEditor extends Editor {
             this.nodeHooks.addTarget(node.hooks);
             node.registerGraph(this);
 
-            if(node.template !== undefined) {
+            if (node.template !== undefined) {
                 const newState = {
                     id: uuidv4(),
                     nodes: node.template.nodes,
                     connections: node.template.connections,
                     inputs: node.template.inputs,
                     outputs: node.template.outputs,
-                    name: node.template.name
-                }
-                node.template = new GraphTemplate(newState, this.editor)
+                    name: node.template.name,
+                };
+                node.template = new GraphTemplate(newState, this.editor);
             }
 
             this._nodes.push(node);
@@ -184,8 +201,8 @@ export default class PipelineManagerEditor extends Editor {
             node = this.nodes.find((n) => n.id === node.id);
             node.onPlaced();
             this.events.addNode.emit(node);
-            return node;
-        }
+            return node; // eslint-disable-line consistent-return
+        };
 
         super.registerGraph(graph);
     }
@@ -197,45 +214,49 @@ export default class PipelineManagerEditor extends Editor {
         state.graphTemplateInstances = [];
         // subgraphs are stored in state.graphTemplates, there is no need to store it
         // in nodes itself
-        state.graph.nodes.forEach(node => {
-            if(node.type.startsWith(GRAPH_NODE_TYPE_PREFIX)) {
+        state.graph.nodes.forEach((node) => {
+            if (node.type.startsWith(GRAPH_NODE_TYPE_PREFIX)) {
                 node.type = node.type.slice(GRAPH_NODE_TYPE_PREFIX.length);
                 node.subgraph = node.graphState.id;
                 state.graphTemplateInstances.push(node.graphState);
             }
-            delete node.graphState
-        })
+            delete node.graphState;
+        });
 
         return state;
     }
 
     load(state) {
-        state.graph.nodes.forEach(node => {
-            if(node.subgraph !== undefined) {
-                const fittingTemplate = state.graphTemplateInstances.filter(template => template.id == node.subgraph)
-                if (fittingTemplate.length != 1) {
-                    throw new Error(`Expected exactly one template with ID ${node.type}, got ${fittingTemplate.length}`)
+        state.graph.nodes.forEach((node) => {
+            if (node.subgraph !== undefined) {
+                const fittingTemplate = state.graphTemplateInstances.filter(
+                    (template) => template.id === node.subgraph,
+                );
+                if (fittingTemplate.length !== 1) {
+                    throw new Error(
+                        `Expected exactly one template with ID ${node.type}, got ${fittingTemplate.length}`,
+                    );
                 }
                 node.graphState = structuredClone(fittingTemplate[0]);
-                node.type = `${GRAPH_NODE_TYPE_PREFIX}${node.type}`
+                node.type = `${GRAPH_NODE_TYPE_PREFIX}${node.type}`;
                 delete node.subgraph;
             }
-        })
+        });
 
         super.load(state);
         state.graph.nodes.forEach((node, ind) => {
-            if(node.graphState !== undefined) {
+            if (node.graphState !== undefined) {
                 const newState = {
                     inputs: node.graphState.inputs,
                     outputs: node.graphState.outputs,
                     connections: node.graphState.connections,
                     nodes: node.graphState.nodes,
                     id: this._graph.nodes[ind].template.id,
-                    name: this._graph.nodes[ind].template.name
-                }
+                    name: this._graph.nodes[ind].template.name,
+                };
                 this._graph.nodes[ind].template.update(newState);
             }
-        })
+        });
         if (state.graph.panning !== undefined) {
             this._graph.panning = state.graph.panning;
         }
@@ -261,10 +282,6 @@ export default class PipelineManagerEditor extends Editor {
         return this.nodeIcons.get(nodeName) || undefined;
     }
 
-    getNodeIconPath(nodeType) {
-        return this.nodeIcons.get(nodeType) || undefined;
-    }
-
     addGraphTemplate(template, category, type) {
         if (this.events.beforeAddGraphTemplate.emit(template).prevented) {
             return;
@@ -279,22 +296,21 @@ export default class PipelineManagerEditor extends Editor {
         const nt = createGraphNodeType(template);
         class stuff extends nt {
             constructor() {
-                super()
-                this.type = `${GRAPH_NODE_TYPE_PREFIX}${type}`
+                super();
+                this.type = `${GRAPH_NODE_TYPE_PREFIX}${type}`;
             }
         }
-        this.registerNodeType(stuff, { category: category, title: template.name });
+        this.registerNodeType(stuff, { category, title: template.name });
 
         this.events.addGraphTemplate.emit(template);
     }
 
     switchToMainGraph(displayedGraph) {
         // SwitchGraph must be defined after viewPlugin and editor are initialized in EditorManager
-        if(this.switchGraph == undefined) {
+        if (this.switchGraph === undefined) {
             const { switchGraph } = useGraph();
             this.switchGraph = switchGraph;
         }
-        // this.saveSubgraphTemplate(displayedGraph)
         displayedGraph.updateTemplate();
         this.switchGraph(this.graph);
     }

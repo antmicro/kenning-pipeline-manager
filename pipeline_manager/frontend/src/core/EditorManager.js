@@ -39,19 +39,22 @@ export default class EditorManager {
         this.baklavaView.ignorableLayers = [];
         this.baklavaView.collapseSidebar = true;
 
-        this.baklavaView.hooks.renderNode.subscribe("EditorManager", (node) => {
-            if(node.node.type.startsWith(GRAPH_NODE_TYPE_PREFIX) ||
-                node.node.type === "__baklava_SubgraphInputNode" ||
-                node.node.type === "__baklava_SubgraphOutputNode"
+        this.baklavaView.hooks.renderNode.subscribe('EditorManager', (node) => {
+            if (
+                node.node.type.startsWith(GRAPH_NODE_TYPE_PREFIX) ||
+                node.node.type === '__baklava_SubgraphInputNode' ||
+                node.node.type === '__baklava_SubgraphOutputNode'
             ) {
-                Object.values(node.node.inputs).forEach(intf =>
-                    intf.direction = "input"
-                )
-                Object.values(node.node.outputs).forEach(intf =>
-                    intf.direction = "output"
-                )
+                /* eslint-disable no-param-reassign */
+                Object.values(node.node.inputs).forEach((intf) => {
+                    intf.direction = 'input';
+                });
+                Object.values(node.node.outputs).forEach((intf) => {
+                    intf.direction = 'output';
+                });
+                /* eslint-enable no-param-reassign */
             }
-        })
+        });
     }
 
     /**
@@ -114,12 +117,14 @@ export default class EditorManager {
                 subgraph.interfaces,
                 subgraph.name,
                 subgraph.type,
-                this.editor
+                this.editor,
             );
             this.editor.addGraphTemplate(mySubgraph, subgraph.category, subgraph.type);
         });
+
         this.editor.readonly = metadata.readonly ?? false;
         this.editor.hideHud = metadata.hideHud ?? false;
+
         NotificationHandler.setShowOption(!this.editor.hideHud);
         if (this.editor.readonly) {
             NotificationHandler.showToast(
@@ -346,11 +351,11 @@ export default class EditorManager {
 
     /**
      * Checks whether currently edited pipeline is one of the subgraphs
-     * 
+     *
      * @returns True if editor is editing subgraph instance, false otherwise
      */
     isInsideSubgraph() {
-        return this.baklavaView.displayedGraph !== this.editor.graph
+        return this.baklavaView.displayedGraph !== this.editor.graph;
     }
 
     /**

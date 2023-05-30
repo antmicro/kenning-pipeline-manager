@@ -16,7 +16,7 @@ import {
     NodeInterfaceType,
     GraphTemplate,
 } from 'baklavajs';
-import { v4 as uuidv4 } from "uuid";
+import { v4 as uuidv4 } from 'uuid';
 
 import InputInterface from '../interfaces/InputInterface';
 import ListInterface from '../interfaces/ListInterface';
@@ -148,39 +148,39 @@ function parseInputs(inputs, interfaceTypes) {
 }
 
 function parseNodeState(state) {
-    if (state.inputs === undefined) {
-        state.inputs = {};
-        state.outputs = {};
+    const newState = { ...state };
+    if (newState.inputs === undefined) {
+        newState.inputs = {};
+        newState.outputs = {};
     }
 
-    if (state.interfaces !== undefined) {
-        state.interfaces.forEach((intf) => {
+    if (newState.interfaces !== undefined) {
+        newState.interfaces.forEach((intf) => {
             if (intf.direction === 'input' || intf.direction === 'inout') {
-                state.inputs[intf.name] = { id: intf.id };
+                newState.inputs[intf.name] = { id: intf.id };
             } else if (intf.direction === 'output') {
-                state.outputs[intf.name] = { id: intf.id };
+                newState.outputs[intf.name] = { id: intf.id };
             }
         });
 
-        delete state.interfaces;
+        delete newState.interfaces;
     }
-    
-    
-    if (state.properties !== undefined) {
-        state.properties.forEach((prop) => {
-            state.inputs[prop.name] = { id: prop.id, value: prop.value };
+
+    if (newState.properties !== undefined) {
+        newState.properties.forEach((prop) => {
+            newState.inputs[prop.name] = { id: prop.id, value: prop.value };
         });
-        delete state.properties;
+        delete newState.properties;
     }
 
-    if ('name' in state) {
-        state.title = state.name;
+    if ('name' in newState) {
+        newState.title = newState.name;
     } else {
-        state.title = '';
+        newState.title = '';
     }
-    delete state.name;
+    delete newState.name;
 
-    return state
+    return newState;
 }
 
 /**
@@ -328,35 +328,39 @@ export function readInterfaceTypes(nodes, metadata) {
 
 /**
  * Function creating the subgraph template as defined in specification
- * 
+ *
  * @param nodes Nodes of the subgraph
- * @param connections Connections inside the subgraph 
- * @param interfaces Inputs and outputs 
+ * @param connections Connections inside the subgraph
+ * @param interfaces Inputs and outputs
  * @param name Default name that will be displayed in editor
  * @param type Type of the subgraph. Used to define which template should be used
  * when new subgraph node is create
  * @param editor PipelineManagerEditor instance
- * @returns 
+ * @returns Graph template that will be used to define the subgraph node
  */
 export function SubgraphFactory(nodes, connections, interfaces, name, type, editor) {
-    const inputs = interfaces.filter(interf => interf.direction == 'input').map(interf => ({
-        id: uuidv4(),
-        nodeInterfaceId: interf.nodeInterface,
-        name: interf.name
-    }))
-    const outputs = interfaces.filter(interf => interf.direction == 'output').map(interf => ({
-        id: uuidv4(),
-        nodeInterfaceId: interf.nodeInterface,
-        name: interf.name
-    }))
+    const inputs = interfaces
+        .filter((interf) => interf.direction === 'input')
+        .map((interf) => ({
+            id: uuidv4(),
+            nodeInterfaceId: interf.nodeInterface,
+            name: interf.name,
+        }));
+    const outputs = interfaces
+        .filter((interf) => interf.direction === 'output')
+        .map((interf) => ({
+            id: uuidv4(),
+            nodeInterfaceId: interf.nodeInterface,
+            name: interf.name,
+        }));
 
     const state = {
         id: type,
         nodes: nodes.map(parseNodeState),
-        connections: connections,
-        inputs: inputs,
-        outputs: outputs,
-        name: name
+        connections,
+        inputs,
+        outputs,
+        name,
     };
     return new GraphTemplate(state, editor);
 }
