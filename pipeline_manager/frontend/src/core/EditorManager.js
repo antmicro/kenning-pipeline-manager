@@ -40,7 +40,10 @@ export default class EditorManager {
         this.baklavaView.collapseSidebar = true;
 
         this.baklavaView.hooks.renderNode.subscribe("EditorManager", (node) => {
-            if(node.node.type.startsWith(GRAPH_NODE_TYPE_PREFIX)) {
+            if(node.node.type.startsWith(GRAPH_NODE_TYPE_PREFIX) ||
+                node.node.type === "__baklava_SubgraphInputNode" ||
+                node.node.type === "__baklava_SubgraphOutputNode"
+            ) {
                 Object.values(node.node.inputs).forEach(intf =>
                     intf.direction = "input"
                 )
