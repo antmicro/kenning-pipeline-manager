@@ -204,15 +204,31 @@ export default class PipelineManagerEditor extends Editor {
             return node; // eslint-disable-line consistent-return
         };
 
+        graph.save = function () {
+            const state = {
+                id: this.id,
+                nodes: this.nodes.map((n) => n.save()),
+                connections: this.connections.map((c) => ({
+                    id: c.id,
+                    from: c.from.id,
+                    to: c.to.id,
+                })),
+                inputs: this.inputs,
+                outputs: this.outputs,
+            };
+            return this.hooks.save.execute(state);
+        };
+
         super.registerGraph(graph);
     }
 
     save() {
         const state = super.save();
+        delete state.graphTemplates;
         state.graph.panning = this._graph.panning;
         state.graph.scaling = this._graph.scaling;
         state.graphTemplateInstances = [];
-        // subgraphs are stored in state.graphTemplates, there is no need to store it
+        // subgraphs are stored in state.graphTemplateInstances, there is no need to store it
         // in nodes itself
         state.graph.nodes.forEach((node) => {
             if (node.type.startsWith(GRAPH_NODE_TYPE_PREFIX)) {
@@ -242,6 +258,7 @@ export default class PipelineManagerEditor extends Editor {
                 delete node.subgraph;
             }
         });
+        state.graphTemplates = [];
 
         super.load(state);
         state.graph.nodes.forEach((node, ind) => {
@@ -298,6 +315,39 @@ export default class PipelineManagerEditor extends Editor {
             constructor() {
                 super();
                 this.type = `${GRAPH_NODE_TYPE_PREFIX}${type}`;
+            }
+
+            save() {
+                const state = super.save();
+                console.log(state);
+                const inputInterfaces = Object.entries(state.inputs).map(([key, value]) => ({
+                    id: value.id,
+                    name: key,
+                    direction: 'input',
+                }));
+                const outputInterfaces = Object.entries(state.outputs)
+                    .filter((key) => key[0] !== '_calculationResults')
+                    .map(([key, value]) => ({ id: value.id, name: key, direction: 'output' }));
+                delete state.inputs;
+                delete state.outputs;
+                return { ...state, interfaces: inputInterfaces.concat(outputInterfaces) };
+            }
+
+            load(state) {
+                const inputs = {};
+                state
+                    .interfaces.filter((intf) => intf.direction === 'input')
+                    .forEach((intf) => {
+                        inputs[intf.name] = { id: intf.id };
+                    });
+                const outputs = { _calculationResults: { id: uuidv4 } };
+                state
+                    .interfaces.filter((intf) => intf.direction === 'output')
+                    .forEach((intf) => {
+                        outputs[intf.name] = { id: intf.id };
+                    });
+                delete state.interfaces;
+                super.load({ ...state, inputs, outputs });
             }
         }
         this.registerNodeType(stuff, { category, title: template.name });
