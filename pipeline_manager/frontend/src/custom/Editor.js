@@ -22,6 +22,7 @@ import {
     GRAPH_NODE_TYPE_PREFIX,
 } from 'baklavajs';
 import { v4 as uuidv4 } from 'uuid';
+import { parseNodeState } from '../core/NodeFactory';
 
 export default class PipelineManagerEditor extends Editor {
     readonly = false;
@@ -267,7 +268,7 @@ export default class PipelineManagerEditor extends Editor {
                     inputs: node.graphState.inputs,
                     outputs: node.graphState.outputs,
                     connections: node.graphState.connections,
-                    nodes: node.graphState.nodes,
+                    nodes: node.graphState.nodes.map(parseNodeState),
                     id: this._graph.nodes[ind].template.id,
                     name: this._graph.nodes[ind].template.name,
                 };

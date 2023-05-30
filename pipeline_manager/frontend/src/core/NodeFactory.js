@@ -147,7 +147,7 @@ function parseInputs(inputs, interfaceTypes) {
     return tempInputs;
 }
 
-function parseNodeState(state) {
+export function parseNodeState(state) {
     const newState = { ...state };
     if (newState.inputs === undefined) {
         newState.inputs = {};
