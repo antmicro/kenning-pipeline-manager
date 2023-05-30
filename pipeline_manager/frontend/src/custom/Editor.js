@@ -11,7 +11,8 @@
  * Inherits from baklavajs/core/src/editor.ts
  */
 
-import { Editor, DummyConnection, createGraphNodeType, useGraph, GRAPH_NODE_TYPE_PREFIX } from 'baklavajs';
+import { Editor, DummyConnection, createGraphNodeType, useGraph, GraphTemplate, GRAPH_NODE_TYPE_PREFIX } from 'baklavajs';
+import { v4 as uuidv4 } from "uuid";
 
 export default class PipelineManagerEditor extends Editor {
     readonly = false;
@@ -150,15 +151,42 @@ export default class PipelineManagerEditor extends Editor {
                 outputs,
                 connections: innerConnections.map((c) => ({ id: c.id, from: c.from.id, to: c.to.id })),
                 nodes: nodes.map((n) => n.save()),
-                // will be ignored in the update method but still providing them to make TypeScript happy
-                // panning: graph.panning,
-                // scaling: graph.scaling,
             });
 
             this.template.panning = this.panning;
             this.template.scaling = this.scaling;
         };
-        
+
+        graph.addNode = function(node) {
+            if (this.events.beforeAddNode.emit(node).prevented) {
+                return;
+            }
+            this.nodeEvents.addTarget(node.events);
+            this.nodeHooks.addTarget(node.hooks);
+            node.registerGraph(this);
+
+            if(node.template !== undefined) {
+                const newState = {
+                    id: uuidv4(),
+                    nodes: node.template.nodes,
+                    connections: node.template.connections,
+                    inputs: node.template.inputs,
+                    outputs: node.template.outputs,
+                    name: node.template.name
+                }
+                node.template = new GraphTemplate(newState, this.editor)
+            }
+
+            this._nodes.push(node);
+            // when adding the node to the array, it will be made reactive by Vue.
+            // However, our current reference is the non-reactive version.
+            // Therefore, we need to get the reactive version from the array.
+            node = this.nodes.find((n) => n.id === node.id);
+            node.onPlaced();
+            this.events.addNode.emit(node);
+            return node;
+        }
+
         super.registerGraph(graph);
     }
 
@@ -166,13 +194,14 @@ export default class PipelineManagerEditor extends Editor {
         const state = super.save();
         state.graph.panning = this._graph.panning;
         state.graph.scaling = this._graph.scaling;
-
+        state.graphTemplateInstances = [];
         // subgraphs are stored in state.graphTemplates, there is no need to store it
         // in nodes itself
         state.graph.nodes.forEach(node => {
             if(node.type.startsWith(GRAPH_NODE_TYPE_PREFIX)) {
                 node.type = node.type.slice(GRAPH_NODE_TYPE_PREFIX.length);
-                node.subgraph = node.graphState;
+                node.subgraph = node.graphState.id;
+                state.graphTemplateInstances.push(node.graphState);
             }
             delete node.graphState
         })
@@ -183,16 +212,30 @@ export default class PipelineManagerEditor extends Editor {
     load(state) {
         state.graph.nodes.forEach(node => {
             if(node.subgraph !== undefined) {
-                const fittingTemplate = state.graphTemplates.filter(template => template.id == node.subgraph)
+                const fittingTemplate = state.graphTemplateInstances.filter(template => template.id == node.subgraph)
                 if (fittingTemplate.length != 1) {
                     throw new Error(`Expected exactly one template with ID ${node.type}, got ${fittingTemplate.length}`)
                 }
                 node.graphState = structuredClone(fittingTemplate[0]);
                 node.type = `${GRAPH_NODE_TYPE_PREFIX}${node.type}`
+                delete node.subgraph;
             }
         })
 
         super.load(state);
+        state.graph.nodes.forEach((node, ind) => {
+            if(node.graphState !== undefined) {
+                const newState = {
+                    inputs: node.graphState.inputs,
+                    outputs: node.graphState.outputs,
+                    connections: node.graphState.connections,
+                    nodes: node.graphState.nodes,
+                    id: this._graph.nodes[ind].template.id,
+                    name: this._graph.nodes[ind].template.name
+                }
+                this._graph.nodes[ind].template.update(newState);
+            }
+        })
         if (state.graph.panning !== undefined) {
             this._graph.panning = state.graph.panning;
         }
@@ -254,5 +297,11 @@ export default class PipelineManagerEditor extends Editor {
         // this.saveSubgraphTemplate(displayedGraph)
         displayedGraph.updateTemplate();
         this.switchGraph(this.graph);
+    }
+
+    swapGraph(newGraph) {
+        const aaa = this._graph;
+        this._graph = newGraph;
+        return aaa;
     }
 }
