@@ -8,14 +8,23 @@ Version: 2
 Script that convert old dataflow format (Vue3-based) to a new one supporting inouts
 Usage of the script:
 
-* python -m pipeline_manager.utils.dataflow_parser_inout old_format_dataflow.json --output new_format_dataflow.json  # noqa: E501
+* python -m pipeline_manager.utils.dataflow_converter_vue3_inout old_format_dataflow.json --output new_format_dataflow.json  # noqa: E501
 """
 
 
 def main(argv):
     parser = argparse.ArgumentParser(argv[0])
-    parser.add_argument("dataflow", type=Path)
-    parser.add_argument("--output", type=Path, default="parsed.json")
+    parser.add_argument(
+        "dataflow",
+        type=Path,
+        help='Input dataflow with version before inouts'
+    )
+    parser.add_argument(
+        "--output",
+        type=Path,
+        default="out.json",
+        help='Output JSON with updated dataflow'
+    )
 
     args, _ = parser.parse_known_args(argv[1:])
 

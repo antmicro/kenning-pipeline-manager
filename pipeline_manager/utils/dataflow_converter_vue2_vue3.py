@@ -7,7 +7,7 @@ Version: 1
 Script that convert old dataflow format (Vue2-based) to a new one (Vue3-based).
 Usage of the script:
 
-* python -m pipeline_manager.utils.dataflow_parser_vue2 old_format_dataflow.json --output new_format_dataflow.json  # noqa: E501
+* python -m pipeline_manager.utils.dataflow_converter_vue2_vue3 old_format_dataflow.json --output new_format_dataflow.json  # noqa: E501
 """
 
 
@@ -192,9 +192,17 @@ def to_new(nodes: list[Node], connections: list[Connection]) -> dict:
 
 def main(argv):
     parser = argparse.ArgumentParser(argv[0])
-    parser.add_argument("dataflow", type=Path)
-    parser.add_argument("--output", type=Path, default="parsed.json")
-    parser.add_argument("--old-to-new", action="store_false")
+    parser.add_argument(
+        "dataflow",
+        type=Path,
+        help="Input dataflow in old format"
+    )
+    parser.add_argument(
+        "--output",
+        type=Path,
+        default="out.json",
+        help="Output with updated dataflow format"
+    )
 
     args, _ = parser.parse_known_args(argv[1:])
 
