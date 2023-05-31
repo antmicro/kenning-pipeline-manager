@@ -5,68 +5,77 @@
             {
                 "type": "RunBehaviour",
                 "id": "f7217c8a-c40f-46bd-aa9c-751dc154b570",
-                "inputs": {},
-                "outputs": {
-                    "Effect": {
-                        "id": "f95e25d3-7a21-4f3b-ad6a-9fd0924f11a3"
-                    }
-                },
                 "position": {
                     "x": 774,
                     "y": 174
                 },
                 "width": 200,
                 "twoColumn": false,
-                "properties": {
-                    "Duration": {
+                "properties": [
+                    {
+                        "name": "Duration",
                         "id": "ef372f69-1d1c-4462-bb6d-91530cf332e6",
                         "value": 5
                     },
-                    "Disconnect": {
+                    {
+                        "name": "Disconnect",
                         "id": "2e3a917f-ef11-4251-b6df-9b73d1e43e0c",
                         "value": false
                     },
-                    "MessageType": {
+                    {
+                        "name": "MessageType",
                         "id": "b41a7d20-c750-4edf-8346-c2d0db003b14",
                         "value": "OK"
                     },
-                    "ProgressMessages": {
+                    {
+                        "name": "ProgressMessages",
                         "id": "25627cba-1ebb-40a9-98e9-3fbf673c9640",
                         "value": 5
                     },
-                    "Message": {
+                    {
+                        "name": "Message",
                         "id": "c8a90687-8274-4be4-8102-7334a5c63001",
                         "value": "Everything went fine!"
                     }
-                },
-                "name": "RunBehaviour"
+                ],
+                "name": "RunBehaviour",
+                "interfaces": [
+                    {
+                        "name": "Effect",
+                        "id": "f95e25d3-7a21-4f3b-ad6a-9fd0924f11a3",
+                        "direction": "output"
+                    }
+                ]
             },
             {
                 "type": "Disconnect",
                 "id": "01cee371-2ae6-4015-ae7e-a515d3f92e1a",
-                "inputs": {
-                    "Effect": {
-                        "id": "3fff22de-8e38-4e99-b92a-1494c25f21f6"
-                    }
-                },
-                "outputs": {},
                 "position": {
                     "x": 1469,
                     "y": 242
                 },
                 "width": 200,
                 "twoColumn": false,
-                "properties": {
-                    "Time offset": {
+                "properties": [
+                    {
+                        "name": "Time offset",
                         "id": "7ecb3001-9679-4ea6-9764-e8669815d10e",
                         "value": 0
                     },
-                    "Should disconnect": {
+                    {
+                        "name": "Should disconnect",
                         "id": "0c1fc2a2-4c1d-4f1c-9bf0-1f5c3475f525",
                         "value": false
                     }
-                },
-                "name": "Disconnect"
+                ],
+                "name": "Disconnect",
+                "interfaces": [
+                    {
+                        "name": "Effect",
+                        "id": "3fff22de-8e38-4e99-b92a-1494c25f21f6",
+                        "direction": "input"
+                    }
+                ]
             }
         ],
         "connections": [
