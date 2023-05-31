@@ -13,30 +13,39 @@
 
 /**
  * Defines the shift the connection should have compared to the default position based on the
- * index of the output interface bound to the connection in the node output interface array.
+ * index of the `from` interface and `to` interface bound to the connection in the nodes.
  * It allows to make a visual distinction between connections going to different interfaces
  * in the same node. The value of the shift is constant distance times the index of an
  * interface, adjusted for any canvas transformation
+ * This funnction is symmetrical.
  *
- * @param ncFrom starting node reference
- * @param ncTo ending node reference
+ * @param ncFrom from node reference
+ * @param ncTo to node reference
  * @param graph the graph definition
- * @param scaling number from viewPlugin defining the scaling of canvas
- * @param symmetric As default, the connections can be indexed from 0 to N-1. If this flag is
- * set to true, it will index from -(N-1)/2 to (N-1)/2
+ * @param scaling number from viewModel defining the scaling of canvas
  * @returns Value the connection should shift from it's default position
  */
 
 /* eslint-disable max-classes-per-file */
-function getShift(ncFrom, ncTo, graph, scaling, symmetric = false) {
+function getShift(ncFrom, ncTo, graph, scaling) {
     const shiftDistance = 15;
     const fromNode = graph.findNodeById(ncFrom.nodeId);
+    const toNode = graph.findNodeById(ncTo.nodeId);
 
-    const outputInterfaceList = Object.values(fromNode.outputs);
-    const index = outputInterfaceList.includes(ncFrom)
-        ? outputInterfaceList.reverse().indexOf(ncFrom)
-        : outputInterfaceList.reverse().indexOf(ncTo);
-    const shiftIndex = symmetric ? index - (outputInterfaceList.length - 1) / 2 : index;
+    const fromNodeNeighbours = [
+        ...Object.values(fromNode.inputs),
+        ...Object.values(fromNode.outputs),
+    ].filter((c) => c.connectionSide === ncFrom.connectionSide && c.port);
+    const toNodeNeighbours = [
+        ...Object.values(toNode.inputs),
+        ...Object.values(toNode.outputs),
+    ].filter((c) => c.connectionSide === ncTo.connectionSide && c.port);
+
+    const fromIndex = fromNodeNeighbours.indexOf(ncFrom);
+    const toIndex = toNodeNeighbours.indexOf(ncTo);
+
+    const shiftIndex =
+        (fromIndex + toIndex - toNodeNeighbours.length + fromNodeNeighbours.length - 2) / 2;
     return shiftDistance * shiftIndex * scaling;
 }
 
@@ -45,8 +54,8 @@ function getShift(ncFrom, ncTo, graph, scaling, symmetric = false) {
  * based on it's DOM element. If the element does not yet exists, returns 0
  *
  * @param connection BaklavaJS-defined connection
- * @param scaling number from viewPlugin defining the scaling of canvas
- * @param panning (x, y) point from viewPlugin defining the translation of canvas
+ * @param scaling number from viewModel defining the scaling of canvas
+ * @param panning (x, y) point from viewModel defining the translation of canvas
  * @returns Y coordinate of a bottom of a node, adjusted for canvas transformation
  */
 function nodeBottomPoint(connection, scaling, panning) {
@@ -153,14 +162,18 @@ export default class ConnectionRenderer {
                 if (nc.from.connectionSide === 'left' && nc.to.connectionSide === 'left') {
                     const leftRx = sideMargin;
                     const leftRy = Math.abs(nc.y1 - nc.y2) / 2;
+                    const renderingSide = nc.y1 > nc.y2 ? 1 : 0;
+
                     return `M ${nc.x1} ${nc.y1}
-                    A ${leftRx} ${leftRy} 0 0 1 ${nc.x2} ${nc.y2}`;
+                    A ${leftRx} ${leftRy} 0 0 ${renderingSide} ${nc.x2} ${nc.y2}`;
                 }
                 if (nc.from.connectionSide === 'right' && nc.to.connectionSide === 'right') {
                     const leftRx = sideMargin;
                     const leftRy = Math.abs(nc.y1 - nc.y2) / 2;
+                    const renderingSide = nc.y1 > nc.y2 ? 0 : 1;
+
                     return `M ${nc.x1} ${nc.y1}
-                    A ${leftRx} ${leftRy} 0 0 0 ${nc.x2} ${nc.y2}`;
+                    A ${leftRx} ${leftRy} 0 0 ${renderingSide} ${nc.x2} ${nc.y2}`;
                 }
 
                 const shift = getShift(nc.from, nc.to, graph, graph.scaling) + 30 * graph.scaling;
@@ -170,8 +183,8 @@ export default class ConnectionRenderer {
 
                 const lefty = nc.from.connectionSide === 'left' ? nc.y1 : nc.y2;
                 const righty = nc.to.connectionSide === 'right' ? nc.y2 : nc.y1;
-
                 const bottomY = nodeBottomPoint(connection, graph.scaling, graph.panning);
+
                 const y = bottomY + shift;
 
                 const rightCx = rightx - shift;
@@ -198,31 +211,26 @@ export default class ConnectionRenderer {
                 const minMargin = 30 * graph.scaling;
                 const middlePoint = (nc.x1 + nc.x2) / 2;
                 if (connection.to) {
+                    const shift = getShift(nc.from, nc.to, graph, graph.scaling);
                     if (nc.from.connectionSide === 'right' && nc.to.connectionSide === 'left') {
-                        return `M ${nc.x1} ${nc.y1} H ${Math.max(
-                            nc.x1 + minMargin,
-                            middlePoint,
-                        )} V ${nc.y2} H ${nc.x2}`;
+                        return `M ${nc.x1} ${nc.y1} H ${
+                            shift + Math.max(nc.x1 + minMargin, middlePoint)
+                        } V ${nc.y2} H ${nc.x2}`;
                     }
                     if (nc.from.connectionSide === 'left' && nc.to.connectionSide === 'right') {
-                        return `M ${nc.x2} ${nc.y2} H ${Math.max(
-                            nc.x2 + minMargin,
-                            middlePoint,
-                        )} V ${nc.y1} H ${nc.x1}`;
+                        return `M ${nc.x2} ${nc.y2} H ${
+                            shift + Math.max(nc.x2 + minMargin, middlePoint)
+                        } V ${nc.y1} H ${nc.x1}`;
                     }
                     if (nc.from.connectionSide === 'right' && nc.to.connectionSide === 'right') {
-                        return `M ${nc.x1} ${nc.y1} H ${Math.max(
-                            nc.x1 + minMargin,
-                            nc.x2 + minMargin,
-                            middlePoint,
-                        )} V ${nc.y2} H ${nc.x2}`;
+                        return `M ${nc.x1} ${nc.y1} H ${
+                            shift + Math.max(nc.x1 + minMargin, nc.x2 + minMargin, middlePoint)
+                        } V ${nc.y2} H ${nc.x2}`;
                     }
                     if (nc.from.connectionSide === 'left' && nc.to.connectionSide === 'left') {
-                        return `M ${nc.x1} ${nc.y1} H ${Math.min(
-                            nc.x1 - minMargin,
-                            nc.x2 - minMargin,
-                            middlePoint,
-                        )} V ${nc.y2} H ${nc.x2}`;
+                        return `M ${nc.x1} ${nc.y1} H ${
+                            shift + Math.min(nc.x1 - minMargin, nc.x2 - minMargin, middlePoint)
+                        } V ${nc.y2} H ${nc.x2}`;
                     }
                 }
                 return `M ${nc.x1} ${nc.y1} H ${middlePoint} V ${nc.y2} H ${nc.x2}`;
@@ -262,10 +270,10 @@ export default class ConnectionRenderer {
     /**
      * Chooses the render method based on active style and connection characteristic
      *
-     * @param x1 X coordinate of input point
-     * @param y1 Y coordinate of input point
-     * @param x2 X coordinate of output point
-     * @param y2 Y coordinate of output point
+     * @param x1 X coordinate of from interface
+     * @param y1 Y coordinate of from interface
+     * @param x2 X coordinate of to interface
+     * @param y2 Y coordinate of to interface
      * @param connection BaklavaJS-defined connection to render
      * @returns String defining connection path in SVG format
      */
