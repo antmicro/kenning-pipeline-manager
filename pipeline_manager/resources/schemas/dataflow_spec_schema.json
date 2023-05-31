@@ -510,7 +510,7 @@
         }
     },
     "required": [
-        "nodes", "metadata"
+        "nodes"
     ],
     "additionalProperties": false
 }
