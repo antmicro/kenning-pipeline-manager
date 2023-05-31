@@ -75,12 +75,14 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
 </template>
 
 <script>
-import { EditorComponent, useGraph } from 'baklavajs';
-import { defineComponent, ref, computed } from 'vue';
+/* eslint-disable object-curly-newline */
+import { EditorComponent, useGraph, useDragMove } from 'baklavajs';
+import { defineComponent, ref, computed, watch } from 'vue';
 import CustomNode from './CustomNode.vue';
 import PipelineManagerConnection from './connection/PipelineManagerConnection.vue';
 import TemporaryConnection from './connection/TemporaryConnection.vue';
 import NodePalette from './nodepalette/NodePalette.vue';
+import { useTemporaryConnection } from './temporaryConnection';
 
 export default defineComponent({
     extends: EditorComponent,
@@ -98,27 +100,56 @@ export default defineComponent({
             connections,
             selectedNodes,
             nodeContainerStyle,
-            onPointerMove,
-            onPointerDown,
-            onPointerUp,
             keyDown,
             keyUp,
             selectNode,
-            temporaryConnection,
             mouseWheel,
             dragging,
         } = EditorComponent.setup(props);
 
         const connRefs = ref([]);
         const { graph } = useGraph();
+        const panningRef = computed(() => graph.value.panning);
+        const dragMove = useDragMove(panningRef);
+        const temporaryConnection = useTemporaryConnection();
 
         const highlightConnections = ref([]);
 
         const readonly = computed(() => props.viewModel.editor.readonly);
 
+        const unselectAllNodes = () => {
+            /* eslint-disable vue/no-mutating-props,no-param-reassign */
+            props.viewModel.displayedGraph.selectedNodes = [];
+        };
+
+        const onPointerDown = (ev) => {
+            if (ev.button === 0) {
+                if (ev.target === el.value) {
+                    unselectAllNodes();
+                    dragMove.onPointerDown(ev);
+                }
+                temporaryConnection.onMouseDown();
+            }
+        };
+
+        const onPointerMove = (ev) => {
+            dragMove.onPointerMove(ev);
+            temporaryConnection.onMouseMove(ev);
+        };
+
+        const onPointerUp = (ev) => {
+            dragMove.onPointerUp(ev);
+            temporaryConnection.onMouseUp();
+        };
+
         const clearHighlight = () => {
             highlightConnections.value.splice(0, highlightConnections.value.length);
         };
+
+        // If a connection is removed by clicking on it all highlighted connections are removed
+        watch(connections.value, () => {
+            clearHighlight();
+        });
 
         const addHighlight = (connection) => {
             if (!highlightConnections.value.includes(connection)) {
@@ -172,7 +203,7 @@ export default defineComponent({
             keyDown,
             keyUp,
             selectNode,
-            temporaryConnection,
+            temporaryConnection: temporaryConnection.temporaryConnection,
             mouseWheel,
             dragging,
             changeHoveredConnections,

@@ -10,7 +10,7 @@ Inherits from baklavajs/renderer-vue/src/connection/ConnectionView.vue
 -->
 
 <template>
-    <g>
+    <g @pointerdown="onMouseDown">
         <path :d="newD" class="connection-wrapper baklava-connection"></path>
         <path :d="newD" class="baklava-connection" :class="cssClasses"></path>
     </g>
@@ -30,6 +30,16 @@ export default defineComponent({
 
         const cssClasses = computed(() => ({ ...classes.value, '--hover': props.isHighlighted }));
 
+        const doubleClickTimer = 700;
+        let lastClickTime = -doubleClickTimer;
+
+        const onMouseDown = () => {
+            if (Date.now() - lastClickTime < doubleClickTimer) {
+                graph.value.removeConnection(props.connection);
+            }
+            lastClickTime = Date.now();
+        };
+
         const transform = (x, y) => {
             const tx = (x + graph.value.panning.x) * graph.value.scaling;
             const ty = (y + graph.value.panning.y) * graph.value.scaling;
@@ -42,7 +52,7 @@ export default defineComponent({
             return viewModel.value.connectionRenderer.render(tx1, ty1, tx2, ty2, props.connection);
         });
 
-        return { cssClasses, newD };
+        return { cssClasses, newD, onMouseDown };
     },
 });
 </script>
