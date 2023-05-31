@@ -94,7 +94,7 @@ export default class EditorManager {
                 node.interfaces,
                 node.properties,
                 interfaceTypes,
-                'twoColumn' in metadata ? metadata.twoColumn : false,
+                metadata && 'twoColumn' in metadata ? metadata.twoColumn : false,
             );
             this.editor.registerNodeType(myNode, { title: node.name, category: node.category });
             if ('icon' in node) {
@@ -110,20 +110,22 @@ export default class EditorManager {
             }
         });
 
-        subgraphs.forEach((subgraph) => {
-            const mySubgraph = SubgraphFactory(
-                subgraph.nodes,
-                subgraph.connections,
-                subgraph.interfaces,
-                subgraph.name,
-                subgraph.type,
-                this.editor,
-            );
-            this.editor.addGraphTemplate(mySubgraph, subgraph.category, subgraph.type);
-        });
+        if (subgraphs !== undefined) {
+            subgraphs.forEach((subgraph) => {
+                const mySubgraph = SubgraphFactory(
+                    subgraph.nodes,
+                    subgraph.connections,
+                    subgraph.interfaces,
+                    subgraph.name,
+                    subgraph.type,
+                    this.editor,
+                );
+                this.editor.addGraphTemplate(mySubgraph, subgraph.category, subgraph.type);
+            });
+        }
 
-        this.editor.readonly = metadata.readonly ?? false;
-        this.editor.hideHud = metadata.hideHud ?? false;
+        this.editor.readonly = (metadata && metadata.readonly) ?? false;
+        this.editor.hideHud = (metadata && metadata.hideHud) ?? false;
 
         NotificationHandler.setShowOption(!this.editor.hideHud);
         if (this.editor.readonly) {
@@ -132,8 +134,8 @@ export default class EditorManager {
                 'The specification is read-only. Only dataflow loading is allowed.',
             );
         }
-        this.editor.allowLoopbacks = metadata.allowLoopbacks ?? false;
-        if ('connectionStyle' in metadata) {
+        this.editor.allowLoopbacks = (metadata && metadata.allowLoopbacks) ?? false;
+        if (metadata && 'connectionStyle' in metadata) {
             this.baklavaView.connectionRenderer.style = metadata.connectionStyle;
         }
 
@@ -162,7 +164,7 @@ export default class EditorManager {
      * @param metadata metadata of the specification
      */
     updateInterfacesStyle(metadata) {
-        if ('interfaces' in metadata) {
+        if (metadata && 'interfaces' in metadata) {
             const styleSheet = document.createElement('style');
             let styles = '';
 
