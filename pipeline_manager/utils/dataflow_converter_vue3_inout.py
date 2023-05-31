@@ -60,7 +60,7 @@ def main(argv):
         del node['outputs']
 
     with open(args.output, 'w') as f:
-        json.dump(loaded, f)
+        json.dump(loaded, f, indent=4)
 
 
 if __name__ == "__main__":

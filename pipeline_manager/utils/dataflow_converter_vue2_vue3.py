@@ -213,7 +213,7 @@ def main(argv):
     new_dataflow = to_new(nodes, connections)
 
     with open(args.output, "w") as f:
-        json.dump(new_dataflow, f)
+        json.dump(new_dataflow, f, indent=4)
 
 
 if __name__ == "__main__":
