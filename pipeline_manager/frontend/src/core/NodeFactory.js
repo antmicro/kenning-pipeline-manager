@@ -109,7 +109,7 @@ function parseOutputs(outputs, interfaceTypes) {
             intf.componentName = 'NodeInterface';
             intf.maxConnectionsCount = o.maxConnectionsCount;
             intf.direction = o.direction;
-            intf.connectionSide = o.connectionSide;
+            intf.connectionSide = o.connectionSide ?? 'right';
             return intf;
         };
     });
@@ -129,7 +129,7 @@ function parseInputs(inputs, interfaceTypes) {
             intf.componentName = 'NodeInterface';
             intf.maxConnectionsCount = i.maxConnectionsCount;
             intf.direction = i.direction;
-            intf.connectionSide = i.connectionSide;
+            intf.connectionSide = i.connectionSide ?? 'left';
             return intf;
         };
     });
