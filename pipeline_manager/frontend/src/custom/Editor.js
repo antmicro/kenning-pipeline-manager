@@ -41,7 +41,7 @@ export default class PipelineManagerEditor extends Editor {
     /* eslint-disable no-underscore-dangle */
 
     registerGraph(graph) {
-        graph.checkConnection = function (from, to) {
+        graph.checkConnection = function checkConnection(from, to) {
             if (!from || !to) {
                 return { connectionAllowed: false };
             }
@@ -118,7 +118,7 @@ export default class PipelineManagerEditor extends Editor {
             };
         };
 
-        graph.updateTemplate = function () {
+        graph.updateTemplate = function updateTemplate() {
             const interfaceConnections = [];
             const SUBGRAPH_INPUT_NODE_TYPE = '__baklava_SubgraphInputNode';
             const SUBGRAPH_OUTPUT_NODE_TYPE = '__baklava_SubgraphOutputNode';
@@ -175,7 +175,7 @@ export default class PipelineManagerEditor extends Editor {
             this.template.scaling = this.scaling;
         };
 
-        graph.addNode = function (node) {
+        graph.addNode = function addNode(node) {
             if (this.events.beforeAddNode.emit(node).prevented) {
                 return;
             }
@@ -205,7 +205,7 @@ export default class PipelineManagerEditor extends Editor {
             return node; // eslint-disable-line consistent-return
         };
 
-        graph.save = function () {
+        graph.save = function save() {
             const state = {
                 id: this.id,
                 nodes: this.nodes.map((n) => n.save()),
