@@ -170,7 +170,25 @@ export function NodeFactory(name, displayName, interfaces, properties, interface
                 const newProperties = [];
                 const newInterfaces = [];
 
-                Object.entries({ ...this.inputs, ...this.outputs }).forEach((io) => {
+                Object.entries({ ...this.inputs }).forEach((io) => {
+                    const [ioName, ioState] = io;
+
+                    if (ioState.port) {
+                        newInterfaces.push({
+                            name: ioName,
+                            id: ioState.id,
+                            direction: ioState.direction,
+                        });
+                    } else {
+                        newProperties.push({
+                            name: ioName,
+                            id: ioState.id,
+                            value: ioState.value === undefined ? null : ioState.value,
+                        });
+                    }
+                });
+
+                Object.entries({ ...this.outputs }).forEach((io) => {
                     const [ioName, ioState] = io;
 
                     if (ioState.port) {
