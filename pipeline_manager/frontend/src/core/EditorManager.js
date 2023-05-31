@@ -71,8 +71,8 @@ export default class EditorManager {
             }
         });
 
-        this.editor.readonly = 'readonly' in metadata ? metadata.readonly : false;
-        this.editor.hideHud = 'hideHud' in metadata ? metadata.hideHud : false;
+        this.editor.readonly = metadata.readonly ?? false;
+        this.editor.hideHud = metadata.hideHud ?? false;
         NotificationHandler.setShowOption(!this.editor.hideHud);
         if (this.editor.readonly) {
             NotificationHandler.showToast(
@@ -80,7 +80,7 @@ export default class EditorManager {
                 'The specification is read-only. Only dataflow loading is allowed.',
             );
         }
-        this.editor.allowLoopbacks = 'allowLoopbacks' in metadata ? metadata.allowLoopbacks : false;
+        this.editor.allowLoopbacks = metadata.allowLoopbacks ?? false;
         if ('connectionStyle' in metadata) {
             this.baklavaView.connectionRenderer.style = metadata.connectionStyle;
         }
