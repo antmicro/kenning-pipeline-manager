@@ -48,9 +48,11 @@ export default class EditorManager {
                 /* eslint-disable no-param-reassign */
                 Object.values(node.node.inputs).forEach((intf) => {
                     intf.direction = 'input';
+                    intf.connectionSide = 'left';
                 });
                 Object.values(node.node.outputs).forEach((intf) => {
                     intf.direction = 'output';
+                    intf.connectionSide = 'right';
                 });
                 /* eslint-enable no-param-reassign */
             }
