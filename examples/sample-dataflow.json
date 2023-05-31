@@ -11,31 +11,37 @@
                     "x": 544,
                     "y": 77
                 },
-                "inputs": {
-                    "image": {
-                        "id": "ni_168064109167612"
-                    },
-                    "kernel": {
-                        "id": "ni_168064109167613"
-                    }
-                },
-                "properties": {
-                    "iterations": {
+                "properties": [
+                    {
+                        "name": "iterations",
                         "id": "8434027854",
                         "value": 1
                     },
-                    "border type": {
+                    {
+                        "name": "border type",
                         "id": "7165552813",
                         "value": "constant"
                     }
-                },
-                "outputs": {
-                    "output": {
-                        "id": "ni_168064109167714"
-                    }
-                },
+                ],
                 "width": 200,
-                "twoColumn": false
+                "twoColumn": false,
+                "interfaces": [
+                    {
+                        "name": "image",
+                        "id": "ni_168064109167612",
+                        "direction": "input"
+                    },
+                    {
+                        "name": "kernel",
+                        "id": "ni_168064109167613",
+                        "direction": "input"
+                    },
+                    {
+                        "name": "output",
+                        "id": "ni_168064109167714",
+                        "direction": "output"
+                    }
+                ]
             },
             {
                 "type": "LoadVideo",
@@ -44,20 +50,22 @@
                     "x": -60,
                     "y": -36
                 },
-                "inputs": {},
-                "properties": {
-                    "filename": {
+                "properties": [
+                    {
+                        "name": "filename",
                         "id": "8887517324",
                         "value": "input.mp4"
                     }
-                },
-                "outputs": {
-                    "frames": {
-                        "id": "ni_168064220761016"
-                    }
-                },
+                ],
                 "width": 200,
-                "twoColumn": false
+                "twoColumn": false,
+                "interfaces": [
+                    {
+                        "name": "frames",
+                        "id": "ni_168064220761016",
+                        "direction": "output"
+                    }
+                ]
             },
             {
                 "type": "GaussianKernel",
@@ -66,24 +74,27 @@
                     "x": -65,
                     "y": 295
                 },
-                "inputs": {},
-                "properties": {
-                    "size": {
+                "properties": [
+                    {
+                        "name": "size",
                         "id": "1247863780",
                         "value": 5
                     },
-                    "sigma": {
+                    {
+                        "name": "sigma",
                         "id": "0187870808",
                         "value": 1
                     }
-                },
-                "outputs": {
-                    "kernel": {
-                        "id": "ni_168064222522422"
-                    }
-                },
+                ],
                 "width": 200,
-                "twoColumn": false
+                "twoColumn": false,
+                "interfaces": [
+                    {
+                        "name": "kernel",
+                        "id": "ni_168064222522422",
+                        "direction": "output"
+                    }
+                ]
             },
             {
                 "type": "Threshold",
@@ -92,28 +103,32 @@
                     "x": 999,
                     "y": 100
                 },
-                "inputs": {
-                    "image": {
-                        "id": "ni_168064225320531"
-                    }
-                },
-                "properties": {
-                    "threshold_value": {
+                "properties": [
+                    {
+                        "name": "threshold_value",
                         "id": "8770324282",
                         "value": 1
                     },
-                    "threshold_type": {
+                    {
+                        "name": "threshold_type",
                         "id": "8305532648",
                         "value": "Otsu"
                     }
-                },
-                "outputs": {
-                    "output": {
-                        "id": "ni_168064225320532"
-                    }
-                },
+                ],
                 "width": 200,
-                "twoColumn": false
+                "twoColumn": false,
+                "interfaces": [
+                    {
+                        "name": "image",
+                        "id": "ni_168064225320531",
+                        "direction": "input"
+                    },
+                    {
+                        "name": "output",
+                        "id": "ni_168064225320532",
+                        "direction": "output"
+                    }
+                ]
             },
             {
                 "type": "StructuringElement",
@@ -123,24 +138,27 @@
                     "x": 1010,
                     "y": 409
                 },
-                "inputs": {},
-                "properties": {
-                    "size": {
+                "properties": [
+                    {
+                        "name": "size",
                         "id": "1587558664",
                         "value": 5
                     },
-                    "shape": {
+                    {
+                        "name": "shape",
                         "id": "1375086555",
                         "value": "Cross"
                     }
-                },
-                "outputs": {
-                    "kernel": {
-                        "id": "ni_168064227787437"
-                    }
-                },
+                ],
                 "width": 200,
-                "twoColumn": false
+                "twoColumn": false,
+                "interfaces": [
+                    {
+                        "name": "kernel",
+                        "id": "ni_168064227787437",
+                        "direction": "output"
+                    }
+                ]
             },
             {
                 "type": "Morphological operation",
@@ -149,35 +167,42 @@
                     "x": 1422,
                     "y": 54
                 },
-                "inputs": {
-                    "image": {
-                        "id": "ni_168064228786539"
-                    },
-                    "kernel": {
-                        "id": "ni_168064228786540"
-                    }
-                },
-                "properties": {
-                    "iterations": {
+                "properties": [
+                    {
+                        "name": "iterations",
                         "id": "0605526715",
                         "value": 1
                     },
-                    "border type": {
+                    {
+                        "name": "border type",
                         "id": "2810748353",
                         "value": "constant"
                     },
-                    "operation type": {
+                    {
+                        "name": "operation type",
                         "id": "8413506138",
                         "value": "dilation"
                     }
-                },
-                "outputs": {
-                    "output": {
-                        "id": "ni_168064228786641"
-                    }
-                },
+                ],
                 "width": 200,
-                "twoColumn": false
+                "twoColumn": false,
+                "interfaces": [
+                    {
+                        "name": "image",
+                        "id": "ni_168064228786539",
+                        "direction": "input"
+                    },
+                    {
+                        "name": "kernel",
+                        "id": "ni_168064228786540",
+                        "direction": "input"
+                    },
+                    {
+                        "name": "output",
+                        "id": "ni_168064228786641",
+                        "direction": "output"
+                    }
+                ]
             },
             {
                 "type": "SaveVideo",
@@ -187,23 +212,27 @@
                     "x": 1773,
                     "y": 76
                 },
-                "inputs": {
-                    "color": {
-                        "id": "ni_168064231007449"
-                    },
-                    "binary": {
-                        "id": "ni_168064231007450"
-                    }
-                },
-                "properties": {
-                    "filename": {
+                "properties": [
+                    {
+                        "name": "filename",
                         "id": "3087244218",
                         "value": "output.mp4"
                     }
-                },
-                "outputs": {},
+                ],
                 "width": 200,
-                "twoColumn": false
+                "twoColumn": false,
+                "interfaces": [
+                    {
+                        "name": "color",
+                        "id": "ni_168064231007449",
+                        "direction": "input"
+                    },
+                    {
+                        "name": "binary",
+                        "id": "ni_168064231007450",
+                        "direction": "input"
+                    }
+                ]
             }
         ],
         "connections": [
