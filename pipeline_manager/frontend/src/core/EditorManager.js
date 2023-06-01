@@ -32,6 +32,9 @@ export default class EditorManager {
 
     constructor() {
         this.baklavaView.connectionRenderer = new ConnectionRenderer(this.baklavaView);
+
+        // need to be set here as settings try to use this value before specification is loaded
+        this.baklavaView.optionalInterfaceTypes = [];
     }
 
     /**
@@ -84,6 +87,8 @@ export default class EditorManager {
         if ('connectionStyle' in metadata) {
             this.baklavaView.connectionRenderer.style = metadata.connectionStyle;
         }
+        this.baklavaView.ignoredInterfaces = new Set();
+        this.baklavaView.optionalInterfaceTypes = metadata.optionalInterfaceTypes ?? [];
         this.specificationLoaded = true;
     }
 
