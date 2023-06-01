@@ -112,6 +112,8 @@ function parseOutputs(outputs, interfaceTypes) {
             intf.connectionSide = o.connectionSide ?? 'right';
             intf.interfaceConnectionPattern =
                 interfaceTypes[o.type].interfaceConnectionPattern ?? 'solid';
+            intf.interfaceConnectionColor =
+                interfaceTypes[o.type].interfaceConnectionColor ?? '#FFFFFF';
             return intf;
         };
     });
@@ -134,6 +136,8 @@ function parseInputs(inputs, interfaceTypes) {
             intf.connectionSide = i.connectionSide ?? 'left';
             intf.interfaceConnectionPattern =
                 interfaceTypes[i.type].interfaceConnectionPattern ?? 'solid';
+            intf.interfaceConnectionColor =
+                interfaceTypes[i.type].interfaceConnectionColor ?? '#FFFFFF';
             return intf;
         };
     });
@@ -277,6 +281,8 @@ export function readInterfaceTypes(nodes, metadata) {
                 if ('interfaces' in metadata && io.type in metadata.interfaces) {
                     interfaceTypes[io.type].interfaceConnectionPattern =
                         metadata.interfaces[io.type].interfaceConnectionPattern ?? 'solid';
+                    interfaceTypes[io.type].interfaceConnectionColor =
+                        metadata.interfaces[io.type].interfaceConnectionColor ?? '#FFFFFF';
                 }
             }
         });

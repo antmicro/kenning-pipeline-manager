@@ -7,14 +7,20 @@
 .baklava-connection {
     pointer-events: visibleStroke;
 
+    stroke: var(--color);
+
     &.--hover {
         stroke-width: 4px;
         stroke: $green;
     }
 
     &.--dashed {
-        stroke-dasharray: 8 8;
+        stroke-dasharray: 10 4;
         stroke-dashoffset: 0;
+    }
+
+    &.--dotted {
+        stroke-dasharray: 3 3;
     }
 }
 

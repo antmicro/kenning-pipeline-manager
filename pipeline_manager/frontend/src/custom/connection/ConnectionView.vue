@@ -12,7 +12,7 @@ Inherits from baklavajs/renderer-vue/src/connection/ConnectionView.vue
 <template>
     <g @pointerdown="onMouseDown">
         <path :d="newD" class="connection-wrapper baklava-connection"></path>
-        <path :d="newD" class="baklava-connection" :class="cssClasses"></path>
+        <path :d="newD" class="baklava-connection" :class="cssClasses" :style="style"></path>
     </g>
 </template>
 
@@ -28,10 +28,17 @@ export default defineComponent({
         const { graph } = useGraph();
         const { viewModel } = useViewModel();
 
+        const strokeColor = props.connection.from.interfaceConnectionColor ?? '#FFFFFF';
+
         const cssClasses = computed(() => ({
             ...classes.value,
             '--hover': props.isHighlighted,
             '--dashed': (props.connection.from.interfaceConnectionPattern ?? 'solid') === 'dashed',
+            '--dotted': (props.connection.from.interfaceConnectionPattern ?? 'solid') === 'dotted',
+        }));
+
+        const style = computed(() => ({
+            '--color': strokeColor,
         }));
 
         const doubleClickTimer = 700;
@@ -56,7 +63,12 @@ export default defineComponent({
             return viewModel.value.connectionRenderer.render(tx1, ty1, tx2, ty2, props.connection);
         });
 
-        return { cssClasses, newD, onMouseDown };
+        return {
+            cssClasses,
+            newD,
+            onMouseDown,
+            style,
+        };
     },
 });
 </script>
