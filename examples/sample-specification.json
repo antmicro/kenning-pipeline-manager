@@ -113,7 +113,12 @@
         "interfaces": {
             "BinaryImage": {
                 "interfaceColor": "#FF00FF",
-                "interfaceConnectionPattern": "dashed"
+                "interfaceConnectionPattern": "dashed",
+                "interfaceConnectionColor": "#FF0000"
+            },
+            "Image": {
+                "interfaceConnectionPattern": "dotted",
+                "interfaceConnectionColor": "#FFFF00"
             }
         },
         "connectionStyle": "orthogonal"
