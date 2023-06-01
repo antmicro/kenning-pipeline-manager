@@ -35,6 +35,8 @@ This object specifies additional editor options and contains the following optio
   Default value is `curved`
 * `hideHud` - boolean value determining whether UI elements should be hidden. Components affected by this flag are: popup notifications, navigation bar and terminal window.
   Default value is `false`
+* `optionalInterfaceTypes` - types of interfaces that can be ignored using settings.
+  Default values is an empty array.
 
 An example:
 
