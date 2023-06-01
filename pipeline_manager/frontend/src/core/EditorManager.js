@@ -52,7 +52,7 @@ export default class EditorManager {
 
         const { nodes, metadata } = dataflowSpecification;
 
-        const interfaceTypes = readInterfaceTypes(nodes);
+        const interfaceTypes = readInterfaceTypes(nodes, metadata);
         this.nodeInterfaceTypes.addTypes(...Object.values(interfaceTypes));
         this.updateInterfacesStyle(metadata);
 
@@ -109,8 +109,8 @@ export default class EditorManager {
             const styleSheet = document.createElement('style');
             let styles = '';
 
-            Object.entries(metadata.interfaces).forEach(([name, color]) => {
-                styles += `.baklava-node-interface[data-interface-type="${name}"] .__port { background-color: ${color}; }`;
+            Object.entries(metadata.interfaces).forEach(([name, data]) => {
+                styles += `.baklava-node-interface[data-interface-type="${name}"] .__port { background-color: ${data.interfaceColor}; }`;
             });
 
             styleSheet.innerText = styles;

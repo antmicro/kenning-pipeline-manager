@@ -110,6 +110,8 @@ function parseOutputs(outputs, interfaceTypes) {
             intf.maxConnectionsCount = o.maxConnectionsCount;
             intf.direction = o.direction;
             intf.connectionSide = o.connectionSide ?? 'right';
+            intf.interfaceConnectionPattern =
+                interfaceTypes[o.type].interfaceConnectionPattern ?? 'solid';
             return intf;
         };
     });
@@ -130,6 +132,8 @@ function parseInputs(inputs, interfaceTypes) {
             intf.maxConnectionsCount = i.maxConnectionsCount;
             intf.direction = i.direction;
             intf.connectionSide = i.connectionSide ?? 'left';
+            intf.interfaceConnectionPattern =
+                interfaceTypes[i.type].interfaceConnectionPattern ?? 'solid';
             return intf;
         };
     });
@@ -260,15 +264,20 @@ export function NodeFactory(name, displayName, interfaces, properties, interface
  *
  * The read interface types are stored in `interfaceTypes` object which is returned by this function
  * @param {*} nodes nodes of the specification
+ * @param {*} metadata metadata containing information about styling
  * @returns read interface types
  */
-export function readInterfaceTypes(nodes) {
+export function readInterfaceTypes(nodes, metadata) {
     const interfaceTypes = {};
 
     nodes.forEach((node) => {
         [...node.interfaces].forEach((io) => {
             if (!Object.prototype.hasOwnProperty.call(interfaceTypes, io.type)) {
                 interfaceTypes[io.type] = new NodeInterfaceType(io.type);
+                if ('interfaces' in metadata && io.type in metadata.interfaces) {
+                    interfaceTypes[io.type].interfaceConnectionPattern =
+                        metadata.interfaces[io.type].interfaceConnectionPattern ?? 'solid';
+                }
             }
         });
     });
