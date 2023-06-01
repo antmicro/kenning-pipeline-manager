@@ -42,6 +42,10 @@ import PaletteCategory from './PaletteCategory.vue';
 import getNodeTree from './nodeTree';
 import PaletteEntry from './PaletteEntry.vue';
 
+import checkRecursion from './checkRecursion';
+import { SUBGRAPH_INPUT_NODE_TYPE, SUBGRAPH_OUTPUT_NODE_TYPE } from './subgraphInterface';
+import { SUBGRAPH_INOUT_NODE_TYPE } from '../Editor';
+
 export default defineComponent({
     components: { PaletteCategory, PaletteEntry },
     setup() {
@@ -53,6 +57,55 @@ export default defineComponent({
         const editorEl = inject('editorEl');
 
         const draggedNode = ref(null);
+        const categories = computed(() => {
+            const nodeTypeEntries = Array.from(editor.nodeTypes.entries());
+            const categoryNames = new Set(nodeTypeEntries.map(([, ni]) => ni.category));
+
+            const tempCategories = [];
+            categoryNames.forEach((c) => {
+                let nodeTypesInCategory = nodeTypeEntries.filter(([, ni]) => ni.category === c);
+                if (viewModel.value.displayedGraph.template) {
+                    // don't show the graph nodes that directly or indirectly contain
+                    // the current subgraph to prevent recursion
+                    nodeTypesInCategory = nodeTypesInCategory.filter(
+                        ([nt]) => !checkRecursion(editor, viewModel.value.displayedGraph, nt),
+                    );
+                } else {
+                    // if we are not in a subgraph, don't show subgraph input & output nodes
+                    nodeTypesInCategory = nodeTypesInCategory.filter(
+                        ([nt]) =>
+                            ![SUBGRAPH_INPUT_NODE_TYPE, SUBGRAPH_OUTPUT_NODE_TYPE, SUBGRAPH_INOUT_NODE_TYPE].includes(nt),
+                    );
+                }
+
+                const nodesIconPath = nodeTypesInCategory.map((n) => {
+                    const [nodeType] = n;
+                    const iconPath = editor.getNodeIconPath(nodeType);
+                    return iconPath;
+                });
+
+                if (nodeTypesInCategory.length > 0) {
+                    tempCategories.push({
+                        name: c,
+                        nodeTypes: Object.fromEntries(nodeTypesInCategory),
+                        nodeIconPaths: nodesIconPath,
+                    });
+                }
+            });
+            // sort, so the default category is always first and all
+            // others are sorted alphabetically
+            tempCategories.sort((a, b) => {
+                if (a.name === 'default') {
+                    return -1;
+                }
+                if (b.name === 'default') {
+                    return 1;
+                }
+                return a.name > b.name ? 1 : -1;
+            });
+
+            return tempCategories;
+        });
 
         const draggedNodeStyles = computed(() => {
             if (!draggedNode.value || !editorEl?.value) {
