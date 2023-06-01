@@ -20,9 +20,36 @@ import {
     useGraph,
     GraphTemplate,
     GRAPH_NODE_TYPE_PREFIX,
+    TextInputInterface,
+    NodeInterface,
+    SelectInterface,
+    defineNode
 } from 'baklavajs';
 import { v4 as uuidv4 } from 'uuid';
 import { parseNodeState } from '../core/NodeFactory';
+
+// Just like there are special nodes representing subgraph input and output,
+// There should be one for it's inout.
+// This most probably should be in separate file
+export const SUBGRAPH_INOUT_NODE_TYPE = "__baklava_SubgraphInoutNode";
+const SubgraphInoutNode = defineNode({
+    type: SUBGRAPH_INOUT_NODE_TYPE,
+    title: "Subgraph Inout",
+    inputs: {
+        name: () => new TextInputInterface("Name", "Inout").setPort(false),
+        side: () => new SelectInterface("Side", "Left", ["Left", "Right"]).setPort(false),
+        placeholder: () => {
+            const ni = new NodeInterface("Connection", undefined);
+            ni.direction = 'inout';
+            ni.connectionSide = 'left';
+            return ni;
+        }
+    },
+    outputs: {},
+    onCreate() {
+        this.graphInterfaceId = uuidv4()
+    }
+})
 
 export default class PipelineManagerEditor extends Editor {
     readonly = false;
@@ -39,6 +66,10 @@ export default class PipelineManagerEditor extends Editor {
 
     /* eslint-disable no-param-reassign */
     /* eslint-disable no-underscore-dangle */
+    constructor() {
+        super()
+        this.registerNodeType(SubgraphInoutNode, { category: "Subgraphs" })
+    }
 
     registerGraph(graph) {
         graph.checkConnection = function checkConnection(from, to) {
@@ -390,11 +421,5 @@ export default class PipelineManagerEditor extends Editor {
         }
         displayedGraph.updateTemplate();
         this.switchGraph(this.graph);
-    }
-
-    swapGraph(newGraph) {
-        const aaa = this._graph;
-        this._graph = newGraph;
-        return aaa;
     }
 }
