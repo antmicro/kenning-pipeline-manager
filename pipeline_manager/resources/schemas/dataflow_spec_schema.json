@@ -7,8 +7,22 @@
             "type": "object",
             "properties": {
                 "interfaces": {
+                    "description": "Styling of the nodes",
                     "type": "object",
-                    "description": "Styling of the nodes"
+                    "properties": {
+                        "interfaceColor": {
+                            "type": "string",
+                            "description": "Color of the interface instance"
+                        },
+                        "interfaceConnectionPattern": {
+                            "description": "Pattern of the connection going from the interface",
+                            "enum": [
+                                "solid",
+                                "dashed"
+                            ],
+                            "default": "solid"
+                        }
+                    }
                 },
                 "allowLoopbacks": {
                     "type": "boolean",
