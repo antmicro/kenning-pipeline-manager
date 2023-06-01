@@ -11,6 +11,11 @@
         stroke-width: 4px;
         stroke: $green;
     }
+
+    &.--dashed {
+        stroke-dasharray: 8 8;
+        stroke-dashoffset: 0;
+    }
 }
 
 .connection-wrapper {

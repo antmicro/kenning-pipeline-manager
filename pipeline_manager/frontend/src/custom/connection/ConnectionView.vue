@@ -28,7 +28,11 @@ export default defineComponent({
         const { graph } = useGraph();
         const { viewModel } = useViewModel();
 
-        const cssClasses = computed(() => ({ ...classes.value, '--hover': props.isHighlighted }));
+        const cssClasses = computed(() => ({
+            ...classes.value,
+            '--hover': props.isHighlighted,
+            '--dashed': (props.connection.from.interfaceConnectionPattern ?? 'solid') === 'dashed',
+        }));
 
         const doubleClickTimer = 700;
         let lastClickTime = -doubleClickTimer;
