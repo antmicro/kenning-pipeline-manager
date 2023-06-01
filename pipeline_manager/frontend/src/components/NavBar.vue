@@ -38,6 +38,7 @@ export default {
         DropdownItem,
         Notifications,
         Cogwheel,
+        Settings,
         Cube,
     },
     data() {
@@ -222,7 +223,6 @@ export default {
         },
 
         displaySettingsTab(isOpen) {
-            const showSettings = '-495px';
             const resetSettings = '0px';
             const settingsPanel = document.querySelector('.settings-panel');
             const { settings } = this.$refs;
@@ -230,14 +230,13 @@ export default {
             this.isSettingsPanelOpen = isOpen;
 
             if (settingsPanel) {
+                const showSettings = '-495px';
                 settingsPanel.style.transition = `transform ${
                     this.isSettingsPanelOpen ? '0.4' : '0.2'
                 }s`;
 
                 settingsPanel.style.transform = `translateX(${
-                    this.isSettingsPanelOpen
-                        ? showSettings
-                        : resetSettings
+                    this.isSettingsPanelOpen ? showSettings : resetSettings
                 })`;
 
                 settings.classList.toggle('open', this.isSettingsPanelOpen);
@@ -245,7 +244,19 @@ export default {
         },
 
         clickOutsideSettings(event) {
+            const { settingsButton } = this.$refs;
 
+            let currentElement = event.target;
+
+            while (currentElement != null) {
+                if (currentElement === settingsButton) {
+                    return;
+                }
+
+                currentElement = currentElement.parentElement;
+            }
+
+            this.displaySettingsTab(false);
         },
 
         /**
@@ -501,7 +512,7 @@ export default {
         </div>
         <div class="progress-bar" />
         <Notifications v-click-outside="clickOutsideNotification" />
-        <Settings v-click-outside="clickOutsideSettings" :baklavaView="editorManager.baklavaView" />
+        <Settings v-click-outside="clickOutsideSettings" :viewModel="editorManager.baklavaView" />
     </div>
 </template>
 
