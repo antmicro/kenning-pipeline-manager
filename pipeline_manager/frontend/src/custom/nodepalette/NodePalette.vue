@@ -4,6 +4,12 @@ Copyright (c) 2022-2023 Antmicro <www.antmicro.com>
 SPDX-License-Identifier: Apache-2.0
 -->
 
+<!--
+Custom node palette - Implements a sidebar containing available nodes.
+
+Inherits from baklavajs/packages/renderer-vue/src/nodepalette/NodePalette.vue
+-->
+
 <template>
     <!-- eslint-disable vue/no-multiple-template-root -->
     <div class="baklava-node-palette">

@@ -4,6 +4,11 @@ Copyright (c) 2022-2023 Antmicro <www.antmicro.com>
 SPDX-License-Identifier: Apache-2.0
 -->
 
+<!--
+Component representing single node's type category/subcategory.
+It groups the nodes of the same subcategory in the block that can be collapsed.
+-->
+
 <template>
     <!-- eslint-disable vue/no-multiple-template-root -->
     <div v-for="(category, name, i) in nodeTree" :key="name">
