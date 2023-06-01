@@ -45,7 +45,7 @@ export default {
             */
             externalApplicationManager: new ExternalApplicationManager(),
             isNotificationPanelOpen: false, // check notification panel state (open or close)
-            isPalettePanelOpen: false, // check palette panel state (open or close)
+            isPalettePanelOpen: true, // check palette panel state (open or close)
             isBackendStatusOpen: false, // check backend panel state (open or close)
             notificationStore,
         };
@@ -110,8 +110,6 @@ export default {
             const negativeNotificationPanelWidth = `-${notificationPanel.offsetWidth}px`; // width of notification panel (negative because we want hide it on close)
             const { palette } = this.$refs;
 
-            this.isPalettePanelOpen = isOpen;
-
             if (notificationPanel) {
                 notificationPanel.style.transition = `transform ${
                     this.isPalettePanelOpen ? '0.4' : '0.2'
@@ -123,8 +121,9 @@ export default {
                         : resetNotificationPanelTransition
                 })`;
 
-                palette.classList.toggle('open', this.isPalettePanelOpen);
+                palette.classList.toggle('open', !this.isPalettePanelOpen);
             }
+            this.isPalettePanelOpen = isOpen;
         },
 
         // Open or hide notificationPanel with slide animation
@@ -348,14 +347,15 @@ export default {
     <div class="wrapper">
         <div class="container">
             <div>
-                <div ref="palette">
-                    <button
-                        ref="paletteButton"
-                        @click="() => displayPalettePanel(!this.isPalettePanelOpen)"
-                    >
+                <div ref="palette" class="open">
+                    <button @click="() => displayPalettePanel(!this.isPalettePanelOpen)">
                         <Cube />
                     </button>
+                    <div class="tooltip first">
+                        <span>Nodes</span>
+                    </div>
                 </div>
+
                 <div class="logo">
                     <Logo />
                     <Arrow color="white" rotate="left" scale="small" />
@@ -551,6 +551,9 @@ export default {
 
             & > .last {
                 transform: translateX(-75%);
+            }
+            & > .first {
+                transform: translateX(-25%);
             }
 
             &.logo:hover > svg:last-of-type {
