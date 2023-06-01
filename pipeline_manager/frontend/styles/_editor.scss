@@ -152,19 +152,44 @@
 
 .baklava-node-palette {
     top: 0px;
+    width: auto;
+    min-width: 300px;
+    background: var(--baklava-node-color-background);
+
     // default baklavjs height - terminal panel height
     height: calc(100% - 60px - 35px);
-    width: auto;
-    padding: 0px 1rem;
+    padding: 0;
     z-index: 1;
+
+    & h1 {
+        margin: 0px;
+    }
 }
 
-.baklava-node.--palette {
-    & .__title {
-        padding-left: $spacing-l;
-        & > .__title-icon {
-            height: max-content;
-            width: max-content;
-        }
+.__entry {
+    padding: $spacing-m 0;
+    font-size: $fs-small;
+    margin-top: -1px;
+
+    border: 1px solid #393939;
+    border-right: 0px;
+    border-left: 0px;
+
+    background: var(--baklava-node-color-background);
+    color: $white;
+
+    display: flex;
+    align-items: center;
+
+    & > .__title-icon {
+        padding-right: $spacing-s;
+        user-select: none;
+
+        height: max-content;
+        width: max-content;
+    }
+
+    & > .__category-title {
+        padding-left: 0.25em;
     }
 }
