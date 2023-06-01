@@ -336,10 +336,14 @@ export default class PipelineManagerEditor extends Editor {
 
             save() {
                 const state = super.save();
+                const inputInterfaceMap = new Map()
+                Object.values(this.inputs).forEach(input => 
+                    inputInterfaceMap.set(input.id, input)    
+                )
                 const inputInterfaces = Object.entries(state.inputs).map(([key, value]) => ({
                     id: value.id,
                     name: key,
-                    direction: value.direction,
+                    direction: inputInterfaceMap.get(value.id).direction,
                 }));
                 const outputInterfaces = Object.entries(state.outputs)
                     .filter((key) => key[0] !== '_calculationResults')
