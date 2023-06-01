@@ -342,14 +342,14 @@ export function SubgraphFactory(nodes, connections, interfaces, name, type, edit
     const inputs = interfaces
         .filter((interf) => interf.direction === 'input')
         .map((interf) => ({
-            id: uuidv4(),
+            id: interf.id ?? uuidv4(),
             nodeInterfaceId: interf.nodeInterface,
             name: interf.name,
         }));
     const outputs = interfaces
         .filter((interf) => interf.direction === 'output')
         .map((interf) => ({
-            id: uuidv4(),
+            id: interf.id ?? uuidv4(),
             nodeInterfaceId: interf.nodeInterface,
             name: interf.name,
         }));

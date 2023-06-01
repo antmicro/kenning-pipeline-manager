@@ -185,7 +185,7 @@ export default class PipelineManagerEditor extends Editor {
 
             if (node.template !== undefined) {
                 const newState = {
-                    id: uuidv4(),
+                    id: node.template.id ?? uuidv4(),
                     nodes: node.template.nodes,
                     connections: node.template.connections,
                     inputs: node.template.inputs,
@@ -323,7 +323,7 @@ export default class PipelineManagerEditor extends Editor {
                 const inputInterfaces = Object.entries(state.inputs).map(([key, value]) => ({
                     id: value.id,
                     name: key,
-                    direction: 'input',
+                    direction: value.direction,
                 }));
                 const outputInterfaces = Object.entries(state.outputs)
                     .filter((key) => key[0] !== '_calculationResults')
@@ -336,15 +336,15 @@ export default class PipelineManagerEditor extends Editor {
             load(state) {
                 const inputs = {};
                 state.interfaces
-                    .filter((intf) => intf.direction === 'input')
+                    .filter((intf) => intf.direction === 'input' || intf.direction === 'inout')
                     .forEach((intf) => {
-                        inputs[intf.name] = { id: intf.id };
+                        inputs[intf.name] = { id: intf.id, direction: intf.direction };
                     });
                 const outputs = { _calculationResults: { id: uuidv4 } };
                 state.interfaces
                     .filter((intf) => intf.direction === 'output')
                     .forEach((intf) => {
-                        outputs[intf.name] = { id: intf.id };
+                        outputs[intf.name] = { id: intf.id, direction: intf.direction };
                     });
                 delete state.interfaces;
                 super.load({ ...state, inputs, outputs });
