@@ -17,6 +17,7 @@ import Run from '../icons/Run.vue';
 import Validate from '../icons/Validate.vue';
 import Backend from '../icons/Backend.vue';
 import Bell from '../icons/Bell.vue';
+import Cube from '../icons/Cube.vue';
 import DropdownItem from './DropdownItem.vue';
 import EditorManager from '../core/EditorManager';
 import NotificationHandler from '../core/notifications';
@@ -34,6 +35,7 @@ export default {
         Bell,
         DropdownItem,
         Notifications,
+        Cube,
     },
     data() {
         return {
@@ -43,7 +45,8 @@ export default {
             */
             externalApplicationManager: new ExternalApplicationManager(),
             isNotificationPanelOpen: false, // check notification panel state (open or close)
-            isBackendStatusOpen: false, // // check backend panel state (open or close)
+            isPalettePanelOpen: false, // check palette panel state (open or close)
+            isBackendStatusOpen: false, // check backend panel state (open or close)
             notificationStore,
         };
     },
@@ -98,6 +101,30 @@ export default {
             };
 
             fileReader.readAsText(file);
+        },
+
+        // Open or hide notificationPanel with slide animation
+        displayPalettePanel(isOpen) {
+            const notificationPanel = document.querySelector('.baklava-node-palette');
+            const resetNotificationPanelTransition = '0px'; // reset notification panel transition to show it
+            const negativeNotificationPanelWidth = `-${notificationPanel.offsetWidth}px`; // width of notification panel (negative because we want hide it on close)
+            const { palette } = this.$refs;
+
+            this.isPalettePanelOpen = isOpen;
+
+            if (notificationPanel) {
+                notificationPanel.style.transition = `transform ${
+                    this.isPalettePanelOpen ? '0.4' : '0.2'
+                }s`;
+
+                notificationPanel.style.transform = `translateX(${
+                    this.isPalettePanelOpen
+                        ? negativeNotificationPanelWidth
+                        : resetNotificationPanelTransition
+                })`;
+
+                palette.classList.toggle('open', this.isPalettePanelOpen);
+            }
         },
 
         // Open or hide notificationPanel with slide animation
@@ -321,6 +348,14 @@ export default {
     <div class="wrapper">
         <div class="container">
             <div>
+                <div ref="palette">
+                    <button
+                        ref="paletteButton"
+                        @click="() => displayPalettePanel(!this.isPalettePanelOpen)"
+                    >
+                        <Cube />
+                    </button>
+                </div>
                 <div class="logo">
                     <Logo />
                     <Arrow color="white" rotate="left" scale="small" />
