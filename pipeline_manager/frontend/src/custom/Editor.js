@@ -37,7 +37,7 @@ const SubgraphInoutNode = defineNode({
     title: "Subgraph Inout",
     inputs: {
         name: () => new TextInputInterface("Name", "Inout").setPort(false),
-        side: () => new SelectInterface("Side", "Left", ["Left", "Right"]).setPort(false),
+        // side: () => new SelectInterface("Side", "Left", ["Left", "Right"]).setPort(false),
         placeholder: () => {
             const ni = new NodeInterface("Connection", undefined);
             ni.direction = 'inout';
@@ -184,11 +184,39 @@ export default class PipelineManagerEditor extends Editor {
                 interfaceConnections.push(...connections);
             });
 
+            const inoutNodes = this.nodes.filter((n) => n.type === SUBGRAPH_INOUT_NODE_TYPE);
+            inoutNodes.forEach((n) => {
+                // Inout interface can be both from and to
+                const connectionsTo = this.connections.filter(
+                    (c) => c.to === n.inputs.placeholder
+                );
+                connectionsTo.forEach((c) => {
+                    inputs.push({
+                        id: n.graphInterfaceId,
+                        name: n.inputs.name.value,
+                        nodeInterfaceId: c.from.id,
+                        direction: 'inout',
+                    });
+                });
+                const connectionsFrom = this.connections.filter(
+                    (c) => c.from === n.inputs.placeholder
+                );
+                connectionsFrom.forEach((c) => {
+                    inputs.push({
+                        id: n.graphInterfaceId,
+                        name: n.inputs.name.value,
+                        nodeInterfaceId: c.to.id,
+                        direction: 'inout'
+                    })
+                })
+                interfaceConnections.push(...connectionsTo, ...connectionsFrom);
+            })
+
             const innerConnections = this.connections.filter(
                 (c) => !interfaceConnections.includes(c),
             );
             const nodes = this.nodes.filter(
-                (n) => n.type !== SUBGRAPH_INPUT_NODE_TYPE && n.type !== SUBGRAPH_OUTPUT_NODE_TYPE,
+                (n) => n.type !== SUBGRAPH_INPUT_NODE_TYPE && n.type !== SUBGRAPH_OUTPUT_NODE_TYPE && n.type !== SUBGRAPH_INOUT_NODE_TYPE,
             );
 
             this.template.update({
