@@ -25,7 +25,7 @@ import {
 } from 'baklavajs';
 import { v4 as uuidv4 } from 'uuid';
 import { parseNodeState } from '../core/NodeFactory';
-import { 
+import {
     SUBGRAPH_OUTPUT_NODE_TYPE,
     SUBGRAPH_INPUT_NODE_TYPE,
     SUBGRAPH_INOUT_NODE_TYPE,
@@ -45,6 +45,8 @@ export default class PipelineManagerEditor extends Editor {
     baseURLs = new Map();
 
     nodeURLs = new Map();
+
+    subgraphStack = [];
 
     /* eslint-disable no-param-reassign */
     /* eslint-disable no-underscore-dangle */
@@ -436,13 +438,100 @@ export default class PipelineManagerEditor extends Editor {
         this.events.addGraphTemplate.emit(template);
     }
 
-    switchToMainGraph(displayedGraph) {
-        // SwitchGraph must be defined after viewPlugin and editor are initialized in EditorManager
-        if (this.switchGraph === undefined) {
+    switchGraph(subgraphNode) {
+        if (this._switchGraph === undefined) {
             const { switchGraph } = useGraph();
-            this.switchGraph = switchGraph;
+            this._switchGraph = switchGraph;
         }
-        displayedGraph.updateTemplate();
-        this.switchGraph(this.graph);
+        this._graph = new Graph(this);
+        subgraphNode.template.createGraph(this._graph);
+
+        Object.entries(subgraphNode.inputs).filter(input => input[1].direction === "input").forEach(([interfaceID, input]) => {
+            const node = new SubgraphInputNode();
+            node.inputs.name.value = input.name
+            node.graphInterfaceId = input.id
+            this._graph.addNode(node)
+            // NodeInterfaceID is stored only in template, we need to find it by ID
+            const templateInput = Object.values(this._graph.inputs).filter(intf => intf.id === interfaceID)
+            if(templateInput.length !== 1) {
+
+                return;
+            }
+            const targetInterface = this._graph.findNodeInterface(templateInput[0].nodeInterfaceId);
+            if(!targetInterface) {
+
+                return;
+            }
+            this._graph.addConnection(node.outputs.placeholder, targetInterface)
+        })
+
+        Object.entries(subgraphNode.inputs).filter(input => input[1].direction === "inout").forEach(([interfaceID, inout]) => {
+            const node = new SubgraphInoutNode();
+            node.inputs.name.value = inout.name;
+            node.graphInterfaceId = inout.id;
+            this._graph.addNode(node)
+            const templateInout = Object.values(this._graph.inputs).filter(intf => intf.id === interfaceID)
+            if(templateInout.length !== 1) {
+
+                return;
+            }
+            const targetInterface = this._graph.findNodeInterface(templateInout[0].nodeInterfaceId);
+            if(!targetInterface) {
+
+                return;
+            }
+            this._graph.addConnection(targetInterface, node.inputs.placeholder);
+        })
+
+        Object.entries(subgraphNode.outputs).filter(output => output[1].name !== "_calculationResults").forEach(([interfaceID, output]) => {
+            const node = new SubgraphOutputNode();
+            node.inputs.name.value = output.name;
+            node.graphInterfaceId = output.id;
+            this._graph.addNode(node);
+            const templateOutput = Object.values(this._graph.outputs).filter(intf => intf.id === interfaceID)
+            if(templateOutput.length !== 1) {
+
+                return;
+            }
+            const targetInterface = this._graph.findNodeInterface(templateOutput[0].nodeInterfaceId);
+            if(!targetInterface) {
+
+                return;
+            }
+            this._graph.addConnection(targetInterface, node.inputs.placeholder);
+        })
+
+        this._switchGraph(this._graph);
     }
+
+    switchToSubgraph(subgraphNode) {
+        if(this._graph.template !== undefined) {
+            this._graph.updateTemplate();
+        }
+        this.subgraphStack.push(copyGraph(this._graph, this));
+        this.switchGraph(subgraphNode)
+    }
+
+    backFromSubgraph(displayedGraph) {
+        const newGraph = this.subgraphStack.pop();
+        displayedGraph.updateTemplate()
+        // If this is main graph, simply switch to it (there is no need to create input/output nodes)
+        if(!this.isInSubgraph()) {
+            this._graph = newGraph;
+            this._switchGraph(this._graph);
+        } else {
+            this.switchGraph(newGraph)
+        }
+    }
+
+    isInSubgraph() {
+        return this.subgraphStack.length > 0
+    }
+}
+
+function copyGraph(graph, editor) {
+    const newGraph = new Graph(editor);
+    newGraph.load(graph.save());
+    newGraph.template = graph.template
+    return newGraph;
 }

@@ -453,7 +453,7 @@ export default {
                         <span>Validate</span>
                     </div>
                 </div>
-                <div v-if="this.editorManager.isInsideSubgraph()">
+                <div v-if="this.editorManager.editor.isInSubgraph()">
                     <button @click="() => this.editorManager.returnFromSubgraph()">
                         <Arrow color="white" rotate="left" />
                     </button>

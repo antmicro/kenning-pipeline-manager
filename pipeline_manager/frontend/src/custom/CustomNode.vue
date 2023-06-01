@@ -195,7 +195,7 @@ const onContextMenuClick = async (action) => {
             renaming.value = true;
             break;
         case 'editSubgraph':
-            switchGraph(props.node.template);
+            viewModel.value.editor.switchToSubgraph(props.node);
             break;
     }
 };

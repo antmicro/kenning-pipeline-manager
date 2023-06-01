@@ -348,6 +348,6 @@ export default class EditorManager {
      * Switches the editor state to main graph
      */
     returnFromSubgraph() {
-        this.editor.switchToMainGraph(this.baklavaView.displayedGraph);
+        this.editor.backFromSubgraph(this.baklavaView.displayedGraph);
     }
 }
