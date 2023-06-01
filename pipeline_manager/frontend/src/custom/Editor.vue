@@ -45,7 +45,7 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
             @mousemove="changeHoveredConnections"
             @mouseleave="clearHighlight"
         >
-            <g v-for="connection in connections" :key="connection.id + counter.toString()">
+            <g v-for="connection in visibleConnections" :key="connection.id + counter.toString()">
                 <PipelineManagerConnection
                     :connection="connection"
                     ref="connRefs"
@@ -188,13 +188,22 @@ export default defineComponent({
             });
         };
 
+        const ignoredInteracesTypes = computed(() => props.viewModel.ignoredInterfaces);
+
+        const visibleConnections = computed(() =>
+            connections.value.filter(
+                (c) =>
+                    !ignoredInteracesTypes.value.has(c.from.type) &&
+                    !ignoredInteracesTypes.value.has(c.to.type),
+            ),
+        );
+
         const scale = computed(() => graph.value.scaling);
 
         return {
             el,
             counter,
             nodes,
-            connections,
             selectedNodes,
             nodeContainerStyle,
             onPointerMove,
@@ -212,6 +221,7 @@ export default defineComponent({
             clearHighlight,
             readonly,
             scale,
+            visibleConnections,
         };
     },
 });
