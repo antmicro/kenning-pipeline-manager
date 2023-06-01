@@ -20,11 +20,19 @@ import {
     useGraph,
     GraphTemplate,
     GRAPH_NODE_TYPE_PREFIX,
-    NodeInterface
+    NodeInterface,
+    Graph
 } from 'baklavajs';
 import { v4 as uuidv4 } from 'uuid';
 import { parseNodeState } from '../core/NodeFactory';
-import { SUBGRAPH_OUTPUT_NODE_TYPE, SUBGRAPH_INPUT_NODE_TYPE, SUBGRAPH_INOUT_NODE_TYPE, SubgraphInoutNode } from './subgraphInterface'
+import { 
+    SUBGRAPH_OUTPUT_NODE_TYPE,
+    SUBGRAPH_INPUT_NODE_TYPE,
+    SUBGRAPH_INOUT_NODE_TYPE,
+    SubgraphInoutNode,
+    SubgraphInputNode,
+    SubgraphOutputNode
+} from './subgraphInterface'
 export default class PipelineManagerEditor extends Editor {
     readonly = false;
 
@@ -42,6 +50,8 @@ export default class PipelineManagerEditor extends Editor {
     /* eslint-disable no-underscore-dangle */
     constructor() {
         super()
+        this.registerNodeType(SubgraphInputNode, { category: "Subgraphs" })
+        this.registerNodeType(SubgraphOutputNode, { category: "Subgraphs" })
         this.registerNodeType(SubgraphInoutNode, { category: "Subgraphs" })
     }
 

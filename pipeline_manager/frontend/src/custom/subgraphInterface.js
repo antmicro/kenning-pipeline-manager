@@ -8,12 +8,47 @@ import { defineNode, TextInputInterface, NodeInterface } from 'baklavajs';
 import { v4 as uuidv4 } from 'uuid';
 
 // Those files are exported here as Baklavajs does not export them
-export const SUBGRAPH_OUTPUT_NODE_TYPE = '__baklava_SubgraphOutputNode';
-export const SUBGRAPH_INPUT_NODE_TYPE = '__baklava_SubgraphInputNode';
+export const SUBGRAPH_INPUT_NODE_TYPE = '__PipelineManager_SubgraphInputNode';
+export const SubgraphInputNode = defineNode({
+    type: SUBGRAPH_INPUT_NODE_TYPE,
+    title: "Subgraph Input",
+    inputs: {
+        name: () => new TextInputInterface("Name", "Input").setPort(false),
+    },
+    outputs: {
+        placeholder: () => {
+            const ni = new NodeInterface("Connection", undefined);
+            ni.direction = 'input'
+            ni.connectionSide = 'left';
+            return ni;
+        }
+    },
+    onCreate() {
+        this.graphInterfaceId = uuidv4();
+    },
+});
+
+export const SUBGRAPH_OUTPUT_NODE_TYPE = '__PipelineManager_SubgraphOutputNode';
+export const SubgraphOutputNode = defineNode({
+    type: SUBGRAPH_OUTPUT_NODE_TYPE,
+    title: "Subgraph Output",
+    inputs: {
+        name: () => new TextInputInterface("Name", "Output").setPort(false),
+        placeholder: () => {
+            const ni = new NodeInterface("Connection", undefined)
+            ni.direction = 'output'
+            ni.connectionSide = 'right'
+            return ni;
+        }
+    },
+    onCreate() {
+        this.graphInterfaceId = uuidv4();
+    },
+});
 
 // Just like there are special nodes representing subgraph input and output,
 // There should be one for it's inout.
-export const SUBGRAPH_INOUT_NODE_TYPE = "__baklava_SubgraphInoutNode";
+export const SUBGRAPH_INOUT_NODE_TYPE = "__PipelineManager_SubgraphInoutNode";
 export const SubgraphInoutNode = defineNode({
     type: SUBGRAPH_INOUT_NODE_TYPE,
     title: "Subgraph Inout",

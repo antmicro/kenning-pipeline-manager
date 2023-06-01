@@ -39,25 +39,6 @@ export default class EditorManager {
         // need to be set here as settings try to use this value before specification is loaded
         this.baklavaView.ignorableLayers = [];
         this.baklavaView.collapseSidebar = true;
-
-        this.baklavaView.hooks.renderNode.subscribe('EditorManager', (node) => {
-            if (
-                node.node.type === SUBGRAPH_INPUT_NODE_TYPE ||
-                node.node.type === SUBGRAPH_OUTPUT_NODE_TYPE ||
-                node.node.type === SUBGRAPH_INOUT_NODE_TYPE
-            ) {
-                /* eslint-disable no-param-reassign */
-                Object.values(node.node.inputs).forEach((intf) => {
-                    intf.direction = intf.direction ? intf.direction : 'input';
-                    intf.connectionSide = 'left';
-                });
-                Object.values(node.node.outputs).forEach((intf) => {
-                    intf.direction = 'output';
-                    intf.connectionSide = 'right';
-                });
-                /* eslint-enable no-param-reassign */
-            }
-        });
     }
 
     /**
