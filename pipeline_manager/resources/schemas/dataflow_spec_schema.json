@@ -53,6 +53,14 @@
                     "type": "boolean",
                     "description": "Hides HUD elements, such as popup notifications, navbar or terminal",
                     "default": false
+                },
+                "optionalInterfaceTypes": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "default": [],
+                    "description": "Types of interfaces that can be ignored using settings."
                 }
             },
             "additionalProperties": false
