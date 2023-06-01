@@ -406,6 +406,22 @@ export default class PipelineManagerEditor extends Editor {
                 delete state.interfaces;
                 super.load({ ...state, inputs, outputs });
             }
+
+            updateInterfaces() {
+                super.updateInterfaces();
+                this.template.inputs.filter(input => input.direction === "inout").forEach(ni => {
+                    this.inputs[ni.id].direction = "inout"
+                    this.inputs[ni.id].connectionSide = "left"
+                })
+                this.template.inputs.filter(input => input.direction !== "inout").forEach(ni => {
+                    this.inputs[ni.id].direction = "input"
+                    this.inputs[ni.id].connectionSide = "left"
+                })
+                this.template.outputs.forEach(ni => {
+                    this.outputs[ni.id].direction = 'output'
+                    this.outputs[ni.id].connectionSide = "right"
+                })
+            }
         }
         this.registerNodeType(stuff, { category, title: template.name });
 

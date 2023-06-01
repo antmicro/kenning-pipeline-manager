@@ -42,14 +42,13 @@ export default class EditorManager {
 
         this.baklavaView.hooks.renderNode.subscribe('EditorManager', (node) => {
             if (
-                node.node.type.startsWith(GRAPH_NODE_TYPE_PREFIX) ||
                 node.node.type === SUBGRAPH_INPUT_NODE_TYPE ||
                 node.node.type === SUBGRAPH_OUTPUT_NODE_TYPE ||
                 node.node.type === SUBGRAPH_INOUT_NODE_TYPE
             ) {
                 /* eslint-disable no-param-reassign */
                 Object.values(node.node.inputs).forEach((intf) => {
-                    intf.direction = 'input';
+                    intf.direction = intf.direction ? intf.direction : 'input';
                     intf.connectionSide = 'left';
                 });
                 Object.values(node.node.outputs).forEach((intf) => {
