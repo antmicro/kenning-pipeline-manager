@@ -340,11 +340,12 @@ export function readInterfaceTypes(nodes, metadata) {
  */
 export function SubgraphFactory(nodes, connections, interfaces, name, type, editor) {
     const inputs = interfaces
-        .filter((interf) => interf.direction === 'input')
+        .filter((interf) => interf.direction === 'input' || interf.direction === 'inout')
         .map((interf) => ({
             id: interf.id ?? uuidv4(),
             nodeInterfaceId: interf.nodeInterface,
             name: interf.name,
+            direction: interf.direction
         }));
     const outputs = interfaces
         .filter((interf) => interf.direction === 'output')
@@ -352,6 +353,7 @@ export function SubgraphFactory(nodes, connections, interfaces, name, type, edit
             id: interf.id ?? uuidv4(),
             nodeInterfaceId: interf.nodeInterface,
             name: interf.name,
+            direction: interf.direction
         }));
 
     const state = {
