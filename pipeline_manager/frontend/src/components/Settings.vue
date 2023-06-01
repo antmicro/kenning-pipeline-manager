@@ -18,7 +18,7 @@ SPDX-License-Identifier: Apache-2.0
             </div>
 
             <div class="__properties" v-show="disableInterfacesOptions.length !== 0">
-                <div class="option-label">Ignored Interfaces:</div>
+                <div class="option-label">Hide Interfaces:</div>
                 <div v-for="option in disableInterfacesOptions" :key="option.id">
                     <component :is="option.component" :intf="option"></component>
                 </div>
