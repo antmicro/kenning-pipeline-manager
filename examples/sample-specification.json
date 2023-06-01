@@ -111,7 +111,10 @@
     ],
     "metadata": {
         "interfaces": {
-            "BinaryImage": "#FF00FF"
+            "BinaryImage": {
+                "interfaceColor": "#FF00FF",
+                "interfaceConnectionPattern": "dashed"
+            }
         },
         "connectionStyle": "orthogonal"
     }
