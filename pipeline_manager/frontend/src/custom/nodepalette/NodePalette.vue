@@ -1,3 +1,9 @@
+<!--
+Copyright (c) 2022-2023 Antmicro <www.antmicro.com>
+
+SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
     <!-- eslint-disable vue/no-multiple-template-root -->
     <div class="baklava-node-palette">
