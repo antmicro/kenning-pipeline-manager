@@ -205,21 +205,6 @@ export default class PipelineManagerEditor extends Editor {
             return node; // eslint-disable-line consistent-return
         };
 
-        graph.save = function save() {
-            const state = {
-                id: this.id,
-                nodes: this.nodes.map((n) => n.save()),
-                connections: this.connections.map((c) => ({
-                    id: c.id,
-                    from: c.from.id,
-                    to: c.to.id,
-                })),
-                inputs: this.inputs,
-                outputs: this.outputs,
-            };
-            return this.hooks.save.execute(state);
-        };
-
         super.registerGraph(graph);
     }
 
@@ -346,6 +331,48 @@ export default class PipelineManagerEditor extends Editor {
                     .forEach((intf) => {
                         outputs[intf.name] = { id: intf.id, direction: intf.direction };
                     });
+
+                /*
+                    When the subgraph node is created, it creates a placeholder interfaces
+                    which are later loaded by super.load, setting proper names and IDs.
+                    The name of interface is an ID of input/output in a subgraph (except for
+                    '_calculationResults`, which is baklava specific hidden output). IDs of
+                    inputs/outputs are also randomly generated IDs, which are later updated, but
+                    the names of are not adjusted. We need to tie an input interface with
+                    corresponding subgraph input (here it is done by name of subgraph input) and
+                    adjust the node's input (and likewise for outputs)
+                */
+                const inputNameToStateID = new Map();
+                const inputGeneratedIDToName = new Map();
+                this.subgraph.inputs.forEach((input) =>
+                    inputGeneratedIDToName.set(input.id, input.name),
+                );
+                state.graphState.inputs.forEach((input) =>
+                    inputNameToStateID.set(input.name, input.id),
+                );
+                this.inputs = Object.fromEntries(
+                    Object.entries(this.inputs).map(([k, v]) => [
+                        inputNameToStateID.get(inputGeneratedIDToName.get(k)),
+                        v,
+                    ]),
+                );
+                const outputNameToStateID = new Map();
+                const outputGeneratedIDToName = new Map();
+                this.subgraph.outputs.forEach((output) =>
+                    outputGeneratedIDToName.set(output.id, output.name),
+                );
+                state.graphState.outputs.forEach((output) =>
+                    outputNameToStateID.set(output.name, output.id),
+                );
+                this.outputs = Object.fromEntries(
+                    Object.entries(this.outputs)
+                        .filter((output) => output[0] !== '_calculationResults')
+                        .map(([k, v]) => [
+                            outputNameToStateID.get(outputGeneratedIDToName.get(k)),
+                            v,
+                        ]),
+                );
+
                 delete state.interfaces;
                 super.load({ ...state, inputs, outputs });
             }
