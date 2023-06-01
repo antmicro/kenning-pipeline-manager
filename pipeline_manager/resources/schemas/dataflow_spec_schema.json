@@ -21,6 +21,11 @@
                                 "dashed"
                             ],
                             "default": "solid"
+                        },
+                        "interfaceConnectionColor": {
+                            "description": "Color of the connection going from the interface",
+                            "type": "string",
+                            "default": "#FFFFFF"
                         }
                     }
                 },
