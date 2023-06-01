@@ -14,6 +14,7 @@ import NotificationHandler from './notifications';
 import { NodeFactory, readInterfaceTypes, SubgraphFactory } from './NodeFactory';
 import specificationSchema from '../../../resources/schemas/dataflow_spec_schema.json';
 import ConnectionRenderer from './ConnectionRenderer';
+import { SUBGRAPH_INPUT_NODE_TYPE, SUBGRAPH_OUTPUT_NODE_TYPE, SUBGRAPH_INOUT_NODE_TYPE } from '../custom/subgraphInterface'
 
 export default class EditorManager {
     static instance;
@@ -42,8 +43,9 @@ export default class EditorManager {
         this.baklavaView.hooks.renderNode.subscribe('EditorManager', (node) => {
             if (
                 node.node.type.startsWith(GRAPH_NODE_TYPE_PREFIX) ||
-                node.node.type === '__baklava_SubgraphInputNode' ||
-                node.node.type === '__baklava_SubgraphOutputNode'
+                node.node.type === SUBGRAPH_INPUT_NODE_TYPE ||
+                node.node.type === SUBGRAPH_OUTPUT_NODE_TYPE ||
+                node.node.type === SUBGRAPH_INOUT_NODE_TYPE
             ) {
                 /* eslint-disable no-param-reassign */
                 Object.values(node.node.inputs).forEach((intf) => {
