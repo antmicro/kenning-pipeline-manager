@@ -19,7 +19,8 @@ import {
     createGraphNodeType,
     useGraph,
     GraphTemplate,
-    GRAPH_NODE_TYPE_PREFIX
+    GRAPH_NODE_TYPE_PREFIX,
+    NodeInterface
 } from 'baklavajs';
 import { v4 as uuidv4 } from 'uuid';
 import { parseNodeState } from '../core/NodeFactory';
@@ -371,37 +372,30 @@ export default class PipelineManagerEditor extends Editor {
                     the names of are not adjusted. We need to tie an input interface with
                     corresponding subgraph input (here it is done by name of subgraph input) and
                     adjust the node's input (and likewise for outputs)
+
                 */
-                const inputNameToStateID = new Map();
-                const inputGeneratedIDToName = new Map();
-                this.subgraph.inputs.forEach((input) =>
-                    inputGeneratedIDToName.set(input.id, input.name),
-                );
-                state.graphState.inputs.forEach((input) =>
-                    inputNameToStateID.set(input.name, input.id),
-                );
-                this.inputs = Object.fromEntries(
-                    Object.entries(this.inputs).map(([k, v]) => [
-                        inputNameToStateID.get(inputGeneratedIDToName.get(k)),
-                        v,
-                    ]),
-                );
-                const outputNameToStateID = new Map();
-                const outputGeneratedIDToName = new Map();
-                this.subgraph.outputs.forEach((output) =>
-                    outputGeneratedIDToName.set(output.id, output.name),
-                );
-                state.graphState.outputs.forEach((output) =>
-                    outputNameToStateID.set(output.name, output.id),
-                );
-                this.outputs = Object.fromEntries(
-                    Object.entries(this.outputs)
-                        .filter((output) => output[0] !== '_calculationResults')
-                        .map(([k, v]) => [
-                            outputNameToStateID.get(outputGeneratedIDToName.get(k)),
-                            v,
-                        ]),
-                );
+                const inputMap = new Map();
+                state.graphState.inputs.forEach(input => {
+                    inputMap.set(input.id, input.name)
+                })
+                this.inputs = {}
+                Object.entries(inputs).forEach(([inputID, inputInfo]) => {
+                    const ni = new NodeInterface(inputMap.get(inputID), undefined);
+                    ni.id = inputInfo.id
+                    ni.direction = inputInfo.direction
+                    this.inputs[inputID] = ni;
+                })
+                const outputMap = new Map();
+                state.graphState.outputs.forEach(outputs => {
+                    outputMap.set(outputs.id, outputs.name)
+                })
+                this.outputs = {}
+                Object.entries(outputs).forEach(([outputID, outputInfo]) => {
+                    const ni = new NodeInterface(outputMap.get(outputID), undefined);
+                    ni.id = outputInfo.id
+                    ni.direction = outputInfo.direction
+                    this.outputs[outputID] = ni;
+                })
 
                 delete state.interfaces;
                 super.load({ ...state, inputs, outputs });
