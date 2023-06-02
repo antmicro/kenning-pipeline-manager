@@ -75,7 +75,11 @@
                                 "description": "Types of interfaces that are ignored in this layer"
                             }
                         },
-                        "required": ["name", "nodeTypes", "nodeInterfaces"],
+                        "required": ["name"],
+                        "anyOf": [
+                            {"required": ["nodeTypes"]},
+                            {"required": ["nodeInterfaces"]}
+                        ],
                         "additionalProperties": false
                     }
                 }
