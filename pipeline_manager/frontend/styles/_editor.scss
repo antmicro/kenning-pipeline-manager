@@ -60,6 +60,53 @@
     & > .__menu {
         flex-grow: 0;
     }
+
+    a {
+        display: inline-block;
+    }
+
+    & > .__url {
+        display: inline-block;
+        margin: 0 $spacing-xs;
+        text-decoration: none;
+        color: inherit;
+        position: relative;
+        flex-grow: 0;
+
+        img {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            width: 100%;
+        }
+
+        & > .__tooltip {
+            z-index: 5;
+            color: inherit;
+            width: max-content;
+
+            position: fixed;
+            text-align: center;
+            flex-direction: column;
+
+            margin: 0 $spacing-s;
+            padding: $spacing-s;
+            background-color: $gray-600;
+            border: 1px solid $gray-500;
+            border-radius: 15px;
+            display: none;
+
+            transform: translateX(-50%) translateY($spacing-s);
+        }
+    }
+
+    & .__url.open:hover > .__tooltip {
+        display: flex;
+    }
+
+    .__url:last-child {
+        margin-right: $spacing-s;
+    }
 }
 
 .baklava-node.--two-column > .__content {
@@ -91,6 +138,10 @@
 .baklava-editor .background {
     background-image: linear-gradient($gray-700 2px, transparent 2px),
         linear-gradient(90deg, $gray-700 2px, transparent 2px);
+}
+
+.baklava-editor {
+    position: relative;
 }
 
 .baklava-slider > .__slider {
@@ -181,6 +232,46 @@
     display: flex;
     align-items: center;
 
+    & > .__url {
+        display: inline-block;
+        margin: 0 $spacing-xs;
+        text-decoration: none;
+        color: inherit;
+        position: relative;
+
+        img {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            width: 100%;
+        }
+
+        & > .__tooltip {
+            z-index: 5;
+            color: inherit;
+            position: fixed;
+            text-align: center;
+            flex-direction: column;
+
+            margin: 0 $spacing-s;
+            padding: $spacing-s;
+            background-color: $gray-600;
+            border: 1px solid $gray-500;
+            border-radius: 15px;
+            display: none;
+
+            transform: translateX(-50%) translateY($spacing-s);
+        }
+    }
+
+    & .__url.open:hover > .__tooltip {
+        display: flex;
+    }
+
+    .__url:last-child {
+        margin-right: $spacing-s;
+    }
+
     & > .__title-icon {
         padding-right: $spacing-s;
         user-select: none;
@@ -189,7 +280,11 @@
         width: max-content;
     }
 
+    & > .__title-label {
+        flex-grow: 1;
+    }
+
     & > .__category-title {
-        padding-left: 0.25em;
+        padding-left: $spacing-s;
     }
 }
