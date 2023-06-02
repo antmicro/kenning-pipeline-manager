@@ -36,8 +36,11 @@ This object specifies additional editor options and contains the following optio
 * `hideHud` - boolean value determining whether UI elements should be hidden. Components affected by this flag are: popup notifications, navigation bar and terminal window.
   Default value is `false`
 * `layers` - layers specyfing groups of interfaces and nodes that can be hidden in the viewer from settings level.
-  The entries are of type [Layer](#layers).
+  The entries are of type [Layer](#layer).
   By default there are no layers.
+* `urls` - list of URL classes present in the specification and flow.
+  It is a dictionary, where key is the name of the URL class, and value is of type [URL class specification](#url-class).
+  The given URL classes can be referred later in [Nodes](#node) with proper link suffix.
 
 An example:
 
@@ -74,6 +77,20 @@ Every layer has three properties (at least `name` and one of `nodeTypes` or `nod
 * `nodeTypes` (optional) - array of names of node types that belong to the layer,
 * `nodeInterfaces` (optional) - array of names of interface types that belong to the layer.
 
+#### URL class
+
+URL class provides links with additional information for a given node.
+They are represented in nodes as icons leading to a URL with additional information on node.
+
+The name of the URL class is specified as key in `urls` entry in metadata.
+
+The URL class parameters are following:
+
+* `name` - name of the URL class, appears as hint on hover over the icon,
+* `icon` - path to the icon representing the URL class,
+* `url` - base URL for URL class.
+  The suffixes for URLs are present in [Node](#node) parameters.
+
 ### Node
 
 This object specifies a single node.
@@ -93,7 +110,10 @@ Every input object requires six properties:
   ``````
 * `interfaces` - array representing inputs, outputs and bidirectional ports for node.
   The entries are of type [Interface](#interface).
-* `properties` - array with elements of type [Property](#property).
+* `properties` - array with elements of type [Property](#property),
+* `urls` - a dictionary of [URL class](#url-class) and URL suffixes pairs.
+  The key should be a URL class key from `urls` in `metadata`.
+  The value of the entry is appended to the URL base from the URL class.
 
 Here is an example of a node:
 
