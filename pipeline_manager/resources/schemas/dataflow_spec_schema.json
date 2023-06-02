@@ -82,6 +82,10 @@
                         ],
                         "additionalProperties": false
                     }
+                },
+                "urls": {
+                    "type": "object",
+                    "description": "URL description put in node palette and nodes"
                 }
             },
             "additionalProperties": false
@@ -323,6 +327,9 @@
                                 }
                             ]
                         }
+                    },
+                    "urls": {
+                        "type": "object"
                     }
                 },
                 "required": [
