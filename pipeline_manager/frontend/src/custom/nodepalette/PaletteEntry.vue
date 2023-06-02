@@ -7,7 +7,6 @@ SPDX-License-Identifier: Apache-2.0
 <!--
 A single entry representing available node type in the sidebar.
 -->
-
 <template>
     <div class="__entry __node-entry" :class="draggedClass" :style="padding">
         <img class="__title-icon" v-if="nodeIcon !== undefined" :src="nodeIcon" />
@@ -23,7 +22,7 @@ A single entry representing available node type in the sidebar.
             @pointerdown.stop
             @pointerover="hover = true"
             @pointerleave="hover = false"
-            target='_blank'
+            target="_blank"
         >
             <img
                 v-if="getIconPath(url.icon) !== undefined"

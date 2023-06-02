@@ -46,7 +46,7 @@ from moving or deleting the nodes.
                 @pointerdown.stop
                 @pointerover="hover = true"
                 @pointerleave="hover = false"
-                target='_blank'
+                target="_blank"
             >
                 <img
                     v-if="getIconPath(url.icon) !== undefined"
