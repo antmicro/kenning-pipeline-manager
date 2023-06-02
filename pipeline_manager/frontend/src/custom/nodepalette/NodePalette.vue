@@ -21,7 +21,6 @@ Inherits from baklavajs/packages/renderer-vue/src/nodepalette/NodePalette.vue
     <transition name="fade">
         <div v-if="draggedNode" class="baklava-dragged-node" :style="draggedNodeStyles">
             <PaletteEntry
-                :type="draggedNode.type"
                 :title="draggedNode.nodeInformation.title"
                 :iconPath="draggedNode.iconPath"
                 :isDragged="true"
