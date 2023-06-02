@@ -136,8 +136,6 @@ export default class PipelineManagerEditor extends Editor {
         };
 
         graph.updateTemplate = function updateTemplate() {
-            const interfaceConnections = [];
-
             const inputs = [];
             const inputNodes = this.nodes.filter((n) => n.type === SUBGRAPH_INPUT_NODE_TYPE);
             inputNodes.forEach((n) => {
@@ -149,11 +147,11 @@ export default class PipelineManagerEditor extends Editor {
                         id: n.graphInterfaceId,
                         name: n.inputs.name.value,
                         nodeInterfaceId: c.to.id,
-                        connectionSide: n.inputs.connectionSide.value,
-                        direction: 'input'
+                        connectionSide: n.inputs.connectionSide.value.toLowerCase(),
+                        direction: 'input',
+                        nodePosition: n.position,
                     });
                 });
-                interfaceConnections.push(...connections);
             });
 
             const outputs = [];
@@ -165,11 +163,11 @@ export default class PipelineManagerEditor extends Editor {
                         id: n.graphInterfaceId,
                         name: n.inputs.name.value,
                         nodeInterfaceId: c.from.id,
-                        connectionSide: n.inputs.connectionSide.value,
-                        direction: 'output'
+                        connectionSide: n.inputs.connectionSide.value.toLowerCase(),
+                        direction: 'output',
+                        nodePosition: n.position,
                     });
                 });
-                interfaceConnections.push(...connections);
             });
 
             const inoutNodes = this.nodes.filter((n) => n.type === SUBGRAPH_INOUT_NODE_TYPE);
@@ -183,8 +181,9 @@ export default class PipelineManagerEditor extends Editor {
                         id: n.graphInterfaceId,
                         name: n.inputs.name.value,
                         nodeInterfaceId: c.from.id,
-                        connectionSide: n.inputs.connectionSide.value,
+                        connectionSide: n.inputs.connectionSide.value.toLowerCase(),
                         direction: 'inout',
+                        nodePosition: n.position
                     });
                 });
                 const connectionsFrom = this.connections.filter(
@@ -195,41 +194,15 @@ export default class PipelineManagerEditor extends Editor {
                         id: n.graphInterfaceId,
                         name: n.inputs.name.value,
                         nodeInterfaceId: c.to.id,
-                        connectionSide: n.inputs.connectionSide.value,
-                        direction: 'inout'
+                        connectionSide: n.inputs.connectionSide.value.toLowerCase(),
+                        direction: 'inout',
+                        nodePosition: n.position
                     })
                 })
-                interfaceConnections.push(...connectionsTo, ...connectionsFrom);
             })
 
-            const innerConnections = this.connections.filter(
-                (c) => !interfaceConnections.includes(c),
-            );
-            const nodes = this.nodes.filter(
-                (n) => n.type !== SUBGRAPH_INPUT_NODE_TYPE && n.type !== SUBGRAPH_OUTPUT_NODE_TYPE && n.type !== SUBGRAPH_INOUT_NODE_TYPE,
-            );
-
-            // this.template.update({
-            //     inputs,
-            //     outputs,
-            //     nodes: nodes.map(n => n.save()),
-            //     connections: innerConnections.map((c) => ({
-            //         id: c.id,
-            //         from: c.from.id,
-            //         to: c.to.id,
-            //     })),
-            // });
-            this.template.nodes = nodes.map(n => n.save())
             this.template.inputs = inputs
             this.template.outputs = outputs
-            this.template.connections = innerConnections.map((c) => ({
-                id: c.id,
-                from: c.from.id,
-                to: c.to.id,
-            })),
-
-            this.template.panning = this.panning;
-            this.template.scaling = this.scaling;
         };
 
         graph.addNode = function addNode(node) {
@@ -449,11 +422,13 @@ export default class PipelineManagerEditor extends Editor {
                 super.updateInterfaces();
                 this.template.inputs.forEach(ni => {
                     this.inputs[ni.id].direction = ni.direction ? ni.direction : 'input'
-                    this.inputs[ni.id].connectionSide = ni.connectionSide ? ni.connectionSide.toLowerCase() : 'left'
+                    this.inputs[ni.id].connectionSide = ni.connectionSide ? ni.connectionSide : 'left'
+                    this.inputs[ni.id].nodePosition = ni.nodePosition ? ni.nodePosition : undefined
                 })
                 this.template.outputs.forEach(ni => {
                     this.outputs[ni.id].direction = 'output'
-                    this.outputs[ni.id].connectionSide = ni.connectionSide ? ni.connectionSide.toLowerCase() : 'right'
+                    this.outputs[ni.id].connectionSide = ni.connectionSide ? ni.connectionSide : 'right'
+                    this.outputs[ni.id].nodePosition = ni.nodePosition ? ni.nodePosition : undefined
                 })
             }
         }
@@ -475,14 +450,18 @@ export default class PipelineManagerEditor extends Editor {
             node.graphInterfaceId = interfaceID
             this._graph.addNode(node)
             // NodeInterfaceID is stored only in template, we need to find it by ID
-            const templateInput = Object.values(this._graph.inputs).filter(intf => intf.id === interfaceID)
-            if(templateInput.length !== 1) {
-
+            const templateInputArr = Object.values(this._graph.inputs).filter(intf => intf.id === interfaceID)
+            if(templateInputArr.length !== 1) {
+                
                 return;
             }
-            const targetInterface = this._graph.findNodeInterface(templateInput[0].nodeInterfaceId);
+            const templateInput = templateInputArr[0]
+            if(templateInput.nodePosition !== undefined) {
+                node.position = templateInput.nodePosition
+            }
+            const targetInterface = this._graph.findNodeInterface(templateInput.nodeInterfaceId);
             if(!targetInterface) {
-
+                
                 return;
             }
             this._graph.addConnection(node.outputs.placeholder, targetInterface)
@@ -493,14 +472,18 @@ export default class PipelineManagerEditor extends Editor {
             node.inputs.name.value = inout.name;
             node.graphInterfaceId = interfaceID;
             this._graph.addNode(node)
-            const templateInout = Object.values(this._graph.inputs).filter(intf => intf.id === interfaceID)
-            if(templateInout.length !== 1) {
-
+            const templateInoutArr = Object.values(this._graph.inputs).filter(intf => intf.id === interfaceID)
+            if(templateInoutArr.length !== 1) {
+                
                 return;
             }
-            const targetInterface = this._graph.findNodeInterface(templateInout[0].nodeInterfaceId);
+            const templateInout = templateInoutArr[0]
+            if(templateInout.nodePosition !== undefined) {
+                node.position = templateInout.nodePosition
+            }
+            const targetInterface = this._graph.findNodeInterface(templateInout.nodeInterfaceId);
             if(!targetInterface) {
-
+                
                 return;
             }
             this._graph.addConnection(targetInterface, node.inputs.placeholder);
@@ -511,14 +494,18 @@ export default class PipelineManagerEditor extends Editor {
             node.inputs.name.value = output.name;
             node.graphInterfaceId = interfaceID;
             this._graph.addNode(node);
-            const templateOutput = Object.values(this._graph.outputs).filter(intf => intf.id === interfaceID)
-            if(templateOutput.length !== 1) {
-
+            const templateOutputArr = Object.values(this._graph.outputs).filter(intf => intf.id === interfaceID)
+            if(templateOutputArr.length !== 1) {
+                
                 return;
             }
-            const targetInterface = this._graph.findNodeInterface(templateOutput[0].nodeInterfaceId);
+            const templateOutput = templateOutputArr[0]
+            if(templateOutput.nodePosition !== undefined) {
+                node.position = templateOutput.nodePosition
+            }
+            const targetInterface = this._graph.findNodeInterface(templateOutput.nodeInterfaceId);
             if(!targetInterface) {
-
+                
                 return;
             }
             this._graph.addConnection(targetInterface, node.inputs.placeholder);
@@ -539,10 +526,10 @@ export default class PipelineManagerEditor extends Editor {
         this._graph.updateTemplate()
         this._graph.inputs = this._graph.template.inputs
         this._graph.outputs = this._graph.template.outputs
-        this._graph.nodes.filter(node => [SUBGRAPH_INPUT_NODE_TYPE, SUBGRAPH_OUTPUT_NODE_TYPE, SUBGRAPH_INOUT_NODE_TYPE].includes(node.type)).forEach(node =>
+        subgraphNode.updateInterfaces()
+        this._graph.nodes.filter(node => [SUBGRAPH_INPUT_NODE_TYPE, SUBGRAPH_OUTPUT_NODE_TYPE, SUBGRAPH_INOUT_NODE_TYPE].includes(node.type)).forEach(node => 
             this._graph.removeNode(node)
         )
-        subgraphNode.updateInterfaces()
 
         this._graph = newGraph;
         this._switchGraph(this._graph);
