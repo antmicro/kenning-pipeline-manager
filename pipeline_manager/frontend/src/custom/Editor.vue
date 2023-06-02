@@ -193,7 +193,7 @@ export default defineComponent({
             const temp = new Set();
 
             ignorableLayers.value.forEach((layer) => {
-                if (ignoredLayers.value.has(layer.name)) {
+                if (layer.nodeInterfaces && ignoredLayers.value.has(layer.name)) {
                     layer.nodeInterfaces.forEach(temp.add, temp);
                 }
             });
@@ -204,7 +204,7 @@ export default defineComponent({
             const temp = new Set();
 
             ignorableLayers.value.forEach((layer) => {
-                if (ignoredLayers.value.has(layer.name)) {
+                if (layer.nodeTypes && ignoredLayers.value.has(layer.name)) {
                     layer.nodeTypes.forEach(temp.add, temp);
                 }
             });
