@@ -6,7 +6,7 @@
 
 import Ajv, { stringify } from 'ajv';
 
-import { useBaklava, BaklavaInterfaceTypes, GRAPH_NODE_TYPE_PREFIX } from 'baklavajs';
+import { useBaklava, BaklavaInterfaceTypes } from 'baklavajs';
 
 import PipelineManagerEditor from '../custom/Editor';
 
@@ -14,7 +14,6 @@ import NotificationHandler from './notifications';
 import { NodeFactory, readInterfaceTypes, SubgraphFactory } from './NodeFactory';
 import specificationSchema from '../../../resources/schemas/dataflow_spec_schema.json';
 import ConnectionRenderer from './ConnectionRenderer';
-import { SUBGRAPH_INPUT_NODE_TYPE, SUBGRAPH_OUTPUT_NODE_TYPE, SUBGRAPH_INOUT_NODE_TYPE } from '../custom/subgraphInterface'
 
 export default class EditorManager {
     static instance;

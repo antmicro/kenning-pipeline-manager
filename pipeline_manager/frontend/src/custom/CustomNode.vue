@@ -109,7 +109,7 @@ const props = defineProps({
 const emit = defineEmits(['select']);
 
 const { viewModel } = useViewModel();
-const { graph, switchGraph } = useGraph();
+const { graph } = useGraph();
 const dragMove = useDragMove(toRef(props.node, 'position'));
 
 // If type start with '_', it is not displayed as node title

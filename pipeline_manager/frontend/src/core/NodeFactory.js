@@ -345,7 +345,7 @@ export function SubgraphFactory(nodes, connections, interfaces, name, type, edit
             id: interf.id ?? uuidv4(),
             nodeInterfaceId: interf.nodeInterface,
             name: interf.name,
-            direction: interf.direction
+            direction: interf.direction,
         }));
     const outputs = interfaces
         .filter((interf) => interf.direction === 'output')
@@ -353,7 +353,7 @@ export function SubgraphFactory(nodes, connections, interfaces, name, type, edit
             id: interf.id ?? uuidv4(),
             nodeInterfaceId: interf.nodeInterface,
             name: interf.name,
-            direction: interf.direction
+            direction: interf.direction,
         }));
 
     const state = {

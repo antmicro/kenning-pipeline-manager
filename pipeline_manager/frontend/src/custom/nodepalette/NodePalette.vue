@@ -43,7 +43,11 @@ import getNodeTree from './nodeTree';
 import PaletteEntry from './PaletteEntry.vue';
 
 import checkRecursion from './checkRecursion';
-import { SUBGRAPH_INPUT_NODE_TYPE, SUBGRAPH_OUTPUT_NODE_TYPE, SUBGRAPH_INOUT_NODE_TYPE } from '../subgraphInterface';
+import {
+    SUBGRAPH_INPUT_NODE_TYPE,
+    SUBGRAPH_OUTPUT_NODE_TYPE,
+    SUBGRAPH_INOUT_NODE_TYPE,
+} from '../subgraphInterface';
 
 export default defineComponent({
     components: { PaletteCategory, PaletteEntry },
@@ -73,14 +77,21 @@ export default defineComponent({
                     // if we are not in a subgraph, don't show subgraph input & output nodes
                     nodeTypesInCategory = nodeTypesInCategory.filter(
                         ([nt]) =>
-                            ![SUBGRAPH_INPUT_NODE_TYPE, SUBGRAPH_OUTPUT_NODE_TYPE, SUBGRAPH_INOUT_NODE_TYPE].includes(nt),
+                            ![
+                                SUBGRAPH_INPUT_NODE_TYPE,
+                                SUBGRAPH_OUTPUT_NODE_TYPE,
+                                SUBGRAPH_INOUT_NODE_TYPE,
+                            ].includes(nt),
                     );
                 }
 
                 // Filter out nodes added by baklava
                 nodeTypesInCategory = nodeTypesInCategory.filter(
-                    ([nt]) => !["__baklava_SubgraphInputNode", "__baklava_SubgraphOutputNode"].includes(nt)
-                )
+                    ([nt]) =>
+                        !['__baklava_SubgraphInputNode', '__baklava_SubgraphOutputNode'].includes(
+                            nt,
+                        ),
+                );
 
                 const nodesIconPath = nodeTypesInCategory.map((n) => {
                     const [nodeType] = n;

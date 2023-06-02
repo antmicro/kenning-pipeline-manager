@@ -21,7 +21,6 @@ import {
     GraphTemplate,
     GRAPH_NODE_TYPE_PREFIX,
     NodeInterface,
-    Graph
 } from 'baklavajs';
 import { v4 as uuidv4 } from 'uuid';
 import { parseNodeState } from '../core/NodeFactory';
@@ -31,8 +30,9 @@ import {
     SUBGRAPH_INOUT_NODE_TYPE,
     SubgraphInoutNode,
     SubgraphInputNode,
-    SubgraphOutputNode
-} from './subgraphInterface'
+    SubgraphOutputNode,
+} from './subgraphInterface';
+
 export default class PipelineManagerEditor extends Editor {
     readonly = false;
 
@@ -51,10 +51,10 @@ export default class PipelineManagerEditor extends Editor {
     /* eslint-disable no-param-reassign */
     /* eslint-disable no-underscore-dangle */
     constructor() {
-        super()
-        this.registerNodeType(SubgraphInputNode, { category: "Subgraphs" })
-        this.registerNodeType(SubgraphOutputNode, { category: "Subgraphs" })
-        this.registerNodeType(SubgraphInoutNode, { category: "Subgraphs" })
+        super();
+        this.registerNodeType(SubgraphInputNode, { category: 'Subgraphs' });
+        this.registerNodeType(SubgraphOutputNode, { category: 'Subgraphs' });
+        this.registerNodeType(SubgraphInoutNode, { category: 'Subgraphs' });
     }
 
     registerGraph(graph) {
@@ -173,9 +173,7 @@ export default class PipelineManagerEditor extends Editor {
             const inoutNodes = this.nodes.filter((n) => n.type === SUBGRAPH_INOUT_NODE_TYPE);
             inoutNodes.forEach((n) => {
                 // Inout interface can be both from and to
-                const connectionsTo = this.connections.filter(
-                    (c) => c.to === n.inputs.placeholder
-                );
+                const connectionsTo = this.connections.filter((c) => c.to === n.inputs.placeholder);
                 connectionsTo.forEach((c) => {
                     inputs.push({
                         id: n.graphInterfaceId,
@@ -183,11 +181,11 @@ export default class PipelineManagerEditor extends Editor {
                         nodeInterfaceId: c.from.id,
                         connectionSide: n.inputs.connectionSide.value.toLowerCase(),
                         direction: 'inout',
-                        nodePosition: n.position
+                        nodePosition: n.position,
                     });
                 });
                 const connectionsFrom = this.connections.filter(
-                    (c) => c.from === n.inputs.placeholder
+                    (c) => c.from === n.inputs.placeholder,
                 );
                 connectionsFrom.forEach((c) => {
                     inputs.push({
@@ -196,13 +194,13 @@ export default class PipelineManagerEditor extends Editor {
                         nodeInterfaceId: c.to.id,
                         connectionSide: n.inputs.connectionSide.value.toLowerCase(),
                         direction: 'inout',
-                        nodePosition: n.position
-                    })
-                })
-            })
+                        nodePosition: n.position,
+                    });
+                });
+            });
 
-            this.template.inputs = inputs
-            this.template.outputs = outputs
+            this.template.inputs = inputs;
+            this.template.outputs = outputs;
         };
 
         graph.addNode = function addNode(node) {
@@ -239,8 +237,7 @@ export default class PipelineManagerEditor extends Editor {
             // Remove possibility of removing graphs - this ignores changes made by
             // default switchGraph (unregistering from editor and removing nodes) and
             // allows to later reuse this instance
-            return;
-        }
+        };
 
         super.registerGraph(graph);
     }
@@ -342,21 +339,21 @@ export default class PipelineManagerEditor extends Editor {
 
             save() {
                 const state = super.save();
-                const inputInterfaceMap = new Map()
-                Object.values(this.inputs).forEach(input => 
-                    inputInterfaceMap.set(input.id, input)    
-                )
+                const inputInterfaceMap = new Map();
+                Object.values(this.inputs).forEach((input) =>
+                    inputInterfaceMap.set(input.id, input),
+                );
                 const inputInterfaces = Object.entries(state.inputs).map(([key, value]) => ({
                     id: value.id,
                     name: key,
                     direction: inputInterfaceMap.get(value.id).direction,
                     connectionSide: inputInterfaceMap.get(value.id).connectionSide,
-                    nodePosition: inputInterfaceMap.get(value.id).nodePosition
+                    nodePosition: inputInterfaceMap.get(value.id).nodePosition,
                 }));
                 const outputInterfaceMap = new Map();
-                Object.values(this.outputs).forEach(output => 
-                    outputInterfaceMap.set(output.id, output)    
-                )
+                Object.values(this.outputs).forEach((output) =>
+                    outputInterfaceMap.set(output.id, output),
+                );
                 const outputInterfaces = Object.entries(state.outputs)
                     .filter((key) => key[0] !== '_calculationResults')
                     .map(([key, value]) => ({
@@ -364,7 +361,7 @@ export default class PipelineManagerEditor extends Editor {
                         name: key,
                         direction: 'output',
                         connectionSide: outputInterfaceMap.get(value.id).connectionSide,
-                        nodePosition: outputInterfaceMap.get(value.id).nodePosition
+                        nodePosition: outputInterfaceMap.get(value.id).nodePosition,
                     }));
                 delete state.inputs;
                 delete state.outputs;
@@ -376,13 +373,21 @@ export default class PipelineManagerEditor extends Editor {
                 state.interfaces
                     .filter((intf) => intf.direction === 'input' || intf.direction === 'inout')
                     .forEach((intf) => {
-                        inputs[intf.name] = { id: intf.id, direction: intf.direction, connectionSide: intf.connectionSide };
+                        inputs[intf.name] = {
+                            id: intf.id,
+                            direction: intf.direction,
+                            connectionSide: intf.connectionSide,
+                        };
                     });
                 const outputs = { _calculationResults: { id: uuidv4 } };
                 state.interfaces
                     .filter((intf) => intf.direction === 'output')
                     .forEach((intf) => {
-                        outputs[intf.name] = { id: intf.id, direction: intf.direction, connectionSide: intf.connectionSide };
+                        outputs[intf.name] = {
+                            id: intf.id,
+                            direction: intf.direction,
+                            connectionSide: intf.connectionSide,
+                        };
                     });
 
                 /*
@@ -397,31 +402,31 @@ export default class PipelineManagerEditor extends Editor {
 
                 */
                 const inputMap = new Map();
-                state.graphState.inputs.forEach(input => {
-                    inputMap.set(input.id, input.name)
-                })
-                this.inputs = {}
+                state.graphState.inputs.forEach((input) => {
+                    inputMap.set(input.id, input.name);
+                });
+                this.inputs = {};
                 Object.entries(inputs).forEach(([inputID, inputInfo]) => {
                     const ni = new NodeInterface(inputMap.get(inputID), undefined);
-                    ni.id = inputInfo.id
-                    ni.direction = inputInfo.direction
-                    ni.connectionSide = inputInfo.connectionSide
-                    ni.nodePosition = inputInfo.nodePosition
+                    ni.id = inputInfo.id;
+                    ni.direction = inputInfo.direction;
+                    ni.connectionSide = inputInfo.connectionSide;
+                    ni.nodePosition = inputInfo.nodePosition;
                     this.inputs[inputID] = ni;
-                })
+                });
                 const outputMap = new Map();
-                state.graphState.outputs.forEach(outputs => {
-                    outputMap.set(outputs.id, outputs.name)
-                })
-                this.outputs = {}
+                state.graphState.outputs.forEach((output) => {
+                    outputMap.set(output.id, output.name);
+                });
+                this.outputs = {};
                 Object.entries(outputs).forEach(([outputID, outputInfo]) => {
                     const ni = new NodeInterface(outputMap.get(outputID), undefined);
-                    ni.id = outputInfo.id
-                    ni.direction = outputInfo.direction
-                    ni.connectionSide = outputInfo.connectionSide
-                    ni.nodePosition = outputInfo.nodePosition
+                    ni.id = outputInfo.id;
+                    ni.direction = outputInfo.direction;
+                    ni.connectionSide = outputInfo.connectionSide;
+                    ni.nodePosition = outputInfo.nodePosition;
                     this.outputs[outputID] = ni;
-                })
+                });
 
                 delete state.interfaces;
                 super.load({ ...state, inputs, outputs });
@@ -429,16 +434,22 @@ export default class PipelineManagerEditor extends Editor {
 
             updateInterfaces() {
                 super.updateInterfaces();
-                this.template.inputs.forEach(ni => {
-                    this.inputs[ni.id].direction = ni.direction ? ni.direction : 'input'
-                    this.inputs[ni.id].connectionSide = ni.connectionSide ? ni.connectionSide : 'left'
-                    this.inputs[ni.id].nodePosition = ni.nodePosition ? ni.nodePosition : undefined
-                })
-                this.template.outputs.forEach(ni => {
-                    this.outputs[ni.id].direction = 'output'
-                    this.outputs[ni.id].connectionSide = ni.connectionSide ? ni.connectionSide : 'right'
-                    this.outputs[ni.id].nodePosition = ni.nodePosition ? ni.nodePosition : undefined
-                })
+                this.template.inputs.forEach((ni) => {
+                    this.inputs[ni.id].direction = ni.direction ? ni.direction : 'input';
+                    this.inputs[ni.id].connectionSide = ni.connectionSide
+                        ? ni.connectionSide
+                        : 'left';
+                    this.inputs[ni.id].nodePosition = ni.nodePosition ? ni.nodePosition : undefined;
+                });
+                this.template.outputs.forEach((ni) => {
+                    this.outputs[ni.id].direction = 'output';
+                    this.outputs[ni.id].connectionSide = ni.connectionSide
+                        ? ni.connectionSide
+                        : 'right';
+                    this.outputs[ni.id].nodePosition = ni.nodePosition
+                        ? ni.nodePosition
+                        : undefined;
+                });
             }
         }
         this.registerNodeType(stuff, { category, title: template.name });
@@ -451,99 +462,118 @@ export default class PipelineManagerEditor extends Editor {
             const { switchGraph } = useGraph();
             this._switchGraph = switchGraph;
         }
-        this._graph = subgraphNode.subgraph
+        this._graph = subgraphNode.subgraph;
 
-        Object.entries(subgraphNode.inputs).filter(input => input[1].direction === "input").forEach(([interfaceID, input]) => {
-            const node = new SubgraphInputNode();
-            node.inputs.name.value = input.name
-            node.inputs.connectionSide.value = input.connectionSide
-            node.graphInterfaceId = interfaceID
-            node.position = input.nodePosition
-            this._graph.addNode(node)
+        const convertToUpperCase = (str) => `${str[0].toUpperCase()}${str.slice(1)}`;
 
-            // NodeInterfaceID is stored only in template, we need to find it by ID
-            const templateInputArr = Object.values(this._graph.inputs).filter(intf => intf.id === interfaceID)
-            if(templateInputArr.length !== 1) {
-                
-                return;
-            }
-            const templateInput = templateInputArr[0]
-            const targetInterface = this._graph.findNodeInterface(templateInput.nodeInterfaceId);
-            if(!targetInterface) {
-                
-                return;
-            }
-            this._graph.addConnection(node.outputs.placeholder, targetInterface)
-        })
+        Object.entries(subgraphNode.inputs)
+            .filter((input) => input[1].direction === 'input')
+            .forEach(([interfaceID, input]) => {
+                const node = new SubgraphInputNode();
+                node.inputs.name.value = input.name;
+                node.inputs.connectionSide.value = convertToUpperCase(input.connectionSide);
+                node.graphInterfaceId = interfaceID;
+                node.position = input.nodePosition;
+                this._graph.addNode(node);
 
-        Object.entries(subgraphNode.inputs).filter(inout => inout[1].direction === "inout").forEach(([interfaceID, inout]) => {
-            const node = new SubgraphInoutNode();
-            node.inputs.name.value = inout.name;
-            node.inputs.connectionSide.value = inout.connectionSide
-            node.graphInterfaceId = interfaceID;
-            node.position = inout.nodePosition
-            this._graph.addNode(node)
-            const templateInoutArr = Object.values(this._graph.inputs).filter(intf => intf.id === interfaceID)
-            if(templateInoutArr.length !== 1) {
-                
-                return;
-            }
-            const templateInout = templateInoutArr[0]
-            const targetInterface = this._graph.findNodeInterface(templateInout.nodeInterfaceId);
-            if(!targetInterface) {
-                
-                return;
-            }
-            this._graph.addConnection(targetInterface, node.inputs.placeholder);
-        })
+                // NodeInterfaceID is stored only in template, we need to find it by ID
+                const templateInputArr = Object.values(this._graph.inputs).filter(
+                    (intf) => intf.id === interfaceID,
+                );
+                if (templateInputArr.length !== 1) {
+                    return;
+                }
+                const templateInput = templateInputArr[0];
+                const targetInterface = this._graph.findNodeInterface(
+                    templateInput.nodeInterfaceId,
+                );
+                if (!targetInterface) {
+                    return;
+                }
+                this._graph.addConnection(node.outputs.placeholder, targetInterface);
+            });
 
-        Object.entries(subgraphNode.outputs).filter(output => output[1].name !== "_calculationResults").forEach(([interfaceID, output]) => {
-            console.log(output)
-            const node = new SubgraphOutputNode();
-            node.inputs.name.value = output.name;
-            node.inputs.connectionSide.value = output.connectionSide
-            node.graphInterfaceId = interfaceID;
-            node.position = output.nodePosition
-            this._graph.addNode(node);
-            const templateOutputArr = Object.values(this._graph.outputs).filter(intf => intf.id === interfaceID)
-            if(templateOutputArr.length !== 1) {
-                
-                return;
-            }
-            const templateOutput = templateOutputArr[0]
-            const targetInterface = this._graph.findNodeInterface(templateOutput.nodeInterfaceId);
-            if(!targetInterface) {
-                
-                return;
-            }
-            this._graph.addConnection(targetInterface, node.inputs.placeholder);
-        })
+        Object.entries(subgraphNode.inputs)
+            .filter((inout) => inout[1].direction === 'inout')
+            .forEach(([interfaceID, inout]) => {
+                const node = new SubgraphInoutNode();
+                node.inputs.name.value = inout.name;
+                node.inputs.connectionSide.value = convertToUpperCase(inout.connectionSide);
+                node.graphInterfaceId = interfaceID;
+                node.position = inout.nodePosition;
+                this._graph.addNode(node);
+                const templateInoutArr = Object.values(this._graph.inputs).filter(
+                    (intf) => intf.id === interfaceID,
+                );
+                if (templateInoutArr.length !== 1) {
+                    return;
+                }
+                const templateInout = templateInoutArr[0];
+                const targetInterface = this._graph.findNodeInterface(
+                    templateInout.nodeInterfaceId,
+                );
+                if (!targetInterface) {
+                    return;
+                }
+                this._graph.addConnection(targetInterface, node.inputs.placeholder);
+            });
+
+        Object.entries(subgraphNode.outputs)
+            .filter((output) => output[1].name !== '_calculationResults')
+            .forEach(([interfaceID, output]) => {
+                const node = new SubgraphOutputNode();
+                node.inputs.name.value = output.name;
+                node.inputs.connectionSide.value = convertToUpperCase(output.connectionSide);
+                node.graphInterfaceId = interfaceID;
+                node.position = output.nodePosition;
+                this._graph.addNode(node);
+                const templateOutputArr = Object.values(this._graph.outputs).filter(
+                    (intf) => intf.id === interfaceID,
+                );
+                if (templateOutputArr.length !== 1) {
+                    return;
+                }
+                const templateOutput = templateOutputArr[0];
+                const targetInterface = this._graph.findNodeInterface(
+                    templateOutput.nodeInterfaceId,
+                );
+                if (!targetInterface) {
+                    return;
+                }
+                this._graph.addConnection(targetInterface, node.inputs.placeholder);
+            });
 
         this._switchGraph(this._graph);
     }
 
     switchToSubgraph(subgraphNode) {
         this.subgraphStack.push([this._graph.id, subgraphNode]);
-        this.switchGraph(subgraphNode)
+        this.switchGraph(subgraphNode);
     }
 
     backFromSubgraph() {
         const [newGraphId, subgraphNode] = this.subgraphStack.pop();
-        const newGraph = [...this.graphs].filter(graph => graph.id === newGraphId)[0]
+        const newGraph = [...this.graphs].filter((graph) => graph.id === newGraphId)[0];
 
-        this._graph.updateTemplate()
-        this._graph.inputs = this._graph.template.inputs
-        this._graph.outputs = this._graph.template.outputs
-        subgraphNode.updateInterfaces()
-        this._graph.nodes.filter(node => [SUBGRAPH_INPUT_NODE_TYPE, SUBGRAPH_OUTPUT_NODE_TYPE, SUBGRAPH_INOUT_NODE_TYPE].includes(node.type)).forEach(node => 
-            this._graph.removeNode(node)
-        )
+        this._graph.updateTemplate();
+        this._graph.inputs = this._graph.template.inputs;
+        this._graph.outputs = this._graph.template.outputs;
+        subgraphNode.updateInterfaces();
+        this._graph.nodes
+            .filter((node) =>
+                [
+                    SUBGRAPH_INPUT_NODE_TYPE,
+                    SUBGRAPH_OUTPUT_NODE_TYPE,
+                    SUBGRAPH_INOUT_NODE_TYPE,
+                ].includes(node.type),
+            )
+            .forEach((node) => this._graph.removeNode(node));
 
         this._graph = newGraph;
         this._switchGraph(this._graph);
     }
 
     isInSubgraph() {
-        return this.subgraphStack.length > 0
+        return this.subgraphStack.length > 0;
     }
 }
