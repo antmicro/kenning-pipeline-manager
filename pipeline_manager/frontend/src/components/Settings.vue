@@ -17,9 +17,9 @@ SPDX-License-Identifier: Apache-2.0
                 <component :is="option.component" :intf="option"></component>
             </div>
 
-            <div class="__properties" v-show="disableInterfacesOptions.length !== 0">
-                <div class="option-label">Hide Interfaces:</div>
-                <div v-for="option in disableInterfacesOptions" :key="option.id">
+            <div class="__properties" v-show="disableLayersOptions.length !== 0">
+                <div class="option-label">Hide Layers:</div>
+                <div v-for="option in disableLayersOptions" :key="option.id">
                     <component :is="option.component" :intf="option"></component>
                 </div>
             </div>
@@ -55,16 +55,16 @@ export default {
             return option;
         });
 
-        const disableInterfacesOptions = computed(() => {
+        const disableLayersOptions = computed(() => {
             const options = ref([]);
 
-            props.viewModel.optionalInterfaceTypes.forEach((intf) => {
-                const option = new CheckboxInterface(intf, false).setPort(false);
+            props.viewModel.ignorableLayers.forEach((layer) => {
+                const option = new CheckboxInterface(layer.name, false).setPort(false);
                 option.events.setValue.subscribe(this, () => {
-                    if (props.viewModel.ignoredInterfaces.has(intf)) {
-                        props.viewModel.ignoredInterfaces.delete(intf);
+                    if (props.viewModel.ignoredLayers.has(layer.name)) {
+                        props.viewModel.ignoredLayers.delete(layer.name);
                     } else {
-                        props.viewModel.ignoredInterfaces.add(intf);
+                        props.viewModel.ignoredLayers.add(layer.name);
                     }
                 });
                 option.componentName = 'CheckboxInterface';
@@ -93,7 +93,7 @@ export default {
 
         const settingOptions = computed(() => [connectionStyleOption.value]);
 
-        return { displayOptionName, settingOptions, disableInterfacesOptions };
+        return { displayOptionName, settingOptions, disableLayersOptions };
     },
 };
 </script>

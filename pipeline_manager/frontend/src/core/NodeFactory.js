@@ -152,13 +152,22 @@ function parseInputs(inputs, interfaceTypes) {
  *
  * @param {string} name Name of the block that is stored when saving
  * @param {string} displayName Name of the block displayed to the user
+ * @param {string} type Type of the node
  * @param {*} interfaces List of interfaces in the block (input, output and inout)
  * @param {*} properties List of properties of the block
  * @param {*} interfaceTypes ReadInterfaceTypes of the specification
  * @param {boolean} twoColumn type of layout of the nodes
  * @returns Node based class
  */
-export function NodeFactory(name, displayName, interfaces, properties, interfaceTypes, twoColumn) {
+export function NodeFactory(
+    name,
+    displayName,
+    nodeType,
+    interfaces,
+    properties,
+    interfaceTypes,
+    twoColumn,
+) {
     const node = defineNode({
         type: name,
 
@@ -169,6 +178,7 @@ export function NodeFactory(name, displayName, interfaces, properties, interface
 
         /* eslint-disable no-param-reassign */
         onCreate() {
+            this.nodeType = nodeType;
             this.parentSave = this.save;
             this.parentLoad = this.load;
 

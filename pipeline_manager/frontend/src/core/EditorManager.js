@@ -34,7 +34,7 @@ export default class EditorManager {
         this.baklavaView.connectionRenderer = new ConnectionRenderer(this.baklavaView);
 
         // need to be set here as settings try to use this value before specification is loaded
-        this.baklavaView.optionalInterfaceTypes = [];
+        this.baklavaView.ignorableLayers = [];
     }
 
     /**
@@ -63,6 +63,7 @@ export default class EditorManager {
             const myNode = NodeFactory(
                 node.name,
                 node.name,
+                node.type,
                 node.interfaces,
                 node.properties,
                 interfaceTypes,
@@ -87,8 +88,10 @@ export default class EditorManager {
         if ('connectionStyle' in metadata) {
             this.baklavaView.connectionRenderer.style = metadata.connectionStyle;
         }
-        this.baklavaView.ignoredInterfaces = new Set();
-        this.baklavaView.optionalInterfaceTypes = metadata.optionalInterfaceTypes ?? [];
+
+        this.baklavaView.ignoredLayers = new Set();
+        this.baklavaView.ignorableLayers = metadata.layers ?? [];
+
         this.specificationLoaded = true;
     }
 

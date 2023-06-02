@@ -61,15 +61,13 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
         </svg>
 
         <div class="node-container" :style="nodeContainerStyle">
-            <transition-group name="fade">
-                <CustomNode
-                    v-for="node in nodes"
-                    :key="node.id + counter.toString()"
-                    :node="node"
-                    :selected="selectedNodes.includes(node)"
-                    @select="selectNode(node)"
-                />
-            </transition-group>
+            <CustomNode
+                v-for="node in visibleNodes"
+                :key="node.id + counter.toString()"
+                :node="node"
+                :selected="selectedNodes.includes(node)"
+                @select="selectNode(node)"
+            />
         </div>
     </div>
 </template>
@@ -188,13 +186,46 @@ export default defineComponent({
             });
         };
 
-        const ignoredInteracesTypes = computed(() => props.viewModel.ignoredInterfaces);
+        const ignoredLayers = computed(() => props.viewModel.ignoredLayers);
+        const ignorableLayers = computed(() => props.viewModel.ignorableLayers);
+
+        const ignoredInterfacesTypes = computed(() => {
+            const temp = new Set();
+
+            ignorableLayers.value.forEach((layer) => {
+                if (ignoredLayers.value.has(layer.name)) {
+                    layer.nodeInterfaces.forEach(temp.add, temp);
+                }
+            });
+            return temp;
+        });
+
+        const ignoredNodesTypes = computed(() => {
+            const temp = new Set();
+
+            ignorableLayers.value.forEach((layer) => {
+                if (ignoredLayers.value.has(layer.name)) {
+                    layer.nodeTypes.forEach(temp.add, temp);
+                }
+            });
+            return temp;
+        });
+
+        const visibleNodes = computed(() =>
+            nodes.value.filter((n) => !ignoredNodesTypes.value.has(n.nodeType)),
+        );
+        const ignoredNodes = computed(() =>
+            nodes.value.filter((n) => ignoredNodesTypes.value.has(n.nodeType)),
+        );
+        const ignoredNodesId = computed(() => ignoredNodes.value.map((n) => n.id));
 
         const visibleConnections = computed(() =>
             connections.value.filter(
                 (c) =>
-                    !ignoredInteracesTypes.value.has(c.from.type) &&
-                    !ignoredInteracesTypes.value.has(c.to.type),
+                    !ignoredInterfacesTypes.value.has(c.from.type) &&
+                    !ignoredInterfacesTypes.value.has(c.to.type) &&
+                    !ignoredNodesId.value.includes(c.from.nodeId) &&
+                    !ignoredNodesId.value.includes(c.to.nodeId),
             ),
         );
 
@@ -203,7 +234,6 @@ export default defineComponent({
         return {
             el,
             counter,
-            nodes,
             selectedNodes,
             nodeContainerStyle,
             onPointerMove,
@@ -222,6 +252,7 @@ export default defineComponent({
             readonly,
             scale,
             visibleConnections,
+            visibleNodes,
         };
     },
 });
