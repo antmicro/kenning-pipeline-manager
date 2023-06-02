@@ -456,6 +456,7 @@ export default class PipelineManagerEditor extends Editor {
         Object.entries(subgraphNode.inputs).filter(input => input[1].direction === "input").forEach(([interfaceID, input]) => {
             const node = new SubgraphInputNode();
             node.inputs.name.value = input.name
+            node.inputs.connectionSide.value = input.connectionSide
             node.graphInterfaceId = interfaceID
             node.position = input.nodePosition
             this._graph.addNode(node)
@@ -478,6 +479,7 @@ export default class PipelineManagerEditor extends Editor {
         Object.entries(subgraphNode.inputs).filter(inout => inout[1].direction === "inout").forEach(([interfaceID, inout]) => {
             const node = new SubgraphInoutNode();
             node.inputs.name.value = inout.name;
+            node.inputs.connectionSide.value = inout.connectionSide
             node.graphInterfaceId = interfaceID;
             node.position = inout.nodePosition
             this._graph.addNode(node)
@@ -499,6 +501,7 @@ export default class PipelineManagerEditor extends Editor {
             console.log(output)
             const node = new SubgraphOutputNode();
             node.inputs.name.value = output.name;
+            node.inputs.connectionSide.value = output.connectionSide
             node.graphInterfaceId = interfaceID;
             node.position = output.nodePosition
             this._graph.addNode(node);
