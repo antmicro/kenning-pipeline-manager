@@ -85,7 +85,19 @@
                 },
                 "urls": {
                     "type": "object",
-                    "description": "URL description put in node palette and nodes"
+                    "description": "URL description put in node palette and nodes",
+                    "patternProperties": {
+                        "^.*$": {
+                            "type": "object",
+                            "description": "A single entry representing an URL group",
+                            "properties": {
+                                "name": {"type": "string", "description": "Name of the url group, appearing in hints"},
+                                "icon": {"type": "string", "description": "Path of the icon in assets"},
+                                "url": {"type": "string", "description": "Base of URL for group"}
+                            },
+                            "required": ["name", "icon", "url"]
+                        }
+                    }
                 }
             },
             "additionalProperties": false
@@ -329,7 +341,11 @@
                         }
                     },
                     "urls": {
-                        "type": "object"
+                        "type": "object",
+                        "description": "Map containing URL group in key and URL suffix in value",
+                        "patternProperties": {
+                            "^.*$": {"type": "string"}
+                        }
                     }
                 },
                 "required": [
