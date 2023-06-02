@@ -121,6 +121,21 @@
                 "interfaceConnectionColor": "#FFFF00"
             }
         },
-        "connectionStyle": "orthogonal"
+        "connectionStyle": "orthogonal",
+        "layers": [
+            {
+                "name": "IOs",
+                "nodeTypes": ["filesystem"]
+            },
+            {
+                "name": "Binary imaging",
+                "nodeInterfaces": ["BinaryImage"]
+            },
+            {
+                "name": "Both",
+                "nodeTypes": ["processing"],
+                "nodeInterfaces": ["BinaryImage"]
+            }
+        ]
     }
 }
