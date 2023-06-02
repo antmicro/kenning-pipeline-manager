@@ -389,15 +389,6 @@ export default {
     <div class="wrapper">
         <div class="container">
             <div>
-                <div ref="palette" class="open">
-                    <button @click="() => displayPalettePanel(!this.isPalettePanelOpen)">
-                        <Cube />
-                    </button>
-                    <div class="tooltip first">
-                        <span>Nodes</span>
-                    </div>
-                </div>
-
                 <div class="logo">
                     <Logo />
                     <Arrow color="white" rotate="left" scale="small" />
@@ -436,6 +427,15 @@ export default {
                                 :eventFunction="() => requestDataflowAction('export')"
                             />
                         </div>
+                    </div>
+                </div>
+
+                <div ref="palette" class="open">
+                    <button @click="() => displayPalettePanel(!this.isPalettePanelOpen)">
+                        <Cube />
+                    </button>
+                    <div class="tooltip">
+                        <span>Nodes</span>
                     </div>
                 </div>
 
