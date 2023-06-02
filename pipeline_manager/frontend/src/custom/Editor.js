@@ -450,8 +450,9 @@ export default class PipelineManagerEditor extends Editor {
             const { switchGraph } = useGraph();
             this._switchGraph = switchGraph;
         }
-        this._graph = new Graph(this);
-        subgraphNode.template.createGraph(this._graph);
+        // this._graph = new Graph(this);
+        // subgraphNode.template.createGraph(this._graph);
+        this._graph = subgraphNode.subgraph
 
         Object.entries(subgraphNode.inputs).filter(input => input[1].direction === "input").forEach(([interfaceID, input]) => {
             const node = new SubgraphInputNode();
@@ -512,33 +513,27 @@ export default class PipelineManagerEditor extends Editor {
     }
 
     switchToSubgraph(subgraphNode) {
-        if(this._graph.template !== undefined) {
-            this._graph.updateTemplate();
-        }
-        this.subgraphStack.push(copyGraph(this._graph, this));
+        // if(this._graph.template !== undefined) {
+        //     displayedGraph.updateTemplate();
+        // }
+        this.subgraphStack.push(this._graph.id);
         this.switchGraph(subgraphNode)
     }
 
     backFromSubgraph(displayedGraph) {
-        const newGraph = this.subgraphStack.pop();
+        const newGraphId = this.subgraphStack.pop();
+        const newGraph = [...this.graphs].filter(graph => graph.id === newGraphId)[0]
         displayedGraph.updateTemplate()
         // If this is main graph, simply switch to it (there is no need to create input/output nodes)
-        if(!this.isInSubgraph()) {
-            this._graph = newGraph;
-            this._switchGraph(this._graph);
-        } else {
-            this.switchGraph(newGraph)
-        }
+        // if(!this.isInSubgraph()) {
+        this._graph = newGraph;
+        this._switchGraph(this._graph);
+        // } else {
+        //     this.switchGraph(newGraph)
+        // }
     }
 
     isInSubgraph() {
         return this.subgraphStack.length > 0
     }
-}
-
-function copyGraph(graph, editor) {
-    const newGraph = new Graph(editor);
-    newGraph.load(graph.save());
-    newGraph.template = graph.template
-    return newGraph;
 }
