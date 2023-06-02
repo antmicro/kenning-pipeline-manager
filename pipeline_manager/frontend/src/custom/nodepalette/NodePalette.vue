@@ -77,6 +77,11 @@ export default defineComponent({
                     );
                 }
 
+                // Filter out nodes added by baklava
+                nodeTypesInCategory = nodeTypesInCategory.filter(
+                    ([nt]) => !["__baklava_SubgraphInputNode", "__baklava_SubgraphOutputNode"].includes(nt)
+                )
+
                 const nodesIconPath = nodeTypesInCategory.map((n) => {
                     const [nodeType] = n;
                     const iconPath = editor.getNodeIconPath(nodeType);
