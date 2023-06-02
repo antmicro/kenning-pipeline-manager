@@ -149,6 +149,8 @@ export default class PipelineManagerEditor extends Editor {
                         id: n.graphInterfaceId,
                         name: n.inputs.name.value,
                         nodeInterfaceId: c.to.id,
+                        connectionSide: n.inputs.connectionSide.value,
+                        direction: 'input'
                     });
                 });
                 interfaceConnections.push(...connections);
@@ -163,6 +165,8 @@ export default class PipelineManagerEditor extends Editor {
                         id: n.graphInterfaceId,
                         name: n.inputs.name.value,
                         nodeInterfaceId: c.from.id,
+                        connectionSide: n.inputs.connectionSide.value,
+                        direction: 'output'
                     });
                 });
                 interfaceConnections.push(...connections);
@@ -179,6 +183,7 @@ export default class PipelineManagerEditor extends Editor {
                         id: n.graphInterfaceId,
                         name: n.inputs.name.value,
                         nodeInterfaceId: c.from.id,
+                        connectionSide: n.inputs.connectionSide.value,
                         direction: 'inout',
                     });
                 });
@@ -190,6 +195,7 @@ export default class PipelineManagerEditor extends Editor {
                         id: n.graphInterfaceId,
                         name: n.inputs.name.value,
                         nodeInterfaceId: c.to.id,
+                        connectionSide: n.inputs.connectionSide.value,
                         direction: 'inout'
                     })
                 })
@@ -203,16 +209,24 @@ export default class PipelineManagerEditor extends Editor {
                 (n) => n.type !== SUBGRAPH_INPUT_NODE_TYPE && n.type !== SUBGRAPH_OUTPUT_NODE_TYPE && n.type !== SUBGRAPH_INOUT_NODE_TYPE,
             );
 
-            this.template.update({
-                inputs,
-                outputs,
-                nodes,
-                connections: innerConnections.map((c) => ({
-                    id: c.id,
-                    from: c.from.id,
-                    to: c.to.id,
-                })),
-            });
+            // this.template.update({
+            //     inputs,
+            //     outputs,
+            //     nodes: nodes.map(n => n.save()),
+            //     connections: innerConnections.map((c) => ({
+            //         id: c.id,
+            //         from: c.from.id,
+            //         to: c.to.id,
+            //     })),
+            // });
+            this.template.nodes = nodes.map(n => n.save())
+            this.template.inputs = inputs
+            this.template.outputs = outputs
+            this.template.connections = innerConnections.map((c) => ({
+                id: c.id,
+                from: c.from.id,
+                to: c.to.id,
+            })),
 
             this.template.panning = this.panning;
             this.template.scaling = this.scaling;
@@ -247,6 +261,13 @@ export default class PipelineManagerEditor extends Editor {
             this.events.addNode.emit(node);
             return node; // eslint-disable-line consistent-return
         };
+
+        graph.destroy = function destroy() {
+            // Remove possibility of removing graphs - this ignores changes made by
+            // default switchGraph (unregistering from editor and removing nodes) and
+            // allows to later reuse this instance
+            return;
+        }
 
         super.registerGraph(graph);
     }
@@ -450,8 +471,6 @@ export default class PipelineManagerEditor extends Editor {
             const { switchGraph } = useGraph();
             this._switchGraph = switchGraph;
         }
-        // this._graph = new Graph(this);
-        // subgraphNode.template.createGraph(this._graph);
         this._graph = subgraphNode.subgraph
 
         Object.entries(subgraphNode.inputs).filter(input => input[1].direction === "input").forEach(([interfaceID, input]) => {
@@ -513,9 +532,6 @@ export default class PipelineManagerEditor extends Editor {
     }
 
     switchToSubgraph(subgraphNode) {
-        // if(this._graph.template !== undefined) {
-        //     displayedGraph.updateTemplate();
-        // }
         this.subgraphStack.push(this._graph.id);
         this.switchGraph(subgraphNode)
     }
@@ -524,13 +540,8 @@ export default class PipelineManagerEditor extends Editor {
         const newGraphId = this.subgraphStack.pop();
         const newGraph = [...this.graphs].filter(graph => graph.id === newGraphId)[0]
         displayedGraph.updateTemplate()
-        // If this is main graph, simply switch to it (there is no need to create input/output nodes)
-        // if(!this.isInSubgraph()) {
         this._graph = newGraph;
         this._switchGraph(this._graph);
-        // } else {
-        //     this.switchGraph(newGraph)
-        // }
     }
 
     isInSubgraph() {
