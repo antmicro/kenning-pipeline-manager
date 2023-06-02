@@ -54,13 +54,30 @@
                     "description": "Hides HUD elements, such as popup notifications, navbar or terminal",
                     "default": false
                 },
-                "optionalInterfaceTypes": {
+                "layers": {
                     "type": "array",
-                    "items": {
-                        "type": "string"
-                    },
                     "default": [],
-                    "description": "Types of interfaces that can be ignored using settings."
+                    "description": "Layers of interfaces and nodes that can be ignored using settings.",
+                    "items" : {
+                        "type": "object",
+                        "description": "Description of a single layer.",
+                        "properties": {
+                            "name": {
+                                "description": "Name of the layer",
+                                "type": "string"
+                            },
+                            "nodeTypes": {
+                                "type": "array",
+                                "description": "Types of nodes that are ignored in this layer"
+                            },
+                            "nodeInterfaces": {
+                                "type": "array",
+                                "description": "Types of interfaces that are ignored in this layer"
+                            }
+                        },
+                        "required": ["name", "nodeTypes", "nodeInterfaces"],
+                        "additionalProperties": false
+                    }
                 }
             },
             "additionalProperties": false
