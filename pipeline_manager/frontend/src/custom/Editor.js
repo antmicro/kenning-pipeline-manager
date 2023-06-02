@@ -447,17 +447,13 @@ export default class PipelineManagerEditor extends Editor {
 
             updateInterfaces() {
                 super.updateInterfaces();
-                this.template.inputs.filter(input => input.direction === "inout").forEach(ni => {
-                    this.inputs[ni.id].direction = "inout"
-                    this.inputs[ni.id].connectionSide = "left"
-                })
-                this.template.inputs.filter(input => input.direction !== "inout").forEach(ni => {
-                    this.inputs[ni.id].direction = "input"
-                    this.inputs[ni.id].connectionSide = "left"
+                this.template.inputs.forEach(ni => {
+                    this.inputs[ni.id].direction = ni.direction ? ni.direction : 'input'
+                    this.inputs[ni.id].connectionSide = ni.connectionSide ? ni.connectionSide.toLowerCase() : 'left'
                 })
                 this.template.outputs.forEach(ni => {
                     this.outputs[ni.id].direction = 'output'
-                    this.outputs[ni.id].connectionSide = "right"
+                    this.outputs[ni.id].connectionSide = ni.connectionSide ? ni.connectionSide.toLowerCase() : 'right'
                 })
             }
         }
@@ -536,7 +532,7 @@ export default class PipelineManagerEditor extends Editor {
         this.switchGraph(subgraphNode)
     }
 
-    backFromSubgraph(displayedGraph) {
+    backFromSubgraph() {
         const [newGraphId, subgraphNode] = this.subgraphStack.pop();
         const newGraph = [...this.graphs].filter(graph => graph.id === newGraphId)[0]
 

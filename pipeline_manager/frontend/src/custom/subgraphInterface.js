@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { defineNode, TextInputInterface, NodeInterface } from 'baklavajs';
+import { defineNode, TextInputInterface, NodeInterface, SelectInterface } from 'baklavajs';
 import { v4 as uuidv4 } from 'uuid';
 
 // Those files are exported here as Baklavajs does not export them
@@ -14,6 +14,7 @@ export const SubgraphInputNode = defineNode({
     title: "Subgraph Input",
     inputs: {
         name: () => new TextInputInterface("Name", "Input").setPort(false),
+        connectionSide: () => new SelectInterface("Interface side", "Left", ["Left", "Right"]).setPort(false),
     },
     outputs: {
         placeholder: () => {
@@ -34,6 +35,7 @@ export const SubgraphOutputNode = defineNode({
     title: "Subgraph Output",
     inputs: {
         name: () => new TextInputInterface("Name", "Output").setPort(false),
+        connectionSide: () => new SelectInterface("Interface side", "Right", ["Left", "Right"]).setPort(false),
         placeholder: () => {
             const ni = new NodeInterface("Connection", undefined)
             ni.direction = 'input'
@@ -54,6 +56,7 @@ export const SubgraphInoutNode = defineNode({
     title: "Subgraph Inout",
     inputs: {
         name: () => new TextInputInterface("Name", "Inout").setPort(false),
+        connectionSide: () => new SelectInterface("Interface side", "Left", ["Left", "Right"]).setPort(false),
         placeholder: () => {
             const ni = new NodeInterface("Connection", undefined);
             ni.direction = 'inout';
