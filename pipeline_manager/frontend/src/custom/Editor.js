@@ -476,7 +476,7 @@ export default class PipelineManagerEditor extends Editor {
         Object.entries(subgraphNode.inputs).filter(input => input[1].direction === "input").forEach(([interfaceID, input]) => {
             const node = new SubgraphInputNode();
             node.inputs.name.value = input.name
-            node.graphInterfaceId = input.id
+            node.graphInterfaceId = interfaceID
             this._graph.addNode(node)
             // NodeInterfaceID is stored only in template, we need to find it by ID
             const templateInput = Object.values(this._graph.inputs).filter(intf => intf.id === interfaceID)
@@ -495,7 +495,7 @@ export default class PipelineManagerEditor extends Editor {
         Object.entries(subgraphNode.inputs).filter(input => input[1].direction === "inout").forEach(([interfaceID, inout]) => {
             const node = new SubgraphInoutNode();
             node.inputs.name.value = inout.name;
-            node.graphInterfaceId = inout.id;
+            node.graphInterfaceId = interfaceID;
             this._graph.addNode(node)
             const templateInout = Object.values(this._graph.inputs).filter(intf => intf.id === interfaceID)
             if(templateInout.length !== 1) {
@@ -513,7 +513,7 @@ export default class PipelineManagerEditor extends Editor {
         Object.entries(subgraphNode.outputs).filter(output => output[1].name !== "_calculationResults").forEach(([interfaceID, output]) => {
             const node = new SubgraphOutputNode();
             node.inputs.name.value = output.name;
-            node.graphInterfaceId = output.id;
+            node.graphInterfaceId = interfaceID;
             this._graph.addNode(node);
             const templateOutput = Object.values(this._graph.outputs).filter(intf => intf.id === interfaceID)
             if(templateOutput.length !== 1) {
@@ -532,14 +532,22 @@ export default class PipelineManagerEditor extends Editor {
     }
 
     switchToSubgraph(subgraphNode) {
-        this.subgraphStack.push(this._graph.id);
+        this.subgraphStack.push([this._graph.id, subgraphNode]);
         this.switchGraph(subgraphNode)
     }
 
     backFromSubgraph(displayedGraph) {
-        const newGraphId = this.subgraphStack.pop();
+        const [newGraphId, subgraphNode] = this.subgraphStack.pop();
         const newGraph = [...this.graphs].filter(graph => graph.id === newGraphId)[0]
-        displayedGraph.updateTemplate()
+
+        this._graph.updateTemplate()
+        this._graph.inputs = this._graph.template.inputs
+        this._graph.outputs = this._graph.template.outputs
+        this._graph.nodes.filter(node => [SUBGRAPH_INPUT_NODE_TYPE, SUBGRAPH_OUTPUT_NODE_TYPE, SUBGRAPH_INOUT_NODE_TYPE].includes(node.type)).forEach(node =>
+            this._graph.removeNode(node)
+        )
+        subgraphNode.updateInterfaces()
+
         this._graph = newGraph;
         this._switchGraph(this._graph);
     }
