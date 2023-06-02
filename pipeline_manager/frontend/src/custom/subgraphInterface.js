@@ -8,7 +8,7 @@ import { defineNode, TextInputInterface, NodeInterface } from 'baklavajs';
 import { v4 as uuidv4 } from 'uuid';
 
 // Those files are exported here as Baklavajs does not export them
-export const SUBGRAPH_INPUT_NODE_TYPE = '__PipelineManager_SubgraphInputNode';
+export const SUBGRAPH_INPUT_NODE_TYPE = '__baklava_CustomSubgraphInputNode';
 export const SubgraphInputNode = defineNode({
     type: SUBGRAPH_INPUT_NODE_TYPE,
     title: "Subgraph Input",
@@ -18,8 +18,8 @@ export const SubgraphInputNode = defineNode({
     outputs: {
         placeholder: () => {
             const ni = new NodeInterface("Connection", undefined);
-            ni.direction = 'input'
-            ni.connectionSide = 'left';
+            ni.direction = 'output'
+            ni.connectionSide = 'right';
             return ni;
         }
     },
@@ -28,7 +28,7 @@ export const SubgraphInputNode = defineNode({
     },
 });
 
-export const SUBGRAPH_OUTPUT_NODE_TYPE = '__PipelineManager_SubgraphOutputNode';
+export const SUBGRAPH_OUTPUT_NODE_TYPE = '__baklava_CustomSubgraphOutputNode';
 export const SubgraphOutputNode = defineNode({
     type: SUBGRAPH_OUTPUT_NODE_TYPE,
     title: "Subgraph Output",
@@ -36,8 +36,8 @@ export const SubgraphOutputNode = defineNode({
         name: () => new TextInputInterface("Name", "Output").setPort(false),
         placeholder: () => {
             const ni = new NodeInterface("Connection", undefined)
-            ni.direction = 'output'
-            ni.connectionSide = 'right'
+            ni.direction = 'input'
+            ni.connectionSide = 'left'
             return ni;
         }
     },
@@ -48,7 +48,7 @@ export const SubgraphOutputNode = defineNode({
 
 // Just like there are special nodes representing subgraph input and output,
 // There should be one for it's inout.
-export const SUBGRAPH_INOUT_NODE_TYPE = "__PipelineManager_SubgraphInoutNode";
+export const SUBGRAPH_INOUT_NODE_TYPE = "__baklava_CustomSubgraphInoutNode";
 export const SubgraphInoutNode = defineNode({
     type: SUBGRAPH_INOUT_NODE_TYPE,
     title: "Subgraph Inout",
