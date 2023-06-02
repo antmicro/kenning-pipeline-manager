@@ -21,6 +21,12 @@
                     "name": "Output",
                     "type": "Connection",
                     "direction": "output"
+                },
+                {
+                    "name": "Inout",
+                    "type": "Connection",
+                    "direction": "inout",
+                    "connectionSide": "right"
                 }
             ]
         },
@@ -51,6 +57,12 @@
                     "name": "Output",
                     "type": "Connection",
                     "direction": "output"
+                },
+                {
+                    "name": "Inout",
+                    "type": "Connection",
+                    "direction": "inout",
+                    "connectionSide": "right"
                 }
             ]
         }
@@ -74,6 +86,12 @@
                             "id": "4ae2f357-f6fc-41a9-80a0-5439ef822921",
                             "name": "Output",
                             "direction": "output"
+                        },
+                        {
+                            "id": "4a1cd750-8018-4f7a-91e1-5dcb63c53fa7",
+                            "name": "Inout",
+                            "direction": "inout",
+                            "connectionSide": "right"
                         }
                     ],
                     "position": {
@@ -98,6 +116,12 @@
                             "id": "245f1738-45e4-4169-a5c0-efffd2795b30",
                             "name": "Output",
                             "direction": "output"
+                        },
+                        {
+                            "id": "c0b9bd16-8162-4f70-8089-d80ef4bde61c",
+                            "name": "Inout",
+                            "direction": "inout",
+                            "connectionSide": "right"
                         }
                     ],
                     "position": {
