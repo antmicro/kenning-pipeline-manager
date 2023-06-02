@@ -22,6 +22,10 @@ export default class PipelineManagerEditor extends Editor {
 
     nodeIcons = new Map();
 
+    baseURLs = new Map();
+
+    nodeURLs = new Map();
+
     /* eslint-disable no-param-reassign */
     /* eslint-disable no-underscore-dangle */
     constructor() {
@@ -122,7 +126,20 @@ export default class PipelineManagerEditor extends Editor {
         }
     }
 
-    getNodeIconPath(nodeType) {
-        return this.nodeIcons.get(nodeType) || undefined;
+    getNodeURLs(nodeName) {
+        const urls = this.nodeURLs.get(nodeName) || {};
+
+        const fullUrls = [];
+        Object.entries(urls).forEach(([urlName, url]) => {
+            const t = { ...this.baseURLs.get(urlName) };
+            t.url += url;
+            fullUrls.push(t);
+        });
+
+        return fullUrls;
+    }
+
+    getNodeIconPath(nodeName) {
+        return this.nodeIcons.get(nodeName) || undefined;
     }
 }

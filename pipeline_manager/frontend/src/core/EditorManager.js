@@ -59,6 +59,12 @@ export default class EditorManager {
         this.nodeInterfaceTypes.addTypes(...Object.values(interfaceTypes));
         this.updateInterfacesStyle(metadata);
 
+        if ('urls' in metadata) {
+            Object.entries(metadata.urls).forEach(([urlName, state]) => {
+                this.editor.baseURLs.set(urlName, state);
+            });
+        }
+
         nodes.forEach((node) => {
             const myNode = NodeFactory(
                 node.name,
@@ -72,6 +78,14 @@ export default class EditorManager {
             this.editor.registerNodeType(myNode, { title: node.name, category: node.category });
             if ('icon' in node) {
                 this.editor.nodeIcons.set(node.name, node.icon);
+            }
+            if ('urls' in node) {
+                Object.entries(node.urls).forEach(([urlName, url]) => {
+                    if (!this.editor.nodeURLs.has(node.name)) {
+                        this.editor.nodeURLs.set(node.name, {});
+                    }
+                    this.editor.nodeURLs.get(node.name)[urlName] = url;
+                });
             }
         });
 
