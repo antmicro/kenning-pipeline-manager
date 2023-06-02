@@ -35,7 +35,8 @@ This object specifies additional editor options and contains the following optio
   Default value is `curved`
 * `hideHud` - boolean value determining whether UI elements should be hidden. Components affected by this flag are: popup notifications, navigation bar and terminal window.
   Default value is `false`
-* `optionalInterfaceTypes` - types of interfaces that can be ignored using settings.
+* `layers` - layers specyfing groups of interfaces and nodes that can be ignored using settings.
+  The entries are of type [Layer](#layers).
   Default values is an empty array.
 
 An example:
@@ -48,9 +49,24 @@ An example:
     "allowLoopbacks": false,
     "readonly": true,
     "connectionStyle": "orthogonal",
-    "hideHud": false
+    "hideHud": false,
+    "layers": [
+        {
+            "name": "Example Layer",
+            "nodeTypes": ["processing"],
+            "nodeInterfaces": ["BinaryImage"]
+        }
+    ]
 }
 ```
+
+#### Layer
+
+Layer used to describe a group of nodes and interfaces that can be not rendered in the editor.
+Every layer has three required properties:
+* `name` - name of the layer displayed in the editor
+* `nodeTypes` - array of names of node types that belong to the layer
+* `nodeInterfaces` - array of names of interface types that belong to the layer
 
 ### Node
 
