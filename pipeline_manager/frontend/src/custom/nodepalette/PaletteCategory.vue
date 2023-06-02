@@ -25,6 +25,7 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
                 :type="nt"
                 :title="ni.title"
                 :iconPath="category.nodes.nodeIconPaths[j]"
+                :urls="category.nodes.nodeURLs[j]"
                 :depth="depth + 1"
                 @pointerdown="onDragStart(nt, ni, category.nodes.nodeIconPaths[j])"
             />

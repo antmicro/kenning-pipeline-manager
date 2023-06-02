@@ -37,6 +37,24 @@ from moving or deleting the nodes.
                 v-click-outside="doneRenaming"
                 @keydown.enter="doneRenaming"
             />
+            <a
+                v-for="url in nodeURLs"
+                :key="url.name"
+                :href="url.url"
+                class="__url"
+                :class="openClass"
+                @pointerdown.stop
+                @pointerover="hover = true"
+                @pointerleave="hover = false"
+                target='_blank'
+            >
+                <img
+                    v-if="getIconPath(url.icon) !== undefined"
+                    :src="getIconPath(url.icon)"
+                    :alt="url.name"
+                />
+                <div class="__tooltip">{{ url.name }}</div>
+            </a>
             <div class="__menu">
                 <vertical-dots class="--clickable" @click="openContextMenuWrapper" />
                 <context-menu
@@ -175,6 +193,11 @@ const startDrag = (ev) => {
 const openContextMenu = () => {
     showContextMenu.value = true;
 };
+
+const nodeURLs = viewModel.value.editor.getNodeURLs(props.node.type);
+const getIconPath = (name) => (name !== undefined ? `./assets/${name}` : undefined);
+const hover = ref(false);
+const openClass = computed(() => ({ open: hover.value }));
 
 /* eslint-disable default-case */
 const onContextMenuClick = async (action) => {

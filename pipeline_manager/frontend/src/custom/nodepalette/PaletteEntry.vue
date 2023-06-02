@@ -14,18 +14,32 @@ A single entry representing available node type in the sidebar.
         <div class="__title-label">
             {{ title }}
         </div>
+        <a
+            v-for="url in urls"
+            :key="url.name"
+            :href="url.url"
+            class="__url"
+            :class="openClass"
+            @pointerdown.stop
+            @pointerover="hover = true"
+            @pointerleave="hover = false"
+            target='_blank'
+        >
+            <img
+                v-if="getIconPath(url.icon) !== undefined"
+                :src="getIconPath(url.icon)"
+                :alt="url.name"
+            />
+            <div class="__tooltip">{{ url.name }}</div>
+        </a>
     </div>
 </template>
 
 <script>
-import { defineComponent, computed } from 'vue';
+import { defineComponent, computed, ref } from 'vue';
 
 export default defineComponent({
     props: {
-        type: {
-            type: String,
-            required: true,
-        },
         title: {
             type: String,
             required: true,
@@ -38,13 +52,18 @@ export default defineComponent({
             type: Number,
             required: true,
         },
+        urls: {
+            default: [],
+        },
         isDragged: {
             type: Boolean,
             default: false,
         },
     },
     setup(props) {
-        const nodeIcon = props.iconPath !== undefined ? `./assets/${props.iconPath}` : undefined;
+        const getIconPath = (name) => (name !== undefined ? `./assets/${name}` : undefined);
+
+        const nodeIcon = computed(() => getIconPath(props.iconPath));
         const paddingDepth = 20;
         const minPadding = 10;
         const padding = computed(
@@ -54,7 +73,17 @@ export default defineComponent({
             __dragged: props.isDragged,
         }));
 
-        return { nodeIcon, padding, draggedClass };
+        const hover = ref(false);
+        const openClass = computed(() => ({ open: hover.value }));
+
+        return {
+            nodeIcon,
+            padding,
+            draggedClass,
+            getIconPath,
+            hover,
+            openClass,
+        };
     },
 });
 </script>
