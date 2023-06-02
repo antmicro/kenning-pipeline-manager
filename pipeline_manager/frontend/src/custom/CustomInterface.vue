@@ -79,12 +79,12 @@ export default defineComponent({
                     return 'right';
                 }
                 if (props.intf.connectionSide === 'right') {
-                    return 'down';
+                    return 'left';
                 }
             }
             if (props.intf.direction === 'output') {
                 if (props.intf.connectionSide === 'left') {
-                    return 'down';
+                    return 'left';
                 }
                 if (props.intf.connectionSide === 'right') {
                     return 'right';
