@@ -250,20 +250,22 @@ export default class PipelineManagerEditor extends Editor {
         state.graphTemplateInstances = [];
         // subgraphs are stored in state.graphTemplateInstances, there is no need to store it
         // in nodes itself
-        state.graph.nodes.forEach((node) => {
+        const recurrentSubgraphSave = (node) => {
             if (node.type.startsWith(GRAPH_NODE_TYPE_PREFIX)) {
                 node.type = node.type.slice(GRAPH_NODE_TYPE_PREFIX.length);
                 node.subgraph = node.graphState.id;
                 state.graphTemplateInstances.push(node.graphState);
+                node.graphState.nodes.forEach(recurrentSubgraphSave)
             }
             delete node.graphState;
-        });
+        }
+        state.graph.nodes.forEach(recurrentSubgraphSave);
 
         return state;
     }
 
     load(state) {
-        state.graph.nodes.forEach((node) => {
+        const recurrentSubgraphLoad = (node) => {
             if (node.subgraph !== undefined) {
                 const fittingTemplate = state.graphTemplateInstances.filter(
                     (template) => template.id === node.subgraph,
@@ -274,26 +276,35 @@ export default class PipelineManagerEditor extends Editor {
                     );
                 }
                 node.graphState = structuredClone(fittingTemplate[0]);
+                node.graphState.nodes.forEach(recurrentSubgraphLoad);
                 node.type = `${GRAPH_NODE_TYPE_PREFIX}${node.type}`;
                 delete node.subgraph;
             }
-        });
+        }
+
+        state.graph.nodes.forEach(recurrentSubgraphLoad);
         state.graphTemplates = [];
 
         super.load(state);
-        state.graph.nodes.forEach((node, ind) => {
+        const recurrentSubgraphParse = (node, graph) => {
             if (node.graphState !== undefined) {
+                const graphs = [...this.graphs].filter(graph => graph.id === node.graphState.id)
+                graphs.forEach(subgraph => {
+                    node.graphState.nodes.forEach(subnode => recurrentSubgraphParse(subnode, subgraph))
+                })
+                const graphNode = graph.nodes.filter(n => n.id === node.id)[0]
                 const newState = {
                     inputs: node.graphState.inputs,
                     outputs: node.graphState.outputs,
                     connections: node.graphState.connections,
                     nodes: node.graphState.nodes.map(parseNodeState),
-                    id: this._graph.nodes[ind].template.id,
-                    name: this._graph.nodes[ind].template.name,
+                    id: graphNode.template.id,
+                    name: graphNode.template.name,
                 };
-                this._graph.nodes[ind].template.update(newState);
+                graphNode.template.update(newState);
             }
-        });
+        };
+        state.graph.nodes.forEach(node => recurrentSubgraphParse(node, this._graph))
         if (state.graph.panning !== undefined) {
             this._graph.panning = state.graph.panning;
         }
