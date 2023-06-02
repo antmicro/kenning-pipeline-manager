@@ -91,16 +91,24 @@ export default function getNodeTree() {
             );
         }
 
+        const nodesURLs = nodeTypesInCategory.map((n) => {
+            const [nodeType] = n;
+            const URLs = editor.getNodeURLs(nodeType);
+            return URLs;
+        });
+
         const nodesIconPath = nodeTypesInCategory.map((n) => {
             const [nodeType] = n;
             const iconPath = editor.getNodeIconPath(nodeType);
             return iconPath;
         });
+
         if (nodeTypesInCategory.length > 0) {
             nodes.push({
                 name: c,
                 nodeTypes: Object.fromEntries(nodeTypesInCategory),
                 nodeIconPaths: nodesIconPath,
+                nodeURLs: nodesURLs,
             });
         }
     });
