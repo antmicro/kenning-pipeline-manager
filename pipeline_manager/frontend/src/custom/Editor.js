@@ -356,10 +356,15 @@ export default class PipelineManagerEditor extends Editor {
                     id: value.id,
                     name: key,
                     direction: inputInterfaceMap.get(value.id).direction,
+                    connectionSide: inputInterfaceMap.get(value.id).connectionSide
                 }));
+                const outputInterfaceMap = new Map();
+                Object.values(this.outputs).forEach(output => 
+                    outputInterfaceMap.set(output.id, output)    
+                )
                 const outputInterfaces = Object.entries(state.outputs)
                     .filter((key) => key[0] !== '_calculationResults')
-                    .map(([key, value]) => ({ id: value.id, name: key, direction: 'output' }));
+                    .map(([key, value]) => ({ id: value.id, name: key, direction: 'output', connectionSide: outputInterfaceMap.get(value.id).connectionSide }));
                 delete state.inputs;
                 delete state.outputs;
                 return { ...state, interfaces: inputInterfaces.concat(outputInterfaces) };
@@ -370,13 +375,13 @@ export default class PipelineManagerEditor extends Editor {
                 state.interfaces
                     .filter((intf) => intf.direction === 'input' || intf.direction === 'inout')
                     .forEach((intf) => {
-                        inputs[intf.name] = { id: intf.id, direction: intf.direction };
+                        inputs[intf.name] = { id: intf.id, direction: intf.direction, connectionSide: intf.connectionSide };
                     });
                 const outputs = { _calculationResults: { id: uuidv4 } };
                 state.interfaces
                     .filter((intf) => intf.direction === 'output')
                     .forEach((intf) => {
-                        outputs[intf.name] = { id: intf.id, direction: intf.direction };
+                        outputs[intf.name] = { id: intf.id, direction: intf.direction, connectionSide: intf.connectionSide };
                     });
 
                 /*
@@ -399,6 +404,7 @@ export default class PipelineManagerEditor extends Editor {
                     const ni = new NodeInterface(inputMap.get(inputID), undefined);
                     ni.id = inputInfo.id
                     ni.direction = inputInfo.direction
+                    ni.connectionSide = inputInfo.connectionSide
                     this.inputs[inputID] = ni;
                 })
                 const outputMap = new Map();
@@ -410,6 +416,7 @@ export default class PipelineManagerEditor extends Editor {
                     const ni = new NodeInterface(outputMap.get(outputID), undefined);
                     ni.id = outputInfo.id
                     ni.direction = outputInfo.direction
+                    ni.connectionSide = outputInfo.connectionSide
                     this.outputs[outputID] = ni;
                 })
 
