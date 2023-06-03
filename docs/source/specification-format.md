@@ -18,8 +18,8 @@ There are two main attributes.
 
 This object specifies additional editor options and contains the following optional properties:
 
-* `interfaces`  - dictionary which defines interface styling in the nodes.
-  Colors can be specified by a hexadecimal value or by name.
+* `interfaces`  - dictionary which defines interface and connection styling for particular interface types.
+  The key in the dictionary is the name of the interface type, and the value is of type [Interface style](#interface-style).
 * `allowLoopbacks` - boolean value that determines whether connections with endpoints at the same node are allowed.
   Default value is `false`.
 * `readonly` - boolean value determining whether the editor is in read-only mode.
@@ -47,7 +47,11 @@ An example:
 ```json
 "metadata": {
     "interfaces": {
-        "Dataset": "#FF0000"
+        "Dataset": {
+            "interfaceColor": "#FF00FF",
+            "interfaceConnectionPattern": "dashed",
+            "interfaceConnectionColor": "#FF0000"
+        }
     },
     "allowLoopbacks": false,
     "readonly": true,
@@ -90,6 +94,16 @@ The URL class parameters are following:
 * `icon` - path to the icon representing the URL class,
 * `url` - base URL for URL class.
   The suffixes for URLs are present in [Node](#node) parameters.
+
+#### Interface style
+
+Interface style describes how interfaces of a given type should look like, as well as its input or output connections.
+It consists of the following properties:
+
+* `interfaceColor` - describes the color of the interface, should be a hexadecimal number representing RGB values.
+* `interfaceConnectionPattern` - describes how the connection line should look like.
+  The possible variants are `solid`, `dashed` and `dotted`.
+* `interfaceConnectionColor` - describes the color of connection lines, should be a hexadecimal number representing RGB values.
 
 ### Node
 
