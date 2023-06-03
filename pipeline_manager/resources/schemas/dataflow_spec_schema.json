@@ -159,7 +159,7 @@
                                 "maxConnectionsCount": {
                                     "description": "Tells how many connections can be established with given interface, <= 0 value for unlimited",
                                     "type": "number",
-                                    "default": 1
+                                    "default": 0
                                 }
                             },
                             "required": [
@@ -225,7 +225,8 @@
                             },
                             "required": [
                                 "name",
-                                "type"
+                                "type",
+                                "default"
                             ],
                             "additionalProperties": false,
                             "allOf": [
