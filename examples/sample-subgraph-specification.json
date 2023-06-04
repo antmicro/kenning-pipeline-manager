@@ -1,9 +1,7 @@
 {
     "metadata": {
-        "interfaces": {
-            "Dataset": "#FF0000"
-        },
-        "allowLoopbacks": true
+        "allowLoopbacks": true,
+        "layers": {}
     },
     "nodes": [
         {
