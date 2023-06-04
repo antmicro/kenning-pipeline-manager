@@ -255,10 +255,10 @@ export default class PipelineManagerEditor extends Editor {
                 node.type = node.type.slice(GRAPH_NODE_TYPE_PREFIX.length);
                 node.subgraph = node.graphState.id;
                 state.graphTemplateInstances.push(node.graphState);
-                node.graphState.nodes.forEach(recurrentSubgraphSave)
+                node.graphState.nodes.forEach(recurrentSubgraphSave);
             }
             delete node.graphState;
-        }
+        };
         state.graph.nodes.forEach(recurrentSubgraphSave);
 
         return state;
@@ -280,19 +280,21 @@ export default class PipelineManagerEditor extends Editor {
                 node.type = `${GRAPH_NODE_TYPE_PREFIX}${node.type}`;
                 delete node.subgraph;
             }
-        }
+        };
 
         state.graph.nodes.forEach(recurrentSubgraphLoad);
         state.graphTemplates = [];
 
         super.load(state);
-        const recurrentSubgraphParse = (node, graph) => {
+        const recurrentSubgraphParse = (node, currgraph) => {
             if (node.graphState !== undefined) {
-                const graphs = [...this.graphs].filter(graph => graph.id === node.graphState.id)
-                graphs.forEach(subgraph => {
-                    node.graphState.nodes.forEach(subnode => recurrentSubgraphParse(subnode, subgraph))
-                })
-                const graphNode = graph.nodes.filter(n => n.id === node.id)[0]
+                const graphs = [...this.graphs].filter((graph) => graph.id === node.graphState.id);
+                graphs.forEach((subgraph) => {
+                    node.graphState.nodes.forEach((subnode) =>
+                        recurrentSubgraphParse(subnode, subgraph),
+                    );
+                });
+                const graphNode = currgraph.nodes.filter((n) => n.id === node.id)[0];
                 const newState = {
                     inputs: node.graphState.inputs,
                     outputs: node.graphState.outputs,
@@ -304,7 +306,7 @@ export default class PipelineManagerEditor extends Editor {
                 graphNode.template.update(newState);
             }
         };
-        state.graph.nodes.forEach(node => recurrentSubgraphParse(node, this._graph))
+        state.graph.nodes.forEach((node) => recurrentSubgraphParse(node, this._graph));
         if (state.graph.panning !== undefined) {
             this._graph.panning = state.graph.panning;
         }
