@@ -5,7 +5,7 @@
  */
 
 import { useViewModel } from 'baklavajs';
-import { SUBGRAPH_INPUT_NODE_TYPE, SUBGRAPH_OUTPUT_NODE_TYPE } from './subgraphInterface';
+import { SUBGRAPH_INPUT_NODE_TYPE, SUBGRAPH_OUTPUT_NODE_TYPE } from '../subgraphInterface';
 import checkRecursion from './checkRecursion';
 
 /**
