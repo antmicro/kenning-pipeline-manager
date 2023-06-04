@@ -35,7 +35,8 @@ export default class EditorManager {
     constructor() {
         this.baklavaView.connectionRenderer = new ConnectionRenderer(this.baklavaView);
 
-        // need to be set here as settings try to use this value before specification is loaded
+        // need to be set here as settings try to use this value
+        // before this value can be loaded from specification
         this.baklavaView.ignorableLayers = [];
         this.baklavaView.collapseSidebar = true;
     }
