@@ -127,8 +127,6 @@ export default function getNodeTree() {
         }
     });
 
-    console.log(nodes);
-
     const nodeCategories = new Set(nodes.map((c) => c.name));
     const categoryTree = parseCategories(nodeCategories);
 
