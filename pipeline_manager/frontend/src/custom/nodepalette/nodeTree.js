@@ -5,7 +5,11 @@
  */
 
 import { useViewModel } from 'baklavajs';
-import { SUBGRAPH_INPUT_NODE_TYPE, SUBGRAPH_OUTPUT_NODE_TYPE } from '../subgraphInterface';
+import {
+    SUBGRAPH_INPUT_NODE_TYPE,
+    SUBGRAPH_OUTPUT_NODE_TYPE,
+    SUBGRAPH_INOUT_NODE_TYPE,
+} from '../subgraphInterface';
 import checkRecursion from './checkRecursion';
 
 /**
@@ -87,9 +91,19 @@ export default function getNodeTree() {
         } else {
             // if we are not in a subgraph, don't show subgraph input & output nodes
             nodeTypesInCategory = nodeTypesInCategory.filter(
-                ([nt]) => ![SUBGRAPH_INPUT_NODE_TYPE, SUBGRAPH_OUTPUT_NODE_TYPE].includes(nt),
+                ([nt]) =>
+                    ![
+                        SUBGRAPH_INPUT_NODE_TYPE,
+                        SUBGRAPH_OUTPUT_NODE_TYPE,
+                        SUBGRAPH_INOUT_NODE_TYPE,
+                    ].includes(nt),
             );
         }
+
+        // Filter out nodes added by baklava
+        nodeTypesInCategory = nodeTypesInCategory.filter(
+            ([nt]) => !['__baklava_SubgraphInputNode', '__baklava_SubgraphOutputNode'].includes(nt),
+        );
 
         const nodesURLs = nodeTypesInCategory.map((n) => {
             const [nodeType] = n;
@@ -112,6 +126,8 @@ export default function getNodeTree() {
             });
         }
     });
+
+    console.log(nodes);
 
     const nodeCategories = new Set(nodes.map((c) => c.name));
     const categoryTree = parseCategories(nodeCategories);
