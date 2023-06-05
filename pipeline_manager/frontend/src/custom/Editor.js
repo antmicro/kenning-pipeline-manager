@@ -287,27 +287,7 @@ export default class PipelineManagerEditor extends Editor {
         state.graphTemplates = [];
 
         super.load(state);
-        const recurrentSubgraphParse = (node, currgraph) => {
-            if (node.graphState !== undefined) {
-                const graphs = [...this.graphs].filter((graph) => graph.id === node.graphState.id);
-                graphs.forEach((subgraph) => {
-                    node.graphState.nodes.forEach((subnode) =>
-                        recurrentSubgraphParse(subnode, subgraph),
-                    );
-                });
-                const graphNode = currgraph.nodes.filter((n) => n.id === node.id)[0];
-                const newState = {
-                    inputs: node.graphState.inputs,
-                    outputs: node.graphState.outputs,
-                    connections: node.graphState.connections,
-                    nodes: node.graphState.nodes.map(parseNodeState),
-                    id: graphNode.template.id,
-                    name: graphNode.template.name,
-                };
-                graphNode.template.update(newState);
-            }
-        };
-        state.graph.nodes.forEach((node) => recurrentSubgraphParse(node, this._graph));
+
         if (state.graph.panning !== undefined) {
             this._graph.panning = state.graph.panning;
         }
