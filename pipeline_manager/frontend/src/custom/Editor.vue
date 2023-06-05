@@ -45,7 +45,11 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
             @mousemove="changeHoveredConnections"
             @mouseleave="clearHighlight"
         >
-            <g v-for="connection in visibleConnections" :key="connection.id + counter.toString()">
+            <g
+                v-for="connection in visibleConnections"
+                :key="connection.id + counter.toString()"
+                @wheel="mouseWheel"
+            >
                 <PipelineManagerConnection
                     :connection="connection"
                     ref="connRefs"
