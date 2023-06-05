@@ -420,30 +420,30 @@ export default class PipelineManagerEditor extends Editor {
                     inputMap.set(input.id, input.name);
                 });
                 Object.keys(this.inputs).forEach((key) => {
-                    this.removeInterface("input", key)
-                })
+                    this.removeInterface('input', key);
+                });
                 Object.entries(inputs).forEach(([inputID, inputInfo]) => {
                     const ni = new NodeInterface(inputMap.get(inputID), undefined);
                     ni.id = inputInfo.id;
                     ni.direction = inputInfo.direction;
                     ni.connectionSide = inputInfo.connectionSide;
                     ni.nodePosition = inputInfo.nodePosition;
-                    this.addInterface("input", inputID, ni);
+                    this.addInterface('input', inputID, ni);
                 });
                 const outputMap = new Map();
                 state.graphState.outputs.forEach((output) => {
                     outputMap.set(output.id, output.name);
                 });
                 Object.keys(this.outputs).forEach((key) => {
-                    this.removeInterface("output", key)
-                })
+                    this.removeInterface('output', key);
+                });
                 Object.entries(outputs).forEach(([outputID, outputInfo]) => {
                     const ni = new NodeInterface(outputMap.get(outputID), undefined);
                     ni.id = outputInfo.id;
                     ni.direction = outputInfo.direction;
                     ni.connectionSide = outputInfo.connectionSide;
                     ni.nodePosition = outputInfo.nodePosition;
-                    this.addInterface("output", outputID, ni);
+                    this.addInterface('output', outputID, ni);
                 });
 
                 delete state.interfaces;
@@ -499,7 +499,10 @@ export default class PipelineManagerEditor extends Editor {
                     (intf) => intf.id === interfaceID,
                 );
                 if (templateInputArr.length !== 1) {
-                    // NotificationHandler.showToast()
+                    NotificationHandler.showToast(
+                        'error',
+                        `Error when creating subgraph ${this._graph.id}: Expected 1 interface with ID ${interfaceID}, got ${templateInputArr.length}`,
+                    );
                     return;
                 }
                 const templateInput = templateInputArr[0];
@@ -507,6 +510,10 @@ export default class PipelineManagerEditor extends Editor {
                     templateInput.nodeInterfaceId,
                 );
                 if (!targetInterface) {
+                    NotificationHandler.showToast(
+                        'error',
+                        `Error when creating subgraph ${this._graph.id}: Could not find interface ${templateInput.nodeInterfaceId} in subgraph`,
+                    );
                     return;
                 }
                 this._graph.addConnection(node.outputs.placeholder, targetInterface);
@@ -525,6 +532,10 @@ export default class PipelineManagerEditor extends Editor {
                     (intf) => intf.id === interfaceID,
                 );
                 if (templateInoutArr.length !== 1) {
+                    NotificationHandler.showToast(
+                        'error',
+                        `Error when creating subgraph ${this._graph.id}: Expected 1 interface with ID ${interfaceID}, got ${templateInoutArr.length}`,
+                    );
                     return;
                 }
                 const templateInout = templateInoutArr[0];
@@ -532,6 +543,10 @@ export default class PipelineManagerEditor extends Editor {
                     templateInout.nodeInterfaceId,
                 );
                 if (!targetInterface) {
+                    NotificationHandler.showToast(
+                        'error',
+                        `Error when creating subgraph ${this._graph.id}: Could not find interface ${templateInout.nodeInterfaceId} in subgraph`,
+                    );
                     return;
                 }
                 this._graph.addConnection(targetInterface, node.inputs.placeholder);
@@ -550,6 +565,10 @@ export default class PipelineManagerEditor extends Editor {
                     (intf) => intf.id === interfaceID,
                 );
                 if (templateOutputArr.length !== 1) {
+                    NotificationHandler.showToast(
+                        'error',
+                        `Error when creating subgraph ${this._graph.id}: Expected 1 interface with ID ${interfaceID}, got ${templateOutputArr.length}`,
+                    );
                     return;
                 }
                 const templateOutput = templateOutputArr[0];
@@ -557,6 +576,10 @@ export default class PipelineManagerEditor extends Editor {
                     templateOutput.nodeInterfaceId,
                 );
                 if (!targetInterface) {
+                    NotificationHandler.showToast(
+                        'error',
+                        `Error when creating subgraph ${this._graph.id}: Could not find interface ${templateOutput.nodeInterfaceId} in subgraph`,
+                    );
                     return;
                 }
                 this._graph.addConnection(targetInterface, node.inputs.placeholder);
