@@ -60,7 +60,7 @@ Each property is described by an object with three attributes:
 Node having two parameters: `example_text` of value `example_value` and `example_number` of value `123` would have the following `options` value:
 
 ```json
-[   
+[
     {
         "id": 1,
         "name": "example_text",
@@ -83,6 +83,7 @@ Each input, output and inout is described by an object with three attributes:
 * `name` - name of the interface
 * `direction` - value determining the type of the interfaces.
   Can be either `input`, `output` or `inout`.
+* `connectionSide` - tells on which side of the node the interface should be placed.
 
 
 #### Connection
