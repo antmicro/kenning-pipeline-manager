@@ -311,7 +311,7 @@ export default {
          * Event handler that that saves a current dataflow to a `save.json` file.
          */
         saveDataflow() {
-            const blob = new Blob([JSON.stringify(this.editorManager.saveDataflow())], {
+            const blob = new Blob([JSON.stringify(this.editorManager.saveDataflow(), null, 4)], {
                 type: 'application/json',
             });
             const linkElement = document.createElement('a');
