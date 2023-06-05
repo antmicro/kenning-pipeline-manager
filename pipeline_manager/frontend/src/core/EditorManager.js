@@ -28,6 +28,8 @@ export default class EditorManager {
 
     specificationLoaded = false;
 
+    currentSpecification = undefined;
+
     interfacesStyleId = 'interfaces-style';
 
     constructor() {
@@ -45,12 +47,17 @@ export default class EditorManager {
      * and its plugins are reinitialized and then the specification is loaded.
      *
      * @param dataflowSpecification Specification to load
+     * @param overriding tells whether the specification is updated on dataflow loading
      */
     /* eslint-disable no-underscore-dangle */
-    updateEditorSpecification(dataflowSpecification) {
+    updateEditorSpecification(dataflowSpecification, overriding = false) {
         if (!dataflowSpecification) return;
         if (this.specificationLoaded) {
             this.cleanEditor();
+        }
+
+        if (!overriding) {
+            this.currentSpecification = JSON.parse(JSON.stringify(dataflowSpecification));
         }
 
         const { nodes, metadata } = dataflowSpecification;
@@ -189,6 +196,36 @@ export default class EditorManager {
      */
     loadDataflow(dataflow) {
         try {
+            if ('metadata' in dataflow && this.currentSpecification !== undefined) {
+                const errors = this.validateMetadata(dataflow.metadata);
+                if (Array.isArray(errors) && errors.length) {
+                    return errors;
+                }
+                const updatedspecification = JSON.parse(JSON.stringify(this.currentSpecification));
+                if ('metadata' in updatedspecification) {
+                    Object.entries(dataflow.metadata).forEach(([key, value]) => {
+                        if (Array.isArray(value)) {
+                            updatedspecification.metadata[key] = [
+                                ...updatedspecification.metadata[key],
+                                ...value,
+                            ];
+                        } else if (typeof value === 'object') {
+                            updatedspecification.metadata[key] = {
+                                ...updatedspecification.metadata[key],
+                                ...value,
+                            };
+                        } else {
+                            updatedspecification.metadata[key] = value;
+                        }
+                    });
+                } else {
+                    updatedspecification.metadata = dataflow.metadata;
+                }
+
+                this.updateEditorSpecification(updatedspecification, true);
+            } else {
+                this.updateEditorSpecification(this.currentSpecification);
+            }
             return this.editor.load(dataflow);
         } catch (err) {
             return [
@@ -212,17 +249,18 @@ export default class EditorManager {
     }
 
     /**
-     * Validates specification passed in `specification` using jsonSchema.
+     * Validates JSON data using given JSON schema
      *
-     * @param specification Specification to validate
+     * @param data JSON file to validate
+     * @param schema Schema to use
      * @returns An array of errors. If the array is empty, the validation was successful.
      */
     /* eslint-disable class-methods-use-this */
-    validateSpecification(specification) {
+    validateJSONWithSchema(data, schema) {
         const ajv = new Ajv();
 
-        const validate = ajv.compile(specificationSchema);
-        const valid = validate(specification);
+        const validate = ajv.compile(schema);
+        const valid = validate(data);
         if (valid) {
             return [];
         }
@@ -238,5 +276,26 @@ export default class EditorManager {
             }
         });
         return errors;
+    }
+
+    /**
+     * Validates specification passed in `specification` using jsonSchema.
+     *
+     * @param specification Specification to validate
+     * @returns An array of errors. If the array is empty, the validation was successful.
+     */
+    /* eslint-disable class-methods-use-this */
+    validateSpecification(specification) {
+        return this.validateJSONWithSchema(specification, specificationSchema);
+    }
+
+    /**
+     * Validates metadata in JSON format using schema from specificationSchema.
+     *
+     * @param jsonmetadata metadata in JSON format to validate
+     * @return An array of errors. If the array is empty, the validation was successful.
+     */
+    validateMetadata(jsonmetadata) {
+        return this.validateJSONWithSchema(jsonmetadata, specificationSchema.properties.metadata);
     }
 }
