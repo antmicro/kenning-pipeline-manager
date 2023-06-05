@@ -196,6 +196,7 @@ export function NodeFactory(
                             name: ioName,
                             id: ioState.id,
                             direction: ioState.direction,
+                            connectionSide: ioState.connectionSide,
                         });
                     } else {
                         newProperties.push({
@@ -214,6 +215,7 @@ export function NodeFactory(
                             name: ioName,
                             id: ioState.id,
                             direction: ioState.direction,
+                            connectionSide: ioState.connectionSide,
                         });
                     } else {
                         newProperties.push({
@@ -251,6 +253,8 @@ export function NodeFactory(
                     state.inputs[prop.name] = { id: prop.id, value: prop.value };
                 });
 
+                const interfacestorage = state.interfaces;
+
                 delete state.properties;
                 delete state.interfaces;
 
@@ -262,6 +266,16 @@ export function NodeFactory(
                 delete state.name;
 
                 this.parentLoad(state);
+
+                interfacestorage.forEach((intf) => {
+                    if ('connectionSide' in intf) {
+                        if (intf.direction === 'input' || intf.direction === 'inout') {
+                            this.inputs[intf.name].connectionSide = intf.connectionSide;
+                        } else if (intf.direction === 'output') {
+                            this.outputs[intf.name].connectionSide = intf.connectionSide;
+                        }
+                    }
+                });
             };
 
             this.twoColumn = twoColumn;
