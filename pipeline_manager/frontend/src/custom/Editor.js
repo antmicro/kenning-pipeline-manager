@@ -371,6 +371,7 @@ export default class PipelineManagerEditor extends Editor {
                             id: intf.id,
                             direction: intf.direction,
                             connectionSide: intf.connectionSide,
+                            nodePosition: intf.nodePosition,
                         };
                     });
                 const outputs = { _calculationResults: { id: uuidv4 } };
@@ -381,6 +382,7 @@ export default class PipelineManagerEditor extends Editor {
                             id: intf.id,
                             direction: intf.direction,
                             connectionSide: intf.connectionSide,
+                            nodePosition: intf.nodePosition,
                         };
                     });
 
