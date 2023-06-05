@@ -344,7 +344,7 @@ export default class PipelineManagerEditor extends Editor {
         this.graphTemplateHooks.addTarget(template.hooks);
 
         const nt = createGraphNodeType(template);
-        class stuff extends nt {
+        class customGraphNodeType extends nt {
             constructor() {
                 super();
                 this.type = `${GRAPH_NODE_TYPE_PREFIX}${type}`;
@@ -465,7 +465,7 @@ export default class PipelineManagerEditor extends Editor {
                 });
             }
         }
-        this.registerNodeType(stuff, { category, title: template.name });
+        this.registerNodeType(customGraphNodeType, { category, title: template.name });
 
         this.events.addGraphTemplate.emit(template);
     }
