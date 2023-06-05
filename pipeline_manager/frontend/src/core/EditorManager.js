@@ -58,6 +58,10 @@ export default class EditorManager {
             this.cleanEditor();
         }
 
+        if (!overriding) {
+            this.currentSpecification = JSON.parse(JSON.stringify(dataflowSpecification));
+        }
+
         const { subgraphs, nodes, metadata } = dataflowSpecification;
 
         const interfaceTypes = readInterfaceTypes(nodes, metadata);
@@ -291,27 +295,6 @@ export default class EditorManager {
             }
         });
         return errors;
-    }
-
-    /**
-     * Validates specification passed in `specification` using jsonSchema.
-     *
-     * @param specification Specification to validate
-     * @returns An array of errors. If the array is empty, the validation was successful.
-     */
-    /* eslint-disable class-methods-use-this */
-    validateSpecification(specification) {
-        return this.validateJSONWithSchema(specification, specificationSchema);
-    }
-
-    /**
-     * Validates metadata in JSON format using schema from specificationSchema.
-     *
-     * @param jsonmetadata metadata in JSON format to validate
-     * @return An array of errors. If the array is empty, the validation was successful.
-     */
-    validateMetadata(jsonmetadata) {
-        return this.validateJSONWithSchema(jsonmetadata, specificationSchema.properties.metadata);
     }
 
     /**
