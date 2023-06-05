@@ -50,13 +50,6 @@ export default class PipelineManagerEditor extends Editor {
 
     /* eslint-disable no-param-reassign */
     /* eslint-disable no-underscore-dangle */
-    constructor() {
-        super();
-        this.registerNodeType(SubgraphInputNode, { category: 'Subgraphs' });
-        this.registerNodeType(SubgraphOutputNode, { category: 'Subgraphs' });
-        this.registerNodeType(SubgraphInoutNode, { category: 'Subgraphs' });
-    }
-
     registerGraph(graph) {
         graph.checkConnection = function checkConnection(from, to) {
             if (!from || !to) {

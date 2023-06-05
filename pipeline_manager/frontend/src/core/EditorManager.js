@@ -14,6 +14,11 @@ import NotificationHandler from './notifications';
 import { NodeFactory, readInterfaceTypes, SubgraphFactory } from './NodeFactory';
 import specificationSchema from '../../../resources/schemas/dataflow_spec_schema.json';
 import ConnectionRenderer from './ConnectionRenderer';
+import {
+    SubgraphInoutNode,
+    SubgraphInputNode,
+    SubgraphOutputNode,
+} from '../custom/subgraphInterface';
 
 export default class EditorManager {
     static instance;
@@ -73,6 +78,10 @@ export default class EditorManager {
                 this.editor.baseURLs.set(urlName, state);
             });
         }
+
+        this.editor.registerNodeType(SubgraphInputNode, { category: 'Subgraphs' });
+        this.editor.registerNodeType(SubgraphOutputNode, { category: 'Subgraphs' });
+        this.editor.registerNodeType(SubgraphInoutNode, { category: 'Subgraphs' });
 
         nodes.forEach((node) => {
             const myNode = NodeFactory(
