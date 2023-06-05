@@ -278,15 +278,17 @@ export function NodeFactory(
             this.load = (state) => {
                 const interfacestorage = state.interfaces;
                 this.parentLoad(parseNodeState(state));
-                interfacestorage.forEach((intf) => {
-                    if ('connectionSide' in intf) {
-                        if (intf.direction === 'input' || intf.direction === 'inout') {
-                            this.inputs[intf.name].connectionSide = intf.connectionSide;
-                        } else if (intf.direction === 'output') {
-                            this.outputs[intf.name].connectionSide = intf.connectionSide;
+                if (interfacestorage !== undefined) {
+                    interfacestorage.forEach((intf) => {
+                        if ('connectionSide' in intf) {
+                            if (intf.direction === 'input' || intf.direction === 'inout') {
+                                this.inputs[intf.name].connectionSide = intf.connectionSide;
+                            } else if (intf.direction === 'output') {
+                                this.outputs[intf.name].connectionSide = intf.connectionSide;
+                            }
                         }
-                    }
-                });
+                    });
+                }
             };
 
             this.twoColumn = twoColumn;
