@@ -35,6 +35,7 @@
 
 .baklava-node {
     min-width: 300px !important;
+    width: auto;
     opacity: 0.9;
     display: table;
 }
@@ -53,8 +54,12 @@
 
     & > .__title-icon {
         flex-grow: 0;
-        height: max-content;
-        width: max-content;
+        height: 100%;
+        width: auto;
+    }
+
+    & > .__title-label {
+        margin-right: 50px;
     }
 
     & > .__menu {
@@ -66,18 +71,19 @@
     }
 
     & > .__url {
-        display: inline-block;
         margin: 0 $spacing-xs;
         text-decoration: none;
         color: inherit;
         position: relative;
         flex-grow: 0;
+        width: 100%;
+        height: 100%;
 
         img {
-            display: block;
             margin-left: auto;
             margin-right: auto;
-            width: 100%;
+            width: auto;
+            height: 100%;
         }
 
         & > .__tooltip {
@@ -225,6 +231,7 @@
     border: 1px solid #393939;
     border-right: 0px;
     border-left: 0px;
+    height: 60px;
 
     background: var(--baklava-node-color-background);
     color: $white;
@@ -233,17 +240,20 @@
     align-items: center;
 
     & > .__url {
-        display: inline-block;
+        display: inline;
         margin: 0 $spacing-xs;
         text-decoration: none;
         color: inherit;
         position: relative;
+        width: auto;
+        height: 100%;
 
         img {
-            display: block;
+            display: inline;
             margin-left: auto;
             margin-right: auto;
-            width: 100%;
+            width: auto;
+            height: 100%;
         }
 
         & > .__tooltip {
@@ -276,12 +286,13 @@
         padding-right: $spacing-s;
         user-select: none;
 
-        height: max-content;
-        width: max-content;
+        height: 100%;
+        width: auto;
     }
 
     & > .__title-label {
         flex-grow: 1;
+        margin-right: 50px;
     }
 
     & > .__category-title {
