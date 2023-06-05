@@ -23,7 +23,6 @@ import {
     NodeInterface,
 } from 'baklavajs';
 import { v4 as uuidv4 } from 'uuid';
-import { parseNodeState } from '../core/NodeFactory';
 import {
     SUBGRAPH_OUTPUT_NODE_TYPE,
     SUBGRAPH_INPUT_NODE_TYPE,
