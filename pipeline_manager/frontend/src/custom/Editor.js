@@ -533,7 +533,7 @@ export default class PipelineManagerEditor extends Editor {
             });
 
         Object.entries(subgraphNode.outputs)
-            .filter((output) => output[1].name !== '_calculationResults')
+            .filter(([name, outputIntf]) => name !== '_calculationResults') // eslint-disable-line no-unused-vars
             .forEach(([interfaceID, output]) => {
                 const node = new SubgraphOutputNode();
                 node.inputs.name.value = output.name;
