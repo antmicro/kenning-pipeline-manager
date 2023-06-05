@@ -14,6 +14,7 @@ There are two main attributes.
 * `metadata` - object of type [Metadata](#metadata) that specifies editor styling and metadata
 * `nodes` - array that specifies valid nodes, where every element is of type [Node](#node).
 
+(specification-format-metadata)=
 ### Metadata
 
 This object specifies additional editor options and contains the following optional properties:

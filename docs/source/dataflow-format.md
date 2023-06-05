@@ -10,6 +10,11 @@ The root of the dataflow format consists of two main attributes.
 * `graph` - object of type [Graph](#graph) that describes the main graph displayed to the user.
 * `graphTemplates` - list of subgraph nodes available to the user.
   Subgraph nodes are used to group multiple nodes in a subgraph and visualize them as a single node.
+* `metadata` - structure of type [Metadata](specification-format-metadata).
+  It is used to override metadata settings from the [Specification format](specification-format).
+  In general, values from dataflow's `metadata` override settings from specification.
+  For simple types, such as strings or integers, values are changed.
+  For arrays and dictionaries, the values are updated (values of existing keys are replaced with new ones, and the new values in arrays are appended to the existing entries).
 
 
 ### Graph
