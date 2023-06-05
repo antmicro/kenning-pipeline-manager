@@ -32,6 +32,7 @@ import {
     SubgraphInputNode,
     SubgraphOutputNode,
 } from './subgraphInterface';
+import NotificationHandler from '../core/notifications';
 
 export default class PipelineManagerEditor extends Editor {
     readonly = false;
@@ -418,27 +419,31 @@ export default class PipelineManagerEditor extends Editor {
                 state.graphState.inputs.forEach((input) => {
                     inputMap.set(input.id, input.name);
                 });
-                this.inputs = {};
+                Object.keys(this.inputs).forEach((key) => {
+                    this.removeInterface("input", key)
+                })
                 Object.entries(inputs).forEach(([inputID, inputInfo]) => {
                     const ni = new NodeInterface(inputMap.get(inputID), undefined);
                     ni.id = inputInfo.id;
                     ni.direction = inputInfo.direction;
                     ni.connectionSide = inputInfo.connectionSide;
                     ni.nodePosition = inputInfo.nodePosition;
-                    this.inputs[inputID] = ni;
+                    this.addInterface("input", inputID, ni);
                 });
                 const outputMap = new Map();
                 state.graphState.outputs.forEach((output) => {
                     outputMap.set(output.id, output.name);
                 });
-                this.outputs = {};
+                Object.keys(this.outputs).forEach((key) => {
+                    this.removeInterface("output", key)
+                })
                 Object.entries(outputs).forEach(([outputID, outputInfo]) => {
                     const ni = new NodeInterface(outputMap.get(outputID), undefined);
                     ni.id = outputInfo.id;
                     ni.direction = outputInfo.direction;
                     ni.connectionSide = outputInfo.connectionSide;
                     ni.nodePosition = outputInfo.nodePosition;
-                    this.outputs[outputID] = ni;
+                    this.addInterface("output", outputID, ni);
                 });
 
                 delete state.interfaces;
@@ -494,6 +499,7 @@ export default class PipelineManagerEditor extends Editor {
                     (intf) => intf.id === interfaceID,
                 );
                 if (templateInputArr.length !== 1) {
+                    // NotificationHandler.showToast()
                     return;
                 }
                 const templateInput = templateInputArr[0];
