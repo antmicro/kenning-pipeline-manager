@@ -185,7 +185,6 @@
             display: flex;
 
             & > .__url {
-                margin: 0 $spacing-xs;
                 text-decoration: none;
                 color: inherit;
                 position: relative;
@@ -195,10 +194,19 @@
                 text-align: center;
                 line-height: 2em;
 
-                img {
-                    padding-right: $spacing-xs;
-                    margin-left: auto;
-                    margin-right: auto;
+                .icon {
+                    margin-right: $spacing-m;
+                    display: inline-block;
+                    float: left;
+
+                    width: 2em;
+
+                    & > img {
+                        height: 2em;
+                    }
+                }
+                .text {
+                    margin-right: $spacing-m;
                     display: block;
                     float: left;
 

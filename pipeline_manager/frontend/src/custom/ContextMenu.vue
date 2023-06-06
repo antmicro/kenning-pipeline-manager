@@ -32,16 +32,21 @@ from creating and deleting connections or altering nodes' values if the editor i
                     @mouseleave="onMouseLeave($event, index)"
                 >
                     <div class="flex-fill" v-if="item.url === undefined">
-                        {{ item.label }}
+                        <div class="__url">
+                            <div class="icon">&nbsp;</div>
+                            <div class="text">{{ item.label }}</div>
+                        </div>
                     </div>
                     <div class="flex-fill" v-else>
                         <a :key="item.name" :href="item.url" class="__url" target="_blank">
-                            {{ item.name }}
-                            <img
-                                v-if="getIconPath(item.icon) !== undefined"
-                                :src="getIconPath(item.icon)"
-                                :alt="item.name"
-                            />
+                            <div class="icon">
+                                <img
+                                    v-if="getIconPath(item.icon) !== undefined"
+                                    :src="getIconPath(item.icon)"
+                                    :alt="item.name"
+                                />
+                            </div>
+                            <div class="text">{{ item.name }}</div>
                         </a>
                     </div>
                     <div v-if="item.submenu" class="__submenu-icon" style="line-height: 1em">
