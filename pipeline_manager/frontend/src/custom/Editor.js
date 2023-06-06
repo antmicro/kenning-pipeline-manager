@@ -258,6 +258,14 @@ export default class PipelineManagerEditor extends Editor {
     }
 
     load(state) {
+        // All subgraphs should be unregistered to avoid conflicts later when trying to
+        // load into subgraph (in that case there may be two subgraphs with the same ID, one
+        // of them from the previous session).
+        [...this.graphs]
+            .filter((graph) => graph.id !== this._graph.id)
+            .forEach((graph) => this.unregisterGraph(graph));
+        this.subgraphStack = [];
+
         const recurrentSubgraphLoad = (node) => {
             if (node.subgraph !== undefined) {
                 const fittingTemplate = state.graphTemplateInstances.filter(
