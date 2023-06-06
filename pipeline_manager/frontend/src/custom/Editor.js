@@ -59,7 +59,7 @@ export default class PipelineManagerEditor extends Editor {
         // Save all changes done to subgraphs before saving
         // const stackCopy = structuredClone(toRaw(this.subgraphStack))
         const stackCopy = Array.from(toRaw(this.subgraphStack));
-        stackCopy.forEach(this.backFromSubgraph);
+        stackCopy.forEach(this.backFromSubgraph.bind(this));
 
         const state = super.save();
         delete state.graphTemplates;
@@ -84,8 +84,8 @@ export default class PipelineManagerEditor extends Editor {
         /* eslint-enable no-unused-vars */
 
         // Main graph should have no IO
-        delete state.graph.inputs
-        delete state.graph.outputs
+        delete state.graph.inputs;
+        delete state.graph.outputs;
 
         return state;
     }
@@ -115,9 +115,17 @@ export default class PipelineManagerEditor extends Editor {
 
                 // create GraphState inputs/outputs by matching interfaces in a correct direction
                 // from node interfaces to subgraphIO
-                node.graphState.inputs = node.interfaces.filter(intf => intf.direction === "input" || intf.direction === "inout").map(intf => node.graphState.subgraphIO.filter(io => intf.name === io.id)[0]) 
-                node.graphState.outputs = node.interfaces.filter(intf => intf.direction === "output").map(intf => node.graphState.subgraphIO.filter(io => intf.name === io.id)[0])
-                delete node.graphState.subgraphIO
+                node.graphState.inputs = node.interfaces
+                    .filter((intf) => intf.direction === 'input' || intf.direction === 'inout')
+                    .map(
+                        (intf) => node.graphState.subgraphIO.filter((io) => intf.name === io.id)[0],
+                    );
+                node.graphState.outputs = node.interfaces
+                    .filter((intf) => intf.direction === 'output')
+                    .map(
+                        (intf) => node.graphState.subgraphIO.filter((io) => intf.name === io.id)[0],
+                    );
+                delete node.graphState.subgraphIO;
 
                 delete node.subgraph;
             }
@@ -205,13 +213,21 @@ export default class PipelineManagerEditor extends Editor {
                 // After entering the edit subgraph mode, subgraph interfaces will contain
                 // redundant information, such as connectionSide, nodePosition etc.
                 // (these are already defined in state.interfaces) so they should be filtered out
-                state.graphState.subgraphIO = []
-                state.graphState.inputs.forEach(input => state.graphState.subgraphIO.push({
-                    id: input.id, name: input.name, nodeInterfaceId: input.nodeInterfaceId
-                }))
-                state.graphState.outputs.forEach(output => state.graphState.subgraphIO.push({
-                    id: output.id, name: output.name, nodeInterfaceId: output.nodeInterfaceId
-                }))
+                state.graphState.subgraphIO = [];
+                state.graphState.inputs.forEach((input) =>
+                    state.graphState.subgraphIO.push({
+                        id: input.id,
+                        name: input.name,
+                        nodeInterfaceId: input.nodeInterfaceId,
+                    }),
+                );
+                state.graphState.outputs.forEach((output) =>
+                    state.graphState.subgraphIO.push({
+                        id: output.id,
+                        name: output.name,
+                        nodeInterfaceId: output.nodeInterfaceId,
+                    }),
+                );
                 delete state.graphState.inputs;
                 delete state.graphState.outputs;
 
