@@ -79,9 +79,19 @@ export default class PipelineManagerEditor extends Editor {
         };
         state.graph.nodes.forEach(recurrentSubgraphSave);
 
+        state.graphTemplateInstances.forEach(subgraph => {
+            subgraph.subgraphIO = [...subgraph.inputs, ...subgraph.outputs];
+            delete subgraph.inputs
+            delete subgraph.outputs
+        })
+
         /* eslint-disable no-unused-vars */
         stackCopy.forEach(([_, subgraphNode]) => this.switchToSubgraph(subgraphNode));
         /* eslint-enable no-unused-vars */
+
+        // Main graph should have no IO
+        delete state.graph.inputs
+        delete state.graph.outputs
 
         return state;
     }
@@ -108,12 +118,21 @@ export default class PipelineManagerEditor extends Editor {
                 node.graphState = structuredClone(fittingTemplate[0]);
                 node.graphState.nodes.forEach(recurrentSubgraphLoad);
                 node.type = `${GRAPH_NODE_TYPE_PREFIX}${node.type}`;
+
+                // create GraphState inputs/outputs by matching interfaces in a correct direction
+                // from node interfaces to subgraphIO
+                node.graphState.inputs = node.interfaces.filter(intf => intf.direction === "input" || intf.direction === "inout").map(intf => node.graphState.subgraphIO.filter(io => intf.name === io.id)[0]) 
+                node.graphState.outputs = node.interfaces.filter(intf => intf.direction === "output").map(intf => node.graphState.subgraphIO.filter(io => intf.name === io.id)[0])
+                delete node.graphState.subgraphIO
+
                 delete node.subgraph;
             }
         };
 
         state.graph.nodes.forEach(recurrentSubgraphLoad);
         state.graphTemplates = [];
+        state.graph.inputs = [];
+        state.graph.outputs = [];
 
         super.load(state);
 
