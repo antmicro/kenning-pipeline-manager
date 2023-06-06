@@ -79,12 +79,6 @@ export default class PipelineManagerEditor extends Editor {
         };
         state.graph.nodes.forEach(recurrentSubgraphSave);
 
-        state.graphTemplateInstances.forEach(subgraph => {
-            subgraph.subgraphIO = [...subgraph.inputs, ...subgraph.outputs];
-            delete subgraph.inputs
-            delete subgraph.outputs
-        })
-
         /* eslint-disable no-unused-vars */
         stackCopy.forEach(([_, subgraphNode]) => this.switchToSubgraph(subgraphNode));
         /* eslint-enable no-unused-vars */
@@ -207,6 +201,20 @@ export default class PipelineManagerEditor extends Editor {
                     }));
                 delete state.inputs;
                 delete state.outputs;
+
+                // After entering the edit subgraph mode, subgraph interfaces will contain
+                // redundant information, such as connectionSide, nodePosition etc.
+                // (these are already defined in state.interfaces) so they should be filtered out
+                state.graphState.subgraphIO = []
+                state.graphState.inputs.forEach(input => state.graphState.subgraphIO.push({
+                    id: input.id, name: input.name, nodeInterfaceId: input.nodeInterfaceId
+                }))
+                state.graphState.outputs.forEach(output => state.graphState.subgraphIO.push({
+                    id: output.id, name: output.name, nodeInterfaceId: output.nodeInterfaceId
+                }))
+                delete state.graphState.inputs;
+                delete state.graphState.outputs;
+
                 return { ...state, interfaces: inputInterfaces.concat(outputInterfaces) };
             }
 
