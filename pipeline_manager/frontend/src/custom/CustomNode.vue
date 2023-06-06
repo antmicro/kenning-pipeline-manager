@@ -91,7 +91,6 @@ import {
     useDragMove,
     useViewModel,
     AbstractNode,
-    Components,
     GRAPH_NODE_TYPE_PREFIX,
     useGraph,
 } from 'baklavajs';
@@ -99,8 +98,6 @@ import {
 import CustomInterface from './CustomInterface.vue';
 import CustomContextMenu from './ContextMenu.vue';
 import VerticalDots from '../components/VerticalDots.vue';
-
-const { ContextMenu } = Components;
 
 // Baklavajs implementation
 
@@ -119,12 +116,14 @@ const nodeRef = ref(null);
 const renaming = ref(false);
 const tempName = ref('');
 
+const nodeURLs = viewModel.value.editor.getNodeURLs(props.node.type);
+
 const showContextMenu = ref(false);
 const contextMenuItems = computed(() => {
     const items = [
         { value: 'delete', label: 'Delete' },
         { value: 'rename', label: 'Rename' },
-        ...nodeURLs
+        ...nodeURLs,
     ];
 
     if (props.node.type.startsWith(GRAPH_NODE_TYPE_PREFIX)) {
@@ -178,10 +177,6 @@ const startDrag = (ev) => {
 const openContextMenu = () => {
     showContextMenu.value = true;
 };
-
-const nodeURLs = viewModel.value.editor.getNodeURLs(props.node.type);
-const getIconPath = (name) => (name !== undefined ? `./assets/${name}` : undefined);
-const hover = ref(false);
 
 /* eslint-disable default-case */
 const onContextMenuClick = async (action) => {
