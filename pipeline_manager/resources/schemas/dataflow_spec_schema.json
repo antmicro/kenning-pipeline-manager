@@ -98,6 +98,11 @@
                             "required": ["name", "icon", "url"]
                         }
                     }
+                },
+                "collapseSidebar": {
+                    "type": "boolean",
+                    "description": "Defines whether nodes sidebar should be collapsed by default",
+                    "default": true
                 }
             },
             "additionalProperties": false

@@ -33,6 +33,7 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
                 :depth="depth + 1"
                 :nodeTree="category.subcategories"
                 :onDragStart="onDragStart"
+                :defaultCollapse="defaultCollapse"
             />
         </div>
     </div>
@@ -56,6 +57,10 @@ export default defineComponent({
             type: Number,
             default: 0,
         },
+        defaultCollapse: {
+            type: Boolean,
+            default: true,
+        },
     },
     setup(props) {
         const paddingDepth = 20;
@@ -64,13 +69,13 @@ export default defineComponent({
             () => `padding-left: ${minPadding + props.depth * paddingDepth}px`,
         );
 
-        const mask = ref(Array(Object.keys(props.nodeTree).length).fill(true));
+        const mask = ref(Array(Object.keys(props.nodeTree).length).fill(!props.defaultCollapse));
 
         // If the category tree changes the mask needs to get reinitialized
         watch(
             () => props.nodeTree,
             () => {
-                mask.value = Array(Object.keys(props.nodeTree).length).fill(true);
+                mask.value = Array(Object.keys(props.nodeTree).length).fill(!props.defaultCollapse);
             },
         );
 

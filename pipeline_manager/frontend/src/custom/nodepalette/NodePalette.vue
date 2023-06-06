@@ -16,7 +16,11 @@ Inherits from baklavajs/packages/renderer-vue/src/nodepalette/NodePalette.vue
         <div class="palette-title">
             <span>Nodes browser</span>
         </div>
-        <PaletteCategory :nodeTree="nodeTree" :onDragStart="onDragStart" />
+        <PaletteCategory
+            :nodeTree="nodeTree"
+            :onDragStart="onDragStart"
+            :defaultCollapse="collapse"
+        />
     </div>
     <transition name="fade">
         <div v-if="draggedNode" class="baklava-dragged-node" :style="draggedNodeStyles">
@@ -42,6 +46,7 @@ export default defineComponent({
     components: { PaletteCategory, PaletteEntry },
     setup() {
         const { viewModel } = useViewModel();
+
         const { x: mouseX, y: mouseY } = usePointer();
         const { transform } = useTransform();
 
@@ -82,12 +87,14 @@ export default defineComponent({
         };
 
         const nodeTree = computed(() => getNodeTree());
+        const collapse = computed(() => viewModel.value.collapseSidebar);
 
         return {
             draggedNodeStyles,
             draggedNode,
             onDragStart,
             nodeTree,
+            collapse,
         };
     },
 });

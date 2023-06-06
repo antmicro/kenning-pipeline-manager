@@ -37,6 +37,7 @@ export default class EditorManager {
 
         // need to be set here as settings try to use this value before specification is loaded
         this.baklavaView.ignorableLayers = [];
+        this.baklavaView.collapseSidebar = true;
     }
 
     /**
@@ -112,6 +113,7 @@ export default class EditorManager {
 
         this.baklavaView.ignoredLayers = new Set();
         this.baklavaView.ignorableLayers = metadata.layers ?? [];
+        this.baklavaView.collapseSidebar = metadata.collapseSidebar ?? true;
 
         this.specificationLoaded = true;
     }

@@ -42,6 +42,8 @@ This object specifies additional editor options and contains the following optio
 * `urls` - list of URL classes present in the specification and flow.
   It is a dictionary, where key is the name of the URL class, and value is of type [URL class specification](#url-class).
   The given URL classes can be referred later in [Nodes](#node) with proper link suffix.
+* `collapseSidebar` - boolean value determining whether nodes sidebar should be collapsed by default
+  Default value is `true`
 
 An example:
 
