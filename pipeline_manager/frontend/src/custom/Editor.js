@@ -23,6 +23,7 @@ import {
     NodeInterface,
 } from 'baklavajs';
 import { v4 as uuidv4 } from 'uuid';
+import { toRaw } from 'vue';
 import {
     SUBGRAPH_OUTPUT_NODE_TYPE,
     SUBGRAPH_INPUT_NODE_TYPE,
@@ -236,6 +237,11 @@ export default class PipelineManagerEditor extends Editor {
     }
 
     save() {
+        // Save all changes done to subgraphs before saving
+        // const stackCopy = structuredClone(toRaw(this.subgraphStack))
+        const stackCopy = Array.from(toRaw(this.subgraphStack));
+        stackCopy.forEach(this.backFromSubgraph);
+
         const state = super.save();
         delete state.graphTemplates;
         state.graph.panning = this._graph.panning;
@@ -253,6 +259,10 @@ export default class PipelineManagerEditor extends Editor {
             delete node.graphState;
         };
         state.graph.nodes.forEach(recurrentSubgraphSave);
+
+        /* eslint-disable no-unused-vars */
+        stackCopy.forEach(([_, subgraphNode]) => this.switchToSubgraph(subgraphNode));
+        /* eslint-enable no-unused-vars */
 
         return state;
     }
