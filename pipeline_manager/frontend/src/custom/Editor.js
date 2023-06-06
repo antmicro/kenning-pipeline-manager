@@ -15,10 +15,8 @@
 
 import {
     Editor,
-    DummyConnection,
     createGraphNodeType,
     useGraph,
-    GraphTemplate,
     GRAPH_NODE_TYPE_PREFIX,
     NodeInterface,
 } from 'baklavajs';
@@ -33,7 +31,10 @@ import {
     SubgraphOutputNode,
 } from './subgraphInterface';
 import NotificationHandler from '../core/notifications';
+import createPipelineManagerGraph from './CustomGraph';
 
+/* eslint-disable no-param-reassign */
+/* eslint-disable no-underscore-dangle */
 export default class PipelineManagerEditor extends Editor {
     readonly = false;
 
@@ -49,191 +50,9 @@ export default class PipelineManagerEditor extends Editor {
 
     subgraphStack = [];
 
-    /* eslint-disable no-param-reassign */
-    /* eslint-disable no-underscore-dangle */
     registerGraph(graph) {
-        graph.checkConnection = function checkConnection(from, to) {
-            if (!from || !to) {
-                return { connectionAllowed: false };
-            }
-
-            const fromNode = this.findNodeById(from.nodeId);
-            const toNode = this.findNodeById(to.nodeId);
-            if (fromNode && toNode && fromNode === toNode && !this.editor.allowLoopbacks) {
-                // connections must be between two separate nodes.
-                return { connectionAllowed: false };
-            }
-
-            // reverse connection so that 'from' is input and 'to' is output
-            if (
-                (from.direction === 'input' && to.direction === 'output') ||
-                (from.direction === 'input' && to.direction === 'inout') ||
-                (from.direction === 'inout' && to.direction === 'output')
-            ) {
-                const tmp = from;
-                from = to;
-                to = tmp;
-            }
-
-            if (from.isInput && from.direction !== 'inout') {
-                // connections are only allowed from input to output or inout interface
-                return { connectionAllowed: false };
-            }
-
-            if (!to.isInput) {
-                // we can connect only to input
-                return { connectionAllowed: false };
-            }
-
-            // prevent duplicate connections
-            if (this.connections.some((c) => c.from === from && c.to === to)) {
-                return { connectionAllowed: false };
-            }
-
-            // the default behavior for outputs is to provide any number of
-            // output connections
-            if (
-                from.maxConnectionsCount > 0 &&
-                from.connectionCount + 1 > from.maxConnectionsCount
-            ) {
-                return { connectionAllowed: false };
-            }
-
-            // the default behavior for inputs is to allow only one connection
-            if (
-                (to.maxConnectionsCount === 0 || to.maxConnectionsCount === undefined) &&
-                to.connectionCount > 0
-            ) {
-                return { connectionAllowed: false };
-            }
-
-            if (to.maxConnectionsCount > 0 && to.connectionCount + 1 > to.maxConnectionsCount) {
-                return { connectionAllowed: false };
-            }
-
-            if (this.events.checkConnection.emit({ from, to }).prevented) {
-                return { connectionAllowed: false };
-            }
-
-            const hookResults = this.hooks.checkConnection.execute({ from, to });
-            if (hookResults.some((hr) => !hr.connectionAllowed)) {
-                return { connectionAllowed: false };
-            }
-
-            // List of connections that are removed once the dummyConnection is created
-            const connectionsInDanger = [];
-            return {
-                connectionAllowed: true,
-                dummyConnection: new DummyConnection(from, to),
-                connectionsInDanger,
-            };
-        };
-
-        graph.updateTemplate = function updateTemplate() {
-            const inputs = [];
-            const inputNodes = this.nodes.filter((n) => n.type === SUBGRAPH_INPUT_NODE_TYPE);
-            inputNodes.forEach((n) => {
-                const connections = this.connections.filter(
-                    (c) => c.from === n.outputs.placeholder,
-                );
-                connections.forEach((c) => {
-                    inputs.push({
-                        id: n.graphInterfaceId,
-                        name: n.inputs.name.value,
-                        nodeInterfaceId: c.to.id,
-                        connectionSide: n.inputs.connectionSide.value.toLowerCase(),
-                        direction: 'input',
-                        nodePosition: n.position,
-                    });
-                });
-            });
-
-            const outputs = [];
-            const outputNodes = this.nodes.filter((n) => n.type === SUBGRAPH_OUTPUT_NODE_TYPE);
-            outputNodes.forEach((n) => {
-                const connections = this.connections.filter((c) => c.to === n.inputs.placeholder);
-                connections.forEach((c) => {
-                    outputs.push({
-                        id: n.graphInterfaceId,
-                        name: n.inputs.name.value,
-                        nodeInterfaceId: c.from.id,
-                        connectionSide: n.inputs.connectionSide.value.toLowerCase(),
-                        direction: 'output',
-                        nodePosition: n.position,
-                    });
-                });
-            });
-
-            const inoutNodes = this.nodes.filter((n) => n.type === SUBGRAPH_INOUT_NODE_TYPE);
-            inoutNodes.forEach((n) => {
-                // Inout interface can be both from and to
-                const connectionsTo = this.connections.filter((c) => c.to === n.inputs.placeholder);
-                connectionsTo.forEach((c) => {
-                    inputs.push({
-                        id: n.graphInterfaceId,
-                        name: n.inputs.name.value,
-                        nodeInterfaceId: c.from.id,
-                        connectionSide: n.inputs.connectionSide.value.toLowerCase(),
-                        direction: 'inout',
-                        nodePosition: n.position,
-                    });
-                });
-                const connectionsFrom = this.connections.filter(
-                    (c) => c.from === n.inputs.placeholder,
-                );
-                connectionsFrom.forEach((c) => {
-                    inputs.push({
-                        id: n.graphInterfaceId,
-                        name: n.inputs.name.value,
-                        nodeInterfaceId: c.to.id,
-                        connectionSide: n.inputs.connectionSide.value.toLowerCase(),
-                        direction: 'inout',
-                        nodePosition: n.position,
-                    });
-                });
-            });
-
-            this.template.inputs = inputs;
-            this.template.outputs = outputs;
-        };
-
-        graph.addNode = function addNode(node) {
-            if (this.events.beforeAddNode.emit(node).prevented) {
-                return;
-            }
-            this.nodeEvents.addTarget(node.events);
-            this.nodeHooks.addTarget(node.hooks);
-            node.registerGraph(this);
-
-            if (node.template !== undefined) {
-                const newState = {
-                    id: node.template.id ?? uuidv4(),
-                    nodes: node.template.nodes,
-                    connections: node.template.connections,
-                    inputs: node.template.inputs,
-                    outputs: node.template.outputs,
-                    name: node.template.name,
-                };
-                node.template = new GraphTemplate(newState, this.editor);
-            }
-
-            this._nodes.push(node);
-            // when adding the node to the array, it will be made reactive by Vue.
-            // However, our current reference is the non-reactive version.
-            // Therefore, we need to get the reactive version from the array.
-            node = this.nodes.find((n) => n.id === node.id);
-            node.onPlaced();
-            this.events.addNode.emit(node);
-            return node; // eslint-disable-line consistent-return
-        };
-
-        graph.destroy = function destroy() {
-            // Remove possibility of removing graphs - this ignores changes made by
-            // default switchGraph (unregistering from editor and removing nodes) and
-            // allows to later reuse this instance
-        };
-
-        super.registerGraph(graph);
+        const customGraph = createPipelineManagerGraph(graph);
+        super.registerGraph(customGraph);
     }
 
     save() {
