@@ -54,7 +54,7 @@
 
     & > .__title-icon {
         flex-grow: 0;
-        height: 100%;
+        height: 2em;
         width: auto;
     }
 
@@ -77,13 +77,15 @@
         position: relative;
         flex-grow: 0;
         width: 100%;
-        height: 100%;
+        display: inline;
 
         img {
             margin-left: auto;
             margin-right: auto;
+            display: block;
+
             width: auto;
-            height: 100%;
+            height: 2em;
         }
 
         & > .__tooltip {
@@ -246,14 +248,13 @@
         color: inherit;
         position: relative;
         width: auto;
-        height: 100%;
 
         img {
-            display: inline;
             margin-left: auto;
             margin-right: auto;
             width: auto;
-            height: 100%;
+            height: 2em;
+            display: block;
         }
 
         & > .__tooltip {
@@ -286,7 +287,7 @@
         padding-right: $spacing-s;
         user-select: none;
 
-        height: 100%;
+        height: 2em;
         width: auto;
     }
 
