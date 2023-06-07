@@ -161,12 +161,13 @@ export default {
          * Loads nodes' specification from JSON structure.
          */
         loadDataflow(dataflow) {
-            const errors = this.editorManager.loadDataflow(dataflow);
-            if (Array.isArray(errors) && errors.length) {
-                NotificationHandler.terminalLog('error', 'Dataflow is invalid', errors);
-            } else {
-                NotificationHandler.showToast('info', 'Dataflow loaded successfully');
-            }
+            this.editorManager.loadDataflow(dataflow).then((errors) => {
+                if (Array.isArray(errors) && errors.length) {
+                    NotificationHandler.terminalLog('error', 'Dataflow is invalid', errors);
+                } else {
+                    NotificationHandler.showToast('info', 'Dataflow loaded successfully');
+                }
+            });
         },
         /**
          * Event handler that Loads a dataflow from a file.

@@ -342,7 +342,7 @@ export default class EditorManager {
      * @returns An array of errors that occured during the dataflow loading.
      * If the array is empty, the loading was successful.
      */
-    loadDataflow(dataflow) {
+    async loadDataflow(dataflow) {
         this.editor.view = this.baklavaView;
         try {
             const specificationVersion = dataflow.version;

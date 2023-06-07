@@ -32,6 +32,7 @@ import {
 } from './subgraphInterface';
 import NotificationHandler from '../core/notifications';
 import createPipelineManagerGraph from './CustomGraph';
+import LayoutManager from '../core/LayoutManager';
 
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-underscore-dangle */
@@ -47,6 +48,11 @@ export default class PipelineManagerEditor extends Editor {
     baseURLs = new Map();
 
     nodeURLs = new Map();
+
+    layoutManager = new LayoutManager();
+
+    /* eslint-disable no-param-reassign */
+    /* eslint-disable no-underscore-dangle */
 
     subgraphStack = [];
 
@@ -89,7 +95,8 @@ export default class PipelineManagerEditor extends Editor {
         return state;
     }
 
-    load(state) {
+    async load(rawState) {
+        const state = await this.layoutManager.computeLayout(rawState);
         // All subgraphs should be unregistered to avoid conflicts later when trying to
         // load into subgraph (in that case there may be two subgraphs with the same ID, one
         // of them from the previous session).
