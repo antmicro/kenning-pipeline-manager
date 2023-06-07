@@ -8,8 +8,7 @@
 function dataflowToGraph(dataflow) {
     const interfaceToNodeId = new Map();
     dataflow.graph.nodes.forEach((node) => {
-        Object.values(node.inputs).forEach((intf) => interfaceToNodeId.set(intf.id, node.id));
-        Object.values(node.outputs).forEach((intf) => interfaceToNodeId.set(intf.id, node.id));
+        Object.values(node.interfaces).forEach((intf) => interfaceToNodeId.set(intf.id, node.id));
     });
 
     const nodes = dataflow.graph.nodes.map((node) => ({
