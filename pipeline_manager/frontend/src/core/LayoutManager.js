@@ -4,6 +4,25 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+/**
+ * Module handles the autolayout calculations.
+ * Defines intermediary graph representation, containing:
+ * - nodes - list of nodes with properties:
+ *   - id - unique id
+ *   - width, height - node dimensions
+ *   - position - position set after the calculations with the layout engine is done.
+ * - connections - list of connections in a graph, each defines property:
+ *   - id - unique id
+ *   - from - id of the starting node
+ *   - to - id of node at the end point
+ *
+ * Layout Manager contains list of registered layout engines. Layout engines are
+ * requested by user in a specification. If no layout engine is set, the default option
+ * (setting position to (0, 0)) is used
+ */
+
+import NoLayoutAlgorithm from "./layoutEngines/noLayoutEngine";
+
 /* eslint-disable no-param-reassign */
 function dataflowToGraph(dataflow) {
     const interfaceToNodeId = new Map();
@@ -37,12 +56,24 @@ function graphToDataflow(graph, dataflow) {
 export default class LayoutManager {
     layoutEngine = undefined;
 
+    // Default option when no layout algorithm is specified
+    // Currently it is possible to register it, when more layout algorithms
+    // are added it should be 1) automatically registered 2) not possible to
+    // choose in available algorithms
     availableEngines = {
-        // TODO
+        NoLayout: NoLayoutEngine,
     };
 
-    registerEngine(engine) {
-        this.layoutEngine = new this.availableEngines[engine]();
+    constructor() {
+        this.useAlgorithm("NoLayout")
+    }
+
+    useAlgorithm(algorithm) {
+        const [engineName, algorithmName] = algorithm.split(' - ');
+        this.layoutEngine = this.engineList[engineName];
+        if(algorithmName !== undefined) {
+            this.layoutEngine.chooseAlgorithm(algorithmName);
+        }
     }
 
     async computeLayout(dataflow) {
