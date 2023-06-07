@@ -176,6 +176,10 @@ export default class EditorManager {
             this.baklavaView.connectionRenderer.style = metadata.connectionStyle;
         }
 
+        if ('layout' in metadata) {
+            this.editor.layoutManager.useAlgorithm(metadata.layout);
+        }
+
         this.baklavaView.movementStep = metadata.movementStep ?? 1;
         this.baklavaView.settings.background.gridSize = metadata.backgroundSize ?? 100;
         this.baklavaView.ignoredLayers = new Set();
