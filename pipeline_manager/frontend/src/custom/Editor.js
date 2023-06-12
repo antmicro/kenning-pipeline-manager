@@ -99,6 +99,9 @@ export default class PipelineManagerEditor extends Editor {
             .forEach((graph) => this.unregisterGraph(graph));
         this.subgraphStack = [];
 
+        // There can be only one subgraph node matching to a particular graphTemplateInstances
+        const usedInstances = new Set();
+
         const recurrentSubgraphLoad = (node) => {
             if (node.subgraph !== undefined) {
                 const fittingTemplate = state.graphTemplateInstances.filter(
@@ -109,6 +112,12 @@ export default class PipelineManagerEditor extends Editor {
                         `Expected exactly one template with ID ${node.type}, got ${fittingTemplate.length}`,
                     );
                 }
+                if (usedInstances.has(node.subgraph)) {
+                    throw new Error(
+                        `Subgraph ${node.subgraph} has multiple nodes pointing to it - only unique IDs are allowed`,
+                    );
+                }
+                usedInstances.add(node.subgraph);
                 node.graphState = structuredClone(fittingTemplate[0]);
                 node.graphState.nodes.forEach(recurrentSubgraphLoad);
                 node.type = `${GRAPH_NODE_TYPE_PREFIX}${node.type}`;
