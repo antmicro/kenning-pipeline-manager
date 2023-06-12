@@ -5,6 +5,11 @@
  */
 
 /* eslint-disable max-classes-per-file */
+/**
+ * Base class allowing to define autolayout algorithms. Each engine
+ * can specify multiple algorithms, names in `availableAlgorithms` array.
+ * Currently chosen algorithm is named in `activeAlgorithm`
+ */
 export default class BaseLayoutEngine {
     availableAlgorithms = [];
 
