@@ -79,6 +79,23 @@ export default {
             return option;
         });
 
+        const LayoutOption = computed(() => {
+            const { layoutManager } = props.viewModel.editor;
+            const items = layoutManager
+                .getAvailableAlgorithms()
+                .map((algorithmName) => ({ text: algorithmName, value: algorithmName }));
+            const option = new SelectInterface(
+                'Autolayout algorithm',
+                layoutManager.usedAlgorithm,
+                items,
+            ).setPort(false);
+            option.events.setValue.subscribe(this, (v) => {
+                layoutManager.useAlgorithm(v);
+            });
+            option.componentName = 'SelectInterface';
+            return option;
+        });
+
         const disableLayersOptions = computed(() => {
             const options = ref([]);
 
@@ -117,6 +134,7 @@ export default {
 
         const settingOptions = computed(() => [
             connectionStyleOption.value,
+            LayoutOption.value,
             backgroundGridSize.value,
             movementStep.value,
         ]);
