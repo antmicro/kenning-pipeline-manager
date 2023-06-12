@@ -5,7 +5,7 @@ Its state can be serialized and saved as a JSON file.
 
 ## Format description
 
-The root of the dataflow format consists of two main attributes.
+The root of the dataflow format consists of four main attributes.
 
 * `graph` - object of type [Graph](#graph) that describes the main graph displayed to the user.
 * `metadata` - structure of type [Metadata](specification-format-metadata).
@@ -15,6 +15,8 @@ The root of the dataflow format consists of two main attributes.
   For arrays and dictionaries, the values are updated (values of existing keys are replaced with new ones, and the new values in arrays are appended to the existing entries).
 * `graphTemplateInstances` - List of subgraphs represented by subgraph nodes.
   The format of subgraphs is specified in [Subgraphs](#subgraphs) section.
+* `version` - string that identifies the version of the specification and dataflow.
+  It is used to check compatibility between provided dataflow and the current version of the implementation.
 
 ### Graph
 

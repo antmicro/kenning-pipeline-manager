@@ -10,5 +10,6 @@ dataflow-format
 frontend-features
 external-app-communication
 example-server
+changelogs
 demo
 ```

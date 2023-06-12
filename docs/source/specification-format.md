@@ -9,11 +9,14 @@ Such a specification defining the nodes needs to be loaded through the front end
 ## Format description
 
 The specification needs to be provided in a JSON file.
-There are two main attributes.
+The specification consists of:
 
 * `metadata` - object of type [Metadata](#metadata) that specifies editor styling and metadata
 * `nodes` - array that specifies valid nodes, where every element is of type [Node](#node).
 * `subgraphs` - Array of dataflow-like objects defining subgraph nodes, of type [Subgraphs](#subgraphs).
+* `version` - string determining version of the specification.
+  Should be set to the newest version described in [Changelogs](#changelogs).
+  {{project}} uses that value to check the compatibility of the specification with the current implementation, giving warnings about inconsistency in versions.
 
 (specification-format-metadata)=
 ### Metadata
@@ -370,7 +373,8 @@ Below, you can see a sample specification containing a hypothetical definition o
             "Image": "#00FF00",
             "BinaryImage": "#FF0000"
         }
-    }
+    },
+    "version": "20230615.1"
 }
 ```
 
