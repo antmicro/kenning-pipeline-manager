@@ -13,8 +13,8 @@ The root of the dataflow format consists of two main attributes.
   In general, values from dataflow's `metadata` override settings from specification.
   For simple types, such as strings or integers, values are changed.
   For arrays and dictionaries, the values are updated (values of existing keys are replaced with new ones, and the new values in arrays are appended to the existing entries).
-* `graphTemplateInstances` - List of subgraphs represented by subgraph nodes. More
-  details in [Subgraphs](#Subgraphs) chapter
+* `graphTemplateInstances` - List of subgraphs represented by subgraph nodes.
+  The format of subgraphs is specified in [Subgraphs](#subgraphs) section.
 
 ### Graph
 
@@ -47,7 +47,8 @@ Each node has:
 * `width` - the node's width in the editor.
 * `twoColumn` - boolean value.
   If set to `true`, then input and output sockets are both rendered in the top part of the node and properties are displayed below.
-* `subgraph` - Optional field defining the ID of subgraph that this node represents
+* `subgraph` - optional field defining the `id` of the subgraph that this node represents.
+  It refers to one of the [Subgraphs](#subgraphs) entries from `graphTemplateInstances` with matching `id`.
 
 ##### Property
 
@@ -406,27 +407,27 @@ Later, in `connections`, you can see triples representing to which interfaces th
 
 ## Subgraphs
 
-If a node contains a `subgraph` field, it is considered a subgraph node. It represents a unique subgraph instance, which, during Pipeline Manager runtime, can be accessed and edited.
-The `subgraph` field should be a string representing an ID of exactly one of the instances that are defined in `graphTemplateInstances`. Each template cannot have more than one subgraph node pointing to it.
+If a node contains a `subgraph` field, it is considered a subgraph node.
+It represents a unique subgraph instance which can be accessed and modified from the frontend level.
+The `subgraph` field should be a string representing an ID of exactly one of the instances that are defined in `graphTemplateInstances`.
+Each template cannot have more than one subgraph node pointing to it.
 
 The graphs defined in `graphTemplateInstances` follow format similar to the main graph.
-Specifically, properties such as `id`, `connections`, `panning` and `scaling`
-follow the same rules. The only differences are changes within the `nodes` definition and
-addition `subgraphIO` fields.
+Specifically, properties such as `id`, `connections`, `panning` and `scaling` follow the same rules.
+The only differences are changes within the `nodes` definition and addition `subgraphIO` fields.
 
-Each subgraph can have input/inout/output that is represented by subgraph node IO. Subgraph IO
-is tied to a single interface within the subgraph. When entering the subgraph, those IO are
-represented by special `Subgraph IO` nodes, which allows to define the parameters such as name
-or it's connection side. This node is connected to an interface within the subgraph it is meant
-to represent.
+Each subgraph can have `input`, `inout` or `output` interfaces.
+In the collapsed view, those are visible as regular interfaces of the node representing a subgraph.
+In the subgraph view, each interface is represented by a dedicated node, called `Subgraph IO` node.
+Such `Subgraph IO` node allows to configure such parameters as interface name or connection side.
 
 Within the dataflow format, `subgraphIO` field allow to tie the subgraph node interface (subgraph IO)
 with a interface in subgraph it is representing. `subgraphIO` is an array of object that follows the
 format:
 
- * `id` - Unique ID
+ * `id` - Unique ID of the interface within the subgraph
  * `name` - Name of the subgraph interface
- * `nodeInterfaceId` - ID of an interface within the subgraph this IO is representing
+ * `nodeInterfaceId` - ID of an interface of the node the given subgraph is representing
 
 When defining the subgraph node (adding `subgraph` property to a node), the `interfaces` object
 differ slightly from interfaces of standard nodes:
