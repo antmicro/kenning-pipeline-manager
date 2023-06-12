@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+/* eslint-disable max-classes-per-file */
 export default class BaseLayoutEngine {
     availableAlgorithms = [];
 
@@ -28,5 +29,20 @@ export default class BaseLayoutEngine {
     /* eslint-disable no-unused-vars */
     async calculate(graph) {
         throw new Error('Method calculate() must be implemented by layout engine');
+    }
+}
+
+/**
+ * Instance of engine with only single algorithm
+ */
+export class BaseLayoutAlgorithm extends BaseLayoutEngine {
+    constructor() {
+        super();
+        this.availableAlgorithms = [this.constructor.name];
+        this.activeAlgorithm = this.constructor.name;
+        this.chooseAlgorithm = undefined; // turn of choosing algorithm
+        if (this.constructor === BaseLayoutAlgorithm) {
+            throw new Error("Can't initialize base class instance"); // eslint-disable-line quotes
+        }
     }
 }
