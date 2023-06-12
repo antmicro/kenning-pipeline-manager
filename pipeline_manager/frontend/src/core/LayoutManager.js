@@ -21,7 +21,7 @@
  * (setting position to (0, 0)) is used
  */
 
-import NoLayoutAlgorithm from "./layoutEngines/noLayoutEngine";
+import NoLayoutAlgorithm from './layoutEngines/noLayoutEngine';
 
 /* eslint-disable no-param-reassign */
 function dataflowToGraph(dataflow) {
@@ -56,24 +56,40 @@ function graphToDataflow(graph, dataflow) {
 export default class LayoutManager {
     layoutEngine = undefined;
 
+    usedAlgorithm = undefined;
+
     // Default option when no layout algorithm is specified
     // Currently it is possible to register it, when more layout algorithms
     // are added it should be 1) automatically registered 2) not possible to
     // choose in available algorithms
     availableEngines = {
-        NoLayout: NoLayoutEngine,
+        NoLayout: new NoLayoutAlgorithm(),
     };
 
     constructor() {
-        this.useAlgorithm("NoLayout")
+        this.useAlgorithm('NoLayout');
     }
 
     useAlgorithm(algorithm) {
         const [engineName, algorithmName] = algorithm.split(' - ');
-        this.layoutEngine = this.engineList[engineName];
-        if(algorithmName !== undefined) {
+        this.layoutEngine = this.availableEngines[engineName];
+        if (algorithmName !== undefined) {
             this.layoutEngine.chooseAlgorithm(algorithmName);
         }
+        this.usedAlgorithm = algorithm;
+    }
+
+    getAvailableAlgorithms() {
+        return Object.entries(this.availableEngines)
+            .map(([engineName, engine]) => {
+                if (engine.availableAlgorithms.length !== 1) {
+                    return engine.availableAlgorithms.map(
+                        (algorithm) => `${engineName} - ${algorithm}`,
+                    );
+                }
+                return engineName;
+            })
+            .flat();
     }
 
     async computeLayout(dataflow) {
