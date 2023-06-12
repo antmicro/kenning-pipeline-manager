@@ -64,11 +64,26 @@ export default class EditorManager {
             this.cleanEditor();
         }
 
+        const { subgraphs, nodes, metadata, version } = dataflowSpecification;
+        if (overriding || !this.currentSpecification) {
+            if (version === undefined) {
+                NotificationHandler.terminalLog(
+                    'warning',
+                    'Specification has no version assigned',
+                    `Loaded specification has no version assigned. Please update the specification to version ${this.specificationVersion}.`,
+                );
+            } else if (version !== this.specificationVersion) {
+                NotificationHandler.terminalLog(
+                    'warning',
+                    'Incompatible specification version',
+                    `The specification format version (${version}) differs from the current specification format version (${this.specificationVersion}). It may result in an unexpected behaviour.`,
+                );
+            }
+        }
+
         if (!overriding) {
             this.currentSpecification = JSON.parse(JSON.stringify(dataflowSpecification));
         }
-
-        const { subgraphs, nodes, metadata } = dataflowSpecification;
 
         const interfaceTypes = readInterfaceTypes(nodes, metadata);
         this.nodeInterfaceTypes.addTypes(...Object.values(interfaceTypes));
@@ -209,7 +224,7 @@ export default class EditorManager {
      */
     saveDataflow() {
         const save = this.editor.save();
-        save.ver = this.specificationVersion;
+        save.version = this.specificationVersion;
         return save;
     }
 
@@ -227,18 +242,18 @@ export default class EditorManager {
     loadDataflow(dataflow) {
         this.editor.view = this.baklavaView;
         try {
-            const specificationVersion = dataflow.ver;
+            const specificationVersion = dataflow.version;
             if (specificationVersion === undefined) {
                 NotificationHandler.terminalLog(
                     'warning',
                     'Dataflow has no format version assigned.',
-                    `Current format specification version is ${this.specificationVersion}.`,
+                    `Current format specification version is ${this.specificationVersion}. It may result in an unexpected behaviour`,
                 );
             } else if (specificationVersion !== this.specificationVersion) {
                 NotificationHandler.terminalLog(
                     'warning',
                     'Incompatible dataflow format',
-                    `Dataflow format version (${specificationVersion}) differs from the current format specification version (${this.specificationVersion}). It may result in unexpected behaviour.`,
+                    `Dataflow format specification version (${specificationVersion}) differs from the current format specification version (${this.specificationVersion}). It may result in unexpected behaviour.`,
                 );
             }
 
