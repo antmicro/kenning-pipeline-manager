@@ -1,4 +1,5 @@
 {
+    "version": "20230615.1",
     "graph": {
         "id": "0c66bbb2-c86b-4209-93aa-44742330680e",
         "nodes": [
@@ -93,5 +94,5 @@
         },
         "scaling": 1
     },
-    "graphTemplates": []
+    "graphTemplateInstances": []
 }

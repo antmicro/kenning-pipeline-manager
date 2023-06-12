@@ -1,5 +1,6 @@
 {
-    "graphTemplates": [],
+    "version": "20230615.1",
+    "graphTemplateInstances": [],
     "graph": {
         "id": "0811047808",
         "nodes": [
