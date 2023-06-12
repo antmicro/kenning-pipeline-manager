@@ -44,6 +44,7 @@ export default class EditorManager {
         // before this value can be loaded from specification
         this.baklavaView.ignorableLayers = [];
         this.baklavaView.collapseSidebar = true;
+        this.specificationVersion = specificationSchema.version;
     }
 
     /**
@@ -207,7 +208,9 @@ export default class EditorManager {
      * @returns Serialized dataflow.
      */
     saveDataflow() {
-        return this.editor.save();
+        const save = this.editor.save();
+        save.ver = this.specificationVersion;
+        return save;
     }
 
     /**
@@ -224,6 +227,21 @@ export default class EditorManager {
     loadDataflow(dataflow) {
         this.editor.view = this.baklavaView;
         try {
+            const specificationVersion = dataflow.ver;
+            if (specificationVersion === undefined) {
+                NotificationHandler.terminalLog(
+                    'warning',
+                    'Dataflow has no format version assigned.',
+                    `Current format specification version is ${this.specificationVersion}.`,
+                );
+            } else if (specificationVersion !== this.specificationVersion) {
+                NotificationHandler.terminalLog(
+                    'warning',
+                    'Incompatible dataflow format',
+                    `Dataflow format version (${specificationVersion}) differs from the current format specification version (${this.specificationVersion}). It may result in unexpected behaviour.`,
+                );
+            }
+
             if ('metadata' in dataflow && this.currentSpecification !== undefined) {
                 const errors = this.validateMetadata(dataflow.metadata);
                 if (Array.isArray(errors) && errors.length) {
@@ -286,6 +304,7 @@ export default class EditorManager {
     /* eslint-disable class-methods-use-this */
     validateJSONWithSchema(data, schema) {
         const ajv = new Ajv();
+        ajv.addKeyword('version');
 
         const validate = ajv.compile(schema);
         const valid = validate(data);
