@@ -483,4 +483,8 @@ export default class PipelineManagerEditor extends Editor {
     isInSubgraph() {
         return this.subgraphStack.length > 0;
     }
+
+    applyAutolayout() {
+        this.load(this.save());
+    }
 }
