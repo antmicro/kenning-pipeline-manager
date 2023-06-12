@@ -84,15 +84,19 @@ export default {
     },
     methods: {
         /**
-         * Loads nodes' specification from JSON structure.
+         * Loads nodes' specification from text structure.
+         * It first validates the specification file. If the validation is successfull the
+         * specification is loaded. Otherwise a proper log is printed to the user.
+         *
+         * @param {string} specText specification to validate and load
          */
-        loadSpecification(specification) {
-            let errors = this.editorManager.validateSpecification(specification);
+        loadSpecification(specText) {
+            let errors = this.editorManager.validateSpecification(specText);
             if (Array.isArray(errors) && errors.length) {
                 NotificationHandler.terminalLog('error', 'Specification is invalid', errors);
                 return;
             }
-            errors = this.editorManager.updateEditorSpecification(specification);
+            errors = this.editorManager.updateEditorSpecification(specText);
             if (Array.isArray(errors) && errors.length) {
                 NotificationHandler.terminalLog('error', 'Specification is invalid', errors);
                 return;
@@ -103,10 +107,7 @@ export default {
 
         /**
          * Event handler that loads a specification passed by the user
-         * and asks the validates it.
-         * If the validation is successful it is passed to the editor that
-         * renders a new environment.
-         * Otherwise user is alerted with a feedback message.
+         * and tries to load it into a new environment it.
          */
         loadSpecificationCallback() {
             const file = document.getElementById('load-spec-button').files[0];
@@ -115,26 +116,7 @@ export default {
             const fileReader = new FileReader();
 
             fileReader.onload = () => {
-                let specification = null;
-                try {
-                    specification = JSON.parse(fileReader.result);
-                } catch (exception) {
-                    if (exception instanceof SyntaxError) {
-                        NotificationHandler.terminalLog(
-                            'error',
-                            'Not a proper JSON file',
-                            exception.toString(),
-                        );
-                    } else {
-                        NotificationHandler.terminalLog(
-                            'error',
-                            'Unknown error',
-                            exception.toString(),
-                        );
-                    }
-                    return;
-                }
-                this.loadSpecification(specification);
+                this.loadSpecification(fileReader.result);
             };
 
             fileReader.readAsText(file);
@@ -274,7 +256,7 @@ export default {
                 });
         },
     },
-    mounted() {
+    async mounted() {
         // Create connection on page load
         if (this.externalApplicationManager.backendAvailable) {
             this.externalApplicationManager.invokeFetchAction(
@@ -284,8 +266,10 @@ export default {
         // Remove notifications during loadup of default settings
         NotificationHandler.setShowNotification(false);
         if (process.env.VUE_APP_SPECIFICATION_PATH !== undefined) {
-            const specification = require(process.env.VUE_APP_SPECIFICATION_PATH); // eslint-disable-line global-require,max-len,import/no-dynamic-require
-            this.loadSpecification(specification);
+            // Use raw-loader which does not parse the specification so that it is possible
+            // To add a more verbose validation log
+            const specText = require(`!!raw-loader!${process.env.VUE_APP_SPECIFICATION_PATH}`); // eslint-disable-line global-require,max-len,import/no-dynamic-require
+            this.loadSpecification(specText.default);
         }
         if (process.env.VUE_APP_DATAFLOW_PATH !== undefined) {
             const dataflow = require(process.env.VUE_APP_DATAFLOW_PATH); // eslint-disable-line global-require,max-len,import/no-dynamic-require
