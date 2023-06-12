@@ -5,6 +5,7 @@
  */
 
 import Ajv, { stringify } from 'ajv';
+import jsonMap from 'json-source-map';
 
 import { useBaklava, BaklavaInterfaceTypes } from 'baklavajs';
 
@@ -444,9 +445,12 @@ export default class EditorManager {
     }
 
     /**
-     * Validates JSON data using given JSON schema
+     * Validates JSON data using given JSON schema. If passed `data` is a string that represents
+     * text of specification file then more information about potential errors - like the exact
+     * line of error - is returned.
      *
-     * @param data JSON file to validate
+     * @param data Specification file to validate. Can be either a parsed JSON object
+     * or a textual file
      * @param schema Schema to use
      * @returns An array of errors. If the array is empty, the validation was successful.
      */
@@ -456,7 +460,17 @@ export default class EditorManager {
         ajv.addKeyword('version');
 
         const validate = ajv.compile(schema);
-        const valid = validate(data);
+        const isTextFormat = typeof data === 'string' || data instanceof String;
+        let dataJSON;
+
+        try {
+            dataJSON = isTextFormat ? JSON.parse(data) : data;
+        } catch (exception) {
+            return [`Not a proper JSON file: ${exception.toString()}`];
+        }
+
+        const valid = validate(dataJSON);
+
         if (valid) {
             return [];
         }
@@ -464,13 +478,32 @@ export default class EditorManager {
         // Parsing errors messages to a human readable string
         const errors = validate.errors.map((error) => {
             const path = `specification${error.instancePath}`;
+
+            let errorPrefix = '';
+
+            if (isTextFormat) {
+                const result = jsonMap.parse(data);
+                // 1 is added as the lines are numbered from 0
+                const lineStart = result.pointers[error.instancePath].value.line + 1;
+                const lineEnd = result.pointers[error.instancePath].valueEnd.line + 1;
+
+                if (lineStart === lineEnd) {
+                    errorPrefix = `Line ${lineStart} -`;
+                } else {
+                    errorPrefix = `Lines ${lineStart}-${lineEnd} -`;
+                }
+            }
+
             switch (error.keyword) {
                 case 'enum':
-                    return `${path} ${error.message} - ${stringify(error.params.allowedValues)}`;
+                    return `${errorPrefix} ${path} ${error.message} - ${stringify(
+                        error.params.allowedValues,
+                    )}`;
                 default:
-                    return `${path} ${error.message}`;
+                    return `${errorPrefix} ${path} ${error.message}`;
             }
         });
+
         return errors;
     }
 
