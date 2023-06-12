@@ -407,7 +407,7 @@ Later, in `connections`, you can see triples representing to which interfaces th
 ## Subgraphs
 
 If a node contains a `subgraph` field, it is considered a subgraph node. It represents a unique subgraph instance, which, during Pipeline Manager runtime, can be accessed and edited.
-The `subgraph` field should be a string representing an ID of exactly one of the instances that are defined in `graphTemplateInstances`.
+The `subgraph` field should be a string representing an ID of exactly one of the instances that are defined in `graphTemplateInstances`. Each template cannot have more than one subgraph node pointing to it.
 
 The graphs defined in `graphTemplateInstances` follow format similar to the main graph.
 Specifically, properties such as `id`, `connections`, `panning` and `scaling`
