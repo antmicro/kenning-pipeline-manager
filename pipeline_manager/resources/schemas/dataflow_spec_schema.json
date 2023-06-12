@@ -3,6 +3,10 @@
     "description": "JSON that serves as an input for the application",
     "type": "object",
     "properties": {
+        "version": {
+            "description": "Version of the specification.",
+            "type": "string"
+        },
         "metadata": {
             "description": "Additional options for editor",
             "type": "object",
