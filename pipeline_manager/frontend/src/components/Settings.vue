@@ -29,7 +29,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { computed, ref } from 'vue';
-import { SelectInterface, CheckboxInterface, IntegerInterface } from 'baklavajs';
+import { SelectInterface, CheckboxInterface, IntegerInterface, ButtonInterface } from 'baklavajs'; // eslint-disable-line object-curly-newline
 
 export default {
     props: {
@@ -96,6 +96,14 @@ export default {
             return option;
         });
 
+        const LayoutButton = computed(() => {
+            const button = new ButtonInterface('Apply autolayout', () => {
+                props.viewModel.editor.applyAutolayout();
+            });
+            button.componentName = 'ButtonInterface';
+            return button;
+        });
+
         const disableLayersOptions = computed(() => {
             const options = ref([]);
 
@@ -127,6 +135,7 @@ export default {
                 case 'CheckboxInterface':
                 case 'SliderInterface':
                 case 'NodeInterface':
+                case 'ButtonInterface':
                 default:
                     return false;
             }
@@ -135,6 +144,7 @@ export default {
         const settingOptions = computed(() => [
             connectionStyleOption.value,
             LayoutOption.value,
+            LayoutButton.value,
             backgroundGridSize.value,
             movementStep.value,
         ]);
