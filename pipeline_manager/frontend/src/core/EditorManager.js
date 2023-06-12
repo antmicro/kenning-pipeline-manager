@@ -6,6 +6,7 @@
 
 import Ajv, { stringify } from 'ajv';
 import jsonMap from 'json-source-map';
+import jsonlint from 'jsonlint';
 
 import { useBaklava, BaklavaInterfaceTypes } from 'baklavajs';
 
@@ -464,7 +465,7 @@ export default class EditorManager {
         let dataJSON;
 
         try {
-            dataJSON = isTextFormat ? JSON.parse(data) : data;
+            dataJSON = isTextFormat ? jsonlint.parse(data) : data;
         } catch (exception) {
             return [`Not a proper JSON file: ${exception.toString()}`];
         }

@@ -11,6 +11,7 @@ Displays user interface and main details about the Pipeline Manager status.
 
 <script>
 import { toPng } from 'html-to-image';
+import jsonlint from 'jsonlint';
 import Logo from '../icons/Logo.vue';
 import Arrow from '../icons/Arrow.vue';
 import Run from '../icons/Run.vue';
@@ -180,7 +181,7 @@ export default {
             fileReader.onload = () => {
                 let dataflow = null;
                 try {
-                    dataflow = JSON.parse(fileReader.result);
+                    dataflow = jsonlint.parse(fileReader.result);
                 } catch (exception) {
                     if (exception instanceof SyntaxError) {
                         NotificationHandler.terminalLog(
