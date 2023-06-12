@@ -25,6 +25,12 @@ module.exports = defineConfig({
             alias: {
                 '@baklavajs': path.resolve(__dirname, 'node_modules/@baklavajs/'),
             },
+            fallback: {
+                fs: false,
+                path: false,
+                system: false,
+                file: false,
+            },
         },
     },
     pages: {
