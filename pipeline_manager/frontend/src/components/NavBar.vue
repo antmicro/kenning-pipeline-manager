@@ -48,11 +48,38 @@ export default {
             connection, dataflow and spectification
             */
             externalApplicationManager: new ExternalApplicationManager(),
-            isNotificationPanelOpen: false, // check notification panel state (open or close)
-            isPalettePanelOpen: true, // check palette panel state (open or close)
-            isBackendStatusOpen: false, // check backend panel state (open or close)
-            isSettingsPanelOpen: false, // check settings panel state (open or close)
             notificationStore,
+            // Toggleable panels and their configuration
+            panels: {
+                notifications: {
+                    isOpen: false,
+                    class: '.notifications',
+                    iconRef: 'notifications',
+                    showTransform: '-495px, 0px',
+                    hideTransform: '0px, 0px',
+                },
+                palette: {
+                    isOpen: true,
+                    class: '.baklava-node-palette',
+                    iconRef: 'palette',
+                    showTransform: '0px, 0px',
+                    hideTransform: '-300px, 0px',
+                },
+                backendStatus: {
+                    isOpen: false,
+                    class: '.backend-status',
+                    iconRef: 'backend',
+                    showTransform: '-89%, 0px',
+                    hideTransform: '-89%, -180px',
+                },
+                settings: {
+                    isOpen: false,
+                    class: '.settings-panel',
+                    iconRef: 'settings',
+                    showTransform: '-495px, 0px',
+                    hideTransform: '0px, 0px',
+                },
+            },
         };
     },
     methods: {
@@ -108,155 +135,37 @@ export default {
             fileReader.readAsText(file);
         },
 
-        // Open or hide notificationPanel with slide animation
-        displayPalettePanel(isOpen) {
-            const notificationPanel = document.querySelector('.baklava-node-palette');
-            const resetNotificationPanelTransition = '0px'; // reset notification panel transition to show it
-            const negativeNotificationPanelWidth = `-${notificationPanel.offsetWidth}px`; // width of notification panel (negative because we want hide it on close)
-            const { palette } = this.$refs;
+        /* eslint-disable no-param-reassign */
+        togglePanel(panel, disable = false) {
+            const panelSelector = document.querySelector(panel.class);
+            const iconRef = this.$refs[panel.iconRef];
 
-            if (notificationPanel) {
-                notificationPanel.style.transition = `transform ${
-                    this.isPalettePanelOpen ? '0.4' : '0.2'
-                }s`;
+            if (disable) {
+                panel.isOpen = false;
+            } else {
+                panel.isOpen = !panel.isOpen;
+            }
+            const isPanelOpen = panel.isOpen;
 
-                notificationPanel.style.transform = `translateX(${
-                    this.isPalettePanelOpen
-                        ? negativeNotificationPanelWidth
-                        : resetNotificationPanelTransition
+            if (panelSelector) {
+                panelSelector.style.transition = `transform ${isPanelOpen ? '0.4' : '0.2'}s`;
+                panelSelector.style.transform = `translate(${
+                    isPanelOpen ? panel.showTransform : panel.hideTransform
                 })`;
 
-                palette.classList.toggle('open', !this.isPalettePanelOpen);
-            }
-            this.isPalettePanelOpen = isOpen;
-        },
-
-        // Open or hide notificationPanel with slide animation
-        displayNotificationPanel(isOpen) {
-            const negativeNotificationPanelWidth = '-495px'; // width of notification panel (negative because we want hide it on close)
-            const notificationPanel = document.querySelector('.notifications');
-            const resetNotificationPanelTransition = '0px'; // reset notification panel transition to show it
-
-            const { notifications } = this.$refs;
-
-            if (this.isBackendStatusOpen) {
-                this.displayBackendPanel(false);
-            }
-
-            this.isNotificationPanelOpen = isOpen;
-
-            if (notificationPanel) {
-                notificationPanel.style.transition = `transform ${
-                    this.isNotificationPanelOpen ? '0.4' : '0.2'
-                }s`;
-
-                notificationPanel.style.transform = `translateX(${
-                    this.isNotificationPanelOpen
-                        ? negativeNotificationPanelWidth
-                        : resetNotificationPanelTransition
-                })`;
-
-                notifications.classList.toggle('open', this.isNotificationPanelOpen);
+                iconRef.classList.toggle('open', isPanelOpen);
             }
         },
 
-        clickOutsideNotification(event) {
-            if (!this.isNotificationPanelOpen) return;
+        clickOutside(event, panel) {
+            const icon = this.$refs[panel.iconRef];
 
-            const { notificationButton } = this.$refs;
-
-            let currentElement = event.target;
-
-            while (currentElement != null) {
-                if (currentElement === notificationButton) {
-                    return;
-                }
-
-                currentElement = currentElement.parentElement;
+            const currentElement = event.target;
+            if (icon.contains(currentElement) || icon === currentElement) {
+                return;
             }
 
-            this.displayNotificationPanel(false);
-        },
-
-        // Open or hide backendStatus info
-        displayBackendPanel(isOpen) {
-            const showBackendStatusPanel = '-89%, 0'; // show backend panel and align it to right border of icon
-            const hideBackendStatusPanel = '-89%, -180px'; // hide backend panel
-            const backendStatus = document.querySelector('.backend-status');
-
-            const { backend } = this.$refs;
-
-            if (this.isNotificationPanelOpen) {
-                this.displayNotificationPanel(false);
-            }
-
-            this.isBackendStatusOpen = isOpen;
-
-            if (backendStatus) {
-                backendStatus.style.transition = `transform ${
-                    this.isBackendStatusOpen ? '0.4' : '0.2'
-                }s`;
-
-                backendStatus.style.transform = `translate(${
-                    this.isBackendStatusOpen ? showBackendStatusPanel : hideBackendStatusPanel
-                })`;
-
-                backend.classList.toggle('open', this.isBackendStatusOpen);
-            }
-        },
-        clickOutsideBackend(event) {
-            if (!this.isBackendStatusOpen) return;
-
-            const { backendButton } = this.$refs;
-
-            let currentElement = event.target;
-
-            while (currentElement != null) {
-                if (currentElement === backendButton) {
-                    return;
-                }
-
-                currentElement = currentElement.parentElement;
-            }
-
-            this.displayBackendPanel(false);
-        },
-
-        displaySettingsTab(isOpen) {
-            const resetSettings = '0px';
-            const settingsPanel = document.querySelector('.settings-panel');
-            const { settings } = this.$refs;
-
-            this.isSettingsPanelOpen = isOpen;
-
-            if (settingsPanel) {
-                const showSettings = '-495px';
-                settingsPanel.style.transition = `transform ${
-                    this.isSettingsPanelOpen ? '0.4' : '0.2'
-                }s`;
-
-                settingsPanel.style.transform = `translateX(${
-                    this.isSettingsPanelOpen ? showSettings : resetSettings
-                })`;
-
-                settings.classList.toggle('open', this.isSettingsPanelOpen);
-            }
-        },
-
-        clickOutsideSettings(event) {
-            const { settingsButton } = this.$refs;
-
-            let currentElement = event.target;
-
-            while (currentElement != null) {
-                if (currentElement === settingsButton) {
-                    return;
-                }
-
-                currentElement = currentElement.parentElement;
-            }
-
-            this.displaySettingsTab(false);
+            this.togglePanel(panel, true);
         },
 
         /**
@@ -431,7 +340,7 @@ export default {
                 </div>
 
                 <div ref="palette" class="open">
-                    <button @click="() => displayPalettePanel(!this.isPalettePanelOpen)">
+                    <button @click="() => togglePanel(panels.palette)">
                         <Cube />
                     </button>
                     <div class="tooltip">
@@ -465,10 +374,7 @@ export default {
             <span> Pipeline Manager </span>
             <div>
                 <div ref="settings">
-                    <button
-                        ref="settingsButton"
-                        @click="() => displaySettingsTab(!this.isSettingsPanelOpen)"
-                    >
+                    <button @click="() => togglePanel(panels.settings)">
                         <Cogwheel />
                     </button>
                     <div class="tooltip">
@@ -476,10 +382,7 @@ export default {
                     </div>
                 </div>
                 <div v-if="this.externalApplicationManager.backendAvailable" ref="backend">
-                    <button
-                        ref="backendButton"
-                        @click="() => displayBackendPanel(!this.isBackendStatusOpen)"
-                    >
+                    <button @click="() => togglePanel(panels.backendStatus)">
                         <Backend
                             v-if="this.externalApplicationManager.externalApplicationConnected"
                             color="connected"
@@ -489,7 +392,10 @@ export default {
                     <div class="tooltip">
                         <span>Backend status</span>
                     </div>
-                    <div v-click-outside="clickOutsideBackend" class="backend-status">
+                    <div
+                        v-click-outside="(ev) => clickOutside(ev, panels.backendStatus)"
+                        class="backend-status"
+                    >
                         <div>
                             <span>Client status:</span>
                             <span
@@ -502,10 +408,7 @@ export default {
                     </div>
                 </div>
                 <div ref="notifications">
-                    <button
-                        ref="notificationButton"
-                        @click="() => displayNotificationPanel(!this.isNotificationPanelOpen)"
-                    >
+                    <button @click="() => togglePanel(panels.notifications)">
                         <Bell
                             v-if="this.notificationStore.notifications.length > 0"
                             color="green"
@@ -519,8 +422,11 @@ export default {
             </div>
         </div>
         <div class="progress-bar" />
-        <Notifications v-click-outside="clickOutsideNotification" />
-        <Settings v-click-outside="clickOutsideSettings" :viewModel="editorManager.baklavaView" />
+        <Notifications v-click-outside="(ev) => clickOutside(ev, panels.notifications)" />
+        <Settings
+            v-click-outside="(ev) => clickOutside(ev, panels.settings)"
+            :viewModel="editorManager.baklavaView"
+        />
     </div>
 </template>
 
