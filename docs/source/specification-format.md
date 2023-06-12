@@ -52,6 +52,8 @@ This object specifies additional editor options and contains the following optio
   Default value is `1`.
 * `backgroundSize` - Defines size of the background grid.
   Default value is `100`.
+* `layout` - String specifying the name of autolayout algorithm used in placing nodes from dataflow
+  Default value is `NoLayout`
 
 An example:
 
@@ -74,7 +76,8 @@ An example:
             "nodeTypes": ["processing"],
             "nodeInterfaces": ["BinaryImage"]
         }
-    ]
+    ],
+    "layout": "NoLayout"
 }
 ```
 
