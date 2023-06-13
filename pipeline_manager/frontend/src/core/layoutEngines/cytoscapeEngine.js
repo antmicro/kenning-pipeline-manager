@@ -29,7 +29,24 @@ export default class CytoscapeLayoutEngine extends BaseLayoutEngine {
             styleEnabled: true,
         });
 
-        const layout = cytoscapeGraph.layout({ name: this.activeAlgorithm, randomize: true });
+        const options = { name: this.activeAlgorithm };
+        switch (this.activeAlgorithm) {
+            case 'random':
+                options.boundingBox = {
+                    x1: 0,
+                    y1: 0,
+                    w: 2000,
+                    h: 2000,
+                };
+                break;
+            case 'grid':
+                options.avoidOverlapPadding = 150;
+                break;
+            default:
+                break;
+        }
+
+        const layout = cytoscapeGraph.layout(options);
         layout.run();
         if (this.activeAlgorithm === 'cose') {
             // cose is the only asynchronous algorithm in this engine
