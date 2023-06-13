@@ -21,6 +21,7 @@
  * (setting position to (0, 0)) is used
  */
 
+import CytoscapeLayoutEngine from './layoutEngines/cytoscapeEngine';
 import NoLayoutAlgorithm from './layoutEngines/noLayoutEngine';
 
 /* eslint-disable no-param-reassign */
@@ -80,6 +81,7 @@ export default class LayoutManager {
     // choose in available algorithms
     availableEngines = {
         NoLayout: new NoLayoutAlgorithm(),
+        CytoscapeEngine: new CytoscapeLayoutEngine(),
     };
 
     constructor() {
