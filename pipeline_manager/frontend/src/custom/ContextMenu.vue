@@ -30,6 +30,7 @@ from creating and deleting connections or altering nodes' values if the editor i
                     :class="{ submenu: !!item.submenu, '--disabled': !!item.disabled }"
                     @mouseenter="onMouseEnter($event, index)"
                     @mouseleave="onMouseLeave($event, index)"
+                    @click.stop="onClick(item)"
                 >
                     <div class="flex-fill" v-if="item.url === undefined">
                         <div class="__url">
