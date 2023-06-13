@@ -118,6 +118,11 @@
                     "type": "number",
                     "description": "Defines size of the background grid",
                     "default": 100
+                },
+                "layout": {
+                    "type": "string",
+                    "description": "Defines the default autolayout algorithm",
+                    "default": "NoLayout"
                 }
             },
             "additionalProperties": false
