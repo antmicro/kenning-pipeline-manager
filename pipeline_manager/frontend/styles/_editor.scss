@@ -36,12 +36,24 @@
 .baklava-node {
     min-width: 300px !important;
     width: auto;
-    opacity: 0.9;
     display: table;
+
+    background-color: #{$gray-600}E6;
+    transition: box-shadow var(--baklava-visual-transition) !important;
+    filter: none;
 
     &.--selected {
         z-index: 5;
         box-shadow: 0 0 0 calc(1px / var(--scale)) $green;
+    }
+
+    &:hover {
+        box-shadow: 0 0 0 calc(1px / var(--scale)) $green;
+    }
+
+    &.--dragging {
+        box-shadow: 0 0 0 calc(1.5px / var(--scale)) $green;
+        filter: none;
     }
 
     & > .__title {
