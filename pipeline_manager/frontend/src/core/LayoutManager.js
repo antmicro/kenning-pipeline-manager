@@ -34,6 +34,7 @@ function dataflowToGraph(dataflow) {
         id: node.id,
         width: Math.min(node.width, 300),
         height: 300, // TODO
+        position: node.position,
     }));
     const connections = dataflow.graph.connections.map((connection) => ({
         id: connection.id,
