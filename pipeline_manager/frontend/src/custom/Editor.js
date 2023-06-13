@@ -485,6 +485,10 @@ export default class PipelineManagerEditor extends Editor {
     }
 
     applyAutolayout() {
-        this.load(this.save());
+        const state = this.save();
+        state.graph.nodes.forEach((node) => {
+            node.position = undefined;
+        });
+        this.load(state);
     }
 }
