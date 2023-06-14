@@ -85,7 +85,10 @@ export default class EditorManager {
             this.currentSpecification = JSON.parse(JSON.stringify(dataflowSpecification));
         }
 
-        const interfaceTypes = readInterfaceTypes(nodes, metadata);
+        const { subgraphs, nodes, metadata } = dataflowSpecification;
+        const resolvedNodes = this.resolveInheritance(nodes);
+
+        const interfaceTypes = readInterfaceTypes(resolvedNodes, metadata);
         this.nodeInterfaceTypes.addTypes(...Object.values(interfaceTypes));
         this.updateInterfacesStyle(metadata);
 
@@ -99,7 +102,7 @@ export default class EditorManager {
         this.editor.registerNodeType(SubgraphOutputNode, { category: 'Subgraphs' });
         this.editor.registerNodeType(SubgraphInoutNode, { category: 'Subgraphs' });
 
-        nodes.forEach((node) => {
+        resolvedNodes.forEach((node) => {
             const myNode = NodeFactory(
                 node.name,
                 node.name,
@@ -157,6 +160,111 @@ export default class EditorManager {
         this.baklavaView.collapseSidebar = metadata.collapseSidebar ?? true;
 
         this.specificationLoaded = true;
+    }
+
+    /* eslint-disable class-methods-use-this,no-param-reassign */
+    resolveInheritance(nodes) {
+        const unsortedNodes = JSON.parse(JSON.stringify(nodes));
+
+        const isObject = (obj) => typeof obj === 'object' && obj !== null && !Array.isArray(obj);
+        const isArray = (obj) => Array.isArray(obj);
+
+        const mergeNodes = (child, base) => {
+            const output = { ...child };
+            if (isObject(child) && isObject(base)) {
+                Object.keys(base).forEach((key) => {
+                    if (isObject(base[key])) {
+                        if (!(key in child)) {
+                            output[key] = base[key];
+                        } else {
+                            output[key] = mergeNodes(child[key], base[key]);
+                        }
+                    } else if (isArray(child[key]) && isArray(base[key])) {
+                        if (key === 'extends') {
+                            output[key] = child[key];
+                        } else {
+                            output[key] = [...child[key], ...base[key]];
+                        }
+                    } else {
+                        output[key] = base[key];
+                    }
+                });
+            }
+            return output;
+        };
+
+        // Topological sort
+        const sortedNodes = [];
+
+        let lastLength = unsortedNodes.length;
+        while (unsortedNodes.length !== 0) {
+            const toResolve = [...unsortedNodes];
+
+            toResolve.forEach((node) => {
+                if (node.extends === undefined || node.extends.length === 0) {
+                    const index = unsortedNodes.indexOf(node);
+                    unsortedNodes.splice(index, 1);
+
+                    sortedNodes.push(node.name);
+                }
+            });
+
+            unsortedNodes.forEach((node) => {
+                const notResolvedExtends = [];
+                const toResolveExtends = [...node.extends];
+
+                toResolveExtends.forEach((name) => {
+                    const found = sortedNodes.find((resolved) => resolved === name);
+                    if (found !== undefined) {
+                        const index = node.extends.indexOf(name);
+                        node.extends.splice(index, 1);
+                    } else {
+                        notResolvedExtends.push(name);
+                    }
+                });
+
+                node.extends = notResolvedExtends;
+            });
+
+            if (lastLength === unsortedNodes.length) {
+                NotificationHandler.showToast(
+                    'error',
+                    'Unresorvable inheritance in specification.',
+                );
+                return [];
+            }
+            lastLength = unsortedNodes.length;
+        }
+
+        const resolvedNodes = [];
+        // DFS resolving inheritance
+        sortedNodes.forEach((name) => {
+            const node = JSON.parse(JSON.stringify(nodes.find((n) => n.name === name)));
+            const visited = [];
+
+            // Reversing so that pop starts from the first element
+            let toVisit = node.extends ? [...node.extends.reverse()] : [];
+
+            while (toVisit.length !== 0) {
+                const visitNodeName = toVisit.pop();
+                if (!visited.includes(visitNodeName)) {
+                    visited.push(visitNodeName);
+
+                    const visitNode = nodes.find((n) => n.name === visitNodeName);
+
+                    if (visitNode.extends !== undefined) {
+                        toVisit = [...toVisit, ...visitNode.extends];
+                    }
+
+                    const nodeName = node.name;
+                    Object.assign(node, mergeNodes(node, visitNode));
+                    node.name = nodeName;
+                }
+            }
+            resolvedNodes.push(node);
+        });
+
+        return resolvedNodes;
     }
 
     /**
