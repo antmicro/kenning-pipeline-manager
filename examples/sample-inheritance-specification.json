@@ -1,0 +1,35 @@
+{
+    "nodes": [
+        {
+            "name": "LoadVideo1",
+            "type": "filesystem",
+            "category": "Filesystem",
+            "properties": [
+                {"name": "1", "type": "text", "default": ""}
+            ],
+            "interfaces": []
+        },
+        {
+            "name": "LoadVideo2",
+            "extends": ["LoadVideo1"],
+            "properties": [
+                {"name": "2", "type": "text", "default": ""}
+            ]
+        },
+        {
+            "name": "LoadVideo3",
+            "extends": ["LoadVideo2", "LoadVideo3"],
+            "properties": [
+                {"name": "3", "type": "text", "default": ""}
+            ]
+        },
+        {
+            "name": "LoadVideo4",
+            "extends": ["LoadVideo3", "LoadVideo1"],
+            "properties": [
+                {"name": "4", "type": "text", "default": ""}
+            ]
+        }
+    ],
+    "metadata": {}
+}
