@@ -57,10 +57,12 @@ export default class EditorManager {
      *
      * @param dataflowSpecification Specification to load
      * @param overriding tells whether the specification is updated on dataflow loading
+     * @param resolve determines whether resolving of inheritance is needed
+     * @returns An array of errors. If the array is empty, the updating process was successful.
      */
     /* eslint-disable no-underscore-dangle */
-    updateEditorSpecification(dataflowSpecification, overriding = false) {
-        if (!dataflowSpecification) return;
+    updateEditorSpecification(dataflowSpecification, overriding = false, resolve = true) {
+        if (!dataflowSpecification) return ['No specification passed'];
         if (this.specificationLoaded) {
             this.cleanEditor();
         }
@@ -86,11 +88,18 @@ export default class EditorManager {
             this.currentSpecification = JSON.parse(JSON.stringify(dataflowSpecification));
         }
 
-        const { subgraphs, nodes, metadata } = dataflowSpecification;
-        const resolvedNodes = this.resolveInheritance(nodes);
+        let resolvedNodes = [];
+
+        if (resolve) {
+            try {
+                resolvedNodes = this.resolveInheritance(nodes);
+            } catch (e) {
+                return [e];
+            }
+        }
 
         const errors = this.validateSpecification(
-            { nodes: resolvedNodes, metadata },
+            { subgraphs, nodes: resolvedNodes, metadata },
             specificationSchema,
         );
         if (Array.isArray(errors) && errors.length) {
@@ -244,11 +253,7 @@ export default class EditorManager {
             });
 
             if (lastLength === unsortedNodes.length) {
-                NotificationHandler.showToast(
-                    'error',
-                    'Unresorvable inheritance in specification.',
-                );
-                return [];
+                throw new Error('Unresorvable inheritance in specification!');
             }
             lastLength = unsortedNodes.length;
         }
@@ -408,9 +413,9 @@ export default class EditorManager {
                     updatedspecification.metadata = dataflow.metadata;
                 }
 
-                this.updateEditorSpecification(updatedspecification, true);
+                this.updateEditorSpecification(updatedspecification, true, false);
             } else {
-                this.updateEditorSpecification(this.currentSpecification);
+                this.updateEditorSpecification(this.currentSpecification, false);
             }
             return this.editor.load(dataflow);
         } catch (err) {
