@@ -21,7 +21,7 @@ import {
     NodeInterface,
 } from 'baklavajs';
 import { v4 as uuidv4 } from 'uuid';
-import { toRaw } from 'vue';
+import { toRaw, nextTick } from 'vue';
 import {
     SUBGRAPH_OUTPUT_NODE_TYPE,
     SUBGRAPH_INPUT_NODE_TYPE,
@@ -96,7 +96,6 @@ export default class PipelineManagerEditor extends Editor {
     }
 
     async load(rawState) {
-        const state = await this.layoutManager.computeLayout(rawState);
         // All subgraphs should be unregistered to avoid conflicts later when trying to
         // load into subgraph (in that case there may be two subgraphs with the same ID, one
         // of them from the previous session).
@@ -110,7 +109,7 @@ export default class PipelineManagerEditor extends Editor {
 
         const recurrentSubgraphLoad = (node) => {
             if (node.subgraph !== undefined) {
-                const fittingTemplate = state.graphTemplateInstances.filter(
+                const fittingTemplate = rawState.graphTemplateInstances.filter(
                     (template) => template.id === node.subgraph,
                 );
                 if (fittingTemplate.length !== 1) {
@@ -146,11 +145,24 @@ export default class PipelineManagerEditor extends Editor {
             }
         };
 
-        state.graph.nodes.forEach(recurrentSubgraphLoad);
-        state.graphTemplates = [];
-        state.graph.inputs = [];
-        state.graph.outputs = [];
+        rawState.graph.nodes.forEach(recurrentSubgraphLoad);
+        rawState.graphTemplates = [];
+        rawState.graph.inputs = [];
+        rawState.graph.outputs = [];
 
+        // Load the node state as it is, wait until vue renders new nodes so that
+        // node dimensions can be retrieved from DOM elements and then update the
+        // location based on autolayout results
+        super.load(rawState);
+        await nextTick();
+        const state = await this.layoutManager.computeLayout(rawState);
+
+        // state.graph.nodes.forEach((nodeState) => {
+        //     const nodeInstance = this._graph.nodes.filter(
+        //         (graphNode) => graphNode.id === nodeState.id,
+        //     )[0];
+        //     nodeInstance.position = nodeState.position;
+        // });
         super.load(state);
 
         if (state.graph.panning !== undefined) {
@@ -484,11 +496,18 @@ export default class PipelineManagerEditor extends Editor {
         return this.subgraphStack.length > 0;
     }
 
-    applyAutolayout() {
+    async applyAutolayout() {
         const state = this.save();
         state.graph.nodes.forEach((node) => {
             node.position = undefined;
         });
         this.load(state);
+        // const layout = await this.layoutManager.computeLayout(state);
+        // layout.graph.nodes.forEach((nodeState) => {
+        //     const nodeInstance = this._graph.nodes.filter(
+        //         (graphNode) => graphNode.id === nodeState.id,
+        //     )[0];
+        //     nodeInstance.position = nodeState.position;
+        // });
     }
 }
