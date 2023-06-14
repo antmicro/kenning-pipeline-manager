@@ -357,14 +357,17 @@
                         "patternProperties": {
                             "^.*$": {"type": "string"}
                         }
+                    },
+                    "extends": {
+                        "type": "array",
+                        "description": "Node names to extend",
+                        "items": {
+                            "type": "string"
+                        }
                     }
                 },
                 "required": [
-                    "name",
-                    "type",
-                    "category",
-                    "interfaces",
-                    "properties"
+                    "name"
                 ],
                 "additionalProperties": false
             }

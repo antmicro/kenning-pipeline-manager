@@ -12,7 +12,7 @@ import PipelineManagerEditor from '../custom/Editor';
 
 import NotificationHandler from './notifications';
 import { NodeFactory, readInterfaceTypes, SubgraphFactory } from './NodeFactory';
-import specificationSchema from '../../../resources/schemas/dataflow_spec_schema.json';
+import unresolvedSpecificationSchema from '../../../resources/schemas/unresolved_specification_schema.json';
 import ConnectionRenderer from './ConnectionRenderer';
 import {
     SubgraphInoutNode,
@@ -455,18 +455,21 @@ export default class EditorManager {
      * @returns An array of errors. If the array is empty, the validation was successful.
      */
     /* eslint-disable class-methods-use-this */
-    validateSpecification(specification) {
-        return this.validateJSONWithSchema(specification, specificationSchema);
+    validateSpecification(specification, schema = unresolvedSpecificationSchema) {
+        return this.validateJSONWithSchema(specification, schema);
     }
 
     /**
-     * Validates metadata in JSON format using schema from specificationSchema.
+     * Validates metadata in JSON format using schema from unresolvedSpecificationSchema.
      *
      * @param jsonmetadata metadata in JSON format to validate
      * @return An array of errors. If the array is empty, the validation was successful.
      */
     validateMetadata(jsonmetadata) {
-        return this.validateJSONWithSchema(jsonmetadata, specificationSchema.properties.metadata);
+        return this.validateJSONWithSchema(
+            jsonmetadata,
+            unresolvedSpecificationSchema.properties.metadata,
+        );
     }
 
     /**
