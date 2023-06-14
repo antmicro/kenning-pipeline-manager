@@ -30,12 +30,15 @@ function dataflowToGraph(dataflow) {
         Object.values(node.interfaces).forEach((intf) => interfaceToNodeId.set(intf.id, node.id));
     });
 
-    const nodes = dataflow.graph.nodes.map((node) => ({
-        id: node.id,
-        width: Math.min(node.width, 300),
-        height: 300, // TODO
-        position: node.position,
-    }));
+    const nodes = dataflow.graph.nodes.map((node) => {
+        const HTMLelement = document.getElementById(node.id);
+        return {
+            id: node.id,
+            width: HTMLelement.offsetWidth,
+            height: HTMLelement.offsetHeight,
+            position: node.position,
+        };
+    });
     const connections = dataflow.graph.connections.map((connection) => ({
         id: connection.id,
         from: interfaceToNodeId.get(connection.from),
