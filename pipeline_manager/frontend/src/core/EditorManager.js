@@ -13,6 +13,7 @@ import PipelineManagerEditor from '../custom/Editor';
 import NotificationHandler from './notifications';
 import { NodeFactory, readInterfaceTypes, SubgraphFactory } from './NodeFactory';
 import unresolvedSpecificationSchema from '../../../resources/schemas/unresolved_specification_schema.json';
+import specificationSchema from '../../../resources/schemas/specification_schema.json';
 import ConnectionRenderer from './ConnectionRenderer';
 import {
     SubgraphInoutNode,
@@ -88,6 +89,14 @@ export default class EditorManager {
         const { subgraphs, nodes, metadata } = dataflowSpecification;
         const resolvedNodes = this.resolveInheritance(nodes);
 
+        const errors = this.validateSpecification(
+            { nodes: resolvedNodes, metadata },
+            specificationSchema,
+        );
+        if (Array.isArray(errors) && errors.length) {
+            return errors;
+        }
+
         const interfaceTypes = readInterfaceTypes(resolvedNodes, metadata);
         this.nodeInterfaceTypes.addTypes(...Object.values(interfaceTypes));
         this.updateInterfacesStyle(metadata);
@@ -160,8 +169,16 @@ export default class EditorManager {
         this.baklavaView.collapseSidebar = metadata.collapseSidebar ?? true;
 
         this.specificationLoaded = true;
+        return [];
     }
 
+    /**
+     * Given nodes resolves their inheritances and returns and array of nodes that are ready
+     * to be loaded by the editor.
+     *
+     * @param nodes
+     * @returns nodes with resolved inheritances
+     */
     /* eslint-disable class-methods-use-this,no-param-reassign */
     resolveInheritance(nodes) {
         const unsortedNodes = JSON.parse(JSON.stringify(nodes));
@@ -246,18 +263,18 @@ export default class EditorManager {
             let toVisit = node.extends ? [...node.extends.reverse()] : [];
 
             while (toVisit.length !== 0) {
-                const visitNodeName = toVisit.pop();
-                if (!visited.includes(visitNodeName)) {
-                    visited.push(visitNodeName);
+                const visitedNodeName = toVisit.pop();
+                if (!visited.includes(visitedNodeName)) {
+                    visited.push(visitedNodeName);
 
-                    const visitNode = nodes.find((n) => n.name === visitNodeName);
+                    const visitedNode = nodes.find((n) => n.name === visitedNodeName);
 
-                    if (visitNode.extends !== undefined) {
-                        toVisit = [...toVisit, ...visitNode.extends];
+                    if (visitedNode.extends !== undefined) {
+                        toVisit = [...toVisit, ...visitedNode.extends];
                     }
 
                     const nodeName = node.name;
-                    Object.assign(node, mergeNodes(node, visitNode));
+                    Object.assign(node, mergeNodes(node, visitedNode));
                     node.name = nodeName;
                 }
             }
