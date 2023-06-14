@@ -57,7 +57,6 @@ export default class PipelineManagerEditor extends Editor {
 
     save() {
         // Save all changes done to subgraphs before saving
-        // const stackCopy = structuredClone(toRaw(this.subgraphStack))
         const stackCopy = Array.from(toRaw(this.subgraphStack));
         stackCopy.forEach(this.backFromSubgraph.bind(this));
 

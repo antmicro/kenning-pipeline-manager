@@ -151,6 +151,8 @@ export function parseNodeState(state) {
     const newState = { ...state };
     if (newState.inputs === undefined) {
         newState.inputs = {};
+    }
+    if (newState.outputs === undefined) {
         newState.outputs = {};
     }
 
