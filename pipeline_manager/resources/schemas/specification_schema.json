@@ -1,0 +1,22 @@
+{
+    "type": "object",
+    "allOf": [
+        {
+            "$schema": "./unresolved_specification_schema.json"
+        }
+    ],
+    "properties": {
+        "nodes": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "required": [
+                    "type",
+                    "category",
+                    "interfaces",
+                    "properties"
+                ]
+            }
+        }
+    }
+}
