@@ -87,13 +87,18 @@ export default {
          * Loads nodes' specification from JSON structure.
          */
         loadSpecification(specification) {
-            const errors = this.editorManager.validateSpecification(specification);
+            let errors = this.editorManager.validateSpecification(specification);
             if (Array.isArray(errors) && errors.length) {
                 NotificationHandler.terminalLog('error', 'Specification is invalid', errors);
-            } else {
-                this.editorManager.updateEditorSpecification(specification);
-                NotificationHandler.showToast('info', 'Specification loaded successfully');
+                return;
             }
+            errors = this.editorManager.updateEditorSpecification(specification);
+            if (Array.isArray(errors) && errors.length) {
+                NotificationHandler.terminalLog('error', 'Specification is invalid', errors);
+                return;
+            }
+
+            NotificationHandler.showToast('info', 'Specification loaded successfully');
         },
 
         /**

@@ -60,14 +60,18 @@ export default class ExternalApplicationManager {
             if (data.type === PMMessageType.OK) {
                 const specification = data.content;
 
-                const errors = this.editorManager.validateSpecification(specification);
+                let errors = this.editorManager.validateSpecification(specification);
                 if (Array.isArray(errors) && errors.length) {
                     NotificationHandler.terminalLog('error', 'Specification is invalid', errors);
-                } else {
-                    this.editorManager.updateEditorSpecification(specification);
-                    message = 'Specification loaded successfully';
-                    NotificationHandler.showToast('info', message);
+                    return;
                 }
+                errors = this.editorManager.updateEditorSpecification(specification);
+                if (Array.isArray(errors) && errors.length) {
+                    NotificationHandler.terminalLog('error', 'Specification is invalid', errors);
+                    return;
+                }
+
+                NotificationHandler.showToast('info', 'Specification loaded successfully');
             } else if (data.type === PMMessageType.ERROR) {
                 message = data.content;
                 NotificationHandler.showToast('error', message);
