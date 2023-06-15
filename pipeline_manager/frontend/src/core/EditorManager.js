@@ -195,6 +195,7 @@ export default class EditorManager {
         const isObject = (obj) => typeof obj === 'object' && obj !== null && !Array.isArray(obj);
         const isArray = (obj) => Array.isArray(obj);
 
+        // Helper function that applies base node properties to the child node
         const mergeNodes = (child, base) => {
             const output = { ...child };
             if (isObject(child) && isObject(base)) {
