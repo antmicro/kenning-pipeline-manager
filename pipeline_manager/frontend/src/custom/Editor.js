@@ -95,7 +95,7 @@ export default class PipelineManagerEditor extends Editor {
         return state;
     }
 
-    async load(rawState) {
+    async load(rawState, calculateLayout = true) {
         // All subgraphs should be unregistered to avoid conflicts later when trying to
         // load into subgraph (in that case there may be two subgraphs with the same ID, one
         // of them from the previous session).
@@ -154,22 +154,17 @@ export default class PipelineManagerEditor extends Editor {
         // node dimensions can be retrieved from DOM elements and then update the
         // location based on autolayout results
         super.load(rawState);
-        await nextTick();
-        const state = await this.layoutManager.computeLayout(rawState);
-
-        // state.graph.nodes.forEach((nodeState) => {
-        //     const nodeInstance = this._graph.nodes.filter(
-        //         (graphNode) => graphNode.id === nodeState.id,
-        //     )[0];
-        //     nodeInstance.position = nodeState.position;
-        // });
-        super.load(state);
-
-        if (state.graph.panning !== undefined) {
-            this._graph.panning = state.graph.panning;
+        if (calculateLayout) {
+            await nextTick();
+            const state = await this.layoutManager.computeLayout(rawState);
+            super.load(state);
         }
-        if (state.graph.scaling !== undefined) {
-            this._graph.scaling = state.graph.scaling;
+
+        if (rawState.graph.panning !== undefined) {
+            this._graph.panning = rawState.graph.panning;
+        }
+        if (rawState.graph.scaling !== undefined) {
+            this._graph.scaling = rawState.graph.scaling;
         }
     }
 
@@ -501,13 +496,7 @@ export default class PipelineManagerEditor extends Editor {
         state.graph.nodes.forEach((node) => {
             node.position = undefined;
         });
-        this.load(state);
-        // const layout = await this.layoutManager.computeLayout(state);
-        // layout.graph.nodes.forEach((nodeState) => {
-        //     const nodeInstance = this._graph.nodes.filter(
-        //         (graphNode) => graphNode.id === nodeState.id,
-        //     )[0];
-        //     nodeInstance.position = nodeState.position;
-        // });
+        const updatedState = await this.layoutManager.computeLayout(state);
+        this.load(updatedState, false);
     }
 }
