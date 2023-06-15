@@ -136,6 +136,8 @@ Every input object requires six properties:
   The key should be a URL class key from `urls` in `metadata`.
   The value of the entry is appended to the URL base from the URL class.
 
+Some or all of the properties above (except for `name`) can be derived from existing node types using the `extends` list - check [Node type inheritance](#node-type-inheritance).
+
 Here is an example of a node:
 
 ```json
@@ -238,6 +240,21 @@ Additional properties:
   Supported values are `string`, `number`, `integer`, `boolean`.
 * `description` - description of the property.
   In some cases, it can be displayed to the user.
+
+#### Node type inheritance
+
+It is possible to inherit:
+
+* `type`
+* `category`
+* `icon`
+* `interfaces`
+* `properties`
+* `urls`
+
+From existing node types using the `extends` parameter.
+The parameter accepts a list of node types.
+The node type is computed by iteratively updating node type definition structures, going through all node types in the `extends` list (in the specified order), and then applying parameters from the currenty node type.
 
 ### Subgraphs
 
