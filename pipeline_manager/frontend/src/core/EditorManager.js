@@ -270,19 +270,20 @@ export default class EditorManager {
 
             while (toVisit.length !== 0) {
                 const visitedNodeName = toVisit.pop();
-                if (!visited.includes(visitedNodeName)) {
-                    visited.push(visitedNodeName);
-
-                    const visitedNode = nodes.find((n) => n.name === visitedNodeName);
-
-                    if (visitedNode.extends !== undefined) {
-                        toVisit = [...toVisit, ...visitedNode.extends];
-                    }
-
-                    const nodeName = node.name;
-                    Object.assign(node, mergeNodes(node, visitedNode));
-                    node.name = nodeName;
+                if (visited.includes(visitedNodeName)) {
+                    throw new Error(`Repeated class in "extends" list:  ${visitedNodeName}`);
                 }
+                visited.push(visitedNodeName);
+
+                const visitedNode = nodes.find((n) => n.name === visitedNodeName);
+
+                if (visitedNode.extends !== undefined) {
+                    toVisit = [...toVisit, ...visitedNode.extends];
+                }
+
+                const nodeName = node.name;
+                Object.assign(node, mergeNodes(node, visitedNode));
+                node.name = nodeName;
             }
             resolvedNodes.push(node);
         });
