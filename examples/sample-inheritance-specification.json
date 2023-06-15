@@ -1,41 +1,46 @@
 {
     "nodes": [
         {
-            "name": "LoadVideo1",
-            "type": "filesystem",
-            "category": "Filesystem",
+            "name": "Type A",
+            "type": "class",
+            "category": "Classes",
             "properties": [
-                {"name": "1", "type": "text", "default": ""}
+                {"name": "prop-a", "type": "text", "default": ""}
             ],
             "interfaces": [
-                {"maxConnectionsCount": 2, "name": "output-1", "type": "TypeTwo", "direction": "output", "connectionSide": "left"}
+                {"name": "output-a", "type": "Interface", "direction": "output"}
             ]
         },
         {
-            "name": "LoadVideo2",
-            "extends": ["LoadVideo1"],
+            "name": "Type B",
+            "extends": ["Type A"],
             "properties": [
-                {"name": "2", "type": "text", "default": ""}
+                {"name": "prop-b", "type": "text", "default": ""}
             ],
             "interfaces": [
-                {"maxConnectionsCount": 2, "name": "output-2", "type": "TypeTwo", "direction": "output", "connectionSide": "left"}
+                {"name": "output-b", "type": "Interface", "direction": "output"}
             ]
         },
         {
-            "name": "LoadVideo3",
-            "extends": ["LoadVideo2"],
+            "name": "Type C",
+            "type": "class",
+            "category": "Classes",
             "properties": [
-                {"name": "1", "type": "number", "default": 5},
-                {"name": "3", "type": "text", "default": ""}
+                {"name": "prop-c", "type": "text", "default": ""}
+            ],
+            "interfaces": [
+                {"name": "input-c", "type": "Interface", "direction": "input"}
             ]
         },
         {
-            "name": "LoadVideo4",
-            "extends": ["LoadVideo3", "LoadVideo1"],
+            "name": "Type D",
+            "extends": ["Type B", "Type C"],
             "properties": [
-                {"name": "4", "type": "text", "default": ""}
+                {"name": "prop-d", "type": "text", "default": ""}
+            ],
+            "interfaces": [
+                {"name": "inout-d", "type": "Interface", "direction": "inout"}
             ]
         }
-    ],
-    "metadata": {}
+    ]
 }
