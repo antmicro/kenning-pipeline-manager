@@ -39,7 +39,7 @@ class PMStateManager:
         self.server = None
 
         self.schema = None
-        self.schema_filename = 'dataflow_spec_schema.json'
+        self.schema_filename = 'unresolved_specification_schema.json'
 
     def reinitialize(
             self,

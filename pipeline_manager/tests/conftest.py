@@ -78,7 +78,7 @@ def sample_dataflow(sample_dataflow_path: Path) -> dict:
 @pytest.fixture
 def specification_schema_path() -> Path:
     """
-    Fixture that returns path to `dataflow_spec_schema.json`
+    Fixture that returns path to `unresolved_specification_schema.json`
     in `examples` directory.
 
     Returns
@@ -86,7 +86,7 @@ def specification_schema_path() -> Path:
     Path :
         Path to the jsonschema
     """
-    specification_schema_path = files(schemas).joinpath('dataflow_spec_schema.json')  # noqa: E501
+    specification_schema_path = files(schemas).joinpath('unresolved_specification_schema.json')  # noqa: E501
     return Path(specification_schema_path)
 
 
