@@ -7,19 +7,25 @@
             "properties": [
                 {"name": "1", "type": "text", "default": ""}
             ],
-            "interfaces": []
+            "interfaces": [
+                {"maxConnectionsCount": 2, "name": "output-1", "type": "TypeTwo", "direction": "output", "connectionSide": "left"}
+            ]
         },
         {
             "name": "LoadVideo2",
             "extends": ["LoadVideo1"],
             "properties": [
                 {"name": "2", "type": "text", "default": ""}
+            ],
+            "interfaces": [
+                {"maxConnectionsCount": 2, "name": "output-2", "type": "TypeTwo", "direction": "output", "connectionSide": "left"}
             ]
         },
         {
             "name": "LoadVideo3",
-            "extends": ["LoadVideo2", "LoadVideo3"],
+            "extends": ["LoadVideo2"],
             "properties": [
+                {"name": "1", "type": "number", "default": 5},
                 {"name": "3", "type": "text", "default": ""}
             ]
         },
