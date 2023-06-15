@@ -256,6 +256,61 @@ From existing node types using the `extends` parameter.
 The parameter accepts a list of node types.
 The node type is computed by iteratively updating node type definition structures, going through all node types in the `extends` list (in the specified order), and then applying parameters from the currenty node type.
 
+Below is a sample specification with used inheritance mechanism:
+
+```json
+{
+    "nodes": [
+        {
+            "name": "Type A",
+            "type": "class",
+            "category": "Classes",
+            "properties": [
+                {"name": "prop-a", "type": "text", "default": ""}
+            ],
+            "interfaces": [
+                {"name": "output-a", "type": "Interface", "direction": "output"}
+            ]
+        },
+        {
+            "name": "Type B",
+            "extends": ["Type A"],
+            "properties": [
+                {"name": "prop-b", "type": "text", "default": ""}
+            ],
+            "interfaces": [
+                {"name": "output-b", "type": "Interface", "direction": "output"}
+            ]
+        },
+        {
+            "name": "Type C",
+            "type": "class",
+            "category": "Classes",
+            "properties": [
+                {"name": "prop-c", "type": "text", "default": ""}
+            ],
+            "interfaces": [
+                {"name": "input-c", "type": "Interface", "direction": "input"}
+            ]
+        },
+        {
+            "name": "Type D",
+            "extends": ["Type B", "Type C"],
+            "properties": [
+                {"name": "prop-d", "type": "text", "default": ""}
+            ],
+            "interfaces": [
+                {"name": "inout-d", "type": "Interface", "direction": "inout"}
+            ]
+        }
+    ]
+}
+```
+
+```{warning}
+Node types can not be repeated (explicitly in list or implicitly through inheritance) in the `extends` list.
+```
+
 ### Subgraphs
 
 Each object defines node representing defined subgraph.
