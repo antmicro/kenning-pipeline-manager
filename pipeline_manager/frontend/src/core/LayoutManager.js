@@ -73,7 +73,11 @@ export default class LayoutManager {
 
     useAlgorithm(algorithm) {
         const [engineName, algorithmName] = algorithm.split(' - ');
-        this.layoutEngine = this.availableEngines[engineName];
+        const layoutEngine = this.availableEngines[engineName];
+        if (layoutEngine === undefined) {
+            throw new Error(`Could not parse the ${algorithm} autolayout algorithm`);
+        }
+        this.layoutEngine = layoutEngine;
         if (algorithmName !== undefined) {
             this.layoutEngine.chooseAlgorithm(algorithmName);
         }
