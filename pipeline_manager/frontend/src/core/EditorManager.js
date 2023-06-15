@@ -106,11 +106,11 @@ export default class EditorManager {
             return errors;
         }
 
-        const interfaceTypes = readInterfaceTypes(resolvedNodes, metadata);
+        const interfaceTypes = readInterfaceTypes(resolvedNodes, metadata ?? {});
         this.nodeInterfaceTypes.addTypes(...Object.values(interfaceTypes));
-        this.updateInterfacesStyle(metadata);
+        this.updateInterfacesStyle(metadata ?? {});
 
-        if ('urls' in metadata) {
+        if (metadata && 'urls' in metadata) {
             Object.entries(metadata.urls).forEach(([urlName, state]) => {
                 this.editor.baseURLs.set(urlName, state);
             });
@@ -174,8 +174,10 @@ export default class EditorManager {
         }
 
         this.baklavaView.ignoredLayers = new Set();
-        this.baklavaView.ignorableLayers = metadata.layers ?? [];
-        this.baklavaView.collapseSidebar = metadata.collapseSidebar ?? true;
+        if (metadata) {
+            this.baklavaView.ignorableLayers = metadata.layers ?? [];
+            this.baklavaView.collapseSidebar = metadata.collapseSidebar ?? true;
+        }
 
         this.specificationLoaded = true;
         return [];
