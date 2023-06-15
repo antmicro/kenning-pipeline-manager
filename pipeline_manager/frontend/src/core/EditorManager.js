@@ -64,7 +64,7 @@ export default class EditorManager {
             this.cleanEditor();
         }
 
-        const { subgraphs, nodes, metadata, version } = dataflowSpecification;
+        const { subgraphs, nodes, metadata, version } = dataflowSpecification; // eslint-disable-line object-curly-newline,max-len
         if (overriding || !this.currentSpecification) {
             if (version === undefined) {
                 NotificationHandler.terminalLog(
