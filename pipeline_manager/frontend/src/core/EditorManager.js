@@ -197,12 +197,12 @@ export default class EditorManager {
 
         // Helper function that applies base node properties to the child node
         const mergeNodes = (child, base) => {
-            const output = { ...child };
+            const output = { ...base };
             if (isObject(child) && isObject(base)) {
-                Object.keys(base).forEach((key) => {
-                    if (isObject(base[key])) {
-                        if (!(key in child)) {
-                            output[key] = base[key];
+                Object.keys(child).forEach((key) => {
+                    if (isObject(child[key])) {
+                        if (!(key in output)) {
+                            output[key] = child[key];
                         } else {
                             output[key] = mergeNodes(child[key], base[key]);
                         }
@@ -210,10 +210,10 @@ export default class EditorManager {
                         if (key === 'extends') {
                             output[key] = child[key];
                         } else {
-                            output[key] = [...child[key], ...base[key]];
+                            output[key] = [...base[key], ...child[key]];
                         }
                     } else {
-                        output[key] = base[key];
+                        output[key] = child[key];
                     }
                 });
             }
@@ -254,7 +254,7 @@ export default class EditorManager {
             });
 
             if (lastLength === unsortedNodes.length) {
-                throw new Error('Unresorvable inheritance in specification!');
+                throw new Error('Unresolvable inheritance in specification!');
             }
             lastLength = unsortedNodes.length;
         }
