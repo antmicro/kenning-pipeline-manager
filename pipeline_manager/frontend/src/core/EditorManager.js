@@ -57,14 +57,19 @@ export default class EditorManager {
      * If the current editor already has a specification loaded then the editor
      * and its plugins are reinitialized and then the specification is loaded.
      *
-     * @param dataflowSpecification Specification to load
+     * @param dataflowSpecification Specification to load, can be either an object or a string
      * @param overriding tells whether the specification is updated on dataflow loading
      * @param resolve determines whether resolving of inheritance is needed
      * @returns An array of errors. If the array is empty, the updating process was successful.
      */
-    /* eslint-disable no-underscore-dangle */
+    /* eslint-disable no-underscore-dangle,no-param-reassign */
     updateEditorSpecification(dataflowSpecification, overriding = false, resolve = true) {
         if (!dataflowSpecification) return ['No specification passed'];
+
+        if (typeof dataflowSpecification === 'string' || dataflowSpecification instanceof String) {
+            dataflowSpecification = jsonlint.parse(dataflowSpecification);
+        }
+
         if (this.specificationLoaded) {
             this.cleanEditor();
         }
