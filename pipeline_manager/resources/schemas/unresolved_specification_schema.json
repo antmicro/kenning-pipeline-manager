@@ -364,7 +364,8 @@
                         "items": {
                             "type": "string"
                         }
-                    }
+                    },
+                    "additionalData": {}
                 },
                 "required": [
                     "name"
