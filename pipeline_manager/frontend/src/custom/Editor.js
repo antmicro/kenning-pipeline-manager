@@ -511,9 +511,9 @@ export default class PipelineManagerEditor extends Editor {
     }
 
     updateNodesPosition(updatedGraph) {
-        this.graph.nodes.forEach((node) => {
-            const updatedState = updatedGraph.graph.nodes.filter(
-                (graphState) => graphState.id === node.id,
+        updatedGraph.nodes.forEach((updatedState) => {
+            const node = this.graph.nodes.filter(
+                (nodeInstance) => updatedState.id === nodeInstance.id,
             )[0];
             node.position = updatedState.position;
         });
