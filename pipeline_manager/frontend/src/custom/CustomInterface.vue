@@ -18,6 +18,7 @@ from creating and deleting connections or altering nodes' values if the editor i
             v-if="intf.port"
             @pointerover="startHoverWrapper"
             @pointerout="endHoverWrapper"
+            @pointerdown="onMouseDown"
         >
             <Arrow v-if="displayArrow" color="black" scale="medium" :rotate="arrowRotation" />
         </div>
@@ -40,6 +41,7 @@ from creating and deleting connections or altering nodes' values if the editor i
 import { defineComponent, computed } from 'vue';
 import { Components, useViewModel } from 'baklavajs';
 import Arrow from '../icons/Arrow.vue';
+import doubleClick from '../core/doubleClick';
 
 export default defineComponent({
     extends: Components.NodeInterface,
@@ -71,6 +73,18 @@ export default defineComponent({
                 endHover();
             }
         };
+
+        /* eslint-disable vue/no-mutating-props,no-param-reassign */
+        const onMouseDown = doubleClick(700, () => {
+            if (!viewModel.value.editor.readonly) {
+                if (props.intf.connectionSide === 'left') {
+                    props.intf.connectionSide = 'right';
+                } else {
+                    props.intf.connectionSide = 'left';
+                }
+                endHover();
+            }
+        });
 
         const displayArrow = props.intf.port && props.intf.direction !== 'inout';
         const arrowRotation = computed(() => {
@@ -111,6 +125,7 @@ export default defineComponent({
             endHoverWrapper,
             displayArrow,
             arrowRotation,
+            onMouseDown,
         };
     },
 });
