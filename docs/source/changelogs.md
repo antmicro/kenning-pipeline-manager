@@ -14,6 +14,7 @@ Commit SHA - `8416661d796f6c628e49539e9cf813412f3b25bb`
 * Added `additionalData` for storing some node-related data, not relevant to {{project}}
 * Changed `connectionSide` to `side` in dataflow and specification
 * `type` of interface now can be either a single string or a list of strings.
+* Introduced optional metadata keyword `layout` specifying algorithm used for automatic node position calculation.
 
 ## 20230615.2
 
