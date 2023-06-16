@@ -26,31 +26,27 @@ import NoLayoutAlgorithm from './layoutEngines/noLayoutEngine';
 /* eslint-disable no-param-reassign */
 function dataflowToGraph(dataflow) {
     const interfaceToNodeId = new Map();
-    dataflow.graph.nodes.forEach((node) => {
-        Object.values(node.interfaces).forEach((intf) => interfaceToNodeId.set(intf.id, node.id));
+    dataflow.nodes.forEach((node) => {
+        node.interfaces.forEach((intf) => interfaceToNodeId.set(intf.id, node.id));
     });
 
-    const nodes = dataflow.graph.nodes.map((node) => {
-        const HTMLelement = document.getElementById(node.id);
-        return {
+    const nodes = dataflow.nodes
+        .map((node) => ({
             id: node.id,
-            width: HTMLelement.offsetWidth,
-            height: HTMLelement.offsetHeight,
-            position: node.position,
-        };
-    });
-    const connections = dataflow.graph.connections.map((connection) => ({
-        id: connection.id,
-        from: interfaceToNodeId.get(connection.from),
-        to: interfaceToNodeId.get(connection.to),
-    }));
+        }));
+    const connections = dataflow.connections
+        .map((connection) => ({
+            id: connection.id,
+            from: interfaceToNodeId.get(connection.from),
+            to: interfaceToNodeId.get(connection.to),
+        }));
     return { nodes, connections };
 }
 
 function graphToDataflow(graph, dataflow) {
     const idToPosition = new Map();
     graph.nodes.forEach((node) => idToPosition.set(node.id, node.position));
-    dataflow.graph.nodes = dataflow.graph.nodes.map((node) => ({
+    dataflow.nodes = dataflow.nodes.map((node) => ({
         ...node,
         position: idToPosition.get(node.id),
     }));
@@ -109,7 +105,7 @@ export default class LayoutManager {
     async computeLayout(dataflow) {
         this.updateDimensions();
         const layout = await this.runEngine(this.graph);
-        return { ...dataflow, graph: graphToDataflow(layout, dataflow) };
+        return graphToDataflow(layout, dataflow);
     }
 
     async runEngine(graph) {
