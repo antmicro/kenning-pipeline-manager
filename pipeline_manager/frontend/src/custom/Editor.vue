@@ -39,6 +39,16 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
             <NodePalette />
         </slot>
 
+        <div class="node-container" :style="nodeContainerStyle">
+            <CustomNode
+                v-for="node in visibleNodes"
+                :key="node.id + counter.toString()"
+                :node="node"
+                :selected="selectedNodes.includes(node)"
+                @select="selectNode(node)"
+            />
+        </div>
+
         <svg
             class="connections-container"
             @mouseenter="changeHoveredConnections"
@@ -63,16 +73,6 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
                 :connection="temporaryConnection"
             />
         </svg>
-
-        <div class="node-container" :style="nodeContainerStyle">
-            <CustomNode
-                v-for="node in visibleNodes"
-                :key="node.id + counter.toString()"
-                :node="node"
-                :selected="selectedNodes.includes(node)"
-                @select="selectNode(node)"
-            />
-        </div>
     </div>
 </template>
 
