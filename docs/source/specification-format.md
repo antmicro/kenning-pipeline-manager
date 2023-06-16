@@ -135,6 +135,7 @@ Every input object requires six properties:
 * `urls` - a dictionary of [URL class](#url-class) and URL suffixes pairs.
   The key should be a URL class key from `urls` in `metadata`.
   The value of the entry is appended to the URL base from the URL class.
+* `additionalData` - can be any JSON-like object (array, dictionary, number, string, ...), it is only used for storing some additional, node-specific data, such as comments etc.
 
 Some or all of the properties above (except for `name`) can be derived from existing node types using the `extends` list - check [Node type inheritance](#node-type-inheritance).
 
