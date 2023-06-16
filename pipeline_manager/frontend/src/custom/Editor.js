@@ -457,6 +457,11 @@ export default class PipelineManagerEditor extends Editor {
             });
 
         this._switchGraph(this._graph);
+        nextTick().then(() => {
+            const graph = this.graph.save();
+            this.layoutManager.registerGraph(graph);
+            this.layoutManager.computeLayout(graph).then(this.updateNodesPosition.bind(this));
+        });
     }
 
     switchToSubgraph(subgraphNode) {
