@@ -95,7 +95,7 @@ export default class PipelineManagerEditor extends Editor {
         return state;
     }
 
-    async load(rawState, calculateLayout = true) {
+    async load(state) {
         // All subgraphs should be unregistered to avoid conflicts later when trying to
         // load into subgraph (in that case there may be two subgraphs with the same ID, one
         // of them from the previous session).
@@ -109,7 +109,7 @@ export default class PipelineManagerEditor extends Editor {
 
         const recurrentSubgraphLoad = (node) => {
             if (node.subgraph !== undefined) {
-                const fittingTemplate = rawState.graphTemplateInstances.filter(
+                const fittingTemplate = state.graphTemplateInstances.filter(
                     (template) => template.id === node.subgraph,
                 );
                 if (fittingTemplate.length !== 1) {
@@ -145,26 +145,25 @@ export default class PipelineManagerEditor extends Editor {
             }
         };
 
-        rawState.graph.nodes.forEach(recurrentSubgraphLoad);
-        rawState.graphTemplates = [];
-        rawState.graph.inputs = [];
-        rawState.graph.outputs = [];
+        state.graph.nodes.forEach(recurrentSubgraphLoad);
+        state.graphTemplates = [];
+        state.graph.inputs = [];
+        state.graph.outputs = [];
 
         // Load the node state as it is, wait until vue renders new nodes so that
         // node dimensions can be retrieved from DOM elements and then update the
         // location based on autolayout results
-        super.load(rawState);
-        if (calculateLayout) {
-            await nextTick();
-            const state = await this.layoutManager.computeLayout(rawState);
-            super.load(state);
-        }
+        this.layoutManager.registerGraph(state.graph);
+        super.load(state);
+        await nextTick();
+        const updatedGraph = await this.layoutManager.computeLayout(state.graph);
+        this.updateNodesPosition(updatedGraph);
 
-        if (rawState.graph.panning !== undefined) {
-            this._graph.panning = rawState.graph.panning;
+        if (state.graph.panning !== undefined) {
+            this._graph.panning = state.graph.panning;
         }
-        if (rawState.graph.scaling !== undefined) {
-            this._graph.scaling = rawState.graph.scaling;
+        if (state.graph.scaling !== undefined) {
+            this._graph.scaling = state.graph.scaling;
         }
     }
 
@@ -496,7 +495,17 @@ export default class PipelineManagerEditor extends Editor {
         state.graph.nodes.forEach((node) => {
             node.position = undefined;
         });
-        const updatedState = await this.layoutManager.computeLayout(state);
-        this.load(updatedState, false);
+        this.layoutManager.registerGraph(state.graph);
+        const updatedGraph = await this.layoutManager.computeLayout(state.graph);
+        this.updateNodesPosition(updatedGraph);
+    }
+
+    updateNodesPosition(updatedGraph) {
+        this.graph.nodes.forEach((node) => {
+            const updatedState = updatedGraph.graph.nodes.filter(
+                (graphState) => graphState.id === node.id,
+            )[0];
+            node.position = updatedState.position;
+        });
     }
 }
