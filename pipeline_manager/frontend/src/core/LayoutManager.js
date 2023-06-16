@@ -27,7 +27,13 @@ import NoLayoutAlgorithm from './layoutEngines/noLayoutEngine';
 function dataflowToGraph(dataflow) {
     const interfaceToNodeId = new Map();
     dataflow.nodes.forEach((node) => {
-        node.interfaces.forEach((intf) => interfaceToNodeId.set(intf.id, node.id));
+        if (node.interfaces !== undefined) {
+            node.interfaces.forEach((intf) => interfaceToNodeId.set(intf.id, node.id));
+        } else {
+            // Should be the case only for nodes SUBGRAPH_INPUT/OUTPUT/INOUT_NODE_TYPE
+            Object.values(node.inputs).forEach((intf) => interfaceToNodeId.set(intf.id, node.id));
+            Object.values(node.outputs).forEach((intf) => interfaceToNodeId.set(intf.id, node.id));
+        }
     });
 
     const nodes = dataflow.nodes
