@@ -31,10 +31,16 @@ function dataflowToGraph(dataflow) {
     });
 
     const nodes = dataflow.nodes
+        .filter((node) => node.position === undefined)
         .map((node) => ({
             id: node.id,
         }));
     const connections = dataflow.connections
+        .filter(
+            (connection) =>
+                nodes.filter((nodeState) => nodeState.id === connection.from).length > 0 &&
+                nodes.filter((nodeState) => nodeState.id === connection.to).length > 0,
+        )
         .map((connection) => ({
             id: connection.id,
             from: interfaceToNodeId.get(connection.from),
