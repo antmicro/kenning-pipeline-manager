@@ -33,6 +33,14 @@
     --baklava-editor-background-pattern-black: #{$gray-500};
 }
 
+.connections-container {
+    z-index: 1;
+}
+
+.node-container {
+    z-index: 2;
+}
+
 .baklava-node {
     min-width: 300px !important;
     width: auto;
@@ -164,6 +172,7 @@
 
 .baklava-editor {
     position: relative;
+    z-index: 1;
 }
 
 .baklava-slider > .__slider {
@@ -269,7 +278,7 @@
     // default baklavjs height - terminal panel height
     height: calc(100% - 60px - 35px);
     padding: 0;
-    z-index: 1;
+    z-index: 3;
 
     & h1 {
         margin: 0px;
