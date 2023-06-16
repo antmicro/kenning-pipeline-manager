@@ -19,6 +19,7 @@ Inherits from baklavajs/renderer-vue/src/connection/ConnectionView.vue
 <script>
 import { defineComponent, computed } from 'vue';
 import { Components, useGraph, useViewModel } from 'baklavajs';
+import doubleClick from '../../core/doubleClick';
 
 export default defineComponent({
     extends: Components.Connection,
@@ -41,15 +42,9 @@ export default defineComponent({
             '--color': strokeColor,
         }));
 
-        const doubleClickTimer = 700;
-        let lastClickTime = -doubleClickTimer;
-
-        const onMouseDown = () => {
-            if (Date.now() - lastClickTime < doubleClickTimer) {
-                graph.value.removeConnection(props.connection);
-            }
-            lastClickTime = Date.now();
-        };
+        const onMouseDown = doubleClick(700, () => {
+            graph.value.removeConnection(props.connection);
+        });
 
         const transform = (x, y) => {
             const tx = (x + graph.value.panning.x) * graph.value.scaling;
