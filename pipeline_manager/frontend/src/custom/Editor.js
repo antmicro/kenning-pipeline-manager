@@ -501,12 +501,12 @@ export default class PipelineManagerEditor extends Editor {
     }
 
     async applyAutolayout() {
-        const state = this.save();
-        state.graph.nodes.forEach((node) => {
+        const state = this.graph.save();
+        state.nodes.forEach((node) => {
             node.position = undefined;
         });
-        this.layoutManager.registerGraph(state.graph);
-        const updatedGraph = await this.layoutManager.computeLayout(state.graph);
+        this.layoutManager.registerGraph(state);
+        const updatedGraph = await this.layoutManager.computeLayout(state);
         this.updateNodesPosition(updatedGraph);
     }
 
