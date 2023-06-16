@@ -78,8 +78,10 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
 
 <script>
 /* eslint-disable object-curly-newline */
-import { EditorComponent, useGraph, useDragMove } from 'baklavajs';
+import { EditorComponent, useGraph } from 'baklavajs';
 import { defineComponent, ref, computed, watch } from 'vue';
+import useDragMove from './useDragMove';
+
 import CustomNode from './CustomNode.vue';
 import PipelineManagerConnection from './connection/PipelineManagerConnection.vue';
 import TemporaryConnection from './connection/TemporaryConnection.vue';

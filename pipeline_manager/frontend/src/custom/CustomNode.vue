@@ -87,17 +87,13 @@ from moving or deleting the nodes.
 <script setup>
 /* eslint-disable object-curly-newline */
 import { ref, computed, toRef, onUpdated, onMounted } from 'vue';
-import {
-    useDragMove,
-    useViewModel,
-    AbstractNode,
-    GRAPH_NODE_TYPE_PREFIX,
-    useGraph,
-} from 'baklavajs';
+import { useViewModel, AbstractNode, GRAPH_NODE_TYPE_PREFIX, useGraph } from 'baklavajs';
 
+import useDragMove from './useDragMove';
 import CustomInterface from './CustomInterface.vue';
 import CustomContextMenu from './ContextMenu.vue';
 import VerticalDots from '../components/VerticalDots.vue';
+import gridSnapper from '../core/gridSnapper';
 
 // Baklavajs implementation
 
@@ -110,7 +106,9 @@ const emit = defineEmits(['select']);
 
 const { viewModel } = useViewModel();
 const { graph } = useGraph();
-const dragMove = useDragMove(toRef(props.node, 'position'));
+const snapOffset = computed(() => viewModel.value.snapOffset);
+
+const dragMove = useDragMove(toRef(props.node, 'position'), gridSnapper(snapOffset.value));
 
 // If type start with '_', it is not displayed as node title
 const IGNORE_TYPE_PREFIX = '_';
