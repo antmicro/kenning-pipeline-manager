@@ -323,6 +323,11 @@ export default class PipelineManagerEditor extends Editor {
 
                 delete state.interfaces;
                 super.load({ ...state, inputs, outputs });
+                // Default position should be undefined instead of (0, 0) so that it can be set
+                // by autolayout
+                if (state.position === undefined) {
+                    this.position = undefined;
+                }
             }
 
             updateInterfaces() {
@@ -362,8 +367,8 @@ export default class PipelineManagerEditor extends Editor {
                 node.inputs.name.value = input.name;
                 node.inputs.side.value = convertToUpperCase(input.side);
                 node.graphInterfaceId = interfaceID;
-                node.position = input.nodePosition;
                 this._graph.addNode(node);
+                node.position = input.nodePosition;
 
                 // NodeInterfaceID is stored only in template, we need to find it by ID
                 const templateInputArr = Object.values(this._graph.inputs).filter(
@@ -397,8 +402,8 @@ export default class PipelineManagerEditor extends Editor {
                 node.inputs.name.value = inout.name;
                 node.inputs.side.value = convertToUpperCase(inout.side);
                 node.graphInterfaceId = interfaceID;
-                node.position = inout.nodePosition;
                 this._graph.addNode(node);
+                node.position = inout.nodePosition;
                 const templateInoutArr = Object.values(this._graph.inputs).filter(
                     (intf) => intf.id === interfaceID,
                 );
@@ -430,8 +435,8 @@ export default class PipelineManagerEditor extends Editor {
                 node.inputs.name.value = output.name;
                 node.inputs.side.value = convertToUpperCase(output.side);
                 node.graphInterfaceId = interfaceID;
-                node.position = output.nodePosition;
                 this._graph.addNode(node);
+                node.position = output.nodePosition;
                 const templateOutputArr = Object.values(this._graph.outputs).filter(
                     (intf) => intf.id === interfaceID,
                 );
