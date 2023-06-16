@@ -103,12 +103,10 @@ export default {
     // height: 100px;
     width: 435px;
     top: 60px;
-    background-color: $gray-600;
-    opacity: 0.9;
+    background-color: #{$gray-600}E6;
     position: absolute;
     right: -495px;
     padding: $spacing-l;
-    z-index: 1;
     color: white;
 
     & > .setting-header {
