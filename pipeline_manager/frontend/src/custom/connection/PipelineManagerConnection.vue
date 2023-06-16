@@ -23,9 +23,10 @@ Inherits from baklavajs/renderer-vue/src/connection/ConnectionView.vue
 </template>
 
 <script>
-import { defineComponent, ref } from 'vue';
-import { Components } from 'baklavajs';
+import { defineComponent, ref, computed, watch } from 'vue'; // eslint-disable-line object-curly-newline
+import { Components, useGraph } from 'baklavajs';
 import ConnectionView from './ConnectionView.vue';
+import getDomElements from './domResolver';
 
 export default defineComponent({
     extends: Components.ConnectionWrapper,
@@ -33,6 +34,8 @@ export default defineComponent({
     components: { ConnectionView },
     setup(props) {
         const conn = ref(null);
+        const { graph } = useGraph();
+        const { d, state } = Components.ConnectionWrapper.setup(props);
 
         /**
          * Check whether the connection path contains the x, y point
@@ -45,8 +48,56 @@ export default defineComponent({
             return elements.includes(conn.value.$el.firstChild);
         };
 
+        const fromNode = computed(() => graph.value.findNodeById(props.connection.from.nodeId));
+        const toNode = computed(() => graph.value.findNodeById(props.connection.to.nodeId));
+
+        const fromNodeConnectionSides = computed(() =>
+            [
+                ...Object.values(fromNode.value?.inputs),
+                ...Object.values(fromNode.value?.outputs),
+            ].map((io) => io.connectionSide),
+        );
+        const toNodeConnectionSides = computed(() =>
+            [...Object.values(toNode.value?.inputs), ...Object.values(toNode.value?.outputs)].map(
+                (io) => io.connectionSide,
+            ),
+        );
+
+        const getPortCoordinates = (resolved) => {
+            if (resolved.node && resolved.interface && resolved.port) {
+                return [
+                    resolved.node.offsetLeft +
+                        resolved.interface.offsetLeft +
+                        resolved.port.offsetLeft +
+                        resolved.port.clientWidth / 2,
+                    resolved.node.offsetTop +
+                        resolved.interface.offsetTop +
+                        resolved.port.offsetTop +
+                        resolved.port.clientHeight / 2,
+                ];
+            }
+            return [0, 0];
+        };
+
+        const updateCoords = () => {
+            const from = getDomElements(props.connection.from);
+            const to = getDomElements(props.connection.to);
+
+            const [x1, y1] = getPortCoordinates(from);
+            const [x2, y2] = getPortCoordinates(to);
+            d.value = {
+                x1,
+                y1,
+                x2,
+                y2,
+            };
+        };
+
+        watch([fromNodeConnectionSides, toNodeConnectionSides], () => updateCoords());
+
         return {
-            ...Components.ConnectionWrapper.setup(props),
+            d,
+            state,
             containsPoint,
             conn,
         };
