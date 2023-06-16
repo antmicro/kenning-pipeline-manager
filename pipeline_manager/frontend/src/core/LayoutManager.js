@@ -60,7 +60,7 @@ function graphToDataflow(graph, dataflow) {
     graph.nodes.forEach((node) => idToPosition.set(node.id, node.position));
     dataflow.nodes = dataflow.nodes.map((node) => ({
         ...node,
-        position: idToPosition.get(node.id),
+        position: idToPosition.has(node.id) ? idToPosition.get(node.id) : node.position,
     }));
     return dataflow;
 }
