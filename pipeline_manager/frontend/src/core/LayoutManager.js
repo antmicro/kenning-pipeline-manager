@@ -62,6 +62,8 @@ export default class LayoutManager {
 
     usedAlgorithm = undefined;
 
+    graph = undefined;
+
     // Default option when no layout algorithm is specified
     // Currently it is possible to register it, when more layout algorithms
     // are added it should be 1) automatically registered 2) not possible to
@@ -100,13 +102,28 @@ export default class LayoutManager {
             .flat();
     }
 
+    registerGraph(dataflow) {
+        this.graph = dataflowToGraph(dataflow);
+    }
+
     async computeLayout(dataflow) {
-        const graph = dataflowToGraph(dataflow);
-        const layout = await this.runEngine(graph);
-        return graphToDataflow(layout, dataflow);
+        this.updateDimensions();
+        const layout = await this.runEngine(this.graph);
+        return { ...dataflow, graph: graphToDataflow(layout, dataflow) };
     }
 
     async runEngine(graph) {
         return this.layoutEngine.calculate(graph);
+    }
+
+    updateDimensions() {
+        this.graph.nodes = this.graph.nodes.map((node) => {
+            const HTMLelement = document.getElementById(node.id);
+            return {
+                ...node,
+                width: HTMLelement.offsetWidth,
+                height: HTMLelement.offsetHeight,
+            };
+        });
     }
 }
