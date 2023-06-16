@@ -86,7 +86,7 @@ Each input, output and inout is described by an object with following attributes
 * `name` - name of the interface
 * `direction` - value determining the type of the interfaces.
   Can be either `input`, `output` or `inout`.
-* `connectionSide` - tells on which side of the node the interface should be placed.
+* `side` - tells on which side of the node the interface should be placed.
 
 #### Connection
 
@@ -434,7 +434,7 @@ format:
 When defining the subgraph node (adding `subgraph` property to a node), the `interfaces` object
 differ slightly from interfaces of standard nodes:
 
- * Properties `id`, `direction` and `connectionSide` follow the same rules
+ * Properties `id`, `direction` and `side` follow the same rules
  * `name` must be set to ID of `subgraphIO`
  * New optional property `nodePosition` (object containing `x` and `y` values) defines the
  position of the `Subgraph IO` node after entering the subgraph. Default position is (0, 0)
@@ -460,19 +460,19 @@ differ slightly from interfaces of standard nodes:
                         "name": "Input",
                         "id": "3c643e48-52f0-4dea-97e0-42c732cbe2e4",
                         "direction": "input",
-                        "connectionSide": "left"
+                        "side": "left"
                     },
                     {
                         "name": "Inout",
                         "id": "bf735164-99fd-47e9-ba38-d26356eb5628",
                         "direction": "inout",
-                        "connectionSide": "right"
+                        "side": "right"
                     },
                     {
                         "name": "Output",
                         "id": "a57c30cc-85d7-46e7-a48f-33d5aeb2c039",
                         "direction": "output",
-                        "connectionSide": "right"
+                        "side": "right"
                     }
                 ],
                 "properties": [],
@@ -492,19 +492,19 @@ differ slightly from interfaces of standard nodes:
                         "name": "Input",
                         "id": "3937a772-dd2e-4037-950a-0ac150539bb9",
                         "direction": "input",
-                        "connectionSide": "left"
+                        "side": "left"
                     },
                     {
                         "name": "Inout",
                         "id": "16946d84-2ede-44b0-b8b0-fd3664e7aedf",
                         "direction": "inout",
-                        "connectionSide": "right"
+                        "side": "right"
                     },
                     {
                         "name": "Output",
                         "id": "4f1d2b5b-583c-4e5f-a925-94659482322d",
                         "direction": "output",
-                        "connectionSide": "right"
+                        "side": "right"
                     }
                 ],
                 "properties": [
@@ -531,7 +531,7 @@ differ slightly from interfaces of standard nodes:
                         "id": "4817aef3-f8e9-4771-9bed-1989357393e6",
                         "name": "cd623eed-54a8-4d3b-b414-2b60869a23f3",
                         "direction": "input",
-                        "connectionSide": "right",
+                        "side": "right",
                         "nodePosition": {
                             "x": 143.61666029302717,
                             "y": 443.6937472467506
@@ -541,7 +541,7 @@ differ slightly from interfaces of standard nodes:
                         "id": "e9cebd1e-995c-4fc0-be4e-5df6273ba01b",
                         "name": "50bfe451-ccb5-4a32-80a4-ea3b3202c54b",
                         "direction": "inout",
-                        "connectionSide": "right",
+                        "side": "right",
                         "nodePosition": {
                             "x": 1642.6972860474395,
                             "y": 707.2506631277816
@@ -551,7 +551,7 @@ differ slightly from interfaces of standard nodes:
                         "id": "a00f133c-3bd4-4c1e-89ac-903cfe868cbc",
                         "name": "9a003337-3d15-4bbb-8e18-2d7bad8eb022",
                         "direction": "output",
-                        "connectionSide": "right",
+                        "side": "right",
                         "nodePosition": {
                             "x": 2212.630660612085,
                             "y": 517.2535000797645
@@ -575,7 +575,7 @@ differ slightly from interfaces of standard nodes:
                         "id": "e3176efa-fd16-4480-936f-3c85e0365be1",
                         "name": "4f089550-4628-4924-ad7e-3cc4ce4b718c",
                         "direction": "input",
-                        "connectionSide": "left",
+                        "side": "left",
                         "nodePosition": {
                             "x": 292.46867580583586,
                             "y": 287.222600903489
@@ -585,7 +585,7 @@ differ slightly from interfaces of standard nodes:
                         "id": "481d1b0a-34fb-4d29-a288-f70658dc30ac",
                         "name": "000f80bd-c6c9-4052-8c36-6659fa086c42",
                         "direction": "output",
-                        "connectionSide": "right",
+                        "side": "right",
                         "nodePosition": {
                             "x": 1836.126215821391,
                             "y": 268.86133874527513
@@ -636,19 +636,19 @@ differ slightly from interfaces of standard nodes:
                             "name": "Input",
                             "id": "a1f8ecf9-3ba5-49e0-b971-e4b522d39b41",
                             "direction": "input",
-                            "connectionSide": "left"
+                            "side": "left"
                         },
                         {
                             "name": "Inout",
                             "id": "2ba9f981-a5ca-490c-a03f-3055c15ed27e",
                             "direction": "inout",
-                            "connectionSide": "right"
+                            "side": "right"
                         },
                         {
                             "name": "Output",
                             "id": "43bbaa63-f1c4-4ef6-b8b6-3f543fec36d1",
                             "direction": "output",
-                            "connectionSide": "right"
+                            "side": "right"
                         }
                     ],
                     "properties": [],
@@ -668,19 +668,19 @@ differ slightly from interfaces of standard nodes:
                             "name": "Input",
                             "id": "eb61a53c-b40e-4cde-a37e-2640e2953439",
                             "direction": "input",
-                            "connectionSide": "left"
+                            "side": "left"
                         },
                         {
                             "name": "Inout",
                             "id": "3c848a6b-f7b0-434b-a806-896ea46dc535",
                             "direction": "inout",
-                            "connectionSide": "right"
+                            "side": "right"
                         },
                         {
                             "name": "Output",
                             "id": "43b80380-300f-4b51-a11d-cf9d2aa5bd4a",
                             "direction": "output",
-                            "connectionSide": "right"
+                            "side": "right"
                         }
                     ],
                     "properties": [],
@@ -700,19 +700,19 @@ differ slightly from interfaces of standard nodes:
                             "name": "Input",
                             "id": "ddbe6411-1af7-455d-94de-6e543a0b944b",
                             "direction": "input",
-                            "connectionSide": "left"
+                            "side": "left"
                         },
                         {
                             "name": "Inout",
                             "id": "a3670f41-fda9-4370-a98c-9e1031f837d6",
                             "direction": "inout",
-                            "connectionSide": "right"
+                            "side": "right"
                         },
                         {
                             "name": "Output",
                             "id": "62bf28f9-54b1-445d-9884-31b53a3f5d84",
                             "direction": "output",
-                            "connectionSide": "right"
+                            "side": "right"
                         }
                     ],
                     "properties": [],
@@ -766,19 +766,19 @@ differ slightly from interfaces of standard nodes:
                             "name": "Input",
                             "id": "5d7fc255-bf5e-44ab-9c08-d81806b809ca",
                             "direction": "input",
-                            "connectionSide": "left"
+                            "side": "left"
                         },
                         {
                             "name": "Inout",
                             "id": "06144692-e66d-45d5-9142-70feff09abfb",
                             "direction": "inout",
-                            "connectionSide": "right"
+                            "side": "right"
                         },
                         {
                             "name": "Output",
                             "id": "c1fea113-7a15-48f0-a72a-79fba7ef0387",
                             "direction": "output",
-                            "connectionSide": "right"
+                            "side": "right"
                         }
                     ],
                     "properties": [],
@@ -798,19 +798,19 @@ differ slightly from interfaces of standard nodes:
                             "name": "Input",
                             "id": "e2ea6cd2-9a41-4f3b-a12b-3b1370526ae8",
                             "direction": "input",
-                            "connectionSide": "left"
+                            "side": "left"
                         },
                         {
                             "name": "Inout",
                             "id": "3b889b0a-ab70-4308-9ea2-5cf38c52f431",
                             "direction": "inout",
-                            "connectionSide": "right"
+                            "side": "right"
                         },
                         {
                             "name": "Output",
                             "id": "a18ee2f2-ded8-4a3b-9f6f-6016545d65ef",
                             "direction": "output",
-                            "connectionSide": "right"
+                            "side": "right"
                         }
                     ],
                     "properties": [

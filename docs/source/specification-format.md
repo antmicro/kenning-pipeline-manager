@@ -200,7 +200,7 @@ Every interface object has following properties:
   Value less than 0 means no limit for connections for a given interface.
   Value equal to 0 means default behavior - one allowed connection to inputs, many allowed connections from outputs.
   The default value is 0.
-* `connectionSide` (optional) - specifies the side on which the interface is rendered.
+* `side` (optional) - specifies the side on which the interface is rendered.
   Value can be either `left` or `right`.
   Interfaces with `direction` set to `input` or `inout` are by default rendered on the left side of the node.
   Interfaces with `direction` set to `output` are by default rendered on the right side of the node.

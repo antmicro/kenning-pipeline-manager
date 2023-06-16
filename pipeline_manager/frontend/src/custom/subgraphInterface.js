@@ -16,14 +16,13 @@ export const SubgraphInputNode = defineNode({
     title: 'Subgraph Input',
     inputs: {
         name: () => new TextInputInterface('Name', 'Input').setPort(false),
-        connectionSide: () =>
-            new SelectInterface('Interface side', 'Left', ['Left', 'Right']).setPort(false),
+        side: () => new SelectInterface('Interface side', 'Left', ['Left', 'Right']).setPort(false),
     },
     outputs: {
         placeholder: () => {
             const ni = new NodeInterface('Connection', undefined);
             ni.direction = 'output';
-            ni.connectionSide = 'right';
+            ni.side = 'right';
             return ni;
         },
     },
@@ -38,12 +37,12 @@ export const SubgraphOutputNode = defineNode({
     title: 'Subgraph Output',
     inputs: {
         name: () => new TextInputInterface('Name', 'Output').setPort(false),
-        connectionSide: () =>
+        side: () =>
             new SelectInterface('Interface side', 'Right', ['Left', 'Right']).setPort(false),
         placeholder: () => {
             const ni = new NodeInterface('Connection', undefined);
             ni.direction = 'input';
-            ni.connectionSide = 'left';
+            ni.side = 'left';
             return ni;
         },
     },
@@ -60,12 +59,11 @@ export const SubgraphInoutNode = defineNode({
     title: 'Subgraph Inout',
     inputs: {
         name: () => new TextInputInterface('Name', 'Inout').setPort(false),
-        connectionSide: () =>
-            new SelectInterface('Interface side', 'Left', ['Left', 'Right']).setPort(false),
+        side: () => new SelectInterface('Interface side', 'Left', ['Left', 'Right']).setPort(false),
         placeholder: () => {
             const ni = new NodeInterface('Connection', undefined);
             ni.direction = 'inout';
-            ni.connectionSide = 'left';
+            ni.side = 'left';
             return ni;
         },
     },

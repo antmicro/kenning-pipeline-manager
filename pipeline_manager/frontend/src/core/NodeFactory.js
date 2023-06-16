@@ -111,7 +111,7 @@ function parseOutputs(outputs, interfaceTypes) {
             intf.componentName = 'NodeInterface';
             intf.maxConnectionsCount = o.maxConnectionsCount;
             intf.direction = o.direction;
-            intf.connectionSide = o.connectionSide ?? 'right';
+            intf.side = o.side ?? 'right';
             intf.interfaceConnectionPattern =
                 interfaceTypes[o.type].interfaceConnectionPattern ?? 'solid';
             intf.interfaceConnectionColor =
@@ -135,7 +135,7 @@ function parseInputs(inputs, interfaceTypes) {
             intf.componentName = 'NodeInterface';
             intf.maxConnectionsCount = i.maxConnectionsCount;
             intf.direction = i.direction;
-            intf.connectionSide = i.connectionSide ?? 'left';
+            intf.side = i.side ?? 'left';
             intf.interfaceConnectionPattern =
                 interfaceTypes[i.type].interfaceConnectionPattern ?? 'solid';
             intf.interfaceConnectionColor =
@@ -236,7 +236,7 @@ export function NodeFactory(
                             name: ioName,
                             id: ioState.id,
                             direction: ioState.direction,
-                            connectionSide: ioState.connectionSide,
+                            side: ioState.side,
                         });
                     } else {
                         newProperties.push({
@@ -255,7 +255,7 @@ export function NodeFactory(
                             name: ioName,
                             id: ioState.id,
                             direction: ioState.direction,
-                            connectionSide: ioState.connectionSide,
+                            side: ioState.side,
                         });
                     } else {
                         newProperties.push({
@@ -282,11 +282,11 @@ export function NodeFactory(
                 this.parentLoad(parseNodeState(state));
                 if (interfacestorage !== undefined) {
                     interfacestorage.forEach((intf) => {
-                        if ('connectionSide' in intf) {
+                        if ('side' in intf) {
                             if (intf.direction === 'input' || intf.direction === 'inout') {
-                                this.inputs[intf.name].connectionSide = intf.connectionSide;
+                                this.inputs[intf.name].side = intf.side;
                             } else if (intf.direction === 'output') {
-                                this.outputs[intf.name].connectionSide = intf.connectionSide;
+                                this.outputs[intf.name].side = intf.side;
                             }
                         }
                     });

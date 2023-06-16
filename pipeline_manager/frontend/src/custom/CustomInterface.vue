@@ -77,10 +77,10 @@ export default defineComponent({
         /* eslint-disable vue/no-mutating-props,no-param-reassign */
         const onMouseDown = doubleClick(700, () => {
             if (!viewModel.value.editor.readonly) {
-                if (props.intf.connectionSide === 'left') {
-                    props.intf.connectionSide = 'right';
+                if (props.intf.side === 'left') {
+                    props.intf.side = 'right';
                 } else {
-                    props.intf.connectionSide = 'left';
+                    props.intf.side = 'left';
                 }
                 endHover();
             }
@@ -89,18 +89,18 @@ export default defineComponent({
         const displayArrow = props.intf.port && props.intf.direction !== 'inout';
         const arrowRotation = computed(() => {
             if (props.intf.direction === 'input') {
-                if (props.intf.connectionSide === 'left') {
+                if (props.intf.side === 'left') {
                     return 'right';
                 }
-                if (props.intf.connectionSide === 'right') {
+                if (props.intf.side === 'right') {
                     return 'down';
                 }
             }
             if (props.intf.direction === 'output') {
-                if (props.intf.connectionSide === 'left') {
+                if (props.intf.side === 'left') {
                     return 'down';
                 }
-                if (props.intf.connectionSide === 'right') {
+                if (props.intf.side === 'right') {
                     return 'right';
                 }
             }
@@ -108,8 +108,8 @@ export default defineComponent({
         });
 
         const newClasses = computed(() => ({
-            '--input': props.intf.connectionSide === 'left',
-            '--output': props.intf.connectionSide === 'right',
+            '--input': props.intf.side === 'left',
+            '--output': props.intf.side === 'right',
             '--connected': isConnected.value,
         }));
 

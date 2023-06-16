@@ -199,7 +199,7 @@ export default class PipelineManagerEditor extends Editor {
                     id: value.id,
                     name: key,
                     direction: inputInterfaceMap.get(value.id).direction,
-                    connectionSide: inputInterfaceMap.get(value.id).connectionSide,
+                    side: inputInterfaceMap.get(value.id).side,
                     nodePosition: inputInterfaceMap.get(value.id).nodePosition,
                 }));
                 const outputInterfaceMap = new Map();
@@ -212,14 +212,14 @@ export default class PipelineManagerEditor extends Editor {
                         id: value.id,
                         name: key,
                         direction: 'output',
-                        connectionSide: outputInterfaceMap.get(value.id).connectionSide,
+                        side: outputInterfaceMap.get(value.id).side,
                         nodePosition: outputInterfaceMap.get(value.id).nodePosition,
                     }));
                 delete state.inputs;
                 delete state.outputs;
 
                 // After entering the edit subgraph mode, subgraph interfaces will contain
-                // redundant information, such as connectionSide, nodePosition etc.
+                // redundant information, such as side, nodePosition etc.
                 // (these are already defined in state.interfaces) so they should be filtered out
                 state.graphState.subgraphIO = [];
                 state.graphState.inputs.forEach((input) =>
@@ -250,7 +250,7 @@ export default class PipelineManagerEditor extends Editor {
                         inputs[intf.name] = {
                             id: intf.id,
                             direction: intf.direction,
-                            connectionSide: intf.connectionSide,
+                            side: intf.side,
                             nodePosition: intf.nodePosition,
                         };
                     });
@@ -261,7 +261,7 @@ export default class PipelineManagerEditor extends Editor {
                         outputs[intf.name] = {
                             id: intf.id,
                             direction: intf.direction,
-                            connectionSide: intf.connectionSide,
+                            side: intf.side,
                             nodePosition: intf.nodePosition,
                         };
                     });
@@ -288,7 +288,7 @@ export default class PipelineManagerEditor extends Editor {
                     const ni = new NodeInterface(inputMap.get(inputID), undefined);
                     ni.id = inputInfo.id;
                     ni.direction = inputInfo.direction;
-                    ni.connectionSide = inputInfo.connectionSide;
+                    ni.side = inputInfo.side;
                     ni.nodePosition = inputInfo.nodePosition;
                     this.addInterface('input', inputID, ni);
                 });
@@ -303,7 +303,7 @@ export default class PipelineManagerEditor extends Editor {
                     const ni = new NodeInterface(outputMap.get(outputID), undefined);
                     ni.id = outputInfo.id;
                     ni.direction = outputInfo.direction;
-                    ni.connectionSide = outputInfo.connectionSide;
+                    ni.side = outputInfo.side;
                     ni.nodePosition = outputInfo.nodePosition;
                     this.addInterface('output', outputID, ni);
                 });
@@ -316,16 +316,12 @@ export default class PipelineManagerEditor extends Editor {
                 super.updateInterfaces();
                 this.template.inputs.forEach((ni) => {
                     this.inputs[ni.id].direction = ni.direction ? ni.direction : 'input';
-                    this.inputs[ni.id].connectionSide = ni.connectionSide
-                        ? ni.connectionSide
-                        : 'left';
+                    this.inputs[ni.id].side = ni.side ? ni.side : 'left';
                     this.inputs[ni.id].nodePosition = ni.nodePosition ? ni.nodePosition : undefined;
                 });
                 this.template.outputs.forEach((ni) => {
                     this.outputs[ni.id].direction = 'output';
-                    this.outputs[ni.id].connectionSide = ni.connectionSide
-                        ? ni.connectionSide
-                        : 'right';
+                    this.outputs[ni.id].side = ni.side ? ni.side : 'right';
                     this.outputs[ni.id].nodePosition = ni.nodePosition
                         ? ni.nodePosition
                         : undefined;
@@ -351,7 +347,7 @@ export default class PipelineManagerEditor extends Editor {
             .forEach(([interfaceID, input]) => {
                 const node = new SubgraphInputNode();
                 node.inputs.name.value = input.name;
-                node.inputs.connectionSide.value = convertToUpperCase(input.connectionSide);
+                node.inputs.side.value = convertToUpperCase(input.side);
                 node.graphInterfaceId = interfaceID;
                 node.position = input.nodePosition;
                 this._graph.addNode(node);
@@ -386,7 +382,7 @@ export default class PipelineManagerEditor extends Editor {
             .forEach(([interfaceID, inout]) => {
                 const node = new SubgraphInoutNode();
                 node.inputs.name.value = inout.name;
-                node.inputs.connectionSide.value = convertToUpperCase(inout.connectionSide);
+                node.inputs.side.value = convertToUpperCase(inout.side);
                 node.graphInterfaceId = interfaceID;
                 node.position = inout.nodePosition;
                 this._graph.addNode(node);
@@ -419,7 +415,7 @@ export default class PipelineManagerEditor extends Editor {
             .forEach(([interfaceID, output]) => {
                 const node = new SubgraphOutputNode();
                 node.inputs.name.value = output.name;
-                node.inputs.connectionSide.value = convertToUpperCase(output.connectionSide);
+                node.inputs.side.value = convertToUpperCase(output.side);
                 node.graphInterfaceId = interfaceID;
                 node.position = output.nodePosition;
                 this._graph.addNode(node);

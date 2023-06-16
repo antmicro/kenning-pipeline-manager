@@ -55,13 +55,13 @@ export default defineComponent({
             [
                 ...Object.values(fromNode.value?.inputs ?? {}),
                 ...Object.values(fromNode.value?.outputs ?? {}),
-            ].map((io) => io.connectionSide),
+            ].map((io) => io.side),
         );
         const toNodeInterfacesSide = computed(() =>
             [
                 ...Object.values(toNode.value?.inputs ?? {}),
                 ...Object.values(toNode.value?.outputs ?? {}),
-            ].map((io) => io.connectionSide),
+            ].map((io) => io.side),
         );
 
         const getPortCoordinates = (resolved) => {

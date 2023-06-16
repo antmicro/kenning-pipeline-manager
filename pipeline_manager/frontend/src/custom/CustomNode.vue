@@ -262,12 +262,12 @@ const openContextMenuWrapper = (ev) => {
 
 const displayedLeftSockets = computed(() =>
     Object.values([...displayedInputs.value, ...displayedOutputs.value]).filter(
-        (intf) => intf.connectionSide === 'left' && intf.port,
+        (intf) => intf.side === 'left' && intf.port,
     ),
 );
 const displayedRightSockets = computed(() =>
     Object.values([...displayedInputs.value, ...displayedOutputs.value]).filter(
-        (intf) => intf.connectionSide === 'right' && intf.port,
+        (intf) => intf.side === 'right' && intf.port,
     ),
 );
 const displayedProperties = computed(() =>

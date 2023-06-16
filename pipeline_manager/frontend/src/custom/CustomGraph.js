@@ -103,7 +103,7 @@ export default function createPipelineManagerGraph(graph) {
                     id: n.graphInterfaceId,
                     name: n.inputs.name.value,
                     nodeInterfaceId: c.to.id,
-                    connectionSide: n.inputs.connectionSide.value.toLowerCase(),
+                    side: n.inputs.side.value.toLowerCase(),
                     direction: 'input',
                     nodePosition: n.position,
                 });
@@ -119,7 +119,7 @@ export default function createPipelineManagerGraph(graph) {
                     id: n.graphInterfaceId,
                     name: n.inputs.name.value,
                     nodeInterfaceId: c.from.id,
-                    connectionSide: n.inputs.connectionSide.value.toLowerCase(),
+                    side: n.inputs.side.value.toLowerCase(),
                     direction: 'output',
                     nodePosition: n.position,
                 });
@@ -135,7 +135,7 @@ export default function createPipelineManagerGraph(graph) {
                     id: n.graphInterfaceId,
                     name: n.inputs.name.value,
                     nodeInterfaceId: c.from.id,
-                    connectionSide: n.inputs.connectionSide.value.toLowerCase(),
+                    side: n.inputs.side.value.toLowerCase(),
                     direction: 'inout',
                     nodePosition: n.position,
                 });
@@ -146,7 +146,7 @@ export default function createPipelineManagerGraph(graph) {
                     id: n.graphInterfaceId,
                     name: n.inputs.name.value,
                     nodeInterfaceId: c.to.id,
-                    connectionSide: n.inputs.connectionSide.value.toLowerCase(),
+                    side: n.inputs.side.value.toLowerCase(),
                     direction: 'inout',
                     nodePosition: n.position,
                 });

@@ -24,7 +24,7 @@
                     "name": "Inout",
                     "type": "Connection",
                     "direction": "inout",
-                    "connectionSide": "right"
+                    "side": "right"
                 }
             ]
         },
@@ -60,7 +60,7 @@
                     "name": "Inout",
                     "type": "Connection",
                     "direction": "inout",
-                    "connectionSide": "right"
+                    "side": "right"
                 }
             ]
         }
@@ -89,7 +89,7 @@
                             "id": "4a1cd750-8018-4f7a-91e1-5dcb63c53fa7",
                             "name": "Inout",
                             "direction": "inout",
-                            "connectionSide": "right"
+                            "side": "right"
                         }
                     ],
                     "position": {
@@ -119,7 +119,7 @@
                             "id": "c0b9bd16-8162-4f70-8089-d80ef4bde61c",
                             "name": "Inout",
                             "direction": "inout",
-                            "connectionSide": "right"
+                            "side": "right"
                         }
                     ],
                     "position": {
