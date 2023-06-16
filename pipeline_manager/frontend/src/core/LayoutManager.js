@@ -44,8 +44,10 @@ function dataflowToGraph(dataflow) {
     const connections = dataflow.connections
         .filter(
             (connection) =>
-                nodes.filter((nodeState) => nodeState.id === connection.from).length > 0 &&
-                nodes.filter((nodeState) => nodeState.id === connection.to).length > 0,
+                nodes.filter((nodeState) => nodeState.id === interfaceToNodeId.get(connection.from))
+                    .length > 0 &&
+                nodes.filter((nodeState) => nodeState.id === interfaceToNodeId.get(connection.to))
+                    .length > 0,
         )
         .map((connection) => ({
             id: connection.id,
