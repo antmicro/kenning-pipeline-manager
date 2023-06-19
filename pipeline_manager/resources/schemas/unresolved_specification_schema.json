@@ -1,5 +1,5 @@
 {
-    "version": "20230615.2",
+    "version": "20230619.3",
     "description": "JSON that serves as an input for the application",
     "type": "object",
     "properties": {
