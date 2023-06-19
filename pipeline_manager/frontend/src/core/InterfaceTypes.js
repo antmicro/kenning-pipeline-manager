@@ -52,6 +52,16 @@ export default class BaklavaInterfaceTypes {
         return typeof type === 'string' || type instanceof String ? [type] : type;
     }
 
+    getCommonStyle(from, to) {
+        const fromTypes = this.normalizeType(from.type);
+        const toTypes = this.normalizeType(to.type);
+
+        const commonTypes = fromTypes.filter((t) => toTypes.includes(t));
+        const firstType = commonTypes.find((t) => this.types[t]?.interfaceColor !== undefined);
+        const style = this.types[firstType];
+        return style;
+    }
+
     /**
      * Function that reads all nodes in the specification and creates `NodeInterfaceType` objects
      * for their inputs' and outputs' types so that a simple validation based on those
