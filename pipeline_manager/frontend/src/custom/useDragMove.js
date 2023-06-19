@@ -13,7 +13,7 @@ import gridSnapper from '../core/gridSnapper';
 export default function useDragMove(positionRef, gridSnapperInstance = undefined) {
     const { graph } = useGraph();
 
-    const calculateSnappedPosition = gridSnapperInstance ?? gridSnapper(1);
+    const calculateSnappedPosition = gridSnapperInstance ?? gridSnapper(ref(1));
 
     const draggingStartPoint = ref(null);
     const draggingStartPosition = ref(null);

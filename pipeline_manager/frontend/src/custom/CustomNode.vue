@@ -108,7 +108,7 @@ const { viewModel } = useViewModel();
 const { graph } = useGraph();
 const snapOffset = computed(() => viewModel.value.snapOffset);
 
-const dragMove = useDragMove(toRef(props.node, 'position'), gridSnapper(snapOffset.value));
+const dragMove = useDragMove(toRef(props.node, 'position'), gridSnapper(snapOffset));
 
 // If type start with '_', it is not displayed as node title
 const IGNORE_TYPE_PREFIX = '_';
