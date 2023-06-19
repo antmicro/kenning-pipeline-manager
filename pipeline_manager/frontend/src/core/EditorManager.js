@@ -431,7 +431,7 @@ export default class EditorManager {
 
                 this.updateEditorSpecification(updatedspecification, true, false);
             } else {
-                this.updateEditorSpecification(this.currentSpecification, false);
+                this.updateEditorSpecification(this.currentSpecification, false, false);
             }
             return this.editor.load(dataflow);
         } catch (err) {
