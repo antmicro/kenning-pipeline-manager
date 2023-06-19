@@ -159,7 +159,7 @@
                                 },
                                 "type": {
                                     "description": "Type that defines styling of the input socket. It is also used for validation purposes",
-                                    "type": "string"
+                                    "type": ["string", "array"]
                                 },
                                 "direction": {
                                     "description": "Tells whether the connector is input, output, or both",
@@ -187,6 +187,23 @@
                                 "type",
                                 "direction"
                             ],
+                            "if": {
+                                "properties": {
+                                    "type": {
+                                        "type": "array"
+                                    }
+                                }
+                            },
+                            "then": {
+                                "properties": {
+                                    "type": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            },
                             "additionalProperties": false
                         }
                     },
