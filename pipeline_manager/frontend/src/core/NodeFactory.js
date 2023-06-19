@@ -13,7 +13,6 @@ import {
     TextInterface,
     defineNode,
     setType,
-    NodeInterfaceType,
     GraphTemplate,
 } from 'baklavajs';
 import { v4 as uuidv4 } from 'uuid';
@@ -300,34 +299,9 @@ export function NodeFactory(
     return node;
 }
 
-/**
- * Function that reads all nodes in the specification and creates `NodeInterfaceType` objects for
- * their inputs' and outputs' types so that a simple validation based on those
- * types can be performed.
- *
- * The read interface types are stored in `interfaceTypes` object which is returned by this function
- * @param {*} nodes nodes of the specification
- * @param {*} metadata metadata containing information about styling
- * @returns read interface types
- */
-export function readInterfaceTypes(nodes, metadata) {
-    const interfaceTypes = {};
-
-    nodes.forEach((node) => {
-        [...node.interfaces].forEach((io) => {
-            if (!Object.prototype.hasOwnProperty.call(interfaceTypes, io.type)) {
-                interfaceTypes[io.type] = new NodeInterfaceType(io.type);
-                if ('interfaces' in metadata && io.type in metadata.interfaces) {
-                    interfaceTypes[io.type].interfaceConnectionPattern =
-                        metadata.interfaces[io.type].interfaceConnectionPattern ?? 'solid';
-                    interfaceTypes[io.type].interfaceConnectionColor =
-                        metadata.interfaces[io.type].interfaceConnectionColor ?? '#FFFFFF';
-                }
-            }
-        });
-    });
-
-    return interfaceTypes;
+export function checkTypesCallback(from, to) {
+    console.log(from, to);
+    return true;
 }
 
 /**

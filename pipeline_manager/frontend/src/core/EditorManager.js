@@ -8,12 +8,13 @@ import Ajv, { stringify } from 'ajv';
 import jsonMap from 'json-source-map';
 import jsonlint from 'jsonlint';
 
-import { useBaklava, BaklavaInterfaceTypes } from 'baklavajs';
+import { useBaklava } from 'baklavajs';
 
 import PipelineManagerEditor from '../custom/Editor';
+import InterfaceTypes from './InterfaceTypes';
 
 import NotificationHandler from './notifications';
-import { NodeFactory, readInterfaceTypes, SubgraphFactory } from './NodeFactory';
+import { NodeFactory, SubgraphFactory } from './NodeFactory';
 import unresolvedSpecificationSchema from '../../../resources/schemas/unresolved_specification_schema.json';
 import specificationSchema from '../../../resources/schemas/specification_schema.json';
 import ConnectionRenderer from './ConnectionRenderer';
@@ -30,15 +31,11 @@ export default class EditorManager {
 
     baklavaView = useBaklava(this.editor);
 
-    nodeInterfaceTypes = new BaklavaInterfaceTypes(this.editor, {
-        viewPlugin: this.baklavaView,
-    });
+    interfaceTypes = new InterfaceTypes(this.baklavaView, this.editor);
 
     specificationLoaded = false;
 
     currentSpecification = undefined;
-
-    interfacesStyleId = 'interfaces-style';
 
     constructor() {
         this.baklavaView.connectionRenderer = new ConnectionRenderer(this.baklavaView);
@@ -116,9 +113,7 @@ export default class EditorManager {
             return errors;
         }
 
-        const interfaceTypes = readInterfaceTypes(resolvedNodes, metadata ?? {});
-        this.nodeInterfaceTypes.addTypes(...Object.values(interfaceTypes));
-        this.updateInterfacesStyle(metadata ?? {});
+        this.interfaceTypes.readInterfaceTypes(nodes, metadata);
 
         if (metadata && 'urls' in metadata) {
             Object.entries(metadata.urls).forEach(([urlName, state]) => {
@@ -137,7 +132,7 @@ export default class EditorManager {
                 node.type,
                 node.interfaces,
                 node.properties,
-                interfaceTypes,
+                this.interfaceTypes.types,
                 metadata && 'twoColumn' in metadata ? metadata.twoColumn : false,
             );
             this.editor.registerNodeType(myNode, { title: node.name, category: node.category });
@@ -306,40 +301,6 @@ export default class EditorManager {
     }
 
     /**
-     * Removes interfaces stylesheet registered using id `interfacesStyleId`.
-     * It is used to cleanup the editor enviornment when chaning a specification.
-     */
-    removeInterfacesStyle() {
-        const styleSheet = document.getElementById(this.interfacesStyleId);
-        if (styleSheet !== null) {
-            document.head.removeChild(styleSheet);
-        }
-    }
-
-    /**
-     * Updates global stylesheet with coloring specified in the metadata argument.
-     * The stylesheet is registered with id `interfacesStyleId`.
-     *
-     * @param metadata metadata of the specification
-     */
-    updateInterfacesStyle(metadata) {
-        if (metadata && 'interfaces' in metadata) {
-            const styleSheet = document.createElement('style');
-            let styles = '';
-
-            Object.entries(metadata.interfaces).forEach(([name, data]) => {
-                styles += `.baklava-node-interface[data-interface-type="${name}"] .__port { background-color: ${data.interfaceColor}; }`;
-            });
-
-            styleSheet.innerText = styles;
-            styleSheet.type = 'text/css';
-            styleSheet.id = this.interfacesStyleId;
-
-            document.head.appendChild(styleSheet);
-        }
-    }
-
-    /**
      * Cleans up the editor.
      *
      * Removes all nodes and connections from the editor and unregisters all
@@ -359,8 +320,6 @@ export default class EditorManager {
         this.editor.nodeTypes.forEach((_, nodeKey) => {
             this.editor.unregisterNodeType(nodeKey);
         });
-
-        this.removeInterfacesStyle();
     }
 
     /**
@@ -467,7 +426,7 @@ export default class EditorManager {
      */
     /* eslint-disable class-methods-use-this */
     validateJSONWithSchema(data, schema) {
-        const ajv = new Ajv();
+        const ajv = new Ajv({ allowUnionTypes: true });
         ajv.addKeyword('version');
 
         const validate = ajv.compile(schema);
