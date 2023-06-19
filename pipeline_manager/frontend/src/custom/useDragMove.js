@@ -17,15 +17,24 @@ export default function useDragMove(positionRef, gridSnapperInstance = undefined
 
     const draggingStartPoint = ref(null);
     const draggingStartPosition = ref(null);
+    const movementStepEnabled = ref(true);
 
     const dragging = computed(() => !!draggingStartPoint.value);
 
+    /* eslint-disable arrow-body-style */
+    const calculatePosition = (pos) => {
+        // allow either snap-to-grid or free movement
+        return movementStepEnabled.value ? calculateSnappedPosition(pos) : pos;
+    };
+    /* eslint-enable arrow-body-style */
+
     if (positionRef.value) {
-        positionRef.value.x = calculateSnappedPosition(positionRef.value.x);
-        positionRef.value.y = calculateSnappedPosition(positionRef.value.y);
+        positionRef.value.x = calculatePosition(positionRef.value.x);
+        positionRef.value.y = calculatePosition(positionRef.value.y);
     }
 
     const onPointerDown = (ev) => {
+        movementStepEnabled.value = !ev.shiftKey;
         draggingStartPoint.value = {
             x: ev.pageX,
             y: ev.pageY,
@@ -37,13 +46,14 @@ export default function useDragMove(positionRef, gridSnapperInstance = undefined
     };
 
     const onPointerMove = (ev) => {
+        movementStepEnabled.value = !ev.shiftKey;
         if (draggingStartPoint.value) {
             const dx = ev.pageX - draggingStartPoint.value.x;
             const dy = ev.pageY - draggingStartPoint.value.y;
-            positionRef.value.x = calculateSnappedPosition(
+            positionRef.value.x = calculatePosition(
                 draggingStartPosition.value.x + dx / graph.value.scaling,
             );
-            positionRef.value.y = calculateSnappedPosition(
+            positionRef.value.y = calculatePosition(
                 draggingStartPosition.value.y + dy / graph.value.scaling,
             );
         }
@@ -52,6 +62,7 @@ export default function useDragMove(positionRef, gridSnapperInstance = undefined
     const onPointerUp = () => {
         draggingStartPoint.value = null;
         draggingStartPosition.value = null;
+        movementStepEnabled.value = true;
     };
 
     return {
