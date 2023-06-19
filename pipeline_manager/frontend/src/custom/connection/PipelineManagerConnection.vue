@@ -51,16 +51,17 @@ export default defineComponent({
         const fromNode = computed(() => graph.value.findNodeById(props.connection.from.nodeId));
         const toNode = computed(() => graph.value.findNodeById(props.connection.to.nodeId));
 
-        const fromNodeConnectionSides = computed(() =>
+        const fromNodeInterfacesSide = computed(() =>
             [
-                ...Object.values(fromNode.value?.inputs),
-                ...Object.values(fromNode.value?.outputs),
+                ...Object.values(fromNode.value?.inputs ?? {}),
+                ...Object.values(fromNode.value?.outputs ?? {}),
             ].map((io) => io.connectionSide),
         );
-        const toNodeConnectionSides = computed(() =>
-            [...Object.values(toNode.value?.inputs), ...Object.values(toNode.value?.outputs)].map(
-                (io) => io.connectionSide,
-            ),
+        const toNodeInterfacesSide = computed(() =>
+            [
+                ...Object.values(toNode.value?.inputs ?? {}),
+                ...Object.values(toNode.value?.outputs ?? {}),
+            ].map((io) => io.connectionSide),
         );
 
         const getPortCoordinates = (resolved) => {
@@ -93,7 +94,9 @@ export default defineComponent({
             };
         };
 
-        watch([fromNodeConnectionSides, toNodeConnectionSides], () => updateCoords());
+        // If any side of any interface in from or to node changes we may need to
+        // Rerender connections
+        watch([fromNodeInterfacesSide, toNodeInterfacesSide], () => updateCoords());
 
         return {
             d,
