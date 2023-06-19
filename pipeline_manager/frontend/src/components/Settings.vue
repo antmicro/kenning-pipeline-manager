@@ -67,6 +67,18 @@ export default {
             return option;
         });
 
+        const movementStep = computed(() => {
+            const option = new IntegerInterface(
+                'Node movement step',
+                props.viewModel.snapOffset,
+            ).setPort(false);
+            option.events.setValue.subscribe(this, (v) => {
+                props.viewModel.snapOffset = v; // eslint-disable-line vue/no-mutating-props,max-len,no-param-reassign
+            });
+            option.componentName = 'IntegerInterface';
+            return option;
+        });
+
         const disableLayersOptions = computed(() => {
             const options = ref([]);
 
@@ -106,6 +118,7 @@ export default {
         const settingOptions = computed(() => [
             connectionStyleOption.value,
             backgroundGridSize.value,
+            movementStep.value,
         ]);
 
         return { displayOptionName, settingOptions, disableLayersOptions };
