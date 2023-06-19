@@ -47,7 +47,7 @@ export default class EditorManager {
         // before this value can be loaded from specification
         this.baklavaView.ignorableLayers = [];
         this.baklavaView.collapseSidebar = true;
-        this.baklavaView.snapOffset = 1;
+        this.baklavaView.movementStep = 1;
         this.specificationVersion = unresolvedSpecificationSchema.version;
     }
 
@@ -181,7 +181,7 @@ export default class EditorManager {
             this.baklavaView.connectionRenderer.style = metadata.connectionStyle;
         }
 
-        this.baklavaView.snapOffset = metadata.snapOffset ?? 1;
+        this.baklavaView.movementStep = metadata.movementStep ?? 1;
         this.baklavaView.settings.background.gridSize = metadata.backgroundSize ?? 100;
         this.baklavaView.ignoredLayers = new Set();
         if (metadata) {

@@ -106,9 +106,9 @@ const emit = defineEmits(['select']);
 
 const { viewModel } = useViewModel();
 const { graph } = useGraph();
-const snapOffset = computed(() => viewModel.value.snapOffset);
+const movementStep = computed(() => viewModel.value.movementStep);
 
-const dragMove = useDragMove(toRef(props.node, 'position'), gridSnapper(snapOffset));
+const dragMove = useDragMove(toRef(props.node, 'position'), gridSnapper(movementStep));
 
 // If type start with '_', it is not displayed as node title
 const IGNORE_TYPE_PREFIX = '_';

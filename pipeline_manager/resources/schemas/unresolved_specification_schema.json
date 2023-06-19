@@ -109,7 +109,7 @@
                     "description": "Defines whether nodes sidebar should be collapsed by default",
                     "default": true
                 },
-                "snapOffset": {
+                "movementStep": {
                     "type": "number",
                     "description": "Defines offset to which nodes snap in the grid",
                     "default": 1

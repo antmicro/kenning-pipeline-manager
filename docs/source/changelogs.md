@@ -24,4 +24,4 @@ Commit SHA - `2a2eb64351a0427068ff152088cc90c4fce8917c`
 * Introduced two new keywords to the specification:
   * `backgroundSize` - defines size of the background grid.
   It has stricly visual effects.
-  * `snapOffset` - offset to which nodes snap in the grid.
+  * `movementStep` - minimal node movement step.

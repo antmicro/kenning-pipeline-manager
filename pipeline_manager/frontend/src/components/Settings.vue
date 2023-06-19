@@ -70,10 +70,10 @@ export default {
         const movementStep = computed(() => {
             const option = new IntegerInterface(
                 'Node movement step',
-                props.viewModel.snapOffset,
+                props.viewModel.movementStep,
             ).setPort(false);
             option.events.setValue.subscribe(this, (v) => {
-                props.viewModel.snapOffset = v; // eslint-disable-line vue/no-mutating-props,max-len,no-param-reassign
+                props.viewModel.movementStep = v; // eslint-disable-line vue/no-mutating-props,max-len,no-param-reassign
             });
             option.componentName = 'IntegerInterface';
             return option;

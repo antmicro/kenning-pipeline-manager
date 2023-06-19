@@ -48,7 +48,7 @@ This object specifies additional editor options and contains the following optio
   The given URL classes can be referred later in [Nodes](#node) with proper link suffix.
 * `collapseSidebar` - boolean value determining whether nodes sidebar should be collapsed by default
   Default value is `true`
-* `snapOffset` - Defines offset to which nodes snap in the grid.
+* `movementStep` - Defines offset to which nodes snap in the grid.
   Default value is `1`.
 * `backgroundSize` - Defines size of the background grid.
   Default value is `100`.

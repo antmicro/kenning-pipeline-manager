@@ -5,12 +5,13 @@
  */
 
 /**
- * Function for calculating node position based on given snapOffset.
+ * Function for calculating node position based on given movementStep.
  *
- * @param snapOffset Vue's reference to value containing snap offset
+ * @param movementStep Vue's reference to value containing snap offset
  */
-export default function gridSnapper(snapOffset) {
-    const calculateSnappedPosition = (coord) => Math.round(coord / snapOffset.value) * snapOffset.value;
+export default function gridSnapper(movementStep) {
+    const calculateSnappedPosition = (coord) =>
+        Math.round(coord / movementStep.value) * movementStep.value;
 
     return calculateSnappedPosition;
 }
