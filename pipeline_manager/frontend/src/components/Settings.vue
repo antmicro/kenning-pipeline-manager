@@ -29,7 +29,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { computed, ref } from 'vue';
-import { SelectInterface, CheckboxInterface } from 'baklavajs';
+import { SelectInterface, CheckboxInterface, IntegerInterface } from 'baklavajs';
 
 export default {
     props: {
@@ -52,6 +52,18 @@ export default {
                 props.viewModel.connectionRenderer.style = v; // eslint-disable-line vue/no-mutating-props,max-len,no-param-reassign
             });
             option.componentName = 'SelectInterface';
+            return option;
+        });
+
+        const backgroundGridSize = computed(() => {
+            const option = new IntegerInterface(
+                'Background grid size',
+                props.viewModel.settings.background.gridSize,
+            ).setPort(false);
+            option.events.setValue.subscribe(this, (v) => {
+                props.viewModel.settings.background.gridSize = v; // eslint-disable-line vue/no-mutating-props,max-len,no-param-reassign
+            });
+            option.componentName = 'IntegerInterface';
             return option;
         });
 
@@ -91,7 +103,10 @@ export default {
             }
         };
 
-        const settingOptions = computed(() => [connectionStyleOption.value]);
+        const settingOptions = computed(() => [
+            connectionStyleOption.value,
+            backgroundGridSize.value,
+        ]);
 
         return { displayOptionName, settingOptions, disableLayersOptions };
     },
@@ -124,6 +139,7 @@ export default {
     & > .panel {
         display: grid;
         grid-row-gap: $spacing-l;
+        user-select: none;
 
         & > div {
             & > .option-label {
