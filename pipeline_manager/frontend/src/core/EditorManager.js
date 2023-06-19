@@ -182,6 +182,7 @@ export default class EditorManager {
         }
 
         this.baklavaView.snapOffset = metadata.snapOffset ?? 1;
+        this.baklavaView.settings.background.gridSize = metadata.backgroundSize ?? 100;
         this.baklavaView.ignoredLayers = new Set();
         if (metadata) {
             this.baklavaView.ignorableLayers = metadata.layers ?? [];
