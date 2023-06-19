@@ -104,6 +104,8 @@ export default class EditorManager {
             } catch (e) {
                 return [e];
             }
+        } else {
+            resolvedNodes.push(...nodes);
         }
 
         const errors = this.validateSpecification(
