@@ -39,12 +39,19 @@ from creating and deleting connections or altering nodes' values if the editor i
                         </div>
                     </div>
                     <div class="flex-fill" v-else>
-                        <a :key="item.name" :href="item.url" class="__url" target="_blank">
+                        <a
+                            :key="item.name"
+                            :href="item.url"
+                            class="__url"
+                            target="_blank"
+                            draggable="false"
+                        >
                             <div class="icon">
                                 <img
                                     v-if="getIconPath(item.icon) !== undefined"
                                     :src="getIconPath(item.icon)"
                                     :alt="item.name"
+                                    draggable="false"
                                 />
                             </div>
                             <div class="text">{{ item.name }}</div>
