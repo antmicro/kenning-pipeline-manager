@@ -47,7 +47,7 @@ export default class EditorManager {
         // before this value can be loaded from specification
         this.baklavaView.ignorableLayers = [];
         this.baklavaView.collapseSidebar = true;
-        this.specificationVersion = specificationSchema.version;
+        this.specificationVersion = unresolvedSpecificationSchema.version;
     }
 
     /**
