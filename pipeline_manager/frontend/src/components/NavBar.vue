@@ -267,8 +267,6 @@ export default {
         // Remove notifications during loadup of default settings
         NotificationHandler.setShowNotification(false);
         if (process.env.VUE_APP_SPECIFICATION_PATH !== undefined) {
-            // check syntax errors in JSON at compile time
-            require(`${process.env.VUE_APP_SPECIFICATION_PATH}`); // eslint-disable-line global-require,max-len,import/no-dynamic-require
             // Use raw-loader which does not parse the specification so that it is possible
             // To add a more verbose validation log
             const specText = require(`!!raw-loader!${process.env.VUE_APP_SPECIFICATION_PATH}`); // eslint-disable-line global-require,max-len,import/no-dynamic-require
