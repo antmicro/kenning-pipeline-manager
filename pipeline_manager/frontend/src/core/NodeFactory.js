@@ -12,7 +12,6 @@ import {
     NodeInterface,
     TextInterface,
     defineNode,
-    setType,
     GraphTemplate,
 } from 'baklavajs';
 import { v4 as uuidv4 } from 'uuid';
@@ -100,21 +99,18 @@ function parseProperties(properties) {
     return tempInputs;
 }
 
-function parseOutputs(outputs, interfaceTypes) {
+function parseOutputs(outputs) {
     const tempOutputs = {};
 
     outputs.forEach((o) => {
         if (o.direction !== 'output') return;
         tempOutputs[o.name] = () => {
-            const intf = new NodeInterface(o.name).use(setType, interfaceTypes[o.type]);
+            const intf = new NodeInterface(o.name);
+            intf.type = o.type;
             intf.componentName = 'NodeInterface';
             intf.maxConnectionsCount = o.maxConnectionsCount;
             intf.direction = o.direction;
             intf.side = o.side ?? 'right';
-            intf.interfaceConnectionPattern =
-                interfaceTypes[o.type].interfaceConnectionPattern ?? 'solid';
-            intf.interfaceConnectionColor =
-                interfaceTypes[o.type].interfaceConnectionColor ?? '#FFFFFF';
             return intf;
         };
     });
@@ -122,7 +118,7 @@ function parseOutputs(outputs, interfaceTypes) {
     return tempOutputs;
 }
 
-function parseInputs(inputs, interfaceTypes) {
+function parseInputs(inputs) {
     const tempInputs = {};
 
     inputs.forEach((i) => {
@@ -130,15 +126,12 @@ function parseInputs(inputs, interfaceTypes) {
         // handling other things than inputs, such as paramters)
         if (i.direction !== 'input' && i.direction !== 'inout') return;
         tempInputs[i.name] = () => {
-            const intf = new NodeInterface(i.name).use(setType, interfaceTypes[i.type]);
+            const intf = new NodeInterface(i.name);
+            intf.type = i.type;
             intf.componentName = 'NodeInterface';
             intf.maxConnectionsCount = i.maxConnectionsCount;
             intf.direction = i.direction;
             intf.side = i.side ?? 'left';
-            intf.interfaceConnectionPattern =
-                interfaceTypes[i.type].interfaceConnectionPattern ?? 'solid';
-            intf.interfaceConnectionColor =
-                interfaceTypes[i.type].interfaceConnectionColor ?? '#FFFFFF';
             return intf;
         };
     });
@@ -297,11 +290,6 @@ export function NodeFactory(
     });
 
     return node;
-}
-
-export function checkTypesCallback(from, to) {
-    console.log(from, to);
-    return true;
 }
 
 /**
