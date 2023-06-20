@@ -228,8 +228,8 @@ export default defineComponent({
         const visibleConnections = computed(() =>
             connections.value.filter(
                 (c) =>
-                    !ignoredInterfacesTypes.value.has(c.from.type) &&
-                    !ignoredInterfacesTypes.value.has(c.to.type) &&
+                    !c.from.type.some((t) => ignoredInterfacesTypes.value.has(t)) &&
+                    !c.to.type.some((t) => ignoredInterfacesTypes.value.has(t)) &&
                     !ignoredNodesId.value.includes(c.from.nodeId) &&
                     !ignoredNodesId.value.includes(c.to.nodeId),
             ),
