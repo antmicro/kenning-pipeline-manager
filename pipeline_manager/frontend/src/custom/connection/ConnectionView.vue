@@ -28,18 +28,22 @@ export default defineComponent({
         const { classes } = Components.Connection.setup(props);
         const { graph } = useGraph();
         const { viewModel } = useViewModel();
+        const { interfaceTypes } = viewModel.value;
 
-        const strokeColor = props.connection.from.interfaceConnectionColor ?? '#FFFFFF';
+        const connectionStyle = interfaceTypes.getConnectionStyle(
+            props.connection.from,
+            props.connection.to,
+        );
 
         const cssClasses = computed(() => ({
             ...classes.value,
             '--hover': props.isHighlighted,
-            '--dashed': (props.connection.from.interfaceConnectionPattern ?? 'solid') === 'dashed',
-            '--dotted': (props.connection.from.interfaceConnectionPattern ?? 'solid') === 'dotted',
+            '--dashed': connectionStyle.interfaceConnectionPattern === 'dashed',
+            '--dotted': connectionStyle.interfaceConnectionPattern === 'dotted',
         }));
 
         const style = computed(() => ({
-            '--color': strokeColor,
+            '--color': connectionStyle.interfaceConnectionColor,
         }));
 
         const onMouseDown = doubleClick(700, () => {
