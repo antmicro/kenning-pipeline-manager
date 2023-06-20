@@ -143,48 +143,65 @@
 }
 
 .baklava-context-menu {
+    display: flex;
+    flex-direction: column;
+
     background-color: $gray-600;
     border-radius: unset;
     min-width: 135px;
-}
 
-.baklava-context-menu {
     & > .item {
+        display: flex;
+        gap: $spacing-m;
+        position: relative;
+        padding: 0;
+        flex-direction: row;
         padding: $spacing-m;
 
-        & .flex-fill {
+        &:hover {
+            color: var(--baklava-control-color-primary);
+        }
+
+        & > .icon {
+            flex-grow: 0;
+            padding: 0;
+            pointer-events: none;
+            width: auto;
+            height: 2em;
+            width: 2em;
+
+            & > img {
+                height: 2em;
+                width: 2em;
+            }
+        }
+
+        .__url {
             display: flex;
+            gap: $spacing-m;
+            position: relative;
+            padding: 0;
+            text-decoration: none;
+            color: inherit;
+            flex-direction: row;
 
-            & > .__url {
-                text-decoration: none;
-                color: inherit;
-                position: relative;
-                flex-grow: 0;
-                width: 100%;
-                display: inline;
-                text-align: center;
-                line-height: 2em;
+            &:hover {
+                color: var(--baklava-control-color-primary);
+            }
 
-                .icon {
-                    margin-right: $spacing-m;
-                    display: inline-block;
-                    float: left;
+            & > .icon {
+                display: contents;
 
-                    width: 2em;
-
-                    & > img {
-                        height: 2em;
-                    }
-                }
-                .text {
-                    margin-right: $spacing-m;
-                    display: block;
-                    float: left;
-
-                    width: auto;
+                & > img {
                     height: 2em;
+                    width: 2em;
                 }
             }
+
+            & > .text {
+                line-height: 2em;
+            }
+
         }
     }
 }
@@ -260,7 +277,7 @@
         flex-grow: 0;
         padding: 0;
         height: 2em;
-        width: auto;
+        width: 2em;
         pointer-events: none;
     }
 
@@ -280,7 +297,7 @@
         width: auto;
 
         img {
-            width: auto;
+            width: 2em;
             height: 2em;
             display: block;
         }

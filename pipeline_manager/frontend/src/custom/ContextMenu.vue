@@ -32,13 +32,11 @@ from creating and deleting connections or altering nodes' values if the editor i
                     @mouseleave="onMouseLeave($event, index)"
                     @click.stop="onClick(item)"
                 >
-                    <div class="flex-fill" v-if="item.url === undefined">
-                        <div class="__url">
-                            <div class="icon">&nbsp;</div>
-                            <div class="text">{{ item.label }}</div>
-                        </div>
-                    </div>
-                    <div class="flex-fill" v-else>
+                    <template v-if="item.url === undefined">
+                        <div class="icon">&nbsp;</div>
+                        <div class="text">{{ item.label }}</div>
+                    </template>
+                    <template v-else>
                         <a
                             :key="item.name"
                             :href="item.url"
@@ -56,27 +54,7 @@ from creating and deleting connections or altering nodes' values if the editor i
                             </div>
                             <div class="text">{{ item.name }}</div>
                         </a>
-                    </div>
-                    <div v-if="item.submenu" class="__submenu-icon" style="line-height: 1em">
-                        <svg width="13" height="13" viewBox="-60 120 250 250">
-                            <!-- eslint-disable max-len -->
-                            <path
-                                d="M160.875 279.5625 L70.875 369.5625 L70.875 189.5625 L160.875 279.5625 Z"
-                                stroke="none"
-                                fill="white"
-                            />
-                            <!-- eslint-enable max-len -->
-                        </svg>
-                    </div>
-                    <context-menu
-                        v-if="item.submenu"
-                        :value="activeMenu === index"
-                        :items="item.submenu"
-                        :is-nested="true"
-                        :is-flipped="{ x: flippedX, y: flippedY }"
-                        :flippable="flippable"
-                        @click="onChildClick"
-                    />
+                    </template>
                 </div>
             </template>
         </div>
