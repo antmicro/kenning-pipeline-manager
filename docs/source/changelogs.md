@@ -5,7 +5,7 @@ This section lists all versions, related features and breaking changes.
 
 ## 20230619.3
 
-Commit SHA - `bd8b069bd923a6894cc57309dada45e9fe60c4a9`
+Commit SHA - `8416661d796f6c628e49539e9cf813412f3b25bb`
 
 * Introduced two new keywords to the specification's `metadata`:
   * `backgroundSize` - defines size of the background grid.
@@ -13,6 +13,7 @@ Commit SHA - `bd8b069bd923a6894cc57309dada45e9fe60c4a9`
   * `movementStep` - minimal node movement step.
 * Added `additionalData` for storing some node-related data, not relevant to {{project}}
 * Changed `connectionSide` to `side` in dataflow and specification
+* `type` of interface now can be either a single string or a list of strings.
 
 ## 20230615.2
 

@@ -191,6 +191,11 @@ Every interface object has following properties:
 
 * `name` - name of the input displayed in the editor
 * `type` - type of the input used for styling and validation purposes.
+  Can be either a list of strings or a single string.
+  If two interfaces have at least one matching type, they can be connected.
+  The first type in the list is a "base" type - it is used to color the interface based on [Interface style](#interface-style).
+  If only one type between two interfaces is matching, the connection style matches the one defined for this particular type.
+  Otherwise, if multiple types are matching, a white solid line for connection is rendered.
 * `direction` - type of the interface in terms of direction, it can be:
 
     * `input` - interface accepts input data,
