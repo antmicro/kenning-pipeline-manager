@@ -18,9 +18,6 @@ export default class BaklavaInterfaceTypes {
     /**
      * Initialize Interface types instance used to manager styles of interfaces and connections
      * and validate adding connections.
-     *
-     * @param viewPlugin
-     * @param  editor
      */
     constructor(viewPlugin, editor) {
         editor.graphEvents.checkConnection.subscribe(this, ({ from, to }, prevent) => {
@@ -56,15 +53,15 @@ export default class BaklavaInterfaceTypes {
     }
 
     /**
-     * Return connection style for a given from and to interfaces.
+     * Returns connection style for a given from and to interfaces.
      * It takes style of a common type of those interfaces and completes its missing values
-     * with defautl ones. If there are multiple common types, a default style is returned.
+     * with default ones. If there are multiple common types, a default style is returned.
      *
      * If there is no `to` interface then a style for `from` interface is returned.
      * Again with completed missing values.
      *
-     * @param {Interface} from
-     * @param {Interface} to
+     * @param {Interface} from connection source
+     * @param {Interface} to connection target
      * @returns style for a defined connection
      */
     getConnectionStyle(from, to) {
@@ -105,8 +102,7 @@ export default class BaklavaInterfaceTypes {
         if ('interfaces' in metadata && metadata.interfaces) {
             Object.entries(metadata.interfaces).forEach(([type, io]) => {
                 this.types[type] = { name: type };
-                this.types[type].interfaceConnectionPattern =
-                    this.defaultStyle.interfaceConnectionPattern;
+                this.types[type].interfaceConnectionPattern = io.interfaceConnectionPattern;
                 this.types[type].interfaceConnectionColor = io.interfaceConnectionColor;
                 this.types[type].interfaceColor = io.interfaceColor;
             });
