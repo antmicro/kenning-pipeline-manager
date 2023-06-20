@@ -68,23 +68,20 @@
         height: 60px;
         display: flex;
         align-items: center;
-        padding-left: $spacing-l;
+        gap: $spacing-m;
+        padding: 0 $spacing-m;
         width: 100%;
-
-        & > * {
-            flex-grow: 1;
-            padding: 0px 5px;
-        }
 
         & > .__title-icon {
             flex-grow: 0;
+            padding: 0;
             height: 2em;
             width: auto;
             pointer-events: none;
         }
 
         & > .__title-label {
-            margin-right: 50px;
+            flex-grow: 1;
         }
 
         & > .__menu {
