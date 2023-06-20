@@ -5,22 +5,25 @@
  *
  */
 
-import { computed } from 'vue';
-
 /* eslint-disable class-methods-use-this */
 export default class BaklavaInterfaceTypes {
-    viewPlugin;
-
-    editor;
-
     types = new Map();
 
-    constructor(viewPlugin, editor) {
-        this.viewPlugin = viewPlugin;
-        this.editor = editor;
-        this.connections = computed(() => this.viewPlugin.displayedGraph.connections);
+    defaultStyle = {
+        interfaceConnectionPattern: 'solid',
+        interfaceConnectionColor: '#FFFFFF',
+        interfaceColor: '#FFFFFF',
+    };
 
-        this.editor.graphEvents.checkConnection.subscribe(this, ({ from, to }, prevent) => {
+    /**
+     * Initialize Interface types instance used to manager styles of interfaces and connections
+     * and validate adding connections.
+     *
+     * @param viewPlugin
+     * @param  editor
+     */
+    constructor(viewPlugin, editor) {
+        editor.graphEvents.checkConnection.subscribe(this, ({ from, to }, prevent) => {
             const fromTypes = this.normalizeType(from.type);
             const toTypes = this.normalizeType(to.type);
 
@@ -37,9 +40,9 @@ export default class BaklavaInterfaceTypes {
             if (intf.type) {
                 const types = this.normalizeType(intf.type);
                 const firstType = types.find((t) => this.types[t]?.interfaceColor !== undefined);
-                const color = this.types[firstType].interfaceColor;
 
-                if (color !== undefined) {
+                if (firstType !== undefined) {
+                    const color = this.types[firstType].interfaceColor;
                     el.querySelector('.__port').style.backgroundColor = color; // eslint-disable-line no-param-reassign
                 }
             }
@@ -52,14 +55,34 @@ export default class BaklavaInterfaceTypes {
         return typeof type === 'string' || type instanceof String ? [type] : type;
     }
 
-    getCommonStyle(from, to) {
-        const fromTypes = this.normalizeType(from.type);
-        const toTypes = this.normalizeType(to.type);
+    /**
+     * Return connection style for a given from and to interfaces.
+     * It takes style of a common type of those interfaces and completes its missing values
+     * with defautl ones.
+     *
+     * If there is no `to` interface then a style for `from` interface is returned.
+     * Again with completed missing values.
+     *
+     * @param {Interface} from
+     * @param {Interface} to
+     * @returns style for a defined connection
+     */
+    getConnectionStyle(from, to) {
+        const fromTypes = this.normalizeType(from?.type);
+        const toTypes = this.normalizeType(to?.type);
+
+        if (to === undefined && from === undefined) {
+            return this.defaultStyle;
+        }
+
+        if (to === undefined) {
+            const firstType = fromTypes.find((t) => this.types[t] !== undefined);
+            return { ...this.defaultStyle, ...this.types[firstType] };
+        }
 
         const commonTypes = fromTypes.filter((t) => toTypes.includes(t));
-        const firstType = commonTypes.find((t) => this.types[t]?.interfaceColor !== undefined);
-        const style = this.types[firstType];
-        return style;
+        const firstType = commonTypes.find((t) => this.types[t] !== undefined);
+        return { ...this.defaultStyle, ...this.types[firstType] };
     }
 
     /**
@@ -69,28 +92,20 @@ export default class BaklavaInterfaceTypes {
      *
      * The read interface types are stored in `interfaceTypes` object which is returned by
      * this function
-     * @param {*} nodes nodes of the specification
      * @param {*} metadata metadata containing information about styling
      * @returns read interface types
      */
-    readInterfaceTypes(nodes, metadata) {
+    readInterfaceTypes(metadata) {
         this.types = {};
 
-        nodes.forEach((node) => {
-            [...node.interfaces].forEach((io) => {
-                if (!Object.prototype.hasOwnProperty.call(this.types, io.type)) {
-                    this.types[io.type] = { name: io.type };
-
-                    if ('interfaces' in metadata && io.type in metadata.interfaces) {
-                        this.types[io.type].interfaceConnectionPattern =
-                            metadata.interfaces[io.type].interfaceConnectionPattern ?? 'solid';
-                        this.types[io.type].interfaceConnectionColor =
-                            metadata.interfaces[io.type].interfaceConnectionColor ?? '#FFFFFF';
-                        this.types[io.type].interfaceColor =
-                            metadata.interfaces[io.type].interfaceColor;
-                    }
-                }
+        if ('interfaces' in metadata && metadata.interfaces) {
+            Object.entries(metadata.interfaces).forEach(([type, io]) => {
+                this.types[type] = { name: type };
+                this.types[type].interfaceConnectionPattern =
+                    this.defaultStyle.interfaceConnectionPattern;
+                this.types[type].interfaceConnectionColor = io.interfaceConnectionColor;
+                this.types[type].interfaceColor = io.interfaceColor;
             });
-        });
+        }
     }
 }
