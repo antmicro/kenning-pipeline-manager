@@ -106,7 +106,7 @@ function parseOutputs(outputs) {
         if (o.direction !== 'output') return;
         tempOutputs[o.name] = () => {
             const intf = new NodeInterface(o.name);
-            intf.type = o.type;
+            intf.type = typeof o.type === 'string' || o.type instanceof String ? [o.type] : o.type;
             intf.componentName = 'NodeInterface';
             intf.maxConnectionsCount = o.maxConnectionsCount;
             intf.direction = o.direction;
@@ -127,7 +127,7 @@ function parseInputs(inputs) {
         if (i.direction !== 'input' && i.direction !== 'inout') return;
         tempInputs[i.name] = () => {
             const intf = new NodeInterface(i.name);
-            intf.type = i.type;
+            intf.type = typeof i.type === 'string' || i.type instanceof String ? [i.type] : i.type;
             intf.componentName = 'NodeInterface';
             intf.maxConnectionsCount = i.maxConnectionsCount;
             intf.direction = i.direction;
