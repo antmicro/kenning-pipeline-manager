@@ -8,7 +8,7 @@ import Ajv, { stringify } from 'ajv';
 import jsonMap from 'json-source-map';
 import jsonlint from 'jsonlint';
 
-import { useBaklava } from 'baklavajs';
+import { useBaklava, SequentialHook } from 'baklavajs';
 
 import PipelineManagerEditor from '../custom/Editor';
 import InterfaceTypes from './InterfaceTypes';
@@ -31,14 +31,13 @@ export default class EditorManager {
 
     baklavaView = useBaklava(this.editor);
 
-    interfaceTypes = new InterfaceTypes(this.baklavaView, this.editor);
-
     specificationLoaded = false;
 
     currentSpecification = undefined;
 
     constructor() {
         this.baklavaView.connectionRenderer = new ConnectionRenderer(this.baklavaView);
+        this.baklavaView.interfaceTypes = new InterfaceTypes(this.baklavaView, this.editor);;
 
         // need to be set here as settings try to use this value
         // before this value can be loaded from specification
@@ -113,7 +112,7 @@ export default class EditorManager {
             return errors;
         }
 
-        this.interfaceTypes.readInterfaceTypes(nodes, metadata);
+        this.baklavaView.interfaceTypes.readInterfaceTypes(metadata);
 
         if (metadata && 'urls' in metadata) {
             Object.entries(metadata.urls).forEach(([urlName, state]) => {
@@ -132,7 +131,7 @@ export default class EditorManager {
                 node.type,
                 node.interfaces,
                 node.properties,
-                this.interfaceTypes.types,
+                this.baklavaView.interfaceTypes.types,
                 metadata && 'twoColumn' in metadata ? metadata.twoColumn : false,
             );
             this.editor.registerNodeType(myNode, { title: node.name, category: node.category });
