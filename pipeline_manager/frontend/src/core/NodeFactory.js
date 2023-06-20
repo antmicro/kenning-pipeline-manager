@@ -187,26 +187,17 @@ export function parseNodeState(state) {
  * @param {string} type Type of the node
  * @param {*} interfaces List of interfaces in the block (input, output and inout)
  * @param {*} properties List of properties of the block
- * @param {*} interfaceTypes ReadInterfaceTypes of the specification
  * @param {boolean} twoColumn type of layout of the nodes
  * @returns Node based class
  */
-export function NodeFactory(
-    name,
-    displayName,
-    nodeType,
-    interfaces,
-    properties,
-    interfaceTypes,
-    twoColumn,
-) {
+export function NodeFactory(name, displayName, nodeType, interfaces, properties, twoColumn) {
     const node = defineNode({
         type: name,
 
         title: displayName,
 
-        outputs: parseOutputs(interfaces, interfaceTypes),
-        inputs: { ...parseProperties(properties), ...parseInputs(interfaces, interfaceTypes) },
+        outputs: parseOutputs(interfaces),
+        inputs: { ...parseProperties(properties), ...parseInputs(interfaces) },
 
         /* eslint-disable no-param-reassign */
         onCreate() {
