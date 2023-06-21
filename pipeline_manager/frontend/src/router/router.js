@@ -15,7 +15,7 @@ const RouterVue = createRouter({
             name: 'home',
             component: Home,
             meta: {
-                title: 'Pipeline Manager',
+                title: process.env.VUE_APP_EDITOR_TITLE ?? 'Pipeline Manager',
             },
         },
     ],
