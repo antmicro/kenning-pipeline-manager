@@ -72,7 +72,13 @@ It is also possible to add a default dataflow that will be loaded on the start o
 To be able to use some additional assets, like icons for nodes, run:
 
 ```bash
-./build --assets-directory <path-to-assets-dir> <path-to-specification> <path-to-dataflow>
+./build --assets-directory <path-to-assets-dir> static-html <path-to-specification> <path-to-dataflow>
+```
+
+To change the title of the editor and page, use `--editor-title` flag, e.g.:
+
+```bash
+./build --editor-title 'Graph editor' static-html <path-to-specification> <path-to-dataflow>
 ```
 
 ### Web application
