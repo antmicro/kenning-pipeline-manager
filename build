@@ -18,6 +18,10 @@ if __name__ == '__main__':
         '--assets-directory',
         help='Path to directory with assets'
     )
+    parser.add_argument(
+        '--editor-title',
+        help='Title of the editor'
+    )
     subparsers = parser.add_subparsers(
         title='build_type',
         help='Build type of the frontend application',
@@ -52,14 +56,23 @@ if __name__ == '__main__':
     if args.assets_directory:
         args.assets_directory = os.path.realpath(args.assets_directory)
 
+    config_path = os.path.join(frontend_path, '.env.static.local')
+
+    config_lines = []
+
+    if args.editor_title:
+        config_lines.append(f'VUE_APP_EDITOR_TITLE={args.editor_title}\n')
+
     if args.build_type == 'static-html' and args.specification:
         args.specification = os.path.realpath(args.specification)
-        config_path = os.path.join(frontend_path, '.env.static.local')
+        config_lines.append(f'VUE_APP_SPECIFICATION_PATH={args.specification}\n')
+        if args.dataflow:
+            args.dataflow = os.path.realpath(args.dataflow)
+            config_lines.append(f'VUE_APP_DATAFLOW_PATH={args.dataflow}\n')
+
+    if config_lines:
         with open(config_path, 'w') as config:
-            config.write(f'VUE_APP_SPECIFICATION_PATH={args.specification}\n')
-            if args.dataflow:
-                args.dataflow = os.path.realpath(args.dataflow)
-                config.write(f'VUE_APP_DATAFLOW_PATH={args.dataflow}\n')
+            config.writelines(config_lines)
 
     subprocess.run(['npm', 'install'], cwd=frontend_path)
 
