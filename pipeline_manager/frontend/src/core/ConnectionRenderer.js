@@ -209,7 +209,7 @@ export default class ConnectionRenderer {
             render(x1, y1, x2, y2, connection) {
                 const graph = viewModel.displayedGraph;
                 const nc = new NormalizedConnection(x1, y1, x2, y2, connection);
-                const minMargin = 30 * graph.scaling;
+                const minMargin = 40 * graph.scaling;
                 const middlePoint = (nc.x1 + nc.x2) / 2;
 
                 if (connection.to) {
