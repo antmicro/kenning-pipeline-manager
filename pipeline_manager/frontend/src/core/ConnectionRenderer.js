@@ -211,26 +211,45 @@ export default class ConnectionRenderer {
                 const nc = new NormalizedConnection(x1, y1, x2, y2, connection);
                 const minMargin = 30 * graph.scaling;
                 const middlePoint = (nc.x1 + nc.x2) / 2;
+
                 if (connection.to) {
                     const shift = getShift(nc.from, nc.to, graph, graph.scaling);
+
                     if (nc.from.side === 'right' && nc.to.side === 'left') {
-                        return `M ${nc.x1} ${nc.y1} H ${
-                            shift + Math.max(nc.x1 + minMargin, middlePoint)
-                        } V ${nc.y2} H ${nc.x2}`;
+                        const mid = Math.max(nc.x1 + minMargin + shift, middlePoint + shift);
+
+                        if (mid >= nc.x2 - minMargin - shift) {
+                            return `M ${nc.x1} ${nc.y1}
+                            H ${mid < nc.x2 - minMargin - shift ? nc.x1 + minMargin + shift : mid}
+                            V ${(nc.y1 + nc.y2) / 2}
+                            H ${nc.x2 - minMargin - shift}
+                            V ${nc.y2}
+                            H ${nc.x2}`;
+                        }
+
+                        return `M ${nc.x1} ${nc.y1} H ${mid} V ${nc.y2} H ${nc.x2}`;
                     }
                     if (nc.from.side === 'left' && nc.to.side === 'right') {
-                        return `M ${nc.x2} ${nc.y2} H ${
-                            shift + Math.max(nc.x2 + minMargin, middlePoint)
-                        } V ${nc.y1} H ${nc.x1}`;
+                        const mid = Math.max(nc.x2 + minMargin + shift, middlePoint + shift);
+
+                        if (mid >= nc.x1 - minMargin - shift) {
+                            return `M ${nc.x2} ${nc.y2}
+                            H ${mid < nc.x1 - minMargin - shift ? nc.x2 + minMargin + shift : mid}
+                            V ${(nc.y1 + nc.y2) / 2}
+                            H ${nc.x1 - minMargin - shift}
+                            V ${nc.y1}
+                            H ${nc.x1}`;
+                        }
+                        return `M ${nc.x2} ${nc.y2} H ${mid} V ${nc.y1} H ${nc.x1}`;
                     }
                     if (nc.from.side === 'right' && nc.to.side === 'right') {
                         return `M ${nc.x1} ${nc.y1} H ${
-                            shift + Math.max(nc.x1 + minMargin, nc.x2 + minMargin, middlePoint)
+                            Math.max(nc.x1 + minMargin, nc.x2 + minMargin, middlePoint) + shift
                         } V ${nc.y2} H ${nc.x2}`;
                     }
                     if (nc.from.side === 'left' && nc.to.side === 'left') {
                         return `M ${nc.x1} ${nc.y1} H ${
-                            shift + Math.min(nc.x1 - minMargin, nc.x2 - minMargin, middlePoint)
+                            Math.min(nc.x1 - minMargin, nc.x2 - minMargin, middlePoint) - shift
                         } V ${nc.y2} H ${nc.x2}`;
                     }
                 }
