@@ -264,6 +264,9 @@ export default {
                 this.externalApplicationManager.initializeConnection,
             );
         }
+
+        this.editorTitle = process.env.VUE_APP_EDITOR_TITLE ?? 'Pipeline Manager';
+
         // Remove notifications during loadup of default settings
         NotificationHandler.setShowNotification(false);
         if (process.env.VUE_APP_SPECIFICATION_PATH !== undefined) {
@@ -361,7 +364,7 @@ export default {
                     </div>
                 </div>
             </div>
-            <span> Pipeline Manager </span>
+            <span> {{ this.editorTitle }} </span>
             <div>
                 <div ref="settings">
                     <button @click="() => togglePanel(panels.settings)">
