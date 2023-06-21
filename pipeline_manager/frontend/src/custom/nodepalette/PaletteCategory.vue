@@ -11,7 +11,7 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
 
 <template>
     <!-- eslint-disable vue/no-multiple-template-root -->
-    <div v-for="(category, name, i) in nodeTree" :key="name">
+    <div v-for="(name, i) in Object.keys(nodeTree).sort(sortEntriesAlphabetically)" :key="name">
         <div class="__entry __category" :style="padding" @click="onMouseDown(i)">
             <Arrow :rotate="getRotation(i)" scale="small" />
             <div class="__title">
@@ -19,19 +19,29 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
             </div>
         </div>
         <div v-show="mask[i]">
-            <PaletteEntry
-                v-for="(ni, nt, j) in category.nodes.nodeTypes"
-                :key="nt"
-                :type="nt"
-                :title="ni.title"
-                :iconPath="category.nodes.nodeIconPaths[j]"
-                :urls="category.nodes.nodeURLs[j]"
-                :depth="depth + 1"
-                @pointerdown="onDragStart(nt, ni, category.nodes.nodeIconPaths[j])"
-            />
+            <div v-if="nodeTree[name].nodes.nodeTypes">
+                <PaletteEntry
+                    v-for="nt in Object.keys(nodeTree[name].nodes.nodeTypes).sort(
+                        sortEntriesAlphabetically,
+                    )"
+                    :key="nt"
+                    :type="nt"
+                    :title="nodeTree[name].nodes.nodeTypes[nt].title"
+                    :iconPath="nodeTree[name].nodes.nodeIconPaths[nt]"
+                    :urls="nodeTree[name].nodes.nodeURLs[nt]"
+                    :depth="depth + 1"
+                    @pointerdown="
+                        onDragStart(
+                            nt,
+                            nodeTree[name].nodes.nodeTypes[nt],
+                            nodeTree[name].nodes.nodeIconPaths[nt],
+                        )
+                    "
+                />
+            </div>
             <PaletteCategory
                 :depth="depth + 1"
-                :nodeTree="category.subcategories"
+                :nodeTree="nodeTree[name].subcategories"
                 :onDragStart="onDragStart"
                 :defaultCollapse="defaultCollapse"
             />
@@ -90,11 +100,14 @@ export default defineComponent({
             mask.value.splice(index, 1, !mask.value[index]);
         };
 
+        const sortEntriesAlphabetically = (a, b) => a.toLowerCase().localeCompare(b.toLowerCase());
+
         return {
             padding,
             mask,
             onMouseDown,
             getRotation,
+            sortEntriesAlphabetically,
         };
     },
 });

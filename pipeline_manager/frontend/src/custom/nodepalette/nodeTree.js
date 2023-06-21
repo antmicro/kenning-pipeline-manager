@@ -105,17 +105,21 @@ export default function getNodeTree() {
             ([nt]) => !['__baklava_SubgraphInputNode', '__baklava_SubgraphOutputNode'].includes(nt),
         );
 
-        const nodesURLs = nodeTypesInCategory.map((n) => {
-            const [nodeType] = n;
-            const URLs = editor.getNodeURLs(nodeType);
-            return URLs;
-        });
+        const nodesURLs = Object.fromEntries(
+            nodeTypesInCategory.map((n) => {
+                const [nodeType] = n;
+                const URLs = editor.getNodeURLs(nodeType);
+                return [nodeType, URLs];
+            }),
+        );
 
-        const nodesIconPath = nodeTypesInCategory.map((n) => {
-            const [nodeType] = n;
-            const iconPath = editor.getNodeIconPath(nodeType);
-            return iconPath;
-        });
+        const nodesIconPath = Object.fromEntries(
+            nodeTypesInCategory.map((n) => {
+                const [nodeType] = n;
+                const iconPath = editor.getNodeIconPath(nodeType);
+                return [nodeType, iconPath];
+            }),
+        );
 
         if (nodeTypesInCategory.length > 0) {
             nodes.push({
