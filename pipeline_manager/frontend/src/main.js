@@ -25,4 +25,6 @@ app.use(vClickOutside);
 app.use(RouterVue);
 app.use(Toast, options);
 
+document.title = process.env.VUE_APP_EDITOR_TITLE ?? 'Pipeline Manager';
+
 app.mount('#app');
