@@ -1,9 +1,7 @@
 # Demonstration of the frontend
 
 ````{only} html
-```{eval-rst}
-To see the work of the frontend, check `live demo <static-demo/index.html>`_.
-```
+To see the work of the frontend, check [live demo](resource:static-demo/index.html).
 ````
 
 ```{only} latex

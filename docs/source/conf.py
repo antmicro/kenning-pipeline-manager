@@ -63,3 +63,9 @@ html_title = project
     latex_logo,
     latex_additional_files
 ) = antmicro_latex(basic_filename, authors, project)
+
+myst_url_schemes = {
+    "http": None,
+    "https": None,
+    "resource": "{{path}}"
+}
