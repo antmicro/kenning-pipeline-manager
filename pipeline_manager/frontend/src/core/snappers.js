@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { useGraph } from 'baklavajs';
+
 /**
  * Function for calculating node position based on given movementStep.
  *
@@ -13,5 +15,18 @@ export function gridSnapper(movementStep) {
     const calculateSnappedPosition = (coord) =>
         Math.round(coord / movementStep.value) * movementStep.value;
 
+    return calculateSnappedPosition;
+}
+
+export function nodeSnapper(kind) {
+    const { graph } = useGraph();
+    const snapDistance = 100;
+    const calculateSnappedPosition = (coord, nodeId) => {
+        const nearestCoords = graph.value.nodes
+            .filter((node) => node.id !== nodeId)
+            .map((node) => node.position[kind])
+            .filter((otherCoords) => Math.abs(coord - otherCoords) < snapDistance);
+        return nearestCoords.length !== 0 ? Math.min(...nearestCoords) : undefined;
+    };
     return calculateSnappedPosition;
 }
