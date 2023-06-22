@@ -152,12 +152,17 @@ export default class PipelineManagerEditor extends Editor {
 
         // Load the node state as it is, wait until vue renders new nodes so that
         // node dimensions can be retrieved from DOM elements and then update the
-        // location based on autolayout results
+        // location based on autolayout results. The editor is set to readonly
+        // during loading to prevent any changes that may happen between graph load
+        // and layout computation
+        const readonlySetting = this.readonly;
+        this.readonly = true;
         this.layoutManager.registerGraph(state.graph);
         super.load(state);
         await nextTick();
         const updatedGraph = await this.layoutManager.computeLayout(state.graph);
         this.updateNodesPosition(updatedGraph);
+        this.readonly = readonlySetting;
 
         if (state.graph.panning !== undefined) {
             this._graph.panning = state.graph.panning;
