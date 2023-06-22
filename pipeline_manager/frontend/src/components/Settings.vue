@@ -96,7 +96,7 @@ export default {
             return option;
         });
 
-        const LayoutButton = computed(() => {
+        const LayoutApply = computed(() => {
             const button = new ButtonInterface('Apply autolayout', () => {
                 props.viewModel.editor.applyAutolayout();
             });
@@ -144,7 +144,7 @@ export default {
         const settingOptions = computed(() => [
             connectionStyleOption.value,
             LayoutOption.value,
-            LayoutButton.value,
+            LayoutApply.value,
             backgroundGridSize.value,
             movementStep.value,
         ]);
