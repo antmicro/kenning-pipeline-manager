@@ -93,7 +93,7 @@ import useDragMove from './useDragMove';
 import CustomInterface from './CustomInterface.vue';
 import CustomContextMenu from './ContextMenu.vue';
 import VerticalDots from '../components/VerticalDots.vue';
-import gridSnapper from '../core/gridSnapper';
+import { gridSnapper } from '../core/snappers';
 
 // Baklavajs implementation
 
