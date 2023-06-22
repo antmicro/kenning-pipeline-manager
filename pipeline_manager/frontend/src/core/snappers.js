@@ -18,6 +18,12 @@ export function gridSnapper(movementStep) {
     return calculateSnappedPosition;
 }
 
+/**
+ * Creates function that aligns the value of node position along specified axis if it is close
+ * enough to other node position
+ *
+ * @param kind Either 'x' or 'y', defines along which axis the coordinate is aligned
+ */
 export function nodeSnapper(kind) {
     const { graph } = useGraph();
     const snapDistance = 100;
