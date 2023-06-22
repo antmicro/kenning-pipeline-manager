@@ -108,8 +108,7 @@ export default class ConnectionRenderer {
         const fromIndex = fromNodeNeighbours.indexOf(ncFrom);
         const toIndex = toNodeNeighbours.indexOf(ncTo);
 
-        const shiftIndex =
-            (fromIndex + toIndex - toNodeNeighbours.length + fromNodeNeighbours.length - 2) / 2;
+        const shiftIndex = (fromIndex + toIndex) / 2;
         return shiftDistance * shiftIndex * scaling;
     }
 
@@ -212,16 +211,17 @@ export default class ConnectionRenderer {
         const middlePoint = (nc.x1 + nc.x2) / 2;
 
         if (connection.to) {
-            const shift = ConnectionRenderer.getShift(nc.from, nc.to, graph, graph.scaling);
+            const shift =
+                ConnectionRenderer.getShift(nc.from, nc.to, graph, graph.scaling) + minMargin;
 
             if (nc.from.side === 'right' && nc.to.side === 'left') {
-                const mid = Math.max(nc.x1 + minMargin + shift, middlePoint + shift);
+                const mid = Math.max(nc.x1 + shift, middlePoint + shift);
 
-                if (mid >= nc.x2 - minMargin - shift) {
+                if (mid >= nc.x2 - shift) {
                     return `M ${nc.x1} ${nc.y1}
-                    H ${mid < nc.x2 - minMargin - shift ? nc.x1 + minMargin + shift : mid}
+                    H ${mid < nc.x2 - shift ? nc.x1 + shift : mid}
                     V ${(nc.y1 + nc.y2) / 2}
-                    H ${nc.x2 - minMargin - shift}
+                    H ${nc.x2 - shift}
                     V ${nc.y2}
                     H ${nc.x2}`;
                 }
@@ -229,13 +229,13 @@ export default class ConnectionRenderer {
                 return `M ${nc.x1} ${nc.y1} H ${mid} V ${nc.y2} H ${nc.x2}`;
             }
             if (nc.from.side === 'left' && nc.to.side === 'right') {
-                const mid = Math.max(nc.x2 + minMargin + shift, middlePoint + shift);
+                const mid = Math.max(nc.x2 + shift, middlePoint + shift);
 
-                if (mid >= nc.x1 - minMargin - shift) {
+                if (mid >= nc.x1 - shift) {
                     return `M ${nc.x2} ${nc.y2}
-                    H ${mid < nc.x1 - minMargin - shift ? nc.x2 + minMargin + shift : mid}
+                    H ${mid < nc.x1 - shift ? nc.x2 + shift : mid}
                     V ${(nc.y1 + nc.y2) / 2}
-                    H ${nc.x1 - minMargin - shift}
+                    H ${nc.x1 - shift}
                     V ${nc.y1}
                     H ${nc.x1}`;
                 }
@@ -243,12 +243,12 @@ export default class ConnectionRenderer {
             }
             if (nc.from.side === 'right' && nc.to.side === 'right') {
                 return `M ${nc.x1} ${nc.y1} H ${
-                    Math.max(nc.x1 + minMargin, nc.x2 + minMargin, middlePoint) + shift
+                    Math.max(nc.x1, nc.x2, middlePoint) + shift + minMargin
                 } V ${nc.y2} H ${nc.x2}`;
             }
             if (nc.from.side === 'left' && nc.to.side === 'left') {
                 return `M ${nc.x1} ${nc.y1} H ${
-                    Math.min(nc.x1 - minMargin, nc.x2 - minMargin, middlePoint) - shift
+                    Math.min(nc.x1, nc.x2, middlePoint) - shift - minMargin
                 } V ${nc.y2} H ${nc.x2}`;
             }
         }
