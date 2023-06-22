@@ -6,7 +6,7 @@
 
 /**
  * Module handles the autolayout calculations.
- * Defines intermediary graph representation, containing:
+ * Defines intermediate graph representation, containing:
  * - nodes - list of nodes with properties:
  *   - id - unique id
  *   - width, height - node dimensions
