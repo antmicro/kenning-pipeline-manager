@@ -101,7 +101,7 @@ export default class ConnectionRenderer {
         return val;
     }
 
-    static getShift(ncFrom, ncTo, graph, scaling) {
+    static getShift(ncFrom, ncTo, graph, scaling, randomizedIndex = false) {
         const shiftDistance = 15;
         const fromNode = graph.findNodeById(ncFrom.nodeId);
         const toNode = graph.findNodeById(ncTo.nodeId);
@@ -120,26 +120,32 @@ export default class ConnectionRenderer {
 
         const shiftIndex = (fromIndex + toIndex) / 2;
 
-        let fromRandomIndex = this.uniqueIdMap.get(ncFrom.id);
-        if (fromRandomIndex === undefined) {
-            this.uniqueIdMap.set(ncFrom.id, this.globalCounter);
-            fromRandomIndex = this.globalCounter;
-            this.globalCounter += 1;
+        if (randomizedIndex) {
+            let fromRandomIndex = this.uniqueIdMap.get(ncFrom.id);
+            if (fromRandomIndex === undefined) {
+                this.uniqueIdMap.set(ncFrom.id, this.globalCounter);
+                fromRandomIndex = this.globalCounter;
+                this.globalCounter += 1;
+            }
+
+            let toRandomIndex = this.uniqueIdMap.get(ncTo.id);
+            if (toRandomIndex === undefined) {
+                this.uniqueIdMap.set(ncTo.id, this.globalCounter);
+                toRandomIndex = this.globalCounter;
+                this.globalCounter += 1;
+            }
+
+            const randomIndex =
+                (toRandomIndex + fromRandomIndex) %
+                (fromNodeNeighbours.length + toNodeNeighbours.length);
+            return shiftDistance * (randomIndex + shiftIndex) * scaling;
         }
 
-        let toRandomIndex = this.uniqueIdMap.get(ncTo.id);
-        if (toRandomIndex === undefined) {
-            this.uniqueIdMap.set(ncTo.id, this.globalCounter);
-            toRandomIndex = this.globalCounter;
-            this.globalCounter += 1;
-        }
-
-        const randomIndex = (toRandomIndex + fromRandomIndex) % 10;
-
-        return shiftDistance * (shiftIndex + randomIndex) * scaling;
+        return shiftDistance * shiftIndex * scaling;
     }
 
-    static curvedRender(x1, y1, x2, y2, connection) {
+    /* eslint-disable class-methods-use-this */
+    curvedRender(x1, y1, x2, y2, connection) {
         const nc = new NormalizedConnection(x1, y1, x2, y2, connection);
         const dx = 0.3 * Math.abs(nc.x1 - nc.x2);
 
@@ -182,7 +188,7 @@ export default class ConnectionRenderer {
     curvedRenderLoopback(x1, y1, x2, y2, connection) {
         const graph = this.viewModel.displayedGraph;
         const nc = new NormalizedConnection(x1, y1, x2, y2, connection);
-        const sideMargin = 30 * graph.scaling;
+        const sideMargin = 10 * graph.scaling;
 
         if (nc.from.side === 'left' && nc.to.side === 'left') {
             const leftRx = sideMargin;
@@ -234,38 +240,54 @@ export default class ConnectionRenderer {
     orthogonalRender(x1, y1, x2, y2, connection) {
         const graph = this.viewModel.displayedGraph;
         const nc = new NormalizedConnection(x1, y1, x2, y2, connection);
-        const minMargin = 40 * graph.scaling;
+        const minMargin = 30 * graph.scaling;
         const middlePoint = (nc.x1 + nc.x2) / 2;
 
         if (connection.to) {
-            const shift =
-                ConnectionRenderer.getShift(nc.from, nc.to, graph, graph.scaling) + minMargin;
+            const shift = ConnectionRenderer.getShift(nc.from, nc.to, graph, graph.scaling);
 
             if (nc.from.side === 'right' && nc.to.side === 'left') {
-                const mid = Math.max(nc.x1 + shift, middlePoint + shift);
+                const mid = Math.max(nc.x1, middlePoint) + shift + minMargin;
 
-                if (mid >= nc.x2 - shift) {
+                const firstTurn = mid < nc.x2 - shift - minMargin ? nc.x1 + shift + minMargin : mid;
+                const lastTurn = nc.x2 - shift - minMargin;
+
+                // S connection
+                if (
+                    mid >= nc.x2 - shift - minMargin &&
+                    (firstTurn > nc.x2 - minMargin || lastTurn < nc.x1 - minMargin)
+                ) {
                     return `M ${nc.x1} ${nc.y1}
-                    H ${mid < nc.x2 - shift ? nc.x1 + shift : mid}
+                    H ${firstTurn}
                     V ${(nc.y1 + nc.y2) / 2}
-                    H ${nc.x2 - shift}
+                    H ${lastTurn}
                     V ${nc.y2}
                     H ${nc.x2}`;
                 }
 
+                // Z connection
                 return `M ${nc.x1} ${nc.y1} H ${mid} V ${nc.y2} H ${nc.x2}`;
             }
             if (nc.from.side === 'left' && nc.to.side === 'right') {
-                const mid = Math.max(nc.x2 + shift, middlePoint + shift);
+                const mid = Math.max(nc.x2, middlePoint) + shift + minMargin;
 
-                if (mid >= nc.x1 - shift) {
+                const firstTurn = mid < nc.x1 - shift - minMargin ? nc.x2 + shift + minMargin : mid;
+                const lastTurn = nc.x1 - shift - minMargin;
+
+                // S connection
+                if (
+                    mid >= nc.x1 - shift - minMargin &&
+                    (firstTurn > nc.x1 - minMargin || lastTurn < nc.x2 - minMargin)
+                ) {
                     return `M ${nc.x2} ${nc.y2}
-                    H ${mid < nc.x1 - shift ? nc.x2 + shift : mid}
+                    H ${firstTurn}
                     V ${(nc.y1 + nc.y2) / 2}
-                    H ${nc.x1 - shift}
+                    H ${lastTurn}
                     V ${nc.y1}
                     H ${nc.x1}`;
                 }
+
+                // Z connection
                 return `M ${nc.x2} ${nc.y2} H ${mid} V ${nc.y1} H ${nc.x1}`;
             }
             if (nc.from.side === 'right' && nc.to.side === 'right') {
