@@ -9,7 +9,7 @@
  *
  * @param movementStep Vue's reference to value containing snap offset
  */
-export default function gridSnapper(movementStep) {
+export function gridSnapper(movementStep) {
     const calculateSnappedPosition = (coord) =>
         Math.round(coord / movementStep.value) * movementStep.value;
 
