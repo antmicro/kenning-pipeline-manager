@@ -76,6 +76,10 @@ export default class ConnectionRenderer {
 
     viewModel = null;
 
+    static uniqueIdMap = new Map();
+
+    static globalCounter = 0;
+
     /**
      * Defines the shift the connection should have compared to the default position based on the
      * index of the `from` interface and `to` interface bound to the connection in the nodes.
@@ -90,6 +94,12 @@ export default class ConnectionRenderer {
      * @param scaling number from viewModel defining the scaling of canvas
      * @returns Value the connection should shift from it's default position
      */
+
+    static clamp(val, min, max) {
+        if (val < min) return min;
+        if (val > max) return max;
+        return val;
+    }
 
     static getShift(ncFrom, ncTo, graph, scaling) {
         const shiftDistance = 15;
@@ -109,7 +119,24 @@ export default class ConnectionRenderer {
         const toIndex = toNodeNeighbours.indexOf(ncTo);
 
         const shiftIndex = (fromIndex + toIndex) / 2;
-        return shiftDistance * shiftIndex * scaling;
+
+        let fromRandomIndex = this.uniqueIdMap.get(ncFrom.id);
+        if (fromRandomIndex === undefined) {
+            this.uniqueIdMap.set(ncFrom.id, this.globalCounter);
+            fromRandomIndex = this.globalCounter;
+            this.globalCounter += 1;
+        }
+
+        let toRandomIndex = this.uniqueIdMap.get(ncTo.id);
+        if (toRandomIndex === undefined) {
+            this.uniqueIdMap.set(ncTo.id, this.globalCounter);
+            toRandomIndex = this.globalCounter;
+            this.globalCounter += 1;
+        }
+
+        const randomIndex = (toRandomIndex + fromRandomIndex) % 10;
+
+        return shiftDistance * (shiftIndex + randomIndex) * scaling;
     }
 
     static curvedRender(x1, y1, x2, y2, connection) {
