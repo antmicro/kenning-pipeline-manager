@@ -98,8 +98,7 @@ export default class BaklavaInterfaceTypes {
      */
     readInterfaceTypes(metadata) {
         this.types = {};
-
-        if ('interfaces' in metadata && metadata.interfaces) {
+        if (metadata?.interfaces) {
             Object.entries(metadata.interfaces).forEach(([type, io]) => {
                 this.types[type] = { name: type };
                 this.types[type].interfaceConnectionPattern = io.interfaceConnectionPattern;
