@@ -113,14 +113,12 @@ export default class ConnectionRenderer {
 
         if (this.randomizedOffset) {
             // the string is a sum of utf16 representation of each character
-            const toRandomIndex = [...ncTo.id].reduce(
-                (accumulator, char) => accumulator + char.charCodeAt(0),
-                0,
-            );
-            const fromRandomIndex = [...ncFrom.id].reduce(
-                (accumulator, char) => accumulator + char.charCodeAt(0),
-                0,
-            );
+            const toRandomIndex =
+                [...ncTo.id].reduce((accumulator, char) => accumulator + char.charCodeAt(0), 0) ??
+                0;
+            const fromRandomIndex =
+                [...ncFrom.id].reduce((accumulator, char) => accumulator + char.charCodeAt(0), 0) ??
+                0;
 
             const randomIndex =
                 (toRandomIndex ^ fromRandomIndex) % // eslint-disable-line no-bitwise
