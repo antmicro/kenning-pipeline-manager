@@ -123,6 +123,11 @@
                     "type": "string",
                     "description": "Defines the default autolayout algorithm",
                     "default": "NoLayout"
+                },
+                "randomizedOffset": {
+                    "type": "boolean",
+                    "description": "Determines whether connections should have randomized, but deterministic offset",
+                    "default": "false"
                 }
             },
             "additionalProperties": false
