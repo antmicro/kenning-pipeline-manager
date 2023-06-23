@@ -55,6 +55,18 @@ export default {
             return option;
         });
 
+        const randomizedOffsetOption = computed(() => {
+            const option = new CheckboxInterface(
+                'Randomized offset',
+                props.viewModel.connectionRenderer.randomizedOffset,
+            ).setPort(false);
+            option.events.setValue.subscribe(this, (v) => {
+                props.viewModel.connectionRenderer.randomizedOffset = v; // eslint-disable-line vue/no-mutating-props,max-len,no-param-reassign
+            });
+            option.componentName = 'CheckboxInterface';
+            return option;
+        });
+
         const backgroundGridSize = computed(() => {
             const option = new IntegerInterface(
                 'Background grid size',
@@ -147,6 +159,7 @@ export default {
             LayoutApply.value,
             backgroundGridSize.value,
             movementStep.value,
+            randomizedOffsetOption.value,
         ]);
 
         return { displayOptionName, settingOptions, disableLayersOptions };

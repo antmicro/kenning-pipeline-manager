@@ -76,9 +76,11 @@ export default class ConnectionRenderer {
 
     viewModel = null;
 
-    static uniqueIdMap = new Map();
+    uniqueIdMap = new Map();
 
-    static globalCounter = 0;
+    globalCounter = 0;
+
+    randomizedOffset = false;
 
     /**
      * Defines the shift the connection should have compared to the default position based on the
@@ -94,14 +96,7 @@ export default class ConnectionRenderer {
      * @param scaling number from viewModel defining the scaling of canvas
      * @returns Value the connection should shift from it's default position
      */
-
-    static clamp(val, min, max) {
-        if (val < min) return min;
-        if (val > max) return max;
-        return val;
-    }
-
-    static getShift(ncFrom, ncTo, graph, scaling, randomizedIndex = false) {
+    getShift(ncFrom, ncTo, graph, scaling) {
         const shiftDistance = 15;
         const fromNode = graph.findNodeById(ncFrom.nodeId);
         const toNode = graph.findNodeById(ncTo.nodeId);
@@ -120,7 +115,7 @@ export default class ConnectionRenderer {
 
         const shiftIndex = (fromIndex + toIndex) / 2;
 
-        if (randomizedIndex) {
+        if (this.randomizedOffset) {
             let fromRandomIndex = this.uniqueIdMap.get(ncFrom.id);
             if (fromRandomIndex === undefined) {
                 this.uniqueIdMap.set(ncFrom.id, this.globalCounter);
@@ -207,8 +202,7 @@ export default class ConnectionRenderer {
             A ${leftRx} ${leftRy} 0 0 ${renderingSide} ${nc.x2} ${nc.y2}`;
         }
 
-        const shift =
-            ConnectionRenderer.getShift(nc.from, nc.to, graph, graph.scaling) + 30 * graph.scaling;
+        const shift = this.getShift(nc.from, nc.to, graph, graph.scaling) + 30 * graph.scaling;
 
         const leftx = nc.from.side === 'left' ? nc.x1 : nc.x2;
         const rightx = nc.to.side === 'right' ? nc.x2 : nc.x1;
@@ -244,7 +238,7 @@ export default class ConnectionRenderer {
         const middlePoint = (nc.x1 + nc.x2) / 2;
 
         if (connection.to) {
-            const shift = ConnectionRenderer.getShift(nc.from, nc.to, graph, graph.scaling);
+            const shift = this.getShift(nc.from, nc.to, graph, graph.scaling);
 
             if (nc.from.side === 'right' && nc.to.side === 'left') {
                 const mid = Math.max(nc.x1, middlePoint) + shift + minMargin;
@@ -307,8 +301,7 @@ export default class ConnectionRenderer {
     orthogonalRenderLoopback(x1, y1, x2, y2, connection) {
         const graph = this.viewModel.displayedGraph;
         const nc = new NormalizedConnection(x1, y1, x2, y2, connection);
-        const shift =
-            ConnectionRenderer.getShift(nc.from, nc.to, graph, graph.scaling) + 30 * graph.scaling;
+        const shift = this.getShift(nc.from, nc.to, graph, graph.scaling) + 30 * graph.scaling;
         const bottomY = nodeBottomPoint(connection, graph.scaling, graph.panning);
         const y = bottomY + shift;
 
@@ -336,8 +329,9 @@ export default class ConnectionRenderer {
         return undefined;
     }
 
-    constructor(viewModel) {
+    constructor(viewModel, randomizedOffset = false) {
         this.viewModel = viewModel;
+        this.randomizedOffset = randomizedOffset;
     }
 
     /**
@@ -351,7 +345,7 @@ export default class ConnectionRenderer {
      * @returns String defining connection path in SVG format
      */
     render(x1, y1, x2, y2, connection) {
-        const loopback = ConnectionRenderer.isLoopback(connection) ? 'Loopback' : '';
+        const loopback = this.isLoopback(connection) ? 'Loopback' : '';
         return this[`${this.style}Render${loopback}`](x1, y1, x2, y2, connection);
     }
 
@@ -361,7 +355,7 @@ export default class ConnectionRenderer {
      * @param connection BaklavaJS-defined connection to test
      * @returns True if connection is loopback.
      */
-    static isLoopback(connection) {
+    isLoopback(connection) {
         // Temporary connections that are not connected to any output (.to is undefined)
         // are not loopback
         return !!connection.to && connection.from.nodeId === connection.to.nodeId;
