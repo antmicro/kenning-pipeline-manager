@@ -16,6 +16,9 @@ Inherits from baklavajs/packages/renderer-vue/src/nodepalette/NodePalette.vue
         <div class="palette-title">
             <span>Nodes browser</span>
         </div>
+        <div class="__entry">
+            <input class="node-search" v-model="nodeSearch" placeholder="Search" />
+        </div>
         <div class="nodes">
             <PaletteCategory
                 :nodeTree="nodeTree"
@@ -133,6 +136,19 @@ export default defineComponent({
     padding-bottom: 1em;
     padding-top: 1em;
     padding-left: 2em;
+}
+
+.node-search {
+    height: 100%;
+    width: 100%;
+    background-color: var(--baklava-node-color-background);
+    border: none;
+    color: $white;
+}
+
+.node-search::placeholder {
+    color: $white;
+    opacity: 0.5
 }
 
 span {
