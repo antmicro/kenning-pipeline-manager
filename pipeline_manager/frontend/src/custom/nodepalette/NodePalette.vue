@@ -17,6 +17,7 @@ Inherits from baklavajs/packages/renderer-vue/src/nodepalette/NodePalette.vue
             <span>Nodes browser</span>
         </div>
         <div class="__entry">
+            <Magnifier style="opacity: 0.5;"/>
             <input class="node-search" v-model="nodeSearch" placeholder="Search" />
         </div>
         <div class="nodes">
@@ -55,9 +56,10 @@ import PaletteCategory from './PaletteCategory.vue';
 import getNodeTree from './nodeTree';
 import PaletteEntry from './PaletteEntry.vue';
 import Tooltip from '../../components/Tooltip.vue';
+import Magnifier from '../../icons/Magnifier.vue';
 
 export default defineComponent({
-    components: { PaletteCategory, PaletteEntry, Tooltip },
+    components: { PaletteCategory, PaletteEntry, Tooltip, Magnifier },
     setup() {
         const { viewModel } = useViewModel();
 
@@ -147,7 +149,6 @@ export default defineComponent({
 }
 
 .node-search::placeholder {
-    color: $white;
     opacity: 0.5
 }
 
