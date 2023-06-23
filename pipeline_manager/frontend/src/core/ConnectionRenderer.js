@@ -76,10 +76,6 @@ export default class ConnectionRenderer {
 
     viewModel = null;
 
-    uniqueIdMap = new Map();
-
-    globalCounter = 0;
-
     randomizedOffset = false;
 
     /**
@@ -116,22 +112,18 @@ export default class ConnectionRenderer {
         const shiftIndex = (fromIndex + toIndex) / 2;
 
         if (this.randomizedOffset) {
-            let fromRandomIndex = this.uniqueIdMap.get(ncFrom.id);
-            if (fromRandomIndex === undefined) {
-                this.uniqueIdMap.set(ncFrom.id, this.globalCounter);
-                fromRandomIndex = this.globalCounter;
-                this.globalCounter += 1;
-            }
-
-            let toRandomIndex = this.uniqueIdMap.get(ncTo.id);
-            if (toRandomIndex === undefined) {
-                this.uniqueIdMap.set(ncTo.id, this.globalCounter);
-                toRandomIndex = this.globalCounter;
-                this.globalCounter += 1;
-            }
+            // the string is a sum of utf16 representation of each character
+            const toRandomIndex = [...ncTo.id].reduce(
+                (accumulator, char) => accumulator + char.charCodeAt(0),
+                0,
+            );
+            const fromRandomIndex = [...ncFrom.id].reduce(
+                (accumulator, char) => accumulator + char.charCodeAt(0),
+                0,
+            );
 
             const randomIndex =
-                (toRandomIndex + fromRandomIndex) %
+                (toRandomIndex ^ fromRandomIndex) % // eslint-disable-line no-bitwise
                 (fromNodeNeighbours.length + toNodeNeighbours.length);
             return shiftDistance * (randomIndex + shiftIndex) * scaling;
         }
