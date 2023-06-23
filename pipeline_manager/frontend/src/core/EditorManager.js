@@ -189,6 +189,8 @@ export default class EditorManager {
         }
 
         this.specificationLoaded = true;
+        this.baklavaView.connectionRenderer.randomizedOffset = metadata?.randomizedOffset ?? false;
+
         return [];
     }
 
@@ -332,6 +334,15 @@ export default class EditorManager {
     saveDataflow() {
         const save = this.editor.save();
         save.version = this.specificationVersion;
+
+        if (this.baklavaView.connectionRenderer.randomizedOffset) {
+            if (save.metadata === undefined) {
+                save.metadata = {};
+            }
+
+            save.metadata.randomizedOffset = true;
+        }
+
         return save;
     }
 
