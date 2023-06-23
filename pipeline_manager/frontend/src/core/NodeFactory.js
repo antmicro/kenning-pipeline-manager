@@ -29,28 +29,28 @@ function parseProperties(properties) {
 
         switch (propType) {
             case 'constant':
-                tempInputs[propName] = () => {
+                tempInputs[`property_${propName}`] = () => {
                     const intf = new TextInterface(propName, propDef).setPort(false);
                     intf.componentName = 'TextInterface';
                     return intf;
                 };
                 break;
             case 'text':
-                tempInputs[propName] = () => {
+                tempInputs[`property_${propName}`] = () => {
                     const intf = new InputInterface(propName, propDef).setPort(false);
                     intf.componentName = 'InputInterface';
                     return intf;
                 };
                 break;
             case 'number':
-                tempInputs[propName] = () => {
+                tempInputs[`property_${propName}`] = () => {
                     const intf = new NumberInterface(propName, propDef).setPort(false);
                     intf.componentName = 'NumberInterface';
                     return intf;
                 };
                 break;
             case 'integer':
-                tempInputs[propName] = () => {
+                tempInputs[`property_${propName}`] = () => {
                     const intf = new IntegerInterface(propName, propDef).setPort(false);
                     intf.componentName = 'IntegerInterface';
                     return intf;
@@ -58,7 +58,7 @@ function parseProperties(properties) {
                 break;
             case 'select': {
                 const it = p.values.map((element) => element.toString());
-                tempInputs[propName] = () => {
+                tempInputs[`property_${propName}`] = () => {
                     const intf = new SelectInterface(propName, propDef, it).setPort(false);
                     intf.componentName = 'SelectInterface';
                     return intf;
@@ -66,7 +66,7 @@ function parseProperties(properties) {
                 break;
             }
             case 'checkbox':
-                tempInputs[propName] = () => {
+                tempInputs[`property_${propName}`] = () => {
                     const intf = new CheckboxInterface(propName, propDef).setPort(false);
                     intf.componentName = 'CheckboxInterface';
                     return intf;
@@ -76,7 +76,7 @@ function parseProperties(properties) {
                 if (propDef === undefined) {
                     propDef = p.min;
                 }
-                tempInputs[propName] = () => {
+                tempInputs[`property_${propName}`] = () => {
                     const intf = new SliderInterface(propName, propDef, p.min, p.max).setPort(
                         false,
                     );
@@ -85,7 +85,7 @@ function parseProperties(properties) {
                 };
                 break;
             case 'list':
-                tempInputs[propName] = () => {
+                tempInputs[`property_${propName}`] = () => {
                     const intf = new ListInterface(propName, propDef, p.dtype).setPort(false);
                     intf.componentName = 'ListInterface';
                     return intf;
@@ -99,44 +99,71 @@ function parseProperties(properties) {
     return tempInputs;
 }
 
-function parseOutputs(outputs) {
+function parseIntefaces(interfaces) {
+    const tempInputs = {};
+    const tempInouts = {};
     const tempOutputs = {};
 
-    outputs.forEach((o) => {
-        if (o.direction !== 'output') return;
-        tempOutputs[o.name] = () => {
-            const intf = new NodeInterface(o.name);
-            intf.type = typeof o.type === 'string' || o.type instanceof String ? [o.type] : o.type;
-            intf.componentName = 'NodeInterface';
-            intf.maxConnectionsCount = o.maxConnectionsCount;
-            intf.direction = o.direction;
-            intf.side = o.side ?? 'right';
-            return intf;
-        };
-    });
-
-    return tempOutputs;
-}
-
-function parseInputs(inputs) {
-    const tempInputs = {};
-
-    inputs.forEach((i) => {
+    interfaces.forEach((i) => {
         // TODO storing inouts currently in the same list as inputs (since they are already
         // handling other things than inputs, such as paramters)
-        if (i.direction !== 'input' && i.direction !== 'inout') return;
-        tempInputs[i.name] = () => {
-            const intf = new NodeInterface(i.name);
-            intf.type = typeof i.type === 'string' || i.type instanceof String ? [i.type] : i.type;
-            intf.componentName = 'NodeInterface';
-            intf.maxConnectionsCount = i.maxConnectionsCount;
-            intf.direction = i.direction;
-            intf.side = i.side ?? 'left';
-            return intf;
-        };
+        if (i.direction === 'input') {
+            tempInputs[i.name] = () => {
+                const intf = new NodeInterface(i.name);
+                intf.type =
+                    typeof i.type === 'string' || i.type instanceof String ? [i.type] : i.type;
+                intf.componentName = 'NodeInterface';
+                intf.maxConnectionsCount = i.maxConnectionsCount;
+                intf.direction = i.direction;
+                intf.side = i.side ?? 'left';
+                return intf;
+            };
+        } else if (i.direction === 'inout') {
+            tempInouts[i.name] = () => {
+                const intf = new NodeInterface(i.name);
+                intf.type =
+                    typeof i.type === 'string' || i.type instanceof String ? [i.type] : i.type;
+                intf.componentName = 'NodeInterface';
+                intf.maxConnectionsCount = i.maxConnectionsCount;
+                intf.direction = i.direction;
+                intf.side = i.side ?? 'left';
+                return intf;
+            };
+        } else if (i.direction === 'output') {
+            tempOutputs[i.name] = () => {
+                const intf = new NodeInterface(i.name);
+                intf.type =
+                    typeof i.type === 'string' || i.type instanceof String ? [i.type] : i.type;
+                intf.componentName = 'NodeInterface';
+                intf.maxConnectionsCount = i.maxConnectionsCount;
+                intf.direction = i.direction;
+                intf.side = i.side ?? 'right';
+                return intf;
+            };
+        }
     });
 
-    return tempInputs;
+    const filteredInouts = Object.fromEntries(
+        Object.entries(tempInouts).filter(
+            ([name]) =>
+                !Object.keys(tempOutputs).includes(name) && !Object.keys(tempInputs).includes(name),
+        ),
+    );
+
+    const renamedInputs = Object.fromEntries(
+        Object.entries(tempInputs).map(([name, constructor]) => [`input_${name}`, constructor]),
+    );
+    const renamedInouts = Object.fromEntries(
+        Object.entries(filteredInouts).map(([name, constructor]) => [`inout_${name}`, constructor]),
+    );
+    const renamedOutputs = Object.fromEntries(
+        Object.entries(tempOutputs).map(([name, constructor]) => [`output_${name}`, constructor]),
+    );
+
+    return {
+        inputs: { ...renamedInouts, ...renamedInputs },
+        outputs: renamedOutputs,
+    };
 }
 
 export function parseNodeState(state) {
@@ -151,9 +178,9 @@ export function parseNodeState(state) {
     if (newState.interfaces !== undefined) {
         newState.interfaces.forEach((intf) => {
             if (intf.direction === 'input' || intf.direction === 'inout') {
-                newState.inputs[intf.name] = { id: intf.id };
+                newState.inputs[`${intf.direction}_${intf.name}`] = { id: intf.id };
             } else if (intf.direction === 'output') {
-                newState.outputs[intf.name] = { id: intf.id };
+                newState.outputs[`${intf.direction}_${intf.name}`] = { id: intf.id };
             }
         });
 
@@ -162,7 +189,7 @@ export function parseNodeState(state) {
 
     if (newState.properties !== undefined) {
         newState.properties.forEach((prop) => {
-            newState.inputs[prop.name] = { id: prop.id, value: prop.value };
+            newState.inputs[`property_${prop.name}`] = { id: prop.id, value: prop.value };
         });
         delete newState.properties;
     }
@@ -196,8 +223,8 @@ export function NodeFactory(name, displayName, nodeType, interfaces, properties,
 
         title: displayName,
 
-        outputs: parseOutputs(interfaces),
-        inputs: { ...parseProperties(properties), ...parseInputs(interfaces) },
+        inputs: { ...parseIntefaces(interfaces).inputs, ...parseProperties(properties) },
+        outputs: parseIntefaces(interfaces).outputs,
 
         /* eslint-disable no-param-reassign */
         onCreate() {
@@ -216,14 +243,14 @@ export function NodeFactory(name, displayName, nodeType, interfaces, properties,
 
                     if (ioState.port) {
                         newInterfaces.push({
-                            name: ioName,
+                            name: ioName.slice(ioState.direction.length + 1),
                             id: ioState.id,
                             direction: ioState.direction,
                             side: ioState.side,
                         });
                     } else {
                         newProperties.push({
-                            name: ioName,
+                            name: ioName.slice('property'.length + 1),
                             id: ioState.id,
                             value: ioState.value === undefined ? null : ioState.value,
                         });
@@ -235,14 +262,14 @@ export function NodeFactory(name, displayName, nodeType, interfaces, properties,
 
                     if (ioState.port) {
                         newInterfaces.push({
-                            name: ioName,
+                            name: ioName.slice(ioState.direction.length + 1),
                             id: ioState.id,
                             direction: ioState.direction,
                             side: ioState.side,
                         });
                     } else {
                         newProperties.push({
-                            name: ioName,
+                            name: ioName.slice('property'.length + 1),
                             id: ioState.id,
                             value: ioState.value === undefined ? null : ioState.value,
                         });
@@ -267,9 +294,9 @@ export function NodeFactory(name, displayName, nodeType, interfaces, properties,
                     interfacestorage.forEach((intf) => {
                         if ('side' in intf) {
                             if (intf.direction === 'input' || intf.direction === 'inout') {
-                                this.inputs[intf.name].side = intf.side;
+                                this.inputs[`${intf.direction}_${intf.name}`].side = intf.side;
                             } else if (intf.direction === 'output') {
-                                this.outputs[intf.name].side = intf.side;
+                                this.outputs[`${intf.direction}_${intf.name}`].side = intf.side;
                             }
                         }
                     });
