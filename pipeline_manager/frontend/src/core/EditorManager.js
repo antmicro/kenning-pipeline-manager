@@ -131,8 +131,9 @@ export default class EditorManager {
                 node.type,
                 node.interfaces,
                 node.properties,
-                metadata && 'twoColumn' in metadata ? metadata.twoColumn : false,
+                metadata?.twoColumn ?? false,
             );
+
             this.editor.registerNodeType(myNode, { title: node.name, category: node.category });
             if ('icon' in node) {
                 this.editor.nodeIcons.set(node.name, node.icon);
@@ -161,8 +162,8 @@ export default class EditorManager {
             });
         }
 
-        this.editor.readonly = (metadata && metadata.readonly) ?? false;
-        this.editor.hideHud = (metadata && metadata.hideHud) ?? false;
+        this.editor.readonly = metadata?.readonly ?? false;
+        this.editor.hideHud = metadata?.hideHud ?? false;
 
         NotificationHandler.setShowOption(!this.editor.hideHud);
         if (this.editor.readonly) {
@@ -171,22 +172,20 @@ export default class EditorManager {
                 'The specification is read-only. Only dataflow loading is allowed.',
             );
         }
-        this.editor.allowLoopbacks = (metadata && metadata.allowLoopbacks) ?? false;
-        if (metadata && 'connectionStyle' in metadata) {
+        this.editor.allowLoopbacks = metadata?.allowLoopbacks ?? false;
+        if (metadata?.connectionStyle) {
             this.baklavaView.connectionRenderer.style = metadata.connectionStyle;
         }
 
-        if ('layout' in metadata) {
+        if (metadata?.layout) {
             this.editor.layoutManager.useAlgorithm(metadata.layout);
         }
 
-        this.baklavaView.movementStep = metadata.movementStep ?? 1;
-        this.baklavaView.settings.background.gridSize = metadata.backgroundSize ?? 100;
+        this.baklavaView.movementStep = metadata?.movementStep ?? 1;
+        this.baklavaView.settings.background.gridSize = metadata?.backgroundSize ?? 100;
         this.baklavaView.ignoredLayers = new Set();
-        if (metadata) {
-            this.baklavaView.ignorableLayers = metadata.layers ?? [];
-            this.baklavaView.collapseSidebar = metadata.collapseSidebar ?? true;
-        }
+        this.baklavaView.ignorableLayers = metadata?.layers ?? [];
+        this.baklavaView.collapseSidebar = metadata?.collapseSidebar ?? true;
 
         this.specificationLoaded = true;
         this.baklavaView.connectionRenderer.randomizedOffset = metadata?.randomizedOffset ?? false;
