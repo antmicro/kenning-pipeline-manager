@@ -21,6 +21,10 @@ export default class BaklavaInterfaceTypes {
      */
     constructor(viewPlugin, editor) {
         editor.graphEvents.checkConnection.subscribe(this, ({ from, to }, prevent) => {
+            if (!from.type || !to.type) {
+                return;
+            }
+
             const fromTypes = this.normalizeType(from.type);
             const toTypes = this.normalizeType(to.type);
 
@@ -68,11 +72,11 @@ export default class BaklavaInterfaceTypes {
         const fromTypes = this.normalizeType(from?.type);
         const toTypes = this.normalizeType(to?.type);
 
-        if (to === undefined && from === undefined) {
+        if (from?.type === undefined) {
             return this.defaultStyle;
         }
 
-        if (to === undefined) {
+        if (to?.type === undefined) {
             const firstType = fromTypes.find((t) => this.types[t] !== undefined);
             return { ...this.defaultStyle, ...this.types[firstType] };
         }
