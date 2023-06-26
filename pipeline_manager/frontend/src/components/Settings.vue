@@ -116,6 +116,14 @@ export default {
             return button;
         });
 
+        const center = computed(() => {
+            const button = new ButtonInterface('Center', () => {
+                props.viewModel.editor.centerZoom();
+            });
+            button.componentName = 'ButtonInterface';
+            return button;
+        });
+
         const disableLayersOptions = computed(() => {
             const options = ref([]);
 
@@ -160,6 +168,7 @@ export default {
             backgroundGridSize.value,
             movementStep.value,
             randomizedOffsetOption.value,
+            center.value,
         ]);
 
         return { displayOptionName, settingOptions, disableLayersOptions };
