@@ -164,11 +164,75 @@ export default class PipelineManagerEditor extends Editor {
         this.updateNodesPosition(updatedGraph);
         this.readonly = readonlySetting;
 
+        // We need sidebar rendered for autozoom
+        await nextTick();
+
         if (state.graph.panning !== undefined) {
             this._graph.panning = state.graph.panning;
         }
         if (state.graph.scaling !== undefined) {
             this._graph.scaling = state.graph.scaling;
+        }
+        if (state.graph.scaling === undefined && state.graph.panning === undefined) {
+            this.centerZoom();
+        }
+    }
+
+    centerZoom() {
+        if (!Array.isArray(this._graph.nodes) || this._graph.nodes.length === 0) return;
+
+        const sizes = this._graph.nodes.map((node) => {
+            const HTMLelement = document.getElementById(node.id);
+            return {
+                width: HTMLelement.offsetWidth,
+                height: HTMLelement.offsetHeight,
+                position: node.position,
+            };
+        });
+
+        const margin = 100;
+        const terminalHeight = document.getElementsByClassName('terminal-wrapper')[0].offsetHeight;
+        const navbarHeight = document.getElementsByClassName('wrapper')[0].offsetHeight;
+        const sideBarWidth = document.getElementsByClassName('baklava-node-palette')[0].offsetWidth;
+
+        const rightmostX = Math.max(...sizes.map((node) => node.position.x + node.width)) + margin;
+        const leftmostX = Math.min(...sizes.map((node) => node.position.x)) - margin;
+
+        const bottommostY =
+            Math.max(...sizes.map((node) => node.position.y + node.height)) + margin;
+        const topmostY = Math.min(...sizes.map((node) => node.position.y)) - margin;
+
+        const graphWidth = rightmostX - leftmostX;
+        const graphHeight = bottommostY - topmostY;
+
+        const editorHeight = window.innerHeight - terminalHeight - navbarHeight;
+        const editorWidth = window.innerWidth - sideBarWidth;
+
+        const scalingY = editorHeight / graphHeight;
+        const scalingX = editorWidth / graphWidth;
+
+        if (scalingX > scalingY) {
+            const graphCenter = graphWidth / 2;
+            const editorCenter = (editorWidth / 2) * (1 / scalingY);
+
+            const translationX = editorCenter - graphCenter;
+
+            this._graph.panning = {
+                x: -(leftmostX - translationX - sideBarWidth / scalingY),
+                y: -topmostY,
+            };
+            this._graph.scaling = scalingY;
+        } else {
+            const graphCenter = graphHeight / 2;
+            const editorCenter = (editorHeight / 2) * (1 / scalingX);
+
+            const translationY = editorCenter - graphCenter;
+
+            this._graph.panning = {
+                x: -(leftmostX - sideBarWidth / scalingX),
+                y: -(topmostY - translationY),
+            };
+            this._graph.scaling = scalingX;
         }
     }
 
