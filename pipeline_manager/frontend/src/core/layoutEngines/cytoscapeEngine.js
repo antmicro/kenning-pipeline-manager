@@ -99,7 +99,12 @@ export default class CytoscapeLayoutEngine extends BaseLayoutEngine {
             ...graph,
             nodes: cytoscapeGraph.nodes().map((node) => ({
                 id: node.id(),
-                position: node.position(),
+                // node.position defines the center of node but graph representation
+                // required coordinates of top left corner
+                position: {
+                    x: node.position().x - node.width() / 2,
+                    y: node.position().y - node.height() / 2,
+                },
             })),
         };
     }
