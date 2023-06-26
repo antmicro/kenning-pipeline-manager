@@ -19,7 +19,9 @@ export default class CytoscapeLayoutEngine extends BaseLayoutEngine {
     // (0, 0)) and 'preset' (every node to user defined position)
     availableAlgorithms = [
         'cola',
-        'dagre',
+        'dagre-network-simplex',
+        'dagre-tight-tree',
+        'dagre-longest-path',
         'random',
         'grid',
         'circle',
@@ -72,10 +74,16 @@ export default class CytoscapeLayoutEngine extends BaseLayoutEngine {
             case 'cola':
                 options.nodeSpacing = (node) => 150;
                 break;
-            case 'dagre':
+            case 'dagre-network-simplex':
+            case 'dagre-tight-tree':
+            case 'dagre-longest-path': {
+                const [name, ...ranker] = this.activeAlgorithm.split('-');
                 options.nodeSep = 50;
                 options.rankSep = 100;
+                options.ranker = ranker.join('-');
+                options.name = name;
                 break;
+            }
             default:
                 break;
         }
