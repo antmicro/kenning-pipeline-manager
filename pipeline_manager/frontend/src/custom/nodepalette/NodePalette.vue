@@ -17,7 +17,7 @@ Inherits from baklavajs/packages/renderer-vue/src/nodepalette/NodePalette.vue
             <span>Nodes browser</span>
         </div>
         <div class="__entry">
-            <Magnifier style="opacity: 0.5;"/>
+            <Magnifier style="opacity: 0.5" />
             <input class="node-search" v-model="nodeSearch" placeholder="Search" />
         </div>
         <div class="nodes">
@@ -109,8 +109,9 @@ export default defineComponent({
             };
             document.addEventListener('pointerup', onDragEnd);
         };
+        const nodeSearch = ref('');
 
-        const nodeTree = computed(() => getNodeTree());
+        const nodeTree = computed(() => getNodeTree(nodeSearch));
         const collapse = computed(() => viewModel.value.collapseSidebar);
 
         return {
@@ -120,6 +121,7 @@ export default defineComponent({
             nodeTree,
             collapse,
             tooltip,
+            nodeSearch,
         };
     },
 });
@@ -149,7 +151,7 @@ export default defineComponent({
 }
 
 .node-search::placeholder {
-    opacity: 0.5
+    opacity: 0.5;
 }
 
 span {
