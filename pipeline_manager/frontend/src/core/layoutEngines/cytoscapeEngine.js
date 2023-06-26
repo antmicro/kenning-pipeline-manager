@@ -6,12 +6,27 @@
  */
 
 import cytoscape from 'cytoscape';
+
+import cola from 'cytoscape-cola';
+import dagre from 'cytoscape-dagre';
 import BaseLayoutEngine from './baseEngine';
+
+cytoscape.use(dagre);
+cytoscape.use(cola);
 
 export default class CytoscapeLayoutEngine extends BaseLayoutEngine {
     // The only cytoscape algorithm not defined here are 'null' (every node to
     // (0, 0)) and 'preset' (every node to user defined position)
-    availableAlgorithms = ['random', 'grid', 'circle', 'concentric', 'breadthfirst', 'cose'];
+    availableAlgorithms = [
+        'cola',
+        'dagre',
+        'random',
+        'grid',
+        'circle',
+        'concentric',
+        'breadthfirst',
+        'cose',
+    ];
 
     async calculate(graph) {
         const cytoscapeGraph = cytoscape({
@@ -54,6 +69,13 @@ export default class CytoscapeLayoutEngine extends BaseLayoutEngine {
                 options.nodeOverlap = 1000;
                 options.idealEdgeLength = (edge) => 300;
                 break;
+            case 'cola':
+                options.nodeSpacing = (node) => 150;
+                break;
+            case 'dagre':
+                options.nodeSep = 50;
+                options.rankSep = 100;
+                break;
             default:
                 break;
         }
@@ -61,8 +83,8 @@ export default class CytoscapeLayoutEngine extends BaseLayoutEngine {
 
         const layout = cytoscapeGraph.layout(options);
         layout.run();
-        if (this.activeAlgorithm === 'cose') {
-            // cose is the only asynchronous algorithm in this engine
+        if (['cose', 'cola'].includes(this.activeAlgorithm)) {
+            // wait until asynchronous algorithm finish calculations
             await layout.promiseOn('layoutstop');
         }
         return {
