@@ -37,6 +37,7 @@ export default class CytoscapeLayoutEngine extends BaseLayoutEngine {
         });
 
         const options = { name: this.activeAlgorithm };
+        /* eslint-disable no-unused-vars */
         switch (this.activeAlgorithm) {
             case 'random':
                 options.boundingBox = {
@@ -49,9 +50,14 @@ export default class CytoscapeLayoutEngine extends BaseLayoutEngine {
             case 'grid':
                 options.avoidOverlapPadding = 150;
                 break;
+            case 'cose':
+                options.nodeOverlap = 1000;
+                options.idealEdgeLength = (edge) => 300;
+                break;
             default:
                 break;
         }
+        /* eslint-enable no-unused-vars */
 
         const layout = cytoscapeGraph.layout(options);
         layout.run();
