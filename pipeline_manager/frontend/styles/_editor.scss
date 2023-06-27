@@ -86,6 +86,22 @@
 
         & > .__menu {
             flex-grow: 0;
+            height: 2em;
+            width: 2em;
+            padding: 0.5em;
+
+            & > svg {
+                height: 1em;
+                width: 1em;
+            }
+        }
+
+        & > .__menu:hover {
+
+            & > svg {
+                color: $green;
+
+            }
         }
     }
 
@@ -149,10 +165,11 @@
         display: flex;
         gap: 1em;
         position: relative;
-        padding: 0;
         flex-direction: row;
-        padding: 1em;
+        text-decoration: none;
+        padding: 1rem;
         height: 4em;
+        color: inherit;
 
         &:hover {
             color: var(--baklava-control-color-primary);
@@ -160,14 +177,12 @@
 
         & > .icon {
             flex-grow: 0;
-            padding: 0;
             pointer-events: none;
             width: auto;
             height: 2em;
             width: 2em;
 
             & > img {
-                padding: 0.25em;
                 height: 2em;
                 width: 2em;
             }
@@ -176,33 +191,6 @@
                 padding: 0.25em;
                 height: 2em;
                 width: 2em;
-            }
-        }
-
-        .__url {
-            display: flex;
-            gap: 1em;
-            position: relative;
-            padding: 0;
-            text-decoration: none;
-            color: inherit;
-            flex-direction: row;
-
-            &:hover {
-                color: var(--baklava-control-color-primary);
-            }
-
-            & > .icon {
-                display: contents;
-
-                & > img {
-                    height: 2em;
-                    width: 2em;
-                }
-            }
-
-            & > .text {
-                line-height: 2em;
             }
         }
     }
