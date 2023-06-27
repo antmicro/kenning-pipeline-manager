@@ -106,17 +106,16 @@ export default defineComponent({
     align-items: center;
     margin: 0;
     border: 1px solid #393939;
-    border-right: 0px;
-    border-top: 0px;
-    border-left: 0px;
+    border-right: 0;
+    border-top: 0;
+    border-left: 0;
 
-    padding-bottom: $spacing-m;
-    padding-top: $spacing-m;
+    padding-bottom: 1em;
+    padding-top: 1em;
     padding-left: 2em;
 }
 
 span {
-    font-size: $fs-small;
     color: $white;
     user-select: none;
 }
