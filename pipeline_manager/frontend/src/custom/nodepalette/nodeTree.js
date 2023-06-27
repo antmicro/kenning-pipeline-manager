@@ -38,6 +38,18 @@ const parseCategories = (categoriesNames) => {
     return categoryTree;
 };
 
+/* eslint-disable no-param-reassign */
+const setMasksToTrue = (treeNode) => {
+    treeNode.mask = true;
+    if (treeNode.nodes.nodeTypes !== undefined) {
+        Object.values(treeNode.nodes.nodeTypes).forEach((nodeType) => {
+            nodeType.mask = true;
+        });
+    }
+
+    Object.values(treeNode.subcategories).forEach((subTree) => setMasksToTrue(subTree));
+};
+
 /**
  * Uses parsed categories structure to create a full tree of nodes based on their categories
  * which can be used to render then in a node palette.
@@ -51,7 +63,6 @@ const parseCategories = (categoriesNames) => {
  * a given category and `subcategories` which represent subcategories. Subcategories are
  * also of this type.
  */
-/* eslint-disable no-param-reassign */
 const categorizeNodes = (categoryTree, nodes, prefix = '') => {
     const nodeTree = {};
     Object.entries(categoryTree).forEach(([category, subcategories]) => {
@@ -69,20 +80,19 @@ const categorizeNodes = (categoryTree, nodes, prefix = '') => {
         }
 
         const nodeTypesInCategory = nodes.find((n) => n.name === name);
-        if (nodeTypesInCategory?.nodeTypes !== undefined) {
-            Object.values(nodeTypesInCategory.nodeTypes).forEach((nodeType) => {
-                nodeType.mask = true;
-            });
-        }
         nodeTree[category].nodes = nodeTypesInCategory ?? {};
-        nodeTree[category].mask = true;
     });
+    Object.values(nodeTree).forEach((subTree) => setMasksToTrue(subTree));
     return nodeTree;
 };
 
 const updateMasks = (treeNode, filter) =>
-    Object.values(treeNode)
-        .map((node) => {
+    Object.entries(treeNode)
+        .map(([categoryName, node]) => {
+            if (categoryName.toLowerCase().includes(filter.toLowerCase())) {
+                setMasksToTrue(node);
+                return true;
+            }
             node.mask = updateMasks(node.subcategories, filter);
             if (node.nodes.nodeTypes !== undefined) {
                 node.mask =
