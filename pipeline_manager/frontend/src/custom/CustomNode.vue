@@ -37,8 +37,8 @@ from moving or deleting the nodes.
                 v-click-outside="doneRenaming"
                 @keydown.enter="doneRenaming"
             />
-            <div class="__menu">
-                <vertical-dots class="--clickable" @click="openContextMenuWrapper" />
+            <div class="__menu --clickable" @click="openContextMenuWrapper">
+                <vertical-dots />
                 <CustomContextMenu
                     v-model="showContextMenu"
                     :x="0"
