@@ -95,14 +95,42 @@ export default class PipelineManagerEditor extends Editor {
         return state;
     }
 
-    async load(state) {
-        // All subgraphs should be unregistered to avoid conflicts later when trying to
-        // load into subgraph (in that case there may be two subgraphs with the same ID, one
-        // of them from the previous session).
+    /**
+     * Cleans up the editor.
+     *
+     * Removes all nodes and connections from the editor and unregisters all
+     * nodes. Its important that registered interface types are not removed, as there
+     * is no support for that in baklavajs, but it should not result in any malfunction.
+     */
+    cleanEditor() {
+        const graphInstance = this._graph;
+
+        for (let i = graphInstance.connections.length - 1; i >= 0; i -= 1) {
+            graphInstance.removeConnection(graphInstance.connections[i]);
+        }
+        for (let i = graphInstance.nodes.length - 1; i >= 0; i -= 1) {
+            graphInstance.removeNode(graphInstance.nodes[i]);
+        }
+    }
+
+    unregisterGraphs() {
         [...this.graphs]
             .filter((graph) => graph.id !== this._graph.id)
             .forEach((graph) => this.unregisterGraph(graph));
         this.subgraphStack = [];
+    }
+
+    unregisterNodes() {
+        this.nodeTypes.forEach((_, nodeKey) => {
+            this.unregisterNodeType(nodeKey);
+        });
+    }
+
+    async load(state) {
+        // All subgraphs should be unregistered to avoid conflicts later when trying to
+        // load into subgraph (in that case there may be two subgraphs with the same ID, one
+        // of them from the previous session).
+        this.unregisterGraphs();
 
         // There can be only one subgraph node matching to a particular graphTemplateInstances
         const usedInstances = new Set();
@@ -145,11 +173,6 @@ export default class PipelineManagerEditor extends Editor {
             }
         };
 
-        state.graph.nodes.forEach(recurrentSubgraphLoad);
-        state.graphTemplates = [];
-        state.graph.inputs = [];
-        state.graph.outputs = [];
-
         // Load the node state as it is, wait until vue renders new nodes so that
         // node dimensions can be retrieved from DOM elements and then update the
         // location based on autolayout results. The editor is set to readonly
@@ -157,8 +180,28 @@ export default class PipelineManagerEditor extends Editor {
         // and layout computation
         const readonlySetting = this.readonly;
         this.readonly = true;
-        this.layoutManager.registerGraph(state.graph);
-        super.load(state);
+        let errors = [];
+        try {
+            state.graph.nodes.forEach(recurrentSubgraphLoad);
+            state.graphTemplates = [];
+            state.graph.inputs = [];
+            state.graph.outputs = [];
+            this.layoutManager.registerGraph(state.graph);
+
+            errors = super.load(state);
+        } catch (err) {
+            // If anything goes wrong during dataflow loading, the editor is cleaned and an
+            // appropriate error is returned.
+            this.cleanEditor();
+            this.readonly = readonlySetting;
+            return [err.toString()];
+        }
+
+        if (Array.isArray(errors) && errors.length) {
+            this.cleanEditor();
+            this.readonly = readonlySetting;
+            return errors;
+        }
         await nextTick();
         const updatedGraph = await this.layoutManager.computeLayout(state.graph);
         this.updateNodesPosition(updatedGraph);
@@ -176,6 +219,8 @@ export default class PipelineManagerEditor extends Editor {
         if (state.graph.scaling === undefined && state.graph.panning === undefined) {
             this.centerZoom();
         }
+
+        return [];
     }
 
     centerZoom() {
