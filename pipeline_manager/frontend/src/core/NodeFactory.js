@@ -166,7 +166,7 @@ function parseIntefaces(interfaces) {
     };
 }
 
-export function parseNodeState(state) {
+function parseNodeState(state) {
     const newState = { ...state };
     if (newState.inputs === undefined) {
         newState.inputs = {};
@@ -178,9 +178,9 @@ export function parseNodeState(state) {
     if (newState.interfaces !== undefined) {
         newState.interfaces.forEach((intf) => {
             if (intf.direction === 'input' || intf.direction === 'inout') {
-                newState.inputs[`${intf.direction}_${intf.name}`] = { id: intf.id };
+                newState.inputs[`${intf.direction}_${intf.name}`] = { ...intf };
             } else if (intf.direction === 'output') {
-                newState.outputs[`${intf.direction}_${intf.name}`] = { id: intf.id };
+                newState.outputs[`${intf.direction}_${intf.name}`] = { ...intf };
             }
         });
 
@@ -189,7 +189,7 @@ export function parseNodeState(state) {
 
     if (newState.properties !== undefined) {
         newState.properties.forEach((prop) => {
-            newState.inputs[`property_${prop.name}`] = { id: prop.id, value: prop.value };
+            newState.inputs[`property_${prop.name}`] = { ...prop };
         });
         delete newState.properties;
     }
@@ -202,6 +202,31 @@ export function parseNodeState(state) {
     delete newState.name;
 
     return newState;
+}
+
+/**
+ * Function perfomrms sanity checking on parsed state before loading it
+ * into the editor. It should throw explicit errors if any discrepancy is detected.
+ *
+ * @param {*} parsedState that is passed to node to load
+ * @param {*} inputs inputs of the node
+ * @param {*} outputs outputs of the node
+ */
+function detectDiscrepancies(parsedState, inputs, outputs) {
+    Object.entries({ ...parsedState.inputs, ...parsedState.outputs }).forEach(([ioName]) => {
+        if (
+            !Object.prototype.hasOwnProperty.call(inputs, ioName) &&
+            !Object.prototype.hasOwnProperty.call(outputs, ioName)
+        ) {
+            const direction = ioName.slice(0, ioName.indexOf('_'));
+            const name = ioName.slice(ioName.indexOf('_') + 1);
+
+            throw new Error(
+                `Node of name ${parsedState.type} and id ${parsedState.id} is corrupted. ` +
+                    `Interface named - ${name} of direction - ${direction} not found in specification!`,
+            );
+        }
+    });
 }
 
 /**
@@ -238,26 +263,7 @@ export function NodeFactory(name, displayName, nodeType, interfaces, properties,
                 const newProperties = [];
                 const newInterfaces = [];
 
-                Object.entries({ ...this.inputs }).forEach((io) => {
-                    const [ioName, ioState] = io;
-
-                    if (ioState.port) {
-                        newInterfaces.push({
-                            name: ioName.slice(ioState.direction.length + 1),
-                            id: ioState.id,
-                            direction: ioState.direction,
-                            side: ioState.side,
-                        });
-                    } else {
-                        newProperties.push({
-                            name: ioName.slice('property'.length + 1),
-                            id: ioState.id,
-                            value: ioState.value === undefined ? null : ioState.value,
-                        });
-                    }
-                });
-
-                Object.entries({ ...this.outputs }).forEach((io) => {
+                Object.entries({ ...this.inputs, ...this.outputs }).forEach((io) => {
                     const [ioName, ioState] = io;
 
                     if (ioState.port) {
@@ -288,19 +294,25 @@ export function NodeFactory(name, displayName, nodeType, interfaces, properties,
             };
 
             this.load = (state) => {
-                const interfacestorage = state.interfaces;
-                this.parentLoad(parseNodeState(state));
-                if (interfacestorage !== undefined) {
-                    interfacestorage.forEach((intf) => {
-                        if ('side' in intf) {
-                            if (intf.direction === 'input' || intf.direction === 'inout') {
-                                this.inputs[`${intf.direction}_${intf.name}`].side = intf.side;
-                            } else if (intf.direction === 'output') {
-                                this.outputs[`${intf.direction}_${intf.name}`].side = intf.side;
+                const parsedState = parseNodeState(state);
+
+                // Function throws an error if any discrepancies are detected
+                detectDiscrepancies(parsedState, this.inputs, this.outputs);
+                this.parentLoad(parsedState);
+
+                // Assinging sides to interfaces if any are defined
+                Object.entries({ ...parsedState.inputs, ...parsedState.outputs }).forEach(
+                    ([ioName, ioState]) => {
+                        if (ioState.direction !== undefined && ioState.side !== undefined) {
+                            if (ioState.direction === 'input' || ioState.direction === 'inout') {
+                                this.inputs[ioName].side = ioState.side;
+                            } else if (ioState.direction === 'output') {
+                                this.outputs[ioName].side = ioState.side;
                             }
                         }
-                    });
-                }
+                    },
+                );
+
                 // Default position should be undefined instead of (0, 0) so that it can be set
                 // by autolayout
                 if (state.position === undefined) {
