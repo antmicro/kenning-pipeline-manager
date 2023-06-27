@@ -5,6 +5,7 @@
  */
 
 import { useViewModel } from 'baklavajs';
+import { watch } from 'vue';
 import {
     SUBGRAPH_INPUT_NODE_TYPE,
     SUBGRAPH_OUTPUT_NODE_TYPE,
@@ -45,11 +46,12 @@ const parseCategories = (categoriesNames) => {
  * nodes into subcategories.
  * @param {*} nodes list of nodes that has information about their types and icons created
  * in `getNodeTree` function.
- * @param {*} prefix represents cagegory path of a node.
+ * @param {*} prefix represents category path of a node.
  * @returns Parsed structure where every node has two keys: `nodes`, which represents nodes of
  * a given category and `subcategories` which represent subcategories. Subcategories are
  * also of this type.
  */
+/* eslint-disable no-param-reassign */
 const categorizeNodes = (categoryTree, nodes, prefix = '') => {
     const nodeTree = {};
     Object.entries(categoryTree).forEach(([category, subcategories]) => {
@@ -67,12 +69,37 @@ const categorizeNodes = (categoryTree, nodes, prefix = '') => {
         }
 
         const nodeTypesInCategory = nodes.find((n) => n.name === name);
+        if (nodeTypesInCategory?.nodeTypes !== undefined) {
+            Object.values(nodeTypesInCategory.nodeTypes).forEach((nodeType) => {
+                nodeType.mask = true;
+            });
+        }
         nodeTree[category].nodes = nodeTypesInCategory ?? {};
+        nodeTree[category].mask = true;
     });
     return nodeTree;
 };
 
-export default function getNodeTree() {
+const updateMasks = (treeNode, filter) =>
+    Object.values(treeNode)
+        .map((node) => {
+            node.mask = updateMasks(node.subcategories, filter);
+            if (node.nodes.nodeTypes !== undefined) {
+                node.mask =
+                    node.mask ||
+                    Object.values(node.nodes.nodeTypes)
+                        .map((nt) => {
+                            nt.mask = nt.title.toLowerCase().includes(filter.toLowerCase());
+                            return nt.mask;
+                        })
+                        .includes(true);
+            }
+            return node.mask;
+        })
+        .includes(true);
+/* eslint-enable no-param-reassign */
+
+export default function getNodeTree(nameFilterRef) {
     const { viewModel } = useViewModel();
     const { editor } = viewModel.value;
 
@@ -134,5 +161,8 @@ export default function getNodeTree() {
     const nodeCategories = new Set(nodes.map((c) => c.name));
     const categoryTree = parseCategories(nodeCategories);
 
-    return categorizeNodes(categoryTree, nodes);
+    const parsedTree = categorizeNodes(categoryTree, nodes);
+    watch(nameFilterRef, (newNameFilter) => updateMasks(parsedTree, newNameFilter));
+
+    return parsedTree;
 }
