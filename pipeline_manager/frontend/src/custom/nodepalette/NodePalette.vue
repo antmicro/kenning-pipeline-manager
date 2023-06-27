@@ -17,7 +17,7 @@ Inherits from baklavajs/packages/renderer-vue/src/nodepalette/NodePalette.vue
             <span>Nodes browser</span>
         </div>
         <div class="__entry">
-            <Magnifier style="opacity: 0.5" />
+            <Magnifier :color="'gray'" />
             <input class="node-search" v-model="nodeSearch" placeholder="Search" />
         </div>
         <div class="nodes">
