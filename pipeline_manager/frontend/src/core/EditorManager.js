@@ -68,7 +68,9 @@ export default class EditorManager {
         }
 
         if (this.specificationLoaded) {
-            this.cleanEditor();
+            this.editor.unregisterNodes();
+            this.editor.unregisterGraphs();
+            this.editor.cleanEditor();
         }
 
         const { subgraphs, nodes, metadata, version } = dataflowSpecification; // eslint-disable-line object-curly-newline,max-len
@@ -301,28 +303,6 @@ export default class EditorManager {
         });
 
         return resolvedNodes;
-    }
-
-    /**
-     * Cleans up the editor.
-     *
-     * Removes all nodes and connections from the editor and unregisters all
-     * nodes. Its important that registered interface types are not removed, as there
-     * is no support for that in baklavajs, but it should not result in any malfunction.
-     */
-    cleanEditor() {
-        const graphInstance = this.editor._graph;
-
-        for (let i = graphInstance.connections.length - 1; i >= 0; i -= 1) {
-            graphInstance.removeConnection(graphInstance.connections[i]);
-        }
-        for (let i = graphInstance.nodes.length - 1; i >= 0; i -= 1) {
-            graphInstance.removeNode(graphInstance.nodes[i]);
-        }
-
-        this.editor.nodeTypes.forEach((_, nodeKey) => {
-            this.editor.unregisterNodeType(nodeKey);
-        });
     }
 
     /**
