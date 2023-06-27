@@ -128,8 +128,8 @@ const nodeURLs = viewModel.value.editor.getNodeURLs(props.node.type);
 const showContextMenu = ref(false);
 const contextMenuItems = computed(() => {
     const items = [
-        { value: 'delete', label: 'Delete', icon: Bin },
         { value: 'rename', label: 'Rename', icon: Pencil },
+        { value: 'delete', label: 'Delete', icon: Bin },
         ...nodeURLs,
     ];
 
