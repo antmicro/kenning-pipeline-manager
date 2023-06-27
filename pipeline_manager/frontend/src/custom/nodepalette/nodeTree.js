@@ -39,15 +39,19 @@ const parseCategories = (categoriesNames) => {
 };
 
 /* eslint-disable no-param-reassign */
-const setMasksToTrue = (treeNode) => {
-    treeNode.mask = true;
-    if (treeNode.nodes.nodeTypes !== undefined) {
-        Object.values(treeNode.nodes.nodeTypes).forEach((nodeType) => {
+/**
+ * Sets in place all masks inside nodes and subcategories to true
+ * @param category Single category object
+ */
+const setMasksToTrue = (category) => {
+    category.mask = true;
+    if (category.nodes.nodeTypes !== undefined) {
+        Object.values(category.nodes.nodeTypes).forEach((nodeType) => {
             nodeType.mask = true;
         });
     }
 
-    Object.values(treeNode.subcategories).forEach((subTree) => setMasksToTrue(subTree));
+    Object.values(category.subcategories).forEach((subTree) => setMasksToTrue(subTree));
 };
 
 /**
@@ -86,6 +90,18 @@ const categorizeNodes = (categoryTree, nodes, prefix = '') => {
     return nodeTree;
 };
 
+/**
+ *
+ * Updates masks of all nodes and subcategories based on filter value.
+ * The node is shown if the lowercase name contains lowercase filter
+ * Category is shown if it contains at least one node in the subtree which is
+ * shown or if lowercase category name contains lowercase filter
+ *
+ * @param treeNode NodeTree instance.
+ * @param filter String which is used for filtering
+ * @returns Boolean value whether at least one of the categories in the tree has
+ * mask set to true.
+ */
 const updateMasks = (treeNode, filter) =>
     Object.entries(treeNode)
         .map(([categoryName, node]) => {
