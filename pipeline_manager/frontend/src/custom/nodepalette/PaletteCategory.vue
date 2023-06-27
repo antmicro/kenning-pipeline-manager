@@ -11,7 +11,11 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
 
 <template>
     <!-- eslint-disable vue/no-multiple-template-root -->
-    <div v-for="(name, i) in Object.keys(nodeTree).sort(sortEntriesAlphabetically)" :key="name">
+    <div
+        v-for="(name, i) in Object.keys(nodeTree).sort(sortEntriesAlphabetically)"
+        :key="name"
+        v-show="nodeTree[name].mask"
+    >
         <div class="__entry __category" :style="padding" @click="onMouseDown(i)">
             <Arrow :rotate="getRotation(i)" scale="small" />
             <div class="__title">
@@ -27,6 +31,7 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
                     v-for="nt in Object.keys(nodeTree[name].nodes.nodeTypes).sort(
                         sortEntriesAlphabetically,
                     )"
+                    v-show="nodeTree[name].nodes.nodeTypes[nt].mask"
                     :key="nt"
                     :type="nt"
                     :title="nodeTree[name].nodes.nodeTypes[nt].title"
