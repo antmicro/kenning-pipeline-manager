@@ -68,9 +68,12 @@ export default class EditorManager {
         }
 
         if (this.specificationLoaded) {
-            this.editor.unregisterNodes();
             this.editor.unregisterGraphs();
             this.editor.cleanEditor();
+        }
+
+        if (this.specificationLoaded && resolve) {
+            this.editor.unregisterNodes();
         }
 
         const { subgraphs, nodes, metadata, version } = dataflowSpecification; // eslint-disable-line object-curly-newline,max-len
