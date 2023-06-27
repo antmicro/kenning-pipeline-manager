@@ -94,6 +94,8 @@ import CustomInterface from './CustomInterface.vue';
 import CustomContextMenu from './ContextMenu.vue';
 import VerticalDots from '../components/VerticalDots.vue';
 import { gridSnapper } from '../core/snappers';
+import Pencil from '../icons/Pencil.vue';
+import Bin from '../icons/Bin.vue';
 
 // Baklavajs implementation
 
@@ -126,8 +128,8 @@ const nodeURLs = viewModel.value.editor.getNodeURLs(props.node.type);
 const showContextMenu = ref(false);
 const contextMenuItems = computed(() => {
     const items = [
-        { value: 'delete', label: 'Delete' },
-        { value: 'rename', label: 'Rename' },
+        { value: 'delete', label: 'Delete', icon: Bin },
+        { value: 'rename', label: 'Rename', icon: Pencil },
         ...nodeURLs,
     ];
 

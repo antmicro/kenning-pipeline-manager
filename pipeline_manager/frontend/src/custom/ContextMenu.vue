@@ -20,43 +20,41 @@ from creating and deleting connections or altering nodes' values if the editor i
             :class="classes"
             :style="styles"
         >
-            <template v-for="(item, index) in itemsWithHoverProperty">
-                <div v-if="item.isDivider" :key="`d-${index}`" class="divider" />
-
-                <div
-                    v-else
-                    :key="`i-${index}`"
-                    class="item"
-                    :class="{ submenu: !!item.submenu, '--disabled': !!item.disabled }"
-                    @mouseenter="onMouseEnter($event, index)"
-                    @mouseleave="onMouseLeave($event, index)"
-                    @click.stop="onClick(item)"
-                >
-                    <template v-if="item.url === undefined">
-                        <div class="icon">&nbsp;</div>
-                        <div class="text">{{ item.label }}</div>
-                    </template>
-                    <template v-else>
-                        <a
-                            :key="item.name"
-                            :href="item.url"
-                            class="__url"
-                            target="_blank"
-                            draggable="false"
-                        >
-                            <div class="icon">
-                                <img
-                                    v-if="getIconPath(item.icon) !== undefined"
-                                    :src="getIconPath(item.icon)"
-                                    :alt="item.name"
-                                    draggable="false"
-                                />
-                            </div>
-                            <div class="text">{{ item.name }}</div>
-                        </a>
-                    </template>
-                </div>
-            </template>
+            <div
+                v-for="(item, index) in itemsWithHoverProperty"
+                :key="`i-${index}`"
+                class="item"
+                :class="{ submenu: !!item.submenu, '--disabled': !!item.disabled }"
+                @mouseenter="onMouseEnter($event, index)"
+                @mouseleave="onMouseLeave($event, index)"
+                @click.stop="onClick(item)"
+            >
+                <template v-if="item.url === undefined">
+                    <div class="icon">
+                        <component v-if="item.icon !== undefined" :is="item.icon"></component>
+                    </div>
+                    <div class="text">{{ item.label }}</div>
+                </template>
+                <template v-else>
+                    <a
+                        :key="item.name"
+                        :href="item.url"
+                        class="__url"
+                        target="_blank"
+                        draggable="false"
+                    >
+                        <div class="icon">
+                            <img
+                                v-if="getIconPath(item.icon) !== undefined"
+                                :src="getIconPath(item.icon)"
+                                :alt="item.name"
+                                draggable="false"
+                            />
+                        </div>
+                        <div class="text">{{ item.name }}</div>
+                    </a>
+                </template>
+            </div>
         </div>
     </transition>
 </template>
