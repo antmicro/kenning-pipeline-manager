@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-:root {
+ :root {
     // Controls
     --baklava-control-color-primary: #{$green};
     --baklava-control-color-error: #{$red};
@@ -65,11 +65,11 @@
     }
 
     & > .__title {
-        height: 60px;
+        height: 4em;
         display: flex;
         align-items: center;
-        gap: $spacing-m;
-        padding: 0 $spacing-m;
+        gap: 1em;
+        padding: 0 1em;
         width: 100%;
 
         & > .__title-icon {
@@ -105,10 +105,6 @@
             grid-column: 1 / span 2;
         }
     }
-}
-
-.baklava-node > .__title > .baklava-node > .__title > .baklava-editor {
-    font-size: 14px;
 }
 
 // Baklava-editor
@@ -148,15 +144,15 @@
 
     background-color: $gray-600;
     border-radius: unset;
-    min-width: 135px;
 
     & > .item {
         display: flex;
-        gap: $spacing-m;
+        gap: 1em;
         position: relative;
         padding: 0;
         flex-direction: row;
-        padding: $spacing-m;
+        padding: 1em;
+        height: 4em;
 
         &:hover {
             color: var(--baklava-control-color-primary);
@@ -171,11 +167,13 @@
             width: 2em;
 
             & > img {
+                padding: 0.25em;
                 height: 2em;
                 width: 2em;
             }
 
             & > svg {
+                padding: 0.25em;
                 height: 2em;
                 width: 2em;
             }
@@ -183,7 +181,7 @@
 
         .__url {
             display: flex;
-            gap: $spacing-m;
+            gap: 1em;
             position: relative;
             padding: 0;
             text-decoration: none;
@@ -255,17 +253,17 @@
 }
 
 .__entry {
-    gap: $spacing-m;
-    padding: 0 $spacing-m;
+    gap: 1em;
+    padding: 0 1em;
     width: 100%;
 
     font-size: $fs-small;
     margin-top: -1px;
 
     border: 1px solid #393939;
-    border-right: 0px;
-    border-left: 0px;
-    height: 60px;
+    border-right: 0;
+    border-left: 0;
+    height: 4em;
 
     background: var(--baklava-node-color-background);
     color: $white;
@@ -290,7 +288,7 @@
     }
 
     & > .__category-title {
-        padding-left: $spacing-s;
+        padding-left: 1em;
     }
 
     & > .__url {
@@ -313,14 +311,14 @@
             text-align: center;
             flex-direction: column;
 
-            margin: 0 $spacing-s;
-            padding: $spacing-s;
+            margin: 0 1em;
+            padding: 1em;
             background-color: $gray-600;
             border: 1px solid $gray-500;
             border-radius: 15px;
             display: none;
 
-            transform: translateX(-50%) translateY($spacing-s);
+            transform: translateX(-50%) translateY(1em);
         }
     }
 }
