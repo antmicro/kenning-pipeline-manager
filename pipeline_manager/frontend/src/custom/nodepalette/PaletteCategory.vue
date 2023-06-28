@@ -18,7 +18,10 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
                 {{ name }}
             </div>
         </div>
-        <div v-show="mask[i]">
+        <!-- Alternatively we could use v-show which has a higher overhead on startup,
+        but it prepares the whole tree structure so it does not need to be reinitialized
+        every time it is toggled -->
+        <div v-if="mask[i]">
             <div v-if="nodeTree[name].nodes.nodeTypes">
                 <PaletteEntry
                     v-for="nt in Object.keys(nodeTree[name].nodes.nodeTypes).sort(
