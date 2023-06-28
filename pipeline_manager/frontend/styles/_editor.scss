@@ -241,6 +241,10 @@
     }
 }
 
+.__entry:hover {
+    color: $green
+}
+
 .__entry {
     gap: 1em;
     padding: 0 1em;
@@ -295,7 +299,7 @@
 
         & > .__tooltip {
             z-index: 5;
-            color: inherit;
+            color: $white;
             position: fixed;
             text-align: center;
             flex-direction: column;
