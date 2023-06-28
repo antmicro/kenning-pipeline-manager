@@ -10,7 +10,6 @@ Displays user interface and main details about the Pipeline Manager status.
 -->
 
 <script>
-import { nextTick } from 'vue';
 import { toPng } from 'html-to-image';
 import jsonlint from 'jsonlint';
 import Logo from '../icons/Logo.vue';
@@ -268,9 +267,7 @@ export default {
             );
         }
 
-        // We want this functionality to be fired after the DOM is rendered and we dont want to
-        // block finishing of mounted function, that is why setTimeout is used.
-        setTimeout(async () => {
+        document.fonts.ready.then(async () => {
             NotificationHandler.setShowNotification(false);
             if (process.env.VUE_APP_SPECIFICATION_PATH !== undefined) {
                 // Use raw-loader which does not parse the specification so that it is possible
@@ -280,19 +277,20 @@ export default {
                     process.env.VUE_APP_VERBOSE !== undefined &&
                     process.env.VUE_APP_VERBOSE === 'true'
                 ) {
-                    specText =
-                        require(`!!raw-loader!${process.env.VUE_APP_SPECIFICATION_PATH}`).default; // eslint-disable-line global-require,import/no-dynamic-require
+                    specText = await import(
+                        `!!raw-loader!${process.env.VUE_APP_SPECIFICATION_PATH}`
+                    ); // eslint-disable-line global-require,import/no-dynamic-require
                 } else {
-                    specText = require(`${process.env.VUE_APP_SPECIFICATION_PATH}`); // eslint-disable-line global-require,import/no-dynamic-require
+                    specText = await import(process.env.VUE_APP_SPECIFICATION_PATH); // eslint-disable-line global-require,import/no-dynamic-require,max-len
                 }
-                this.loadSpecification(specText);
+                this.loadSpecification(specText.default);
             }
-            await nextTick();
+
             if (process.env.VUE_APP_DATAFLOW_PATH !== undefined) {
-                const dataflow = require(process.env.VUE_APP_DATAFLOW_PATH); // eslint-disable-line global-require,max-len,import/no-dynamic-require
-                this.loadDataflow(dataflow);
+                const dataflow = await import(process.env.VUE_APP_DATAFLOW_PATH); // eslint-disable-line global-require,max-len,import/no-dynamic-require
+                this.loadDataflow(dataflow.default);
             }
-        }, 0);
+        });
 
         // During specification load, show option may be set to either true or false
         // We do not want to set the showNotification to hardcoded value true, but rather
