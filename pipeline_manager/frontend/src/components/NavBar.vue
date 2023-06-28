@@ -290,12 +290,11 @@ export default {
                 const dataflow = await import(process.env.VUE_APP_DATAFLOW_PATH); // eslint-disable-line global-require,max-len,import/no-dynamic-require
                 this.loadDataflow(dataflow.default);
             }
+            // During specification load, show option may be set to either true or false
+            // We do not want to set the showNotification to hardcoded value true, but rather
+            // to the value of option set in specification
+            NotificationHandler.restoreShowNotification();
         });
-
-        // During specification load, show option may be set to either true or false
-        // We do not want to set the showNotification to hardcoded value true, but rather
-        // to the value of option set in specification
-        NotificationHandler.restoreShowNotification();
     },
 };
 </script>
