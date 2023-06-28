@@ -19,7 +19,7 @@ Resizable terminal panel that handles the user interactions
             </div>
 
             <div class="button-wrapper">
-                <button v-if="this.isPipelineManagerTerminalOpen" @click="clearTermianlOutput">
+                <button v-if="this.isPipelineManagerTerminalOpen" @click="clearTerminalOutput">
                     <span>Clear terminal</span>
                 </button>
                 <button @click="togglePipelineManagerTerminal">
@@ -78,7 +78,7 @@ export default {
                 this.$refs.pipelineSpan.classList.remove('active');
             }
         },
-        clearTermianlOutput() {
+        clearTerminalOutput() {
             terminalStore.remove();
         },
     },
