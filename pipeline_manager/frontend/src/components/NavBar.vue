@@ -272,8 +272,17 @@ export default {
         if (process.env.VUE_APP_SPECIFICATION_PATH !== undefined) {
             // Use raw-loader which does not parse the specification so that it is possible
             // To add a more verbose validation log
-            const specText = require(`!!raw-loader!${process.env.VUE_APP_SPECIFICATION_PATH}`); // eslint-disable-line global-require,max-len,import/no-dynamic-require
-            this.loadSpecification(specText.default);
+            let specText;
+            if (
+                process.env.VUE_APP_VERBOSE !== undefined &&
+                process.env.VUE_APP_VERBOSE === 'true'
+            ) {
+                specText =
+                    require(`!!raw-loader!${process.env.VUE_APP_SPECIFICATION_PATH}`).default; // eslint-disable-line global-require,import/no-dynamic-require
+            } else {
+                specText = require(`${process.env.VUE_APP_SPECIFICATION_PATH}`); // eslint-disable-line global-require,import/no-dynamic-require
+            }
+            this.loadSpecification(specText);
         }
         if (process.env.VUE_APP_DATAFLOW_PATH !== undefined) {
             const dataflow = require(process.env.VUE_APP_DATAFLOW_PATH); // eslint-disable-line global-require,max-len,import/no-dynamic-require
