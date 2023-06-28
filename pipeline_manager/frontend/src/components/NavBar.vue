@@ -101,10 +101,7 @@ export default {
             errors = this.editorManager.updateEditorSpecification(specText);
             if (Array.isArray(errors) && errors.length) {
                 NotificationHandler.terminalLog('error', 'Specification is invalid', errors);
-                return;
             }
-
-            NotificationHandler.showToast('info', 'Specification loaded successfully');
         },
 
         /**
@@ -164,8 +161,6 @@ export default {
             this.editorManager.loadDataflow(dataflow).then((errors) => {
                 if (Array.isArray(errors) && errors.length) {
                     NotificationHandler.terminalLog('error', 'Dataflow is invalid', errors);
-                } else {
-                    NotificationHandler.showToast('info', 'Dataflow loaded successfully');
                 }
             });
         },
