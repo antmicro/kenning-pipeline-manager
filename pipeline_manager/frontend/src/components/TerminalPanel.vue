@@ -19,7 +19,7 @@ Resizable terminal panel that handles the user interactions
             </div>
 
             <div class="button-wrapper">
-                <button @click="clearTermianlOutput">
+                <button v-if="this.isPipelineManagerTerminalOpen" @click="clearTermianlOutput">
                     <span>Clear terminal</span>
                 </button>
                 <button @click="togglePipelineManagerTerminal">
