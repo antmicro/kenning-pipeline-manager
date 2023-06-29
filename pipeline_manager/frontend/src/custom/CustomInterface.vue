@@ -55,12 +55,12 @@ export default defineComponent({
 
         const { viewModel } = useViewModel();
 
-        if (viewModel.value.editor.readonly) {
-            const token = Symbol(null);
-            props.intf.events.beforeSetValue.subscribe(token, (_, prevent) => {
+        const token = Symbol(null);
+        props.intf.events.beforeSetValue.subscribe(token, (_, prevent) => {
+            if (viewModel.value.editor.readonly) {
                 prevent();
-            });
-        }
+            }
+        });
 
         const startHoverWrapper = () => {
             if (!viewModel.value.editor.readonly) {
