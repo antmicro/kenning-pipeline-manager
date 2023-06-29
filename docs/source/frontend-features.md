@@ -2,26 +2,32 @@
 
 ## Graph manipulation
 
-![Node menu](img/node-menu.png)
+![Node palette](img/node-palette.png)
 
-To add a new node in the editor, right-click in the editor area and select your preferred node.
-You can also select existing nodes and copy and paste them using `Copy Nodes` and `Paste Nodes`.
+On the left side there is a node palette (which can be turned off or on using the green icon in the upper left corner).
+To add a new node to the graph, click the node in the palette and drag it to the editor.
+You can also select existing nodes and copy and paste them using `ctrl-c` and `ctrl-v` keyboard shortcuts.
 
-It is possible to remove a node either by right-clicking a node and clicking `Delete` or by pressing the `Delete` key after selecting it.
+![Node context menu](img/node-context-menu.png)
+
+In the upper right corner of each node there is an context menu toggle. It contains following options:
+* `Rename` - Changes title of the node. More details regarding the node naming can be seen in the ['title' field of dataflow format](project:dataflow-format.md#node)
+* `Delete` - Deletes the node from the dataflow. Other way of deleting nodes is to select and press the `Delete` key.
+* Additional, user defined URLs. More details in the [URL specification](project:specification-format.md#url-class)
 
 Scroll lets you to zoom in and out. 
 Left-clicking and dragging the editor background allows you to move around the editor area.
 
-Left-clicking on a node lets you to select and drag the node within the editor area.
+Left-clicking on a node lets you to select and drag the node within the editor area. Pressing the `ctrl` key while moving node allows you to align the node to other along some axis.
 
 To create a connection, left-click a node's connector and connect it to a connector (of a matching type, see [Specification format](specification-format)) on another node.
-To remove a connection, left-click its input connector.
+Double left-click on an existing connection removes it.
 
 ## Notifications
 
 ![Notifications](img/notifications.png)
 
-{{project}} provides notifications describing errors occuring in:
+{{project}} provides notifications describing errors occurring in:
 
 * The front end, such as invalid input specification, or invalid dataflow
 * The back end (see [Communication with an external application](external-app-communication))
