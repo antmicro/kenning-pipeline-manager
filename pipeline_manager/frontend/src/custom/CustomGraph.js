@@ -193,5 +193,58 @@ export default function createPipelineManagerGraph(graph) {
         // allows to later reuse this instance
     };
 
+    graph.load = function load(state) {
+        const errors = [];
+
+        // Clear current state
+        for (let i = this.connections.length - 1; i >= 0; i -= 1) {
+            this.removeConnection(this.connections[i]);
+        }
+        for (let i = this.nodes.length - 1; i >= 0; i -= 1) {
+            this.removeNode(this.nodes[i]);
+        }
+
+        // Load state
+        this.id = state.id;
+        this.inputs = state.inputs;
+        this.outputs = state.outputs;
+
+        state.nodes.forEach((n) => {
+            const nodeInformation = this.editor.nodeTypes.get(n.type);
+            if (!nodeInformation) {
+                errors.push(`Node type ${n.type} is not registered`);
+            } else {
+                const node = new nodeInformation.type(); // eslint-disable-line new-cap
+                this.addNode(node);
+                const nodeErrors = node.load(n);
+                if (Array.isArray(nodeErrors) && nodeErrors.length) {
+                    errors.push(...nodeErrors);
+                }
+            }
+        });
+
+        state.connections.forEach((c) => {
+            const fromIf = this.findNodeInterface(c.from);
+            const toIf = this.findNodeInterface(c.to);
+            if (!fromIf) {
+                errors.push(
+                    `Connection of id: ${c.id} invalid. Could not find interface with id ${c.from}`,
+                );
+            } else if (!toIf) {
+                errors.push(
+                    `Connection of id: ${c.id} invalid. Could not find interface with id ${c.to}`,
+                );
+            } else {
+                const createdConnection = this.addConnection(fromIf, toIf);
+                if (createdConnection === undefined) {
+                    errors.push(`Could not create connection of id: ${c.id}`);
+                }
+            }
+        });
+
+        this.hooks.load.execute(state);
+        return errors;
+    };
+
     return graph;
 }
