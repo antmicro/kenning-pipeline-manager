@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-// vue.config.js
 const { defineConfig } = require('@vue/cli-service');
 const path = require('path');
 
@@ -19,9 +18,19 @@ module.exports = defineConfig({
             },
         },
     },
-    configureWebpack: {
-        devtool: 'eval-source-map',
-        resolve: {
+    /* eslint-disable no-param-reassign */
+    configureWebpack: (config) => {
+        if (process.env.NODE_ENV === 'development') {
+            config.devtool = 'eval-source-map';
+        } else if (process.env.NODE_ENV === 'production') {
+            config.optimization = {
+                splitChunks: {
+                    maxSize: 250000, // This value is arbitrary, can be adjusted if needed
+                    chunks: 'all',
+                },
+            };
+        }
+        config.resolve = {
             alias: {
                 '@baklavajs': path.resolve(__dirname, 'node_modules/@baklavajs/'),
             },
@@ -31,7 +40,7 @@ module.exports = defineConfig({
                 system: false,
                 file: false,
             },
-        },
+        };
     },
     pages: {
         index: {
