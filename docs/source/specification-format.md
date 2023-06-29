@@ -223,6 +223,8 @@ An object that specifies a single property.
 Every project object has two required base properties:
 * `name` - name of the property.
 * `type` - type of the property.
+* `default` - specifies a default selected value
+  Its type depends on the `type` chosen.
 
 There are eight possible values for the `type` property.
 * `text` - property is a string.
@@ -236,7 +238,7 @@ There are eight possible values for the `type` property.
 * `select` - property is a string with a defined range.
   It requires a `values` property.
 * `checkbox` - property is a bool.
-  It requires a `default` property.
+  A checkbox representing boolean value
 * `slider` - property is a float with a specified range.
   It requires `min` and `max` properties.
 * `list` - property is a list of arguments of the same type, which can be specified using `dtype`.
@@ -246,8 +248,6 @@ Additional properties:
 
 * `min` - specifies the left end of a range.
 * `max` - specifies the right end of a range.
-* `default` - specifies a default selected value.
-  Its type depends on the `type` chosen.
 * `values` - specifies a range of possible values for `select`.
 * `dtype` - specifies data type of elements in a `list`.
   Supported values are `string`, `number`, `integer`, `boolean`.
