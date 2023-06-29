@@ -1,0 +1,69 @@
+{
+    "$id": "dataflow_schema",
+    "description": "Schema used to validate dataflows",
+    "type": "object",
+    "allOf": [
+        {
+            "$ref": "metadata_schema"
+        },
+        {
+            "properties": {
+                "version": {
+                    "description": "Version of the dataflow",
+                    "type": "string"
+                },
+                "graphTemplateInstances": {
+                    "type": "array",
+                    "items": {
+                        "allOf": [
+                            {
+                                "$ref": "graph_schema"
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "subgraphIO": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string",
+                                                    "description": "Unique identifier of the interface within the subgraph"
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "description": "Name of the subgraph interface"
+                                                },
+                                                "nodeInterfaceId": {
+                                                    "type": "string",
+                                                    "description": "Identifier of an interface of the node the given subgraph is representing"
+                                                }
+                                            },
+                                            "required": [
+                                                "id",
+                                                "name",
+                                                "nodeInterfaceId"
+                                            ]
+                                        }
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                },
+                "graph": {
+                    "allOf": [
+                        {
+                                "$ref": "graph_schema"
+                        }
+                    ]
+                }
+            },
+            "required": [
+                "graph"
+            ],
+            "unevaluatedProperties": false
+        }
+    ]
+}
