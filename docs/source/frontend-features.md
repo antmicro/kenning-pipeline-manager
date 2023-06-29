@@ -5,7 +5,7 @@
 ![Node palette](img/node-palette.png)
 
 On the left side there is a node palette (which can be turned off or on using the green icon in the upper left corner).
-To add a new node to the graph, click the node in the palette and drag it to the editor.
+To add a new node to the graph, click the node in the palette and drag it to the editor. 
 You can also select existing nodes and copy and paste them using `ctrl-c` and `ctrl-v` keyboard shortcuts.
 
 ![Node context menu](img/node-context-menu.png)
@@ -22,6 +22,22 @@ Left-clicking on a node lets you to select and drag the node within the editor a
 
 To create a connection, left-click a node's connector and connect it to a connector (of a matching type, see [Specification format](specification-format)) on another node.
 Double left-click on an existing connection removes it.
+
+## Settings
+
+![Settings tab](img/settings-tab.png)
+
+On the upper right corner of {{project}} window there is a gear icon toggling settings tab. In the tab following options can be found:
+* `Connection style` - Switch the style of the connection between `orthogonal` and `curved`
+* `AutoLayout algorithm` - Choose the algorithm for automatic node placement. Autolayout algorithm is triggered in the following situations:
+  * When loading the dataflow autolayout is used to place nodes without the `position` parameter set. Dataflow load can be triggered either via external application or
+  choosing the `Load graph file` option. In this case autolayout is applied to both main graph and the nodes in the subgraphs.
+  * By pressing the `Apply autolayout` button in the settings tab. In this case autolayout is applied to entire graph.
+* `Background grid size` - Sets the size of single grid cell visible in the background
+* `Node movement step` - Sets the minimum step size which can be taken along each axis when moving node.
+* `Center` - Pressing this buttons moves the viewport to the center of graph and sets the zoom level so that whole dataflow is visible
+* `Hide layers` - [Metadata](project:specification-format.md#layer) allows to specify layers for certain set of interface types and connections. Toggling this checkbox allows to hide
+connections belonging to said layer
 
 ## Notifications
 
