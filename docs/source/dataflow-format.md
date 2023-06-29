@@ -27,10 +27,6 @@ The graph format has following attributes:
   Every element is of type [Node](#node).
 * `connections` - array that specifies all connections in the dataflow.
   Every element is of type [Connection](#connection).
-* `inputs` - used for multi-graph dataflows.
-  Should be set to an empty list.
-* `outputs` - used for multi-graph dataflows.
-  Should be set to an empty list.
 * `panning` - object of type [Panning](#panning) that defines the position of the top-left corner in the rendered editor.
 * `scaling` - floating-point number that defines the zoom level in the editor.
 
