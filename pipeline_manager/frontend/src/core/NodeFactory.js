@@ -213,6 +213,8 @@ function parseNodeState(state) {
  * @param {*} outputs outputs of the node
  */
 function detectDiscrepancies(parsedState, inputs, outputs) {
+    const errors = [];
+
     Object.entries({ ...parsedState.inputs, ...parsedState.outputs }).forEach(([ioName]) => {
         if (
             !Object.prototype.hasOwnProperty.call(inputs, ioName) &&
@@ -221,12 +223,13 @@ function detectDiscrepancies(parsedState, inputs, outputs) {
             const direction = ioName.slice(0, ioName.indexOf('_'));
             const name = ioName.slice(ioName.indexOf('_') + 1);
 
-            throw new Error(
+            errors.push(
                 `Node of name ${parsedState.type} and id ${parsedState.id} is corrupted. ` +
                     `Interface named - ${name} of direction - ${direction} not found in specification!`,
             );
         }
     });
+    return errors;
 }
 
 /**
@@ -296,8 +299,11 @@ export function NodeFactory(name, displayName, nodeType, interfaces, properties,
             this.load = (state) => {
                 const parsedState = parseNodeState(state);
 
-                // Function throws an error if any discrepancies are detected
-                detectDiscrepancies(parsedState, this.inputs, this.outputs);
+                const errors = detectDiscrepancies(parsedState, this.inputs, this.outputs);
+                if (Array.isArray(errors) && errors.length) {
+                    return errors;
+                }
+
                 this.parentLoad(parsedState);
 
                 // Assinging sides to interfaces if any are defined
@@ -318,6 +324,7 @@ export function NodeFactory(name, displayName, nodeType, interfaces, properties,
                 if (state.position === undefined) {
                     this.position = undefined;
                 }
+                return [];
             };
 
             this.twoColumn = twoColumn;
