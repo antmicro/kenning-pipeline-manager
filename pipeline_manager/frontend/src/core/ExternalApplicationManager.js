@@ -161,12 +161,13 @@ export default class ExternalApplicationManager {
             const data = await response.json();
 
             if (data.type === PMMessageType.OK) {
-                const errors = this.editorManager.loadDataflow(data.content);
-                if (Array.isArray(errors) && errors.length) {
-                    NotificationHandler.terminalLog('error', 'Dataflow is invalid', errors);
-                } else {
-                    NotificationHandler.showToast('info', message);
-                }
+                this.editorManager.loadDataflow(data.content).then((errors) => {
+                    if (Array.isArray(errors) && errors.length) {
+                        NotificationHandler.terminalLog('error', 'Dataflow is invalid', errors);
+                    } else {
+                        NotificationHandler.showToast('info', message);
+                    }
+                });
             } else if (data.type === PMMessageType.ERROR) {
                 message = data.content;
                 NotificationHandler.showToast('error', message);
