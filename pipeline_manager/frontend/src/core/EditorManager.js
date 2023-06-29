@@ -4,7 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import Ajv, { stringify } from 'ajv';
+import { stringify } from 'ajv';
+import Ajv2019 from 'ajv/dist/2019';
 import jsonMap from 'json-source-map';
 import jsonlint from 'jsonlint';
 
@@ -17,6 +18,9 @@ import NotificationHandler from './notifications';
 import { NodeFactory, SubgraphFactory } from './NodeFactory';
 import unresolvedSpecificationSchema from '../../../resources/schemas/unresolved_specification_schema.json';
 import specificationSchema from '../../../resources/schemas/specification_schema.json';
+import metadataSchema from '../../../resources/schemas/metadata_schema.json';
+import dataflowSchema from '../../../resources/schemas/dataflow_schema.json';
+import graphSchema from '../../../resources/schemas/graph_schema.json';
 import ConnectionRenderer from './ConnectionRenderer';
 import {
     SubgraphInoutNode,
@@ -340,6 +344,11 @@ export default class EditorManager {
      * If the array is empty, the loading was successful.
      */
     async loadDataflow(dataflow) {
+        const validationErrors = this.validateDataflow(dataflow);
+        if (Array.isArray(validationErrors) && validationErrors.length) {
+            return validationErrors;
+        }
+
         this.editor.view = this.baklavaView;
         try {
             const specificationVersion = dataflow.version;
@@ -421,7 +430,16 @@ export default class EditorManager {
      */
     /* eslint-disable class-methods-use-this */
     validateJSONWithSchema(data, schema) {
-        const ajv = new Ajv({ allowUnionTypes: true });
+        const ajv = new Ajv2019({
+            allowUnionTypes: true,
+            schemas: [
+                unresolvedSpecificationSchema,
+                specificationSchema,
+                metadataSchema,
+                dataflowSchema,
+                graphSchema,
+            ],
+        });
         ajv.addKeyword('version');
 
         const validate = ajv.compile(schema);
@@ -442,8 +460,10 @@ export default class EditorManager {
 
         // Parsing errors messages to a human readable string
         const errors = validate.errors.map((error) => {
-            const path = `specification${error.instancePath}`;
-
+            // It is assumed that the id of the schema is for example `dataflow_schema`
+            // Here a prefix is obtained
+            const nameOfEntity = schema.$id.split('_').slice(0, -1).join('_');
+            const path = `${nameOfEntity}${error.instancePath}`;
             let errorPrefix = '';
 
             if (isTextFormat) {
@@ -463,6 +483,10 @@ export default class EditorManager {
                 case 'enum':
                     return `${errorPrefix} ${path} ${error.message} - ${stringify(
                         error.params.allowedValues,
+                    )}`;
+                case 'additionalProperties':
+                    return `${errorPrefix} ${path} ${error.message} - ${stringify(
+                        error.params.additionalProperty,
                     )}`;
                 default:
                     return `${errorPrefix} ${path} ${error.message}`;
@@ -490,10 +514,17 @@ export default class EditorManager {
      * @return An array of errors. If the array is empty, the validation was successful.
      */
     validateMetadata(jsonmetadata) {
-        return this.validateJSONWithSchema(
-            jsonmetadata,
-            unresolvedSpecificationSchema.properties.metadata,
-        );
+        return this.validateJSONWithSchema(jsonmetadata, metadataSchema);
+    }
+
+    /**
+     * Validates metadata in JSON format using schema from dataflowSchema.
+     *
+     * @param jsonmetadata dataflow in JSON format to validate
+     * @return An array of errors. If the array is empty, the validation was successful.
+     */
+    validateDataflow(jsonmetadata) {
+        return this.validateJSONWithSchema(jsonmetadata, dataflowSchema);
     }
 
     /**
