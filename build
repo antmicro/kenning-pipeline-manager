@@ -42,6 +42,12 @@ if __name__ == '__main__':
         help='Path to dataflow file',
         nargs='?'
     )
+    static_app_args.add_argument(
+        '--mode',
+        help='Decides whether the mode of the static build, it can be set either to development or production',
+        choices=['development', 'production'],
+        default='production'
+    )
     server_app_args = subparsers.add_parser(
         'server-app',
         help='Builds frontend for a server-based application',
@@ -69,6 +75,7 @@ if __name__ == '__main__':
         if args.dataflow:
             args.dataflow = os.path.realpath(args.dataflow)
             config_lines.append(f'VUE_APP_DATAFLOW_PATH={args.dataflow}\n')
+        config_lines = config_lines.append(f'NODE_ENV="{args.mode}"\n')
 
     if config_lines:
         with open(config_path, 'w') as config:
