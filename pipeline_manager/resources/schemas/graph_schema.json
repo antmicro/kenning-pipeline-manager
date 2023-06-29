@@ -1,0 +1,179 @@
+{
+    "$id": "graph_schema",
+    "description": "Schema used to validate a single subgraph",
+    "type": "object",
+    "properties": {
+        "id": {
+            "description": "Unique identifier of a graph",
+            "type": "string"
+        },
+        "nodes": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "type": {
+                        "description": "Node type, as defined in the specification",
+                        "type": "string"
+                    },
+                    "id": {
+                        "description": "Unique identifier of a node",
+                        "type": "string"
+                    },
+                    "name": {
+                        "description": "Optional field defining a node name rendered to the user",
+                        "type": "string"
+                    },
+                    "properties": {
+                        "description": "List describing the node parameterized values",
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "id": {
+                                    "description": "Unique value assigned to the property",
+                                    "type": "string"
+                                },
+                                "name": {
+                                    "description": "Name of the property",
+                                    "type": "string"
+                                },
+                                "value": {
+                                    "description": "Actual value of the property"
+                                }
+                            },
+                            "required": [
+                                "id",
+                                "name",
+                                "value"
+                            ]
+                        }
+                    },
+                    "interfaces": {
+                        "description": "List describing the node interfaces",
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "id": {
+                                    "description": "Unique value assigned to the interface",
+                                    "type": "string"
+                                },
+                                "name": {
+                                    "description": "name of the interface",
+                                    "type": "string"
+                                },
+                                "direction": {
+                                    "description": "Determines the type of the interfaces",
+                                    "enum": [
+                                        "input",
+                                        "output",
+                                        "inout"
+                                    ]
+                                },
+                                "side": {
+                                    "description": "Determines side of the node the interface that the interface is placed on",
+                                    "enum": [
+                                        "left",
+                                        "right"
+                                    ]
+                                },
+                                "nodePosition": {
+                                    "type": "object",
+                                    "properties": {
+                                        "x": {
+                                            "description": "x coordinate of the top left interface corner",
+                                            "type": "number"
+                                        },
+                                        "y": {
+                                            "description": "y coordinate of the top left interface corner",
+                                            "type": "number"
+                                        }
+                                    },
+                                    "required": [
+                                        "x",
+                                        "y"
+                                    ]
+                                }
+                            },
+                            "required": [
+                                "id",
+                                "name",
+                                "direction"
+                            ]
+                        }
+                    },
+                    "width": {
+                        "description": "Width of the node",
+                        "type": "number"
+                    },
+                    "twoColumn": {
+                        "description": "Determines whether sockets should be rendered in the top part of the node and properties below them",
+                        "type": "boolean"
+                    },
+                    "subgraph": {
+                        "description": "Optional field defining the id of the subgraph that this node represents",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "type",
+                    "id",
+                    "interfaces"
+                ]
+            }
+        },
+        "connections": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "Unique identifier of a connection"
+                    },
+                    "from": {
+                        "type": "string",
+                        "description": "Identifier of a from interface"
+                    },
+                    "to": {
+                        "type": "string",
+                        "description": "Identifier of a to connection"
+                    }
+                },
+                "required": [
+                    "id",
+                    "from",
+                    "to"
+                ]
+            }
+        },
+        "panning": {
+            "type": "object",
+            "description": "Defines the position of the top-left corner in the rendered editor",
+            "properties": {
+                "x": {
+                    "description": "x coordinate of the corner",
+                    "type": "number"
+                },
+                "y": {
+                    "description": "y coordinate of the corner",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "x",
+                "y"
+            ]
+        },
+        "scaling": {
+            "description": "Floating-point number that defines the zoom level in the editor",
+            "type": "number"
+        }
+    },
+    "required": [
+        "id",
+        "nodes",
+        "connections"
+    ]
+}
