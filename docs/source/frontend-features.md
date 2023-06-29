@@ -34,7 +34,7 @@ Double left-click on an existing connection removes it.
 
 During pipeline development or execution, notifications can display various messages to the user.
 
-## Loading files
+## Editor menu
 
 ![Front end menu](img/frontend-menu.png)
 
@@ -45,6 +45,8 @@ Depending the application's mode (`static-html` or `server-app`), the following 
   It appears only in the `static-html` build mode, where a specification is not delivered by a third-party app.
   ```
 * `Load graph file` - lets the user load a graph specification in {{project}}'s internal format (see [Dataflow specification](dataflow-format)).
+* `Save graph file` - Saves the graph currently stored in the editor into JSON using {{project}}'s internal format.
+* `Export graph to PNG` - Saves the graph currently stored in the editor as PNG image
 * `Load file` - lets the user load a file describing a graph in the native format supported by the third-party application using {{project}} for visualization.
   ```{note}
   It appears only in the `server-app` build mode, since the third-party app performs conversion from its native format to the [Dataflow format](dataflow-format)
