@@ -8,6 +8,9 @@ from importlib.resources import files
 from pathlib import Path
 
 import pytest
+from jsonschema import Draft202012Validator
+from referencing import Registry
+from referencing.jsonschema import DRAFT202012
 
 import examples
 from pipeline_manager.resources import schemas
@@ -24,8 +27,8 @@ def sample_specification_path() -> Path:
     Path :
         Path to the specification
     """
-    sample_specification_path = files(examples).joinpath('sample-specification.json')  # noqa: E501
-    return Path(sample_specification_path)
+    path = files(examples).joinpath("sample-specification.json")  # noqa: E501
+    return Path(path)
 
 
 @pytest.fixture
@@ -39,9 +42,9 @@ def sample_specification(sample_specification_path) -> dict:
     dict :
         Sample specification
     """
-    with open(sample_specification_path, 'r') as f:
-        sample_specification = json.load(f)
-    return sample_specification
+    with open(sample_specification_path, "r") as f:
+        specification = json.load(f)
+    return specification
 
 
 @pytest.fixture
@@ -55,8 +58,8 @@ def sample_dataflow_path() -> Path:
     Path :
         Path to the dataflow
     """
-    sample_dataflow_path = files(examples).joinpath('sample-dataflow.json')
-    return Path(sample_dataflow_path)
+    path = files(examples).joinpath("sample-dataflow.json")
+    return Path(path)
 
 
 @pytest.fixture
@@ -70,13 +73,13 @@ def sample_dataflow(sample_dataflow_path: Path) -> dict:
     dict :
         Sample specification
     """
-    with open(sample_dataflow_path, 'r') as f:
-        sample_dataflow = json.load(f)
-    return sample_dataflow
+    with open(sample_dataflow_path, "r") as f:
+        dataflow = json.load(f)
+    return dataflow
 
 
 @pytest.fixture
-def specification_schema_path() -> Path:
+def unresolved_specification_schema_path() -> Path:
     """
     Fixture that returns path to `unresolved_specification_schema.json`
     in `examples` directory.
@@ -86,12 +89,78 @@ def specification_schema_path() -> Path:
     Path :
         Path to the jsonschema
     """
-    specification_schema_path = files(schemas).joinpath('unresolved_specification_schema.json')  # noqa: E501
-    return Path(specification_schema_path)
+    path = files(schemas).joinpath("unresolved_specification_schema.json")  # noqa: E501
+    return Path(path)
 
 
 @pytest.fixture
-def specification_schema(specification_schema_path) -> dict:
+def unresolved_specification_schema(
+        unresolved_specification_schema_path
+        ) -> Path:
+    """
+    Fixture that returns path to `unresolved_specification_schema.json`
+    in `examples` directory.
+
+    Returns
+    -------
+    Path :
+        Path to the jsonschema
+    """
+    with open(unresolved_specification_schema_path, "r") as f:
+        schema = json.load(f)
+    return schema
+
+
+@pytest.fixture
+def metadata_schema_path() -> Path:
+    """
+    Fixture that returns path to `metadata_schema.json`
+    in `examples` directory.
+
+    Returns
+    -------
+    Path :
+        Path to the jsonschema
+    """
+    path = files(schemas).joinpath("metadata_schema.json")  # noqa: E501
+    return Path(path)
+
+
+@pytest.fixture
+def metadata_schema(metadata_schema_path) -> Path:
+    """
+    Fixture that returns path to `metadata_schema.json`
+    in `examples` directory.
+
+    Returns
+    -------
+    Path :
+        Path to the jsonschema
+    """
+    with open(metadata_schema_path, "r") as f:
+        schema = json.load(f)
+    return schema
+
+
+@pytest.fixture
+def specification_schema_path() -> Path:
+    """
+    Fixture that returns path to `specification_schema.json`
+    in `examples` directory.
+
+    Returns
+    -------
+    Path :
+        Path to the jsonschema
+    """
+    path = files(schemas).joinpath("specification_schema.json")  # noqa: E501
+    return Path(path)
+
+
+@pytest.fixture
+def specification_validator(
+    specification_schema_path, metadata_schema, unresolved_specification_schema
+) -> dict:
     """
     Fixture that reads specification jsonschema that is stored
     in `specification_schema_path`.
@@ -99,11 +168,27 @@ def specification_schema(specification_schema_path) -> dict:
     Returns
     ------
     dict :
-        Sample specification
+        Sample specification, resolver
     """
-    with open(specification_schema_path, 'r') as f:
+    registry = Registry().with_resources(
+        [
+            ("metadata_schema", DRAFT202012.create_resource(metadata_schema)),
+            (
+                "unresolved_specification_schema",
+                DRAFT202012.create_resource(unresolved_specification_schema),
+            ),
+        ]
+    )
+
+    with open(specification_schema_path, "r") as f:
         specification_schema = json.load(f)
-    return specification_schema
+
+    validator = Draft202012Validator(
+        specification_schema,
+        registry=registry,
+    )
+
+    return validator
 
 
 @pytest.fixture

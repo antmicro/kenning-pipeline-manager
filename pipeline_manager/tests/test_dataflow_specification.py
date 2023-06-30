@@ -9,7 +9,6 @@ import pytest
 @pytest.fixture
 def specification_invalid_property_type():
     return {
-        'metadata': {},
         'nodes': [
             {
                 'name': 'TestNode',
@@ -21,40 +20,21 @@ def specification_invalid_property_type():
                         'type': 'InvalidType',
                     }
                 ],
-                'inputs': [],
-                'outputs': []
+                'interfaces': []
             }
         ]
     }
 
 
 @pytest.fixture
-def specification_missing_input():
+def specification_missing_interfaces():
     return {
-        'metadata': {},
         'nodes': [
             {
                 'name': 'TestNode',
                 'type': 'TestNode',
                 'category': 'TestNode',
-                'properties': [],
-                'outputs': []
-            }
-        ]
-    }
-
-
-@pytest.fixture
-def specification_missing_output():
-    return {
-        'metadata': {},
-        'nodes': [
-            {
-                'name': 'TestNode',
-                'type': 'TestNode',
-                'category': 'TestNode',
-                'properties': [],
-                'inputs': []
+                'properties': []
             }
         ]
     }
@@ -63,7 +43,6 @@ def specification_missing_output():
 @pytest.fixture
 def specification_invalid_property_value():
     return {
-        'metadata': {},
         'nodes': [
             {
                 'name': 'TestNode',
@@ -76,8 +55,7 @@ def specification_invalid_property_value():
                         'values': 'Invalid'
                     }
                 ],
-                'inputs': [],
-                'outputs': []
+                'interfaces': [],
             }
         ]
     }
@@ -86,14 +64,12 @@ def specification_invalid_property_value():
 @pytest.fixture
 def specification_invalid_nodes_without_name():
     return {
-        'metadata': {},
         'nodes': [
             {
                 'type': 'TestNode',
                 'category': 'TestNode',
                 'properties': [],
-                'inputs': [],
-                'outputs': []
+                'interfaces': []
             }
         ]
     }
@@ -102,28 +78,25 @@ def specification_invalid_nodes_without_name():
 @pytest.fixture
 def specification_invalid_nodes_without_type():
     return {
-        'metadata': {},
         'nodes': [
             {
                 'name': 'TestNode',
                 'category': 'TestNode',
                 'properties': [],
-                'inputs': [],
-                'outputs': []
+                'interfaces': []
             }
         ]
     }
 
 
-def test_example_specification(sample_specification, specification_schema):
-    jsonschema.validate(sample_specification, specification_schema)
+def test_example_specification(sample_specification, specification_validator):
+    specification_validator.validate(sample_specification)
 
 
 @pytest.mark.parametrize(
     'invalid_specification', [
         'specification_invalid_property_type',
-        'specification_missing_input',
-        'specification_missing_output',
+        'specification_missing_interfaces',
         'specification_invalid_property_value',
         'specification_invalid_nodes_without_name',
         'specification_invalid_nodes_without_type'
@@ -131,19 +104,14 @@ def test_example_specification(sample_specification, specification_schema):
 )
 def test_invalid_specification(
         invalid_specification,
-        specification_schema,
+        specification_validator,
         request):
     invalid_specification = request.getfixturevalue(invalid_specification)
     with pytest.raises(jsonschema.ValidationError):
-        jsonschema.validate(invalid_specification, specification_schema)
+        specification_validator.validate(invalid_specification)
 
 
-def test_example_specification_without_metadata(sample_specification, specification_schema):  # noqa: E501
-    del sample_specification['metadata']
-    jsonschema.validate(sample_specification, specification_schema)
-
-
-def test_example_specification_without_nodes(sample_specification, specification_schema):  # noqa: E501
+def test_example_specification_without_nodes(sample_specification, specification_validator):  # noqa: E501
     del sample_specification['nodes']
     with pytest.raises(jsonschema.ValidationError):
-        jsonschema.validate(sample_specification, specification_schema)
+        specification_validator.validate(sample_specification)
