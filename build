@@ -10,6 +10,70 @@ import subprocess
 import shutil
 
 
+def build_prepare():
+    scriptpath = os.path.dirname(os.path.realpath(__file__))
+    frontend_path = os.path.join(scriptpath, 'pipeline_manager/frontend')
+    subprocess.run(['npm', 'install'], cwd=frontend_path)
+
+
+def build_frontend(
+        build_type,
+        assets_directory=None,
+        editor_title=None,
+        specification=None,
+        dataflow=None,
+        mode='production',
+        output_directory=None,
+        clean_build=None):
+    """
+    Builds the frontend for the Pipeline Manager.
+    """
+    scriptpath = os.path.dirname(os.path.realpath(__file__))
+    frontend_path = os.path.join(scriptpath, 'pipeline_manager/frontend')
+
+    config_path = os.path.join(frontend_path, '.env.static.local')
+
+    config_lines = []
+
+    if editor_title:
+        config_lines.append(f'VUE_APP_EDITOR_TITLE={editor_title}\n')
+
+    if build_type == 'static-html' and specification:
+        specification = os.path.realpath(specification)
+        config_lines.append(f'VUE_APP_SPECIFICATION_PATH={specification}\n')
+        if dataflow:
+            dataflow = os.path.realpath(dataflow)
+            config_lines.append(f'VUE_APP_DATAFLOW_PATH={dataflow}\n')
+        config_lines.append(f'NODE_ENV="{mode}"\n')
+
+    if config_lines:
+        with open(config_path, 'w') as config:
+            config.writelines(config_lines)
+
+    subprocess.run(['npm', 'install'], cwd=frontend_path)
+
+    if build_type == 'static-html':
+        subprocess.run(['npm', 'run', 'build-static-html'], cwd=frontend_path)
+    if build_type == 'server-app':
+        subprocess.run(['npm', 'run', 'build-server-app'], cwd=frontend_path)
+
+    if assets_directory:
+        shutil.copytree(
+            assets_directory,
+            os.path.join(frontend_path, 'dist/assets'),
+            dirs_exist_ok=True
+        )
+
+    if output_directory:
+        if clean_build:
+            shutil.rmtree(output_directory)
+        shutil.copytree(
+            os.path.join(frontend_path, 'dist'),
+            output_directory,
+            dirs_exist_ok=True
+        )
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description='Tool for building the frontend application'
@@ -21,6 +85,10 @@ if __name__ == '__main__':
     parser.add_argument(
         '--editor-title',
         help='Title of the editor'
+    )
+    parser.add_argument(
+        '--output-directory',
+        help='Directory where the built frontend should be stored'
     )
     subparsers = parser.add_subparsers(
         title='build_type',
@@ -44,9 +112,16 @@ if __name__ == '__main__':
     )
     static_app_args.add_argument(
         '--mode',
-        help='Decides whether the mode of the static build, it can be set either to development or production',
+        help='Decides whether the mode of the static build, '
+             'it can be set either to development or production',
         choices=['development', 'production'],
         default='production'
+    )
+    parser.add_argument(
+        '--clean-build',
+        help='If --output-directory is defined, '
+             'it is cleared before putting built frontend application',
+        action='store_true'
     )
     server_app_args = subparsers.add_parser(
         'server-app',
@@ -55,42 +130,11 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    scriptpath = os.path.dirname(os.path.realpath(__file__))
-
-    frontend_path = os.path.join(scriptpath, 'pipeline_manager/frontend')
-
     if args.assets_directory:
         args.assets_directory = os.path.realpath(args.assets_directory)
 
-    config_path = os.path.join(frontend_path, '.env.static.local')
+    args = {k: v for k, v in vars(args).items() if v is not None}
 
-    config_lines = []
+    build_prepare()
 
-    if args.editor_title:
-        config_lines.append(f'VUE_APP_EDITOR_TITLE={args.editor_title}\n')
-
-    if args.build_type == 'static-html' and args.specification:
-        args.specification = os.path.realpath(args.specification)
-        config_lines.append(f'VUE_APP_SPECIFICATION_PATH={args.specification}\n')
-        if args.dataflow:
-            args.dataflow = os.path.realpath(args.dataflow)
-            config_lines.append(f'VUE_APP_DATAFLOW_PATH={args.dataflow}\n')
-        config_lines = config_lines.append(f'NODE_ENV="{args.mode}"\n')
-
-    if config_lines:
-        with open(config_path, 'w') as config:
-            config.writelines(config_lines)
-
-    subprocess.run(['npm', 'install'], cwd=frontend_path)
-
-    if args.build_type == 'static-html':
-        subprocess.run(['npm', 'run', 'build-static-html'], cwd=frontend_path)
-    if args.build_type == 'server-app':
-        subprocess.run(['npm', 'run', 'build-server-app'], cwd=frontend_path)
-
-    if args.assets_directory:
-        shutil.copytree(
-            args.assets_directory,
-            os.path.join(frontend_path, 'dist/assets'),
-            dirs_exist_ok=True
-        )
+    build_frontend(**args)
