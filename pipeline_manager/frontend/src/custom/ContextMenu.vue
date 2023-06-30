@@ -59,7 +59,7 @@ from creating and deleting connections or altering nodes' values if the editor i
 </template>
 
 <script>
-import { defineComponent } from 'vue';
+import { defineComponent, ref } from 'vue';
 import { Components } from 'baklavajs';
 
 export default defineComponent({
@@ -70,8 +70,23 @@ export default defineComponent({
             default: [],
         },
     },
+    emits: ['update:modelValue'],
     setup(props, context) {
         const getIconPath = (name) => (name !== undefined ? `./assets/${name}` : undefined);
+        const justOpened = ref(true);
+
+        window.addEventListener('mousedown', () => {
+            if (props.modelValue === true) {
+                // We need a counter so that this event is not fired right when the menu is opened
+                if (justOpened.value === false) {
+                    context.emit('update:modelValue', false);
+                    justOpened.value = true;
+                    return;
+                }
+
+                justOpened.value = false;
+            }
+        });
 
         return { ...Components.ContextMenu.setup(props, context), getIconPath };
     },
