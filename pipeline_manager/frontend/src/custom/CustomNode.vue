@@ -21,9 +21,14 @@ from moving or deleting the nodes.
         :class="classes"
         :style="styles"
         :data-node-type="node.type"
-        @pointerdown="select"
+        @pointerdown.left.self="select()"
     >
-        <div class="__title" @pointerdown.self.stop="startDragWrapper">
+        <div
+            class="__title"
+            @pointerdown.left.self.stop="startDragWrapper($event)"
+            @pointerdown.right="openContextMenuWrapper"
+            oncontextmenu="return false;"
+        >
             <img class="__title-icon" v-if="nodeIcon !== undefined" :src="nodeIcon" />
             <div v-if="!renaming" class="__title-label">
                 {{ nodeTitle }}
@@ -37,17 +42,14 @@ from moving or deleting the nodes.
                 v-click-outside="doneRenaming"
                 @keydown.enter="doneRenaming"
             />
-            <div class="__menu --clickable" @click="openContextMenuWrapper">
-                <vertical-dots />
-                <CustomContextMenu
-                    v-model="showContextMenu"
-                    :x="0"
-                    :y="0"
-                    :items="contextMenuItems"
-                    :urls="nodeURLs"
-                    @click="onContextMenuClick"
-                />
-            </div>
+            <CustomContextMenu
+                v-model="showContextMenu"
+                :x="contextMenuX"
+                :y="contextMenuY"
+                :items="contextMenuItems"
+                :urls="nodeURLs"
+                @click="onContextMenuClick"
+            />
         </div>
 
         <div class="__content">
@@ -92,7 +94,6 @@ import { useViewModel, AbstractNode, GRAPH_NODE_TYPE_PREFIX, useGraph } from 'ba
 import useDragMove from './useDragMove';
 import CustomInterface from './CustomInterface.vue';
 import CustomContextMenu from './ContextMenu.vue';
-import VerticalDots from '../components/VerticalDots.vue';
 import { gridSnapper } from '../core/snappers';
 import Pencil from '../icons/Pencil.vue';
 import Bin from '../icons/Bin.vue';
@@ -126,6 +127,8 @@ const tempName = ref('');
 const nodeURLs = viewModel.value.editor.getNodeURLs(props.node.type);
 
 const showContextMenu = ref(false);
+const contextMenuX = ref(0);
+const contextMenuY = ref(0);
 const contextMenuItems = computed(() => {
     const items = [
         { value: 'rename', label: 'Rename', icon: Pencil },
@@ -184,7 +187,9 @@ const startDrag = (ev) => {
     select();
 };
 
-const openContextMenu = () => {
+const openContextMenu = (ev) => {
+    contextMenuX.value = ev.offsetX - 25;
+    contextMenuY.value = ev.offsetY - 25;
     showContextMenu.value = true;
 };
 
@@ -261,7 +266,7 @@ const startDragWrapper = (ev) => {
  * @param ev Event
  */
 const openContextMenuWrapper = (ev) => {
-    if (!viewModel.value.editor.readonly) {
+    if (!viewModel.value.editor.readonly && showContextMenu.value === false) {
         openContextMenu(ev);
     }
 };
