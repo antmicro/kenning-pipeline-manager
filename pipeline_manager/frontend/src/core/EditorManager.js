@@ -383,9 +383,9 @@ export default class EditorManager {
                     updatedspecification.metadata = dataflow.metadata;
                 }
 
-                this.updateEditorSpecification(updatedspecification, true, false);
+                this.updateEditorSpecification(updatedspecification, true, true);
             } else {
-                this.updateEditorSpecification(this.currentSpecification, false, false);
+                this.updateEditorSpecification(this.currentSpecification, false, true);
             }
             return this.editor.load(dataflow);
         } catch (err) {
