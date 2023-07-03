@@ -31,7 +31,7 @@ def build_frontend(
     scriptpath = os.path.dirname(os.path.realpath(__file__))
     frontend_path = os.path.join(scriptpath, 'pipeline_manager/frontend')
 
-    config_path = os.path.join(frontend_path, '.env.static.local')
+    config_path = os.path.join(frontend_path, '.env.local')
 
     config_lines = []
 
@@ -39,6 +39,7 @@ def build_frontend(
         config_lines.append(f'VUE_APP_EDITOR_TITLE={editor_title}\n')
 
     if build_type == 'static-html' and specification:
+        config_path = os.path.join(frontend_path, '.env.static.local')
         specification = os.path.realpath(specification)
         config_lines.append(f'VUE_APP_SPECIFICATION_PATH={specification}\n')
         if dataflow:
