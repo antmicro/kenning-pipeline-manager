@@ -13,3 +13,6 @@ fi
 if [ -f "./.env.static.local" ]; then
     rm .env.static.local
 fi
+if [ -f "./.env.local" ]; then
+    rm .env.local
+fi

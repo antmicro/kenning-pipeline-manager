@@ -64,7 +64,8 @@ def build_frontend(
         if dataflow:
             dataflow = Path(dataflow).absolute()
             config_lines.append(f'VUE_APP_DATAFLOW_PATH={dataflow}\n')
-        config_lines.append(f'NODE_ENV="{mode}"\n')
+
+    config_lines.append(f'NODE_ENV="{mode}"\n')
 
     if config_lines:
         with open(config_path, 'w') as config:
