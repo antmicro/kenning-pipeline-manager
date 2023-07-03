@@ -13,18 +13,21 @@ Inherits from baklavajs/packages/renderer-vue/src/nodepalette/NodePalette.vue
 <template>
     <!-- eslint-disable vue/no-multiple-template-root -->
     <div class="baklava-node-palette">
-        <div class="palette-title">
-            <span>Nodes browser</span>
-        </div>
-        <div class="__entry">
-            <Magnifier :color="'gray'" />
-            <input class="node-search" v-model="nodeSearch" placeholder="Search" />
+        <div class="search-bar">
+            <div class="palette-title">
+                <span>Nodes browser</span>
+            </div>
+            <div class="__entry">
+                <Magnifier :color="'gray'" />
+                <input class="node-search" v-model="nodeSearch" placeholder="Search" />
+            </div>
         </div>
         <div class="nodes">
             <PaletteCategory
                 :nodeTree="nodeTree"
                 :onDragStart="onDragStart"
                 :defaultCollapse="collapse"
+                :nodeSearch="nodeSearch"
                 :tooltip="tooltip"
             />
         </div>

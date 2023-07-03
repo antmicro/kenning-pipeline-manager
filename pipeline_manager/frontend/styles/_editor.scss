@@ -239,7 +239,11 @@
 
     display: flex;
     flex-direction: column;
-    overflow: visible;
+    overflow: hidden;
+
+    & .searchbar {
+        flex-grow: 0;
+    }
 
     .nodes {
         overflow-y: auto;
@@ -247,6 +251,10 @@
 
     & h1 {
         margin: 0px;
+    }
+
+    & > .nodes {
+        overflow-y: auto;   
     }
 }
 
@@ -283,7 +291,21 @@
 
     & > .__title-label {
         flex-grow: 1;
+
+        & > span {
+            color: $green;
+        }
     }
+
+    &.__category {
+        cursor: pointer;
+
+        & > .__title > span {
+            color: $green;
+        }
+
+    }
+    
 
     & > .__category-title {
         padding-left: 1em;
