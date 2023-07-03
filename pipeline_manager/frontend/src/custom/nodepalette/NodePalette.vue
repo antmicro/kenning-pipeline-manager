@@ -151,6 +151,10 @@ export default defineComponent({
     background-color: var(--baklava-node-color-background);
     border: none;
     color: $white;
+
+    &:focus {
+        outline: 1px solid $green;
+    }
 }
 
 .node-search::placeholder {

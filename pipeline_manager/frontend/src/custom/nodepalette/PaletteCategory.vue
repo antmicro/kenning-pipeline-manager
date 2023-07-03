@@ -18,8 +18,7 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
     >
         <div class="__entry __category" :style="padding" @click="onMouseDown(i)">
             <Arrow :rotate="getRotation(i)" scale="small" />
-            <div class="__title">
-                {{ name }}
+            <div class="__title" v-html="highlightText(name)">
             </div>
         </div>
         <!-- Alternatively we could use v-show which has a higher overhead on startup,
@@ -34,7 +33,7 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
                     v-show="nodeTree[name].nodes.nodeTypes[nt].mask"
                     :key="nt"
                     :type="nt"
-                    :title="nodeTree[name].nodes.nodeTypes[nt].title"
+                    :title="highlightText(nodeTree[name].nodes.nodeTypes[nt].title)"
                     :iconPath="nodeTree[name].nodes.nodeIconPaths[nt]"
                     :urls="nodeTree[name].nodes.nodeURLs[nt]"
                     :depth="depth + 1"
@@ -54,6 +53,7 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
                 :onDragStart="onDragStart"
                 :defaultCollapse="defaultCollapse"
                 :tooltip="tooltip"
+                :nodeSearch="nodeSearch"
             />
         </div>
     </div>
@@ -84,6 +84,10 @@ export default defineComponent({
         tooltip: {
             required: false,
         },
+        nodeSearch: {
+            type: String,
+            default: ''
+        },
     },
     setup(props) {
         const paddingDepth = 20;
@@ -101,6 +105,22 @@ export default defineComponent({
                 mask.value = Array(Object.keys(props.nodeTree).length).fill(!props.defaultCollapse);
             },
         );
+        
+        let previousMask;
+        let maskSaved = false;
+        watch(
+            () => props.nodeSearch,
+            () => {
+                if (props.nodeSearch === '') {
+                    mask.value = previousMask;
+                    maskSaved = false
+                } else if (!maskSaved) {
+                    maskSaved = true;
+                    previousMask = mask.value;
+                    mask.value = Array(Object.keys(props.nodeTree).length).fill(true);
+                }
+            },
+        );
 
         const getRotation = (index) => {
             if (mask.value[index]) {
@@ -115,19 +135,27 @@ export default defineComponent({
 
         const sortEntriesAlphabetically = (a, b) => a.toLowerCase().localeCompare(b.toLowerCase());
 
+        const highlightText = (name) => {
+            const substring = props.nodeSearch.toLowerCase();
+            const idx = name.toLowerCase().indexOf(substring);
+
+            if (idx === -1) {
+                return name;
+            }
+
+            return name.substring(0, idx) +
+                '<span>' + name.substring(idx, idx + substring.length) + '</span>' +
+                name.substring(idx + substring.length);            
+        }
+
         return {
             padding,
             mask,
             onMouseDown,
             getRotation,
             sortEntriesAlphabetically,
+            highlightText,
         };
     },
 });
 </script>
-
-<style scoped>
-.__category {
-    cursor: pointer;
-}
-</style>
