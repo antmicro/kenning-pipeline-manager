@@ -3,129 +3,123 @@
     "description": "Schema used to validate specification metadata",
     "type": "object",
     "properties": {
-        "metadata": {
-            "description": "Additional options for editor",
+        "interfaces": {
+            "description": "Styling of the nodes",
             "type": "object",
             "properties": {
-                "interfaces": {
-                    "description": "Styling of the nodes",
-                    "type": "object",
-                    "properties": {
-                        "interfaceColor": {
-                            "type": "string",
-                            "description": "Color of the interface instance"
-                        },
-                        "interfaceConnectionPattern": {
-                            "description": "Pattern of the connection going from the interface",
-                            "enum": [
-                                "solid",
-                                "dashed"
-                            ],
-                            "default": "solid"
-                        },
-                        "interfaceConnectionColor": {
-                            "description": "Color of the connection going from the interface",
-                            "type": "string",
-                            "default": "#FFFFFF"
-                        }
-                    }
-                },
-                "allowLoopbacks": {
-                    "type": "boolean",
-                    "description": "Flag allowing connections with endpoints at the same node",
-                    "default": false
-                },
-                "readonly": {
-                    "type": "boolean",
-                    "description": "Flag determining whether the editor is in readonly mode",
-                    "default": false
-                },
-                "twoColumn": {
-                    "type": "boolean",
-                    "description": "Flag determining whether displaying nodes as two columns",
-                    "default": false
-                },
-                "connectionStyle": {
-                    "enum": ["curved", "orthogonal"],
-                    "description": "Defines connection style",
-                    "default": "curved"
-                },
-                "hideHud": {
-                    "type": "boolean",
-                    "description": "Hides HUD elements, such as popup notifications, navbar or terminal",
-                    "default": false
-                },
-                "layers": {
-                    "type": "array",
-                    "default": [],
-                    "description": "Layers of interfaces and nodes that can be ignored using settings.",
-                    "items" : {
-                        "type": "object",
-                        "description": "Description of a single layer.",
-                        "properties": {
-                            "name": {
-                                "description": "Name of the layer",
-                                "type": "string"
-                            },
-                            "nodeTypes": {
-                                "type": "array",
-                                "description": "Types of nodes that are ignored in this layer"
-                            },
-                            "nodeInterfaces": {
-                                "type": "array",
-                                "description": "Types of interfaces that are ignored in this layer"
-                            }
-                        },
-                        "required": ["name"],
-                        "anyOf": [
-                            {"required": ["nodeTypes"]},
-                            {"required": ["nodeInterfaces"]}
-                        ],
-                        "additionalProperties": false
-                    }
-                },
-                "urls": {
-                    "type": "object",
-                    "description": "URL description put in node palette and nodes",
-                    "patternProperties": {
-                        "^.*$": {
-                            "type": "object",
-                            "description": "A single entry representing an URL group",
-                            "properties": {
-                                "name": {"type": "string", "description": "Name of the url group, appearing in hints"},
-                                "icon": {"type": "string", "description": "Path of the icon in assets"},
-                                "url": {"type": "string", "description": "Base of URL for group"}
-                            },
-                            "required": ["name", "icon", "url"]
-                        }
-                    }
-                },
-                "collapseSidebar": {
-                    "type": "boolean",
-                    "description": "Defines whether nodes sidebar should be collapsed by default",
-                    "default": true
-                },
-                "movementStep": {
-                    "type": "number",
-                    "description": "Defines offset to which nodes snap in the grid",
-                    "default": 1
-                },
-                "backgroundSize": {
-                    "type": "number",
-                    "description": "Defines size of the background grid",
-                    "default": 100
-                },
-                "layout": {
+                "interfaceColor": {
                     "type": "string",
-                    "description": "Defines the default autolayout algorithm",
-                    "default": "NoLayout"
+                    "description": "Color of the interface instance"
                 },
-                "randomizedOffset": {
-                    "type": "boolean",
-                    "description": "Determines whether connections should have randomized, but deterministic offset",
-                    "default": "false"
+                "interfaceConnectionPattern": {
+                    "description": "Pattern of the connection going from the interface",
+                    "enum": [
+                        "solid",
+                        "dashed"
+                    ],
+                    "default": "solid"
+                },
+                "interfaceConnectionColor": {
+                    "description": "Color of the connection going from the interface",
+                    "type": "string",
+                    "default": "#FFFFFF"
                 }
             }
+        },
+        "allowLoopbacks": {
+            "type": "boolean",
+            "description": "Flag allowing connections with endpoints at the same node",
+            "default": false
+        },
+        "readonly": {
+            "type": "boolean",
+            "description": "Flag determining whether the editor is in readonly mode",
+            "default": false
+        },
+        "twoColumn": {
+            "type": "boolean",
+            "description": "Flag determining whether displaying nodes as two columns",
+            "default": false
+        },
+        "connectionStyle": {
+            "enum": ["curved", "orthogonal"],
+            "description": "Defines connection style",
+            "default": "curved"
+        },
+        "hideHud": {
+            "type": "boolean",
+            "description": "Hides HUD elements, such as popup notifications, navbar or terminal",
+            "default": false
+        },
+        "layers": {
+            "type": "array",
+            "default": [],
+            "description": "Layers of interfaces and nodes that can be ignored using settings.",
+            "items" : {
+                "type": "object",
+                "description": "Description of a single layer.",
+                "properties": {
+                    "name": {
+                        "description": "Name of the layer",
+                        "type": "string"
+                    },
+                    "nodeTypes": {
+                        "type": "array",
+                        "description": "Types of nodes that are ignored in this layer"
+                    },
+                    "nodeInterfaces": {
+                        "type": "array",
+                        "description": "Types of interfaces that are ignored in this layer"
+                    }
+                },
+                "required": ["name"],
+                "anyOf": [
+                    {"required": ["nodeTypes"]},
+                    {"required": ["nodeInterfaces"]}
+                ],
+                "additionalProperties": false
+            }
+        },
+        "urls": {
+            "type": "object",
+            "description": "URL description put in node palette and nodes",
+            "patternProperties": {
+                "^.*$": {
+                    "type": "object",
+                    "description": "A single entry representing an URL group",
+                    "properties": {
+                        "name": {"type": "string", "description": "Name of the url group, appearing in hints"},
+                        "icon": {"type": "string", "description": "Path of the icon in assets"},
+                        "url": {"type": "string", "description": "Base of URL for group"}
+                    },
+                    "required": ["name", "icon", "url"]
+                }
+            }
+        },
+        "collapseSidebar": {
+            "type": "boolean",
+            "description": "Defines whether nodes sidebar should be collapsed by default",
+            "default": true
+        },
+        "movementStep": {
+            "type": "number",
+            "description": "Defines offset to which nodes snap in the grid",
+            "default": 1
+        },
+        "backgroundSize": {
+            "type": "number",
+            "description": "Defines size of the background grid",
+            "default": 100
+        },
+        "layout": {
+            "type": "string",
+            "description": "Defines the default autolayout algorithm",
+            "default": "NoLayout"
+        },
+        "randomizedOffset": {
+            "type": "boolean",
+            "description": "Determines whether connections should have randomized, but deterministic offset",
+            "default": "false"
         }
     }
 }

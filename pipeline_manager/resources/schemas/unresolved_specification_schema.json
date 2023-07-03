@@ -3,442 +3,438 @@
     "$id": "unresolved_specification_schema",
     "description": "Schema used to validate specification that hasn't resovled inheritance",
     "type": "object",
-    "allOf": [
-        {
+    "properties": {
+        "version": {
+            "description": "Version of the specification.",
+            "type": "string"
+        },
+        "metadata": {
             "$ref": "metadata_schema"
         },
-        {
-            "properties": {
-                "version": {
-                    "description": "Version of the specification.",
-                    "type": "string"
-                },
-                "nodes": {
-                    "description": "Definition of the available nodes",
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "properties": {
-                            "name": {
-                                "description": "Name displayed in a node",
-                                "type": "string"
+        "nodes": {
+            "description": "Definition of the available nodes",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "description": "Name displayed in a node",
+                        "type": "string"
+                    },
+                    "type": {
+                        "description": "Type that defines styling of a node",
+                        "type": "string"
+                    },
+                    "category": {
+                        "description": "Category of a node in a side bar",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "icon": {
+                        "description": "Icon of a node",
+                        "type": "string"
+                    },
+                    "interfaces": {
+                        "description": "Definition of available interfaces of the node",
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "description": "Name of the input socket displayed in the node",
+                                    "type": "string"
+                                },
+                                "type": {
+                                    "description": "Type that defines styling of the input socket. It is also used for validation purposes",
+                                    "type": ["string", "array"]
+                                },
+                                "direction": {
+                                    "description": "Tells whether the connector is input, output, or both",
+                                    "enum": [
+                                        "input",
+                                        "output",
+                                        "inout"
+                                    ]
+                                },
+                                "side": {
+                                    "description": "Determines the side on which the socket is rendered",
+                                    "enum": [
+                                        "left",
+                                        "right"
+                                    ]
+                                },
+                                "maxConnectionsCount": {
+                                    "description": "Tells how many connections can be established with given interface, <= 0 value for unlimited",
+                                    "type": "number",
+                                    "default": 0
+                                }
                             },
-                            "type": {
-                                "description": "Type that defines styling of a node",
-                                "type": "string"
+                            "required": [
+                                "name",
+                                "type",
+                                "direction"
+                            ],
+                            "if": {
+                                "properties": {
+                                    "type": {
+                                        "type": "array"
+                                    }
+                                }
                             },
-                            "category": {
-                                "description": "Category of a node in a side bar",
-                                "type": [
-                                    "string",
-                                    "null"
-                                ]
-                            },
-                            "icon": {
-                                "description": "Icon of a node",
-                                "type": "string"
-                            },
-                            "interfaces": {
-                                "description": "Definition of available interfaces of the node",
-                                "type": "array",
-                                "items": {
-                                    "type": "object",
-                                    "properties": {
-                                        "name": {
-                                            "description": "Name of the input socket displayed in the node",
+                            "then": {
+                                "properties": {
+                                    "type": {
+                                        "type": "array",
+                                        "items": {
                                             "type": "string"
-                                        },
-                                        "type": {
-                                            "description": "Type that defines styling of the input socket. It is also used for validation purposes",
-                                            "type": ["string", "array"]
-                                        },
-                                        "direction": {
-                                            "description": "Tells whether the connector is input, output, or both",
-                                            "enum": [
-                                                "input",
-                                                "output",
-                                                "inout"
-                                            ]
-                                        },
-                                        "side": {
-                                            "description": "Determines the side on which the socket is rendered",
-                                            "enum": [
-                                                "left",
-                                                "right"
-                                            ]
-                                        },
-                                        "maxConnectionsCount": {
-                                            "description": "Tells how many connections can be established with given interface, <= 0 value for unlimited",
-                                            "type": "number",
-                                            "default": 0
                                         }
-                                    },
-                                    "required": [
-                                        "name",
-                                        "type",
-                                        "direction"
-                                    ],
+                                    }
+                                }
+                            },
+                            "additionalProperties": false
+                        }
+                    },
+                    "properties": {
+                        "description": "Definition of the properties of the node",
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "description": "Name of the property. Can be displayed for some types of properties",
+                                    "type": "string"
+                                },
+                                "type": {
+                                    "description": "Type of the property",
+                                    "enum": [
+                                        "text",
+                                        "number",
+                                        "integer",
+                                        "select",
+                                        "checkbox",
+                                        "slider",
+                                        "list",
+                                        "constant"
+                                    ]
+                                },
+                                "description": {
+                                    "description": "Description of the property. Can be displayed to the user",
+                                    "type": "string"
+                                },
+                                "default": {
+                                    "description": "Default value of the property"
+                                },
+                                "min": {
+                                    "description": "Minimum value of a range for slider, number and integer type",
+                                    "type": "number"
+                                },
+                                "max": {
+                                    "description": "Maxiumum value of a range for slider, number and integer type",
+                                    "type": "number"
+                                },
+                                "values": {
+                                    "description": "Range of values for the select type",
+                                    "type": "array"
+                                },
+                                "dtype": {
+                                    "description": "Data types of elements in a list type",
+                                    "type": "string",
+                                    "enum": [
+                                        "integer",
+                                        "number",
+                                        "string",
+                                        "boolean"
+                                    ]
+                                }
+                            },
+                            "required": [
+                                "name",
+                                "type",
+                                "default"
+                            ],
+                            "additionalProperties": false,
+                            "allOf": [
+                                {
                                     "if": {
+                                        "type": "object",
                                         "properties": {
                                             "type": {
-                                                "type": "array"
+                                                "const": "slider"
                                             }
                                         }
                                     },
                                     "then": {
                                         "properties": {
+                                            "default": {
+                                                "type": ["number", "null"]
+                                            }
+                                        },
+                                        "required": [
+                                            "min",
+                                            "max"
+                                        ]
+                                    }
+                                },
+                                {
+                                    "if": {
+                                        "type": "object",
+                                        "properties": {
                                             "type": {
-                                                "type": "array",
-                                                "items": {
-                                                    "type": "string"
-                                                }
+                                                "const": "checkbox"
                                             }
                                         }
                                     },
-                                    "additionalProperties": false
+                                    "then": {
+                                        "properties": {
+                                            "default": {
+                                                "type": ["boolean", "null"]
+                                            }
+                                        },
+                                        "required": [
+                                            "default"
+                                        ]
+                                    }
+                                },
+                                {
+                                    "if": {
+                                        "type": "object",
+                                        "properties": {
+                                            "type": {
+                                                "const": "select"
+                                            }
+                                        }
+                                    },
+                                    "then": {
+                                        "required": [
+                                            "values"
+                                        ]
+                                    }
+                                },
+                                {
+                                    "if": {
+                                        "type": "object",
+                                        "properties": {
+                                            "type": {
+                                                "enum": [
+                                                    "integer",
+                                                    "number"
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "then": {
+                                        "properties": {
+                                            "default": {
+                                                "type": ["number", "null"]
+                                            }
+                                        }
+                                    }
+                                },
+                                {
+                                    "if": {
+                                        "type": "object",
+                                        "properties": {
+                                            "type": {
+                                                "const": "text"
+                                            }
+                                        }
+                                    },
+                                    "then": {
+                                        "properties": {
+                                            "default": {
+                                                "type": ["string", "null"]
+                                            }
+                                        }
+                                    }
+                                },
+                                {
+                                    "if": {
+                                        "type": "object",
+                                        "properties": {
+                                            "type": {
+                                                "const": "constant"
+                                            }
+                                        }
+                                    },
+                                    "then": {
+                                        "required": [
+                                            "default"
+                                        ]
+                                    }
                                 }
-                            },
+                            ]
+                        }
+                    },
+                    "urls": {
+                        "type": "object",
+                        "description": "Map containing URL group in key and URL suffix in value",
+                        "patternProperties": {
+                            "^.*$": {"type": "string"}
+                        }
+                    },
+                    "extends": {
+                        "type": "array",
+                        "description": "Node names to extend",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "additionalData": {}
+                },
+                "required": [
+                    "name"
+                ],
+                "additionalProperties": false
+            }
+        },
+        "subgraphs": {
+            "description": "Definition of available subgraphs",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "description": "Default name displayed as title",
+                        "type": "string"
+                    },
+                    "type": {
+                        "description": "Type that defines styling of a node",
+                        "type": "string"
+                    },
+                    "category": {
+                        "description": "Category of a node in a side bar",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "nodes": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
                             "properties": {
-                                "description": "Definition of the properties of the node",
-                                "type": "array",
-                                "items": {
+                                "type": {
+                                    "description": "Type of a node",
+                                    "type": "string"
+                                },
+                                "id": {
+                                    "description": "ID of a node in subgraph",
+                                    "type": "string"
+                                },
+                                "title": {
+                                    "description": "Displayed title of a node",
+                                    "type": "string"
+                                },
+                                "interfaces": {
+                                    "description": "Input/output interfaces. Keys are name of interface, while values are object with a single ID property",
+                                    "type": "array"
+                                },
+                                "properties": {
+                                    "description": "Value of node properties",
+                                    "type": "array"
+                                },
+                                "position": {
+                                    "description": "Position of a node in an editor",
                                     "type": "object",
                                     "properties": {
-                                        "name": {
-                                            "description": "Name of the property. Can be displayed for some types of properties",
-                                            "type": "string"
-                                        },
-                                        "type": {
-                                            "description": "Type of the property",
-                                            "enum": [
-                                                "text",
-                                                "number",
-                                                "integer",
-                                                "select",
-                                                "checkbox",
-                                                "slider",
-                                                "list",
-                                                "constant"
-                                            ]
-                                        },
-                                        "description": {
-                                            "description": "Description of the property. Can be displayed to the user",
-                                            "type": "string"
-                                        },
-                                        "default": {
-                                            "description": "Default value of the property"
-                                        },
-                                        "min": {
-                                            "description": "Minimum value of a range for slider, number and integer type",
+                                        "x": {
+                                            "description": "X coordinate of node position",
                                             "type": "number"
                                         },
-                                        "max": {
-                                            "description": "Maxiumum value of a range for slider, number and integer type",
+                                        "y": {
+                                            "description": "Y coordinate of node position",
                                             "type": "number"
-                                        },
-                                        "values": {
-                                            "description": "Range of values for the select type",
-                                            "type": "array"
-                                        },
-                                        "dtype": {
-                                            "description": "Data types of elements in a list type",
-                                            "type": "string",
-                                            "enum": [
-                                                "integer",
-                                                "number",
-                                                "string",
-                                                "boolean"
-                                            ]
                                         }
-                                    },
-                                    "required": [
-                                        "name",
-                                        "type",
-                                        "default"
-                                    ],
-                                    "additionalProperties": false,
-                                    "allOf": [
-                                        {
-                                            "if": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "type": {
-                                                        "const": "slider"
-                                                    }
-                                                }
-                                            },
-                                            "then": {
-                                                "properties": {
-                                                    "default": {
-                                                        "type": ["number", "null"]
-                                                    }
-                                                },
-                                                "required": [
-                                                    "min",
-                                                    "max"
-                                                ]
-                                            }
-                                        },
-                                        {
-                                            "if": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "type": {
-                                                        "const": "checkbox"
-                                                    }
-                                                }
-                                            },
-                                            "then": {
-                                                "properties": {
-                                                    "default": {
-                                                        "type": ["boolean", "null"]
-                                                    }
-                                                },
-                                                "required": [
-                                                    "default"
-                                                ]
-                                            }
-                                        },
-                                        {
-                                            "if": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "type": {
-                                                        "const": "select"
-                                                    }
-                                                }
-                                            },
-                                            "then": {
-                                                "required": [
-                                                    "values"
-                                                ]
-                                            }
-                                        },
-                                        {
-                                            "if": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "type": {
-                                                        "enum": [
-                                                            "integer",
-                                                            "number"
-                                                        ]
-                                                    }
-                                                }
-                                            },
-                                            "then": {
-                                                "properties": {
-                                                    "default": {
-                                                        "type": ["number", "null"]
-                                                    }
-                                                }
-                                            }
-                                        },
-                                        {
-                                            "if": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "type": {
-                                                        "const": "text"
-                                                    }
-                                                }
-                                            },
-                                            "then": {
-                                                "properties": {
-                                                    "default": {
-                                                        "type": ["string", "null"]
-                                                    }
-                                                }
-                                            }
-                                        },
-                                        {
-                                            "if": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "type": {
-                                                        "const": "constant"
-                                                    }
-                                                }
-                                            },
-                                            "then": {
-                                                "required": [
-                                                    "default"
-                                                ]
-                                            }
-                                        }
-                                    ]
+                                    }
+                                },
+                                "width": {
+                                    "description": "Displayed width of a node",
+                                    "type": "number"
+                                },
+                                "twoColumn": {
+                                    "description": "Whether in/out interfaces should be displayed next to each other",
+                                    "type": "boolean"
                                 }
                             },
-                            "urls": {
-                                "type": "object",
-                                "description": "Map containing URL group in key and URL suffix in value",
-                                "patternProperties": {
-                                    "^.*$": {"type": "string"}
-                                }
-                            },
-                            "extends": {
-                                "type": "array",
-                                "description": "Node names to extend",
-                                "items": {
+                            "additionalProperties": false
+                        }
+                    },
+                    "connections": {
+                        "description": "Connections within the subgraph",
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "from": {
+                                    "description": "ID of starting point interface",
+                                    "type": "string"
+                                },
+                                "to": {
+                                    "description": "ID of ending point interface",
+                                    "type": "string"
+                                },
+                                "id": {
+                                    "description": "ID of connection",
                                     "type": "string"
                                 }
                             },
-                            "additionalData": {}
-                        },
-                        "required": [
-                            "name"
-                        ],
-                        "additionalProperties": false
+                            "additionalProperties": false,
+                            "required": [
+                                "from",
+                                "to",
+                                "id"
+                            ]
+                        }
+                    },
+                    "interfaces": {
+                        "description": "Definition of available interfaces of the node",
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "description": "Name of the input socket displayed in the node",
+                                    "type": "string"
+                                },
+                                "type": {
+                                    "description": "Type that defines styling of the input socket. It is also used for validation purposes",
+                                    "type": "string"
+                                },
+                                "direction": {
+                                    "description": "Tells whether the connector is input, output, or both",
+                                    "enum": [
+                                        "input",
+                                        "output",
+                                        "inout"
+                                    ]
+                                },
+                                "maxConnectionsCount": {
+                                    "description": "Tells how many connections can be established with given interface, <= 0 value for unlimited",
+                                    "type": "number",
+                                    "default": 1
+                                },
+                                "nodeInterface": {
+                                    "description": "",
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "name",
+                                "type",
+                                "direction",
+                                "nodeInterface"
+                            ],
+                            "additionalProperties": false
+                        }
                     }
                 },
-                "subgraphs": {
-                    "description": "Definition of available subgraphs",
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "properties": {
-                            "name": {
-                                "description": "Default name displayed as title",
-                                "type": "string"
-                            },
-                            "type": {
-                                "description": "Type that defines styling of a node",
-                                "type": "string"
-                            },
-                            "category": {
-                                "description": "Category of a node in a side bar",
-                                "type": [
-                                    "string",
-                                    "null"
-                                ]
-                            },
-                            "nodes": {
-                                "type": "array",
-                                "items": {
-                                    "type": "object",
-                                    "properties": {
-                                        "type": {
-                                            "description": "Type of a node",
-                                            "type": "string"
-                                        },
-                                        "id": {
-                                            "description": "ID of a node in subgraph",
-                                            "type": "string"
-                                        },
-                                        "title": {
-                                            "description": "Displayed title of a node",
-                                            "type": "string"
-                                        },
-                                        "interfaces": {
-                                            "description": "Input/output interfaces. Keys are name of interface, while values are object with a single ID property",
-                                            "type": "array"
-                                        },
-                                        "properties": {
-                                            "description": "Value of node properties",
-                                            "type": "array"
-                                        },
-                                        "position": {
-                                            "description": "Position of a node in an editor",
-                                            "type": "object",
-                                            "properties": {
-                                                "x": {
-                                                    "description": "X coordinate of node position",
-                                                    "type": "number"
-                                                },
-                                                "y": {
-                                                    "description": "Y coordinate of node position",
-                                                    "type": "number"
-                                                }
-                                            }
-                                        },
-                                        "width": {
-                                            "description": "Displayed width of a node",
-                                            "type": "number"
-                                        },
-                                        "twoColumn": {
-                                            "description": "Whether in/out interfaces should be displayed next to each other",
-                                            "type": "boolean"
-                                        }
-                                    },
-                                    "additionalProperties": false
-                                }
-                            },
-                            "connections": {
-                                "description": "Connections within the subgraph",
-                                "type": "array",
-                                "items": {
-                                    "type": "object",
-                                    "properties": {
-                                        "from": {
-                                            "description": "ID of starting point interface",
-                                            "type": "string"
-                                        },
-                                        "to": {
-                                            "description": "ID of ending point interface",
-                                            "type": "string"
-                                        },
-                                        "id": {
-                                            "description": "ID of connection",
-                                            "type": "string"
-                                        }
-                                    },
-                                    "additionalProperties": false,
-                                    "required": [
-                                        "from",
-                                        "to",
-                                        "id"
-                                    ]
-                                }
-                            },
-                            "interfaces": {
-                                "description": "Definition of available interfaces of the node",
-                                "type": "array",
-                                "items": {
-                                    "type": "object",
-                                    "properties": {
-                                        "name": {
-                                            "description": "Name of the input socket displayed in the node",
-                                            "type": "string"
-                                        },
-                                        "type": {
-                                            "description": "Type that defines styling of the input socket. It is also used for validation purposes",
-                                            "type": "string"
-                                        },
-                                        "direction": {
-                                            "description": "Tells whether the connector is input, output, or both",
-                                            "enum": [
-                                                "input",
-                                                "output",
-                                                "inout"
-                                            ]
-                                        },
-                                        "maxConnectionsCount": {
-                                            "description": "Tells how many connections can be established with given interface, <= 0 value for unlimited",
-                                            "type": "number",
-                                            "default": 1
-                                        },
-                                        "nodeInterface": {
-                                            "description": "",
-                                            "type": "string"
-                                        }
-                                    },
-                                    "required": [
-                                        "name",
-                                        "type",
-                                        "direction",
-                                        "nodeInterface"
-                                    ],
-                                    "additionalProperties": false
-                                }
-                            }
-                        },
-                        "additionalProperties": false
-                    }
-                }
-            },
-            "required": [
-                "nodes"
-            ]
+                "additionalProperties": false
+            }
         }
+    },
+    "required": [
+        "nodes"
     ]
 }
