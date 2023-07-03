@@ -50,15 +50,16 @@ def build_frontend(
     projectpath = Path(__file__).parent.parent.absolute()
     frontend_path = projectpath / 'pipeline_manager/frontend'
 
-    config_path = frontend_path / '.env.local'
+    config_path = frontend_path / '.env.static.local' if \
+        build_type == 'static-html' else \
+        frontend_path / '.env.local'
 
     config_lines = []
 
     if editor_title:
         config_lines.append(f'VUE_APP_EDITOR_TITLE={editor_title}\n')
 
-    if build_type == 'static-html' and specification:
-        config_path = frontend_path / '.env.static.local'
+    if specification:
         specification = Path(specification).absolute()
         config_lines.append(f'VUE_APP_SPECIFICATION_PATH={specification}\n')
         if dataflow:
