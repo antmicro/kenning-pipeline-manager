@@ -236,6 +236,8 @@
     padding: 0;
     z-index: 3;
 
+    overflow: visible;
+
     & h1 {
         margin: 0px;
     }
@@ -288,7 +290,6 @@
         display: inline;
         text-decoration: none;
         color: inherit;
-        position: relative;
         width: auto;
 
         img {
@@ -300,9 +301,10 @@
         & > .__tooltip {
             z-index: 5;
             color: $white;
-            position: fixed;
+            position: absolute;
             text-align: center;
             flex-direction: column;
+            width: max-content;
 
             margin: 0 1em;
             padding: 1em;
