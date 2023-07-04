@@ -111,14 +111,12 @@ const updateMasks = (treeNode, filter) =>
             }
             node.mask = updateMasks(node.subcategories, filter);
             if (node.nodes.nodeTypes !== undefined) {
-                node.mask =
-                    node.mask ||
-                    Object.values(node.nodes.nodeTypes)
-                        .map((nt) => {
-                            nt.mask = nt.title.toLowerCase().includes(filter.toLowerCase());
-                            return nt.mask;
-                        })
-                        .includes(true);
+                node.mask = Object.values(node.nodes.nodeTypes)
+                    .map((nt) => {
+                        nt.mask = nt.title.toLowerCase().includes(filter.toLowerCase());
+                        return nt.mask;
+                    })
+                    .includes(true) || node.mask;
             }
             return node.mask;
         })
