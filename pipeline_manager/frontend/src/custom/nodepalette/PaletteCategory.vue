@@ -12,44 +12,43 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
 <template>
     <!-- eslint-disable vue/no-multiple-template-root -->
     <div
-        v-for="(name, i) in Object.keys(nodeTree).sort(sortEntriesAlphabetically)"
+        v-for="([name, category], i) in Object.entries(nodeTree)"
         :key="name"
-        v-show="nodeTree[name].mask"
+        v-show="category.mask"
     >
         <div class="__entry __category" :style="padding" @click="onMouseDown(i)">
             <Arrow :rotate="getRotation(i)" scale="small" />
+            {{ forceShow }}
             <div class="__title" v-html="highlightText(name)">
             </div>
         </div>
         <!-- Alternatively we could use v-show which has a higher overhead on startup,
         but it prepares the whole tree structure so it does not need to be reinitialized
         every time it is toggled -->
-        <div v-if="mask[i]">
-            <div v-if="nodeTree[name].nodes.nodeTypes">
+        <div v-show="forceShow || mask[i]">
+            <div v-if="category.nodes.nodeTypes">
                 <PaletteEntry
-                    v-for="nt in Object.keys(nodeTree[name].nodes.nodeTypes).sort(
-                        sortEntriesAlphabetically,
-                    )"
-                    v-show="nodeTree[name].nodes.nodeTypes[nt].mask"
+                    v-for="[nt, node] in Object.entries(category.nodes.nodeTypes)"
+                    v-show="node.mask"
                     :key="nt"
                     :type="nt"
-                    :title="highlightText(nodeTree[name].nodes.nodeTypes[nt].title)"
-                    :iconPath="nodeTree[name].nodes.nodeIconPaths[nt]"
-                    :urls="nodeTree[name].nodes.nodeURLs[nt]"
+                    :title="highlightText(node.title)"
+                    :iconPath="category.nodes.nodeIconPaths[nt]"
+                    :urls="category.nodes.nodeURLs[nt]"
                     :depth="depth + 1"
                     :tooltip="tooltip"
                     @pointerdown="
                         onDragStart(
                             nt,
-                            nodeTree[name].nodes.nodeTypes[nt],
-                            nodeTree[name].nodes.nodeIconPaths[nt],
+                            node,
+                            category.nodes.nodeIconPaths[nt],
                         )
                     "
                 />
             </div>
             <PaletteCategory
                 :depth="depth + 1"
-                :nodeTree="nodeTree[name].subcategories"
+                :nodeTree="category.subcategories"
                 :onDragStart="onDragStart"
                 :defaultCollapse="defaultCollapse"
                 :tooltip="tooltip"
@@ -105,22 +104,8 @@ export default defineComponent({
                 mask.value = Array(Object.keys(props.nodeTree).length).fill(!props.defaultCollapse);
             },
         );
-        
-        let previousMask;
-        let maskSaved = false;
-        watch(
-            () => props.nodeSearch,
-            () => {
-                if (props.nodeSearch === '') {
-                    mask.value = previousMask;
-                    maskSaved = false
-                } else if (!maskSaved) {
-                    maskSaved = true;
-                    previousMask = mask.value;
-                    mask.value = Array(Object.keys(props.nodeTree).length).fill(true);
-                }
-            },
-        );
+
+        const forceShow = computed(() => props.nodeSearch !== '');
 
         const getRotation = (index) => {
             if (mask.value[index]) {
@@ -133,7 +118,9 @@ export default defineComponent({
             mask.value.splice(index, 1, !mask.value[index]);
         };
 
-        const sortEntriesAlphabetically = (a, b) => a.toLowerCase().localeCompare(b.toLowerCase());
+        const sortEntriesAlphabetically = (a, b) => {
+            a[0].toLowerCase().localeCompare(b[0].toLowerCase())
+        };
 
         const highlightText = (name) => {
             const substring = props.nodeSearch.toLowerCase();
@@ -155,6 +142,7 @@ export default defineComponent({
             getRotation,
             sortEntriesAlphabetically,
             highlightText,
+            forceShow,
         };
     },
 });

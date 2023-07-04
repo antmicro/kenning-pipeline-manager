@@ -105,7 +105,7 @@ const categorizeNodes = (categoryTree, nodes, prefix = '') => {
 const updateMasks = (treeNode, filter) =>
     Object.entries(treeNode)
         .map(([categoryName, node]) => {
-            if (categoryName.toLowerCase().includes(filter.toLowerCase())) {
+            if (categoryName.toLowerCase().includes(filter)) {
                 setMasksToTrue(node);
                 return true;
             }
@@ -113,7 +113,7 @@ const updateMasks = (treeNode, filter) =>
             if (node.nodes.nodeTypes !== undefined) {
                 node.mask = Object.values(node.nodes.nodeTypes)
                     .map((nt) => {
-                        nt.mask = nt.title.toLowerCase().includes(filter.toLowerCase());
+                        nt.mask = nt.title.toLowerCase().includes(filter);
                         return nt.mask;
                     })
                     .includes(true) || node.mask;
@@ -122,6 +122,8 @@ const updateMasks = (treeNode, filter) =>
         })
         .includes(true);
 /* eslint-enable no-param-reassign */
+
+let unWatch = undefined;
 
 export default function getNodeTree(nameFilterRef) {
     const { viewModel } = useViewModel();
@@ -186,7 +188,13 @@ export default function getNodeTree(nameFilterRef) {
     const categoryTree = parseCategories(nodeCategories);
 
     const parsedTree = categorizeNodes(categoryTree, nodes);
-    watch(nameFilterRef, (newNameFilter) => updateMasks(parsedTree, newNameFilter));
+
+    // If specification changes we no logner want to watch it
+    if (unWatch) {
+        unWatch();
+    }
+
+    unWatch = watch(nameFilterRef, (newNameFilter) => updateMasks(parsedTree, newNameFilter.toLowerCase()));
 
     return parsedTree;
 }
