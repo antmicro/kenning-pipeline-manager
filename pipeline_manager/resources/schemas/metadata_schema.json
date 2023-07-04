@@ -42,7 +42,10 @@
             "default": false
         },
         "connectionStyle": {
-            "enum": ["curved", "orthogonal"],
+            "enum": [
+                "curved",
+                "orthogonal"
+            ],
             "description": "Defines connection style",
             "default": "curved"
         },
@@ -55,7 +58,7 @@
             "type": "array",
             "default": [],
             "description": "Layers of interfaces and nodes that can be ignored using settings.",
-            "items" : {
+            "items": {
                 "type": "object",
                 "description": "Description of a single layer.",
                 "properties": {
@@ -72,10 +75,20 @@
                         "description": "Types of interfaces that are ignored in this layer"
                     }
                 },
-                "required": ["name"],
+                "required": [
+                    "name"
+                ],
                 "anyOf": [
-                    {"required": ["nodeTypes"]},
-                    {"required": ["nodeInterfaces"]}
+                    {
+                        "required": [
+                            "nodeTypes"
+                        ]
+                    },
+                    {
+                        "required": [
+                            "nodeInterfaces"
+                        ]
+                    }
                 ],
                 "additionalProperties": false
             }
@@ -88,11 +101,24 @@
                     "type": "object",
                     "description": "A single entry representing an URL group",
                     "properties": {
-                        "name": {"type": "string", "description": "Name of the url group, appearing in hints"},
-                        "icon": {"type": "string", "description": "Path of the icon in assets"},
-                        "url": {"type": "string", "description": "Base of URL for group"}
+                        "name": {
+                            "type": "string",
+                            "description": "Name of the url group, appearing in hints"
+                        },
+                        "icon": {
+                            "type": "string",
+                            "description": "Path of the icon in assets"
+                        },
+                        "url": {
+                            "type": "string",
+                            "description": "Base of URL for group"
+                        }
                     },
-                    "required": ["name", "icon", "url"]
+                    "required": [
+                        "name",
+                        "icon",
+                        "url"
+                    ]
                 }
             }
         },
@@ -121,5 +147,6 @@
             "description": "Determines whether connections should have randomized, but deterministic offset",
             "default": "false"
         }
-    }
+    },
+    "unevaluatedProperties": false
 }

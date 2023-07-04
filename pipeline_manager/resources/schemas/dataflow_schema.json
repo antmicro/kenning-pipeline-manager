@@ -53,7 +53,7 @@
         "graph": {
             "allOf": [
                 {
-                        "$ref": "graph_schema"
+                    "$ref": "graph_schema"
                 }
             ]
         }

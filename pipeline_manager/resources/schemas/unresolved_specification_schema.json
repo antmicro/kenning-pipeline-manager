@@ -436,5 +436,6 @@
     },
     "required": [
         "nodes"
-    ]
+    ],
+    "unevaluatedProperties": false
 }
