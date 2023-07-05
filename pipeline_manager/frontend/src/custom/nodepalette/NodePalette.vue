@@ -16,10 +16,20 @@ Inherits from baklavajs/packages/renderer-vue/src/nodepalette/NodePalette.vue
         <div class="palette-title">
             <span>Nodes browser</span>
         </div>
-        <PaletteCategory
-            :nodeTree="nodeTree"
-            :onDragStart="onDragStart"
-            :defaultCollapse="collapse"
+        <div class="nodes">
+            <PaletteCategory
+                :nodeTree="nodeTree"
+                :onDragStart="onDragStart"
+                :defaultCollapse="collapse"
+                :tooltip="tooltip"
+            />
+        </div>
+        <!-- Heigth of the sidebar is 60 so we need to substract that -->
+        <Tooltip
+            v-show="tooltip.visible"
+            :text="tooltip.text"
+            :left="tooltip.left"
+            :top="tooltip.top - 60"
         />
     </div>
     <transition name="fade">
@@ -41,9 +51,10 @@ import { usePointer } from '@vueuse/core';
 import PaletteCategory from './PaletteCategory.vue';
 import getNodeTree from './nodeTree';
 import PaletteEntry from './PaletteEntry.vue';
+import Tooltip from '../../components/Tooltip.vue';
 
 export default defineComponent({
-    components: { PaletteCategory, PaletteEntry },
+    components: { PaletteCategory, PaletteEntry, Tooltip },
     setup() {
         const { viewModel } = useViewModel();
 
@@ -53,6 +64,14 @@ export default defineComponent({
         const editorEl = inject('editorEl');
 
         const draggedNode = ref(null);
+        const tooltip = ref(null);
+
+        tooltip.value = {
+            top: 0,
+            left: 0,
+            visible: false,
+            text: '',
+        };
 
         const draggedNodeStyles = computed(() => {
             if (!draggedNode.value || !editorEl?.value) {
@@ -95,6 +114,7 @@ export default defineComponent({
             onDragStart,
             nodeTree,
             collapse,
+            tooltip,
         };
     },
 });

@@ -18,10 +18,9 @@ A single entry representing available node type in the sidebar.
             :key="url.name"
             :href="url.url"
             class="__url"
-            :class="openClass"
             @pointerdown.stop
-            @pointerover="hover = true"
-            @pointerleave="hover = false"
+            @pointerover="(ev) => onPointerOver(ev, url.name)"
+            @pointerleave="onPointerLeave"
             target="_blank"
             draggable="false"
         >
@@ -31,13 +30,12 @@ A single entry representing available node type in the sidebar.
                 :alt="url.name"
                 draggable="false"
             />
-            <div class="__tooltip">{{ url.name }}</div>
         </a>
     </div>
 </template>
 
 <script>
-import { defineComponent, computed, ref } from 'vue';
+import { defineComponent, computed } from 'vue';
 
 export default defineComponent({
     props: {
@@ -60,6 +58,9 @@ export default defineComponent({
             type: Boolean,
             default: false,
         },
+        tooltip: {
+            required: false,
+        },
     },
     setup(props) {
         const getIconPath = (name) => (name !== undefined ? `./assets/${name}` : undefined);
@@ -74,16 +75,29 @@ export default defineComponent({
             __dragged: props.isDragged,
         }));
 
-        const hover = ref(false);
-        const openClass = computed(() => ({ open: hover.value }));
+        /* eslint-disable vue/no-mutating-props,no-param-reassign */
+        const onPointerOver = (ev, name) => {
+            if (props.tooltip !== undefined) {
+                props.tooltip.left = ev.clientX - ev.offsetX + ev.currentTarget.offsetWidth / 2;
+                props.tooltip.top = ev.clientY - ev.offsetY + ev.currentTarget.offsetHeight;
+                props.tooltip.text = name;
+                props.tooltip.visible = true;
+            }
+        };
+
+        const onPointerLeave = () => {
+            if (props.tooltip !== undefined) {
+                props.tooltip.visible = false;
+            }
+        };
 
         return {
             nodeIcon,
             padding,
             draggedClass,
             getIconPath,
-            hover,
-            openClass,
+            onPointerOver,
+            onPointerLeave,
         };
     },
 });

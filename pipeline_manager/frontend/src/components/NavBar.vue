@@ -64,7 +64,7 @@ export default {
                     class: '.baklava-node-palette',
                     iconRef: 'palette',
                     showTransform: '0px, 0px',
-                    hideTransform: '-300px, 0px',
+                    hideTransform: '-450px, 0px',
                 },
                 backendStatus: {
                     isOpen: false,

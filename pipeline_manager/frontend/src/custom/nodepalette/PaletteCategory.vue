@@ -33,6 +33,7 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
                     :iconPath="nodeTree[name].nodes.nodeIconPaths[nt]"
                     :urls="nodeTree[name].nodes.nodeURLs[nt]"
                     :depth="depth + 1"
+                    :tooltip="tooltip"
                     @pointerdown="
                         onDragStart(
                             nt,
@@ -47,6 +48,7 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
                 :nodeTree="nodeTree[name].subcategories"
                 :onDragStart="onDragStart"
                 :defaultCollapse="defaultCollapse"
+                :tooltip="tooltip"
             />
         </div>
     </div>
@@ -73,6 +75,9 @@ export default defineComponent({
         defaultCollapse: {
             type: Boolean,
             default: true,
+        },
+        tooltip: {
+            required: false,
         },
     },
     setup(props) {
