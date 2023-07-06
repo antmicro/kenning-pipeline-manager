@@ -43,7 +43,7 @@ export default class EditorManager {
         // before this value can be loaded from specification
         this.baklavaView.ignorableLayers = [];
         this.baklavaView.collapseSidebar = true;
-        this.baklavaView.movementStep = 1;
+        this.baklavaView.movementStep = 50;
         this.specificationVersion = unresolvedSpecificationSchema.version;
     }
 
@@ -186,7 +186,7 @@ export default class EditorManager {
             this.editor.layoutManager.useAlgorithm(metadata.layout);
         }
 
-        this.baklavaView.movementStep = metadata?.movementStep ?? 1;
+        this.baklavaView.movementStep = metadata?.movementStep ?? this.baklavaView.movementStep;
         this.baklavaView.settings.background.gridSize = metadata?.backgroundSize ?? 100;
         this.baklavaView.ignoredLayers = new Set();
         this.baklavaView.ignorableLayers = metadata?.layers ?? [];
