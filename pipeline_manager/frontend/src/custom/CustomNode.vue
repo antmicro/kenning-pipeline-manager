@@ -70,6 +70,7 @@ from moving or deleting the nodes.
                     :key="output.id"
                     :node="node"
                     :intf="output"
+                    :highlighted="iface.includes(output)"
                 />
             </div>
 
@@ -81,6 +82,7 @@ from moving or deleting the nodes.
                     :key="input.id"
                     :node="node"
                     :intf="input"
+                    :highlighted="iface.includes(input)"
                 />
             </div>
         </div>
@@ -104,6 +106,7 @@ import Bin from '../icons/Bin.vue';
 const props = defineProps({
     node: AbstractNode,
     selected: Boolean,
+    interfaces: Array,
 });
 
 const emit = defineEmits(['select']);
@@ -125,6 +128,7 @@ const nodeRef = ref(null);
 const renaming = ref(false);
 const renameField = ref(null);
 const tempName = ref('');
+const iface = computed(() => props.interfaces);
 
 const nodeURLs = viewModel.value.editor.getNodeURLs(props.node.type);
 

@@ -19,6 +19,7 @@ from creating and deleting connections or altering nodes' values if the editor i
             @pointerover="startHoverWrapper"
             @pointerout="endHoverWrapper"
             @pointerdown="onMouseDown"
+            :class="{ greyout_arrow: highlighted }"
         >
             <Arrow v-if="displayArrow" color="black" scale="medium" :rotate="arrowRotation" />
         </div>
@@ -45,6 +46,9 @@ import doubleClick from '../core/doubleClick';
 
 export default defineComponent({
     extends: Components.NodeInterface,
+    props: {
+        highlighted: Boolean,
+    },
     components: {
         Arrow,
     },
@@ -73,6 +77,7 @@ export default defineComponent({
                 endHover();
             }
         };
+        const highlighted = computed(() => props.highlighted);
 
         /* eslint-disable vue/no-mutating-props,no-param-reassign */
         const onMouseDown = doubleClick(700, () => {
