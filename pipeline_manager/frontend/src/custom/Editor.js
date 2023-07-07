@@ -236,9 +236,11 @@ export default class PipelineManagerEditor extends Editor {
         });
 
         const margin = 100;
-        const terminalHeight = document.getElementsByClassName('terminal-wrapper')[0].offsetHeight;
-        const navbarHeight = document.getElementsByClassName('wrapper')[0].offsetHeight;
-        const sideBarWidth = document.getElementsByClassName('baklava-node-palette')[0].offsetWidth;
+        const terminalHeight =
+            document.getElementsByClassName('terminal-wrapper')[0]?.offsetHeight ?? 0;
+        const navbarHeight = document.getElementsByClassName('wrapper')[0]?.offsetHeight ?? 0;
+        const sideBarWidth =
+            document.getElementsByClassName('baklava-node-palette')[0]?.offsetWidth ?? 0;
 
         const rightmostX = Math.max(...sizes.map((node) => node.position.x + node.width)) + margin;
         const leftmostX = Math.min(...sizes.map((node) => node.position.x)) - margin;
