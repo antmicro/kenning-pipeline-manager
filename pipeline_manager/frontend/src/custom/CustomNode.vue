@@ -39,6 +39,7 @@ from moving or deleting the nodes.
                 class="dark-input"
                 v-model="tempName"
                 placeholder="Node Name"
+                ref="renameField"
                 v-click-outside="doneRenaming"
                 @keydown.enter="doneRenaming"
             />
@@ -88,7 +89,7 @@ from moving or deleting the nodes.
 
 <script setup>
 /* eslint-disable object-curly-newline */
-import { ref, computed, toRef, onUpdated, onMounted } from 'vue';
+import { ref, computed, toRef, onUpdated, onMounted, nextTick } from 'vue';
 import { useViewModel, AbstractNode, GRAPH_NODE_TYPE_PREFIX, useGraph } from 'baklavajs';
 
 import useDragMove from './useDragMove';
@@ -122,6 +123,7 @@ const IGNORE_TYPE_PREFIX = '_';
 
 const nodeRef = ref(null);
 const renaming = ref(false);
+const renameField = ref(null);
 const tempName = ref('');
 
 const nodeURLs = viewModel.value.editor.getNodeURLs(props.node.type);
@@ -193,6 +195,11 @@ const openContextMenu = (ev) => {
     showContextMenu.value = true;
 };
 
+const focusOnRename = () => {
+    renameField.value.focus();
+    renameField.value.select();
+};
+
 /* eslint-disable default-case */
 const onContextMenuClick = async (action) => {
     switch (action) {
@@ -202,6 +209,10 @@ const onContextMenuClick = async (action) => {
         case 'rename':
             tempName.value = props.node.title;
             renaming.value = true;
+            nextTick().then(() => {
+                focusOnRename();
+            });
+            focusOnRename();
             break;
         case 'editSubgraph':
             viewModel.value.editor.switchToSubgraph(props.node);
