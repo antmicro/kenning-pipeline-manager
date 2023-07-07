@@ -47,7 +47,9 @@ export default defineComponent({
         }));
 
         const onMouseDown = doubleClick(700, () => {
-            graph.value.removeConnection(props.connection);
+            if (!viewModel.value.editor.readonly) {
+                graph.value.removeConnection(props.connection);
+            }
         });
 
         const transform = (x, y) => {
