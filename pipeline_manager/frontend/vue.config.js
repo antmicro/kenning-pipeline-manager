@@ -10,6 +10,7 @@ const path = require('path');
 module.exports = defineConfig({
     publicPath: '',
     css: {
+        extract: !process.env.VUE_APP_SINGLEHTML_BUILD,
         loaderOptions: {
             scss: {
                 additionalData: `
@@ -24,10 +25,10 @@ module.exports = defineConfig({
             config.devtool = 'eval-source-map';
         } else if (process.env.NODE_ENV === 'production') {
             config.optimization = {
-                splitChunks: {
+                splitChunks: process.env.VUE_APP_SINGLEHTML_BUILD ? false : {
                     maxSize: 250000, // This value is arbitrary, can be adjusted if needed
                     chunks: 'all',
-                },
+                }
             };
         }
         config.resolve = {

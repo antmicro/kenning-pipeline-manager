@@ -274,18 +274,16 @@ export default {
                     process.env.VUE_APP_VERBOSE !== undefined &&
                     process.env.VUE_APP_VERBOSE === 'true'
                 ) {
-                    specText = await import(
-                        `!!raw-loader!${process.env.VUE_APP_SPECIFICATION_PATH}`
-                    ); // eslint-disable-line global-require,import/no-dynamic-require
+                    specText = require(`!!raw-loader!${process.env.VUE_APP_SPECIFICATION_PATH}`); // eslint-disable-line global-require,import/no-dynamic-require
                 } else {
-                    specText = await import(process.env.VUE_APP_SPECIFICATION_PATH); // eslint-disable-line global-require,import/no-dynamic-require,max-len
+                    specText = require(process.env.VUE_APP_SPECIFICATION_PATH); // eslint-disable-line global-require,import/no-dynamic-require,max-len
                 }
-                this.loadSpecification(specText.default);
+                this.loadSpecification(specText);
             }
 
             if (process.env.VUE_APP_DATAFLOW_PATH !== undefined) {
-                const dataflow = await import(process.env.VUE_APP_DATAFLOW_PATH); // eslint-disable-line global-require,max-len,import/no-dynamic-require
-                this.loadDataflow(dataflow.default);
+                const dataflow = require(process.env.VUE_APP_DATAFLOW_PATH); // eslint-disable-line global-require,max-len,import/no-dynamic-require
+                this.loadDataflow(dataflow);
             }
             // During specification load, show option may be set to either true or false
             // We do not want to set the showNotification to hardcoded value true, but rather
