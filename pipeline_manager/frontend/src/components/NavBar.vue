@@ -119,6 +119,7 @@ export default {
             };
 
             fileReader.readAsText(file);
+            document.getElementById('load-spec-button').value = '';
         },
 
         /* eslint-disable no-param-reassign */
@@ -200,6 +201,7 @@ export default {
             };
 
             fileReader.readAsText(file);
+            document.getElementById('load-dataflow-button').value = '';
         },
         /**
          * Event handler that that saves a current dataflow to a `save.json` file.
