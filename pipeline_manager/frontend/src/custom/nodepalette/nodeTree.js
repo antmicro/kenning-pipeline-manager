@@ -129,6 +129,8 @@ const updateMasks = (treeNode, filter) =>
             if (categoryResult !== null) {
                 setMasksToTrue(node);
                 node.hitSubstring = fuzzysort.highlight(categoryResult, '<span>', '</span>');
+            } else {
+                node.hitSubstring = categoryName;
             }
 
             if (node.nodes.nodeTypes !== undefined) {
