@@ -99,65 +99,57 @@ function parseProperties(properties) {
     return tempInputs;
 }
 
-function parseIntefaces(interfaces) {
-    const tempInputs = {};
-    const tempInouts = {};
-    const tempOutputs = {};
+function createInterface(io, name = undefined) {
+    return () => {
+        const intf = new NodeInterface(name ?? io.name);
+        intf.type = typeof io.type === 'string' || io.type instanceof String ? [io.type] : io.type;
+        intf.componentName = 'NodeInterface';
+        intf.maxConnectionsCount = io.maxConnectionsCount;
+        intf.direction = io.direction;
+        intf.side = io.side ?? (io.direction === 'output' ? 'right' : 'left');
+        return intf;
+    };
+}
 
-    interfaces.forEach((i) => {
-        // TODO storing inouts currently in the same list as inputs (since they are already
-        // handling other things than inputs, such as paramters)
-        if (i.direction === 'input') {
-            tempInputs[i.name] = () => {
-                const intf = new NodeInterface(i.name);
-                intf.type =
-                    typeof i.type === 'string' || i.type instanceof String ? [i.type] : i.type;
-                intf.componentName = 'NodeInterface';
-                intf.maxConnectionsCount = i.maxConnectionsCount;
-                intf.direction = i.direction;
-                intf.side = i.side ?? 'left';
-                return intf;
-            };
-        } else if (i.direction === 'inout') {
-            tempInouts[i.name] = () => {
-                const intf = new NodeInterface(i.name);
-                intf.type =
-                    typeof i.type === 'string' || i.type instanceof String ? [i.type] : i.type;
-                intf.componentName = 'NodeInterface';
-                intf.maxConnectionsCount = i.maxConnectionsCount;
-                intf.direction = i.direction;
-                intf.side = i.side ?? 'left';
-                return intf;
-            };
-        } else if (i.direction === 'output') {
-            tempOutputs[i.name] = () => {
-                const intf = new NodeInterface(i.name);
-                intf.type =
-                    typeof i.type === 'string' || i.type instanceof String ? [i.type] : i.type;
-                intf.componentName = 'NodeInterface';
-                intf.maxConnectionsCount = i.maxConnectionsCount;
-                intf.direction = i.direction;
-                intf.side = i.side ?? 'right';
-                return intf;
-            };
+/* eslint-disable no-lonely-if */
+function parseIntefaces(interfaces) {
+    const tempIO = {
+        input: {},
+        inout: {},
+        output: {},
+    };
+
+    // TODO storing inouts currently in the same list as inputs (since they are already
+    // handling other things than inputs, such as paramters)
+    interfaces.forEach((io) => {
+        if (io.array !== undefined) {
+            const [left, right] = io.array;
+
+            for (let j = left; j < right; j += 1) {
+                const newName = `${io.name}[${j}]`;
+                tempIO[io.direction][newName] = createInterface(io, newName);
+            }
+        } else {
+            tempIO[io.direction][io.name] = createInterface(io);
         }
     });
 
     const filteredInouts = Object.fromEntries(
-        Object.entries(tempInouts).filter(
+        Object.entries(tempIO.inout).filter(
             ([name]) =>
-                !Object.keys(tempOutputs).includes(name) && !Object.keys(tempInputs).includes(name),
+                !Object.keys(tempIO.output).includes(name) &&
+                !Object.keys(tempIO.input).includes(name),
         ),
     );
 
     const renamedInputs = Object.fromEntries(
-        Object.entries(tempInputs).map(([name, constructor]) => [`input_${name}`, constructor]),
+        Object.entries(tempIO.input).map(([name, constructor]) => [`input_${name}`, constructor]),
     );
     const renamedInouts = Object.fromEntries(
         Object.entries(filteredInouts).map(([name, constructor]) => [`inout_${name}`, constructor]),
     );
     const renamedOutputs = Object.fromEntries(
-        Object.entries(tempOutputs).map(([name, constructor]) => [`output_${name}`, constructor]),
+        Object.entries(tempIO.output).map(([name, constructor]) => [`output_${name}`, constructor]),
     );
 
     return {
