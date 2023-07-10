@@ -111,19 +111,20 @@ const updateMasks = (treeNode, filter) =>
             }
             node.mask = updateMasks(node.subcategories, filter);
             if (node.nodes.nodeTypes !== undefined) {
-                node.mask = Object.values(node.nodes.nodeTypes)
-                    .map((nt) => {
-                        nt.mask = nt.title.toLowerCase().includes(filter);
-                        return nt.mask;
-                    })
-                    .includes(true) || node.mask;
+                node.mask =
+                    Object.values(node.nodes.nodeTypes)
+                        .map((nt) => {
+                            nt.mask = nt.title.toLowerCase().includes(filter);
+                            return nt.mask;
+                        })
+                        .includes(true) || node.mask;
             }
             return node.mask;
         })
         .includes(true);
 /* eslint-enable no-param-reassign */
 
-let unWatch = undefined;
+let unWatch;
 
 export default function getNodeTree(nameFilterRef) {
     const { viewModel } = useViewModel();
@@ -194,7 +195,9 @@ export default function getNodeTree(nameFilterRef) {
         unWatch();
     }
 
-    unWatch = watch(nameFilterRef, (newNameFilter) => updateMasks(parsedTree, newNameFilter.toLowerCase()));
+    unWatch = watch(nameFilterRef, (newNameFilter) =>
+        updateMasks(parsedTree, newNameFilter.toLowerCase()),
+    );
 
     return parsedTree;
 }
