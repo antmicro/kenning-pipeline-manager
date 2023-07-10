@@ -12,47 +12,58 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
 <template>
     <!-- eslint-disable vue/no-multiple-template-root -->
     <div
-        v-for="([name, category], i) in Object.entries(nodeTree)"
+        v-for="([name, category], i) in sortedEntries(nodeTree)"
         :key="name"
         v-show="category.mask"
     >
-        <div class="__entry __category" :style="padding" @click="onMouseDown(i)">
+        <div class="__entry __category" :style="padding(depth)" @click="onMouseDown(i)">
             <Arrow :rotate="getRotation(i)" scale="small" />
-            {{ forceShow }}
-            <div class="__title" v-html="highlightText(name)">
-            </div>
+            <div class="__title" v-html="name"></div>
         </div>
-        <!-- Alternatively we could use v-show which has a higher overhead on startup,
-        but it prepares the whole tree structure so it does not need to be reinitialized
-        every time it is toggled -->
-        <div v-show="forceShow || mask[i]">
+        <div v-show="mask[i]">
             <div v-if="category.nodes.nodeTypes">
-                <PaletteEntry
-                    v-for="[nt, node] in Object.entries(category.nodes.nodeTypes)"
+                <div
+                    v-for="[nt, node] in sortedEntries(category.nodes.nodeTypes)"
+                    class="__entry __node-entry"
+                    :style="padding(depth + 1)"
                     v-show="node.mask"
                     :key="nt"
-                    :type="nt"
-                    :title="highlightText(node.title)"
-                    :iconPath="category.nodes.nodeIconPaths[nt]"
-                    :urls="category.nodes.nodeURLs[nt]"
-                    :depth="depth + 1"
-                    :tooltip="tooltip"
-                    @pointerdown="
-                        onDragStart(
-                            nt,
-                            node,
-                            category.nodes.nodeIconPaths[nt],
-                        )
-                    "
-                />
+                    @pointerdown="onDragStart(nt, node, category.nodes.nodeIconPaths[nt])"
+                >
+                    <img
+                        class="__title-icon"
+                        v-if="nodeIcon !== undefined"
+                        :src="nodeIcon"
+                        draggable="false"
+                    />
+                    <div class="__title-label" v-html="node.title"></div>
+                    <a
+                        v-for="url in category.nodes.nodeURLs[nt]"
+                        :key="url.name"
+                        :href="url.url"
+                        class="__url"
+                        @pointerdown.stop
+                        @pointerover="(ev) => onPointerOver(ev, url.name)"
+                        @pointerleave="onPointerLeave"
+                        target="_blank"
+                        draggable="false"
+                    >
+                        <img
+                            v-if="getIconPath(url.icon) !== undefined"
+                            :src="getIconPath(url.icon)"
+                            :alt="url.name"
+                            draggable="false"
+                        />
+                    </a>
+                </div>
             </div>
             <PaletteCategory
-                :depth="depth + 1"
                 :nodeTree="category.subcategories"
                 :onDragStart="onDragStart"
+                :depth="depth + 1"
                 :defaultCollapse="defaultCollapse"
                 :tooltip="tooltip"
-                :nodeSearch="nodeSearch"
+                :forceShow="forceShow"
             />
         </div>
     </div>
@@ -60,11 +71,10 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
 
 <script>
 import { defineComponent, computed, ref, watch } from 'vue'; // eslint-disable-line object-curly-newline
-import PaletteEntry from './PaletteEntry.vue';
 import Arrow from '../../icons/Arrow.vue';
 
 export default defineComponent({
-    components: { PaletteEntry, Arrow },
+    components: { Arrow },
     props: {
         nodeTree: {
             required: true,
@@ -83,19 +93,37 @@ export default defineComponent({
         tooltip: {
             required: false,
         },
-        nodeSearch: {
-            type: String,
-            default: ''
+        forceShow: {
+            type: Boolean,
+            required: true,
         },
     },
     setup(props) {
-        const paddingDepth = 20;
+        const getIconPath = (name) => (name !== undefined ? `./assets/${name}` : undefined);
+        const nodeIcon = computed(() => getIconPath(props.iconPath));
+
+        /* eslint-disable vue/no-mutating-props,no-param-reassign */
+        const onPointerOver = (ev, name) => {
+            if (props.tooltip !== undefined) {
+                props.tooltip.left = ev.clientX - ev.offsetX + ev.currentTarget.offsetWidth / 2;
+                props.tooltip.top = ev.clientY - ev.offsetY + ev.currentTarget.offsetHeight;
+                props.tooltip.text = name;
+                props.tooltip.visible = true;
+            }
+        };
+
+        const onPointerLeave = () => {
+            if (props.tooltip !== undefined) {
+                props.tooltip.visible = false;
+            }
+        };
+
+        const paddingDepth = 30;
         const minPadding = 10;
-        const padding = computed(
-            () => `padding-left: ${minPadding + props.depth * paddingDepth}px`,
-        );
+        const padding = (depth) => `padding-left: ${minPadding + depth * paddingDepth}px`;
 
         const mask = ref(Array(Object.keys(props.nodeTree).length).fill(!props.defaultCollapse));
+        let storedMask = mask.value;
 
         // If the category tree changes the mask needs to get reinitialized
         watch(
@@ -105,7 +133,18 @@ export default defineComponent({
             },
         );
 
-        const forceShow = computed(() => props.nodeSearch !== '');
+        // If searching then the sidebar is expanded
+        watch(
+            () => props.forceShow,
+            (newValue, oldValue) => {
+                if (newValue && !oldValue) {
+                    storedMask = mask.value;
+                    mask.value = Array(Object.keys(props.nodeTree).length).fill(true);
+                } else if (!newValue && oldValue) {
+                    mask.value = storedMask;
+                }
+            },
+        );
 
         const getRotation = (index) => {
             if (mask.value[index]) {
@@ -118,31 +157,21 @@ export default defineComponent({
             mask.value.splice(index, 1, !mask.value[index]);
         };
 
-        const sortEntriesAlphabetically = (a, b) => {
-            a[0].toLowerCase().localeCompare(b[0].toLowerCase())
-        };
-
-        const highlightText = (name) => {
-            const substring = props.nodeSearch.toLowerCase();
-            const idx = name.toLowerCase().indexOf(substring);
-
-            if (idx === -1) {
-                return name;
-            }
-
-            return name.substring(0, idx) +
-                '<span>' + name.substring(idx, idx + substring.length) + '</span>' +
-                name.substring(idx + substring.length);            
-        }
+        const sortedEntries = (obj) =>
+            Object.entries(obj).sort(([a], [b]) =>
+                a[0].toLowerCase().localeCompare(b[0].toLowerCase()),
+            );
 
         return {
             padding,
             mask,
             onMouseDown,
             getRotation,
-            sortEntriesAlphabetically,
-            highlightText,
-            forceShow,
+            sortedEntries,
+            getIconPath,
+            nodeIcon,
+            onPointerOver,
+            onPointerLeave,
         };
     },
 });

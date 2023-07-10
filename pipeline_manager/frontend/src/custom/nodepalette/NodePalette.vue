@@ -27,8 +27,8 @@ Inherits from baklavajs/packages/renderer-vue/src/nodepalette/NodePalette.vue
                 :nodeTree="nodeTree"
                 :onDragStart="onDragStart"
                 :defaultCollapse="collapse"
-                :nodeSearch="nodeSearch"
                 :tooltip="tooltip"
+                :forceShow="nodeSearch !== ''"
             />
         </div>
         <!-- Heigth of the sidebar is 60 so we need to substract that -->
@@ -62,7 +62,12 @@ import Tooltip from '../../components/Tooltip.vue';
 import Magnifier from '../../icons/Magnifier.vue';
 
 export default defineComponent({
-    components: { PaletteCategory, PaletteEntry, Tooltip, Magnifier },
+    components: {
+        PaletteCategory,
+        PaletteEntry,
+        Tooltip,
+        Magnifier,
+    },
     setup() {
         const { viewModel } = useViewModel();
 
