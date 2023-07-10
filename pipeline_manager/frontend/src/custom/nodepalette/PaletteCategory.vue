@@ -32,8 +32,8 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
                 >
                     <img
                         class="__title-icon"
-                        v-if="nodeIcon !== undefined"
-                        :src="nodeIcon"
+                        v-if="getNodeIcon(category.nodes.nodeIconPaths[nt]) !== undefined"
+                        :src="getNodeIcon(category.nodes.nodeIconPaths[nt])"
                         draggable="false"
                     />
                     <div class="__title-label" v-html="node.hitSubstring"></div>
@@ -70,7 +70,7 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
 </template>
 
 <script>
-import { defineComponent, computed, ref, watch } from 'vue'; // eslint-disable-line object-curly-newline
+import { defineComponent, ref, watch } from 'vue'; // eslint-disable-line object-curly-newline
 import Arrow from '../../icons/Arrow.vue';
 
 export default defineComponent({
@@ -100,7 +100,7 @@ export default defineComponent({
     },
     setup(props) {
         const getIconPath = (name) => (name !== undefined ? `./assets/${name}` : undefined);
-        const nodeIcon = computed(() => getIconPath(props.iconPath));
+        const getNodeIcon = (iconName) => getIconPath(iconName);
 
         /* eslint-disable vue/no-mutating-props,no-param-reassign */
         const onPointerOver = (ev, name) => {
@@ -169,7 +169,7 @@ export default defineComponent({
             getRotation,
             sortedEntries,
             getIconPath,
-            nodeIcon,
+            getNodeIcon,
             onPointerOver,
             onPointerLeave,
         };
