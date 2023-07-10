@@ -6,6 +6,8 @@
 
 import { useViewModel } from 'baklavajs';
 import { watch } from 'vue';
+import fuzzysort from 'fuzzysort';
+
 import {
     SUBGRAPH_INPUT_NODE_TYPE,
     SUBGRAPH_OUTPUT_NODE_TYPE,
@@ -36,6 +38,23 @@ const parseCategories = (categoriesNames) => {
     });
 
     return categoryTree;
+};
+
+/* eslint-disable no-param-reassign */
+/**
+ * Sets `hitSubstring` value of all nodes of a given category to default names.
+ * @param category Single category entry
+ */
+const setDefaultNames = (category) => {
+    const [categoryName, categoryNode] = category;
+    categoryNode.hitSubstring = categoryName;
+    if (categoryNode.nodes.nodeTypes !== undefined) {
+        Object.entries(categoryNode.nodes.nodeTypes).forEach(([nodeName, nodeType]) => {
+            nodeType.hitSubstring = nodeName;
+        });
+    }
+
+    Object.entries(categoryNode.subcategories).forEach((subTree) => setDefaultNames(subTree));
 };
 
 /* eslint-disable no-param-reassign */
@@ -86,16 +105,16 @@ const categorizeNodes = (categoryTree, nodes, prefix = '') => {
         const nodeTypesInCategory = nodes.find((n) => n.name === name);
         nodeTree[category].nodes = nodeTypesInCategory ?? {};
     });
-    Object.values(nodeTree).forEach((subTree) => setMasksToTrue(subTree));
+
     return nodeTree;
 };
 
 /**
  *
  * Updates masks of all nodes and subcategories based on filter value.
- * The node is shown if the lowercase name contains lowercase filter
+ * The node is shown if filter is a substring of the name.
  * Category is shown if it contains at least one node in the subtree which is
- * shown or if lowercase category name contains lowercase filter
+ * shown or if filter is a substring of the category name
  *
  * @param treeNode NodeTree instance.
  * @param filter String which is used for filtering
@@ -105,25 +124,37 @@ const categorizeNodes = (categoryTree, nodes, prefix = '') => {
 const updateMasks = (treeNode, filter) =>
     Object.entries(treeNode)
         .map(([categoryName, node]) => {
-            if (categoryName.toLowerCase().includes(filter)) {
+            const categoryResult = fuzzysort.single(filter, categoryName);
+
+            if (categoryResult !== null) {
                 setMasksToTrue(node);
-                return true;
+                node.hitSubstring = fuzzysort.highlight(categoryResult, '<span>', '</span>');
             }
-            node.mask = updateMasks(node.subcategories, filter);
+
             if (node.nodes.nodeTypes !== undefined) {
-                node.mask =
-                    Object.values(node.nodes.nodeTypes)
-                        .map((nt) => {
-                            nt.mask = nt.title.toLowerCase().includes(filter);
-                            return nt.mask;
-                        })
-                        .includes(true) || node.mask;
+                node.mask = Object.values(node.nodes.nodeTypes)
+                    .map((nt) => {
+                        const entryResult = fuzzysort.single(filter, nt.title);
+                        nt.mask = entryResult !== null || categoryResult !== null;
+
+                        if (entryResult !== null) {
+                            nt.hitSubstring = fuzzysort.highlight(entryResult, '<span>', '</span>');
+                        } else {
+                            nt.hitSubstring = nt.title;
+                        }
+                        return nt.mask;
+                    })
+                    .includes(true);
+            } else {
+                node.mask = false;
             }
+
+            node.mask = updateMasks(node.subcategories, filter) || node.mask;
             return node.mask;
         })
         .includes(true);
-/* eslint-enable no-param-reassign */
 
+/* eslint-enable no-param-reassign */
 let unWatch;
 
 export default function getNodeTree(nameFilterRef) {
@@ -189,15 +220,22 @@ export default function getNodeTree(nameFilterRef) {
     const categoryTree = parseCategories(nodeCategories);
 
     const parsedTree = categorizeNodes(categoryTree, nodes);
+    Object.entries(parsedTree).forEach((subTree) => setDefaultNames(subTree));
+    Object.values(parsedTree).forEach((subTree) => setMasksToTrue(subTree));
 
-    // If specification changes we no logner want to watch it
+    // If specification changes we no longer want to watch it
     if (unWatch) {
         unWatch();
     }
 
-    unWatch = watch(nameFilterRef, (newNameFilter) =>
-        updateMasks(parsedTree, newNameFilter.toLowerCase()),
-    );
+    unWatch = watch(nameFilterRef, (newNameFilter) => {
+        if (newNameFilter === '') {
+            Object.entries(parsedTree).forEach((subTree) => setDefaultNames(subTree));
+            Object.values(parsedTree).forEach((subTree) => setMasksToTrue(subTree));
+        } else {
+            updateMasks(parsedTree, newNameFilter.toLowerCase());
+        }
+    });
 
     return parsedTree;
 }
