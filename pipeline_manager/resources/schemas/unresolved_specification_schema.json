@@ -41,59 +41,68 @@
                         "type": "array",
                         "items": {
                             "type": "object",
-                            "properties": {
-                                "name": {
-                                    "description": "Name of the input socket displayed in the node",
-                                    "type": "string"
+                            "allOf": [
+                                {
+                                    "$ref": "#/$defs/interface"
                                 },
-                                "type": {
-                                    "description": "Type that defines styling of the input socket. It is also used for validation purposes",
-                                    "type": ["string", "array"]
-                                },
-                                "direction": {
-                                    "description": "Tells whether the connector is input, output, or both",
-                                    "enum": [
-                                        "input",
-                                        "output",
-                                        "inout"
-                                    ]
-                                },
-                                "side": {
-                                    "description": "Determines the side on which the socket is rendered",
-                                    "enum": [
-                                        "left",
-                                        "right"
-                                    ]
-                                },
-                                "maxConnectionsCount": {
-                                    "description": "Tells how many connections can be established with given interface, <= 0 value for unlimited",
-                                    "type": "number",
-                                    "default": 0
-                                }
-                            },
-                            "required": [
-                                "name",
-                                "type",
-                                "direction"
-                            ],
-                            "if": {
-                                "properties": {
-                                    "type": {
-                                        "type": "array"
-                                    }
-                                }
-                            },
-                            "then": {
-                                "properties": {
-                                    "type": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "string"
+                                {
+                                    "properties": {
+                                        "array": {
+                                            "description": "Used to define multiple similar interfaces using only one entry",
+                                            "type": "array",
+                                            "minItems": 2,
+                                            "maxItems": 2,
+                                            "items": {
+                                                "type": "number"
+                                            }
                                         }
                                     }
                                 }
-                            },
-                            "additionalProperties": false
+                            ]
+                        }
+                    },
+                    "interfaceGroups": {
+                        "description": "Defines groups of interfaces that use multiple interfaces",
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "allOf": [
+                                {
+                                    "$ref": "#/$defs/interface"
+                                },
+                                {
+                                    "properties": {
+                                        "interfaces": {
+                                            "description": "Describes interfaces that create the interface group",
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "name": {
+                                                        "description": "Name of the the group of interfaces",
+                                                        "type": "string"
+                                                    },
+                                                    "array": {
+                                                        "description": "Used to define multiple similar interfaces using only one entry",
+                                                        "type": "array",
+                                                        "minItems": 2,
+                                                        "maxItems": 2,
+                                                        "items": {
+                                                            "type": "number"
+                                                        }
+                                                    }
+                                                },
+                                                "required": [
+                                                    "name"
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "interfaces"
+                                    ]
+                                }
+                            ]
                         }
                     },
                     "properties": {
@@ -437,5 +446,40 @@
     "required": [
         "nodes"
     ],
-    "unevaluatedProperties": false
+    "unevaluatedProperties": false,
+    "$defs": {
+        "interface": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "description": "Name of the socket displayed in the node",
+                    "type": "string"
+                },
+                "type": {
+                    "description": "Type that defines styling of the input socket. It is also used for validation purposes",
+                    "type": ["string", "array"]
+                },
+                "direction": {
+                    "description": "Tells whether the connector is input, output, or both",
+                    "enum": [
+                        "input",
+                        "output",
+                        "inout"
+                    ]
+                },
+                "side": {
+                    "description": "Determines the side on which the socket is rendered",
+                    "enum": [
+                        "left",
+                        "right"
+                    ]
+                },
+                "maxConnectionsCount": {
+                    "description": "Tells how many connections can be established with given interface, <= 0 value for unlimited",
+                    "type": "number",
+                    "default": 0
+                }
+            }
+        }
+    }
 }

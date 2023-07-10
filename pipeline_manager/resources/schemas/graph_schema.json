@@ -103,6 +103,13 @@
                             ]
                         }
                     },
+                    "enabledInterfaceGroups": {
+                        "descirpion": "List of names of chosen interface groups",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
                     "width": {
                         "description": "Width of the node",
                         "type": "number"
