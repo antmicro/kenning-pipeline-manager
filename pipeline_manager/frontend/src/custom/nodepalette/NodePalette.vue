@@ -28,7 +28,7 @@ Inherits from baklavajs/packages/renderer-vue/src/nodepalette/NodePalette.vue
                 :onDragStart="onDragStart"
                 :defaultCollapse="collapse"
                 :tooltip="tooltip"
-                :forceShow="nodeSearch !== ''"
+                :nodeSearch="nodeSearch"
             />
         </div>
         <!-- Heigth of the sidebar is 60 so we need to substract that -->

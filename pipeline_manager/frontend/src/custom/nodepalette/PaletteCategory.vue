@@ -13,12 +13,12 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
     <!-- eslint-disable vue/no-multiple-template-root -->
     <div
         v-for="([name, category], i) in sortedEntries(nodeTree)"
-        :key="name"
         v-show="category.mask"
+        :key="name"
     >
         <div class="__entry __category" :style="padding(depth)" @click="onMouseDown(i)">
             <Arrow :rotate="getRotation(i)" scale="small" />
-            <div class="__title" v-html="name"></div>
+            <div class="__title" v-html="category.hitSubstring"></div>
         </div>
         <div v-show="mask[i]">
             <div v-if="category.nodes.nodeTypes">
@@ -36,7 +36,7 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
                         :src="nodeIcon"
                         draggable="false"
                     />
-                    <div class="__title-label" v-html="node.title"></div>
+                    <div class="__title-label" v-html="node.hitSubstring"></div>
                     <a
                         v-for="url in category.nodes.nodeURLs[nt]"
                         :key="url.name"
@@ -63,7 +63,7 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
                 :depth="depth + 1"
                 :defaultCollapse="defaultCollapse"
                 :tooltip="tooltip"
-                :forceShow="forceShow"
+                :nodeSearch="nodeSearch"
             />
         </div>
     </div>
@@ -93,8 +93,8 @@ export default defineComponent({
         tooltip: {
             required: false,
         },
-        forceShow: {
-            type: Boolean,
+        nodeSearch: {
+            type: String,
             required: true,
         },
     },
@@ -135,12 +135,12 @@ export default defineComponent({
 
         // If searching then the sidebar is expanded
         watch(
-            () => props.forceShow,
+            () => props.nodeSearch,
             (newValue, oldValue) => {
-                if (newValue && !oldValue) {
+                if (newValue !== '' && oldValue === '') {
                     storedMask = mask.value;
                     mask.value = Array(Object.keys(props.nodeTree).length).fill(true);
-                } else if (!newValue && oldValue) {
+                } else if (newValue === '' && oldValue !== '') {
                     mask.value = storedMask;
                 }
             },
