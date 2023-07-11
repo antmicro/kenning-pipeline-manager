@@ -99,6 +99,16 @@ function parseProperties(properties) {
     return tempInputs;
 }
 
+/**
+ * Returns an interface constructor that is used to build nodes
+ *
+ * @param io confiuration of the interface
+ * @param hidden whether th interface should be hidden. For example groups of interfaces
+ * are hidden by default
+ * @param {*} name custom name for the interface that should be used instaed of the one coming
+ * from `io`
+ * @returns baklava interface constructor
+ */
 function createInterface(io, hidden = true, name = undefined) {
     return () => {
         const intf = new NodeInterface(name ?? io.name);
@@ -108,6 +118,7 @@ function createInterface(io, hidden = true, name = undefined) {
         intf.direction = io.direction;
         intf.side = io.side ?? (io.direction === 'output' ? 'right' : 'left');
         intf.hidden = hidden;
+        intf.interfaces = io.interfaces;
         return intf;
     };
 }
@@ -120,6 +131,7 @@ function parseIntefaces(interfaces, interfaceGroups) {
         output: {},
     };
 
+    // Interfaces that are mentioned in interfaces groups should not be rendered by default
     const interfacesFromGroups = new Set();
 
     interfaceGroups.forEach((ig) => {
@@ -188,7 +200,6 @@ function parseIntefaces(interfaces, interfaceGroups) {
 function parseNodeState(state) {
     const newState = { ...state };
 
-    delete newState.enabledInterfaceGroups;
     if (newState.inputs === undefined) {
         newState.inputs = {};
     }
@@ -215,6 +226,16 @@ function parseNodeState(state) {
         delete newState.properties;
     }
 
+    if (newState.enabledInterfaceGroups !== undefined) {
+        const newEnabledInterfaceGroups = {};
+        newState.enabledInterfaceGroups.forEach((intf) => {
+            newEnabledInterfaceGroups[`${intf.direction}_${intf.name}`] = { ...intf };
+        });
+        newState.enabledInterfaceGroups = newEnabledInterfaceGroups;
+    } else {
+        newState.enabledInterfaceGroups = {};
+    }
+
     if ('name' in newState) {
         newState.title = newState.name;
     } else {
@@ -229,14 +250,18 @@ function parseNodeState(state) {
  * Function perfomrms sanity checking on parsed state before loading it
  * into the editor. It should throw explicit errors if any discrepancy is detected.
  *
- * @param {*} parsedState that is passed to node to load
- * @param {*} inputs inputs of the node
- * @param {*} outputs outputs of the node
+ * @param parsedState that is passed to node to load
+ * @param inputs inputs of the node
+ * @param outputs outputs of the node
  */
 function detectDiscrepancies(parsedState, inputs, outputs) {
     const errors = [];
 
-    Object.entries({ ...parsedState.inputs, ...parsedState.outputs }).forEach(([ioName]) => {
+    // Checking for existance of interfaces defined
+    Object.keys({
+        ...parsedState.inputs,
+        ...parsedState.outputs,
+    }).forEach((ioName) => {
         if (
             !Object.prototype.hasOwnProperty.call(inputs, ioName) &&
             !Object.prototype.hasOwnProperty.call(outputs, ioName)
@@ -250,6 +275,60 @@ function detectDiscrepancies(parsedState, inputs, outputs) {
             );
         }
     });
+
+    // Checking for existance of interface groups
+    Object.keys(parsedState.enabledInterfaceGroups).forEach((groupName) => {
+        if (
+            !Object.prototype.hasOwnProperty.call(inputs, groupName) &&
+            !Object.prototype.hasOwnProperty.call(outputs, groupName)
+        ) {
+            const direction = groupName.slice(0, groupName.indexOf('_'));
+            const name = groupName.slice(groupName.indexOf('_') + 1);
+
+            errors.push(
+                `Node of name ${parsedState.type} and id ${parsedState.id} is corrupted. ` +
+                    `Interface group named - ${name} of direction - ${direction} not found in specification!`,
+            );
+        }
+    });
+
+    // Checking for integrity of interface groups
+    const usedInterfaces = new Set();
+    Object.entries(parsedState.enabledInterfaceGroups).forEach(([groupName, group]) => {
+        const interfaces = inputs[groupName]?.interfaces ?? outputs[groupName]?.interfaces;
+        const direction = groupName.slice(0, groupName.indexOf('_'));
+        const name = groupName.slice(groupName.indexOf('_') + 1);
+
+        interfaces.forEach((intf) => {
+            if (intf.array !== undefined) {
+                const [left, right] = intf.array;
+
+                for (let j = left; j < right; j += 1) {
+                    const newName = `${intf.name}[${j}]`;
+                    if (usedInterfaces.has(newName)) {
+                        errors.push(
+                            `Interface of name ${intf.name}[${j}] has been reused ` +
+                                `by interface group named - ${name} of direction - ${direction}. ` +
+                                `Make sure your interface groups are disjoint.`,
+                        );
+                    } else {
+                        usedInterfaces.add(newName);
+                    }
+                }
+            } else {
+                if (usedInterfaces.has(intf.name)) {
+                    errors.push(
+                        `Interface of name ${intf.name} has been reused ` +
+                            `by interface group named - ${name} of direction - ${direction}. ` +
+                            `Make sure your interface groups are disjoint.`,
+                    );
+                } else {
+                    usedInterfaces.add(intf.name);
+                }
+            }
+        });
+    });
+
     return errors;
 }
 
@@ -336,16 +415,16 @@ export function NodeFactory(
             };
 
             this.load = (state) => {
-                if (state.enabledInterfaceGroups !== undefined) {
-                    state.enabledInterfaceGroups.forEach((groupName) => {
-                        this.inputs[`${groupName.direction}_${groupName.name}`].hidden = false;
-                    });
-                }
-
                 const parsedState = parseNodeState(state);
                 const errors = detectDiscrepancies(parsedState, this.inputs, this.outputs);
                 if (Array.isArray(errors) && errors.length) {
                     return errors;
+                }
+
+                if (state.enabledInterfaceGroups !== undefined) {
+                    state.enabledInterfaceGroups.forEach((groupName) => {
+                        this.inputs[`${groupName.direction}_${groupName.name}`].hidden = false;
+                    });
                 }
 
                 this.parentLoad(parsedState);
