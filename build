@@ -19,25 +19,27 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description='Tool for building the frontend application'
     )
-    parser.add_argument(
+
+    base_parser = argparse.ArgumentParser()
+    base_parser.add_argument(
         '--assets-directory',
         help='Path to directory with assets'
     )
-    parser.add_argument(
+    base_parser.add_argument(
         '--editor-title',
         help='Title of the editor'
     )
-    parser.add_argument(
+    base_parser.add_argument(
         '--output-directory',
         help='Directory where the built frontend should be stored'
     )
-    parser.add_argument(
+    base_parser.add_argument(
         '--clean-build',
         help='If --output-directory is defined, '
              'it is cleared before putting built frontend application',
         action='store_true'
     )
-    parser.add_argument(
+    base_parser.add_argument(
         '--single-html',
         help='Path where single, self-contained HTML should be built',
         type=Path
@@ -50,7 +52,9 @@ if __name__ == '__main__':
     )
     static_app_args = subparsers.add_parser(
         'static-html',
-        help='Builds a static HTML page'
+        help='Builds a static HTML page',
+        parents=[base_parser],
+        add_help=False
     )
     static_app_args.add_argument(
         'specification',
@@ -78,6 +82,8 @@ if __name__ == '__main__':
     server_app_args = subparsers.add_parser(
         'server-app',
         help='Builds frontend for a server-based application',
+        parents=[base_parser],
+        add_help=False
     )
 
     args = parser.parse_args()
