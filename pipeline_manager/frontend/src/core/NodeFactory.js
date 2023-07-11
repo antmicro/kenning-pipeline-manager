@@ -99,7 +99,7 @@ function parseProperties(properties) {
     return tempInputs;
 }
 
-function createInterface(io, name = undefined) {
+function createInterface(io, hidden = true, name = undefined) {
     return () => {
         const intf = new NodeInterface(name ?? io.name);
         intf.type = typeof io.type === 'string' || io.type instanceof String ? [io.type] : io.type;
@@ -107,30 +107,57 @@ function createInterface(io, name = undefined) {
         intf.maxConnectionsCount = io.maxConnectionsCount;
         intf.direction = io.direction;
         intf.side = io.side ?? (io.direction === 'output' ? 'right' : 'left');
+        intf.hidden = hidden;
         return intf;
     };
 }
 
 /* eslint-disable no-lonely-if */
-function parseIntefaces(interfaces) {
+function parseIntefaces(interfaces, interfaceGroups) {
     const tempIO = {
         input: {},
         inout: {},
         output: {},
     };
 
-    // TODO storing inouts currently in the same list as inputs (since they are already
-    // handling other things than inputs, such as paramters)
+    const interfacesFromGroups = new Set();
+
+    interfaceGroups.forEach((ig) => {
+        tempIO[ig.direction][ig.name] = createInterface(ig, true);
+
+        ig.interfaces.forEach((intf) => {
+            if (intf.array !== undefined) {
+                const [left, right] = intf.array;
+
+                for (let j = left; j < right; j += 1) {
+                    const newName = `${intf.name}[${j}]`;
+                    interfacesFromGroups.add(`${intf.direction}_${newName}`);
+                }
+            } else {
+                interfacesFromGroups.add(`${intf.direction}_${intf.name}`);
+            }
+        });
+    });
+
+    // storing inouts currently in the same list as inputs (since they are already
+    // handling other things than inputs, such as parameters)
     interfaces.forEach((io) => {
         if (io.array !== undefined) {
             const [left, right] = io.array;
 
             for (let j = left; j < right; j += 1) {
                 const newName = `${io.name}[${j}]`;
-                tempIO[io.direction][newName] = createInterface(io, newName);
+                if (!interfacesFromGroups.has(`${io.direction}_${newName}`)) {
+                    tempIO[io.direction][newName] = createInterface(io, false, newName);
+                }
             }
         } else {
-            tempIO[io.direction][io.name] = createInterface(io);
+            if (!interfacesFromGroups.has(`${io.direction}_${io.name}`)) {
+                tempIO[io.direction][io.name] = createInterface(
+                    io,
+                    interfacesFromGroups.has(`${io.direction}_${io.name}`),
+                );
+            }
         }
     });
 
@@ -160,6 +187,8 @@ function parseIntefaces(interfaces) {
 
 function parseNodeState(state) {
     const newState = { ...state };
+
+    delete newState.enabledInterfaceGroups;
     if (newState.inputs === undefined) {
         newState.inputs = {};
     }
@@ -237,14 +266,25 @@ function detectDiscrepancies(parsedState, inputs, outputs) {
  * @param {boolean} twoColumn type of layout of the nodes
  * @returns Node based class
  */
-export function NodeFactory(name, displayName, nodeType, interfaces, properties, twoColumn) {
+export function NodeFactory(
+    name,
+    displayName,
+    nodeType,
+    interfaces,
+    properties,
+    interfaceGroups,
+    twoColumn,
+) {
     const node = defineNode({
         type: name,
 
         title: displayName,
 
-        inputs: { ...parseIntefaces(interfaces).inputs, ...parseProperties(properties) },
-        outputs: parseIntefaces(interfaces).outputs,
+        inputs: {
+            ...parseIntefaces(interfaces, interfaceGroups).inputs,
+            ...parseProperties(properties),
+        },
+        outputs: parseIntefaces(interfaces, interfaceGroups).outputs,
 
         /* eslint-disable no-param-reassign */
         onCreate() {
@@ -262,12 +302,19 @@ export function NodeFactory(name, displayName, nodeType, interfaces, properties,
                     const [ioName, ioState] = io;
 
                     if (ioState.port) {
-                        newInterfaces.push({
-                            name: ioName.slice(ioState.direction.length + 1),
-                            id: ioState.id,
-                            direction: ioState.direction,
-                            side: ioState.side,
-                        });
+                        // Only interface that are have any connections are stored
+                        if (
+                            ioState.connectionCount > 0 ||
+                            this.graph.inputs.find((inp) => inp.nodeInterfaceId === ioState.id) ||
+                            this.graph.outputs.find((inp) => inp.nodeInterfaceId === ioState.id)
+                        ) {
+                            newInterfaces.push({
+                                name: ioName.slice(ioState.direction.length + 1),
+                                id: ioState.id,
+                                direction: ioState.direction,
+                                side: ioState.side,
+                            });
+                        }
                     } else {
                         newProperties.push({
                             name: ioName.slice('property'.length + 1),
@@ -289,14 +336,25 @@ export function NodeFactory(name, displayName, nodeType, interfaces, properties,
             };
 
             this.load = (state) => {
-                const parsedState = parseNodeState(state);
+                if (state.enabledInterfaceGroups !== undefined) {
+                    state.enabledInterfaceGroups.forEach((groupName) => {
+                        this.inputs[`${groupName.direction}_${groupName.name}`].hidden = false;
+                    });
+                }
 
+                const parsedState = parseNodeState(state);
                 const errors = detectDiscrepancies(parsedState, this.inputs, this.outputs);
                 if (Array.isArray(errors) && errors.length) {
                     return errors;
                 }
 
                 this.parentLoad(parsedState);
+
+                // As we do not save to dataflow information about interfaces
+                // that have no connections they have to be initialized manually
+                Object.entries({ ...this.inputs, ...this.outputs }).forEach(([, intf]) => {
+                    intf.nodeId = this.id;
+                });
 
                 // Assinging sides to interfaces if any are defined
                 Object.entries({ ...parsedState.inputs, ...parsedState.outputs }).forEach(

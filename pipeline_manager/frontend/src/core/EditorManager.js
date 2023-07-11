@@ -160,7 +160,8 @@ export default class EditorManager {
                 node.type,
                 node.interfaces,
                 node.properties,
-                this.baklavaView.twoColumn,
+                node.interfaceGroups ?? [],
+                metadata?.twoColumn ?? false,
             );
 
             this.editor.registerNodeType(myNode, { title: node.name, category: node.category });
