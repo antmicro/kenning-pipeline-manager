@@ -3,6 +3,14 @@
 Formats of dataflows and specification is often updated with new features, that makes former formats incompatible with the new ones.
 This section lists all versions, related features and breaking changes.
 
+## 20230619.4
+
+Commit SHA - `bdc4b2fb998ed9d6318a676d4ac77f92c1603d39`
+
+* Introduced `interfaceGroups` and `enabledInterfaceGroups` keywords that allow defining groups of interfaces.
+* Introfuced arrays of interfaces that can be easily created using `array` keyword.
+* Simplified dataflows as interfaces that have no connections are no longer saved into output `.json` files.
+
 ## 20230619.3
 
 Commit SHA - `84559ae8327d7aa214c388200c5b48d112021679`
