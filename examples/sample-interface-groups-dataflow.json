@@ -1,0 +1,26 @@
+{
+    "graph": {
+        "id": "68957efd-6ced-4756-86d4-e4bca26ea536",
+        "nodes": [
+            {
+                "type": "TestNode",
+                "id": "71c76e27-f8f0-4acb-8dde-0abd8346f5e4",
+                "position": {
+                    "x": 750,
+                    "y": 0
+                },
+                "width": 200,
+                "twoColumn": false,
+                "interfaces": [],
+                "properties": [],
+                "enabledInterfaceGroups": [
+                    {"name": "1", "direction": "input"}
+                ],
+                "name": "TestNode"
+            }
+        ],
+        "connections": []
+    },
+    "graphTemplateInstances": [],
+    "version": "20230619.3"
+}

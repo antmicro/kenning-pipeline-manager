@@ -1,0 +1,39 @@
+{
+    "version": "20230619.3",
+    "nodes": [
+        {
+            "name": "TestNode",
+            "type": "TestNode",
+            "category": "TestCategory",
+            "properties": [],
+            "interfaces": [
+                {"name": "1", "type": "test", "direction": "output", "array": [0, 16]},
+                {"name": "1", "type": "test", "direction": "output", "array": [32, 48]},
+                {"name": "2", "type": "test", "direction": "input"}
+            ],
+            "interfaceGroups": [
+                {
+                    "name": "1",
+                    "type": "test",
+                    "direction": "input",
+                    "interfaces": [
+                        {"name": "1[1]", "direction": "output"},
+                        {"name": "1", "array": [3, 15], "direction": "output"},
+                        {"name": "1", "array": [35, 48], "direction": "output"}
+                    ]
+                },
+                {
+                    "name": "2",
+                    "type": "test",
+                    "direction": "output",
+                    "interfaces": [
+                        {"name": "2", "direction": "input"},
+                        {"name": "1[10]", "direction": "output"},
+                        {"name": "1[15]", "direction": "output"}
+                    ]
+                }
+            ]
+        }
+    ]
+}
+
