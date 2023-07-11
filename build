@@ -31,6 +31,17 @@ if __name__ == '__main__':
         '--output-directory',
         help='Directory where the built frontend should be stored'
     )
+    parser.add_argument(
+        '--clean-build',
+        help='If --output-directory is defined, '
+             'it is cleared before putting built frontend application',
+        action='store_true'
+    )
+    parser.add_argument(
+        '--single-html',
+        help='Path where single, self-contained HTML should be built',
+        type=Path
+    )
     subparsers = parser.add_subparsers(
         title='build_type',
         help='Build type of the frontend application',
@@ -58,10 +69,10 @@ if __name__ == '__main__':
         choices=['development', 'production'],
         default='production'
     )
-    parser.add_argument(
-        '--clean-build',
-        help='If --output-directory is defined, '
-             'it is cleared before putting built frontend application',
+    static_app_args.add_argument(
+        '--minify-specification',
+        help='Creates a minimal specification for a given dataflow'
+             ' (using only types used in the dataflow)',
         action='store_true'
     )
     server_app_args = subparsers.add_parser(
