@@ -227,13 +227,14 @@ function parseNodeState(state) {
     }
 
     if (newState.enabledInterfaceGroups !== undefined) {
-        const newEnabledInterfaceGroups = {};
+        const interfaceGroups = {};
         newState.enabledInterfaceGroups.forEach((intf) => {
-            newEnabledInterfaceGroups[`${intf.direction}_${intf.name}`] = { ...intf };
+            interfaceGroups[`${intf.direction}_${intf.name}`] = { ...intf };
         });
-        newState.enabledInterfaceGroups = newEnabledInterfaceGroups;
+        newState.interfaceGroups = interfaceGroups;
+        delete newState.enabledInterfaceGroups;
     } else {
-        newState.enabledInterfaceGroups = {};
+        newState.interfaceGroups = {};
     }
 
     if ('name' in newState) {
@@ -277,7 +278,7 @@ function detectDiscrepancies(parsedState, inputs, outputs) {
     });
 
     // Checking for existance of interface groups
-    Object.keys(parsedState.enabledInterfaceGroups).forEach((groupName) => {
+    Object.keys(parsedState.interfaceGroups).forEach((groupName) => {
         if (
             !Object.prototype.hasOwnProperty.call(inputs, groupName) &&
             !Object.prototype.hasOwnProperty.call(outputs, groupName)
@@ -292,9 +293,13 @@ function detectDiscrepancies(parsedState, inputs, outputs) {
         }
     });
 
+    if (Array.isArray(errors) && errors.length) {
+        return errors;
+    }
+
     // Checking for integrity of interface groups
     const usedInterfaces = new Set();
-    Object.entries(parsedState.enabledInterfaceGroups).forEach(([groupName, group]) => {
+    Object.keys(parsedState.interfaceGroups).forEach((groupName) => {
         const interfaces = inputs[groupName]?.interfaces ?? outputs[groupName]?.interfaces;
         const direction = groupName.slice(0, groupName.indexOf('_'));
         const name = groupName.slice(groupName.indexOf('_') + 1);
@@ -421,11 +426,13 @@ export function NodeFactory(
                     return errors;
                 }
 
-                if (state.enabledInterfaceGroups !== undefined) {
-                    state.enabledInterfaceGroups.forEach((groupName) => {
-                        this.inputs[`${groupName.direction}_${groupName.name}`].hidden = false;
-                    });
-                }
+                Object.entries(parsedState.interfaceGroups).forEach(([groupName, groupState]) => {
+                    if (groupState.direction === 'input' || groupState.direction === 'inout') {
+                        this.inputs[groupName].hidden = false;
+                    } else if (groupState.direction === 'output') {
+                        this.outputs[groupName].hidden = false;
+                    }
+                });
 
                 this.parentLoad(parsedState);
 
@@ -436,17 +443,19 @@ export function NodeFactory(
                 });
 
                 // Assinging sides to interfaces if any are defined
-                Object.entries({ ...parsedState.inputs, ...parsedState.outputs }).forEach(
-                    ([ioName, ioState]) => {
-                        if (ioState.direction !== undefined && ioState.side !== undefined) {
-                            if (ioState.direction === 'input' || ioState.direction === 'inout') {
-                                this.inputs[ioName].side = ioState.side;
-                            } else if (ioState.direction === 'output') {
-                                this.outputs[ioName].side = ioState.side;
-                            }
+                Object.entries({
+                    ...parsedState.inputs,
+                    ...parsedState.outputs,
+                    ...parsedState.interfaceGroups,
+                }).forEach(([ioName, ioState]) => {
+                    if (ioState.direction !== undefined && ioState.side !== undefined) {
+                        if (ioState.direction === 'input' || ioState.direction === 'inout') {
+                            this.inputs[ioName].side = ioState.side;
+                        } else if (ioState.direction === 'output') {
+                            this.outputs[ioName].side = ioState.side;
                         }
-                    },
-                );
+                    }
+                });
 
                 // Default position should be undefined instead of (0, 0) so that it can be set
                 // by autolayout
