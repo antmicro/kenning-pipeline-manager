@@ -47,6 +47,8 @@ Each node has:
   If set to `true`, then input and output sockets are both rendered in the top part of the node and properties are displayed below.
 * `subgraph` - optional field defining the `id` of the subgraph that this node represents.
   It refers to one of the [Subgraphs](#subgraphs) entries from `graphTemplateInstances` with matching `id`.
+* `enabledInterfaceGroups` - optional array describing enabled interface groups.
+  Every element is of type [Enabled Interface Groups](#enabled-interface-groups)
 
 ##### Property
 
@@ -101,6 +103,18 @@ Two attributes are used:
 
 * `x` - x coordinate of the corner
 * `y` - y coordinate of the corner.
+
+#### Enabled Interface Groups
+
+Each enabled interface group is described by the following properties:
+
+* `name` - name of the interface group
+* `direction` - value determining the type of the interfaces.
+  Can be either `input`, `output` or `inout`.
+
+```{warning}
+Make sure that enabled interface groups use disjoint interfaces.
+```
 
 ## Example dataflow
 

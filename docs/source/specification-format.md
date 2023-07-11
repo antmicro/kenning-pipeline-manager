@@ -139,6 +139,7 @@ Every input object requires six properties:
 * `interfaces` - array representing inputs, outputs and bidirectional ports for node.
   The entries are of type [Interface](#interface).
 * `properties` - array with elements of type [Property](#property),
+* `interfaceGroups` - array with elements of type [Interface Groups](#interface-groups),
 * `urls` - a dictionary of [URL class](#url-class) and URL suffixes pairs.
   The key should be a URL class key from `urls` in `metadata`.
   The value of the entry is appended to the URL base from the URL class.
@@ -212,6 +213,9 @@ Every interface object has following properties:
   Value can be either `left` or `right`.
   Interfaces with `direction` set to `input` or `inout` are by default rendered on the left side of the node.
   Interfaces with `direction` set to `output` are by default rendered on the right side of the node.
+* `array` (optional) - special keyword to easily define a range of interfaces.
+  Value has to be a list with two integer values that specify the range of interfaces.
+  For example for an `example` interface with `array: [0, 2]` two interfaces called `example[0]` and `example[1]` are created.
 
 ```{note}
 Only interfaces of the same `type` can be connected together.
@@ -323,6 +327,30 @@ Below is a sample specification with used inheritance mechanism:
 ```{warning}
 Node types can not be repeated (explicitly in list or implicitly through inheritance) in the `extends` list.
 ```
+
+### Interface Groups
+
+Object similar to a single interface but reserves a range of interfaces.
+`name`, `type`, `direction`, `maxConnectionsCount` and `side` are the same as in a regular [Interface](#interface).
+The only difference is that a range of interfaces has to be defined which describes constraints of an interface.
+For example two interface groups can be defined that have consist of common interfaces and thus cannot coexist.
+
+```json
+"interfaceGroups": [
+  {
+    "name": "1",
+    "type": "test",
+    "direction": "input",
+    "interfaces": [
+      {"name": "1[1]", "direction": "output"},
+      {"name": "1", "array": [3, 15], "direction": "output"},
+      {"name": "1", "array": [35, 48], "direction": "output"}
+    ]
+  }
+]
+```
+
+The interface group called `1` consists of three ranges of interfaces: `1[1]`, interfaces `1[3], 1[4], ..., 1[14]` and `1[35], 1[36], ..., 1[47]`.
 
 ### Subgraphs
 
