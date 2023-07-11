@@ -49,8 +49,8 @@ const setDefaultNames = (category) => {
     const [categoryName, categoryNode] = category;
     categoryNode.hitSubstring = categoryName;
     if (categoryNode.nodes.nodeTypes !== undefined) {
-        Object.entries(categoryNode.nodes.nodeTypes).forEach(([nodeName, nodeType]) => {
-            nodeType.hitSubstring = nodeName;
+        Object.entries(categoryNode.nodes.nodeTypes).forEach(([, nodeType]) => {
+            nodeType.hitSubstring = nodeType.title;
         });
     }
 
