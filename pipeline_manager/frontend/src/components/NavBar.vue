@@ -274,7 +274,7 @@ export default {
                     process.env.VUE_APP_VERBOSE !== undefined &&
                     process.env.VUE_APP_VERBOSE === 'true'
                 ) {
-                    specText = require(`!!raw-loader!${process.env.VUE_APP_SPECIFICATION_PATH}`); // eslint-disable-line global-require,import/no-dynamic-require
+                    specText = require(`!!raw-loader!${process.env.VUE_APP_SPECIFICATION_PATH}`).default; // eslint-disable-line global-require,import/no-dynamic-require
                 } else {
                     specText = require(process.env.VUE_APP_SPECIFICATION_PATH); // eslint-disable-line global-require,import/no-dynamic-require,max-len
                 }
