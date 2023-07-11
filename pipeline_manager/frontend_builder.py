@@ -8,7 +8,6 @@ from pathlib import Path
 import subprocess
 import shutil
 from typing import Optional
-from bs4 import BeautifulSoup
 import errno
 from pipeline_manager.specification_reader import minify_specification as minify_spec  # noqa: E501
 
@@ -24,6 +23,7 @@ def build_singlehtml(dist_path: Path, single_html_path: Path):
     single_html_path: Path
         Path to the output standalone HTML file
     """
+    from bs4 import BeautifulSoup
     with open(dist_path / "index.html", "r") as indexfile:
         soup = BeautifulSoup(indexfile.read(), features="html.parser")
     scripts = soup.findAll("script")
