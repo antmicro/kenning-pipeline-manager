@@ -10,4 +10,5 @@ pyrsistent==0.18.1
 referencing==0.29.0
 six==1.16.0
 Werkzeug==2.2.2
+beautifulsoup4==4.12.2
 git+https://github.com/antmicro/kenning-pipeline-manager-backend-communication.git
