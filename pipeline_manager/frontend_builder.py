@@ -134,6 +134,8 @@ def build_frontend(
         config_lines.append('VUE_APP_SINGLEHTML_BUILD=true\n')
 
     config_lines.append(f'NODE_ENV="{mode}"\n')
+    if mode == 'development':
+        config_lines.append('VUE_APP_VERBOSE=true\n')
 
     if config_lines:
         with open(config_path, 'w') as config:
