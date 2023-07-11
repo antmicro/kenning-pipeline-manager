@@ -24,6 +24,10 @@
                         "description": "Optional field defining a node name rendered to the user",
                         "type": "string"
                     },
+                    "title": {
+                        "description": "Optional field defining an instance name rendered to the user",
+                        "type": "string"
+                    },
                     "properties": {
                         "description": "List describing the node parameterized values",
                         "type": "array",
@@ -104,10 +108,18 @@
                         }
                     },
                     "enabledInterfaceGroups": {
-                        "descirpion": "List of names of chosen interface groups",
+                        "description": "List of names of chosen interface groups",
                         "type": "array",
                         "items": {
-                            "type": "string"
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "type": "string"
+                                },
+                                "direction": {
+                                    "enum": ["input", "output", "inout"]
+                                }
+                            }
                         }
                     },
                     "width": {
@@ -121,13 +133,28 @@
                     "subgraph": {
                         "description": "Optional field defining the id of the subgraph that this node represents",
                         "type": "string"
+                    },
+                    "position": {
+                        "description": "Position of a node in an editor",
+                        "type": "object",
+                        "properties": {
+                            "x": {
+                                "description": "X coordinate of node position",
+                                "type": "number"
+                            },
+                            "y": {
+                                "description": "Y coordinate of node position",
+                                "type": "number"
+                            }
+                        }
                     }
                 },
                 "required": [
                     "type",
                     "id",
                     "interfaces"
-                ]
+                ],
+                "additionalProperties": false
             }
         },
         "connections": {
