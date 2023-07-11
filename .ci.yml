@@ -20,6 +20,7 @@ eslint:
         - cd pipeline_manager/frontend
         - npm install
         - npm run lint
+        - test $(git status --porcelain | wc -l) -eq 0 || { git diff; false; }
 
 build-server-app:
     stage: build
