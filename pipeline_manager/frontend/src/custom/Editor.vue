@@ -35,7 +35,7 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
             <background />
         </slot>
 
-        <slot name="palette" v-if="!readonly">
+        <slot name="palette" v-if="!(readonly || hideHud)">
             <NodePalette />
         </slot>
 
@@ -119,6 +119,7 @@ export default defineComponent({
         const highlightInterfaces = ref([]);
 
         const readonly = computed(() => props.viewModel.editor.readonly);
+        const hideHud = computed(() => props.viewModel.hideHud);
 
         const unselectAllNodes = () => {
             /* eslint-disable vue/no-mutating-props,no-param-reassign */
@@ -291,6 +292,7 @@ export default defineComponent({
             connRefs,
             clearHighlight,
             readonly,
+            hideHud,
             scale,
             visibleConnections,
             visibleNodes,
