@@ -27,7 +27,7 @@ export default class BaklavaInterfaceTypes {
 
                 if (firstType !== undefined) {
                     const color = this.types[firstType].interfaceColor;
-                    const arrow = el.querySelector('.__port:not(.greyout_arrow)'); // eslint-disable-line no-param-reassign
+                    const arrow = el.querySelector('.__port:not(.greyedout_arrow)'); // eslint-disable-line no-param-reassign
                     if (arrow !== null) arrow.style.backgroundColor = color;
                     else {
                         const greyArrow = el.querySelector('.__port');
