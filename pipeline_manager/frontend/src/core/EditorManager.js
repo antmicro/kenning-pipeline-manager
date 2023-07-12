@@ -82,12 +82,11 @@ export default class EditorManager {
      * and its plugins are reinitialized and then the specification is loaded.
      *
      * @param dataflowSpecification Specification to load, can be either an object or a string
-     * @param overriding tells whether the specification is updated on dataflow loading
      * @param resolve determines whether resolving of inheritance is needed
      * @returns An array of errors. If the array is empty, the updating process was successful.
      */
     /* eslint-disable no-underscore-dangle,no-param-reassign */
-    updateEditorSpecification(dataflowSpecification, overriding = false, resolve = true) {
+    updateEditorSpecification(dataflowSpecification, resolve = true) {
         if (!dataflowSpecification) return ['No specification passed'];
 
         if (typeof dataflowSpecification === 'string' || dataflowSpecification instanceof String) {
@@ -103,8 +102,8 @@ export default class EditorManager {
             this.editor.unregisterNodes();
         }
 
-        const { subgraphs, nodes, metadata, version } = dataflowSpecification; // eslint-disable-line object-curly-newline,max-len
-        if (overriding || !this.currentSpecification) {
+        const { metadata, version } = dataflowSpecification; // eslint-disable-line object-curly-newline,max-len
+        if (!this.currentSpecification) {
             if (version === undefined) {
                 NotificationHandler.terminalLog(
                     'warning',
@@ -120,16 +119,13 @@ export default class EditorManager {
             }
         }
 
-        if (!overriding) {
-            this.currentSpecification = JSON.parse(JSON.stringify(dataflowSpecification));
-        }
+        this.currentSpecification = dataflowSpecification;
+        this.updateMetadata(metadata);
 
-        const errors = this.updateGraphSpecification(subgraphs, nodes, metadata, resolve);
+        const errors = this.updateGraphSpecification(dataflowSpecification, resolve);
         if (Array.isArray(errors) && errors.length) {
             return errors;
         }
-
-        this.updateMetadata(metadata);
 
         this.specificationLoaded = true;
         return [];
@@ -138,7 +134,9 @@ export default class EditorManager {
     /**
      * Reads and validates part of specification related to nodes and subgraphs
      */
-    updateGraphSpecification(subgraphs, nodes, metadata, resolve) {
+    updateGraphSpecification(dataflowSpecification, resolve) {
+        const { subgraphs, nodes, metadata } = dataflowSpecification; // eslint-disable-line object-curly-newline,max-len
+
         let resolvedNodes = [];
 
         if (resolve) {
@@ -170,7 +168,7 @@ export default class EditorManager {
                 node.type,
                 node.interfaces,
                 node.properties,
-                metadata?.twoColumn ?? false,
+                this.baklavaView.twoColumn,
             );
 
             this.editor.registerNodeType(myNode, { title: node.name, category: node.category });
@@ -207,8 +205,29 @@ export default class EditorManager {
      * Reads and validates metadatada from specification and loads it into the editor
      *
      * @param metadata metdata to load
+     * @param overriding tells whether the metadata is updated on dataflow loading
+     *
      */
-    updateMetadata(metadata) {
+    updateMetadata(metadata, overriding = false) {
+        if (overriding) {
+            const updatedMetadata = JSON.parse(JSON.stringify(this.currentSpecification.metadata));
+
+            Object.entries(metadata).forEach(([key, value]) => {
+                if (Array.isArray(value)) {
+                    updatedMetadata[key] = [...updatedMetadata[key], ...value];
+                } else if (typeof value === 'object') {
+                    updatedMetadata[key] = {
+                        ...updatedMetadata[key],
+                        ...value,
+                    };
+                } else {
+                    updatedMetadata[key] = value;
+                }
+            });
+
+            metadata = updatedMetadata;
+        }
+
         this.baklavaView.interfaceTypes.readInterfaceTypes(metadata);
 
         if (metadata && 'urls' in metadata) {
@@ -233,6 +252,7 @@ export default class EditorManager {
 
         this.editor.allowLoopbacks =
             metadata?.allowLoopbacks ?? this.defaultMetadata.allowLoopbacks;
+        this.baklavaView.twoColumn = metadata?.twoColumn ?? this.defaultMetadata.twoColumn;
         this.baklavaView.connectionRenderer.style =
             metadata?.connectionStyle ?? this.defaultMetadata.connectionStyle;
 
@@ -395,7 +415,6 @@ export default class EditorManager {
             return validationErrors;
         }
 
-        this.editor.view = this.baklavaView;
         try {
             const specificationVersion = dataflow.version;
             if (specificationVersion === undefined) {
@@ -417,30 +436,10 @@ export default class EditorManager {
                 if (Array.isArray(errors) && errors.length) {
                     return errors;
                 }
-                const updatedspecification = JSON.parse(JSON.stringify(this.currentSpecification));
-                if ('metadata' in updatedspecification) {
-                    Object.entries(dataflow.metadata).forEach(([key, value]) => {
-                        if (Array.isArray(value)) {
-                            updatedspecification.metadata[key] = [
-                                ...updatedspecification.metadata[key],
-                                ...value,
-                            ];
-                        } else if (typeof value === 'object') {
-                            updatedspecification.metadata[key] = {
-                                ...updatedspecification.metadata[key],
-                                ...value,
-                            };
-                        } else {
-                            updatedspecification.metadata[key] = value;
-                        }
-                    });
-                } else {
-                    updatedspecification.metadata = dataflow.metadata;
-                }
 
-                this.updateEditorSpecification(updatedspecification, true, true);
+                this.updateMetadata(dataflow.metadata, true);
             } else {
-                this.updateEditorSpecification(this.currentSpecification, false, true);
+                this.updateMetadata(this.currentSpecification.metadata);
             }
             return this.editor.load(dataflow);
         } catch (err) {
