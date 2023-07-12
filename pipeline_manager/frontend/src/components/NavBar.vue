@@ -10,7 +10,7 @@ Displays user interface and main details about the Pipeline Manager status.
 -->
 
 <script>
-import { toPng } from 'html-to-image';
+import { toPng, toSvg } from 'html-to-image';
 import jsonlint from 'jsonlint';
 import Logo from '../icons/Logo.vue';
 import Arrow from '../icons/Arrow.vue';
@@ -269,6 +269,31 @@ export default {
                     NotificationHandler.showToast('error', `Export to PNG failed: ${error}`);
                 });
         },
+
+        exportToSvg() {
+            // Get editor with data flow
+            const nodeEditor = document.querySelector('.inner-editor');
+            // Exclude node palette
+            const filter = (node) => !node.classList?.contains('baklava-node-palette');
+
+            toSvg(nodeEditor, { filter })
+                .then((dataUrl) => {
+                    const downloadLink = document.createElement('a');
+                    downloadLink.download = 'dataflow.svg';
+                    downloadLink.href = dataUrl;
+                    downloadLink.dataset.downloadurl = [
+                        dataUrl,
+                        downloadLink.download,
+                        downloadLink.href,
+                    ].join(':');
+                    document.body.appendChild(downloadLink);
+                    downloadLink.click();
+                    document.body.removeChild(downloadLink);
+                })
+                .catch((error) => {
+                    NotificationHandler.showToast('error', `Export to SVG failed: ${error}`);
+                });
+        },
     },
     async mounted() {
         // Create connection on page load
@@ -309,6 +334,11 @@ export default {
                             type="'button'"
                             text="Export graph to PNG"
                             :eventFunction="exportToPng"
+                        />
+                        <DropdownItem
+                            type="'button'"
+                            text="Export graph to SVG"
+                            :eventFunction="exportToSvg"
                         />
                         <div v-if="this.externalApplicationManager.externalApplicationConnected">
                             <hr />
