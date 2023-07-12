@@ -19,24 +19,7 @@ export default class BaklavaInterfaceTypes {
      * Initialize Interface types instance used to manager styles of interfaces and connections
      * and validate adding connections.
      */
-    constructor(viewPlugin, editor) {
-        editor.graphEvents.checkConnection.subscribe(this, ({ from, to }, prevent) => {
-            if (!from.type || !to.type) {
-                return;
-            }
-
-            const fromTypes = this.normalizeType(from.type);
-            const toTypes = this.normalizeType(to.type);
-
-            const commonTypes = fromTypes.filter((t) => toTypes.includes(t));
-
-            if (Array.isArray(commonTypes) && commonTypes.length) {
-                return;
-            }
-
-            return prevent(); // eslint-disable-line consistent-return
-        });
-
+    constructor(viewPlugin) {
         viewPlugin.hooks.renderInterface.subscribe(this, ({ intf, el }) => {
             if (intf.type) {
                 const types = this.normalizeType(intf.type);

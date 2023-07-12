@@ -75,6 +75,21 @@ export default function createPipelineManagerGraph(graph) {
             return { connectionAllowed: false };
         }
 
+        if (from.type && to.type) {
+            const fromTypes =
+                typeof from.type === 'string' || from.type instanceof String
+                    ? [from.type]
+                    : from.type;
+            const toTypes =
+                typeof to.type === 'string' || to.type instanceof String ? [to.type] : to.type;
+
+            const commonTypes = fromTypes.filter((t) => toTypes.includes(t));
+
+            if (!(Array.isArray(commonTypes) && commonTypes.length)) {
+                return { connectionAllowed: false };
+            }
+        }
+
         if (this.events.checkConnection.emit({ from, to }).prevented) {
             return { connectionAllowed: false };
         }
