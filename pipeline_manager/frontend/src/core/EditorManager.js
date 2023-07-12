@@ -402,7 +402,7 @@ export default class EditorManager {
      * @returns An array of errors that occurred during the dataflow loading.
      * If the array is empty, the loading was successful.
      */
-    async loadDataflow(dataflow) {
+    loadDataflow(dataflow) {
         const validationErrors = this.validateDataflow(dataflow);
         if (Array.isArray(validationErrors) && validationErrors.length) {
             return validationErrors;
