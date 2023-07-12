@@ -8,7 +8,7 @@
  * Implements custom version of baklava's Graph object
  */
 
-import { GraphTemplate, DummyConnection } from 'baklavajs';
+import { GraphTemplate, DummyConnection, Connection } from 'baklavajs';
 import { v4 as uuidv4 } from 'uuid';
 import {
     SUBGRAPH_INPUT_NODE_TYPE,
@@ -21,14 +21,14 @@ import {
 export default function createPipelineManagerGraph(graph) {
     graph.checkConnection = function checkConnection(from, to) {
         if (!from || !to) {
-            return { connectionAllowed: false };
+            return { connectionAllowed: false, error: 'Invalid from and to references.' };
         }
 
         const fromNode = this.findNodeById(from.nodeId);
         const toNode = this.findNodeById(to.nodeId);
+
         if (fromNode && toNode && fromNode === toNode && !this.editor.allowLoopbacks) {
-            // connections must be between two separate nodes.
-            return { connectionAllowed: false };
+            return { connectionAllowed: false, error: 'Loopbacks are not allowed.' };
         }
 
         // reverse connection so that 'from' is input and 'to' is output
@@ -43,36 +43,45 @@ export default function createPipelineManagerGraph(graph) {
         }
 
         if (from.isInput && from.direction !== 'inout') {
-            // connections are only allowed from input to output or inout interface
-            return { connectionAllowed: false };
+            return {
+                connectionAllowed: false,
+                error: 'Connections are only allowed from output or inout interfaces.',
+            };
         }
 
         if (!to.isInput) {
-            // we can connect only to input
-            return { connectionAllowed: false };
+            return {
+                connectionAllowed: false,
+                error: 'Connections are only allowed to input or inout interfaces.',
+            };
         }
 
-        // prevent duplicate connections
         if (this.connections.some((c) => c.from === from && c.to === to)) {
-            return { connectionAllowed: false };
+            return { connectionAllowed: false, error: 'Duplicate connections are not allowed.' };
         }
 
-        // the default behavior for outputs is to provide any number of
-        // output connections
         if (from.maxConnectionsCount > 0 && from.connectionCount + 1 > from.maxConnectionsCount) {
-            return { connectionAllowed: false };
+            return {
+                connectionAllowed: false,
+                error: `Too many connections from an input interface (${from.id}), maximum of ${from.maxConnectionsCount} are allowed.`,
+            };
         }
 
-        // the default behavior for inputs is to allow only one connection
         if (
             (to.maxConnectionsCount === 0 || to.maxConnectionsCount === undefined) &&
             to.connectionCount > 0
         ) {
-            return { connectionAllowed: false };
+            return {
+                connectionAllowed: false,
+                error: `By default only one connection to an input interface (${to.id}) allowed.`,
+            };
         }
 
         if (to.maxConnectionsCount > 0 && to.connectionCount + 1 > to.maxConnectionsCount) {
-            return { connectionAllowed: false };
+            return {
+                connectionAllowed: false,
+                error: `Too many connections to an output interface (${to.id}), maximum of ${to.maxConnectionsCount} are allowed.`,
+            };
         }
 
         if (from.type && to.type) {
@@ -83,20 +92,29 @@ export default function createPipelineManagerGraph(graph) {
             const toTypes =
                 typeof to.type === 'string' || to.type instanceof String ? [to.type] : to.type;
 
-            const commonTypes = fromTypes.filter((t) => toTypes.includes(t));
+            const commonType = fromTypes.find((t) => toTypes.includes(t));
 
-            if (!(Array.isArray(commonTypes) && commonTypes.length)) {
-                return { connectionAllowed: false };
+            if (commonType === undefined) {
+                return {
+                    connectionAllowed: false,
+                    error: `No common types between interfaces. Interface ${from.id} supports types ${fromTypes} and interface ${to.id} supports types ${toTypes}.`,
+                };
             }
         }
 
         if (this.events.checkConnection.emit({ from, to }).prevented) {
-            return { connectionAllowed: false };
+            return {
+                connectionAllowed: false,
+                error: `Connection between an input interface (${from.id}) and an output interface (${to.id}) was prevented`,
+            };
         }
 
         const hookResults = this.hooks.checkConnection.execute({ from, to });
         if (hookResults.some((hr) => !hr.connectionAllowed)) {
-            return { connectionAllowed: false };
+            return {
+                connectionAllowed: false,
+                errors: `Connection between an input interface (${from.id}) and an output interface (${to.id}) was prevented`,
+            };
         }
 
         // List of connections that are removed once the dummyConnection is created
@@ -250,9 +268,29 @@ export default function createPipelineManagerGraph(graph) {
                     `Connection of id: ${c.id} invalid. Could not find interface with id ${c.to}`,
                 );
             } else {
-                const createdConnection = this.addConnection(fromIf, toIf);
-                if (createdConnection === undefined) {
-                    errors.push(`Could not create connection of id: ${c.id}`);
+                // Manually adding connections instead of using `addConnection` from baklavajs
+                // as we want to get a feedback message from `checkConnection` function
+                // which is suppressed in baklavajs functionality
+                const checkConnectionResult = this.checkConnection(fromIf, toIf);
+                if (!checkConnectionResult.connectionAllowed) {
+                    errors.push(
+                        `Could not create connection of id: ${c.id}. ${checkConnectionResult.error}`,
+                    );
+                } else {
+                    checkConnectionResult.connectionsInDanger.forEach((connectionToRemove) => {
+                        const instance = this.connections.find(
+                            (conn) => conn.id === connectionToRemove.id,
+                        );
+                        if (instance) {
+                            this.removeConnection(instance);
+                        }
+                    });
+
+                    const conn = new Connection(
+                        checkConnectionResult.dummyConnection.from,
+                        checkConnectionResult.dummyConnection.to,
+                    );
+                    this.internalAddConnection(conn);
                 }
             }
         });
