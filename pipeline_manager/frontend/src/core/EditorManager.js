@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+/* eslint-disable max-classes-per-file */
 import { stringify } from 'ajv';
 import Ajv2019 from 'ajv/dist/2019';
 import jsonMap from 'json-source-map';
@@ -51,6 +52,7 @@ export default class EditorManager {
     constructor() {
         this.baklavaView.connectionRenderer = new ConnectionRenderer(this.baklavaView);
         this.baklavaView.interfaceTypes = new InterfaceTypes(this.baklavaView, this.editor);
+        this.baklavaView.metadata = new Metadata();
 
         // need to be set here as settings try to use this value
         // before this value can be loaded from specification
@@ -110,6 +112,21 @@ export default class EditorManager {
             this.currentSpecification = JSON.parse(JSON.stringify(dataflowSpecification));
         }
 
+        const errors = this.updateGraphSpecification(subgraphs, nodes, metadata, resolve);
+        if (Array.isArray(errors) && errors.length) {
+            return errors;
+        }
+
+        this.updateMetadata(metadata);
+
+        this.specificationLoaded = true;
+        return [];
+    }
+
+    /**
+     * Reads and validates part of specification related to nodes and subgraphs
+     */
+    updateGraphSpecification(subgraphs, nodes, metadata, resolve) {
         let resolvedNodes = [];
 
         if (resolve) {
@@ -128,14 +145,6 @@ export default class EditorManager {
         );
         if (Array.isArray(errors) && errors.length) {
             return errors;
-        }
-
-        this.baklavaView.interfaceTypes.readInterfaceTypes(metadata);
-
-        if (metadata && 'urls' in metadata) {
-            Object.entries(metadata.urls).forEach(([urlName, state]) => {
-                this.editor.baseURLs.set(urlName, state);
-            });
         }
 
         this.editor.registerNodeType(SubgraphInputNode, { category: 'Subgraphs' });
@@ -179,6 +188,22 @@ export default class EditorManager {
                 this.editor.addGraphTemplate(mySubgraph, subgraph.category, subgraph.type);
             });
         }
+        return [];
+    }
+
+    /**
+     * Reads and validates metadatada from specification and loads it into the editor
+     *
+     * @param metadata metdata to load
+     */
+    updateMetadata(metadata) {
+        this.baklavaView.interfaceTypes.readInterfaceTypes(metadata);
+
+        if (metadata && 'urls' in metadata) {
+            Object.entries(metadata.urls).forEach(([urlName, state]) => {
+                this.editor.baseURLs.set(urlName, state);
+            });
+        }
 
         this.editor.readonly = metadata?.readonly ?? false;
         this.editor.hideHud = metadata?.hideHud ?? false;
@@ -205,10 +230,7 @@ export default class EditorManager {
         this.baklavaView.ignorableLayers = metadata?.layers ?? [];
         this.baklavaView.collapseSidebar = metadata?.collapseSidebar ?? true;
 
-        this.specificationLoaded = true;
         this.baklavaView.connectionRenderer.randomizedOffset = metadata?.randomizedOffset ?? false;
-
-        return [];
     }
 
     /**
