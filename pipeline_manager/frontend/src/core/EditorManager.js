@@ -30,6 +30,9 @@ import {
 } from '../custom/subgraphInterface';
 
 /* eslint-disable lines-between-class-members */
+/**
+ * Readonly helper class that reads and stores default values from metadata schema.
+ */
 class Metadata {
     constructor() {
         Object.entries(metadataSchema.properties).forEach(([name, state]) => {
@@ -41,6 +44,8 @@ class Metadata {
 export default class EditorManager {
     static instance;
 
+    defaultMetadata = new Metadata();
+
     editor = new PipelineManagerEditor();
 
     baklavaView = useBaklava(this.editor);
@@ -50,15 +55,22 @@ export default class EditorManager {
     currentSpecification = undefined;
 
     constructor() {
-        this.baklavaView.connectionRenderer = new ConnectionRenderer(this.baklavaView);
+        this.baklavaView.connectionRenderer = new ConnectionRenderer(
+            this.baklavaView,
+            this.defaultMetadata.connectionStyle,
+            this.defaultMetadata.randomizedOffset,
+        );
+
+        this.editor.layoutManager.useAlgorithm(this.defaultMetadata.layout);
         this.baklavaView.interfaceTypes = new InterfaceTypes(this.baklavaView, this.editor);
-        this.baklavaView.metadata = new Metadata();
 
         // need to be set here as settings try to use this value
         // before this value can be loaded from specification
-        this.baklavaView.ignorableLayers = [];
-        this.baklavaView.collapseSidebar = true;
-        this.baklavaView.movementStep = 50;
+        this.baklavaView.layers = this.defaultMetadata.layers;
+        this.baklavaView.collapseSidebar = this.defaultMetadata.collapseSidebar;
+        this.baklavaView.movementStep = this.defaultMetadata.movementStep;
+        this.editor.allowLoopbacks = this.defaultMetadata.allowLoopbacks;
+
         this.specificationVersion = unresolvedSpecificationSchema.version;
     }
 
@@ -205,7 +217,7 @@ export default class EditorManager {
             });
         }
 
-        this.editor.readonly = metadata?.readonly ?? false;
+        this.editor.readonly = metadata?.readonly ?? this.defaultMetadata.readonly;
         this.baklavaView.hideHud ??= metadata?.hideHud;
 
         NotificationHandler.setShowOption(!this.baklavaView.hideHud);
@@ -215,22 +227,25 @@ export default class EditorManager {
                 'The specification is read-only. Only dataflow loading is allowed.',
             );
         }
-        this.editor.allowLoopbacks = metadata?.allowLoopbacks ?? false;
-        if (metadata?.connectionStyle) {
-            this.baklavaView.connectionRenderer.style = metadata.connectionStyle;
-        }
 
-        if (metadata?.layout) {
-            this.editor.layoutManager.useAlgorithm(metadata.layout);
-        }
+        this.baklavaView.hideHud = metadata?.hideHud ?? this.defaultMetadata.hideHud;
+        NotificationHandler.setShowOption(!this.baklavaView.hideHud);
 
-        this.baklavaView.movementStep = metadata?.movementStep ?? this.baklavaView.movementStep;
-        this.baklavaView.settings.background.gridSize = metadata?.backgroundSize ?? 100;
+        this.editor.allowLoopbacks =
+            metadata?.allowLoopbacks ?? this.defaultMetadata.allowLoopbacks;
+        this.baklavaView.connectionRenderer.style =
+            metadata?.connectionStyle ?? this.defaultMetadata.connectionStyle;
+
+        this.baklavaView.movementStep = metadata?.movementStep ?? this.defaultMetadata.movementStep;
+        this.baklavaView.settings.background.gridSize =
+            metadata?.backgroundSize ?? this.defaultMetadata.backgroundSize;
+        this.baklavaView.connectionRenderer.randomizedOffset =
+            metadata?.randomizedOffset ?? this.defaultMetadata.randomizedOffset;
+
         this.baklavaView.ignoredLayers = new Set();
-        this.baklavaView.ignorableLayers = metadata?.layers ?? [];
-        this.baklavaView.collapseSidebar = metadata?.collapseSidebar ?? true;
-
-        this.baklavaView.connectionRenderer.randomizedOffset = metadata?.randomizedOffset ?? false;
+        this.baklavaView.layers = metadata?.layers ?? this.defaultMetadata.layers;
+        this.baklavaView.collapseSidebar =
+            metadata?.collapseSidebar ?? this.defaultMetadata.collapseSidebar;
     }
 
     /**

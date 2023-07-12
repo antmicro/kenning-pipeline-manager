@@ -319,8 +319,9 @@ export default class ConnectionRenderer {
         return undefined;
     }
 
-    constructor(viewModel, randomizedOffset = false) {
+    constructor(viewModel, style, randomizedOffset = false) {
         this.viewModel = viewModel;
+        this.style = style;
         this.randomizedOffset = randomizedOffset;
     }
 

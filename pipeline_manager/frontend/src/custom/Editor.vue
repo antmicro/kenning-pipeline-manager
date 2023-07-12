@@ -190,7 +190,7 @@ export default defineComponent({
         };
 
         const ignoredLayers = computed(() => props.viewModel.ignoredLayers);
-        const ignorableLayers = computed(() => props.viewModel.ignorableLayers);
+        const ignorableLayers = computed(() => props.viewModel.layers);
 
         const ignoredInterfacesTypes = computed(() => {
             const temp = new Set();

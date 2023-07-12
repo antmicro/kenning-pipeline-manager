@@ -127,7 +127,7 @@ export default {
         const disableLayersOptions = computed(() => {
             const options = ref([]);
 
-            props.viewModel.ignorableLayers.forEach((layer) => {
+            props.viewModel.layers.forEach((layer) => {
                 const option = new CheckboxInterface(layer.name, false).setPort(false);
                 option.events.setValue.subscribe(this, () => {
                     if (props.viewModel.ignoredLayers.has(layer.name)) {
