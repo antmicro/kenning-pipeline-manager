@@ -250,6 +250,7 @@ export default function createPipelineManagerGraph(graph) {
                 const node = new nodeInformation.type(); // eslint-disable-line new-cap
                 this.addNode(node);
                 const nodeErrors = node.load(n);
+
                 if (Array.isArray(nodeErrors) && nodeErrors.length) {
                     errors.push(...nodeErrors);
                 }
@@ -263,10 +264,24 @@ export default function createPipelineManagerGraph(graph) {
                 errors.push(
                     `Connection of id: ${c.id} invalid. Could not find interface with id ${c.from}`,
                 );
+            } else if (fromIf.componentName !== 'NodeInterface') {
+                errors.push(
+                    `Connection of id: ${c.id} invalid. Source of the connection is not an Interface`,
+                );
             } else if (!toIf) {
                 errors.push(
                     `Connection of id: ${c.id} invalid. Could not find interface with id ${c.to}`,
                 );
+            } else if (toIf.componentName !== 'NodeInterface') {
+                errors.push(
+                    `Connection of id: ${c.id} invalid. Destination of the connection is not an Interface`,
+                );
+            } else if (
+                state.connections.some(
+                    (conn) => conn.id === c.id && (conn.from !== c.from || conn.to !== c.to),
+                )
+            ) {
+                errors.push(`Connection of id: ${c.id} invalid. ID is already taken.`);
             } else {
                 // Manually adding connections instead of using `addConnection` from baklavajs
                 // as we want to get a feedback message from `checkConnection` function
