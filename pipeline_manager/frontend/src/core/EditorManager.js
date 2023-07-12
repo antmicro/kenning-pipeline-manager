@@ -28,6 +28,15 @@ import {
     SubgraphOutputNode,
 } from '../custom/subgraphInterface';
 
+/* eslint-disable lines-between-class-members */
+class Metadata {
+    constructor() {
+        Object.entries(metadataSchema.properties).forEach(([name, state]) => {
+            this[name] = state.default;
+        });
+    }
+}
+
 export default class EditorManager {
     static instance;
 
