@@ -23,8 +23,10 @@
                     "description": "Color of the connection going from the interface",
                     "type": "string",
                     "default": "#FFFFFF"
-                }
-            }
+                },
+                "additionalProperties": false
+            },
+            "default": {}
         },
         "allowLoopbacks": {
             "type": "boolean",
@@ -118,9 +120,11 @@
                         "name",
                         "icon",
                         "url"
-                    ]
+                    ],
+                    "additionalProperties": false
                 }
-            }
+            },
+            "default": {}
         },
         "collapseSidebar": {
             "type": "boolean",
@@ -148,5 +152,5 @@
             "default": "false"
         }
     },
-    "unevaluatedProperties": false
+    "additionalProperties": false
 }
