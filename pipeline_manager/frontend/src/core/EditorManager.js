@@ -82,11 +82,10 @@ export default class EditorManager {
      * and its plugins are reinitialized and then the specification is loaded.
      *
      * @param dataflowSpecification Specification to load, can be either an object or a string
-     * @param resolve determines whether resolving of inheritance is needed
      * @returns An array of errors. If the array is empty, the updating process was successful.
      */
     /* eslint-disable no-underscore-dangle,no-param-reassign */
-    updateEditorSpecification(dataflowSpecification, resolve = true) {
+    updateEditorSpecification(dataflowSpecification) {
         if (!dataflowSpecification) return ['No specification passed'];
 
         if (typeof dataflowSpecification === 'string' || dataflowSpecification instanceof String) {
@@ -96,9 +95,6 @@ export default class EditorManager {
         if (this.specificationLoaded) {
             this.editor.unregisterGraphs();
             this.editor.cleanEditor();
-        }
-
-        if (this.specificationLoaded && resolve) {
             this.editor.unregisterNodes();
         }
 
@@ -122,7 +118,7 @@ export default class EditorManager {
         this.currentSpecification = dataflowSpecification;
         this.updateMetadata(metadata);
 
-        const errors = this.updateGraphSpecification(dataflowSpecification, resolve);
+        const errors = this.updateGraphSpecification(dataflowSpecification);
         if (Array.isArray(errors) && errors.length) {
             return errors;
         }
@@ -134,19 +130,15 @@ export default class EditorManager {
     /**
      * Reads and validates part of specification related to nodes and subgraphs
      */
-    updateGraphSpecification(dataflowSpecification, resolve) {
+    updateGraphSpecification(dataflowSpecification) {
         const { subgraphs, nodes, metadata } = dataflowSpecification; // eslint-disable-line object-curly-newline,max-len
 
         let resolvedNodes = [];
 
-        if (resolve) {
-            try {
-                resolvedNodes = this.resolveInheritance(nodes);
-            } catch (e) {
-                return [e];
-            }
-        } else {
-            resolvedNodes.push(...nodes);
+        try {
+            resolvedNodes = this.resolveInheritance(nodes);
+        } catch (e) {
+            return [e];
         }
 
         const errors = this.validateSpecification(
@@ -237,7 +229,7 @@ export default class EditorManager {
         }
 
         this.editor.readonly = metadata?.readonly ?? this.defaultMetadata.readonly;
-        this.baklavaView.hideHud ??= metadata?.hideHud;
+        this.baklavaView.hideHud = metadata?.hideHud ?? this.defaultMetadata.hideHud;
 
         NotificationHandler.setShowOption(!this.baklavaView.hideHud);
         if (this.editor.readonly) {
