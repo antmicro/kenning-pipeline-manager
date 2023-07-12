@@ -36,7 +36,7 @@ export default {
     },
     computed: {
         hideHud() {
-            return this.editorManager.editor.hideHud;
+            return this.editorManager.baklavaView.hideHud;
         },
     },
 };

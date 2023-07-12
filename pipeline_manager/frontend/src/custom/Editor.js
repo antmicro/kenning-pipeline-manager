@@ -39,8 +39,6 @@ import LayoutManager from '../core/LayoutManager';
 export default class PipelineManagerEditor extends Editor {
     readonly = false;
 
-    hideHud = false;
-
     allowLoopbacks = false;
 
     nodeIcons = new Map();

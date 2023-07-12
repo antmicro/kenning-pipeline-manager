@@ -206,9 +206,9 @@ export default class EditorManager {
         }
 
         this.editor.readonly = metadata?.readonly ?? false;
-        this.editor.hideHud = metadata?.hideHud ?? false;
+        this.baklavaView.hideHud ??= metadata?.hideHud;
 
-        NotificationHandler.setShowOption(!this.editor.hideHud);
+        NotificationHandler.setShowOption(!this.baklavaView.hideHud);
         if (this.editor.readonly) {
             NotificationHandler.showToast(
                 'info',
