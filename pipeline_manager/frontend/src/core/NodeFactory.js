@@ -102,10 +102,10 @@ function parseProperties(properties) {
 /**
  * Returns an interface constructor that is used to build nodes
  *
- * @param io confiuration of the interface
+ * @param io configuration of the interface
  * @param hidden whether th interface should be hidden. For example groups of interfaces
  * are hidden by default
- * @param {*} name custom name for the interface that should be used instaed of the one coming
+ * @param {*} name custom name for the interface that should be used instead of the one coming
  * from `io`
  * @returns baklava interface constructor
  */
@@ -248,7 +248,7 @@ function parseNodeState(state) {
 }
 
 /**
- * Function perfomrms sanity checking on parsed state before loading it
+ * Function performs sanity checking on parsed state before loading it
  * into the editor. It should throw explicit errors if any discrepancy is detected.
  *
  * @param parsedState that is passed to node to load
@@ -258,7 +258,7 @@ function parseNodeState(state) {
 function detectDiscrepancies(parsedState, inputs, outputs) {
     const errors = [];
 
-    // Checking for existance of interfaces defined
+    // Checking for existence of interfaces defined
     Object.keys({
         ...parsedState.inputs,
         ...parsedState.outputs,
@@ -277,7 +277,7 @@ function detectDiscrepancies(parsedState, inputs, outputs) {
         }
     });
 
-    // Checking for existance of interface groups
+    // Checking for existence of interface groups
     Object.keys(parsedState.interfaceGroups).forEach((groupName) => {
         if (
             !Object.prototype.hasOwnProperty.call(inputs, groupName) &&
@@ -386,7 +386,7 @@ export function NodeFactory(
                     const [ioName, ioState] = io;
 
                     if (ioState.port) {
-                        // Only interface that are have any connections are stored
+                        // Only interfaces that have any connections are stored
                         if (
                             ioState.connectionCount > 0 ||
                             this.graph.inputs.find((inp) => inp.nodeInterfaceId === ioState.id) ||
@@ -442,7 +442,7 @@ export function NodeFactory(
                     intf.nodeId = this.id;
                 });
 
-                // Assinging sides to interfaces if any are defined
+                // Assigning sides to interfaces if any are defined
                 Object.entries({
                     ...parsedState.inputs,
                     ...parsedState.outputs,

@@ -399,7 +399,7 @@ export default class EditorManager {
      * to Baklava format is done )
      *
      * @param dataflow Dataflow to load
-     * @returns An array of errors that occured during the dataflow loading.
+     * @returns An array of errors that occurred during the dataflow loading.
      * If the array is empty, the loading was successful.
      */
     async loadDataflow(dataflow) {
