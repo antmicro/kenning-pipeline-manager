@@ -61,15 +61,15 @@ export default class EditorManager {
             this.defaultMetadata.randomizedOffset,
         );
 
-        this.editor.layoutManager.useAlgorithm(this.defaultMetadata.layout);
-        this.baklavaView.interfaceTypes = new InterfaceTypes(this.baklavaView, this.editor);
+        this.baklavaView.editor.layoutManager.useAlgorithm(this.defaultMetadata.layout);
+        this.baklavaView.interfaceTypes = new InterfaceTypes(this.baklavaView);
 
         // need to be set here as settings try to use this value
         // before this value can be loaded from specification
         this.baklavaView.layers = this.defaultMetadata.layers;
         this.baklavaView.collapseSidebar = this.defaultMetadata.collapseSidebar;
         this.baklavaView.movementStep = this.defaultMetadata.movementStep;
-        this.editor.allowLoopbacks = this.defaultMetadata.allowLoopbacks;
+        this.baklavaView.editor.allowLoopbacks = this.defaultMetadata.allowLoopbacks;
 
         this.specificationVersion = unresolvedSpecificationSchema.version;
     }
@@ -93,9 +93,9 @@ export default class EditorManager {
         }
 
         if (this.specificationLoaded) {
-            this.editor.unregisterGraphs();
-            this.editor.cleanEditor();
-            this.editor.unregisterNodes();
+            this.baklavaView.editor.unregisterGraphs();
+            this.baklavaView.editor.cleanEditor();
+            this.baklavaView.editor.unregisterNodes();
         }
 
         const { metadata, version } = dataflowSpecification; // eslint-disable-line object-curly-newline,max-len
@@ -149,9 +149,9 @@ export default class EditorManager {
             return errors;
         }
 
-        this.editor.registerNodeType(SubgraphInputNode, { category: 'Subgraphs' });
-        this.editor.registerNodeType(SubgraphOutputNode, { category: 'Subgraphs' });
-        this.editor.registerNodeType(SubgraphInoutNode, { category: 'Subgraphs' });
+        this.baklavaView.editor.registerNodeType(SubgraphInputNode, { category: 'Subgraphs' });
+        this.baklavaView.editor.registerNodeType(SubgraphOutputNode, { category: 'Subgraphs' });
+        this.baklavaView.editor.registerNodeType(SubgraphInoutNode, { category: 'Subgraphs' });
 
         resolvedNodes.forEach((node) => {
             const myNode = NodeFactory(
@@ -164,16 +164,19 @@ export default class EditorManager {
                 metadata?.twoColumn ?? false,
             );
 
-            this.editor.registerNodeType(myNode, { title: node.name, category: node.category });
+            this.baklavaView.editor.registerNodeType(myNode, {
+                title: node.name,
+                category: node.category,
+            });
             if ('icon' in node) {
-                this.editor.nodeIcons.set(node.name, node.icon);
+                this.baklavaView.editor.nodeIcons.set(node.name, node.icon);
             }
             if ('urls' in node) {
                 Object.entries(node.urls).forEach(([urlName, url]) => {
-                    if (!this.editor.nodeURLs.has(node.name)) {
-                        this.editor.nodeURLs.set(node.name, {});
+                    if (!this.baklavaView.editor.nodeURLs.has(node.name)) {
+                        this.baklavaView.editor.nodeURLs.set(node.name, {});
                     }
-                    this.editor.nodeURLs.get(node.name)[urlName] = url;
+                    this.baklavaView.editor.nodeURLs.get(node.name)[urlName] = url;
                 });
             }
         });
@@ -186,9 +189,13 @@ export default class EditorManager {
                     subgraph.interfaces,
                     subgraph.name,
                     subgraph.type,
-                    this.editor,
+                    this.baklavaView.editor,
                 );
-                this.editor.addGraphTemplate(mySubgraph, subgraph.category, subgraph.type);
+                this.baklavaView.editor.addGraphTemplate(
+                    mySubgraph,
+                    subgraph.category,
+                    subgraph.type,
+                );
             });
         }
         return [];
@@ -225,15 +232,15 @@ export default class EditorManager {
 
         if (metadata && 'urls' in metadata) {
             Object.entries(metadata.urls).forEach(([urlName, state]) => {
-                this.editor.baseURLs.set(urlName, state);
+                this.baklavaView.editor.baseURLs.set(urlName, state);
             });
         }
 
-        this.editor.readonly = metadata?.readonly ?? this.defaultMetadata.readonly;
+        this.baklavaView.editor.readonly = metadata?.readonly ?? this.defaultMetadata.readonly;
         this.baklavaView.hideHud = metadata?.hideHud ?? this.defaultMetadata.hideHud;
 
         NotificationHandler.setShowOption(!this.baklavaView.hideHud);
-        if (this.editor.readonly) {
+        if (this.baklavaView.editor.readonly) {
             NotificationHandler.showToast(
                 'info',
                 'The specification is read-only. Only dataflow loading is allowed.',
@@ -243,7 +250,7 @@ export default class EditorManager {
         this.baklavaView.hideHud = metadata?.hideHud ?? this.defaultMetadata.hideHud;
         NotificationHandler.setShowOption(!this.baklavaView.hideHud);
 
-        this.editor.allowLoopbacks =
+        this.baklavaView.editor.allowLoopbacks =
             metadata?.allowLoopbacks ?? this.defaultMetadata.allowLoopbacks;
         this.baklavaView.twoColumn = metadata?.twoColumn ?? this.defaultMetadata.twoColumn;
         this.baklavaView.connectionRenderer.style =
@@ -377,7 +384,7 @@ export default class EditorManager {
      * @returns Serialized dataflow.
      */
     saveDataflow() {
-        const save = this.editor.save();
+        const save = this.baklavaView.editor.save();
         save.version = this.specificationVersion;
 
         if (this.baklavaView.connectionRenderer.randomizedOffset) {
@@ -434,7 +441,7 @@ export default class EditorManager {
             } else {
                 this.updateMetadata(this.currentSpecification.metadata);
             }
-            return this.editor.load(dataflow);
+            return this.baklavaView.editor.load(dataflow);
         } catch (err) {
             return [
                 'Unrecognized format. Make sure that the passed dataflow is correct.',
@@ -571,13 +578,13 @@ export default class EditorManager {
      * @returns True if editor is editing subgraph instance, false otherwise
      */
     isInsideSubgraph() {
-        return this.baklavaView.displayedGraph !== this.editor.graph;
+        return this.baklavaView.displayedGraph !== this.baklavaView.editor.graph;
     }
 
     /**
      * Switches the editor state to main graph
      */
     returnFromSubgraph() {
-        this.editor.backFromSubgraph(this.baklavaView.displayedGraph);
+        this.baklavaView.editor.backFromSubgraph(this.baklavaView.displayedGraph);
     }
 }
