@@ -276,15 +276,18 @@ export default defineComponent({
 
         const scale = computed(() => graph.value.scaling);
 
+        const defaultSpecification = process.env.VUE_APP_SPECIFICATION_PATH !== undefined;
+        const defaultDataflow = process.env.VUE_APP_DATAFLOW_PATH !== undefined;
+        const verboseLoad =
+            process.env.VUE_APP_VERBOSE !== undefined && process.env.VUE_APP_VERBOSE === 'true';
+
         onBeforeMount(() => {
-            if (process.env.VUE_APP_SPECIFICATION_PATH !== undefined) {
+            NotificationHandler.setShowNotification(false);
+            if (defaultSpecification) {
                 // Use raw-loader which does not parse the specification so that it is possible
                 // To add a more verbose validation log
                 let specText;
-                if (
-                    process.env.VUE_APP_VERBOSE !== undefined &&
-                    process.env.VUE_APP_VERBOSE === 'true'
-                ) {
+                if (verboseLoad) {
                     specText =
                         require(`!!raw-loader!${process.env.VUE_APP_SPECIFICATION_PATH}`).default; // eslint-disable-line global-require,import/no-dynamic-require
                 } else {
@@ -296,7 +299,9 @@ export default defineComponent({
                     NotificationHandler.terminalLog('error', 'Specification is invalid', errors);
                     return;
                 }
-                errors = editorManager.updateEditorSpecification(specText);
+
+                editorManager.updateEditorSpecification(specText, true);
+                errors = editorManager.updateMetadata();
                 if (Array.isArray(errors) && errors.length) {
                     NotificationHandler.terminalLog('error', 'Specification is invalid', errors);
                 }
@@ -304,9 +309,14 @@ export default defineComponent({
         });
 
         onMounted(() => {
-            NotificationHandler.setShowNotification(false);
+            if (defaultSpecification) {
+                const errors = editorManager.updateGraphSpecification();
+                if (Array.isArray(errors) && errors.length) {
+                    NotificationHandler.terminalLog('error', 'Specification is invalid', errors);
+                }
+            }
 
-            if (process.env.VUE_APP_DATAFLOW_PATH !== undefined) {
+            if (defaultDataflow) {
                 const dataflow = require(process.env.VUE_APP_DATAFLOW_PATH); // eslint-disable-line global-require,max-len,import/no-dynamic-require
                 editorManager.loadDataflow(dataflow);
             }
