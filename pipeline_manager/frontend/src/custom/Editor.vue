@@ -180,7 +180,10 @@ export default defineComponent({
                     ];
 
                     viableConnections.forEach((n) => {
-                        if (n.componentName === 'NodeInterface') {
+                        if (
+                            n.componentName === 'NodeInterface' &&
+                            n !== temporaryConnection.temporaryConnection.value.from
+                        ) {
                             const result = graph.value.checkConnection(
                                 temporaryConnection.temporaryConnection.value.from,
                                 n,
