@@ -46,6 +46,12 @@ To build Pipeline Manager as a static HTML application run  in the root director
 ./build static-html
 ```
 
+For available flags, run:
+
+```bash
+./build static-html -h
+```
+
 To run built application open `./pipeline_manager/frontend/dist/index.html` in a preferred browser.
 As an example, if the browser of your choice is `firefox` then you should run:
 
@@ -81,12 +87,39 @@ To change the title of the editor and page, use `--editor-title` flag, e.g.:
 ./build --editor-title 'Graph editor' static-html <path-to-specification> <path-to-dataflow>
 ```
 
+For details on how to write specification, check:
+
+* [Pipeline Manager documentation](https://antmicro.github.io/kenning-pipeline-manager)
+* [Specification format](https://antmicro.github.io/kenning-pipeline-manager/specification-format.html)
+* [Dataflow format](https://antmicro.github.io/kenning-pipeline-manager/dataflow-format.html)
+* [Examples in `examples/` directory](./examples/) - in the directory you can find sample specification files (with `-specification.json` suffix), usually paired with supported dataflow files (with `-dataflow.json` suffix)
+
+For example, run:
+
+```bash
+./build static-html ./examples/sample-specification.json ./examples/sample-dataflow.json --output-directory ./pipeline-manager-demo
+```
+
+After successful build, run:
+
+```bash
+firefox ./pipeline-manager-demo/index.html
+```
+
+You should get the graph view similar to [documentation's demo](https://antmicro.github.io/kenning-pipeline-manager/static-demo).
+
 ### Web application
 
 To build Pipeline Manager to work with an external application (like Kenning) run in the root directory:
 
 ```bash
 ./build server-app
+```
+
+For available flags, check:
+
+```bash
+./build server-app -h
 ```
 
 In this scenario, backend server is expected to serve the Pipeline Manager content.
