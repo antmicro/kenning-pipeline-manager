@@ -16,6 +16,8 @@
         "baklavajs": "^2.0.2-beta.3",
         "click-outside-vue3": "^4.0.1",
         "cytoscape": "^3.25.0",
+        "cytoscape-cola": "^2.5.1",
+        "cytoscape-dagre": "^2.5.0",
         "eslint-config-prettier": "^8.6.0",
         "eslint-plugin-prettier": "^4.2.1",
         "html-to-image": "^1.11.11",
