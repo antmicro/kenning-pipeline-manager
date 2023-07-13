@@ -5,8 +5,10 @@
 This documentation contains the following chapters:
 
 * [{{project}}](project-readme) - a quickstart guide for the project
-* [Front-end features](frontend-features) - description of front-end features and front end testing
 * [Specification format](specification-format) - description of the node specification format
 * [Dataflow format](dataflow-format) - graph description format overview
+* [Front-end features](frontend-features) - description of front-end features and front end testing
 * [Communication with an external application](external-app-communication) - external application integration overview
+* [Sample third-party server](example-server) - describes how to configure server for testing frontend features
+* [Dataflow and specification format changelog](changelogs) - lists changes and versions in the format of dataflow and specification files
 * [Front end demo](demo) - {{project}}'s front end demonstration.
