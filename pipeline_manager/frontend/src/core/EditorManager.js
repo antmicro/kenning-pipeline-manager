@@ -82,10 +82,12 @@ export default class EditorManager {
      * and its plugins are reinitialized and then the specification is loaded.
      *
      * @param dataflowSpecification Specification to load, can be either an object or a string
+     * @param lazyLoad Decides wether to actually load the specification or just store
+     * it and check its versioning. Can be used when loading parts of specification manually.
      * @returns An array of errors. If the array is empty, the updating process was successful.
      */
     /* eslint-disable no-underscore-dangle,no-param-reassign */
-    updateEditorSpecification(dataflowSpecification) {
+    updateEditorSpecification(dataflowSpecification, lazyLoad = false) {
         if (!dataflowSpecification) return ['No specification passed'];
 
         if (typeof dataflowSpecification === 'string' || dataflowSpecification instanceof String) {
@@ -116,11 +118,13 @@ export default class EditorManager {
         }
 
         this.currentSpecification = dataflowSpecification;
-        this.updateMetadata(metadata);
 
-        const errors = this.updateGraphSpecification(dataflowSpecification);
-        if (Array.isArray(errors) && errors.length) {
-            return errors;
+        if (!lazyLoad) {
+            this.updateMetadata(metadata);
+            const errors = this.updateGraphSpecification(dataflowSpecification);
+            if (Array.isArray(errors) && errors.length) {
+                return errors;
+            }
         }
 
         this.specificationLoaded = true;
@@ -129,8 +133,18 @@ export default class EditorManager {
 
     /**
      * Reads and validates part of specification related to nodes and subgraphs
+     * If no specification is passed it uses a stored specification.
+     *
+     * @param dataflowSpecification Specification to load, can be either
+     * an object a string or undefined
      */
-    updateGraphSpecification(dataflowSpecification) {
+    updateGraphSpecification(dataflowSpecification = undefined) {
+        if (dataflowSpecification === undefined) {
+            dataflowSpecification = this.currentSpecification;
+        }
+
+        if (!dataflowSpecification) return ['No specification to load provided.'];
+
         const { subgraphs, nodes, metadata } = dataflowSpecification; // eslint-disable-line object-curly-newline,max-len
 
         let resolvedNodes = [];
@@ -202,13 +216,20 @@ export default class EditorManager {
     }
 
     /**
-     * Reads and validates metadatada from specification and loads it into the editor
+     * Reads and validates metadata from specification and loads it into the editor.
+     * if no metadata is passed it uses a stored specification.
      *
-     * @param metadata metdata to load
+     * @param metadata metadata to load
      * @param overriding tells whether the metadata is updated on dataflow loading
      *
      */
-    updateMetadata(metadata, overriding = false) {
+    updateMetadata(metadata = undefined, overriding = false) {
+        if (metadata === undefined) {
+            metadata = this.currentSpecification.metadata;
+        }
+
+        if (!metadata) return ['No specification to load provided.'];
+
         if (overriding) {
             const updatedMetadata = JSON.parse(JSON.stringify(this.currentSpecification.metadata));
 
@@ -266,6 +287,8 @@ export default class EditorManager {
         this.baklavaView.layers = metadata?.layers ?? this.defaultMetadata.layers;
         this.baklavaView.collapseSidebar =
             metadata?.collapseSidebar ?? this.defaultMetadata.collapseSidebar;
+
+        return [];
     }
 
     /**

@@ -44,9 +44,9 @@ export default {
     },
     data() {
         return {
-            editorManager: EditorManager.getEditorManagerInstance(), // create instance of baklava
+            editorManager: EditorManager.getEditorManagerInstance(),
             /* create instance of external manager to control
-            connection, dataflow and spectification
+            connection, dataflow and specification
             */
             externalApplicationManager: new ExternalApplicationManager(),
             notificationStore,
@@ -87,7 +87,7 @@ export default {
     methods: {
         /**
          * Loads nodes' specification from text structure.
-         * It first validates the specification file. If the validation is successfull the
+         * It first validates the specification file. If the validation is successful the
          * specification is loaded. Otherwise a proper log is printed to the user.
          *
          * @param {string} specText specification to validate and load
@@ -263,34 +263,6 @@ export default {
                 this.externalApplicationManager.initializeConnection,
             );
         }
-
-        document.fonts.ready.then(async () => {
-            NotificationHandler.setShowNotification(false);
-            if (process.env.VUE_APP_SPECIFICATION_PATH !== undefined) {
-                // Use raw-loader which does not parse the specification so that it is possible
-                // To add a more verbose validation log
-                let specText;
-                if (
-                    process.env.VUE_APP_VERBOSE !== undefined &&
-                    process.env.VUE_APP_VERBOSE === 'true'
-                ) {
-                    specText =
-                        require(`!!raw-loader!${process.env.VUE_APP_SPECIFICATION_PATH}`).default; // eslint-disable-line global-require,import/no-dynamic-require
-                } else {
-                    specText = require(process.env.VUE_APP_SPECIFICATION_PATH); // eslint-disable-line global-require,import/no-dynamic-require,max-len
-                }
-                this.loadSpecification(specText);
-            }
-
-            if (process.env.VUE_APP_DATAFLOW_PATH !== undefined) {
-                const dataflow = require(process.env.VUE_APP_DATAFLOW_PATH); // eslint-disable-line global-require,max-len,import/no-dynamic-require
-                this.loadDataflow(dataflow);
-            }
-            // During specification load, show option may be set to either true or false
-            // We do not want to set the showNotification to hardcoded value true, but rather
-            // to the value of option set in specification
-            NotificationHandler.restoreShowNotification();
-        });
     },
 };
 </script>

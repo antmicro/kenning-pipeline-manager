@@ -77,7 +77,7 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
 <script>
 /* eslint-disable object-curly-newline */
 import { EditorComponent, useGraph } from 'baklavajs';
-import { defineComponent, ref, computed, watch } from 'vue';
+import { defineComponent, ref, computed, watch, onBeforeMount, onMounted } from 'vue';
 import useDragMove from './useDragMove';
 
 import CustomNode from './CustomNode.vue';
@@ -85,6 +85,8 @@ import PipelineManagerConnection from './connection/PipelineManagerConnection.vu
 import TemporaryConnection from './connection/TemporaryConnection.vue';
 import NodePalette from './nodepalette/NodePalette.vue';
 import { useTemporaryConnection } from './temporaryConnection';
+import NotificationHandler from '../core/notifications';
+import EditorManager from '../core/EditorManager';
 
 export default defineComponent({
     extends: EditorComponent,
@@ -114,6 +116,7 @@ export default defineComponent({
         const panningRef = computed(() => graph.value.panning);
         const dragMove = useDragMove(panningRef);
         const temporaryConnection = useTemporaryConnection();
+        const editorManager = EditorManager.getEditorManagerInstance();
 
         const highlightConnections = ref([]);
         const highlightInterfaces = ref([]);
@@ -273,6 +276,44 @@ export default defineComponent({
 
         const scale = computed(() => graph.value.scaling);
 
+        onBeforeMount(() => {
+            if (process.env.VUE_APP_SPECIFICATION_PATH !== undefined) {
+                // Use raw-loader which does not parse the specification so that it is possible
+                // To add a more verbose validation log
+                let specText;
+                if (
+                    process.env.VUE_APP_VERBOSE !== undefined &&
+                    process.env.VUE_APP_VERBOSE === 'true'
+                ) {
+                    specText =
+                        require(`!!raw-loader!${process.env.VUE_APP_SPECIFICATION_PATH}`).default; // eslint-disable-line global-require,import/no-dynamic-require
+                } else {
+                    specText = require(process.env.VUE_APP_SPECIFICATION_PATH); // eslint-disable-line global-require,import/no-dynamic-require,max-len
+                }
+
+                let errors = editorManager.validateSpecification(specText);
+                if (Array.isArray(errors) && errors.length) {
+                    NotificationHandler.terminalLog('error', 'Specification is invalid', errors);
+                    return;
+                }
+                errors = editorManager.updateEditorSpecification(specText);
+                if (Array.isArray(errors) && errors.length) {
+                    NotificationHandler.terminalLog('error', 'Specification is invalid', errors);
+                }
+            }
+        });
+
+        onMounted(() => {
+            NotificationHandler.setShowNotification(false);
+
+            if (process.env.VUE_APP_DATAFLOW_PATH !== undefined) {
+                const dataflow = require(process.env.VUE_APP_DATAFLOW_PATH); // eslint-disable-line global-require,max-len,import/no-dynamic-require
+                editorManager.loadDataflow(dataflow);
+            }
+
+            NotificationHandler.restoreShowNotification();
+        });
+
         return {
             el,
             counter,
@@ -281,6 +322,7 @@ export default defineComponent({
             onPointerMove,
             onPointerDown,
             onPointerUp,
+            nodes,
             keyDown,
             keyUp,
             selectNode,
