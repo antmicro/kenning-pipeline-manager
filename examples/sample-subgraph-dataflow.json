@@ -167,12 +167,7 @@
                 "from": "16946d84-2ede-44b0-b8b0-fd3664e7aedf",
                 "to": "e3176efa-fd16-4480-936f-3c85e0365be1"
             }
-        ],
-        "panning": {
-            "x": 0,
-            "y": 0
-        },
-        "scaling": 1
+        ]
     },
     "graphTemplateInstances": [
         {

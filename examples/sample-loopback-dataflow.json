@@ -155,12 +155,7 @@
           }
       ],
       "inputs": [],
-      "outputs": [],
-      "panning": {
-          "x": 151.2062355324075,
-          "y": -18.316984953703695
-      },
-      "scaling": 0.884736
+      "outputs": []
   },
   "graphTemplateInstances": []
 }
