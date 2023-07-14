@@ -264,7 +264,7 @@ export default function createPipelineManagerGraph(graph) {
                 errors.push(
                     `Connection of id: ${c.id} invalid. Could not find interface with id ${c.from}`,
                 );
-            } else if (fromIf.componentName !== 'NodeInterface') {
+            } else if (!fromIf.port) {
                 errors.push(
                     `Connection of id: ${c.id} invalid. Source of the connection is not an Interface`,
                 );
@@ -272,7 +272,7 @@ export default function createPipelineManagerGraph(graph) {
                 errors.push(
                     `Connection of id: ${c.id} invalid. Could not find interface with id ${c.to}`,
                 );
-            } else if (toIf.componentName !== 'NodeInterface') {
+            } else if (!toIf.port) {
                 errors.push(
                     `Connection of id: ${c.id} invalid. Destination of the connection is not an Interface`,
                 );
