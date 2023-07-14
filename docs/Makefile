@@ -12,16 +12,16 @@ PROJ_DIR      = $(realpath $(DOCS_DIR)/..)
 .PHONY: Makefile
 
 %:
-	$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
+	env BUILDDIR=$(BUILDDIR) $(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
 # Catch-all target: route all unknown targets to Sphinx using the "make mode" option.
 # $(O) is meant as a shortcut for $(SPHINXOPTS).
 html: $(BUILDDIR)/html/static-demo
-	$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
+	env BUILDDIR=$(BUILDDIR) $(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
 $(BUILDDIR)/html/static-demo:
 	echo "Building static page for demo..."
 	cd $(PROJ_DIR)
-	$(PROJ_DIR)/build static-html $(PROJ_DIR)/examples/sample-specification.json $(PROJ_DIR)/examples/sample-dataflow.json --output-directory $(BUILDDIR)/html/static-demo
+	$(DOCS_DIR)/build-examples $(PROJ_DIR)/examples $(BUILDDIR)/html/static-demo
 	cd -
 	echo "Building static page for demo... DONE"

@@ -1,7 +1,7 @@
 # Demonstration of the frontend
 
 ````{only} html
-To see the work of the frontend, check [live demo](resource:static-demo/index.html).
+{{examples}}
 ````
 
 ```{only} latex

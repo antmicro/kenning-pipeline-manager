@@ -2,6 +2,8 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
+import os
+from pathlib import Path
 from datetime import datetime
 
 from antmicro_sphinx_utils.defaults import (
@@ -34,8 +36,18 @@ myst_enable_extensions = default_myst_enable_extensions
 myst_fence_as_directive = default_myst_fence_as_directive
 
 myst_substitutions = {
-    "project": project
+    "project": project,
+    "examples": 'To see the work of the frontend, check HTML documentation or follow [Building and Running](project-readme.md#building-and-running).'  # noqa: E501
 }
+
+html_build_dir = Path(os.environ['BUILDDIR']) / 'html'
+
+if html_build_dir.is_dir():
+    exampleentries = ['To see the work of the frontend check one of the below examples:\n']  # noqa: E501
+    for example in (html_build_dir / 'static-demo').iterdir():
+        relexample = example.relative_to(html_build_dir)
+        exampleentries.append(f'* [{relexample.stem}](resource:{relexample}/index.html)')  # noqa: E501
+    myst_substitutions["examples"] = '\n'.join(exampleentries)
 
 today_fmt = '%Y-%m-%d'
 
