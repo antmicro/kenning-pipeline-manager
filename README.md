@@ -92,7 +92,7 @@ For details on how to write specification, check:
 * [Pipeline Manager documentation](https://antmicro.github.io/kenning-pipeline-manager)
 * [Specification format](https://antmicro.github.io/kenning-pipeline-manager/specification-format.html)
 * [Dataflow format](https://antmicro.github.io/kenning-pipeline-manager/dataflow-format.html)
-* [Examples in `examples/` directory](./examples/) - in the directory you can find sample specification files (with `-specification.json` suffix), usually paired with supported dataflow files (with `-dataflow.json` suffix)
+* [Examples in `examples/` directory](https://github.com/antmicro/kenning-pipeline-manager/tree/main/examples) - in the directory you can find sample specification files (with `-specification.json` suffix), usually paired with supported dataflow files (with `-dataflow.json` suffix)
 
 For example, run:
 
