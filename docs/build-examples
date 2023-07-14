@@ -1,0 +1,61 @@
+#!/usr/bin/env python3
+
+# Copyright (c) 2022-2023 Antmicro <www.antmicro.com>
+#
+# SPDX-License-Identifier: Apache-2.0
+
+"""
+Script for building all examples from the Pipeline Manager for the
+documentation.
+"""
+
+import sys
+from pathlib import Path
+import errno
+
+import argparse
+
+sys.path.append(str(Path(__file__).parent.parent.absolute()))
+
+from pipeline_manager.frontend_builder import build_prepare, build_frontend  # noqa: E402
+
+
+def main(argv):
+    parser = argparse.ArgumentParser(argv[0])
+    parser.add_argument(
+        'examples_dir',
+        help='Directory with examples to build samples from',
+        type=Path
+    )
+    parser.add_argument(
+        'output_dir',
+        help='Directory where outputs will be stored',
+        type=Path
+    )
+
+    args = parser.parse_args(argv[1:])
+
+    if not args.examples_dir.exists():
+        return errno.EINVAL
+
+    build_prepare()
+
+    all_specs = args.examples_dir.rglob('*-specification.json')
+    for spec in all_specs:
+        dataflow = Path(str(spec).replace('specification', 'dataflow'))
+        if not dataflow.is_file():
+            dataflow = None
+        title = str(spec.stem).replace('-specification', '')
+        print(f'### Building {title} ###')
+        build_frontend(
+            build_type='static-html',
+            editor_title=title,
+            specification=spec,
+            dataflow=dataflow,
+            mode='production',
+            output_directory=args.output_dir / title
+        )
+
+
+if __name__ == '__main__':
+    sys.exit(main(sys.argv))
