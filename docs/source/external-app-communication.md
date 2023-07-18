@@ -90,7 +90,7 @@ See [RUN](#run) for more information.
 The communication described above is necessary to integrate an application with {{project}}.
 The client needs to be able to read requests coming from {{project}} and send proper responses.
 
-For applications is written in Python, you can use the [kenning-pipeline-manager-backend-communication](https://github.com/antmicro/kenning-pipeline-manager-backend-communication) library.
+For applications is written in Python, you can use the [pipeline-manager-backend-communication](https://github.com/antmicro/kenning-pipeline-manager-backend-communication) library.
 It implements an easy-to-use interface that is able to communicate with {{project}} along with helper structures and enumerations.
 
 The main structures provided by the `pipeline-manager-backend-communication` library are:
@@ -132,9 +132,9 @@ As described in the [Communication protocol](#communication-protocol) section, a
 
 { emphasize-lines="23-33" }
 ```python
-from kenning_pipeline_manager_backend_communication.communication_backend import \
+from pipeline_manager_backend_communication.communication_backend import \
     CommunicationBackend
-from kenning_pipeline_manager_backend_communication.misc_structures import \
+from pipeline_manager_backend_communication.misc_structures import \
     MessageType, Status
 
 host = '127.0.0.1'
