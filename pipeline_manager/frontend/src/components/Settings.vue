@@ -183,14 +183,16 @@ export default {
 
 <style lang="scss">
 .settings-panel {
-    // height: 100px;
-    width: 435px;
-    top: 60px;
     background-color: #{$gray-600}E6;
     position: absolute;
-    right: -495px;
     padding: $spacing-l;
     color: white;
+    right: -495px;
+    width: 435px;
+    // viewport - terminal - navbar - padding
+    max-height: calc(100vh - 60px - 35px - 2 * $spacing-l);
+    min-height: fit-content;
+    overflow-y: auto;
 
     & > .setting-header {
         display: flex;
@@ -218,4 +220,5 @@ export default {
         }
     }
 }
+
 </style>
