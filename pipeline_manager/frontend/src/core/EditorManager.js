@@ -11,6 +11,8 @@ import jsonMap from 'json-source-map';
 import jsonlint from 'jsonlint';
 
 import { useBaklava } from '@baklavajs/renderer-vue';
+import { useCommandHandler } from 'baklavajs';
+import { useHistory,setTransaction } from './History.ts';
 
 import PipelineManagerEditor from '../custom/Editor.js';
 import InterfaceTypes from './InterfaceTypes.js';
@@ -71,6 +73,9 @@ export default class EditorManager {
         this.baklavaView.editor.allowLoopbacks = this.defaultMetadata.allowLoopbacks;
 
         this.specificationVersion = unresolvedSpecificationSchema.version;
+        this.baklavaView.commandHandler = useCommandHandler();
+        this.baklavaView.history = null;
+        this.baklavaView.history = useHistory(this.baklavaView.displayedGraph, this.baklavaView.commandHandler);
     }
 
     /**

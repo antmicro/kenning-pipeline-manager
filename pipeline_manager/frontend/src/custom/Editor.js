@@ -31,9 +31,11 @@ import {
     SubgraphInoutNode,
     SubgraphInputNode,
     SubgraphOutputNode,
-} from './subgraphInterface.js';
-import createPipelineManagerGraph from './CustomGraph.js';
-import LayoutManager from '../core/LayoutManager.js';
+} from './subgraphInterface';
+import NotificationHandler from '../core/notifications';
+import createPipelineManagerGraph from './CustomGraph';
+import LayoutManager from '../core/LayoutManager';
+import {setTransaction} from '../core/History.ts';
 
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-underscore-dangle */
@@ -372,8 +374,8 @@ export default class PipelineManagerEditor extends Editor {
                         nodeInterfaceId: output.nodeInterfaceId,
                     }),
                 );
-                delete state.graphState.inputs;
-                delete state.graphState.outputs;
+                // delete state.graphState.inputs;
+                // delete state.graphState.outputs;
 
                 return { ...state, interfaces: inputInterfaces.concat(outputInterfaces) };
             }
@@ -479,6 +481,9 @@ export default class PipelineManagerEditor extends Editor {
             const { switchGraph } = useGraph();
             this._switchGraph = switchGraph;
         }
+        // disable history logging for the switch - don't push nodes being created here
+        setTransaction(true);
+
         this._graph = subgraphNode.subgraph;
         const errors = [];
 
@@ -502,6 +507,8 @@ export default class PipelineManagerEditor extends Editor {
                     errors.push([
                         `Error when creating subgraph ${this._graph.id}: Expected 1 interface with ID ${interfaceID}, got ${templateInputArr.length}`,
                     ]);
+                    setTransaction(false);
+                    return;
                 }
                 const templateInput = templateInputArr[0];
                 const targetInterface = this._graph.findNodeInterface(
@@ -511,6 +518,8 @@ export default class PipelineManagerEditor extends Editor {
                     errors.push([
                         `Error when creating subgraph ${this._graph.id}: Could not find interface ${templateInput.nodeInterfaceId} in subgraph`,
                     ]);
+                    setTransaction(false);
+                    return;
                 }
                 this._graph.addConnection(node.outputs.placeholder, targetInterface);
             });
@@ -531,6 +540,8 @@ export default class PipelineManagerEditor extends Editor {
                     errors.push([
                         `Error when creating subgraph ${this._graph.id}: Expected 1 interface with ID ${interfaceID}, got ${templateInoutArr.length}`,
                     ]);
+                    setTransaction(false);
+                    return;
                 }
                 const templateInout = templateInoutArr[0];
                 const targetInterface = this._graph.findNodeInterface(
@@ -540,6 +551,8 @@ export default class PipelineManagerEditor extends Editor {
                     errors.push([
                         `Error when creating subgraph ${this._graph.id}: Could not find interface ${templateInout.nodeInterfaceId} in subgraph`,
                     ]);
+                    setTransaction(false);
+                    return;
                 }
                 this._graph.addConnection(targetInterface, node.inputs.placeholder);
             });
@@ -560,6 +573,8 @@ export default class PipelineManagerEditor extends Editor {
                     errors.push([
                         `Error when creating subgraph ${this._graph.id}: Expected 1 interface with ID ${interfaceID}, got ${templateOutputArr.length}`,
                     ]);
+                    setTransaction(false);
+                    return;
                 }
                 const templateOutput = templateOutputArr[0];
                 const targetInterface = this._graph.findNodeInterface(
@@ -569,10 +584,13 @@ export default class PipelineManagerEditor extends Editor {
                     errors.push([
                         `Error when creating subgraph ${this._graph.id}: Could not find interface ${templateOutput.nodeInterfaceId} in subgraph`,
                     ]);
+                    setTransaction(false);
+                    return;
                 }
                 this._graph.addConnection(targetInterface, node.inputs.placeholder);
             });
 
+        setTransaction(false);
         this._switchGraph(this._graph);
         nextTick().then(() => {
             const graph = this.graph.save();
