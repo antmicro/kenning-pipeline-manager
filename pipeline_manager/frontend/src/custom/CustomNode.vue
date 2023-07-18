@@ -91,8 +91,9 @@ from moving or deleting the nodes.
 
 <script setup>
 /* eslint-disable object-curly-newline */
-import { ref, computed, toRef, onUpdated, onMounted, nextTick } from 'vue';
-import { useViewModel, AbstractNode, GRAPH_NODE_TYPE_PREFIX, useGraph } from 'baklavajs';
+import { ref, computed, toRef, onUpdated, onMounted, nextTick, markRaw } from 'vue';
+import { useViewModel, useGraph } from '@baklavajs/renderer-vue';
+import { AbstractNode, GRAPH_NODE_TYPE_PREFIX } from '@baklavajs/core';
 
 import useDragMove from './useDragMove';
 import CustomInterface from './CustomInterface.vue';
@@ -100,6 +101,12 @@ import CustomContextMenu from './ContextMenu.vue';
 import { gridSnapper } from '../core/snappers';
 import Pencil from '../icons/Pencil.vue';
 import Bin from '../icons/Bin.vue';
+
+import NotificationHandler from '../core/notifications.js';
+
+import InputInterfaceComponent from '../interfaces/InputInterface.vue';
+import ListInterfaceComponent from '../interfaces/ListInterface.vue';
+import SliderInterfaceComponent from '../interfaces/SliderInterface.vue';
 
 // Baklavajs implementation
 

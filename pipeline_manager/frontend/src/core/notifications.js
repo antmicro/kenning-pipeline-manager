@@ -11,7 +11,7 @@
  */
 
 import { createToastInterface, POSITION } from 'vue-toastification';
-import { notificationStore, terminalStore } from './stores';
+import { notificationStore, terminalStore } from './stores.js';
 import Notification from '../components/Notification.vue';
 
 const toast = createToastInterface({

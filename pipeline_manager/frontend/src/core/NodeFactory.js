@@ -9,16 +9,16 @@ import {
     IntegerInterface,
     NumberInterface,
     SelectInterface,
-    NodeInterface,
     TextInterface,
-    defineNode,
-    GraphTemplate,
-} from 'baklavajs';
+} from '@baklavajs/renderer-vue';
+
+import { defineNode, GraphTemplate, NodeInterface } from '@baklavajs/core';
+
 import { v4 as uuidv4 } from 'uuid';
 
-import InputInterface from '../interfaces/InputInterface';
-import ListInterface from '../interfaces/ListInterface';
-import SliderInterface from '../interfaces/SliderInterface';
+import InputInterface from '../interfaces/InputInterface.js';
+import ListInterface from '../interfaces/ListInterface.js';
+import SliderInterface from '../interfaces/SliderInterface.js';
 
 function parseProperties(properties) {
     const tempInputs = {};

@@ -60,7 +60,7 @@ from creating and deleting connections or altering nodes' values if the editor i
 
 <script>
 import { defineComponent, ref } from 'vue';
-import { Components } from 'baklavajs';
+import { Components } from '@baklavajs/renderer-vue';
 
 export default defineComponent({
     extends: Components.ContextMenu,

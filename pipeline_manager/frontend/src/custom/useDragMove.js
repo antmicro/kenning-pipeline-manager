@@ -6,7 +6,7 @@
  */
 
 import { computed, ref } from 'vue';
-import { useGraph } from 'baklavajs';
+import { useGraph } from '@baklavajs/renderer-vue';
 import { gridSnapper, nodeSnapper } from '../core/snappers';
 
 /* eslint-disable no-param-reassign */

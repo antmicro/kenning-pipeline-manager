@@ -8,13 +8,13 @@
  * Implements custom version of baklava's Graph object
  */
 
-import { GraphTemplate, DummyConnection, Connection } from 'baklavajs';
+import { GraphTemplate, DummyConnection, Connection } from '@baklavajs/core';
 import { v4 as uuidv4 } from 'uuid';
 import {
     SUBGRAPH_INPUT_NODE_TYPE,
     SUBGRAPH_INOUT_NODE_TYPE,
     SUBGRAPH_OUTPUT_NODE_TYPE,
-} from './subgraphInterface';
+} from './subgraphInterface.js';
 
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-underscore-dangle */

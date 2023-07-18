@@ -6,10 +6,10 @@
  */
 
 import cytoscape from 'cytoscape';
-
 import cola from 'cytoscape-cola';
 import dagre from 'cytoscape-dagre';
-import BaseLayoutEngine from './baseEngine';
+
+import BaseLayoutEngine from './baseEngine.js';
 
 cytoscape.use(dagre);
 cytoscape.use(cola);

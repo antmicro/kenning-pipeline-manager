@@ -24,7 +24,7 @@ Inherits from baklavajs/renderer-vue/src/connection/ConnectionView.vue
 
 <script>
 import { defineComponent, ref, computed, watch } from 'vue'; // eslint-disable-line object-curly-newline
-import { Components, useGraph } from 'baklavajs';
+import { Components, useGraph } from '@baklavajs/renderer-vue';
 import ConnectionView from './ConnectionView.vue';
 import getDomElements from './domResolver';
 

@@ -40,7 +40,7 @@ from creating and deleting connections or altering nodes' values if the editor i
 
 <script>
 import { defineComponent, computed } from 'vue';
-import { Components, useViewModel } from 'baklavajs';
+import { Components, useViewModel } from '@baklavajs/renderer-vue';
 import Arrow from '../icons/Arrow.vue';
 import doubleClick from '../core/doubleClick';
 

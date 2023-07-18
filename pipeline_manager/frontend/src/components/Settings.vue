@@ -29,7 +29,12 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { computed, ref } from 'vue';
-import { SelectInterface, CheckboxInterface, IntegerInterface, ButtonInterface } from 'baklavajs'; // eslint-disable-line object-curly-newline
+import {
+    SelectInterface,
+    CheckboxInterface,
+    IntegerInterface,
+    ButtonInterface,
+} from '@baklavajs/renderer-vue'; // eslint-disable-line object-curly-newline
 
 export default {
     props: {

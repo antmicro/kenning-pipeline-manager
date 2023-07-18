@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useGraph } from 'baklavajs';
+import { useGraph } from '@baklavajs/renderer-vue';
 
 /**
  * Function for calculating node position based on given movementStep.

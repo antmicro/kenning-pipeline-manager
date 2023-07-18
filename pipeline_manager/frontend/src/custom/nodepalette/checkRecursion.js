@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-import { getGraphNodeTypeString, GRAPH_NODE_TYPE_PREFIX } from 'baklavajs';
+import { getGraphNodeTypeString, GRAPH_NODE_TYPE_PREFIX } from '@baklavajs/core';
 
 /** This function checks, whether the given GraphNode would cause a recursion
  * if placed in the specified current graph */

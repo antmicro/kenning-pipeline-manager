@@ -11,7 +11,7 @@
  */
 
 import { provide, ref } from 'vue';
-import { useGraph } from 'baklavajs';
+import { useGraph } from '@baklavajs/renderer-vue';
 
 /**
  * This enum class is based on baklavajs enum `TemporaryConnectionState`

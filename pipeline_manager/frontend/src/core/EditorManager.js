@@ -6,28 +6,27 @@
 
 /* eslint-disable max-classes-per-file */
 import { stringify } from 'ajv';
-import Ajv2019 from 'ajv/dist/2019';
+import Ajv2019 from 'ajv/dist/2019.js';
 import jsonMap from 'json-source-map';
 import jsonlint from 'jsonlint';
 
-import { useBaklava } from 'baklavajs';
+import { useBaklava } from '@baklavajs/renderer-vue';
 
-import PipelineManagerEditor from '../custom/Editor';
-import InterfaceTypes from './InterfaceTypes';
+import PipelineManagerEditor from '../custom/Editor.js';
+import InterfaceTypes from './InterfaceTypes.js';
 
-import NotificationHandler from './notifications';
-import { NodeFactory, SubgraphFactory } from './NodeFactory';
-import unresolvedSpecificationSchema from '../../../resources/schemas/unresolved_specification_schema.json';
-import specificationSchema from '../../../resources/schemas/specification_schema.json';
-import metadataSchema from '../../../resources/schemas/metadata_schema.json';
-import dataflowSchema from '../../../resources/schemas/dataflow_schema.json';
-import graphSchema from '../../../resources/schemas/graph_schema.json';
-import ConnectionRenderer from './ConnectionRenderer';
+import { NodeFactory, SubgraphFactory } from './NodeFactory.js';
+import unresolvedSpecificationSchema from '../../../resources/schemas/unresolved_specification_schema.json' assert { type: 'json' };
+import specificationSchema from '../../../resources/schemas/specification_schema.json' assert { type: 'json' };
+import metadataSchema from '../../../resources/schemas/metadata_schema.json' assert { type: 'json' };
+import dataflowSchema from '../../../resources/schemas/dataflow_schema.json' assert { type: 'json' };
+import graphSchema from '../../../resources/schemas/graph_schema.json' assert { type: 'json' };
+import ConnectionRenderer from './ConnectionRenderer.js';
 import {
     SubgraphInoutNode,
     SubgraphInputNode,
     SubgraphOutputNode,
-} from '../custom/subgraphInterface';
+} from '../custom/subgraphInterface.js';
 
 /* eslint-disable lines-between-class-members */
 /**

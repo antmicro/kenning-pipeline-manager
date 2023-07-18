@@ -53,7 +53,7 @@ Inherits from baklavajs/packages/renderer-vue/src/nodepalette/NodePalette.vue
 
 <script>
 import { computed, defineComponent, inject, ref, reactive } from 'vue'; // eslint-disable-line object-curly-newline
-import { useViewModel, useTransform } from 'baklavajs';
+import { useViewModel, useTransform } from '@baklavajs/renderer-vue';
 import { usePointer } from '@vueuse/core';
 import PaletteCategory from './PaletteCategory.vue';
 import getNodeTree from './nodeTree';

@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { BaseLayoutAlgorithm } from './baseEngine';
+import { BaseLayoutAlgorithm } from './baseEngine.js';
 
 /**
  * Default layout algorithm that puts all nodes into (0, 0) position

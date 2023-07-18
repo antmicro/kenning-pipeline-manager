@@ -18,7 +18,7 @@ The entrypoint of the application.
 
 <script>
 import NavBar from './NavBar.vue';
-import EditorManager from '../core/EditorManager';
+import EditorManager from '../core/EditorManager.js';
 import TerminalPanel from './TerminalPanel.vue';
 import Editor from '../custom/Editor.vue';
 import '@baklavajs/themes/dist/classic.css';

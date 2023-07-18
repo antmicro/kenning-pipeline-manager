@@ -6,7 +6,9 @@
 
 /* eslint-disable object-curly-newline */
 import { v4 as uuidv4 } from 'uuid';
-import { defineNode, TextInputInterface, NodeInterface, SelectInterface } from 'baklavajs';
+
+import { NodeInterface, defineNode } from '@baklavajs/core';
+import { TextInputInterface, SelectInterface } from '@baklavajs/renderer-vue';
 /* eslint-enable object-curly-newline */
 
 // Those files are exported here as Baklavajs does not export them

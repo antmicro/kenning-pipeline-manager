@@ -76,7 +76,7 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
 
 <script>
 /* eslint-disable object-curly-newline */
-import { EditorComponent, useGraph } from 'baklavajs';
+import { EditorComponent, useGraph } from '@baklavajs/renderer-vue';
 import { defineComponent, ref, computed, watch, onBeforeMount, onMounted } from 'vue';
 import useDragMove from './useDragMove';
 

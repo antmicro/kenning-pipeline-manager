@@ -18,7 +18,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { computed } from 'vue';
-import { Components } from 'baklavajs';
+import { Components } from '@baklavajs/renderer-vue';
 import ConnectionView from './ConnectionView.vue';
 
 export default {

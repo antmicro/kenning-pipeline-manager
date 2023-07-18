@@ -16,10 +16,12 @@
 import {
     Editor,
     createGraphNodeType,
-    useGraph,
     GRAPH_NODE_TYPE_PREFIX,
     NodeInterface,
-} from 'baklavajs';
+} from '@baklavajs/core';
+
+import { useGraph } from '@baklavajs/renderer-vue';
+
 import { v4 as uuidv4 } from 'uuid';
 import { toRaw, nextTick } from 'vue';
 import {
@@ -29,10 +31,9 @@ import {
     SubgraphInoutNode,
     SubgraphInputNode,
     SubgraphOutputNode,
-} from './subgraphInterface';
-import NotificationHandler from '../core/notifications';
-import createPipelineManagerGraph from './CustomGraph';
-import LayoutManager from '../core/LayoutManager';
+} from './subgraphInterface.js';
+import createPipelineManagerGraph from './CustomGraph.js';
+import LayoutManager from '../core/LayoutManager.js';
 
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-underscore-dangle */

@@ -4,9 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { markRaw } from 'vue';
-import { NodeInterface } from 'baklavajs';
-import InputInterfaceComponent from './InputInterface.vue';
+import { NodeInterface } from '@baklavajs/core';
 
 export default class InputInterface extends NodeInterface {
     constructor(name, value) {

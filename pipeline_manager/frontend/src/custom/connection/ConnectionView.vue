@@ -18,7 +18,7 @@ Inherits from baklavajs/renderer-vue/src/connection/ConnectionView.vue
 
 <script>
 import { defineComponent, computed } from 'vue';
-import { Components, useGraph, useViewModel } from 'baklavajs';
+import { Components, useGraph, useViewModel } from '@baklavajs/renderer-vue';
 import doubleClick from '../../core/doubleClick';
 
 export default defineComponent({

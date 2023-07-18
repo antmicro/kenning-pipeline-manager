@@ -40,7 +40,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { defineComponent, computed } from 'vue';
-import { SliderInterfaceComponent } from 'baklavajs';
+import { SliderInterfaceComponent } from '@baklavajs/renderer-vue';
 
 export default defineComponent({
     extends: SliderInterfaceComponent,

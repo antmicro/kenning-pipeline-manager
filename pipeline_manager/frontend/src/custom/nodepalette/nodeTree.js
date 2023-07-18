@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useViewModel } from 'baklavajs';
+import { useViewModel } from '@baklavajs/renderer-vue';
 import { watch } from 'vue';
 import fuzzysort from 'fuzzysort';
 

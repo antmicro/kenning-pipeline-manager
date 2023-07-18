@@ -21,8 +21,8 @@
  * (setting position to (0, 0)) is used
  */
 
-import CytoscapeLayoutEngine from './layoutEngines/cytoscapeEngine';
-import NoLayoutAlgorithm from './layoutEngines/noLayoutEngine';
+import CytoscapeLayoutEngine from './layoutEngines/cytoscapeEngine.js';
+import NoLayoutAlgorithm from './layoutEngines/noLayoutEngine.js';
 
 /* eslint-disable no-param-reassign */
 function dataflowToGraph(dataflow) {
