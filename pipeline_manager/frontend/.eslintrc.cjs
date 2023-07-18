@@ -12,8 +12,11 @@ module.exports = {
     extends: ['plugin:vue/essential', 'plugin:prettier/recommended', 'airbnb-base'],
     overrides: [],
     parserOptions: {
+        parser: '@babel/eslint-parser',
+        requireConfigFile: false,
         ecmaVersion: 'latest',
         sourceType: 'module',
+        babelOptions: { plugins: [ '@babel/plugin-syntax-import-assertions' ], }
     },
     plugins: ['vue'],
     rules: {
@@ -24,5 +27,6 @@ module.exports = {
         'operator-linebreak': 'off',
         'vue/multi-word-component-names': 0,
         quotes: ['error', 'single', { allowTemplateLiterals: true }],
+        'import/extensions': ['error', { js: 'ignorePackages', json: 'ignorePackages' }],
     },
 };
