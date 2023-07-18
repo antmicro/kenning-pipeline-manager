@@ -83,7 +83,8 @@ export default class EditorManager {
      * @param dataflowSpecification Specification to load, can be either an object or a string
      * @param lazyLoad Decides wether to actually load the specification or just store
      * it and check its versioning. Can be used when loading parts of specification manually.
-     * @returns An array of errors. If the array is empty, the updating process was successful.
+     * @returns An object consisting of errors and warnings arrays. If any array is empty
+     * the updating process was successful.
      */
     /* eslint-disable no-underscore-dangle,no-param-reassign */
     updateEditorSpecification(dataflowSpecification, lazyLoad = false) {
@@ -99,25 +100,21 @@ export default class EditorManager {
             this.baklavaView.editor.unregisterNodes();
         }
 
+        const warnings = [];
         const { metadata, version } = dataflowSpecification; // eslint-disable-line object-curly-newline,max-len
         if (!this.currentSpecification) {
             if (version === undefined) {
-                NotificationHandler.terminalLog(
-                    'warning',
-                    'Specification has no version assigned',
+                warnings.push(
                     `Loaded specification has no version assigned. Please update the specification to version ${this.specificationVersion}.`,
                 );
             } else if (version !== this.specificationVersion) {
-                NotificationHandler.terminalLog(
-                    'warning',
-                    'Incompatible specification version',
+                warnings.push(
                     `The specification format version (${version}) differs from the current specification format version (${this.specificationVersion}). It may result in an unexpected behaviour.`,
                 );
             }
         }
 
         this.currentSpecification = dataflowSpecification;
-
         if (!lazyLoad) {
             this.updateMetadata(metadata);
             const errors = this.updateGraphSpecification(dataflowSpecification);
@@ -127,7 +124,7 @@ export default class EditorManager {
         }
 
         this.specificationLoaded = true;
-        return [];
+        return { errors, warnings };
     }
 
     /**
@@ -259,18 +256,7 @@ export default class EditorManager {
         this.baklavaView.editor.readonly = metadata?.readonly ?? this.defaultMetadata.readonly;
         this.baklavaView.hideHud = metadata?.hideHud ?? this.defaultMetadata.hideHud;
 
-        NotificationHandler.setShowOption(!this.baklavaView.hideHud);
-        if (this.baklavaView.editor.readonly) {
-            NotificationHandler.showToast(
-                'info',
-                'The specification is read-only. Only dataflow loading is allowed.',
-            );
-        }
-
-        this.baklavaView.hideHud = metadata?.hideHud ?? this.defaultMetadata.hideHud;
-        NotificationHandler.setShowOption(!this.baklavaView.hideHud);
-
-        this.baklavaView.editor.allowLoopbacks =
+        this.editor.allowLoopbacks =
             metadata?.allowLoopbacks ?? this.defaultMetadata.allowLoopbacks;
         this.baklavaView.twoColumn = metadata?.twoColumn ?? this.defaultMetadata.twoColumn;
         this.baklavaView.connectionRenderer.style =
@@ -431,24 +417,21 @@ export default class EditorManager {
      * @returns An array of errors that occurred during the dataflow loading.
      * If the array is empty, the loading was successful.
      */
-    loadDataflow(dataflow) {
+    async loadDataflow(dataflow) {
         const validationErrors = this.validateDataflow(dataflow);
         if (Array.isArray(validationErrors) && validationErrors.length) {
-            return validationErrors;
+            return { errors: validationErrors };
         }
 
         try {
             const specificationVersion = dataflow.version;
+            const warnings = [];
             if (specificationVersion === undefined) {
-                NotificationHandler.terminalLog(
-                    'warning',
-                    'Dataflow has no format version assigned.',
+                warnings.push(
                     `Current format specification version is ${this.specificationVersion}. It may result in an unexpected behaviour`,
                 );
             } else if (specificationVersion !== this.specificationVersion) {
-                NotificationHandler.terminalLog(
-                    'warning',
-                    'Incompatible dataflow format',
+                warnings.push(
                     `Dataflow format specification version (${specificationVersion}) differs from the current format specification version (${this.specificationVersion}). It may result in unexpected behaviour.`,
                 );
             }
@@ -456,19 +439,21 @@ export default class EditorManager {
             if ('metadata' in dataflow && this.currentSpecification !== undefined) {
                 const errors = this.validateMetadata(dataflow.metadata);
                 if (Array.isArray(errors) && errors.length) {
-                    return errors;
+                    return { errors, warnings };
                 }
 
                 this.updateMetadata(dataflow.metadata, true);
             } else {
                 this.updateMetadata(this.currentSpecification.metadata);
             }
-            return this.baklavaView.editor.load(dataflow);
+            return { errors: await this.baklavaView.editor.load(dataflow), warnings };
         } catch (err) {
-            return [
-                'Unrecognized format. Make sure that the passed dataflow is correct.',
-                err.toString(),
-            ];
+            return {
+                errors: [
+                    'Unrecognized format. Make sure that the passed dataflow is correct.',
+                    err.toString(),
+                ],
+            };
         }
     }
 

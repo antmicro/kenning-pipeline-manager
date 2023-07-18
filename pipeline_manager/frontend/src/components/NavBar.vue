@@ -93,12 +93,19 @@ export default {
          * @param {string} specText specification to validate and load
          */
         loadSpecification(specText) {
-            let errors = this.editorManager.validateSpecification(specText);
+            let { errors, warnings } = this.editorManager.validateSpecification(specText);
             if (Array.isArray(errors) && errors.length) {
                 NotificationHandler.terminalLog('error', 'Specification is invalid', errors);
                 return;
             }
-            errors = this.editorManager.updateEditorSpecification(specText);
+            ({ errors, warnings } = this.editorManager.updateEditorSpecification(specText));
+            if (Array.isArray(warnings) && warnings.length) {
+                NotificationHandler.terminalLog(
+                    'warning',
+                    'Issue when loading specification',
+                    warnings,
+                );
+            }
             if (Array.isArray(errors) && errors.length) {
                 NotificationHandler.terminalLog('error', 'Specification is invalid', errors);
             }
@@ -159,7 +166,14 @@ export default {
          * Loads nodes' specification from JSON structure.
          */
         loadDataflow(dataflow) {
-            this.editorManager.loadDataflow(dataflow).then((errors) => {
+            this.editorManager.loadDataflow(dataflow).then(({ errors, warnings }) => {
+                if (Array.isArray(warnings) && warnings.length) {
+                    NotificationHandler.terminalLog(
+                        'warning',
+                        'Issue when loading dataflow',
+                        warnings,
+                    );
+                }
                 if (Array.isArray(errors) && errors.length) {
                     NotificationHandler.terminalLog('error', 'Dataflow is invalid', errors);
                 }

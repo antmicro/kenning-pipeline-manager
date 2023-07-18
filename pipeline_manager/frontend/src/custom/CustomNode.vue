@@ -224,9 +224,13 @@ const onContextMenuClick = async (action) => {
             });
             focusOnRename();
             break;
-        case 'editSubgraph':
-            viewModel.value.editor.switchToSubgraph(props.node);
+        case 'editSubgraph': {
+            const errors = viewModel.value.editor.switchToSubgraph(props.node);
+            if (Array.isArray(errors) && errors.length) {
+                NotificationHandler.terminalLog('error', 'Dataflow is invalid', errors);
+            }
             break;
+        }
     }
 };
 

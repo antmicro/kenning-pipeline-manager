@@ -84,7 +84,12 @@ export default class PipelineManagerEditor extends Editor {
         state.graph.nodes.forEach(recurrentSubgraphSave);
 
         /* eslint-disable no-unused-vars */
-        stackCopy.forEach(([_, subgraphNode]) => this.switchToSubgraph(subgraphNode));
+        stackCopy.forEach(([_, subgraphNode]) => {
+            const errors = this.switchToSubgraph(subgraphNode);
+            if (Array.isArray(errors) && errors.length) {
+                throw new Error(errors);
+            }
+        });
         /* eslint-enable no-unused-vars */
 
         // Main graph should have no IO
@@ -224,6 +229,9 @@ export default class PipelineManagerEditor extends Editor {
 
     centerZoom() {
         if (!Array.isArray(this._graph.nodes) || this._graph.nodes.length === 0) return;
+        if (typeof document === 'undefined') {
+            return;
+        }
 
         const sizes = this._graph.nodes.map((node) => {
             const HTMLelement = document.getElementById(node.id);
@@ -472,6 +480,7 @@ export default class PipelineManagerEditor extends Editor {
             this._switchGraph = switchGraph;
         }
         this._graph = subgraphNode.subgraph;
+        const errors = [];
 
         const convertToUpperCase = (str) => `${str[0].toUpperCase()}${str.slice(1)}`;
 
@@ -490,22 +499,18 @@ export default class PipelineManagerEditor extends Editor {
                     (intf) => intf.id === interfaceID,
                 );
                 if (templateInputArr.length !== 1) {
-                    NotificationHandler.showToast(
-                        'error',
+                    errors.push([
                         `Error when creating subgraph ${this._graph.id}: Expected 1 interface with ID ${interfaceID}, got ${templateInputArr.length}`,
-                    );
-                    return;
+                    ]);
                 }
                 const templateInput = templateInputArr[0];
                 const targetInterface = this._graph.findNodeInterface(
                     templateInput.nodeInterfaceId,
                 );
                 if (!targetInterface) {
-                    NotificationHandler.showToast(
-                        'error',
+                    errors.push([
                         `Error when creating subgraph ${this._graph.id}: Could not find interface ${templateInput.nodeInterfaceId} in subgraph`,
-                    );
-                    return;
+                    ]);
                 }
                 this._graph.addConnection(node.outputs.placeholder, targetInterface);
             });
@@ -523,22 +528,18 @@ export default class PipelineManagerEditor extends Editor {
                     (intf) => intf.id === interfaceID,
                 );
                 if (templateInoutArr.length !== 1) {
-                    NotificationHandler.showToast(
-                        'error',
+                    errors.push([
                         `Error when creating subgraph ${this._graph.id}: Expected 1 interface with ID ${interfaceID}, got ${templateInoutArr.length}`,
-                    );
-                    return;
+                    ]);
                 }
                 const templateInout = templateInoutArr[0];
                 const targetInterface = this._graph.findNodeInterface(
                     templateInout.nodeInterfaceId,
                 );
                 if (!targetInterface) {
-                    NotificationHandler.showToast(
-                        'error',
+                    errors.push([
                         `Error when creating subgraph ${this._graph.id}: Could not find interface ${templateInout.nodeInterfaceId} in subgraph`,
-                    );
-                    return;
+                    ]);
                 }
                 this._graph.addConnection(targetInterface, node.inputs.placeholder);
             });
@@ -556,22 +557,18 @@ export default class PipelineManagerEditor extends Editor {
                     (intf) => intf.id === interfaceID,
                 );
                 if (templateOutputArr.length !== 1) {
-                    NotificationHandler.showToast(
-                        'error',
+                    errors.push([
                         `Error when creating subgraph ${this._graph.id}: Expected 1 interface with ID ${interfaceID}, got ${templateOutputArr.length}`,
-                    );
-                    return;
+                    ]);
                 }
                 const templateOutput = templateOutputArr[0];
                 const targetInterface = this._graph.findNodeInterface(
                     templateOutput.nodeInterfaceId,
                 );
                 if (!targetInterface) {
-                    NotificationHandler.showToast(
-                        'error',
+                    errors.push([
                         `Error when creating subgraph ${this._graph.id}: Could not find interface ${templateOutput.nodeInterfaceId} in subgraph`,
-                    );
-                    return;
+                    ]);
                 }
                 this._graph.addConnection(targetInterface, node.inputs.placeholder);
             });
@@ -582,6 +579,7 @@ export default class PipelineManagerEditor extends Editor {
             this.layoutManager.registerGraph(graph);
             this.layoutManager.computeLayout(graph).then(this.updateNodesPosition.bind(this));
         });
+        return errors;
     }
 
     switchToSubgraph(subgraphNode) {

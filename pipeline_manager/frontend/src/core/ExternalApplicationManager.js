@@ -60,12 +60,20 @@ export default class ExternalApplicationManager {
             if (data.type === PMMessageType.OK) {
                 const specification = data.content;
 
-                let errors = this.editorManager.validateSpecification(specification);
+                let { errors, warnings } = this.editorManager.validateSpecification(specification);
                 if (Array.isArray(errors) && errors.length) {
                     NotificationHandler.terminalLog('error', 'Specification is invalid', errors);
                     return;
                 }
-                errors = this.editorManager.updateEditorSpecification(specification);
+                ({ errors, warnings } =
+                    this.editorManager.updateEditorSpecification(specification));
+                if (Array.isArray(warnings) && warnings.length) {
+                    NotificationHandler.terminalLog(
+                        'warning',
+                        'Warnings when loading specification',
+                        warnings,
+                    );
+                }
                 if (Array.isArray(errors) && errors.length) {
                     NotificationHandler.terminalLog('error', 'Specification is invalid', errors);
                     return;
@@ -161,7 +169,7 @@ export default class ExternalApplicationManager {
             const data = await response.json();
 
             if (data.type === PMMessageType.OK) {
-                this.editorManager.loadDataflow(data.content).then((errors) => {
+                this.editorManager.loadDataflow(data.content).then(({ errors }) => {
                     if (Array.isArray(errors) && errors.length) {
                         NotificationHandler.terminalLog('error', 'Dataflow is invalid', errors);
                     } else {
