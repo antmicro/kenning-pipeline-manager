@@ -101,6 +101,7 @@ export default class EditorManager {
         }
 
         const warnings = [];
+        const errors = [];
         const { metadata, version } = dataflowSpecification; // eslint-disable-line object-curly-newline,max-len
         if (!this.currentSpecification) {
             if (version === undefined) {
@@ -117,17 +118,14 @@ export default class EditorManager {
         this.currentSpecification = dataflowSpecification;
         if (!lazyLoad) {
             this.updateMetadata(metadata);
-            const errors = this.updateGraphSpecification(dataflowSpecification);
-            if (Array.isArray(errors) && errors.length) {
-                return errors;
-            }
+            errors.concat(this.updateGraphSpecification(dataflowSpecification));
         }
 
         this.specificationLoaded = true;
         return { errors, warnings };
     }
 
-        /**
+    /**
      * Reads and validates part of specification related to nodes and subgraphs
      * @param dataflowSpecification Specification to load
      * @returns An object consisting of errors and warnings arrays. If any array is empty
