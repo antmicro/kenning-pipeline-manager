@@ -5,6 +5,13 @@ if (process.argv.length >= 3) {
     fs.readFile(process.argv[2], async function (err, spec) {
         const instance = EditorManager.getEditorManagerInstance();
 
+        let validationWarning = instance.validateSpecification(spec.toString());
+        if (Array.isArray(validationWarning) && validationWarning.length) {
+            console.log('Specification invalid, errors:')
+            console.log(validationWarning);
+            return;
+        }
+
         let { errors, warnings } = instance.updateEditorSpecification(spec.toString());
         if (Array.isArray(warnings) && warnings.length) {
             console.log('Specification warnings:')
@@ -19,7 +26,7 @@ if (process.argv.length >= 3) {
 
         if (process.argv.length >= 4) {
             fs.readFile(process.argv[3], async function (err, dataflow) {
-                ({ errors, warnings } = await instance.loadDataflow(JSON.parse(dataflow.toString())));
+                ({ errors, warnings } = await instance.loadDataflow(dataflow.toString()));
                 if (Array.isArray(warnings) && warnings.length) {
                     console.log('Dataflow warnings:')
                     console.log(warnings);

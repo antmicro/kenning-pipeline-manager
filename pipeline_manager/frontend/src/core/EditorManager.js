@@ -127,12 +127,11 @@ export default class EditorManager {
         return { errors, warnings };
     }
 
-    /**
+        /**
      * Reads and validates part of specification related to nodes and subgraphs
-     * If no specification is passed it uses a stored specification.
-     *
-     * @param dataflowSpecification Specification to load, can be either
-     * an object a string or undefined
+     * @param dataflowSpecification Specification to load
+     * @returns An object consisting of errors and warnings arrays. If any array is empty
+     * the updating process was successful.
      */
     updateGraphSpecification(dataflowSpecification = undefined) {
         if (dataflowSpecification === undefined) {
@@ -413,7 +412,7 @@ export default class EditorManager {
      * error is returned. Dataflow should be passed in PipelineManager format (translation
      * to Baklava format is done )
      *
-     * @param dataflow Dataflow to load
+     * @param dataflow Dataflow to load. Can be eithe an object or a string
      * @returns An array of errors that occurred during the dataflow loading.
      * If the array is empty, the loading was successful.
      */
@@ -424,6 +423,10 @@ export default class EditorManager {
         }
 
         try {
+            if (typeof dataflow === 'string' || dataflow instanceof String) {
+                dataflow = jsonlint.parse(dataflow);
+            }
+
             const specificationVersion = dataflow.version;
             const warnings = [];
             if (specificationVersion === undefined) {
