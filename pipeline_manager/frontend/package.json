@@ -8,7 +8,8 @@
         "build-static-html": "vue-cli-service --mode static build",
         "lint": "eslint --ext .js,.vue src/ --fix",
         "format": "prettier --write .",
-        "clean": "rm -rf node_modules"
+        "clean": "rm -rf node_modules",
+        "postinstall": "patch-package"
     },
     "dependencies": {
         "@vue/cli-service": "^5.0.8",
@@ -21,6 +22,7 @@
         "fuzzysort": "^2.0.4",
         "html-to-image": "^1.11.11",
         "json-source-map": "^0.6.1",
+        "patch-package": "^7.0.2",
         "raw-loader": "^4.0.2",
         "sass": "^1.62.0",
         "sass-loader": "^13.2.2",
@@ -29,6 +31,8 @@
         "vue-toastification": "^2.0.0-rc.5"
     },
     "devDependencies": {
+        "@babel/eslint-parser": "^7.22.9",
+        "@babel/plugin-syntax-import-assertions": "^7.22.5",
         "@vueuse/core": "^9.9.0",
         "eslint": "^8.27.0",
         "eslint-config-airbnb-base": "^15.0.0",
@@ -44,5 +48,7 @@
     "engines": {
         "node": ">=16.0.0",
         "npm": ">=8.15.0"
-    }
+    },
+    "type": "module",
+    "main": "index.js"
 }
