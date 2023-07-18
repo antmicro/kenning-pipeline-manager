@@ -306,6 +306,18 @@ const displayedProperties = computed(() =>
     Object.values(displayedInputs.value).filter((intf) => !intf.port),
 );
 
+displayedProperties.value.forEach((prop) => {
+    if (prop.component === undefined) {
+        if (prop.componentName === 'InputInterface') {
+            prop.setComponent(markRaw(InputInterfaceComponent));
+        } else if (prop.componentName === 'ListInterface') {
+            prop.setComponent(markRaw(ListInterfaceComponent));
+        } else if (prop.componentName === 'SliderInterface') {
+            prop.setComponent(markRaw(SliderInterfaceComponent));
+        }
+    }
+});
+
 const iconPath = viewModel.value.editor.getNodeIconPath(props.node.type);
 const nodeIcon = iconPath !== undefined ? `./assets/${iconPath}` : undefined; // eslint-disable-line global-require,max-len,import/no-dynamic-require
 </script>

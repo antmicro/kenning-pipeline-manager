@@ -11,7 +11,5 @@ export default class SliderInterface extends NodeInterface {
         super(name, value);
         this.min = min;
         this.max = max;
-
-        this.setComponent(markRaw(SliderInterfaceComponent));
     }
 }

@@ -10,6 +10,5 @@ export default class InputInterface extends NodeInterface {
     constructor(name, value, dtype) {
         super(name, value);
         this.dtype = dtype;
-        this.setComponent(markRaw(ListInterfaceComponent));
     }
 }

@@ -6,9 +6,4 @@
 
 import { NodeInterface } from '@baklavajs/core';
 
-export default class InputInterface extends NodeInterface {
-    constructor(name, value) {
-        super(name, value);
-        this.setComponent(markRaw(InputInterfaceComponent));
-    }
-}
+export default class InputInterface extends NodeInterface {}
