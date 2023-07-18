@@ -4,10 +4,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-const { defineConfig } = require('@vue/cli-service');
-const path = require('path');
+import { defineConfig } from '@vue/cli-service';
+import { fileURLToPath } from 'url';
+import path, { dirname } from 'path';
 
-module.exports = defineConfig({
+const __filename = fileURLToPath(import.meta.url);
+
+export default defineConfig({
     publicPath: '',
     css: {
         extract: !process.env.VUE_APP_SINGLEHTML_BUILD,
@@ -33,7 +36,7 @@ module.exports = defineConfig({
         }
         config.resolve = {
             alias: {
-                '@baklavajs': path.resolve(__dirname, 'node_modules/@baklavajs/'),
+                '@baklavajs': path.resolve(dirname(__filename), 'node_modules/@baklavajs/'),
             },
             fallback: {
                 fs: false,
