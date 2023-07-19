@@ -1,49 +1,49 @@
 import EditorManager from './src/core/EditorManager.js';
 import fs from 'fs';
 
-if (process.argv.length >= 3) {
-    fs.readFile(process.argv[2], async function (err, spec) {
-        const instance = EditorManager.getEditorManagerInstance();
+console.warn = function() {}; // Supressing baklavajs logging
 
-        let validationWarning = instance.validateSpecification(spec.toString());
-        if (Array.isArray(validationWarning) && validationWarning.length) {
-            console.log('Specification invalid, errors:')
-            console.log(validationWarning);
-            return;
-        }
+fs.readFile(process.argv[2], async function (err, spec) {
+    const instance = EditorManager.getEditorManagerInstance();
 
-        let { errors, warnings } = instance.updateEditorSpecification(spec.toString());
-        if (Array.isArray(warnings) && warnings.length) {
-            console.log('Specification warnings:')
-            console.log(warnings);
-        }
-        if (Array.isArray(errors) && errors.length) {
-            console.log('Specification invalid, errors:')
-            console.log(errors);
-            return;
-        }
-        console.log('Specification valid.\n');
+    let validationError = instance.validateSpecification(spec.toString());
+    if (Array.isArray(validationError) && validationError.length) {
+        console.log('Specification errors:')
+        validationError.forEach((error) => console.log(`* \t\x1b[31m${error}\x1b[0m`))
+        console.log('\x1b[31mSpecification invalid.\x1b[0m');
+        return;
+    }
 
-        if (process.argv.length >= 4) {
-            fs.readFile(process.argv[3], async function (err, dataflow) {
-                ({ errors, warnings } = await instance.loadDataflow(dataflow.toString()));
-                if (Array.isArray(warnings) && warnings.length) {
-                    console.log('Dataflow warnings:')
-                    console.log(warnings);
-                }
-                if (Array.isArray(errors) && errors.length) {
-                    console.log('Dataflow invalid, errors:')
-                    console.log(errors);
-                    return;
-                }
-                console.log('Dataflow valid.\n');
-            });
-        }
-    });
-} else {
-    console.log(
-        'Pass specification path and optionally dataflow path\n\n' +
-        'Example:\n' +
-        'node validator.js <specification_path.json> <dataflow_path.json>'
-    )
-}
+    let { errors, warnings } = instance.updateEditorSpecification(spec.toString());
+    if (Array.isArray(warnings) && warnings.length) {
+        console.log('Specification warnings:')
+        warnings.forEach((warning) => console.log(`* \t\x1b[33m${warning}\x1b[0m`))
+    }
+    if (Array.isArray(errors) && errors.length) {
+        console.log('Specification errors:')
+        errors.forEach((error) => console.log(`* \t\x1b[31m${error}\x1b[0m`))
+        console.log('\x1b[31mSpecification invalid.\x1b[0m');
+        return;
+    }
+    console.log('\x1b[32mSpecification valid.\x1b[0m');
+
+    if (process.argv.length >= 4) {
+        console.log('\n-----\n')
+        fs.readFile(process.argv[3], async function (err, dataflow) {
+
+            ({ errors, warnings } = await instance.loadDataflow(dataflow.toString()));
+            if (Array.isArray(warnings) && warnings.length) {
+                console.log('Dataflow warnings:')
+                warnings.forEach((warning) => console.log(`* \t\x1b[33m${warning}\x1b[0m`))
+            }
+            if (Array.isArray(errors) && errors.length) {
+                console.log('Dataflow errors:')
+                errors.forEach((error) => console.log(`* \t\x1b[31m${error}\x1b[0m`))
+                console.log('\x1b[31mDataflow invalid.\x1b[0m');
+
+                return;
+            }
+            console.log('\x1b[32mDataflow valid.\x1b[0m');
+        });
+    }
+});
