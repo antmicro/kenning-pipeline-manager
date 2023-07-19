@@ -10,7 +10,7 @@ edited by a user
 
 Inherits from baklavajs/rendered-vue/src/editor/Editor.vue
 
-Sidebar and Minimap components are removed whatsoever as they are not used.
+Minimap component is removed whatsoever as they are not used.
 Hovered connections are calculated and rendered with an appropriate `isHighlighted` value.
 -->
 
@@ -36,7 +36,7 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
         </slot>
 
         <slot name="sidebar">
-            <sidebar />
+            <CustomSidebar />
         </slot>
 
         <slot name="palette" v-if="!(readonly || hideHud)">
@@ -91,6 +91,7 @@ import NodePalette from './nodepalette/NodePalette.vue';
 import { useTemporaryConnection } from './temporaryConnection';
 import NotificationHandler from '../core/notifications';
 import EditorManager from '../core/EditorManager';
+import CustomSidebar from './CustomSidebar.vue';
 
 export default defineComponent({
     extends: EditorComponent,
@@ -99,6 +100,7 @@ export default defineComponent({
         PipelineManagerConnection,
         TemporaryConnection,
         NodePalette,
+        CustomSidebar,
     },
     setup(props) {
         const {

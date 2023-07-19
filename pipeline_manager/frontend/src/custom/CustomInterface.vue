@@ -30,7 +30,6 @@ from creating and deleting connections or altering nodes' values if the editor i
             v-model="intf.value"
             :node="node"
             :intf="intf"
-            @open-sidebar="openSidebar"
         />
         <span v-else class="align-middle">
             {{ intf.name }}

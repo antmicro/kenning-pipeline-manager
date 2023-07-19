@@ -183,6 +183,9 @@ const nodeTitle = computed(() => {
 });
 
 const select = () => {
+    const { sidebar } = viewModel.value.displayedGraph;
+    sidebar.nodeId = props.node.id;
+    sidebar.visible = true;
     emit('select');
 };
 
