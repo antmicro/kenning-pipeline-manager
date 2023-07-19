@@ -36,6 +36,21 @@
                         "description": "Icon of a node",
                         "type": "string"
                     },
+                    "defaultInterfaceGroups": {
+                        "description": "List of names of chosen interface groups that are enabled by default",
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "type": "string"
+                                },
+                                "direction": {
+                                    "enum": ["input", "output", "inout"]
+                                }
+                            }
+                        }
+                    },
                     "interfaces": {
                         "description": "Definition of available interfaces of the node",
                         "type": "array",
