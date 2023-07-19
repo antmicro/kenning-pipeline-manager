@@ -6,7 +6,7 @@
 
 from pathlib import Path
 import subprocess
-
+import sys
 import argparse
 
 from pipeline_manager.frontend_builder import build_prepare  # noqa: E402
@@ -40,7 +40,7 @@ if __name__ == "__main__":
         build_prepare()
 
     if args.dataflow:
-        subprocess.run(
+        exit_status = subprocess.run(
             [
                 "node",
                 "--no-warnings",
@@ -51,7 +51,7 @@ if __name__ == "__main__":
             cwd=frontend_path,
         )
     else:
-        subprocess.run(
+        exit_status = subprocess.run(
             [
                 "node",
                 "--no-warnings",
@@ -60,3 +60,5 @@ if __name__ == "__main__":
             ],
             cwd=frontend_path,
         )
+
+    sys.exit(exit_status.returncode)
