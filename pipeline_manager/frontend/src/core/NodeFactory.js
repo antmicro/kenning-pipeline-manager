@@ -93,7 +93,7 @@ function parseProperties(properties) {
                 break;
             default:
                 /* eslint-disable no-console */
-                console.error(propType, '- input type is not recognized.');
+                console.error(propType, ' input type is not recognized.');
         }
     });
     return tempInputs;
@@ -109,7 +109,7 @@ function parseProperties(properties) {
  * from `io`
  * @returns baklava interface constructor
  */
-function createInterface(io, hidden = true, name = undefined) {
+function createInterface(io, hidden, name = undefined) {
     return () => {
         const intf = new NodeInterface(name ?? io.name);
         intf.type = typeof io.type === 'string' || io.type instanceof String ? [io.type] : io.type;
@@ -123,77 +123,182 @@ function createInterface(io, hidden = true, name = undefined) {
     };
 }
 
-/* eslint-disable no-lonely-if */
-function parseIntefaces(interfaces, interfaceGroups) {
-    const tempIO = {
+/**
+ *
+ * @param interfaces list of interfaces from specification that is going to be parsed
+ * @param interfaceGroup determines whether `interfaces` are interface groups. If true the
+ * additionaly field `.interfaces` is parsed.
+ * @returns
+ */
+function parseSingleInterfaces(interfaces, interfaceGroup = false) {
+    const errors = [];
+    const tempParsed = {
         input: {},
         inout: {},
         output: {},
     };
 
-    // Interfaces that are mentioned in interfaces groups should not be rendered by default
-    const interfacesFromGroups = new Set();
-
-    interfaceGroups.forEach((ig) => {
-        tempIO[ig.direction][ig.name] = createInterface(ig, true);
-
-        ig.interfaces.forEach((intf) => {
-            if (intf.array !== undefined) {
-                const [left, right] = intf.array;
-
-                for (let j = left; j < right; j += 1) {
-                    const newName = `${intf.name}[${j}]`;
-                    interfacesFromGroups.add(`${intf.direction}_${newName}`);
-                }
-            } else {
-                interfacesFromGroups.add(`${intf.direction}_${intf.name}`);
-            }
-        });
-    });
-
-    // storing inouts currently in the same list as inputs (since they are already
-    // handling other things than inputs, such as parameters)
     interfaces.forEach((io) => {
         if (io.array !== undefined) {
             const [left, right] = io.array;
 
             for (let j = left; j < right; j += 1) {
-                const newName = `${io.name}[${j}]`;
-                if (!interfacesFromGroups.has(`${io.direction}_${newName}`)) {
-                    tempIO[io.direction][newName] = createInterface(io, false, newName);
+                const name = `${io.name}[${j}]`;
+                if (tempParsed[io.direction][name] !== undefined) {
+                    errors.push(
+                        `Interface named ${name} of direction ${io.direction} is a duplicate.`,
+                    );
                 }
+                tempParsed[io.direction][`${io.name}[${j}]`] = io;
             }
         } else {
-            if (!interfacesFromGroups.has(`${io.direction}_${io.name}`)) {
-                tempIO[io.direction][io.name] = createInterface(
-                    io,
-                    interfacesFromGroups.has(`${io.direction}_${io.name}`),
+            if (tempParsed[io.direction][io.name] !== undefined) {
+                errors.push(
+                    `Interface named ${io.name} of direction ${io.direction} is a duplicate.`,
                 );
             }
+            tempParsed[io.direction][io.name] = io;
+        }
+
+        if (interfaceGroup) {
+            const newInterfaces = [];
+
+            io.interfaces.forEach((buildingIO) => {
+                if (buildingIO.array !== undefined) {
+                    const [left, right] = buildingIO.array;
+
+                    for (let j = left; j < right; j += 1) {
+                        const name = `${buildingIO.direction}_${buildingIO.name}[${j}]`;
+                        newInterfaces.push(name);
+                    }
+                } else {
+                    const name = `${buildingIO.direction}_${buildingIO.name}`;
+                    newInterfaces.push(name);
+                }
+            });
+            io.interfaces = newInterfaces;
         }
     });
 
-    const filteredInouts = Object.fromEntries(
-        Object.entries(tempIO.inout).filter(
-            ([name]) =>
-                !Object.keys(tempIO.output).includes(name) &&
-                !Object.keys(tempIO.input).includes(name),
-        ),
+    // Removing inout with duplicate names
+    const filteredTempInouts = Object.fromEntries(
+        Object.entries(tempParsed.inout).filter(([name, state]) => {
+            const duplicate =
+                Object.keys(tempParsed.output).includes(name) ||
+                Object.keys(tempParsed.input).includes(name);
+            if (duplicate) {
+                errors.push(
+                    `Interface named ${name} of direction ${state.direction} ` +
+                        `is a duplicate. There already exists an input or output of this name.`,
+                );
+            }
+            return !duplicate;
+        }),
     );
 
-    const renamedInputs = Object.fromEntries(
-        Object.entries(tempIO.input).map(([name, constructor]) => [`input_${name}`, constructor]),
+    tempParsed.inout = filteredTempInouts;
+    tempParsed.input = { ...tempParsed.input, ...tempParsed.inout };
+    delete tempParsed.inout;
+
+    tempParsed.input = Object.fromEntries(
+        Object.entries(tempParsed.input).map(([name, state]) => [
+            `${state.direction}_${name}`,
+            state,
+        ]),
     );
-    const renamedInouts = Object.fromEntries(
-        Object.entries(filteredInouts).map(([name, constructor]) => [`inout_${name}`, constructor]),
+    tempParsed.output = Object.fromEntries(
+        Object.entries(tempParsed.output).map(([name, state]) => [
+            `${state.direction}_${name}`,
+            state,
+        ]),
     );
-    const renamedOutputs = Object.fromEntries(
-        Object.entries(tempIO.output).map(([name, constructor]) => [`output_${name}`, constructor]),
-    );
+
+    if (Array.isArray(errors) && errors.length) {
+        return errors;
+    }
+    return tempParsed;
+}
+
+/* eslint-disable no-lonely-if */
+function parseIntefaces(interfaces, interfaceGroups) {
+    const errors = [];
+
+    // Parsing single interfaces first
+    const tempParsed = parseSingleInterfaces(interfaces);
+
+    // Checking for integrity of interface groups
+    interfaceGroups.forEach((intfG) => {
+        intfG.interfaces.forEach((intf) => {
+            if (intf.array !== undefined) {
+                const [left, right] = intf.array;
+
+                for (let j = left; j < right; j += 1) {
+                    const name = `${intf.direction}_${intf.name}[${j}]`;
+                    if (
+                        !Object.keys({ ...tempParsed.input, ...tempParsed.output }).includes(name)
+                    ) {
+                        errors.push(
+                            `Interface named ${intf.name}[${j}] of direction ${intf.direction} ` +
+                                `used for interface group ${intfG.name} of direction ` +
+                                `${intfG.direction} does not exist.`,
+                        );
+                    }
+                }
+            } else {
+                const name = `${intf.direction}_${intf.name}`;
+                if (!Object.keys({ ...tempParsed.input, ...tempParsed.output }).includes(name)) {
+                    errors.push(
+                        `Interface named ${intf.name} of direction ${intf.direction} ` +
+                            `used for interface group ${intfG.name} of direction ` +
+                            `${intfG.direction} does not exist.`,
+                    );
+                }
+            }
+        });
+    });
+
+    const tempParsedGroups = parseSingleInterfaces(interfaceGroups, true);
+
+    // All interfaces that create some interfaces groups
+    const interfacesCreatingGroups = new Set();
+    Object.values({
+        ...tempParsedGroups.input,
+        ...tempParsedGroups.output,
+    }).forEach((state) => {
+        state.interfaces.forEach((intf) => interfacesCreatingGroups.add(intf));
+    });
+
+    const createdInterfaces = {
+        inputs: {},
+        outputs: {},
+    };
+
+    // Filtering single interfaces that are part of interface groups
+    // Those interfaces are removed as they are never rendered
+    Object.entries(tempParsed.input).forEach(([name, intf]) => {
+        if (!interfacesCreatingGroups.has(name)) {
+            createdInterfaces.inputs[name] = createInterface(intf, false, name);
+        }
+    });
+
+    Object.entries(tempParsed.output).forEach(([name, intf]) => {
+        if (!interfacesCreatingGroups.has(name)) {
+            createdInterfaces.outputs[name] = createInterface(intf, false, name);
+        }
+    });
+
+    // Adding interfaces groups, hidden by default
+    Object.entries(tempParsedGroups.input).forEach(([name, intf]) => {
+        createdInterfaces.inputs[name] = createInterface(intf, true, name);
+    });
+
+    Object.entries(tempParsedGroups.output).forEach(([name, intf]) => {
+        createdInterfaces.inputs[name] = createInterface(intf, true, name);
+    });
 
     return {
-        inputs: { ...renamedInouts, ...renamedInputs },
-        outputs: renamedOutputs,
+        inputs: createdInterfaces.inputs,
+        outputs: createdInterfaces.outputs,
     };
 }
 
@@ -247,6 +352,46 @@ function parseNodeState(state) {
     return newState;
 }
 
+function validateInterfaceGroups(interfaceGroups, inputs, outputs) {
+    const errors = [];
+    // Checking for integrity of interface groups
+    const usedInterfaces = new Set();
+    Object.keys(interfaceGroups).forEach((groupName) => {
+        const interfaces = inputs[groupName]?.interfaces ?? outputs[groupName]?.interfaces;
+        const direction = groupName.slice(0, groupName.indexOf('_'));
+        const name = groupName.slice(groupName.indexOf('_') + 1);
+
+        interfaces.forEach((intf) => {
+            if (intf.array !== undefined) {
+                const [left, right] = intf.array;
+
+                for (let j = left; j < right; j += 1) {
+                    const newName = `${intf.name}[${j}]`;
+                    if (usedInterfaces.has(newName)) {
+                        errors.push(
+                            `Interface of name ${intf.name}[${j}] has been reused ` +
+                                `by interface group named ${name} of direction ${direction}. ` +
+                                `Make sure your interface groups are disjoint.`,
+                        );
+                    } else {
+                        usedInterfaces.add(newName);
+                    }
+                }
+            } else {
+                if (usedInterfaces.has(intf.name)) {
+                    errors.push(
+                        `Interface of name ${intf.name} has been reused ` +
+                            `by interface group named ${name} of direction ${direction}. ` +
+                            `Make sure your interface groups are disjoint.`,
+                    );
+                } else {
+                    usedInterfaces.add(intf.name);
+                }
+            }
+        });
+    });
+}
+
 /**
  * Function performs sanity checking on parsed state before loading it
  * into the editor. It should throw explicit errors if any discrepancy is detected.
@@ -256,7 +401,7 @@ function parseNodeState(state) {
  * @param outputs outputs of the node
  */
 function detectDiscrepancies(parsedState, inputs, outputs) {
-    const errors = [];
+    let errors = [];
 
     // Checking for existence of interfaces defined
     Object.keys({
@@ -272,7 +417,7 @@ function detectDiscrepancies(parsedState, inputs, outputs) {
 
             errors.push(
                 `Node of name ${parsedState.type} and id ${parsedState.id} is corrupted. ` +
-                    `Interface named - ${name} of direction - ${direction} not found in specification!`,
+                    `Interface named ${name} of direction ${direction} not found in specification!`,
             );
         }
     });
@@ -288,7 +433,7 @@ function detectDiscrepancies(parsedState, inputs, outputs) {
 
             errors.push(
                 `Node of name ${parsedState.type} and id ${parsedState.id} is corrupted. ` +
-                    `Interface group named - ${name} of direction - ${direction} not found in specification!`,
+                    `Interface group named ${name} of direction ${direction} not found in specification!`,
             );
         }
     });
@@ -297,42 +442,7 @@ function detectDiscrepancies(parsedState, inputs, outputs) {
         return errors;
     }
 
-    // Checking for integrity of interface groups
-    const usedInterfaces = new Set();
-    Object.keys(parsedState.interfaceGroups).forEach((groupName) => {
-        const interfaces = inputs[groupName]?.interfaces ?? outputs[groupName]?.interfaces;
-        const direction = groupName.slice(0, groupName.indexOf('_'));
-        const name = groupName.slice(groupName.indexOf('_') + 1);
-
-        interfaces.forEach((intf) => {
-            if (intf.array !== undefined) {
-                const [left, right] = intf.array;
-
-                for (let j = left; j < right; j += 1) {
-                    const newName = `${intf.name}[${j}]`;
-                    if (usedInterfaces.has(newName)) {
-                        errors.push(
-                            `Interface of name ${intf.name}[${j}] has been reused ` +
-                                `by interface group named - ${name} of direction - ${direction}. ` +
-                                `Make sure your interface groups are disjoint.`,
-                        );
-                    } else {
-                        usedInterfaces.add(newName);
-                    }
-                }
-            } else {
-                if (usedInterfaces.has(intf.name)) {
-                    errors.push(
-                        `Interface of name ${intf.name} has been reused ` +
-                            `by interface group named - ${name} of direction - ${direction}. ` +
-                            `Make sure your interface groups are disjoint.`,
-                    );
-                } else {
-                    usedInterfaces.add(intf.name);
-                }
-            }
-        });
-    });
+    errors = validateInterfaceGroups(parsedState.interfaceGroups, inputs, outputs);
 
     return errors;
 }
@@ -357,18 +467,21 @@ export function NodeFactory(
     interfaces,
     properties,
     interfaceGroups,
+    defaultInterfaceGroups,
     twoColumn,
 ) {
+    const parsedInterfaces = parseIntefaces(interfaces, interfaceGroups);
+
     const node = defineNode({
         type: name,
 
         title: displayName,
 
         inputs: {
-            ...parseIntefaces(interfaces, interfaceGroups).inputs,
+            ...parsedInterfaces.inputs,
             ...parseProperties(properties),
         },
-        outputs: parseIntefaces(interfaces, interfaceGroups).outputs,
+        outputs: parsedInterfaces.outputs,
 
         /* eslint-disable no-param-reassign */
         onCreate() {
@@ -422,10 +535,12 @@ export function NodeFactory(
             this.load = (state) => {
                 const parsedState = parseNodeState(state);
                 const errors = detectDiscrepancies(parsedState, this.inputs, this.outputs);
+
                 if (Array.isArray(errors) && errors.length) {
                     return errors;
                 }
 
+                // Enabling interface groups
                 Object.entries(parsedState.interfaceGroups).forEach(([groupName, groupState]) => {
                     if (groupState.direction === 'input' || groupState.direction === 'inout') {
                         this.inputs[groupName].hidden = false;
