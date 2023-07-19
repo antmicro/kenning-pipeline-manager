@@ -124,11 +124,13 @@ function createInterface(io, hidden, name = undefined) {
 }
 
 /**
+ * Parses and validates interfaces passed in specification
  *
  * @param interfaces list of interfaces from specification that is going to be parsed
  * @param interfaceGroup determines whether `interfaces` are interface groups. If true the
  * additionaly field `.interfaces` is parsed.
- * @returns
+ * @returns parsed interfaces that can be passed to baklavajs if the interfaces were valid.
+ * Otherwise an array of errors is returned.
  */
 function parseSingleInterfaces(interfaces, interfaceGroup = false) {
     const errors = [];
@@ -176,7 +178,7 @@ function parseSingleInterfaces(interfaces, interfaceGroup = false) {
                     newInterfaces.push(name);
                 }
             });
-            io.interfaces = newInterfaces;
+            io.interfaces = newInterfaces; // eslint-disable-line no-param-reassign
         }
     });
 
@@ -213,18 +215,123 @@ function parseSingleInterfaces(interfaces, interfaceGroup = false) {
         ]),
     );
 
-    if (Array.isArray(errors) && errors.length) {
+    if (errors.length) {
         return errors;
     }
     return tempParsed;
 }
 
-/* eslint-disable no-lonely-if */
-function parseIntefaces(interfaces, interfaceGroups) {
+/**
+ * Checks whether interface groups that are in enabledInterfaceGroup
+ * can be enabled at the same time
+ * @param {array} enabledInterfaceGroups array of names of enabled interface groups
+ * @param {*} inputs inputs of the node
+ * @param {*} outputs outputs of the node
+ * @returns list of errors.
+ */
+function validateInterfaceGroups(enabledInterfaceGroups, inputs, outputs) {
     const errors = [];
+    // Checking for integrity of interface groups
+    const usedInterfaces = new Set();
+    enabledInterfaceGroups.forEach((name) => {
+        const interfaces = inputs[name]?.interfaces ?? outputs[name]?.interfaces;
+        const groupDirection = name.slice(0, name.indexOf('_'));
+        const groupName = name.slice(name.indexOf('_') + 1);
+
+        interfaces.forEach((intfName) => {
+            if (usedInterfaces.has(intfName)) {
+                const intfDirection = intfName.slice(0, intfName.indexOf('_'));
+                const parsedIntfName = intfName.slice(intfName.indexOf('_') + 1);
+
+                errors.push(
+                    `Interface of name ${parsedIntfName} and direction ${intfDirection} has been reused ` +
+                        `by interface group named ${groupName} of direction ${groupDirection}. ` +
+                        `Make sure your interface groups are disjoint.`,
+                );
+            } else {
+                usedInterfaces.add(intfName);
+            }
+        });
+    });
+    return errors;
+}
+
+/**
+ * Function performs sanity checking on parsed state before loading it
+ * into the editor. It should throw explicit errors if any discrepancy is detected.
+ *
+ * @param parsedState that is passed to node to load
+ * @param inputs inputs of the node
+ * @param outputs outputs of the node
+ * @returns list of errors.
+ */
+function detectDiscrepancies(parsedState, inputs, outputs) {
+    let errors = [];
+
+    // Checking for existence of interfaces defined
+    Object.keys({
+        ...parsedState.inputs,
+        ...parsedState.outputs,
+    }).forEach((ioName) => {
+        if (
+            !Object.prototype.hasOwnProperty.call(inputs, ioName) &&
+            !Object.prototype.hasOwnProperty.call(outputs, ioName)
+        ) {
+            const direction = ioName.slice(0, ioName.indexOf('_'));
+            const name = ioName.slice(ioName.indexOf('_') + 1);
+
+            errors.push(
+                `Node of name ${parsedState.type} and id ${parsedState.id} is corrupted. ` +
+                    `Interface named ${name} of direction ${direction} not found in specification!`,
+            );
+        }
+    });
+
+    // Checking for existence of interface groups
+    Object.keys(parsedState.enabledInterfaceGroups).forEach((groupName) => {
+        if (
+            !Object.prototype.hasOwnProperty.call(inputs, groupName) &&
+            !Object.prototype.hasOwnProperty.call(outputs, groupName)
+        ) {
+            const direction = groupName.slice(0, groupName.indexOf('_'));
+            const name = groupName.slice(groupName.indexOf('_') + 1);
+
+            errors.push(
+                `Node of name ${parsedState.type} and id ${parsedState.id} is corrupted. ` +
+                    `Interface group named ${name} of direction ${direction} not found in specification!`,
+            );
+        }
+    });
+
+    if (errors && errors.length) {
+        return errors;
+    }
+
+    errors = validateInterfaceGroups(
+        Object.keys(parsedState.enabledInterfaceGroups),
+        inputs,
+        outputs,
+    );
+
+    return errors;
+}
+
+/**
+ * @param {*} interfaces List of interfaces in the block (input, output and inout)
+ * @param {*} interfaceGroups Object describing groups of interfaces
+ * @param {*} defaultInterfaceGroups Object describing groups of interfaces that
+ * @returns
+ */
+/* eslint-disable no-lonely-if */
+function parseIntefaces(interfaces, interfaceGroups, defaultInterfaceGroups) {
+    let errors = [];
 
     // Parsing single interfaces first
     const tempParsed = parseSingleInterfaces(interfaces);
+    // If parseSingleInterfaces returns an array, it is an array of errors
+    if (Array.isArray(tempParsed) && tempParsed.length) {
+        return tempParsed;
+    }
 
     // Checking for integrity of interface groups
     interfaceGroups.forEach((intfG) => {
@@ -257,7 +364,15 @@ function parseIntefaces(interfaces, interfaceGroups) {
         });
     });
 
+    if (errors.length) {
+        return errors;
+    }
+
     const tempParsedGroups = parseSingleInterfaces(interfaceGroups, true);
+    // If parseSingleInterfaces returns an array, it is an array of errors
+    if (Array.isArray(tempParsedGroups) && tempParsedGroups.length) {
+        return tempParsedGroups;
+    }
 
     // All interfaces that create some interfaces groups
     const interfacesCreatingGroups = new Set();
@@ -268,6 +383,22 @@ function parseIntefaces(interfaces, interfaceGroups) {
         state.interfaces.forEach((intf) => interfacesCreatingGroups.add(intf));
     });
 
+    // Detecting integrity of enabled interface groups
+    const enabledInterfaceGroupsNames = defaultInterfaceGroups.map(
+        (group) => `${group.direction}_${group.name}`,
+    );
+
+    errors = validateInterfaceGroups(
+        enabledInterfaceGroupsNames,
+        { ...tempParsedGroups.input, ...tempParsed.input },
+        { ...tempParsedGroups.output, ...tempParsed.output },
+    );
+
+    if (errors.length) {
+        return errors;
+    }
+
+    // Creating interfaces for baklavajs
     const createdInterfaces = {
         inputs: {},
         outputs: {},
@@ -302,6 +433,10 @@ function parseIntefaces(interfaces, interfaceGroups) {
     };
 }
 
+/**
+ * @param {*} state state to be loaded. Should be a valid dataflow
+ * @returns state that can be given to baklavajs
+ */
 function parseNodeState(state) {
     const newState = { ...state };
 
@@ -336,10 +471,9 @@ function parseNodeState(state) {
         newState.enabledInterfaceGroups.forEach((intf) => {
             interfaceGroups[`${intf.direction}_${intf.name}`] = { ...intf };
         });
-        newState.interfaceGroups = interfaceGroups;
-        delete newState.enabledInterfaceGroups;
+        newState.enabledInterfaceGroups = interfaceGroups;
     } else {
-        newState.interfaceGroups = {};
+        newState.enabledInterfaceGroups = {};
     }
 
     if ('name' in newState) {
@@ -352,101 +486,6 @@ function parseNodeState(state) {
     return newState;
 }
 
-function validateInterfaceGroups(interfaceGroups, inputs, outputs) {
-    const errors = [];
-    // Checking for integrity of interface groups
-    const usedInterfaces = new Set();
-    Object.keys(interfaceGroups).forEach((groupName) => {
-        const interfaces = inputs[groupName]?.interfaces ?? outputs[groupName]?.interfaces;
-        const direction = groupName.slice(0, groupName.indexOf('_'));
-        const name = groupName.slice(groupName.indexOf('_') + 1);
-
-        interfaces.forEach((intf) => {
-            if (intf.array !== undefined) {
-                const [left, right] = intf.array;
-
-                for (let j = left; j < right; j += 1) {
-                    const newName = `${intf.name}[${j}]`;
-                    if (usedInterfaces.has(newName)) {
-                        errors.push(
-                            `Interface of name ${intf.name}[${j}] has been reused ` +
-                                `by interface group named ${name} of direction ${direction}. ` +
-                                `Make sure your interface groups are disjoint.`,
-                        );
-                    } else {
-                        usedInterfaces.add(newName);
-                    }
-                }
-            } else {
-                if (usedInterfaces.has(intf.name)) {
-                    errors.push(
-                        `Interface of name ${intf.name} has been reused ` +
-                            `by interface group named ${name} of direction ${direction}. ` +
-                            `Make sure your interface groups are disjoint.`,
-                    );
-                } else {
-                    usedInterfaces.add(intf.name);
-                }
-            }
-        });
-    });
-}
-
-/**
- * Function performs sanity checking on parsed state before loading it
- * into the editor. It should throw explicit errors if any discrepancy is detected.
- *
- * @param parsedState that is passed to node to load
- * @param inputs inputs of the node
- * @param outputs outputs of the node
- */
-function detectDiscrepancies(parsedState, inputs, outputs) {
-    let errors = [];
-
-    // Checking for existence of interfaces defined
-    Object.keys({
-        ...parsedState.inputs,
-        ...parsedState.outputs,
-    }).forEach((ioName) => {
-        if (
-            !Object.prototype.hasOwnProperty.call(inputs, ioName) &&
-            !Object.prototype.hasOwnProperty.call(outputs, ioName)
-        ) {
-            const direction = ioName.slice(0, ioName.indexOf('_'));
-            const name = ioName.slice(ioName.indexOf('_') + 1);
-
-            errors.push(
-                `Node of name ${parsedState.type} and id ${parsedState.id} is corrupted. ` +
-                    `Interface named ${name} of direction ${direction} not found in specification!`,
-            );
-        }
-    });
-
-    // Checking for existence of interface groups
-    Object.keys(parsedState.interfaceGroups).forEach((groupName) => {
-        if (
-            !Object.prototype.hasOwnProperty.call(inputs, groupName) &&
-            !Object.prototype.hasOwnProperty.call(outputs, groupName)
-        ) {
-            const direction = groupName.slice(0, groupName.indexOf('_'));
-            const name = groupName.slice(groupName.indexOf('_') + 1);
-
-            errors.push(
-                `Node of name ${parsedState.type} and id ${parsedState.id} is corrupted. ` +
-                    `Interface group named ${name} of direction ${direction} not found in specification!`,
-            );
-        }
-    });
-
-    if (Array.isArray(errors) && errors.length) {
-        return errors;
-    }
-
-    errors = validateInterfaceGroups(parsedState.interfaceGroups, inputs, outputs);
-
-    return errors;
-}
-
 /**
  * Class factory that creates a class for a custom Node that is described by the arguments.
  * It can be later registered so that the user can use it and save the editor.
@@ -457,8 +496,11 @@ function detectDiscrepancies(parsedState, inputs, outputs) {
  * @param {string} type Type of the node
  * @param {*} interfaces List of interfaces in the block (input, output and inout)
  * @param {*} properties List of properties of the block
+ * @param {*} interfaceGroups Object describing groups of interfaces
+ * @param {*} defaultInterfaceGroups Object describing groups of interfaces that
+ * are enabled by default
  * @param {boolean} twoColumn type of layout of the nodes
- * @returns Node based class
+ * @returns Node based class is successful, otherwise an array of errors is returned.
  */
 export function NodeFactory(
     name,
@@ -470,7 +512,11 @@ export function NodeFactory(
     defaultInterfaceGroups,
     twoColumn,
 ) {
-    const parsedInterfaces = parseIntefaces(interfaces, interfaceGroups);
+    const parsedInterfaces = parseIntefaces(interfaces, interfaceGroups, defaultInterfaceGroups);
+    // If parsedInterfaces returns an array, it is an array of errors
+    if (Array.isArray(parsedInterfaces) && parsedInterfaces.length) {
+        return parsedInterfaces;
+    }
 
     const node = defineNode({
         type: name,
@@ -541,13 +587,15 @@ export function NodeFactory(
                 }
 
                 // Enabling interface groups
-                Object.entries(parsedState.interfaceGroups).forEach(([groupName, groupState]) => {
-                    if (groupState.direction === 'input' || groupState.direction === 'inout') {
-                        this.inputs[groupName].hidden = false;
-                    } else if (groupState.direction === 'output') {
-                        this.outputs[groupName].hidden = false;
-                    }
-                });
+                Object.entries(parsedState.enabledInterfaceGroups).forEach(
+                    ([groupName, groupState]) => {
+                        if (groupState.direction === 'input' || groupState.direction === 'inout') {
+                            this.inputs[groupName].hidden = false;
+                        } else if (groupState.direction === 'output') {
+                            this.outputs[groupName].hidden = false;
+                        }
+                    },
+                );
 
                 this.parentLoad(parsedState);
 
@@ -561,7 +609,7 @@ export function NodeFactory(
                 Object.entries({
                     ...parsedState.inputs,
                     ...parsedState.outputs,
-                    ...parsedState.interfaceGroups,
+                    ...parsedState.enabledInterfaceGroups,
                 }).forEach(([ioName, ioState]) => {
                     if (ioState.direction !== undefined && ioState.side !== undefined) {
                         if (ioState.direction === 'input' || ioState.direction === 'inout') {
