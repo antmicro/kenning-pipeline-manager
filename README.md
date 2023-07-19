@@ -134,6 +134,27 @@ In addition to using the sample specification you can also connect the third-par
 
 ### Miscellaneous
 
+#### Validation
+
+During the development of specifications and dataflows a validation tool can be a usefull aid.
+
+To validate existing specification run in the root directory:
+
+```
+./validate <specification-path>
+```
+
+To validate existing specification and dataflow run in the root directory:
+
+```
+./validate <specification-path> <dataflow-path>
+```
+
+Replace both `specification-path` and `dataflow-path` with the actual paths to the JSON configuration file you want to validate.
+When running the validation tool for the first time, make sure to include a `--instal-dependencies` flag.
+
+#### Cleanup
+
 To remove installed `npm` dependencies and built application run in the root directory:
 
 ```
