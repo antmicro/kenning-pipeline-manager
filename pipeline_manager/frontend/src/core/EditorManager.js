@@ -148,7 +148,7 @@ export default class EditorManager {
             return [e];
         }
 
-        const errors = this.validateSpecification(
+        let errors = this.validateSpecification(
             { subgraphs, nodes: resolvedNodes, metadata },
             specificationSchema,
         );
@@ -160,6 +160,7 @@ export default class EditorManager {
         this.baklavaView.editor.registerNodeType(SubgraphOutputNode, { category: 'Subgraphs' });
         this.baklavaView.editor.registerNodeType(SubgraphInoutNode, { category: 'Subgraphs' });
 
+        errors = [];
         resolvedNodes.forEach((node) => {
             const myNode = NodeFactory(
                 node.name,
@@ -171,6 +172,12 @@ export default class EditorManager {
                 node.defaultInterfaceGroups ?? [],
                 metadata?.twoColumn ?? false,
             );
+
+            // If my node is any array then it is an array of errors
+            if (Array.isArray(myNode) && myNode.length) {
+                errors.push(myNode);
+                return;
+            }
 
             this.baklavaView.editor.registerNodeType(myNode, {
                 title: node.name,
@@ -188,6 +195,10 @@ export default class EditorManager {
                 });
             }
         });
+
+        if (errors.length) {
+            return errors;
+        }
 
         if (subgraphs !== undefined) {
             subgraphs.forEach((subgraph) => {
@@ -218,8 +229,8 @@ export default class EditorManager {
      *
      */
     updateMetadata(metadata = undefined, overriding = false) {
-        if (metadata === undefined) {
-            metadata = this.currentSpecification.metadata;
+        if (metadata === undefined && this.currentSpecification) {
+            metadata = this.currentSpecification.metadata ?? {};
         }
 
         if (!metadata) return ['No specification to load provided.'];
@@ -417,7 +428,7 @@ export default class EditorManager {
      */
     async loadDataflow(dataflow) {
         const validationErrors = this.validateDataflow(dataflow);
-        if (Array.isArray(validationErrors) && validationErrors.length) {
+        if (validationErrors.length) {
             return { errors: validationErrors };
         }
 
@@ -446,7 +457,7 @@ export default class EditorManager {
 
                 this.updateMetadata(dataflow.metadata, true);
             } else {
-                this.updateMetadata(this.currentSpecification.metadata);
+                this.updateMetadata();
             }
             return { errors: await this.baklavaView.editor.load(dataflow), warnings };
         } catch (err) {
