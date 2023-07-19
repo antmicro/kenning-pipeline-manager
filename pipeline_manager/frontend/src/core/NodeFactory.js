@@ -420,11 +420,19 @@ function parseIntefaces(interfaces, interfaceGroups, defaultInterfaceGroups) {
 
     // Adding interfaces groups, hidden by default
     Object.entries(tempParsedGroups.input).forEach(([name, intf]) => {
-        createdInterfaces.inputs[name] = createInterface(intf, true, name);
+        createdInterfaces.inputs[name] = createInterface(
+            intf,
+            !enabledInterfaceGroupsNames.includes(name),
+            name,
+        );
     });
 
     Object.entries(tempParsedGroups.output).forEach(([name, intf]) => {
-        createdInterfaces.inputs[name] = createInterface(intf, true, name);
+        createdInterfaces.outputs[name] = createInterface(
+            intf,
+            !enabledInterfaceGroupsNames.includes(name),
+            name,
+        );
     });
 
     return {
@@ -586,6 +594,18 @@ export function NodeFactory(
                     return errors;
                 }
 
+                this.parentLoad(parsedState);
+
+                // Disabling default interface groups if the node has its own state
+                if (Object.keys(parsedState.enabledInterfaceGroups).length) {
+                    Object.entries({ ...this.inputs, ...this.outputs }).forEach(([, intf]) => {
+                        // If this is an interfaces group
+                        if (intf.interfaces !== undefined) {
+                            intf.hidden = true;
+                        }
+                    });
+                }
+
                 // Enabling interface groups
                 Object.entries(parsedState.enabledInterfaceGroups).forEach(
                     ([groupName, groupState]) => {
@@ -596,8 +616,6 @@ export function NodeFactory(
                         }
                     },
                 );
-
-                this.parentLoad(parsedState);
 
                 // As we do not save to dataflow information about interfaces
                 // that have no connections they have to be initialized manually
