@@ -295,30 +295,34 @@ export default defineComponent({
                 }
 
                 let errors = editorManager.validateSpecification(specText);
-                if (Array.isArray(errors) && errors.length) {
+                if (errors.length) {
                     NotificationHandler.terminalLog('error', 'Specification is invalid', errors);
                     return;
                 }
 
                 editorManager.updateEditorSpecification(specText, true);
                 errors = editorManager.updateMetadata();
-                if (Array.isArray(errors) && errors.length) {
+                if (errors.length) {
                     NotificationHandler.terminalLog('error', 'Specification is invalid', errors);
                 }
             }
         });
 
-        onMounted(() => {
+        onMounted(async () => {
             if (defaultSpecification) {
                 const errors = editorManager.updateGraphSpecification();
-                if (Array.isArray(errors) && errors.length) {
+                if (errors.length) {
                     NotificationHandler.terminalLog('error', 'Specification is invalid', errors);
+                    return;
                 }
             }
 
             if (defaultDataflow) {
                 const dataflow = require(process.env.VUE_APP_DATAFLOW_PATH); // eslint-disable-line global-require,max-len,import/no-dynamic-require
-                editorManager.loadDataflow(dataflow);
+                const errors = await editorManager.loadDataflow(dataflow);
+                if (errors.length) {
+                    NotificationHandler.terminalLog('error', 'Dataflow is invalid', errors);
+                }
             }
 
             NotificationHandler.restoreShowNotification();
