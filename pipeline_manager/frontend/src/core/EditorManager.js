@@ -168,6 +168,7 @@ export default class EditorManager {
                 node.interfaces,
                 node.properties,
                 node.interfaceGroups ?? [],
+                node.defaultInterfaceGroups ?? [],
                 metadata?.twoColumn ?? false,
             );
 
