@@ -35,6 +35,10 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
             <background />
         </slot>
 
+        <slot name="sidebar">
+            <sidebar />
+        </slot>
+
         <slot name="palette" v-if="!(readonly || hideHud)">
             <NodePalette />
         </slot>
