@@ -1,0 +1,104 @@
+/*
+ * Copyright (c) 2022-2023 Antmicro <www.antmicro.com>
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.baklava-node-palette {
+    top: 0px;
+    width: auto;
+    min-width: 300px;
+    max-width: 450px;
+    background: var(--baklava-node-color-background);
+
+    // default baklavjs height - terminal panel height
+    height: calc(100% - 60px - 35px);
+    padding: 0;
+    z-index: 3;
+
+    display: flex;
+    flex-direction: column;
+    overflow: visible;
+
+    & .searchbar {
+        flex-grow: 0;
+    }
+
+    .nodes {
+        overflow-y: auto;
+    }
+
+    & h1 {
+        margin: 0px;
+    }
+
+    & > .nodes {
+        overflow-y: auto;
+    }
+}
+
+.__entry:hover {
+    color: $green
+}
+
+.__entry {
+    gap: 1em;
+    padding: 0 1em;
+    width: 100%;
+
+    font-size: $fs-small;
+    margin-top: -1px;
+
+    border: 1px solid #393939;
+    border-right: 0;
+    border-left: 0;
+    height: 4em;
+
+    background: var(--baklava-node-color-background);
+    color: $white;
+
+    display: flex;
+    align-items: center;
+    cursor: grab;
+
+    & > .__title-icon {
+        flex-grow: 0;
+        padding: 0;
+        height: 2em;
+        width: 2em;
+        pointer-events: none;
+    }
+
+    & > .__title-label {
+        flex-grow: 1;
+
+        & > span {
+            color: $green;
+        }
+    }
+
+    &.__category {
+        cursor: pointer;
+
+        & > .__title > span {
+            color: $green;
+        }
+    }
+
+    & > .__category-title {
+        padding-left: 1em;
+    }
+
+    & > .__url {
+        display: inline;
+        text-decoration: none;
+        color: inherit;
+        width: auto;
+
+        img {
+            width: 2em;
+            height: 2em;
+            display: block;
+        }
+    }
+}

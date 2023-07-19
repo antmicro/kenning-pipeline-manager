@@ -1,0 +1,88 @@
+/*
+ * Copyright (c) 2022-2023 Antmicro <www.antmicro.com>
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.baklava-node {
+    min-width: 300px !important;
+    width: auto;
+    display: table;
+
+    background-color: #{$gray-600}E6;
+    transition: box-shadow var(--baklava-visual-transition) !important;
+    filter: none;
+
+    &.--selected {
+        z-index: 5;
+        box-shadow: 0 0 0 calc(1px / var(--scale)) $green;
+    }
+
+    &:hover {
+        box-shadow: 0 0 0 calc(1px / var(--scale)) $green;
+    }
+
+    &.--dragging {
+        box-shadow: 0 0 0 calc(1.5px / var(--scale)) $green;
+        filter: none;
+    }
+
+    & > .__title {
+        height: 4em;
+        display: flex;
+        align-items: center;
+        gap: 1em;
+        padding: 0 1em;
+        width: 100%;
+
+        & > .__title-icon {
+            flex-grow: 0;
+            padding: 0;
+            height: 2em;
+            width: 2em;
+            pointer-events: none;
+        }
+
+        & > .__title-label {
+            flex-grow: 1;
+        }
+
+        & > .__menu {
+            cursor: pointer;
+            flex-grow: 0;
+            height: 2em;
+            width: 2em;
+            padding: 0.5em;
+
+            & > svg {
+                height: 1em;
+                width: 1em;
+            }
+        }
+
+        & > .__menu:hover {
+
+            & > svg {
+                color: $green;
+
+            }
+        }
+    }
+
+    &.--two-column > .__content {
+        & > .__inputs {
+            grid-row: 2;
+            grid-column: 1;
+        }
+
+        & > .__outputs {
+            grid-row: 2;
+            grid-column: 2;
+        }
+
+        & > .__properties {
+            grid-row: 1;
+            grid-column: 1 / span 2;
+        }
+    }
+}
