@@ -489,7 +489,7 @@ Below, you can see a sample specification containing a hypothetical definition o
             "BinaryImage": "#FF0000"
         }
     },
-    "version": "20230711.4"
+    "version": "20230720.5"
 }
 ```
 
