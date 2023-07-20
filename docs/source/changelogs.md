@@ -3,6 +3,13 @@
 Formats of dataflows and specification is often updated with new features, that makes former formats incompatible with the new ones.
 This section lists all versions, related features and breaking changes.
 
+## 20230619.5
+
+Commit SHA - `84fe865ca44b3a80b87a2be418eedc1d1c025ee4`
+
+* Introduced `defaultInterfaceGroups` groups of interfaces that are enabled by default.
+* Implemented more verbose error logging both for interfaces and interface groups.
+
 ## 20230619.4
 
 Commit SHA - `bdc4b2fb998ed9d6318a676d4ac77f92c1603d39`

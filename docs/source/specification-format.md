@@ -140,6 +140,8 @@ Every input object requires six properties:
   The entries are of type [Interface](#interface).
 * `properties` - array with elements of type [Property](#property),
 * `interfaceGroups` - array with elements of type [Interface Groups](#interface-groups),
+* `defaultInterfaceGroups` - array of objects that specifies which interfaces groups are enabled by default.
+  Every object should contain a `name` and `direction` of an [Interface Groups](#interface-groups).
 * `urls` - a dictionary of [URL class](#url-class) and URL suffixes pairs.
   The key should be a URL class key from `urls` in `metadata`.
   The value of the entry is appended to the URL base from the URL class.
