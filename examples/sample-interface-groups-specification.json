@@ -32,6 +32,9 @@
                         {"name": "1[15]", "direction": "output"}
                     ]
                 }
+            ],
+            "defaultInterfaceGroups": [
+                {"name": "1", "direction": "input"}
             ]
         }
     ]

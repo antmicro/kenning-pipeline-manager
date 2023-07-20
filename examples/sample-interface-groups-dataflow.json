@@ -14,7 +14,7 @@
                 "interfaces": [],
                 "properties": [],
                 "enabledInterfaceGroups": [
-                    {"name": "1", "direction": "input"}
+                    {"name": "2", "direction": "output"}
                 ],
                 "name": "TestNode"
             }
