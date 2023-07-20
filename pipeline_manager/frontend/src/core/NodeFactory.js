@@ -491,6 +491,7 @@ function parseNodeState(state) {
     }
     delete newState.name;
 
+    newState.parsed = true;
     return newState;
 }
 
@@ -587,7 +588,17 @@ export function NodeFactory(
             };
 
             this.load = (state) => {
-                const parsedState = parseNodeState(state);
+                let parsedState;
+
+                // `parsed` determines whether the state was already parsed before loading
+                // This is caused by the fact that `load` can be used both to load a state
+                // from a dataflow and from an instance of a node
+                if (Object.prototype.hasOwnProperty.call(state, 'parsed') && state.parsed) {
+                    parsedState = state;
+                } else {
+                    parsedState = parseNodeState(state);
+                }
+
                 const errors = detectDiscrepancies(parsedState, this.inputs, this.outputs);
 
                 if (Array.isArray(errors) && errors.length) {
