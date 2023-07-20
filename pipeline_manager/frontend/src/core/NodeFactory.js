@@ -404,17 +404,19 @@ function parseIntefaces(interfaces, interfaceGroups, defaultInterfaceGroups) {
         outputs: {},
     };
 
+    const stripName = (name) => name.slice(name.indexOf('_') + 1);
+
     // Filtering single interfaces that are part of interface groups
     // Those interfaces are removed as they are never rendered
     Object.entries(tempParsed.input).forEach(([name, intf]) => {
         if (!interfacesCreatingGroups.has(name)) {
-            createdInterfaces.inputs[name] = createInterface(intf, false, name);
+            createdInterfaces.inputs[name] = createInterface(intf, false, stripName(name));
         }
     });
 
     Object.entries(tempParsed.output).forEach(([name, intf]) => {
         if (!interfacesCreatingGroups.has(name)) {
-            createdInterfaces.outputs[name] = createInterface(intf, false, name);
+            createdInterfaces.outputs[name] = createInterface(intf, false, stripName(name));
         }
     });
 
@@ -423,7 +425,7 @@ function parseIntefaces(interfaces, interfaceGroups, defaultInterfaceGroups) {
         createdInterfaces.inputs[name] = createInterface(
             intf,
             !enabledInterfaceGroupsNames.includes(name),
-            name,
+            stripName(name),
         );
     });
 
@@ -431,7 +433,7 @@ function parseIntefaces(interfaces, interfaceGroups, defaultInterfaceGroups) {
         createdInterfaces.outputs[name] = createInterface(
             intf,
             !enabledInterfaceGroupsNames.includes(name),
-            name,
+            stripName(name),
         );
     });
 
