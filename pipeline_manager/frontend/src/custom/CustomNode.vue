@@ -56,10 +56,9 @@ from moving or deleting the nodes.
         <div class="__content">
             <!-- Properties -->
             <div class="__properties">
-                <!-- eslint-disable vue/require-v-for-key -->
-                <div v-for="input in displayedProperties">
+                <div v-for="input in displayedProperties" :key="input.id">
                     {{ getOptionName(input.componentName) ? `${input.name}:` : '' }}
-                    <CustomInterface :key="input.id" :node="node" :intf="input" />
+                    <CustomInterface :node="node" :intf="input" />
                 </div>
             </div>
 
