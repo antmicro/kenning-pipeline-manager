@@ -31,6 +31,10 @@
     --baklava-editor-background-pattern-default: #{$black};
     --baklava-editor-background-pattern-line: #{$gray-500};
     --baklava-editor-background-pattern-black: #{$gray-500};
+
+    // Sidebar
+    --baklava-sidebar-color-background: #{$gray-600};
+    --baklava-sidebar-color-foreground: #{$white};
 }
 
 .connections-container {
