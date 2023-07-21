@@ -5,6 +5,51 @@
  */
 
 .baklava-sidebar {
-    background-color: var(--baklava-node-color-background);
-    color: var(--baklava-sidebar-color-foreground);
+    position: absolute;
+    min-width: 300px;
+    max-width: 600px;
+    z-index: 1000;
+
+    // default baklavjs height - terminal panel height
+    height: calc(100% - 60px - 35px);
+
+    transform: translateX(100%);
+    transition: transform 0.4s;
+    overflow-y: scroll;
+
+    &.--open {
+        transform: translateX(0);
+        transition: transform 0.2s;
+        box-shadow: 0px 0px 15px black;
+    }
+
+    & > .__resizer {
+        width: 10px;
+    }
+
+    & > .__content {
+        display: flex;
+        flex-direction: column;
+        row-gap: 1.5em;
+
+        & > .__properties {
+            & > .__title {
+                text-align: center;
+                margin: 0.5em 0;
+            }
+        }
+
+        & > .__interface_groups {
+            & > .__title {
+                text-align: center;
+                margin: 0.5em 0;
+            }
+
+            & > .__error_outputs {
+                h1 {
+                    font-size: 1.25em;
+                }
+            }
+        }
+    }
 }
