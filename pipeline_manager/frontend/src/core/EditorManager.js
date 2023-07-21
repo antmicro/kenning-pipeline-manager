@@ -236,7 +236,9 @@ export default class EditorManager {
         if (!metadata) return ['No specification to load provided.'];
 
         if (overriding) {
-            const updatedMetadata = JSON.parse(JSON.stringify(this.currentSpecification.metadata));
+            const updatedMetadata = JSON.parse(
+                JSON.stringify(this.currentSpecification.metadata ?? {}),
+            );
 
             Object.entries(metadata).forEach(([key, value]) => {
                 if (Array.isArray(value)) {
