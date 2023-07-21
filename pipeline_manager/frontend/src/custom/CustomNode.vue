@@ -144,6 +144,7 @@ const contextMenuItems = computed(() => {
     const items = [
         { value: 'rename', label: 'Rename', icon: Pencil },
         { value: 'delete', label: 'Delete', icon: Bin },
+        { value: 'sidebar', label: 'Sidebar' },
         ...nodeURLs,
     ];
 
@@ -182,9 +183,6 @@ const nodeTitle = computed(() => {
 });
 
 const select = () => {
-    const { sidebar } = viewModel.value.displayedGraph;
-    sidebar.nodeId = props.node.id;
-    sidebar.visible = true;
     emit('select');
 };
 
@@ -226,6 +224,12 @@ const onContextMenuClick = async (action) => {
             });
             focusOnRename();
             break;
+        case 'sidebar': {
+            const { sidebar } = viewModel.value.displayedGraph;
+            sidebar.nodeId = props.node.id;
+            sidebar.visible = true;
+            break;
+        }
         case 'editSubgraph': {
             const errors = viewModel.value.editor.switchToSubgraph(props.node);
             if (Array.isArray(errors) && errors.length) {
