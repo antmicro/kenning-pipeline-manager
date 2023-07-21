@@ -301,8 +301,16 @@ export default defineComponent({
                 }
 
                 editorManager.updateEditorSpecification(specText, true);
-                errors = editorManager.updateMetadata();
-                if (errors.length) {
+                let warnings;
+                ({ errors, warnings } = editorManager.updateMetadata()); // eslint-disable-line prefer-const,max-len
+                if (Array.isArray(warnings) && warnings.length) {
+                    NotificationHandler.terminalLog(
+                        'warning',
+                        'Issue when loading specification',
+                        warnings,
+                    );
+                }
+                if (Array.isArray(errors) && errors.length) {
                     NotificationHandler.terminalLog('error', 'Specification is invalid', errors);
                 }
             }
@@ -319,8 +327,15 @@ export default defineComponent({
 
             if (defaultDataflow) {
                 const dataflow = require(process.env.VUE_APP_DATAFLOW_PATH); // eslint-disable-line global-require,max-len,import/no-dynamic-require
-                const errors = await editorManager.loadDataflow(dataflow);
-                if (errors.length) {
+                const { errors, warnings } = await editorManager.loadDataflow(dataflow);
+                if (Array.isArray(warnings) && warnings.length) {
+                    NotificationHandler.terminalLog(
+                        'warning',
+                        'Issue when loading dataflow',
+                        warnings,
+                    );
+                }
+                if (Array.isArray(errors) && errors.length) {
                     NotificationHandler.terminalLog('error', 'Dataflow is invalid', errors);
                 }
             }
