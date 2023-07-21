@@ -210,6 +210,12 @@ const focusOnRename = () => {
     renameField.value.select();
 };
 
+const openSidebar = () => {
+    const { sidebar } = viewModel.value.displayedGraph;
+    sidebar.nodeId = props.node.id;
+    sidebar.visible = true;
+};
+
 /* eslint-disable default-case */
 const onContextMenuClick = async (action) => {
     switch (action) {
@@ -224,12 +230,9 @@ const onContextMenuClick = async (action) => {
             });
             focusOnRename();
             break;
-        case 'sidebar': {
-            const { sidebar } = viewModel.value.displayedGraph;
-            sidebar.nodeId = props.node.id;
-            sidebar.visible = true;
+        case 'sidebar':
+            openSidebar();
             break;
-        }
         case 'editSubgraph': {
             const errors = viewModel.value.editor.switchToSubgraph(props.node);
             if (Array.isArray(errors) && errors.length) {
