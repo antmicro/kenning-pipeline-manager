@@ -222,16 +222,7 @@ function parseSingleInterfaces(nodetype, interfaces, interfaceGroup = false) {
     return tempParsed;
 }
 
-/**
- * Checks whether interface groups that are in enabledInterfaceGroup
- * can be enabled at the same time
- * @param {*} nodetype name of the node type
- * @param {array} enabledInterfaceGroups array of names of enabled interface groups
- * @param {*} inputs inputs of the node
- * @param {*} outputs outputs of the node
- * @returns list of errors.
- */
-function validateInterfaceGroups(nodetype, enabledInterfaceGroups, inputs, outputs) {
+export function validateInterfaceGroupsNames(enabledInterfaceGroups, inputs, outputs) {
     const errors = [];
     // Checking for integrity of interface groups
     const usedInterfaces = new Set();
@@ -245,17 +236,37 @@ function validateInterfaceGroups(nodetype, enabledInterfaceGroups, inputs, outpu
                 const intfDirection = intfName.slice(0, intfName.indexOf('_'));
                 const parsedIntfName = intfName.slice(intfName.indexOf('_') + 1);
 
-                errors.push(
-                    `Node type ${nodetype}:  Interface of name ${parsedIntfName} and direction ${intfDirection} has been reused ` +
-                        `by interface group named ${groupName} of direction ${groupDirection}. ` +
-                        `Make sure your interface groups are disjoint.`,
-                );
+                errors.push([parsedIntfName, intfDirection, groupName, groupDirection]);
             } else {
                 usedInterfaces.add(intfName);
             }
         });
     });
     return errors;
+}
+
+/**
+ * Checks whether interface groups that are in enabledInterfaceGroup
+ * can be enabled at the same time
+ * @param {*} nodetype name of the node type
+ * @param {array} enabledInterfaceGroups array of names of enabled interface groups
+ * @param {*} inputs inputs of the node
+ * @param {*} outputs outputs of the node
+ * @returns list of errors.
+ */
+function validateInterfaceGroups(nodetype, enabledInterfaceGroups, inputs, outputs) {
+    const errors = validateInterfaceGroupsNames(enabledInterfaceGroups, inputs, outputs);
+    const errorMessages = [];
+
+    errors.forEach(([parsedIntfName, intfDirection, groupName, groupDirection]) => {
+        errorMessages.push(
+            `Node type ${nodetype}:  Interface of name ${parsedIntfName} and direction ${intfDirection} has been reused ` +
+                `by interface group named ${groupName} of direction ${groupDirection}. ` +
+                `Make sure your interface groups are disjoint.`,
+        );
+    });
+
+    return errorMessages;
 }
 
 /**
@@ -556,16 +567,44 @@ export function NodeFactory(
             this.parentSave = this.save;
             this.parentLoad = this.load;
 
+            /**
+             * Toggles interface groups and removes any connections attached
+             * to the interface it is toggled to hidden.
+             *
+             * @param intf interface instance of the interface group
+             * @param {bool} visible whether to enable or disable interface group
+             */
+            this.toggleInterfaceGroup = (intf, visible) => {
+                // If the interface is visible and is being disabled
+
+                if (!intf.hidden && !visible) {
+                    const connections = this.graphInstance.connections.filter(
+                        (c) => c.from === intf || c.to === intf,
+                    );
+                    connections.forEach((c) => {
+                        this.graphInstance.removeConnection(c);
+                    });
+                }
+                intf.hidden = !visible;
+            };
+
             this.save = () => {
                 const savedState = this.parentSave();
-
                 const newProperties = [];
                 const newInterfaces = [];
+                const enabledInterfaceGroups = [];
 
                 Object.entries({ ...this.inputs, ...this.outputs }).forEach((io) => {
                     const [ioName, ioState] = io;
 
                     if (ioState.port) {
+                        if (ioState.interfaces && !ioState.hidden) {
+                            enabledInterfaceGroups.push({
+                                name: ioName.slice(ioState.direction.length + 1),
+                                direction: ioState.direction,
+                            });
+                        }
+
                         // Only interfaces that have any connections are stored
                         if (
                             ioState.connectionCount > 0 ||
@@ -592,6 +631,7 @@ export function NodeFactory(
                 delete savedState.outputs;
                 savedState.interfaces = newInterfaces;
                 savedState.properties = newProperties;
+                savedState.enabledInterfaceGroups = enabledInterfaceGroups;
 
                 savedState.name = savedState.title;
                 delete savedState.title;
