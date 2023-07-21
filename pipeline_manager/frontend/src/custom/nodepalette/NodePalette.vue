@@ -52,7 +52,7 @@ Inherits from baklavajs/packages/renderer-vue/src/nodepalette/NodePalette.vue
 </template>
 
 <script>
-import { computed, defineComponent, inject, ref, reactive } from 'vue'; // eslint-disable-line object-curly-newline
+import { computed, defineComponent, inject, ref } from 'vue'; // eslint-disable-line object-curly-newline
 import { useViewModel, useTransform } from '@baklavajs/renderer-vue';
 import { usePointer } from '@vueuse/core';
 import PaletteCategory from './PaletteCategory.vue';
@@ -104,7 +104,7 @@ export default defineComponent({
                 iconPath,
             };
             const onDragEnd = () => {
-                const instance = reactive(new nodeInformation.type()); // eslint-disable-line new-cap,max-len
+                const instance = new nodeInformation.type(); // eslint-disable-line new-cap,max-len
                 viewModel.value.displayedGraph.addNode(instance);
 
                 const rect = editorEl.value.getBoundingClientRect();
