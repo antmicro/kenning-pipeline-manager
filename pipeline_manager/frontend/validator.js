@@ -73,9 +73,11 @@ if (process.argv.length >= 3) {
                         process.exit(2);
                     }
                     console.log('\x1b[32mDataflow valid.\x1b[0m');
+                    process.exit(0);
                 });
+            } else {
+                process.exit(0);
             }
-            process.exit();
         });
     }
 } else {
