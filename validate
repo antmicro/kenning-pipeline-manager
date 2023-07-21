@@ -9,19 +9,19 @@ import subprocess
 import sys
 import argparse
 
-from pipeline_manager.frontend_builder import build_prepare  # noqa: E402
+from pipeline_manager.validator import validate
 
 if __name__ == "__main__":
     validator_parser = argparse.ArgumentParser(
         description="Tool for validating dataflow and specification files"
     )
     validator_parser.add_argument(
-        "specification",
+        "specification_path",
         help="Path to specification file",
         type=Path,
     )
     validator_parser.add_argument(
-        "dataflow",
+        "dataflow_path",
         help="Path to dataflow file",
         nargs="?",
         type=Path,
@@ -33,32 +33,8 @@ if __name__ == "__main__":
     )
     args = validator_parser.parse_args()
 
-    projectpath = Path(__file__).parent.absolute()
-    frontend_path = projectpath / "pipeline_manager/frontend"
+    args = {k: v for k, v in vars(args).items() if v is not None}
 
-    if (args.instal_dependencies):
-        build_prepare()
+    exit_status = validate(**args)
 
-    if args.dataflow:
-        exit_status = subprocess.run(
-            [
-                "node",
-                "--no-warnings",
-                "validator.js",
-                args.specification.absolute(),
-                args.dataflow.absolute(),
-            ],
-            cwd=frontend_path,
-        )
-    else:
-        exit_status = subprocess.run(
-            [
-                "node",
-                "--no-warnings",
-                "validator.js",
-                args.specification.absolute()
-            ],
-            cwd=frontend_path,
-        )
-
-    sys.exit(exit_status.returncode)
+    sys.exit(exit_status)
