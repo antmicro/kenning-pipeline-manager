@@ -95,4 +95,5 @@ if __name__ == '__main__':
 
     build_prepare()
 
-    build_frontend(**args)
+    ret = build_frontend(**args)
+    sys.exit(ret)

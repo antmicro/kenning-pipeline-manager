@@ -141,12 +141,18 @@ def build_frontend(
         with open(config_path, 'w') as config:
             config.writelines(config_lines)
 
-    subprocess.run(['npm', 'install'], cwd=frontend_path)
+    exit_status = subprocess.run(['npm', 'install'], cwd=frontend_path)
+    if exit_status.returncode != 0:
+        return exit_status.returncode
 
     if build_type == 'static-html':
         subprocess.run(['npm', 'run', 'build-static-html'], cwd=frontend_path)
+        if exit_status.returncode != 0:
+            return exit_status.returncode
     if build_type == 'server-app':
         subprocess.run(['npm', 'run', 'build-server-app'], cwd=frontend_path)
+        if exit_status.returncode != 0:
+            return exit_status.returncode
 
     if assets_directory:
         shutil.copytree(
