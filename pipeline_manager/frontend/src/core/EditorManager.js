@@ -10,9 +10,9 @@ import Ajv2019 from 'ajv/dist/2019.js';
 import jsonMap from 'json-source-map';
 import jsonlint from 'jsonlint';
 
-import { useBaklava } from '@baklavajs/renderer-vue';
-import { useCommandHandler } from 'baklavajs';
-import { useHistory,setTransaction } from './History.ts';
+import { useBaklava, useCommandHandler } from '@baklavajs/renderer-vue';
+import { toRaw } from 'vue';
+import { useHistory } from './History.ts';
 
 import PipelineManagerEditor from '../custom/Editor.js';
 import InterfaceTypes from './InterfaceTypes.js';
@@ -75,7 +75,10 @@ export default class EditorManager {
         this.specificationVersion = unresolvedSpecificationSchema.version;
         this.baklavaView.commandHandler = useCommandHandler();
         this.baklavaView.history = null;
-        this.baklavaView.history = useHistory(this.baklavaView.displayedGraph, this.baklavaView.commandHandler);
+        this.baklavaView.history = useHistory(
+            toRaw(this.baklavaView).displayedGraph,
+            this.baklavaView.commandHandler,
+        );
     }
 
     /**
@@ -469,7 +472,9 @@ export default class EditorManager {
             } else {
                 this.updateMetadata();
             }
-            return { errors: await this.baklavaView.editor.load(dataflow), warnings };
+            const errors = { errors: await this.baklavaView.editor.load(dataflow), warnings };
+            this.baklavaView.history.graphSwitch(this.baklavaView.displayedGraph, undefined);
+            return errors;
         } catch (err) {
             return {
                 errors: [

@@ -1,11 +1,10 @@
-import { reactive, Ref, ref, watch, unref,computed } from "vue";
+import { reactive, Ref, ref, watch } from "vue";
 import { Graph } from "@baklavajs/core";
 
 import {
-    ICommandHandler, ICommand, Commands
+    ICommandHandler, ICommand
 } from "@baklavajs/renderer-vue";
 
-export const UNDO_COMMAND = "UNDO";
 
 export interface IHistory {
     max_steps: number;
@@ -19,70 +18,71 @@ export class Step {
         this.topic = topic;
     }
 }
-export var currentlyInTransaction: Ref<Boolean> = ref(false);
-export function setTransaction(value: Boolean) {
-    currentlyInTransaction.value = value;
+export var suppressingHistory: Ref<Boolean> = ref(false);
+export function suppressHistoryLogging(value: Boolean) {
+    suppressingHistory.value = value;
 };
 
 export function useHistory(graph: Ref<Graph>, commandHandler: ICommandHandler): IHistory {
     const token = Symbol("CustomHistoryToken");
     const max_steps: number = 200;
-    const history: Step[] = [];
-    const undoneHistory: Step[] = [];
+    const history: Map<string, Step[]> = new Map<string, Step[]>();
+    const undoneHistory: Map<string, Step[]> = new Map<string, Step[]>();
     const removedObjectsMap : Map<string, any> = new Map<string, any>();
-    graph = ref(graph);
+    var currentId = "ThisShouldNotAppearInHistoryMaps";
+    var oldId = "ThisShouldNotAppearInHistoryMaps";
 
-    // TODO(jbylicki): This is broken, it will watch loop itself forever
-    // despite it being very simmilar to how the internal implementation functions
-    // or not trigger when subgraph changes the graph. Removing the ref above will
-    // result in the mentioned infinite loop. Hilariously, exactly the same watch works
-    // fine inside of baklava with the same argument and called with seemingly the same object.
+    // Switch all the events to any new graph that's displayed
+    const graphSwitch = (newGraph : any, oldGraph: any, copyStateStack: Boolean = false) => {
+        if (oldGraph) {
+            oldGraph.events.addNode.unsubscribe(token);
+            oldGraph.events.removeNode.unsubscribe(token);
+            oldGraph.events.addConnection.unsubscribe(token);
+            oldGraph.events.removeConnection.unsubscribe(token);
+        }
+        if (newGraph) {
+            oldId = currentId;
+            currentId = newGraph.id;
+            if(history.get(currentId ) === undefined)
+                history.set(currentId ,[]);
+            if(undoneHistory.get(currentId ) === undefined)
+                undoneHistory.set(currentId ,[]);
+            if(copyStateStack) {
+                undoneHistory.set(currentId, undoneHistory.get(oldId)!);
+                history.set(currentId, history.get(oldId)!);
+            }
+            newGraph.events.addNode.subscribe(token, (node : any) => {
+                if(!suppressingHistory.value) {
+                    history.get(newGraph.id)!.push(new Step("add", "node::"+node.id.toString()));
+                }
+            });
+            newGraph.events.removeNode.subscribe(token, (node : any) => {
+                if(!suppressingHistory.value) {
+                    history.get(newGraph.id)!.push(new Step("rem", "node::"+node.id.toString()));
+                }
+                removedObjectsMap.set("node::"+node.id.toString(),[node,node.save()]);
+            });
+            newGraph.events.addConnection.subscribe(token, (conn : any) => {
+                if(!suppressingHistory.value) {
+                    history.get(newGraph.id)!.push(new Step("add", "conn::"+conn.id.toString()));
+                }
+            });
+            newGraph.events.removeConnection.subscribe(token, (conn : any) => {
+                if(!suppressingHistory.value) {
+                    history.get(newGraph.id)!.push(new Step("rem", "conn::"+conn.id.toString()));
+                }
+                removedObjectsMap.set("conn::"+conn.id.toString(),conn);
+            });
+        }
+    };
 
-    // Switch all the watching to new graph events
-    watch(graph,
-        async (newGraph, oldGraph) => {
-            if (oldGraph) {
-                oldGraph.events.addNode.unsubscribe(token);
-                oldGraph.events.removeNode.unsubscribe(token);
-                oldGraph.events.addConnection.unsubscribe(token);
-                oldGraph.events.removeConnection.unsubscribe(token);
-            }
-            if (newGraph) {
-                newGraph.events.addNode.subscribe(token, (node : any) => {
-                    if(!currentlyInTransaction.value) {
-                        history.push(new Step("add", "node::"+node.id.toString()));
-                    }
-                });
-                newGraph.events.removeNode.subscribe(token, (node : any) => {
-                    if(!currentlyInTransaction.value) {
-                        history.push(new Step("rem", "node::"+node.id.toString()));
-                    }
-                    removedObjectsMap.set("node::"+node.id.toString(),[node,node.save()]);
-                });
-                newGraph.events.addConnection.subscribe(token, (conn : any) => {
-                    if(!currentlyInTransaction.value) {
-                        history.push(new Step("add", "conn::"+conn.id.toString()));
-                    }
-                });
-                newGraph.events.removeConnection.subscribe(token, (conn : any) => {
-                    if(!currentlyInTransaction.value) {
-                        history.push(new Step("rem", "conn::"+conn.id.toString()));
-                    }
-                    removedObjectsMap.set("conn::"+conn.id.toString(),conn);
-                });
-            }
-            console.log("Watch triggered on graph change");
-            console.log(newGraph);
-        },
-        { immediate: true, deep: false },
+    watch(graph, (newGraph, oldGraph) => graphSwitch(newGraph, oldGraph),
+        { flush: "post" },
     );
-
     const singleStepTransaction = (main_history: Step[], auxiliary_history:Step[]) => {
             var foo : Step | undefined = main_history.pop();
-            if(foo === undefined)
-                return;
-
-            currentlyInTransaction.value = true;
+            if(foo === undefined) return;
+            suppressingHistory.value = true;
             if(foo.type === "add") {
                 foo.type = "rem"
                 if(foo.topic.startsWith("node")) {
@@ -96,6 +96,15 @@ export function useHistory(graph: Ref<Graph>, commandHandler: ICommandHandler): 
                     if(conn !== undefined) {
                         graph.value.removeConnection(conn!); 
                     } 
+                }
+                else if(foo.topic.startsWith("load")) {
+                    removedObjectsMap.set("load::"+graph.value.id.toString(), graph.value.save());
+                    for (let i = graph.value.connections.length - 1; i >= 0; i -= 1) {
+                        graph.value.removeConnection(graph.value.connections[i]);
+                    }
+                    for (let i = graph.value.nodes.length - 1; i >= 0; i -= 1) {
+                        graph.value.removeNode(graph.value.nodes[i]);
+                    }
                 }
             }
             else if(foo.type === "rem") {
@@ -117,23 +126,42 @@ export function useHistory(graph: Ref<Graph>, commandHandler: ICommandHandler): 
                         conn_added!.id = conn.id;
                     } 
                 }
+                else if(foo.topic.startsWith("load")) {
+                    const conn = removedObjectsMap.get(foo.topic);
+                    if(conn !== undefined) {
+                        graph.value.load(conn);
+                    } 
+                }
                 
             }
             auxiliary_history.push(foo);
-            currentlyInTransaction.value = false;
+            suppressingHistory.value = false;
     };
     
     commandHandler.registerCommand<ICommand<void>>("undo", {
         canExecute: ()=>true,
         execute: () => {
-            singleStepTransaction(history,undoneHistory);
+            if(history.get(currentId)!.length === 0 && (graph.value.nodes.length > 0)) {
+                suppressHistoryLogging(true);
+                removedObjectsMap.set("load::"+graph.value.id.toString(), graph.value.save());
+                for (let i = graph.value.connections.length - 1; i >= 0; i -= 1) {
+                    graph.value.removeConnection(graph.value.connections[i]);
+                }
+                for (let i = graph.value.nodes.length - 1; i >= 0; i -= 1) {
+                    graph.value.removeNode(graph.value.nodes[i]);
+                }
+                suppressHistoryLogging(false);
+                undoneHistory.get(currentId)!.push(new Step("rem", "load::"+graph.value.id.toString()));
+            }
+            else
+                singleStepTransaction(history.get(currentId)!,undoneHistory.get(currentId)!);
         },
     });
 
     commandHandler.registerCommand<ICommand<void>>("redo", {
         canExecute: ()=>true,
         execute: () => {
-            singleStepTransaction(undoneHistory,history);
+            singleStepTransaction(undoneHistory.get(currentId)!,history.get(currentId)!);
         },
     });
 
@@ -141,6 +169,7 @@ export function useHistory(graph: Ref<Graph>, commandHandler: ICommandHandler): 
     commandHandler.registerHotkey(["Control", "y"], "redo");
 
     return reactive({
-        max_steps
+        max_steps,
+        graphSwitch
     });
 }

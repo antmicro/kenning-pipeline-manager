@@ -32,10 +32,9 @@ import {
     SubgraphInputNode,
     SubgraphOutputNode,
 } from './subgraphInterface';
-import NotificationHandler from '../core/notifications';
 import createPipelineManagerGraph from './CustomGraph';
 import LayoutManager from '../core/LayoutManager';
-import {setTransaction} from '../core/History.ts';
+import { suppressHistoryLogging } from '../core/History.ts';
 
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-underscore-dangle */
@@ -111,12 +110,14 @@ export default class PipelineManagerEditor extends Editor {
     cleanEditor() {
         const graphInstance = this._graph;
 
+        suppressHistoryLogging(true);
         for (let i = graphInstance.connections.length - 1; i >= 0; i -= 1) {
             graphInstance.removeConnection(graphInstance.connections[i]);
         }
         for (let i = graphInstance.nodes.length - 1; i >= 0; i -= 1) {
             graphInstance.removeNode(graphInstance.nodes[i]);
         }
+        suppressHistoryLogging(false);
     }
 
     unregisterGraphs() {
@@ -374,8 +375,6 @@ export default class PipelineManagerEditor extends Editor {
                         nodeInterfaceId: output.nodeInterfaceId,
                     }),
                 );
-                // delete state.graphState.inputs;
-                // delete state.graphState.outputs;
 
                 return { ...state, interfaces: inputInterfaces.concat(outputInterfaces) };
             }
@@ -482,7 +481,7 @@ export default class PipelineManagerEditor extends Editor {
             this._switchGraph = switchGraph;
         }
         // disable history logging for the switch - don't push nodes being created here
-        setTransaction(true);
+        suppressHistoryLogging(true);
 
         this._graph = subgraphNode.subgraph;
         const errors = [];
@@ -507,7 +506,7 @@ export default class PipelineManagerEditor extends Editor {
                     errors.push([
                         `Error when creating subgraph ${this._graph.id}: Expected 1 interface with ID ${interfaceID}, got ${templateInputArr.length}`,
                     ]);
-                    setTransaction(false);
+                    suppressHistoryLogging(false);
                     return;
                 }
                 const templateInput = templateInputArr[0];
@@ -518,7 +517,7 @@ export default class PipelineManagerEditor extends Editor {
                     errors.push([
                         `Error when creating subgraph ${this._graph.id}: Could not find interface ${templateInput.nodeInterfaceId} in subgraph`,
                     ]);
-                    setTransaction(false);
+                    suppressHistoryLogging(false);
                     return;
                 }
                 this._graph.addConnection(node.outputs.placeholder, targetInterface);
@@ -540,7 +539,7 @@ export default class PipelineManagerEditor extends Editor {
                     errors.push([
                         `Error when creating subgraph ${this._graph.id}: Expected 1 interface with ID ${interfaceID}, got ${templateInoutArr.length}`,
                     ]);
-                    setTransaction(false);
+                    suppressHistoryLogging(false);
                     return;
                 }
                 const templateInout = templateInoutArr[0];
@@ -551,7 +550,7 @@ export default class PipelineManagerEditor extends Editor {
                     errors.push([
                         `Error when creating subgraph ${this._graph.id}: Could not find interface ${templateInout.nodeInterfaceId} in subgraph`,
                     ]);
-                    setTransaction(false);
+                    suppressHistoryLogging(false);
                     return;
                 }
                 this._graph.addConnection(targetInterface, node.inputs.placeholder);
@@ -573,7 +572,7 @@ export default class PipelineManagerEditor extends Editor {
                     errors.push([
                         `Error when creating subgraph ${this._graph.id}: Expected 1 interface with ID ${interfaceID}, got ${templateOutputArr.length}`,
                     ]);
-                    setTransaction(false);
+                    suppressHistoryLogging(false);
                     return;
                 }
                 const templateOutput = templateOutputArr[0];
@@ -584,14 +583,14 @@ export default class PipelineManagerEditor extends Editor {
                     errors.push([
                         `Error when creating subgraph ${this._graph.id}: Could not find interface ${templateOutput.nodeInterfaceId} in subgraph`,
                     ]);
-                    setTransaction(false);
+                    suppressHistoryLogging(false);
                     return;
                 }
                 this._graph.addConnection(targetInterface, node.inputs.placeholder);
             });
 
-        setTransaction(false);
         this._switchGraph(this._graph);
+        suppressHistoryLogging(false);
         nextTick().then(() => {
             const graph = this.graph.save();
             this.layoutManager.registerGraph(graph);
@@ -609,6 +608,8 @@ export default class PipelineManagerEditor extends Editor {
         const [newGraphId, subgraphNode] = this.subgraphStack.pop();
         const newGraph = [...this.graphs].filter((graph) => graph.id === newGraphId)[0];
 
+        suppressHistoryLogging(true);
+
         this._graph.updateTemplate();
         this._graph.inputs = this._graph.template.inputs;
         this._graph.outputs = this._graph.template.outputs;
@@ -625,6 +626,8 @@ export default class PipelineManagerEditor extends Editor {
 
         this._graph = newGraph;
         this._switchGraph(this._graph);
+
+        suppressHistoryLogging(false);
     }
 
     isInSubgraph() {

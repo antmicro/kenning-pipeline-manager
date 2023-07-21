@@ -248,7 +248,7 @@ export default function createPipelineManagerGraph(graph) {
                 errors.push(`Node type ${n.type} is not registered`);
             } else {
                 const node = new nodeInformation.type(); // eslint-disable-line new-cap
-                node.id = n.id
+                node.id = n.id;
                 this.addNode(node);
                 const nodeErrors = node.load(n);
                 if (Array.isArray(nodeErrors) && nodeErrors.length) {
