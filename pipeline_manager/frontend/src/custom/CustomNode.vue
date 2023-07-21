@@ -25,6 +25,7 @@ from moving or deleting the nodes.
     >
         <div
             class="__title"
+            @pointerdown="onMouseDown"
             @pointerdown.left.self.stop="startDragWrapper($event)"
             @pointerdown.right="openContextMenuWrapper"
             oncontextmenu="return false;"
@@ -100,6 +101,7 @@ import CustomContextMenu from './ContextMenu.vue';
 import { gridSnapper } from '../core/snappers';
 import Pencil from '../icons/Pencil.vue';
 import Bin from '../icons/Bin.vue';
+import doubleClick from '../core/doubleClick.js';
 
 import NotificationHandler from '../core/notifications.js';
 
@@ -293,6 +295,13 @@ const startDragWrapper = (ev) => {
         startDrag(ev);
     }
 };
+
+/* eslint-disable vue/no-mutating-props,no-param-reassign */
+const onMouseDown = doubleClick(700, () => {
+    if (!viewModel.value.editor.readonly) {
+        openSidebar();
+    }
+});
 
 /**
  * Wrapper that prevents opening the context menu if the editor is in read-only mode.
