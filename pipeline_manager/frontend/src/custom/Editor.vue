@@ -78,7 +78,7 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
 /* eslint-disable object-curly-newline */
 import { EditorComponent, useGraph } from '@baklavajs/renderer-vue';
 import { defineComponent, ref, computed, watch, onBeforeMount, onMounted } from 'vue';
-import useDragMove from './useDragMove';
+import usePanZoom from './panZoom';
 
 import CustomNode from './CustomNode.vue';
 import PipelineManagerConnection from './connection/PipelineManagerConnection.vue';
@@ -107,14 +107,12 @@ export default defineComponent({
             keyDown,
             keyUp,
             selectNode,
-            mouseWheel,
-            dragging,
         } = EditorComponent.setup(props);
 
         const connRefs = ref([]);
         const { graph } = useGraph();
-        const panningRef = computed(() => graph.value.panning);
-        const dragMove = useDragMove(panningRef);
+
+        const panZoom = usePanZoom();
         const temporaryConnection = useTemporaryConnection();
         const editorManager = EditorManager.getEditorManagerInstance();
 
@@ -133,19 +131,19 @@ export default defineComponent({
             if (ev.button === 0) {
                 if (ev.target === el.value) {
                     unselectAllNodes();
-                    dragMove.onPointerDown(ev);
+                    panZoom.onPointerDown(ev);
                 }
                 temporaryConnection.onMouseDown();
             }
         };
 
         const onPointerMove = (ev) => {
-            dragMove.onPointerMove(ev);
+            panZoom.onPointerMove(ev);
             temporaryConnection.onMouseMove(ev);
         };
 
         const onPointerUp = (ev) => {
-            dragMove.onPointerUp(ev);
+            panZoom.onPointerUp(ev);
             temporaryConnection.onMouseUp();
         };
 
@@ -356,8 +354,8 @@ export default defineComponent({
             keyUp,
             selectNode,
             temporaryConnection: temporaryConnection.temporaryConnection,
-            mouseWheel,
-            dragging,
+            mouseWheel: panZoom.onMouseWheel,
+            dragging: panZoom.dragging,
             changeHoveredConnections,
             highlightConnections,
             connRefs,
