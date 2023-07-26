@@ -78,6 +78,7 @@ deploy:
         GIT_STRATEGY: none
     tags:
         - docs
+    before_script: []
     script: echo 'Deploying docs'
     artifacts:
         paths:
