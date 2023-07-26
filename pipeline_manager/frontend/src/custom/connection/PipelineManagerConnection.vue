@@ -23,19 +23,33 @@ Inherits from baklavajs/renderer-vue/src/connection/ConnectionView.vue
 </template>
 
 <script>
-import { defineComponent, ref, computed, watch } from 'vue'; // eslint-disable-line object-curly-newline
+import { defineComponent, ref, computed, watch, nextTick, onMounted } from 'vue'; // eslint-disable-line object-curly-newline
 import { Components, useGraph } from '@baklavajs/renderer-vue';
 import ConnectionView from './ConnectionView.vue';
 import getDomElements from './domResolver';
+import { TemporaryConnectionState } from '../temporaryConnection.js';
 
 export default defineComponent({
     extends: Components.ConnectionWrapper,
-    props: { isHighlighted: { default: false } },
+    props: { connection: { required: true }, isHighlighted: { default: false } },
     components: { ConnectionView },
     setup(props) {
         const conn = ref(null);
         const { graph } = useGraph();
-        const { d, state } = Components.ConnectionWrapper.setup(props);
+
+        const d = ref({
+            x1: 0,
+            y1: 0,
+            x2: 0,
+            y2: 0,
+        });
+
+        // eslint-disable-next-line no-confusing-arrow
+        const state = computed(() =>
+            props.connection.isInDanger
+                ? TemporaryConnectionState.FORBIDDEN
+                : TemporaryConnectionState.NONE,
+        );
 
         /**
          * Check whether the connection path contains the x, y point
@@ -48,6 +62,13 @@ export default defineComponent({
             return elements.includes(conn.value.$el.firstChild);
         };
 
+        const fromNodePosition = computed(
+            () => graph.value.findNodeById(props.connection.from.nodeId)?.position,
+        );
+        const toNodePosition = computed(
+            () => graph.value.findNodeById(props.connection.to.nodeId)?.position,
+        );
+
         const fromNode = computed(() => graph.value.findNodeById(props.connection.from.nodeId));
         const toNode = computed(() => graph.value.findNodeById(props.connection.to.nodeId));
 
@@ -55,13 +76,13 @@ export default defineComponent({
             [
                 ...Object.values(fromNode.value?.inputs ?? {}),
                 ...Object.values(fromNode.value?.outputs ?? {}),
-            ].map((io) => io.side),
+            ].map((io) => [io.side, io.sidePosition]),
         );
         const toNodeInterfacesSide = computed(() =>
             [
                 ...Object.values(toNode.value?.inputs ?? {}),
                 ...Object.values(toNode.value?.outputs ?? {}),
-            ].map((io) => io.side),
+            ].map((io) => [io.side, io.sidePosition]),
         );
 
         const getPortCoordinates = (resolved) => {
@@ -96,7 +117,24 @@ export default defineComponent({
 
         // If any side of any interface in from or to node changes we may need to
         // Rerender connections
-        watch([fromNodeInterfacesSide, toNodeInterfacesSide], () => updateCoords());
+        watch([fromNodeInterfacesSide, toNodeInterfacesSide], async () => {
+            await nextTick();
+            updateCoords();
+        });
+
+        watch(
+            [fromNodePosition, toNodePosition],
+            async () => {
+                await nextTick();
+                updateCoords();
+            },
+            { deep: true },
+        );
+
+        onMounted(async () => {
+            await nextTick();
+            updateCoords();
+        });
 
         return {
             d,
