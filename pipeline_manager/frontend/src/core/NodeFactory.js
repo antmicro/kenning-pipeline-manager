@@ -119,6 +119,11 @@ function createInterface(io, hidden, name = undefined) {
         intf.side = io.side ?? (io.direction === 'output' ? 'right' : 'left');
         intf.hidden = hidden;
         intf.interfaces = io.interfaces;
+        intf.sidePosition = io.sidePosition ?? -1;
+
+        // Readonly values used for detecting whether there were any changes to the interface
+        intf.originalSide = intf.side;
+        intf.originalSidePosition = intf.sidePosition;
         return intf;
     };
 }
@@ -547,7 +552,7 @@ export function NodeFactory(
     );
     // If parsedInterfaces returns an array, it is an array of errors
     if (Array.isArray(parsedInterfaces) && parsedInterfaces.length) {
-        return parsedInterfaces;
+        return parsedInterfaces.map((error) => `Node ${name} is invalid. ${error}`);
     }
 
     const node = defineNode({
@@ -604,18 +609,21 @@ export function NodeFactory(
                                 direction: ioState.direction,
                             });
                         }
-
                         // Only interfaces that have any connections are stored
+                        // or sidePosition specified
                         if (
                             ioState.connectionCount > 0 ||
                             this.graph.inputs.find((inp) => inp.nodeInterfaceId === ioState.id) ||
-                            this.graph.outputs.find((inp) => inp.nodeInterfaceId === ioState.id)
+                            this.graph.outputs.find((inp) => inp.nodeInterfaceId === ioState.id) ||
+                            ioState.side !== ioState.originalSide ||
+                            ioState.sidePosition !== ioState.originalSidePosition
                         ) {
                             newInterfaces.push({
                                 name: ioName.slice(ioState.direction.length + 1),
                                 id: ioState.id,
                                 direction: ioState.direction,
                                 side: ioState.side,
+                                sidePosition: ioState.sidePosition,
                             });
                         }
                     } else {
@@ -681,12 +689,13 @@ export function NodeFactory(
                 );
 
                 // As we do not save to dataflow information about interfaces
-                // that have no connections they have to be initialized manually
+                // that have no connections, no direction or no sidePosition specified
+                // they have to be initialized manually
                 Object.entries({ ...this.inputs, ...this.outputs }).forEach(([, intf]) => {
                     intf.nodeId = this.id;
                 });
 
-                // Assigning sides to interfaces if any are defined
+                // Assigning sides and sides Positions to interfaces if any are defined
                 Object.entries({
                     ...parsedState.inputs,
                     ...parsedState.outputs,
@@ -697,6 +706,14 @@ export function NodeFactory(
                             this.inputs[ioName].side = ioState.side;
                         } else if (ioState.direction === 'output') {
                             this.outputs[ioName].side = ioState.side;
+                        }
+                    }
+
+                    if (ioState.direction !== undefined && ioState.sidePosition !== undefined) {
+                        if (ioState.direction === 'input' || ioState.direction === 'inout') {
+                            this.inputs[ioName].sidePosition = ioState.sidePosition;
+                        } else if (ioState.direction === 'output') {
+                            this.outputs[ioName].sidePosition = ioState.sidePosition;
                         }
                     }
                 });
