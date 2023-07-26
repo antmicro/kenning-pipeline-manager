@@ -18,10 +18,10 @@ from creating and deleting connections or altering nodes' values if the editor i
             v-if="intf.port"
             @pointerover="startHoverWrapper"
             @pointerout="endHoverWrapper"
-            @pointerdown="onMouseDown"
-            :class="{ greyedout_arrow: highlighted }"
+            @pointerdown.left="onMouseDown"
+            :class="{ greyedout_arrow: highlighted, picked: picked }"
         >
-            <Arrow v-if="displayArrow" color="black" scale="medium" :rotate="arrowRotation" />
+            <Arrow v-if="displayArrow" color="black" scale="big" :rotate="arrowRotation" />
         </div>
 
         <component
@@ -47,6 +47,7 @@ export default defineComponent({
     extends: Components.NodeInterface,
     props: {
         highlighted: Boolean,
+        picked: Boolean,
     },
     components: {
         Arrow,
