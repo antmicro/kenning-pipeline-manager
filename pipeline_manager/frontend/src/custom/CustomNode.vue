@@ -22,13 +22,16 @@ from moving or deleting the nodes.
         :style="styles"
         :data-node-type="node.type"
         @pointerdown.left.self="select()"
+        oncontextmenu="return false;"
     >
+        <div class="interface-cursor">
+            <div class="line" :style="interfaceCursorStyle"></div>
+        </div>
         <div
             class="__title"
             @pointerdown="onMouseDown"
             @pointerdown.left.self.stop="startDragWrapper($event)"
             @pointerdown.right="openContextMenuWrapper"
-            oncontextmenu="return false;"
         >
             <img class="__title-icon" v-if="nodeIcon !== undefined" :src="nodeIcon" />
             <div v-if="!renaming" class="__title-label">
@@ -64,25 +67,29 @@ from moving or deleting the nodes.
             </div>
 
             <!-- Outputs -->
-            <div class="__outputs">
+            <div class="__outputs" ref="rightSocketsRefs">
                 <CustomInterface
                     v-for="output in displayedRightSockets"
+                    @pointerdown.right="pickInterface(output, $event)"
                     :key="output.id"
                     :node="node"
                     :intf="output"
                     :highlighted="props.interfaces.includes(output)"
+                    :picked="isPickedInterface(output)"
                 />
             </div>
 
             <!-- Inputs -->
-            <div class="__inputs">
+            <div class="__inputs" ref="leftSocketsRefs">
                 <!-- eslint-disable vue/require-v-for-key -->
                 <CustomInterface
+                    @pointerdown.right="pickInterface(input, $event)"
                     v-for="input in displayedLeftSockets"
                     :key="input.id"
                     :node="node"
                     :intf="input"
                     :highlighted="props.interfaces.includes(input)"
+                    :picked="isPickedInterface(input)"
                 />
             </div>
         </div>
@@ -315,15 +322,17 @@ const openContextMenuWrapper = (ev) => {
 };
 
 const displayedLeftSockets = computed(() =>
-    Object.values([...displayedInputs.value, ...displayedOutputs.value]).filter(
-        (intf) => intf.side === 'left' && intf.port,
-    ),
+    Object.values([...displayedInputs.value, ...displayedOutputs.value])
+        .filter((intf) => intf.side === 'left' && intf.port)
+        .sort((intf1, intf2) => intf1.sidePosition - intf2.sidePosition),
 );
+
 const displayedRightSockets = computed(() =>
-    Object.values([...displayedInputs.value, ...displayedOutputs.value]).filter(
-        (intf) => intf.side === 'right' && intf.port,
-    ),
+    Object.values([...displayedInputs.value, ...displayedOutputs.value])
+        .filter((intf) => intf.side === 'right' && intf.port)
+        .sort((intf1, intf2) => intf1.sidePosition - intf2.sidePosition),
 );
+
 const displayedProperties = computed(() =>
     Object.values(displayedInputs.value).filter((intf) => !intf.port),
 );
@@ -342,4 +351,124 @@ displayedProperties.value.forEach((prop) => {
 
 const iconPath = viewModel.value.editor.getNodeIconPath(props.node.type);
 const nodeIcon = iconPath !== undefined ? `./assets/${iconPath}` : undefined; // eslint-disable-line global-require,max-len,import/no-dynamic-require
+
+let newSocketIndex;
+let chosenInterface;
+
+const leftSocketsRefs = ref(null);
+const rightSocketsRefs = ref(null);
+
+const interfaceCursorStyle = ref({
+    top: '0px',
+    left: '0px',
+    display: 'none',
+});
+
+const isPickedInterface = (intf) => intf === chosenInterface;
+
+const dropInterface = (ev) => {
+    if (ev.button !== 2) {
+        return;
+    }
+
+    if (chosenInterface !== undefined) {
+        let sockets;
+        if (chosenInterface.side === 'right') {
+            sockets = displayedRightSockets.value;
+        } else if (chosenInterface.side === 'left') {
+            sockets = displayedLeftSockets.value;
+        }
+
+        const numOfSockets = sockets.length;
+        // Chosen socket is the last one
+        if (numOfSockets === newSocketIndex) {
+            chosenInterface.sidePosition = sockets[newSocketIndex - 1].sidePosition + 1;
+        } else if (newSocketIndex === 0) {
+            // Chosen socket is the first one
+            chosenInterface.sidePosition = sockets[0].sidePosition - 1;
+        } else {
+            // Chosen socket is between some two sockets
+            chosenInterface.sidePosition =
+                (sockets[newSocketIndex].sidePosition + sockets[newSocketIndex - 1].sidePosition) /
+                2;
+        }
+    }
+    pickInterface(undefined, ev); // eslint-disable-line no-use-before-define
+};
+
+const dragInterface = (ev) => {
+    if (chosenInterface !== undefined) {
+        let sockets;
+        if (chosenInterface.side === 'right') {
+            sockets = rightSocketsRefs.value;
+        } else if (chosenInterface.side === 'left') {
+            sockets = leftSocketsRefs.value;
+        }
+
+        // Finding the first interface that is lower than the cursor
+        let socket = [...sockets.children].findIndex((socketRef) => {
+            const boundingRect = socketRef.getBoundingClientRect();
+            const middle = (boundingRect.top + boundingRect.bottom) / 2;
+            return middle > ev.clientY;
+        });
+        newSocketIndex = socket;
+
+        let el;
+        if (socket === -1) {
+            socket = sockets.children.length - 1;
+            newSocketIndex = sockets.children.length;
+
+            el = sockets.children[socket];
+            interfaceCursorStyle.value = {
+                top: `${el.offsetTop - 2.5 + el.offsetHeight}px`,
+                display: 'block',
+            };
+        } else {
+            el = sockets.children[socket];
+            interfaceCursorStyle.value = {
+                top: `${el.offsetTop - 2.5}px`,
+                display: 'block',
+            };
+        }
+
+        if (chosenInterface.side === 'right') {
+            interfaceCursorStyle.value.right = '-0.7em';
+        } else if (chosenInterface.side === 'left') {
+            interfaceCursorStyle.value.left = '-0.7em';
+        }
+
+        document.addEventListener('mousemove', dragInterface);
+        document.addEventListener('mouseup', dropInterface);
+    } else {
+        interfaceCursorStyle.value = {
+            top: '0px',
+            left: '0px',
+            rigth: '0px',
+            display: 'none',
+        };
+
+        document.removeEventListener('mousemove', dragInterface);
+        document.removeEventListener('mouseup', dropInterface);
+    }
+};
+
+const pickInterface = (intf, ev) => {
+    chosenInterface = intf;
+    dragInterface(ev);
+};
 </script>
+
+<style lang="scss" scoped>
+.interface-cursor {
+    position: relative;
+    top: 0;
+    left: 0;
+
+    & > .line {
+        position: absolute;
+        height: 0.2em;
+        width: 1.4em;
+        background-color: $gold;
+    }
+}
+</style>
