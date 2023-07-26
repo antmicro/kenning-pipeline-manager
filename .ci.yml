@@ -9,6 +9,9 @@ stages:
     - build
     - deploy
 
+before_script:
+    - n 20.5.0
+
 flake8:
     stage: lint
     script:
