@@ -31,9 +31,9 @@ import {
     SubgraphInoutNode,
     SubgraphInputNode,
     SubgraphOutputNode,
-} from './subgraphInterface';
-import createPipelineManagerGraph from './CustomGraph';
-import LayoutManager from '../core/LayoutManager';
+} from './subgraphInterface.js';
+import createPipelineManagerGraph from './CustomGraph.js';
+import LayoutManager from '../core/LayoutManager.js';
 import { suppressHistoryLogging } from '../core/History.ts';
 
 /* eslint-disable no-param-reassign */

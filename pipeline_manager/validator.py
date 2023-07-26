@@ -36,6 +36,8 @@ def validate(
             [
                 "node",
                 "--no-warnings",
+                "--loader",
+                "ts-node/esm",
                 "validator.js",
                 specification_path.absolute(),
                 dataflow_path.absolute(),
@@ -47,6 +49,8 @@ def validate(
             [
                 "node",
                 "--no-warnings",
+                "--loader",
+                "ts-node/esm",
                 "validator.js",
                 specification_path.absolute()
             ],
