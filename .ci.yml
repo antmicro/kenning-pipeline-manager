@@ -27,6 +27,16 @@ build-server-app:
     script:
         - ./build server-app
 
+test_singlehtml_build:
+    stage: build
+    script:
+        - ./build static-html ./examples/sample-specification.json ./examples/sample-dataflow.json --editor-title "Test webpage" --output-directory ./output-dir --clean-build --single-html output.html --minify-specification
+
+test_validate:
+    stage: build
+    script:
+        - ./validate ./examples/sample-specification.json ./examples/sample-dataflow.json --install-dependencies
+
 pytest:
     stage: build
     script:
