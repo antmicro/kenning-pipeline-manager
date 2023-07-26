@@ -98,6 +98,10 @@
                                         "x",
                                         "y"
                                     ]
+                                },
+                                "sidePosition": {
+                                    "description": "Determines the order of interfaces rendered",
+                                    "type": "number"
                                 }
                             },
                             "required": [

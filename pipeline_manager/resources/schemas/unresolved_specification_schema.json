@@ -493,6 +493,10 @@
                     "description": "Tells how many connections can be established with given interface, <= 0 value for unlimited",
                     "type": "number",
                     "default": 0
+                },
+                "sidePosition": {
+                    "description": "Determines the order of interfaces rendered",
+                    "type": "number"
                 }
             },
             "required": [
