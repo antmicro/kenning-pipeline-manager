@@ -76,4 +76,8 @@ export default {
 .medium {
     scale: 0.5;
 }
+
+.big {
+    scale: 0.6;
+}
 </style>
