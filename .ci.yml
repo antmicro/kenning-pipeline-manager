@@ -33,6 +33,7 @@ build-server-app:
 test_singlehtml_build:
     stage: build
     script:
+        - pip install beautifulsoup4
         - ./build static-html ./examples/sample-specification.json ./examples/sample-dataflow.json --editor-title "Test webpage" --output-directory ./output-dir --clean-build --single-html output.html --minify-specification
 
 test_validate:
