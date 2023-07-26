@@ -59,15 +59,28 @@
     background-color: $green;
 }
 
-.baklava-node-interface .__port {
-    background-color: $green;
-    width: 16px;
-    height: 16px;
-    top: calc(50% - 8px);
+.baklava-node-interface {
+    padding: 0.5em 0;
 
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    .--output {
+        height: 1em;
+    }
+
+    .--input {
+        height: 1em;
+    }
+
+    & > .__port {
+        background-color: $green;
+        width: 1em;
+        height: 1em;
+        top: calc(50% - 0.5em);
+
+        & > svg {
+            height: 1em;
+            width: 1em;
+        }
+    }
 }
 
 .baklava-checkbox .__checkmark-container > svg > path {
@@ -76,6 +89,10 @@
 
 .baklava-node-interface .greyedout_arrow {
     background-color: $gray-500;
+};
+
+.baklava-node-interface .picked {
+    background-color: $gold;
 };
 
 .baklava-context-menu {

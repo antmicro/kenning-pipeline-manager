@@ -27,6 +27,10 @@
         filter: none;
     }
 
+    & > .__content > div > div {
+        margin: 0;
+    }
+
     & > .__title {
         height: 4em;
         display: flex;
