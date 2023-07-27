@@ -9,8 +9,13 @@ module.exports = {
         browser: true,
         es2022: true,
     },
-    extends: ['plugin:vue/essential', 'plugin:prettier/recommended', 'airbnb-base'],
-    overrides: [],
+    extends: ['plugin:vue/essential', 'prettier', 'airbnb-base'],
+    overrides: [{
+        "files": ["**/*.{ts,tsx}"],
+        "parser": "@typescript-eslint/parser",
+        "plugins": ["@typescript-eslint"],
+        "extends": ["plugin:@typescript-eslint/recommended"]
+    }],
     parserOptions: {
         parser: '@babel/eslint-parser',
         requireConfigFile: false,
@@ -18,7 +23,7 @@ module.exports = {
         sourceType: 'module',
         babelOptions: { plugins: [ '@babel/plugin-syntax-import-assertions' ], }
     },
-    plugins: ['vue'],
+    plugins: ['vue',"@typescript-eslint"],
     rules: {
         'import/no-extraneous-dependencies': 0,
         indent: ['error', 4, { SwitchCase: 1 }],
