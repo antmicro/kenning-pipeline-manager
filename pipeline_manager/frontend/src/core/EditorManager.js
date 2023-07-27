@@ -281,6 +281,9 @@ export default class EditorManager {
         this.baklavaView.layers = metadata?.layers ?? this.defaultMetadata.layers;
         this.baklavaView.collapseSidebar =
             metadata?.collapseSidebar ?? this.defaultMetadata.collapseSidebar;
+        this.baklavaView.editor.layoutManager.useAlgorithm(
+            metadata?.layout ?? this.defaultMetadata.layout,
+        );
 
         return [];
     }
