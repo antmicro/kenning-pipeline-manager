@@ -23,7 +23,7 @@ Inherits from baklavajs/renderer-vue/src/connection/ConnectionView.vue
 </template>
 
 <script>
-import { defineComponent, ref, computed, watch, nextTick, onMounted } from 'vue'; // eslint-disable-line object-curly-newline
+import { defineComponent, ref, computed, watch, nextTick, onMounted, onBeforeUnmount } from 'vue'; // eslint-disable-line object-curly-newline
 import { Components, useGraph } from '@baklavajs/renderer-vue';
 import ConnectionView from './ConnectionView.vue';
 import getDomElements from './domResolver';
@@ -37,6 +37,7 @@ export default defineComponent({
         const conn = ref(null);
         const { graph } = useGraph();
 
+        let resizeObserver;
         const d = ref({
             x1: 0,
             y1: 0,
@@ -104,6 +105,15 @@ export default defineComponent({
         const updateCoords = () => {
             const from = getDomElements(props.connection.from);
             const to = getDomElements(props.connection.to);
+            if (from.node && to.node) {
+                if (!resizeObserver) {
+                    resizeObserver = new ResizeObserver(() => {
+                        updateCoords();
+                    });
+                    resizeObserver.observe(from.node);
+                    resizeObserver.observe(to.node);
+                }
+            }
 
             const [x1, y1] = getPortCoordinates(from);
             const [x2, y2] = getPortCoordinates(to);
@@ -134,6 +144,12 @@ export default defineComponent({
         onMounted(async () => {
             await nextTick();
             updateCoords();
+        });
+
+        onBeforeUnmount(() => {
+            if (resizeObserver) {
+                resizeObserver.disconnect();
+            }
         });
 
         return {
