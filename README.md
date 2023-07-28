@@ -2,7 +2,7 @@
 
 Copyright (c) 2022-2023 [Antmicro](https://www.antmicro.com)
 
-Pipeline Manager is a data-based, application-agnostic web application for creating, visualizing and managing dataflows of various applications.
+Pipeline Manager is a data-based, application-agnostic web application for creating, visualizing and managing dataflows in various applications.
 It does not assume any properties of the application it is working with, thanks to which fast integration with various formats is possible.
 
 [Pipeline Manager documentation](https://antmicro.github.io/kenning-pipeline-manager/) | [Demo application](https://antmicro.github.io/kenning-pipeline-manager/static-demo)
@@ -136,26 +136,26 @@ In addition to using the sample specification you can also connect the third-par
 
 #### Validation
 
-During the development of specifications and dataflows a validation tool can be a usefull aid.
+Pipeline Manager also includes a validation tool you can use during specification and dataflow development.
 
-To validate existing specification run in the root directory:
+To validate an existing specification, run the following in the root directory:
 
 ```
 ./validate <specification-path>
 ```
 
-To validate existing specification and dataflow run in the root directory:
+To validate an existing specification and dataflow, run the following in the root directory:
 
 ```
 ./validate <specification-path> <dataflow-path>
 ```
 
 Replace both `specification-path` and `dataflow-path` with the actual paths to the JSON configuration file you want to validate.
-When running the validation tool for the first time, make sure to include a `--instal-dependencies` flag.
+When running the validation tool for the first time, make sure to include the `--instal-dependencies` flag.
 
 #### Cleanup
 
-To remove installed `npm` dependencies and built application run in the root directory:
+To remove installed `npm` dependencies and the built application, run the following in the root directory:
 
 ```
 ./cleanup
