@@ -26,8 +26,6 @@ from creating and deleting connections or altering nodes' values if the editor i
                     :key="`i-${index}`"
                     class="item"
                     :class="{ submenu: !!item.submenu, '--disabled': !!item.disabled }"
-                    @mouseenter="onMouseEnter($event, index)"
-                    @mouseleave="onMouseLeave($event, index)"
                     @click.stop="onClick(item)"
                 >
                     <div class="icon">
@@ -72,23 +70,43 @@ export default defineComponent({
     },
     emits: ['update:modelValue'],
     setup(props, context) {
+        const {
+            el,
+            styles,
+            classes,
+            itemsWithHoverProperty,
+            onClick,
+        } = // eslint-disable-line object-curly-newline
+            Components.ContextMenu.setup(props, context);
+
         const getIconPath = (name) => (name !== undefined ? `./assets/${name}` : undefined);
         const justOpened = ref(true);
 
-        window.addEventListener('mousedown', () => {
+        window.addEventListener('mousedown', (ev) => {
             if (props.modelValue === true) {
                 // We need a counter so that this event is not fired right when the menu is opened
                 if (justOpened.value === false) {
-                    context.emit('update:modelValue', false);
+                    const elements = document.elementsFromPoint(ev.clientX, ev.clientY);
+                    // We only need to fire closing event if the click was
+                    // outside of the context menu. Otherwise `onClick` is fired.
+                    if (!elements.includes(el.value)) {
+                        context.emit('update:modelValue', false);
+                    }
                     justOpened.value = true;
-                    return;
+                } else {
+                    justOpened.value = false;
                 }
-
-                justOpened.value = false;
             }
         });
 
-        return { ...Components.ContextMenu.setup(props, context), getIconPath };
+        return {
+            el,
+            styles,
+            classes,
+            itemsWithHoverProperty,
+            onClick,
+            getIconPath,
+        };
     },
 });
 </script>
