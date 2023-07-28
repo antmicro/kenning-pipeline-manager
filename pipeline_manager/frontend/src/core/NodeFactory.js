@@ -131,14 +131,13 @@ function createInterface(io, hidden, name = undefined, sidePosition = undefined)
 /**
  * Parses and validates interfaces passed in specification
  *
- * @param nodetype name of the node type
  * @param interfaces list of interfaces from specification that is going to be parsed
  * @param interfaceGroup determines whether `interfaces` are interface groups. If true the
  * additionaly field `.interfaces` is parsed.
  * @returns parsed interfaces that can be passed to baklavajs if the interfaces were valid.
  * Otherwise an array of errors is returned.
  */
-function parseSingleInterfaces(nodetype, interfaces, interfaceGroup = false) {
+function parseSingleInterfaces(interfaces, interfaceGroup = false) {
     const errors = [];
     const tempParsed = {
         input: {},
@@ -154,7 +153,7 @@ function parseSingleInterfaces(nodetype, interfaces, interfaceGroup = false) {
                 const name = `${io.name}[${j}]`;
                 if (tempParsed[io.direction][name] !== undefined) {
                     errors.push(
-                        `Node type ${nodetype}:  Interface named ${name} of direction ${io.direction} is a duplicate.`,
+                        `Interface named ${name} of direction ${io.direction} is a duplicate.`,
                     );
                 }
                 tempParsed[io.direction][`${io.name}[${j}]`] = io;
@@ -162,7 +161,7 @@ function parseSingleInterfaces(nodetype, interfaces, interfaceGroup = false) {
         } else {
             if (tempParsed[io.direction][io.name] !== undefined) {
                 errors.push(
-                    `Node type ${nodetype}:  Interface named ${io.name} of direction ${io.direction} is a duplicate.`,
+                    `Interface named ${io.name} of direction ${io.direction} is a duplicate.`,
                 );
             }
             tempParsed[io.direction][io.name] = io;
@@ -196,7 +195,7 @@ function parseSingleInterfaces(nodetype, interfaces, interfaceGroup = false) {
                 Object.keys(tempParsed.input).includes(name);
             if (duplicate) {
                 errors.push(
-                    `Node type ${nodetype}:  Interface named ${name} of direction ${state.direction} ` +
+                    `Interface named ${name} of direction ${state.direction} ` +
                         `is a duplicate. There already exists an input or output of this name.`,
                 );
             }
@@ -231,6 +230,7 @@ export function validateInterfaceGroupsNames(enabledInterfaceGroups, inputs, out
     const errors = [];
     // Checking for integrity of interface groups
     const usedInterfaces = new Set();
+
     enabledInterfaceGroups.forEach((name) => {
         const interfaces = inputs[name]?.interfaces ?? outputs[name]?.interfaces;
         const groupDirection = name.slice(0, name.indexOf('_'));
@@ -253,19 +253,18 @@ export function validateInterfaceGroupsNames(enabledInterfaceGroups, inputs, out
 /**
  * Checks whether interface groups that are in enabledInterfaceGroup
  * can be enabled at the same time
- * @param {*} nodetype name of the node type
  * @param {array} enabledInterfaceGroups array of names of enabled interface groups
  * @param {*} inputs inputs of the node
  * @param {*} outputs outputs of the node
  * @returns list of errors.
  */
-function validateInterfaceGroups(nodetype, enabledInterfaceGroups, inputs, outputs) {
+function validateInterfaceGroups(enabledInterfaceGroups, inputs, outputs) {
     const errors = validateInterfaceGroupsNames(enabledInterfaceGroups, inputs, outputs);
     const errorMessages = [];
 
     errors.forEach(([parsedIntfName, intfDirection, groupName, groupDirection]) => {
         errorMessages.push(
-            `Node type ${nodetype}:  Interface of name ${parsedIntfName} and direction ${intfDirection} has been reused ` +
+            `Interface of name ${parsedIntfName} and direction ${intfDirection} has been reused ` +
                 `by interface group named ${groupName} of direction ${groupDirection}. ` +
                 `Make sure your interface groups are disjoint.`,
         );
@@ -326,7 +325,6 @@ function detectDiscrepancies(parsedState, inputs, outputs) {
     }
 
     errors = validateInterfaceGroups(
-        parsedState.type,
         Object.keys(parsedState.enabledInterfaceGroups),
         inputs,
         outputs,
@@ -336,18 +334,17 @@ function detectDiscrepancies(parsedState, inputs, outputs) {
 }
 
 /**
- * @param {*} nodetype Name of the node type
  * @param {*} interfaces List of interfaces in the block (input, output and inout)
  * @param {*} interfaceGroups Object describing groups of interfaces
  * @param {*} defaultInterfaceGroups Object describing groups of interfaces that
  * @returns
  */
 /* eslint-disable no-lonely-if */
-function parseInterfaces(nodetype, interfaces, interfaceGroups, defaultInterfaceGroups) {
+function parseInterfaces(interfaces, interfaceGroups, defaultInterfaceGroups) {
     let errors = [];
 
     // Parsing single interfaces first
-    const tempParsed = parseSingleInterfaces(nodetype, interfaces);
+    const tempParsed = parseSingleInterfaces(interfaces);
     // If parseSingleInterfaces returns an array, it is an array of errors
     if (Array.isArray(tempParsed) && tempParsed.length) {
         return tempParsed;
@@ -365,7 +362,7 @@ function parseInterfaces(nodetype, interfaces, interfaceGroups, defaultInterface
                         !Object.keys({ ...tempParsed.input, ...tempParsed.output }).includes(name)
                     ) {
                         errors.push(
-                            `Node type ${nodetype}:  Interface named ${intf.name}[${j}] of direction ${intf.direction} ` +
+                            `Interface named ${intf.name}[${j}] of direction ${intf.direction} ` +
                                 `used for interface group ${intfG.name} of direction ` +
                                 `${intfG.direction} does not exist.`,
                         );
@@ -375,7 +372,7 @@ function parseInterfaces(nodetype, interfaces, interfaceGroups, defaultInterface
                 const name = `${intf.direction}_${intf.name}`;
                 if (!Object.keys({ ...tempParsed.input, ...tempParsed.output }).includes(name)) {
                     errors.push(
-                        `Node type ${nodetype}:  Interface named ${intf.name} of direction ${intf.direction} ` +
+                        `Interface named ${intf.name} of direction ${intf.direction} ` +
                             `used for interface group ${intfG.name} of direction ` +
                             `${intfG.direction} does not exist.`,
                     );
@@ -388,7 +385,7 @@ function parseInterfaces(nodetype, interfaces, interfaceGroups, defaultInterface
         return errors;
     }
 
-    const tempParsedGroups = parseSingleInterfaces(nodetype, interfaceGroups, true);
+    const tempParsedGroups = parseSingleInterfaces(interfaceGroups, true);
     // If parseSingleInterfaces returns an array, it is an array of errors
     if (Array.isArray(tempParsedGroups) && tempParsedGroups.length) {
         return tempParsedGroups;
@@ -409,7 +406,6 @@ function parseInterfaces(nodetype, interfaces, interfaceGroups, defaultInterface
     );
 
     errors = validateInterfaceGroups(
-        nodetype,
         enabledInterfaceGroupsNames,
         { ...tempParsedGroups.input, ...tempParsed.input },
         { ...tempParsedGroups.output, ...tempParsed.output },
@@ -431,24 +427,26 @@ function parseInterfaces(nodetype, interfaces, interfaceGroups, defaultInterface
     const occupiedInputSidePositions = new Set();
     const occupiedOutputSidePositions = new Set();
 
-    Object.values({ ...tempParsed.input, ...tempParsedGroups.input }).forEach((intf) => {
+    Object.entries({ ...tempParsed.input, ...tempParsedGroups.input }).forEach(([name, intf]) => {
         if (intf.sidePosition !== undefined) {
             if (occupiedInputSidePositions.has(intf.sidePosition)) {
                 errors.push(
-                    `Interface named ${intf.name} of direction ${intf.direction} has ` +
-                        `invalid sidePosition value. There already exists an input with this sidePosition.`,
+                    `Interface named ${stripName(name)} of direction ${intf.direction} has ` +
+                        `invalid sidePosition value ${intf.sidePosition}. ` +
+                        `There already exists an input with this sidePosition.`,
                 );
             }
             occupiedInputSidePositions.add(intf.sidePosition);
         }
     });
 
-    Object.values({ ...tempParsed.output, ...tempParsedGroups.output }).forEach((intf) => {
+    Object.entries({ ...tempParsed.output, ...tempParsedGroups.output }).forEach(([name, intf]) => {
         if (intf.sidePosition !== undefined) {
             if (occupiedOutputSidePositions.has(intf.sidePosition)) {
                 errors.push(
-                    `Interface named ${intf.name} of direction ${intf.direction} has ` +
-                        `invalid sidePosition value. There already exists an output this sidePosition.`,
+                    `Interface named ${stripName(name)} of direction ${intf.direction} has ` +
+                        `invalid sidePosition value ${intf.sidePosition}. ` +
+                        `There already exists an input with this sidePosition.`,
                 );
             }
             occupiedOutputSidePositions.add(intf.sidePosition);
@@ -613,15 +611,10 @@ export function NodeFactory(
     defaultInterfaceGroups,
     twoColumn,
 ) {
-    const parsedInterfaces = parseInterfaces(
-        nodeType,
-        interfaces,
-        interfaceGroups,
-        defaultInterfaceGroups,
-    );
+    const parsedInterfaces = parseInterfaces(interfaces, interfaceGroups, defaultInterfaceGroups);
     // If parsedInterfaces returns an array, it is an array of errors
     if (Array.isArray(parsedInterfaces) && parsedInterfaces.length) {
-        return parsedInterfaces.map((error) => `Node ${name} is invalid. ${error}`);
+        return parsedInterfaces.map((error) => `Node ${nodeType} is invalid: ${error}`);
     }
 
     const node = defineNode({
