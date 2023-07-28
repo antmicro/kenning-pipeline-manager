@@ -25,7 +25,7 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
         }"
         :style="`--scale: ${this.scale}`"
         @pointermove.self="onPointerMove"
-        @pointerdown="onPointerDown"
+        @pointerdown.left.exact="onPointerDown"
         @pointerup="onPointerUp"
         @wheel.self="mouseWheel"
         @keydown="keyDown"
@@ -134,13 +134,11 @@ export default defineComponent({
         };
 
         const onPointerDown = (ev) => {
-            if (ev.button === 0) {
-                if (ev.target === el.value) {
-                    unselectAllNodes();
-                    panZoom.onPointerDown(ev);
-                }
-                temporaryConnection.onMouseDown();
+            if (ev.target === el.value) {
+                unselectAllNodes();
+                panZoom.onPointerDown(ev);
             }
+            temporaryConnection.onMouseDown();
         };
 
         const onPointerMove = (ev) => {
