@@ -85,6 +85,8 @@ Each input, output and inout is described by an object with following attributes
 * `direction` - value determining the type of the interfaces.
   Can be either `input`, `output` or `inout`.
 * `side` - tells on which side of the node the interface should be placed.
+* `nodePosition` - specifies row on which the interface is rendered.
+  Values for interfaces of the same `side` value have to be unique.
 
 #### Connection
 

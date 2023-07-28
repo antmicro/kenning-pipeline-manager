@@ -218,6 +218,10 @@ Every interface object has following properties:
 * `array` (optional) - special keyword to easily define a range of interfaces.
   Value has to be a list with two integer values that specify the range of interfaces.
   For example for an `example` interface with `array: [0, 2]` two interfaces called `example[0]` and `example[1]` are created.
+* `nodePosition` (optional) - specifies row on which the interface is rendered.
+  Values for interfaces of the same `side` value have to be unique.
+  If the value is not provided then rows are automatically provided by iterating from the first upper row.
+  This value does not work for `array` keyword, as it produces more than one interface.
 
 ```{note}
 Only interfaces of the same `type` can be connected together.
