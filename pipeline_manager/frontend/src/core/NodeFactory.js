@@ -109,7 +109,7 @@ function parseProperties(properties) {
  * from `io`
  * @returns baklava interface constructor
  */
-function createInterface(io, hidden, name = undefined) {
+function createInterface(io, hidden, name = undefined, sidePosition = undefined) {
     return () => {
         const intf = new NodeInterface(name ?? io.name);
         intf.type = typeof io.type === 'string' || io.type instanceof String ? [io.type] : io.type;
@@ -119,7 +119,7 @@ function createInterface(io, hidden, name = undefined) {
         intf.side = io.side ?? (io.direction === 'output' ? 'right' : 'left');
         intf.hidden = hidden;
         intf.interfaces = io.interfaces;
-        intf.sidePosition = io.sidePosition ?? -1;
+        intf.sidePosition = sidePosition ?? io.sidePosition;
 
         // Readonly values used for detecting whether there were any changes to the interface
         intf.originalSide = intf.side;
@@ -427,17 +427,84 @@ function parseInterfaces(nodetype, interfaces, interfaceGroups, defaultInterface
 
     const stripName = (name) => name.slice(name.indexOf('_') + 1);
 
+    // validating and setting sidePositions
+    const occupiedInputSidePositions = new Set();
+    const occupiedOutputSidePositions = new Set();
+
+    Object.values({ ...tempParsed.input, ...tempParsedGroups.input }).forEach((intf) => {
+        if (intf.sidePosition !== undefined) {
+            if (occupiedInputSidePositions.has(intf.sidePosition)) {
+                errors.push(
+                    `Interface named ${intf.name} of direction ${intf.direction} has ` +
+                        `invalid sidePosition value. There already exists an input with this sidePosition.`,
+                );
+            }
+            occupiedInputSidePositions.add(intf.sidePosition);
+        }
+    });
+
+    Object.values({ ...tempParsed.output, ...tempParsedGroups.output }).forEach((intf) => {
+        if (intf.sidePosition !== undefined) {
+            if (occupiedOutputSidePositions.has(intf.sidePosition)) {
+                errors.push(
+                    `Interface named ${intf.name} of direction ${intf.direction} has ` +
+                        `invalid sidePosition value. There already exists an output this sidePosition.`,
+                );
+            }
+            occupiedOutputSidePositions.add(intf.sidePosition);
+        }
+    });
+
+    if (errors.length) {
+        return errors;
+    }
+
+    let inputSidePositionIndex = 0;
+    let outputSidePositionIndex = 0;
+
+    const getInputSidePos = (intf) => {
+        if (intf.sidePosition === undefined) {
+            while (occupiedInputSidePositions.has(inputSidePositionIndex)) {
+                inputSidePositionIndex += 1;
+            }
+            occupiedInputSidePositions.add(inputSidePositionIndex);
+            return inputSidePositionIndex;
+        }
+        return intf.sidePosition;
+    };
+
+    const getOutputSidePos = (intf) => {
+        if (intf.sidePosition === undefined) {
+            while (occupiedOutputSidePositions.has(outputSidePositionIndex)) {
+                outputSidePositionIndex += 1;
+            }
+            occupiedOutputSidePositions.add(outputSidePositionIndex);
+            return outputSidePositionIndex;
+        }
+        return intf.sidePosition;
+    };
+
     // Filtering single interfaces that are part of interface groups
     // Those interfaces are removed as they are never rendered
     Object.entries(tempParsed.input).forEach(([name, intf]) => {
         if (!interfacesCreatingGroups.has(name)) {
-            createdInterfaces.inputs[name] = createInterface(intf, false, stripName(name));
+            createdInterfaces.inputs[name] = createInterface(
+                intf,
+                false,
+                stripName(name),
+                getInputSidePos(intf),
+            );
         }
     });
 
     Object.entries(tempParsed.output).forEach(([name, intf]) => {
         if (!interfacesCreatingGroups.has(name)) {
-            createdInterfaces.outputs[name] = createInterface(intf, false, stripName(name));
+            createdInterfaces.outputs[name] = createInterface(
+                intf,
+                false,
+                stripName(name),
+                getOutputSidePos(intf),
+            );
         }
     });
 
@@ -447,6 +514,7 @@ function parseInterfaces(nodetype, interfaces, interfaceGroups, defaultInterface
             intf,
             !enabledInterfaceGroupsNames.includes(name),
             stripName(name),
+            getInputSidePos(intf),
         );
     });
 
@@ -455,6 +523,7 @@ function parseInterfaces(nodetype, interfaces, interfaceGroups, defaultInterface
             intf,
             !enabledInterfaceGroupsNames.includes(name),
             stripName(name),
+            getOutputSidePos(intf),
         );
     });
 
