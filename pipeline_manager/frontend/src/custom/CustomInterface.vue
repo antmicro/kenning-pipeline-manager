@@ -48,6 +48,7 @@ export default defineComponent({
     props: {
         highlighted: Boolean,
         picked: Boolean,
+        switchSides: {},
     },
     components: {
         Arrow,
@@ -81,11 +82,7 @@ export default defineComponent({
         /* eslint-disable vue/no-mutating-props,no-param-reassign */
         const onMouseDown = doubleClick(700, () => {
             if (!viewModel.value.editor.readonly) {
-                if (props.intf.side === 'left') {
-                    props.intf.side = 'right';
-                } else {
-                    props.intf.side = 'left';
-                }
+                props.switchSides(props.intf);
                 endHover();
             }
         });

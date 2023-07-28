@@ -31,7 +31,7 @@ from moving or deleting the nodes.
             class="__title"
             @pointerdown="onMouseDown"
             @pointerdown.left.self.stop="startDragWrapper($event)"
-            @pointerdown.right="openContextMenuWrapper"
+            @pointerdown.right="openContextMenuTitle"
         >
             <img class="__title-icon" v-if="nodeIcon !== undefined" :src="nodeIcon" />
             <div v-if="!renaming" class="__title-label">
@@ -48,12 +48,12 @@ from moving or deleting the nodes.
                 @keydown.enter="doneRenaming"
             />
             <CustomContextMenu
-                v-model="showContextMenu"
-                :x="contextMenuX"
-                :y="contextMenuY"
-                :items="contextMenuItems"
+                v-model="showContextMenuTitle"
+                :x="contextMenuTitleX"
+                :y="contextMenuTitleY"
+                :items="contextMenuTitleItems"
                 :urls="nodeURLs"
-                @click="onContextMenuClick"
+                @click="onContextMenuTitleClick"
             />
         </div>
 
@@ -68,37 +68,56 @@ from moving or deleting the nodes.
 
             <!-- Outputs -->
             <div class="__outputs" ref="rightSocketsRefs">
-                <CustomInterface
-                    v-for="output in displayedRightSockets"
-                    @pointerdown.right="pickInterface(output, $event)"
-                    :key="output.id"
-                    :node="node"
-                    :intf="output"
-                    :highlighted="props.interfaces.includes(output)"
-                    :picked="isPickedInterface(output)"
-                />
+                <template v-for="output in displayedRightRows">
+                    <CustomInterface
+                        :key="output.id"
+                        v-if="output"
+                        @pointerdown.left.shift="pickInterface(output, $event)"
+                        @pointerdown.right.exact="openContextMenuInterface(output, $event)"
+                        :node="node"
+                        :intf="output"
+                        :highlighted="props.interfaces.includes(output)"
+                        :picked="isPickedInterface(output)"
+                        :switchSides="switchSides"
+                    />
+                    <!-- eslint-disable-next-line vue/require-v-for-key -->
+                    <div v-else class="baklava-node-interface --output">&nbsp;</div>
+                </template>
             </div>
 
             <!-- Inputs -->
             <div class="__inputs" ref="leftSocketsRefs">
-                <!-- eslint-disable vue/require-v-for-key -->
-                <CustomInterface
-                    @pointerdown.right="pickInterface(input, $event)"
-                    v-for="input in displayedLeftSockets"
-                    :key="input.id"
-                    :node="node"
-                    :intf="input"
-                    :highlighted="props.interfaces.includes(input)"
-                    :picked="isPickedInterface(input)"
-                />
+                <template v-for="input in displayedLeftRows">
+                    <CustomInterface
+                        :key="input.id"
+                        v-if="input"
+                        @pointerdown.left.shift="pickInterface(input, $event)"
+                        @pointerdown.right.exact="openContextMenuInterface(input, $event)"
+                        :node="node"
+                        :intf="input"
+                        :highlighted="props.interfaces.includes(input)"
+                        :picked="isPickedInterface(input)"
+                        :switchSides="switchSides"
+                    />
+                    <!-- eslint-disable-next-line vue/require-v-for-key -->
+                    <div v-else class="baklava-node-interface --input">&nbsp;</div>
+                </template>
             </div>
+
+            <CustomContextMenu
+                v-model="showContextMenuInterface"
+                :x="contextMenuInterfaceX"
+                :y="contextMenuInterfaceY"
+                :items="contextMenuInterfaceItems"
+                @click="onContextMenuInterfaceClick"
+            />
         </div>
     </div>
 </template>
 
 <script setup>
 /* eslint-disable object-curly-newline */
-import { ref, computed, toRef, onUpdated, onMounted, nextTick, markRaw } from 'vue';
+import { ref, computed, toRef, onUpdated, onMounted, nextTick, markRaw, watch } from 'vue';
 import { useViewModel, useGraph } from '@baklavajs/renderer-vue';
 import { AbstractNode, GRAPH_NODE_TYPE_PREFIX } from '@baklavajs/core';
 
@@ -146,10 +165,17 @@ const tempName = ref('');
 
 const nodeURLs = viewModel.value.editor.getNodeURLs(props.node.type);
 
-const showContextMenu = ref(false);
-const contextMenuX = ref(0);
-const contextMenuY = ref(0);
-const contextMenuItems = computed(() => {
+const focusOnRename = () => {
+    renameField.value.focus();
+    renameField.value.select();
+};
+
+// Title context menu
+
+const showContextMenuTitle = ref(false);
+const contextMenuTitleX = ref(0);
+const contextMenuTitleY = ref(0);
+const contextMenuTitleItems = computed(() => {
     const items = [
         { value: 'rename', label: 'Rename', icon: Pencil },
         { value: 'delete', label: 'Delete', icon: Bin },
@@ -163,6 +189,47 @@ const contextMenuItems = computed(() => {
 
     return items;
 });
+
+const openSidebar = () => {
+    const { sidebar } = viewModel.value.displayedGraph;
+    sidebar.nodeId = props.node.id;
+    sidebar.visible = true;
+};
+
+/* eslint-disable default-case */
+const onContextMenuTitleClick = async (action) => {
+    switch (action) {
+        case 'delete':
+            graph.value.removeNode(props.node);
+            break;
+        case 'rename':
+            tempName.value = props.node.title;
+            renaming.value = true;
+            nextTick().then(() => {
+                focusOnRename();
+            });
+            focusOnRename();
+            break;
+        case 'sidebar':
+            openSidebar();
+            break;
+        case 'editSubgraph': {
+            const errors = viewModel.value.editor.switchToSubgraph(props.node);
+            if (Array.isArray(errors) && errors.length) {
+                NotificationHandler.terminalLog('error', 'Dataflow is invalid', errors);
+            }
+            break;
+        }
+    }
+};
+
+const openContextMenuTitle = (ev) => {
+    if (!viewModel.value.editor.readonly && showContextMenuTitle.value === false) {
+        contextMenuTitleX.value = ev.offsetX - 25;
+        contextMenuTitleY.value = ev.offsetY - 25;
+        showContextMenuTitle.value = true;
+    }
+};
 
 const classes = computed(() => ({
     '--selected': props.selected,
@@ -206,50 +273,6 @@ const startDrag = (ev) => {
     document.addEventListener('pointermove', dragMove.onPointerMove);
     document.addEventListener('pointerup', stopDrag);
     select();
-};
-
-const openContextMenu = (ev) => {
-    contextMenuX.value = ev.offsetX - 25;
-    contextMenuY.value = ev.offsetY - 25;
-    showContextMenu.value = true;
-};
-
-const focusOnRename = () => {
-    renameField.value.focus();
-    renameField.value.select();
-};
-
-const openSidebar = () => {
-    const { sidebar } = viewModel.value.displayedGraph;
-    sidebar.nodeId = props.node.id;
-    sidebar.visible = true;
-};
-
-/* eslint-disable default-case */
-const onContextMenuClick = async (action) => {
-    switch (action) {
-        case 'delete':
-            graph.value.removeNode(props.node);
-            break;
-        case 'rename':
-            tempName.value = props.node.title;
-            renaming.value = true;
-            nextTick().then(() => {
-                focusOnRename();
-            });
-            focusOnRename();
-            break;
-        case 'sidebar':
-            openSidebar();
-            break;
-        case 'editSubgraph': {
-            const errors = viewModel.value.editor.switchToSubgraph(props.node);
-            if (Array.isArray(errors) && errors.length) {
-                NotificationHandler.terminalLog('error', 'Dataflow is invalid', errors);
-            }
-            break;
-        }
-    }
 };
 
 const doneRenaming = () => {
@@ -310,16 +333,9 @@ const onMouseDown = doubleClick(700, () => {
     }
 });
 
-/**
- * Wrapper that prevents opening the context menu if the editor is in read-only mode.
- *
- * @param ev Event
- */
-const openContextMenuWrapper = (ev) => {
-    if (!viewModel.value.editor.readonly && showContextMenu.value === false) {
-        openContextMenu(ev);
-    }
-};
+const displayedProperties = computed(() =>
+    Object.values(displayedInputs.value).filter((intf) => !intf.port),
+);
 
 const displayedLeftSockets = computed(() =>
     Object.values([...displayedInputs.value, ...displayedOutputs.value])
@@ -333,9 +349,27 @@ const displayedRightSockets = computed(() =>
         .sort((intf1, intf2) => intf1.sidePosition - intf2.sidePosition),
 );
 
-const displayedProperties = computed(() =>
-    Object.values(displayedInputs.value).filter((intf) => !intf.port),
-);
+const getRows = (sockets) => {
+    if (!sockets.length) {
+        return [];
+    }
+    const numOfLines = sockets[sockets.length - 1].sidePosition;
+    let numOfSocket = 0;
+    const rows = [];
+
+    for (let i = 0; i <= numOfLines; i += 1) {
+        if (sockets[numOfSocket].sidePosition === i) {
+            rows.push(sockets[numOfSocket]);
+            numOfSocket += 1;
+        } else {
+            rows.push(undefined);
+        }
+    }
+    return rows;
+};
+
+const displayedRightRows = computed(() => getRows(displayedRightSockets.value));
+const displayedLeftRows = computed(() => getRows(displayedLeftSockets.value));
 
 displayedProperties.value.forEach((prop) => {
     if (prop.component === undefined) {
@@ -352,6 +386,8 @@ displayedProperties.value.forEach((prop) => {
 const iconPath = viewModel.value.editor.getNodeIconPath(props.node.type);
 const nodeIcon = iconPath !== undefined ? `./assets/${iconPath}` : undefined; // eslint-disable-line global-require,max-len,import/no-dynamic-require
 
+// Interface modification
+
 let newSocketIndex;
 let chosenInterface;
 
@@ -366,95 +402,173 @@ const interfaceCursorStyle = ref({
 
 const isPickedInterface = (intf) => intf === chosenInterface;
 
-const dropInterface = (ev) => {
-    if (ev.button !== 2) {
-        return;
+const assignNewPosition = () => {
+    let sockets;
+    if (chosenInterface.side === 'right') {
+        sockets = displayedRightRows.value;
+    } else if (chosenInterface.side === 'left') {
+        sockets = displayedLeftRows.value;
     }
 
-    if (chosenInterface !== undefined) {
-        let sockets;
-        if (chosenInterface.side === 'right') {
-            sockets = displayedRightSockets.value;
-        } else if (chosenInterface.side === 'left') {
-            sockets = displayedLeftSockets.value;
-        }
-
-        const numOfSockets = sockets.length;
-        // Chosen socket is the last one
-        if (numOfSockets === newSocketIndex) {
-            chosenInterface.sidePosition = sockets[newSocketIndex - 1].sidePosition + 1;
-        } else if (newSocketIndex === 0) {
-            // Chosen socket is the first one
-            chosenInterface.sidePosition = sockets[0].sidePosition - 1;
-        } else {
-            // Chosen socket is between some two sockets
-            chosenInterface.sidePosition =
-                (sockets[newSocketIndex].sidePosition + sockets[newSocketIndex - 1].sidePosition) /
-                2;
-        }
+    if (sockets[newSocketIndex] !== undefined) {
+        sockets[newSocketIndex].sidePosition = chosenInterface.sidePosition;
     }
-    pickInterface(undefined, ev); // eslint-disable-line no-use-before-define
+    chosenInterface.sidePosition = newSocketIndex;
 };
 
 const dragInterface = (ev) => {
-    if (chosenInterface !== undefined) {
-        let sockets;
-        if (chosenInterface.side === 'right') {
-            sockets = rightSocketsRefs.value;
-        } else if (chosenInterface.side === 'left') {
-            sockets = leftSocketsRefs.value;
-        }
-
-        // Finding the first interface that is lower than the cursor
-        let socket = [...sockets.children].findIndex((socketRef) => {
-            const boundingRect = socketRef.getBoundingClientRect();
-            const middle = (boundingRect.top + boundingRect.bottom) / 2;
-            return middle > ev.clientY;
-        });
-        newSocketIndex = socket;
-
-        let el;
-        if (socket === -1) {
-            socket = sockets.children.length - 1;
-            newSocketIndex = sockets.children.length;
-
-            el = sockets.children[socket];
-            interfaceCursorStyle.value = {
-                top: `${el.offsetTop - 2.5 + el.offsetHeight}px`,
-                display: 'block',
-            };
-        } else {
-            el = sockets.children[socket];
-            interfaceCursorStyle.value = {
-                top: `${el.offsetTop - 2.5}px`,
-                display: 'block',
-            };
-        }
-
-        if (chosenInterface.side === 'right') {
-            interfaceCursorStyle.value.right = '-0.7em';
-        } else if (chosenInterface.side === 'left') {
-            interfaceCursorStyle.value.left = '-0.7em';
-        }
-
-        document.addEventListener('mousemove', dragInterface);
-        document.addEventListener('mouseup', dropInterface);
-    } else {
-        interfaceCursorStyle.value = {
-            top: '0px',
-            left: '0px',
-            rigth: '0px',
-            display: 'none',
-        };
-
-        document.removeEventListener('mousemove', dragInterface);
-        document.removeEventListener('mouseup', dropInterface);
+    let sockets;
+    if (chosenInterface.side === 'right') {
+        sockets = rightSocketsRefs.value;
+    } else if (chosenInterface.side === 'left') {
+        sockets = leftSocketsRefs.value;
     }
+
+    // Finding the first interface that is lower than the cursor
+    let socket = [...sockets.children].findIndex((socketRef) => {
+        const boundingRect = socketRef.getBoundingClientRect();
+        return boundingRect.bottom > ev.clientY;
+    });
+    newSocketIndex = socket;
+
+    if (socket === -1) {
+        socket = sockets.children.length - 1;
+        newSocketIndex = sockets.children.length - 1;
+    }
+
+    const el = sockets.children[socket];
+    interfaceCursorStyle.value = {
+        top: `${el.offsetTop + el.offsetHeight / 2 - 2.5}px`,
+        display: 'block',
+    };
+
+    if (chosenInterface.side === 'right') {
+        interfaceCursorStyle.value.right = '-0.7em';
+    } else if (chosenInterface.side === 'left') {
+        interfaceCursorStyle.value.left = '-0.7em';
+    }
+};
+
+const dropInterface = () => {
+    assignNewPosition();
+
+    chosenInterface = undefined;
+    interfaceCursorStyle.value = {
+        top: '0px',
+        left: '0px',
+        rigth: '0px',
+        display: 'none',
+    };
+
+    document.removeEventListener('mousemove', dragInterface);
+    document.removeEventListener('mouseup', dropInterface);
 };
 
 const pickInterface = (intf, ev) => {
     chosenInterface = intf;
     dragInterface(ev);
+
+    document.addEventListener('mousemove', dragInterface);
+    document.addEventListener('mouseup', dropInterface);
+};
+
+// Interface context menu
+
+const showContextMenuInterface = ref(false);
+const contextMenuInterfaceX = ref(0);
+const contextMenuInterfaceY = ref(0);
+const contextMenuInterfaceItems = computed(() => {
+    const items = [
+        { value: 'SpaceUp', label: 'Space Up' },
+        { value: 'SpaceDown', label: 'Space Down' },
+        { value: 'MoveUp', label: 'Move Up' },
+        { value: 'MoveDown', label: 'Move Down' },
+    ];
+
+    return items;
+});
+
+/* eslint-disable default-case */
+const onContextMenuInterfaceClick = (action) => {
+    switch (action) {
+        case 'MoveUp':
+            if (chosenInterface.sidePosition === 0) {
+                chosenInterface = undefined;
+                break;
+            }
+            newSocketIndex = chosenInterface.sidePosition - 1;
+            dropInterface();
+            break;
+        case 'MoveDown':
+            newSocketIndex = chosenInterface.sidePosition + 1;
+            dropInterface();
+            break;
+        case 'SpaceUp': {
+            const sockets =
+                chosenInterface.side === 'right'
+                    ? displayedRightRows.value
+                    : displayedLeftRows.value;
+            Object.values(sockets).forEach((intf) => {
+                if (intf !== undefined && intf.sidePosition >= chosenInterface.sidePosition) {
+                    intf.sidePosition += 1; // eslint-disable-line no-param-reassign
+                }
+            });
+            break;
+        }
+        case 'SpaceDown': {
+            const sockets =
+                chosenInterface.side === 'right'
+                    ? displayedRightRows.value
+                    : displayedLeftRows.value;
+            Object.values(sockets).forEach((intf) => {
+                if (intf !== undefined && intf.sidePosition > chosenInterface.sidePosition) {
+                    intf.sidePosition += 1; // eslint-disable-line no-param-reassign
+                }
+            });
+            break;
+        }
+    }
+};
+
+const openContextMenuInterface = (intf, ev) => {
+    if (!viewModel.value.editor.readonly && showContextMenuInterface.value === false) {
+        chosenInterface = intf;
+        if (chosenInterface.side === 'right') {
+            contextMenuInterfaceX.value = ev.currentTarget.offsetLeft + 162.5;
+            contextMenuInterfaceY.value = ev.currentTarget.offsetTop + 12.5;
+        } else if (chosenInterface.side === 'left') {
+            contextMenuInterfaceX.value =
+                ev.currentTarget.offsetLeft - ev.currentTarget.offsetWidth + 162.5;
+            contextMenuInterfaceY.value = ev.currentTarget.offsetTop + 12.5;
+        }
+
+        showContextMenuInterface.value = true;
+    }
+};
+
+watch(showContextMenuInterface, () => {
+    if (showContextMenuInterface.value === false) {
+        chosenInterface = undefined;
+    }
+});
+
+/* eslint-disable no-param-reassign */
+const switchSides = (intf) => {
+    // Switching side of an interface and if the opposite place is occupied then then
+    // the interface is moved to the last row
+    if (intf.side === 'left') {
+        const l = displayedLeftRows.value.indexOf(intf);
+        if (displayedRightRows.value[l]) {
+            intf.sidePosition = displayedRightRows.value.length;
+        }
+        intf.side = 'right';
+    } else {
+        const r = displayedRightRows.value.indexOf(intf);
+        if (displayedLeftRows.value[r]) {
+            intf.sidePosition = displayedLeftRows.value.length;
+        }
+        intf.side = 'left';
+    }
 };
 </script>
 
@@ -469,6 +583,7 @@ const pickInterface = (intf, ev) => {
         height: 0.2em;
         width: 1.4em;
         background-color: $gold;
+        z-index: 100;
     }
 }
 </style>
