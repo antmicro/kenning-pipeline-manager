@@ -36,6 +36,13 @@ dependencies = [
 ]
 
 [tool.setuptools.packages.find]
-where = [""]
-include = ["pipeline_manager"]
+include = [
+    "pipeline_manager*"
+]
+exclude = [
+    "examples*"
+]
 namespaces = false
+
+[tool.setuptools.package-data]
+pipeline_manager = ["**/*.*"]
