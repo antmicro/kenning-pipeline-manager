@@ -37,6 +37,7 @@ class PMStateManager:
         self.tcp_server_port = tcp_server_port
         self.tcp_server_host = tcp_server_host
         self.server = None
+        self.server_process = None
 
         self.schema = None
         self.schema_filename = 'unresolved_specification_schema.json'
