@@ -46,6 +46,21 @@ export default defineConfig({
             },
             extensions: ['.ts', '.js', '.json']
         };
+
+        config.module.rules = config.module.rules.filter((rule) => !rule.test.toString().match(/svg/) && !rule.test.toString().match(/png/))
+        if (process.env.VUE_APP_SINGLEHTML_BUILD) {
+            // Make sure that png and svg files are built into a separate folder with a predictable name
+            config.module.rules.push({
+                test: /\.(|svg|png|jpe?g|gif|webp|avif)(\?.*)?$/,
+                type: 'asset/inline',
+            })
+        } else {
+            config.module.rules.push({
+                test: /\.(|svg|png|jpe?g|gif|webp|avif)(\?.*)?$/,
+                type: 'asset/resource',
+                generator: { filename: 'img/[name].[hash:8][ext]' }
+            })
+        }
     },
     pages: {
         index: {
