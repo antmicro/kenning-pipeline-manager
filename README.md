@@ -134,6 +134,22 @@ In addition to using the sample specification you can also connect the third-par
 
 ### Miscellaneous
 
+#### Development
+
+To run a development server which automatically recompiles the project after detecting any changes, run in `./pipeline_manager/frontend` directory:
+
+```
+npm run serve-static
+```
+
+in case of a static mode, and run:
+
+```
+npm run serve
+```
+
+in case of a regular web application mode.
+
 #### Validation
 
 Pipeline Manager also includes a validation tool you can use during specification and dataflow development.
