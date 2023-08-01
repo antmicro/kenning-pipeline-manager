@@ -71,6 +71,7 @@ export default class EditorManager {
         this.baklavaView.collapseSidebar = this.defaultMetadata.collapseSidebar;
         this.baklavaView.movementStep = this.defaultMetadata.movementStep;
         this.baklavaView.editor.allowLoopbacks = this.defaultMetadata.allowLoopbacks;
+        this.baklavaView.cache = {};
 
         this.specificationVersion = unresolvedSpecificationSchema.version;
         this.baklavaView.commandHandler = useCommandHandler();
