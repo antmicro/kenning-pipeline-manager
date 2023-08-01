@@ -16,6 +16,11 @@ export default function usePanZoom() {
     let prevDiff = -1;
     let midpoint = { x: 0, y: 0 };
 
+    // Limit for zooming that does not allow for zomming if
+    // `zoomLimit` number of graphs would fit into the editor
+    // vertically or horizontally
+    const zoomLimit = 3;
+
     const panningRef = computed(() => graph.value.panning);
     const dragMove = useDragMove(panningRef);
 
@@ -29,9 +34,26 @@ export default function usePanZoom() {
             centerY / newScale - graph.value.panning.y,
         ];
         const diff = [newPoint[0] - currentPoint[0], newPoint[1] - currentPoint[1]];
-        graph.value.scaling = newScale;
-        graph.value.panning.x += diff[0];
-        graph.value.panning.y += diff[1];
+
+        const editorHeight = window.innerHeight;
+        const editorWidth = window.innerWidth;
+
+        const allowZoomOut = (zoomLimit * graph.value.size().graphWidth > editorWidth / newScale ||
+            zoomLimit * graph.value.size().graphHeight > editorHeight / newScale);
+
+        const allowZoomIn = (
+            (1 / zoomLimit) * graph.value.size().graphHeight < editorHeight / newScale ||
+            (1 / zoomLimit) * graph.value.size().graphHeight < editorHeight / newScale);
+
+        if (
+            (allowZoomIn && allowZoomOut) ||
+            (!allowZoomIn && newScale < graph.value.scaling) ||
+            (!allowZoomOut && newScale > graph.value.scaling)
+        ) {
+            graph.value.scaling = newScale;
+            graph.value.panning.x += diff[0];
+            graph.value.panning.y += diff[1];
+        }
     };
 
     const onMouseWheel = (ev) => {
@@ -41,7 +63,7 @@ export default function usePanZoom() {
             scrollAmount *= 32; // Firefox fix, multiplier is trial & error
         }
         const newScale = graph.value.scaling * (1 - scrollAmount / 3000);
-        applyZoom(ev.offsetX, ev.offsetY, newScale);
+        applyZoom(ev.clientX, ev.clientY, newScale);
     };
 
     const getCoordsFromCache = () => ({
