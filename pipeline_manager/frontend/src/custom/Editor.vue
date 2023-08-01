@@ -27,7 +27,7 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
         @pointermove.self="onPointerMove"
         @pointerdown.left.exact="onPointerDown"
         @pointerup="onPointerUp"
-        @wheel.self="mouseWheel"
+        @wheel="mouseWheel"
         @keydown="keyDown"
         @keyup="keyUp"
     >
@@ -59,7 +59,6 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
             @mouseenter="changeHoveredConnections"
             @mousemove="changeHoveredConnections"
             @mouseleave="clearHighlight"
-            @wheel="mouseWheel"
         >
             <PipelineManagerConnection
                 v-for="connection in visibleConnections"
