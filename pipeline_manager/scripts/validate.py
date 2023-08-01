@@ -1,0 +1,43 @@
+#!/usr/bin/env python3
+
+# Copyright (c) 2022-2023 Antmicro <www.antmicro.com>
+#
+# SPDX-License-Identifier: Apache-2.0
+
+from pathlib import Path
+import sys
+import argparse
+
+from pipeline_manager.validator import validate
+
+
+def script_validate():
+    validator_parser = argparse.ArgumentParser(
+        description="Tool for validating dataflow and specification files"
+    )
+    validator_parser.add_argument(
+        "specification_path",
+        help="Path to specification file",
+        type=Path,
+    )
+    validator_parser.add_argument(
+        "dataflow_path",
+        help="Path to dataflow file",
+        nargs="?",
+        type=Path,
+    )
+    validator_parser.add_argument(
+        "--install-dependencies",
+        help="Determines whether to install dependencies before running the script",  # noqa: E501
+        action='store_true',
+    )
+    args = validator_parser.parse_args()
+
+    args = {k: v for k, v in vars(args).items() if v is not None}
+
+    return validate(**args)
+
+
+if __name__ == '__main__':
+    ret = script_validate()
+    sys.exit(ret)
