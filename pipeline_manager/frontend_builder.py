@@ -145,6 +145,13 @@ def build_frontend(
     if exit_status.returncode != 0:
         return exit_status.returncode
 
+    if assets_directory:
+        shutil.copytree(
+            assets_directory,
+            frontend_path / 'assets',
+            dirs_exist_ok=True
+        )
+
     if build_type == 'static-html':
         subprocess.run(['npm', 'run', 'build-static-html'], cwd=frontend_path)
         if exit_status.returncode != 0:
@@ -154,19 +161,7 @@ def build_frontend(
         if exit_status.returncode != 0:
             return exit_status.returncode
 
-    if assets_directory:
-        shutil.copytree(
-            assets_directory,
-            frontend_path / 'dist/assets',
-            dirs_exist_ok=True
-        )
-
     if single_html:
-        if assets_directory:
-            print(
-                'WARNING: Assets are not included in the standalone HTML',
-                file=sys.stderr
-            )
         build_singlehtml(frontend_path / 'dist', single_html)
 
     if output_directory:
