@@ -12,7 +12,8 @@ from pathlib import Path
 
 
 def script_cleanup(argv):
-    base_dir = Path(os.path.dirname(argv[0]))
+
+    base_dir = Path(os.path.dirname(__file__)).parent
 
     frontend_dir = base_dir / 'frontend'
 

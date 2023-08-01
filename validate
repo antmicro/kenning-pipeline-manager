@@ -4,37 +4,8 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-from pathlib import Path
-import subprocess
 import sys
-import argparse
+from pipeline_manager.__main__ import script_handler
 
-from pipeline_manager.validator import validate
-
-if __name__ == "__main__":
-    validator_parser = argparse.ArgumentParser(
-        description="Tool for validating dataflow and specification files"
-    )
-    validator_parser.add_argument(
-        "specification_path",
-        help="Path to specification file",
-        type=Path,
-    )
-    validator_parser.add_argument(
-        "dataflow_path",
-        help="Path to dataflow file",
-        nargs="?",
-        type=Path,
-    )
-    validator_parser.add_argument(
-        "--install-dependencies",
-        help="Determines whether to install dependencies before running the script",  # noqa: E501
-        action='store_true',
-    )
-    args = validator_parser.parse_args()
-
-    args = {k: v for k, v in vars(args).items() if v is not None}
-
-    exit_status = validate(**args)
-
-    sys.exit(exit_status)
+if __name__ == '__main__':
+    script_handler(sys.argv, 'validate')

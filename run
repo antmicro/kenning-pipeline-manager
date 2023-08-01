@@ -4,4 +4,4 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-python3 -m pipeline_manager.backend.app $@
+python3 -m pipeline_manager run $@

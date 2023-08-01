@@ -35,6 +35,13 @@ dependencies = [
     "pipeline-manager-backend-communication @ git+https://github.com/antmicro/kenning-pipeline-manager-backend-communication.git"
 ]
 
+[project.urls]
+homepage = "https://antmicro.github.io/kenning-pipeline-manager/"
+repository = "https://github.com/antmicro/kenning-pipeline-manager"
+
+[project.scripts]
+pipeline_manager = "pipeline_manager.__main__:main"
+
 [tool.setuptools.packages.find]
 include = [
     "pipeline_manager*"
