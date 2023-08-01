@@ -240,14 +240,12 @@ export default class PipelineManagerEditor extends Editor {
             return;
         }
 
-        const sizes = this._graph.nodes.map((node) => {
-            const HTMLelement = document.getElementById(node.id);
-            return {
-                width: HTMLelement.offsetWidth,
-                height: HTMLelement.offsetHeight,
-                position: node.position,
-            };
-        });
+        const {
+            graphHeight,
+            graphWidth,
+            leftmostX,
+            topmostY,
+        } = this._graph.size();
 
         const margin = 100;
         const terminalHeight =
@@ -256,42 +254,32 @@ export default class PipelineManagerEditor extends Editor {
         const sideBarWidth =
             document.getElementsByClassName('baklava-node-palette')[0]?.offsetWidth ?? 0;
 
-        const rightmostX = Math.max(...sizes.map((node) => node.position.x + node.width)) + margin;
-        const leftmostX = Math.min(...sizes.map((node) => node.position.x)) - margin;
-
-        const bottommostY =
-            Math.max(...sizes.map((node) => node.position.y + node.height)) + margin;
-        const topmostY = Math.min(...sizes.map((node) => node.position.y)) - margin;
-
-        const graphWidth = rightmostX - leftmostX;
-        const graphHeight = bottommostY - topmostY;
-
         const editorHeight = window.innerHeight - terminalHeight - navbarHeight;
         const editorWidth = window.innerWidth - sideBarWidth;
 
-        const scalingY = editorHeight / graphHeight;
-        const scalingX = editorWidth / graphWidth;
+        const scalingY = editorHeight / (graphHeight + 2 * margin);
+        const scalingX = editorWidth / (graphWidth + 2 * margin);
 
         if (scalingX > scalingY) {
-            const graphCenter = graphWidth / 2;
+            const graphCenter = (graphWidth + 2 * margin) / 2;
             const editorCenter = (editorWidth / 2) * (1 / scalingY);
 
             const translationX = editorCenter - graphCenter;
 
             this._graph.panning = {
-                x: -(leftmostX - translationX - sideBarWidth / scalingY),
-                y: -topmostY,
+                x: -(leftmostX - margin - translationX - sideBarWidth / scalingY),
+                y: -(topmostY - margin),
             };
             this._graph.scaling = scalingY;
         } else {
-            const graphCenter = graphHeight / 2;
+            const graphCenter = (graphHeight + 2 * margin) / 2;
             const editorCenter = (editorHeight / 2) * (1 / scalingX);
 
             const translationY = editorCenter - graphCenter;
 
             this._graph.panning = {
-                x: -(leftmostX - sideBarWidth / scalingX),
-                y: -(topmostY - translationY),
+                x: -(leftmostX - margin - sideBarWidth / scalingX),
+                y: -(topmostY - margin - translationY),
             };
             this._graph.scaling = scalingX;
         }
