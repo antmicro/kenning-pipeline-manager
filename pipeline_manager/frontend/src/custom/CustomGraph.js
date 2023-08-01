@@ -314,5 +314,36 @@ export default function createPipelineManagerGraph(graph) {
         return errors;
     };
 
+    graph.size = function size() {
+        const sizes = this.nodes.map((node) => {
+            const HTMLelement = document.getElementById(node.id);
+            return {
+                width: HTMLelement.offsetWidth,
+                height: HTMLelement.offsetHeight,
+                position: node.position,
+            };
+        });
+        const margin = 100;
+
+        const rightmostX = Math.max(...sizes.map((node) => node.position.x + node.width)) + margin;
+        const leftmostX = Math.min(...sizes.map((node) => node.position.x)) - margin;
+
+        const bottommostY =
+            Math.max(...sizes.map((node) => node.position.y + node.height)) + margin;
+        const topmostY = Math.min(...sizes.map((node) => node.position.y)) - margin;
+
+        const graphWidth = rightmostX - leftmostX;
+        const graphHeight = bottommostY - topmostY;
+
+        return {
+            graphHeight,
+            graphWidth,
+            rightmostX,
+            leftmostX,
+            bottommostY,
+            topmostY,
+        };
+    };
+
     return graph;
 }
