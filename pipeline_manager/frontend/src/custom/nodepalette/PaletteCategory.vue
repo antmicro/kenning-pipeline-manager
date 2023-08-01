@@ -32,8 +32,8 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
                 >
                     <img
                         class="__title-icon"
-                        v-if="getNodeIcon(category.nodes.nodeIconPaths[nt]) !== undefined"
-                        :src="getNodeIcon(category.nodes.nodeIconPaths[nt])"
+                        v-if="category.nodes.nodeIconPaths[nt] !== undefined"
+                        :src="getIconPath(category.nodes.nodeIconPaths[nt])"
                         draggable="false"
                     />
                     <div class="__title-label" v-html="node.hitSubstring"></div>
@@ -49,7 +49,7 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
                         draggable="false"
                     >
                         <img
-                            v-if="getIconPath(url.icon) !== undefined"
+                            v-if="url.icon !== undefined"
                             :src="getIconPath(url.icon)"
                             :alt="url.name"
                             draggable="false"
@@ -71,6 +71,7 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
 
 <script>
 import { defineComponent, ref, watch } from 'vue'; // eslint-disable-line object-curly-newline
+import { useViewModel } from '@baklavajs/renderer-vue';
 import Arrow from '../../icons/Arrow.vue';
 
 export default defineComponent({
@@ -99,8 +100,8 @@ export default defineComponent({
         },
     },
     setup(props) {
-        const getIconPath = (name) => (name !== undefined ? `./assets/${name}` : undefined);
-        const getNodeIcon = (iconName) => getIconPath(iconName);
+        const { viewModel } = useViewModel();
+        const getIconPath = (name) => (name !== undefined ? viewModel.value.cache[`./${name}`] : undefined);
 
         /* eslint-disable vue/no-mutating-props,no-param-reassign */
         const onPointerOver = (ev, name) => {
@@ -169,7 +170,6 @@ export default defineComponent({
             getRotation,
             sortedEntries,
             getIconPath,
-            getNodeIcon,
             onPointerOver,
             onPointerLeave,
         };

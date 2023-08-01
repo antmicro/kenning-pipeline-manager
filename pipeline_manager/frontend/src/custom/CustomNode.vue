@@ -33,7 +33,11 @@ from moving or deleting the nodes.
             @pointerdown.left.self.stop="startDragWrapper($event)"
             @pointerdown.right="openContextMenuTitle"
         >
-            <img class="__title-icon" v-if="nodeIcon !== undefined" :src="nodeIcon" />
+            <img
+                class="__title-icon"
+                v-if="getIconPath(iconPath) !== undefined"
+                :src="getIconPath(iconPath)"
+            >
             <div v-if="!renaming" class="__title-label">
                 {{ nodeTitle }}
             </div>
@@ -389,7 +393,7 @@ displayedProperties.value.forEach((prop) => {
 });
 
 const iconPath = viewModel.value.editor.getNodeIconPath(props.node.type);
-const nodeIcon = iconPath !== undefined ? `./assets/${iconPath}` : undefined; // eslint-disable-line global-require,max-len,import/no-dynamic-require
+const getIconPath = (name) => (name !== undefined ? viewModel.value.cache[`./${iconPath}`] : undefined);
 
 // Interface modification
 

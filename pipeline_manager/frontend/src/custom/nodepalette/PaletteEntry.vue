@@ -11,29 +11,13 @@ A single entry representing available node type in the sidebar.
     <div class="__entry __node-entry __dragged" :style="padding">
         <img class="__title-icon" v-if="nodeIcon !== undefined" :src="nodeIcon" draggable="false" />
         <div class="__title-label" v-html="title"></div>
-        <a
-            v-for="url in urls"
-            :key="url.name"
-            :href="url.url"
-            class="__url"
-            @pointerdown.stop
-            @pointerover="(ev) => onPointerOver(ev, url.name)"
-            @pointerleave="onPointerLeave"
-            target="_blank"
-            draggable="false"
-        >
-            <img
-                v-if="getIconPath(url.icon) !== undefined"
-                :src="getIconPath(url.icon)"
-                :alt="url.name"
-                draggable="false"
-            />
-        </a>
+
     </div>
 </template>
 
 <script>
 import { defineComponent, computed } from 'vue';
+import { useViewModel } from '@baklavajs/renderer-vue';
 
 export default defineComponent({
     props: {
@@ -49,13 +33,10 @@ export default defineComponent({
             type: Number,
             required: true,
         },
-        urls: {
-            default: [],
-        },
     },
     setup(props) {
-        const getIconPath = (name) => (name !== undefined ? `./assets/${name}` : undefined);
-
+        const { viewModel } = useViewModel();
+        const getIconPath = (name) => (name !== undefined ? viewModel.value.cache[`./${name}`] : undefined);
         const nodeIcon = computed(() => getIconPath(props.iconPath));
         const paddingDepth = 20;
         const minPadding = 10;

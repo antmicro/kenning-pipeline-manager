@@ -58,7 +58,7 @@ from creating and deleting connections or altering nodes' values if the editor i
 
 <script>
 import { defineComponent, ref } from 'vue';
-import { Components } from '@baklavajs/renderer-vue';
+import { Components, useViewModel } from '@baklavajs/renderer-vue';
 
 export default defineComponent({
     extends: Components.ContextMenu,
@@ -79,7 +79,9 @@ export default defineComponent({
         } = // eslint-disable-line object-curly-newline
             Components.ContextMenu.setup(props, context);
 
-        const getIconPath = (name) => (name !== undefined ? `./assets/${name}` : undefined);
+        const { viewModel } = useViewModel();
+        const getIconPath = (name) => (name !== undefined ? viewModel.value.cache[`./${name}`] : undefined);
+
         const justOpened = ref(true);
 
         window.addEventListener('mousedown', (ev) => {
