@@ -14,7 +14,7 @@ import {
 
 import { defineNode, GraphTemplate, NodeInterface } from '@baklavajs/core';
 
-import { v4 as uuidv4 } from 'uuid';
+import { parseInterfaces, validateInterfaceGroups } from './interfaceParser.js';
 
 import InputInterface from '../interfaces/InputInterface.js';
 import ListInterface from '../interfaces/ListInterface.js';
@@ -100,180 +100,6 @@ function parseProperties(properties) {
 }
 
 /**
- * Returns an interface constructor that is used to build nodes
- *
- * @param io configuration of the interface
- * @param hidden whether th interface should be hidden. For example groups of interfaces
- * are hidden by default
- * @param {*} name custom name for the interface that should be used instead of the one coming
- * from `io`
- * @returns baklava interface constructor
- */
-function createInterface(io, hidden, name = undefined, sidePosition = undefined) {
-    return () => {
-        const intf = new NodeInterface(name ?? io.name);
-        intf.type = typeof io.type === 'string' || io.type instanceof String ? [io.type] : io.type;
-        intf.componentName = 'NodeInterface';
-        intf.maxConnectionsCount = io.maxConnectionsCount;
-        intf.direction = io.direction;
-        intf.side = io.side ?? (io.direction === 'output' ? 'right' : 'left');
-        intf.hidden = hidden;
-        intf.interfaces = io.interfaces;
-        intf.sidePosition = sidePosition ?? io.sidePosition;
-
-        // Readonly values used for detecting whether there were any changes to the interface
-        intf.originalSide = intf.side;
-        intf.originalSidePosition = intf.sidePosition;
-        return intf;
-    };
-}
-
-/**
- * Parses and validates interfaces passed in specification
- *
- * @param interfaces list of interfaces from specification that is going to be parsed
- * @param interfaceGroup determines whether `interfaces` are interface groups. If true the
- * additionaly field `.interfaces` is parsed.
- * @returns parsed interfaces that can be passed to baklavajs if the interfaces were valid.
- * Otherwise an array of errors is returned.
- */
-function parseSingleInterfaces(interfaces, interfaceGroup = false) {
-    const errors = [];
-    const tempParsed = {
-        input: {},
-        inout: {},
-        output: {},
-    };
-
-    interfaces.forEach((io) => {
-        if (io.array !== undefined) {
-            const [left, right] = io.array;
-
-            for (let j = left; j < right; j += 1) {
-                const name = `${io.name}[${j}]`;
-                if (tempParsed[io.direction][name] !== undefined) {
-                    errors.push(
-                        `Interface named ${name} of direction ${io.direction} is a duplicate.`,
-                    );
-                }
-                tempParsed[io.direction][`${io.name}[${j}]`] = io;
-            }
-        } else {
-            if (tempParsed[io.direction][io.name] !== undefined) {
-                errors.push(
-                    `Interface named ${io.name} of direction ${io.direction} is a duplicate.`,
-                );
-            }
-            tempParsed[io.direction][io.name] = io;
-        }
-
-        if (interfaceGroup) {
-            const newInterfaces = [];
-
-            io.interfaces.forEach((buildingIO) => {
-                if (buildingIO.array !== undefined) {
-                    const [left, right] = buildingIO.array;
-
-                    for (let j = left; j < right; j += 1) {
-                        const name = `${buildingIO.direction}_${buildingIO.name}[${j}]`;
-                        newInterfaces.push(name);
-                    }
-                } else {
-                    const name = `${buildingIO.direction}_${buildingIO.name}`;
-                    newInterfaces.push(name);
-                }
-            });
-            io.interfaces = newInterfaces; // eslint-disable-line no-param-reassign
-        }
-    });
-
-    // Removing inout with duplicate names
-    const filteredTempInouts = Object.fromEntries(
-        Object.entries(tempParsed.inout).filter(([name, state]) => {
-            const duplicate =
-                Object.keys(tempParsed.output).includes(name) ||
-                Object.keys(tempParsed.input).includes(name);
-            if (duplicate) {
-                errors.push(
-                    `Interface named ${name} of direction ${state.direction} ` +
-                        `is a duplicate. There already exists an input or output of this name.`,
-                );
-            }
-            return !duplicate;
-        }),
-    );
-
-    tempParsed.inout = filteredTempInouts;
-    tempParsed.input = { ...tempParsed.input, ...tempParsed.inout };
-    delete tempParsed.inout;
-
-    tempParsed.input = Object.fromEntries(
-        Object.entries(tempParsed.input).map(([name, state]) => [
-            `${state.direction}_${name}`,
-            state,
-        ]),
-    );
-    tempParsed.output = Object.fromEntries(
-        Object.entries(tempParsed.output).map(([name, state]) => [
-            `${state.direction}_${name}`,
-            state,
-        ]),
-    );
-
-    if (errors.length) {
-        return errors;
-    }
-    return tempParsed;
-}
-
-export function validateInterfaceGroupsNames(enabledInterfaceGroups, inputs, outputs) {
-    const errors = [];
-    // Checking for integrity of interface groups
-    const usedInterfaces = new Set();
-
-    enabledInterfaceGroups.forEach((name) => {
-        const interfaces = inputs[name]?.interfaces ?? outputs[name]?.interfaces;
-        const groupDirection = name.slice(0, name.indexOf('_'));
-        const groupName = name.slice(name.indexOf('_') + 1);
-
-        interfaces.forEach((intfName) => {
-            if (usedInterfaces.has(intfName)) {
-                const intfDirection = intfName.slice(0, intfName.indexOf('_'));
-                const parsedIntfName = intfName.slice(intfName.indexOf('_') + 1);
-
-                errors.push([parsedIntfName, intfDirection, groupName, groupDirection]);
-            } else {
-                usedInterfaces.add(intfName);
-            }
-        });
-    });
-    return errors;
-}
-
-/**
- * Checks whether interface groups that are in enabledInterfaceGroup
- * can be enabled at the same time
- * @param {array} enabledInterfaceGroups array of names of enabled interface groups
- * @param {*} inputs inputs of the node
- * @param {*} outputs outputs of the node
- * @returns list of errors.
- */
-function validateInterfaceGroups(enabledInterfaceGroups, inputs, outputs) {
-    const errors = validateInterfaceGroupsNames(enabledInterfaceGroups, inputs, outputs);
-    const errorMessages = [];
-
-    errors.forEach(([parsedIntfName, intfDirection, groupName, groupDirection]) => {
-        errorMessages.push(
-            `Interface of name ${parsedIntfName} and direction ${intfDirection} has been reused ` +
-                `by interface group named ${groupName} of direction ${groupDirection}. ` +
-                `Make sure your interface groups are disjoint.`,
-        );
-    });
-
-    return errorMessages;
-}
-
-/**
  * Function performs sanity checking on parsed state before loading it
  * into the editor. It should throw explicit errors if any discrepancy is detected.
  *
@@ -334,225 +160,21 @@ function detectDiscrepancies(parsedState, inputs, outputs) {
 }
 
 /**
- * @param {*} interfaces List of interfaces in the block (input, output and inout)
- * @param {*} interfaceGroups Object describing groups of interfaces
- * @param {*} defaultInterfaceGroups Object describing groups of interfaces that
- * @returns
- */
-/* eslint-disable no-lonely-if */
-function parseInterfaces(interfaces, interfaceGroups, defaultInterfaceGroups) {
-    let errors = [];
-
-    // Parsing single interfaces first
-    const tempParsed = parseSingleInterfaces(interfaces);
-    // If parseSingleInterfaces returns an array, it is an array of errors
-    if (Array.isArray(tempParsed) && tempParsed.length) {
-        return tempParsed;
-    }
-
-    // Checking for integrity of interface groups
-    interfaceGroups.forEach((intfG) => {
-        intfG.interfaces.forEach((intf) => {
-            if (intf.array !== undefined) {
-                const [left, right] = intf.array;
-
-                for (let j = left; j < right; j += 1) {
-                    const name = `${intf.direction}_${intf.name}[${j}]`;
-                    if (
-                        !Object.keys({ ...tempParsed.input, ...tempParsed.output }).includes(name)
-                    ) {
-                        errors.push(
-                            `Interface named ${intf.name}[${j}] of direction ${intf.direction} ` +
-                                `used for interface group ${intfG.name} of direction ` +
-                                `${intfG.direction} does not exist.`,
-                        );
-                    }
-                }
-            } else {
-                const name = `${intf.direction}_${intf.name}`;
-                if (!Object.keys({ ...tempParsed.input, ...tempParsed.output }).includes(name)) {
-                    errors.push(
-                        `Interface named ${intf.name} of direction ${intf.direction} ` +
-                            `used for interface group ${intfG.name} of direction ` +
-                            `${intfG.direction} does not exist.`,
-                    );
-                }
-            }
-        });
-    });
-
-    if (errors.length) {
-        return errors;
-    }
-
-    const tempParsedGroups = parseSingleInterfaces(interfaceGroups, true);
-    // If parseSingleInterfaces returns an array, it is an array of errors
-    if (Array.isArray(tempParsedGroups) && tempParsedGroups.length) {
-        return tempParsedGroups;
-    }
-
-    // All interfaces that create some interfaces groups
-    const interfacesCreatingGroups = new Set();
-    Object.values({
-        ...tempParsedGroups.input,
-        ...tempParsedGroups.output,
-    }).forEach((state) => {
-        state.interfaces.forEach((intf) => interfacesCreatingGroups.add(intf));
-    });
-
-    // Detecting integrity of enabled interface groups
-    const enabledInterfaceGroupsNames = defaultInterfaceGroups.map(
-        (group) => `${group.direction}_${group.name}`,
-    );
-
-    errors = validateInterfaceGroups(
-        enabledInterfaceGroupsNames,
-        { ...tempParsedGroups.input, ...tempParsed.input },
-        { ...tempParsedGroups.output, ...tempParsed.output },
-    );
-
-    if (errors.length) {
-        return errors;
-    }
-
-    // Creating interfaces for baklavajs
-    const createdInterfaces = {
-        inputs: {},
-        outputs: {},
-    };
-
-    const stripName = (name) => name.slice(name.indexOf('_') + 1);
-
-    // validating and setting sidePositions
-    const occupiedInputSidePositions = new Set();
-    const occupiedOutputSidePositions = new Set();
-
-    Object.entries({ ...tempParsed.input, ...tempParsedGroups.input }).forEach(([name, intf]) => {
-        if (intf.sidePosition !== undefined) {
-            if (occupiedInputSidePositions.has(intf.sidePosition)) {
-                errors.push(
-                    `Interface named ${stripName(name)} of direction ${intf.direction} has ` +
-                        `invalid sidePosition value ${intf.sidePosition}. ` +
-                        `There already exists an input with this sidePosition.`,
-                );
-            }
-            occupiedInputSidePositions.add(intf.sidePosition);
-        }
-    });
-
-    Object.entries({ ...tempParsed.output, ...tempParsedGroups.output }).forEach(([name, intf]) => {
-        if (intf.sidePosition !== undefined) {
-            if (occupiedOutputSidePositions.has(intf.sidePosition)) {
-                errors.push(
-                    `Interface named ${stripName(name)} of direction ${intf.direction} has ` +
-                        `invalid sidePosition value ${intf.sidePosition}. ` +
-                        `There already exists an input with this sidePosition.`,
-                );
-            }
-            occupiedOutputSidePositions.add(intf.sidePosition);
-        }
-    });
-
-    if (errors.length) {
-        return errors;
-    }
-
-    let inputSidePositionIndex = 0;
-    let outputSidePositionIndex = 0;
-
-    const getInputSidePos = (intf) => {
-        if (intf.sidePosition === undefined) {
-            while (occupiedInputSidePositions.has(inputSidePositionIndex)) {
-                inputSidePositionIndex += 1;
-            }
-            occupiedInputSidePositions.add(inputSidePositionIndex);
-            return inputSidePositionIndex;
-        }
-        return intf.sidePosition;
-    };
-
-    const getOutputSidePos = (intf) => {
-        if (intf.sidePosition === undefined) {
-            while (occupiedOutputSidePositions.has(outputSidePositionIndex)) {
-                outputSidePositionIndex += 1;
-            }
-            occupiedOutputSidePositions.add(outputSidePositionIndex);
-            return outputSidePositionIndex;
-        }
-        return intf.sidePosition;
-    };
-
-    // Filtering single interfaces that are part of interface groups
-    // Those interfaces are removed as they are never rendered
-    Object.entries(tempParsed.input).forEach(([name, intf]) => {
-        if (!interfacesCreatingGroups.has(name)) {
-            createdInterfaces.inputs[name] = createInterface(
-                intf,
-                false,
-                stripName(name),
-                getInputSidePos(intf),
-            );
-        }
-    });
-
-    Object.entries(tempParsed.output).forEach(([name, intf]) => {
-        if (!interfacesCreatingGroups.has(name)) {
-            createdInterfaces.outputs[name] = createInterface(
-                intf,
-                false,
-                stripName(name),
-                getOutputSidePos(intf),
-            );
-        }
-    });
-
-    // Adding interfaces groups, hidden by default
-    Object.entries(tempParsedGroups.input).forEach(([name, intf]) => {
-        createdInterfaces.inputs[name] = createInterface(
-            intf,
-            !enabledInterfaceGroupsNames.includes(name),
-            stripName(name),
-            getInputSidePos(intf),
-        );
-    });
-
-    Object.entries(tempParsedGroups.output).forEach(([name, intf]) => {
-        createdInterfaces.outputs[name] = createInterface(
-            intf,
-            !enabledInterfaceGroupsNames.includes(name),
-            stripName(name),
-            getOutputSidePos(intf),
-        );
-    });
-
-    return {
-        inputs: createdInterfaces.inputs,
-        outputs: createdInterfaces.outputs,
-    };
-}
-
-/**
  * @param {*} state state to be loaded. Should be a valid dataflow
- * @returns state that can be given to baklavajs
+ * @returns state that can be given to baklavajs, or an array of errors if any occured
  */
 function parseNodeState(state) {
     const newState = { ...state };
 
-    if (newState.inputs === undefined) {
-        newState.inputs = {};
-    }
-    if (newState.outputs === undefined) {
-        newState.outputs = {};
-    }
-
     if (newState.interfaces !== undefined) {
-        newState.interfaces.forEach((intf) => {
-            if (intf.direction === 'input' || intf.direction === 'inout') {
-                newState.inputs[`${intf.direction}_${intf.name}`] = { ...intf };
-            } else if (intf.direction === 'output') {
-                newState.outputs[`${intf.direction}_${intf.name}`] = { ...intf };
-            }
-        });
+        const out = parseInterfaces(newState.interfaces, [], []);
+        if (Array.isArray(out) && out.length) {
+            return out;
+        }
+
+        const { inputs, outputs } = out;
+        newState.inputs = inputs;
+        newState.outputs = outputs;
 
         delete newState.interfaces;
     }
@@ -614,8 +236,29 @@ export function NodeFactory(
     const parsedInterfaces = parseInterfaces(interfaces, interfaceGroups, defaultInterfaceGroups);
     // If parsedInterfaces returns an array, it is an array of errors
     if (Array.isArray(parsedInterfaces) && parsedInterfaces.length) {
-        return parsedInterfaces.map((error) => `Node ${nodeType} is invalid: ${error}`);
+        return parsedInterfaces.map((error) => `Node ${nodeType} of id: ${this.id} invalid. ${error}`);
     }
+
+    function createBaklavaInterface(intf) {
+        return () => {
+            const baklavaIntf = new NodeInterface(intf.name);
+            Object.assign(baklavaIntf, intf);
+            return baklavaIntf;
+        };
+    }
+
+    // Creating interfaces for baklavajs
+    const inputs = Object.fromEntries(
+        Object.entries(parsedInterfaces.inputs).map(
+            ([n, intf]) => [n, createBaklavaInterface(intf)],
+        ),
+    );
+
+    const outputs = Object.fromEntries(
+        Object.entries(parsedInterfaces.outputs).map(
+            ([n, intf]) => [n, createBaklavaInterface(intf)],
+        ),
+    );
 
     const node = defineNode({
         type: name,
@@ -623,10 +266,10 @@ export function NodeFactory(
         title: displayName,
 
         inputs: {
-            ...parsedInterfaces.inputs,
+            ...inputs,
             ...parseProperties(properties),
         },
-        outputs: parsedInterfaces.outputs,
+        outputs,
 
         /* eslint-disable no-param-reassign */
         onCreate() {
@@ -671,23 +314,14 @@ export function NodeFactory(
                                 direction: ioState.direction,
                             });
                         }
-                        // Only interfaces that have any connections are stored
-                        // or sidePosition specified
-                        if (
-                            ioState.connectionCount > 0 ||
-                            this.graph.inputs.find((inp) => inp.nodeInterfaceId === ioState.id) ||
-                            this.graph.outputs.find((inp) => inp.nodeInterfaceId === ioState.id) ||
-                            ioState.side !== ioState.originalSide ||
-                            ioState.sidePosition !== ioState.originalSidePosition
-                        ) {
-                            newInterfaces.push({
-                                name: ioName.slice(ioState.direction.length + 1),
-                                id: ioState.id,
-                                direction: ioState.direction,
-                                side: ioState.side,
-                                sidePosition: ioState.sidePosition,
-                            });
-                        }
+
+                        newInterfaces.push({
+                            name: ioName.slice(ioState.direction.length + 1),
+                            id: ioState.id,
+                            direction: ioState.direction,
+                            side: ioState.side,
+                            sidePosition: ioState.sidePosition,
+                        });
                     } else {
                         newProperties.push({
                             name: ioName.slice('property'.length + 1),
@@ -719,12 +353,16 @@ export function NodeFactory(
                     parsedState = state;
                 } else {
                     parsedState = parseNodeState(state);
+
+                    if (Array.isArray(parsedState) && parsedState.length) {
+                        return parsedState.map((error) => `Node ${nodeType} of id: ${this.id} invalid. ${error}`);
+                    }
                 }
 
                 const errors = detectDiscrepancies(parsedState, this.inputs, this.outputs);
 
                 if (Array.isArray(errors) && errors.length) {
-                    return errors;
+                    return errors.map((error) => `Node ${nodeType} of id: ${this.id} invalid. ${error}`);
                 }
 
                 this.parentLoad(parsedState);
@@ -750,33 +388,22 @@ export function NodeFactory(
                     },
                 );
 
-                // As we do not save to dataflow information about interfaces
-                // that have no connections, no direction or no sidePosition specified
-                // they have to be initialized manually
-                Object.entries({ ...this.inputs, ...this.outputs }).forEach(([, intf]) => {
-                    intf.nodeId = this.id;
-                });
-
-                // Assigning sides and sides Positions to interfaces if any are defined
+                // Assigning sides and sides Positions to interfaces
                 Object.entries({
                     ...parsedState.inputs,
                     ...parsedState.outputs,
                     ...parsedState.enabledInterfaceGroups,
                 }).forEach(([ioName, ioState]) => {
-                    if (ioState.direction !== undefined && ioState.side !== undefined) {
-                        if (ioState.direction === 'input' || ioState.direction === 'inout') {
-                            this.inputs[ioName].side = ioState.side;
-                        } else if (ioState.direction === 'output') {
-                            this.outputs[ioName].side = ioState.side;
-                        }
+                    if (ioState.direction === 'input' || ioState.direction === 'inout') {
+                        this.inputs[ioName].side = ioState.side;
+                    } else if (ioState.direction === 'output') {
+                        this.outputs[ioName].side = ioState.side;
                     }
 
-                    if (ioState.direction !== undefined && ioState.sidePosition !== undefined) {
-                        if (ioState.direction === 'input' || ioState.direction === 'inout') {
-                            this.inputs[ioName].sidePosition = ioState.sidePosition;
-                        } else if (ioState.direction === 'output') {
-                            this.outputs[ioName].sidePosition = ioState.sidePosition;
-                        }
+                    if (ioState.direction === 'input' || ioState.direction === 'inout') {
+                        this.inputs[ioName].sidePosition = ioState.sidePosition;
+                    } else if (ioState.direction === 'output') {
+                        this.outputs[ioName].sidePosition = ioState.sidePosition;
                     }
                 });
 
@@ -808,30 +435,24 @@ export function NodeFactory(
  * @returns Graph template that will be used to define the subgraph node
  */
 export function SubgraphFactory(nodes, connections, interfaces, name, type, editor) {
-    const inputs = interfaces
-        .filter((interf) => interf.direction === 'input' || interf.direction === 'inout')
-        .map((interf) => ({
-            id: interf.id ?? uuidv4(),
-            nodeInterfaceId: interf.nodeInterface,
-            name: interf.name,
-            direction: interf.direction,
-        }));
-    const outputs = interfaces
-        .filter((interf) => interf.direction === 'output')
-        .map((interf) => ({
-            id: interf.id ?? uuidv4(),
-            nodeInterfaceId: interf.nodeInterface,
-            name: interf.name,
-            direction: interf.direction,
-        }));
+    const { inputs, outputs } = parseInterfaces(interfaces, [], [], true);
+
+    const graphInputs = Object.values(inputs);
+    const graphOutputs = Object.values(outputs);
+
+    const parsedState = nodes.map(parseNodeState);
+    if (Array.isArray(parsedState) && parsedState.length) {
+        return parsedState;
+    }
 
     const state = {
         id: type,
-        nodes: nodes.map(parseNodeState),
+        nodes: parsedState,
         connections,
-        inputs,
-        outputs,
+        inputs: graphInputs,
+        outputs: graphOutputs,
         name,
     };
+
     return new GraphTemplate(state, editor);
 }
