@@ -12,7 +12,7 @@ Inherits from baklavajs/packages/renderer-vue/src/nodepalette/NodePalette.vue
 
 <template>
     <!-- eslint-disable vue/no-multiple-template-root -->
-    <div class="baklava-node-palette">
+    <div class="baklava-node-palette" ref="paletteRef">
         <div class="search-bar">
             <div class="palette-title">
                 <span>Nodes browser</span>
@@ -74,6 +74,7 @@ export default defineComponent({
         const { x: mouseX, y: mouseY } = usePointer();
         const { transform } = useTransform();
 
+        const paletteRef = ref(null);
         const editorEl = inject('editorEl');
 
         const draggedNode = ref(null);
@@ -103,18 +104,24 @@ export default defineComponent({
                 nodeInformation,
                 iconPath,
             };
-            const onDragEnd = () => {
-                const instance = new nodeInformation.type(); // eslint-disable-line new-cap,max-len
-                viewModel.value.displayedGraph.addNode(instance);
 
-                const rect = editorEl.value.getBoundingClientRect();
-                const [x, y] = transform(mouseX.value - rect.left, mouseY.value - rect.top);
-                instance.position.x = x;
-                instance.position.y = y;
+            const onDragEnd = (ev) => {
+                const elements = document.elementsFromPoint(ev.clientX, ev.clientY);
 
-                draggedNode.value = null;
-                document.removeEventListener('pointerup', onDragEnd);
+                if (!elements.includes(paletteRef.value)) {
+                    const instance = new nodeInformation.type(); // eslint-disable-line new-cap,max-len
+                    viewModel.value.displayedGraph.addNode(instance);
+
+                    const rect = editorEl.value.getBoundingClientRect();
+                    const [x, y] = transform(mouseX.value - rect.left, mouseY.value - rect.top);
+                    instance.position.x = x;
+                    instance.position.y = y;
+
+                    draggedNode.value = null;
+                    document.removeEventListener('pointerup', onDragEnd);
+                }
             };
+
             document.addEventListener('pointerup', onDragEnd);
         };
         const nodeSearch = ref('');
@@ -130,6 +137,7 @@ export default defineComponent({
             collapse,
             tooltip,
             nodeSearch,
+            paletteRef,
         };
     },
 });
