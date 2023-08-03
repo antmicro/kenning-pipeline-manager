@@ -58,7 +58,7 @@ import { useGraph, CheckboxInterface, ButtonInterface } from '@baklavajs/rendere
 import CustomInterface from './CustomInterface.vue';
 import Cross from '../icons/Cross.vue';
 
-import { validateInterfaceGroupsNames } from '../core/NodeFactory';
+import { validateInterfaceGroupsNames } from '../core/interfaceParser';
 
 export default defineComponent({
     components: {
