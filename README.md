@@ -176,3 +176,24 @@ To remove installed `npm` dependencies and the built application, run the follow
 ```
 ./cleanup
 ```
+
+### Using Pipeline Manager as a Python module
+
+To install Pipeline Manager with `pip`, run:
+
+```
+pip install -U git+https://github.com/antmicro/kenning-pipeline-manager.git
+```
+
+To work directly with the repository, install the module with:
+
+```
+pip install -e .
+```
+
+All Pipeline Manager scripts can then be used from the command-line interface:
+
+```
+pipeline_manager
+usage: pipeline_manager {build,run,validate,cleanup}
+```
