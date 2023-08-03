@@ -22,7 +22,6 @@ import {
 
 import { useGraph } from '@baklavajs/renderer-vue';
 
-import { v4 as uuidv4 } from 'uuid';
 import { toRaw, nextTick } from 'vue';
 import {
     SUBGRAPH_OUTPUT_NODE_TYPE,
@@ -35,6 +34,7 @@ import {
 import createPipelineManagerGraph from './CustomGraph.js';
 import LayoutManager from '../core/LayoutManager.js';
 import { suppressHistoryLogging } from '../core/History.ts';
+import { parseInterfaces } from '../core/interfaceParser.js';
 
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-underscore-dangle */
@@ -380,28 +380,7 @@ export default class PipelineManagerEditor extends Editor {
             }
 
             load(state) {
-                const inputs = {};
-                state.interfaces
-                    .filter((intf) => intf.direction === 'input' || intf.direction === 'inout')
-                    .forEach((intf) => {
-                        inputs[intf.name] = {
-                            id: intf.id,
-                            direction: intf.direction,
-                            side: intf.side,
-                            nodePosition: intf.nodePosition,
-                        };
-                    });
-                const outputs = { _calculationResults: { id: uuidv4 } };
-                state.interfaces
-                    .filter((intf) => intf.direction === 'output')
-                    .forEach((intf) => {
-                        outputs[intf.name] = {
-                            id: intf.id,
-                            direction: intf.direction,
-                            side: intf.side,
-                            nodePosition: intf.nodePosition,
-                        };
-                    });
+                const { inputs, outputs } = parseInterfaces(state.interfaces, [], [], true);
 
                 /*
                     When the subgraph node is created, it creates a placeholder interfaces
@@ -412,8 +391,8 @@ export default class PipelineManagerEditor extends Editor {
                     the names of are not adjusted. We need to tie an input interface with
                     corresponding subgraph input (here it is done by name of subgraph input) and
                     adjust the node's input (and likewise for outputs)
-
                 */
+
                 const inputMap = new Map();
                 state.graphState.inputs.forEach((input) => {
                     inputMap.set(input.id, input.name);
@@ -421,13 +400,14 @@ export default class PipelineManagerEditor extends Editor {
                 Object.keys(this.inputs).forEach((key) => {
                     this.removeInterface('input', key);
                 });
-                Object.entries(inputs).forEach(([inputID, inputInfo]) => {
-                    const ni = new NodeInterface(inputMap.get(inputID), undefined);
+                Object.values(inputs).forEach((inputInfo) => {
+                    const ni = new NodeInterface(inputMap.get(inputInfo.name), undefined);
                     ni.id = inputInfo.id;
                     ni.direction = inputInfo.direction;
                     ni.side = inputInfo.side;
                     ni.nodePosition = inputInfo.nodePosition;
-                    this.addInterface('input', inputID, ni);
+                    ni.sidePosition = inputInfo.sidePosition;
+                    this.addInterface('input', inputInfo.name, ni);
                 });
                 const outputMap = new Map();
                 state.graphState.outputs.forEach((output) => {
@@ -436,13 +416,14 @@ export default class PipelineManagerEditor extends Editor {
                 Object.keys(this.outputs).forEach((key) => {
                     this.removeInterface('output', key);
                 });
-                Object.entries(outputs).forEach(([outputID, outputInfo]) => {
-                    const ni = new NodeInterface(outputMap.get(outputID), undefined);
+                Object.values(outputs).forEach((outputInfo) => {
+                    const ni = new NodeInterface(outputMap.get(outputInfo.name), undefined);
                     ni.id = outputInfo.id;
                     ni.direction = outputInfo.direction;
                     ni.side = outputInfo.side;
                     ni.nodePosition = outputInfo.nodePosition;
-                    this.addInterface('output', outputID, ni);
+                    ni.sidePosition = outputInfo.sidePosition;
+                    this.addInterface('output', outputInfo.name, ni);
                 });
 
                 delete state.interfaces;
@@ -457,16 +438,10 @@ export default class PipelineManagerEditor extends Editor {
             updateInterfaces() {
                 super.updateInterfaces();
                 this.template.inputs.forEach((ni) => {
-                    this.inputs[ni.id].direction = ni.direction ? ni.direction : 'input';
-                    this.inputs[ni.id].side = ni.side ? ni.side : 'left';
-                    this.inputs[ni.id].nodePosition = ni.nodePosition ? ni.nodePosition : undefined;
+                    Object.assign(this.inputs[ni.id], ni);
                 });
                 this.template.outputs.forEach((ni) => {
-                    this.outputs[ni.id].direction = 'output';
-                    this.outputs[ni.id].side = ni.side ? ni.side : 'right';
-                    this.outputs[ni.id].nodePosition = ni.nodePosition
-                        ? ni.nodePosition
-                        : undefined;
+                    Object.assign(this.outputs[ni.id], ni);
                 });
             }
         }
