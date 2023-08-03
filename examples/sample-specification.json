@@ -111,6 +111,7 @@
         }
     ],
     "metadata": {
+        "twoColumn": true,
         "interfaces": {
             "BinaryImage": {
                 "interfaceColor": "#FF00FF",
