@@ -25,6 +25,7 @@ export const SubgraphInputNode = defineNode({
             const ni = new NodeInterface('Connection', undefined);
             ni.direction = 'output';
             ni.side = 'right';
+            ni.sidePosition = 0;
             return ni;
         },
     },
@@ -45,6 +46,7 @@ export const SubgraphOutputNode = defineNode({
             const ni = new NodeInterface('Connection', undefined);
             ni.direction = 'input';
             ni.side = 'left';
+            ni.sidePosition = 0;
             return ni;
         },
     },
@@ -66,6 +68,7 @@ export const SubgraphInoutNode = defineNode({
             const ni = new NodeInterface('Connection', undefined);
             ni.direction = 'inout';
             ni.side = 'left';
+            ni.sidePosition = 0;
             return ni;
         },
     },
