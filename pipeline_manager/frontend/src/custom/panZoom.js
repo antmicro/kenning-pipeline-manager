@@ -41,13 +41,8 @@ export default function usePanZoom() {
         const allowZoomOut = (zoomLimit * graph.value.size().graphWidth > editorWidth / newScale ||
             zoomLimit * graph.value.size().graphHeight > editorHeight / newScale);
 
-        const allowZoomIn = (
-            (1 / zoomLimit) * graph.value.size().graphHeight < editorHeight / newScale ||
-            (1 / zoomLimit) * graph.value.size().graphHeight < editorHeight / newScale);
-
         if (
-            (allowZoomIn && allowZoomOut) ||
-            (!allowZoomIn && newScale < graph.value.scaling) ||
+            (allowZoomOut) ||
             (!allowZoomOut && newScale > graph.value.scaling)
         ) {
             graph.value.scaling = newScale;
