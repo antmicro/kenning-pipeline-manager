@@ -353,12 +353,17 @@ const getRows = (sockets) => {
     if (!sockets.length) {
         return [];
     }
-    const numOfLines = sockets[sockets.length - 1].sidePosition;
+
+    const numOfLines = Math.max(
+        displayedLeftSockets.value.at(-1)?.sidePosition ?? 0,
+        displayedRightSockets.value.at(-1)?.sidePosition ?? 0,
+    );
+
     let numOfSocket = 0;
     const rows = [];
 
     for (let i = 0; i <= numOfLines; i += 1) {
-        if (sockets[numOfSocket].sidePosition === i) {
+        if (sockets[numOfSocket]?.sidePosition === i) {
             rows.push(sockets[numOfSocket]);
             numOfSocket += 1;
         } else {
