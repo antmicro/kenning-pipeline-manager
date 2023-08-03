@@ -220,6 +220,13 @@ export default class EditorManager {
                     subgraph.type,
                     this.baklavaView.editor,
                 );
+
+                // If my subgraph is any array then it is an array of errors
+                if (Array.isArray(mySubgraph) && mySubgraph.length) {
+                    errors.push(...mySubgraph);
+                    return;
+                }
+
                 this.baklavaView.editor.addGraphTemplate(
                     mySubgraph,
                     subgraph.category,
@@ -227,6 +234,11 @@ export default class EditorManager {
                 );
             });
         }
+
+        if (errors.length) {
+            return errors;
+        }
+
         return [];
     }
 

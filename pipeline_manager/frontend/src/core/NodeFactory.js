@@ -236,7 +236,7 @@ export function NodeFactory(
     const parsedInterfaces = parseInterfaces(interfaces, interfaceGroups, defaultInterfaceGroups);
     // If parsedInterfaces returns an array, it is an array of errors
     if (Array.isArray(parsedInterfaces) && parsedInterfaces.length) {
-        return parsedInterfaces.map((error) => `Node ${nodeType} of id: ${this.id} invalid. ${error}`);
+        return parsedInterfaces.map((error) => `Node ${nodeType} invalid. ${error}`);
     }
 
     function createBaklavaInterface(intf) {
@@ -441,8 +441,10 @@ export function SubgraphFactory(nodes, connections, interfaces, name, type, edit
     const graphOutputs = Object.values(outputs);
 
     const parsedState = nodes.map(parseNodeState);
-    if (Array.isArray(parsedState) && parsedState.length) {
-        return parsedState;
+    const errorMessages = parsedState.filter((n) => Array.isArray(n) && n.length);
+
+    if (errorMessages.length) {
+        return errorMessages.map((error) => `Node ${type} invalid. ${error}`);
     }
 
     const state = {
