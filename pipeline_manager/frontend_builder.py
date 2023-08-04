@@ -134,6 +134,16 @@ def build_frontend(
         build_type == 'static-html' else \
         frontend_path / '.env.local'
 
+    frontend_dist_path = frontend_path / 'dist'
+    # when the project is installed via pip, change the default build location
+    # to ./build
+    if not subprocess.call(["pip", "show", "pipeline_manager"]):
+        build_dir = Path(os.getcwd()) / 'build'
+        frontend_dist_path = build_dir / 'dist'
+        config_path = build_dir / '.env.static.local' if \
+            build_type == 'static_html' else \
+            build_dir / '.env.local'
+
     config_lines = []
 
     if specification:
@@ -189,17 +199,11 @@ def build_frontend(
     if exit_status.returncode != 0:
         return exit_status.returncode
 
-    frontend_dist_path = frontend_path / 'dist'
-
-    # when the project is installed via pip, change the default build location
-    # to ./build
-    if not subprocess.call(["pip", "show", "pipeline_manager"]):
-        frontend_dist_path = Path(os.getcwd()) / 'build' # noqa E501
-
     if output_directory:
         if clean_build and Path(output_directory).exists():
             shutil.rmtree(output_directory)
-        frontend_dist_path = Path(os.path.abspath(sys.argv[0])).parent / output_directory # noqa E501
+        frontend_dist_path = Path(
+            os.path.abspath(sys.argv[0])).parent / output_directory
 
     if assets_directory:
         shutil.copytree(
