@@ -101,11 +101,15 @@ export default class PipelineManagerEditor extends Editor {
     }
 
     /**
-     * Cleans up the editor.
-     *
-     * Removes all nodes and connections from the editor and unregisters all
-     * nodes. Its important that registered interface types are not removed, as there
-     * is no support for that in baklavajs, but it should not result in any malfunction.
+     * Cleans all graphs in the editor.
+     */
+    deepCleanEditor() {
+        this.subgraphStack.forEach(this.backFromSubgraph.bind(this));
+        this.cleanEditor();
+    }
+
+    /**
+     * Cleans up the current graph current graph editor.
      */
     cleanEditor() {
         const graphInstance = this._graph;
