@@ -125,11 +125,13 @@ export default class EditorManager {
 
         this.currentSpecification = dataflowSpecification;
         if (!lazyLoad) {
-            this.updateMetadata(metadata);
-            errors.concat(this.updateGraphSpecification(dataflowSpecification));
+            errors.push(...this.updateMetadata(metadata));
+            errors.push(...this.updateGraphSpecification(dataflowSpecification));
         }
 
-        this.specificationLoaded = true;
+        if (!errors.length) {
+            this.specificationLoaded = true;
+        }
         return { errors, warnings };
     }
 
@@ -183,7 +185,7 @@ export default class EditorManager {
 
             // If my node is any array then it is an array of errors
             if (Array.isArray(myNode) && myNode.length) {
-                errors.push(myNode);
+                errors.push(...myNode);
                 return;
             }
 
