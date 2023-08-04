@@ -129,6 +129,14 @@ export default {
             return button;
         });
 
+        const clearEditor = computed(() => {
+            const button = new ButtonInterface('Clean editor', () => {
+                props.viewModel.editor.deepCleanEditor();
+            });
+            button.componentName = 'ButtonInterface';
+            return button;
+        });
+
         const disableLayersOptions = computed(() => {
             const options = ref([]);
 
@@ -174,6 +182,7 @@ export default {
             movementStep.value,
             randomizedOffsetOption.value,
             center.value,
+            clearEditor.value,
         ]);
 
         return { displayOptionName, settingOptions, disableLayersOptions };
