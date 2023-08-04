@@ -6,7 +6,7 @@
  */
 
 import { computed, ref } from 'vue';
-import { useGraph } from '@baklavajs/renderer-vue';
+import { useGraph, useViewModel } from '@baklavajs/renderer-vue';
 import { gridSnapper, nodeSnapper } from '../core/snappers';
 
 /* eslint-disable no-param-reassign */
@@ -16,8 +16,13 @@ export default function useDragMove(
     nodeId = undefined,
 ) {
     const { graph } = useGraph();
+    const { viewModel } = useViewModel();
 
     const calculateSnappedPosition = gridSnapperInstance ?? gridSnapper(ref(1));
+
+    const gridSize = computed(() => viewModel.value.settings.background.gridSize);
+    const backgroundGridSnapper = gridSnapper(gridSize);
+
     const nodeSnappers = {
         x: nodeSnapper('x'),
         y: nodeSnapper('y'),
@@ -30,12 +35,16 @@ export default function useDragMove(
     const dragging = computed(() => !!draggingStartPoint.value);
 
     /* eslint-disable arrow-body-style */
-    const calculatePosition = (pos, kind, align = false) => {
+    const calculatePosition = (pos, kind, align = false, gridSnap = false) => {
         if (align && nodeId !== undefined) {
             const alignedCoord = nodeSnappers[kind](pos, nodeId);
             if (alignedCoord !== undefined) {
                 return alignedCoord;
             }
+        }
+
+        if (gridSnap) {
+            return backgroundGridSnapper(pos);
         }
         // allow either snap-to-grid or free movement
         return movementStepEnabled.value ? calculateSnappedPosition(pos) : pos;
@@ -62,6 +71,7 @@ export default function useDragMove(
     const onPointerMove = (ev) => {
         movementStepEnabled.value = !ev.shiftKey;
         const align = ev.ctrlKey;
+        const gridSnap = ev.shiftKey;
         if (draggingStartPoint.value) {
             const dx = ev.pageX - draggingStartPoint.value.x;
             const dy = ev.pageY - draggingStartPoint.value.y;
@@ -69,11 +79,13 @@ export default function useDragMove(
                 draggingStartPosition.value.x + dx / graph.value.scaling,
                 'x',
                 align,
+                gridSnap,
             );
             positionRef.value.y = calculatePosition(
                 draggingStartPosition.value.y + dy / graph.value.scaling,
                 'y',
                 align,
+                gridSnap,
             );
         }
     };
