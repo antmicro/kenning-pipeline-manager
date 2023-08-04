@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import base64
+import os
 import errno
 import json
 import shutil
@@ -188,6 +189,12 @@ def build_frontend(
     if exit_status.returncode != 0:
         return exit_status.returncode
 
+    frontend_dist_path = frontend_path / 'dist'
+    if output_directory:
+        if clean_build and Path(output_directory).exists():
+            shutil.rmtree(output_directory)
+        frontend_dist_path = Path(os.path.abspath(sys.argv[0])).parent / output_directory # noqa E501
+
     if assets_directory:
         shutil.copytree(
             assets_directory,
@@ -196,24 +203,17 @@ def build_frontend(
         )
 
     if build_type == 'static-html':
-        subprocess.run(['npm', 'run', 'build-static-html'], cwd=frontend_path)
+        subprocess.run(['npm', 'run', 'build-static-html', '--', '--dest',
+                        f'{frontend_dist_path}'], cwd=frontend_path)
         if exit_status.returncode != 0:
             return exit_status.returncode
     if build_type == 'server-app':
-        subprocess.run(['npm', 'run', 'build-server-app'], cwd=frontend_path)
+        subprocess.run(['npm', 'run', 'build-server-app', '--', '--dest',
+                        f'{frontend_dist_path}'], cwd=frontend_path)
         if exit_status.returncode != 0:
             return exit_status.returncode
 
     if single_html:
         build_singlehtml(frontend_path / 'dist', single_html, used_icons)
-
-    if output_directory:
-        if clean_build and Path(output_directory).exists():
-            shutil.rmtree(output_directory)
-        shutil.copytree(
-            frontend_path / 'dist',
-            output_directory,
-            dirs_exist_ok=True
-        )
 
     return 0
