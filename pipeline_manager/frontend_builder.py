@@ -190,6 +190,12 @@ def build_frontend(
         return exit_status.returncode
 
     frontend_dist_path = frontend_path / 'dist'
+
+    # when the project is installed via pip, change the default build location
+    # to ./build
+    if not subprocess.call(["pip", "show", "pipeline_manager"]):
+        frontend_dist_path = Path(os.getcwd()) / 'build' # noqa E501
+
     if output_directory:
         if clean_build and Path(output_directory).exists():
             shutil.rmtree(output_directory)
@@ -214,6 +220,6 @@ def build_frontend(
             return exit_status.returncode
 
     if single_html:
-        build_singlehtml(frontend_path / 'dist', single_html, used_icons)
+        build_singlehtml(frontend_dist_path, single_html, used_icons)
 
     return 0
