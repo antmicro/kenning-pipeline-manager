@@ -30,6 +30,7 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
         @wheel="mouseWheel"
         @keydown="keyDown"
         @keyup="keyUp"
+        oncontextmenu="return false;"
     >
         <slot name="background">
             <background />
