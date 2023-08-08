@@ -24,9 +24,6 @@ import { useGraph } from '@baklavajs/renderer-vue';
 
 import { toRaw, nextTick } from 'vue';
 import {
-    SUBGRAPH_OUTPUT_NODE_TYPE,
-    SUBGRAPH_INPUT_NODE_TYPE,
-    SUBGRAPH_INOUT_NODE_TYPE,
     SubgraphInoutNode,
     SubgraphInputNode,
     SubgraphOutputNode,
@@ -480,7 +477,7 @@ export default class PipelineManagerEditor extends Editor {
         this.events.addGraphTemplate.emit(template);
     }
 
-    switchGraph(subgraphNode) {
+    firstSwitchGraph(subgraphNode) {
         if (this._switchGraph === undefined) {
             const { switchGraph } = useGraph();
             this._switchGraph = switchGraph;
@@ -604,9 +601,38 @@ export default class PipelineManagerEditor extends Editor {
         return errors;
     }
 
+    switchGraph(subgraphNode) {
+        if (this._switchGraph === undefined) {
+            const { switchGraph } = useGraph();
+            this._switchGraph = switchGraph;
+        }
+        // disable history logging for the switch - don't push nodes being created here
+        suppressHistoryLogging(true);
+
+        this._graph = subgraphNode.subgraph;
+
+        this._switchGraph(this._graph);
+        suppressHistoryLogging(false);
+        nextTick().then(() => {
+            const graph = this.graph.save();
+            this.layoutManager.registerGraph(graph);
+            this.layoutManager.computeLayout(graph).then(this.updateNodesPosition.bind(this));
+        });
+    }
+
+    // TODO(mleonowicz, jbylicki): As a part of the refactor, the load needs to
+    // change alongside the dataflow; this value keeps the first load original such that later
+    // it can be adapted. For later use, the cut-down version is used.
+    backwardsCompatibleFistLoad = true;
+
     switchToSubgraph(subgraphNode) {
         this.subgraphStack.push([this._graph.id, subgraphNode]);
-        this.switchGraph(subgraphNode);
+        if (this.backwardsCompatibleFistLoad) {
+            this.firstSwitchGraph(subgraphNode);
+            this.backwardsCompatibleFistLoad = false;
+        } else {
+            this.switchGraph(subgraphNode);
+        }
     }
 
     backFromSubgraph() {
@@ -619,15 +645,6 @@ export default class PipelineManagerEditor extends Editor {
         this._graph.inputs = this._graph.template.inputs;
         this._graph.outputs = this._graph.template.outputs;
         subgraphNode.updateInterfaces();
-        this._graph.nodes
-            .filter((node) =>
-                [
-                    SUBGRAPH_INPUT_NODE_TYPE,
-                    SUBGRAPH_OUTPUT_NODE_TYPE,
-                    SUBGRAPH_INOUT_NODE_TYPE,
-                ].includes(node.type),
-            )
-            .forEach((node) => this._graph.removeNode(node));
 
         this._graph = newGraph;
         this._switchGraph(this._graph);

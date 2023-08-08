@@ -127,63 +127,48 @@ export default function createPipelineManagerGraph(graph) {
     };
 
     graph.updateTemplate = function updateTemplate() {
+        // REVIEW(melonowicz, glatosinski): This *might* screw with the order sometimes,
+        // maybe a different approach would be better?
+        let positionCounter = 0;
         const inputs = [];
         const inputNodes = this.nodes.filter((n) => n.type === SUBGRAPH_INPUT_NODE_TYPE);
         inputNodes.forEach((n) => {
-            const connections = this.connections.filter((c) => c.from === n.outputs.placeholder);
-            connections.forEach((c) => {
-                inputs.push({
-                    id: n.graphInterfaceId,
-                    name: n.inputs.name.value,
-                    nodeInterfaceId: c.to.id,
-                    side: n.inputs.side.value.toLowerCase(),
-                    direction: 'input',
-                    nodePosition: n.position,
-                });
+            inputs.push({
+                id: n.graphInterfaceId,
+                name: n.inputs.name.value,
+                side: n.inputs.side.value.toLowerCase(),
+                direction: 'input',
+                nodePosition: n.position,
+                sidePosition: positionCounter,
             });
+            positionCounter += 1;
         });
 
         const outputs = [];
         const outputNodes = this.nodes.filter((n) => n.type === SUBGRAPH_OUTPUT_NODE_TYPE);
         outputNodes.forEach((n) => {
-            const connections = this.connections.filter((c) => c.to === n.inputs.placeholder);
-            connections.forEach((c) => {
-                outputs.push({
-                    id: n.graphInterfaceId,
-                    name: n.inputs.name.value,
-                    nodeInterfaceId: c.from.id,
-                    side: n.inputs.side.value.toLowerCase(),
-                    direction: 'output',
-                    nodePosition: n.position,
-                });
+            outputs.push({
+                id: n.graphInterfaceId,
+                name: n.inputs.name.value,
+                side: n.inputs.side.value.toLowerCase(),
+                direction: 'output',
+                nodePosition: n.position,
+                sidePosition: positionCounter,
             });
+            positionCounter += 1;
         });
 
         const inoutNodes = this.nodes.filter((n) => n.type === SUBGRAPH_INOUT_NODE_TYPE);
         inoutNodes.forEach((n) => {
-            // Inout interface can be both from and to
-            const connectionsTo = this.connections.filter((c) => c.to === n.inputs.placeholder);
-            connectionsTo.forEach((c) => {
-                inputs.push({
-                    id: n.graphInterfaceId,
-                    name: n.inputs.name.value,
-                    nodeInterfaceId: c.from.id,
-                    side: n.inputs.side.value.toLowerCase(),
-                    direction: 'inout',
-                    nodePosition: n.position,
-                });
+            inputs.push({
+                id: n.graphInterfaceId,
+                name: n.inputs.name.value,
+                side: n.inputs.side.value.toLowerCase(),
+                direction: 'inout',
+                nodePosition: n.position,
+                sidePosition: positionCounter,
             });
-            const connectionsFrom = this.connections.filter((c) => c.from === n.inputs.placeholder);
-            connectionsFrom.forEach((c) => {
-                inputs.push({
-                    id: n.graphInterfaceId,
-                    name: n.inputs.name.value,
-                    nodeInterfaceId: c.to.id,
-                    side: n.inputs.side.value.toLowerCase(),
-                    direction: 'inout',
-                    nodePosition: n.position,
-                });
-            });
+            positionCounter += 1;
         });
 
         this.template.inputs = inputs;
