@@ -87,6 +87,7 @@ export default defineComponent({
         };
 
         const onMouseShiftDown = (ev, index) => {
+            if (viewModel.value.connectionRenderer.style !== 'orthogonal') return;
             if (props.connection.anchors === undefined) {
                 props.connection.anchors = [];
             }
@@ -123,7 +124,11 @@ export default defineComponent({
             return d;
         });
 
-        const hasAnchors = computed(() => props.connection.anchors !== undefined && props.connection.anchors.length && viewModel.value.connectionRenderer.style === 'orthogonal');
+        const hasAnchors = computed(() =>
+            props.connection.anchors !== undefined &&
+            props.connection.anchors.length &&
+            viewModel.value.connectionRenderer.style === 'orthogonal',
+        );
 
         return {
             cssClasses,
