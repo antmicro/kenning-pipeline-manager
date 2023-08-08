@@ -137,8 +137,13 @@ def build_frontend(
     frontend_dist_path = frontend_path / 'dist'
     # when the project is installed via pip, change the default build location
     # to ./build
-    if not subprocess.call(["pip", "show", "pipeline_manager"]):
+    if not subprocess.call(["pip", "show", "-qq", "pipeline_manager"],
+                           stdout=subprocess.DEVNULL):
         build_dir = Path(os.getcwd()) / 'build'
+
+        if not os.path.exists(build_dir):
+            build_dir.mkdir()
+
         frontend_dist_path = build_dir / 'dist'
         config_path = build_dir / '.env.static.local' if \
             build_type == 'static_html' else \
