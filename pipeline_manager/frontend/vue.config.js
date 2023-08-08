@@ -44,6 +44,7 @@ export default defineConfig({
                 system: false,
                 file: false,
             },
+            extensions: ['.ts', '.js', '.json']
         };
     },
     pages: {
