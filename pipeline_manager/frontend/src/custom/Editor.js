@@ -316,10 +316,7 @@ export default class PipelineManagerEditor extends Editor {
 
         const nt = createGraphNodeType(template);
         class customGraphNodeType extends nt {
-            constructor() {
-                super();
-                this.type = `${GRAPH_NODE_TYPE_PREFIX}${type}`;
-            }
+            type = `${GRAPH_NODE_TYPE_PREFIX}${type}`;
 
             save() {
                 const state = super.save();
