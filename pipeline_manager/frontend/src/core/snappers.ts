@@ -5,14 +5,16 @@
  */
 
 import { useGraph } from '@baklavajs/renderer-vue';
+import { Ref } from 'vue';
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Function for calculating node position based on given movementStep.
  *
  * @param movementStep Vue's reference to value containing snap offset
  */
-export function gridSnapper(movementStep) {
-    const calculateSnappedPosition = (coord) =>
+export function gridSnapper(movementStep: Ref<number>) {
+    const calculateSnappedPosition = (coord: number) =>
         Math.round(coord / movementStep.value) * movementStep.value;
 
     return calculateSnappedPosition;
@@ -24,13 +26,14 @@ export function gridSnapper(movementStep) {
  *
  * @param kind Either 'x' or 'y', defines along which axis the coordinate is aligned
  */
-export function nodeSnapper(kind) {
+export function nodeSnapper(kind: 'x' | 'y') {
     const { graph } = useGraph();
     const snapDistance = 100;
-    const calculateSnappedPosition = (coord, nodeId) => {
+    const calculateSnappedPosition = (coord: number, nodeId: string) => {
         const nearestCoords = graph.value.nodes
-            .filter((node) => node.id !== nodeId)
-            .map((node) => node.position[kind])
+            // any definition is an ad-hoc solution as we don't have our node definition
+            .filter((node: any) => node.id !== nodeId)
+            .map((node: any) => node.position[kind])
             .filter((otherCoords) => Math.abs(coord - otherCoords) < snapDistance);
         return nearestCoords.length !== 0 ? Math.min(...nearestCoords) : undefined;
     };

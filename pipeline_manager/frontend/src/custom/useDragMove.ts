@@ -5,17 +5,23 @@
  *
  */
 
-import { computed, ref } from 'vue';
+import { computed, ref, Ref } from 'vue';
 import { useGraph, useViewModel } from '@baklavajs/renderer-vue';
 import { gridSnapper, nodeSnapper } from '../core/snappers';
 
-/* eslint-disable no-param-reassign */
+interface coordinates {
+    x: number;
+    y: number;
+}
+
+/* eslint-disable no-param-reassign, @typescript-eslint/no-explicit-any */
 export default function useDragMove(
-    positionRef,
+    positionRef: Ref<coordinates>,
     gridSnapperInstance = undefined,
     nodeId = undefined,
 ) {
-    const { graph } = useGraph();
+    // any definition is an ad-hoc solution as we don't have our graph definition
+    const { graph } = useGraph() as { graph: any };
     const { viewModel } = useViewModel();
 
     const calculateSnappedPosition = gridSnapperInstance ?? gridSnapper(ref(1));
@@ -28,21 +34,20 @@ export default function useDragMove(
         y: nodeSnapper('y'),
     };
 
-    const draggingStartPoint = ref(null);
-    const draggingStartPosition = ref(null);
-    const movementStepEnabled = ref(true);
+    const draggingStartPoint = ref<coordinates | null>(null);
+    const draggingStartPosition = ref<coordinates | null>(null);
+    const movementStepEnabled = ref<boolean>(true);
 
     const dragging = computed(() => !!draggingStartPoint.value);
 
     /* eslint-disable arrow-body-style */
-    const calculatePosition = (pos, kind, align = false, gridSnap = false) => {
+    const calculatePosition = (pos: number, kind: 'x' | 'y', align = false, gridSnap = false) => {
         if (align && nodeId !== undefined) {
             const alignedCoord = nodeSnappers[kind](pos, nodeId);
             if (alignedCoord !== undefined) {
                 return alignedCoord;
             }
         }
-
         if (gridSnap) {
             return backgroundGridSnapper(pos);
         }
@@ -56,7 +61,7 @@ export default function useDragMove(
         positionRef.value.y = calculatePosition(positionRef.value.y, 'y');
     }
 
-    const onPointerDown = (ev) => {
+    const onPointerDown = (ev: PointerEvent) => {
         movementStepEnabled.value = !ev.shiftKey;
         draggingStartPoint.value = {
             x: ev.pageX,
@@ -68,11 +73,11 @@ export default function useDragMove(
         };
     };
 
-    const onPointerMove = (ev) => {
+    const onPointerMove = (ev: PointerEvent) => {
         movementStepEnabled.value = !ev.shiftKey;
         const align = ev.ctrlKey;
         const gridSnap = ev.shiftKey;
-        if (draggingStartPoint.value) {
+        if (draggingStartPoint.value && draggingStartPosition.value) {
             const dx = ev.pageX - draggingStartPoint.value.x;
             const dy = ev.pageY - draggingStartPoint.value.y;
             positionRef.value.x = calculatePosition(
