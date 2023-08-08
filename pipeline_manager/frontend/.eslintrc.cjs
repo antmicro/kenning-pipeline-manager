@@ -9,21 +9,21 @@ module.exports = {
         browser: true,
         es2022: true,
     },
-    extends: ['plugin:vue/essential', 'prettier', 'airbnb-base'],
+    extends: ['plugin:vue/essential', 'prettier', 'airbnb-base', 'plugin:import/typescript'],
     overrides: [{
-        "files": ["**/*.{ts,tsx}"],
-        "parser": "@typescript-eslint/parser",
-        "plugins": ["@typescript-eslint"],
-        "extends": ["plugin:@typescript-eslint/recommended"]
+        files: ['**/*.{ts,tsx}'],
+        parser: '@typescript-eslint/parser',
+        plugins: ['@typescript-eslint'],
+        extends: ['plugin:@typescript-eslint/recommended']
     }],
     parserOptions: {
-        parser: '@babel/eslint-parser',
+        parser: '@typescript-eslint/parser',
         requireConfigFile: false,
         ecmaVersion: 'latest',
         sourceType: 'module',
-        babelOptions: { plugins: [ '@babel/plugin-syntax-import-assertions' ], }
+        babelOptions: { plugins: ['@babel/plugin-syntax-import-assertions'], }
     },
-    plugins: ['vue',"@typescript-eslint"],
+    plugins: ['vue', '@typescript-eslint'],
     rules: {
         'import/no-extraneous-dependencies': 0,
         indent: ['error', 4, { SwitchCase: 1 }],
@@ -32,6 +32,6 @@ module.exports = {
         'operator-linebreak': 'off',
         'vue/multi-word-component-names': 0,
         quotes: ['error', 'single', { allowTemplateLiterals: true }],
-        'import/extensions': ['error', { js: 'ignorePackages', json: 'ignorePackages' }],
+        'import/extensions': ['error', { js: 'ignorePackages', json: 'ignorePackages', ts: 'ignorePackages' }],
     },
 };
