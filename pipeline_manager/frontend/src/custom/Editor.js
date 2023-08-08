@@ -417,12 +417,49 @@ export default class PipelineManagerEditor extends Editor {
                 });
 
                 delete state.interfaces;
-                super.load({ ...state, inputs, outputs });
+
+                const errors = [];
+                if (!this.subgraph) {
+                    errors.push('Cannot load a graph node without a graph');
+                }
+                if (!this.template) {
+                    errors.push('Unable to load graph node without graph template');
+                }
+                if (errors.length) {
+                    return errors;
+                }
+
+                // Loading the subgraph of the graph
+                this.subgraph.load(state.graphState);
+
+                // Loading the graph itself
+                this.hooks.beforeLoad.execute(state);
+                this.id = state.id;
+                this.title = state.title;
+
+                // Loading interfaces
+                Object.entries(inputs).forEach(([, intf]) => {
+                    if (this.inputs[intf.name]) {
+                        this.inputs[intf.name].load(intf);
+                        this.inputs[intf.name].nodeId = this.id;
+                    }
+                });
+
+                Object.entries(outputs).forEach(([, intf]) => {
+                    if (this.outputs[intf.name]) {
+                        this.outputs[intf.name].load(intf);
+                        this.outputs[intf.name].nodeId = this.id;
+                    }
+                });
+
                 // Default position should be undefined instead of (0, 0) so that it can be set
                 // by autolayout
                 if (state.position === undefined) {
                     this.position = undefined;
                 }
+
+                this.events.loaded.emit(this);
+                return [];
             }
 
             updateInterfaces() {
