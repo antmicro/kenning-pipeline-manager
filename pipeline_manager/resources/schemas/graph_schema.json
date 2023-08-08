@@ -177,6 +177,27 @@
                     "to": {
                         "type": "string",
                         "description": "Identifier of a to connection"
+                    },
+                    "anchors": {
+                        "type": "array",
+                        "description": "Definition of anchor points that are used for orthogonal connections",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "x": {
+                                    "description": "x coordinate of the anchor",
+                                    "type": "number"
+                                },
+                                "y": {
+                                    "description": "y coordinate of the anchor",
+                                    "type": "number"
+                                }
+                            },
+                            "required": [
+                                "x",
+                                "y"
+                            ]
+                        }
                     }
                 },
                 "required": [
