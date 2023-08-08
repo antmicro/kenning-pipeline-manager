@@ -194,12 +194,12 @@ export default class PipelineManagerEditor extends Editor {
         let errors = [];
         try {
             state.graph.nodes.forEach(recurrentSubgraphLoad);
-            state.graphTemplates = [];
             state.graph.inputs = [];
             state.graph.outputs = [];
             this.layoutManager.registerGraph(state.graph);
 
-            errors = super.load(state);
+            state = this.hooks.load.execute(state);
+            errors = this._graph.load(state.graph);
         } catch (err) {
             // If anything goes wrong during dataflow loading, the editor is cleaned and an
             // appropriate error is returned.
@@ -213,6 +213,7 @@ export default class PipelineManagerEditor extends Editor {
             this.readonly = readonlySetting;
             return errors;
         }
+        this.events.loaded.emit();
         await nextTick();
         const updatedGraph = await this.layoutManager.computeLayout(state.graph);
         this.updateNodesPosition(updatedGraph);
