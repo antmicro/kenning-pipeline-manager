@@ -305,6 +305,8 @@ export default function createPipelineManagerGraph(graph) {
                         checkConnectionResult.dummyConnection.from,
                         checkConnectionResult.dummyConnection.to,
                     );
+
+                    conn.anchors = c.anchors?.map((anchor) => ({ ...anchor, id: Date.now() }));
                     this.internalAddConnection(conn);
                 }
             }
@@ -343,6 +345,25 @@ export default function createPipelineManagerGraph(graph) {
             bottommostY,
             topmostY,
         };
+    };
+
+    graph.save = function save() {
+        const state = {
+            id: this.id,
+            nodes: this.nodes.map((n) => n.save()),
+            connections: this.connections.map((c) => ({
+                id: c.id,
+                from: c.from.id,
+                to: c.to.id,
+                anchors: c.anchors?.map((anchor) => ({
+                    x: anchor.x,
+                    y: anchor.y,
+                })),
+            })),
+            inputs: this.inputs,
+            outputs: this.outputs,
+        };
+        return this.hooks.save.execute(state);
     };
 
     return graph;
