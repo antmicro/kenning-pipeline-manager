@@ -96,6 +96,16 @@ It has three attributes:
 * `id` - unique value assigned to the connection
 * `from` - the connection's output socket id
 * `to` - the connection's input socket id.
+* `anchors` - optional list of [Anchor](#anchor) objects.
+
+##### Anchor
+
+This object describes a single anchor that is used to render connections divided into subparts.
+Every part of the connection is rendered between two adjacent anchors.
+Two attributes are used:
+
+* `x` - x coordinate of the anchor
+* `y` - y coordinate of the anchor.
 
 #### Panning
 
