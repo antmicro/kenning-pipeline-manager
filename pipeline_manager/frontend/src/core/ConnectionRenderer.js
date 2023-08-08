@@ -224,6 +224,26 @@ export default class ConnectionRenderer {
     orthogonalRender(x1, y1, x2, y2, connection) {
         const graph = this.viewModel.displayedGraph;
         const nc = new NormalizedConnection(x1, y1, x2, y2, connection);
+
+        if (connection.anchors !== undefined && connection.anchors.length) {
+            const anchors = connection.anchors.map((anchor) => {
+                const transform = (a) => {
+                    const tx = (a.x + graph.panning.x) * graph.scaling;
+                    const ty = (a.y + graph.panning.y) * graph.scaling;
+                    return { x: tx, y: ty };
+                };
+
+                return transform(anchor);
+            });
+
+            const path = [{ x: nc.x1, y: nc.y1 }];
+            anchors.forEach((anchor) => {
+                path.push({ x: anchor.x, y: anchor.y });
+            });
+            path.push({ x: nc.x2, y: nc.y2 });
+            return path;
+        }
+
         const minMargin = 30 * graph.scaling;
         const middlePoint = (nc.x1 + nc.x2) / 2;
 
