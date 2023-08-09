@@ -129,7 +129,6 @@ export default function createPipelineManagerGraph(graph) {
     graph.updateTemplate = function updateTemplate() {
         // REVIEW(melonowicz, glatosinski): This *might* screw with the order sometimes,
         // maybe a different approach would be better?
-        let positionCounter = 0;
         const inputs = [];
         const inputNodes = this.nodes.filter((n) => n.type === SUBGRAPH_INPUT_NODE_TYPE);
         inputNodes.forEach((n) => {
@@ -139,9 +138,8 @@ export default function createPipelineManagerGraph(graph) {
                 side: n.inputs.side.value.toLowerCase(),
                 direction: 'input',
                 nodePosition: n.position,
-                sidePosition: positionCounter,
+                sidePosition: undefined,
             });
-            positionCounter += 1;
         });
 
         const outputs = [];
@@ -153,9 +151,8 @@ export default function createPipelineManagerGraph(graph) {
                 side: n.inputs.side.value.toLowerCase(),
                 direction: 'output',
                 nodePosition: n.position,
-                sidePosition: positionCounter,
+                sidePosition: undefined,
             });
-            positionCounter += 1;
         });
 
         const inoutNodes = this.nodes.filter((n) => n.type === SUBGRAPH_INOUT_NODE_TYPE);
@@ -166,9 +163,8 @@ export default function createPipelineManagerGraph(graph) {
                 side: n.inputs.side.value.toLowerCase(),
                 direction: 'inout',
                 nodePosition: n.position,
-                sidePosition: positionCounter,
+                sidePosition: undefined,
             });
-            positionCounter += 1;
         });
 
         this.template.inputs = inputs;

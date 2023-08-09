@@ -221,7 +221,7 @@ export function validateInterfaceGroups(enabledInterfaceGroups, inputs, outputs)
  * @returns inputs and outputs of the nodes with `sidePositions` assigned if
  * there were no errors found. Otherwise a list of errors is returned.
  */
-function applySidePositions(inputs, outputs) {
+export function applySidePositions(inputs, outputs) {
     const tempParsedSides = {
         left: {},
         right: {},

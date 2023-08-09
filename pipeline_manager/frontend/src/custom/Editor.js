@@ -31,7 +31,7 @@ import {
 import createPipelineManagerGraph from './CustomGraph.js';
 import LayoutManager from '../core/LayoutManager.js';
 import { suppressHistoryLogging } from '../core/History.ts';
-import { parseInterfaces } from '../core/interfaceParser.js';
+import { parseInterfaces, applySidePositions } from '../core/interfaceParser.js';
 
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-underscore-dangle */
@@ -645,11 +645,20 @@ export default class PipelineManagerEditor extends Editor {
         this._graph.inputs = this._graph.template.inputs;
         this._graph.outputs = this._graph.template.outputs;
         subgraphNode.updateInterfaces();
+        const ifaceOrPositionErrors = applySidePositions(subgraphNode.inputs, subgraphNode.outputs);
+
+        // TODO(jbylicki): Propagate the error forward
+        if (Array.isArray(ifaceOrPositionErrors)) {
+            return ifaceOrPositionErrors;
+        }
+        subgraphNode.inputs = ifaceOrPositionErrors.inputs;
+        subgraphNode.outputs = ifaceOrPositionErrors.outputs;
 
         this._graph = newGraph;
         this._switchGraph(this._graph);
 
         suppressHistoryLogging(false);
+        return [];
     }
 
     isInSubgraph() {
