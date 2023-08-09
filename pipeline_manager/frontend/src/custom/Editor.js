@@ -66,8 +66,8 @@ export default class PipelineManagerEditor extends Editor {
         const stackCopy = Array.from(toRaw(this.subgraphStack));
         stackCopy.forEach(this.backFromSubgraph.bind(this));
 
-        const state = super.save();
-        delete state.graphTemplates;
+        const state = { graph: this.graph.save() };
+
         state.graph.panning = this._graph.panning;
         state.graph.scaling = this._graph.scaling;
         state.graphTemplateInstances = [];
@@ -365,6 +365,9 @@ export default class PipelineManagerEditor extends Editor {
                         nodeInterfaceId: output.nodeInterfaceId,
                     }),
                 );
+
+                delete state.graphState.inputs;
+                delete state.graphState.outputs;
 
                 return { ...state, interfaces: inputInterfaces.concat(outputInterfaces) };
             }
