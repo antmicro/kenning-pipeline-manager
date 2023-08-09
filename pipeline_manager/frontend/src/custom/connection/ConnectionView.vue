@@ -20,7 +20,7 @@ Inherits from baklavajs/renderer-vue/src/connection/ConnectionView.vue
             <g
                 v-for="(d, index) in parsedNewD"
                 @pointerdown.left.exact="onMouseDown"
-                @pointerdown.left.shift.exact="(ev) => onMouseShiftDown(ev, index)"
+                @pointerdown.left.ctrl.exact="(ev) => onMouseShiftDown(ev, index)"
             >
             <path :d="d" class="connection-wrapper baklava-connection"></path>
             <path :d="d" class="baklava-connection" :class="cssClasses" :style="style"></path>
@@ -36,7 +36,7 @@ Inherits from baklavajs/renderer-vue/src/connection/ConnectionView.vue
     <g
         v-else
         @pointerdown.left.exact="onMouseDown"
-        @pointerdown.left.shift.exact="(ev) => onMouseShiftDown(ev, 0)"
+        @pointerdown.left.ctrl.exact="(ev) => onMouseShiftDown(ev, 0)"
     >
         <path :d="parsedNewD" class="connection-wrapper baklava-connection"></path>
         <path :d="parsedNewD" class="baklava-connection" :class="cssClasses" :style="style"></path>

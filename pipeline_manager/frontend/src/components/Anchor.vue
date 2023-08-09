@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
     <g
-        @pointerdown.left.exact="startDrag"
+        @pointerdown.left="startDrag"
         @pointerdown.right.exact="rightclickCallback"
         class="anchor"
     >
