@@ -141,6 +141,11 @@ export default function createPipelineManagerGraph(graph) {
                 });
             } else {
                 const idx = inputs.findIndex((x) => x.id === n.graphInterfaceId);
+                // To avoid redundancy the information about direction is not saved to subgraphIO
+                // in the dataflow, and therefore the information does not make it here.
+                // These values can be hardcoded easily here and this line prevents data duplication
+                // in the dataflow.
+                inputs[idx].direction = 'input';
                 inputs[idx].name = n.inputs.name.value;
                 inputs[idx].side = n.inputs.side.value.toLowerCase();
             }
@@ -160,6 +165,7 @@ export default function createPipelineManagerGraph(graph) {
                 });
             } else {
                 const idx = outputs.findIndex((x) => x.id === n.graphInterfaceId);
+                outputs[idx].direction = 'output';
                 outputs[idx].name = n.inputs.name.value;
                 outputs[idx].side = n.inputs.side.value.toLowerCase();
             }
@@ -178,6 +184,7 @@ export default function createPipelineManagerGraph(graph) {
                 });
             } else {
                 const idx = inputs.findIndex((x) => x.id === n.graphInterfaceId);
+                inputs[idx].direction = 'inout';
                 inputs[idx].name = n.inputs.name.value;
                 inputs[idx].side = n.inputs.side.value.toLowerCase();
             }
