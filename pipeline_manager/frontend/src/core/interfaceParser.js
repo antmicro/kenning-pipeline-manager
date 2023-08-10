@@ -49,6 +49,9 @@ function createGraphInterface(io, hidden, name = undefined) {
     Object.assign(intf, io);
     intf.name = name ?? io.name;
     intf.id = io.id ?? uuidv4();
+    if (intf.type !== undefined) {
+        intf.type = typeof io.type === 'string' || io.type instanceof String ? [io.type] : io.type;
+    }
 
     // For some reason this value is named differently
     intf.nodeInterfaceId = intf.nodeInterface;
