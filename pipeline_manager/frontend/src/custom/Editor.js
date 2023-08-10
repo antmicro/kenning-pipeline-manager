@@ -27,6 +27,9 @@ import {
     SubgraphInoutNode,
     SubgraphInputNode,
     SubgraphOutputNode,
+    SUBGRAPH_INPUT_NODE_TYPE,
+    SUBGRAPH_OUTPUT_NODE_TYPE,
+    SUBGRAPH_INOUT_NODE_TYPE,
 } from './subgraphInterface.js';
 import createPipelineManagerGraph from './CustomGraph.js';
 import LayoutManager from '../core/LayoutManager.js';
@@ -74,6 +77,14 @@ export default class PipelineManagerEditor extends Editor {
             if (node.type.startsWith(GRAPH_NODE_TYPE_PREFIX)) {
                 node.type = node.type.slice(GRAPH_NODE_TYPE_PREFIX.length);
                 node.subgraph = node.graphState.id;
+                node.graphState.nodes = node.graphState.nodes
+                    .filter((n) =>
+                        ![
+                            SUBGRAPH_INPUT_NODE_TYPE,
+                            SUBGRAPH_OUTPUT_NODE_TYPE,
+                            SUBGRAPH_INOUT_NODE_TYPE,
+                        ].includes(n.type),
+                    );
                 state.graphTemplateInstances.push(node.graphState);
                 node.graphState.nodes.forEach(recurrentSubgraphSave);
             }
@@ -418,25 +429,6 @@ export default class PipelineManagerEditor extends Editor {
 
                 delete state.interfaces;
 
-                const errors = [];
-                if (!this.subgraph) {
-                    errors.push('Cannot load a graph node without a graph');
-                }
-                if (!this.template) {
-                    errors.push('Unable to load graph node without graph template');
-                }
-                if (errors.length) {
-                    return errors;
-                }
-
-                // Loading the subgraph of the graph
-                this.subgraph.load(state.graphState);
-
-                // Loading the graph itself
-                this.hooks.beforeLoad.execute(state);
-                this.id = state.id;
-                this.title = state.title;
-
                 // Loading interfaces
                 Object.entries(inputs).forEach(([, intf]) => {
                     if (this.inputs[intf.name]) {
@@ -451,6 +443,24 @@ export default class PipelineManagerEditor extends Editor {
                         this.outputs[intf.name].nodeId = this.id;
                     }
                 });
+
+                let errors = [];
+                if (!this.subgraph) {
+                    errors.push('Cannot load a graph node without a graph');
+                }
+                if (!this.template) {
+                    errors.push('Unable to load graph node without graph template');
+                }
+                if (errors.length) {
+                    return errors;
+                }
+
+                // Loading the subgraph of the graph
+                this.subgraph.load(state.graphState);
+                errors = this.initializeSubgraphInterfaces();
+                if (errors.length) {
+                    return errors;
+                }
 
                 // Default position should be undefined instead of (0, 0) so that it can be set
                 // by autolayout
@@ -471,134 +481,127 @@ export default class PipelineManagerEditor extends Editor {
                     Object.assign(this.outputs[ni.id], ni);
                 });
             }
+
+            initialize() {
+                super.initialize();
+
+                // There should be any erorrs returned as it is part of initialization.
+                const errors = this.initializeSubgraphInterfaces();
+                if (errors.length) {
+                    throw new Error(`Error while initializing subgraph ${this.type}. ${errors.join('. ')}`);
+                }
+            }
+
+            initializeSubgraphInterfaces() {
+                const convertToUpperCase = (str) => `${str[0].toUpperCase()}${str.slice(1)}`;
+
+                const errors = [];
+                Object.entries(this.inputs)
+                    .filter((input) => input[1].direction === 'input')
+                    .forEach(([interfaceID, input]) => {
+                        const node = new SubgraphInputNode();
+                        node.inputs.name.value = input.name;
+                        node.inputs.side.value = convertToUpperCase(input.side);
+                        node.graphInterfaceId = interfaceID;
+                        this.subgraph.addNode(node);
+                        node.position = input.nodePosition;
+
+                        // NodeInterfaceID is stored only in template, we need to find it by ID
+                        const templateInputArr = Object.values(this.subgraph.inputs).filter(
+                            (intf) => intf.id === interfaceID,
+                        );
+                        if (templateInputArr.length !== 1) {
+                            errors.push([
+                                `Error when creating subgraph ${this.subgraph.id}: Expected 1 interface with ID ${interfaceID}, got ${templateInputArr.length}`,
+                            ]);
+                            suppressHistoryLogging(false);
+                            return;
+                        }
+                        const templateInput = templateInputArr[0];
+                        const targetInterface = this.subgraph.findNodeInterface(
+                            templateInput.nodeInterfaceId,
+                        );
+                        if (!targetInterface) {
+                            errors.push([
+                                `Error when creating subgraph ${this.subgraph.id}: Could not find interface ${templateInput.nodeInterfaceId} in subgraph`,
+                            ]);
+                            suppressHistoryLogging(false);
+                            return;
+                        }
+                        this.subgraph.addConnection(node.outputs.placeholder, targetInterface);
+                    });
+
+                Object.entries(this.inputs)
+                    .filter((inout) => inout[1].direction === 'inout')
+                    .forEach(([interfaceID, inout]) => {
+                        const node = new SubgraphInoutNode();
+                        node.inputs.name.value = inout.name;
+                        node.inputs.side.value = convertToUpperCase(inout.side);
+                        node.graphInterfaceId = interfaceID;
+                        this.subgraph.addNode(node);
+                        node.position = inout.nodePosition;
+                        const templateInoutArr = Object.values(this.subgraph.inputs).filter(
+                            (intf) => intf.id === interfaceID,
+                        );
+                        if (templateInoutArr.length !== 1) {
+                            errors.push([
+                                `Error when creating subgraph ${this.subgraph.id}: Expected 1 interface with ID ${interfaceID}, got ${templateInoutArr.length}`,
+                            ]);
+                            suppressHistoryLogging(false);
+                            return;
+                        }
+                        const templateInout = templateInoutArr[0];
+                        const targetInterface = this.subgraph.findNodeInterface(
+                            templateInout.nodeInterfaceId,
+                        );
+                        if (!targetInterface) {
+                            errors.push([
+                                `Error when creating subgraph ${this.subgraph.id}: Could not find interface ${templateInout.nodeInterfaceId} in subgraph`,
+                            ]);
+                            suppressHistoryLogging(false);
+                            return;
+                        }
+                        this.subgraph.addConnection(targetInterface, node.inputs.placeholder);
+                    });
+
+                Object.entries(this.outputs)
+                    .filter(([name, outputIntf]) => name !== '_calculationResults') // eslint-disable-line no-unused-vars
+                    .forEach(([interfaceID, output]) => {
+                        const node = new SubgraphOutputNode();
+                        node.inputs.name.value = output.name;
+                        node.inputs.side.value = convertToUpperCase(output.side);
+                        node.graphInterfaceId = interfaceID;
+                        this.subgraph.addNode(node);
+                        node.position = output.nodePosition;
+                        const templateOutputArr = Object.values(this.subgraph.outputs).filter(
+                            (intf) => intf.id === interfaceID,
+                        );
+                        if (templateOutputArr.length !== 1) {
+                            errors.push([
+                                `Error when creating subgraph ${this.subgraph.id}: Expected 1 interface with ID ${interfaceID}, got ${templateOutputArr.length}`,
+                            ]);
+                            suppressHistoryLogging(false);
+                            return;
+                        }
+                        const templateOutput = templateOutputArr[0];
+                        const targetInterface = this.subgraph.findNodeInterface(
+                            templateOutput.nodeInterfaceId,
+                        );
+                        if (!targetInterface) {
+                            errors.push([
+                                `Error when creating subgraph ${this.subgraph.id}: Could not find interface ${templateOutput.nodeInterfaceId} in subgraph`,
+                            ]);
+                            suppressHistoryLogging(false);
+                            return;
+                        }
+                        this.subgraph.addConnection(targetInterface, node.inputs.placeholder);
+                    });
+                return errors;
+            }
         }
         this.registerNodeType(customGraphNodeType, { category, title: template.name });
 
         this.events.addGraphTemplate.emit(template);
-    }
-
-    firstSwitchGraph(subgraphNode) {
-        if (this._switchGraph === undefined) {
-            const { switchGraph } = useGraph();
-            this._switchGraph = switchGraph;
-        }
-        // disable history logging for the switch - don't push nodes being created here
-        suppressHistoryLogging(true);
-
-        this._graph = subgraphNode.subgraph;
-        const errors = [];
-
-        const convertToUpperCase = (str) => `${str[0].toUpperCase()}${str.slice(1)}`;
-
-        Object.entries(subgraphNode.inputs)
-            .filter((input) => input[1].direction === 'input')
-            .forEach(([interfaceID, input]) => {
-                const node = new SubgraphInputNode();
-                node.inputs.name.value = input.name;
-                node.inputs.side.value = convertToUpperCase(input.side);
-                node.graphInterfaceId = interfaceID;
-                this._graph.addNode(node);
-                node.position = input.nodePosition;
-
-                // NodeInterfaceID is stored only in template, we need to find it by ID
-                const templateInputArr = Object.values(this._graph.inputs).filter(
-                    (intf) => intf.id === interfaceID,
-                );
-                if (templateInputArr.length !== 1) {
-                    errors.push([
-                        `Error when creating subgraph ${this._graph.id}: Expected 1 interface with ID ${interfaceID}, got ${templateInputArr.length}`,
-                    ]);
-                    suppressHistoryLogging(false);
-                    return;
-                }
-                const templateInput = templateInputArr[0];
-                const targetInterface = this._graph.findNodeInterface(
-                    templateInput.nodeInterfaceId,
-                );
-                if (!targetInterface) {
-                    errors.push([
-                        `Error when creating subgraph ${this._graph.id}: Could not find interface ${templateInput.nodeInterfaceId} in subgraph`,
-                    ]);
-                    suppressHistoryLogging(false);
-                    return;
-                }
-                this._graph.addConnection(node.outputs.placeholder, targetInterface);
-            });
-
-        Object.entries(subgraphNode.inputs)
-            .filter((inout) => inout[1].direction === 'inout')
-            .forEach(([interfaceID, inout]) => {
-                const node = new SubgraphInoutNode();
-                node.inputs.name.value = inout.name;
-                node.inputs.side.value = convertToUpperCase(inout.side);
-                node.graphInterfaceId = interfaceID;
-                this._graph.addNode(node);
-                node.position = inout.nodePosition;
-                const templateInoutArr = Object.values(this._graph.inputs).filter(
-                    (intf) => intf.id === interfaceID,
-                );
-                if (templateInoutArr.length !== 1) {
-                    errors.push([
-                        `Error when creating subgraph ${this._graph.id}: Expected 1 interface with ID ${interfaceID}, got ${templateInoutArr.length}`,
-                    ]);
-                    suppressHistoryLogging(false);
-                    return;
-                }
-                const templateInout = templateInoutArr[0];
-                const targetInterface = this._graph.findNodeInterface(
-                    templateInout.nodeInterfaceId,
-                );
-                if (!targetInterface) {
-                    errors.push([
-                        `Error when creating subgraph ${this._graph.id}: Could not find interface ${templateInout.nodeInterfaceId} in subgraph`,
-                    ]);
-                    suppressHistoryLogging(false);
-                    return;
-                }
-                this._graph.addConnection(targetInterface, node.inputs.placeholder);
-            });
-
-        Object.entries(subgraphNode.outputs)
-            .filter(([name, outputIntf]) => name !== '_calculationResults') // eslint-disable-line no-unused-vars
-            .forEach(([interfaceID, output]) => {
-                const node = new SubgraphOutputNode();
-                node.inputs.name.value = output.name;
-                node.inputs.side.value = convertToUpperCase(output.side);
-                node.graphInterfaceId = interfaceID;
-                this._graph.addNode(node);
-                node.position = output.nodePosition;
-                const templateOutputArr = Object.values(this._graph.outputs).filter(
-                    (intf) => intf.id === interfaceID,
-                );
-                if (templateOutputArr.length !== 1) {
-                    errors.push([
-                        `Error when creating subgraph ${this._graph.id}: Expected 1 interface with ID ${interfaceID}, got ${templateOutputArr.length}`,
-                    ]);
-                    suppressHistoryLogging(false);
-                    return;
-                }
-                const templateOutput = templateOutputArr[0];
-                const targetInterface = this._graph.findNodeInterface(
-                    templateOutput.nodeInterfaceId,
-                );
-                if (!targetInterface) {
-                    errors.push([
-                        `Error when creating subgraph ${this._graph.id}: Could not find interface ${templateOutput.nodeInterfaceId} in subgraph`,
-                    ]);
-                    suppressHistoryLogging(false);
-                    return;
-                }
-                this._graph.addConnection(targetInterface, node.inputs.placeholder);
-            });
-
-        this._switchGraph(this._graph);
-        suppressHistoryLogging(false);
-        nextTick().then(() => {
-            const graph = this.graph.save();
-            this.layoutManager.registerGraph(graph);
-            this.layoutManager.computeLayout(graph).then(this.updateNodesPosition.bind(this));
-        });
-        return errors;
     }
 
     switchGraph(subgraphNode) {
@@ -620,19 +623,9 @@ export default class PipelineManagerEditor extends Editor {
         });
     }
 
-    // TODO(mleonowicz, jbylicki): As a part of the refactor, the load needs to
-    // change alongside the dataflow; this value keeps the first load original such that later
-    // it can be adapted. For later use, the cut-down version is used.
-    backwardsCompatibleFistLoad = true;
-
     switchToSubgraph(subgraphNode) {
         this.subgraphStack.push([this._graph.id, subgraphNode]);
-        if (this.backwardsCompatibleFistLoad) {
-            this.firstSwitchGraph(subgraphNode);
-            this.backwardsCompatibleFistLoad = false;
-        } else {
-            this.switchGraph(subgraphNode);
-        }
+        this.switchGraph(subgraphNode);
     }
 
     backFromSubgraph() {
@@ -644,15 +637,48 @@ export default class PipelineManagerEditor extends Editor {
         this._graph.updateTemplate();
         this._graph.inputs = this._graph.template.inputs;
         this._graph.outputs = this._graph.template.outputs;
-        subgraphNode.updateInterfaces();
-        const ifaceOrPositionErrors = applySidePositions(subgraphNode.inputs, subgraphNode.outputs);
+
+        // applySidePositions needs a map, not an arrray
+        const ifaceOrPositionErrors = applySidePositions(
+            Object.fromEntries(this._graph.inputs.map((intf) => [intf.id, intf])),
+            Object.fromEntries(this._graph.outputs.map((intf) => [intf.id, intf])),
+        );
 
         // TODO(jbylicki): Propagate the error forward
         if (Array.isArray(ifaceOrPositionErrors)) {
             return ifaceOrPositionErrors;
         }
-        subgraphNode.inputs = ifaceOrPositionErrors.inputs;
-        subgraphNode.outputs = ifaceOrPositionErrors.outputs;
+
+        // Creating new interfaces for a subgraph node
+        Object.keys(subgraphNode.inputs).forEach((k) => {
+            if (!Object.keys(ifaceOrPositionErrors.inputs).includes(k)) {
+                subgraphNode.removeInput(k);
+            }
+        });
+        Object.entries(ifaceOrPositionErrors.inputs).forEach(([name, intf]) => {
+            if (!Object.keys(subgraphNode.inputs).includes(name)) {
+                const baklavaIntf = new NodeInterface(intf.name);
+                Object.assign(baklavaIntf, intf);
+                subgraphNode.addInput(name, baklavaIntf);
+            } else {
+                Object.assign(subgraphNode.inputs[name], intf);
+            }
+        });
+
+        Object.keys(subgraphNode.outputs).forEach((k) => {
+            if (!Object.keys(ifaceOrPositionErrors.outputs).includes(k)) {
+                subgraphNode.removeOutput(k);
+            }
+        });
+        Object.entries(ifaceOrPositionErrors.outputs).forEach(([name, intf]) => {
+            if (!Object.keys(subgraphNode.outputs).includes(name)) {
+                const baklavaIntf = new NodeInterface(intf.name);
+                Object.assign(baklavaIntf, intf);
+                subgraphNode.addOutput(name, baklavaIntf);
+            } else {
+                Object.assign(subgraphNode.outputs[name], intf);
+            }
+        });
 
         this._graph = newGraph;
         this._switchGraph(this._graph);
