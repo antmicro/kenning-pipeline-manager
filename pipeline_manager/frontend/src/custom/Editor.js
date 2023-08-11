@@ -662,13 +662,11 @@ export default class PipelineManagerEditor extends Editor {
         suppressHistoryLogging(true);
 
         this._graph.updateTemplate();
-        this._graph.inputs = this._graph.template.inputs;
-        this._graph.outputs = this._graph.template.outputs;
 
         // applySidePositions needs a map, not an arrray
         const ifaceOrPositionErrors = applySidePositions(
-            Object.fromEntries(this._graph.inputs.map((intf) => [intf.id, intf])),
-            Object.fromEntries(this._graph.outputs.map((intf) => [intf.id, intf])),
+            Object.fromEntries(this._graph.template.inputs.map((intf) => [intf.id, intf])),
+            Object.fromEntries(this._graph.template.outputs.map((intf) => [intf.id, intf])),
         );
 
         if (Array.isArray(ifaceOrPositionErrors)) {
@@ -708,6 +706,9 @@ export default class PipelineManagerEditor extends Editor {
                 Object.assign(subgraphNode.outputs[name], intf);
             }
         });
+
+        this._graph.inputs = Object.values(subgraphNode.inputs);
+        this._graph.outputs = Object.values(subgraphNode.outputs);
 
         this._graph = newGraph;
         this._switchGraph(this._graph);

@@ -130,7 +130,9 @@ export default function createPipelineManagerGraph(graph) {
         const { inputs } = this;
         const inputNodes = this.nodes.filter((n) => n.type === SUBGRAPH_INPUT_NODE_TYPE);
         inputNodes.forEach((n) => {
-            if (inputs.filter((x) => x.id === n.graphInterfaceId).length === 0) {
+            const idx = inputs.findIndex((x) => x.id === n.graphInterfaceId);
+
+            if (idx === -1) {
                 inputs.push({
                     id: n.graphInterfaceId,
                     name: n.inputs.name.value,
@@ -140,7 +142,6 @@ export default function createPipelineManagerGraph(graph) {
                     sidePosition: undefined,
                 });
             } else {
-                const idx = inputs.findIndex((x) => x.id === n.graphInterfaceId);
                 // To avoid redundancy the information about direction is not saved to subgraphIO
                 // in the dataflow, and therefore the information does not make it here.
                 // These values can be hardcoded easily here and this line prevents data duplication
@@ -154,7 +155,9 @@ export default function createPipelineManagerGraph(graph) {
         const { outputs } = this;
         const outputNodes = this.nodes.filter((n) => n.type === SUBGRAPH_OUTPUT_NODE_TYPE);
         outputNodes.forEach((n) => {
-            if (outputs.filter((x) => x.id === n.graphInterfaceId).length === 0) {
+            const idx = outputs.findIndex((x) => x.id === n.graphInterfaceId);
+
+            if (idx === -1) {
                 outputs.push({
                     id: n.graphInterfaceId,
                     name: n.inputs.name.value,
@@ -164,7 +167,6 @@ export default function createPipelineManagerGraph(graph) {
                     sidePosition: undefined,
                 });
             } else {
-                const idx = outputs.findIndex((x) => x.id === n.graphInterfaceId);
                 outputs[idx].direction = 'output';
                 outputs[idx].name = n.inputs.name.value;
                 outputs[idx].side = n.inputs.side.value.toLowerCase();
@@ -173,7 +175,9 @@ export default function createPipelineManagerGraph(graph) {
 
         const inoutNodes = this.nodes.filter((n) => n.type === SUBGRAPH_INOUT_NODE_TYPE);
         inoutNodes.forEach((n) => {
-            if (inputs.filter((x) => x.id === n.graphInterfaceId).length === 0) {
+            const idx = inputs.findIndex((x) => x.id === n.graphInterfaceId);
+
+            if (idx === -1) {
                 inputs.push({
                     id: n.graphInterfaceId,
                     name: n.inputs.name.value,
@@ -183,7 +187,6 @@ export default function createPipelineManagerGraph(graph) {
                     sidePosition: undefined,
                 });
             } else {
-                const idx = inputs.findIndex((x) => x.id === n.graphInterfaceId);
                 inputs[idx].direction = 'inout';
                 inputs[idx].name = n.inputs.name.value;
                 inputs[idx].side = n.inputs.side.value.toLowerCase();
