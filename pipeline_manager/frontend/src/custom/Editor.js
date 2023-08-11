@@ -644,9 +644,11 @@ export default class PipelineManagerEditor extends Editor {
             Object.fromEntries(this._graph.outputs.map((intf) => [intf.id, intf])),
         );
 
-        // TODO(jbylicki): Propagate the error forward
         if (Array.isArray(ifaceOrPositionErrors)) {
-            return ifaceOrPositionErrors;
+            throw new Error(
+                `Internal error occured while returning back from a subgraph. ` +
+                `Reason: ${ifaceOrPositionErrors.join('. ')}`,
+            );
         }
 
         // Creating new interfaces for a subgraph node
@@ -684,7 +686,6 @@ export default class PipelineManagerEditor extends Editor {
         this._switchGraph(this._graph);
 
         suppressHistoryLogging(false);
-        return [];
     }
 
     isInSubgraph() {
