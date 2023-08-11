@@ -605,12 +605,39 @@ export default class PipelineManagerEditor extends Editor {
     }
 
     switchGraph(subgraphNode) {
+        const convertToUpperCase = (str) => `${str[0].toUpperCase()}${str.slice(1)}`;
         if (this._switchGraph === undefined) {
             const { switchGraph } = useGraph();
             this._switchGraph = switchGraph;
         }
         // disable history logging for the switch - don't push nodes being created here
         suppressHistoryLogging(true);
+
+        // Propagate side data back to the subgraph such that if it was changed, the
+        // selector inside would be updated
+        subgraphNode.subgraph.nodes.filter((n) =>
+            [
+                SUBGRAPH_INPUT_NODE_TYPE,
+                SUBGRAPH_INOUT_NODE_TYPE,
+            ].includes(n.type),
+        ).forEach((n) => {
+            Object.entries(subgraphNode.inputs).filter(
+                ([id]) => id === n.graphInterfaceId,
+            ).forEach(([, iface]) => {
+                n.inputs.side.value = convertToUpperCase(iface.side);
+            });
+        });
+        subgraphNode.subgraph.nodes.filter((n) =>
+            [
+                SUBGRAPH_OUTPUT_NODE_TYPE,
+            ].includes(n.type),
+        ).forEach((n) => {
+            Object.entries(subgraphNode.outputs).filter(
+                ([id]) => id === n.graphInterfaceId,
+            ).forEach(([, iface]) => {
+                n.inputs.side.value = convertToUpperCase(iface.side);
+            });
+        });
 
         this._graph = subgraphNode.subgraph;
 
