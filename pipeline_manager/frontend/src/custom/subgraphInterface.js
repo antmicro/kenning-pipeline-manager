@@ -11,13 +11,20 @@ import { NodeInterface, defineNode } from '@baklavajs/core';
 import { TextInputInterface, SelectInterface } from '@baklavajs/renderer-vue';
 /* eslint-enable object-curly-newline */
 
+let CounterInput = 0;
+let CounterOutput = 0;
+let CounterInout = 0;
+
 // Those files are exported here as Baklavajs does not export them
 export const SUBGRAPH_INPUT_NODE_TYPE = '__baklava_CustomSubgraphInputNode';
 export const SubgraphInputNode = defineNode({
     type: SUBGRAPH_INPUT_NODE_TYPE,
     title: 'Subgraph Input',
     inputs: {
-        name: () => new TextInputInterface('Name', 'Input').setPort(false),
+        name: () => {
+            CounterInput += 1;
+            return new TextInputInterface('Name', `Input #${CounterInput}`).setPort(false);
+        },
         side: () => new SelectInterface('Interface side', 'Left', ['Left', 'Right']).setPort(false),
     },
     outputs: {
@@ -39,7 +46,10 @@ export const SubgraphOutputNode = defineNode({
     type: SUBGRAPH_OUTPUT_NODE_TYPE,
     title: 'Subgraph Output',
     inputs: {
-        name: () => new TextInputInterface('Name', 'Output').setPort(false),
+        name: () => {
+            CounterOutput += 1;
+            return new TextInputInterface('Name', `Output #${CounterOutput}`).setPort(false);
+        },
         side: () =>
             new SelectInterface('Interface side', 'Right', ['Left', 'Right']).setPort(false),
         placeholder: () => {
@@ -62,7 +72,10 @@ export const SubgraphInoutNode = defineNode({
     type: SUBGRAPH_INOUT_NODE_TYPE,
     title: 'Subgraph Inout',
     inputs: {
-        name: () => new TextInputInterface('Name', 'Inout').setPort(false),
+        name: () => {
+            CounterInout += 1;
+            return new TextInputInterface('Name', `Inout #${CounterInout}`).setPort(false);
+        },
         side: () => new SelectInterface('Interface side', 'Left', ['Left', 'Right']).setPort(false),
         placeholder: () => {
             const ni = new NodeInterface('Connection', undefined);
@@ -72,8 +85,8 @@ export const SubgraphInoutNode = defineNode({
             return ni;
         },
     },
-    outputs: {},
     onCreate() {
         this.graphInterfaceId = uuidv4();
     },
+    outputs: {},
 });
