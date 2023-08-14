@@ -14,6 +14,9 @@ import {
     SUBGRAPH_INPUT_NODE_TYPE,
     SUBGRAPH_INOUT_NODE_TYPE,
     SUBGRAPH_OUTPUT_NODE_TYPE,
+    SubgraphInoutNode,
+    SubgraphInputNode,
+    SubgraphOutputNode,
 } from './subgraphInterface.js';
 
 /* eslint-disable no-param-reassign */
@@ -248,6 +251,40 @@ export default function createPipelineManagerGraph(graph) {
         this.id = state.id;
         this.inputs = state.inputs;
         this.outputs = state.outputs;
+
+        // Adding subgraph interface nodes
+        const convertToUpperCase = (str) => `${str[0].toUpperCase()}${str.slice(1)}`;
+        this.inputs.filter((input) => input.direction === 'input')
+            .forEach((input) => {
+                const node = new SubgraphInputNode();
+                node.inputs.name.value = input.name;
+                node.inputs.side.value = convertToUpperCase(input.side);
+                node.outputs.placeholder.id = input.id;
+                node.graphInterfaceId = input.id;
+                node.position = input.nodePosition ?? { x: 0, y: 0 };
+                this.addNode(node);
+            });
+
+        this.inputs.filter((inout) => inout.direction === 'inout')
+            .forEach((inout) => {
+                const node = new SubgraphInoutNode();
+                node.inputs.name.value = inout.name;
+                node.inputs.side.value = convertToUpperCase(inout.side);
+                node.inputs.placeholder.id = inout.id;
+                node.graphInterfaceId = inout.id;
+                node.position = inout.nodePosition ?? { x: 0, y: 0 };
+                this.addNode(node);
+            });
+
+        this.outputs.forEach((output) => {
+            const node = new SubgraphOutputNode();
+            node.inputs.name.value = output.name;
+            node.inputs.side.value = convertToUpperCase(output.side);
+            node.inputs.placeholder.id = output.id;
+            node.graphInterfaceId = output.id;
+            node.position = output.nodePosition ?? { x: 0, y: 0 };
+            this.addNode(node);
+        });
 
         state.nodes.forEach((n) => {
             const nodeInformation = this.editor.nodeTypes.get(n.type);
