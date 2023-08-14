@@ -540,7 +540,7 @@ export default class PipelineManagerEditor extends Editor {
             ].includes(n.type),
         ).forEach((n) => {
             Object.entries(subgraphNode.inputs).filter(
-                ([id]) => id === n.graphInterfaceId,
+                ([id]) => id === n.id,
             ).forEach(([, iface]) => {
                 n.inputs.side.value = convertToUpperCase(iface.side);
             });
@@ -551,7 +551,7 @@ export default class PipelineManagerEditor extends Editor {
             ].includes(n.type),
         ).forEach((n) => {
             Object.entries(subgraphNode.outputs).filter(
-                ([id]) => id === n.graphInterfaceId,
+                ([id]) => id === n.id,
             ).forEach(([, iface]) => {
                 n.inputs.side.value = convertToUpperCase(iface.side);
             });
@@ -595,33 +595,41 @@ export default class PipelineManagerEditor extends Editor {
         }
 
         // Creating new interfaces for a subgraph node
-        Object.keys(subgraphNode.inputs).forEach((k) => {
-            if (!Object.keys(ifaceOrPositionErrors.inputs).includes(k)) {
+        Object.values(subgraphNode.inputs).forEach((k) => {
+            if (!Object.keys(ifaceOrPositionErrors.inputs).includes(k.subgraphNodeId)) {
                 subgraphNode.removeInput(k);
             }
         });
-        Object.entries(ifaceOrPositionErrors.inputs).forEach(([name, intf]) => {
-            if (!Object.keys(subgraphNode.inputs).includes(name)) {
+        Object.entries(ifaceOrPositionErrors.inputs).forEach(([id, intf]) => {
+            const foundIntf = Object.values(subgraphNode.inputs).find(
+                (io) => io.subgraphNodeId === id,
+            );
+            if (foundIntf === undefined) {
                 const baklavaIntf = new NodeInterface(intf.name);
                 Object.assign(baklavaIntf, intf);
-                subgraphNode.addInput(name, baklavaIntf);
+                subgraphNode.addInput(intf.name, baklavaIntf);
             } else {
-                Object.assign(subgraphNode.inputs[name], intf);
+                // TODO: something wrong here with id and subgraphNodeId
+                Object.assign(foundIntf, intf);
             }
         });
 
-        Object.keys(subgraphNode.outputs).forEach((k) => {
-            if (!Object.keys(ifaceOrPositionErrors.outputs).includes(k)) {
+        Object.values(subgraphNode.outputs).forEach((k) => {
+            if (!Object.keys(ifaceOrPositionErrors.outputs).includes(k.subgraphNodeId)) {
                 subgraphNode.removeOutput(k);
             }
         });
-        Object.entries(ifaceOrPositionErrors.outputs).forEach(([name, intf]) => {
-            if (!Object.keys(subgraphNode.outputs).includes(name)) {
+        Object.entries(ifaceOrPositionErrors.outputs).forEach(([id, intf]) => {
+            const foundIntf = Object.values(subgraphNode.outputs).find(
+                (io) => io.subgraphNodeId === id,
+            );
+            if (foundIntf === undefined) {
                 const baklavaIntf = new NodeInterface(intf.name);
                 Object.assign(baklavaIntf, intf);
-                subgraphNode.addOutput(name, baklavaIntf);
+                subgraphNode.addOutput(intf.name, baklavaIntf);
             } else {
-                Object.assign(subgraphNode.outputs[name], intf);
+                // TODO: something wrong here with id and subgraphNodeId
+                Object.assign(foundIntf, intf);
             }
         });
 
