@@ -22,56 +22,44 @@ export default function CreateCustomGraphNodeType(template, type) {
 
         save() {
             const state = super.save();
-            const inputInterfaceMap = new Map();
-            Object.values(this.inputs).forEach((input) =>
-                inputInterfaceMap.set(input.id, input),
-            );
-            const inputInterfaces = Object.entries(state.inputs).map(([key, value]) => ({
-                id: value.id,
-                name: key,
-                direction: inputInterfaceMap.get(value.id).direction,
-                side: inputInterfaceMap.get(value.id).side,
-                nodePosition: inputInterfaceMap.get(value.id).nodePosition,
-            }));
-            const outputInterfaceMap = new Map();
-            Object.values(this.outputs).forEach((output) =>
-                outputInterfaceMap.set(output.id, output),
-            );
-            const outputInterfaces = Object.entries(state.outputs)
-                .filter((key) => key[0] !== '_calculationResults')
-                .map(([key, value]) => ({
-                    id: value.id,
-                    name: key,
-                    direction: 'output',
-                    side: outputInterfaceMap.get(value.id).side,
-                    nodePosition: outputInterfaceMap.get(value.id).nodePosition,
-                }));
+
+            const newInterfaces = [];
+            [...this.subgraph.inputs, ...this.subgraph.outputs].forEach((io) => {
+                newInterfaces.push({
+                    name: io.name,
+                    id: io.id,
+                    subgraphNodeId: io.subgraphNodeId,
+                    direction: io.direction,
+                    side: io.side,
+                    sidePosition: io.sidePosition,
+                });
+            });
+
+            state.interfaces = newInterfaces;
             delete state.inputs;
             delete state.outputs;
 
             // After entering the edit subgraph mode, subgraph interfaces will contain
             // redundant information, such as side, nodePosition etc.
             // (these are already defined in state.interfaces) so they should be filtered out
-            state.graphState.subgraphIO = [];
+            state.graphState.interfaces = [];
             state.graphState.inputs.forEach((input) =>
-                state.graphState.subgraphIO.push({
-                    id: input.id,
-                    name: input.name,
-                    nodeInterfaceId: input.nodeInterfaceId,
+                state.graphState.interfaces.push({
+                    id: input.subgraphNodeId,
+                    nodePosition: input.nodePosition,
                 }),
             );
             state.graphState.outputs.forEach((output) =>
-                state.graphState.subgraphIO.push({
-                    id: output.id,
-                    name: output.name,
-                    nodeInterfaceId: output.nodeInterfaceId,
+                state.graphState.interfaces.push({
+                    id: output.subgraphNodeId,
+                    nodePosition: output.nodePosition,
                 }),
             );
 
             delete state.graphState.inputs;
             delete state.graphState.outputs;
 
-            return { ...state, interfaces: inputInterfaces.concat(outputInterfaces) };
+            return state;
         }
 
         load(state) {
