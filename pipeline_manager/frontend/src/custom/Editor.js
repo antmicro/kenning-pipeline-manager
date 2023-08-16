@@ -15,12 +15,9 @@
 
 import {
     Editor,
-    createGraphNodeType,
     GRAPH_NODE_TYPE_PREFIX,
     NodeInterface,
-    Graph,
 } from '@baklavajs/core';
-import { v4 as uuidv4 } from 'uuid';
 
 import { useGraph } from '@baklavajs/renderer-vue';
 
@@ -172,10 +169,10 @@ export default class PipelineManagerEditor extends Editor {
 
                 const interfaces = node.graphState.interfaces.map(
                     (io) => ({
+                        ...io,
                         ...node.interfaces.find(
                             (intf) => intf.subgraphNodeId === io.id,
                         ),
-                        ...io,
                     }),
                 );
 
@@ -337,33 +334,34 @@ export default class PipelineManagerEditor extends Editor {
 
         // Propagate side data back to the subgraph such that if it was changed, the
         // selector inside would be updated
-        subgraphNode.subgraph.nodes.filter((n) =>
-            [
-                SUBGRAPH_INPUT_NODE_TYPE,
-                SUBGRAPH_INOUT_NODE_TYPE,
-            ].includes(n.type),
-        ).forEach((n) => {
-            Object.entries(subgraphNode.inputs).filter(
-                ([id]) => id === n.id,
-            ).forEach(([, iface]) => {
-                n.inputs.side.value = convertToUpperCase(iface.side);
-            });
+        Object.values(subgraphNode.inputs).forEach((intf) => {
+            const subgraphIntf = subgraphNode.subgraph.inputs.find(
+                (subIntf) => subIntf.id === intf.id,
+            );
+            subgraphIntf.sidePosition = intf.sidePosition;
+
+            const subgraphIntfNode = subgraphNode.subgraph.nodes.find(
+                (node) => node.graphInterfaceId === intf.id,
+            );
+
+            subgraphIntfNode.inputs.side.value = convertToUpperCase(intf.side);
         });
-        subgraphNode.subgraph.nodes.filter((n) =>
-            [
-                SUBGRAPH_OUTPUT_NODE_TYPE,
-            ].includes(n.type),
-        ).forEach((n) => {
-            Object.entries(subgraphNode.outputs).filter(
-                ([id]) => id === n.id,
-            ).forEach(([, iface]) => {
-                n.inputs.side.value = convertToUpperCase(iface.side);
-            });
+
+        Object.values(subgraphNode.outputs).forEach((intf) => {
+            const subgraphIntf = subgraphNode.subgraph.outputs.find(
+                (subIntf) => subIntf.id === intf.id,
+            );
+            subgraphIntf.sidePosition = intf.sidePosition;
+
+            const subgraphIntfNode = subgraphNode.subgraph.nodes.find(
+                (node) => node.graphInterfaceId === intf.id,
+            );
+
+            subgraphIntfNode.inputs.side.value = convertToUpperCase(intf.side);
         });
 
         this._graph = subgraphNode.subgraph;
-
-        this._switchGraph(this._graph);
+        this._switchGraph(subgraphNode.subgraph);
         suppressHistoryLogging(false);
         nextTick().then(() => {
             const graph = this.graph.save();
@@ -377,20 +375,31 @@ export default class PipelineManagerEditor extends Editor {
         this.switchGraph(subgraphNode);
     }
 
+    /**
+     * Switches back from a displayed graph.
+     * The function changes the currently displayed graph and propagates changes in interfaces
+     * back to the graph node.
+     *
+     * It also updates the graph node's interfaces to match the ones in the graph.
+     * It checks for existing interface nodes, checks which were added, removed and changed
+     * and updates the graph node's interfaces accordingly.
+     */
     backFromSubgraph() {
         const [newGraphId, subgraphNode] = this.subgraphStack.pop();
         const newGraph = [...this.graphs].filter((graph) => graph.id === newGraphId)[0];
 
         suppressHistoryLogging(true);
 
-        this._graph.updateTemplate();
+        // Updates information of the graph about its interfaces
+        this._graph.updateInterfaces();
 
         // applySidePositions needs a map, not an arrray
         const ifaceOrPositionErrors = applySidePositions(
-            Object.fromEntries(this._graph.template.inputs.map((intf) => [intf.id, intf])),
-            Object.fromEntries(this._graph.template.outputs.map((intf) => [intf.id, intf])),
+            Object.fromEntries(this._graph.inputs.map((intf) => [intf.subgraphNodeId, intf])),
+            Object.fromEntries(this._graph.outputs.map((intf) => [intf.subgraphNodeId, intf])),
         );
 
+        // TODO: Fix me, it may occur when changing side of a subgraph interface
         if (Array.isArray(ifaceOrPositionErrors)) {
             throw new Error(
                 `Internal error occured while returning back from a subgraph. ` +
@@ -398,7 +407,7 @@ export default class PipelineManagerEditor extends Editor {
             );
         }
 
-        // Creating new interfaces for a subgraph node
+        // Updating interfaces of a graph node
         Object.values(subgraphNode.inputs).forEach((k) => {
             if (!Object.keys(ifaceOrPositionErrors.inputs).includes(k.subgraphNodeId)) {
                 subgraphNode.removeInput(k);
@@ -413,7 +422,6 @@ export default class PipelineManagerEditor extends Editor {
                 Object.assign(baklavaIntf, intf);
                 subgraphNode.addInput(intf.name, baklavaIntf);
             } else {
-                // TODO: something wrong here with id and subgraphNodeId
                 Object.assign(foundIntf, intf);
             }
         });
@@ -432,13 +440,9 @@ export default class PipelineManagerEditor extends Editor {
                 Object.assign(baklavaIntf, intf);
                 subgraphNode.addOutput(intf.name, baklavaIntf);
             } else {
-                // TODO: something wrong here with id and subgraphNodeId
                 Object.assign(foundIntf, intf);
             }
         });
-
-        this._graph.inputs = Object.values(subgraphNode.inputs);
-        this._graph.outputs = Object.values(subgraphNode.outputs);
 
         this._graph = newGraph;
         this._switchGraph(this._graph);

@@ -129,7 +129,7 @@ export default function createPipelineManagerGraph(graph) {
         };
     };
 
-    graph.updateTemplate = function updateTemplate() {
+    graph.updateInterfaces = function updateInterfaces() {
         const { inputs } = this;
         const inputNodes = this.nodes.filter((n) => n.type === SUBGRAPH_INPUT_NODE_TYPE);
         inputNodes.forEach((n) => {
@@ -138,6 +138,7 @@ export default function createPipelineManagerGraph(graph) {
             if (idx === -1) {
                 inputs.push({
                     id: n.graphInterfaceId,
+                    subgraphNodeId: n.outputs.placeholder.id,
                     name: n.inputs.name.value,
                     side: n.inputs.side.value.toLowerCase(),
                     direction: 'input',
@@ -163,6 +164,7 @@ export default function createPipelineManagerGraph(graph) {
             if (idx === -1) {
                 outputs.push({
                     id: n.graphInterfaceId,
+                    subgraphNodeId: n.inputs.placeholder.id,
                     name: n.inputs.name.value,
                     side: n.inputs.side.value.toLowerCase(),
                     direction: 'output',
@@ -183,6 +185,7 @@ export default function createPipelineManagerGraph(graph) {
             if (idx === -1) {
                 inputs.push({
                     id: n.graphInterfaceId,
+                    subgraphNodeId: n.outputs.placeholder.id,
                     name: n.inputs.name.value,
                     side: n.inputs.side.value.toLowerCase(),
                     direction: 'inout',
@@ -196,8 +199,8 @@ export default function createPipelineManagerGraph(graph) {
             }
         });
 
-        this.template.inputs = inputs;
-        this.template.outputs = outputs;
+        this.inputs = inputs;
+        this.outputs = outputs;
     };
 
     graph.addNode = function addNode(node) {
@@ -259,7 +262,7 @@ export default function createPipelineManagerGraph(graph) {
                 const node = new SubgraphInputNode();
                 node.inputs.name.value = input.name;
                 node.inputs.side.value = convertToUpperCase(input.side);
-                node.outputs.placeholder.id = input.id;
+                node.outputs.placeholder.id = input.subgraphNodeId;
                 node.graphInterfaceId = input.id;
                 node.position = input.nodePosition ?? { x: 0, y: 0 };
                 this.addNode(node);
@@ -270,7 +273,7 @@ export default function createPipelineManagerGraph(graph) {
                 const node = new SubgraphInoutNode();
                 node.inputs.name.value = inout.name;
                 node.inputs.side.value = convertToUpperCase(inout.side);
-                node.inputs.placeholder.id = inout.id;
+                node.inputs.placeholder.id = inout.subgraphNodeId;
                 node.graphInterfaceId = inout.id;
                 node.position = inout.nodePosition ?? { x: 0, y: 0 };
                 this.addNode(node);
@@ -280,7 +283,7 @@ export default function createPipelineManagerGraph(graph) {
             const node = new SubgraphOutputNode();
             node.inputs.name.value = output.name;
             node.inputs.side.value = convertToUpperCase(output.side);
-            node.inputs.placeholder.id = output.id;
+            node.inputs.placeholder.id = output.subgraphNodeId;
             node.graphInterfaceId = output.id;
             node.position = output.nodePosition ?? { x: 0, y: 0 };
             this.addNode(node);
