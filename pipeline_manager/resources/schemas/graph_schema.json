@@ -82,26 +82,13 @@
                                         "right"
                                     ]
                                 },
-                                "nodePosition": {
-                                    "type": "object",
-                                    "properties": {
-                                        "x": {
-                                            "description": "x coordinate of the top left interface corner",
-                                            "type": "number"
-                                        },
-                                        "y": {
-                                            "description": "y coordinate of the top left interface corner",
-                                            "type": "number"
-                                        }
-                                    },
-                                    "required": [
-                                        "x",
-                                        "y"
-                                    ]
-                                },
                                 "sidePosition": {
                                     "description": "Determines the order of interfaces rendered",
                                     "type": "number"
+                                },
+                                "subgraphNodeId": {
+                                    "description": "Id of a subgraph interface node",
+                                    "type": "string"
                                 }
                             },
                             "required": [

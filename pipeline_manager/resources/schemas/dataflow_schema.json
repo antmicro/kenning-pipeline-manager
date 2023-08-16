@@ -20,7 +20,7 @@
                     {
                         "type": "object",
                         "properties": {
-                            "subgraphIO": {
+                            "interfaces": {
                                 "type": "array",
                                 "items": {
                                     "type": "object",
@@ -29,19 +29,27 @@
                                             "type": "string",
                                             "description": "Unique identifier of the interface within the subgraph"
                                         },
-                                        "name": {
-                                            "type": "string",
-                                            "description": "Name of the subgraph interface"
-                                        },
-                                        "nodeInterfaceId": {
-                                            "type": "string",
-                                            "description": "Identifier of an interface of the node the given subgraph is representing"
+                                        "nodePosition": {
+                                            "type": "object",
+                                            "properties": {
+                                                "x": {
+                                                    "description": "x coordinate of the top left interface corner",
+                                                    "type": "number"
+                                                },
+                                                "y": {
+                                                    "description": "y coordinate of the top left interface corner",
+                                                    "type": "number"
+                                                }
+                                            },
+                                            "required": [
+                                                "x",
+                                                "y"
+                                            ]
                                         }
                                     },
                                     "required": [
                                         "id",
-                                        "name",
-                                        "nodeInterfaceId"
+                                        "nodePosition"
                                     ]
                                 }
                             }

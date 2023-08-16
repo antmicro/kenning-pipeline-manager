@@ -343,10 +343,6 @@
                                     "description": "Type of a node",
                                     "type": "string"
                                 },
-                                "id": {
-                                    "description": "ID of a node in subgraph",
-                                    "type": "string"
-                                },
                                 "title": {
                                     "description": "Displayed title of a node",
                                     "type": "string"
@@ -398,17 +394,12 @@
                                 "to": {
                                     "description": "ID of ending point interface",
                                     "type": "string"
-                                },
-                                "id": {
-                                    "description": "ID of connection",
-                                    "type": "string"
                                 }
                             },
                             "additionalProperties": false,
                             "required": [
                                 "from",
-                                "to",
-                                "id"
+                                "to"
                             ]
                         }
                     },
@@ -417,40 +408,7 @@
                         "type": "array",
                         "items": {
                             "type": "object",
-                            "properties": {
-                                "name": {
-                                    "description": "Name of the input socket displayed in the node",
-                                    "type": "string"
-                                },
-                                "type": {
-                                    "description": "Type that defines styling of the input socket. It is also used for validation purposes",
-                                    "type": "string"
-                                },
-                                "direction": {
-                                    "description": "Tells whether the connector is input, output, or both",
-                                    "enum": [
-                                        "input",
-                                        "output",
-                                        "inout"
-                                    ]
-                                },
-                                "maxConnectionsCount": {
-                                    "description": "Tells how many connections can be established with given interface, <= 0 value for unlimited",
-                                    "type": "number",
-                                    "default": 1
-                                },
-                                "nodeInterface": {
-                                    "description": "",
-                                    "type": "string"
-                                }
-                            },
-                            "required": [
-                                "name",
-                                "type",
-                                "direction",
-                                "nodeInterface"
-                            ],
-                            "additionalProperties": false
+                            "$ref": "#/$defs/interface"
                         }
                     }
                 },
