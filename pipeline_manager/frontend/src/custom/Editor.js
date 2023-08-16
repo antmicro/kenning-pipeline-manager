@@ -399,7 +399,6 @@ export default class PipelineManagerEditor extends Editor {
             Object.fromEntries(this._graph.outputs.map((intf) => [intf.subgraphNodeId, intf])),
         );
 
-        // TODO: Fix me, it may occur when changing side of a subgraph interface
         if (Array.isArray(ifaceOrPositionErrors)) {
             throw new Error(
                 `Internal error occured while returning back from a subgraph. ` +

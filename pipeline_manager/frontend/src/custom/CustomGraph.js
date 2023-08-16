@@ -132,6 +132,24 @@ export default function createPipelineManagerGraph(graph) {
     graph.updateInterfaces = function updateInterfaces() {
         const { inputs } = this;
         const inputNodes = this.nodes.filter((n) => n.type === SUBGRAPH_INPUT_NODE_TYPE);
+
+        // If a side is switched then it is possible that there already exsists
+        // an interface with the same sidePosition.
+        // This function is used to set a new sidePosition for such interface.
+        const needsNewSidePosition = (io, newSide) => {
+            if (io.side !== newSide) {
+                return [...this.inputs, ...this.outputs]
+                    .filter((intf) => intf.side === newSide)
+                    .find((intf) => intf.sidePosition === io.sidePosition) !== undefined;
+            }
+            return false;
+        };
+
+        const getMaxSidePosition = (newSide) => [...this.inputs, ...this.outputs]
+            .filter((intf) => intf.side === newSide)
+            .map((intf) => intf.sidePosition ?? 0)
+            .reduce((a, b) => Math.max(a, b), -Infinity);
+
         inputNodes.forEach((n) => {
             const idx = inputs.findIndex((x) => x.id === n.graphInterfaceId);
 
@@ -150,6 +168,12 @@ export default function createPipelineManagerGraph(graph) {
                 // in the dataflow, and therefore the information does not make it here.
                 // These values can be hardcoded easily here and this line prevents data duplication
                 // in the dataflow.
+                if (needsNewSidePosition(inputs[idx], n.inputs.side.value.toLowerCase())) {
+                    inputs[idx].sidePosition = getMaxSidePosition(
+                        n.inputs.side.value.toLowerCase(),
+                    ) + 1;
+                }
+
                 inputs[idx].direction = 'input';
                 inputs[idx].name = n.inputs.name.value;
                 inputs[idx].side = n.inputs.side.value.toLowerCase();
@@ -172,6 +196,13 @@ export default function createPipelineManagerGraph(graph) {
                     sidePosition: undefined,
                 });
             } else {
+                if (needsNewSidePosition(outputs[idx], n.inputs.side.value.toLowerCase())) {
+                    const a = getMaxSidePosition(
+                        n.inputs.side.value.toLowerCase(),
+                    ) + 1;
+                    outputs[idx].sidePosition = a;
+                }
+
                 outputs[idx].direction = 'output';
                 outputs[idx].name = n.inputs.name.value;
                 outputs[idx].side = n.inputs.side.value.toLowerCase();
@@ -193,6 +224,12 @@ export default function createPipelineManagerGraph(graph) {
                     sidePosition: undefined,
                 });
             } else {
+                if (needsNewSidePosition(inputs[idx], n.inputs.side.value.toLowerCase())) {
+                    inputs[idx].sidePosition = getMaxSidePosition(
+                        n.inputs.side.value.toLowerCase(),
+                    ) + 1;
+                }
+
                 inputs[idx].direction = 'inout';
                 inputs[idx].name = n.inputs.name.value;
                 inputs[idx].side = n.inputs.side.value.toLowerCase();
