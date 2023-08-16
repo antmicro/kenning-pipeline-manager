@@ -185,7 +185,7 @@ export default function createPipelineManagerGraph(graph) {
             if (idx === -1) {
                 inputs.push({
                     id: n.graphInterfaceId,
-                    subgraphNodeId: n.outputs.placeholder.id,
+                    subgraphNodeId: n.inputs.placeholder.id,
                     name: n.inputs.name.value,
                     side: n.inputs.side.value.toLowerCase(),
                     direction: 'inout',
