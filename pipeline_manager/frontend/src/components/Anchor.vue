@@ -28,14 +28,13 @@ export default defineComponent({
             required: true,
         },
         rightclickCallback: {
-            type: Object as () => undefined,
             required: true,
+            type: Function,
         },
     },
     setup(props) {
         // any definition is an ad-hoc solution as we don't have our graph definition
         const { graph } = useGraph() as { graph: any };
-
         const radius = 7.5;
         const styles = computed(() => ({
             cx: `${(props.position.x + graph.value.panning.x) * graph.value.scaling}px`,
