@@ -360,14 +360,14 @@ The interface group called `1` consists of three ranges of interfaces: `1[1]`, i
 
 ### Subgraphs
 
-Each object defines node representing defined subgraph.
+List of graphs defined using `subgraphs` array.
+Each object represent a single subgraph that consists of regular nodes and subgraph interfaces.
 Fields `name`, `type`, `category`, `icon` are defined the same way as in standard nodes.
 Apart from those, subgraph node contains additional properties:
 
 * `nodes` - List of nodes in a subgraph, specified in [Dataflow format](#dataflow-format)
 * `connections` - List of connections in a subgraph, specified in [Dataflow format](dataflow-format)
-* `interfaces` - Apart from properties defined in [Node interface](#interface), contains:
-  * `nodeInterface` - ID of an interface of a node defined in subgraph to which this particular interface is tied to.
+* `interfaces` - List of subgraph interfaces, which are represented as separate nodes, specified in [Node interface](#interface).
 
 ## Example
 

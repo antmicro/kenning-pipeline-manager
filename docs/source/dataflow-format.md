@@ -432,32 +432,32 @@ Later, in `connections`, you can see triples representing to which interfaces th
 ## Subgraphs
 
 If a node contains a `subgraph` field, it is considered a subgraph node.
-It represents a unique subgraph instance which can be accessed and modified from the frontend level.
+It represents a unique subgraph instance that can be accessed and modified from the frontend level.
 The `subgraph` field should be a string representing an ID of exactly one of the instances that are defined in `graphTemplateInstances`.
 Each template cannot have more than one subgraph node pointing to it.
 
 The graphs defined in `graphTemplateInstances` follow format similar to the main graph.
-Specifically, properties such as `id`, `connections`, `panning` and `scaling` follow the same rules.
-The only differences are changes within the `nodes` definition and addition `subgraphIO` fields.
+Specifically, properties such as `id`, `connections`, `panning`, and `scaling` follow the same rules.
+The only differences are changes within the `nodes` definition and the addition of `interfaces` field.
 
-Each subgraph can have `input`, `inout` or `output` interfaces.
+Each subgraph can have `input`, `inout`, or `output` interfaces.
 In the collapsed view, those are visible as regular interfaces of the node representing a subgraph.
 In the subgraph view, each interface is represented by a dedicated node, called `Subgraph IO` node.
 Such `Subgraph IO` node allows to configure such parameters as interface name or connection side.
 
-Within the dataflow format, `subgraphIO` field allow to tie the subgraph node interface (subgraph IO)
-with a interface in subgraph it is representing. `subgraphIO` is an array of object that follows the
+Within the dataflow format, `interfaces` field allows to tie the subgraph node interface (subgraph IO)
+with an interface in subgraph it is representing. `interfaces` is an array of object that follows the
 format:
 
  * `id` - Unique ID of the interface within the subgraph
- * `name` - Name of the subgraph interface
- * `nodeInterfaceId` - ID of an interface of the node the given subgraph is representing
+ * `nodePosition` - optional property (object containing `x` and `y` values) defining the
+ position of the interface node after entering the subgraph. The default position is `(0, 0)`.
 
 When defining the subgraph node (adding `subgraph` property to a node), the `interfaces` object
-differ slightly from interfaces of standard nodes:
+differs slightly from interfaces of standard nodes:
 
- * Properties `id`, `direction` and `side` follow the same rules
- * `name` must be set to ID of `subgraphIO`
+ * Every property like `id`, `direction`, or `side` followw the same rules.
+ * `subgraphNodeId` must be set to `id` of `subgraphIO`.
  * New optional property `nodePosition` (object containing `x` and `y` values) defines the
  position of the `Subgraph IO` node after entering the subgraph. Default position is (0, 0)
 
@@ -465,6 +465,7 @@ differ slightly from interfaces of standard nodes:
 
 ```json
 {
+    "version": "20230720.5",
     "graph": {
         "id": "9c4d5349-9d3b-401f-86bb-021b7b3e5b81",
         "nodes": [
@@ -551,33 +552,24 @@ differ slightly from interfaces of standard nodes:
                 "interfaces": [
                     {
                         "id": "4817aef3-f8e9-4771-9bed-1989357393e6",
-                        "name": "cd623eed-54a8-4d3b-b414-2b60869a23f3",
+                        "name": "Subgraph input",
+                        "subgraphNodeId": "cd623eed-54a8-4d3b-b414-2b60869a23f3",
                         "direction": "input",
-                        "side": "right",
-                        "nodePosition": {
-                            "x": 143.61666029302717,
-                            "y": 443.6937472467506
-                        }
+                        "side": "right"
                     },
                     {
                         "id": "e9cebd1e-995c-4fc0-be4e-5df6273ba01b",
-                        "name": "50bfe451-ccb5-4a32-80a4-ea3b3202c54b",
+                        "name": "Subgraph inout",
+                        "subgraphNodeId": "50bfe451-ccb5-4a32-80a4-ea3b3202c54b",
                         "direction": "inout",
-                        "side": "right",
-                        "nodePosition": {
-                            "x": 1642.6972860474395,
-                            "y": 707.2506631277816
-                        }
+                        "side": "right"
                     },
                     {
                         "id": "a00f133c-3bd4-4c1e-89ac-903cfe868cbc",
-                        "name": "9a003337-3d15-4bbb-8e18-2d7bad8eb022",
+                        "name": "Subgraph output",
+                        "subgraphNodeId": "9a003337-3d15-4bbb-8e18-2d7bad8eb022",
                         "direction": "output",
-                        "side": "right",
-                        "nodePosition": {
-                            "x": 2212.630660612085,
-                            "y": 517.2535000797645
-                        }
+                        "side": "right"
                     }
                 ],
                 "subgraph": "97abeeb5-61a1-4918-8816-5e74ba4e8be4"
@@ -595,23 +587,17 @@ differ slightly from interfaces of standard nodes:
                 "interfaces": [
                     {
                         "id": "e3176efa-fd16-4480-936f-3c85e0365be1",
-                        "name": "4f089550-4628-4924-ad7e-3cc4ce4b718c",
+                        "name": "Subgraph input",
+                        "subgraphNodeId": "4f089550-4628-4924-ad7e-3cc4ce4b718c",
                         "direction": "input",
-                        "side": "left",
-                        "nodePosition": {
-                            "x": 292.46867580583586,
-                            "y": 287.222600903489
-                        }
+                        "side": "left"
                     },
                     {
                         "id": "481d1b0a-34fb-4d29-a288-f70658dc30ac",
-                        "name": "000f80bd-c6c9-4052-8c36-6659fa086c42",
+                        "name": "Subgraph output",
+                        "subgraphNodeId": "000f80bd-c6c9-4052-8c36-6659fa086c42",
                         "direction": "output",
-                        "side": "right",
-                        "nodePosition": {
-                            "x": 1836.126215821391,
-                            "y": 268.86133874527513
-                        }
+                        "side": "right"
                     }
                 ],
                 "subgraph": "c84e5d7e-7713-4528-a5a7-9cad25209bb0"
@@ -633,12 +619,7 @@ differ slightly from interfaces of standard nodes:
                 "from": "16946d84-2ede-44b0-b8b0-fd3664e7aedf",
                 "to": "e3176efa-fd16-4480-936f-3c85e0365be1"
             }
-        ],
-        "panning": {
-            "x": 0,
-            "y": 0
-        },
-        "scaling": 1
+        ]
     },
     "graphTemplateInstances": [
         {
@@ -751,23 +732,44 @@ differ slightly from interfaces of standard nodes:
                     "id": "83ac1716-a405-4371-89f9-df3b5325244f",
                     "from": "62bf28f9-54b1-445d-9884-31b53a3f5d84",
                     "to": "eb61a53c-b40e-4cde-a37e-2640e2953439"
+                },
+                {
+                    "id": "something1",
+                    "from": "cd623eed-54a8-4d3b-b414-2b60869a23f3",
+                    "to": "a1f8ecf9-3ba5-49e0-b971-e4b522d39b41"
+                },
+                {
+                    "id": "something2",
+                    "from": "a3670f41-fda9-4370-a98c-9e1031f837d6",
+                    "to": "50bfe451-ccb5-4a32-80a4-ea3b3202c54b"
+                },
+                {
+                    "id": "something3",
+                    "from": "43b80380-300f-4b51-a11d-cf9d2aa5bd4a",
+                    "to": "9a003337-3d15-4bbb-8e18-2d7bad8eb022"
                 }
             ],
-            "subgraphIO": [
+            "interfaces": [
                 {
                     "id": "cd623eed-54a8-4d3b-b414-2b60869a23f3",
-                    "name": "Subgraph input",
-                    "nodeInterfaceId": "a1f8ecf9-3ba5-49e0-b971-e4b522d39b41"
+                    "nodePosition": {
+                        "x": 143.61666029302717,
+                        "y": 443.6937472467506
+                    }
                 },
                 {
                     "id": "50bfe451-ccb5-4a32-80a4-ea3b3202c54b",
-                    "name": "Subgraph Inout",
-                    "nodeInterfaceId": "a3670f41-fda9-4370-a98c-9e1031f837d6"
+                    "nodePosition": {
+                        "x": 1642.6972860474395,
+                        "y": 707.2506631277816
+                    }
                 },
                 {
                     "id": "9a003337-3d15-4bbb-8e18-2d7bad8eb022",
-                    "name": "Subgraph output",
-                    "nodeInterfaceId": "43b80380-300f-4b51-a11d-cf9d2aa5bd4a"
+                    "nodePosition": {
+                        "x": 2212.630660612085,
+                        "y": 517.2535000797645
+                    }
                 }
             ]
         },
@@ -850,18 +852,32 @@ differ slightly from interfaces of standard nodes:
                     "id": "edea7e7e-0c56-48d9-bcf9-06b883252ae2",
                     "from": "c1fea113-7a15-48f0-a72a-79fba7ef0387",
                     "to": "e2ea6cd2-9a41-4f3b-a12b-3b1370526ae8"
+                },
+                {
+                    "id": "f2f5b890-3c1a-11ee-be56-0242ac120002",
+                    "from": "4f089550-4628-4924-ad7e-3cc4ce4b718c",
+                    "to": "5d7fc255-bf5e-44ab-9c08-d81806b809ca"
+                },
+                {
+                    "id": "something5",
+                    "from": "a18ee2f2-ded8-4a3b-9f6f-6016545d65ef",
+                    "to": "000f80bd-c6c9-4052-8c36-6659fa086c42"
                 }
             ],
-            "subgraphIO": [
+            "interfaces": [
                 {
                     "id": "4f089550-4628-4924-ad7e-3cc4ce4b718c",
-                    "name": "Subgraph input",
-                    "nodeInterfaceId": "5d7fc255-bf5e-44ab-9c08-d81806b809ca"
+                    "nodePosition": {
+                        "x": 292.46867580583586,
+                        "y": 287.222600903489
+                    }
                 },
                 {
                     "id": "000f80bd-c6c9-4052-8c36-6659fa086c42",
-                    "name": "Subgraph output",
-                    "nodeInterfaceId": "a18ee2f2-ded8-4a3b-9f6f-6016545d65ef"
+                    "nodePosition": {
+                        "x": 1836.126215821391,
+                        "y": 268.86133874527513
+                    }
                 }
             ]
         }
