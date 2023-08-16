@@ -173,6 +173,14 @@ export function useHistory(graph: Ref<Graph>, commandHandler: ICommandHandler): 
             if (historyItem && undoneItem) singleStepTransaction(undoneItem, historyItem);
         },
     });
+    commandHandler.registerCommand<ICommand<void>>('START_TRANSACTION', {
+        canExecute: () => true,
+        execute: () => false,
+    });
+    commandHandler.registerCommand<ICommand<void>>('COMMIT_TRANSACTION', {
+        canExecute: () => true,
+        execute: () => false,
+    });
 
     commandHandler.registerHotkey(['Control', 'z'], 'undo');
     commandHandler.registerHotkey(['Control', 'y'], 'redo');

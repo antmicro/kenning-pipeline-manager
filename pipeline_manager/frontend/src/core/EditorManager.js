@@ -11,8 +11,9 @@ import jsonMap from 'json-source-map';
 import jsonlint from 'jsonlint';
 
 import { useBaklava, useCommandHandler } from '@baklavajs/renderer-vue';
-import { toRaw } from 'vue';
+import { toRaw, ref } from 'vue';
 import { useHistory } from './History.ts';
+import { useClipboard } from './Clipboard.ts';
 
 import PipelineManagerEditor from '../custom/Editor.js';
 import InterfaceTypes from './InterfaceTypes.js';
@@ -78,6 +79,11 @@ export default class EditorManager {
         this.baklavaView.history = null;
         this.baklavaView.history = useHistory(
             toRaw(this.baklavaView).displayedGraph,
+            this.baklavaView.commandHandler,
+        );
+        this.baklavaView.clipboard = useClipboard(
+            toRaw(this.baklavaView).displayedGraph,
+            ref(this.baklavaView.editor),
             this.baklavaView.commandHandler,
         );
     }
