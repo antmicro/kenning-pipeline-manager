@@ -3,6 +3,25 @@
 Formats of dataflows and specification is often updated with new features, that makes former formats incompatible with the new ones.
 This section lists all versions, related features and breaking changes.
 
+## 20230817.7
+
+Commit SHA - `5946db06d8f42a33934a07fba95634aa8a70c78e`
+
+* Format of subgraph dataflows and specifications are redesigned.
+  Details can be found in [Dataflow format](dataflow-format) and [Specification format](specification-format).
+* Dataflow
+  * `SubgraphIO` was renamed to `interfaces` and its properties are changed.
+  *  Connections are now defined using `connections` property instead of `nodeInterfaceId` keyword.
+* Specification
+  * `id` property for nodes and connections in subgraphs is no longer required.
+  *  Connections are now defined using `connections` property instead of `nodeInterface` keyword.
+
+## 20230809.6
+
+Commit SHA - `59b04f8bc9cd0ce1cb757dcc4027750e1275d935`
+
+* Introduced `anchors` for connections, which is a list of coordinates that allows rendering custom connections shapes.
+
 ## 20230619.5
 
 Commit SHA - `84fe865ca44b3a80b87a2be418eedc1d1c025ee4`
