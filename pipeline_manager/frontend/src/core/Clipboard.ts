@@ -108,7 +108,8 @@ export function useClipboard(
                 return;
             }
             /* eslint-disable-next-line new-cap */
-            const copiedNode = new nodeType.type();
+            let copiedNode = new nodeType.type();
+
             const generatedId = copiedNode.id;
             newNodes.push(copiedNode);
 
@@ -138,9 +139,9 @@ export function useClipboard(
                 return ns;
             });
 
-            graph.addNode(copiedNode);
+            copiedNode = graph.addNode(copiedNode);
+            parsedNodeBuffer[i].id = generatedId;
             copiedNode.load(parsedNodeBuffer[i]);
-            copiedNode.id = generatedId;
             idmap.set(parsedNodeBuffer[i].id, generatedId);
         }
 
