@@ -63,3 +63,29 @@ def minify_specification(specification, dataflow):
 
     specification["nodes"] = new_nodes
     return specification
+
+
+def retrieve_used_icons(specification) -> list[str]:
+    """
+    Retrives names of used icons from the dataflow
+
+    Parameters
+    ----------
+    specification: Dict
+        Minified specification
+    Returns
+    -------
+    List : names of used icons
+    """
+    icon_names = []
+
+    if "urls" in specification["metadata"]:
+        for url in specification["metadata"]["urls"].values():
+            icon_names.append(url['icon'])
+
+    for node in specification["nodes"]:
+        if "icon" in node:
+            filename = node["icon"]
+            icon_names.append(filename)
+
+    return icon_names

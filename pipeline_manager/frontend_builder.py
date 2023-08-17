@@ -2,17 +2,23 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-import sys
-import json
-from pathlib import Path
-import subprocess
-import shutil
-from typing import Optional
+import base64
 import errno
-from pipeline_manager.specification_reader import minify_specification as minify_spec  # noqa: E501
+import json
+import shutil
+import subprocess
+import sys
+from pathlib import Path
+from typing import Optional, List
+
+from pipeline_manager.specification_reader import \
+    minify_specification as minify_spec, retrieve_used_icons  # noqa: E501
 
 
-def build_singlehtml(dist_path: Path, single_html_path: Path):
+def build_singlehtml(
+        dist_path: Path,
+        single_html_path: Path,
+        used_icons: Optional[List]):
     """
     Creates a single, self-contained HTML from the dist directory.
 
@@ -22,8 +28,12 @@ def build_singlehtml(dist_path: Path, single_html_path: Path):
         Path to the dist directory with built frontend
     single_html_path: Path
         Path to the output standalone HTML file
+    used_icons: Optional[List]
+        List of names of used images that are included in the output html.
+        If the value is None then all images are included.
     """
     from bs4 import BeautifulSoup
+
     with open(dist_path / "index.html", "r") as indexfile:
         soup = BeautifulSoup(indexfile.read(), features="html.parser")
     scripts = soup.findAll("script")
@@ -32,8 +42,32 @@ def build_singlehtml(dist_path: Path, single_html_path: Path):
         with open(dist_path / script["src"], "r") as scriptfile:
             tag.string = scriptfile.read()
         script.replaceWith(tag)
-    with open(single_html_path, 'w') as outputfile:
-        outputfile.write(str(soup))
+
+    soup = str(soup)
+
+    assets_path = dist_path / "assets"
+    for file in assets_path.glob("**/*"):
+        if file.is_dir():
+            continue
+        relative_filename = str(file.relative_to(assets_path))
+        if used_icons is None or relative_filename in used_icons:
+            if file.suffix == ".svg":
+                ctype = "svg+xml"
+            elif file.suffix == ".png":
+                ctype = "png"
+            else:
+                # Fallback ctype is the suffix without a dot
+                ctype = file.suffix[1:]
+
+            with open(file, "rb") as imgfile:
+                imgB64 = base64.b64encode(imgfile.read())
+                soup = soup.replace(
+                    f"assets/{relative_filename}",
+                    f"data:image/{ctype};base64,{imgB64.decode()}",
+                )
+
+    with open(single_html_path, "w") as outputfile:
+        outputfile.write(soup)
 
 
 def build_prepare():
@@ -105,6 +139,7 @@ def build_frontend(
     if editor_title:
         config_lines.append(f'VUE_APP_EDITOR_TITLE={editor_title}\n')
 
+    used_icons = None
     if minify_specification:
         if not (specification and dataflow):
             print(
@@ -117,6 +152,7 @@ def build_frontend(
         with open(dataflow, 'r') as dataflowfile:
             dataflowstruct = json.load(dataflowfile)
         newspec = minify_spec(spec, dataflowstruct)
+        used_icons = retrieve_used_icons(newspec)
         minified_spec_path = specification.with_suffix('.min.json')
         with open(minified_spec_path, 'w') as minified_spec_file:
             print(f"Writing minimized specification to:  {minified_spec_path}")
@@ -162,7 +198,7 @@ def build_frontend(
             return exit_status.returncode
 
     if single_html:
-        build_singlehtml(frontend_path / 'dist', single_html)
+        build_singlehtml(frontend_path / 'dist', single_html, used_icons)
 
     if output_directory:
         if clean_build and Path(output_directory).exists():
