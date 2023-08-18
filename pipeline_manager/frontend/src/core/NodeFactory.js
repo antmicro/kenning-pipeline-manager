@@ -21,82 +21,82 @@ import ListInterface from '../interfaces/ListInterface.js';
 import SliderInterface from '../interfaces/SliderInterface.js';
 
 function parseProperties(properties) {
-    const tempInputs = {};
-    properties.forEach((p) => {
+    const getIntf = (p, hidden = false) => {
         const propName = p.name;
         const propType = p.type;
         let propDef = p.default;
+        let intf;
 
         switch (propType) {
             case 'constant':
-                tempInputs[`property_${propName}`] = () => {
-                    const intf = new TextInterface(propName, propDef).setPort(false);
-                    intf.componentName = 'TextInterface';
-                    return intf;
-                };
+                intf = new TextInterface(propName, propDef).setPort(false);
+                intf.componentName = 'TextInterface';
                 break;
             case 'text':
-                tempInputs[`property_${propName}`] = () => {
-                    const intf = new InputInterface(propName, propDef).setPort(false);
-                    intf.componentName = 'InputInterface';
-                    return intf;
-                };
+                intf = new InputInterface(propName, propDef).setPort(false);
+                intf.componentName = 'InputInterface';
                 break;
             case 'number':
-                tempInputs[`property_${propName}`] = () => {
-                    const intf = new NumberInterface(propName, propDef).setPort(false);
-                    intf.componentName = 'NumberInterface';
-                    return intf;
-                };
+                intf = new NumberInterface(propName, propDef).setPort(false);
+                intf.componentName = 'NumberInterface';
                 break;
             case 'integer':
-                tempInputs[`property_${propName}`] = () => {
-                    const intf = new IntegerInterface(propName, propDef).setPort(false);
-                    intf.componentName = 'IntegerInterface';
-                    return intf;
-                };
+                intf = new IntegerInterface(propName, propDef).setPort(false);
+                intf.componentName = 'IntegerInterface';
                 break;
             case 'select': {
                 const it = p.values.map((element) => element.toString());
-                tempInputs[`property_${propName}`] = () => {
-                    const intf = new SelectInterface(propName, propDef, it).setPort(false);
-                    intf.componentName = 'SelectInterface';
-                    return intf;
-                };
-                break;
-            }
+                intf = new SelectInterface(propName, propDef, it).setPort(false);
+                intf.componentName = 'SelectInterface';
+            } break;
             case 'checkbox':
-                tempInputs[`property_${propName}`] = () => {
-                    const intf = new CheckboxInterface(propName, propDef).setPort(false);
-                    intf.componentName = 'CheckboxInterface';
-                    return intf;
-                };
+                intf = new CheckboxInterface(propName, propDef).setPort(false);
+                intf.componentName = 'CheckboxInterface';
                 break;
             case 'slider':
                 if (propDef === undefined) {
                     propDef = p.min;
                 }
-                tempInputs[`property_${propName}`] = () => {
-                    const intf = new SliderInterface(propName, propDef, p.min, p.max).setPort(
-                        false,
-                    );
-                    intf.componentName = 'SliderInterface';
-                    return intf;
-                };
+                intf = new SliderInterface(propName, propDef, p.min, p.max).setPort(
+                    false,
+                );
+                intf.componentName = 'SliderInterface';
                 break;
             case 'list':
-                tempInputs[`property_${propName}`] = () => {
-                    const intf = new ListInterface(propName, propDef, p.dtype).setPort(false);
-                    intf.componentName = 'ListInterface';
-                    return intf;
-                };
+                intf = new ListInterface(propName, propDef, p.dtype).setPort(false);
+                intf.componentName = 'ListInterface';
                 break;
             default:
                 /* eslint-disable no-console */
                 console.error(propType, ' input type is not recognized.');
         }
+        if (intf !== undefined) {
+            intf.hidden = hidden;
+        }
+
+        return intf;
+    };
+
+    const tempInputs = {};
+    const groups = {};
+    properties.forEach((p) => {
+        if (p.group !== undefined) {
+            const checkbox = getIntf(p);
+            checkbox.group = p.group.map((groupP) => `property_${groupP.name}`);
+            tempInputs[`property_${p.name}`] = () => checkbox;
+
+            p.group.forEach((groupP) => {
+                tempInputs[`property_${groupP.name}`] = () => getIntf(groupP);
+            });
+        } else {
+            tempInputs[`property_${p.name}`] = () => getIntf(p);
+        }
     });
-    return tempInputs;
+
+    return {
+        parsedProperties: tempInputs,
+        groups,
+    };
 }
 
 /**
@@ -260,6 +260,8 @@ export function NodeFactory(
         ),
     );
 
+    const { groups, parsedProperties } = parseProperties(properties);
+
     const node = defineNode({
         type: name,
 
@@ -267,12 +269,13 @@ export function NodeFactory(
 
         inputs: {
             ...inputs,
-            ...parseProperties(properties),
+            ...parsedProperties,
         },
         outputs,
 
         /* eslint-disable no-param-reassign */
         onCreate() {
+            this.groups = groups;
             this.nodeType = nodeType;
             this.parentSave = this.save;
             this.parentLoad = this.load;
