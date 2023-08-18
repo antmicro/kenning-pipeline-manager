@@ -125,167 +125,20 @@
                         "type": "array",
                         "items": {
                             "type": "object",
-                            "properties": {
-                                "name": {
-                                    "description": "Name of the property. Can be displayed for some types of properties",
-                                    "type": "string"
-                                },
-                                "type": {
-                                    "description": "Type of the property",
-                                    "enum": [
-                                        "text",
-                                        "number",
-                                        "integer",
-                                        "select",
-                                        "checkbox",
-                                        "slider",
-                                        "list",
-                                        "constant"
-                                    ]
-                                },
-                                "description": {
-                                    "description": "Description of the property. Can be displayed to the user",
-                                    "type": "string"
-                                },
-                                "default": {
-                                    "description": "Default value of the property"
-                                },
-                                "min": {
-                                    "description": "Minimum value of a range for slider, number and integer type",
-                                    "type": "number"
-                                },
-                                "max": {
-                                    "description": "Maxiumum value of a range for slider, number and integer type",
-                                    "type": "number"
-                                },
-                                "values": {
-                                    "description": "Range of values for the select type",
-                                    "type": "array"
-                                },
-                                "dtype": {
-                                    "description": "Data types of elements in a list type",
-                                    "type": "string",
-                                    "enum": [
-                                        "integer",
-                                        "number",
-                                        "string",
-                                        "boolean"
-                                    ]
-                                }
-                            },
-                            "required": [
-                                "name",
-                                "type",
-                                "default"
-                            ],
-                            "additionalProperties": false,
                             "allOf": [
                                 {
-                                    "if": {
-                                        "type": "object",
-                                        "properties": {
-                                            "type": {
-                                                "const": "slider"
-                                            }
-                                        }
-                                    },
-                                    "then": {
-                                        "properties": {
-                                            "default": {
-                                                "type": ["number", "null"]
-                                            }
-                                        },
-                                        "required": [
-                                            "min",
-                                            "max"
-                                        ]
-                                    }
+                                    "$ref": "#/$defs/property"
                                 },
                                 {
-                                    "if": {
-                                        "type": "object",
-                                        "properties": {
-                                            "type": {
-                                                "const": "checkbox"
+                                    "properties": {
+                                        "group": {
+                                            "description": "Definition of the group properties",
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "$ref": "#/$defs/property"
                                             }
                                         }
-                                    },
-                                    "then": {
-                                        "properties": {
-                                            "default": {
-                                                "type": ["boolean", "null"]
-                                            }
-                                        },
-                                        "required": [
-                                            "default"
-                                        ]
-                                    }
-                                },
-                                {
-                                    "if": {
-                                        "type": "object",
-                                        "properties": {
-                                            "type": {
-                                                "const": "select"
-                                            }
-                                        }
-                                    },
-                                    "then": {
-                                        "required": [
-                                            "values"
-                                        ]
-                                    }
-                                },
-                                {
-                                    "if": {
-                                        "type": "object",
-                                        "properties": {
-                                            "type": {
-                                                "enum": [
-                                                    "integer",
-                                                    "number"
-                                                ]
-                                            }
-                                        }
-                                    },
-                                    "then": {
-                                        "properties": {
-                                            "default": {
-                                                "type": ["number", "null"]
-                                            }
-                                        }
-                                    }
-                                },
-                                {
-                                    "if": {
-                                        "type": "object",
-                                        "properties": {
-                                            "type": {
-                                                "const": "text"
-                                            }
-                                        }
-                                    },
-                                    "then": {
-                                        "properties": {
-                                            "default": {
-                                                "type": ["string", "null"]
-                                            }
-                                        }
-                                    }
-                                },
-                                {
-                                    "if": {
-                                        "type": "object",
-                                        "properties": {
-                                            "type": {
-                                                "const": "constant"
-                                            }
-                                        }
-                                    },
-                                    "then": {
-                                        "required": [
-                                            "default"
-                                        ]
                                     }
                                 }
                             ]
@@ -460,6 +313,172 @@
             "required": [
                 "name",
                 "direction"
+            ]
+        },
+        "property": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "description": "Name of the property. Can be displayed for some types of properties",
+                    "type": "string"
+                },
+                "type": {
+                    "description": "Type of the property",
+                    "enum": [
+                        "text",
+                        "number",
+                        "integer",
+                        "select",
+                        "checkbox",
+                        "slider",
+                        "list",
+                        "constant"
+                    ]
+                },
+                "description": {
+                    "description": "Description of the property. Can be displayed to the user",
+                    "type": "string"
+                },
+                "default": {
+                    "description": "Default value of the property"
+                },
+                "min": {
+                    "description": "Minimum value of a range for slider, number and integer type",
+                    "type": "number"
+                },
+                "max": {
+                    "description": "Maxiumum value of a range for slider, number and integer type",
+                    "type": "number"
+                },
+                "values": {
+                    "description": "Range of values for the select type",
+                    "type": "array"
+                },
+                "dtype": {
+                    "description": "Data types of elements in a list type",
+                    "type": "string",
+                    "enum": [
+                        "integer",
+                        "number",
+                        "string",
+                        "boolean"
+                    ]
+                }
+            },
+            "required": [
+                "name",
+                "type",
+                "default"
+            ],
+            "allOf": [
+                {
+                    "if": {
+                        "type": "object",
+                        "properties": {
+                            "type": {
+                                "const": "slider"
+                            }
+                        }
+                    },
+                    "then": {
+                        "properties": {
+                            "default": {
+                                "type": ["number", "null"]
+                            }
+                        },
+                        "required": [
+                            "min",
+                            "max"
+                        ]
+                    }
+                },
+                {
+                    "if": {
+                        "type": "object",
+                        "properties": {
+                            "type": {
+                                "const": "checkbox"
+                            }
+                        }
+                    },
+                    "then": {
+                        "properties": {
+                            "default": {
+                                "type": ["boolean", "null"]
+                            }
+                        },
+                        "required": [
+                            "default"
+                        ]
+                    }
+                },
+                {
+                    "if": {
+                        "type": "object",
+                        "properties": {
+                            "type": {
+                                "const": "select"
+                            }
+                        }
+                    },
+                    "then": {
+                        "required": [
+                            "values"
+                        ]
+                    }
+                },
+                {
+                    "if": {
+                        "type": "object",
+                        "properties": {
+                            "type": {
+                                "enum": [
+                                    "integer",
+                                    "number"
+                                ]
+                            }
+                        }
+                    },
+                    "then": {
+                        "properties": {
+                            "default": {
+                                "type": ["number", "null"]
+                            }
+                        }
+                    }
+                },
+                {
+                    "if": {
+                        "type": "object",
+                        "properties": {
+                            "type": {
+                                "const": "text"
+                            }
+                        }
+                    },
+                    "then": {
+                        "properties": {
+                            "default": {
+                                "type": ["string", "null"]
+                            }
+                        }
+                    }
+                },
+                {
+                    "if": {
+                        "type": "object",
+                        "properties": {
+                            "type": {
+                                "const": "constant"
+                            }
+                        }
+                    },
+                    "then": {
+                        "required": [
+                            "default"
+                        ]
+                    }
+                }
             ]
         }
     }
