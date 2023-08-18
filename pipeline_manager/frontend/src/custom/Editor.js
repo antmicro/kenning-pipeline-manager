@@ -152,6 +152,7 @@ export default class PipelineManagerEditor extends Editor {
         const usedInstances = new Set();
 
         const recurrentSubgraphLoad = (node) => {
+            const errors = [];
             if (node.subgraph !== undefined) {
                 const fittingTemplate = state.graphTemplateInstances.filter(
                     (template) => template.id === node.subgraph,
@@ -164,19 +165,38 @@ export default class PipelineManagerEditor extends Editor {
                 }
                 usedInstances.add(node.subgraph);
                 node.graphState = structuredClone(fittingTemplate[0]);
-                node.graphState.nodes.forEach(recurrentSubgraphLoad);
+
+                node.graphState.nodes.forEach((n) => {
+                    errors.push(...recurrentSubgraphLoad(n));
+                });
                 node.type = `${GRAPH_NODE_TYPE_PREFIX}${node.type}`;
 
                 const interfaces = node.graphState.interfaces.map(
-                    (io) => ({
-                        ...io,
-                        ...node.interfaces.find(
+                    (io) => {
+                        const correspondingInterface = node.interfaces.find(
                             (intf) => intf.subgraphNodeId === io.id,
-                        ),
-                    }),
+                        );
+                        if (correspondingInterface === undefined) {
+                            errors.push(`No corresponding subgraphNodeId for subgraph interface of id ${io.id} found.`);
+                        }
+
+                        return {
+                            ...io,
+                            ...correspondingInterface,
+                        };
+                    },
                 );
 
-                const { inputs, outputs } = parseInterfaces(interfaces, [], []);
+                if (errors.length) {
+                    return errors;
+                }
+
+                const out = parseInterfaces(interfaces, [], []);
+                if (Array.isArray(out) && out.length) {
+                    return out;
+                }
+                const { inputs, outputs } = out;
+
                 node.graphState.inputs = Object.values(inputs);
                 node.graphState.outputs = Object.values(outputs);
 
@@ -184,7 +204,7 @@ export default class PipelineManagerEditor extends Editor {
 
                 delete node.subgraph;
             }
-            return [];
+            return errors;
         };
 
         // Load the node state as it is, wait until vue renders new nodes so that
@@ -196,7 +216,14 @@ export default class PipelineManagerEditor extends Editor {
         this.readonly = true;
         let errors = [];
         try {
-            state.graph.nodes.forEach(recurrentSubgraphLoad);
+            state.graph.nodes.forEach((n) => {
+                errors.push(...recurrentSubgraphLoad(n));
+            });
+
+            if (errors.length) {
+                return errors;
+            }
+
             state.graph.inputs = [];
             state.graph.outputs = [];
             this.layoutManager.registerGraph(state.graph);

@@ -63,7 +63,11 @@ export default function CreateCustomGraphNodeType(template, type) {
         }
 
         load(state) {
-            const { inputs, outputs } = parseInterfaces(state.interfaces, [], [], true);
+            const out = parseInterfaces(state.interfaces, [], [], true);
+            if (Array.isArray(out) && out.length) {
+                return out;
+            }
+            const { inputs, outputs } = out;
 
             /*
                 When the subgraph node is created, it creates a placeholder interfaces
@@ -78,7 +82,7 @@ export default function CreateCustomGraphNodeType(template, type) {
             this.updateInterfaces(inputs, outputs);
             delete state.interfaces; // eslint-disable-line no-param-reassign
 
-            const errors = [];
+            let errors = [];
             if (!this.subgraph) {
                 errors.push('Cannot load a graph node without a graph');
             }
@@ -90,7 +94,10 @@ export default function CreateCustomGraphNodeType(template, type) {
             }
 
             // Loading the subgraph of the graph
-            this.subgraph.load(state.graphState);
+            errors = this.subgraph.load(state.graphState);
+            if (errors.length) {
+                return errors;
+            }
 
             // Default position should be undefined instead of (0, 0) so that it can be set
             // by autolayout
@@ -111,7 +118,14 @@ export default function CreateCustomGraphNodeType(template, type) {
             const state = this.prepareSubgraphInstance();
             this.updateInterfaces(state.inputs, state.outputs);
 
-            graph.load(state);
+            const errors = graph.load(state);
+            if (errors.length) {
+                throw new Error(
+                    `Internal error occured while initializing ${graph.type} graph. ` +
+                    `Reason: ${errors.join('. ')}`,
+                );
+            }
+
             graph.template = this.template;
             this.subgraph = graph;
 
@@ -139,7 +153,6 @@ export default function CreateCustomGraphNodeType(template, type) {
         }
 
         prepareSubgraphInstance() {
-            // FIX ME: Lacking subgraphNodeId value
             const idMap = new Map();
 
             const createNewId = (oldId) => {
