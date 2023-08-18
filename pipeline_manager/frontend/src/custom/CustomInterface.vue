@@ -49,6 +49,7 @@ export default defineComponent({
         highlighted: Boolean,
         picked: Boolean,
         switchSides: {},
+        toggleGroup: { default: () => {}, required: false },
     },
     components: {
         Arrow,
@@ -64,6 +65,8 @@ export default defineComponent({
         props.intf.events.beforeSetValue.subscribe(token, (_, prevent) => {
             if (viewModel.value.editor.readonly) {
                 prevent();
+            } else if (props.intf.group) {
+                props.toggleGroup(props.intf);
             }
         });
 

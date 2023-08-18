@@ -66,7 +66,7 @@ from moving or deleting the nodes.
             <div class="__properties">
                 <div v-for="input in displayedProperties" :key="input.id">
                     {{ getOptionName(input.componentName) ? `${input.name}:` : '' }}
-                    <CustomInterface :node="node" :intf="input" />
+                    <CustomInterface :node="node" :intf="input" :toggleGroup="toggleGroup" />
                 </div>
             </div>
 
@@ -560,6 +560,12 @@ watch(showContextMenuInterface, () => {
         chosenInterface = undefined;
     }
 });
+
+const toggleGroup = (intf) => {
+    intf.group.forEach((name) => {
+        props.node.inputs[name].hidden = intf.value;
+    });
+};
 
 /* eslint-disable no-param-reassign */
 const switchSides = (intf) => {
