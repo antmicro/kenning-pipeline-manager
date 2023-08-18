@@ -2,6 +2,11 @@
 
 Formats of dataflows and specification is often updated with new features, that makes former formats incompatible with the new ones.
 This section lists all versions, related features and breaking changes.
+## 20230818.8
+
+Commit SHA - `d4abcc80bce3e280120078a47d784eff92821a8a`
+
+* Introduced `group` keyword for checkbox property which allows defining groups of properties that can be disabled.
 
 ## 20230817.7
 

@@ -230,7 +230,7 @@ Only interfaces of the same `type` can be connected together.
 #### Property
 
 An object that specifies a single property.
-Every project object has two required base properties:
+Every project object has three required base properties:
 * `name` - name of the property.
 * `type` - type of the property.
 * `default` - specifies a default selected value
@@ -263,6 +263,9 @@ Additional properties:
   Supported values are `string`, `number`, `integer`, `boolean`.
 * `description` - description of the property.
   In some cases, it can be displayed to the user.
+* `group` - array with elements of type [Property](#property).
+  It defines properties that are toggled by the property.
+  `group` can only be used with property of type `checkbox`.
 
 #### Node type inheritance
 
