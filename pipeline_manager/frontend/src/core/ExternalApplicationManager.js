@@ -83,6 +83,9 @@ export default class ExternalApplicationManager {
             } else if (data.type === PMMessageType.ERROR) {
                 message = data.content;
                 NotificationHandler.showToast('error', message);
+            } else if (data.type === PMMessageType.WARNING) {
+                message = data.content;
+                NotificationHandler.showToast('warning', message);
             }
         } else if (response.status === HTTPCodes.ServiceUnavailable) {
             message = await response.text();
@@ -144,7 +147,9 @@ export default class ExternalApplicationManager {
         if (data.type === PMMessageType.OK) {
             NotificationHandler.showToast('info', data.content);
         } else if (data.type === PMMessageType.ERROR) {
-            NotificationHandler.terminalLog('error', 'Error occured', data.content);
+            NotificationHandler.terminalLog('error', `Error occured: ${data.content}`, data.content);
+        } else if (data.type === PMMessageType.WARNING) {
+            NotificationHandler.terminalLog('warning', `Warning: ${data.content}`, data.content);
         }
     }
 
