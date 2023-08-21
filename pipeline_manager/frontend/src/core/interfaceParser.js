@@ -84,7 +84,7 @@ function parseSingleInterfaces(interfaces, interfaceGroup = false) {
                 const name = `${io.name}[${j}]`;
                 if (tempParsed[io.direction][name] !== undefined) {
                     errors.push(
-                        `Interface named ${name} of direction ${io.direction} is a duplicate.`,
+                        `Interface named '${name}' of direction '${io.direction}' is a duplicate.`,
                     );
                 }
                 tempParsed[io.direction][`${io.name}[${j}]`] = io;
@@ -92,7 +92,7 @@ function parseSingleInterfaces(interfaces, interfaceGroup = false) {
         } else {
             if (tempParsed[io.direction][io.name] !== undefined) {
                 errors.push(
-                    `Interface named ${io.name} of direction ${io.direction} is a duplicate.`,
+                    `Interface named '${io.name}' of direction '${io.direction}' is a duplicate.`,
                 );
             }
             tempParsed[io.direction][io.name] = io;
@@ -126,7 +126,7 @@ function parseSingleInterfaces(interfaces, interfaceGroup = false) {
                 Object.keys(tempParsed.input).includes(name);
             if (duplicate) {
                 errors.push(
-                    `Interface named ${name} of direction ${state.direction} ` +
+                    `Interface named '${name}' of direction '${state.direction}' ` +
                         `is a duplicate. There already exists an input or output of this name.`,
                 );
             }
@@ -204,8 +204,8 @@ export function validateInterfaceGroups(enabledInterfaceGroups, inputs, outputs)
 
     errors.forEach(([parsedIntfName, intfDirection, groupName, groupDirection]) => {
         errorMessages.push(
-            `Interface of name ${parsedIntfName} and direction ${intfDirection} has been reused ` +
-                `by interface group named ${groupName} of direction ${groupDirection}. ` +
+            `Interface of name '${parsedIntfName}' and direction '${intfDirection}' has been reused ` +
+                `by interface group named '${groupName}' of direction '${groupDirection}'. ` +
                 `Make sure your interface groups are disjoint.`,
         );
     });
@@ -249,8 +249,8 @@ export function applySidePositions(inputs, outputs) {
         if (intf.sidePosition !== undefined) {
             if (occupiedInputSidePositions.has(intf.sidePosition)) {
                 errors.push(
-                    `Interface named ${stripName(name)} of direction ${intf.direction} has ` +
-                        `invalid sidePosition value ${intf.sidePosition}. ` +
+                    `Interface named '${stripName(name)}' of direction '${intf.direction}' has ` +
+                        `invalid sidePosition value '${intf.sidePosition}'. ` +
                         `There already exists an input or output with this sidePosition.`,
                 );
             }
@@ -262,8 +262,8 @@ export function applySidePositions(inputs, outputs) {
         if (intf.sidePosition !== undefined) {
             if (occupiedOutputSidePositions.has(intf.sidePosition)) {
                 errors.push(
-                    `Interface named ${stripName(name)} of direction ${intf.direction} has ` +
-                        `invalid sidePosition value ${intf.sidePosition}. ` +
+                    `Interface named '${stripName(name)}' of direction '${intf.direction}' has ` +
+                        `invalid sidePosition value '${intf.sidePosition}'. ` +
                         `There already exists an input or output with this sidePosition.`,
                 );
             }
@@ -355,9 +355,9 @@ export function parseInterfaces(
                         !Object.keys({ ...tempParsed.input, ...tempParsed.output }).includes(name)
                     ) {
                         errors.push(
-                            `Interface named ${intf.name}[${j}] of direction ${intf.direction} ` +
-                                `used for interface group ${intfG.name} of direction ` +
-                                `${intfG.direction} does not exist.`,
+                            `Interface named '${intf.name}[${j}]' of direction '${intf.direction}' ` +
+                                `used for interface group '${intfG.name}' of direction ` +
+                                `'${intfG.direction}' does not exist.`,
                         );
                     }
                 }
@@ -365,9 +365,9 @@ export function parseInterfaces(
                 const name = `${intf.direction}_${intf.name}`;
                 if (!Object.keys({ ...tempParsed.input, ...tempParsed.output }).includes(name)) {
                     errors.push(
-                        `Interface named ${intf.name} of direction ${intf.direction} ` +
-                            `used for interface group ${intfG.name} of direction ` +
-                            `${intfG.direction} does not exist.`,
+                        `Interface named '${intf.name}' of direction '${intf.direction}' ` +
+                            `used for interface group '${intfG.name}' of direction ` +
+                            `'${intfG.direction}' does not exist.`,
                     );
                 }
             }

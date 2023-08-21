@@ -463,7 +463,7 @@ export default class EditorManager {
     async loadDataflow(dataflow) {
         const validationErrors = this.validateDataflow(dataflow);
         if (validationErrors.length) {
-            return { errors: validationErrors };
+            return { errors: validationErrors, warnings: [] };
         }
 
         try {
@@ -502,6 +502,7 @@ export default class EditorManager {
                     'Unrecognized format. Make sure that the passed dataflow is correct.',
                     err.toString(),
                 ],
+                warnings: [],
             };
         }
     }

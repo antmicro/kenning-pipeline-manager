@@ -123,10 +123,7 @@ function detectDiscrepancies(parsedState, inputs, outputs) {
             const direction = ioName.slice(0, ioName.indexOf('_'));
             const name = ioName.slice(ioName.indexOf('_') + 1);
 
-            errors.push(
-                `Node of name ${parsedState.type} and id ${parsedState.id} is corrupted. ` +
-                    `Interface named ${name} of direction ${direction} not found in specification!`,
-            );
+            errors.push(`Interface named '${name}' of direction '${direction}' not found in specification!`);
         }
     });
 
@@ -139,10 +136,7 @@ function detectDiscrepancies(parsedState, inputs, outputs) {
             const direction = groupName.slice(0, groupName.indexOf('_'));
             const name = groupName.slice(groupName.indexOf('_') + 1);
 
-            errors.push(
-                `Node of name ${parsedState.type} and id ${parsedState.id} is corrupted. ` +
-                    `Interface group named ${name} of direction ${direction} not found in specification!`,
-            );
+            errors.push(`Interface group named '${name}' of direction '${direction}' not found in specification!`);
         }
     });
 
@@ -447,7 +441,7 @@ export function SubgraphFactory(nodes, connections, interfaces, name, type, edit
     const errorMessages = parsedState.filter((n) => Array.isArray(n) && n.length);
 
     if (errorMessages.length) {
-        return errorMessages.map((error) => `Node ${type} invalid. ${error}`);
+        return errorMessages.map((error) => `Node '${type}' invalid. ${error}`);
     }
 
     const state = {

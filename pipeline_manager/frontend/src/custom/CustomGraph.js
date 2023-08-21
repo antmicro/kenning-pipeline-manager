@@ -66,7 +66,7 @@ export default function createPipelineManagerGraph(graph) {
         if (from.maxConnectionsCount > 0 && from.connectionCount + 1 > from.maxConnectionsCount) {
             return {
                 connectionAllowed: false,
-                error: `Too many connections from an input interface (${from.id}), maximum of ${from.maxConnectionsCount} are allowed.`,
+                error: `Too many connections from an input interface '${from.id}', maximum of '${from.maxConnectionsCount}' are allowed.`,
             };
         }
 
@@ -76,14 +76,14 @@ export default function createPipelineManagerGraph(graph) {
         ) {
             return {
                 connectionAllowed: false,
-                error: `By default only one connection to an input interface (${to.id}) allowed.`,
+                error: `By default only one connection to an input interface '${to.id}' allowed.`,
             };
         }
 
         if (to.maxConnectionsCount > 0 && to.connectionCount + 1 > to.maxConnectionsCount) {
             return {
                 connectionAllowed: false,
-                error: `Too many connections to an output interface (${to.id}), maximum of ${to.maxConnectionsCount} are allowed.`,
+                error: `Too many connections to an output interface '${to.id}', maximum of '${to.maxConnectionsCount}' are allowed.`,
             };
         }
 
@@ -100,7 +100,7 @@ export default function createPipelineManagerGraph(graph) {
             if (commonType === undefined) {
                 return {
                     connectionAllowed: false,
-                    error: `No common types between interfaces. Interface ${from.id} supports types ${fromTypes} and interface ${to.id} supports types ${toTypes}.`,
+                    error: `No common types between interfaces. Interface '${from.id}' supports types '${fromTypes}' and interface '${to.id}' supports types '${toTypes}'.`,
                 };
             }
         }
@@ -108,7 +108,7 @@ export default function createPipelineManagerGraph(graph) {
         if (this.events.checkConnection.emit({ from, to }).prevented) {
             return {
                 connectionAllowed: false,
-                error: `Connection between an input interface (${from.id}) and an output interface (${to.id}) was prevented`,
+                error: `Connection between an input interface '${from.id}' and an output interface '${to.id}' was prevented`,
             };
         }
 
@@ -116,7 +116,7 @@ export default function createPipelineManagerGraph(graph) {
         if (hookResults.some((hr) => !hr.connectionAllowed)) {
             return {
                 connectionAllowed: false,
-                errors: `Connection between an input interface (${from.id}) and an output interface (${to.id}) was prevented`,
+                errors: `Connection between an input interface '${from.id}' and an output interface '${to.id}' was prevented`,
             };
         }
 
@@ -346,26 +346,26 @@ export default function createPipelineManagerGraph(graph) {
             const toIf = this.findNodeInterface(c.to);
             if (!fromIf) {
                 errors.push(
-                    `Connection of id: ${c.id} invalid. Could not find interface with id ${c.from}`,
+                    `Connection of id '${c.id}' invalid. Could not find interface with id '${c.from}'`,
                 );
             } else if (!fromIf.port) {
                 errors.push(
-                    `Connection of id: ${c.id} invalid. Source of the connection is not an Interface`,
+                    `Connection of id '${c.id}' invalid. Source of the connection is not an Interface`,
                 );
             } else if (!toIf) {
                 errors.push(
-                    `Connection of id: ${c.id} invalid. Could not find interface with id ${c.to}`,
+                    `Connection of id '${c.id}' invalid. Could not find interface with id '${c.to}'`,
                 );
             } else if (!toIf.port) {
                 errors.push(
-                    `Connection of id: ${c.id} invalid. Destination of the connection is not an Interface`,
+                    `Connection of id '${c.id}' invalid. Destination of the connection is not an Interface`,
                 );
             } else if (
                 state.connections.some(
                     (conn) => conn.id === c.id && (conn.from !== c.from || conn.to !== c.to),
                 )
             ) {
-                errors.push(`Connection of id: ${c.id} invalid. ID is already taken.`);
+                errors.push(`Connection of id '${c.id}' invalid. ID is already taken.`);
             } else {
                 // Manually adding connections instead of using `addConnection` from baklavajs
                 // as we want to get a feedback message from `checkConnection` function
@@ -373,7 +373,7 @@ export default function createPipelineManagerGraph(graph) {
                 const checkConnectionResult = this.checkConnection(fromIf, toIf);
                 if (!checkConnectionResult.connectionAllowed) {
                     errors.push(
-                        `Could not create connection of id: ${c.id}. ${checkConnectionResult.error}`,
+                        `Could not create connection of id '${c.id}'. ${checkConnectionResult.error}`,
                     );
                 } else {
                     checkConnectionResult.connectionsInDanger.forEach((connectionToRemove) => {
