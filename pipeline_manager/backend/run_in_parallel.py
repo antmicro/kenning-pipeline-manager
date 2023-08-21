@@ -1,6 +1,14 @@
 # Copyright (c) 2022-2023 Antmicro <www.antmicro.com>
 #
 # SPDX-License-Identifier: Apache-2.0
+
+"""
+Provides methods for running Pipeline Manager server in parallel.
+
+Allows to run Pipeline Manager in parallel to the script
+communicating with it.
+"""
+
 import logging
 from multiprocessing import Process
 
