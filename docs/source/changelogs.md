@@ -7,7 +7,7 @@ This section lists all versions, related features and breaking changes.
 
 Commit SHA - `5946db06d8f42a33934a07fba95634aa8a70c78e`
 
-* Format of subgraph dataflows and specifications are redesigned.
+* Format of subgraph dataflows and specifications is redesigned.
   Details can be found in [Dataflow format](dataflow-format) and [Specification format](specification-format).
 * Dataflow
   * `SubgraphIO` was renamed to `interfaces` and its properties are changed.

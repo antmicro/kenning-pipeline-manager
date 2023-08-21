@@ -451,12 +451,13 @@ format:
 
  * `id` - Unique ID of the interface within the subgraph
  * `nodePosition` - optional property (object containing `x` and `y` values) defining the
- position of the interface node after entering the subgraph. The default position is `(0, 0)`.
+   position of the interface node after entering the subgraph.
+   The default position is `(0, 0)`.
 
 When defining the subgraph node (adding `subgraph` property to a node), the `interfaces` object
 differs slightly from interfaces of standard nodes:
 
- * Every property like `id`, `direction`, or `side` followw the same rules.
+ * Every property like `id`, `direction`, or `side` follow the same rules.
  * `subgraphNodeId` must be set to `id` of `subgraphIO`.
  * New optional property `nodePosition` (object containing `x` and `y` values) defines the
  position of the `Subgraph IO` node after entering the subgraph. Default position is (0, 0)
