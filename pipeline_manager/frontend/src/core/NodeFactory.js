@@ -236,7 +236,7 @@ export function NodeFactory(
     const parsedInterfaces = parseInterfaces(interfaces, interfaceGroups, defaultInterfaceGroups);
     // If parsedInterfaces returns an array, it is an array of errors
     if (Array.isArray(parsedInterfaces) && parsedInterfaces.length) {
-        return parsedInterfaces.map((error) => `Node ${nodeType} invalid. ${error}`);
+        return parsedInterfaces.map((error) => `Node ${displayName} invalid. ${error}`);
     }
 
     function createBaklavaInterface(intf) {
@@ -355,14 +355,14 @@ export function NodeFactory(
                     parsedState = parseNodeState(state);
 
                     if (Array.isArray(parsedState) && parsedState.length) {
-                        return parsedState.map((error) => `Node ${nodeType} of id: ${this.id} invalid. ${error}`);
+                        return parsedState.map((error) => `Node ${displayName} of id: ${this.id} invalid. ${error}`);
                     }
                 }
 
                 const errors = detectDiscrepancies(parsedState, this.inputs, this.outputs);
 
                 if (Array.isArray(errors) && errors.length) {
-                    return errors.map((error) => `Node ${nodeType} of id: ${this.id} invalid. ${error}`);
+                    return errors.map((error) => `Node ${displayName} of id: ${this.id} invalid. ${error}`);
                 }
 
                 this.parentLoad(parsedState);
