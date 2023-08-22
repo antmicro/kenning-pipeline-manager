@@ -62,6 +62,23 @@ firefox ./pipeline_manager/frontend/dist/index.html
 After running Pipeline Manager you can use sample specification under `./examples/sample_specification.json` to check the visualization and editing of pipelines.
 Additionaly `./examples/sample_dataflow.json` can be used to see how dataflows are stored.
 
+The specification can be loaded in the webpage using `Load specification` option in the main menu.
+The dataflow can be loaded in the webpage using `Load graph file` option in the main menu.
+
+What is more, the specification and the dataflow can be provided as URL arguments:
+
+* `spec` - should contain URL to the specification file,
+* `graph` - should contain URL to the dataflow file.
+
+For example:
+
+```bash
+firefox "./pipeline_manager/frontend/dist/index.html?spec=https%3A%2F%2Fraw.githubusercontent.com%2Fantmicro%2Fkenning-pipeline-manager%2Fmain%2Fexamples%2Fsample-specification.json&graph=https%3A%2F%2Fraw.githubusercontent.com%2Fantmicro%2Fkenning-pipeline-manager%2Fmain%2Fexamples%2Fsample-dataflow.json"
+```
+
+Will fetch and use specification and dataflow from the Github repository for this project.
+The URLs need to be encoded.
+
 It is possible to add a default specification JSON to the generated HTML.
 It just needs to be provided as the second argument of the `./build` script:
 
