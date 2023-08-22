@@ -175,7 +175,10 @@ export default {
                     );
                 }
                 if (Array.isArray(errors) && errors.length) {
-                    NotificationHandler.terminalLog('error', 'Dataflow is invalid', errors);
+                    const messageTitle = process.env.VUE_APP_SOFT_VALIDATION === 'true' ?
+                        'Softload enabled, errors found while loading the dataflow' :
+                        'Dataflow is invalid';
+                    NotificationHandler.terminalLog('error', messageTitle, errors);
                 }
             });
         },
