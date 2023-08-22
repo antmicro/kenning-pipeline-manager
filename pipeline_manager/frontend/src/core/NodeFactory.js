@@ -340,6 +340,108 @@ export function NodeFactory(
                 return savedState;
             };
 
+            /**
+             * Function used to update interfaces of a node when loading a dataflow
+             * in a development mode.
+             */
+            this.updateInterfaces = (stateInputs, stateOutputs) => {
+                const errors = [];
+                // Updating interfaces of a graph node
+                Object.entries(this.inputs).forEach(([k, intf]) => {
+                    // Process only interfaces, not properties
+                    if (intf.direction === undefined) return;
+                    if (!Object.keys(stateInputs).includes(k)) {
+                        errors.push(
+                            `Interface '${intf.name}' of direction '${intf.direction}' ` +
+                            `removed as it was not found in the dataflow.`,
+                        );
+                        this.removeInput(k);
+                    }
+                });
+                Object.entries(stateInputs).forEach(([idA, intfA]) => {
+                    if (intfA.direction === undefined) return;
+                    const foundIntf = Object.entries(this.inputs).find(
+                        ([idB, intfB]) => idB === idA && intfB.direction === intfA.direction,
+                    );
+                    if (foundIntf === undefined) {
+                        const baklavaIntf = new NodeInterface(idA);
+                        errors.push(
+                            `Interface '${intfA.name}' of direction '${intfA.direction}' ` +
+                            `created as it was not found in the specification.`,
+                        );
+                        Object.assign(baklavaIntf, intfA);
+                        this.addInterface(baklavaIntf.direction, idA, baklavaIntf);
+                    } else {
+                        Object.assign(foundIntf[1], intfA);
+                    }
+                });
+
+                Object.entries(this.outputs).forEach(([k, intf]) => {
+                    // Process only interfaces, not properties
+                    if (intf.direction === undefined) return;
+                    if (!Object.keys(stateOutputs).includes(k)) {
+                        errors.push(
+                            `Interface '${intf.name}' of direction '${intf.direction}' ` +
+                            `removed as it was not found in the dataflow.`,
+                        );
+                        this.removeOutput(k);
+                    }
+                });
+                Object.entries(stateOutputs).forEach(([idA, intfA]) => {
+                    const foundIntf = Object.entries(this.outputs).find(
+                        ([idB, intfB]) => idB === idA && intfB.direction === intfA.direction,
+                    );
+                    if (foundIntf === undefined) {
+                        const baklavaIntf = new NodeInterface(idA);
+                        errors.push(
+                            `Interface '${intfA.name}' of direction '${intfA.direction}' ` +
+                            `created as it was not found in the specification.`,
+                        );
+                        Object.assign(baklavaIntf, intfA);
+                        this.addInterface(baklavaIntf.direction, idA, baklavaIntf);
+                    } else {
+                        Object.assign(foundIntf[1], intfA);
+                    }
+                });
+                return errors;
+            };
+
+            const updateProperties = (stateProperties) => {
+                const errors = [];
+                // Updating properties of a graph node
+                Object.entries(this.inputs).forEach(([k, prop]) => {
+                    // Process only properties, not interfaces
+                    if (prop.direction !== undefined) return;
+                    if (!Object.keys(stateProperties).includes(k)) {
+                        errors.push(
+                            `Property '${prop.name}' ` +
+                            `removed as it was not found in the dataflow.`,
+                        );
+                        this.removeInput(k);
+                    }
+                });
+                Object.entries(stateProperties).forEach(([idA, propA]) => {
+                    if (propA.direction !== undefined) return;
+                    const foundProp = Object.entries(this.inputs).find(
+                        ([idB]) => idB === idA,
+                    );
+                    if (foundProp === undefined) {
+                        const baklavaProp = new InputInterface(
+                            propA.name,
+                            propA.value,
+                        ).setPort(false);
+                        baklavaProp.componentName = 'InputInterface';
+                        errors.push(
+                            `Property '${propA.name}' ` +
+                            `created as it was not found in the specification.`,
+                        );
+                        Object.assign(baklavaProp, propA);
+                        this.addInput(idA, baklavaProp);
+                    }
+                });
+                return errors;
+            };
+
             this.load = (state) => {
                 let parsedState;
 
@@ -356,10 +458,16 @@ export function NodeFactory(
                     }
                 }
 
-                const errors = detectDiscrepancies(parsedState, this.inputs, this.outputs);
-
-                if (Array.isArray(errors) && errors.length) {
-                    return errors.map((error) => `Node ${displayName} of id: ${this.id} invalid. ${error}`);
+                let errors = [];
+                if (process.env.VUE_APP_SOFT_VALIDATION === 'true') {
+                    errors = this.updateInterfaces(parsedState.inputs, parsedState.outputs);
+                    errors = [...errors, ...updateProperties(parsedState.inputs)];
+                    errors = errors.map((error) => `Node ${displayName} of id: ${this.id} invalid. ${error}`);
+                } else {
+                    errors = detectDiscrepancies(parsedState, this.inputs, this.outputs);
+                    if (Array.isArray(errors) && errors.length) {
+                        return errors.map((error) => `Node ${displayName} of id: ${this.id} invalid. ${error}`);
+                    }
                 }
 
                 this.parentLoad(parsedState);
@@ -409,7 +517,7 @@ export function NodeFactory(
                 if (state.position === undefined) {
                     this.position = undefined;
                 }
-                return [];
+                return errors;
             };
 
             this.twoColumn = twoColumn;

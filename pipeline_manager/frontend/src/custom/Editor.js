@@ -238,7 +238,7 @@ export default class PipelineManagerEditor extends Editor {
             return [err.toString()];
         }
 
-        if (Array.isArray(errors) && errors.length) {
+        if (Array.isArray(errors) && errors.length && process.env.VUE_APP_SOFT_VALIDATION === 'false') {
             this.cleanEditor();
             this.readonly = readonlySetting;
             return errors;
@@ -262,7 +262,7 @@ export default class PipelineManagerEditor extends Editor {
             this.centerZoom();
         }
 
-        return [];
+        return errors;
     }
 
     centerZoom() {
