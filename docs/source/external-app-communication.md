@@ -34,6 +34,12 @@ Its `content` may vary depending on the request type.
 Message of `type` `ERROR` (1) is used to indicate a failure and optionally includes an answer to a previous request.
 Its `content` may vary depending on the answered request.
 
+#### WARNING
+
+Message of `type` `WARNING` (8) is used to indicate a success but also alerts of a condition that might cause a problem in the future.
+It optionally includes an answer to a previous request.
+Its `content` may vary depending on the answered request.
+
 ### Request messages - sent by {{project}}
 
 #### VALIDATE
