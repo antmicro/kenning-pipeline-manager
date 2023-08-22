@@ -211,8 +211,10 @@ export default defineComponent({
 
         const changeHoveredConnections = (ev) => {
             // Get all connection DOM elements that have mouse hovered over them
+            const elements = document.elementsFromPoint(ev.clientX, ev.clientY);
+
             const hoveredHtml = connRefs.value.filter((conn) =>
-                conn.containsPoint(ev.clientX, ev.clientY),
+                conn.containsPoint(elements),
             );
 
             // Convert DOM elements to BaklavaJS connections

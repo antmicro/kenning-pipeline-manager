@@ -55,13 +55,10 @@ export default defineComponent({
         /**
          * Check whether the connection path contains the x, y point
          *
-         * @param x X coordinate of input point
-         * @param y Y coordinate of input point
+         * @param elements result of `document.elementsFromPoint()` for a given x, y point.
          */
-        const containsPoint = (x, y) => {
-            const elements = document.elementsFromPoint(x, y);
-            return elements.includes(conn.value.$el.firstChild);
-        };
+        const containsPoint = (elements) =>
+            elements.includes(conn.value.$el.firstChild);
 
         const fromNodePosition = computed(
             () => graph.value.findNodeById(props.connection.from.nodeId)?.position,
