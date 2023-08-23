@@ -79,7 +79,15 @@ def script_build():
              ' (using only types used in the dataflow)',
         action='store_true'
     )
-    server_app_args = subparsers.add_parser(  # noqa F841
+    static_app_args.add_argument(
+        '--graph-development-mode',
+        help='Allows errors in the graph to occur and tries to visualize'
+             'as much of the graph as possible for development purposes.'
+             'It provides a list of found errors.',
+        action='store_true'
+    )
+
+    subparsers.add_parser(
         'server-app',
         help='Builds frontend for a server-based application',
         parents=[base_parser],
