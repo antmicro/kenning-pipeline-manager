@@ -278,7 +278,7 @@ export default defineComponent({
 
         const scale = computed(() => graph.value.scaling);
 
-        const defaultSpecification = process.env.VUE_APP_SPECIFICATION_PATH !== undefined;
+        const defaultSpecification = process.env.VUE_APP_GRAPH_DEVELOPMENT_MODE !== undefined;
         const defaultDataflow = process.env.VUE_APP_DATAFLOW_PATH !== undefined;
         const verboseLoad =
             process.env.VUE_APP_VERBOSE !== undefined && process.env.VUE_APP_VERBOSE === 'true';
@@ -413,7 +413,7 @@ export default defineComponent({
                     );
                 }
                 if (Array.isArray(errors) && errors.length) {
-                    const messageTitle = process.env.VUE_APP_SOFT_VALIDATION === 'true' ?
+                    const messageTitle = process.env.VUE_APP_GRAPH_DEVELOPMENT_MODE === 'true' ?
                         'Softload enabled, errors found while loading the dataflow' :
                         'Dataflow is invalid';
                     NotificationHandler.terminalLog('error', messageTitle, errors);

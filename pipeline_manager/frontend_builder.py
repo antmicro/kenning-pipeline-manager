@@ -86,7 +86,8 @@ def build_frontend(
         output_directory: Optional[Path] = None,
         clean_build: bool = False,
         single_html: Optional[Path] = None,
-        minify_specification: bool = False):
+        minify_specification: bool = False,
+        graph_development_mode: bool = False):
     """
     Builds the frontend for the Pipeline Manager.
 
@@ -117,6 +118,9 @@ def build_frontend(
         Creates a minimal specification for the given dataflow.
         The specification will only contain node types used in
         given dataflow.
+    graph_development_mode: bool
+        Allows errors in the graph to occur and tries to visualize
+        as much of the graph as possible for development/debugging purposes.
 
     Returns
     -------
@@ -168,6 +172,9 @@ def build_frontend(
 
     if single_html:
         config_lines.append('VUE_APP_SINGLEHTML_BUILD=true\n')
+
+    if graph_development_mode:
+        config_lines.append('VUE_APP_GRAPH_DEVELOPMENT_MODE=true\n')
 
     config_lines.append(f'NODE_ENV="{mode}"\n')
     if mode == 'development':

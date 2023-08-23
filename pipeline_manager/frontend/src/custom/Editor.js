@@ -238,7 +238,7 @@ export default class PipelineManagerEditor extends Editor {
             return [err.toString()];
         }
 
-        if (Array.isArray(errors) && errors.length && process.env.VUE_APP_SOFT_VALIDATION === 'false') {
+        if (Array.isArray(errors) && errors.length && process.env.VUE_APP_GRAPH_DEVELOPMENT_MODE !== 'true') {
             this.cleanEditor();
             this.readonly = readonlySetting;
             return errors;

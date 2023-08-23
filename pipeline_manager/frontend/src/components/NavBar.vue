@@ -175,7 +175,7 @@ export default {
                     );
                 }
                 if (Array.isArray(errors) && errors.length) {
-                    const messageTitle = process.env.VUE_APP_SOFT_VALIDATION === 'true' ?
+                    const messageTitle = process.env.VUE_APP_GRAPH_DEVELOPMENT_MODE === 'true' ?
                         'Softload enabled, errors found while loading the dataflow' :
                         'Dataflow is invalid';
                     NotificationHandler.terminalLog('error', messageTitle, errors);

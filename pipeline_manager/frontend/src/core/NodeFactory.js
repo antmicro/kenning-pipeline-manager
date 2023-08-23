@@ -459,7 +459,7 @@ export function NodeFactory(
                 }
 
                 let errors = [];
-                if (process.env.VUE_APP_SOFT_VALIDATION === 'true') {
+                if (process.env.VUE_APP_GRAPH_DEVELOPMENT_MODE === 'true') {
                     errors = this.updateInterfaces(parsedState.inputs, parsedState.outputs);
                     errors = [...errors, ...updateProperties(parsedState.inputs)];
                     errors = errors.map((error) => `Node ${displayName} of id: ${this.id} invalid. ${error}`);
