@@ -6,7 +6,9 @@ import argparse
 import json
 import logging
 import os
+import subprocess
 import sys
+from pathlib import Path
 from typing import Tuple, Any
 from http import HTTPStatus
 
@@ -19,6 +21,10 @@ from pipeline_manager.backend.state_manager import global_state_manager
 from pipeline_manager.utils.logger import string_to_verbosity
 
 dist_path = os.path.join(os.path.dirname(frontend.__file__), 'dist')
+if not subprocess.call(["pip", "show", "-qq", "pipeline_manager"],
+                       stdout=subprocess.DEVNULL)\
+        and not os.path.isfile(Path(os.getcwd()) / 'build'):
+    dist_path = Path(os.getcwd()) / 'build' / 'dist'
 
 app = Flask(
     'Pipeline Manager',
