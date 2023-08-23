@@ -14,6 +14,10 @@ from pathlib import Path
 def script_cleanup(argv):
 
     base_dir = Path(os.path.dirname(__file__)).parent
+    if not subprocess.call(["pip", "show", "-qq", "pipeline_manager"],
+                           stdout=subprocess.DEVNULL)\
+            and not os.path.isfile(Path(os.getcwd()) / 'build'):
+        base_dir = Path(os.getcwd()) / 'build'
 
     frontend_dir = base_dir / 'frontend'
 
