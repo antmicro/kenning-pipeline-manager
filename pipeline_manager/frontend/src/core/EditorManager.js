@@ -74,6 +74,10 @@ export default class EditorManager {
         this.baklavaView.editor.allowLoopbacks = this.defaultMetadata.allowLoopbacks;
         this.baklavaView.cache = {};
 
+        // hideHud and readonly are set to true so that there is no dissappearning UI
+        this.baklavaView.hideHud = true;
+        this.baklavaView.editor.readonly = true;
+
         this.specificationVersion = unresolvedSpecificationSchema.version;
         this.baklavaView.commandHandler = useCommandHandler();
         this.baklavaView.history = null;

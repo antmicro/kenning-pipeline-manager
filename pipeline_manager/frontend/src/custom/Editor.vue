@@ -81,7 +81,7 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
 <script>
 /* eslint-disable object-curly-newline */
 import { EditorComponent, useGraph } from '@baklavajs/renderer-vue';
-import { defineComponent, ref, computed, watch, onBeforeMount, onMounted } from 'vue';
+import { defineComponent, ref, computed, watch, onMounted } from 'vue';
 import usePanZoom from './panZoom';
 
 import CustomNode from './CustomNode.vue';
@@ -289,21 +289,19 @@ export default defineComponent({
          * Prepares the Editor based on specification configuration.
          *
          * The function validates the specification, updates the Editor
-         * based on metadata and provides error messages for erroneous
-         * content.
+         * and provides error messages for erroneous content.
          *
          * @param specification The object holding the parsed specification file
          */
-        function prepareEditorForSpecification(specification) {
+        function updateEditorSpecification(specification) {
             let errors = editorManager.validateSpecification(specification);
+            let warnings;
             if (errors.length) {
                 NotificationHandler.terminalLog('error', 'Specification is invalid', errors);
-                return;
+                return errors;
             }
 
-            editorManager.updateEditorSpecification(specification, true);
-            let warnings;
-            ({ errors, warnings } = editorManager.updateMetadata()); // eslint-disable-line prefer-const,max-len
+            ({ errors, warnings } = editorManager.updateEditorSpecification(specification)); // eslint-disable-line prefer-const,max-len
             if (Array.isArray(warnings) && warnings.length) {
                 NotificationHandler.terminalLog(
                     'warning',
@@ -314,6 +312,8 @@ export default defineComponent({
             if (Array.isArray(errors) && errors.length) {
                 NotificationHandler.terminalLog('error', 'Specification is invalid', errors);
             }
+
+            return errors;
         }
 
         /**
@@ -346,10 +346,26 @@ export default defineComponent({
             }
         }
 
-        onBeforeMount(async () => {
+        /* eslint-disable no-lonely-if */
+        onMounted(async () => {
             NotificationHandler.setShowNotification(false);
+            editorManager.updateMetadata({}); // Defaulting metadata values
+
             let specText;
-            if (defaultSpecification) {
+            if (!defaultSpecification) {
+                // Try loading default specification and/or dataflow from URLs provided in an
+                // escaped form in the page's URL
+                const urlParams = new URLSearchParams(window.location.search);
+                if (urlParams.has('spec')) {
+                    specText = await loadJsonFromRemoteLocation(urlParams.get('spec'));
+                    if (specText === undefined) {
+                        NotificationHandler.terminalLog(
+                            'error',
+                            `Failed to load the specification file from: ${urlParams.get('spec')}`,
+                        );
+                    }
+                }
+            } else {
                 // Use raw-loader which does not parse the specification so that it is possible
                 // To add a more verbose validation log
                 if (verboseLoad) {
@@ -359,69 +375,48 @@ export default defineComponent({
                     specText = require(process.env.VUE_APP_SPECIFICATION_PATH); // eslint-disable-line global-require,import/no-dynamic-require,max-len
                 }
             }
-            if (specText) {
-                prepareEditorForSpecification(specText);
-            }
-        });
 
-        onMounted(async () => {
-            if (!defaultSpecification) {
-                // Try loading default specification and/or dataflow from URLs provided in an
-                // escaped form in the page's URL
-                const urlParams = new URLSearchParams(window.location.search);
-                if (urlParams.has('spec')) {
-                    const specText = await loadJsonFromRemoteLocation(urlParams.get('spec'));
-                    if (!specText) {
-                        NotificationHandler.terminalLog(
-                            'error',
-                            `Failed to load the specification file from: ${urlParams.get('spec')}`,
-                        );
-                        return;
-                    }
-                    prepareEditorForSpecification(specText);
-                } else {
+            if (specText !== undefined) {
+                let errors = updateEditorSpecification(specText);
+
+                if (errors.length) {
+                    NotificationHandler.restoreShowNotification();
                     return;
                 }
-            }
 
-            const updateSpecErrors = editorManager.updateGraphSpecification();
-            if (updateSpecErrors.length) {
-                NotificationHandler.terminalLog('error', 'Specification is invalid', updateSpecErrors);
-                return;
-            }
-
-            let dataflow;
-            if (defaultDataflow) {
-                dataflow = require(process.env.VUE_APP_DATAFLOW_PATH); // eslint-disable-line global-require,max-len,import/no-dynamic-require
-            } else {
-                const urlParams = new URLSearchParams(window.location.search);
-                if (urlParams.has('graph')) {
-                    dataflow = await loadJsonFromRemoteLocation(urlParams.get('graph'));
-                    if (!dataflow) {
+                let dataflow;
+                if (defaultDataflow) {
+                    dataflow = require(process.env.VUE_APP_DATAFLOW_PATH); // eslint-disable-line global-require,max-len,import/no-dynamic-require
+                } else {
+                    const urlParams = new URLSearchParams(window.location.search);
+                    if (urlParams.has('graph')) {
+                        dataflow = await loadJsonFromRemoteLocation(urlParams.get('graph'));
+                        if (!dataflow) {
+                            NotificationHandler.terminalLog(
+                                'error',
+                                `Failed to load the graph file from: ${urlParams.get('graph')}`,
+                            );
+                        }
+                    }
+                }
+                if (dataflow) {
+                    let warnings;
+                    ({ errors, warnings } = await editorManager.loadDataflow(dataflow));
+                    if (Array.isArray(warnings) && warnings.length) {
                         NotificationHandler.terminalLog(
-                            'error',
-                            `Failed to load the graph file from: ${urlParams.get('graph')}`,
+                            'warning',
+                            'Issue when loading dataflow',
+                            warnings,
                         );
+                    }
+                    if (Array.isArray(errors) && errors.length) {
+                        const messageTitle = process.env.VUE_APP_GRAPH_DEVELOPMENT_MODE === 'true' ?
+                            'Softload enabled, errors found while loading the dataflow' :
+                            'Dataflow is invalid';
+                        NotificationHandler.terminalLog('error', messageTitle, errors);
                     }
                 }
             }
-            if (dataflow) {
-                const { errors, warnings } = await editorManager.loadDataflow(dataflow);
-                if (Array.isArray(warnings) && warnings.length) {
-                    NotificationHandler.terminalLog(
-                        'warning',
-                        'Issue when loading dataflow',
-                        warnings,
-                    );
-                }
-                if (Array.isArray(errors) && errors.length) {
-                    const messageTitle = process.env.VUE_APP_GRAPH_DEVELOPMENT_MODE === 'true' ?
-                        'Softload enabled, errors found while loading the dataflow' :
-                        'Dataflow is invalid';
-                    NotificationHandler.terminalLog('error', messageTitle, errors);
-                }
-            }
-
             NotificationHandler.restoreShowNotification();
         });
 
