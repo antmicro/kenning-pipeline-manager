@@ -80,7 +80,7 @@ export default defineComponent({
             Components.ContextMenu.setup(props, context);
 
         const { viewModel } = useViewModel();
-        const getIconPath = (name) => (name !== undefined ? viewModel.value.cache[`./${name}`] : undefined);
+        const getIconPath = (name) => viewModel.value.cache[`./${name}`] ?? name;
 
         const justOpened = ref(true);
 

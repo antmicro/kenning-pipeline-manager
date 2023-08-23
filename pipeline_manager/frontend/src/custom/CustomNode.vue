@@ -35,8 +35,8 @@ from moving or deleting the nodes.
         >
             <img
                 class="__title-icon"
-                v-if="getIconPath(iconPath) !== undefined"
-                :src="getIconPath(iconPath)"
+                v-if="iconPath !== undefined"
+                :src="iconPath"
             >
             <div v-if="!renaming" class="__title-label">
                 {{ nodeTitle }}
@@ -392,8 +392,8 @@ displayedProperties.value.forEach((prop) => {
     }
 });
 
-const iconPath = viewModel.value.editor.getNodeIconPath(props.node.type);
-const getIconPath = (name) => (name !== undefined ? viewModel.value.cache[`./${iconPath}`] : undefined);
+const path = viewModel.value.editor.getNodeIconPath(props.node.type);
+const iconPath = viewModel.value.cache[`./${path}`] ?? path;
 
 // Interface modification
 

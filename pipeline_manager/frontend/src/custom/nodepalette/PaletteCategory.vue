@@ -101,7 +101,7 @@ export default defineComponent({
     },
     setup(props) {
         const { viewModel } = useViewModel();
-        const getIconPath = (name) => (name !== undefined ? viewModel.value.cache[`./${name}`] : undefined);
+        const getIconPath = (name) => viewModel.value.cache[`./${name}`] ?? name;
 
         /* eslint-disable vue/no-mutating-props,no-param-reassign */
         const onPointerOver = (ev, name) => {

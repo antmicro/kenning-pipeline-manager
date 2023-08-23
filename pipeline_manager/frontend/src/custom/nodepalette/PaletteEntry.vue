@@ -36,7 +36,7 @@ export default defineComponent({
     },
     setup(props) {
         const { viewModel } = useViewModel();
-        const getIconPath = (name) => (name !== undefined ? viewModel.value.cache[`./${name}`] : undefined);
+        const getIconPath = (name) => viewModel.value.cache[`./${name}`] ?? name;
         const nodeIcon = computed(() => getIconPath(props.iconPath));
         const paddingDepth = 20;
         const minPadding = 10;
