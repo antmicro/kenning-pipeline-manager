@@ -74,6 +74,29 @@ def build_singlehtml(
 def build_prepare():
     projectpath = Path(__file__).parent.parent.absolute()
     frontend_path = projectpath / 'pipeline_manager/frontend'
+    resources_path = projectpath / 'pipeline_manager/resources'
+
+    # when the project is installed via pip, change the default build location
+    # to ./build
+    if not subprocess.call(["pip", "show", "-qq", "pipeline_manager"],
+                           stdout=subprocess.DEVNULL):
+        build_dir = Path(os.getcwd()) / 'build'
+
+        if not os.path.exists(build_dir):
+            build_dir.mkdir()
+
+        # copy frontend and resources to build location
+        shutil.copytree(
+            frontend_path,
+            build_dir / 'frontend',
+            dirs_exist_ok=True)
+        shutil.copytree(
+            resources_path,
+            build_dir / 'resources',
+            dirs_exist_ok=True)
+
+        frontend_path = build_dir / 'frontend'
+
     subprocess.run(['npm', 'install'], cwd=frontend_path)
 
 
@@ -143,6 +166,8 @@ def build_frontend(
 
         if not os.path.exists(build_dir):
             build_dir.mkdir()
+
+        frontend_path = build_dir / 'frontend'
 
         frontend_dist_path = build_dir / 'dist'
         config_path = build_dir / '.env.static.local' if \
