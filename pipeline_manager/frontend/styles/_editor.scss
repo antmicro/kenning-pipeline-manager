@@ -81,6 +81,16 @@
             width: 1em;
         }
     }
+
+    &.__readonly > * {
+        pointer-events: none;
+        user-select: none;
+        cursor: auto;
+
+        * {
+            pointer-events: none;
+        }
+    }
 }
 
 .baklava-checkbox .__checkmark-container > svg > path {
