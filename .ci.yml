@@ -1,5 +1,11 @@
 image: $CI_IMAGE
 
+.common_only: &common_only
+    only:
+        - main
+        - dev
+        - merge_requests
+
 variables:
     GIT_STRATEGY: clone
     GIT_SUBMODULE_STRATEGY: recursive
@@ -14,11 +20,13 @@ before_script:
 
 flake8:
     stage: lint
+    <<: *common_only
     script:
         - flake8 .
 
 eslint:
     stage: lint
+    <<: *common_only
     script:
         - cd pipeline_manager/frontend
         - npm install
@@ -27,28 +35,33 @@ eslint:
 
 build-server-app:
     stage: build
+    <<: *common_only
     script:
         - ./build server-app
 
 test_singlehtml_build:
     stage: build
+    <<: *common_only
     script:
         - pip install beautifulsoup4
         - ./build static-html ./examples/sample-specification.json ./examples/sample-dataflow.json --editor-title "Test webpage" --output-directory ./output-dir --clean-build --single-html output.html --minify-specification
 
 test_validate:
     stage: build
+    <<: *common_only
     script:
         - ./validate ./examples/sample-specification.json ./examples/sample-dataflow.json --install-dependencies
 
 pytest:
     stage: build
+    <<: *common_only
     script:
         - pip install -r requirements.txt
         - python3 -m pytest
 
 check-links:
     stage: build
+    <<: *common_only
     script:
         - cd docs
         - make linkcheck
@@ -56,6 +69,7 @@ check-links:
 
 build-docs-and-static-html:
     stage: build
+    <<: *common_only
     script:
         - cd docs
         - echo -en "\nhtml_js_files = [ '$ANNOTANT' ]" >> source/conf.py
@@ -72,6 +86,7 @@ build-docs-and-static-html:
 deploy:
     image: $CI_DOCS_DOCKER_IMAGE
     stage: deploy
+    <<: *common_only
     dependencies:
         - build-docs-and-static-html
     variables:
