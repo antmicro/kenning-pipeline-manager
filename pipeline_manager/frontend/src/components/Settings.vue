@@ -174,16 +174,24 @@ export default {
             }
         };
 
-        const settingOptions = computed(() => [
-            connectionStyleOption.value,
-            LayoutOption.value,
-            LayoutApply.value,
-            backgroundGridSize.value,
-            movementStep.value,
-            randomizedOffsetOption.value,
+        const readonlyOptions = computed(() => {
+            if (props.viewModel.editor.readonly) {
+                return [];
+            }
+            return [
+                connectionStyleOption.value,
+                LayoutOption.value,
+                LayoutApply.value,
+                backgroundGridSize.value,
+                clearEditor.value,
+                movementStep.value,
+                randomizedOffsetOption.value,
+            ];
+        });
+
+        const settingOptions = computed(() => ([
             center.value,
-            clearEditor.value,
-        ]);
+        ].concat(readonlyOptions.value)));
 
         return { displayOptionName, settingOptions, disableLayersOptions };
     },
