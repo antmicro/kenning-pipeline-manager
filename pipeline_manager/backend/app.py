@@ -6,7 +6,6 @@ import argparse
 import json
 import logging
 import os
-import subprocess
 import sys
 from pathlib import Path
 from typing import Tuple, Any
@@ -21,10 +20,6 @@ from pipeline_manager.backend.state_manager import global_state_manager
 from pipeline_manager.utils.logger import string_to_verbosity
 
 dist_path = os.path.join(os.path.dirname(frontend.__file__), 'dist')
-if not subprocess.call(["pip", "show", "-qq", "pipeline_manager"],
-                       stdout=subprocess.DEVNULL)\
-        and not os.path.isfile(Path(os.getcwd()) / 'build'):
-    dist_path = Path(os.getcwd()) / 'build' / 'dist'
 
 app = Flask(
     'Pipeline Manager',
@@ -316,6 +311,13 @@ def main(argv):
         default=5000
     )
     parser.add_argument(
+        '--frontend-directory',
+        help='Location of the built frontend. '
+             'Used only when custom --output-directory was specified during '
+             'building',
+        type=Path
+    )
+    parser.add_argument(
         '--skip-connecting',
         action='store_true',
         help='Specifies whether Pipeline Manager should wait '
@@ -330,6 +332,22 @@ def main(argv):
     )
     args, _ = parser.parse_known_args(argv[1:])
     logging.basicConfig(level=string_to_verbosity(args.verbosity))
+
+    if not os.path.exists(dist_path) and not args.frontend_directory:
+        logging.log(
+            logging.ERROR,
+            'Frontend files have not been found in the default directory.'
+        )
+        logging.log(
+            logging.ERROR,
+            'Build the frontend first or specify a custom path to the '
+            'built frontend using --frontend-directory'
+        )
+        return
+
+    if args.frontend_directory:
+        app.static_folder = Path(os.getcwd()) / args.frontend_directory
+        app.template_folder = Path(os.getcwd()) / args.frontend_directory
 
     global_state_manager.reinitialize(
         args.tcp_server_port,

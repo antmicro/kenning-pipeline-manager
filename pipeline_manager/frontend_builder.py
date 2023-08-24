@@ -12,6 +12,7 @@ import sys
 from pathlib import Path
 from typing import Optional, List
 
+import pipeline_manager
 from pipeline_manager.specification_reader import \
     minify_specification as minify_spec, retrieve_used_icons  # noqa: E501
 
@@ -131,9 +132,9 @@ def build_frontend(
     -------
     int: 0 if successfull, EINVAL if arguments are conflicting or invalid
     """
-    projectpath = Path(__file__).parent.parent.absolute()
-    frontend_path = projectpath / 'pipeline_manager/frontend'
-    resources_path = projectpath / 'pipeline_manager/resources'
+    project_path = Path(__file__).parent.parent.absolute()
+    frontend_path = project_path / 'pipeline_manager/frontend'
+    resources_path = project_path / 'pipeline_manager/resources'
 
     config_path = frontend_path / '.env.static.local' if \
         build_type == 'static-html' else \
@@ -159,6 +160,16 @@ def build_frontend(
             file=sys.stderr
         )
         return errno.EINVAL
+
+    # change project path to current working directory if project is
+    # installed in other location, but we are still in the repo directory
+    if os.path.exists(Path(os.getcwd()) / 'pipeline_manager/frontend')\
+        and not Path(pipeline_manager.__file__).samefile(Path(os.getcwd()) / 'pipeline_manager/__init__.py'): # noqa E501
+
+        project_path = Path(os.getcwd()).absolute()
+        frontend_path = project_path / 'pipeline_manager/frontend'
+        frontend_dist_path = frontend_path / 'dist'
+        resources_path = project_path / 'pipeline_manager/resources'
 
     if workspace_directory:
 
