@@ -2,6 +2,13 @@
 
 Formats of dataflows and specification is often updated with new features, that makes former formats incompatible with the new ones.
 This section lists all versions, related features and breaking changes.
+
+## 20230824.9
+
+Commit SHA - `de31d01d9b6591993559e3b10851815f3320e545`
+
+* Introduced `description` keyword for nodes that allows displaing markdown-based description in a sidebar.
+
 ## 20230818.8
 
 Commit SHA - `d4abcc80bce3e280120078a47d784eff92821a8a`
