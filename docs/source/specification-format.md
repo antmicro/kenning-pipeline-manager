@@ -263,9 +263,23 @@ Additional properties:
   Supported values are `string`, `number`, `integer`, `boolean`.
 * `description` - description of the property.
   In some cases, it can be displayed to the user.
-* `group` - array with elements of type [Property](#property).
-  It defines properties that are toggled by the property.
-  `group` can only be used with property of type `checkbox`.
+* `group` - object of type [Group](#group).
+
+##### Group
+
+Array with elements of type [Property](#property).
+It defines properties that are toggled by the property.
+`group` can only be used with property of type `checkbox`.
+
+Example group of properties:
+```json
+{
+    "name": "Group", "type": "checkbox", "default": true, "group": [
+        {"name": "prop-a", "type": "integer", "default": 1},
+        {"name": "prop-b", "type": "text", "default": ""}
+    ]
+}
+```
 
 #### Node type inheritance
 
@@ -469,18 +483,22 @@ Below, you can see a sample specification containing a hypothetical definition o
             "type": "processing",
             "category": "Processing",
             "properties": [
-                {"name": "iterations", "type": "integer", "default": 1},
                 {
-                    "name": "border type",
-                    "type": "select",
-                    "values": ["constant", "replicate", "wrap", "reflect"],
-                    "default": "constant"
-                },
-                {
-                    "name": "operation type",
-                    "type": "select",
-                    "values": ["dilation", "erosion", "closing", "opening"],
-                    "default": "dilation"
+                    "name": "Enable operations", "type": "checkbox", "default": true, "group": [
+                        {"name": "iterations", "type": "integer", "default": 1},
+                        {
+                            "name": "border type",
+                            "type": "select",
+                            "values": ["constant", "replicate", "wrap", "reflect"],
+                            "default": "constant"
+                        },
+                        {
+                            "name": "operation type",
+                            "type": "select",
+                            "values": ["dilation", "erosion", "closing", "opening"],
+                            "default": "dilation"
+                        }
+                    ]
                 }
             ],
             "inputs": [
