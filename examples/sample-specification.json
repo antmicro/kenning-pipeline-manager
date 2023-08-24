@@ -8,7 +8,8 @@
             "properties": [
                 {"name": "filename", "type": "text", "default": ""}
             ],
-            "interfaces": [{"name": "frames", "type": "Image", "direction": "output"}]
+            "interfaces": [{"name": "frames", "type": "Image", "direction": "output"}],
+            "description": "### Information \n\n Node used to load a video and parametrize the *filename*.\n\nAdditionally the video can be passed to another node."
         },
         {
             "name": "SaveVideo",
@@ -51,6 +52,7 @@
             "name": "Filter2D",
             "type": "processing",
             "category": "Processing",
+            "description": "Node that applies a *2D* filter.",
             "properties": [
                 {"name": "iterations", "type": "integer", "default": 1},
                 {
