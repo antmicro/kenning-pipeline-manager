@@ -27,7 +27,7 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
         @pointermove.self="onPointerMove"
         @pointerdown.left.exact="onPointerDown"
         @pointerup="onPointerUp"
-        @wheel="mouseWheel"
+        @wheel.self="mouseWheel"
         @keydown="keyDown"
         @keyup="keyUp"
         oncontextmenu="return false;"
@@ -44,7 +44,7 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
             <NodePalette />
         </slot>
 
-        <div class="node-container" :style="nodeContainerStyle">
+        <div class="node-container" :style="nodeContainerStyle" @wheel="mouseWheel">
             <CustomNode
                 v-for="node in visibleNodes"
                 :key="node.id + counter.toString()"
@@ -60,6 +60,7 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
             @mouseenter="changeHoveredConnections"
             @mousemove="changeHoveredConnections"
             @mouseleave="clearHighlight"
+            @wheel="mouseWheel"
         >
             <PipelineManagerConnection
                 v-for="connection in visibleConnections"
