@@ -226,6 +226,7 @@ export function NodeFactory(
     interfaceGroups,
     defaultInterfaceGroups,
     twoColumn,
+    description = '',
 ) {
     const parsedInterfaces = parseInterfaces(interfaces, interfaceGroups, defaultInterfaceGroups);
     // If parsedInterfaces returns an array, it is an array of errors
@@ -269,6 +270,7 @@ export function NodeFactory(
 
         /* eslint-disable no-param-reassign */
         onCreate() {
+            this.description = description;
             this.groups = groups;
             this.nodeType = nodeType;
             this.parentSave = this.save;

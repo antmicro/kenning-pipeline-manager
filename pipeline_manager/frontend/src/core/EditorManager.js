@@ -192,6 +192,7 @@ export default class EditorManager {
                 node.interfaceGroups ?? [],
                 node.defaultInterfaceGroups ?? [],
                 metadata?.twoColumn ?? false,
+                node.description ?? '',
             );
 
             // If my node is any array then it is an array of errors
