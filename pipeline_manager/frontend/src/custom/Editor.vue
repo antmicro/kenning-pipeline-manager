@@ -280,7 +280,7 @@ export default defineComponent({
 
         const scale = computed(() => graph.value.scaling);
 
-        const defaultSpecification = process.env.VUE_APP_GRAPH_DEVELOPMENT_MODE !== undefined;
+        const defaultSpecification = process.env.VUE_APP_SPECIFICATION_PATH !== undefined;
         const defaultDataflow = process.env.VUE_APP_DATAFLOW_PATH !== undefined;
         const verboseLoad =
             process.env.VUE_APP_VERBOSE !== undefined && process.env.VUE_APP_VERBOSE === 'true';
