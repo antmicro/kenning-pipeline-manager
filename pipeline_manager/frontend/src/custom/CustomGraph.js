@@ -177,6 +177,7 @@ export default function createPipelineManagerGraph(graph) {
                 inputs[idx].direction = 'input';
                 inputs[idx].name = n.inputs.name.value;
                 inputs[idx].side = n.inputs.side.value.toLowerCase();
+                inputs[idx].nodePosition = n.position;
             }
         });
 
@@ -206,6 +207,7 @@ export default function createPipelineManagerGraph(graph) {
                 outputs[idx].direction = 'output';
                 outputs[idx].name = n.inputs.name.value;
                 outputs[idx].side = n.inputs.side.value.toLowerCase();
+                outputs[idx].nodePosition = n.position;
             }
         });
 
@@ -233,6 +235,7 @@ export default function createPipelineManagerGraph(graph) {
                 inputs[idx].direction = 'inout';
                 inputs[idx].name = n.inputs.name.value;
                 inputs[idx].side = n.inputs.side.value.toLowerCase();
+                inputs[idx].nodePosition = n.position;
             }
         });
 
