@@ -6,9 +6,13 @@
 
 .baklava-sidebar {
     position: absolute;
-    min-width: 300px;
+    min-width: min-content;
     max-width: 600px;
-    z-index: 1000;
+    z-index: 3;
+    padding: 0;
+
+    border: 1px solid #393939;
+    border-right: 0;
 
     // default baklavjs height - terminal panel height
     height: calc(100% - 60px - 35px);
@@ -30,25 +34,113 @@
     & > .__content {
         display: flex;
         flex-direction: column;
-        row-gap: 1.5em;
+
+        & > div {
+            border: 1px solid #393939;
+            border-right: 0;
+            border-left: 0;
+            border-top: 0;
+
+            & > .__title {
+                text-align: left;
+                font-weight: 600;
+                padding: 1.25em 0.625em;
+
+                border: 1px solid #393939;
+                border-right: 0;
+                border-left: 0;
+                border-top: 0;
+            }
+        }
+
+        & > .__header {
+            height: 4em;
+            display: flex;
+            gap: 1em;
+            padding: 0 1em;
+            width: 100%;
+
+
+            & .__close {
+                min-width: 0.5em;
+                cursor: pointer;
+                outline: none;
+            }
+
+            & > .__node-icon {
+                flex-grow: 0;
+                padding: 0;
+                height: 2em;
+                width: 2em;
+                pointer-events: none;
+            }
+
+            & > .__node-name {
+                margin: 0;
+                flex-grow: 1;
+            }
+
+            & > .__url {
+                display: inline;
+                text-decoration: none;
+                color: inherit;
+                width: auto;
+                position: relative;
+
+                img {
+                    width: 2em;
+                    height: 2em;
+                    display: block;
+                }
+            }
+        }
 
         & > .__properties {
-            & > .__title {
-                text-align: center;
-                margin: 0.5em 0;
+            & > .__property {
+                padding: 0.625em 1.25em 0 1.25em;
+
+                & > .__property-name {
+                    font-size: 0.9em;
+                }
+            }
+
+            & > .__property:last-child {
+                padding-bottom: 1.25em;
             }
         }
 
         & > .__interface_groups {
-            & > .__title {
-                text-align: center;
-                margin: 0.5em 0;
+            & > .__group {
+                padding: 0.3em 1.25em;
             }
 
-            & > .__error_outputs {
-                h1 {
-                    font-size: 1.25em;
+            & > .__group:last-child {
+                border: 0px;
+            }
+
+            & > .__group-assign {
+                padding: 0.625em 1.25em;
+
+                .--disabled {
+                    pointer-events: none;
+                    cursor: not-allowed;
+                    opacity: 0.65;
+                    filter: alpha(opacity=65);
+                    -webkit-box-shadow: none;
+                    box-shadow: none;
                 }
+            }
+        }
+
+        & > .__error_outputs {
+            p {
+                padding: 0 1.25em;
+            }
+        }
+
+        & > .__description {
+            & > .__description-content {
+                padding: 0.625em 1.25em;
             }
         }
     }
