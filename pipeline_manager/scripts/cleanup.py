@@ -9,28 +9,49 @@ import shutil
 import subprocess
 import sys
 from pathlib import Path
+import argparse
 
 
 def script_cleanup(argv):
 
+    parser = argparse.ArgumentParser(argv[0])
+    parser.add_argument(
+        '--frontend-directory',
+        help='Location of the built frontend. '
+             'Used only when custom --output-directory was specified during '
+             'building.',
+        type=Path
+    )
+    parser.add_argument(
+        '--workspace-directory',
+        help='Location of the frontend sources. '
+             'Used only when custom --workspace-directory was specified '
+             'during building.',
+        type=Path
+    )
+
+    args = parser.parse_args(argv[1:])
+
     base_dir = Path(os.path.dirname(__file__)).parent
-    if not subprocess.call(["pip", "show", "-qq", "pipeline_manager"],
-                           stdout=subprocess.DEVNULL)\
-            and not os.path.isfile(Path(os.getcwd()) / 'build'):
-        base_dir = Path(os.getcwd()) / 'build'
 
-    frontend_dir = base_dir / 'frontend'
+    frontend_dir = base_dir / 'frontend/dist'
+    workspace_dir = base_dir / 'frontend'
 
-    subprocess.run('npm run clean', shell=True, cwd=frontend_dir)
+    if args.frontend_directory:
+        frontend_dir = args.frontend_directory
+    if args.workspace_directory:
+        workspace_dir = args.workspace_directory
 
-    if os.path.isdir(frontend_dir / 'dist'):
-        shutil.rmtree(frontend_dir / 'dist', ignore_errors=True)
+    subprocess.run('npm run clean', shell=True, cwd=workspace_dir)
 
-    if os.path.exists(frontend_dir / '.env.static.local'):
-        os.remove(frontend_dir / '.env.static.local')
+    if os.path.isdir(frontend_dir):
+        shutil.rmtree(frontend_dir, ignore_errors=True)
 
-    if os.path.exists(frontend_dir / '.env.local'):
-        os.remove(frontend_dir / '.env.local')
+    if os.path.exists(workspace_dir / '.env.static.local'):
+        os.remove(workspace_dir / '.env.static.local')
+
+    if os.path.exists(workspace_dir / '.env.local'):
+        os.remove(workspace_dir / '.env.local')
 
     return 0
 
