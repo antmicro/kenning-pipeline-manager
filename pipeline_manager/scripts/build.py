@@ -12,7 +12,7 @@ import os
 
 sys.path.append(str(Path(__file__).parent.absolute()))
 
-from pipeline_manager.frontend_builder import build_prepare, build_frontend  # noqa: E402,E501
+from pipeline_manager.frontend_builder import build_frontend  # noqa: E402
 
 
 def script_build():
@@ -31,12 +31,19 @@ def script_build():
     )
     base_parser.add_argument(
         '--output-directory',
-        help='Directory where the built frontend should be stored'
+        help='Directory where the built frontend should be stored',
+        type=Path
+    )
+    base_parser.add_argument(
+        '--workspace-directory',
+        help='Directory where the frontend sources should be stored',
+        type=Path
     )
     base_parser.add_argument(
         '--clean-build',
-        help='If --output-directory is defined, '
-             'it is cleared before putting built frontend application',
+        help='If --output-directory and/or --workspace-directory is defined, '
+             'it is cleared before putting built frontend application or '
+             'frontend sources',
         action='store_true'
     )
     base_parser.add_argument(
@@ -100,8 +107,6 @@ def script_build():
         args.assets_directory = os.path.realpath(args.assets_directory)
 
     args = {k: v for k, v in vars(args).items() if v is not None}
-
-    build_prepare()
 
     return build_frontend(**args)
 

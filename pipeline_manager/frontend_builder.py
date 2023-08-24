@@ -71,32 +71,7 @@ def build_singlehtml(
         outputfile.write(soup)
 
 
-def build_prepare():
-    projectpath = Path(__file__).parent.parent.absolute()
-    frontend_path = projectpath / 'pipeline_manager/frontend'
-    resources_path = projectpath / 'pipeline_manager/resources'
-
-    # when the project is installed via pip, change the default build location
-    # to ./build
-    build_dir = Path(os.getcwd()) / 'build'
-    if not subprocess.call(["pip", "show", "-qq", "pipeline_manager"],
-                           stdout=subprocess.DEVNULL)\
-            and not os.path.isfile(build_dir):
-
-        if not os.path.exists(build_dir):
-            build_dir.mkdir()
-
-        # copy frontend and resources to build location
-        shutil.copytree(
-            frontend_path,
-            build_dir / 'frontend',
-            dirs_exist_ok=True)
-        shutil.copytree(
-            resources_path,
-            build_dir / 'resources',
-            dirs_exist_ok=True)
-
-        frontend_path = build_dir / 'frontend'
+def build_prepare(frontend_path):
 
     subprocess.run(['npm', 'install'], cwd=frontend_path)
 
@@ -109,6 +84,7 @@ def build_frontend(
         dataflow: Optional[Path] = None,
         mode: str = 'production',
         output_directory: Optional[Path] = None,
+        workspace_directory: Optional[Path] = None,
         clean_build: bool = False,
         single_html: Optional[Path] = None,
         minify_specification: bool = False,
@@ -134,6 +110,10 @@ def build_frontend(
     output_directory: Optional[Path]
         Tells where the built frontend should be stored.
         By default it is pipeline_manager/frontend/dist
+    workspace_directory: Optional[Path]
+        Tells where the frontend sources should be stored.
+        Is only used when building the project in location different than
+        repository root
     clean_build: bool
         Tells if the build directories should be cleaned before building
     single_html: Optional[Path]
@@ -153,6 +133,7 @@ def build_frontend(
     """
     projectpath = Path(__file__).parent.parent.absolute()
     frontend_path = projectpath / 'pipeline_manager/frontend'
+    resources_path = projectpath / 'pipeline_manager/resources'
 
     config_path = frontend_path / '.env.static.local' if \
         build_type == 'static-html' else \
@@ -160,24 +141,50 @@ def build_frontend(
 
     frontend_dist_path = frontend_path / 'dist'
 
-    build_dir = Path(os.getcwd()) / 'build'
-    # when the project is installed via pip, change the default build location
-    # to ./build
-    if not subprocess.call(["pip", "show", "-qq", "pipeline_manager"],
-                           stdout=subprocess.DEVNULL)\
-            and not os.path.isfile(build_dir):
-
-        if not os.path.exists(build_dir):
-            build_dir.mkdir()
-
-        frontend_path = build_dir / 'frontend'
-
-        frontend_dist_path = build_dir / 'dist'
-        config_path = build_dir / '.env.static.local' if \
-            build_type == 'static_html' else \
-            build_dir / '.env.local'
-
     config_lines = []
+
+    # check if building is happening in repo, if not ask the user to provide
+    # the necessary directory paths
+    if not os.path.exists(Path(os.getcwd()) / 'pipeline_manager/frontend')\
+            and not workspace_directory and not output_directory:
+
+        print(
+            'The build script requires providing workspace path for storing '
+            'frontend sources and a path for the built frontend',
+            file=sys.stderr
+        )
+        print(
+            'Please provide them with --workspace-directory and '
+            '--output-directory',
+            file=sys.stderr
+        )
+        return errno.EINVAL
+
+    if workspace_directory:
+
+        workspace_directory = Path(os.getcwd() / workspace_directory)
+
+        if clean_build and Path(workspace_directory).exists():
+            shutil.rmtree(workspace_directory)
+
+        if not os.path.exists(workspace_directory):
+            workspace_directory.mkdir(parents=True)
+
+        shutil.copytree(
+            frontend_path,
+            workspace_directory / 'frontend',
+            dirs_exist_ok=True)
+        shutil.copytree(
+            resources_path,
+            workspace_directory / 'resources',
+            dirs_exist_ok=True)
+
+        frontend_path = workspace_directory / 'frontend'
+        config_path = workspace_directory / '.env.static.local' if \
+            build_type == 'static_html' else \
+            workspace_directory / '.env.local'
+
+    build_prepare(frontend_path)
 
     if specification:
         specification = Path(specification).absolute()
@@ -233,6 +240,8 @@ def build_frontend(
         return exit_status.returncode
 
     if output_directory:
+        output_directory = Path(os.getcwd() / output_directory)
+
         if clean_build and Path(output_directory).exists():
             shutil.rmtree(output_directory)
         frontend_dist_path = Path(
@@ -253,6 +262,19 @@ def build_frontend(
     if build_type == 'server-app':
         subprocess.run(['npm', 'run', 'build-server-app', '--', '--dest',
                         f'{frontend_dist_path}'], cwd=frontend_path)
+        if exit_status.returncode == errno.EACCES:
+            print(
+                'The build script requires providing workspace path for '
+                'storing frontend sources and a path for the built frontend',
+                file=sys.stderr
+            )
+            print(
+                'Please provide them with --workspace-directory and '
+                '--output-directory',
+                file=sys.stderr
+            )
+            return exit_status.returncode
+
         if exit_status.returncode != 0:
             return exit_status.returncode
 
