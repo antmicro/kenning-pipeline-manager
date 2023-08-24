@@ -239,6 +239,7 @@ const classes = computed(() => ({
     '--selected': props.selected,
     '--dragging': dragMove.dragging.value,
     '--two-column': !!props.node.twoColumn,
+    __readonly: viewModel.value.editor.readonly,
 }));
 
 const styles = computed(() => ({
@@ -599,6 +600,14 @@ const switchSides = (intf) => {
         width: 1.4em;
         background-color: $gold;
         z-index: 100;
+    }
+}
+
+.baklava-node {
+    &.__readonly  {
+        > .__title {
+            cursor: auto;
+        }
     }
 }
 </style>

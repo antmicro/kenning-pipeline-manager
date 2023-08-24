@@ -12,7 +12,7 @@ from creating and deleting connections or altering nodes' values if the editor i
 -->
 
 <template>
-    <div :id="intf.id" ref="el" class="baklava-node-interface" :class="newClasses">
+    <div :id="intf.id" ref="el" class="baklava-node-interface" :class="newClasses" >
         <div
             class="__port"
             v-if="intf.port"
@@ -115,6 +115,7 @@ export default defineComponent({
             '--input': props.intf.side === 'left',
             '--output': props.intf.side === 'right',
             '--connected': isConnected.value,
+            __readonly: viewModel.value.editor.readonly,
         }));
 
         return {
@@ -134,3 +135,6 @@ export default defineComponent({
     },
 });
 </script>
+
+<style lang="scss" scoped>
+</style>
