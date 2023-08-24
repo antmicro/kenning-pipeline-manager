@@ -89,18 +89,22 @@
             "type": "processing",
             "category": "Processing",
             "properties": [
-                {"name": "iterations", "type": "integer", "default": 1},
                 {
-                    "name": "border type",
-                    "type": "select",
-                    "values": ["constant", "replicate", "wrap", "reflect"],
-                    "default": "constant"
-                },
-                {
-                    "name": "operation type",
-                    "type": "select",
-                    "values": ["dilation", "erosion", "closing", "opening"],
-                    "default": "dilation"
+                    "name": "Enable operations", "type": "checkbox", "default": true, "group": [
+                        {"name": "iterations", "type": "integer", "default": 1},
+                        {
+                            "name": "border type",
+                            "type": "select",
+                            "values": ["constant", "replicate", "wrap", "reflect"],
+                            "default": "constant"
+                        },
+                        {
+                            "name": "operation type",
+                            "type": "select",
+                            "values": ["dilation", "erosion", "closing", "opening"],
+                            "default": "dilation"
+                        }
+                    ]
                 }
             ],
             "interfaces": [

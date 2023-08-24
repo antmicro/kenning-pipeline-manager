@@ -172,6 +172,11 @@
                 },
                 "properties": [
                     {
+                        "name": "Enable operations",
+                        "id": "68927496012",
+                        "value": true
+                    },
+                    {
                         "name": "iterations",
                         "id": "0605526715",
                         "value": 1
