@@ -4,59 +4,103 @@ Copyright (c) 2022-2023 Antmicro <www.antmicro.com>
 SPDX-License-Identifier: Apache-2.0
 -->
 
+<!-- eslint-disable vue/no-multiple-template-root -->
 <template>
+    <Tooltip
+        ref="tooltipRef"
+        :left="tooltip.left"
+        :top="tooltip.top - 60"
+        :text="tooltip.text"
+        v-show="tooltip.visible"
+    />
     <div
-        ref="el"
         class="baklava-sidebar"
         :class="{ '--open': graph.sidebar.visible }"
         :style="styles"
     >
         <div class="__resizer" @mousedown="startResize" />
-
         <div v-if="node" class="__content">
             <div class="__header">
                 <Cross tabindex="-1" class="__close" @click="close" />
+                <img
+                    class="__node-icon"
+                    v-if="nodeIconPath !== undefined"
+                    :src="nodeIconPath"
+                />
                 <div class="__node-name">
                     {{ node.title ? node.title : node.type }}
                 </div>
-                <!-- !ICONS -->
+                <a
+                    v-for="url in nodeURLs"
+                    :key="url.name"
+                    :href="url.url"
+                    class="__url"
+                    target="_blank"
+                    draggable="false"
+                    @pointerover="(ev) => onPointerOver(url.name, ev)"
+                    @pointerleave="onPointerLeave"
+                >
+                    <img
+                        v-if="url.icon !== undefined"
+                        :src="getIconPath(url.icon)"
+                        :alt="url.name"
+                        draggable="false"
+                    />
+                </a>
             </div>
 
             <div class="__properties" v-if="displayedProperties.length">
                 <div class="__title">Properties</div>
                 <div v-for="input in displayedProperties" :key="input.id" class="__property">
-                    {{ input.name }}
+                    <div class="__property-name">
+                        {{ input.name }}:
+                    </div>
                     <CustomInterface :node="node" :intf="input" />
                 </div>
             </div>
 
+            <div class="__description" v-show="desc">
+                <div class="__title">
+                    Description
+                </div>
+                <div class="__description-content" v-html="desc"></div>
+            </div>
+
             <div class="__interface_groups" v-if="interfaceGroupsCheckboxes.length">
                 <div class="__title">Interface Groups</div>
-                <div v-for="intfG in interfaceGroupsCheckboxes" :key="intfG.id">
+                <div
+                    v-for="intfG in interfaceGroupsCheckboxes"
+                    :key="intfG.id"
+                    class="__group"
+                >
                     <component :is="intfG.component" :intf="intfG"></component>
                 </div>
-                <component
-                    :is="interfaceGroupsButton.component"
-                    :intf="interfaceGroupsButton"
-                    :class="interfaceGroupsButtonClasses"
-                ></component>
-                <div v-if="interfaceGroupsOutput.length" class="__error_outputs">
-                    <h1>Conflicts:</h1>
-                    <!-- eslint-disable vue/require-v-for-key -->
-                    <p v-for="output in interfaceGroupsOutput">
-                        {{ output }}
-                    </p>
+                <div class="__group-assign">
+                    <component
+                        :is="interfaceGroupsButton.component"
+                        :intf="interfaceGroupsButton"
+                        :class="interfaceGroupsButtonClasses"
+                    ></component>
                 </div>
+            </div>
+            <div v-show="interfaceGroupsOutput.length" class="__error_outputs">
+                <div class="__title">Conflicts:</div>
+                <!-- eslint-disable vue/require-v-for-key -->
+                <p v-for="output in interfaceGroupsOutput">
+                    {{ output }}
+                </p>
             </div>
         </div>
     </div>
 </template>
 
 <script>
-import { computed, defineComponent, watch, ref } from 'vue'; // eslint-disable-line object-curly-newline
-import { useGraph, CheckboxInterface, ButtonInterface } from '@baklavajs/renderer-vue';
+import { computed, defineComponent, watch, ref, nextTick } from 'vue'; // eslint-disable-line object-curly-newline
+import { useGraph, useViewModel, CheckboxInterface, ButtonInterface } from '@baklavajs/renderer-vue'; // eslint-disable-line object-curly-newline
+import showdown from 'showdown';
 import CustomInterface from './CustomInterface.vue';
 import Cross from '../icons/Cross.vue';
+import Tooltip from '../components/Tooltip.vue';
 
 import { validateInterfaceGroupsNames } from '../core/interfaceParser';
 
@@ -65,11 +109,13 @@ export default defineComponent({
         Cross,
         CustomInterface,
         CheckboxInterface,
+        Tooltip,
     },
     setup() {
         const { graph } = useGraph();
+        const { viewModel } = useViewModel();
+        const converter = new showdown.Converter();
 
-        const el = ref(null);
         const width = ref(300);
 
         const node = computed(() => {
@@ -77,11 +123,53 @@ export default defineComponent({
             return graph.value.nodes.find((x) => x.id === id);
         });
 
+        const desc = computed(() => converter.makeHtml(node.value?.description ?? ''));
+        const nodeIcon = computed(() => viewModel.value.editor.getNodeIconPath(node.value?.type));
+        const nodeURLs = computed(() => viewModel.value.editor.getNodeURLs(node.value?.type));
+
+        const getIconPath = (name) => viewModel.value.cache[`./${name}`] ?? name;
+        const nodeIconPath = computed(() => getIconPath(nodeIcon.value));
+
         watch(node, () => {
             if (node.value === undefined) {
                 graph.value.sidebar.visible = false;
             }
         });
+
+        const tooltipRef = ref(null);
+        const tooltip = ref(null);
+
+        tooltip.value = {
+            top: 0,
+            left: 0,
+            visible: false,
+            text: '',
+        };
+
+        const onPointerOver = (name, ev) => {
+            tooltip.value.text = name;
+            tooltip.value.visible = true;
+
+            // We need to wait for the next frame to get the tooltips width first to get its width
+            nextTick().then(() => {
+                const right = ev.clientX - ev.offsetX + ev.currentTarget.offsetWidth / 2 +
+                    tooltipRef.value.$el.clientWidth;
+
+                tooltip.value.top = ev.clientY - ev.offsetY + ev.currentTarget.offsetHeight;
+
+                // If the tooltip is out of user view port it is moved to the left
+                if (right > window.innerWidth) {
+                    tooltip.value.left = ev.clientX - ev.offsetX + ev.currentTarget.offsetWidth / 2
+                        - tooltipRef.value.$el.clientWidth / 2;
+                } else {
+                    tooltip.value.left = ev.clientX - ev.offsetX + ev.currentTarget.offsetWidth / 2;
+                }
+            });
+        };
+
+        const onPointerLeave = () => {
+            tooltip.value.visible = false;
+        };
 
         const styles = computed(() => ({
             width: `${width.value}px`,
@@ -180,7 +268,6 @@ export default defineComponent({
         });
 
         return {
-            el,
             graph,
             node,
             styles,
@@ -192,18 +279,15 @@ export default defineComponent({
             interfaceGroupsButton,
             interfaceGroupsOutput,
             interfaceGroupsButtonClasses,
+            nodeIconPath,
+            nodeURLs,
+            getIconPath,
+            desc,
+            tooltip,
+            onPointerOver,
+            onPointerLeave,
+            tooltipRef,
         };
     },
 });
 </script>
-
-<style>
-.--disabled {
-    pointer-events: none;
-    cursor: not-allowed;
-    opacity: 0.65;
-    filter: alpha(opacity=65);
-    -webkit-box-shadow: none;
-    box-shadow: none;
-}
-</style>
