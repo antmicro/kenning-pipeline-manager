@@ -158,6 +158,10 @@
                             "type": "string"
                         }
                     },
+                    "description": {
+                        "type": "string",
+                        "description": "Description of the node in markdown"
+                    },
                     "additionalData": {}
                 },
                 "required": [
