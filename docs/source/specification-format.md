@@ -75,7 +75,7 @@ An example:
     "layers": [
         {
             "name": "Example Layer",
-            "nodeTypes": ["processing"],
+            "nodeLayers": ["processing"],
             "nodeInterfaces": ["BinaryImage"]
         }
     ],
@@ -91,10 +91,10 @@ They can be also used to hide connections for given interface types.
 
 The layers can be enabled or disabled in editor settings.
 
-Every layer has three properties (at least `name` and one of `nodeTypes` or `nodeInterfaces` need to be defined):
+Every layer has three properties (at least `name` and one of `nodeLayers` or `nodeInterfaces` need to be defined):
 
 * `name` - name of the layer displayed in the editor,
-* `nodeTypes` (optional) - array of names of node types that belong to the layer,
+* `nodeLayers` (optional) - array of names of node types that belong to the layer,
 * `nodeInterfaces` (optional) - array of names of interface types that belong to the layer.
 
 #### URL class
@@ -127,7 +127,7 @@ This object specifies a single node.
 Every input object requires six properties:
 
 * `name` - name displayed in the editor.
-* `type` - value used for styling.
+* `layer` - layer type used for styling and toggling the node visibility in the editor.
 * `category` - context menu category displayed in the editor.
 * `icon` - name of an SVG icon that is going to be displayed next to the name of the node.
   The value of `icon` can be:
@@ -160,7 +160,7 @@ Here is an example of a node:
 ```json
 {
     "name": "Filter2D",
-    "type": "filters",
+    "layer": "filters",
     "category": "Filters",
     "icon": "filter.svg",
     "description": "Node that applies a *2D* filter.",
@@ -276,12 +276,12 @@ Additional properties:
 
 Array with elements of type [Property](#property).
 It defines properties that are toggled by the property.
-`group` can only be used with property of type `checkbox`.
+`group` can only be used with property of type `bool`.
 
 Example group of properties:
 ```json
 {
-    "name": "Group", "type": "checkbox", "default": true, "group": [
+    "name": "Group", "type": "bool", "default": true, "group": [
         {"name": "prop-a", "type": "integer", "default": 1},
         {"name": "prop-b", "type": "text", "default": ""}
     ]
@@ -292,7 +292,7 @@ Example group of properties:
 
 It is possible to inherit:
 
-* `type`
+* `layer`
 * `category`
 * `icon`
 * `interfaces`
@@ -310,7 +310,7 @@ Below is a sample specification with used inheritance mechanism:
     "nodes": [
         {
             "name": "Type A",
-            "type": "class",
+            "layer": "class",
             "category": "Classes",
             "properties": [
                 {"name": "prop-a", "type": "text", "default": ""}
@@ -331,7 +331,7 @@ Below is a sample specification with used inheritance mechanism:
         },
         {
             "name": "Type C",
-            "type": "class",
+            "layer": "class",
             "category": "Classes",
             "properties": [
                 {"name": "prop-c", "type": "text", "default": ""}
@@ -386,7 +386,7 @@ The interface group called `1` consists of three ranges of interfaces: `1[1]`, i
 
 List of graphs defined using `subgraphs` array.
 Each object represent a single subgraph that consists of regular nodes and subgraph interfaces.
-Fields `name`, `type`, `category`, `icon` are defined the same way as in standard nodes.
+Fields `name`, `layer`, `category`, `icon` are defined the same way as in standard nodes.
 Apart from those, subgraph node contains additional properties:
 
 * `nodes` - List of nodes in a subgraph, specified in [Dataflow format](#dataflow-format)
@@ -402,7 +402,7 @@ Below, you can see a sample specification containing a hypothetical definition o
     "nodes": [
         {
             "name": "LoadVideo",
-            "type": "filesystem",
+            "layer": "filesystem",
             "category": "Filesystem",
             "properties": [
                 {"name": "filename", "type": "text", "default": ""}
@@ -411,7 +411,7 @@ Below, you can see a sample specification containing a hypothetical definition o
         },
         {
             "name": "SaveVideo",
-            "type": "filesystem",
+            "layer": "filesystem",
             "category": "Filesystem",
             "properties": [
                 {"name": "filename", "type": "text", "default": ""}
@@ -423,7 +423,7 @@ Below, you can see a sample specification containing a hypothetical definition o
         },
         {
             "name": "GaussianKernel",
-            "type": "kernel",
+            "layer": "kernel",
             "category": "Generators",
             "properties": [
                 {"name": "size", "type": "integer", "default": 5},
@@ -433,7 +433,7 @@ Below, you can see a sample specification containing a hypothetical definition o
         },
         {
             "name": "StructuringElement",
-            "type": "kernel",
+            "layer": "kernel",
             "category": "Generators",
             "properties": [
                 {"name": "size", "type": "integer", "default": 5},
@@ -448,7 +448,7 @@ Below, you can see a sample specification containing a hypothetical definition o
         },
         {
             "name": "Filter2D",
-            "type": "processing",
+            "layer": "processing",
             "category": "Processing",
             "properties": [
                 {"name": "iterations", "type": "integer", "default": 1},
@@ -467,7 +467,7 @@ Below, you can see a sample specification containing a hypothetical definition o
         },
         {
             "name": "Threshold",
-            "type": "processing",
+            "layer": "processing",
             "category": "Processing",
             "properties": [
                 {"name": "threshold_value", "type": "integer", "default": 1},
@@ -485,11 +485,11 @@ Below, you can see a sample specification containing a hypothetical definition o
         },
         {
             "name": "Morphological operation",
-            "type": "processing",
+            "layer": "processing",
             "category": "Processing",
             "properties": [
                 {
-                    "name": "Enable operations", "type": "checkbox", "default": true, "group": [
+                    "name": "Enable operations", "type": "bool", "default": true, "group": [
                         {"name": "iterations", "type": "integer", "default": 1},
                         {
                             "name": "border type",
@@ -519,7 +519,7 @@ Below, you can see a sample specification containing a hypothetical definition o
             "BinaryImage": "#FF0000"
         }
     },
-    "version": "20230824.9"
+    "version": "20230830.10"
 }
 ```
 

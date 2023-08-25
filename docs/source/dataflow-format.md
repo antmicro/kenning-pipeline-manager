@@ -37,9 +37,10 @@ The graph format has following attributes:
 An object that describes a single node in the editor.
 Each node has:
 
-* `type` - node type, as defined in the specification.
+* `name` - node name, as defined in the specification.
 * `id` - unique value assigned to the node.
-* `name` - optional field defining a node's name rendered to the user. If set, `name (type)` will be displayed, otherwise just the `type` will be rendered.
+* `instanceName` - optional field defining a node's title rendered to the user.
+  If set, `instancename (name)` will be displayed, otherwise, just the `name` will be rendered.
 * `properties` - list describing the node's parameterized values.
   Every element is of type [Property](#property)
 * `interfaces` - list describing the node's interfaces.
@@ -48,7 +49,7 @@ Each node has:
 * `twoColumn` - boolean value.
   If set to `true`, then input and output sockets are both rendered in the top part of the node and properties are displayed below.
 * `subgraph` - optional field defining the `id` of the subgraph that this node represents.
-  It refers to one of the [Subgraphs](#subgraphs) entries from `subgraphs` with matching `id`.
+  It refers to one of the [Subgraphs](#subgraphs) entries from `subgraphs` with a matching `id`.
 * `enabledInterfaceGroups` - optional array describing enabled interface groups.
   Every element is of type [Enabled Interface Groups](#enabled-interface-groups)
 
@@ -79,15 +80,15 @@ Node having two parameters: `example_text` of value `example_value` and `example
 
 ##### Interface
 
-Each input, output and inout is described by an object with following attributes:
+Each input, output, and inout is described by an object with a following attributes:
 
 * `id` - unique value assigned to the property.
   It is used to describe connections in the dataflow.
 * `name` - name of the interface
 * `direction` - value determining the type of the interfaces.
-  Can be either `input`, `output` or `inout`.
+  Can be either `input`, `output`, or `inout`.
 * `side` - tells on which side of the node the interface should be placed.
-* `nodePosition` - specifies row on which the interface is rendered.
+* `nodePosition` - specifies a row on which the interface is rendered.
   Values for interfaces of the same `side` value have to be unique.
 
 #### Connection
@@ -141,7 +142,7 @@ The example dataflow for a specification defined in [Specification format](speci
         "id": "2035108300",
         "nodes": [
             {
-                "type": "Filter2D",
+                "name": "Filter2D",
                 "id": "node_168064109167511",
                 "position": {
                     "x": 544,
@@ -178,10 +179,10 @@ The example dataflow for a specification defined in [Specification format](speci
                         "value": "constant"
                     }
                 ],
-                "name": "Filter"
+                "instanceName": "Filter"
             },
             {
-                "type": "LoadVideo",
+                "name": "LoadVideo",
                 "id": "node_168064220761015",
                 "position": {
                     "x": -60,
@@ -202,11 +203,10 @@ The example dataflow for a specification defined in [Specification format](speci
                         "id": "8887517324",
                         "value": "input.mp4"
                     }
-                ],
-                "name": ""
+                ]
             },
             {
-                "type": "GaussianKernel",
+                "name": "GaussianKernel",
                 "id": "node_168064222522321",
                 "position": {
                     "x": -65,
@@ -232,11 +232,10 @@ The example dataflow for a specification defined in [Specification format](speci
                         "id": "0187870808",
                         "value": 1
                     }
-                ],
-                "name": ""
+                ]
             },
             {
-                "type": "Threshold",
+                "name": "Threshold",
                 "id": "node_168064225320530",
                 "position": {
                     "x": 999,
@@ -267,11 +266,10 @@ The example dataflow for a specification defined in [Specification format](speci
                         "id": "8305532648",
                         "value": "Otsu"
                     }
-                ],
-                "name": ""
+                ]
             },
             {
-                "type": "StructuringElement",
+                "name": "StructuringElement",
                 "id": "node_168064227787336",
                 "position": {
                     "x": 1010,
@@ -297,11 +295,10 @@ The example dataflow for a specification defined in [Specification format](speci
                         "id": "1375086555",
                         "value": "Cross"
                     }
-                ],
-                "name": "Structuring Element"
+                ]
             },
             {
-                "type": "Morphological operation",
+                "name": "Morphological operation",
                 "id": "node_168064228786538",
                 "position": {
                     "x": 1422,
@@ -342,11 +339,10 @@ The example dataflow for a specification defined in [Specification format](speci
                         "id": "8413506138",
                         "value": "dilation"
                     }
-                ],
-                "name": ""
+                ]
             },
             {
-                "type": "SaveVideo",
+                "name": "SaveVideo",
                 "id": "node_168064231007448",
                 "position": {
                     "x": 1773,
@@ -372,8 +368,7 @@ The example dataflow for a specification defined in [Specification format](speci
                         "id": "3087244218",
                         "value": "output.mp4"
                     }
-                ],
-                "name": "Save Video"
+                ]
             }
         ],
         "connections": [
@@ -424,7 +419,7 @@ The highlighted bits of code represent all code fragments relevant to the `Filte
 In the `nodes` list, there is a full specification of the state of the `Filter2D` node:
 
 * Its unique `id`
-* Its `type`
+* Its `name`
 * Its parameters (stored in `parameters`), e.g. `border_type` equal to `constant`
 * Its interfaces, with unique `id` representing each input and output
 * Rendering data, such as `position` or `width`.
@@ -438,7 +433,7 @@ It represents a unique subgraph instance that can be accessed and modified from 
 The `subgraph` field should be a string representing an ID of exactly one of the instances that are defined in `subgraphs`.
 Each template cannot have more than one subgraph node pointing to it.
 
-The graphs defined in `subgraphs` follow format similar to the main graph.
+The graphs defined in `subgraphs` follow a format similar to the main graph.
 Specifically, properties such as `id`, `connections`, `panning`, and `scaling` follow the same rules.
 The only differences are changes within the `nodes` definition and the addition of `interfaces` field.
 
@@ -447,8 +442,9 @@ In the collapsed view, those are visible as regular interfaces of the node repre
 In the subgraph view, each interface is represented by a dedicated node, which is parametrized by a dedicated entry in `interfaces` array.
 Such node allows to configure such parameters as interface name or connection side of its corresponding interface.
 
-Within the dataflow format, `subgraphNodeId` field allows to tie the subgraph interface node with an interface it is representing.
-`interfaces` is an array of object that follows the format:
+Within the dataflow format, `interfaces` field allows to tie the subgraph node interface (subgraph IO)
+with an interface in the subgraph it is representing. `interfaces` is an array of objects that follows the
+format:
 
  * `id` - Unique ID of the interface within the subgraph
  * `nodePosition` - optional property (object containing `x` and `y` values) defining the
@@ -463,178 +459,176 @@ differs slightly from interfaces of standard nodes:
  * New optional property `nodePosition` (object containing `x` and `y` values) defines the
  position of the node after entering the subgraph. Default position is (0, 0)
 
-Additionally, a subgraph dataflow must define a `entryGraph` property, which is an ID of one of the subgraphs in `graphTemplateInstances`.
+Additionally, a subgraph dataflow must define a `entryGraph` property, which is an ID of one of the subgraphs in `subgraphs`.
 This value determines which graph is rendered to the user when the dataflow is loaded.
 
 ## Example dataflow with subgraphs
 
 ```json
 {
-    "version": "20230720.5",
+    "version": "20230830.10",
     "graph": {
         "entryGraph": "9c4d5349-9d3b-401f-86bb-021b7b3e5b81",
     },
+    "subgraphs": {
+        "id": "9c4d5349-9d3b-401f-86bb-021b7b3e5b81",
+        "nodes": [
+            {
+                "name": "Test node #1",
+                "id": "bfeb3891-53ce-476d-bc0b-a27e99428c10",
+                "position": {
+                    "x": 919,
+                    "y": 241
+                },
+                "width": 200,
+                "twoColumn": false,
+                "interfaces": [
+                    {
+                        "name": "Input",
+                        "id": "3c643e48-52f0-4dea-97e0-42c732cbe2e4",
+                        "direction": "input",
+                        "side": "left"
+                    },
+                    {
+                        "name": "Inout",
+                        "id": "bf735164-99fd-47e9-ba38-d26356eb5628",
+                        "direction": "inout",
+                        "side": "right"
+                    },
+                    {
+                        "name": "Output",
+                        "id": "a57c30cc-85d7-46e7-a48f-33d5aeb2c039",
+                        "direction": "output",
+                        "side": "right"
+                    }
+                ],
+                "properties": [],
+                "instanceName": "Test node #1"
+            },
+            {
+                "name": "Test node #2",
+                "id": "ea3463d7-b4d5-4531-9ecb-e1f3d524f0aa",
+                "position": {
+                    "x": 1525,
+                    "y": 182
+                },
+                "width": 200,
+                "twoColumn": false,
+                "interfaces": [
+                    {
+                        "name": "Input",
+                        "id": "3937a772-dd2e-4037-950a-0ac150539bb9",
+                        "direction": "input",
+                        "side": "left"
+                    },
+                    {
+                        "name": "Inout",
+                        "id": "16946d84-2ede-44b0-b8b0-fd3664e7aedf",
+                        "direction": "inout",
+                        "side": "right"
+                    },
+                    {
+                        "name": "Output",
+                        "id": "4f1d2b5b-583c-4e5f-a925-94659482322d",
+                        "direction": "output",
+                        "side": "right"
+                    }
+                ],
+                "properties": [
+                    {
+                        "name": "Sample option",
+                        "id": "d536c9b8-bbb9-496d-81ab-d3946ff7cf79",
+                        "value": "Option 2"
+                    }
+                ],
+                "instanceName": "Test node #2"
+            },
+            {
+                "name": "Test subgraph node #1",
+                "id": "4ece9e09-100e-45aa-9203-1c00241c2580",
+                "position": {
+                    "x": 520,
+                    "y": 263
+                },
+                "width": 200,
+                "twoColumn": false,
+                "interfaces": [
+                    {
+                        "id": "4817aef3-f8e9-4771-9bed-1989357393e6",
+                        "name": "Subgraph input",
+                        "subgraphNodeId": "cd623eed-54a8-4d3b-b414-2b60869a23f3",
+                        "direction": "input",
+                        "side": "right"
+                    },
+                    {
+                        "id": "e9cebd1e-995c-4fc0-be4e-5df6273ba01b",
+                        "name": "Subgraph inout",
+                        "subgraphNodeId": "50bfe451-ccb5-4a32-80a4-ea3b3202c54b",
+                        "direction": "inout",
+                        "side": "right"
+                    },
+                    {
+                        "id": "a00f133c-3bd4-4c1e-89ac-903cfe868cbc",
+                        "name": "Subgraph output",
+                        "subgraphNodeId": "9a003337-3d15-4bbb-8e18-2d7bad8eb022",
+                        "direction": "output",
+                        "side": "right"
+                    }
+                ],
+                "subgraph": "97abeeb5-61a1-4918-8816-5e74ba4e8be4"
+            },
+            {
+                "name": "Test subgraph node #2",
+                "id": "16ad1f85-41bf-4fbc-a8bb-0b8841a2a13d",
+                "position": {
+                    "x": 1963,
+                    "y": 257
+                },
+                "width": 200,
+                "twoColumn": false,
+                "interfaces": [
+                    {
+                        "id": "e3176efa-fd16-4480-936f-3c85e0365be1",
+                        "name": "Subgraph input",
+                        "subgraphNodeId": "4f089550-4628-4924-ad7e-3cc4ce4b718c",
+                        "direction": "input",
+                        "side": "left"
+                    },
+                    {
+                        "id": "481d1b0a-34fb-4d29-a288-f70658dc30ac",
+                        "name": "Subgraph output",
+                        "subgraphNodeId": "000f80bd-c6c9-4052-8c36-6659fa086c42",
+                        "direction": "output",
+                        "side": "right"
+                    }
+                ],
+                "subgraph": "c84e5d7e-7713-4528-a5a7-9cad25209bb0"
+            }
+        ],
+        "connections": [
+            {
+                "id": "7b0426b9-1ebb-45f4-8dc2-deb61cf5f03a",
+                "from": "bf735164-99fd-47e9-ba38-d26356eb5628",
+                "to": "3937a772-dd2e-4037-950a-0ac150539bb9"
+            },
+            {
+                "id": "faad4eb8-f60c-498c-b931-f25e35d03ad2",
+                "from": "a00f133c-3bd4-4c1e-89ac-903cfe868cbc",
+                "to": "3c643e48-52f0-4dea-97e0-42c732cbe2e4"
+            },
+            {
+                "id": "3a9b1e43-7060-40cf-b511-5f664edc478f",
+                "from": "16946d84-2ede-44b0-b8b0-fd3664e7aedf",
+                "to": "e3176efa-fd16-4480-936f-3c85e0365be1"
+            }
+        ]
+    },
     "subgraphs": [
-        {
-            "id": "9c4d5349-9d3b-401f-86bb-021b7b3e5b81",
-            "nodes": [
-                {
-                    "type": "Test node #1",
-                    "id": "bfeb3891-53ce-476d-bc0b-a27e99428c10",
-                    "position": {
-                        "x": 919,
-                        "y": 241
-                    },
-                    "width": 200,
-                    "twoColumn": false,
-                    "interfaces": [
-                        {
-                            "name": "Input",
-                            "id": "3c643e48-52f0-4dea-97e0-42c732cbe2e4",
-                            "direction": "input",
-                            "side": "left"
-                        },
-                        {
-                            "name": "Inout",
-                            "id": "bf735164-99fd-47e9-ba38-d26356eb5628",
-                            "direction": "inout",
-                            "side": "right"
-                        },
-                        {
-                            "name": "Output",
-                            "id": "a57c30cc-85d7-46e7-a48f-33d5aeb2c039",
-                            "direction": "output",
-                            "side": "right"
-                        }
-                    ],
-                    "properties": [],
-                    "name": "Test node #1"
-                },
-                {
-                    "type": "Test node #2",
-                    "id": "ea3463d7-b4d5-4531-9ecb-e1f3d524f0aa",
-                    "position": {
-                        "x": 1525,
-                        "y": 182
-                    },
-                    "width": 200,
-                    "twoColumn": false,
-                    "interfaces": [
-                        {
-                            "name": "Input",
-                            "id": "3937a772-dd2e-4037-950a-0ac150539bb9",
-                            "direction": "input",
-                            "side": "left"
-                        },
-                        {
-                            "name": "Inout",
-                            "id": "16946d84-2ede-44b0-b8b0-fd3664e7aedf",
-                            "direction": "inout",
-                            "side": "right"
-                        },
-                        {
-                            "name": "Output",
-                            "id": "4f1d2b5b-583c-4e5f-a925-94659482322d",
-                            "direction": "output",
-                            "side": "right"
-                        }
-                    ],
-                    "properties": [
-                        {
-                            "name": "Sample option",
-                            "id": "d536c9b8-bbb9-496d-81ab-d3946ff7cf79",
-                            "value": "Option 2"
-                        }
-                    ],
-                    "name": "Test node #2"
-                },
-                {
-                    "type": "Test subgraph node #1",
-                    "id": "4ece9e09-100e-45aa-9203-1c00241c2580",
-                    "title": "Test subgraph node #1",
-                    "position": {
-                        "x": 520,
-                        "y": 263
-                    },
-                    "width": 200,
-                    "twoColumn": false,
-                    "interfaces": [
-                        {
-                            "id": "4817aef3-f8e9-4771-9bed-1989357393e6",
-                            "name": "Subgraph input",
-                            "subgraphNodeId": "cd623eed-54a8-4d3b-b414-2b60869a23f3",
-                            "direction": "input",
-                            "side": "right"
-                        },
-                        {
-                            "id": "e9cebd1e-995c-4fc0-be4e-5df6273ba01b",
-                            "name": "Subgraph inout",
-                            "subgraphNodeId": "50bfe451-ccb5-4a32-80a4-ea3b3202c54b",
-                            "direction": "inout",
-                            "side": "right"
-                        },
-                        {
-                            "id": "a00f133c-3bd4-4c1e-89ac-903cfe868cbc",
-                            "name": "Subgraph output",
-                            "subgraphNodeId": "9a003337-3d15-4bbb-8e18-2d7bad8eb022",
-                            "direction": "output",
-                            "side": "right"
-                        }
-                    ],
-                    "subgraph": "97abeeb5-61a1-4918-8816-5e74ba4e8be4"
-                },
-                {
-                    "type": "Test subgraph node #2",
-                    "id": "16ad1f85-41bf-4fbc-a8bb-0b8841a2a13d",
-                    "title": "Test subgraph node #2",
-                    "position": {
-                        "x": 1963,
-                        "y": 257
-                    },
-                    "width": 200,
-                    "twoColumn": false,
-                    "interfaces": [
-                        {
-                            "id": "e3176efa-fd16-4480-936f-3c85e0365be1",
-                            "name": "Subgraph input",
-                            "subgraphNodeId": "4f089550-4628-4924-ad7e-3cc4ce4b718c",
-                            "direction": "input",
-                            "side": "left"
-                        },
-                        {
-                            "id": "481d1b0a-34fb-4d29-a288-f70658dc30ac",
-                            "name": "Subgraph output",
-                            "subgraphNodeId": "000f80bd-c6c9-4052-8c36-6659fa086c42",
-                            "direction": "output",
-                            "side": "right"
-                        }
-                    ],
-                    "subgraph": "c84e5d7e-7713-4528-a5a7-9cad25209bb0"
-                }
-            ],
-            "connections": [
-                {
-                    "id": "7b0426b9-1ebb-45f4-8dc2-deb61cf5f03a",
-                    "from": "bf735164-99fd-47e9-ba38-d26356eb5628",
-                    "to": "3937a772-dd2e-4037-950a-0ac150539bb9"
-                },
-                {
-                    "id": "faad4eb8-f60c-498c-b931-f25e35d03ad2",
-                    "from": "a00f133c-3bd4-4c1e-89ac-903cfe868cbc",
-                    "to": "3c643e48-52f0-4dea-97e0-42c732cbe2e4"
-                },
-                {
-                    "id": "3a9b1e43-7060-40cf-b511-5f664edc478f",
-                    "from": "16946d84-2ede-44b0-b8b0-fd3664e7aedf",
-                    "to": "e3176efa-fd16-4480-936f-3c85e0365be1"
-                }
-            ]
-        },
         {
             "id": "97abeeb5-61a1-4918-8816-5e74ba4e8be4",
             "nodes": [
                 {
-                    "type": "Test node #1",
+                    "name": "Test node #1",
                     "id": "72aa86ac-bcfd-48ba-ab0b-7c05c039ea48",
                     "position": {
                         "x": 749.2777990232428,
@@ -662,11 +656,10 @@ This value determines which graph is rendered to the user when the dataflow is l
                             "side": "right"
                         }
                     ],
-                    "properties": [],
-                    "name": ""
+                    "properties": []
                 },
                 {
-                    "type": "Test node #1",
+                    "name": "Test node #1",
                     "id": "fcfc1ea4-7780-4dff-882c-38928640bcad",
                     "position": {
                         "x": 1557.7609886679443,
@@ -694,11 +687,10 @@ This value determines which graph is rendered to the user when the dataflow is l
                             "side": "right"
                         }
                     ],
-                    "properties": [],
-                    "name": ""
+                    "properties": []
                 },
                 {
-                    "type": "Test node #1",
+                    "name": "Test node #1",
                     "id": "47f9b554-26a8-4c36-933f-118d353c038a",
                     "position": {
                         "x": 1166.3103153193495,
@@ -727,7 +719,7 @@ This value determines which graph is rendered to the user when the dataflow is l
                         }
                     ],
                     "properties": [],
-                    "name": "Test node #1"
+                    "instanceName": "Test node #1"
                 }
             ],
             "connections": [
@@ -742,17 +734,17 @@ This value determines which graph is rendered to the user when the dataflow is l
                     "to": "eb61a53c-b40e-4cde-a37e-2640e2953439"
                 },
                 {
-                    "id": "f2f5bc6e-3c1a-11ee-be56-0242ac120002",
+                    "id": "something1",
                     "from": "cd623eed-54a8-4d3b-b414-2b60869a23f3",
                     "to": "a1f8ecf9-3ba5-49e0-b971-e4b522d39b41"
                 },
                 {
-                    "id": "f2f5bd86-3c1a-11ee-be56-0242ac120002",
+                    "id": "something2",
                     "from": "a3670f41-fda9-4370-a98c-9e1031f837d6",
                     "to": "50bfe451-ccb5-4a32-80a4-ea3b3202c54b"
                 },
                 {
-                    "id": "f2f5be8a-3c1a-11ee-be56-0242ac120002",
+                    "id": "something3",
                     "from": "43b80380-300f-4b51-a11d-cf9d2aa5bd4a",
                     "to": "9a003337-3d15-4bbb-8e18-2d7bad8eb022"
                 }
@@ -785,7 +777,7 @@ This value determines which graph is rendered to the user when the dataflow is l
             "id": "c84e5d7e-7713-4528-a5a7-9cad25209bb0",
             "nodes": [
                 {
-                    "type": "Test node #1",
+                    "name": "Test node #1",
                     "id": "9cc0788d-38a5-43e0-a480-ea4adf070978",
                     "position": {
                         "x": 884.4110055908411,
@@ -813,11 +805,10 @@ This value determines which graph is rendered to the user when the dataflow is l
                             "side": "right"
                         }
                     ],
-                    "properties": [],
-                    "name": ""
+                    "properties": []
                 },
                 {
-                    "type": "Test node #2",
+                    "name": "Test node #2",
                     "id": "98571611-c27f-4a87-90a0-f1e44c69b45e",
                     "position": {
                         "x": 1380.9345561767602,
@@ -851,8 +842,7 @@ This value determines which graph is rendered to the user when the dataflow is l
                             "id": "89c71d25-7add-45f9-80c3-291a3fe169ed",
                             "value": "Option 1"
                         }
-                    ],
-                    "name": ""
+                    ]
                 }
             ],
             "connections": [
@@ -867,7 +857,7 @@ This value determines which graph is rendered to the user when the dataflow is l
                     "to": "5d7fc255-bf5e-44ab-9c08-d81806b809ca"
                 },
                 {
-                    "id": "f2f5bb42-3c1a-11ee-be56-0242ac120002",
+                    "id": "something5",
                     "from": "a18ee2f2-ded8-4a3b-9f6f-6016545d65ef",
                     "to": "000f80bd-c6c9-4052-8c36-6659fa086c42"
                 }

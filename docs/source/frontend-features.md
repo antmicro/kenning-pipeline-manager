@@ -11,7 +11,7 @@ You can also select existing nodes and copy and paste them using `ctrl-c` and `c
 ![Node context menu](img/node-context-menu.png)
 
 In the upper right corner of each node there is an context menu toggle. It contains following options:
-* `Rename` - Changes title of the node. More details regarding the node naming can be seen in the ['title' field of dataflow format](project:dataflow-format.md#node)
+* `Rename` - Changes instanceName of the node. More details regarding the node naming can be seen in the ['instanceName' field of dataflow format](project:dataflow-format.md#node)
 * `Delete` - Deletes the node from the dataflow. Other way of deleting nodes is to select and press the `Delete` key.
 * Additional, user defined URLs. More details in the [URL specification](project:specification-format.md#url-class)
 
