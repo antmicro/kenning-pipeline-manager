@@ -23,6 +23,8 @@ The root of the dataflow format consists of four main attributes.
 The graph format has following attributes:
 
 * `id` - unique value that identifies the graph.
+* `name` - human-readable name of the graph.
+* `additionalData` - any JSON-like data that provides additional information regarding the graph.
 * `nodes` - array that specifies all nodes in the dataflow.
   Every element is of type [Node](#node).
 * `connections` - array that specifies all connections in the dataflow.
