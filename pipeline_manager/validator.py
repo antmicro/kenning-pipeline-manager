@@ -25,11 +25,11 @@ def validate(
     -------
     int: Error code from the validator.js script, 0 if successful
     """
-    if install_dependencies:
-        build_prepare()
-
     projectpath = Path(__file__).parent.parent.absolute()
     frontend_path = projectpath / "pipeline_manager/frontend"
+
+    if install_dependencies:
+        build_prepare(frontend_path)
 
     if dataflow_path:
         exit_status = subprocess.run(

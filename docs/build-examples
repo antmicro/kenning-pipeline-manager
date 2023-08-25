@@ -38,8 +38,6 @@ def main(argv):
     if not args.examples_dir.exists():
         return errno.EINVAL
 
-    build_prepare()
-
     all_specs = args.examples_dir.rglob('*-specification.json')
     for spec in all_specs:
         dataflow = Path(str(spec).replace('specification', 'dataflow'))
