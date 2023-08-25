@@ -94,5 +94,5 @@
         },
         "scaling": 1
     },
-    "graphTemplateInstances": []
+    "subgraphs": []
 }

@@ -70,8 +70,8 @@ export default class PipelineManagerEditor extends Editor {
 
         state.graph.panning = this._graph.panning;
         state.graph.scaling = this._graph.scaling;
-        state.graphTemplateInstances = [];
-        // subgraphs are stored in state.graphTemplateInstances, there is no need to store it
+        state.subgraphs = [];
+        // subgraphs are stored in state.subgraphs, there is no need to store it
         // in nodes itself
         const recurrentSubgraphSave = (node) => {
             if (node.type.startsWith(GRAPH_NODE_TYPE_PREFIX)) {
@@ -85,7 +85,7 @@ export default class PipelineManagerEditor extends Editor {
                             SUBGRAPH_INOUT_NODE_TYPE,
                         ].includes(n.type),
                     );
-                state.graphTemplateInstances.push(node.graphState);
+                state.subgraphs.push(node.graphState);
                 node.graphState.nodes.forEach(recurrentSubgraphSave);
             }
             delete node.graphState;
@@ -157,13 +157,13 @@ export default class PipelineManagerEditor extends Editor {
         // of them from the previous session).
         this.unregisterGraphs();
 
-        // There can be only one subgraph node matching to a particular graphTemplateInstances
+        // There can be only one subgraph node matching to a particular subgraphs
         const usedInstances = new Set();
 
         const recurrentSubgraphLoad = (node) => {
             const errors = [];
             if (node.subgraph !== undefined) {
-                const fittingTemplate = state.graphTemplateInstances.filter(
+                const fittingTemplate = state.subgraphs.filter(
                     (template) => template.id === node.subgraph,
                 );
                 if (fittingTemplate.length !== 1) {

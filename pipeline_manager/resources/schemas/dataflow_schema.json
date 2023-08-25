@@ -10,7 +10,7 @@
         "metadata": {
             "$ref": "metadata_schema"
         },
-        "graphTemplateInstances": {
+        "subgraphs": {
             "type": "array",
             "items": {
                 "allOf": [

@@ -1,6 +1,6 @@
 {
     "version": "20230824.9",
-    "graphTemplateInstances": [],
+    "subgraphs": [],
     "graph": {
         "id": "7883587577",
         "nodes": [

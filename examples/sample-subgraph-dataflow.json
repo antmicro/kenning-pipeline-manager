@@ -4,7 +4,7 @@
         "name": "Subgraph usage example",
         "entryGraph": "9c4d5349-9d3b-401f-86bb-021b7b3e5b81"
     },
-    "graphTemplateInstances": [
+    "subgraphs": [
         {
             "id": "9c4d5349-9d3b-401f-86bb-021b7b3e5b81",
             "nodes": [

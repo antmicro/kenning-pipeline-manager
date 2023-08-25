@@ -1,6 +1,6 @@
 {
     "version": "20230824.9",
-    "graphTemplateInstances": [],
+    "subgraphs": [],
     "graph": {
         "name": "Basic Graph example",
         "id": "2035108300",

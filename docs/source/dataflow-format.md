@@ -13,7 +13,7 @@ The root of the dataflow format consists of four main attributes.
   In general, values from dataflow's `metadata` override settings from specification.
   For simple types, such as strings or integers, values are changed.
   For arrays and dictionaries, the values are updated (values of existing keys are replaced with new ones, and the new values in arrays are appended to the existing entries).
-* `graphTemplateInstances` - List of subgraphs represented by subgraph nodes.
+* `subgraphs` - List of subgraphs represented by subgraph nodes.
   The format of subgraphs is specified in [Subgraphs](#subgraphs) section.
 * `version` - string that identifies the version of the specification and dataflow.
   It is used to check compatibility between provided dataflow and the current version of the implementation.
@@ -48,7 +48,7 @@ Each node has:
 * `twoColumn` - boolean value.
   If set to `true`, then input and output sockets are both rendered in the top part of the node and properties are displayed below.
 * `subgraph` - optional field defining the `id` of the subgraph that this node represents.
-  It refers to one of the [Subgraphs](#subgraphs) entries from `graphTemplateInstances` with matching `id`.
+  It refers to one of the [Subgraphs](#subgraphs) entries from `subgraphs` with matching `id`.
 * `enabledInterfaceGroups` - optional array describing enabled interface groups.
   Every element is of type [Enabled Interface Groups](#enabled-interface-groups)
 
@@ -416,7 +416,7 @@ The example dataflow for a specification defined in [Specification format](speci
         },
         "scaling": 1
     },
-    "graphTemplateInstances": []
+    "subgraphs": []
 }
 ```
 
@@ -435,10 +435,10 @@ Later, in `connections`, you can see triples representing to which interfaces th
 
 If a node contains a `subgraph` field, it is considered a subgraph node.
 It represents a unique subgraph instance that can be accessed and modified from the frontend level.
-The `subgraph` field should be a string representing an ID of exactly one of the instances that are defined in `graphTemplateInstances`.
+The `subgraph` field should be a string representing an ID of exactly one of the instances that are defined in `subgraphs`.
 Each template cannot have more than one subgraph node pointing to it.
 
-The graphs defined in `graphTemplateInstances` follow format similar to the main graph.
+The graphs defined in `subgraphs` follow format similar to the main graph.
 Specifically, properties such as `id`, `connections`, `panning`, and `scaling` follow the same rules.
 The only differences are changes within the `nodes` definition and the addition of `interfaces` field.
 
@@ -474,7 +474,7 @@ This value determines which graph is rendered to the user when the dataflow is l
     "graph": {
         "entryGraph": "9c4d5349-9d3b-401f-86bb-021b7b3e5b81",
     },
-    "graphTemplateInstances": [
+    "subgraphs": [
         {
             "id": "9c4d5349-9d3b-401f-86bb-021b7b3e5b81",
             "nodes": [

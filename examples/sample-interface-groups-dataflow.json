@@ -116,9 +116,6 @@
         },
         "scaling": 0.7191816916217644
     },
-    "graphTemplateInstances": [],
-    "version": "20230824.9",
-    "metadata": {
-        "randomizedOffset": true
-    }
+    "subgraphs": [],
+    "version": "20230824.9"
 }
