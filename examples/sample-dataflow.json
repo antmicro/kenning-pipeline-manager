@@ -2,6 +2,7 @@
     "version": "20230720.5",
     "graphTemplateInstances": [],
     "graph": {
+        "name": "Sample graph",
         "id": "2035108300",
         "nodes": [
             {
