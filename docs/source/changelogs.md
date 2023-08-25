@@ -19,7 +19,7 @@ Commit SHA - `de31d01d9b6591993559e3b10851815f3320e545`
 
 Commit SHA - `d4abcc80bce3e280120078a47d784eff92821a8a`
 
-* Introduced `group` keyword for checkbox property which allows defining groups of properties that can be disabled.
+* Introduced `group` keyword for bool property which allows defining groups of properties that can be disabled.
 
 ## 20230817.7
 

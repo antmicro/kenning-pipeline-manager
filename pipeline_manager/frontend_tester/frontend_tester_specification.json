@@ -20,7 +20,7 @@
                 },
                 {
                     "name": "Disconnect",
-                    "type": "checkbox",
+                    "type": "bool",
                     "default": false
                 },
                 {
@@ -62,7 +62,7 @@
                 },
                 {
                     "name": "Disconnect",
-                    "type": "checkbox",
+                    "type": "bool",
                     "default": false
                 },
                 {
@@ -99,7 +99,7 @@
                 },
                 {
                     "name": "Disconnect",
-                    "type": "checkbox",
+                    "type": "bool",
                     "default": false
                 },
                 {
@@ -130,7 +130,7 @@
                 },
                 {
                     "name": "Should disconnect",
-                    "type": "checkbox",
+                    "type": "bool",
                     "default": false
                 }
             ],

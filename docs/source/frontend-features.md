@@ -5,7 +5,7 @@
 ![Node palette](img/node-palette.png)
 
 On the left side there is a node palette (which can be turned off or on using the green icon in the upper left corner).
-To add a new node to the graph, click the node in the palette and drag it to the editor. 
+To add a new node to the graph, click the node in the palette and drag it to the editor.
 You can also select existing nodes and copy and paste them using `ctrl-c` and `ctrl-v` keyboard shortcuts.
 
 ![Node context menu](img/node-context-menu.png)
@@ -15,7 +15,7 @@ In the upper right corner of each node there is an context menu toggle. It conta
 * `Delete` - Deletes the node from the dataflow. Other way of deleting nodes is to select and press the `Delete` key.
 * Additional, user defined URLs. More details in the [URL specification](project:specification-format.md#url-class)
 
-Scroll lets you to zoom in and out. 
+Scroll lets you to zoom in and out.
 Left-clicking and dragging the editor background allows you to move around the editor area.
 
 Left-clicking on a node lets you to select and drag the node within the editor area. Pressing the `ctrl` key while moving node allows you to align the node to other along some axis.

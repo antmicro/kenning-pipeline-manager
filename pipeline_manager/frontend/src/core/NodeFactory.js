@@ -49,7 +49,7 @@ function parseProperties(properties) {
                 intf = new SelectInterface(propName, propDef, it).setPort(false);
                 intf.componentName = 'SelectInterface';
             } break;
-            case 'checkbox':
+            case 'bool':
                 intf = new CheckboxInterface(propName, propDef).setPort(false);
                 intf.componentName = 'CheckboxInterface';
                 break;

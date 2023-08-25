@@ -225,7 +225,7 @@ Every interface object has following properties:
 * `array` (optional) - special keyword to easily define a range of interfaces.
   Value has to be a list with two integer values that specify the range of interfaces.
   For example for an `example` interface with `array: [0, 2]` two interfaces called `example[0]` and `example[1]` are created.
-* `nodePosition` (optional) - specifies row on which the interface is rendered.
+* `sidePosition` (optional) - specifies row on which the interface is rendered.
   Values for interfaces of the same `side` value have to be unique.
   If the value is not provided then rows are automatically provided by iterating from the first upper row.
   This value does not work for `array` keyword, as it produces more than one interface.
@@ -254,8 +254,8 @@ There are eight possible values for the `type` property.
   A number field that only accepts integers is displayed to the user.
 * `select` - property is a string with a defined range.
   It requires a `values` property.
-* `checkbox` - property is a bool.
-  A checkbox representing boolean value
+* `bool` - property is a bool.
+  A bool representing boolean value
 * `slider` - property is a float with a specified range.
   It requires `min` and `max` properties.
 * `list` - property is a list of arguments of the same type, which can be specified using `dtype`.
@@ -407,8 +407,7 @@ Below, you can see a sample specification containing a hypothetical definition o
             "properties": [
                 {"name": "filename", "type": "text", "default": ""}
             ],
-            "inputs": [],
-            "outputs": [{"name": "frames", "type": "Image"}]
+            "interfaces": [{"name": "frames", "type": "Image", "direction": "output"}]
         },
         {
             "name": "SaveVideo",
@@ -417,11 +416,10 @@ Below, you can see a sample specification containing a hypothetical definition o
             "properties": [
                 {"name": "filename", "type": "text", "default": ""}
             ],
-            "inputs": [
-                {"name": "color", "type": "Image"},
-                {"name": "binary", "type": "BinaryImage"}
-            ],
-            "outputs": []
+            "interfaces": [
+                {"name": "color", "type": "Image", "direction": "input"},
+                {"name": "binary", "type": "BinaryImage", "direction": "input"}
+            ]
         },
         {
             "name": "GaussianKernel",
@@ -431,8 +429,7 @@ Below, you can see a sample specification containing a hypothetical definition o
                 {"name": "size", "type": "integer", "default": 5},
                 {"name": "sigma", "type": "number", "default": 1.0}
             ],
-            "inputs": [],
-            "outputs": [{"name": "kernel", "type": "Image"}]
+            "interfaces": [{"name": "kernel", "type": "Image", "direction": "output"}]
         },
         {
             "name": "StructuringElement",
@@ -447,8 +444,7 @@ Below, you can see a sample specification containing a hypothetical definition o
                     "default": "Cross"
                 }
             ],
-            "inputs": [],
-            "outputs": [{"name": "kernel", "type": "BinaryImage"}]
+            "interfaces": [{"name": "kernel", "type": "BinaryImage", "direction": "output"}]
         },
         {
             "name": "Filter2D",
@@ -463,11 +459,11 @@ Below, you can see a sample specification containing a hypothetical definition o
                     "default": "constant"
                 }
             ],
-            "inputs": [
-                {"name": "image", "type": "Image"},
-                {"name": "kernel", "type": "Image"}
-            ],
-            "outputs": [{"name": "output", "type": "Image"}]
+            "interfaces": [
+                {"name": "image", "type": "Image", "direction": "input"},
+                {"name": "kernel", "type": "Image", "direction": "input"},
+                {"name": "output", "type": "Image", "direction": "output"}
+            ]
         },
         {
             "name": "Threshold",
@@ -482,8 +478,10 @@ Below, you can see a sample specification containing a hypothetical definition o
                     "default": "constant"
                 }
             ],
-            "inputs": [{"name": "image", "type": "Image"}],
-            "outputs": [{"name": "output", "type": "BinaryImage"}]
+            "interfaces": [
+                {"name": "image", "type": "Image", "direction": "input"},
+                {"name": "output", "type": "BinaryImage", "direction": "output"}
+            ]
         },
         {
             "name": "Morphological operation",
@@ -508,11 +506,11 @@ Below, you can see a sample specification containing a hypothetical definition o
                     ]
                 }
             ],
-            "inputs": [
-                {"name": "image", "type": "BinaryImage"},
-                {"name": "kernel", "type": "BinaryImage"}
-            ],
-            "outputs": [{"name": "output", "type": "BinaryImage"}]
+            "interfaces": [
+                {"name": "image", "type": "BinaryImage", "direction": "input"},
+                {"name": "kernel", "type": "BinaryImage", "direction": "input"},
+                {"name": "output", "type": "BinaryImage", "direction": "output"}
+            ]
         }
     ],
     "metadata": {
@@ -525,7 +523,7 @@ Below, you can see a sample specification containing a hypothetical definition o
 }
 ```
 
-Thanks to the flexibility of the specification format, you can use any combination of properties, inputs, and outputs to create a custom node.
+Thanks to the flexibility of the specification format, you can use any combination of properties and interfaces to create a custom node.
 It is also readable and divided into distinct parts, so you can implement a process of automated specification generation into an external application.
 See the [External App Communication](external-app-communication) section to find out more.
 

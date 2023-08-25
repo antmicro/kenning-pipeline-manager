@@ -333,7 +333,7 @@
                         "number",
                         "integer",
                         "select",
-                        "checkbox",
+                        "bool",
                         "slider",
                         "list",
                         "constant"
@@ -401,7 +401,7 @@
                         "type": "object",
                         "properties": {
                             "type": {
-                                "const": "checkbox"
+                                "const": "bool"
                             }
                         }
                     },
