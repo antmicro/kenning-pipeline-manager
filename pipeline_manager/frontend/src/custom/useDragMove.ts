@@ -106,5 +106,7 @@ export default function useDragMove(
         onPointerDown,
         onPointerMove,
         onPointerUp,
+        draggingStartPoint,
+        draggingStartPosition
     };
 }

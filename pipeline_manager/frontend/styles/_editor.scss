@@ -45,6 +45,16 @@
     z-index: 2;
 }
 
+.selection-container {
+    z-index: 3;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+}
+
 .baklava-editor .background {
     background-image: linear-gradient($gray-700 2px, transparent 2px),
         linear-gradient(90deg, $gray-700 2px, transparent 2px);

@@ -24,6 +24,11 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
             '--temporary-connection': !!temporaryConnection,
         }"
         :style="`--scale: ${this.scale}`"
+        @pointermove.self="onPointerMove"
+        @pointerdown.left.exact="onPointerDown"
+        @pointerup.left.exact="onPointerUp"
+        @pointerdown.right.exact="onRightPointerDown"
+        @pointerup.right.exact="onRightPointerUp"
         @wheel.self="mouseWheel"
         @keydown="keyDown"
         @keyup="keyUp"
@@ -73,14 +78,21 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
                 :connection="temporaryConnection"
             />
         </svg>
+
+        <div class="selection-container">
+            <RectangleSelection
+                ref="rectangleSelection"
+                />
+        </div>
     </div>
 </template>
 
 <script>
 /* eslint-disable object-curly-newline */
 import { EditorComponent, useGraph } from '@baklavajs/renderer-vue';
-import { defineComponent, ref, computed, watch, onMounted } from 'vue';
+import { defineComponent, reactive, ref, computed, watch, onBeforeMount, onMounted } from 'vue';
 import usePanZoom from './panZoom';
+import useDragMove from './useDragMove';
 
 import CustomNode from './CustomNode.vue';
 import PipelineManagerConnection from './connection/PipelineManagerConnection.vue';
@@ -90,6 +102,7 @@ import { useTemporaryConnection } from './temporaryConnection';
 import NotificationHandler from '../core/notifications';
 import EditorManager from '../core/EditorManager';
 import CustomSidebar from './CustomSidebar.vue';
+import RectangleSelection from './RectangleSelection.vue';
 
 export default defineComponent({
     extends: EditorComponent,
@@ -99,6 +112,7 @@ export default defineComponent({
         TemporaryConnection,
         NodePalette,
         CustomSidebar,
+        RectangleSelection,
     },
     setup(props) {
         const {
@@ -125,6 +139,8 @@ export default defineComponent({
 
         const readonly = computed(() => props.viewModel.editor.readonly);
         const hideHud = computed(() => props.viewModel.hideHud);
+        
+        const rectangleSelection = ref(null);
 
         const unselectAllNodes = () => {
             /* eslint-disable vue/no-mutating-props,no-param-reassign */
@@ -139,9 +155,14 @@ export default defineComponent({
             temporaryConnection.onMouseDown();
         };
 
+        const onRightPointerDown = (ev) => {
+            rectangleSelection.value.onPointerDown(ev);
+        }
+
         const onPointerMove = (ev) => {
             panZoom.onPointerMove(ev);
             temporaryConnection.onMouseMove(ev);
+            rectangleSelection.value.onPointerMove(ev);
         };
 
         const onPointerUp = (ev) => {
@@ -152,13 +173,9 @@ export default defineComponent({
             document.removeEventListener('mousemove', onPointerMove);
         };
 
-        document.addEventListener('mousedown', (ev) => {
-            if (ev.button === 0) {
-                onPointerDown(ev);
-                document.addEventListener('mouseup', onPointerUp);
-                document.addEventListener('mousemove', onPointerMove);
-            }
-        });
+        const onRightPointerUp = (ev) => {
+            rectangleSelection.value.onPointerUp(ev);
+        }
 
         const clearHighlight = () => {
             highlightConnections.value.splice(0, highlightConnections.value.length);
@@ -479,11 +496,14 @@ export default defineComponent({
             nodeContainerStyle,
             onPointerMove,
             onPointerDown,
+            onRightPointerDown,
             onPointerUp,
+            onRightPointerUp,
             nodes,
             keyDown,
             keyUp,
             selectNode,
+            rectangleSelection,
             temporaryConnection: temporaryConnection.temporaryConnection,
             mouseWheel: panZoom.onMouseWheel,
             dragging: panZoom.dragging,
