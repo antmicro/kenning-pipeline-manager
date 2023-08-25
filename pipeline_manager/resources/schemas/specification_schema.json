@@ -13,7 +13,6 @@
                     "items": {
                         "type": "object",
                         "required": [
-                            "type",
                             "category",
                             "interfaces",
                             "properties"

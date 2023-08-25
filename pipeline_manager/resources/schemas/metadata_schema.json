@@ -68,7 +68,7 @@
                         "description": "Name of the layer",
                         "type": "string"
                     },
-                    "nodeTypes": {
+                    "nodeLayers": {
                         "type": "array",
                         "description": "Types of nodes that are ignored in this layer"
                     },
@@ -83,7 +83,7 @@
                 "anyOf": [
                     {
                         "required": [
-                            "nodeTypes"
+                            "nodeLayers"
                         ]
                     },
                     {

@@ -1,5 +1,5 @@
 {
-    "version": "20230824.9",
+    "version": "20230830.10",
     "$id": "unresolved_specification_schema",
     "description": "Schema used to validate specification that hasn't resovled inheritance",
     "type": "object",
@@ -21,8 +21,8 @@
                         "description": "Name displayed in a node",
                         "type": "string"
                     },
-                    "type": {
-                        "description": "Type that defines styling of a node",
+                    "layer": {
+                        "description": "Layer that defines styling of a node",
                         "type": "string"
                     },
                     "category": {
@@ -180,7 +180,7 @@
                         "description": "Default name displayed as title",
                         "type": "string"
                     },
-                    "type": {
+                    "layer": {
                         "description": "Type that defines styling of a node",
                         "type": "string"
                     },
@@ -196,11 +196,11 @@
                         "items": {
                             "type": "object",
                             "properties": {
-                                "type": {
-                                    "description": "Type of a node",
+                                "name": {
+                                    "description": "Name of the type of a node from specification",
                                     "type": "string"
                                 },
-                                "title": {
+                                "instanceName": {
                                     "description": "Displayed title of a node",
                                     "type": "string"
                                 },

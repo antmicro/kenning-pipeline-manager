@@ -16,15 +16,15 @@
             "items": {
                 "type": "object",
                 "properties": {
-                    "type": {
-                        "description": "Node type, as defined in the specification",
+                    "name": {
+                        "description": "Name of the node type as defined in the specification",
                         "type": "string"
                     },
                     "id": {
                         "description": "Unique identifier of a node",
                         "type": "string"
                     },
-                    "name": {
+                    "instanceName": {
                         "description": "Optional field defining a node name rendered to the user",
                         "type": "string"
                     },
@@ -145,7 +145,7 @@
                     }
                 },
                 "required": [
-                    "type",
+                    "name",
                     "id",
                     "interfaces"
                 ],
