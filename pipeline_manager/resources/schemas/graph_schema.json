@@ -215,7 +215,12 @@
         "scaling": {
             "description": "Floating-point number that defines the zoom level in the editor",
             "type": "number"
-        }
+        },
+        "name": {
+            "type": "string",
+            "description": "Name of the graph"
+        },
+        "additionalData": {}
     },
     "required": [
         "id",
