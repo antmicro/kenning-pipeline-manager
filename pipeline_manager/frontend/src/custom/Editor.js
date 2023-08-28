@@ -60,20 +60,6 @@ export default class PipelineManagerEditor extends Editor {
         super.registerGraph(customGraph);
     }
 
-    moveSelectedNodes(dx, dy) {
-        console.log(this.graph.nodes[0]);
-        console.log(this.graph.selectedNodes);
-        this.graph.nodes.forEach((node) => {
-            console.log(node.position);
-            node.position.x += dx;
-            node.position.y += dy;
-            console.log(node.position);
-        });
-        
-
-
-    }
-
     save() {
         // Save all changes done to subgraphs before saving
         const currentGraphId = this._graph.id;

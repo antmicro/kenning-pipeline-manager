@@ -11,101 +11,67 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { computed, reactive, defineComponent, watch, ref, toRef, onMounted } from 'vue'; // eslint-disable-line object-curly-newline
-import useDragMove from './useDragMove';
-import selectionRefBegin from './Editor'
-import { useViewModel, useGraph } from '@baklavajs/renderer-vue';
+import { computed, defineComponent, ref } from 'vue'; // eslint-disable-line object-curly-newline
 
 export default defineComponent({
-    setup(props) {
-
-        // const dragMove = useDragMove(
-        //     toRef(props.positionEnd)
-        // );
-
-        // const classes = computed(() => ({
-        //     '--dragging': dragMove.dragging.value,
-        // }));
-
-        // console.log(selectionRefBegin);
-        
+    setup() {
         const selecting = ref(false);
-        const selectionBegin = ref({x: 0, y: 0});
-        const selectionEnd = ref({x: 0, y: 0});
-        const selectionBoundingRect = computed(() => ({
-            xBegin: selectionBegin?.value.x < selectionEnd?.value.x ? selectionBegin?.value.x : selectionEnd?.value.x,
-            yBegin: selectionBegin?.value.y < selectionEnd?.value.y ? selectionBegin?.value.y : selectionEnd?.value.y,
-            xEnd: selectionBegin?.value.x >= selectionEnd?.value.x ? selectionBegin?.value.x : selectionEnd?.value.x,
-            yEnd: selectionBegin?.value.y >= selectionEnd?.value.y ? selectionBegin?.value.y : selectionEnd?.value.y,
+        const selectionBegin = ref({ x: 0, y: 0 });
+        const selectionEnd = ref({ x: 0, y: 0 });
+        const boundingRect = computed(() => ({
+            xBegin: selectionBegin?.value.x < selectionEnd?.value.x ?
+                selectionBegin?.value.x : selectionEnd?.value.x,
+
+            yBegin: selectionBegin?.value.y < selectionEnd?.value.y ?
+                selectionBegin?.value.y : selectionEnd?.value.y,
+
+            xEnd: selectionBegin?.value.x >= selectionEnd?.value.x ?
+                selectionBegin?.value.x : selectionEnd?.value.x,
+
+            yEnd: selectionBegin?.value.y >= selectionEnd?.value.y ?
+                selectionBegin?.value.y : selectionEnd?.value.y,
         }));
-
-        const { graph } = useGraph();
-
-        const dragMove = useDragMove(selectionEnd);
-        const { viewModel } = useViewModel();
 
         const styles = computed(() => ({
             position: 'absolute',
-            top: `${selectionBoundingRect.value.yBegin}px`,
-            left: `${selectionBoundingRect.value.xBegin}px`,
-            width: `${Math.abs(selectionBoundingRect.value.xEnd - selectionBoundingRect.value.xBegin) ?? 0}px`,
-            height: `${Math.abs(selectionBoundingRect.value.yEnd - selectionBoundingRect.value.yBegin) ?? 0}px`,
-            
+            visibility: `${selecting.value ? 'visible' : 'hidden'}`,
+            top: `${boundingRect.value.yBegin}px`,
+            left: `${boundingRect.value.xBegin}px`,
+            width: `${Math.abs(boundingRect.value.xEnd - boundingRect.value.xBegin) ?? 0}px`,
+            height: `${Math.abs(boundingRect.value.yEnd - boundingRect.value.yBegin) ?? 0}px`,
+
             background: 'red',
             opacity: 0.3,
         }));
 
         const onPointerDown = (ev) => {
             selecting.value = true;
-            selectionBegin.value = {x: ev.pageX, y: ev.pageY};
-            selectionEnd.value = {x: ev.pageX, y: ev.pageY};
-        }
+            selectionBegin.value = { x: ev.pageX, y: ev.pageY };
+            selectionEnd.value = { x: ev.pageX, y: ev.pageY };
+        };
 
         const onPointerMove = (ev) => {
             if (selecting.value) {
-                selectionEnd.value = {x: ev.pageX, y: ev.pageY};
+                selectionEnd.value = { x: ev.pageX, y: ev.pageY };
             }
-        }
+        };
 
-        const onPointerUp = (ev) => {
+        const onPointerUp = () => {
             selecting.value = false;
 
-            selectNodes();
-
-            selectionBegin.value = {x: 0, y: 0};
-            selectionEnd.value = {x: 0, y: 0};
-        }
-
-        const selectNodes = () => {
-            for (let i = 0; i < graph.value.nodes.length; i += 1) {
-                let node = graph.value.nodes[i];
-
-                const navBarHeight = 60;
-
-                const panningX = graph.value.panning.x;
-                const panningY = graph.value.panning.y;
-                const scaling = graph.value.scaling;
-
-                const nodeX = scaling * (panningX + node.position.x);
-                const nodeY = scaling * (panningY + node.position.y + navBarHeight);
-
-                if (nodeX > selectionBoundingRect.value.xBegin
-                && nodeX < selectionBoundingRect.value.xEnd
-                && nodeY > selectionBoundingRect.value.yBegin
-                && nodeY < selectionBoundingRect.value.yEnd) {
-                    graph.value.selectedNodes.push(node);
-                }
-            }
-        }
+            selectionBegin.value = { x: 0, y: 0 };
+            selectionEnd.value = { x: 0, y: 0 };
+        };
 
         return {
             styles,
             onPointerDown,
             onPointerMove,
-            onPointerUp
+            onPointerUp,
+            selecting,
+            boundingRect,
         };
     },
 });
-
 
 </script>

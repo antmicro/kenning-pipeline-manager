@@ -24,7 +24,7 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
             '--temporary-connection': !!temporaryConnection,
         }"
         :style="`--scale: ${this.scale}`"
-        @pointermove.self="onPointerMove"
+        @pointermove="onPointerMove"
         @pointerdown.left.exact="onPointerDown"
         @pointerup.left.exact="onPointerUp"
         @pointerdown.right.exact="onRightPointerDown"
@@ -80,9 +80,7 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
         </svg>
 
         <div class="selection-container">
-            <RectangleSelection
-                ref="rectangleSelection"
-                />
+            <RectangleSelection ref="rectangleSelection"/>
         </div>
     </div>
 </template>
@@ -90,9 +88,8 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
 <script>
 /* eslint-disable object-curly-newline */
 import { EditorComponent, useGraph } from '@baklavajs/renderer-vue';
-import { defineComponent, reactive, ref, computed, watch, onBeforeMount, onMounted } from 'vue';
+import { defineComponent, ref, computed, watch, onMounted } from 'vue';
 import usePanZoom from './panZoom';
-import useDragMove from './useDragMove';
 
 import CustomNode from './CustomNode.vue';
 import PipelineManagerConnection from './connection/PipelineManagerConnection.vue';
@@ -139,8 +136,34 @@ export default defineComponent({
 
         const readonly = computed(() => props.viewModel.editor.readonly);
         const hideHud = computed(() => props.viewModel.hideHud);
-        
+
         const rectangleSelection = ref(null);
+
+        const selectMultipleNodes = () => {
+            const selectionBoundingRect = rectangleSelection.value.boundingRect;
+
+            graph.value.nodes.forEach((node) => {
+                const nodeHTMLelement = document.getElementById(node.id);
+
+                const navBarHeight = 60;
+
+                const panningX = graph.value.panning.x;
+                const panningY = graph.value.panning.y;
+                const { scaling } = graph.value;
+
+                const nodeX = scaling * (panningX + node.position.x);
+                const nodeY = scaling * (panningY + node.position.y + navBarHeight);
+                const nodeWidth = nodeHTMLelement.offsetWidth;
+                const nodeHeight = nodeHTMLelement.offsetHeight;
+
+                if (nodeX > selectionBoundingRect.xBegin
+                && nodeX + nodeWidth < selectionBoundingRect.xEnd
+                && nodeY > selectionBoundingRect.yBegin
+                && nodeY + nodeHeight < selectionBoundingRect.yEnd) {
+                    graph.value.selectedNodes.push(node);
+                }
+            });
+        };
 
         const unselectAllNodes = () => {
             /* eslint-disable vue/no-mutating-props,no-param-reassign */
@@ -157,7 +180,7 @@ export default defineComponent({
 
         const onRightPointerDown = (ev) => {
             rectangleSelection.value.onPointerDown(ev);
-        }
+        };
 
         const onPointerMove = (ev) => {
             panZoom.onPointerMove(ev);
@@ -173,9 +196,10 @@ export default defineComponent({
             document.removeEventListener('mousemove', onPointerMove);
         };
 
-        const onRightPointerUp = (ev) => {
-            rectangleSelection.value.onPointerUp(ev);
-        }
+        const onRightPointerUp = () => {
+            selectMultipleNodes();
+            rectangleSelection.value.onPointerUp();
+        };
 
         const clearHighlight = () => {
             highlightConnections.value.splice(0, highlightConnections.value.length);
