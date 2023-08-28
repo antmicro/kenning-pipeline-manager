@@ -68,10 +68,34 @@ export default defineComponent({
         }
 
         const onPointerUp = (ev) => {
-
             selecting.value = false;
+
+            selectNodes();
+
             selectionBegin.value = {x: 0, y: 0};
             selectionEnd.value = {x: 0, y: 0};
+        }
+
+        const selectNodes = () => {
+            for (let i = 0; i < graph.value.nodes.length; i += 1) {
+                let node = graph.value.nodes[i];
+
+                const navBarHeight = 60;
+
+                const panningX = graph.value.panning.x;
+                const panningY = graph.value.panning.y;
+                const scaling = graph.value.scaling;
+
+                const nodeX = scaling * (panningX + node.position.x);
+                const nodeY = scaling * (panningY + node.position.y + navBarHeight);
+
+                if (nodeX > selectionBoundingRect.value.xBegin
+                && nodeX < selectionBoundingRect.value.xEnd
+                && nodeY > selectionBoundingRect.value.yBegin
+                && nodeY < selectionBoundingRect.value.yEnd) {
+                    graph.value.selectedNodes.push(node);
+                }
+            }
         }
 
         return {
