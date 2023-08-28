@@ -1,5 +1,8 @@
 image: $CI_IMAGE
 
+.ace: &ace
+    tags: ['ace-x86_64']
+
 .common_only: &common_only
     only:
         - main
@@ -20,12 +23,14 @@ before_script:
 
 flake8:
     stage: lint
+    <<: *ace
     <<: *common_only
     script:
         - flake8 .
 
 eslint:
     stage: lint
+    <<: *ace
     <<: *common_only
     script:
         - cd pipeline_manager/frontend
@@ -35,12 +40,14 @@ eslint:
 
 build-server-app:
     stage: build
+    <<: *ace
     <<: *common_only
     script:
         - ./build server-app
 
 test_singlehtml_build:
     stage: build
+    <<: *ace
     <<: *common_only
     script:
         - pip install beautifulsoup4
@@ -48,12 +55,14 @@ test_singlehtml_build:
 
 test_validate:
     stage: build
+    <<: *ace
     <<: *common_only
     script:
         - ./validate ./examples/sample-specification.json ./examples/sample-dataflow.json --install-dependencies
 
 pytest:
     stage: build
+    <<: *ace
     <<: *common_only
     script:
         - pip install -r requirements.txt
@@ -61,6 +70,7 @@ pytest:
 
 check-links:
     stage: build
+    <<: *ace
     <<: *common_only
     script:
         - cd docs
@@ -69,6 +79,7 @@ check-links:
 
 build-docs-and-static-html:
     stage: build
+    <<: *ace
     <<: *common_only
     script:
         - cd docs
