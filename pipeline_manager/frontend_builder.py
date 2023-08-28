@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import base64
-import os
 import errno
 import json
 import shutil
@@ -73,7 +72,6 @@ def build_singlehtml(
 
 
 def build_prepare(frontend_path):
-
     subprocess.run(['npm', 'install'], cwd=frontend_path)
 
 
@@ -146,7 +144,7 @@ def build_frontend(
 
     # check if building is happening in repo, if not ask the user to provide
     # the necessary directory paths
-    if not os.path.exists(Path(os.getcwd()) / 'pipeline_manager/frontend')\
+    if not (Path.cwd() / 'pipeline_manager/frontend').is_dir() \
             and not workspace_directory and not output_directory:
 
         print(
@@ -163,23 +161,22 @@ def build_frontend(
 
     # change project path to current working directory if project is
     # installed in other location, but we are still in the repo directory
-    if os.path.exists(Path(os.getcwd()) / 'pipeline_manager/frontend')\
-        and not Path(pipeline_manager.__file__).samefile(Path(os.getcwd()) / 'pipeline_manager/__init__.py'): # noqa E501
+    if (Path.cwd() / 'pipeline_manager/frontend').is_dir() \
+            and not Path(pipeline_manager.__file__).samefile(Path.cwd() / 'pipeline_manager/__init__.py'):  # noqa E501
 
-        project_path = Path(os.getcwd()).absolute()
+        project_path = Path.cwd().absolute()
         frontend_path = project_path / 'pipeline_manager/frontend'
         frontend_dist_path = frontend_path / 'dist'
         resources_path = project_path / 'pipeline_manager/resources'
 
     if workspace_directory:
 
-        workspace_directory = Path(os.getcwd() / workspace_directory)
+        workspace_directory = Path.cwd() / workspace_directory
 
         if clean_build and Path(workspace_directory).exists():
             shutil.rmtree(workspace_directory)
 
-        if not os.path.exists(workspace_directory):
-            workspace_directory.mkdir(parents=True)
+        workspace_directory.mkdir(parents=True, exist_ok=True)
 
         shutil.copytree(
             frontend_path,
@@ -251,12 +248,12 @@ def build_frontend(
         return exit_status.returncode
 
     if output_directory:
-        output_directory = Path(os.getcwd() / output_directory)
+        output_directory = Path.cwd() / output_directory
 
         if clean_build and Path(output_directory).exists():
             shutil.rmtree(output_directory)
-        frontend_dist_path = Path(
-            os.path.abspath(sys.argv[0])).parent / output_directory
+        frontend_dist_path = \
+            Path(sys.argv[0]).resolve().parent / output_directory
 
     if assets_directory:
         shutil.copytree(
