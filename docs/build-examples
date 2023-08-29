@@ -17,7 +17,7 @@ import argparse
 
 sys.path.append(str(Path(__file__).parent.parent.absolute()))
 
-from pipeline_manager.frontend_builder import build_frontend  # noqa: E402
+from pipeline_manager.frontend_builder import build_prepare, build_frontend  # noqa: E402
 
 
 def main(argv):
@@ -38,6 +38,8 @@ def main(argv):
     if not args.examples_dir.exists():
         return errno.EINVAL
 
+    build_prepare()
+
     all_specs = args.examples_dir.rglob('*-specification.json')
     for spec in all_specs:
         dataflow = Path(str(spec).replace('specification', 'dataflow'))
@@ -51,7 +53,8 @@ def main(argv):
             specification=spec,
             dataflow=dataflow,
             mode='production',
-            output_directory=args.output_dir / title
+            output_directory=args.output_dir / title,
+            skip_install_deps=True
         )
 
 
