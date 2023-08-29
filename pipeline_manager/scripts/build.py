@@ -51,6 +51,11 @@ def script_build():
         help='Path where single, self-contained HTML should be built',
         type=Path
     )
+    base_parser.add_argument(
+        '--skip-install-deps',
+        help='Tells if the npm install should be skipped or not',
+        action='store_true'
+    )
     subparsers = parser.add_subparsers(
         title='build_type',
         help='Build type of the frontend application',
