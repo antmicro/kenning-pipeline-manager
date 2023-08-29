@@ -185,8 +185,7 @@ export default class EditorManager {
         resolvedNodes.forEach((node) => {
             const myNode = NodeFactory(
                 node.name,
-                node.name,
-                node.type,
+                node.layer,
                 node.interfaces,
                 node.properties,
                 node.interfaceGroups ?? [],
@@ -236,7 +235,6 @@ export default class EditorManager {
                     subgraph.connections,
                     subgraph.interfaces,
                     subgraph.name,
-                    subgraph.type,
                     this.baklavaView.editor,
                 );
 
@@ -249,7 +247,7 @@ export default class EditorManager {
                 this.baklavaView.editor.addGraphTemplate(
                     mySubgraph,
                     subgraph.category,
-                    subgraph.type,
+                    subgraph.name,
                 );
             });
         }

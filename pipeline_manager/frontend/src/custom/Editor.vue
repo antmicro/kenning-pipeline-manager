@@ -262,18 +262,18 @@ export default defineComponent({
             const temp = new Set();
 
             ignorableLayers.value.forEach((layer) => {
-                if (layer.nodeTypes && ignoredLayers.value.has(layer.name)) {
-                    layer.nodeTypes.forEach(temp.add, temp);
+                if (layer.nodeLayers && ignoredLayers.value.has(layer.name)) {
+                    layer.nodeLayers.forEach(temp.add, temp);
                 }
             });
             return temp;
         });
 
         const visibleNodes = computed(() =>
-            nodes.value.filter((n) => !ignoredNodesTypes.value.has(n.nodeType)),
+            nodes.value.filter((n) => !ignoredNodesTypes.value.has(n.layer)),
         );
         const ignoredNodes = computed(() =>
-            nodes.value.filter((n) => ignoredNodesTypes.value.has(n.nodeType)),
+            nodes.value.filter((n) => ignoredNodesTypes.value.has(n.layer)),
         );
         const ignoredNodesId = computed(() => ignoredNodes.value.map((n) => n.id));
 

@@ -74,8 +74,8 @@ export default class PipelineManagerEditor extends Editor {
         // subgraphs are stored in state.subgraphs, there is no need to store it
         // in nodes itself
         const recurrentSubgraphSave = (node) => {
-            if (node.type.startsWith(GRAPH_NODE_TYPE_PREFIX)) {
-                node.type = node.type.slice(GRAPH_NODE_TYPE_PREFIX.length);
+            if (node.name?.startsWith(GRAPH_NODE_TYPE_PREFIX)) {
+                node.name = node.name.slice(GRAPH_NODE_TYPE_PREFIX.length);
                 node.subgraph = node.graphState.id;
                 node.graphState.nodes = node.graphState.nodes
                     .filter((n) =>
@@ -110,6 +110,16 @@ export default class PipelineManagerEditor extends Editor {
                 throw new Error(errors);
             }
         });
+        /* eslint-enable no-unused-vars */
+
+        if (state.subgraphs.length === 0) {
+            delete state.subgraphs;
+        }
+
+        // Main graph should have no IO
+        delete state.graph.inputs;
+        delete state.graph.outputs;
+
         return state;
     }
 
@@ -167,7 +177,7 @@ export default class PipelineManagerEditor extends Editor {
                     (template) => template.id === node.subgraph,
                 );
                 if (fittingTemplate.length !== 1) {
-                    return [`Expected exactly one template with ID ${node.type}, got ${fittingTemplate.length}`];
+                    return [`Expected exactly one template with ID ${node.name}, got ${fittingTemplate.length}`];
                 }
                 if (usedInstances.has(node.subgraph)) {
                     return [`Subgraph ${node.subgraph} has multiple nodes pointing to it - only unique IDs are allowed`];
@@ -178,7 +188,7 @@ export default class PipelineManagerEditor extends Editor {
                 node.graphState.nodes.forEach((n) => {
                     errors.push(...recurrentSubgraphLoad(n));
                 });
-                node.type = `${GRAPH_NODE_TYPE_PREFIX}${node.type}`;
+                node.name = `${GRAPH_NODE_TYPE_PREFIX}${node.name}`;
 
                 const interfaces = node.graphState.interfaces.map(
                     (io) => {
