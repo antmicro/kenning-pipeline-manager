@@ -29,6 +29,8 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
         @pointerup.left.exact="onPointerUp"
         @pointerdown.right.exact="onRightPointerDown"
         @pointerup.right.exact="onRightPointerUp"
+        @pointerdown.right.ctrl="onRightPointerDownCtrl"
+        @pointerup.right.ctrl="onRightPointerUpCtrl"
         @keyup.delete="deleteKeyUp"
         @wheel.self="mouseWheel"
         @keydown="keyDown"
@@ -101,6 +103,7 @@ import NotificationHandler from '../core/notifications';
 import EditorManager from '../core/EditorManager';
 import CustomSidebar from './CustomSidebar.vue';
 import RectangleSelection from './RectangleSelection.vue';
+import nodeInsideSelection from './rectangleSelection.js';
 
 export default defineComponent({
     extends: EditorComponent,
@@ -143,35 +146,28 @@ export default defineComponent({
         const pressStartTime = ref(0);
         const longPressMilisTreshold = ref(100);
 
-        const selectMultipleNodes = () => {
-            const selectionBoundingRect = rectangleSelection.value.boundingRect;
+        const unselectAllNodes = () => {
+            /* eslint-disable vue/no-mutating-props,no-param-reassign */
+            props.viewModel.displayedGraph.selectedNodes = [];
+        };
 
+        const appendSelectMultipleNodes = () => {
             graph.value.nodes.forEach((node) => {
-                const nodeHTMLelement = document.getElementById(node.id);
+                if (graph.value.selectedNodes.includes(node)) {
+                    return;
+                }
 
-                const navBarHeight = 60;
+                const selectionBoundingRect = rectangleSelection.value.boundingRect;
 
-                const panningX = graph.value.panning.x;
-                const panningY = graph.value.panning.y;
-                const { scaling } = graph.value;
-
-                const nodeX = scaling * (panningX + node.position.x);
-                const nodeY = scaling * (panningY + node.position.y + navBarHeight);
-                const nodeWidth = nodeHTMLelement.offsetWidth;
-                const nodeHeight = nodeHTMLelement.offsetHeight;
-
-                if (nodeX > selectionBoundingRect.xBegin
-                && nodeX + nodeWidth < selectionBoundingRect.xEnd
-                && nodeY > selectionBoundingRect.yBegin
-                && nodeY + nodeHeight < selectionBoundingRect.yEnd) {
+                if (nodeInsideSelection(graph.value, node, selectionBoundingRect)) {
                     graph.value.selectedNodes.push(node);
                 }
             });
         };
 
-        const unselectAllNodes = () => {
-            /* eslint-disable vue/no-mutating-props,no-param-reassign */
-            props.viewModel.displayedGraph.selectedNodes = [];
+        const selectMultipleNodes = () => {
+            unselectAllNodes();
+            appendSelectMultipleNodes();
         };
 
         const onPointerDown = (ev) => {
@@ -185,6 +181,11 @@ export default defineComponent({
 
         const onRightPointerDown = (ev) => {
             rectangleSelection.value.onPointerDown(ev);
+            if (ev.target === el.value) {
+                unselectAllNodes();
+            }
+
+            pressStartTime.value = new Date();
         };
 
         const onPointerMove = (ev) => {
@@ -200,19 +201,34 @@ export default defineComponent({
             // handle press & hold
             const currentTime = new Date();
             const elapsedTime = currentTime - pressStartTime.value;
-            if (elapsedTime < longPressMilisTreshold.value) {
+            if (elapsedTime < longPressMilisTreshold.value
+                && ev.target === el.value) {
                 unselectAllNodes();
             }
         };
 
         const onRightPointerUp = () => {
-            selectMultipleNodes();
+            // handle press & hold right mouse button
+            const currentTime = new Date();
+            const elapsedTime = currentTime - pressStartTime.value;
+            if (elapsedTime >= longPressMilisTreshold.value) {
+                selectMultipleNodes();
+            }
+            rectangleSelection.value.onPointerUp();
+        };
+
+        const onRightPointerDownCtrl = (ev) => {
+            rectangleSelection.value.onPointerDown(ev);
+        };
+
+        const onRightPointerUpCtrl = () => {
+            appendSelectMultipleNodes();
             rectangleSelection.value.onPointerUp();
         };
 
         const deleteKeyUp = () => {
             graph.value.removeSelectedNodes();
-        }
+        };
 
         const clearHighlight = () => {
             highlightConnections.value.splice(0, highlightConnections.value.length);
@@ -536,6 +552,8 @@ export default defineComponent({
             onRightPointerDown,
             onPointerUp,
             onRightPointerUp,
+            onRightPointerDownCtrl,
+            onRightPointerUpCtrl,
             deleteKeyUp,
             nodes,
             keyDown,

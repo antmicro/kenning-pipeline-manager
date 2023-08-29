@@ -464,7 +464,7 @@ export default function createPipelineManagerGraph(graph) {
         for (let i = this.selectedNodes.length - 1; i >= 0; i -= 1) {
             this.removeNode(this.selectedNodes[i]);
         }
-    }
+    };
 
     return graph;
 }
