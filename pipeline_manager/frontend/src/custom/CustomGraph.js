@@ -460,5 +460,11 @@ export default function createPipelineManagerGraph(graph) {
         return this.hooks.save.execute(state);
     };
 
+    graph.removeSelectedNodes = function removeSelectedNodes() {
+        for (let i = this.selectedNodes.length - 1; i >= 0; i -= 1) {
+            this.removeNode(this.selectedNodes[i]);
+        }
+    }
+
     return graph;
 }

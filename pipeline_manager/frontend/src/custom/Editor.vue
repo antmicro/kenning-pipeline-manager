@@ -29,6 +29,7 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
         @pointerup.left.exact="onPointerUp"
         @pointerdown.right.exact="onRightPointerDown"
         @pointerup.right.exact="onRightPointerUp"
+        @keyup.delete="deleteKeyUp"
         @wheel.self="mouseWheel"
         @keydown="keyDown"
         @keyup="keyUp"
@@ -208,6 +209,10 @@ export default defineComponent({
             selectMultipleNodes();
             rectangleSelection.value.onPointerUp();
         };
+
+        const deleteKeyUp = () => {
+            graph.value.removeSelectedNodes();
+        }
 
         const clearHighlight = () => {
             highlightConnections.value.splice(0, highlightConnections.value.length);
@@ -531,6 +536,7 @@ export default defineComponent({
             onRightPointerDown,
             onPointerUp,
             onRightPointerUp,
+            deleteKeyUp,
             nodes,
             keyDown,
             keyUp,

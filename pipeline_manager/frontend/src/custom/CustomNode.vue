@@ -223,7 +223,7 @@ const openSidebar = () => {
 const onContextMenuTitleClick = async (action) => {
     switch (action) {
         case 'delete':
-            startTransaction();
+            graph.value.removeSelectedNodes();
             graph.value.removeNode(props.node);
             commitTransaction();
             break;
