@@ -53,9 +53,9 @@ SPDX-License-Identifier: Apache-2.0
                 <div class="__title">Properties</div>
                 <div v-for="input in displayedProperties" :key="input.id" class="__property">
                     <div class="__property-name">
-                        {{ input.name }}:
+                        {{ getOptionName(input.componentName) ? `${input.name}:` : '' }}
                     </div>
-                    <CustomInterface :node="node" :intf="input" />
+                    <CustomInterface :node="node" :intf="input" :toggleGroup="toggleGroup" />
                 </div>
             </div>
 
@@ -165,6 +165,29 @@ export default defineComponent({
                     tooltip.value.left = ev.clientX - ev.offsetX + ev.currentTarget.offsetWidth / 2;
                 }
             });
+        };
+
+        const toggleGroup = (intf) => {
+            intf.group.forEach((name) => {
+                node.value.inputs[name].hidden = intf.value;
+            });
+        };
+
+        const getOptionName = (optionType) => {
+            switch (optionType) {
+                case 'InputInterface':
+                case 'SelectInterface':
+                case 'ListInterface':
+                case 'TextInterface':
+                    return true;
+                case 'NumberInterface':
+                case 'IntegerInterface':
+                case 'CheckboxInterface':
+                case 'SliderInterface':
+                case 'NodeInterface':
+                default:
+                    return false;
+            }
         };
 
         const onPointerLeave = () => {
@@ -287,6 +310,8 @@ export default defineComponent({
             onPointerOver,
             onPointerLeave,
             tooltipRef,
+            toggleGroup,
+            getOptionName,
         };
     },
 });
