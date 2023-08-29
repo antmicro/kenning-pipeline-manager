@@ -59,6 +59,12 @@ export default function CreateCustomGraphNodeType(template, type) {
             delete state.graphState.inputs;
             delete state.graphState.outputs;
 
+            state.name = state.type;
+            delete state.type;
+
+            state.instanceName = state.title === '' ? undefined : state.title;
+            delete state.title;
+
             return state;
         }
 
