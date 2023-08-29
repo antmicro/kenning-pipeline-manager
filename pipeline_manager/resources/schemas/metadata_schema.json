@@ -150,6 +150,9 @@
             "type": "boolean",
             "description": "Determines whether connections should have randomized, but deterministic offset",
             "default": "false"
+        },
+        "icons": {
+            "type": "object"
         }
     },
     "additionalProperties": false

@@ -34,7 +34,7 @@
                     },
                     "icon": {
                         "description": "Icon of a node",
-                        "type": "string"
+                        "type": ["object", "string"]
                     },
                     "defaultInterfaceGroups": {
                         "description": "List of names of chosen interface groups that are enabled by default",
