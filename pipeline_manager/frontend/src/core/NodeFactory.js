@@ -190,12 +190,8 @@ function parseNodeState(state) {
         newState.enabledInterfaceGroups = {};
     }
 
-    if ('name' in newState) {
-        newState.title = newState.name;
-    } else {
-        newState.title = '';
-    }
-    delete newState.name;
+    newState.title = newState.instanceName ?? '';
+    delete newState.instanceName;
 
     newState.parsed = true;
     return newState;
@@ -207,8 +203,7 @@ function parseNodeState(state) {
  * `inputs`, `properties` and `outputs` formats are described in the documentation.
  *
  * @param {string} name Name of the block that is stored when saving
- * @param {string} displayName Name of the block displayed to the user
- * @param {string} type Type of the node
+ * @param {string} layer Layer of the node
  * @param {*} interfaces List of interfaces in the block (input, output and inout)
  * @param {*} properties List of properties of the block
  * @param {*} interfaceGroups Object describing groups of interfaces
@@ -219,8 +214,7 @@ function parseNodeState(state) {
  */
 export function NodeFactory(
     name,
-    displayName,
-    nodeType,
+    layer,
     interfaces,
     properties,
     interfaceGroups,
@@ -231,7 +225,7 @@ export function NodeFactory(
     const parsedInterfaces = parseInterfaces(interfaces, interfaceGroups, defaultInterfaceGroups);
     // If parsedInterfaces returns an array, it is an array of errors
     if (Array.isArray(parsedInterfaces) && parsedInterfaces.length) {
-        return parsedInterfaces.map((error) => `Node ${displayName} invalid. ${error}`);
+        return parsedInterfaces.map((error) => `Node ${name} invalid. ${error}`);
     }
 
     function createBaklavaInterface(intf) {
@@ -260,8 +254,6 @@ export function NodeFactory(
     const node = defineNode({
         type: name,
 
-        title: displayName,
-
         inputs: {
             ...inputs,
             ...parsedProperties,
@@ -272,7 +264,7 @@ export function NodeFactory(
         onCreate() {
             this.description = description;
             this.groups = groups;
-            this.nodeType = nodeType;
+            this.layer = layer;
             this.parentSave = this.save;
             this.parentLoad = this.load;
 
@@ -361,7 +353,10 @@ export function NodeFactory(
                 savedState.properties = newProperties;
                 savedState.enabledInterfaceGroups = enabledInterfaceGroups;
 
-                savedState.name = savedState.title;
+                savedState.name = savedState.type;
+                delete savedState.type;
+
+                savedState.instanceName = savedState.title === '' ? undefined : savedState.title;
                 delete savedState.title;
 
                 return savedState;
@@ -481,7 +476,7 @@ export function NodeFactory(
                     parsedState = parseNodeState(state);
 
                     if (Array.isArray(parsedState) && parsedState.length) {
-                        return parsedState.map((error) => `Node ${displayName} of id: ${this.id} invalid. ${error}`);
+                        return parsedState.map((error) => `Node ${name} of id: ${this.id} invalid. ${error}`);
                     }
                 }
 
@@ -489,11 +484,11 @@ export function NodeFactory(
                 if (process.env.VUE_APP_GRAPH_DEVELOPMENT_MODE === 'true') {
                     errors = this.updateInterfaces(parsedState.inputs, parsedState.outputs);
                     errors = [...errors, ...updateProperties(parsedState.inputs)];
-                    errors = errors.map((error) => `Node ${displayName} of id: ${this.id} invalid. ${error}`);
+                    errors = errors.map((error) => `Node ${name} of id: ${this.id} invalid. ${error}`);
                 } else {
                     errors = detectDiscrepancies(parsedState, this.inputs, this.outputs);
                     if (Array.isArray(errors) && errors.length) {
-                        return errors.map((error) => `Node ${displayName} of id: ${this.id} invalid. ${error}`);
+                        return errors.map((error) => `Node ${name} of id: ${this.id} invalid. ${error}`);
                     }
                 }
 
@@ -560,12 +555,10 @@ export function NodeFactory(
  * @param connections Connections inside the subgraph
  * @param interfaces Inputs and outputs
  * @param name Default name that will be displayed in editor
- * @param type Type of the subgraph. Used to define which template should be used
- * when new subgraph node is create
  * @param editor PipelineManagerEditor instance
  * @returns Graph template that will be used to define the subgraph node
  */
-export function SubgraphFactory(nodes, connections, interfaces, name, type, editor) {
+export function SubgraphFactory(nodes, connections, interfaces, name, editor) {
     const { inputs, outputs } = parseInterfaces(interfaces, [], [], true);
 
     const graphInputs = Object.values(inputs);
@@ -575,16 +568,15 @@ export function SubgraphFactory(nodes, connections, interfaces, name, type, edit
     const errorMessages = parsedState.filter((n) => Array.isArray(n) && n.length);
 
     if (errorMessages.length) {
-        return errorMessages.map((error) => `Node '${type}' invalid. ${error}`);
+        return errorMessages.map((error) => `Node '${name}' invalid. ${error}`);
     }
 
     const state = {
-        id: type,
+        name,
         nodes: parsedState,
         connections,
         inputs: graphInputs,
         outputs: graphOutputs,
-        name,
     };
 
     return new GraphTemplate(state, editor);
