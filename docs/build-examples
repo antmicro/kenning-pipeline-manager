@@ -17,7 +17,7 @@ import argparse
 
 sys.path.append(str(Path(__file__).parent.parent.absolute()))
 
-from pipeline_manager.frontend_builder import build_prepare, build_frontend  # noqa: E402
+from pipeline_manager.frontend_builder import build_frontend  # noqa: E402
 
 
 def main(argv):
