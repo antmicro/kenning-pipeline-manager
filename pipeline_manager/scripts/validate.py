@@ -32,13 +32,19 @@ def script_validate():
         help='Directory where the frontend sources should be stored',
         type=Path
     )
+    validator_parser.add_argument(
+        '--skip-install-deps',
+        help='Tells if the npm install should be skipped or not',
+        action='store_true'
+    )
     args = validator_parser.parse_args()
 
     build_prepare(
-        args.workspace_directory if 'workspace_directory' in args else None
+        args.workspace_directory if 'workspace_directory' in args else None,
+        skip_install_deps=args.skip_install_deps
     )
 
-    args = {k: v for k, v in vars(args).items() if v is not None}
+    args = {k: v for k, v in vars(args).items() if v is not None and k != 'skip_install_deps'}  # noqa: E501
 
     return validate(**args)
 
