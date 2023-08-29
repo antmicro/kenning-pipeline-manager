@@ -12,7 +12,7 @@ def specification_invalid_property_type():
         'nodes': [
             {
                 'name': 'TestNode',
-                'type': 'TestNode',
+                'layer': 'TestNode',
                 'category': 'TestNode',
                 'properties': [
                     {
@@ -32,7 +32,7 @@ def specification_missing_interfaces():
         'nodes': [
             {
                 'name': 'TestNode',
-                'type': 'TestNode',
+                'layer': 'TestNode',
                 'category': 'TestNode',
                 'properties': []
             }
@@ -46,7 +46,7 @@ def specification_invalid_property_value():
         'nodes': [
             {
                 'name': 'TestNode',
-                'type': 'TestNode',
+                'layer': 'TestNode',
                 'category': 'TestNode',
                 'properties': [
                     {
@@ -66,21 +66,7 @@ def specification_invalid_nodes_without_name():
     return {
         'nodes': [
             {
-                'type': 'TestNode',
-                'category': 'TestNode',
-                'properties': [],
-                'interfaces': []
-            }
-        ]
-    }
-
-
-@pytest.fixture
-def specification_invalid_nodes_without_type():
-    return {
-        'nodes': [
-            {
-                'name': 'TestNode',
+                'layer': 'TestNode',
                 'category': 'TestNode',
                 'properties': [],
                 'interfaces': []
@@ -99,7 +85,6 @@ def test_example_specification(sample_specification, specification_validator):
         'specification_missing_interfaces',
         'specification_invalid_property_value',
         'specification_invalid_nodes_without_name',
-        'specification_invalid_nodes_without_type'
     ]
 )
 def test_invalid_specification(
