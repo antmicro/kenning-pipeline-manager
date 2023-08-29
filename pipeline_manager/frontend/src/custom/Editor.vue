@@ -139,6 +139,9 @@ export default defineComponent({
 
         const rectangleSelection = ref(null);
 
+        const pressStartTime = ref(0);
+        const longPressMilisTreshold = ref(100);
+
         const selectMultipleNodes = () => {
             const selectionBoundingRect = rectangleSelection.value.boundingRect;
 
@@ -172,10 +175,11 @@ export default defineComponent({
 
         const onPointerDown = (ev) => {
             if (ev.target === el.value) {
-                unselectAllNodes();
                 panZoom.onPointerDown(ev);
             }
             temporaryConnection.onMouseDown();
+
+            pressStartTime.value = new Date();
         };
 
         const onRightPointerDown = (ev) => {
@@ -192,8 +196,12 @@ export default defineComponent({
             panZoom.onPointerUp(ev);
             temporaryConnection.onMouseUp();
 
-            document.removeEventListener('mouseup', onPointerUp);
-            document.removeEventListener('mousemove', onPointerMove);
+            // handle press & hold
+            const currentTime = new Date();
+            const elapsedTime = currentTime - pressStartTime.value;
+            if (elapsedTime < longPressMilisTreshold.value) {
+                unselectAllNodes();
+            }
         };
 
         const onRightPointerUp = () => {
