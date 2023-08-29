@@ -5,7 +5,7 @@
  */
 
 .baklava-node-palette {
-    top: 0px;
+    top: 0;
     width: auto;
     min-width: 300px;
     max-width: 450px;
@@ -29,7 +29,7 @@
     }
 
     & h1 {
-        margin: 0px;
+        margin: 0;
     }
 
     & > .nodes {

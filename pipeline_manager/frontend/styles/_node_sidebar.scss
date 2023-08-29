@@ -24,7 +24,7 @@
     &.--open {
         transform: translateX(0);
         transition: transform 0.2s;
-        box-shadow: 0px 0px 15px black;
+        box-shadow: 0 0 15px black;
     }
 
     & > .__resizer {
@@ -115,7 +115,7 @@
             }
 
             & > .__group:last-child {
-                border: 0px;
+                border: 0;
             }
 
             & > .__group-assign {
