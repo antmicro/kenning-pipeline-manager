@@ -18,9 +18,6 @@ stages:
     - build
     - deploy
 
-before_script:
-    - n 20.5.0
-
 flake8:
     stage: lint
     <<: *ace
@@ -50,7 +47,6 @@ test_singlehtml_build:
     <<: *ace
     <<: *common_only
     script:
-        - pip install beautifulsoup4
         - ./build static-html ./examples/sample-specification.json ./examples/sample-dataflow.json --editor-title "Test webpage" --output-directory ./output-dir --clean-build --single-html output.html --minify-specification
 
 test_validate:
@@ -65,7 +61,6 @@ pytest:
     <<: *ace
     <<: *common_only
     script:
-        - pip install -r requirements.txt
         - python3 -m pytest
 
 check-links:
