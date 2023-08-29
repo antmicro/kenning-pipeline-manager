@@ -72,7 +72,8 @@ def build_singlehtml(
 
 
 def build_prepare(
-        workspace_directory: Optional[Path] = None):
+        workspace_directory: Optional[Path] = None,
+        skip_install_deps: bool = False):
     """
     Prepares the workspace directory for building.
 
@@ -84,6 +85,8 @@ def build_prepare(
     ----------
     workspace_directory: Path
         Path where the frontend should be built
+    skip_install_deps: bool
+        Tells whether npm install should be skipped or not
 
     Returns
     -------
@@ -134,6 +137,8 @@ def build_prepare(
         workspace_directory = project_path / 'pipeline_manager'
     frontend_path = workspace_directory / 'frontend'
 
+    if skip_install_deps:
+        return 0, workspace_directory
     exit_status = subprocess.run(
         ['npm', 'install'],
         cwd=frontend_path
@@ -153,7 +158,8 @@ def build_frontend(
         clean_build: bool = False,
         single_html: Optional[Path] = None,
         minify_specification: bool = False,
-        graph_development_mode: bool = False):
+        graph_development_mode: bool = False,
+        skip_install_deps: bool = False):
     """
     Builds the frontend for the Pipeline Manager.
 
@@ -191,13 +197,18 @@ def build_frontend(
     graph_development_mode: bool
         Allows errors in the graph to occur and tries to visualize
         as much of the graph as possible for development/debugging purposes.
+    skip_install_deps: bool
+        Tells if npm install should be skipped or not
 
     Returns
     -------
     int: 0 if successfull, EINVAL if arguments are conflicting or invalid
     """
 
-    exit_status, workspace_directory = build_prepare(workspace_directory)
+    exit_status, workspace_directory = build_prepare(
+        workspace_directory,
+        skip_install_deps
+    )
     if exit_status != 0:
         return exit_status
 
