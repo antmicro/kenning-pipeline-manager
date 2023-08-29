@@ -3,26 +3,26 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
-def collect_dependencies(resolved_types, specification_nodes_map, curr_type):
+def collect_dependencies(resolved_names, specification_nodes_map, curr_name):
     """
     Performs quick recursive collection of base type for the current type.
 
     Parameters
     ----------
-    resolved_types: List
+    resolved_names: List
         List of resolved types
     specification_nodes_map: Dict[str, object]
-        Mapping from node type name to node type definition
-    curr_type: str
-        Currently processed type
+        Mapping from node type name to node definition
+    curr_name: str
+        Currently processed name
     """
-    if curr_type in resolved_types:
+    if curr_name in resolved_names:
         return
-    resolved_types.append(curr_type)
-    if "extends" in specification_nodes_map[curr_type]:
-        for partype in specification_nodes_map[curr_type]["extends"]:
+    resolved_names.append(curr_name)
+    if "extends" in specification_nodes_map[curr_name]:
+        for partype in specification_nodes_map[curr_name]["extends"]:
             collect_dependencies(
-                resolved_types,
+                resolved_names,
                 specification_nodes_map,
                 partype
             )
@@ -46,20 +46,20 @@ def minify_specification(specification, dataflow):
     -------
     Dict : Updated specification
     """
-    used_types = []
+    used_names = []
     for node in dataflow["graph"]["nodes"]:
-        if node["type"] not in used_types:
-            used_types.append(node["type"])
+        if node["name"] not in used_names:
+            used_names.append(node["name"])
 
-    resolved_types = []
-    names_to_types = {node["name"]: node for node in specification["nodes"]}
-    for nodetype in used_types:
-        collect_dependencies(resolved_types, names_to_types, nodetype)
+    resolved_names = []
+    names_to_nodes = {node["name"]: node for node in specification["nodes"]}
+    for nodename in used_names:
+        collect_dependencies(resolved_names, names_to_nodes, nodename)
 
     new_nodes = []
 
-    for entry in resolved_types:
-        new_nodes.append(names_to_types[entry])
+    for entry in resolved_names:
+        new_nodes.append(names_to_nodes[entry])
 
     specification["nodes"] = new_nodes
     return specification
