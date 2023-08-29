@@ -21,7 +21,5 @@ html: $(BUILDDIR)/html/static-demo
 
 $(BUILDDIR)/html/static-demo:
 	echo "Building static page for demo..."
-	cd $(PROJ_DIR)
-	$(DOCS_DIR)/build-examples $(PROJ_DIR)/examples $(BUILDDIR)/html/static-demo
-	cd -
+	cd $(PROJ_DIR); $(DOCS_DIR)/build-examples $(PROJ_DIR)/examples $(BUILDDIR)/html/static-demo
 	echo "Building static page for demo... DONE"
