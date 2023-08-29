@@ -44,6 +44,8 @@ export default class PipelineManagerEditor extends Editor {
 
     baseURLs = new Map();
 
+    baseIconUrls = new Map();
+
     nodeURLs = new Map();
 
     layoutManager = new LayoutManager();

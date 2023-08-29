@@ -206,7 +206,14 @@ export default class EditorManager {
                 category: node.category,
             });
             if ('icon' in node) {
-                this.baklavaView.editor.nodeIcons.set(node.name, node.icon);
+                if (typeof node.icon === 'string') {
+                    this.baklavaView.editor.nodeIcons.set(node.name, node.icon);
+                } else {
+                    const baseName = Object.keys(node.icon)[0];
+                    const suffix = Object.values(node.icon)[0];
+                    const baseUrl = this.baklavaView.editor.baseIconUrls.get(baseName);
+                    this.baklavaView.editor.nodeIcons.set(node.name, `${baseUrl}/${suffix}`);
+                }
             }
             if ('urls' in node) {
                 Object.entries(node.urls).forEach(([urlName, url]) => {
@@ -295,6 +302,12 @@ export default class EditorManager {
         if (metadata && 'urls' in metadata) {
             Object.entries(metadata.urls).forEach(([urlName, state]) => {
                 this.baklavaView.editor.baseURLs.set(urlName, state);
+            });
+        }
+
+        if (metadata && 'icons' in metadata) {
+            Object.entries(metadata.icons).forEach(([iconName, state]) => {
+                this.baklavaView.editor.baseIconUrls.set(iconName, state);
             });
         }
 
