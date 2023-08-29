@@ -54,7 +54,7 @@ test_validate:
     <<: *ace
     <<: *common_only
     script:
-        - ./validate ./examples/sample-specification.json ./examples/sample-dataflow.json --install-dependencies
+        - ./validate ./examples/sample-specification.json ./examples/sample-dataflow.json
 
 pytest:
     stage: build
