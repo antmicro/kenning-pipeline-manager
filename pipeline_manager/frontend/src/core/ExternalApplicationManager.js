@@ -183,9 +183,9 @@ export default class ExternalApplicationManager {
                 });
             } else if (data.type === PMMessageType.ERROR) {
                 message = data.content;
-                NotificationHandler.terminalLog('error', 'Error occured', message);
+                NotificationHandler.terminalLog('error', `Error occured: ${data.content}`, message);
             } else if (data.type === PMMessageType.WARNING) {
-                NotificationHandler.terminalLog('warning', 'Warning', message);
+                NotificationHandler.terminalLog('warning', `Warning: ${data.content}`, message);
             }
         } else if (response.status === HTTPCodes.ServiceUnavailable) {
             const data = await response.text();
