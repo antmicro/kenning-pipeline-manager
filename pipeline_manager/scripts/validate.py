@@ -9,6 +9,7 @@ import sys
 import argparse
 
 from pipeline_manager.validator import validate
+from pipeline_manager.frontend_builder import build_prepare
 
 
 def script_validate():
@@ -27,11 +28,15 @@ def script_validate():
         type=Path,
     )
     validator_parser.add_argument(
-        "--install-dependencies",
-        help="Determines whether to install dependencies before running the script",  # noqa: E501
-        action='store_true',
+        '--workspace-directory',
+        help='Directory where the frontend sources should be stored',
+        type=Path
     )
     args = validator_parser.parse_args()
+
+    build_prepare(
+        args.workspace_directory if 'workspace_directory' in args else None
+    )
 
     args = {k: v for k, v in vars(args).items() if v is not None}
 
