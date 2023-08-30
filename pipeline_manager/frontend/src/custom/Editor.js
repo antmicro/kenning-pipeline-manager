@@ -218,8 +218,35 @@ export default class PipelineManagerEditor extends Editor {
         const readonlySetting = this.readonly;
         this.readonly = true;
         let errors = [];
+        const entryId = state.graph.entry;
+
+        const usedSubgraphs = new Set();
+        state.graphTemplateInstances.forEach((subgraph) => {
+            subgraph.nodes.forEach((n) => {
+                if (n.subgraph !== undefined) {
+                    usedSubgraphs.add(n.subgraph);
+                }
+            });
+        });
+
+        // Finding a root graph by checking which graph is not referenced by any other
+        const rootGraph = state.graphTemplateInstances.find((subgraph) =>
+            !usedSubgraphs.has(subgraph.id),
+        );
+        if (rootGraph === undefined) {
+            return ['No root graph found. Make sure you graph does not have any reccurency'];
+        }
+
+        const entryGraph = state.graphTemplateInstances.find(
+            (subgraph) => subgraph.id === state.graph.entry,
+        );
+        if (entryGraph === undefined) {
+            return [`No entry graph found of id '${state.graph.entry}'`];
+        }
+        const { panning, scaling } = entryGraph;
+
         try {
-            state.graph.nodes.forEach((n) => {
+            rootGraph.nodes.forEach((n) => {
                 errors.push(...recurrentSubgraphLoad(n));
             });
 
@@ -227,11 +254,11 @@ export default class PipelineManagerEditor extends Editor {
                 return errors;
             }
 
-            state.graph.inputs = [];
-            state.graph.outputs = [];
+            rootGraph.inputs = [];
+            rootGraph.outputs = [];
 
             state = this.hooks.load.execute(state);
-            errors = this._graph.load(state.graph);
+            errors = this._graph.load(rootGraph);
         } catch (err) {
             // If anything goes wrong during dataflow loading, the editor is cleaned and an
             // appropriate error is returned.
@@ -239,7 +266,6 @@ export default class PipelineManagerEditor extends Editor {
             this.readonly = readonlySetting;
             return [err.toString()];
         }
-
         if (Array.isArray(errors) && errors.length && process.env.VUE_APP_GRAPH_DEVELOPMENT_MODE !== 'true') {
             this.cleanEditor();
             this.readonly = readonlySetting;
@@ -260,18 +286,42 @@ export default class PipelineManagerEditor extends Editor {
             this.updateNodesPosition(layout);
         }
 
-        // WARN: If there is any weird behavior with centering the viewport it
-        // might stem from a race here, then another nextTick() might be needed in
-        // this chain: only option for a race is that the centering will happen before the
-        // sidebar is loaded but I doubt this actually can happen
+        const dfs = (subgraph, path) => {
+            if (subgraph?.nodes !== undefined) {
+                for (let i = 0; i < subgraph.nodes.length; i += 1) {
+                    if (subgraph.nodes[i].subgraph !== undefined) {
+                        if (subgraph.nodes[i].subgraph.id === entryId) {
+                            return [...path, subgraph.nodes[i]];
+                        }
+                        const returnedPath = dfs(
+                            subgraph.nodes[i].subgraph,
+                            [...path, subgraph.nodes[i]],
+                        );
+                        if (returnedPath.length) {
+                            return returnedPath;
+                        }
+                    }
+                }
+            }
+            return [];
+        };
+
+        // Finding a path to the defined entry and switching to it sequentially
+        const path = dfs(this._graph, []);
+        path.forEach((node) => {
+            this.switchToSubgraph(node);
+        });
+
+        // We need graph switched and sidebar rendered for autozoom
         await nextTick();
-        if (state.graph.panning !== undefined) {
-            this._graph.panning = state.graph.panning;
+
+        if (panning !== undefined) {
+            this._graph.panning = panning;
         }
-        if (state.graph.scaling !== undefined) {
-            this._graph.scaling = state.graph.scaling;
+        if (scaling !== undefined) {
+            this._graph.scaling = scaling;
         }
-        if (state.graph.scaling === undefined && state.graph.panning === undefined) {
+        if (scaling === undefined && panning === undefined) {
             this.centerZoom();
         }
         return errors;
