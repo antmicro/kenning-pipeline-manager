@@ -54,6 +54,8 @@ This object specifies additional editor options and contains the following optio
   Default value is `100`.
 * `layout` - String specifying the name of autolayout algorithm used in placing nodes from dataflow
   Default value is `NoLayout`
+* `icons` - contains definition of icon classes.
+  Icon classes are key-value pairs, where key is the name of the icon class, and value is the URL prefix that is used to compute the actual path.
 
 An example:
 
@@ -128,8 +130,11 @@ Every input object requires six properties:
 * `type` - value used for styling.
 * `category` - context menu category displayed in the editor.
 * `icon` - name of an SVG icon that is going to be displayed next to the name of the node.
-  The icons have to be placed in the `assets` directory in the built frontend (default is `pipeline_manager/frontend/dist/assets`).
-  The path in `icon` should be the path within the `assets` directory, e.g. `filter.svg` for `pipeline_manager/frontend/dist/assets/filter.svg`.
+  The value of `icon` can be:
+
+  * `string` containing the path to the icon relative to the `assets` directory, e.g. `filter.svg` for `pipeline_manager/frontend/dist/assets/filter.svg`
+  * `string` containing the URL to the remote image file
+  * `{"key": "value"}` pair, where `key` is the name of the icon class created in `icons`, in [Metadata](#metadata), and `value` is a suffix of the URL.
   ``````{note}
   The `assets` directory can be created and filled manually or added by `build` script with `--assets-directory <path-to-directory-with-icons>`, e.g.:
   ```bash
