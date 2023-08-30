@@ -152,7 +152,14 @@
             "default": "false"
         },
         "icons": {
-            "type": "object"
+            "type": "object",
+            "description": "Mapping from icon URL class to URL prefix",
+            "patternProperties": {
+                "^.*$": {
+                    "type": "string",
+                    "description": "URL prefix for a given icon class"
+                }
+            }
         }
     },
     "additionalProperties": false
