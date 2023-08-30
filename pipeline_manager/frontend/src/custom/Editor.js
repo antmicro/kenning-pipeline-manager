@@ -229,7 +229,6 @@ export default class PipelineManagerEditor extends Editor {
 
             state.graph.inputs = [];
             state.graph.outputs = [];
-            this.layoutManager.registerGraph(state.graph);
 
             state = this.hooks.load.execute(state);
             errors = this._graph.load(state.graph);
@@ -247,16 +246,25 @@ export default class PipelineManagerEditor extends Editor {
             return errors;
         }
         this.events.loaded.emit();
-        await nextTick();
-        const updatedGraph = await this.layoutManager.computeLayout(state.graph);
         this.graphName = state.graph.name;
-
-        this.updateNodesPosition(updatedGraph);
         this.readonly = readonlySetting;
+        if (this.layoutManager.layoutEngine.activeAlgorithm !== 'NoLayout') {
+            const unorderedGraph = JSON.parse(JSON.stringify(state.graph));
+            unorderedGraph.nodes.forEach((node) => {
+                node.position = undefined;
+            });
+            this.layoutManager.registerGraph(unorderedGraph);
 
-        // We need sidebar rendered for autozoom
+            await nextTick();
+            const layout = await this.layoutManager.computeLayout(state.graph);
+            this.updateNodesPosition(layout);
+        }
+
+        // WARN: If there is any weird behavior with centering the viewport it
+        // might stem from a race here, then another nextTick() might be needed in
+        // this chain: only option for a race is that the centering will happen before the
+        // sidebar is loaded but I doubt this actually can happen
         await nextTick();
-
         if (state.graph.panning !== undefined) {
             this._graph.panning = state.graph.panning;
         }
@@ -266,7 +274,6 @@ export default class PipelineManagerEditor extends Editor {
         if (state.graph.scaling === undefined && state.graph.panning === undefined) {
             this.centerZoom();
         }
-
         return errors;
     }
 

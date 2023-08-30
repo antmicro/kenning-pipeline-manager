@@ -11,6 +11,12 @@ import { BaseLayoutAlgorithm } from './baseEngine.js';
  */
 export default class NoLayoutAlgorithm extends BaseLayoutAlgorithm {
     /* eslint-disable class-methods-use-this */
+    availableAlgorithms = [
+        'NoLayout',
+    ];
+
+    activeAlgorithm = 'NoLayout';
+
     calculate(graph) {
         const nodes = graph.nodes.map((node) => ({
             ...node,
