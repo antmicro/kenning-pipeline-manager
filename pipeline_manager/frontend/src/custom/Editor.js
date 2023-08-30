@@ -438,7 +438,7 @@ export default class PipelineManagerEditor extends Editor {
         // Updating interfaces of a graph node
         Object.values(subgraphNode.inputs).forEach((k) => {
             if (!Object.keys(ifaceOrPositionErrors.inputs).includes(k.subgraphNodeId)) {
-                subgraphNode.removeInput(k);
+                subgraphNode.removeInput(k.name);
             }
         });
         Object.entries(ifaceOrPositionErrors.inputs).forEach(([id, intf]) => {
@@ -456,7 +456,7 @@ export default class PipelineManagerEditor extends Editor {
 
         Object.values(subgraphNode.outputs).forEach((k) => {
             if (!Object.keys(ifaceOrPositionErrors.outputs).includes(k.subgraphNodeId)) {
-                subgraphNode.removeOutput(k);
+                subgraphNode.removeOutput(k.name);
             }
         });
         Object.entries(ifaceOrPositionErrors.outputs).forEach(([id, intf]) => {

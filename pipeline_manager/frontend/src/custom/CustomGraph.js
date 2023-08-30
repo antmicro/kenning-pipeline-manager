@@ -239,8 +239,13 @@ export default function createPipelineManagerGraph(graph) {
             }
         });
 
-        this.inputs = inputs;
-        this.outputs = outputs;
+        // Filtering interfaces that were removed and do not have corresponding nodes
+        this.inputs = inputs.filter(
+            (inp) => undefined !== this.nodes.find((n) => n.graphInterfaceId === inp.id),
+        );
+        this.outputs = outputs.filter(
+            (inp) => undefined !== this.nodes.find((n) => n.graphInterfaceId === inp.id),
+        );
     };
 
     graph.addNode = function addNode(node) {
