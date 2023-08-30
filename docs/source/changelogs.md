@@ -3,6 +3,12 @@
 Formats of dataflows and specification is often updated with new features, that makes former formats incompatible with the new ones.
 This section lists all versions, related features and breaking changes.
 
+## 20230824.10
+
+Commit SHA - `6ce3bf106353bc58fb8e7217b9bc8aa7db9ebd20`
+
+* Choosing an entry graph that is rendered to the user when loading a subgraph dataflow is now possible using `entryGraph` property.
+
 ## 20230824.9
 
 Commit SHA - `de31d01d9b6591993559e3b10851815f3320e545`
