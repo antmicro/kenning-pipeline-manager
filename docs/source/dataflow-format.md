@@ -468,7 +468,7 @@ differs slightly from interfaces of standard nodes:
 
 ```json
 {
-    "version": "20230720.5",
+    "version": "20230824.9",
     "graph": {
         "id": "9c4d5349-9d3b-401f-86bb-021b7b3e5b81",
         "nodes": [
