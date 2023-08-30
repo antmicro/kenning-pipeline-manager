@@ -293,12 +293,15 @@ export default class ConnectionRenderer {
                     x: path[path.length - 1].x,
                     y: path[path.length - 1].y + (nc.y2 - path[path.length - 1].y) / 2,
                 });
+                let offset = 0;
+                if (nc.to.side === 'left') offset = 10;
+                else offset = -10;
                 path.push({
-                    x: nc.x2 - 10,
+                    x: nc.x2 - offset,
                     y: path[path.length - 2].y + (nc.y2 - path[path.length - 2].y) / 2,
                 });
                 path.push({
-                    x: nc.x2 - 10,
+                    x: nc.x2 - offset,
                     y: nc.y2,
                 });
                 path.push({
