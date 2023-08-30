@@ -59,15 +59,25 @@
             }
         },
         "graph": {
-            "allOf": [
-                {
-                    "$ref": "graph_schema"
-                }
-            ]
+            "$ref": "graph_schema"
+        },
+        "entryGraph": {
+            "description": "Id of a subgraph that is displayed when a dataflow is loaded. It is only used for subgraphs",
+            "type": "string"
         }
     },
-    "required": [
-        "graph"
+    "oneOf": [
+        {
+            "required": [
+                "graph"
+            ]
+        },
+        {
+            "required": [
+                "entryGraph",
+                "graphTemplateInstances"
+            ]
+        }
     ],
     "unevaluatedProperties": false
 }
