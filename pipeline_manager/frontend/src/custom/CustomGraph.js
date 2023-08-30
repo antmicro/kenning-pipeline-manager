@@ -454,6 +454,8 @@ export default function createPipelineManagerGraph(graph) {
             })),
             inputs: this.inputs,
             outputs: this.outputs,
+            scaling: this.scaling,
+            panning: this.panning,
         };
         return this.hooks.save.execute(state);
     };
