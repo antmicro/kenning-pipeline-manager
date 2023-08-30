@@ -62,6 +62,7 @@ export default class PipelineManagerEditor extends Editor {
 
     save() {
         // Save all changes done to subgraphs before saving
+        const currentGraphId = this._graph.id;
         const stackCopy = Array.from(toRaw(this.subgraphStack));
         stackCopy.forEach(this.backFromSubgraph.bind(this));
 
@@ -91,6 +92,14 @@ export default class PipelineManagerEditor extends Editor {
         };
         state.graph.nodes.forEach(recurrentSubgraphSave);
 
+        // Main graph should have no IO
+        delete state.graph.inputs;
+        delete state.graph.outputs;
+
+        state.graphTemplateInstances.push(state.graph);
+        state.entryGraph = currentGraphId;
+        delete state.graph;
+
         /* eslint-disable no-unused-vars */
         stackCopy.forEach(([_, subgraphNode]) => {
             const errors = this.switchToSubgraph(subgraphNode);
@@ -98,12 +107,6 @@ export default class PipelineManagerEditor extends Editor {
                 throw new Error(errors);
             }
         });
-        /* eslint-enable no-unused-vars */
-
-        // Main graph should have no IO
-        delete state.graph.inputs;
-        delete state.graph.outputs;
-
         return state;
     }
 
@@ -218,7 +221,7 @@ export default class PipelineManagerEditor extends Editor {
         const readonlySetting = this.readonly;
         this.readonly = true;
         let errors = [];
-        const entryId = state.graph.entry;
+        const entryId = state.entryGraph;
 
         const usedSubgraphs = new Set();
         state.graphTemplateInstances.forEach((subgraph) => {
@@ -238,10 +241,10 @@ export default class PipelineManagerEditor extends Editor {
         }
 
         const entryGraph = state.graphTemplateInstances.find(
-            (subgraph) => subgraph.id === state.graph.entry,
+            (subgraph) => subgraph.id === state.entryGraph,
         );
         if (entryGraph === undefined) {
-            return [`No entry graph found of id '${state.graph.entry}'`];
+            return [`No entry graph found of id '${state.entryGraph}'`];
         }
         const { panning, scaling } = entryGraph;
 
