@@ -429,10 +429,7 @@ export default defineComponent({
         try {
             importAll(require.context('../../assets', true, /\.(|svg|png)$/));
         } catch (e) {
-            NotificationHandler.terminalLog(
-                'warning',
-                'No assets directory found',
-            );
+            // assets directory not found
         } finally {
             props.viewModel.cache = cache;
         }
