@@ -218,7 +218,7 @@ def build_frontend(
         build_type == 'static-html' else \
         frontend_path / '.env.local'
 
-    frontend_dist_path = frontend_path / 'dist'
+    frontend_dist_path = (frontend_path / 'dist').resolve()
 
     config_lines = []
 
