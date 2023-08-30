@@ -57,6 +57,7 @@ from moving or deleting the nodes.
                 :y="contextMenuTitleY"
                 :items="contextMenuTitleItems"
                 :urls="nodeURLs"
+                :style="contextMenuStyle"
                 @click="onContextMenuTitleClick"
             />
         </div>
@@ -113,6 +114,7 @@ from moving or deleting the nodes.
                 :x="contextMenuInterfaceX"
                 :y="contextMenuInterfaceY"
                 :items="contextMenuInterfaceItems"
+                :style="contextMenuStyle"
                 @click="onContextMenuInterfaceClick"
             />
         </div>
@@ -152,6 +154,11 @@ const emit = defineEmits(['select']);
 const { viewModel } = useViewModel();
 const { graph } = useGraph();
 const movementStep = computed(() => viewModel.value.movementStep);
+
+const contextMenuStyle = computed(() => ({
+    'transform-origin': '0 0',
+    transform: `scale(${1 / graph.value.scaling})`,
+}));
 
 const dragMove = useDragMove(
     toRef(props.node, 'position'),
