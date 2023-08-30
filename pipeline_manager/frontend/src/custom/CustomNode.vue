@@ -236,8 +236,8 @@ const onContextMenuTitleClick = async (action) => {
 
 const openContextMenuTitle = (ev) => {
     if (!viewModel.value.editor.readonly && showContextMenuTitle.value === false) {
-        contextMenuTitleX.value = ev.offsetX - 25;
-        contextMenuTitleY.value = ev.offsetY - 25;
+        contextMenuTitleX.value = ev.offsetX - 25 * (1 / graph.value.scaling);
+        contextMenuTitleY.value = ev.offsetY - 25 * (1 / graph.value.scaling);
         showContextMenuTitle.value = true;
     }
 };
