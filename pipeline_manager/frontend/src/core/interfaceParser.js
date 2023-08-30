@@ -53,6 +53,8 @@ function createGraphInterface(io, hidden, name = undefined) {
         intf.type = typeof io.type === 'string' || io.type instanceof String ? [io.type] : io.type;
     }
 
+    intf.nodePosition = io.nodePosition ?? { x: 0, y: 0 };
+
     // Readonly values used for detecting whether there were any changes to the interface
     intf.originalSide = intf.side;
     intf.originalSidePosition = intf.sidePosition;
