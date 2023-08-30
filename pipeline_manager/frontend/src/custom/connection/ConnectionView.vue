@@ -91,8 +91,11 @@ export default defineComponent({
             if (props.connection.anchors === undefined) {
                 props.connection.anchors = [];
             }
-
-            props.connection.anchors.splice(index, 0, {
+            // The index shows the connection section that was pressed -
+            // since we have an extra one at the beginning, we need a -1 and a
+            // division by 3 with no decimal to determine what anchor position
+            // corresponds
+            props.connection.anchors.splice(Math.trunc((index - 1) / 3), 0, {
                 x: (ev.offsetX / graph.value.scaling) - graph.value.panning.x,
                 y: (ev.offsetY / graph.value.scaling) - graph.value.panning.y,
                 id: Date.now(),
