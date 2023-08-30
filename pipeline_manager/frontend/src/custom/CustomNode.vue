@@ -153,6 +153,7 @@ const props = defineProps({
     node: AbstractNode,
     selected: Boolean,
     interfaces: Array,
+    selectedNodesDragMoves: Array,
 });
 
 const emit = defineEmits(['select']);
@@ -171,6 +172,8 @@ const dragMove = useDragMove(
     gridSnapper(movementStep),
     props.node.id,
 );
+
+const dragMoveOtherNodes = ref([]);
 
 // If type start with '_', it is not displayed as node title
 const IGNORE_TYPE_PREFIX = '_';
@@ -286,12 +289,18 @@ const select = () => {
     emit('select');
 };
 
-let abortDrag;
-let stopDrag;
+const stopDrag = () => {
+    // dragMove.onPointerUp();
+    // document.removeEventListener('pointermove', dragMove.onPointerMove);
+    
 
-const cleanEvents = () => {
-    document.removeEventListener('pointermove', dragMove.onPointerMove);
-    document.removeEventListener('keyboard.escape', abortDrag);
+    props.selectedNodesDragMoves.forEach((dragMove) => {
+        dragMove.onPointerUp();
+        document.removeEventListener('pointermove', dragMove.onPointerMove);
+    });
+
+    props.selectedNodesDragMoves = [];
+
     document.removeEventListener('pointerup', stopDrag);
 };
 
@@ -305,11 +314,24 @@ stopDrag = () => {
 };
 
 const startDrag = (ev) => {
-    dragMove.onPointerDown(ev);
-    document.addEventListener('pointermove', dragMove.onPointerMove);
-    document.addEventListener('keyboard.escape', abortDrag);
+    if (!graph.value.selectedNodes.includes(props.node)) {
+        select();
+    }
+
+    for(let i = 0; i < graph.value.selectedNodes.length; i++) {
+        const node = graph.value.selectedNodes[i];
+        const nodeDragMove = useDragMove(
+            ref(node.position),
+            gridSnapper(movementStep),
+            node.id,
+        );
+        nodeDragMove.onPointerDown(ev);
+        document.addEventListener('pointermove', nodeDragMove.onPointerMove);
+        
+        props.selectedNodesDragMoves.push(nodeDragMove);
+    }
+
     document.addEventListener('pointerup', stopDrag);
-    select();
 };
 
 const doneRenaming = () => {
