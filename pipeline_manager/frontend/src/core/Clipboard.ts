@@ -151,8 +151,8 @@ export function useClipboard(
             copiedNode.hooks.beforeLoad.subscribe(token, (nodeState) => {
                 const ns = nodeState as any;
                 if (ns.position) {
-                    ns.position.x += 10;
-                    ns.position.y += 10;
+                    ns.position.x += 40;
+                    ns.position.y += 40;
                 }
                 copiedNode.hooks.beforeLoad.unsubscribe(token);
                 return ns;

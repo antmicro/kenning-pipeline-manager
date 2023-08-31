@@ -22,10 +22,14 @@ export default function nodeInsideSelection(graph, node, boundingRect) {
     const nodeWidth = nodeHTMLelement.offsetWidth;
     const nodeHeight = nodeHTMLelement.offsetHeight;
 
-    if (nodeX > selectionBoundingRect.xBegin
-    && nodeX + nodeWidth * scaling < selectionBoundingRect.xEnd
-    && nodeY > selectionBoundingRect.yBegin
-    && nodeY + nodeHeight * scaling < selectionBoundingRect.yEnd) {
+    // reduce node dimensions by this coeff so that they are easier to select
+    const nodeDimCoefficient = 0.9;
+
+    if (nodeX + nodeX * (1 - nodeDimCoefficient) > selectionBoundingRect.xBegin
+    && nodeX + nodeWidth * scaling - nodeX * (1 - nodeDimCoefficient) < selectionBoundingRect.xEnd
+    && nodeY + nodeY * (1 - nodeDimCoefficient) > selectionBoundingRect.yBegin
+    && nodeY + nodeHeight * scaling
+        - nodeY * (1 - nodeDimCoefficient) < selectionBoundingRect.yEnd) {
         return true;
     }
     return false;

@@ -173,8 +173,6 @@ const dragMove = useDragMove(
     props.node.id,
 );
 
-const dragMoveOtherNodes = ref([]);
-
 // If type start with '_', it is not displayed as node title
 const IGNORE_TYPE_PREFIX = '_';
 
@@ -290,15 +288,12 @@ const select = () => {
 };
 
 const stopDrag = () => {
-    // dragMove.onPointerUp();
-    // document.removeEventListener('pointermove', dragMove.onPointerMove);
-    
-
-    props.selectedNodesDragMoves.forEach((dragMove) => {
-        dragMove.onPointerUp();
-        document.removeEventListener('pointermove', dragMove.onPointerMove);
+    props.selectedNodesDragMoves.forEach((nodeDragMove) => {
+        nodeDragMove.onPointerUp();
+        document.removeEventListener('pointermove', nodeDragMove.onPointerMove);
     });
 
+    /* eslint-disable vue/no-mutating-props,no-param-reassign */
     props.selectedNodesDragMoves = [];
 
     document.removeEventListener('pointerup', stopDrag);
@@ -318,7 +313,7 @@ const startDrag = (ev) => {
         select();
     }
 
-    for(let i = 0; i < graph.value.selectedNodes.length; i++) {
+    for (let i = 0; i < graph.value.selectedNodes.length; i += 1) {
         const node = graph.value.selectedNodes[i];
         const nodeDragMove = useDragMove(
             ref(node.position),
@@ -327,7 +322,8 @@ const startDrag = (ev) => {
         );
         nodeDragMove.onPointerDown(ev);
         document.addEventListener('pointermove', nodeDragMove.onPointerMove);
-        
+
+        /* eslint-disable vue/no-mutating-props,no-param-reassign */
         props.selectedNodesDragMoves.push(nodeDragMove);
     }
 

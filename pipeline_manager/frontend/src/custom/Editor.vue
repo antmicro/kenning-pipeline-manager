@@ -31,10 +31,10 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
         @pointerup.right.exact="onRightPointerUp"
         @pointerdown.right.ctrl="onRightPointerDownCtrl"
         @pointerup.right.ctrl="onRightPointerUpCtrl"
-        @keyup.delete="deleteKeyUp"
         @wheel.self="mouseWheel"
         @keydown="keyDown"
         @keyup="keyUp"
+        @keyup.delete="deleteKeyUp"
         oncontextmenu="return false;"
     >
         <slot name="background">
@@ -182,10 +182,10 @@ export default defineComponent({
         };
 
         const onRightPointerDown = (ev) => {
-            rectangleSelection.value.onPointerDown(ev);
             if (ev.target === el.value) {
                 unselectAllNodes();
                 selectedNodesDragMoves.value = [];
+                rectangleSelection.value.onPointerDown(ev);
             }
 
             pressStartTime.value = new Date();
@@ -210,11 +210,12 @@ export default defineComponent({
             }
         };
 
-        const onRightPointerUp = () => {
+        const onRightPointerUp = (ev) => {
             // handle press & hold right mouse button
             const currentTime = new Date();
             const elapsedTime = currentTime - pressStartTime.value;
-            if (elapsedTime >= longPressMilisTreshold.value) {
+            if (elapsedTime >= longPressMilisTreshold.value
+                && ev.target === el.value) {
                 selectMultipleNodes();
             }
             rectangleSelection.value.onPointerUp();
