@@ -136,9 +136,12 @@ const updateMasks = (treeNode, filter) =>
             if (node.nodes.nodeTypes !== undefined) {
                 node.mask = Object.values(node.nodes.nodeTypes)
                     .map((nt) => {
+                        const threshold = -50;
                         const entryResult = fuzzysort.single(filter, nt.title);
-                        nt.mask = entryResult !== null || categoryResult !== null;
-
+                        nt.mask = (
+                            (entryResult !== null && entryResult.score > threshold) ||
+                            (categoryResult !== null && categoryResult.score > threshold)
+                        );
                         if (entryResult !== null) {
                             nt.hitSubstring = fuzzysort.highlight(entryResult, '<span>', '</span>');
                         } else {
