@@ -186,6 +186,7 @@ export default defineComponent({
                 unselectAllNodes();
                 selectedNodesDragMoves.value = [];
                 rectangleSelection.value.onPointerDown(ev);
+                rectangleSelection.value.selecting = true;
             }
 
             pressStartTime.value = new Date();
@@ -195,6 +196,9 @@ export default defineComponent({
             panZoom.onPointerMove(ev);
             temporaryConnection.onMouseMove(ev);
             rectangleSelection.value.onPointerMove(ev);
+            if (rectangleSelection.value.selecting) {
+                selectMultipleNodes();
+            }
         };
 
         const onPointerUp = (ev) => {
@@ -208,6 +212,7 @@ export default defineComponent({
                 && ev.target === el.value) {
                 unselectAllNodes();
             }
+            rectangleSelection.value.selecting = false;
         };
 
         const onRightPointerUp = (ev) => {
@@ -216,7 +221,7 @@ export default defineComponent({
             const elapsedTime = currentTime - pressStartTime.value;
             if (elapsedTime >= longPressMilisTreshold.value
                 && ev.target === el.value) {
-                selectMultipleNodes();
+                appendSelectMultipleNodes();
             }
             rectangleSelection.value.onPointerUp();
         };
