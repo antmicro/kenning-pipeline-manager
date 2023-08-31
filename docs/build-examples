@@ -12,6 +12,8 @@ documentation.
 import sys
 from pathlib import Path
 import errno
+import json
+import shutil
 
 import argparse
 
@@ -45,7 +47,16 @@ def main(argv):
         dataflow = Path(str(spec).replace('specification', 'dataflow'))
         if not dataflow.is_file():
             dataflow = None
-        title = str(spec.stem).replace('-specification', '')
+            # Each example is required to have a dataflow
+            continue
+        title = ""
+        dir_name = str(spec.stem).replace('-specification', '')
+        try:
+            with open(dataflow, 'r') as f:
+                title = json.load(f)['graph']['name']
+        except (KeyError, FileNotFoundError):
+            title = dir_name
+
         print(f'### Building {title} ###')
         build_frontend(
             build_type='static-html',
@@ -53,9 +64,11 @@ def main(argv):
             specification=spec,
             dataflow=dataflow,
             mode='production',
-            output_directory=args.output_dir / title,
+            output_directory=args.output_dir / dir_name,
             skip_install_deps=True
         )
+        shutil.copy(Path(str(spec)).absolute(), args.output_dir / dir_name / "spec.json")
+        shutil.copy(dataflow, args.output_dir / dir_name / "graph.json")
 
 
 if __name__ == '__main__':

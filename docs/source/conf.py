@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import os
+import json
 from pathlib import Path
 from datetime import datetime
 
@@ -46,7 +47,13 @@ if html_build_dir.is_dir():
     exampleentries = ['To see the work of the frontend check one of the below examples:\n']  # noqa: E501
     for example in (html_build_dir / 'static-demo').iterdir():
         relexample = example.relative_to(html_build_dir)
-        exampleentries.append(f'* [{relexample.stem}](resource:{relexample}/index.html)')  # noqa: E501
+        title = ""
+        try:
+            with open(example / "graph.json", 'r') as f:
+                title = json.load(f)['graph']['name']
+        except (KeyError, FileNotFoundError):
+            title = relexample.stem
+        exampleentries.append(f'* [{title}](resource:{relexample}/index.html)')  # noqa: E501
     myst_substitutions["examples"] = '\n'.join(exampleentries)
 
 today_fmt = '%Y-%m-%d'
