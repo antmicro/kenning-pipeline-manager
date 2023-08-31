@@ -184,3 +184,15 @@
 .baklava-context-menu > .item > .ml-3 > svg > path {
     d: path('M99.4,111.6l64.2,69.2L99.4,250h54.5l64.2-69.2l-64.2-69.2H99.4z') !important;
 }
+
+.rectangle-selection {
+    height: 100%;
+    width: 100%;
+    opacity: 0.15;
+    background-color: $green;
+}
+
+.rectangle-selection-border {
+    border: 2px dashed $green;
+    opacity: 0.7;
+}

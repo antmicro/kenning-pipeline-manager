@@ -5,8 +5,10 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-    <div id="rectangle-selection" :style="styles">
+    <div class="rectangle-selection-border" :style="styles">
+        <div class="rectangle-selection">
 
+        </div>
     </div>
 </template>
 
@@ -39,9 +41,6 @@ export default defineComponent({
             left: `${boundingRect.value.xBegin}px`,
             width: `${Math.abs(boundingRect.value.xEnd - boundingRect.value.xBegin) ?? 0}px`,
             height: `${Math.abs(boundingRect.value.yEnd - boundingRect.value.yBegin) ?? 0}px`,
-
-            background: 'red',
-            opacity: 0.3,
         }));
 
         const onPointerDown = (ev) => {
