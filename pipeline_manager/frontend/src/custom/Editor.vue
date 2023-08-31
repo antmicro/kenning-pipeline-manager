@@ -35,6 +35,7 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
         @keydown="keyDown"
         @keyup="keyUp"
         @keyup.delete="deleteKeyUp"
+        @mouseleave="onRightPointerUp"
         oncontextmenu="return false;"
     >
         <slot name="background">
