@@ -20,8 +20,14 @@
     flex-direction: column;
     overflow: visible;
 
-    & .searchbar {
-        flex-grow: 0;
+    & .search-bar {
+        & > .__entry {
+            padding-right: 0;
+
+            & > .node-search {
+                padding-left: 1em;
+            }
+        }
     }
 
     .nodes {
