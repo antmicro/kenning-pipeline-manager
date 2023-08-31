@@ -84,7 +84,7 @@ export default defineComponent({
 
         const justOpened = ref(true);
 
-        window.addEventListener('mousedown', (ev) => {
+        const closeContextMenu = (ev) => {
             if (props.modelValue === true) {
                 // We need a counter so that this event is not fired right when the menu is opened
                 if (justOpened.value === false) {
@@ -92,6 +92,8 @@ export default defineComponent({
                     // We only need to fire closing event if the click was
                     // outside of the context menu. Otherwise `onClick` is fired.
                     if (!elements.includes(el.value)) {
+                        window.removeEventListener('wheel', closeContextMenu);
+                        window.removeEventListener('mousedown', closeContextMenu);
                         context.emit('update:modelValue', false);
                     }
                     justOpened.value = true;
@@ -99,7 +101,10 @@ export default defineComponent({
                     justOpened.value = false;
                 }
             }
-        });
+        };
+
+        window.addEventListener('wheel', closeContextMenu);
+        window.addEventListener('mousedown', closeContextMenu);
 
         return {
             el,
