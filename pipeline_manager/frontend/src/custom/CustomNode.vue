@@ -135,6 +135,7 @@ import CustomContextMenu from './ContextMenu.vue';
 import { gridSnapper } from '../core/snappers';
 import Pencil from '../icons/Pencil.vue';
 import Bin from '../icons/Bin.vue';
+import Sidebar from '../icons/Sidebar.vue';
 import doubleClick from '../core/doubleClick.js';
 
 import NotificationHandler from '../core/notifications.js';
@@ -197,7 +198,7 @@ const contextMenuTitleItems = computed(() => {
     }
 
     if (!viewModel.value.hideHud) {
-        items.push({ value: 'sidebar', label: 'Details' });
+        items.push({ value: 'sidebar', label: 'Details', icon: Sidebar });
     }
 
     items.push(...nodeURLs);
