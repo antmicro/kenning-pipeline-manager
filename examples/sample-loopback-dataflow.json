@@ -2,6 +2,7 @@
     "version": "20230824.9",
     "graph": {
       "id": "98a51a3d-654b-4cd6-8c36-1cfdb90abb58",
+      "name": "Connection loopback example",
       "nodes": [
           {
               "type": "Node",

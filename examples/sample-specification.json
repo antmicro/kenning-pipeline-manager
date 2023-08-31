@@ -24,6 +24,32 @@
             ]
         },
         {
+            "name": "SaveFrames",
+            "type": "filesystem",
+            "category": "Filesystem",
+            "properties": [
+                {"name": "Folder name", "type": "text", "default": ""},
+                {"name": "Name prefix", "type": "text", "default": ""}
+            ],
+            "interfaces": [
+                {"name": "color", "type": "Image", "direction": "input"},
+                {"name": "binary", "type": "BinaryImage", "direction": "input"}
+            ]
+        },
+        {
+            "name": "SaveFrame",
+            "type": "filesystem",
+            "category": "Filesystem",
+            "properties": [
+                {"name": "filename", "type": "text", "default": ""},
+                {"name": "Frame number", "type": "integer", "default": 0}
+            ],
+            "interfaces": [
+                {"name": "color", "type": "Image", "direction": "input"},
+                {"name": "binary", "type": "BinaryImage", "direction": "input"}
+            ]
+        },
+        {
             "name": "GaussianKernel",
             "type": "kernel",
             "category": "Generators",
@@ -32,6 +58,18 @@
                 {"name": "sigma", "type": "number", "default": 1.0}
             ],
             "interfaces": [{"name": "kernel", "type": "Image", "direction": "output"}]
+        },
+        {
+            "name": "SobelKernel",
+            "type": "kernel",
+            "category": "Generators",
+            "properties": [
+                {"name": "size", "type": "integer", "default": 3}
+            ],
+            "interfaces": [
+                {"name": "Horizontal edge kernel", "type": "Image", "direction": "output"},
+                {"name": "Vertical edge kernel", "type": "Image", "direction": "output"}
+            ]
         },
         {
             "name": "StructuringElement",
@@ -83,6 +121,74 @@
             ],
             "interfaces": [
                 {"name": "image", "type": "Image", "direction": "input"},
+                {"name": "output", "type": "BinaryImage", "direction": "output"}
+            ]
+        },
+        {
+            "name": "CannyEdgeDetection",
+            "type": "processing",
+            "category": "Processing",
+            "properties": [
+                {"name": "sigma", "type": "text", "default": "1.4"},
+                {"name": "kernel size", "type": "integer", "default": 3}
+            ],
+            "interfaces": [
+                {"name": "input", "type": "Image", "direction": "input"},
+                {"name": "output", "type": "Image", "direction": "output"}
+            ]
+        },
+        {
+            "name": "Scale",
+            "type": "processing",
+            "category": "Processing",
+            "properties": [
+                {"name": "Scaling factor", "type": "text", "default": "1.75"}
+            ],
+            "interfaces": [
+                {"name": "input", "type": "Image", "direction": "input"},
+                {"name": "output", "type": "Image", "direction": "output"}
+            ]
+        },
+        {
+            "name": "Logical AND",
+            "type": "processing",
+            "category": "Processing",
+            "properties": [],
+            "interfaces": [
+                {"name": "input 1", "type": "BinaryImage", "direction": "input"},
+                {"name": "input 2", "type": "BinaryImage", "direction": "input"},
+                {"name": "output", "type": "BinaryImage", "direction": "output"}
+            ]
+        },
+        {
+            "name": "Logical OR",
+            "type": "processing",
+            "category": "Processing",
+            "properties": [],
+            "interfaces": [
+                {"name": "input 1", "type": "BinaryImage", "direction": "input"},
+                {"name": "input 2", "type": "BinaryImage", "direction": "input"},
+                {"name": "output", "type": "BinaryImage", "direction": "output"}
+            ]
+        },
+        {
+            "name": "Logical NOT",
+            "type": "processing",
+            "category": "Processing",
+            "properties": [],
+            "interfaces": [
+                {"name": "input", "type": "BinaryImage", "direction": "input"},
+                {"name": "output", "type": "BinaryImage", "direction": "output"}
+            ]
+        },
+        {
+            "name": "Logical XOR",
+            "type": "processing",
+            "category": "Processing",
+            "properties": [],
+            "interfaces": [
+                {"name": "input 1", "type": "BinaryImage", "direction": "input"},
+                {"name": "input 2", "type": "BinaryImage", "direction": "input"},
                 {"name": "output", "type": "BinaryImage", "direction": "output"}
             ]
         },
