@@ -23,9 +23,9 @@ export default function nodeInsideSelection(graph, node, boundingRect) {
     const nodeHeight = nodeHTMLelement.offsetHeight;
 
     if (nodeX > selectionBoundingRect.xBegin
-    && nodeX + nodeWidth < selectionBoundingRect.xEnd
+    && nodeX + nodeWidth * scaling < selectionBoundingRect.xEnd
     && nodeY > selectionBoundingRect.yBegin
-    && nodeY + nodeHeight < selectionBoundingRect.yEnd) {
+    && nodeY + nodeHeight * scaling < selectionBoundingRect.yEnd) {
         return true;
     }
     return false;
