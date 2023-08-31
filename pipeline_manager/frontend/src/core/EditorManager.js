@@ -456,12 +456,30 @@ export default class EditorManager {
         const save = this.baklavaView.editor.save();
         save.version = this.specificationVersion;
 
-        if (this.baklavaView.connectionRenderer.randomizedOffset) {
-            if (save.metadata === undefined) {
-                save.metadata = {};
-            }
+        if (save.metadata === undefined) {
+            save.metadata = {};
+        }
 
-            save.metadata.randomizedOffset = true;
+        [
+            [this.baklavaView.editor.readonly, 'readonly'],
+            [this.baklavaView.hideHud, 'hideHud'],
+            [this.editor.allowLoopbacks, 'allowLoopbacks'],
+            [this.baklavaView.twoColumn, 'twoColumn'],
+            [this.baklavaView.connectionRenderer.style, 'connectionStyle'],
+            [this.baklavaView.movementStep, 'movementStep'],
+            [this.baklavaView.settings.background.gridSize, 'backgroundSize'],
+            [this.baklavaView.connectionRenderer.randomizedOffset, 'randomizedOffset'],
+        ].forEach(([currVal, name]) => {
+            const m = this.currentSpecification.metadata ?? {};
+            const dm = this.defaultMetadata;
+
+            if (currVal !== (m[name] ?? dm[name])) {
+                save.metadata[name] = currVal;
+            }
+        });
+
+        if (Object.keys(save.metadata).length === 0) {
+            delete save.metadata;
         }
 
         return save;
