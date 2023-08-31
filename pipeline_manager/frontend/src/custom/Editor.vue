@@ -36,7 +36,7 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
             <background />
         </slot>
 
-        <slot name="sidebar">
+        <slot name="sidebar" v-if="!hideHud">
             <CustomSidebar />
         </slot>
 

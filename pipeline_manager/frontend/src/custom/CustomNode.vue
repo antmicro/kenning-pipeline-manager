@@ -52,6 +52,7 @@ from moving or deleting the nodes.
                 @keydown.enter="doneRenaming"
             />
             <CustomContextMenu
+                v-if="showContextMenuTitle"
                 v-model="showContextMenuTitle"
                 :x="contextMenuTitleX"
                 :y="contextMenuTitleY"
@@ -110,6 +111,7 @@ from moving or deleting the nodes.
             </div>
 
             <CustomContextMenu
+                v-if="showContextMenuInterface"
                 v-model="showContextMenuInterface"
                 :x="contextMenuInterfaceX"
                 :y="contextMenuInterfaceY"
@@ -187,12 +189,19 @@ const showContextMenuTitle = ref(false);
 const contextMenuTitleX = ref(0);
 const contextMenuTitleY = ref(0);
 const contextMenuTitleItems = computed(() => {
-    const items = [
-        { value: 'rename', label: 'Rename', icon: Pencil },
-        { value: 'delete', label: 'Delete', icon: Bin },
-        { value: 'sidebar', label: 'Sidebar' },
-        ...nodeURLs,
-    ];
+    const items = [];
+    if (!viewModel.value.editor.readonly) {
+        items.push(
+            { value: 'rename', label: 'Rename', icon: Pencil },
+            { value: 'delete', label: 'Delete', icon: Bin },
+        );
+    }
+
+    if (!viewModel.value.hideHud) {
+        items.push({ value: 'sidebar', label: 'Sidebar' });
+    }
+
+    items.push(...nodeURLs);
 
     if (props.node.type.startsWith(GRAPH_NODE_TYPE_PREFIX)) {
         items.push({ value: 'editSubgraph', label: 'Edit Subgraph' });
@@ -235,9 +244,9 @@ const onContextMenuTitleClick = async (action) => {
 };
 
 const openContextMenuTitle = (ev) => {
-    if (!viewModel.value.editor.readonly && showContextMenuTitle.value === false) {
-        contextMenuTitleX.value = ev.offsetX - 25 * (1 / graph.value.scaling);
-        contextMenuTitleY.value = ev.offsetY - 25 * (1 / graph.value.scaling);
+    if (showContextMenuTitle.value === false) {
+        contextMenuTitleX.value = ev.offsetX;
+        contextMenuTitleY.value = ev.offsetY;
         showContextMenuTitle.value = true;
     }
 };
