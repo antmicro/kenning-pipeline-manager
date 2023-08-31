@@ -57,7 +57,6 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
                 :node="node"
                 :selected="selectedNodes.includes(node)"
                 :interfaces="highlightInterfaces"
-                :selectedNodesDragMoves="selectedNodesDragMoves"
                 @select="selectNode(node)"
             />
         </div>
@@ -144,7 +143,8 @@ export default defineComponent({
         const hideHud = computed(() => props.viewModel.hideHud);
 
         const rectangleSelection = ref(null);
-        const selectedNodesDragMoves = ref([]);
+
+        const selectedNodesDragMove = ref(null);
 
         const pressStartTime = ref(0);
         const longPressMilisTreshold = ref(100);
@@ -185,9 +185,7 @@ export default defineComponent({
         const onRightPointerDown = (ev) => {
             if (ev.target === el.value) {
                 unselectAllNodes();
-                selectedNodesDragMoves.value = [];
                 rectangleSelection.value.onPointerDown(ev);
-                rectangleSelection.value.selecting = true;
             }
 
             pressStartTime.value = new Date();
@@ -213,7 +211,6 @@ export default defineComponent({
                 && ev.target === el.value) {
                 unselectAllNodes();
             }
-            rectangleSelection.value.selecting = false;
         };
 
         const onRightPointerUp = (ev) => {
@@ -570,7 +567,7 @@ export default defineComponent({
             keyUp,
             selectNode,
             rectangleSelection,
-            selectedNodesDragMoves,
+            selectedNodesDragMove,
             temporaryConnection: temporaryConnection.temporaryConnection,
             mouseWheel: panZoom.onMouseWheel,
             dragging: panZoom.dragging,

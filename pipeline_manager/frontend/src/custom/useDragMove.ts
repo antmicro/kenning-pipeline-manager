@@ -18,7 +18,7 @@ interface coordinates {
 export default function useDragMove(
     positionRef: Ref<coordinates>,
     gridSnapperInstance = undefined,
-    nodeId = undefined,
+    nodeIds = undefined,
 ) {
     // any definition is an ad-hoc solution as we don't have our graph definition
     const { graph } = useGraph() as { graph: any };
@@ -42,8 +42,8 @@ export default function useDragMove(
 
     /* eslint-disable arrow-body-style */
     const calculatePosition = (pos: number, kind: 'x' | 'y', align = false, gridSnap = false) => {
-        if (align && nodeId !== undefined) {
-            const alignedCoord = nodeSnappers[kind](pos, nodeId);
+        if (align && nodeIds !== undefined) {
+            const alignedCoord = nodeSnappers[kind](pos, nodeIds);
             if (alignedCoord !== undefined) {
                 return alignedCoord;
             }
@@ -106,7 +106,43 @@ export default function useDragMove(
         onPointerDown,
         onPointerMove,
         onPointerUp,
-        draggingStartPoint,
-        draggingStartPosition,
     };
+}
+
+export function useGroupDragMove(
+    dragRootNodePosition: any,
+    gridSnapperInstance = undefined,
+) {
+    const { graph } = useGraph() as { graph: any };
+    const selectedNodesPositions = graph.value.selectedNodes.map(
+        (node: { position: coordinates; }) => node.position,
+    );
+
+    const groupPositionCoords: Ref<coordinates> = ref(
+        { x: dragRootNodePosition.value.x, y: dragRootNodePosition.value.y },
+    );
+
+    const groupDragMove = useDragMove(
+        groupPositionCoords,
+        gridSnapperInstance,
+        graph.value.selectedNodes.map((node: { id: string }) => node.id),
+    );
+
+    const groupPointerMove = groupDragMove.onPointerMove;
+
+    const onPointerMove = (ev: PointerEvent) => {
+        groupPointerMove(ev);
+
+        const dx = groupPositionCoords.value.x - dragRootNodePosition.value.x;
+        const dy = groupPositionCoords.value.y - dragRootNodePosition.value.y;
+
+        selectedNodesPositions.forEach((pos: coordinates) => {
+            pos.x += dx;
+            pos.y += dy;
+        });
+    };
+
+    groupDragMove.onPointerMove = onPointerMove;
+
+    return groupDragMove;
 }

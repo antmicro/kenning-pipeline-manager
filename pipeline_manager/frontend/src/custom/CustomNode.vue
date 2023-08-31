@@ -129,7 +129,7 @@ import { ref, computed, toRef, onUpdated, onMounted, nextTick, markRaw, watch } 
 import { useViewModel, useGraph } from '@baklavajs/renderer-vue';
 import { AbstractNode, GRAPH_NODE_TYPE_PREFIX } from '@baklavajs/core';
 
-import useDragMove from './useDragMove';
+import useDragMove, { useGroupDragMove } from './useDragMove';
 import CustomInterface from './CustomInterface.vue';
 import CustomContextMenu from './ContextMenu.vue';
 import { gridSnapper } from '../core/snappers';
@@ -153,7 +153,7 @@ const props = defineProps({
     node: AbstractNode,
     selected: Boolean,
     interfaces: Array,
-    selectedNodesDragMoves: Array,
+    selectedNodesDragMove: undefined,
 });
 
 const emit = defineEmits(['select']);
@@ -287,13 +287,9 @@ const select = () => {
 };
 
 const stopDrag = () => {
-    props.selectedNodesDragMoves.forEach((nodeDragMove) => {
-        nodeDragMove.onPointerUp();
-        document.removeEventListener('pointermove', nodeDragMove.onPointerMove);
-    });
-
-    /* eslint-disable vue/no-mutating-props,no-param-reassign */
-    props.selectedNodesDragMoves = [];
+    viewModel.value.editor.selectedNodesDragMove.onPointerUp();
+    document.removeEventListener('pointermove', viewModel.value.editor.selectedNodesDragMove.onPointerMove);
+    viewModel.value.editor.selectedNodesDragMove = null;
 
     document.removeEventListener('pointerup', stopDrag);
 };
@@ -312,20 +308,13 @@ const startDrag = (ev) => {
         select();
     }
 
-    for (let i = 0; i < graph.value.selectedNodes.length; i += 1) {
-        const node = graph.value.selectedNodes[i];
-        const nodeDragMove = useDragMove(
-            ref(node.position),
-            gridSnapper(movementStep),
-            node.id,
-        );
-        nodeDragMove.onPointerDown(ev);
-        document.addEventListener('pointermove', nodeDragMove.onPointerMove);
-
-        /* eslint-disable vue/no-mutating-props,no-param-reassign */
-        props.selectedNodesDragMoves.push(nodeDragMove);
-    }
-
+    const nodesDragMove = useGroupDragMove(
+        toRef(props.node, 'position'),
+        gridSnapper(movementStep),
+    );
+    nodesDragMove.onPointerDown(ev);
+    document.addEventListener('pointermove', nodesDragMove.onPointerMove);
+    viewModel.value.editor.selectedNodesDragMove = nodesDragMove;
     document.addEventListener('pointerup', stopDrag);
 };
 
