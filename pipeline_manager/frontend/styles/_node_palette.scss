@@ -10,6 +10,7 @@
     min-width: 300px;
     max-width: 450px;
     background: var(--baklava-node-color-background);
+    user-select: none;
 
     // default baklavjs height - terminal panel height
     height: calc(100% - 60px - 35px);
