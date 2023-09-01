@@ -29,7 +29,7 @@ from moving or deleting the nodes.
         </div>
         <div
             class="__title"
-            @pointerdown="onMouseDown"
+            @pointerdown.left.exact="onMouseDown"
             @pointerdown.left.self.stop="startDragWrapper($event)"
             @pointerdown.right="openContextMenuTitle"
         >
@@ -184,7 +184,6 @@ const focusOnRename = () => {
 };
 
 // Title context menu
-
 const showContextMenuTitle = ref(false);
 const contextMenuTitleX = ref(0);
 const contextMenuTitleY = ref(0);
@@ -198,7 +197,7 @@ const contextMenuTitleItems = computed(() => {
     }
 
     if (!viewModel.value.hideHud) {
-        items.push({ value: 'sidebar', label: 'Sidebar' });
+        items.push({ value: 'sidebar', label: 'Details' });
     }
 
     items.push(...nodeURLs);
@@ -347,12 +346,21 @@ const startDragWrapper = (ev) => {
     }
 };
 
-/* eslint-disable vue/no-mutating-props,no-param-reassign */
-const onMouseDown = doubleClick(700, () => {
+const openDoubleClick = doubleClick(700, () => {
     if (!viewModel.value.editor.readonly) {
         openSidebar();
     }
 });
+
+/* eslint-disable vue/no-mutating-props,no-param-reassign */
+const onMouseDown = () => {
+    const { sidebar } = viewModel.value.displayedGraph;
+    if (sidebar.visible) {
+        sidebar.nodeId = props.node.id;
+    }
+
+    openDoubleClick();
+};
 
 const displayedProperties = computed(() =>
     Object.values(displayedInputs.value).filter((intf) => !intf.port),
