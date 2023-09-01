@@ -10,6 +10,7 @@ Displays user interface and main details about the Pipeline Manager status.
 -->
 
 <script>
+import { markRaw } from 'vue';
 import { toPng, toSvg } from 'html-to-image';
 import jsonlint from 'jsonlint';
 import Logo from '../icons/Logo.vue';
@@ -27,6 +28,10 @@ import { notificationStore } from '../core/stores';
 import ExternalApplicationManager from '../core/ExternalApplicationManager';
 import Notifications from './Notifications.vue';
 import Settings from './Settings.vue';
+import SaveMenu from './SaveMenu.vue';
+
+import InputInterface from '../interfaces/InputInterface.js';
+import InputInterfaceComponent from '../interfaces/InputInterface.vue';
 
 export default {
     components: {
@@ -41,14 +46,74 @@ export default {
         Cogwheel,
         Settings,
         Cube,
+        SaveMenu,
+    },
+    computed: {
+        dataflowGraphName() {
+            return this.editorManager.baklavaView.editor.graphName;
+        },
+        editorTitle() {
+            if (this.graphName === undefined) {
+                return this.appName;
+            }
+            const normalizedGraphName = this.graphName.trim();
+            return normalizedGraphName === '' ? this.appName : normalizedGraphName;
+        },
+    },
+    watch: {
+        dataflowGraphName(newValue) {
+            this.graphName = newValue;
+
+            // Resetting the save configuration
+            this.saveConfiguration = {
+                readonly: false,
+                hideHud: false,
+                position: false,
+                savename: 'save',
+                graphname: newValue ?? '',
+            };
+        },
+        graphName(newValue) {
+            // Resetting the save configuration
+            this.saveConfiguration = {
+                readonly: false,
+                hideHud: false,
+                position: false,
+                savename: 'save',
+                graphname: newValue ?? '',
+            };
+        },
     },
     data() {
+        const editorManager = EditorManager.getEditorManagerInstance();
+        const graphName = editorManager.baklavaView.editor.graphName ?? '';
+        const appName = process.env.VUE_APP_EDITOR_TITLE ?? 'Pipeline Manager';
+
+        const editorTitleInterface = new InputInterface(
+            'Graph name',
+            '',
+        ).setPort(false);
+        editorTitleInterface.componentName = 'InputInterface';
+        editorTitleInterface.setComponent(markRaw(InputInterfaceComponent));
+
         return {
-            editorManager: EditorManager.getEditorManagerInstance(),
+            appName,
+            graphName,
+            editorManager,
+            editorTitleInterface,
+            saveConfiguration: {
+                readonly: false,
+                hideHud: false,
+                position: false,
+                savename: 'save',
+                graphname: graphName ?? '',
+            },
             /* create instance of external manager to control
             connection, dataflow and specification
             */
             externalApplicationManager: new ExternalApplicationManager(),
+            saveMenuShow: false,
+            editTitle: false,
             notificationStore,
             // Toggleable panels and their configuration
             panels: {
@@ -81,7 +146,6 @@ export default {
                     hideTransform: '0px, 0px',
                 },
             },
-            editorTitle: process.env.VUE_APP_EDITOR_TITLE ?? 'Pipeline Manager',
         };
     },
     methods: {
@@ -224,12 +288,18 @@ export default {
          * Event handler that that saves a current dataflow to a `save.json` file.
          */
         saveDataflow() {
-            const blob = new Blob([JSON.stringify(this.editorManager.saveDataflow(), null, 4)], {
+            const blob = new Blob([JSON.stringify(this.editorManager.saveDataflow(
+                this.saveConfiguration.readonly,
+                this.saveConfiguration.hideHud,
+                this.saveConfiguration.position,
+                this.saveConfiguration.graphname,
+            ), null, 4)], {
                 type: 'application/json',
             });
+
             const linkElement = document.createElement('a');
             linkElement.href = window.URL.createObjectURL(blob);
-            linkElement.download = 'save';
+            linkElement.download = this.saveConfiguration.savename;
             linkElement.click();
             NotificationHandler.showToast('info', 'Dataflow saved');
         },
@@ -328,11 +398,15 @@ export default {
                             text="Load graph file"
                             :eventFunction="loadDataflowCallback"
                         />
-                        <DropdownItem
-                            type="'button'"
-                            text="Save graph file"
-                            :eventFunction="saveDataflow"
-                        />
+                        <div class="save-option">
+                            <DropdownItem
+                                class="save-button"
+                                type="'button'"
+                                text="Save graph file"
+                                :eventFunction="saveDataflow"
+                            />
+                            <Cogwheel class="save-icon" @click="saveMenuShow = !saveMenuShow" />
+                        </div>
                         <DropdownItem
                             type="'button'"
                             text="Export graph to PNG"
@@ -343,7 +417,9 @@ export default {
                             text="Export graph to SVG"
                             :eventFunction="exportToSvg"
                         />
-                        <div v-if="this.externalApplicationManager.externalApplicationConnected">
+                        <div
+                            v-if="this.externalApplicationManager.externalApplicationConnected"
+                        >
                             <hr />
                             <DropdownItem
                                 text="Load file"
@@ -391,7 +467,20 @@ export default {
                     </div>
                 </div>
             </div>
-            <span> {{ editorTitle }} </span>
+            <component
+                v-if="editTitle"
+                :is="editorTitleInterface.component"
+                :intf="editorTitleInterface"
+                class="editorTitleInput"
+                v-model="graphName"
+                v-click-outside="() => { editTitle = false }"
+            />
+            <span
+                v-else
+                class="editorTitle"
+                @dblclick="editTitle = true">
+                    {{ editorTitle }}
+            </span>
             <div>
                 <div ref="settings">
                     <button @click="() => togglePanel(panels.settings)">
@@ -447,6 +536,15 @@ export default {
             v-click-outside="(ev) => clickOutside(ev, panels.settings)"
             :viewModel="editorManager.baklavaView"
         />
+        <Transition name="fade">
+            <SaveMenu
+                v-show="saveMenuShow"
+                v-model="saveMenuShow"
+                :viewModel="editorManager.baklavaView"
+                :saveConfiguration="saveConfiguration"
+                :saveCallback="saveDataflow"
+            />
+        </Transition>
     </div>
 </template>
 
@@ -473,6 +571,15 @@ export default {
     padding: 0 $spacing-l;
     background-color: $gray-600;
 
+    .editorTitle {
+        cursor: text;
+        text-align: right;
+    }
+
+    .editorTitleInput {
+        font-size: $fs-small;
+    }
+
     & > div {
         display: inherit;
         align-items: center;
@@ -487,6 +594,7 @@ export default {
             height: 100%;
 
             & > .dropdown-wrapper {
+                user-select: none;
                 width: max-content;
                 position: absolute;
                 flex-direction: column;
@@ -498,6 +606,22 @@ export default {
                 display: none;
                 background-color: $gray-600;
                 border: 1px solid $gray-500;
+
+                & > .save-option {
+                    display: flex;
+                    align-items: center;
+
+                    & > .save-icon {
+                        height: 1em;
+                        width: 1em;
+                        padding-right: $spacing-s;
+                        cursor: pointer;
+                    }
+
+                    & > .save-button {
+                        flex-grow: 1;
+                    }
+                }
             }
 
             & > .backend-status {
