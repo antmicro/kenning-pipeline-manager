@@ -111,6 +111,7 @@
 
     background-color: $gray-600;
     border-radius: unset;
+    border: 1px solid $gray-500;
     cursor: pointer;
 
     & > .item {
@@ -119,9 +120,10 @@
         position: relative;
         flex-direction: row;
         text-decoration: none;
-        padding: 1rem;
-        height: 4em;
+        padding: 0.75em 1em;
+        height: 2.75em;
         color: inherit;
+        font-size: 0.875em;
 
         &:hover {
             color: var(--baklava-control-color-primary);
@@ -131,18 +133,17 @@
             flex-grow: 0;
             pointer-events: none;
             width: auto;
-            height: 2em;
-            width: 2em;
+            height: 1.25em;
+            width: 1.25em;
 
             & > img {
-                height: 2em;
-                width: 2em;
+                height: 1.25em;
+                width: 1.25em;
             }
 
             & > svg {
-                padding: 0.25em;
-                height: 2em;
-                width: 2em;
+                height: 1.25em;
+                width: 1.25em;
             }
         }
     }
