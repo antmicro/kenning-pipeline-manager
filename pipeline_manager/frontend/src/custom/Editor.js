@@ -221,32 +221,42 @@ export default class PipelineManagerEditor extends Editor {
         const readonlySetting = this.readonly;
         this.readonly = true;
         let errors = [];
-        const entryId = state.entryGraph;
 
-        const usedSubgraphs = new Set();
-        state.graphTemplateInstances.forEach((subgraph) => {
-            subgraph.nodes.forEach((n) => {
-                if (n.subgraph !== undefined) {
-                    usedSubgraphs.add(n.subgraph);
-                }
+        let panning;
+        let scaling;
+        let rootGraph;
+
+        if (state.entryGraph !== undefined) {
+            // multi-graph dataflow
+            const usedSubgraphs = new Set();
+
+            state.graphTemplateInstances.forEach((subgraph) => {
+                subgraph.nodes.forEach((n) => {
+                    if (n.subgraph !== undefined) {
+                        usedSubgraphs.add(n.subgraph);
+                    }
+                });
             });
-        });
+            // Finding a root graph by checking which graph is not referenced by any other
+            rootGraph = state.graphTemplateInstances.find((subgraph) =>
+                !usedSubgraphs.has(subgraph.id),
+            );
+            if (rootGraph === undefined) {
+                return ['No root graph found. Make sure you graph does not have any reccurency'];
+            }
 
-        // Finding a root graph by checking which graph is not referenced by any other
-        const rootGraph = state.graphTemplateInstances.find((subgraph) =>
-            !usedSubgraphs.has(subgraph.id),
-        );
-        if (rootGraph === undefined) {
-            return ['No root graph found. Make sure you graph does not have any reccurency'];
+            const entryGraph = state.graphTemplateInstances.find(
+                (subgraph) => subgraph.id === state.entryGraph,
+            );
+            if (entryGraph === undefined) {
+                return [`No entry graph found of id '${state.entryGraph}'`];
+            }
+            ({ panning, scaling } = entryGraph);
+        } else {
+            // single-graph dataflow
+            rootGraph = state.graph;
+            ({ panning, scaling } = state.graph);
         }
-
-        const entryGraph = state.graphTemplateInstances.find(
-            (subgraph) => subgraph.id === state.entryGraph,
-        );
-        if (entryGraph === undefined) {
-            return [`No entry graph found of id '${state.entryGraph}'`];
-        }
-        const { panning, scaling } = entryGraph;
 
         try {
             rootGraph.nodes.forEach((n) => {
@@ -289,31 +299,33 @@ export default class PipelineManagerEditor extends Editor {
             this.updateNodesPosition(layout);
         }
 
-        const dfs = (subgraph, path) => {
-            if (subgraph?.nodes !== undefined) {
-                for (let i = 0; i < subgraph.nodes.length; i += 1) {
-                    if (subgraph.nodes[i].subgraph !== undefined) {
-                        if (subgraph.nodes[i].subgraph.id === entryId) {
-                            return [...path, subgraph.nodes[i]];
-                        }
-                        const returnedPath = dfs(
-                            subgraph.nodes[i].subgraph,
-                            [...path, subgraph.nodes[i]],
-                        );
-                        if (returnedPath.length) {
-                            return returnedPath;
+        if (state.entryGraph !== undefined) {
+            const dfs = (subgraph, path) => {
+                if (subgraph?.nodes !== undefined) {
+                    for (let i = 0; i < subgraph.nodes.length; i += 1) {
+                        if (subgraph.nodes[i].subgraph !== undefined) {
+                            if (subgraph.nodes[i].subgraph.id === state.entryGraph) {
+                                return [...path, subgraph.nodes[i]];
+                            }
+                            const returnedPath = dfs(
+                                subgraph.nodes[i].subgraph,
+                                [...path, subgraph.nodes[i]],
+                            );
+                            if (returnedPath.length) {
+                                return returnedPath;
+                            }
                         }
                     }
                 }
-            }
-            return [];
-        };
+                return [];
+            };
 
-        // Finding a path to the defined entry and switching to it sequentially
-        const path = dfs(this._graph, []);
-        path.forEach((node) => {
-            this.switchToSubgraph(node);
-        });
+            // Finding a path to the defined entry and switching to it sequentially
+            const path = dfs(this._graph, []);
+            path.forEach((node) => {
+                this.switchToSubgraph(node);
+            });
+        }
 
         // We need graph switched and sidebar rendered for autozoom
         await nextTick();
