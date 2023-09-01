@@ -98,6 +98,33 @@ export default defineComponent({
             };
         });
 
+        const dragEndPlaceNode = (ev) => {
+            const elements = document.elementsFromPoint(ev.clientX, ev.clientY);
+
+            if (!elements.includes(paletteRef.value)) {
+                const instance = new draggedNode.value.nodeInformation.type(); // eslint-disable-line new-cap,max-len
+                viewModel.value.displayedGraph.addNode(instance);
+
+                const rect = editorEl.value.getBoundingClientRect();
+                const [x, y] = transform(mouseX.value - rect.left, mouseY.value - rect.top);
+                instance.position.x = x;
+                instance.position.y = y;
+
+                draggedNode.value = null;
+                document.removeEventListener('pointerup', dragEndPlaceNode);
+                document.removeEventListener('keydown', dragEndDeselectNode); // eslint-disable-line no-use-before-define
+            }
+        };
+
+        const dragEndDeselectNode = (ev) => {
+            if (ev.key === 'Escape') {
+                draggedNode.value = null;
+
+                document.removeEventListener('pointerup', dragEndPlaceNode);
+                document.removeEventListener('keydown', dragEndDeselectNode);
+            }
+        };
+
         const onDragStart = (type, nodeInformation, iconPath) => {
             draggedNode.value = {
                 type,
@@ -105,24 +132,8 @@ export default defineComponent({
                 iconPath,
             };
 
-            const onDragEnd = (ev) => {
-                const elements = document.elementsFromPoint(ev.clientX, ev.clientY);
-
-                if (!elements.includes(paletteRef.value)) {
-                    const instance = new nodeInformation.type(); // eslint-disable-line new-cap,max-len
-                    viewModel.value.displayedGraph.addNode(instance);
-
-                    const rect = editorEl.value.getBoundingClientRect();
-                    const [x, y] = transform(mouseX.value - rect.left, mouseY.value - rect.top);
-                    instance.position.x = x;
-                    instance.position.y = y;
-
-                    draggedNode.value = null;
-                    document.removeEventListener('pointerup', onDragEnd);
-                }
-            };
-
-            document.addEventListener('pointerup', onDragEnd);
+            document.addEventListener('pointerup', dragEndPlaceNode);
+            document.addEventListener('keydown', dragEndDeselectNode);
         };
         const nodeSearch = ref('');
 
