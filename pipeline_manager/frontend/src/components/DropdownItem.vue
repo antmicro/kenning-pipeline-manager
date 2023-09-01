@@ -43,7 +43,7 @@ export default {
 div {
     display: flex;
     justify-content: space-between;
-    width: 160px;
+    min-width: 10em;
     flex-direction: row;
     padding: $spacing-s $spacing-s;
     align-items: center;
@@ -56,6 +56,11 @@ div {
         background-color: unset;
         border: unset;
         cursor: pointer;
+    }
+
+    & > input[type='button']:hover,
+    label:hover {
+        color: $green;
     }
 }
 </style>
