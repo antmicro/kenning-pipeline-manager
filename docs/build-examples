@@ -67,8 +67,8 @@ def main(argv):
             output_directory=args.output_dir / dir_name,
             skip_install_deps=True
         )
-        shutil.copy(Path(str(spec)).absolute(), args.output_dir / dir_name / "spec.json")
-        shutil.copy(dataflow, args.output_dir / dir_name / "graph.json")
+        print(shutil.copy(Path(str(spec)).absolute(), args.output_dir / dir_name / "spec.json"))
+        print(shutil.copy(dataflow, args.output_dir / dir_name / "graph.json"))
 
 
 if __name__ == '__main__':

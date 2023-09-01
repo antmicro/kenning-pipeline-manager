@@ -53,7 +53,7 @@ if html_build_dir.is_dir():
                 title = json.load(f)['graph']['name']
         except (KeyError, FileNotFoundError):
             title = relexample.stem
-        exampleentries.append(f'* [{title}](resource:{relexample}/index.html)')  # noqa: E501
+        exampleentries.append(f'* [{title}](resource:{relexample}/index.html) ([Graph](resource:{relexample}/graph.json), [Spec](resource:{relexample}/spec.json))')  # noqa: E501
     myst_substitutions["examples"] = '\n'.join(exampleentries)
 
 today_fmt = '%Y-%m-%d'
