@@ -24,9 +24,6 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
             '--temporary-connection': !!temporaryConnection,
         }"
         :style="`--scale: ${this.scale}`"
-        @pointermove.self="onPointerMove"
-        @pointerdown.left.exact="onPointerDown"
-        @pointerup="onPointerUp"
         @wheel.self="mouseWheel"
         @keydown="keyDown"
         @keyup="keyUp"
@@ -150,7 +147,18 @@ export default defineComponent({
         const onPointerUp = (ev) => {
             panZoom.onPointerUp(ev);
             temporaryConnection.onMouseUp();
+
+            document.removeEventListener('mouseup', onPointerUp);
+            document.removeEventListener('mousemove', onPointerMove);
         };
+
+        document.addEventListener('mousedown', (ev) => {
+            if (ev.button === 0) {
+                onPointerDown(ev);
+                document.addEventListener('mouseup', onPointerUp);
+                document.addEventListener('mousemove', onPointerMove);
+            }
+        });
 
         const clearHighlight = () => {
             highlightConnections.value.splice(0, highlightConnections.value.length);
