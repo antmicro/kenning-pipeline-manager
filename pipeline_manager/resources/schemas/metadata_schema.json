@@ -144,7 +144,7 @@
         "layout": {
             "type": "string",
             "description": "Defines the default autolayout algorithm",
-            "default": "NoLayout"
+            "default": "CytoscapeEngine - dagre-longest-path"
         },
         "randomizedOffset": {
             "type": "boolean",
