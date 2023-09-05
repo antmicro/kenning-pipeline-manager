@@ -283,15 +283,28 @@ const select = () => {
     emit('select');
 };
 
-const stopDrag = () => {
-    dragMove.onPointerUp();
+let abortDrag;
+let stopDrag;
+
+const cleanEvents = () => {
     document.removeEventListener('pointermove', dragMove.onPointerMove);
+    document.removeEventListener('keyboard.escape', abortDrag);
     document.removeEventListener('pointerup', stopDrag);
+};
+
+abortDrag = () => {
+    cleanEvents();
+};
+
+stopDrag = () => {
+    dragMove.onPointerUp();
+    cleanEvents();
 };
 
 const startDrag = (ev) => {
     dragMove.onPointerDown(ev);
     document.addEventListener('pointermove', dragMove.onPointerMove);
+    document.addEventListener('keyboard.escape', abortDrag);
     document.addEventListener('pointerup', stopDrag);
     select();
 };

@@ -26,6 +26,7 @@ import {
 
 export const COPY_COMMAND = 'COPY';
 export const DELETE_COMMAND = 'DELETE';
+export const UNHIGHLIGHT_COMMAND = 'UNHIGHLIGHT';
 export const PASTE_COMMAND = 'PASTE';
 export const CLEAR_CLIPBOARD_COMMAND = 'CLEAR_CLIPBOARD';
 
@@ -72,11 +73,11 @@ export function useClipboard(
     };
 
     const del = () => {
-        // TODO(jbylicki): Once history is going to get adjusted to 
-        // subgraph and other changes, this should behave as one 
+        // TODO(jbylicki): Once history is going to get adjusted to
+        // subgraph and other changes, this should behave as one
         // transaction including all the conenctions
         displayedGraph.value.selectedNodes.forEach((node : any) => {
-           displayedGraph.value.removeNode(node);
+            displayedGraph.value.removeNode(node);
         });
     };
 
@@ -190,6 +191,13 @@ export function useClipboard(
         execute: del,
     });
     commandHandler.registerHotkey(['Delete'], DELETE_COMMAND);
+    commandHandler.registerCommand(UNHIGHLIGHT_COMMAND, {
+        canExecute: () => true,
+        execute: () => {
+            displayedGraph.value.selectedNodes = []; // eslint-disable-line no-param-reassign
+        },
+    });
+    commandHandler.registerHotkey(['Escape'], UNHIGHLIGHT_COMMAND);
     commandHandler.registerCommand(COPY_COMMAND, {
         canExecute: () => true,
         execute: copy,
