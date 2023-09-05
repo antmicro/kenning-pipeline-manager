@@ -19,7 +19,6 @@ def script_build():
     parser = argparse.ArgumentParser(
         description='Tool for building the frontend application'
     )
-
     base_parser = argparse.ArgumentParser()
     base_parser.add_argument(
         '--assets-directory',
@@ -45,6 +44,11 @@ def script_build():
              'it is cleared before putting built frontend application or '
              'frontend sources',
         action='store_true'
+    )
+    base_parser.add_argument(
+        '--json_url_specification',
+        help='Path to url substitution specification file',
+        type=Path
     )
     base_parser.add_argument(
         '--single-html',

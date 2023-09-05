@@ -326,13 +326,43 @@ export default defineComponent({
         }
 
         /**
+         * Translates the provided url according to
+         * the optional substitution spec provided at compile time.
+         *
+         * @param {string} loc the encoded URL location of the resource
+         * @returns a translated URL
+         */
+        function parseLocation(loc) {
+            const jsonsubs = process.env.VUE_APP_JSON_URL_SUBSTITUTES ?? '{"https": "https://{}", "http": "http://{}"}';
+            const subs = JSON.parse(jsonsubs);
+            const parts = loc.split('//');
+
+            if (parts.length < 2) return undefined;
+
+            const key = parts[0].substring(0, parts[0].length - 1);
+            const specifiedUrl = parts.slice(1).join('');
+
+            if (!Object.keys(subs).includes(key)) return undefined;
+
+            return subs[key].replace('{}', specifiedUrl);
+        }
+
+        /**
          * Loads the JSON file from the remote location given in URL.
          *
          * @param {string} location the URL location of the resource
          * @returns a string with JSON data or undefined if the
          * downloading/parsing of the JSON failed
          */
-        async function loadJsonFromRemoteLocation(location) {
+        async function loadJsonFromRemoteLocation(customLocation) {
+            const location = parseLocation(customLocation);
+            if (location === undefined) {
+                NotificationHandler.terminalLog(
+                    'error',
+                    `Could not download the resource from:  ${customLocation}.`,
+                );
+                return undefined;
+            }
             let fetchedContent;
             try {
                 fetchedContent = await fetch(location, { mode: 'cors' });

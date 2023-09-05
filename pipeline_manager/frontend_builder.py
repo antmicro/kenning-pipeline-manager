@@ -149,6 +149,7 @@ def build_prepare(
 def build_frontend(
         build_type: str,
         assets_directory: Optional[Path] = None,
+        json_url_specification: Optional[Path] = None,
         editor_title: Optional[str] = None,
         specification: Optional[Path] = None,
         dataflow: Optional[Path] = None,
@@ -230,6 +231,12 @@ def build_frontend(
     if editor_title:
         config_lines.append(f'VUE_APP_EDITOR_TITLE={editor_title}\n')
 
+    urls = None
+    if json_url_specification:
+        json_url_specification = Path(json_url_specification).absolute()
+        with open(json_url_specification, 'r') as f:
+            urls = json.load(f)
+
     used_icons = None
     if minify_specification:
         if not (specification and dataflow):
@@ -266,6 +273,11 @@ def build_frontend(
     config_lines.append(f'NODE_ENV="{mode}"\n')
     if mode == 'development':
         config_lines.append('VUE_APP_VERBOSE=true\n')
+
+    if urls is not None:
+        config_lines.append(
+            f'VUE_APP_JSON_URL_SUBSTITUTES="{json.dumps(urls)}"\n'
+        )
 
     if config_lines:
         with open(config_path, 'w') as config:
