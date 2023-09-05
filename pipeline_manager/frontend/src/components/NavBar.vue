@@ -29,6 +29,7 @@ import ExternalApplicationManager from '../core/ExternalApplicationManager';
 import Notifications from './Notifications.vue';
 import Settings from './Settings.vue';
 import SaveMenu from './SaveMenu.vue';
+import BlurPanel from './BlurPanel.vue';
 
 import InputInterface from '../interfaces/InputInterface.js';
 import InputInterfaceComponent from '../interfaces/InputInterface.vue';
@@ -47,6 +48,7 @@ export default {
         Settings,
         Cube,
         SaveMenu,
+        BlurPanel,
     },
     computed: {
         dataflowGraphName() {
@@ -379,7 +381,19 @@ export default {
 };
 </script>
 
+<!-- eslint-disable vue/no-multiple-template-root -->
 <template>
+    <Transition name="fade" @click.self="saveMenuShow = false">
+        <BlurPanel v-show="saveMenuShow">
+            <SaveMenu
+                v-show="saveMenuShow"
+                v-model="saveMenuShow"
+                :viewModel="editorManager.baklavaView"
+                :saveConfiguration="saveConfiguration"
+                :saveCallback="saveDataflow"
+            />
+        </BlurPanel>
+    </Transition>
     <div class="wrapper">
         <div class="container">
             <div>
@@ -536,15 +550,6 @@ export default {
             v-click-outside="(ev) => clickOutside(ev, panels.settings)"
             :viewModel="editorManager.baklavaView"
         />
-        <Transition name="fade">
-            <SaveMenu
-                v-show="saveMenuShow"
-                v-model="saveMenuShow"
-                :viewModel="editorManager.baklavaView"
-                :saveConfiguration="saveConfiguration"
-                :saveCallback="saveDataflow"
-            />
-        </Transition>
     </div>
 </template>
 
