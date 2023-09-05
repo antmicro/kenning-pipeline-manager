@@ -453,12 +453,17 @@ export default class EditorManager {
      * @param readonly whether the dataflow should be saved in readonly mode
      * @param hideHud whether the dataflow should be saved in hideHud mode
      * @param position whether the dataflow should store panning and scaling values
+     * @param graphname graph name which is rendered to the user
      *
      * @returns Serialized dataflow.
      */
-    saveDataflow(readonly, hideHud, position) {
+    saveDataflow(readonly, hideHud, position, graphname) {
         const save = this.baklavaView.editor.save();
         save.version = this.specificationVersion;
+
+        if (graphname !== undefined) {
+            save.graph.name = graphname;
+        }
 
         if (!position) {
             delete save.graph.panning;

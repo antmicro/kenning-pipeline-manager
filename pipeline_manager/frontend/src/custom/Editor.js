@@ -113,6 +113,7 @@ export default class PipelineManagerEditor extends Editor {
     deepCleanEditor() {
         this.subgraphStack.forEach(this.backFromSubgraph.bind(this));
         this.cleanEditor();
+        this.graphName = undefined;
     }
 
     /**
@@ -248,6 +249,8 @@ export default class PipelineManagerEditor extends Editor {
         this.events.loaded.emit();
         await nextTick();
         const updatedGraph = await this.layoutManager.computeLayout(state.graph);
+        this.graphName = state.graph.name;
+
         this.updateNodesPosition(updatedGraph);
         this.readonly = readonlySetting;
 
