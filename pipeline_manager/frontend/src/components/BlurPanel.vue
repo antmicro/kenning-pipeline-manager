@@ -5,13 +5,13 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-    <div class="help-panel">
+    <div class="blur-panel">
         <slot />
     </div>
 </template>
 
 <style lang="scss">
-.help-panel {
+.blur-panel {
     background-color: #{$gray-600}80;
     backdrop-filter: blur(10px);
     position: absolute;
