@@ -16,7 +16,7 @@ variables:
 stages:
     - lint
     - build
-    - deploy
+    - docs
 
 flake8:
     stage: lint
@@ -89,9 +89,9 @@ build-docs-and-static-html:
             - docs/build/latex/*.pdf
             - $CI_DOCS_ARCHIVE
 
-deploy:
+docs:
     image: $CI_DOCS_DOCKER_IMAGE
-    stage: deploy
+    stage: docs
     <<: *common_only
     dependencies:
         - build-docs-and-static-html
