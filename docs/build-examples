@@ -48,14 +48,20 @@ def main(argv):
         if not dataflow.is_file():
             dataflow = None
             # Each example is required to have a dataflow
-            continue
+            print(f'The specification {spec} misses its corresponding dataflow.')
+            print('Please provide an example dataflow')
+            return errno.EINVAL
         title = ""
         dir_name = str(spec.stem).replace('-specification', '')
         try:
             with open(dataflow, 'r') as f:
                 title = json.load(f)['graph']['name']
         except (KeyError, FileNotFoundError):
-            title = dir_name
+            print(
+                f'The dataflow file {dataflow} is invalid '
+                'or misses graph name'
+            )
+            return errno.ENOENT
 
         print(f'### Building {title} ###')
         build_frontend(
@@ -67,8 +73,10 @@ def main(argv):
             output_directory=args.output_dir / dir_name,
             skip_install_deps=True
         )
-        print(shutil.copy(Path(str(spec)).absolute(), args.output_dir / dir_name / "spec.json"))
-        print(shutil.copy(dataflow, args.output_dir / dir_name / "graph.json"))
+        shutil.copy(
+            spec.absolute(), args.output_dir / dir_name / "spec.json"
+        )
+        shutil.copy(dataflow, args.output_dir / dir_name / "graph.json")
 
 
 if __name__ == '__main__':
