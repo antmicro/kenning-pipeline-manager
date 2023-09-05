@@ -8,7 +8,7 @@ import logging
 import sys
 from pathlib import Path
 
-from pipeline_manager.utils.logger import string_to_verbosity
+# from pipeline_manager.utils.logger import string_to_verbosity
 
 """
 Script that can be used to apply patches to update an old dataflow
@@ -23,7 +23,7 @@ python -m pipeline_manager.utils.dataflow_format_converter \
 """
 
 
-def pre_20230615_1(dataflow: dict) -> dict:
+def dataflow_ver_20230615_1(dataflow: dict) -> dict:
     """
     Converts dataflows to version 20230615.1
 
@@ -41,6 +41,29 @@ def pre_20230615_1(dataflow: dict) -> dict:
     return dataflow
 
 
+def dataflow_ver_20230830_11(dataflow: dict) -> dict:
+    dataflow["version"] = '20230830.11'
+
+    def parse_graph(graph):
+        for node in graph['nodes']:
+            if 'name' in node:
+                node['instanceName'] = node['name']
+                del node['name']
+
+            node['name'] = node['type']
+            del node['type']
+
+    parse_graph(dataflow['graph'])
+    if 'graphTemplateInstances' in dataflow:
+        for subgraph in dataflow['graphTemplateInstances']:
+            parse_graph(subgraph)
+
+    dataflow['subgraphs'] = dataflow['graphTemplateInstances']
+    del dataflow['graphTemplateInstances']
+
+    return dataflow
+
+
 def main(argv):
     parser = argparse.ArgumentParser(argv[0])
     parser.add_argument(
@@ -51,7 +74,7 @@ def main(argv):
     parser.add_argument(
         "--from-version",
         type=str,
-        default="20230615.1",
+        default="pre-20230615.1",
         help="Version of the input dataflow."
         + "All patches starting from this version are going to be applied",
     )
@@ -69,24 +92,25 @@ def main(argv):
         type=str,
     )
     args, _ = parser.parse_known_args(argv[1:])
-    logging.basicConfig(level=string_to_verbosity(args.verbosity))
+    # logging.basicConfig(level=string_to_verbosity(args.verbosity))
 
     args, _ = parser.parse_known_args(argv[1:])
 
     with open(args.dataflow) as f:
         dataflow = json.load(f)
 
-    patches = {
-        "pre-20230615.1": pre_20230615_1,
+    dataflow_patches = {
+        "pre-20230615.1": dataflow_ver_20230615_1,
+        "20230824.10": dataflow_ver_20230830_11,
     }
 
     try:
-        first_patch = list(patches.keys()).index(args.from_version)
+        first_patch = list(dataflow_patches.keys()).index(args.from_version)
     except ValueError:
         logging.error(f"Version - {args.from_version} is not valid")
         return
 
-    for ver, patch in list(patches.items())[first_patch:]:
+    for ver, patch in list(dataflow_patches.items())[first_patch:]:
         logging.info(f"Applying patch from version - {ver}")
         dataflow = patch(dataflow)
 
