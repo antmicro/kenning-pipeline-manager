@@ -4,7 +4,7 @@
         "name": "Multiple Input-Output node example",
         "nodes": [
             {
-                "type": "MultipleIO",
+                "name": "MultipleIO",
                 "id": "8ba85801-7371-4fb6-a07b-9f83be8fe501",
                 "position": {
                     "x": 1100,
@@ -112,12 +112,10 @@
                         "sidePosition": 6
                     }
                 ],
-                "properties": [],
-                "enabledInterfaceGroups": [],
-                "name": "MultipleIO"
+                "properties": []
             },
             {
-                "type": "MultipleIO",
+                "name": "MultipleIO",
                 "id": "df891f41-0401-4aa6-a7b2-7bf0293d8791",
                 "position": {
                     "x": 300,
@@ -225,12 +223,10 @@
                         "sidePosition": 6
                     }
                 ],
-                "properties": [],
-                "enabledInterfaceGroups": [],
-                "name": "MultipleIO"
+                "properties": []
             },
             {
-                "type": "MultipleIO",
+                "name": "MultipleIO",
                 "id": "728fb690-4750-449b-9ccd-42c80e17b81d",
                 "position": {
                     "x": 1100,
@@ -338,12 +334,10 @@
                         "sidePosition": 6
                     }
                 ],
-                "properties": [],
-                "enabledInterfaceGroups": [],
-                "name": "MultipleIO"
+                "properties": []
             },
             {
-                "type": "MultipleIO",
+                "name": "MultipleIO",
                 "id": "0603b359-d24f-4839-8f6b-9977e5f45ac1",
                 "position": {
                     "x": 1100,
@@ -451,9 +445,7 @@
                         "sidePosition": 6
                     }
                 ],
-                "properties": [],
-                "enabledInterfaceGroups": [],
-                "name": "MultipleIO"
+                "properties": []
             }
         ],
         "connections": [
@@ -491,8 +483,7 @@
         },
         "scaling": 0.5769551445016295
     },
-    "graphTemplateInstances": [],
-    "version": "20230824.9",
+    "version": "20230830.10",
     "metadata": {
         "randomizedOffset": true
     }

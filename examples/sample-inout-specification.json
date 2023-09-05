@@ -1,9 +1,9 @@
 {
-    "version": "20230824.9",
+    "version": "20230830.10",
     "nodes": [
         {
             "name": "TestInout",
-            "type": "filesystem",
+            "layer": "filesystem",
             "category": "Test",
             "properties": [
                 {"name": "property-1", "type": "text", "default": ""},

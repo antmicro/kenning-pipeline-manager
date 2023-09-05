@@ -1,9 +1,9 @@
 {
-    "version": "20230824.9",
+    "version": "20230830.10",
     "nodes": [
         {
             "name": "TestNode",
-            "type": "TestNode",
+            "layer": "TestNode",
             "category": "TestCategory",
             "properties": [
                 {"name": "test", "type": "text", "default": "testing"}

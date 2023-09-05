@@ -1,5 +1,5 @@
 {
-    "version": "20230824.9",
+    "version": "20230830.10",
     "metadata": {
         "allowLoopbacks": true,
         "layers": []
@@ -7,7 +7,6 @@
     "nodes": [
         {
             "name": "Test node #1",
-            "type": "Test node #1",
             "category": "First Category",
             "properties": [],
             "interfaces": [
@@ -31,7 +30,6 @@
         },
         {
             "name": "Test node #2",
-            "type": "Test node #2",
             "category": "Second Category",
             "properties": [
                 {
@@ -68,11 +66,10 @@
     "subgraphs": [
         {
             "name": "Test subgraph node #1",
-            "type": "Test subgraph node #1",
             "category": "First Category",
             "nodes": [
                 {
-                    "type": "Test node #1",
+                    "name": "Test node #1",
                     "interfaces": [
                         {
                             "id": "40adf4d9-bf08-40ee-82f3-c95b4588dc32",
@@ -98,10 +95,10 @@
                     "width": 200,
                     "twoColumn": false,
                     "properties": [],
-                    "title": "Foo"
+                    "instanceName": "Foo"
                 },
                 {
-                    "type": "Test node #1",
+                    "name": "Test node #1",
                     "interfaces": [
                         {
                             "id": "2315f500-e0fd-477f-9d86-d7efc27eac7e",
@@ -126,8 +123,7 @@
                     },
                     "width": 200,
                     "twoColumn": false,
-                    "properties": [],
-                    "title": ""
+                    "properties": []
                 }
             ],
             "connections": [
@@ -161,11 +157,10 @@
         },
         {
             "name": "Test subgraph node #2",
-            "type": "Test subgraph node #2",
             "category": "Second Category",
             "nodes": [
                 {
-                    "type": "Test node #1",
+                    "name": "Test node #1",
                     "position": {
                         "x": 849,
                         "y": 325
@@ -193,7 +188,7 @@
                     "properties": []
                 },
                 {
-                    "type": "Test node #2",
+                    "name": "Test node #2",
                     "position": {
                         "x": 1377,
                         "y": 344

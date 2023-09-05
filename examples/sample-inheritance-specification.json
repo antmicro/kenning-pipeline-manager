@@ -1,9 +1,9 @@
 {
-    "version": "20230824.9",
+    "version": "20230830.10",
     "nodes": [
         {
             "name": "Type A",
-            "type": "class",
+            "layer": "class",
             "category": "Classes",
             "properties": [
                 {"name": "prop-a", "type": "text", "default": ""}
@@ -24,7 +24,7 @@
         },
         {
             "name": "Type C",
-            "type": "class",
+            "layer": "class",
             "category": "Classes",
             "properties": [
                 {"name": "prop-c", "type": "text", "default": ""}

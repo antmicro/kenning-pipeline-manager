@@ -1,5 +1,5 @@
 {
-    "version": "20230824.9",
+    "version": "20230830.10",
     "graph": {
         "name": "Subgraph usage example",
         "entryGraph": "9c4d5349-9d3b-401f-86bb-021b7b3e5b81"
@@ -9,7 +9,7 @@
             "id": "9c4d5349-9d3b-401f-86bb-021b7b3e5b81",
             "nodes": [
                 {
-                    "type": "Test node #1",
+                    "name": "Test node #1",
                     "id": "bfeb3891-53ce-476d-bc0b-a27e99428c10",
                     "position": {
                         "x": 919,
@@ -37,11 +37,10 @@
                             "side": "right"
                         }
                     ],
-                    "properties": [],
-                    "name": "Test node #1"
+                    "properties": []
                 },
                 {
-                    "type": "Test node #2",
+                    "name": "Test node #2",
                     "id": "ea3463d7-b4d5-4531-9ecb-e1f3d524f0aa",
                     "position": {
                         "x": 1525,
@@ -75,11 +74,10 @@
                             "id": "d536c9b8-bbb9-496d-81ab-d3946ff7cf79",
                             "value": "Option 2"
                         }
-                    ],
-                    "name": "Test node #2"
+                    ]
                 },
                 {
-                    "type": "Test subgraph node #1",
+                    "name": "Test subgraph node #1",
                     "id": "4ece9e09-100e-45aa-9203-1c00241c2580",
                     "title": "Test subgraph node #1",
                     "position": {
@@ -114,7 +112,7 @@
                     "subgraph": "97abeeb5-61a1-4918-8816-5e74ba4e8be4"
                 },
                 {
-                    "type": "Test subgraph node #2",
+                    "name": "Test subgraph node #2",
                     "id": "16ad1f85-41bf-4fbc-a8bb-0b8841a2a13d",
                     "title": "Test subgraph node #2",
                     "position": {
@@ -164,7 +162,7 @@
             "id": "97abeeb5-61a1-4918-8816-5e74ba4e8be4",
             "nodes": [
                 {
-                    "type": "Test node #1",
+                    "name": "Test node #1",
                     "id": "72aa86ac-bcfd-48ba-ab0b-7c05c039ea48",
                     "position": {
                         "x": 749.2777990232428,
@@ -192,11 +190,10 @@
                             "side": "right"
                         }
                     ],
-                    "properties": [],
-                    "name": ""
+                    "properties": []
                 },
                 {
-                    "type": "Test node #1",
+                    "name": "Test node #1",
                     "id": "fcfc1ea4-7780-4dff-882c-38928640bcad",
                     "position": {
                         "x": 1557.7609886679443,
@@ -224,11 +221,10 @@
                             "side": "right"
                         }
                     ],
-                    "properties": [],
-                    "name": ""
+                    "properties": []
                 },
                 {
-                    "type": "Test node #1",
+                    "name": "Test node #1",
                     "id": "47f9b554-26a8-4c36-933f-118d353c038a",
                     "position": {
                         "x": 1166.3103153193495,
@@ -256,8 +252,7 @@
                             "side": "right"
                         }
                     ],
-                    "properties": [],
-                    "name": "Test node #1"
+                    "properties": []
                 }
             ],
             "connections": [
@@ -315,7 +310,7 @@
             "id": "c84e5d7e-7713-4528-a5a7-9cad25209bb0",
             "nodes": [
                 {
-                    "type": "Test node #1",
+                    "name": "Test node #1",
                     "id": "9cc0788d-38a5-43e0-a480-ea4adf070978",
                     "position": {
                         "x": 884.4110055908411,
@@ -343,11 +338,10 @@
                             "side": "right"
                         }
                     ],
-                    "properties": [],
-                    "name": ""
+                    "properties": []
                 },
                 {
-                    "type": "Test node #2",
+                    "name": "Test node #2",
                     "id": "98571611-c27f-4a87-90a0-f1e44c69b45e",
                     "position": {
                         "x": 1380.9345561767602,
@@ -381,8 +375,7 @@
                             "id": "89c71d25-7add-45f9-80c3-291a3fe169ed",
                             "value": "Option 1"
                         }
-                    ],
-                    "name": ""
+                    ]
                 }
             ],
             "connections": [

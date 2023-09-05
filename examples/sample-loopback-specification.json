@@ -1,5 +1,5 @@
 {
-    "version": "20230824.9",
+    "version": "20230830.10",
     "metadata": {
         "allowLoopbacks": true,
         "connectionStyle": "curved"
@@ -7,7 +7,7 @@
     "nodes": [
         {
             "name": "Node",
-            "type": "Type",
+            "layer": "Type",
             "category": "Nodes",
             "properties": [],
             "interfaces": [

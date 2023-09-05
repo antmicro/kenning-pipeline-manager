@@ -1,14 +1,11 @@
 {
-    "version": "20230824.9",
-    "subgraphs": [],
+    "version": "20230830.10",
     "graph": {
         "name": "Basic Graph example",
         "id": "2035108300",
         "nodes": [
             {
-                "type": "Filter2D",
                 "id": "node_168064109167511",
-                "name": "Filter",
                 "position": {
                     "x": 544,
                     "y": 77
@@ -44,10 +41,11 @@
                         "id": "ni_168064109167714",
                         "direction": "output"
                     }
-                ]
+                ],
+                "instanceName": "Filter",
+                "name": "Filter2D"
             },
             {
-                "type": "LoadVideo",
                 "id": "node_168064220761015",
                 "position": {
                     "x": -60,
@@ -68,10 +66,10 @@
                         "id": "ni_168064220761016",
                         "direction": "output"
                     }
-                ]
+                ],
+                "name": "LoadVideo"
             },
             {
-                "type": "GaussianKernel",
                 "id": "node_168064222522321",
                 "position": {
                     "x": -65,
@@ -97,10 +95,10 @@
                         "id": "ni_168064222522422",
                         "direction": "output"
                     }
-                ]
+                ],
+                "name": "GaussianKernel"
             },
             {
-                "type": "Threshold",
                 "id": "node_168064225320530",
                 "position": {
                     "x": 999,
@@ -131,12 +129,11 @@
                         "id": "ni_168064225320532",
                         "direction": "output"
                     }
-                ]
+                ],
+                "name": "Threshold"
             },
             {
-                "type": "StructuringElement",
                 "id": "node_168064227787336",
-                "name": "Structuring Element",
                 "position": {
                     "x": 1010,
                     "y": 409
@@ -161,10 +158,11 @@
                         "id": "ni_168064227787437",
                         "direction": "output"
                     }
-                ]
+                ],
+                "instanceName": "Structuring Element",
+                "name": "StructuringElement"
             },
             {
-                "type": "Morphological operation",
                 "id": "node_168064228786538",
                 "position": {
                     "x": 1422,
@@ -210,12 +208,11 @@
                         "id": "ni_168064228786641",
                         "direction": "output"
                     }
-                ]
+                ],
+                "name": "Morphological operation"
             },
             {
-                "type": "SaveVideo",
                 "id": "node_168064231007448",
-                "name": "Save Video",
                 "position": {
                     "x": 1773,
                     "y": 76
@@ -240,7 +237,9 @@
                         "id": "ni_168064231007450",
                         "direction": "input"
                     }
-                ]
+                ],
+                "instanceName": "Save Video",
+                "name": "SaveVideo"
             }
         ],
         "connections": [

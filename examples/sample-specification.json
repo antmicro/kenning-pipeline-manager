@@ -1,9 +1,9 @@
 {
-    "version": "20230824.9",
+    "version": "20230830.10",
     "nodes": [
         {
             "name": "LoadVideo",
-            "type": "filesystem",
+            "layer": "filesystem",
             "category": "Filesystem",
             "properties": [
                 {"name": "filename", "type": "text", "default": ""}
@@ -13,7 +13,7 @@
         },
         {
             "name": "SaveVideo",
-            "type": "filesystem",
+            "layer": "filesystem",
             "category": "Filesystem",
             "properties": [
                 {"name": "filename", "type": "text", "default": ""}
@@ -25,7 +25,7 @@
         },
         {
             "name": "SaveFrames",
-            "type": "filesystem",
+            "layer": "filesystem",
             "category": "Filesystem",
             "properties": [
                 {"name": "Folder name", "type": "text", "default": ""},
@@ -38,7 +38,7 @@
         },
         {
             "name": "SaveFrame",
-            "type": "filesystem",
+            "layer": "filesystem",
             "category": "Filesystem",
             "properties": [
                 {"name": "filename", "type": "text", "default": ""},
@@ -51,7 +51,7 @@
         },
         {
             "name": "GaussianKernel",
-            "type": "kernel",
+            "layer": "kernel",
             "category": "Generators",
             "properties": [
                 {"name": "size", "type": "integer", "default": 5},
@@ -61,7 +61,7 @@
         },
         {
             "name": "SobelKernel",
-            "type": "kernel",
+            "layer": "kernel",
             "category": "Generators",
             "properties": [
                 {"name": "size", "type": "integer", "default": 3}
@@ -73,7 +73,7 @@
         },
         {
             "name": "StructuringElement",
-            "type": "kernel",
+            "layer": "kernel",
             "category": "Generators",
             "properties": [
                 {"name": "size", "type": "integer", "default": 5},
@@ -88,7 +88,7 @@
         },
         {
             "name": "Filter2D",
-            "type": "processing",
+            "layer": "processing",
             "category": "Processing",
             "description": "Node that applies a *2D* filter.",
             "properties": [
@@ -108,7 +108,7 @@
         },
         {
             "name": "Threshold",
-            "type": "processing",
+            "layer": "processing",
             "category": "Processing",
             "properties": [
                 {"name": "threshold_value", "type": "integer", "default": 1},
@@ -126,7 +126,7 @@
         },
         {
             "name": "CannyEdgeDetection",
-            "type": "processing",
+            "layer": "processing",
             "category": "Processing",
             "properties": [
                 {"name": "sigma", "type": "text", "default": "1.4"},
@@ -139,7 +139,7 @@
         },
         {
             "name": "Scale",
-            "type": "processing",
+            "layer": "processing",
             "category": "Processing",
             "properties": [
                 {"name": "Scaling factor", "type": "text", "default": "1.75"}
@@ -151,7 +151,7 @@
         },
         {
             "name": "Logical AND",
-            "type": "processing",
+            "layer": "processing",
             "category": "Processing",
             "properties": [],
             "interfaces": [
@@ -162,7 +162,7 @@
         },
         {
             "name": "Logical OR",
-            "type": "processing",
+            "layer": "processing",
             "category": "Processing",
             "properties": [],
             "interfaces": [
@@ -173,7 +173,7 @@
         },
         {
             "name": "Logical NOT",
-            "type": "processing",
+            "layer": "processing",
             "category": "Processing",
             "properties": [],
             "interfaces": [
@@ -183,7 +183,7 @@
         },
         {
             "name": "Logical XOR",
-            "type": "processing",
+            "layer": "processing",
             "category": "Processing",
             "properties": [],
             "interfaces": [
@@ -194,11 +194,11 @@
         },
         {
             "name": "Morphological operation",
-            "type": "processing",
+            "layer": "processing",
             "category": "Processing",
             "properties": [
                 {
-                    "name": "Enable operations", "type": "checkbox", "default": true, "group": [
+                    "name": "Enable operations", "type": "bool", "default": true, "group": [
                         {"name": "iterations", "type": "integer", "default": 1},
                         {
                             "name": "border type",
@@ -239,7 +239,7 @@
         "layers": [
             {
                 "name": "IOs",
-                "nodeTypes": ["filesystem"]
+                "nodeLayers": ["filesystem"]
             },
             {
                 "name": "Binary imaging",
@@ -247,7 +247,7 @@
             },
             {
                 "name": "Both",
-                "nodeTypes": ["processing"],
+                "nodeLayers": ["processing"],
                 "nodeInterfaces": ["BinaryImage"]
             }
         ]

@@ -4,7 +4,7 @@
         "name": "Node inheritance example",
         "nodes": [
             {
-                "type": "Type A",
+                "name": "Type A",
                 "id": "dc2362f4-0717-4528-a628-7ff07390015f",
                 "position": {
                     "x": -300,
@@ -27,12 +27,10 @@
                         "id": "fabd231c-7576-45bf-9cbf-cb8145c94b0d",
                         "value": ""
                     }
-                ],
-                "enabledInterfaceGroups": [],
-                "name": "Type A"
+                ]
             },
             {
-                "type": "Type C",
+                "name": "Type C",
                 "id": "013fa177-1633-4b19-a00c-33d33631d85d",
                 "position": {
                     "x": 900,
@@ -55,12 +53,10 @@
                         "id": "36a5a1b6-c01a-46b0-b329-28ecb58b4eb6",
                         "value": ""
                     }
-                ],
-                "enabledInterfaceGroups": [],
-                "name": "Type C"
+                ]
             },
             {
-                "type": "Type B",
+                "name": "Type B",
                 "id": "361be28a-df14-439d-af21-72924f1112fd",
                 "position": {
                     "x": -300,
@@ -95,12 +91,10 @@
                         "id": "5bcd9ed0-621a-48b9-babd-414d2869cd4a",
                         "value": ""
                     }
-                ],
-                "enabledInterfaceGroups": [],
-                "name": "Type B"
+                ]
             },
             {
-                "type": "Type D",
+                "name": "Type D",
                 "id": "d697ee10-ee3e-4b79-bbff-c931de59f025",
                 "position": {
                     "x": 300,
@@ -159,9 +153,7 @@
                         "id": "b0cfd317-5502-4d71-bb13-38f94fbf4d8c",
                         "value": ""
                     }
-                ],
-                "enabledInterfaceGroups": [],
-                "name": "Type D"
+                ]
             }
         ],
         "connections": [
@@ -187,8 +179,7 @@
         },
         "scaling": 0.6674458201284119
     },
-    "graphTemplateInstances": [],
-    "version": "20230824.9",
+    "version": "20230830.10",
     "metadata": {
         "randomizedOffset": true
     }

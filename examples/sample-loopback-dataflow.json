@@ -1,11 +1,11 @@
 {
-    "version": "20230824.9",
+    "version": "20230830.10",
     "graph": {
       "id": "98a51a3d-654b-4cd6-8c36-1cfdb90abb58",
       "name": "Connection loopback example",
       "nodes": [
           {
-              "type": "Node",
+              "name": "Node",
               "id": "35dca9a9-dab0-40d4-a2fc-640cd71ff25d",
               "position": {
                   "x": 797,
@@ -65,11 +65,10 @@
                       "direction": "output"
                   }
               ],
-              "properties": [],
-              "name": "Node"
+              "properties": []
           },
           {
-              "type": "Node",
+              "name": "Node",
               "id": "2be5774e-6bc3-4d09-9f19-96828100db84",
               "position": {
                   "x": 1452,
@@ -129,8 +128,7 @@
                       "direction": "output"
                   }
               ],
-              "properties": [],
-              "name": "Node"
+              "properties": []
           }
       ],
       "connections": [
@@ -157,6 +155,5 @@
       ],
       "inputs": [],
       "outputs": []
-  },
-  "subgraphs": []
+  }
 }

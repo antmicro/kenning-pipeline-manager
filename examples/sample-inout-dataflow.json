@@ -4,7 +4,7 @@
         "name": "In-Out interface type example",
         "nodes": [
             {
-                "type": "TestInout",
+                "name": "TestInout",
                 "id": "ae784e0e-1d1a-4f5d-99e1-955b42cbd47e",
                 "position": {
                     "x": 395,
@@ -67,12 +67,10 @@
                         "id": "290f2265-9e21-4e80-ba64-8489091386a6",
                         "value": ""
                     }
-                ],
-                "enabledInterfaceGroups": [],
-                "name": "TestInout"
+                ]
             },
             {
-                "type": "TestInout",
+                "name": "TestInout",
                 "id": "0ac3c905-8094-49b6-83b6-181611796c79",
                 "position": {
                     "x": 1102,
@@ -135,12 +133,10 @@
                         "id": "daf8c9fa-7fd5-4e11-a0e9-95e5ed3ecde5",
                         "value": ""
                     }
-                ],
-                "enabledInterfaceGroups": [],
-                "name": "TestInout"
+                ]
             },
             {
-                "type": "TestInout",
+                "name": "TestInout",
                 "id": "bdf08ea2-e85e-444c-b057-5ace26153d81",
                 "position": {
                     "x": 400,
@@ -203,9 +199,7 @@
                         "id": "8d3417c7-c54e-4d80-8ef0-0753b255757d",
                         "value": ""
                     }
-                ],
-                "enabledInterfaceGroups": [],
-                "name": "TestInout"
+                ]
             }
         ],
         "connections": [
@@ -242,8 +236,7 @@
         },
         "scaling": 0.601069668993798
     },
-    "graphTemplateInstances": [],
-    "version": "20230824.9",
+    "version": "20230830.10",
     "metadata": {
         "randomizedOffset": true
     }
