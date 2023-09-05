@@ -25,6 +25,7 @@ import {
 } from '@baklavajs/renderer-vue';
 
 export const COPY_COMMAND = 'COPY';
+export const DELETE_COMMAND = 'DELETE';
 export const PASTE_COMMAND = 'PASTE';
 export const CLEAR_CLIPBOARD_COMMAND = 'CLEAR_CLIPBOARD';
 
@@ -68,6 +69,15 @@ export function useClipboard(
         nodeBuffer.value = JSON.stringify(displayedGraph.value.selectedNodes.map(
             (n : any) => n.save()),
         );
+    };
+
+    const del = () => {
+        // TODO(jbylicki): Once history is going to get adjusted to 
+        // subgraph and other changes, this should behave as one 
+        // transaction including all the conenctions
+        displayedGraph.value.selectedNodes.forEach((node : any) => {
+           displayedGraph.value.removeNode(node);
+        });
     };
 
     const findInterface = (
@@ -175,6 +185,11 @@ export function useClipboard(
         };
     };
 
+    commandHandler.registerCommand(DELETE_COMMAND, {
+        canExecute: () => displayedGraph.value.selectedNodes.length > 0,
+        execute: del,
+    });
+    commandHandler.registerHotkey(['Delete'], DELETE_COMMAND);
     commandHandler.registerCommand(COPY_COMMAND, {
         canExecute: () => true,
         execute: copy,
