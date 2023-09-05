@@ -487,7 +487,7 @@ export default {
                 </div>
                 <div v-if="this.editorManager.editor.isInSubgraph()">
                     <button @click="() => this.editorManager.returnFromSubgraph()">
-                        <Arrow color="white" rotate="down" />
+                        <Arrow rotate="down" :hoverable="true" />
                     </button>
                     <div class="tooltip">
                         <span>Return from subgraph editor</span>
@@ -659,10 +659,13 @@ $bar-height: 60px;
                 }
             }
 
+            & > button > svg {
+                display: block
+            }
+
             & > .backend-status {
                 @extend .dropdown-wrapper;
                 width: 220px;
-                height: 30px;
                 display: flex;
                 /* Hide backend panel and position it
                   to right border of backend icon
@@ -694,6 +697,7 @@ $bar-height: 60px;
                 padding: $spacing-s;
                 left: 0;
                 transform: translateX(-50%);
+                pointer-events: none;
             }
 
             & > .last {
@@ -711,7 +715,7 @@ $bar-height: 60px;
                 display: flex;
             }
 
-            &:not(.open):hover > .tooltip {
+            &:not(.open) > button:hover + div {
                 display: flex;
             }
         }
