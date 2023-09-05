@@ -7,7 +7,8 @@ SPDX-License-Identifier: Apache-2.0
 <!-- eslint-disable max-len -->
 <template>
     <svg
-        :class="[rotate, scale]"
+        class="arrow"
+        :class="[rotate, scale, { 'hoverable': hoverable } ]"
         width="16"
         height="18"
         viewBox="0 0 16 18"
@@ -15,14 +16,16 @@ SPDX-License-Identifier: Apache-2.0
         xmlns="http://www.w3.org/2000/svg"
     >
         <path
+            class="highlighted"
             :class="[color]"
             d="M16 18L7.33664 9.00005L16 4.78745e-05L8.65202 4.77869e-05L1.07327e-07 9.00005L8.65202 18L16 18Z"
             fill="#6F6F6F"
+            stroke-width="0"
         />
     </svg>
 </template>
 
-<script>
+<script lang="ts">
 export default {
     props: {
         color: {
@@ -36,6 +39,10 @@ export default {
         scale: {
             type: String,
             required: false,
+        },
+        hoverable: {
+            type: Boolean,
+            default: false,
         },
     },
 };
@@ -79,5 +86,9 @@ export default {
 
 .big {
     scale: 0.6;
+}
+
+.hoverable:hover > .highlighted {
+    fill: $green;
 }
 </style>
