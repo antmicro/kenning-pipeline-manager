@@ -3,6 +3,24 @@
 Formats of dataflows and specification is often updated with new features, that makes former formats incompatible with the new ones.
 This section lists all versions, related features and breaking changes.
 
+## 20230830.11
+
+```{warning}
+This updates changes the existing format of specification and dataflow.
+```
+
+Commit SHA - `583dd2300163053d49baacbe5a8349477b2e466a`
+
+* Intorduced changes in dataflow and specification formats:
+  * `type` -> `name` for dataflows for consistency with specification naming
+  * `name` -> `instanceName` for dataflows to make it more explicit and avoid conflicts
+  * `type` -> `layer` for nodes in specification.
+    This property is now also optional.
+  * `nodeTypes` -> `nodeLayers` in `layers` keywords in metadata
+  * `checkbox` -> `bool` for property type
+  * `graphTemplateInstances` -> `subgraphs` for dataflow and specification.
+* Added converter from version `20230824.10` to `20230830.11`
+
 ## 20230824.10
 
 Commit SHA - `6ce3bf106353bc58fb8e7217b9bc8aa7db9ebd20`
@@ -19,7 +37,7 @@ Commit SHA - `de31d01d9b6591993559e3b10851815f3320e545`
 
 Commit SHA - `d4abcc80bce3e280120078a47d784eff92821a8a`
 
-* Introduced `group` keyword for bool property which allows defining groups of properties that can be disabled.
+* Introduced `group` keyword for checkbox property which allows defining groups of properties that can be disabled.
 
 ## 20230817.7
 
