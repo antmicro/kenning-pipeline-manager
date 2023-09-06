@@ -19,6 +19,7 @@ import { parseInterfaces, validateInterfaceGroups } from './interfaceParser.js';
 import InputInterface from '../interfaces/InputInterface.js';
 import ListInterface from '../interfaces/ListInterface.js';
 import SliderInterface from '../interfaces/SliderInterface.js';
+import HexInterface from '../interfaces/HexInterface.js';
 
 /**
  * @param properties coming from the specification
@@ -94,6 +95,10 @@ function createProperties(properties) {
             case 'integer':
                 intf = new IntegerInterface(propName, propDef).setPort(false);
                 intf.componentName = 'IntegerInterface';
+                break;
+            case 'hex':
+                intf = new HexInterface(propName, propDef.toLowerCase()).setPort(false);
+                intf.componentName = 'HexInterface';
                 break;
             case 'select': {
                 const it = p.values.map((element) => element.toString());
