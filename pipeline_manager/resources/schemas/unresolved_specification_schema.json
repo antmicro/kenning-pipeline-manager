@@ -341,7 +341,8 @@
                         "bool",
                         "slider",
                         "list",
-                        "constant"
+                        "constant",
+                        "hex"
                     ]
                 },
                 "description": {
@@ -486,6 +487,23 @@
                         "required": [
                             "default"
                         ]
+                    }
+                },
+                {
+                    "if": {
+                        "type": "object",
+                        "properties": {
+                            "type": {
+                                "const": "hex"
+                            }
+                        }
+                    },
+                    "then": {
+                        "properties": {
+                            "default": {
+                                "type": ["string", "null"]
+                            }
+                        }
                     }
                 }
             ]
