@@ -147,6 +147,7 @@ import NotificationHandler from '../core/notifications.js';
 import InputInterfaceComponent from '../interfaces/InputInterface.vue';
 import ListInterfaceComponent from '../interfaces/ListInterface.vue';
 import SliderInterfaceComponent from '../interfaces/SliderInterface.vue';
+import HexInterfaceComponent from '../interfaces/HexInterface.vue';
 
 // Baklavajs implementation
 
@@ -358,6 +359,7 @@ const getOptionName = (optionType) => {
         case 'SelectInterface':
         case 'ListInterface':
         case 'TextInterface':
+        case 'HexInterface':
             return true;
         case 'NumberInterface':
         case 'IntegerInterface':
@@ -447,6 +449,8 @@ displayedProperties.value.forEach((prop) => {
             prop.setComponent(markRaw(ListInterfaceComponent));
         } else if (prop.componentName === 'SliderInterface') {
             prop.setComponent(markRaw(SliderInterfaceComponent));
+        } else if (prop.componentName === 'HexInterface') {
+            prop.setComponent(markRaw(HexInterfaceComponent));
         }
     }
 });
