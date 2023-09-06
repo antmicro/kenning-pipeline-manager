@@ -176,6 +176,11 @@ const tempName = ref('');
 
 const nodeURLs = viewModel.value.editor.getNodeURLs(props.node.type);
 
+const displayedInputs = computed(() => Object.values(props.node.inputs).filter((ni) => !ni.hidden));
+const displayedOutputs = computed(() =>
+    Object.values(props.node.outputs).filter((ni) => !ni.hidden),
+);
+
 const focusOnRename = () => {
     renameField.value.focus();
     renameField.value.select();
@@ -191,6 +196,7 @@ const contextMenuTitleItems = computed(() => {
         items.push(
             { value: 'rename', label: 'Rename', icon: Pencil },
             { value: 'delete', label: 'Delete', icon: Bin },
+            { value: 'disconnect', label: 'Disconnect' },
         );
     }
 
@@ -227,6 +233,18 @@ const onContextMenuTitleClick = async (action) => {
             await nextTick();
             focusOnRename();
             break;
+        case 'disconnect': {
+            startTransaction();
+            const nodeConnections = graph.value.connections.filter(
+                (c) =>
+                    (displayedInputs.value.find((i) => i === c.from || i === c.to) !== undefined) ||
+                    (displayedOutputs.value.find((i) => i === c.from || i === c.to) !== undefined),
+            );
+            nodeConnections.forEach((c) => {
+                graph.value.removeConnection(c);
+            });
+            commitTransaction();
+        } break;
         case 'sidebar':
             openSidebar();
             break;
@@ -266,11 +284,6 @@ const styles = computed(() => ({
     left: `${props.node.position?.x ?? 0}px`,
     width: `${props.node.width ?? 200}px`,
 }));
-
-const displayedInputs = computed(() => Object.values(props.node.inputs).filter((ni) => !ni.hidden));
-const displayedOutputs = computed(() =>
-    Object.values(props.node.outputs).filter((ni) => !ni.hidden),
-);
 
 const nodeTitle = computed(() => {
     if (props.node.type.startsWith(IGNORE_TYPE_PREFIX)) {
