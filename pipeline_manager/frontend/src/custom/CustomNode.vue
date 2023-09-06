@@ -225,9 +225,7 @@ const onContextMenuTitleClick = async (action) => {
         case 'rename':
             tempName.value = props.node.title;
             renaming.value = true;
-            nextTick().then(() => {
-                focusOnRename();
-            });
+            await nextTick();
             focusOnRename();
             break;
         case 'sidebar':
