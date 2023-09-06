@@ -550,8 +550,9 @@ export default class EditorManager {
             } else {
                 this.updateMetadata();
             }
+            const oldGraph = this.baklavaView.displayedGraph ?? undefined;
+            this.baklavaView.history.graphSwitch(this.baklavaView.displayedGraph, oldGraph);
             const errors = { errors: await this.baklavaView.editor.load(dataflow), warnings };
-            this.baklavaView.history.graphSwitch(this.baklavaView.displayedGraph, undefined);
             return errors;
         } catch (err) {
             return {
