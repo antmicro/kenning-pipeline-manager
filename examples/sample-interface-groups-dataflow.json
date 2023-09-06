@@ -33,20 +33,6 @@
                         "direction": "output",
                         "side": "right",
                         "sidePosition": 1
-                    },
-                    {
-                        "name": "2",
-                        "id": "36fd57e4-db08-4e9e-a26a-aaf745078ea0",
-                        "direction": "output",
-                        "side": "right",
-                        "sidePosition": 0
-                    },
-                    {
-                        "name": "3",
-                        "id": "4bdc0bc3-14ba-4c8a-978f-a514aa64a200",
-                        "direction": "output",
-                        "side": "right",
-                        "sidePosition": 1
                     }
                 ],
                 "properties": [
@@ -93,20 +79,6 @@
                         "id": "701ad4e7-f21a-4c1f-9676-cba9c4423eb3",
                         "direction": "output",
                         "side": "left",
-                        "sidePosition": 1
-                    },
-                    {
-                        "name": "2",
-                        "id": "a98cf027-18ec-4ac4-afb0-d8373ca66aa1",
-                        "direction": "output",
-                        "side": "right",
-                        "sidePosition": 0
-                    },
-                    {
-                        "name": "3",
-                        "id": "349228ac-f70b-4248-9e20-c40e86ce287c",
-                        "direction": "output",
-                        "side": "right",
                         "sidePosition": 1
                     }
                 ],
