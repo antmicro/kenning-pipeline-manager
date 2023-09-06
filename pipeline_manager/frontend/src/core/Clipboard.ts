@@ -23,6 +23,9 @@ import {
 import {
     ICommandHandler, ICommand,
 } from '@baklavajs/renderer-vue';
+import {
+    startTransaction, commitTransaction,
+} from './History';
 
 export const COPY_COMMAND = 'COPY';
 export const DELETE_COMMAND = 'DELETE';
@@ -73,12 +76,11 @@ export function useClipboard(
     };
 
     const del = () => {
-        // TODO(jbylicki): Once history is going to get adjusted to
-        // subgraph and other changes, this should behave as one
-        // transaction including all the conenctions
+        startTransaction();
         displayedGraph.value.selectedNodes.forEach((node : any) => {
             displayedGraph.value.removeNode(node);
         });
+        commitTransaction();
     };
 
     const findInterface = (

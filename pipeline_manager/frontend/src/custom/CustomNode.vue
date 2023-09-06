@@ -137,6 +137,9 @@ import Pencil from '../icons/Pencil.vue';
 import Bin from '../icons/Bin.vue';
 import Sidebar from '../icons/Sidebar.vue';
 import doubleClick from '../core/doubleClick.js';
+import {
+    startTransaction, commitTransaction,
+} from '../core/History.ts';
 
 import NotificationHandler from '../core/notifications.js';
 
@@ -220,7 +223,9 @@ const openSidebar = () => {
 const onContextMenuTitleClick = async (action) => {
     switch (action) {
         case 'delete':
+            startTransaction();
             graph.value.removeNode(props.node);
+            commitTransaction();
             break;
         case 'rename':
             tempName.value = props.node.title;

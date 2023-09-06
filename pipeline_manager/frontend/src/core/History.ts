@@ -9,11 +9,14 @@ import {
 } from 'vue';
 import { Graph } from '@baklavajs/core';
 
+import { v4 as uuidv4 } from 'uuid';
+
 import {
     ICommandHandler, ICommand,
 } from '@baklavajs/renderer-vue';
 
 export const suppressingHistory: Ref<boolean> = ref(false);
+const transactionId: Ref<string> = ref('');
 
 export interface IHistory {
     max_steps: number;
@@ -22,18 +25,36 @@ export interface IHistory {
 export class Step {
     type: string;
 
+    transactionId: string;
+
     // I need this to be of basically any type, as
     // it may need to receive objects, arrays of objects, other steps
     /* eslint-disable @typescript-eslint/no-explicit-any */
     topic: any;
 
-    constructor(type: string, topic: any) {
+    constructor(type: string, topic: any, tid: string = uuidv4()) {
         this.type = type;
         this.topic = topic;
+        this.transactionId = tid;
     }
 }
 export function suppressHistoryLogging(value: boolean) {
     suppressingHistory.value = value;
+}
+
+function createStep(key: string, value: string, id: string) {
+    if (id !== '') return new Step(key, value, id);
+    return new Step(key, value);
+}
+
+export function startTransaction(id: string = uuidv4()) {
+    if (transactionId.value !== '') return undefined;
+    transactionId.value = id;
+    return id;
+}
+
+export function commitTransaction() {
+    transactionId.value = '';
 }
 
 export function useHistory(graph: Ref<Graph>, commandHandler: ICommandHandler): IHistory {
@@ -67,26 +88,30 @@ export function useHistory(graph: Ref<Graph>, commandHandler: ICommandHandler): 
             newGraph.events.addNode.subscribe(token, (node : any) => {
                 if (!suppressingHistory.value) {
                     const historyItem = history.get(newGraph.id);
-                    if (historyItem) historyItem.push(new Step('add', `node::${node.id.toString()}`));
+                    if (!historyItem) return;
+                    historyItem.push(createStep('add', `node::${node.id.toString()}`, transactionId.value));
                 }
             });
             newGraph.events.removeNode.subscribe(token, (node : any) => {
                 if (!suppressingHistory.value) {
                     const historyItem = history.get(newGraph.id);
-                    if (historyItem) historyItem.push(new Step('rem', `node::${node.id.toString()}`));
+                    if (!historyItem) return;
+                    historyItem.push(createStep('rem', `node::${node.id.toString()}`, transactionId.value));
                 }
                 removedObjectsMap.set(`node::${node.id.toString()}`, [node, node.save()]);
             });
             newGraph.events.addConnection.subscribe(token, (conn : any) => {
                 if (!suppressingHistory.value) {
                     const historyItem = history.get(newGraph.id);
-                    if (historyItem) historyItem.push(new Step('add', `conn::${conn.id.toString()}`));
+                    if (!historyItem) return;
+                    historyItem.push(createStep('add', `conn::${conn.id.toString()}`, transactionId.value));
                 }
             });
             newGraph.events.removeConnection.subscribe(token, (conn : any) => {
                 if (!suppressingHistory.value) {
                     const historyItem = history.get(newGraph.id);
-                    if (historyItem) historyItem.push(new Step('rem', `conn::${conn.id.toString()}`));
+                    if (!historyItem) return;
+                    historyItem.push(createStep('rem', `conn::${conn.id.toString()}`, transactionId.value));
                 }
                 removedObjectsMap.set(`conn::${conn.id.toString()}`, conn);
             });
@@ -145,6 +170,10 @@ export function useHistory(graph: Ref<Graph>, commandHandler: ICommandHandler): 
             }
         }
         auxiliaryHistory.push(foo);
+        if (
+            mainHistory.length > 0 &&
+            mainHistory[mainHistory.length - 1].transactionId === foo.transactionId
+        ) singleStepTransaction(mainHistory, auxiliaryHistory);
         suppressingHistory.value = false;
     };
 
@@ -180,12 +209,12 @@ export function useHistory(graph: Ref<Graph>, commandHandler: ICommandHandler): 
         },
     });
     commandHandler.registerCommand<ICommand<void>>('START_TRANSACTION', {
-        canExecute: () => true,
-        execute: () => false,
+        canExecute: () => transactionId.value === '',
+        execute: () => startTransaction,
     });
     commandHandler.registerCommand<ICommand<void>>('COMMIT_TRANSACTION', {
-        canExecute: () => true,
-        execute: () => false,
+        canExecute: () => transactionId.value !== '',
+        execute: () => commitTransaction,
     });
 
     commandHandler.registerHotkey(['Control', 'z'], 'undo');
