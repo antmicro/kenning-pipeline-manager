@@ -410,21 +410,22 @@ export function parseInterfaces(
         return errors;
     }
 
-    const tempParsedGroupsSides = applySidePositions(
-        tempParsedGroups.input,
-        tempParsedGroups.output,
+    // Interfaces that belong to groups are removed as they should not have side
+    // positions applied as they are never rendered
+    tempParsed.input = Object.fromEntries(Object.entries(tempParsed.input).filter(
+        ([name]) => !interfacesCreatingGroups.has(name),
+    ));
+
+    tempParsed.output = Object.fromEntries(Object.entries(tempParsed.output).filter(
+        ([name]) => !interfacesCreatingGroups.has(name),
+    ));
+
+    const parsedSides = applySidePositions(
+        { ...tempParsed.input, ...tempParsedGroups.input },
+        { ...tempParsed.output, ...tempParsedGroups.output },
     );
-    if (Array.isArray(tempParsedGroupsSides) && tempParsedGroupsSides.length) {
-        return tempParsedGroupsSides;
-    }
-
-    const tempParsedSides = applySidePositions(tempParsed.input, tempParsed.output);
-    if (Array.isArray(tempParsedSides) && tempParsedSides.length) {
-        return tempParsedSides;
-    }
-
-    if (errors.length) {
-        return errors;
+    if (Array.isArray(parsedSides) && parsedSides.length) {
+        return parsedSides;
     }
 
     const interfaceCreater = subgraphInterfaces ? createGraphInterface : createInterface;
@@ -438,8 +439,17 @@ export function parseInterfaces(
 
     // Filtering single interfaces that are part of interface groups
     // Those interfaces are removed as they are never rendered
-    Object.entries(tempParsedSides.inputs).forEach(([name, intf]) => {
-        if (!interfacesCreatingGroups.has(name)) {
+    // This is only used when parsing a specification format
+    Object.entries(parsedSides.inputs).forEach(([name, intf]) => {
+        // It is an interface group
+        if (intf.interfaces !== undefined) {
+            // Adding interfaces groups, hidden by default
+            createdInterfaces.inputs[name] = interfaceCreater(
+                intf,
+                !enabledInterfaceGroupsNames.includes(name),
+                stripName(name),
+            );
+        } else {
             createdInterfaces.inputs[name] = interfaceCreater(
                 intf,
                 false,
@@ -448,31 +458,22 @@ export function parseInterfaces(
         }
     });
 
-    Object.entries(tempParsedSides.outputs).forEach(([name, intf]) => {
-        if (!interfacesCreatingGroups.has(name)) {
+    Object.entries(parsedSides.outputs).forEach(([name, intf]) => {
+        // It is an interface group
+        if (intf.interfaces !== undefined) {
+            // Adding interfaces groups, hidden by default
+            createdInterfaces.outputs[name] = interfaceCreater(
+                intf,
+                !enabledInterfaceGroupsNames.includes(name),
+                stripName(name),
+            );
+        } else {
             createdInterfaces.outputs[name] = interfaceCreater(
                 intf,
                 false,
                 stripName(name),
             );
         }
-    });
-
-    // Adding interfaces groups, hidden by default
-    Object.entries(tempParsedGroupsSides.inputs).forEach(([name, intf]) => {
-        createdInterfaces.inputs[name] = interfaceCreater(
-            intf,
-            !enabledInterfaceGroupsNames.includes(name),
-            stripName(name),
-        );
-    });
-
-    Object.entries(tempParsedGroupsSides.outputs).forEach(([name, intf]) => {
-        createdInterfaces.outputs[name] = interfaceCreater(
-            intf,
-            !enabledInterfaceGroupsNames.includes(name),
-            stripName(name),
-        );
     });
 
     return createdInterfaces;

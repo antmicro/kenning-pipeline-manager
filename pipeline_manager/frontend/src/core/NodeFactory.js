@@ -294,6 +294,28 @@ export function NodeFactory(
                         this.graphInstance.removeConnection(c);
                     });
                 }
+
+                if (visible) {
+                    // checking if there is an interface with the same side position
+                    const found = [
+                        ...Object.values(this.inputs),
+                        ...Object.values(this.outputs),
+                    ].find(
+                        (io) => io.id !== intf.id &&
+                            io.sidePosition === intf.sidePosition &&
+                            io.side === intf.side,
+                    );
+                    if (found !== undefined) {
+                        // Finding the greates side position on that side
+                        const sameSide = [
+                            ...Object.values(this.inputs),
+                            ...Object.values(this.outputs),
+                        ].filter((io) => io.side === intf.side && !io.hidden);
+                        const maxSidePosition = Math.max(...sameSide.map((io) => io.sidePosition));
+                        intf.sidePosition = maxSidePosition + 1;
+                    }
+                }
+                // It may also need a new sidePosition
                 intf.hidden = !visible;
             };
 
@@ -307,20 +329,23 @@ export function NodeFactory(
                     const [ioName, ioState] = io;
 
                     if (ioState.port) {
-                        if (ioState.interfaces && !ioState.hidden) {
-                            enabledInterfaceGroups.push({
+                        if (!ioState.hidden) {
+                            if (ioState.interfaces) {
+                                // Enabled interface groups
+                                enabledInterfaceGroups.push({
+                                    name: ioName.slice(ioState.direction.length + 1),
+                                    direction: ioState.direction,
+                                });
+                            }
+
+                            newInterfaces.push({
                                 name: ioName.slice(ioState.direction.length + 1),
+                                id: ioState.id,
                                 direction: ioState.direction,
+                                side: ioState.side,
+                                sidePosition: ioState.sidePosition,
                             });
                         }
-
-                        newInterfaces.push({
-                            name: ioName.slice(ioState.direction.length + 1),
-                            id: ioState.id,
-                            direction: ioState.direction,
-                            side: ioState.side,
-                            sidePosition: ioState.sidePosition,
-                        });
                     } else {
                         newProperties.push({
                             name: ioName.slice('property'.length + 1),
@@ -499,7 +524,6 @@ export function NodeFactory(
                 Object.entries({
                     ...parsedState.inputs,
                     ...parsedState.outputs,
-                    ...parsedState.enabledInterfaceGroups,
                 }).forEach(([ioName, ioState]) => {
                     if (ioState.direction === 'input' || ioState.direction === 'inout') {
                         this.inputs[ioName].side = ioState.side;
