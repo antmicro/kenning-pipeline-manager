@@ -162,6 +162,7 @@ export default {
                 case 'SelectInterface':
                 case 'ListInterface':
                 case 'TextInterface':
+                case 'HexInterface':
                     return true;
                 case 'NumberInterface':
                 case 'IntegerInterface':
