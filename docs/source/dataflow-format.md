@@ -471,7 +471,9 @@ This value determines which graph is rendered to the user when the dataflow is l
 ```json
 {
     "version": "20230720.5",
-    "entryGraph": "9c4d5349-9d3b-401f-86bb-021b7b3e5b81",
+    "graph": {
+        "entryGraph": "9c4d5349-9d3b-401f-86bb-021b7b3e5b81",
+    },
     "graphTemplateInstances": [
         {
             "id": "9c4d5349-9d3b-401f-86bb-021b7b3e5b81",

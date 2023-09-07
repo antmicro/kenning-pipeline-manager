@@ -7,6 +7,10 @@
             "description": "Unique identifier of a graph",
             "type": "string"
         },
+        "entryGraph": {
+            "description": "Id of a subgraph that is displayed when a dataflow is loaded. It is only used for subgraphs",
+            "type": "string"
+        },
         "nodes": {
             "type": "array",
             "items": {
@@ -222,9 +226,18 @@
         },
         "additionalData": {}
     },
-    "required": [
-        "id",
-        "nodes",
-        "connections"
+    "oneOf": [
+        {
+            "required": [
+                "id",
+                "nodes",
+                "connections"
+            ]
+        },
+        {
+            "required": [
+                "entryGraph"
+            ]
+        }
     ]
 }

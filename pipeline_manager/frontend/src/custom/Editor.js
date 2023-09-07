@@ -96,9 +96,12 @@ export default class PipelineManagerEditor extends Editor {
         delete state.graph.inputs;
         delete state.graph.outputs;
 
-        state.graphTemplateInstances.push(state.graph);
-        state.entryGraph = currentGraphId;
-        delete state.graph;
+        if (state.graphTemplateInstances.length !== 0) {
+            state.graphTemplateInstances.push(state.graph);
+            delete state.graph;
+            state.graph = {};
+            state.graph.entryGraph = currentGraphId;
+        }
 
         /* eslint-disable no-unused-vars */
         stackCopy.forEach(([_, subgraphNode]) => {
@@ -225,8 +228,9 @@ export default class PipelineManagerEditor extends Editor {
         let panning;
         let scaling;
         let rootGraph;
+        let entryGraph;
 
-        if (state.entryGraph !== undefined) {
+        if (state.graph.entryGraph !== undefined) {
             // multi-graph dataflow
             const usedSubgraphs = new Set();
 
@@ -245,16 +249,17 @@ export default class PipelineManagerEditor extends Editor {
                 return ['No root graph found. Make sure you graph does not have any reccurency'];
             }
 
-            const entryGraph = state.graphTemplateInstances.find(
-                (subgraph) => subgraph.id === state.entryGraph,
+            entryGraph = state.graphTemplateInstances.find(
+                (subgraph) => subgraph.id === state.graph.entryGraph,
             );
             if (entryGraph === undefined) {
-                return [`No entry graph found of id '${state.entryGraph}'`];
+                return [`No entry graph found of id '${state.graph.entryGraph}'`];
             }
             ({ panning, scaling } = entryGraph);
         } else {
             // single-graph dataflow
             rootGraph = state.graph;
+            entryGraph = state.graph;
             ({ panning, scaling } = state.graph);
         }
 
@@ -287,24 +292,13 @@ export default class PipelineManagerEditor extends Editor {
         this.events.loaded.emit();
         this.graphName = state.graph.name;
         this.readonly = readonlySetting;
-        if (this.layoutManager.layoutEngine.activeAlgorithm !== 'NoLayout') {
-            const unorderedGraph = JSON.parse(JSON.stringify(state.graph));
-            unorderedGraph.nodes.forEach((node) => {
-                node.position = undefined;
-            });
-            this.layoutManager.registerGraph(unorderedGraph);
 
-            await nextTick();
-            const layout = await this.layoutManager.computeLayout(state.graph);
-            this.updateNodesPosition(layout);
-        }
-
-        if (state.entryGraph !== undefined) {
+        if (state.graph.entryGraph !== undefined) {
             const dfs = (subgraph, path) => {
                 if (subgraph?.nodes !== undefined) {
                     for (let i = 0; i < subgraph.nodes.length; i += 1) {
                         if (subgraph.nodes[i].subgraph !== undefined) {
-                            if (subgraph.nodes[i].subgraph.id === state.entryGraph) {
+                            if (subgraph.nodes[i].subgraph.id === state.graph.entryGraph) {
                                 return [...path, subgraph.nodes[i]];
                             }
                             const returnedPath = dfs(
@@ -327,9 +321,13 @@ export default class PipelineManagerEditor extends Editor {
             });
         }
 
+        if (this.layoutManager.layoutEngine.activeAlgorithm !== 'NoLayout') {
+            await nextTick();
+            await this.applyAutolayout();
+        }
+
         // We need graph switched and sidebar rendered for autozoom
         await nextTick();
-
         if (panning !== undefined) {
             this._graph.panning = panning;
         }
