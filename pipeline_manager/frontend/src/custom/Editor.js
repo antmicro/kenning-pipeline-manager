@@ -323,7 +323,7 @@ export default class PipelineManagerEditor extends Editor {
 
         if (this.layoutManager.layoutEngine.activeAlgorithm !== 'NoLayout') {
             await nextTick();
-            await this.applyAutolayout();
+            await this.applyAutolayout(false);
         }
 
         // We need graph switched and sidebar rendered for autozoom
@@ -555,11 +555,13 @@ export default class PipelineManagerEditor extends Editor {
         return this.subgraphStack.length > 0;
     }
 
-    async applyAutolayout() {
+    async applyAutolayout(resetLocations = true) {
         const state = this.graph.save();
-        state.nodes.forEach((node) => {
-            node.position = undefined;
-        });
+        if (resetLocations) {
+            state.nodes.forEach((node) => {
+                node.position = undefined;
+            });
+        }
         this.layoutManager.registerGraph(state);
         const updatedGraph = await this.layoutManager.computeLayout(state);
         this.updateNodesPosition(updatedGraph);
