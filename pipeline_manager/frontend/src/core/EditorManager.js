@@ -550,9 +550,18 @@ export default class EditorManager {
             } else {
                 this.updateMetadata();
             }
-            const oldGraph = this.baklavaView.displayedGraph ?? undefined;
-            this.baklavaView.history.graphSwitch(this.baklavaView.displayedGraph, oldGraph);
+            if (this.baklavaView.displayedGraph !== undefined) {
+                // Delete baklava internal history listeners
+                this.baklavaView.history.unsubscribeFromGraphEvents(
+                    this.baklavaView.displayedGraph,
+                    Symbol('HistoryToken'),
+                );
+            }
             const errors = { errors: await this.baklavaView.editor.load(dataflow), warnings };
+            this.baklavaView.history.graphSwitch(
+                this.baklavaView.displayedGraph,
+                this.baklavaView.displayedGraph,
+            );
             return errors;
         } catch (err) {
             return {

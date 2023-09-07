@@ -66,13 +66,16 @@ export function useHistory(graph: Ref<Graph>, commandHandler: ICommandHandler): 
     let currentId = 'ThisShouldNotAppearInHistoryMaps';
     let oldId = 'ThisShouldNotAppearInHistoryMaps';
 
+    const unsubscribeFromGraphEvents = (g: any, tok : symbol) => {
+        g.events.addNode.unsubscribe(tok);
+        g.events.removeNode.unsubscribe(tok);
+        g.events.addConnection.unsubscribe(tok);
+        g.events.removeConnection.unsubscribe(tok);
+    };
     // Switch all the events to any new graph that's displayed
     const graphSwitch = (newGraph : any, oldGraph: any, copyStateStack = false) => {
         if (oldGraph) {
-            oldGraph.events.addNode.unsubscribe(token);
-            oldGraph.events.removeNode.unsubscribe(token);
-            oldGraph.events.addConnection.unsubscribe(token);
-            oldGraph.events.removeConnection.unsubscribe(token);
+            unsubscribeFromGraphEvents(oldGraph, token);
         }
         if (newGraph) {
             oldId = currentId;
@@ -223,5 +226,6 @@ export function useHistory(graph: Ref<Graph>, commandHandler: ICommandHandler): 
     return reactive({
         max_steps: maxSteps,
         graphSwitch,
+        unsubscribeFromGraphEvents,
     });
 }
