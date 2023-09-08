@@ -31,7 +31,7 @@ export default defineConfig({
                 splitChunks: process.env.VUE_APP_SINGLEHTML_BUILD ? false : {
                     maxSize: 250000, // This value is arbitrary, can be adjusted if needed
                     chunks: 'all',
-                }
+                },
             };
         }
         config.resolve = {
@@ -44,7 +44,7 @@ export default defineConfig({
                 system: false,
                 file: false,
             },
-            extensions: ['.ts', '.js', '.json']
+            extensions: ['.ts', '.js', '.json'],
         };
 
         config.module.rules = config.module.rules.filter((rule) => !rule.test.toString().match(/svg/) && !rule.test.toString().match(/png/))
@@ -52,8 +52,8 @@ export default defineConfig({
         config.module.rules.push({
             test: /\.(|svg|png|jpe?g|gif|webp|avif)(\?.*)?$/,
             type: 'asset/resource',
-            generator: { filename: '[path][name][ext]' }
-        })
+            generator: { filename: '[path][name][ext]' },
+        });
     },
     pages: {
         index: {

@@ -11,6 +11,7 @@
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
     "useDefineForClassFields": true,
+    "allowImportingTsExtensions": true,
     "baseUrl": ".",
     "types": [
       "webpack-env"

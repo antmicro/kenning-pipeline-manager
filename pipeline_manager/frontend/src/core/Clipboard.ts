@@ -25,7 +25,7 @@ import {
 } from '@baklavajs/renderer-vue';
 import {
     startTransaction, commitTransaction,
-} from './History';
+} from './History.ts';
 
 export const COPY_COMMAND = 'COPY';
 export const DELETE_COMMAND = 'DELETE';
