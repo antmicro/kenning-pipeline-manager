@@ -54,7 +54,35 @@ SPDX-License-Identifier: Apache-2.0
                     {{ prettyCategory }}
                 </div>
             </div>
-
+            <div class="__replace">
+                <div class="__title">Inheritance</div>
+                <div class="__replace_entry" v-if="replacementParents.length">
+                    <div class="__replace_title">Parents:</div>
+                    <div
+                        v-for="parent in replacementParents"
+                        :key="parent"
+                        class="__replace_button"
+                    >
+                        <component :is="parent.component" :intf="parent"></component>
+                    </div>
+                </div>
+                <div class="__replace_entry" v-if="replacementChildren.length">
+                    <div class="__replace_title">Children:</div>
+                    <div v-for="child in replacementChildren" :key="child" class="__replace_button">
+                        <component :is="child.component" :intf="child"></component>
+                    </div>
+                </div>
+                <div class="__replace_entry" v-if="replacementSiblings.length">
+                    <div class="__replace_title">Siblings:</div>
+                    <div
+                        v-for="sibling in replacementSiblings"
+                        :key="sibling"
+                        class="__replace_button"
+                    >
+                        <component :is="sibling.component" :intf="sibling"></component>
+                    </div>
+                </div>
+            </div>
             <div class="__properties" v-if="displayedProperties.length">
                 <div class="__title">Properties</div>
                 <div v-for="input in displayedProperties" :key="input.id" class="__property">
@@ -283,6 +311,23 @@ export default defineComponent({
             return checkbox;
         });
 
+        const replacementButtons = (list) => {
+            const buttons = ref([]);
+
+            (list ?? []).forEach((eName) => {
+                const button = new ButtonInterface(eName, () => {
+                    graph.value.replaceNode(node.value, eName);
+                });
+                button.componentName = 'ButtonInterface';
+                buttons.value.push(button);
+            });
+            return buttons.value;
+        };
+
+        const replacementParents = computed(() => replacementButtons(node.value.extends));
+        const replacementChildren = computed(() => replacementButtons(node.value.extending));
+        const replacementSiblings = computed(() => replacementButtons(node.value.siblings));
+
         return {
             graph,
             node,
@@ -306,6 +351,10 @@ export default defineComponent({
             toggleGroup,
             getOptionName,
             prettyCategory,
+
+            replacementParents,
+            replacementChildren,
+            replacementSiblings,
         };
     },
 });
