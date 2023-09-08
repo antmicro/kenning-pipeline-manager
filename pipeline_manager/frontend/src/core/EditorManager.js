@@ -181,6 +181,30 @@ export default class EditorManager {
         this.baklavaView.editor.registerNodeType(SubgraphOutputNode, { category: 'Subgraphs' });
         this.baklavaView.editor.registerNodeType(SubgraphInoutNode, { category: 'Subgraphs' });
 
+        // Resolving siblings, parents and children
+
+        // Resolving children
+        resolvedNodes.forEach((node) => {
+            (node.extends ?? []).forEach((eName) => {
+                const extended = resolvedNodes.find((n) => n.name === eName);
+                if (extended.extending === undefined) {
+                    extended.extending = [];
+                }
+                extended.extending.push(node.name);
+            });
+        });
+
+        // Resolving children
+        resolvedNodes.forEach((node) => {
+            const siblings = new Set();
+            (node.extends ?? []).forEach((eName) => {
+                const extended = resolvedNodes.find((n) => n.name === eName);
+                extended.extending.forEach((e) => siblings.add(e));
+            });
+            siblings.delete(node.name);
+            node.siblings = Array.from(siblings);
+        });
+
         errors = [];
         resolvedNodes.forEach((node) => {
             const myNode = NodeFactory(
@@ -192,6 +216,9 @@ export default class EditorManager {
                 node.defaultInterfaceGroups ?? [],
                 metadata?.twoColumn ?? false,
                 node.description ?? '',
+                node.extends ?? [],
+                node.extending ?? [],
+                node.siblings ?? [],
             );
 
             // If my node is any array then it is an array of errors
