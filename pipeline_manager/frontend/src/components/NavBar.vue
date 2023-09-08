@@ -61,6 +61,9 @@ export default {
             const normalizedGraphName = this.graphName.trim();
             return normalizedGraphName === '' ? this.appName : normalizedGraphName;
         },
+        hideHud() {
+            return this.editorManager.baklavaView.hideHud;
+        },
     },
     watch: {
         dataflowGraphName(newValue) {
@@ -218,6 +221,8 @@ export default {
         },
 
         clickOutside(event, panel) {
+            if (this.hideHud) { return; }
+
             const icon = this.$refs[panel.iconRef];
 
             const currentElement = event.target;
@@ -369,6 +374,10 @@ export default {
                     NotificationHandler.showToast('error', `Export to SVG failed: ${error}`);
                 });
         },
+
+        handleMouseLeave(panel) {
+            if (this.hideHud) this.togglePanel(panel, true);
+        },
     },
     async mounted() {
         // Create connection on page load
@@ -394,7 +403,10 @@ export default {
             />
         </BlurPanel>
     </Transition>
-    <div class="wrapper">
+    <div class="wrapper"
+        :class="!hideHud ? 'wrapper-hud' : 'wrapper-hidden'"
+        @mouseleave="() => handleMouseLeave(panels.settings)"
+    >
         <div class="container">
             <div>
                 <div class="logo">
@@ -402,12 +414,13 @@ export default {
                     <Arrow color="white" rotate="left" scale="small" />
                     <div class="dropdown-wrapper">
                         <DropdownItem
-                            v-if="!this.externalApplicationManager.backendAvailable"
+                            v-if="!this.externalApplicationManager.backendAvailable && !hideHud"
                             text="Load specification"
                             id="load-spec-button"
                             :eventFunction="loadSpecificationCallback"
                         />
                         <DropdownItem
+                            v-if="!hideHud"
                             id="load-dataflow-button"
                             text="Load graph file"
                             :eventFunction="loadDataflowCallback"
@@ -449,7 +462,7 @@ export default {
                     </div>
                 </div>
 
-                <div ref="palette" class="open">
+                <div ref="palette" class="open" v-if="!hideHud">
                     <button @click="() => togglePanel(panels.palette)">
                         <Cube />
                     </button>
@@ -530,7 +543,7 @@ export default {
                         </div>
                     </div>
                 </div>
-                <div ref="notifications">
+                <div ref="notifications" v-if="!hideHud">
                     <button @click="() => togglePanel(panels.notifications)">
                         <Bell
                             v-if="this.notificationStore.notifications.length > 0"
@@ -554,8 +567,9 @@ export default {
 </template>
 
 <style lang="scss" scoped>
+$bar-height: 60px;
+
 .wrapper {
-    position: relative;
     z-index: 2;
 
     & > .progress-bar {
@@ -568,11 +582,27 @@ export default {
     }
 }
 
+.wrapper-hud {
+    position: relative;
+}
+
+.wrapper-hidden {
+    position: absolute;
+    width: 100%;
+    top: -$bar-height;
+    padding-bottom: 90px;
+    transition: 0.2s;
+
+    &:hover {
+        transform: translateY($bar-height);
+    }
+}
+
 .container {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    height: 60px;
+    height: $bar-height;
     padding: 0 $spacing-l;
     background-color: $gray-600;
 
