@@ -286,6 +286,9 @@ export function NodeFactory(
     defaultInterfaceGroups,
     twoColumn,
     description = '',
+    nodeExtends = [],
+    nodeExtending = [],
+    nodeSiblings = [],
 ) {
     const parsedInterfaces = parseInterfaces(interfaces, interfaceGroups, defaultInterfaceGroups);
     // If parsedInterfaces returns an array, it is an array of errors
@@ -333,6 +336,9 @@ export function NodeFactory(
         /* eslint-disable no-param-reassign */
         onCreate() {
             this.description = description;
+            this.extends = nodeExtends;
+            this.extending = nodeExtending;
+            this.siblings = nodeSiblings;
             this.layer = layer;
             this.parentSave = this.save;
             this.parentLoad = this.load;
@@ -497,7 +503,7 @@ export function NodeFactory(
                 return errors;
             };
 
-            const updateProperties = (stateProperties) => {
+            this.updateProperties = (stateProperties) => {
                 const errors = [];
                 // Updating properties of a graph node
                 Object.entries(this.inputs).forEach(([k, prop]) => {
@@ -552,7 +558,7 @@ export function NodeFactory(
                 let errors = [];
                 if (process.env.VUE_APP_GRAPH_DEVELOPMENT_MODE === 'true') {
                     errors = this.updateInterfaces(parsedState.inputs, parsedState.outputs);
-                    errors = [...errors, ...updateProperties(parsedState.inputs)];
+                    errors = [...errors, ...this.updateProperties(parsedState.inputs)];
                     errors = errors.map((error) => `Node ${name} of id: ${this.id} invalid. ${error}`);
                 } else {
                     errors = detectDiscrepancies(parsedState, this.inputs, this.outputs);
