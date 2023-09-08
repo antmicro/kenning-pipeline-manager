@@ -18,6 +18,7 @@ import {
     SubgraphInputNode,
     SubgraphOutputNode,
 } from './subgraphInterface.js';
+import { startTransaction, commitTransaction } from '../core/History.ts';
 
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-underscore-dangle */
@@ -127,6 +128,70 @@ export default function createPipelineManagerGraph(graph) {
             dummyConnection: new DummyConnection(from, to),
             connectionsInDanger,
         };
+    };
+
+    // Replaces given instance of a noce with a node of type `newNodeName`
+    // All properties that are common preserve their values
+    // All connections that were connected to the interfaces that are common
+    // for those two nodes are preserved as well.
+    graph.replaceNode = function replaceNode(oldNode, newNodeName) {
+        const oldPosition = oldNode.position;
+        const newNode = this.editor.nodeTypes.get(newNodeName);
+        const newNodeInstance = new newNode.type(); // eslint-disable-line new-cap
+
+        // Restoring properties
+        Object.entries(oldNode.inputs).forEach(([name, intf]) => {
+            if (intf.direction !== undefined) return;
+
+            if (Object.prototype.hasOwnProperty.call(newNodeInstance.inputs, name)) {
+                newNodeInstance.inputs[name].value = intf.value;
+            }
+        });
+
+        // Restoring connections
+        const interfaces = [...Object.values(oldNode.inputs), ...Object.values(oldNode.outputs)];
+        const connections = this.connections.filter(
+            (c) => interfaces.includes(c.from) || interfaces.includes(c.to),
+        );
+
+        const connectionsToRestore = [];
+
+        Object.entries({ ...oldNode.inputs, ...oldNode.outputs }).forEach(([name, intf]) => {
+            if (intf.direction === undefined) return;
+
+            // Rewiring connections to new interfaces
+            connections.forEach((conn) => {
+                if (Object.prototype.hasOwnProperty.call(newNodeInstance.inputs, name)) {
+                    if (conn.from === intf) {
+                        const newConn = new Connection(newNodeInstance.inputs[name], conn.to);
+                        connectionsToRestore.push(newConn);
+                    } else if (conn.to === intf) {
+                        const newConn = new Connection(conn.from, newNodeInstance.inputs[name]);
+                        connectionsToRestore.push(newConn);
+                    }
+                }
+
+                if (Object.prototype.hasOwnProperty.call(newNodeInstance.outputs, name)) {
+                    if (conn.from === intf) {
+                        const newConn = new Connection(newNodeInstance.outputs[name], conn.to);
+                        connectionsToRestore.push(newConn);
+                    } else if (conn.to === intf) {
+                        const newConn = new Connection(conn.from, newNodeInstance.outputs[name]);
+                        connectionsToRestore.push(newConn);
+                    }
+                }
+            });
+        });
+
+        newNodeInstance.position = oldPosition;
+
+        startTransaction();
+
+        this.removeNode(oldNode);
+        this.addNode(newNodeInstance);
+        connectionsToRestore.forEach((conn) => this.internalAddConnection(conn));
+
+        commitTransaction();
     };
 
     graph.updateInterfaces = function updateInterfaces() {
