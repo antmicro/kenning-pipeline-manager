@@ -48,6 +48,8 @@ export function useClipboard(
     const nodeBuffer = ref('');
     const connectionBuffer = ref('');
 
+    const consecutivePasteNumber = ref(0);
+
     const isEmpty = computed(() => !nodeBuffer.value);
 
     const clear = () => {
@@ -73,6 +75,8 @@ export function useClipboard(
         nodeBuffer.value = JSON.stringify(displayedGraph.value.selectedNodes.map(
             (n : any) => n.save()),
         );
+
+        consecutivePasteNumber.value = 0;
     };
 
     const del = () => {
@@ -151,8 +155,10 @@ export function useClipboard(
             copiedNode.hooks.beforeLoad.subscribe(token, (nodeState) => {
                 const ns = nodeState as any;
                 if (ns.position) {
-                    ns.position.x += 40;
-                    ns.position.y += 40;
+                    consecutivePasteNumber.value += 1;
+
+                    ns.position.x += consecutivePasteNumber.value * 40;
+                    ns.position.y += consecutivePasteNumber.value * 40;
                 }
                 copiedNode.hooks.beforeLoad.unsubscribe(token);
                 return ns;
