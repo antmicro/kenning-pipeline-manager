@@ -166,6 +166,9 @@ class SpecificationBuilder(object):
             name of the base class, or list of
             base classes' names.
         """
+        if type(parent_names) is str:
+            parent_names = [parent_names]
+
         for extcls in parent_names:
             if extcls not in self._nodes:
                 raise SpecificationBuilderException(
@@ -237,7 +240,7 @@ class SpecificationBuilder(object):
             raise SpecificationBuilderException(
                 f"The description for {self._nodes[name]} already defined: ${self._nodes[name]['description']}"  # noqa: E501
             )
-        self.set_node_description(self, name, description)
+        self.set_node_description(name, description)
 
     def get_node_description(self, name):
         """
@@ -252,7 +255,7 @@ class SpecificationBuilder(object):
             return ""
         return self._nodes[name]["description"]
 
-    def add_node_type_icon(self, name: str, iconpath: str):
+    def add_node_type_icon(self, name: str, iconpath: Union[dict, str]):
         """
         Adds icon for the node type.
 
@@ -260,7 +263,7 @@ class SpecificationBuilder(object):
         ----------
         name: str
             Name of the node type
-        iconpath: str
+        iconpath: Union[dict, str]
             Icon path
         """
         if self.assets_dir and not isinstance(iconpath, dict):
@@ -387,6 +390,10 @@ class SpecificationBuilder(object):
         additionaldata: Any
             Any JSON-like construct
         """
+        if "additionalData" in self._nodes[name]:
+            raise SpecificationBuilderException(
+                f"The additionalData for {self._nodes[name]} already defined: ${self._nodes[name]['additionalData']}"  # noqa: E501
+            )
         self._nodes[name]["additionalData"] = additionaldata
 
     def add_node_type_interface(
@@ -418,7 +425,7 @@ class SpecificationBuilder(object):
         if 'interfaces' not in self._nodes[name]:
             self._nodes[name]['interfaces'] = []
 
-        if any([entry['name'] == interfacename and entry['side'] == side
+        if any([entry['name'] == interfacename and entry['direction'] == side
                 for entry in self._nodes[name]['interfaces']]):
             raise SpecificationBuilderException(
                 f'Interface of the same direction ({side}) and name '
@@ -438,6 +445,118 @@ class SpecificationBuilder(object):
         set_if_not_none(interface, "maxConnectionsCount", maxcount)
 
         self._nodes[name]['interfaces'].append(interface)
+
+    def create_property(
+            self,
+            propname: str,
+            proptype: str,
+            default: Any,
+            description: Optional[str] = None,
+            min: Any = None,
+            max: Any = None,
+            values: Optional[List[Any]] = None,
+            dtype: Optional[str] = None) -> dict:
+        """
+        Creates and returns a property
+
+        Parameters
+        ----------
+        propname: str
+            Name of the property
+        proptype: str
+            Type of the property
+        default: Any
+            Default value of the property
+        description: Optional[str]
+            Optional description for the property
+        min: Any
+            Minimal value
+        max: Any
+            Maximal value
+        values: Optional[List[Any]]
+            List of allowed values
+        dtype: Optional[str]
+            Type of elements in property type is list
+        """
+
+        prop = {
+            "name": propname,
+            "type": proptype,
+            "default": default
+        }
+
+        set_if_not_none(prop, 'description', description)
+        set_if_not_none(prop, 'min', min)
+        set_if_not_none(prop, 'max', max)
+        set_if_not_none(prop, 'values', values)
+        set_if_not_none(prop, 'dtype', dtype)
+
+        return prop
+
+    def add_node_type_property_group(
+            self,
+            name: str,
+            propgroupname: str,
+            propname: str,
+            proptype: str,
+            default: Any,
+            description: Optional[str] = None,
+            min: Any = None,
+            max: Any = None,
+            values: Optional[List[Any]] = None,
+            dtype: Optional[str] = None):
+        """
+        Adds a property to a property group
+
+        Parameters
+        ----------
+        name: str
+            Name of the node type
+        propgroupname: str
+            Name of the group of property
+        propname: str
+            Name of the property
+        proptype: str
+            Type of the property
+        default: Any
+            Default value of the property
+        description: Optional[str]
+            Optional description for the property
+        min: Any
+            Minimal value
+        max: Any
+            Maximal value
+        values: Optional[List[Any]]
+            List of allowed values
+        dtype: Optional[str]
+            Type of elements in property type is list
+        """
+
+        if 'properties' not in self._nodes[name] or all(
+                entry['name'] != propgroupname
+                for entry in self._nodes[name]['properties']):
+            raise SpecificationBuilderException(
+                f'Property {propgroupname} does not exits'
+            )
+
+        prop = self.create_property(
+            propname,
+            proptype,
+            default,
+            description,
+            min,
+            max,
+            values,
+            dtype
+        )
+
+        for entry in self._nodes[name]['properties']:
+            if entry['name'] == propgroupname:
+                if 'group' not in entry:
+                    entry['group'] = []
+                entry['group'].append(prop)
+
+        self._nodes[name]['properties'].append(prop)
 
     def add_node_type_property(
             self,
@@ -483,18 +602,16 @@ class SpecificationBuilder(object):
                 f'Property of the same name ({propname}) already exists in {name}'  # noqa: E501
             )
 
-        prop = {
-            "name": propname,
-            "type": proptype,
-            "default": default
-        }
-
-        set_if_not_none(prop, 'description', description)
-        set_if_not_none(prop, 'min', min)
-        set_if_not_none(prop, 'max', max)
-        set_if_not_none(prop, 'values', values)
-        set_if_not_none(prop, 'dtype', dtype)
-
+        prop = self.create_property(
+            propname,
+            proptype,
+            default,
+            description,
+            min,
+            max,
+            values,
+            dtype
+        )
         self._nodes[name]['properties'].append(prop)
 
     def add_node_type_from_spec(self, node):
@@ -523,6 +640,11 @@ class SpecificationBuilder(object):
                 node["name"],
                 node["additionalData"]
             )
+        if "description" in node:
+            self.add_node_description(
+                node["name"],
+                node["description"]
+            )
         if "interfaces" in node:
             for interface in node["interfaces"]:
                 self.add_node_type_interface(
@@ -546,6 +668,20 @@ class SpecificationBuilder(object):
                     get_optional(property, "values"),
                     get_optional(property, "dtype")
                 )
+                if 'group' in property:
+                    for childprop in property['group']:
+                        self.add_node_type_property_group(
+                            node['name'],
+                            property['name'],
+                            childprop["name"],
+                            childprop["type"],
+                            childprop["default"],
+                            get_optional(childprop, "description"),
+                            get_optional(childprop, "min"),
+                            get_optional(childprop, "max"),
+                            get_optional(childprop, "values"),
+                            get_optional(childprop, "dtype")
+                        )
 
     def add_subgraph_from_spec(self, subgraph):
         """
@@ -621,6 +757,11 @@ class SpecificationBuilder(object):
         entry = {'name': name}
         set_if_not_none(entry, 'nodeTypes', nodetypes)
         set_if_not_none(entry, 'nodeInterfaces', nodeinterfaces)
+
+        if 'nodeInterfaces' in entry:
+            entry['nodeInterfaces'] = [
+                intf.lower() for intf in entry['nodeInterfaces']
+            ]
         self._metadata['layers'].append(entry)
 
     def metadata_add_url(
@@ -695,9 +836,9 @@ class SpecificationBuilder(object):
             metadata = otherspec['metadata']
             for prop, propvalue in metadata.items():
                 if prop == 'interfaces':
-                    for interfacestyle in propvalue:
+                    for interfacename, interfacestyle in propvalue.items():
                         self.metadata_add_interface_styling(
-                            interfacestyle['name'],
+                            interfacename.lower(),
                             get_optional(interfacestyle, 'interfaceColor'),
                             get_optional(interfacestyle, 'interfaceConnectionPattern'),  # noqa: E501
                             get_optional(interfacestyle, 'interfaceConnectionColor')  # noqa: E501
