@@ -12,6 +12,7 @@
     "forceConsistentCasingInFileNames": true,
     "useDefineForClassFields": true,
     "allowImportingTsExtensions": true,
+    "noEmit": true,
     "baseUrl": ".",
     "types": [
       "webpack-env"
