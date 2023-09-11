@@ -96,8 +96,8 @@ export default class PipelineManagerEditor extends Editor {
         delete state.graph.inputs;
         delete state.graph.outputs;
 
-        if (state.graphTemplateInstances.length !== 0) {
-            state.graphTemplateInstances.push(state.graph);
+        if (state.subgraphs.length !== 0) {
+            state.subgraphs.push(state.graph);
             delete state.graph;
             state.graph = {};
             state.graph.entryGraph = currentGraphId;
@@ -244,7 +244,7 @@ export default class PipelineManagerEditor extends Editor {
             // multi-graph dataflow
             const usedSubgraphs = new Set();
 
-            state.graphTemplateInstances.forEach((subgraph) => {
+            state.subgraphs.forEach((subgraph) => {
                 subgraph.nodes.forEach((n) => {
                     if (n.subgraph !== undefined) {
                         usedSubgraphs.add(n.subgraph);
@@ -252,14 +252,14 @@ export default class PipelineManagerEditor extends Editor {
                 });
             });
             // Finding a root graph by checking which graph is not referenced by any other
-            rootGraph = state.graphTemplateInstances.find((subgraph) =>
+            rootGraph = state.subgraphs.find((subgraph) =>
                 !usedSubgraphs.has(subgraph.id),
             );
             if (rootGraph === undefined) {
                 return ['No root graph found. Make sure you graph does not have any reccurency'];
             }
 
-            entryGraph = state.graphTemplateInstances.find(
+            entryGraph = state.subgraphs.find(
                 (subgraph) => subgraph.id === state.graph.entryGraph,
             );
             if (entryGraph === undefined) {

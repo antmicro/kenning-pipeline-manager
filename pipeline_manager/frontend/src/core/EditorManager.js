@@ -467,8 +467,8 @@ export default class EditorManager {
             delete save.graph.panning;
             delete save.graph.scaling;
 
-            if (save.graph.graphTemplateInstances !== undefined) {
-                save.graph.graphTemplateInstances.forEach((template) => {
+            if (save.graph.subgraphs !== undefined) {
+                save.graph.subgraphs.forEach((template) => {
                     delete template.panning;
                     delete template.scaling;
                 });
