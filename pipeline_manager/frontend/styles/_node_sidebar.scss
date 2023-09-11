@@ -78,6 +78,7 @@
             & > .__node-name {
                 margin: 0;
                 flex-grow: 1;
+                white-space: nowrap;
             }
 
             & > .__url {
@@ -92,6 +93,13 @@
                     height: 2em;
                     display: block;
                 }
+            }
+        }
+
+        & > .__category {
+            & > .__category-name {
+                white-space: nowrap;
+                padding: 0.625em 1.25em;
             }
         }
 

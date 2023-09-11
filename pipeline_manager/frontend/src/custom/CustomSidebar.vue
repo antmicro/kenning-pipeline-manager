@@ -48,6 +48,12 @@ SPDX-License-Identifier: Apache-2.0
                     />
                 </a>
             </div>
+            <div class="__category">
+                <div class="__title">Category</div>
+                <div class="__category-name">
+                    {{ prettyCategory }}
+                </div>
+            </div>
 
             <div class="__properties" v-if="displayedProperties.length">
                 <div class="__title">Properties</div>
@@ -122,6 +128,9 @@ export default defineComponent({
             const id = graph.value.sidebar.nodeId;
             return graph.value.nodes.find((x) => x.id === id);
         });
+
+        const category = computed(() => graph.value.editor.nodeTypes.get(node.value.type).category);
+        const prettyCategory = computed(() => `${category.value.split('/').join(' / ')}`);
 
         const desc = computed(() => converter.makeHtml(node.value?.description ?? ''));
         const nodeIcon = computed(() => viewModel.value.editor.getNodeIconPath(node.value?.type));
@@ -312,6 +321,7 @@ export default defineComponent({
             tooltipRef,
             toggleGroup,
             getOptionName,
+            prettyCategory,
         };
     },
 });
