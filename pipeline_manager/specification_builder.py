@@ -108,7 +108,7 @@ class SpecificationBuilder(object):
         """
         self.version = spec_version
         self._nodes = dict()
-        self._nodetypes = set()
+        self._nodelayers = set()
         self._categories = set()
         self._subgraphs = dict()
         self._metadata = dict()
@@ -182,7 +182,7 @@ class SpecificationBuilder(object):
     def add_node_type(
             self,
             name: str,
-            type: Optional[str] = None,
+            layer: Optional[str] = None,
             category: Optional[str] = None,
             extends: Optional[Union[str, List[str]]] = None):
         """
@@ -192,7 +192,7 @@ class SpecificationBuilder(object):
         ----------
         name: str
             Name of the node type
-        type: Optional[str]
+        layer: Optional[str]
             Name of the layer metatype
         category: Optional[str]
             Category of the node
@@ -206,9 +206,9 @@ class SpecificationBuilder(object):
         self._nodes[name] = {"name": name, "interfaces": [], "properties": []}
         if extends:
             self.add_node_type_parent(name, extends)
-        if type:
-            self._nodes[name]["type"] = type
-            self._nodetypes.add(type)
+        if layer:
+            self._nodes[name]["layer"] = layer
+            self._nodelayers.add(layer)
         if category:
             self.add_node_type_category(name, category)
 
@@ -626,7 +626,7 @@ class SpecificationBuilder(object):
             )
         self.add_node_type(
             node["name"],
-            node["type"] if "type" in node else None,
+            node["layer"] if "layer" in node else None,
             node["category"] if "category" in node else None,
             node["extends"] if "extends" in node else None
         )
@@ -731,7 +731,7 @@ class SpecificationBuilder(object):
     def metadata_add_layer(
             self,
             name: str,
-            nodetypes: Optional[Union[str, List[str]]] = None,
+            nodelayers: Optional[Union[str, List[str]]] = None,
             nodeinterfaces: Optional[Union[str, List[str]]] = None):
         """
         Adds nodes' layer to metadata.
@@ -740,22 +740,22 @@ class SpecificationBuilder(object):
         ----------
         name: str
             Name of the layer
-        nodetypes: Optional[Union[str, List[str]]]
-            List of node types in the layer
+        nodelayers: Optional[Union[str, List[str]]]
+            List of node layers in the layer
         nodeinterfaces: Optional[Union[str, List[str]]]
             List of interface types in the layer
         """
         if 'layers' not in self._metadata:
             self._metadata['layers'] = []
 
-        assert nodetypes or nodeinterfaces
+        assert nodelayers or nodeinterfaces
 
         if any([entry['name'] == name for entry in self._metadata['layers']]):
             raise SpecificationBuilderException(
                 f'Layer {name} already exists.'
             )
         entry = {'name': name}
-        set_if_not_none(entry, 'nodeTypes', nodetypes)
+        set_if_not_none(entry, 'nodeLayers', nodelayers)
         set_if_not_none(entry, 'nodeInterfaces', nodeinterfaces)
 
         if 'nodeInterfaces' in entry:
@@ -855,7 +855,7 @@ class SpecificationBuilder(object):
                     for layer in propvalue:
                         self.metadata_add_layer(
                             layer['name'],
-                            get_optional(layer, 'nodeTypes'),
+                            get_optional(layer, 'nodeLayers'),
                             get_optional(layer, 'nodeInterfaces')
                         )
                 else:
