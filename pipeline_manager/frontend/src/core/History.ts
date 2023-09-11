@@ -15,6 +15,8 @@ import {
     ICommandHandler, ICommand,
 } from '@baklavajs/renderer-vue';
 
+import { applySidePositions } from './interfaceParser.js';
+
 export const suppressingHistory: Ref<boolean> = ref(false);
 const transactionId: Ref<string> = ref('');
 
@@ -101,7 +103,8 @@ export function useHistory(graph: Ref<Graph>, commandHandler: ICommandHandler): 
                     if (!historyItem) return;
                     historyItem.push(createStep('rem', `node::${node.id.toString()}`, transactionId.value));
                 }
-                removedObjectsMap.set(`node::${node.id.toString()}`, [node, node.save()]);
+                if (node.subgraph !== undefined) removedObjectsMap.set(`node::${node.id.toString()}`, [node, node.save(), node.subgraph.save()]);
+                else { removedObjectsMap.set(`node::${node.id.toString()}`, [node, node.save()]); }
             });
             newGraph.events.addConnection.subscribe(token, (conn : any) => {
                 if (!suppressingHistory.value) {
@@ -153,13 +156,62 @@ export function useHistory(graph: Ref<Graph>, commandHandler: ICommandHandler): 
             if (foo.topic.startsWith('node')) {
                 const nodeTuple = removedObjectsMap.get(foo.topic);
                 if (nodeTuple[0] !== undefined) {
-                    graph.value.addNode(nodeTuple[0]);
-                    nodeTuple[0].load(nodeTuple[1]);
+                    const n = graph.value.addNode(nodeTuple[0]);
+                    if (nodeTuple.length <= 2) n.load(nodeTuple[1]);
+                    else {
+                        // eslint-disable-next-line prefer-destructuring
+                        nodeTuple[1].graphState = nodeTuple[2];
+                        n.load(nodeTuple[1]);
+                        n.subgraph.load(nodeTuple[2]);
+                        const ifaceOrPositionErrors = applySidePositions(
+                            Object.fromEntries(nodeTuple[2].inputs.map(
+                                (intf: any) => [intf.subgraphNodeId, intf]),
+                            ),
+                            Object.fromEntries(nodeTuple[2].outputs.map(
+                                (intf: any) => [intf.subgraphNodeId, intf]),
+                            ),
+                        );
+                        if (Array.isArray(ifaceOrPositionErrors)) {
+                            throw new Error(
+                                `Internal error occured while processing history stacks. ` +
+                                `Reason: ${ifaceOrPositionErrors.join('. ')}`,
+                            );
+                        }
+                        n.updateInterfaces(
+                            ifaceOrPositionErrors.inputs,
+                            ifaceOrPositionErrors.outputs,
+                        );
+                    }
                 }
             } else if (foo.topic.startsWith('conn')) {
                 const conn = removedObjectsMap.get(foo.topic);
                 if (conn !== undefined) {
-                    const connAdded = graph.value.addConnection(conn.from, conn.to);
+                    // The object of the interfaces itself has changed and despite
+                    // having all the same fields, it will not assign the connection
+                    // correctly. That's why it is necessary to extract the nodeId
+                    // from what we have and find the interface in said node manually
+
+                    const fromNode = graph.value.findNodeById(conn.from.nodeId);
+                    const toNode = graph.value.findNodeById(conn.to.nodeId);
+                    if (!fromNode || !toNode) return;
+
+                    const from = [
+                        ...Object.values(fromNode.inputs),
+                        ...Object.values(fromNode.outputs),
+                    ].filter(
+                        (iface) => iface.port,
+                    ).find((iface) => iface.id === conn.from.id);
+
+                    const to = [
+                        ...Object.values(toNode.inputs),
+                        ...Object.values(toNode.outputs),
+                    ].filter(
+                        (iface) => iface.port,
+                    ).find((iface) => iface.id === conn.to.id);
+
+                    if (!from || !to) return;
+
+                    const connAdded = graph.value.addConnection(from, to);
                     if (connAdded === undefined) {
                         return;
                     }
