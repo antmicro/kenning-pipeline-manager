@@ -24,13 +24,6 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
             '--temporary-connection': !!temporaryConnection,
         }"
         :style="`--scale: ${this.scale}`"
-        @pointermove="onPointerMove"
-        @pointerdown.left.exact="onPointerDown"
-        @pointerup.left.exact="onPointerUp"
-        @pointerdown.right.exact="onRightPointerDown"
-        @pointerup.right.exact="onRightPointerUp"
-        @pointerdown.right.ctrl="onRightPointerDownCtrl"
-        @pointerup.right.ctrl="onRightPointerUpCtrl"
         @wheel.self="mouseWheel"
         @keydown="keyDown"
         @keyup="keyUp"
@@ -143,6 +136,7 @@ export default defineComponent({
         const hideHud = computed(() => props.viewModel.hideHud);
 
         const rectangleSelection = ref(null);
+        const selectedNodesCtrlBackup = ref([]);
 
         const selectedNodesDragMove = ref(null);
 
@@ -211,6 +205,9 @@ export default defineComponent({
                 && ev.target === el.value) {
                 unselectAllNodes();
             }
+
+            document.removeEventListener('mouseup', onPointerUp);
+            document.removeEventListener('mousemove', onPointerMove);
         };
 
         const onRightPointerUp = (ev) => {
@@ -222,20 +219,45 @@ export default defineComponent({
                 appendSelectMultipleNodes();
             }
             rectangleSelection.value.onPointerUp();
+
+            document.removeEventListener('mouseup', onRightPointerUp);
+            document.removeEventListener('mousemove', onPointerMove);
         };
 
         const onRightPointerDownCtrl = (ev) => {
             rectangleSelection.value.onPointerDown(ev);
+            selectedNodesCtrlBackup.value = graph.value.selectedNodes;
         };
 
         const onRightPointerUpCtrl = () => {
+            graph.value.selectedNodes = selectedNodesCtrlBackup.value;
             appendSelectMultipleNodes();
             rectangleSelection.value.onPointerUp();
+
+            document.removeEventListener('mouseup', onRightPointerUpCtrl);
+            document.removeEventListener('mousemove', onPointerMove);
         };
 
         const deleteKeyUp = () => {
             graph.value.removeSelectedNodes();
         };
+
+        document.addEventListener('mousedown', (ev) => {
+            if (ev.button === 0) {
+                onPointerDown(ev);
+                document.addEventListener('mouseup', onPointerUp);
+                document.addEventListener('mousemove', onPointerMove);
+            }
+            if (ev.button === 2 && ev.ctrlKey) {
+                onRightPointerDownCtrl(ev);
+                document.addEventListener('mouseup', onRightPointerUpCtrl);
+                document.addEventListener('mousemove', onPointerMove);
+            } else if (ev.button === 2) {
+                onRightPointerDown(ev);
+                document.addEventListener('mouseup', onRightPointerUp);
+                document.addEventListener('mousemove', onPointerMove);
+            }
+        });
 
         const clearHighlight = () => {
             highlightConnections.value.splice(0, highlightConnections.value.length);

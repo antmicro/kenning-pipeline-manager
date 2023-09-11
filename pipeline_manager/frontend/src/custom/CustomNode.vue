@@ -224,6 +224,7 @@ const openSidebar = () => {
 const onContextMenuTitleClick = async (action) => {
     switch (action) {
         case 'delete':
+            startTransaction();
             graph.value.removeNode(props.node);
             commitTransaction();
             break;
@@ -286,21 +287,24 @@ const select = () => {
     emit('select');
 };
 
-const stopDrag = () => {
-    viewModel.value.editor.selectedNodesDragMove.onPointerUp();
-    document.removeEventListener('pointermove', viewModel.value.editor.selectedNodesDragMove.onPointerMove);
-    viewModel.value.editor.selectedNodesDragMove = null;
+let abortDrag;
+let stopDrag;
 
+const cleanEvents = () => {
+    document.removeEventListener('pointermove', viewModel.value.editor.selectedNodesDragMove.onPointerMove);
+    document.removeEventListener('keyboard.escape', abortDrag);
     document.removeEventListener('pointerup', stopDrag);
 };
 
 abortDrag = () => {
     cleanEvents();
+    viewModel.value.editor.selectedNodesDragMove = null;
 };
 
 stopDrag = () => {
-    dragMove.onPointerUp();
+    viewModel.value.editor.selectedNodesDragMove.onPointerUp();
     cleanEvents();
+    viewModel.value.editor.selectedNodesDragMove = null;
 };
 
 const startDrag = (ev) => {
@@ -315,6 +319,7 @@ const startDrag = (ev) => {
     nodesDragMove.onPointerDown(ev);
     document.addEventListener('pointermove', nodesDragMove.onPointerMove);
     viewModel.value.editor.selectedNodesDragMove = nodesDragMove;
+    document.addEventListener('keyboard.escape', abortDrag);
     document.addEventListener('pointerup', stopDrag);
 };
 
