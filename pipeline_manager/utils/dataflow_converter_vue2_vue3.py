@@ -7,7 +7,11 @@ Version: 1
 Script that convert old dataflow format (Vue2-based) to a new one (Vue3-based).
 Usage of the script:
 
-* python -m pipeline_manager.utils.dataflow_converter_vue2_vue3 old_format_dataflow.json --output new_format_dataflow.json  # noqa: E501
+```
+python -m pipeline_manager.utils.dataflow_converter_vue2_vue3 \
+    old_format_dataflow.json \
+    --output new_format_dataflow.json
+```
 """
 
 

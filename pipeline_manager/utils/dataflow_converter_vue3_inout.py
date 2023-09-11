@@ -9,10 +9,16 @@ import sys
 
 """
 Version: 2
-Script that convert old dataflow format (Vue3-based) to a new one supporting inouts
+Script that convert old dataflow format (Vue3-based) to a new one supporting
+inouts.
+
 Usage of the script:
 
-* python -m pipeline_manager.utils.dataflow_converter_vue3_inout old_format_dataflow.json --output new_format_dataflow.json  # noqa: E501
+```
+python -m pipeline_manager.utils.dataflow_converter_vue3_inout \
+    old_format_dataflow.json \
+    --output new_format_dataflow.json
+```
 """
 
 

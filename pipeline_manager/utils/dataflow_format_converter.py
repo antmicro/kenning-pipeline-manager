@@ -16,7 +16,10 @@ format to a newest one.
 
 Usage of the script:
 
-* python -m pipeline_manager.utils.dataflow_format_converter old_format_dataflow.json  # noqa: E501
+```
+python -m pipeline_manager.utils.dataflow_format_converter \
+    old_format_dataflow.json
+```
 """
 
 
