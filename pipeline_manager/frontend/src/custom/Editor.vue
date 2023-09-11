@@ -109,7 +109,8 @@ export default defineComponent({
         CustomSidebar,
         RectangleSelection,
     },
-    setup(props) {
+    emits: ['loadWait', 'loadFinish'],
+    setup(props, { emit }) {
         const {
             el,
             counter,
@@ -499,7 +500,9 @@ export default defineComponent({
                 // escaped form in the page's URL
                 const urlParams = new URLSearchParams(window.location.search);
                 if (urlParams.has('spec')) {
+                    emit('loadWait');
                     specText = await loadJsonFromRemoteLocation(urlParams.get('spec'));
+                    emit('loadFinish');
                     if (specText === undefined) {
                         NotificationHandler.terminalLog(
                             'error',
@@ -532,7 +535,9 @@ export default defineComponent({
                 } else {
                     const urlParams = new URLSearchParams(window.location.search);
                     if (urlParams.has('graph')) {
+                        emit('loadWait');
                         dataflow = await loadJsonFromRemoteLocation(urlParams.get('graph'));
+                        emit('loadFinish');
                         if (!dataflow) {
                             NotificationHandler.terminalLog(
                                 'error',
