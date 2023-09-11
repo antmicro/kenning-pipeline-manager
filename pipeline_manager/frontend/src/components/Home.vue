@@ -9,17 +9,27 @@ The entrypoint of the application.
 -->
 
 <template>
-    <div id="container">
-        <NavBar v-if="!hideHud" />
-        <Editor class="inner-editor" :view-model="editorManager.baklavaView" />
-        <TerminalPanel v-if="!hideHud" />
+    <div>
+        <LoadingScreen v-if="counter > 0" />
+        <div id="container">
+            <NavBar v-if="!hideHud" />
+            <Editor
+                class="inner-editor"
+                :view-model="editorManager.baklavaView"
+                @loadWait="handleLoadWait"
+                @loadFinish="handleLoadFinish"
+            />
+            <TerminalPanel v-if="!hideHud" />
+        </div>
     </div>
 </template>
 
 <script>
+import { ref, computed } from 'vue';
 import NavBar from './NavBar.vue';
 import EditorManager from '../core/EditorManager.js';
 import TerminalPanel from './TerminalPanel.vue';
+import LoadingScreen from './LoadingScreen.vue';
 import Editor from '../custom/Editor.vue';
 import '@baklavajs/themes/dist/classic.css';
 
@@ -28,16 +38,31 @@ export default {
         NavBar,
         Editor,
         TerminalPanel,
+        LoadingScreen,
     },
-    data() {
+    setup() {
         const editorManager = EditorManager.getEditorManagerInstance();
+        const counter = ref(0);
 
-        return { editorManager };
-    },
-    computed: {
-        hideHud() {
-            return this.editorManager.baklavaView.hideHud;
-        },
+        const hideHud = computed(() => editorManager.baklavaView.hideHud);
+
+        const handleLoadWait = () => {
+            counter.value += 1;
+        };
+        const handleLoadFinish = () => {
+            counter.value -= 1;
+        };
+
+        return {
+            editorManager,
+            counter,
+            hideHud,
+            handleLoadWait,
+            handleLoadFinish,
+        };
     },
 };
 </script>
+
+<style lang="scss">
+</style>
