@@ -366,7 +366,7 @@ export default class EditorManager {
                         } else {
                             output[key] = [...base[key], ...child[key]];
                         }
-                    } else {
+                    } else if (key !== 'abstract') {
                         output[key] = child[key];
                     }
                 });
@@ -417,6 +417,10 @@ export default class EditorManager {
         // DFS resolving inheritance
         sortedNodes.forEach((name) => {
             const node = JSON.parse(JSON.stringify(nodes.find((n) => n.name === name)));
+            if (node.abstract === true) {
+                // Skip resolving/adding abstract nodes
+                return;
+            }
             const visited = [];
 
             // Reversing so that pop starts from the first element
