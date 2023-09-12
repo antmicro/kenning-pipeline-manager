@@ -12,7 +12,7 @@ SPDX-License-Identifier: Apache-2.0
         <div class="panel">
             <div v-for="option in settingOptions" :key="option.id">
                 <div class="option-label">
-                    {{ displayOptionName(option) ? `${option.name}:` : '' }}
+                    {{ getOptionName(option) ? `${option.name}:` : '' }}
                 </div>
                 <component :is="option.component" :intf="option"></component>
             </div>
@@ -35,6 +35,7 @@ import {
     IntegerInterface,
     ButtonInterface,
 } from '@baklavajs/renderer-vue'; // eslint-disable-line object-curly-newline
+import getOptionName from '../custom/CustomNode.js';
 
 export default {
     props: {
@@ -156,25 +157,6 @@ export default {
             return options.value;
         });
 
-        const displayOptionName = (option) => {
-            switch (option.componentName) {
-                case 'InputInterface':
-                case 'SelectInterface':
-                case 'ListInterface':
-                case 'TextInterface':
-                case 'HexInterface':
-                    return true;
-                case 'NumberInterface':
-                case 'IntegerInterface':
-                case 'CheckboxInterface':
-                case 'SliderInterface':
-                case 'NodeInterface':
-                case 'ButtonInterface':
-                default:
-                    return false;
-            }
-        };
-
         const readonlyOptions = computed(() => {
             if (props.viewModel.editor.readonly) {
                 return [];
@@ -194,7 +176,7 @@ export default {
             center.value,
         ].concat(readonlyOptions.value)));
 
-        return { displayOptionName, settingOptions, disableLayersOptions };
+        return { getOptionName, settingOptions, disableLayersOptions };
     },
 };
 </script>
