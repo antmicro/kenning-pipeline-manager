@@ -185,7 +185,7 @@ class SpecificationBuilder(object):
             layer: Optional[str] = None,
             category: Optional[str] = None,
             extends: Optional[Union[str, List[str]]] = None,
-            abstract: bool = False):
+            abstract: Optional[bool] = False):
         """
         Adds a node type to the specification.
 
@@ -217,7 +217,8 @@ class SpecificationBuilder(object):
             self._nodelayers.add(layer)
         if category:
             self.add_node_type_category(name, category)
-        self.set_node_type_abstract(name, abstract)
+        if abstract is not None:
+            self.set_node_type_abstract(name, abstract)
 
     def set_node_type_abstract(self, name, value):
         self._nodes[name]["abstract"] = value
