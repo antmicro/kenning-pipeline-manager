@@ -152,7 +152,6 @@
             "name": "Logical AND",
             "layer": "processing",
             "category": "Processing",
-            "properties": [],
             "interfaces": [
                 {"name": "input 1", "type": "BinaryImage", "direction": "input"},
                 {"name": "input 2", "type": "BinaryImage", "direction": "input"},
@@ -163,7 +162,6 @@
             "name": "Logical OR",
             "layer": "processing",
             "category": "Processing",
-            "properties": [],
             "interfaces": [
                 {"name": "input 1", "type": "BinaryImage", "direction": "input"},
                 {"name": "input 2", "type": "BinaryImage", "direction": "input"},
@@ -174,7 +172,6 @@
             "name": "Logical NOT",
             "layer": "processing",
             "category": "Processing",
-            "properties": [],
             "interfaces": [
                 {"name": "input", "type": "BinaryImage", "direction": "input"},
                 {"name": "output", "type": "BinaryImage", "direction": "output"}
@@ -184,7 +181,6 @@
             "name": "Logical XOR",
             "layer": "processing",
             "category": "Processing",
-            "properties": [],
             "interfaces": [
                 {"name": "input 1", "type": "BinaryImage", "direction": "input"},
                 {"name": "input 2", "type": "BinaryImage", "direction": "input"},
