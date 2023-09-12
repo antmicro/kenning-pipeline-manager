@@ -184,7 +184,8 @@ class SpecificationBuilder(object):
             name: str,
             layer: Optional[str] = None,
             category: Optional[str] = None,
-            extends: Optional[Union[str, List[str]]] = None):
+            extends: Optional[Union[str, List[str]]] = None,
+            abstract: bool = False):
         """
         Adds a node type to the specification.
 
@@ -198,6 +199,11 @@ class SpecificationBuilder(object):
             Category of the node
         extends: Optional[Union[str, List[str]]]
             Base classes for the node type
+        abstract: bool
+            Tells if the type is abstract or not.
+            Abstract types do not need to be complete, they
+            are also not added to the final specification.
+            They are templates for other classes.
         """
         if name in self._nodes:
             raise SpecificationBuilderException(
@@ -211,6 +217,10 @@ class SpecificationBuilder(object):
             self._nodelayers.add(layer)
         if category:
             self.add_node_type_category(name, category)
+        self.set_node_type_abstract(name, abstract)
+
+    def set_node_type_abstract(self, name, value):
+        self._nodes[name]["abstract"] = value
 
     def set_node_description(self, name: str, description: str):
         """
@@ -625,10 +635,11 @@ class SpecificationBuilder(object):
                 f"{json.dumps(node, indent=4)}"
             )
         self.add_node_type(
-            node["name"],
-            node["layer"] if "layer" in node else None,
-            node["category"] if "category" in node else None,
-            node["extends"] if "extends" in node else None
+            name=node["name"],
+            layer=get_optional(node, "layer"),
+            category=get_optional(node, "category"),
+            extends=get_optional(node, "extends"),
+            abstract=get_optional(node, "abstract")
         )
         if "icon" in node:
             self.add_node_type_icon(node["name"], node["icon"])
