@@ -129,7 +129,8 @@ import { ref, computed, toRef, onUpdated, onMounted, nextTick, markRaw, watch } 
 import { useViewModel, useGraph } from '@baklavajs/renderer-vue';
 import { AbstractNode, GRAPH_NODE_TYPE_PREFIX } from '@baklavajs/core';
 
-import useDragMove, { useGroupDragMove } from './useDragMove';
+import useDragMove from './useDragMove';
+import useGroupDragMove from './useGroupDragMove';
 import CustomInterface from './CustomInterface.vue';
 import CustomContextMenu from './ContextMenu.vue';
 import { gridSnapper } from '../core/snappers';
