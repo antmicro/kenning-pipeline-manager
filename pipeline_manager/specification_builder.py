@@ -902,7 +902,7 @@ class SpecificationBuilder(object):
         with tempfile.TemporaryDirectory() as tmpdir:
             specpath = Path(tmpdir) / 'spec.json'
             with open(Path(tmpdir) / 'spec.json', 'w') as spec_file:
-                json.dump(spec, spec_file)
+                json.dump(spec, spec_file, indent=4)
             res = validate(
                 specification_path=specpath,
                 workspace_directory=workspacedir
