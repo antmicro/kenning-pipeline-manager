@@ -33,12 +33,16 @@ export const UNHIGHLIGHT_COMMAND = 'UNHIGHLIGHT';
 export const PASTE_COMMAND = 'PASTE';
 export const CLEAR_CLIPBOARD_COMMAND = 'CLEAR_CLIPBOARD';
 
+/* eslint-disable  @typescript-eslint/no-explicit-any */
+interface PMNodeState extends INodeState<any, any> {
+    name: string;
+}
+
 export interface IClipboard {
     isEmpty: boolean;
 }
 
 export function useClipboard(
-    /* eslint-disable  @typescript-eslint/no-explicit-any */
     displayedGraph: any,
     editor: Ref<Editor>,
     commandHandler: ICommandHandler,
@@ -115,7 +119,7 @@ export function useClipboard(
         // Map old IDs to new IDs
         const idmap = new Map<string, string>();
 
-        const parsedNodeBuffer = JSON.parse(nodeBuffer.value) as INodeState<any, any>[];
+        const parsedNodeBuffer = JSON.parse(nodeBuffer.value) as PMNodeState[];
         const parsedConnectionBuffer = JSON.parse(connectionBuffer.value) as IConnectionState[];
 
         const newNodes: AbstractNode[] = [];
@@ -126,7 +130,7 @@ export function useClipboard(
         commandHandler.executeCommand<ICommand<void>>('START_TRANSACTION');
 
         for (let i = 0; i < parsedNodeBuffer.length; i += 1) {
-            const nodeType = editor.value.nodeTypes.get(parsedNodeBuffer[i].type);
+            const nodeType = editor.value.nodeTypes.get(parsedNodeBuffer[i].name);
             if (!nodeType) {
                 return;
             }
