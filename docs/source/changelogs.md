@@ -9,7 +9,7 @@ This section lists all versions, related features and breaking changes.
 This updates changes the existing format of specification and dataflow.
 ```
 
-Commit SHA - `583dd2300163053d49baacbe5a8349477b2e466a`
+Commit SHA - `11f75ce8185a87c4c1192bd1508e270a036e5c61`
 
 * Intorduced changes in dataflow and specification formats:
   * `type` -> `name` for dataflows for consistency with specification naming
@@ -20,6 +20,7 @@ Commit SHA - `583dd2300163053d49baacbe5a8349477b2e466a`
   * `checkbox` -> `bool` for property type
   * `graphTemplateInstances` -> `subgraphs` for dataflow and specification.
 * Added converter from version `20230824.10` to `20230830.11`
+* Added `abstract` parameter for node types to define abstract types.
 
 ## 20230824.10
 
