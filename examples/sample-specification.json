@@ -2,22 +2,23 @@
     "version": "20230830.10",
     "nodes": [
         {
-            "name": "LoadVideo",
+            "name": "Filesystem-base",
+            "abstract": true,
             "layer": "filesystem",
             "category": "Filesystem",
             "properties": [
                 {"name": "filename", "type": "text", "default": ""}
-            ],
+            ]
+        },
+        {
+            "name": "LoadVideo",
+            "extends": ["Filesystem-base"],
             "interfaces": [{"name": "frames", "type": "Image", "direction": "output"}],
             "description": "### Information \n\n Node used to load a video and parametrize the *filename*.\n\nAdditionally the video can be passed to another node."
         },
         {
             "name": "SaveVideo",
-            "layer": "filesystem",
-            "category": "Filesystem",
-            "properties": [
-                {"name": "filename", "type": "text", "default": ""}
-            ],
+            "extends": ["Filesystem-base"],
             "interfaces": [
                 {"name": "color", "type": "Image", "direction": "input"},
                 {"name": "binary", "type": "BinaryImage", "direction": "input"}
@@ -38,10 +39,8 @@
         },
         {
             "name": "SaveFrame",
-            "layer": "filesystem",
-            "category": "Filesystem",
+            "extends": ["Filesystem-base"],
             "properties": [
-                {"name": "filename", "type": "text", "default": ""},
                 {"name": "Frame number", "type": "integer", "default": 0}
             ],
             "interfaces": [
