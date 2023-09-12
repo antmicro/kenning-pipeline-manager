@@ -209,7 +209,7 @@ class SpecificationBuilder(object):
             raise SpecificationBuilderException(
                 f"Redefined node type:  {name}"
             )
-        self._nodes[name] = {"name": name, "interfaces": [], "properties": []}
+        self._nodes[name] = {"name": name}
         if extends:
             self.add_node_type_parent(name, extends)
         if layer:
