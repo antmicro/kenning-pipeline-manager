@@ -8,4 +8,4 @@ import sys
 from pipeline_manager.__main__ import script_handler
 
 if __name__ == '__main__':
-    script_handler(sys.argv, 'validate')
+    sys.exit(script_handler(sys.argv, 'validate'))
