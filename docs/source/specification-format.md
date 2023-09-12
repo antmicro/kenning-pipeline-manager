@@ -150,6 +150,10 @@ Every input object requires six properties:
 * `urls` - a dictionary of [URL class](#url-class) and URL suffixes pairs.
   The key should be a URL class key from `urls` in `metadata`.
   The value of the entry is appended to the URL base from the URL class.
+* `abstract` - boolean telling if the node type is abstract or not.
+  Abstract node types are used only for inheritance purposes, they do not appear in the final list of available nodes.
+  They only have one mandatory field - `name`.
+  The rest of the fields can be provided to introduce some common properties of classes inheriting from it.
 * `additionalData` - can be any JSON-like object (array, dictionary, number, string, ...), it is only used for storing some additional, node-specific data, such as comments etc.
 * `description` - description of the node in markdown format that is displayed in a sidebar node.
 
