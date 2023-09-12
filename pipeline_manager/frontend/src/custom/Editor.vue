@@ -136,12 +136,10 @@ export default defineComponent({
         const hideHud = computed(() => props.viewModel.hideHud);
 
         const rectangleSelection = ref(null);
-        const selectedNodesCtrlBackup = ref([]);
+        const selectedNodesCtrlBackup = [];
 
-        const selectedNodesDragMove = ref(null);
-
-        const pressStartTime = ref(0);
-        const longPressMilisTreshold = ref(100);
+        let pressStartTime = 0;
+        const longPressMilisTreshold = 100;
 
         const unselectAllNodes = () => {
             /* eslint-disable vue/no-mutating-props,no-param-reassign */
@@ -163,8 +161,14 @@ export default defineComponent({
         };
 
         const selectMultipleNodes = () => {
-            unselectAllNodes();
-            appendSelectMultipleNodes();
+            graph.value.selectedNodes = [];
+            graph.value.nodes.forEach((node) => {
+                const selectionBoundingRect = rectangleSelection.value.boundingRect;
+
+                if (nodeInsideSelection(graph.value, node, selectionBoundingRect)) {
+                    graph.value.selectedNodes.push(node);
+                }
+            });
         };
 
         const onPointerDown = (ev) => {
@@ -173,7 +177,7 @@ export default defineComponent({
             }
             temporaryConnection.onMouseDown();
 
-            pressStartTime.value = new Date();
+            pressStartTime = new Date();
         };
 
         const onRightPointerDown = (ev) => {
@@ -182,7 +186,7 @@ export default defineComponent({
                 rectangleSelection.value.onPointerDown(ev);
             }
 
-            pressStartTime.value = new Date();
+            pressStartTime = new Date();
         };
 
         const onPointerMove = (ev) => {
@@ -200,8 +204,8 @@ export default defineComponent({
 
             // handle press & hold
             const currentTime = new Date();
-            const elapsedTime = currentTime - pressStartTime.value;
-            if (elapsedTime < longPressMilisTreshold.value
+            const elapsedTime = currentTime - pressStartTime;
+            if (elapsedTime < longPressMilisTreshold
                 && ev.target === el.value) {
                 unselectAllNodes();
             }
@@ -213,8 +217,8 @@ export default defineComponent({
         const onRightPointerUp = (ev) => {
             // handle press & hold right mouse button
             const currentTime = new Date();
-            const elapsedTime = currentTime - pressStartTime.value;
-            if (elapsedTime >= longPressMilisTreshold.value
+            const elapsedTime = currentTime - pressStartTime;
+            if (elapsedTime >= longPressMilisTreshold
                 && ev.target === el.value) {
                 appendSelectMultipleNodes();
             }
@@ -576,20 +580,13 @@ export default defineComponent({
             counter,
             selectedNodes,
             nodeContainerStyle,
-            onPointerMove,
-            onPointerDown,
-            onRightPointerDown,
-            onPointerUp,
             onRightPointerUp,
-            onRightPointerDownCtrl,
-            onRightPointerUpCtrl,
             deleteKeyUp,
             nodes,
             keyDown,
             keyUp,
             selectNode,
             rectangleSelection,
-            selectedNodesDragMove,
             temporaryConnection: temporaryConnection.temporaryConnection,
             mouseWheel: panZoom.onMouseWheel,
             dragging: panZoom.dragging,

@@ -129,7 +129,6 @@ import { ref, computed, toRef, onUpdated, onMounted, nextTick, markRaw, watch } 
 import { useViewModel, useGraph } from '@baklavajs/renderer-vue';
 import { AbstractNode, GRAPH_NODE_TYPE_PREFIX } from '@baklavajs/core';
 
-import useDragMove from './useDragMove';
 import useGroupDragMove from './useGroupDragMove';
 import CustomInterface from './CustomInterface.vue';
 import CustomContextMenu from './ContextMenu.vue';
@@ -154,7 +153,6 @@ const props = defineProps({
     node: AbstractNode,
     selected: Boolean,
     interfaces: Array,
-    selectedNodesDragMove: undefined,
 });
 
 const emit = defineEmits(['select']);
@@ -167,12 +165,6 @@ const contextMenuStyle = computed(() => ({
     'transform-origin': '0 0',
     transform: `scale(${1 / graph.value.scaling})`,
 }));
-
-const dragMove = useDragMove(
-    toRef(props.node, 'position'),
-    gridSnapper(movementStep),
-    props.node.id,
-);
 
 // If type start with '_', it is not displayed as node title
 const IGNORE_TYPE_PREFIX = '_';
@@ -256,9 +248,15 @@ const openContextMenuTitle = (ev) => {
     }
 };
 
+const groupDragMove = useGroupDragMove(
+    toRef(props.node, 'position'),
+    props.node.id,
+    gridSnapper(movementStep),
+);
+
 const classes = computed(() => ({
     '--selected': props.selected,
-    '--dragging': dragMove.dragging.value,
+    '--dragging': groupDragMove.dragging.value,
     '--two-column': !!props.node.twoColumn,
     __readonly: viewModel.value.editor.readonly,
 }));
@@ -292,20 +290,18 @@ let abortDrag;
 let stopDrag;
 
 const cleanEvents = () => {
-    document.removeEventListener('pointermove', viewModel.value.editor.selectedNodesDragMove.onPointerMove);
+    document.removeEventListener('pointermove', groupDragMove.onPointerMove);
     document.removeEventListener('keyboard.escape', abortDrag);
     document.removeEventListener('pointerup', stopDrag);
 };
 
 abortDrag = () => {
     cleanEvents();
-    viewModel.value.editor.selectedNodesDragMove = null;
 };
 
 stopDrag = () => {
-    viewModel.value.editor.selectedNodesDragMove.onPointerUp();
+    groupDragMove.onPointerUp();
     cleanEvents();
-    viewModel.value.editor.selectedNodesDragMove = null;
 };
 
 const startDrag = (ev) => {
@@ -313,13 +309,8 @@ const startDrag = (ev) => {
         select();
     }
 
-    const nodesDragMove = useGroupDragMove(
-        toRef(props.node, 'position'),
-        gridSnapper(movementStep),
-    );
-    nodesDragMove.onPointerDown(ev);
-    document.addEventListener('pointermove', nodesDragMove.onPointerMove);
-    viewModel.value.editor.selectedNodesDragMove = nodesDragMove;
+    groupDragMove.onPointerDown(ev);
+    document.addEventListener('pointermove', groupDragMove.onPointerMove);
     document.addEventListener('keyboard.escape', abortDrag);
     document.addEventListener('pointerup', stopDrag);
 };

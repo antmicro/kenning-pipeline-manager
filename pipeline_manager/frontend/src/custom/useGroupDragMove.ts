@@ -5,7 +5,7 @@
  *
  */
 
-import { ref, Ref } from 'vue';
+import { Ref } from 'vue';
 import { useGraph } from '@baklavajs/renderer-vue';
 import useDragMove from './useDragMove';
 
@@ -17,34 +17,35 @@ interface coordinates {
 /* eslint-disable no-param-reassign, @typescript-eslint/no-explicit-any */
 export default function useGroupDragMove(
     dragRootNodePosition: Ref<coordinates>,
+    dragRootNodeId = undefined,
     gridSnapperInstance = undefined,
 ) {
     const { graph } = useGraph() as { graph: any };
-    const selectedNodesPositions = graph.value.selectedNodes.map(
-        (node: { position: coordinates; }) => node.position,
-    );
-
-    const groupPositionCoords: Ref<coordinates> = ref(
-        { x: dragRootNodePosition.value.x, y: dragRootNodePosition.value.y },
-    );
 
     const groupDragMove = useDragMove(
-        groupPositionCoords,
+        dragRootNodePosition,
         gridSnapperInstance,
-        graph.value.selectedNodes.map((node: { id: string }) => node.id),
+        dragRootNodeId,
     );
 
     const groupPointerMove = groupDragMove.onPointerMove;
 
     const onPointerMove = (ev: PointerEvent) => {
+        const groupPositionCoords = {
+            x: dragRootNodePosition.value.x,
+            y: dragRootNodePosition.value.y,
+        };
+
         groupPointerMove(ev);
 
-        const dx = groupPositionCoords.value.x - dragRootNodePosition.value.x;
-        const dy = groupPositionCoords.value.y - dragRootNodePosition.value.y;
+        const dx = dragRootNodePosition.value.x - groupPositionCoords.x;
+        const dy = dragRootNodePosition.value.y - groupPositionCoords.y;
 
-        selectedNodesPositions.forEach((pos: coordinates) => {
-            pos.x += dx;
-            pos.y += dy;
+        graph.value.selectedNodes.forEach((node: any) => {
+            if (node.id !== dragRootNodeId) {
+                node.position.x += dx;
+                node.position.y += dy;
+            }
         });
     };
 

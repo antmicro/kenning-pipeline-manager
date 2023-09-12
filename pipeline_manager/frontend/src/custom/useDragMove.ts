@@ -18,7 +18,7 @@ interface coordinates {
 export default function useDragMove(
     positionRef: Ref<coordinates>,
     gridSnapperInstance = undefined,
-    nodeIds = undefined,
+    nodeId = undefined,
 ) {
     // any definition is an ad-hoc solution as we don't have our graph definition
     const { graph } = useGraph() as { graph: any };
@@ -42,8 +42,11 @@ export default function useDragMove(
 
     /* eslint-disable arrow-body-style */
     const calculatePosition = (pos: number, kind: 'x' | 'y', align = false, gridSnap = false) => {
-        if (align && nodeIds !== undefined) {
-            const alignedCoord = nodeSnappers[kind](pos, nodeIds);
+        if (align && nodeId !== undefined) {
+            const alignedCoord = nodeSnappers[kind](
+                pos,
+                nodeId,
+                graph.value.selectedNodes.map((node: { id: string }) => node.id));
             if (alignedCoord !== undefined) {
                 return alignedCoord;
             }

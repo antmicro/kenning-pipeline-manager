@@ -29,10 +29,13 @@ export function gridSnapper(movementStep: Ref<number>) {
 export function nodeSnapper(kind: 'x' | 'y') {
     const { graph } = useGraph();
     const snapDistance = 100;
-    const calculateSnappedPosition = (coord: number, nodeIds: string) => {
+    const calculateSnappedPosition = (
+        coord: number,
+        nodeId: string,
+        selectedNodesIds: Array<string>) => {
         const nearestCoords = graph.value.nodes
             // any definition is an ad-hoc solution as we don't have our node definition
-            .filter((node: any) => !nodeIds.includes(node.id))
+            .filter((node: any) => node.id !== nodeId && !selectedNodesIds.includes(node.id))
             .map((node: any) => node.position[kind])
             .filter((otherCoords) => Math.abs(coord - otherCoords) < snapDistance);
         return nearestCoords.length !== 0 ? Math.min(...nearestCoords) : undefined;
