@@ -1,5 +1,5 @@
 {
-    "version": "20230830.10",
+    "version": "20230830.11",
     "graph": {
         "name": "Subgraph usage example",
         "entryGraph": "9c4d5349-9d3b-401f-86bb-021b7b3e5b81"
