@@ -215,6 +215,18 @@
                 {"name": "kernel", "type": "BinaryImage", "direction": "input"},
                 {"name": "output", "type": "BinaryImage", "direction": "output"}
             ]
+        },
+        {
+            "name": "RemoveColor",
+            "layer": "processing",
+            "category": "Processing",
+            "properties": [
+                {"name": "color", "type": "hex", "default": "0xFFFFFF"}
+            ],
+            "interfaces": [
+                {"name": "input", "type": "BinaryImage", "direction": "input"},
+                {"name": "output", "type": "BinaryImage", "direction": "output"}
+            ]
         }
     ],
     "metadata": {
