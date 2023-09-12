@@ -15,6 +15,7 @@ SPDX-License-Identifier: Apache-2.0
             :placeholder="intf.name"
             :title="intf.name"
             @keypress="handleRestrictedKeys"
+            @blur="handleBlur"
         />
     </div>
 </template>
@@ -22,8 +23,9 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { computed, defineComponent, ref } from 'vue';
 
-const restrictedKeys = /[^a-f0-9x]/i;
+const restrictedKeys = /[^a-f0-9]/i;
 const hexScheme = /^0x[a-fA-F0-9]+$/;
+const swapPrefix = /^((.*)0)?((.*)x)?/;
 
 export default defineComponent({
     props: {
@@ -48,14 +50,39 @@ export default defineComponent({
         const v = computed({
             get: () => props.modelValue,
             set: (val) => {
-                emit('update:modelValue', val);
+                let validatedVal;
+                let cursorPosition;
+                if (!val.startsWith('0x') && swapPrefix.test(val)) {
+                    const match = val.match(swapPrefix);
+                    validatedVal = val.replace(swapPrefix, '0x$2$4');
+                    const additionalLenght = ((match[2] ?? '').length) + ((match[4] ?? '').length);
+                    cursorPosition = 2;
+                    if (additionalLenght > 0) cursorPosition += additionalLenght;
+                    else if (props.modelValue.length > validatedVal.length
+                            || props.modelValue === '') {
+                        cursorPosition += 1;
+                    }
+                } else {
+                    validatedVal = val;
+                }
+                if (validatedVal === '0x') {
+                    validatedVal = '';
+                }
+                emit('update:modelValue', validatedVal);
                 el.value.value = props.intf.value;
+                if (cursorPosition !== undefined) {
+                    el.value.setSelectionRange(cursorPosition, cursorPosition);
+                }
             },
         });
         const invalid = computed(() => !hexScheme.test(props.intf.value));
 
+        const handleBlur = () => {
+            emit('update:modelValue', props.modelValue.toLowerCase());
+        };
+
         return {
-            v, el, handleRestrictedKeys, invalid,
+            v, el, handleRestrictedKeys, handleBlur, invalid,
         };
     },
 });
