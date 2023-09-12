@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+/* eslint-disable max-classes-per-file */
 import {
     reactive, Ref, ref, watch,
 } from 'vue';
@@ -39,14 +40,118 @@ export class Step {
         this.topic = topic;
         this.transactionId = tid;
     }
-}
-export function suppressHistoryLogging(value: boolean) {
-    suppressingHistory.value = value;
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    add(graph: Ref<Graph>) {
+        throw new Error(`Method add has thrown an error for topic: ${this.topic}`);
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    remove(graph: Ref<Graph>) {
+        throw new Error(`Method remove has thrown an error for topic: ${this.topic}`);
+    }
 }
 
-function createStep(key: string, value: string, id: string) {
-    if (id !== '') return new Step(key, value, id);
-    return new Step(key, value);
+class NodeStep extends Step {
+    nodeTuple: Array<any> = [];
+
+    constructor(type: string, topic: any, tid: string = uuidv4()) {
+        if (tid === '') tid = uuidv4(); // eslint-disable-line no-param-reassign
+        super(type, topic, tid);
+    }
+
+    add(graph: Ref<Graph>) {
+        if (this.nodeTuple[0] !== undefined) {
+            const n = graph.value.addNode(this.nodeTuple[0]);
+            if (this.nodeTuple.length <= 2) n.load(this.nodeTuple[1]);
+            else {
+                // eslint-disable-next-line prefer-destructuring
+                this.nodeTuple[1].graphState = this.nodeTuple[2];
+                n.load(this.nodeTuple[1]);
+                n.subgraph.load(this.nodeTuple[2]);
+                const ifaceOrPositionErrors = applySidePositions(
+                    Object.fromEntries(this.nodeTuple[2].inputs.map(
+                        (intf: any) => [intf.subgraphNodeId, intf]),
+                    ),
+                    Object.fromEntries(this.nodeTuple[2].outputs.map(
+                        (intf: any) => [intf.subgraphNodeId, intf]),
+                    ),
+                );
+                if (Array.isArray(ifaceOrPositionErrors)) {
+                    throw new Error(
+                        `Internal error occured while processing history stacks. ` +
+                        `Reason: ${ifaceOrPositionErrors.join('. ')}`,
+                    );
+                }
+                n.updateInterfaces(
+                    ifaceOrPositionErrors.inputs,
+                    ifaceOrPositionErrors.outputs,
+                );
+            }
+        }
+    }
+
+    remove(graph: Ref<Graph>) {
+        const node = graph.value.nodes.find((n) => n.id === this.topic);
+        if (node !== undefined) {
+            graph.value.removeNode(node);
+        }
+    }
+}
+
+class ConnectionStep extends Step {
+    conn: any = undefined;
+
+    constructor(type: string, topic: any, tid: string = uuidv4()) {
+        if (tid === '') tid = uuidv4(); // eslint-disable-line no-param-reassign
+        super(type, topic, tid);
+    }
+
+    add(graph: Ref<Graph>) {
+        if (this.conn !== undefined) {
+            // The object of the interfaces itself has changed and despite
+            // having all the same fields, it will not assign the connection
+            // correctly. That's why it is necessary to extract the nodeId
+            // from what we have and find the interface in said node manually
+
+            const fromNode = graph.value.findNodeById(this.conn.from.nodeId);
+            const toNode = graph.value.findNodeById(this.conn.to.nodeId);
+            if (!fromNode || !toNode) return;
+
+            const from = [
+                ...Object.values(fromNode.inputs),
+                ...Object.values(fromNode.outputs),
+            ].filter(
+                (iface) => iface.port,
+            ).find((iface) => iface.id === this.conn.from.id);
+
+            const to = [
+                ...Object.values(toNode.inputs),
+                ...Object.values(toNode.outputs),
+            ].filter(
+                (iface) => iface.port,
+            ).find((iface) => iface.id === this.conn.to.id);
+
+            if (!from || !to) return;
+
+            const connAdded = graph.value.addConnection(from, to);
+            if (connAdded === undefined) {
+                return;
+            }
+            connAdded.id = this.conn.id;
+        }
+    }
+
+    remove(graph: Ref<Graph>) {
+        const conn = graph.value.connections.find((n) => n.id === this.topic);
+        if (conn !== undefined) {
+            graph.value.removeConnection(conn);
+        }
+    }
+}
+
+export function suppressHistoryLogging(value: boolean) {
+    suppressingHistory.value = value;
 }
 
 export function startTransaction(id: string = uuidv4()) {
@@ -64,7 +169,6 @@ export function useHistory(graph: Ref<Graph>, commandHandler: ICommandHandler): 
     const maxSteps = 200;
     const history: Map<string, Step[]> = new Map<string, Step[]>();
     const undoneHistory: Map<string, Step[]> = new Map<string, Step[]>();
-    const removedObjectsMap : Map<string, any> = new Map<string, any>();
     let currentId = 'ThisShouldNotAppearInHistoryMaps';
     let oldId = 'ThisShouldNotAppearInHistoryMaps';
 
@@ -94,32 +198,39 @@ export function useHistory(graph: Ref<Graph>, commandHandler: ICommandHandler): 
                 if (!suppressingHistory.value) {
                     const historyItem = history.get(newGraph.id);
                     if (!historyItem) return;
-                    historyItem.push(createStep('add', `node::${node.id.toString()}`, transactionId.value));
+                    historyItem.push(new NodeStep('add', node.id.toString(), transactionId.value));
                 }
             });
             newGraph.events.removeNode.subscribe(token, (node : any) => {
                 if (!suppressingHistory.value) {
                     const historyItem = history.get(newGraph.id);
                     if (!historyItem) return;
-                    historyItem.push(createStep('rem', `node::${node.id.toString()}`, transactionId.value));
+                    const step = new NodeStep('rem', node.id.toString(), transactionId.value);
+                    historyItem.push(step);
+                    if (node.subgraph !== undefined) {
+                        step.nodeTuple = [
+                            node,
+                            node.save(),
+                            node.subgraph.save(),
+                        ];
+                    } else step.nodeTuple = [node, node.save()];
                 }
-                if (node.subgraph !== undefined) removedObjectsMap.set(`node::${node.id.toString()}`, [node, node.save(), node.subgraph.save()]);
-                else { removedObjectsMap.set(`node::${node.id.toString()}`, [node, node.save()]); }
             });
             newGraph.events.addConnection.subscribe(token, (conn : any) => {
                 if (!suppressingHistory.value) {
                     const historyItem = history.get(newGraph.id);
                     if (!historyItem) return;
-                    historyItem.push(createStep('add', `conn::${conn.id.toString()}`, transactionId.value));
+                    historyItem.push(new ConnectionStep('add', conn.id.toString(), transactionId.value));
                 }
             });
             newGraph.events.removeConnection.subscribe(token, (conn : any) => {
                 if (!suppressingHistory.value) {
                     const historyItem = history.get(newGraph.id);
                     if (!historyItem) return;
-                    historyItem.push(createStep('rem', `conn::${conn.id.toString()}`, transactionId.value));
+                    const step = new ConnectionStep('rem', conn.id.toString(), transactionId.value);
+                    historyItem.push(step);
+                    step.conn = conn;
                 }
-                removedObjectsMap.set(`conn::${conn.id.toString()}`, conn);
             });
         }
     };
@@ -127,107 +238,20 @@ export function useHistory(graph: Ref<Graph>, commandHandler: ICommandHandler): 
     watch(graph, (newGraph, oldGraph) => graphSwitch(newGraph, oldGraph), { flush: 'post' },
     );
     const singleStepTransaction = (mainHistory: Step[], auxiliaryHistory:Step[]) => {
-        const foo : Step | undefined = mainHistory.pop();
-        if (foo === undefined) return;
+        const step : Step | undefined = mainHistory.pop();
+        if (step === undefined) return;
         suppressingHistory.value = true;
-        if (foo.type === 'add') {
-            foo.type = 'rem';
-            if (foo.topic.startsWith('node')) {
-                const node = graph.value.nodes.find((n) => n.id === foo.topic.slice(6));
-                if (node !== undefined) {
-                    graph.value.removeNode(node);
-                }
-            } else if (foo.topic.startsWith('conn')) {
-                const conn = graph.value.connections.find((n) => n.id === foo.topic.slice(6));
-                if (conn !== undefined) {
-                    graph.value.removeConnection(conn);
-                }
-            } else if (foo.topic.startsWith('load')) {
-                removedObjectsMap.set(`load::${graph.value.id.toString()}`, graph.value.save());
-                for (let i = graph.value.connections.length - 1; i >= 0; i -= 1) {
-                    graph.value.removeConnection(graph.value.connections[i]);
-                }
-                for (let i = graph.value.nodes.length - 1; i >= 0; i -= 1) {
-                    graph.value.removeNode(graph.value.nodes[i]);
-                }
-            }
-        } else if (foo.type === 'rem') {
-            foo.type = 'add';
-            if (foo.topic.startsWith('node')) {
-                const nodeTuple = removedObjectsMap.get(foo.topic);
-                if (nodeTuple[0] !== undefined) {
-                    const n = graph.value.addNode(nodeTuple[0]);
-                    if (nodeTuple.length <= 2) n.load(nodeTuple[1]);
-                    else {
-                        // eslint-disable-next-line prefer-destructuring
-                        nodeTuple[1].graphState = nodeTuple[2];
-                        n.load(nodeTuple[1]);
-                        n.subgraph.load(nodeTuple[2]);
-                        const ifaceOrPositionErrors = applySidePositions(
-                            Object.fromEntries(nodeTuple[2].inputs.map(
-                                (intf: any) => [intf.subgraphNodeId, intf]),
-                            ),
-                            Object.fromEntries(nodeTuple[2].outputs.map(
-                                (intf: any) => [intf.subgraphNodeId, intf]),
-                            ),
-                        );
-                        if (Array.isArray(ifaceOrPositionErrors)) {
-                            throw new Error(
-                                `Internal error occured while processing history stacks. ` +
-                                `Reason: ${ifaceOrPositionErrors.join('. ')}`,
-                            );
-                        }
-                        n.updateInterfaces(
-                            ifaceOrPositionErrors.inputs,
-                            ifaceOrPositionErrors.outputs,
-                        );
-                    }
-                }
-            } else if (foo.topic.startsWith('conn')) {
-                const conn = removedObjectsMap.get(foo.topic);
-                if (conn !== undefined) {
-                    // The object of the interfaces itself has changed and despite
-                    // having all the same fields, it will not assign the connection
-                    // correctly. That's why it is necessary to extract the nodeId
-                    // from what we have and find the interface in said node manually
-
-                    const fromNode = graph.value.findNodeById(conn.from.nodeId);
-                    const toNode = graph.value.findNodeById(conn.to.nodeId);
-                    if (!fromNode || !toNode) return;
-
-                    const from = [
-                        ...Object.values(fromNode.inputs),
-                        ...Object.values(fromNode.outputs),
-                    ].filter(
-                        (iface) => iface.port,
-                    ).find((iface) => iface.id === conn.from.id);
-
-                    const to = [
-                        ...Object.values(toNode.inputs),
-                        ...Object.values(toNode.outputs),
-                    ].filter(
-                        (iface) => iface.port,
-                    ).find((iface) => iface.id === conn.to.id);
-
-                    if (!from || !to) return;
-
-                    const connAdded = graph.value.addConnection(from, to);
-                    if (connAdded === undefined) {
-                        return;
-                    }
-                    connAdded.id = conn.id;
-                }
-            } else if (foo.topic.startsWith('load')) {
-                const conn = removedObjectsMap.get(foo.topic);
-                if (conn !== undefined) {
-                    graph.value.load(conn);
-                }
-            }
+        if (step.type === 'add') {
+            step.type = 'rem';
+            step.remove(graph);
+        } else if (step.type === 'rem') {
+            step.type = 'add';
+            step.add(graph);
         }
-        auxiliaryHistory.push(foo);
+        auxiliaryHistory.push(step);
         if (
             mainHistory.length > 0 &&
-            mainHistory[mainHistory.length - 1].transactionId === foo.transactionId
+            mainHistory[mainHistory.length - 1].transactionId === step.transactionId
         ) singleStepTransaction(mainHistory, auxiliaryHistory);
         suppressingHistory.value = false;
     };
@@ -236,19 +260,7 @@ export function useHistory(graph: Ref<Graph>, commandHandler: ICommandHandler): 
         canExecute: () => true,
         execute: () => {
             const historyItem = history.get(currentId);
-            if (historyItem && historyItem.length === 0 && (graph.value.nodes.length > 0)) {
-                suppressHistoryLogging(true);
-                removedObjectsMap.set(`load::${graph.value.id.toString()}`, graph.value.save());
-                for (let i = graph.value.connections.length - 1; i >= 0; i -= 1) {
-                    graph.value.removeConnection(graph.value.connections[i]);
-                }
-                for (let i = graph.value.nodes.length - 1; i >= 0; i -= 1) {
-                    graph.value.removeNode(graph.value.nodes[i]);
-                }
-                suppressHistoryLogging(false);
-                const undoneItem = undoneHistory.get(currentId);
-                if (undoneItem) undoneItem.push(new Step('rem', `load::${graph.value.id.toString()}`));
-            } else {
+            if (historyItem && historyItem.length !== 0) {
                 const undoneItem = undoneHistory.get(currentId);
                 if (historyItem && undoneItem) singleStepTransaction(historyItem, undoneItem);
             }
