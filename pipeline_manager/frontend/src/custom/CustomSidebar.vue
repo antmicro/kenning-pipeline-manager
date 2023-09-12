@@ -109,6 +109,7 @@ import Cross from '../icons/Cross.vue';
 import Tooltip from '../components/Tooltip.vue';
 
 import { validateInterfaceGroupsNames } from '../core/interfaceParser';
+import getOptionName from './CustomNode.js';
 
 export default defineComponent({
     components: {
@@ -180,23 +181,6 @@ export default defineComponent({
             intf.group.forEach((name) => {
                 node.value.inputs[name].hidden = intf.value;
             });
-        };
-
-        const getOptionName = (optionType) => {
-            switch (optionType) {
-                case 'InputInterface':
-                case 'SelectInterface':
-                case 'ListInterface':
-                case 'TextInterface':
-                    return true;
-                case 'NumberInterface':
-                case 'IntegerInterface':
-                case 'CheckboxInterface':
-                case 'SliderInterface':
-                case 'NodeInterface':
-                default:
-                    return false;
-            }
         };
 
         const onPointerLeave = () => {

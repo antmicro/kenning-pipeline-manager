@@ -138,6 +138,7 @@ import Bin from '../icons/Bin.vue';
 import Disconnect from '../icons/Disconnect.vue';
 import Sidebar from '../icons/Sidebar.vue';
 import doubleClick from '../core/doubleClick.js';
+import getOptionName from './CustomNode.js';
 import {
     startTransaction, commitTransaction,
 } from '../core/History.ts';
@@ -345,31 +346,6 @@ onMounted(onRender);
 onUpdated(onRender);
 
 // ----------
-
-/**
- * The function decides whether a name for the option should be displayed.
- *
- * @param optionType Name of the option component
- * @returns True if the name should be displayed, false otherwise.
- */
-
-const getOptionName = (optionType) => {
-    switch (optionType) {
-        case 'InputInterface':
-        case 'SelectInterface':
-        case 'ListInterface':
-        case 'TextInterface':
-        case 'HexInterface':
-            return true;
-        case 'NumberInterface':
-        case 'IntegerInterface':
-        case 'CheckboxInterface':
-        case 'SliderInterface':
-        case 'NodeInterface':
-        default:
-            return false;
-    }
-};
 
 /**
  * Wrapper that prevents node moving if the editor is in read-only mode.
