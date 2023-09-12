@@ -69,6 +69,7 @@ export default function CreateCustomGraphNodeType(template, type) {
         }
 
         load(state) {
+            this.hooks.beforeLoad.execute(state);
             const out = parseInterfaces(state.interfaces, [], [], true);
             if (Array.isArray(out) && out.length) {
                 return out;

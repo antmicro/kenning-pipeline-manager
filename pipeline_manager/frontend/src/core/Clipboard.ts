@@ -26,6 +26,12 @@ import {
 import {
     startTransaction, commitTransaction,
 } from './History.ts';
+import {
+    SUBGRAPH_INPUT_NODE_TYPE,
+    SUBGRAPH_OUTPUT_NODE_TYPE,
+    SUBGRAPH_INOUT_NODE_TYPE,
+} from '../custom/subgraphInterface.js';
+import { applySidePositions } from './interfaceParser.js';
 
 export const COPY_COMMAND = 'COPY';
 export const DELETE_COMMAND = 'DELETE';
@@ -36,6 +42,7 @@ export const CLEAR_CLIPBOARD_COMMAND = 'CLEAR_CLIPBOARD';
 /* eslint-disable  @typescript-eslint/no-explicit-any */
 interface PMNodeState extends INodeState<any, any> {
     name: string;
+    graphState: any;
 }
 
 export interface IClipboard {
@@ -77,7 +84,14 @@ export function useClipboard(
 
         connectionBuffer.value = JSON.stringify(connections);
         nodeBuffer.value = JSON.stringify(displayedGraph.value.selectedNodes.map(
-            (n : any) => n.save()),
+            (n : any) => {
+                const state = n.save();
+                if (n.subgraph !== undefined) {
+                    state.graphState = n.subgraph.save();
+                    state.graphState.id = uuidv4();
+                }
+                return state;
+            }),
         );
 
         consecutivePasteNumber.value = 0;
@@ -157,7 +171,6 @@ export function useClipboard(
 
             tapInterfaces(copiedNode.inputs);
             tapInterfaces(copiedNode.outputs);
-
             copiedNode.hooks.beforeLoad.subscribe(token, (nodeState) => {
                 const ns = nodeState as any;
                 if (ns.position) {
@@ -166,6 +179,12 @@ export function useClipboard(
                     ns.position.x += consecutivePasteNumber.value * Math.max(40, movementStep);
                     ns.position.y += consecutivePasteNumber.value * Math.max(40, movementStep);
                 }
+                if (parsedNodeBuffer[i].graphState !== undefined) {
+                    parsedNodeBuffer[i].graphState.nodes.forEach((n: any) => {
+                        /* eslint-disable-next-line no-param-reassign */
+                        if (n.type !== undefined) n.name = n.type;
+                    });
+                }
                 copiedNode.hooks.beforeLoad.unsubscribe(token);
                 return ns;
             });
@@ -173,6 +192,47 @@ export function useClipboard(
             copiedNode = graph.addNode(copiedNode);
             parsedNodeBuffer[i].id = generatedId;
             copiedNode.load(parsedNodeBuffer[i]);
+
+            // Interfaces need a refresh and their positions need to be updated.
+            // The loads also have duplicated the i/o subgraph nodes,
+            // so a filter is applied
+            if (parsedNodeBuffer[i].graphState !== undefined) {
+                const node = (<any>copiedNode);
+                const ifaceOrPositionErrors = applySidePositions(
+                    Object.fromEntries(parsedNodeBuffer[i].graphState.inputs.map(
+                        (intf: any) => [intf.subgraphNodeId, intf]),
+                    ),
+                    Object.fromEntries(parsedNodeBuffer[i].graphState.outputs.map(
+                        (intf: any) => [intf.subgraphNodeId, intf]),
+                    ),
+                );
+                if (Array.isArray(ifaceOrPositionErrors)) {
+                    throw new Error(
+                        `Internal error occured while processing the pasted node. ` +
+                        `Reason: ${ifaceOrPositionErrors.join('. ')}`,
+                    );
+                }
+                const ifaces = [
+                    ...Object.values((<any>ifaceOrPositionErrors).inputs),
+                    ...Object.values((<any>ifaceOrPositionErrors).outputs),
+                ];
+                const subgraphTypes = [
+                    SUBGRAPH_INPUT_NODE_TYPE,
+                    SUBGRAPH_OUTPUT_NODE_TYPE,
+                    SUBGRAPH_INOUT_NODE_TYPE,
+                ];
+                // eslint-disable-next-line no-underscore-dangle
+                node.subgraph._nodes = node.subgraph._nodes.filter(
+                    (n: any) => (subgraphTypes.includes(n.type) &&
+                        ifaces.find(
+                            (iface: any) => iface.id === n.graphInterfaceId) !== undefined
+                    ) || !subgraphTypes.includes(n.type),
+                );
+                node.updateInterfaces(
+                    (<any>ifaceOrPositionErrors).inputs,
+                    (<any>ifaceOrPositionErrors).outputs,
+                );
+            }
             idmap.set(parsedNodeBuffer[i].id, generatedId);
         }
 
