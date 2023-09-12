@@ -8,9 +8,6 @@ from importlib.resources import files
 from pathlib import Path
 
 import pytest
-from jsonschema import Draft202012Validator
-from referencing import Registry
-from referencing.jsonschema import DRAFT202012
 
 import examples
 from pipeline_manager.resources import schemas
@@ -155,40 +152,6 @@ def specification_schema_path() -> Path:
     """
     path = files(schemas).joinpath("specification_schema.json")  # noqa: E501
     return Path(path)
-
-
-@pytest.fixture
-def specification_validator(
-    specification_schema_path, metadata_schema, unresolved_specification_schema
-) -> dict:
-    """
-    Fixture that reads specification jsonschema that is stored
-    in `specification_schema_path`.
-
-    Returns
-    ------
-    dict :
-        Sample specification, resolver
-    """
-    registry = Registry().with_resources(
-        [
-            ("metadata_schema", DRAFT202012.create_resource(metadata_schema)),
-            (
-                "unresolved_specification_schema",
-                DRAFT202012.create_resource(unresolved_specification_schema),
-            ),
-        ]
-    )
-
-    with open(specification_schema_path, "r") as f:
-        specification_schema = json.load(f)
-
-    validator = Draft202012Validator(
-        specification_schema,
-        registry=registry,
-    )
-
-    return validator
 
 
 @pytest.fixture

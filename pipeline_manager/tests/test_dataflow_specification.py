@@ -2,8 +2,20 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-import jsonschema
+import json
 import pytest
+import tempfile
+from pipeline_manager.validator import validate
+from pathlib import Path
+
+
+def check_validation(spec):
+    with tempfile.TemporaryDirectory() as tmpdir:
+        specpath = Path(tmpdir) / 'spec.json'
+        with open(specpath, 'w') as specfile:
+            json.dump(spec, specfile)
+        res = validate(specpath)
+    return res
 
 
 @pytest.fixture
@@ -75,8 +87,8 @@ def specification_invalid_nodes_without_name():
     }
 
 
-def test_example_specification(sample_specification, specification_validator):
-    specification_validator.validate(sample_specification)
+def test_example_specification(sample_specification):
+    assert check_validation(sample_specification) == 0
 
 
 @pytest.mark.parametrize(
@@ -89,14 +101,11 @@ def test_example_specification(sample_specification, specification_validator):
 )
 def test_invalid_specification(
         invalid_specification,
-        specification_validator,
         request):
     invalid_specification = request.getfixturevalue(invalid_specification)
-    with pytest.raises(jsonschema.ValidationError):
-        specification_validator.validate(invalid_specification)
+    assert check_validation(invalid_specification) == 1
 
 
-def test_example_specification_without_nodes(sample_specification, specification_validator):  # noqa: E501
+def test_example_specification_without_nodes(sample_specification):  # noqa: E501
     del sample_specification['nodes']
-    with pytest.raises(jsonschema.ValidationError):
-        specification_validator.validate(sample_specification)
+    assert check_validation(sample_specification) == 1
