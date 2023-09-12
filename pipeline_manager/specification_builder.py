@@ -894,7 +894,8 @@ class SpecificationBuilder(object):
     def create_and_validate_spec(
             self,
             workspacedir: Optional[Path] = None,
-            fail_on_warnings: bool = True):
+            fail_on_warnings: bool = True,
+            dump_spec: Optional[Path] = None):
         """
         Creates a specification and validates it using schema.
 
@@ -904,6 +905,9 @@ class SpecificationBuilder(object):
             Path to the workspace directory for Pipeline Manager
         fail_on_warnings: bool
             Tells if the specification creation should fail on warnings
+        dump_spec: Optional[Path]
+            Tells where the specification should be dumped to file
+            before validation for debugging purposes.
         """
         import tempfile
         spec = self._construct_specification()
@@ -915,6 +919,9 @@ class SpecificationBuilder(object):
             specpath = Path(tmpdir) / 'spec.json'
             with open(Path(tmpdir) / 'spec.json', 'w') as spec_file:
                 json.dump(spec, spec_file, indent=4)
+            if dump_spec:
+                with open(dump_spec, 'w') as spec_file:
+                    json.dump(spec, spec_file, indent=4)
             res = validate(
                 specification_path=specpath,
                 workspace_directory=workspacedir
