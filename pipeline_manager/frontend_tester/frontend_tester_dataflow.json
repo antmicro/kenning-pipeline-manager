@@ -4,7 +4,7 @@
         "id": "0c66bbb2-c86b-4209-93aa-44742330680e",
         "nodes": [
             {
-                "type": "RunBehaviour",
+                "name": "RunBehaviour",
                 "id": "f7217c8a-c40f-46bd-aa9c-751dc154b570",
                 "position": {
                     "x": 774,
@@ -39,7 +39,6 @@
                         "value": "Everything went fine!"
                     }
                 ],
-                "name": "RunBehaviour",
                 "interfaces": [
                     {
                         "name": "Effect",
@@ -49,7 +48,7 @@
                 ]
             },
             {
-                "type": "Disconnect",
+                "name": "Disconnect",
                 "id": "01cee371-2ae6-4015-ae7e-a515d3f92e1a",
                 "position": {
                     "x": 1469,
@@ -69,7 +68,6 @@
                         "value": false
                     }
                 ],
-                "name": "Disconnect",
                 "interfaces": [
                     {
                         "name": "Effect",
@@ -93,6 +91,5 @@
             "y": -2
         },
         "scaling": 1
-    },
-    "subgraphs": []
+    }
 }

@@ -8,7 +8,6 @@
     "nodes": [
         {
             "name": "RunBehaviour",
-            "type": "RunBehaviour",
             "category": "Descriptions",
             "properties": [
                 {
@@ -50,7 +49,6 @@
         },
         {
             "name": "ValidationBehaviour",
-            "type": "ValidationBehaviour",
             "category": "Descriptions",
             "properties": [
                 {
@@ -87,7 +85,6 @@
         },
         {
             "name": "ExportBehaviour",
-            "type": "ExportBehaviour",
             "category": "Descriptions",
             "properties": [
                 {
@@ -118,7 +115,6 @@
         },
         {
             "name": "Disconnect",
-            "type": "Disconnect",
             "category": "Effects",
             "properties": [
                 {
