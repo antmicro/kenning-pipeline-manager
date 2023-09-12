@@ -1,7 +1,7 @@
 {
     "version": "20230830.11",
     "$id": "unresolved_specification_schema",
-    "description": "Schema used to validate specification that hasn't resovled inheritance",
+    "description": "Schema used to validate specification that hasn't resolved inheritance",
     "type": "object",
     "properties": {
         "version": {
@@ -20,6 +20,11 @@
                     "name": {
                         "description": "Name displayed in a node",
                         "type": "string"
+                    },
+                    "abstract": {
+                        "description": "Tells if the given node type is abstract or not",
+                        "type": "boolean",
+                        "default": false
                     },
                     "layer": {
                         "description": "Layer that defines styling of a node",
