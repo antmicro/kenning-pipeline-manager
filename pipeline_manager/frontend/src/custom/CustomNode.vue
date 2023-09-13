@@ -135,6 +135,7 @@ import CustomContextMenu from './ContextMenu.vue';
 import { gridSnapper } from '../core/snappers';
 import Pencil from '../icons/Pencil.vue';
 import Bin from '../icons/Bin.vue';
+import Disconnect from '../icons/Disconnect.vue';
 import Sidebar from '../icons/Sidebar.vue';
 import doubleClick from '../core/doubleClick.js';
 import {
@@ -196,7 +197,7 @@ const contextMenuTitleItems = computed(() => {
         items.push(
             { value: 'rename', label: 'Rename', icon: Pencil },
             { value: 'delete', label: 'Delete', icon: Bin },
-            { value: 'disconnect', label: 'Disconnect' },
+            { value: 'disconnect', label: 'Disconnect', icon: Disconnect },
         );
     }
 
