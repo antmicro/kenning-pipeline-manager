@@ -351,7 +351,7 @@ export default class EditorManager {
 
         // Helper function that applies base node properties to the child node
         const mergeNodes = (child, base) => {
-            const output = { ...base };
+            const output = { ...structuredClone(base) };
             if (isObject(child) && isObject(base)) {
                 Object.keys(child).forEach((key) => {
                     if (isObject(child[key])) {
@@ -364,7 +364,24 @@ export default class EditorManager {
                         if (key === 'extends') {
                             output[key] = child[key];
                         } else {
-                            output[key] = [...base[key], ...child[key]];
+                            const baseNames = Object.fromEntries(
+                                base[key].map((obj, i) => [obj.name, i]),
+                            );
+                            child[key].forEach((obj) => {
+                                if (obj.name && obj.name in baseNames) {
+                                    const index = baseNames[obj.name];
+                                    if (obj.override) {
+                                        output[key][index] = {
+                                            ...base[key][index],
+                                            ...obj,
+                                        };
+                                    } else {
+                                        throw new Error(`'${child.name}' node cannot override '${obj.name}' property of '${base.name}' node`);
+                                    }
+                                } else {
+                                    output[key].push(obj);
+                                }
+                            });
                         }
                     } else if (key !== 'abstract') {
                         output[key] = child[key];
