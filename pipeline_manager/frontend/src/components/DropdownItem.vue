@@ -44,8 +44,8 @@ div {
     display: flex;
     justify-content: space-between;
     min-width: 10em;
+    height: 2.5em;
     flex-direction: row;
-    padding: $spacing-s $spacing-s;
     align-items: center;
 
     & > input[type='button'],
@@ -53,6 +53,8 @@ div {
         width: 100%;
         font-size: $fs-small;
         color: $white;
+        padding: 0 0.9375em;
+        line-height: 2.5rem;
         background-color: unset;
         border: unset;
         cursor: pointer;
