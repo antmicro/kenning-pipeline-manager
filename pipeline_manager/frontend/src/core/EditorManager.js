@@ -183,8 +183,10 @@ export default class EditorManager {
 
         errors = [];
         resolvedNodes.forEach((node) => {
+            const name = node.isCategory ? node.category : node.name;
+
             const myNode = NodeFactory(
-                node.name,
+                name,
                 node.layer,
                 node.interfaces ?? [],
                 node.properties ?? [],
@@ -201,25 +203,26 @@ export default class EditorManager {
             }
 
             this.baklavaView.editor.registerNodeType(myNode, {
-                title: node.name,
+                title: name,
                 category: node.category,
+                isCategory: node.isCategory ?? false,
             });
             if ('icon' in node) {
                 if (typeof node.icon === 'string') {
-                    this.baklavaView.editor.nodeIcons.set(node.name, node.icon);
+                    this.baklavaView.editor.nodeIcons.set(name, node.icon);
                 } else {
                     const baseName = Object.keys(node.icon)[0];
                     const suffix = Object.values(node.icon)[0];
                     const baseUrl = this.baklavaView.editor.baseIconUrls.get(baseName);
-                    this.baklavaView.editor.nodeIcons.set(node.name, `${baseUrl}/${suffix}`);
+                    this.baklavaView.editor.nodeIcons.set(name, `${baseUrl}/${suffix}`);
                 }
             }
             if ('urls' in node) {
                 Object.entries(node.urls).forEach(([urlName, url]) => {
-                    if (!this.baklavaView.editor.nodeURLs.has(node.name)) {
-                        this.baklavaView.editor.nodeURLs.set(node.name, {});
+                    if (!this.baklavaView.editor.nodeURLs.has(name)) {
+                        this.baklavaView.editor.nodeURLs.set(name, {});
                     }
-                    this.baklavaView.editor.nodeURLs.get(node.name)[urlName] = url;
+                    this.baklavaView.editor.nodeURLs.get(name)[urlName] = url;
                 });
             }
         });

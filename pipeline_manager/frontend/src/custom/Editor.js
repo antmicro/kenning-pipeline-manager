@@ -161,6 +161,20 @@ export default class PipelineManagerEditor extends Editor {
         });
     }
 
+    registerNodeType(type, options) {
+        if (this.events.beforeRegisterNodeType.emit({ type, options }).prevented) {
+            return;
+        }
+        const nodeInstance = new type(); // eslint-disable-line new-cap
+        this._nodeTypes.set(nodeInstance.type, {
+            type,
+            category: options?.category ?? 'default',
+            title: options?.title ?? nodeInstance.title,
+            isCategory: options?.isCategory ?? false,
+        });
+        this.events.registerNodeType.emit({ type, options });
+    }
+
     async load(state) {
         // All subgraphs should be unregistered to avoid conflicts later when trying to
         // load into subgraph (in that case there may be two subgraphs with the same ID, one
