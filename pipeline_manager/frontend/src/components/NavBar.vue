@@ -64,6 +64,18 @@ export default {
         hideHud() {
             return this.editorManager.baklavaView.hideHud;
         },
+        settingsOpen() {
+            return this.panels.settings.isOpen;
+        },
+        notificationsOpen() {
+            return this.panels.notifications.isOpen;
+        },
+        paletteOpen() {
+            return this.panels.palette.isOpen;
+        },
+        backendStatusOpen() {
+            return this.panels.backendStatus.isOpen;
+        },
     },
     watch: {
         dataflowGraphName(newValue) {
@@ -411,7 +423,6 @@ export default {
             <div>
                 <div class="logo">
                     <Logo />
-                    <Arrow color="white" rotate="left" scale="small" />
                     <div class="dropdown-wrapper">
                         <DropdownItem
                             v-if="!this.externalApplicationManager.backendAvailable && !hideHud"
@@ -464,7 +475,7 @@ export default {
 
                 <div ref="palette" class="open" v-if="!hideHud">
                     <button @click="() => togglePanel(panels.palette)">
-                        <Cube />
+                        <Cube :active="paletteOpen" />
                     </button>
                     <div class="tooltip">
                         <span>Nodes</span>
@@ -472,14 +483,17 @@ export default {
                 </div>
 
                 <div v-if="this.externalApplicationManager.backendAvailable">
-                    <button @click="() => requestDataflowAction('run')"><Run /></button>
+                    <button
+                        @click="() => requestDataflowAction('run')">
+                        <Run color="white" />
+                    </button>
                     <div class="tooltip">
                         <span>Run</span>
                     </div>
                 </div>
                 <div v-if="this.externalApplicationManager.backendAvailable">
                     <button @click="() => requestDataflowAction('validate')">
-                        <Validate />
+                        <Validate color="white" />
                     </button>
                     <div class="tooltip">
                         <span>Validate</span>
@@ -487,7 +501,7 @@ export default {
                 </div>
                 <div v-if="this.editorManager.editor.isInSubgraph()">
                     <button @click="() => this.editorManager.returnFromSubgraph()">
-                        <Arrow rotate="down" :hoverable="true" />
+                        <Arrow rotate="down" hoverable="true" color="white" />
                     </button>
                     <div class="tooltip">
                         <span>Return from subgraph editor</span>
@@ -511,7 +525,7 @@ export default {
             <div>
                 <div ref="settings">
                     <button @click="() => togglePanel(panels.settings)">
-                        <Cogwheel />
+                        <Cogwheel :active="settingsOpen" />
                     </button>
                     <div class="tooltip">
                         <span>Settings</span>
@@ -522,8 +536,9 @@ export default {
                         <Backend
                             v-if="this.externalApplicationManager.externalApplicationConnected"
                             color="connected"
+                            :active="backendStatusOpen"
                         />
-                        <Backend v-else color="disconnected" />
+                        <Backend v-else color="disconnected" :active="backendStatusOpen" />
                     </button>
                     <div class="tooltip">
                         <span>Backend status</span>
@@ -548,8 +563,9 @@ export default {
                         <Bell
                             v-if="this.notificationStore.notifications.length > 0"
                             color="green"
+                            :active="notificationsOpen"
                         />
-                        <Bell v-else />
+                        <Bell v-else :active="notificationsOpen" />
                     </button>
                     <div class="tooltip last">
                         <span>Notifications</span>
@@ -605,6 +621,9 @@ $bar-height: 60px;
     height: $bar-height;
     padding: 0 $spacing-l;
     background-color: $gray-600;
+    border: 1px solid $gray-500;
+    border-left: 0;
+    border-right: 0;
 
     .editorTitle {
         cursor: text;
@@ -618,38 +637,58 @@ $bar-height: 60px;
     & > div {
         display: inherit;
         align-items: center;
-        gap: $spacing-xxl;
         height: 100%;
 
         & > div {
-            display: inherit;
-            align-items: inherit;
-            gap: $spacing-xs;
+            display: flex;
+            width: 3.75em;
+            height: 3.75em;
+            padding: 1em;
+            justify-content: center;
+            align-items: center;
             position: relative;
-            height: 100%;
+            box-sizing: border-box;
+
+            border-left: 1px solid $gray-500;
+
+            &:last-child {
+                border-right: 1px solid $gray-500;
+            }
+
+            & > svg {
+                display: block;
+                width: 1.6875em;
+                height: 1.6875em;
+            }
+
+            & > button > svg {
+                display: block;
+                width: 1.4em;
+                height: 1.4em;
+            }
 
             & > .dropdown-wrapper {
                 user-select: none;
-                width: max-content;
                 position: absolute;
                 flex-direction: column;
-                margin: 0 $spacing-s;
-                padding: $spacing-xs 0;
                 top: 100%;
-                width: fit-content;
-                left: -20px;
+                left: 0;
                 display: none;
-                background-color: $gray-600;
-                border: 1px solid $gray-500;
+                background-color: #181818;
+                border: 2px solid #737373;
+
+                & > div:hover {
+                    background-color: #2A2A2A;
+                }
 
                 & > .save-option {
                     display: flex;
                     align-items: center;
 
                     & > .save-icon {
-                        height: 1em;
+                        height: 2.5em;
                         width: 1em;
-                        padding-right: $spacing-s;
+                        padding: 0 $spacing-s;
                         cursor: pointer;
                     }
 
@@ -657,10 +696,6 @@ $bar-height: 60px;
                         flex-grow: 1;
                     }
                 }
-            }
-
-            & > button > svg {
-                display: block
             }
 
             & > .backend-status {
@@ -694,21 +729,20 @@ $bar-height: 60px;
             & > .tooltip {
                 @extend .dropdown-wrapper;
                 border-radius: 15px;
+                background-color: $gray-600;
+                border: none;
                 padding: $spacing-s;
-                left: 0;
-                transform: translateX(-50%);
+                left: calc(3.75em / 2);
+                transform: translate(-50%, 25%);
                 pointer-events: none;
+                white-space: nowrap;
             }
 
             & > .last {
-                transform: translateX(-75%);
+                transform: translate(-75%, 25%);
             }
             & > .first {
-                transform: translateX(-25%);
-            }
-
-            &.logo:hover > svg:last-of-type {
-                rotate: 90deg;
+                transform: translate(-25%, 25%);
             }
 
             &.logo:hover > .dropdown-wrapper {
