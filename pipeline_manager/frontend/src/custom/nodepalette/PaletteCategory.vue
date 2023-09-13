@@ -18,7 +18,43 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
     >
         <div class="__entry __category" :style="padding(depth)" @click="onMouseDown(i)">
             <Arrow :rotate="getRotation(i)" scale="small" />
-            <div class="__title" v-html="category.hitSubstring"></div>
+            <!-- There is only one category node -->
+            <div v-if="isCategoryNode(category)" @click="onMouseDown(i)">
+                <div
+                    v-for="[nt, node] in sortedEntries(category.categoryNodes.nodeTypes)"
+                    class="__entry __node-entry"
+                    v-show="node.mask"
+                    :key="nt"
+                    @pointerdown="onDragStart(nt, node, node.iconPath)"
+                >
+                    <img
+                        class="__title-icon"
+                        v-if="node.iconPath !== undefined"
+                        :src="getIconPath(node.iconPath)"
+                        draggable="false"
+                    />
+                    <div class="__title-label" v-html="node.hitSubstring"></div>
+                    <a
+                        v-for="url in node.URLs"
+                        :key="url.name"
+                        :href="url.url"
+                        class="__url"
+                        @pointerdown.stop
+                        @pointerover="(ev) => onPointerOver(ev, url.name)"
+                        @pointerleave="onPointerLeave"
+                        target="_blank"
+                        draggable="false"
+                    >
+                        <img
+                            v-if="url.icon !== undefined"
+                            :src="getIconPath(url.icon)"
+                            :alt="url.name"
+                            draggable="false"
+                        />
+                    </a>
+                </div>
+            </div>
+            <div v-else class="__title" v-html="category.hitSubstring"></div>
         </div>
         <div v-show="mask[i]">
             <div v-if="category.nodes.nodeTypes">
@@ -28,17 +64,17 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
                     :style="padding(depth + 1)"
                     v-show="node.mask"
                     :key="nt"
-                    @pointerdown="onDragStart(nt, node, category.nodes.nodeIconPaths[nt])"
+                    @pointerdown="onDragStart(nt, node, node.iconPath)"
                 >
                     <img
                         class="__title-icon"
-                        v-if="category.nodes.nodeIconPaths[nt] !== undefined"
-                        :src="getIconPath(category.nodes.nodeIconPaths[nt])"
+                        v-if="node.iconPath !== undefined"
+                        :src="getIconPath(node.iconPath)"
                         draggable="false"
                     />
                     <div class="__title-label" v-html="node.hitSubstring"></div>
                     <a
-                        v-for="url in category.nodes.nodeURLs[nt]"
+                        v-for="url in node.URLs"
                         :key="url.name"
                         :href="url.url"
                         class="__url"
@@ -102,6 +138,10 @@ export default defineComponent({
     setup(props) {
         const { viewModel } = useViewModel();
         const getIconPath = (name) => viewModel.value.cache[`./${name}`] ?? name;
+        const isCategoryNode = (category) => {
+            if (category?.categoryNodes?.nodeTypes === undefined) return false;
+            return Object.keys(category.categoryNodes?.nodeTypes).length > 0;
+        };
 
         /* eslint-disable vue/no-mutating-props,no-param-reassign */
         const onPointerOver = (ev, name) => {
@@ -172,6 +212,7 @@ export default defineComponent({
             getIconPath,
             onPointerOver,
             onPointerLeave,
+            isCategoryNode,
         };
     },
 });
