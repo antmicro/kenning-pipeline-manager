@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <!-- eslint-disable max-len -->
 <template>
-    <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg" class="backend">
+    <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg" class="backend" :class="classes">
         <path
             fill-rule="evenodd"
             clip-rule="evenodd"
@@ -36,27 +36,57 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import { computed } from 'vue';
+
 export default {
     props: {
         color: {
             type: String,
             required: true,
         },
+        active: {
+            type: Boolean,
+            required: true,
+        },
+    },
+    setup(props) {
+        const classes = computed(() => ({
+            __active: props.active,
+            __inactive: !props.active,
+        }));
+
+        return { classes };
     },
 };
 </script>
 
 <style lang="scss" scoped>
 /* Color */
+.__active {
+    > .highlighted {
+        fill: $green;
+    }
+
+    &:hover > .highlighted {
+        fill: #80f2c6;
+    }
+}
+
+.__inactive {
+    > .highlighted {
+        fill: #FFFFFF;
+    }
+
+    &:hover > .highlighted {
+        fill: $green;
+    }
+}
+
 .connected {
     fill: $green;
 }
 
 .disconnected {
     fill: $red;
-}
-
-.backend:hover > .highlighted {
-    fill: $green;
 }
 </style>
