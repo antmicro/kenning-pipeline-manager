@@ -6,11 +6,17 @@ import json
 import tempfile
 from importlib.resources import files
 from pathlib import Path
+from pipeline_manager.frontend_builder import build_prepare
 
 import pytest
 
 import examples
 from pipeline_manager.resources import schemas
+
+
+@pytest.fixture(scope='session', autouse=True)
+def prepare_validation_environment():
+    build_prepare()
 
 
 @pytest.fixture
