@@ -2,22 +2,16 @@
     "type": "object",
     "$id": "specification_schema",
     "description": "Schema used to validate specification that has resolved inheritance",
-    "allOf": [
-        {
-            "$ref": "unresolved_specification_schema"
-        },
-        {
-            "properties": {
-                "nodes": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "required": [
-                            "category"
-                        ]
-                    }
-                }
+    "$ref": "unresolved_specification_schema",
+    "properties": {
+        "nodes": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "required": [
+                    "category"
+                ]
             }
         }
-    ]
+    }
 }

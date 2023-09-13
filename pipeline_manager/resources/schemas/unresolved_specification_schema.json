@@ -37,6 +37,11 @@
                             "null"
                         ]
                     },
+                    "isCategory": {
+                        "description": "Determines whether the nodes defines a category",
+                        "type": "boolean",
+                        "default": false
+                    },
                     "icon": {
                         "description": "Icon of a node. Can be a string with relative path, URL, or tuple {'icon_type': 'url_suffix'}",
                         "type": ["object", "string"]
@@ -169,8 +174,37 @@
                     },
                     "additionalData": {}
                 },
-                "required": [
-                    "name"
+                "oneOf": [
+                    {
+                        "allOf": [
+                            {
+                                "required": [
+                                    "isCategory"
+                                ],
+                                "properties": {
+                                    "isCategory": {
+                                        "const": true
+                                    }
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "allOf": [
+                            {
+                                "not": {
+                                    "required": [
+                                        "isCategory"
+                                    ]
+                                }
+                            },
+                            {
+                                "required": [
+                                    "name"
+                                ]
+                            }
+                        ]
+                    }
                 ],
                 "additionalProperties": false
             }
