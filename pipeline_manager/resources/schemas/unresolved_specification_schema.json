@@ -317,6 +317,11 @@
                 "sidePosition": {
                     "description": "Determines the order of interfaces rendered",
                     "type": "number"
+                },
+                "override": {
+                    "description": "Determines whether this interface can should overridden",
+                    "type": "boolean",
+                    "default": false
                 }
             },
             "required": [
@@ -373,6 +378,11 @@
                         "string",
                         "boolean"
                     ]
+                },
+                "override": {
+                    "description": "Determines whether this property should be overridden",
+                    "type": "boolean",
+                    "default": false
                 }
             },
             "required": [
