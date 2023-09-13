@@ -186,8 +186,8 @@ export default class EditorManager {
             const myNode = NodeFactory(
                 node.name,
                 node.layer,
-                node.interfaces,
-                node.properties,
+                node.interfaces ?? [],
+                node.properties ?? [],
                 node.interfaceGroups ?? [],
                 node.defaultInterfaceGroups ?? [],
                 metadata?.twoColumn ?? false,
