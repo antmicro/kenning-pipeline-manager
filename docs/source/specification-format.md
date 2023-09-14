@@ -363,6 +363,27 @@ Below is a sample specification with used inheritance mechanism:
 Node types can not be repeated (explicitly in list or implicitly through inheritance) in the `extends` list.
 ```
 
+Moreover, it is possible to override inherited properties and interfaces.
+This mechanism requires using the same name and `"override"` attribute set to `true`.
+Only attributes used in child node are overridden, others are inherited without change.
+For instance:
+
+```json
+        {
+            "name": "Type D",
+            "extends": ["Type B", "Type C"],
+            "properties": [
+                {"name": "prop-a", "type": "number", "default": 1.4, "override": true},
+                {"name": "prop-c", "type": "integer", "default": 5, "override": true},
+                {"name": "prop-d", "type": "text", "default": ""}
+            ],
+            "interfaces": [
+                {"name": "inout-d", "type": "Interface", "direction": "inout"},
+                {"name": "output-a", "type": "Interface", "direction": "inout", "override": true}
+            ]
+        }
+```
+
 ### Interface Groups
 
 Object similar to a single interface but reserves a range of interfaces.
