@@ -20,7 +20,58 @@ import InputInterface from '../interfaces/InputInterface.js';
 import ListInterface from '../interfaces/ListInterface.js';
 import SliderInterface from '../interfaces/SliderInterface.js';
 
+/**
+ * @param properties coming from the specification
+ * @returns object that can be used to create properties or an array of errors
+ * if any occured.
+ */
 function parseProperties(properties) {
+    const parsedProperties = {};
+    const usedNames = new Set();
+    const errors = [];
+
+    properties.forEach((prop) => {
+        if (prop.group !== undefined) {
+            const parsedGroup = parseProperties(prop.group);
+            if (Array.isArray(parsedGroup) && parsedGroup.length) {
+                errors.push(...parsedGroup);
+            }
+
+            Object.entries(parsedGroup).forEach(([pgroupname]) => {
+                if (usedNames.has(pgroupname)) {
+                    const realname = pgroupname.slice(pgroupname.indexOf('_') + 1);
+                    errors.push(
+                        `Property named '${realname}' in a group property '${prop.name}' is a duplicate.`,
+                    );
+                }
+                usedNames.add(pgroupname);
+            });
+
+            prop.group = parsedGroup; // eslint-disable-line no-param-reassign
+        }
+
+        if (usedNames.has(`property_${prop.name}`)) {
+            errors.push(
+                `Property named '${prop.name}' is a duplicate.`,
+            );
+        }
+
+        parsedProperties[`property_${prop.name}`] = { ...prop };
+        usedNames.add(`property_${prop.name}`);
+    });
+
+    if (errors.length) {
+        return errors;
+    }
+
+    return parsedProperties;
+}
+
+/**
+ * @param properties that are validated and parsed
+ * @returns created properties
+ */
+function createProperties(properties) {
     const getIntf = (p, hidden = false) => {
         const propName = p.name;
         const propType = p.type;
@@ -77,26 +128,23 @@ function parseProperties(properties) {
         return intf;
     };
 
-    const tempInputs = {};
-    const groups = {};
-    properties.forEach((p) => {
+    const tempProperties = {};
+
+    Object.entries(properties).forEach(([pname, p]) => {
         if (p.group !== undefined) {
             const checkbox = getIntf(p);
-            checkbox.group = p.group.map((groupP) => `property_${groupP.name}`);
-            tempInputs[`property_${p.name}`] = () => checkbox;
 
-            p.group.forEach((groupP) => {
-                tempInputs[`property_${groupP.name}`] = () => getIntf(groupP);
+            checkbox.group = Object.keys(p.group);
+
+            tempProperties[pname] = () => checkbox;
+            Object.entries(p.group).forEach(([pgroupname, pgroup]) => {
+                tempProperties[pgroupname] = () => getIntf(pgroup);
             });
         } else {
-            tempInputs[`property_${p.name}`] = () => getIntf(p);
+            tempProperties[pname] = () => getIntf(p);
         }
     });
-
-    return {
-        parsedProperties: tempInputs,
-        groups,
-    };
+    return tempProperties;
 }
 
 /**
@@ -123,7 +171,11 @@ function detectDiscrepancies(parsedState, inputs, outputs) {
             const direction = ioName.slice(0, ioName.indexOf('_'));
             const name = ioName.slice(ioName.indexOf('_') + 1);
 
-            errors.push(`Interface named '${name}' of direction '${direction}' not found in specification!`);
+            if (direction === 'property') {
+                errors.push(`Property named '${name}' not found in specification!`);
+            } else {
+                errors.push(`Interface named '${name}' of direction '${direction}' not found in specification!`);
+            }
         }
     });
 
@@ -174,9 +226,12 @@ function parseNodeState(state) {
     }
 
     if (newState.properties !== undefined) {
-        newState.properties.forEach((prop) => {
-            newState.inputs[`property_${prop.name}`] = { ...prop };
-        });
+        const out = parseProperties(newState.properties);
+        if (Array.isArray(out) && out.length) {
+            return out;
+        }
+
+        newState.inputs = { ...newState.inputs, ...out };
         delete newState.properties;
     }
 
@@ -249,21 +304,25 @@ export function NodeFactory(
         ),
     );
 
-    const { groups, parsedProperties } = parseProperties(properties);
+    const parsedProperties = parseProperties(properties);
+    // If parsedProperties returns an array, it is an array of errors
+    if (Array.isArray(parsedProperties) && parsedProperties.length) {
+        return parsedProperties.map((error) => `Node ${name} invalid. ${error}`);
+    }
+    const createdProperties = createProperties(parsedProperties);
 
     const node = defineNode({
         type: name,
 
         inputs: {
             ...inputs,
-            ...parsedProperties,
+            ...createdProperties,
         },
         outputs,
 
         /* eslint-disable no-param-reassign */
         onCreate() {
             this.description = description;
-            this.groups = groups;
             this.layer = layer;
             this.parentSave = this.save;
             this.parentLoad = this.load;
