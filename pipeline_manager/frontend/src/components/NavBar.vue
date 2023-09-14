@@ -76,6 +76,21 @@ export default {
         backendStatusOpen() {
             return this.panels.backendStatus.isOpen;
         },
+        notificationsTooltipClasses() {
+            return {
+                last: !this.hideHud,
+            };
+        },
+        backendStatusTooltipClasses() {
+            return {
+                last: this.hideHud && this.externalApplicationManager.backendAvailable,
+            };
+        },
+        settingsTooltipClasses() {
+            return {
+                last: this.hideHud && !this.externalApplicationManager.backendAvailable,
+            };
+        },
     },
     watch: {
         dataflowGraphName(newValue) {
@@ -527,7 +542,7 @@ export default {
                     <button @click="() => togglePanel(panels.settings)">
                         <Cogwheel :active="settingsOpen" />
                     </button>
-                    <div class="tooltip">
+                    <div class="tooltip" :class="settingsTooltipClasses">
                         <span>Settings</span>
                     </div>
                 </div>
@@ -540,7 +555,7 @@ export default {
                         />
                         <Backend v-else color="disconnected" :active="backendStatusOpen" />
                     </button>
-                    <div class="tooltip">
+                    <div class="tooltip" :class="backendStatusTooltipClasses">
                         <span>Backend status</span>
                     </div>
                     <div
@@ -567,7 +582,7 @@ export default {
                         />
                         <Bell v-else :active="notificationsOpen" />
                     </button>
-                    <div class="tooltip last">
+                    <div class="tooltip" :class="notificationsTooltipClasses">
                         <span>Notifications</span>
                     </div>
                 </div>
@@ -619,7 +634,6 @@ $bar-height: 60px;
     justify-content: space-between;
     align-items: center;
     height: $bar-height;
-    padding: 0 $spacing-l;
     background-color: $gray-600;
     border: 1px solid $gray-500;
     border-left: 0;
