@@ -164,7 +164,8 @@ export default class EditorManager {
         let resolvedNodes = [];
 
         try {
-            resolvedNodes = this.resolveInheritance(nodes);
+            const preprocessedNodes = this.preprocessNodes(nodes);
+            resolvedNodes = this.resolveInheritance(preprocessedNodes);
         } catch (e) {
             return [e];
         }
@@ -182,8 +183,9 @@ export default class EditorManager {
         this.baklavaView.editor.registerNodeType(SubgraphInoutNode, { category: 'Subgraphs' });
 
         errors = [];
+        const categoryNodes = new Set();
         resolvedNodes.forEach((node) => {
-            const name = node.isCategory ? node.category : node.name;
+            const name = node.isCategory ? node.category.split('/').at(-1) : node.name;
 
             const myNode = NodeFactory(
                 name,
@@ -200,6 +202,15 @@ export default class EditorManager {
             if (Array.isArray(myNode) && myNode.length) {
                 errors.push(...myNode);
                 return;
+            }
+
+            // Checking if a category has multiple nodes defining it
+            if (node.isCategory === true) {
+                if (categoryNodes.has(name)) {
+                    errors.push(`Category '${node.category}' has multiple nodes defining it.`);
+                    return;
+                }
+                categoryNodes.add(name);
             }
 
             this.baklavaView.editor.registerNodeType(myNode, {
@@ -260,6 +271,19 @@ export default class EditorManager {
         }
 
         return [];
+    }
+
+    /**
+     * Preprocess nodes to be later passed to `resolveInheritance` function
+     *
+     * @param nodes coming from specification
+     */
+    preprocessNodes(nodes) { // eslint-disable-line class-methods-use-this
+        const getNodeName = (node) => (node.isCategory ? node.category.split('/').at(-1) : node.name);
+
+        nodes.forEach((node) => {
+            node.name = getNodeName(node);
+        });
     }
 
     /**
@@ -639,12 +663,20 @@ export default class EditorManager {
                     return `${errorPrefix} ${path} ${error.message} - ${stringify(
                         error.params.additionalProperty,
                     )}`;
+                case 'const':
+                    return `${errorPrefix} ${path} ${error.message} - ${stringify(
+                        error.params.allowedValue,
+                    )}`;
+                // Those errors are not informative at all
+                case 'not':
+                case 'oneOf':
+                    return '';
                 default:
                     return `${errorPrefix} ${path} ${error.message}`;
             }
         });
 
-        return errors;
+        return errors.filter((err) => err !== '');
     }
 
     /**
