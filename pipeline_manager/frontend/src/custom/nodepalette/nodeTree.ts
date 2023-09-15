@@ -64,7 +64,7 @@ const parseCategories = (categoriesNames: Set<string>) => {
 
     categoriesNames.forEach((c) => {
         const [label, ...rest] = c.split('/');
-        if (!(label in categoryTree)) {
+        if (!Object.keys(toParse).includes(label)) {
             toParse[label] = [];
         }
         if (rest.length > 0) {
