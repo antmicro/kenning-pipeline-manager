@@ -40,6 +40,7 @@ from creating and deleting connections or altering nodes' values if the editor i
                     class="item"
                     target="_blank"
                     draggable="false"
+                    @click.stop="onClick(item)"
                 >
                     <div class="icon">
                         <img
@@ -68,14 +69,13 @@ export default defineComponent({
             default: [],
         },
     },
-    emits: ['update:modelValue'],
+    emits: ['update:modelValue', 'click'],
     setup(props, context) {
         const {
             el,
             styles,
             classes,
             itemsWithHoverProperty,
-            onClick,
         } = // eslint-disable-line object-curly-newline
             Components.ContextMenu.setup(props, context);
 
@@ -105,6 +105,11 @@ export default defineComponent({
 
         window.addEventListener('wheel', closeContextMenu);
         window.addEventListener('mousedown', closeContextMenu);
+
+        const onClick = (item) => {
+            context.emit('click', item.value);
+            context.emit('update:modelValue', false);
+        };
 
         return {
             el,
