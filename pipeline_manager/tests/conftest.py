@@ -7,6 +7,7 @@ import tempfile
 from importlib.resources import files
 from pathlib import Path
 from pipeline_manager.frontend_builder import build_prepare
+from pipeline_manager.validator import validate
 
 import pytest
 
@@ -85,7 +86,7 @@ def sample_dataflow(sample_dataflow_path: Path) -> dict:
 def unresolved_specification_schema_path() -> Path:
     """
     Fixture that returns path to `unresolved_specification_schema.json`
-    in `examples` directory.
+    in `resources` directory.
 
     Returns
     -------
@@ -102,7 +103,7 @@ def unresolved_specification_schema(
         ) -> Path:
     """
     Fixture that returns path to `unresolved_specification_schema.json`
-    in `examples` directory.
+    in `resources` directory.
 
     Returns
     -------
@@ -118,7 +119,7 @@ def unresolved_specification_schema(
 def metadata_schema_path() -> Path:
     """
     Fixture that returns path to `metadata_schema.json`
-    in `examples` directory.
+    in `resources` directory.
 
     Returns
     -------
@@ -133,7 +134,7 @@ def metadata_schema_path() -> Path:
 def metadata_schema(metadata_schema_path) -> Path:
     """
     Fixture that returns path to `metadata_schema.json`
-    in `examples` directory.
+    in `resources` directory.
 
     Returns
     -------
@@ -149,7 +150,7 @@ def metadata_schema(metadata_schema_path) -> Path:
 def specification_schema_path() -> Path:
     """
     Fixture that returns path to `specification_schema.json`
-    in `examples` directory.
+    in `resources` directory.
 
     Returns
     -------
@@ -158,6 +159,24 @@ def specification_schema_path() -> Path:
     """
     path = files(schemas).joinpath("specification_schema.json")  # noqa: E501
     return Path(path)
+
+
+@pytest.fixture
+def specification_schema(
+        specification_schema_path
+        ) -> Path:
+    """
+    Fixture that returns path to `specification_schema.json`
+    in `resources` directory.
+
+    Returns
+    -------
+    Path :
+        Path to the jsonschema
+    """
+    with open(specification_schema_path, "r") as f:
+        schema = json.load(f)
+    return schema
 
 
 @pytest.fixture
@@ -173,3 +192,33 @@ def empty_file_path() -> Path:
     """
     with tempfile.NamedTemporaryFile() as tmp_file:
         yield Path(tmp_file.name)
+
+
+def example_pairs():
+    specifications = [
+        str(file)
+        for file in Path(examples.__file__).parent.glob("*specification.json")
+    ]
+    dataflows = [
+        str(file)
+        for file in Path(examples.__file__).parent.glob("*dataflow.json")
+    ]
+
+    for spec in specifications:
+        prefix = spec.rstrip('specification.json')
+        corresponding_dataflow = prefix + 'dataflow.json'
+
+        if corresponding_dataflow in dataflows:
+            yield (
+                Path(spec),
+                Path(corresponding_dataflow),
+            )
+
+
+def check_validation(spec):
+    with tempfile.TemporaryDirectory() as tmpdir:
+        specpath = Path(tmpdir) / 'spec.json'
+        with open(specpath, 'w') as specfile:
+            json.dump(spec, specfile)
+        res = validate(specpath)
+    return res

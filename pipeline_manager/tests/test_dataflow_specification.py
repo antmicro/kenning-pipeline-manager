@@ -3,19 +3,13 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import json
-import pytest
 import tempfile
-from pipeline_manager.validator import validate
 from pathlib import Path
 
+import pytest
 
-def check_validation(spec):
-    with tempfile.TemporaryDirectory() as tmpdir:
-        specpath = Path(tmpdir) / 'spec.json'
-        with open(specpath, 'w') as specfile:
-            json.dump(spec, specfile)
-        res = validate(specpath)
-    return res
+from pipeline_manager.validator import validate
+from pipeline_manager.tests.conftest import check_validation, example_pairs
 
 
 @pytest.fixture
@@ -115,10 +109,27 @@ def specification_valid_nodes_without_layer():
     }
 
 
-def test_example_specification(
-        prepare_validation_environment,
-        sample_specification):
-    assert check_validation(sample_specification) == 0
+@pytest.fixture
+def specification_valid_nodes_only_name_and_category():
+    return {
+        'nodes': [
+            {
+                'name': 'TestNode',
+                'category': 'TestNode',
+            }
+        ]
+    }
+
+
+@pytest.mark.parametrize('example', example_pairs())
+def test_all_existing_examples(example):
+    """
+    Tests all exsiting pairs of specification and dataflow files in
+    examples module. It is assumed that each pair is in format
+    (*-specification.json, *-dataflow.json).
+    """
+    spec, dataflow = example
+    assert validate(spec, dataflow) == 0
 
 
 @pytest.mark.parametrize(
@@ -126,6 +137,7 @@ def test_example_specification(
         'specification_valid_nodes_without_properties',
         'specification_valid_nodes_without_interfaces',
         'specification_valid_nodes_without_layer',
+        'specification_valid_nodes_only_name_and_category'
     ]
 )
 def test_valid_specification(
@@ -149,9 +161,3 @@ def test_invalid_specification(
         request):
     invalid_specification = request.getfixturevalue(invalid_specification)
     assert check_validation(invalid_specification) == 1
-
-
-def test_example_specification_without_nodes(
-        sample_specification):
-    del sample_specification['nodes']
-    assert check_validation(sample_specification) == 1
