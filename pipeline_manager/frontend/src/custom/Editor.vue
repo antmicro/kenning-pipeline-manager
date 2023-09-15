@@ -27,7 +27,6 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
         @wheel.self="mouseWheel"
         @keydown="keyDown"
         @keyup="keyUp"
-        @keyup.delete="deleteKeyUp"
         @mouseleave="onRightPointerUp"
         oncontextmenu="return false;"
     >
@@ -241,10 +240,6 @@ export default defineComponent({
 
             document.removeEventListener('mouseup', onRightPointerUpCtrl);
             document.removeEventListener('mousemove', onPointerMove);
-        };
-
-        const deleteKeyUp = () => {
-            graph.value.removeSelectedNodes();
         };
 
         document.addEventListener('mousedown', (ev) => {
@@ -586,7 +581,6 @@ export default defineComponent({
             selectedNodes,
             nodeContainerStyle,
             onRightPointerUp,
-            deleteKeyUp,
             nodes,
             keyDown,
             keyUp,
