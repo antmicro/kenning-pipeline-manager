@@ -19,12 +19,13 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
         <div class="__entry __category" :style="padding(depth)" @click="onMouseDown(i)">
             <Arrow :rotate="getRotation(i)" scale="small" />
             <!-- There is only one category node -->
-            <div v-if="isCategoryNode(category)" @click="onMouseDown(i)">
+            <template v-if="isCategoryNode(category)">
                 <div
                     v-for="[nt, node] in sortedEntries(category.categoryNodes.nodeTypes)"
                     class="__entry __node-entry"
                     v-show="node.mask"
                     :key="nt"
+                    @click="onMouseDown(i)"
                     @pointerdown="onDragStart(nt, node, node.iconPath)"
                 >
                     <img
@@ -53,7 +54,7 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
                         />
                     </a>
                 </div>
-            </div>
+            </template>
             <div v-else class="__title" v-html="category.hitSubstring"></div>
         </div>
         <div v-show="mask[i]">

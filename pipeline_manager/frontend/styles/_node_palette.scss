@@ -122,6 +122,10 @@
             flex-grow: 1;
         }
 
+        & > .__entry {
+            border-left: 1px solid #393939;
+        }
+
         & > .__title > span {
             color: $green;
         }
