@@ -12,7 +12,12 @@ from creating and deleting connections or altering nodes' values if the editor i
 -->
 
 <template>
-    <div :id="intf.id" ref="el" class="baklava-node-interface" :class="newClasses" >
+    <div
+        :id="intf.id"
+        ref="el"
+        class="baklava-node-interface"
+        :class="newClasses"
+    >
         <div
             class="__port"
             v-if="intf.port"
@@ -24,12 +29,14 @@ from creating and deleting connections or altering nodes' values if the editor i
             <Arrow v-if="displayArrow" color="black" scale="big" :rotate="arrowRotation" />
         </div>
 
+        <!-- @keydown.stop is added so that events are not bubbled up to the editor -->
         <component
             :is="intf.component"
             v-if="showComponent"
             v-model="intf.value"
             :node="node"
             :intf="intf"
+            @keydown.stop
         />
         <span v-else class="align-middle">
             {{ intf.name }}
@@ -56,7 +63,7 @@ export default defineComponent({
     },
     setup(props) {
         /* eslint-disable object-curly-newline,no-unused-vars */
-        const { el, isConnected, classes, showComponent, startHover, endHover, openSidebar } =
+        const { el, isConnected, showComponent, startHover, endHover, openSidebar } =
             Components.NodeInterface.setup(props);
 
         const { viewModel } = useViewModel();
