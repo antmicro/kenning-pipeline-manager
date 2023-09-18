@@ -24,8 +24,7 @@ SPDX-License-Identifier: Apache-2.0
 import { computed, defineComponent, ref } from 'vue';
 
 const restrictedKeys = /[^a-f0-9]/i;
-const hexScheme = /^0x[a-fA-F0-9]+$/;
-const swapPrefix = /^((.*)0)?((.*)x)?/;
+const swapPrefix = /^(?:(.*)0)?(?:(.*)x)?/;
 
 export default defineComponent({
     props: {
@@ -54,8 +53,8 @@ export default defineComponent({
                 let cursorPosition;
                 if (!val.startsWith('0x') && swapPrefix.test(val)) {
                     const match = val.match(swapPrefix);
-                    validatedVal = val.replace(swapPrefix, '0x$2$4');
-                    const additionalLenght = ((match[2] ?? '').length) + ((match[4] ?? '').length);
+                    validatedVal = val.replace(swapPrefix, '0x$1$2');
+                    const additionalLenght = ((match[1] ?? '').length) + ((match[2] ?? '').length);
                     cursorPosition = 2;
                     if (additionalLenght > 0) cursorPosition += additionalLenght;
                     else if (props.modelValue.length > validatedVal.length
@@ -75,10 +74,32 @@ export default defineComponent({
                 }
             },
         });
-        const invalid = computed(() => !hexScheme.test(props.intf.value));
+
+        const invalid = computed(() => {
+            let value;
+            try {
+                value = BigInt(props.intf.value);
+            } catch (SyntaxError) {
+                return true;
+            }
+            return value < props.intf.min || value > props.intf.max;
+        });
 
         const handleBlur = () => {
-            emit('update:modelValue', props.modelValue.toLowerCase());
+            let value;
+            try {
+                value = BigInt(props.intf.value);
+            } catch (SyntaxError) {
+                emit('update:modelValue', props.modelValue.toLowerCase());
+                return;
+            }
+            if (value > props.intf.max) {
+                emit('update:modelValue', `0x${props.intf.max.toString(16)}`);
+            } else if (value < props.intf.min) {
+                emit('update:modelValue', `0x${props.intf.min.toString(16)}`);
+            } else {
+                emit('update:modelValue', props.modelValue.toLowerCase());
+            }
         };
 
         return {

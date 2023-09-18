@@ -6,4 +6,10 @@
 
 import { NodeInterface } from '@baklavajs/core';
 
-export default class HexInterface extends NodeInterface {}
+export default class HexInterface extends NodeInterface {
+    constructor(name, value, min, max) {
+        super(name, value);
+        this.min = min;
+        this.max = max;
+    }
+}
