@@ -247,7 +247,7 @@ Every project object has three required base properties:
 * `default` - specifies a default selected value
   Its type depends on the `type` chosen.
 
-There are eight possible values for the `type` property.
+There are nine possible values for the `type` property.
 * `text` - property is a string.
   A text field is displayed to the user.
 * `constant` - property is a string.
@@ -263,12 +263,13 @@ There are eight possible values for the `type` property.
 * `slider` - property is a float with a specified range.
   It requires `min` and `max` properties.
 * `list` - property is a list of arguments of the same type, which can be specified using `dtype`.
+* `hex` - property is a string representing base-16 number which has to match following regex: `/0x[a-fA-F0-9]`. 
 
 
 Additional properties:
 
-* `min` - specifies the left end of a range.
-* `max` - specifies the right end of a range.
+* `min` - specifies the left end of a range or minimal value of the base-16 number.
+* `max` - specifies the right end of a range or maximal value of the base-16 number.
 * `values` - specifies a range of possible values for `select`.
 * `dtype` - specifies data type of elements in a `list`.
   Supported values are `string`, `number`, `integer`, `boolean`.
