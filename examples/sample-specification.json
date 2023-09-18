@@ -221,7 +221,7 @@
             "layer": "processing",
             "category": "Processing",
             "properties": [
-                {"name": "color", "type": "hex", "default": "0xFFFFFF"}
+                {"name": "color", "type": "hex", "default": "0xFFFF", "min": "0xFF"}
             ],
             "interfaces": [
                 {"name": "input", "type": "BinaryImage", "direction": "input"},
