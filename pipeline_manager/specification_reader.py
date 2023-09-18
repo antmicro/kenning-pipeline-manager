@@ -47,12 +47,22 @@ def minify_specification(specification, dataflow):
     Dict : Updated specification
     """
     used_names = []
+
+    def getNodeName(node):
+        # Category nodes have to be takin into accont
+        if "name" in node:
+            return node["name"]
+        else:
+            return node["category"].split('/')[-1]
+
     for node in dataflow["graph"]["nodes"]:
-        if node["name"] not in used_names:
-            used_names.append(node["name"])
+        if getNodeName(node) not in used_names:
+            used_names.append(getNodeName(node))
 
     resolved_names = []
-    names_to_nodes = {node["name"]: node for node in specification["nodes"]}
+    names_to_nodes = {
+        getNodeName(node): node for node in specification["nodes"]
+    }
     for nodename in used_names:
         collect_dependencies(resolved_names, names_to_nodes, nodename)
 
