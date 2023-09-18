@@ -353,12 +353,12 @@
                     "description": "Default value of the property"
                 },
                 "min": {
-                    "description": "Minimum value of a range for slider, number and integer type",
-                    "type": "number"
+                    "description": "Minimum value of a range for slider, number, integer and hex type",
+                    "type": ["number", "string"]
                 },
                 "max": {
-                    "description": "Maxiumum value of a range for slider, number and integer type",
-                    "type": "number"
+                    "description": "Maxiumum value of a range for slider, number, integer and hex type",
+                    "type": ["number", "string"]
                 },
                 "values": {
                     "description": "Range of values for the select type",
@@ -453,6 +453,12 @@
                         "properties": {
                             "default": {
                                 "type": ["number", "null"]
+                            },
+                            "min": {
+                                "type": ["number", "null"]
+                            },
+                            "max": {
+                                "type": ["number", "null"]
                             }
                         }
                     }
@@ -501,7 +507,16 @@
                     "then": {
                         "properties": {
                             "default": {
-                                "type": ["string", "null"]
+                                "type": ["string", "null"],
+                                "format": "hex"
+                            },
+                            "min": {
+                                "type": ["string", "null"],
+                                "format": "hex"
+                            },
+                            "max": {
+                                "type": ["string", "null"],
+                                "format": "hex"
                             }
                         }
                     }
