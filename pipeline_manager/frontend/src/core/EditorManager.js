@@ -167,14 +167,13 @@ export default class EditorManager {
             const preprocessedNodes = this.preprocessNodes(nodes);
             resolvedNodes = this.resolveInheritance(preprocessedNodes);
         } catch (e) {
-            return [e];
+            return [e.message];
         }
 
-        let errors = this.validateSpecification(
+        let errors = this.validateResolvedSpecification(
             { subgraphs, nodes: resolvedNodes, metadata },
-            specificationSchema,
         );
-        if (Array.isArray(errors) && errors.length) {
+        if (errors.length) {
             return errors;
         }
 
@@ -183,12 +182,9 @@ export default class EditorManager {
         this.baklavaView.editor.registerNodeType(SubgraphInoutNode, { category: 'Subgraphs' });
 
         errors = [];
-        const categoryNodes = new Set();
         resolvedNodes.forEach((node) => {
-            const name = node.isCategory ? node.category.split('/').at(-1) : node.name;
-
             const myNode = NodeFactory(
-                name,
+                node.name,
                 node.layer,
                 node.interfaces ?? [],
                 node.properties ?? [],
@@ -204,36 +200,27 @@ export default class EditorManager {
                 return;
             }
 
-            // Checking if a category has multiple nodes defining it
-            if (node.isCategory === true) {
-                if (categoryNodes.has(name)) {
-                    errors.push(`Category '${node.category}' has multiple nodes defining it.`);
-                    return;
-                }
-                categoryNodes.add(name);
-            }
-
             this.baklavaView.editor.registerNodeType(myNode, {
-                title: name,
+                title: node.name,
                 category: node.category,
                 isCategory: node.isCategory ?? false,
             });
             if ('icon' in node) {
                 if (typeof node.icon === 'string') {
-                    this.baklavaView.editor.nodeIcons.set(name, node.icon);
+                    this.baklavaView.editor.nodeIcons.set(node.name, node.icon);
                 } else {
                     const baseName = Object.keys(node.icon)[0];
                     const suffix = Object.values(node.icon)[0];
                     const baseUrl = this.baklavaView.editor.baseIconUrls.get(baseName);
-                    this.baklavaView.editor.nodeIcons.set(name, `${baseUrl}/${suffix}`);
+                    this.baklavaView.editor.nodeIcons.set(node.name, `${baseUrl}/${suffix}`);
                 }
             }
             if ('urls' in node) {
                 Object.entries(node.urls).forEach(([urlName, url]) => {
-                    if (!this.baklavaView.editor.nodeURLs.has(name)) {
-                        this.baklavaView.editor.nodeURLs.set(name, {});
+                    if (!this.baklavaView.editor.nodeURLs.has(node.name)) {
+                        this.baklavaView.editor.nodeURLs.set(node.name, {});
                     }
-                    this.baklavaView.editor.nodeURLs.get(name)[urlName] = url;
+                    this.baklavaView.editor.nodeURLs.get(node.name)[urlName] = url;
                 });
             }
         });
@@ -279,11 +266,16 @@ export default class EditorManager {
      * @param nodes coming from specification
      */
     preprocessNodes(nodes) { // eslint-disable-line class-methods-use-this
-        const getNodeName = (node) => (node.isCategory ? node.category.split('/').at(-1) : node.name);
-
         nodes.forEach((node) => {
-            node.name = getNodeName(node);
+            if (node.isCategory) {
+                const name = node.category.split('/').at(-1);
+                if (node.name !== undefined && node.name !== name) {
+                    throw new Error(`Node '${node.name}' is a category node and has a name defined different than ${name}`);
+                }
+                node.name = name;
+            }
         });
+        return nodes;
     }
 
     /**
@@ -379,6 +371,12 @@ export default class EditorManager {
         // Helper function that applies base node properties to the child node
         const mergeNodes = (child, base) => {
             const output = { ...structuredClone(base) };
+            const nonInheritableKeys = ['abstract', 'isCategory'];
+
+            nonInheritableKeys.forEach((key) => {
+                delete output[key];
+            });
+
             if (isObject(child) && isObject(base)) {
                 Object.keys(child).forEach((key) => {
                     if (isObject(child[key])) {
@@ -411,7 +409,7 @@ export default class EditorManager {
                                 }
                             });
                         }
-                    } else if (key !== 'abstract') {
+                    } else {
                         output[key] = child[key];
                     }
                 });
@@ -677,6 +675,62 @@ export default class EditorManager {
         });
 
         return errors.filter((err) => err !== '');
+    }
+
+    validateResolvedSpecification(specification) {
+        const validationErrors = this.validateSpecification(specification, specificationSchema);
+        if (validationErrors.length) return validationErrors;
+
+        // Validating category nodes
+        const { nodes } = specification;
+        const categoryNodes = nodes.filter((node) => node.isCategory);
+        const definedCategories = new Set();
+
+        // Finding muliple category nodes defining the same category
+        const errors = [];
+        categoryNodes.forEach((node) => {
+            if (definedCategories.has(node.name)) {
+                errors.push(`Category '${node.category}' has multiple nodes defining it.`);
+            } else {
+                definedCategories.add(node.name);
+            }
+        });
+
+        // Nodes have to extend the first category node in their category path.
+        // For example, if we have two category nodes A and C and we have a node e
+        // which has a category 'A/b/C/d/e' then it has to extend C (and C has to extend A)
+        nodes.forEach((node) => {
+            const categories = node.category.split('/');
+
+            for (let i = categories.length - 1; i >= 0; i -= 1) {
+                const categoryNodeName = categories[i];
+
+                if (
+                    definedCategories.has(categoryNodeName) &&
+                    node.name !== categoryNodeName
+                ) {
+                    if (node.extends === undefined || !node.extends.includes(categoryNodeName)) {
+                        errors.push(`Node '${node.name}' does not extend its category node '${categoryNodeName}'.`);
+                    }
+                    break;
+                }
+            }
+
+            // Nodes that extend from a category node have to be in their subtree i.e. have a common
+            // category prefix with the category node
+            for (let i = 0; i < (node.extends ?? []).length; i += 1) {
+                const extendedNode = node.extends[i];
+                if (definedCategories.has(extendedNode)) {
+                    if (!categories.includes(extendedNode)) {
+                        errors.push(
+                            `Node '${node.name}' extends from a category node '${extendedNode}' but is not in its category`,
+                        );
+                        break;
+                    }
+                }
+            }
+        });
+        return errors;
     }
 
     /**
