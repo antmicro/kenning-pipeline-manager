@@ -97,7 +97,12 @@ function createProperties(properties) {
                 intf.componentName = 'IntegerInterface';
                 break;
             case 'hex':
-                intf = new HexInterface(propName, propDef.toLowerCase()).setPort(false);
+                intf = new HexInterface(
+                    propName,
+                    propDef.toLowerCase(),
+                    p.min ? BigInt(p.min) : NaN,
+                    p.max ? BigInt(p.max) : NaN,
+                ).setPort(false);
                 intf.componentName = 'HexInterface';
                 break;
             case 'select': {
