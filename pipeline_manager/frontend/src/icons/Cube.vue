@@ -34,8 +34,8 @@ export default {
     },
     setup(props) {
         const classes = computed(() => ({
-            __active: props.active,
-            __inactive: !props.active,
+            __cubeActive: props.active,
+            __cubeInactive: !props.active,
         }));
 
         return { classes };
@@ -44,17 +44,17 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.__active {
+.__cubeActive {
     > .highlighted {
-        fill: $green;
+        fill: $white;
     }
 
     &:hover > .highlighted {
-        fill: #80f2c6;
+        fill: $green;
     }
 }
 
-.__inactive {
+.__cubeInactive {
     > .highlighted {
         fill: #FFFFFF;
     }

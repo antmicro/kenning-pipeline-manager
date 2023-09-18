@@ -155,6 +155,7 @@ export default {
                     iconRef: 'notifications',
                     showTransform: '-495px, 0px',
                     hideTransform: '0px, 0px',
+                    hover: false,
                 },
                 palette: {
                     isOpen: true,
@@ -489,12 +490,15 @@ export default {
                     </div>
                 </div>
 
-                <div ref="palette" class="open" v-if="!hideHud">
+                <div ref="palette" class="hoverbox" v-if="!hideHud">
                     <button @click="() => togglePanel(panels.palette)">
                         <Cube :active="paletteOpen" />
                     </button>
-                    <div class="tooltip">
-                        <span>Nodes</span>
+                    <div class="tooltip" v-if="paletteOpen">
+                        <span>Hide node browser</span>
+                    </div>
+                    <div class="tooltip" v-if="!paletteOpen">
+                        <span>Show node browser</span>
                     </div>
                 </div>
 
@@ -539,7 +543,7 @@ export default {
                     {{ editorTitle }}
             </span>
             <div>
-                <div ref="settings">
+                <div ref="settings" class="hoverbox">
                     <button @click="() => togglePanel(panels.settings)">
                         <Cogwheel :active="settingsOpen" />
                     </button>
@@ -574,17 +578,31 @@ export default {
                         </div>
                     </div>
                 </div>
-                <div ref="notifications" v-if="!hideHud">
-                    <button @click="() => togglePanel(panels.notifications)">
-                        <Bell
-                            v-if="this.notificationStore.notifications.length > 0"
-                            color="green"
-                            :active="notificationsOpen"
-                        />
-                        <Bell v-else :active="notificationsOpen" />
-                    </button>
-                    <div class="tooltip" :class="notificationsTooltipClasses">
-                        <span>Notifications</span>
+                <div
+                    ref="notifications"
+                    v-if="!hideHud"
+                    class="hoverbox"
+                    role="button"
+                    @click="() => togglePanel(panels.notifications)"
+                    @pointerover="() => panels.notifications.hover = true"
+                    @pointerleave="() => panels.notifications.hover = false"
+                >
+                    <Bell
+                        v-if="this.notificationStore.notifications.length > 0"
+                        color="green"
+                        :hover="panels.notifications.hover"
+                        class="small_svg"
+                    />
+                    <Bell v-else class="small_svg" :hover="panels.notifications.hover"/>
+                    <div
+                        class="tooltip"
+                        v-if="notificationsOpen"
+                        :class="notificationsTooltipClasses"
+                    >
+                        <span>Hide notifications</span>
+                    </div>
+                    <div class="tooltip" v-else :class="notificationsTooltipClasses">
+                        <span>Show notifications</span>
                     </div>
                 </div>
             </div>
@@ -681,6 +699,11 @@ $bar-height: 60px;
                 width: 1.4em;
                 height: 1.4em;
             }
+            & > .small_svg {
+                display: block;
+                width: 1.4em;
+                height: 1.4em;
+            }
 
             & > .dropdown-wrapper {
                 user-select: none;
@@ -729,7 +752,7 @@ $bar-height: 60px;
                 @extend .dropdown-wrapper;
                 border-radius: 15px;
                 background-color: $gray-600;
-                border: none;
+                border: 1px solid $gray-200;
                 padding: $spacing-s;
                 left: calc(3.75em / 2);
                 transform: translate(-50%, 25%);
@@ -748,9 +771,17 @@ $bar-height: 60px;
                 display: flex;
             }
 
-            &:not(.open) > button:hover + div {
-                display: flex;
+            & > .hoverbox {
             }
+
+            &.hoverbox:hover > .tooltip {
+                display: flex;
+                z-index: 11;
+            }
+            &.hoverbox:hover ~ .small_svg {
+                fill: $green;
+            }
+
         }
     }
 }
