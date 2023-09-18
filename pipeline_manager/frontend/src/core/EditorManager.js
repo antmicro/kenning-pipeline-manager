@@ -603,6 +603,9 @@ export default class EditorManager {
     validateJSONWithSchema(data, schema) {
         const ajv = new Ajv2019({
             allowUnionTypes: true,
+            formats: {
+                hex: /^0x[a-fA-F0-9]+$/,
+            },
             schemas: [
                 unresolvedSpecificationSchema,
                 specificationSchema,
