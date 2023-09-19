@@ -375,6 +375,7 @@ export default class EditorManager {
                                             ...base[key][index],
                                             ...obj,
                                         };
+                                        delete output[key][index].override;
                                     } else {
                                         throw new Error(`'${child.name}' node cannot override '${obj.name}' property of '${base.name}' node`);
                                     }
@@ -391,79 +392,35 @@ export default class EditorManager {
             return output;
         };
 
-        // Topological sort
-        const sortedNodes = [];
-
-        let lastLength = unsortedNodes.length;
-        while (unsortedNodes.length !== 0) {
-            const toResolve = [...unsortedNodes];
-
-            toResolve.forEach((node) => {
-                if (node.extends === undefined || node.extends.length === 0) {
-                    const index = unsortedNodes.indexOf(node);
-                    unsortedNodes.splice(index, 1);
-
-                    sortedNodes.push(node.name);
-                }
+        const resolvedNodes = {};
+        const recurrentMerge = (name) => {
+            // Node resolved
+            if (name in resolvedNodes) return resolvedNodes[name];
+            let node = nodes.find((n) => n.name === name);
+            // Node does not inherite anything
+            if (!node.extends) {
+                resolvedNodes[name] = node;
+                return node;
+            }
+            // Check if extends has unique values
+            if ((new Set(node.extends)).size !== node.extends.length) {
+                throw new Error(`Repeated class in "extends" list of "${node.name}" node`);
+            }
+            // Get base nodes and merge them
+            let base;
+            node.extends.forEach((baseName) => {
+                base = recurrentMerge(baseName);
+                node = mergeNodes(node, base);
             });
+            resolvedNodes[name] = node;
+            return node;
+        };
+        // Filter out abstract nodes and get merged ones
+        const mergedNodes = unsortedNodes.filter(
+            (node) => !node.abstract,
+        ).map((node) => recurrentMerge(node.name));
 
-            unsortedNodes.forEach((node) => {
-                const notResolvedExtends = [];
-                const toResolveExtends = [...node.extends];
-
-                toResolveExtends.forEach((name) => {
-                    const found = sortedNodes.find((resolved) => resolved === name);
-                    if (found !== undefined) {
-                        const index = node.extends.indexOf(name);
-                        node.extends.splice(index, 1);
-                    } else {
-                        notResolvedExtends.push(name);
-                    }
-                });
-
-                node.extends = notResolvedExtends;
-            });
-
-            if (lastLength === unsortedNodes.length) {
-                throw new Error('Unresolvable inheritance in specification!');
-            }
-            lastLength = unsortedNodes.length;
-        }
-
-        const resolvedNodes = [];
-        // DFS resolving inheritance
-        sortedNodes.forEach((name) => {
-            const node = JSON.parse(JSON.stringify(nodes.find((n) => n.name === name)));
-            if (node.abstract === true) {
-                // Skip resolving/adding abstract nodes
-                return;
-            }
-            const visited = [];
-
-            // Reversing so that pop starts from the first element
-            let toVisit = node.extends ? [...node.extends.reverse()] : [];
-
-            while (toVisit.length !== 0) {
-                const visitedNodeName = toVisit.pop();
-                if (visited.includes(visitedNodeName)) {
-                    throw new Error(`Repeated class in "extends" list:  ${visitedNodeName}`);
-                }
-                visited.push(visitedNodeName);
-
-                const visitedNode = nodes.find((n) => n.name === visitedNodeName);
-
-                if (visitedNode.extends !== undefined) {
-                    toVisit = [...toVisit, ...visitedNode.extends];
-                }
-
-                const nodeName = node.name;
-                Object.assign(node, mergeNodes(node, visitedNode));
-                node.name = nodeName;
-            }
-            resolvedNodes.push(node);
-        });
-
-        return resolvedNodes;
+        return mergedNodes;
     }
 
     /**
