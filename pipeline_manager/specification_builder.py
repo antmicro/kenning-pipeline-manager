@@ -414,7 +414,8 @@ class SpecificationBuilder(object):
             interfacetype: Union[str, List[str]],
             direction: str,
             side: Optional[str] = None,
-            maxcount: Optional[int] = None):
+            maxcount: Optional[int] = None,
+            override: Optional[bool] = None):
         """
         Adds interface to the node type.
 
@@ -432,6 +433,8 @@ class SpecificationBuilder(object):
             On which side the interface should be placed by default
         maxcount: Optional[int]
             The maximum connections to the given interface
+        override: Optional[bool]
+            Determines whether interface should be overriden
         """
         if 'interfaces' not in self._nodes[name]:
             self._nodes[name]['interfaces'] = []
@@ -454,6 +457,7 @@ class SpecificationBuilder(object):
 
         set_if_not_none(interface, "side", side)
         set_if_not_none(interface, "maxConnectionsCount", maxcount)
+        set_if_not_none(interface, "override", override)
 
         self._nodes[name]['interfaces'].append(interface)
 
@@ -466,7 +470,8 @@ class SpecificationBuilder(object):
             min: Any = None,
             max: Any = None,
             values: Optional[List[Any]] = None,
-            dtype: Optional[str] = None) -> dict:
+            dtype: Optional[str] = None,
+            override: Optional[bool] = None) -> dict:
         """
         Creates and returns a property
 
@@ -488,6 +493,8 @@ class SpecificationBuilder(object):
             List of allowed values
         dtype: Optional[str]
             Type of elements in property type is list
+        override: Optional[bool]
+            Determines whether property should be overriden
         """
 
         prop = {
@@ -501,6 +508,7 @@ class SpecificationBuilder(object):
         set_if_not_none(prop, 'max', max)
         set_if_not_none(prop, 'values', values)
         set_if_not_none(prop, 'dtype', dtype)
+        set_if_not_none(prop, 'override', override)
 
         return prop
 
@@ -515,7 +523,8 @@ class SpecificationBuilder(object):
             min: Any = None,
             max: Any = None,
             values: Optional[List[Any]] = None,
-            dtype: Optional[str] = None):
+            dtype: Optional[str] = None,
+            override: Optional[bool] = None):
         """
         Adds a property to a property group
 
@@ -541,6 +550,8 @@ class SpecificationBuilder(object):
             List of allowed values
         dtype: Optional[str]
             Type of elements in property type is list
+        override: Optional[bool]
+            Determines whether property should be overriden
         """
 
         if 'properties' not in self._nodes[name] or all(
@@ -558,7 +569,8 @@ class SpecificationBuilder(object):
             min,
             max,
             values,
-            dtype
+            dtype,
+            override,
         )
 
         for entry in self._nodes[name]['properties']:
@@ -578,7 +590,8 @@ class SpecificationBuilder(object):
             min: Any = None,
             max: Any = None,
             values: Optional[List[Any]] = None,
-            dtype: Optional[str] = None):
+            dtype: Optional[str] = None,
+            override: Optional[bool] = None):
         """
         Adds property to the node
 
@@ -602,6 +615,8 @@ class SpecificationBuilder(object):
             List of allowed values
         dtype: Optional[str]
             Type of elements in property type is list
+        override: Optional[bool]
+            Determines whether property should be overriden
         """
         if 'properties' not in self._nodes[name]:
             self._nodes[name]['properties'] = []
@@ -620,7 +635,8 @@ class SpecificationBuilder(object):
             min,
             max,
             values,
-            dtype
+            dtype,
+            override,
         )
         self._nodes[name]['properties'].append(prop)
 
@@ -664,7 +680,8 @@ class SpecificationBuilder(object):
                     [typ.lower() for typ in interface["type"]] if isinstance(interface["type"], list) else interface["type"].lower(),  # noqa: E501
                     interface["direction"],
                     get_optional(interface, "side"),
-                    get_optional(interface, "maxConnectionsCount")
+                    get_optional(interface, "maxConnectionsCount"),
+                    get_optional(interface, "override"),
                 )
         if "properties" in node:
             for property in node["properties"]:
@@ -677,7 +694,8 @@ class SpecificationBuilder(object):
                     get_optional(property, "min"),
                     get_optional(property, "max"),
                     get_optional(property, "values"),
-                    get_optional(property, "dtype")
+                    get_optional(property, "dtype"),
+                    get_optional(property, "override"),
                 )
                 if 'group' in property:
                     for childprop in property['group']:
@@ -691,7 +709,8 @@ class SpecificationBuilder(object):
                             get_optional(childprop, "min"),
                             get_optional(childprop, "max"),
                             get_optional(childprop, "values"),
-                            get_optional(childprop, "dtype")
+                            get_optional(childprop, "dtype"),
+                            get_optional(property, "override"),
                         )
 
     def add_subgraph_from_spec(self, subgraph):
