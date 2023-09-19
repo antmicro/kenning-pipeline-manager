@@ -182,10 +182,11 @@ class SpecificationBuilder(object):
     def add_node_type(
             self,
             name: str,
-            layer: Optional[str] = None,
             category: Optional[str] = None,
+            layer: Optional[str] = None,
             extends: Optional[Union[str, List[str]]] = None,
-            abstract: Optional[bool] = False):
+            abstract: Optional[bool] = False,
+            isCategory: Optional[bool] = False):
         """
         Adds a node type to the specification.
 
@@ -193,17 +194,19 @@ class SpecificationBuilder(object):
         ----------
         name: str
             Name of the node type
-        layer: Optional[str]
-            Name of the layer metatype
         category: Optional[str]
             Category of the node
+        layer: Optional[str]
+            Name of the layer metatype
         extends: Optional[Union[str, List[str]]]
             Base classes for the node type
-        abstract: bool
+        abstract: Optional[bool]
             Tells if the type is abstract or not.
             Abstract types do not need to be complete, they
             are also not added to the final specification.
             They are templates for other classes.
+        isCategory: Optional[bool]
+            Defines whether the node is a category node.
         """
         if name in self._nodes:
             raise SpecificationBuilderException(
@@ -644,38 +647,55 @@ class SpecificationBuilder(object):
         """
         Adds single node type defined in JSON-like format.
         """
-        if "name" not in node:
-            raise SpecificationBuilderException(
-                "The given node specification is invalid - it is "
-                "missing the 'name' field\n"
-                f"{json.dumps(node, indent=4)}"
+        if "isCategory" in node and node["isCategory"]:
+            if "category" not in node:
+                raise SpecificationBuilderException(
+                    "The given category node specification is invalid - it is "
+                    "missing the 'category' field\n"
+                    f"{json.dumps(node, indent=4)}"
+                )
+            nodename = node['category'].split('/')[-1]
+            self.add_node_type(
+                name=nodename,
+                category=node["category"],
+                layer=get_optional(node, "layer"),
+                extends=get_optional(node, "extends"),
+                isCategory=True,
             )
-        self.add_node_type(
-            name=node["name"],
-            layer=get_optional(node, "layer"),
-            category=get_optional(node, "category"),
-            extends=get_optional(node, "extends"),
-            abstract=get_optional(node, "abstract")
-        )
+        else:
+            if "name" not in node:
+                raise SpecificationBuilderException(
+                    "The given node specification is invalid - it is "
+                    "missing the 'name' field\n"
+                    f"{json.dumps(node, indent=4)}"
+                )
+            nodename = node["name"]
+            self.add_node_type(
+                name=nodename,
+                category=get_optional(node, "category"),
+                layer=get_optional(node, "layer"),
+                extends=get_optional(node, "extends"),
+                abstract=get_optional(node, "abstract")
+            )
         if "icon" in node:
-            self.add_node_type_icon(node["name"], node["icon"])
+            self.add_node_type_icon(nodename, node["icon"])
         if "urls" in node:
             for urlgroup, urlsuffix in node["urls"].items():
-                self.add_node_type_url(node["name"], urlgroup, urlsuffix)
+                self.add_node_type_url(nodename, urlgroup, urlsuffix)
         if "additionalData" in node:
             self.add_node_type_additional_data(
-                node["name"],
+                nodename,
                 node["additionalData"]
             )
         if "description" in node:
             self.add_node_description(
-                node["name"],
+                nodename,
                 node["description"]
             )
         if "interfaces" in node:
             for interface in node["interfaces"]:
                 self.add_node_type_interface(
-                    node["name"],
+                    nodename,
                     interface["name"],
                     [typ.lower() for typ in interface["type"]] if isinstance(interface["type"], list) else interface["type"].lower(),  # noqa: E501
                     interface["direction"],
@@ -686,7 +706,7 @@ class SpecificationBuilder(object):
         if "properties" in node:
             for property in node["properties"]:
                 self.add_node_type_property(
-                    node["name"],
+                    nodename,
                     property["name"],
                     property["type"],
                     property["default"],
@@ -700,7 +720,7 @@ class SpecificationBuilder(object):
                 if 'group' in property:
                     for childprop in property['group']:
                         self.add_node_type_property_group(
-                            node['name'],
+                            nodename,
                             property['name'],
                             childprop["name"],
                             childprop["type"],
