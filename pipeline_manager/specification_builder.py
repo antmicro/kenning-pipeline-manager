@@ -566,8 +566,7 @@ class SpecificationBuilder(object):
                 if 'group' not in entry:
                     entry['group'] = []
                 entry['group'].append(prop)
-
-        self._nodes[name]['properties'].append(prop)
+                break
 
     def add_node_type_property(
             self,
