@@ -92,8 +92,15 @@ class NodeStep extends Step {
     }
 
     remove(graph: Ref<Graph>) {
-        const node = graph.value.nodes.find((n) => n.id === this.topic);
+        const node : any = graph.value.nodes.find((n) => n.id === this.topic);
         if (node !== undefined) {
+            if (node.subgraph !== undefined) {
+                this.nodeTuple = [
+                    node,
+                    node.save(),
+                    node.subgraph.save(),
+                ];
+            } else this.nodeTuple = [node, node.save()];
             graph.value.removeNode(node);
         }
     }
@@ -145,6 +152,7 @@ class ConnectionStep extends Step {
     remove(graph: Ref<Graph>) {
         const conn = graph.value.connections.find((n) => n.id === this.topic);
         if (conn !== undefined) {
+            this.conn = conn;
             graph.value.removeConnection(conn);
         }
     }
@@ -178,6 +186,7 @@ export function useHistory(graph: Ref<Graph>, commandHandler: ICommandHandler): 
         g.events.addConnection.unsubscribe(tok);
         g.events.removeConnection.unsubscribe(tok);
     };
+
     // Switch all the events to any new graph that's displayed
     const graphSwitch = (newGraph : any, oldGraph: any, copyStateStack = false) => {
         if (oldGraph) {
@@ -199,6 +208,7 @@ export function useHistory(graph: Ref<Graph>, commandHandler: ICommandHandler): 
                     const historyItem = history.get(newGraph.id);
                     if (!historyItem) return;
                     historyItem.push(new NodeStep('add', node.id.toString(), transactionId.value));
+                    undoneHistory.set(newGraph.id, []);
                 }
             });
             newGraph.events.removeNode.subscribe(token, (node : any) => {
@@ -214,6 +224,7 @@ export function useHistory(graph: Ref<Graph>, commandHandler: ICommandHandler): 
                             node.subgraph.save(),
                         ];
                     } else step.nodeTuple = [node, node.save()];
+                    undoneHistory.set(newGraph.id, []);
                 }
             });
             newGraph.events.addConnection.subscribe(token, (conn : any) => {
@@ -221,6 +232,7 @@ export function useHistory(graph: Ref<Graph>, commandHandler: ICommandHandler): 
                     const historyItem = history.get(newGraph.id);
                     if (!historyItem) return;
                     historyItem.push(new ConnectionStep('add', conn.id.toString(), transactionId.value));
+                    undoneHistory.set(newGraph.id, []);
                 }
             });
             newGraph.events.removeConnection.subscribe(token, (conn : any) => {
@@ -230,13 +242,14 @@ export function useHistory(graph: Ref<Graph>, commandHandler: ICommandHandler): 
                     const step = new ConnectionStep('rem', conn.id.toString(), transactionId.value);
                     historyItem.push(step);
                     step.conn = conn;
+                    undoneHistory.set(newGraph.id, []);
                 }
             });
         }
     };
 
-    watch(graph, (newGraph, oldGraph) => graphSwitch(newGraph, oldGraph), { flush: 'post' },
-    );
+    watch(graph, (newGraph, oldGraph) => graphSwitch(newGraph, oldGraph), { flush: 'post' });
+
     const singleStepTransaction = (mainHistory: Step[], auxiliaryHistory:Step[]) => {
         const step : Step | undefined = mainHistory.pop();
         if (step === undefined) return;
@@ -272,7 +285,9 @@ export function useHistory(graph: Ref<Graph>, commandHandler: ICommandHandler): 
         execute: () => {
             const historyItem = history.get(currentId);
             const undoneItem = undoneHistory.get(currentId);
-            if (historyItem && undoneItem) singleStepTransaction(undoneItem, historyItem);
+            if (historyItem && undoneItem && undoneItem.length !== 0) {
+                singleStepTransaction(undoneItem, historyItem);
+            }
         },
     });
     commandHandler.registerCommand<ICommand<void>>('START_TRANSACTION', {
