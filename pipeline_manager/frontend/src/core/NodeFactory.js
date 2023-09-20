@@ -344,6 +344,61 @@ export function NodeFactory(
             this.parentLoad = this.load;
 
             /**
+             * Updates a side and optionally a sidePosition of an interface
+             *
+             * @param intf interface to update
+             * @param newSide new side of the interface
+             * @param newSidePosition new position of the interface. If it is occupied
+             * @param swap if true then if an interface is found in 'newSidePosition' then they
+             * are swapped
+             * then an old interface is moved.
+             */
+            this.updateInterfacePosition = (
+                intf,
+                newSide,
+                newSidePosition = undefined,
+                swap = false,
+            ) => {
+                const oldSidePosition = intf.sidePosition;
+
+                intf.side = newSide;
+                if (newSidePosition !== undefined) {
+                    intf.sidePosition = newSidePosition;
+                }
+
+                const found = [
+                    ...Object.values(this.inputs),
+                    ...Object.values(this.outputs),
+                ].find(
+                    (io) => io.id !== intf.id &&
+                        io.sidePosition === intf.sidePosition &&
+                        io.side === intf.side,
+                );
+
+                if (found !== undefined) {
+                    if (newSidePosition !== undefined && swap) {
+                        found.sidePosition = oldSidePosition;
+                    } else {
+                        const intfToMove = newSidePosition === undefined ? intf : found;
+
+                        // Finding the first non occupied side position on that side
+                        const sameSide = [
+                            ...Object.values(this.inputs),
+                            ...Object.values(this.outputs),
+                        ].filter((io) => io.side === intfToMove.side && !io.hidden);
+                        const occupiedPositions = sameSide.map((io) => io.sidePosition);
+
+                        let proposedPosition = 0;
+                        while (occupiedPositions.includes(proposedPosition)) {
+                            proposedPosition += 1;
+                        }
+
+                        intfToMove.sidePosition = proposedPosition;
+                    }
+                }
+            };
+
+            /**
              * Toggles interface groups and removes any connections attached
              * to the interface it is toggled to hidden.
              *
@@ -362,25 +417,9 @@ export function NodeFactory(
                     });
                 }
 
+                // checking if there is an interface with the same side position
                 if (visible) {
-                    // checking if there is an interface with the same side position
-                    const found = [
-                        ...Object.values(this.inputs),
-                        ...Object.values(this.outputs),
-                    ].find(
-                        (io) => io.id !== intf.id &&
-                            io.sidePosition === intf.sidePosition &&
-                            io.side === intf.side,
-                    );
-                    if (found !== undefined) {
-                        // Finding the greates side position on that side
-                        const sameSide = [
-                            ...Object.values(this.inputs),
-                            ...Object.values(this.outputs),
-                        ].filter((io) => io.side === intf.side && !io.hidden);
-                        const maxSidePosition = Math.max(...sameSide.map((io) => io.sidePosition));
-                        intf.sidePosition = maxSidePosition + 1;
-                    }
+                    this.updateInterfacePosition(intf, intf.side);
                 }
                 // It may also need a new sidePosition
                 intf.hidden = !visible;
