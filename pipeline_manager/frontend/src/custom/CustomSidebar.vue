@@ -55,9 +55,8 @@ SPDX-License-Identifier: Apache-2.0
                 </div>
             </div>
             <div class="__replace">
-                <div class="__title">Inheritance</div>
                 <div class="__replace_entry" v-if="replacementParents.length">
-                    <div class="__replace_title">Parents:</div>
+                    <div class="__replace_title">Generalize:</div>
                     <div
                         v-for="parent in replacementParents"
                         :key="parent"
@@ -67,13 +66,13 @@ SPDX-License-Identifier: Apache-2.0
                     </div>
                 </div>
                 <div class="__replace_entry" v-if="replacementChildren.length">
-                    <div class="__replace_title">Children:</div>
+                    <div class="__replace_title">Specialize:</div>
                     <div v-for="child in replacementChildren" :key="child" class="__replace_button">
                         <component :is="child.component" :intf="child"></component>
                     </div>
                 </div>
                 <div class="__replace_entry" v-if="replacementSiblings.length">
-                    <div class="__replace_title">Siblings:</div>
+                    <div class="__replace_title">Choose other type:</div>
                     <div
                         v-for="sibling in replacementSiblings"
                         :key="sibling"

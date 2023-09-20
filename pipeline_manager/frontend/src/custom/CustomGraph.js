@@ -130,7 +130,7 @@ export default function createPipelineManagerGraph(graph) {
         };
     };
 
-    // Replaces given instance of a noce with a node of type `newNodeName`
+    // Replaces given instance of a node with a node of type `newNodeName`
     // All properties that are common preserve their values
     // All connections that were connected to the interfaces that are common
     // for those two nodes are preserved as well.
