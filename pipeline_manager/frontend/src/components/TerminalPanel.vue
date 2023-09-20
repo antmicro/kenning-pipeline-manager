@@ -20,6 +20,7 @@ Resizable terminal panel that handles the user interactions
 
             <div class="button-wrapper">
                 <button v-if="this.isPipelineManagerTerminalOpen" @click="clearTerminalOutput">
+                    <Bin/>
                     <span>Clear terminal</span>
                 </button>
                 <button @click="togglePipelineManagerTerminal">
@@ -40,12 +41,14 @@ Resizable terminal panel that handles the user interactions
 <script>
 import Terminal from './Terminal.vue';
 import Arrow from '../icons/Arrow.vue';
+import Bin from '../icons/Bin.vue';
 import { mouseDownHandler } from '../core/events';
 import { terminalStore } from '../core/stores';
 
 export default {
     components: {
         Arrow,
+        Bin,
         Terminal,
     },
     data() {
@@ -123,7 +126,7 @@ export default {
     & > .button-wrapper {
         display: flex;
         align-items: center;
-        gap: $spacing-m;
+        gap: $spacing-xxl;
     }
 
     & > .tab {
@@ -144,5 +147,10 @@ span.active {
 
 button {
     display: flex;
+    gap: $spacing-s;
+
+    &:hover > span {
+        color: $green;
+    }
 }
 </style>
