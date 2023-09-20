@@ -163,6 +163,7 @@ export default {
                     iconRef: 'palette',
                     showTransform: '0px, 0px',
                     hideTransform: '-450px, 0px',
+                    hover: false,
                 },
                 backendStatus: {
                     isOpen: false,
@@ -177,6 +178,7 @@ export default {
                     iconRef: 'settings',
                     showTransform: '-495px, 0px',
                     hideTransform: '0px, 0px',
+                    hover: false,
                 },
             },
         };
@@ -543,12 +545,24 @@ export default {
                     {{ editorTitle }}
             </span>
             <div>
-                <div ref="settings" class="hoverbox">
-                    <button @click="() => togglePanel(panels.settings)">
-                        <Cogwheel :active="settingsOpen" />
-                    </button>
-                    <div class="tooltip" :class="settingsTooltipClasses">
-                        <span>Settings</span>
+                <div
+                    ref="settings"
+                    class="hoverbox"
+                    role="button"
+                    @click="() => togglePanel(panels.settings)"
+                    @pointerover="() => panels.settings.hover = true"
+                    @pointerleave="() => panels.settings.hover = false"
+                >
+                    <Cogwheel :hover="panels.settings.hover" class="small_svg" />
+                    <div
+                        class="tooltip"
+                        :class="settingsTooltipClasses"
+                        v-if="!panels.settings.isOpen"
+                    >
+                        <span>Show settings</span>
+                    </div>
+                    <div class="tooltip" :class="settingsTooltipClasses" v-else>
+                        <span>Hide settings</span>
                     </div>
                 </div>
                 <div v-if="this.externalApplicationManager.backendAvailable" ref="backend">
@@ -701,8 +715,8 @@ $bar-height: 60px;
             }
             & > .small_svg {
                 display: block;
-                width: 1.4em;
-                height: 1.4em;
+                width: 1.2em;
+                height: 1.2em;
             }
 
             & > .dropdown-wrapper {
