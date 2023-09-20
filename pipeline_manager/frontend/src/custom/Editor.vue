@@ -243,7 +243,7 @@ export default defineComponent({
         };
 
         document.addEventListener('mousedown', (ev) => {
-            if (ev.button === 0) {
+            if (ev.button === 0 && !ev.shiftKey) {
                 onPointerDown(ev);
                 document.addEventListener('mouseup', onPointerUp);
                 document.addEventListener('mousemove', onPointerMove);
