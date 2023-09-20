@@ -147,6 +147,7 @@ export default {
             saveMenuShow: false,
             editTitle: false,
             notificationStore,
+            logoHover: false,
             // Toggleable panels and their configuration
             panels: {
                 notifications: {
@@ -439,8 +440,12 @@ export default {
     >
         <div class="container">
             <div>
-                <div class="logo">
-                    <Logo />
+                <div
+                    class="logo"
+                    @pointerover="() => logoHover = true"
+                    @pointerleave="() => logoHover = false"
+                >
+                    <Logo :hover="logoHover" />
                     <div class="dropdown-wrapper">
                         <DropdownItem
                             v-if="!this.externalApplicationManager.backendAvailable && !hideHud"
