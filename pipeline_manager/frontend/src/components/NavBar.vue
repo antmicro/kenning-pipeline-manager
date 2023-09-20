@@ -451,15 +451,16 @@ export default {
                             text="Load graph file"
                             :eventFunction="loadDataflowCallback"
                         />
-                        <div class="save-option">
-                            <DropdownItem
-                                class="save-button"
-                                type="'button'"
-                                text="Save graph file"
-                                :eventFunction="saveDataflow"
-                            />
-                            <Cogwheel class="save-icon" @click="saveMenuShow = !saveMenuShow" />
-                        </div>
+                        <DropdownItem
+                            type="'button'"
+                            text="Save graph file"
+                            :eventFunction="saveDataflow"
+                        />
+                        <DropdownItem
+                            type="'button'"
+                            text="Save graph as file as..."
+                            :eventFunction="() => {saveMenuShow = !saveMenuShow}"
+                        />
                         <DropdownItem
                             type="'button'"
                             text="Export graph to PNG"
@@ -693,22 +694,6 @@ $bar-height: 60px;
 
                 & > div:hover {
                     background-color: #2A2A2A;
-                }
-
-                & > .save-option {
-                    display: flex;
-                    align-items: center;
-
-                    & > .save-icon {
-                        height: 2.5em;
-                        width: 1em;
-                        padding: 0 $spacing-s;
-                        cursor: pointer;
-                    }
-
-                    & > .save-button {
-                        flex-grow: 1;
-                    }
                 }
             }
 
