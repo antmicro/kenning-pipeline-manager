@@ -166,7 +166,7 @@ class SpecificationBuilder(object):
             name of the base class, or list of
             base classes' names.
         """
-        if type(parent_names) is str:
+        if isinstance(parent_names, str):
             parent_names = [parent_names]
 
         for extcls in parent_names:
@@ -185,8 +185,7 @@ class SpecificationBuilder(object):
             category: Optional[str] = None,
             layer: Optional[str] = None,
             extends: Optional[Union[str, List[str]]] = None,
-            abstract: Optional[bool] = False,
-            isCategory: Optional[bool] = False):
+            abstract: Optional[bool] = False):
         """
         Adds a node type to the specification.
 
@@ -205,8 +204,6 @@ class SpecificationBuilder(object):
             Abstract types do not need to be complete, they
             are also not added to the final specification.
             They are templates for other classes.
-        isCategory: Optional[bool]
-            Defines whether the node is a category node.
         """
         if name in self._nodes:
             raise SpecificationBuilderException(
@@ -222,6 +219,40 @@ class SpecificationBuilder(object):
             self.add_node_type_category(name, category)
         if abstract is not None:
             self.set_node_type_abstract(name, abstract)
+
+    def add_node_type_as_category(
+            self,
+            categoryname,
+            categoryparent: str = "",
+            layer: Optional[str] = None,
+            extends: Optional[Union[str, List[str]]] = None):
+        """
+        Adds a node type "as category" to the specification.
+
+        Parameters
+        ----------
+        categoryname: str
+            Name of the newly added category
+        categoryparent: str
+            Path to the new category
+        layer: Optional[str]
+            Name of the layer metatype
+        extends: Optional[Union[str, List[str]]]
+            Base classes for the node type
+        """
+        if categoryname in self._nodes:
+            raise SpecificationBuilderException(
+                f"Redefined node type:  {categoryname} in category as node: {categoryparent}"  # noqa: E501
+            )
+        self._nodes[categoryname] = {
+            "category": str(Path(categoryparent) / categoryname) if len(categoryparent) != 0 else categoryname,  # noqa: E501
+            "isCategory": True
+        }
+        if extends:
+            self.add_node_type_parent(categoryname, extends)
+        if layer:
+            self._nodes[categoryname]["layer"] = layer
+            self._nodelayers.add(layer)
 
     def set_node_type_abstract(self, name, value):
         self._nodes[name]["abstract"] = value
@@ -654,13 +685,16 @@ class SpecificationBuilder(object):
                     "missing the 'category' field\n"
                     f"{json.dumps(node, indent=4)}"
                 )
-            nodename = node['category'].split('/')[-1]
-            self.add_node_type(
-                name=nodename,
-                category=node["category"],
+            if '/' in node['category']:
+                categoryparent, categoryname = node['category'].rsplit('/', 1)
+            else:
+                categoryparent = ""
+                categoryname = node['category']
+            self.add_node_type_as_category(
+                categoryname=categoryname,
+                categoryparent=categoryparent,
                 layer=get_optional(node, "layer"),
-                extends=get_optional(node, "extends"),
-                isCategory=True,
+                extends=get_optional(node, "extends")
             )
         else:
             if "name" not in node:
