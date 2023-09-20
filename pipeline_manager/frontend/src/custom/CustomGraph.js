@@ -139,11 +139,28 @@ export default function createPipelineManagerGraph(graph) {
         const newNode = this.editor.nodeTypes.get(newNodeName);
         const newNodeInstance = new newNode.type(); // eslint-disable-line new-cap
 
-        // Restoring properties
-        Object.entries(oldNode.inputs).forEach(([name, intf]) => {
-            if (intf.direction !== undefined) return;
-
-            if (Object.prototype.hasOwnProperty.call(newNodeInstance.inputs, name)) {
+        // Restoring properties and interfaces
+        Object.entries({ ...oldNode.inputs, ...oldNode.outputs }).forEach(([name, intf]) => {
+            if (intf.direction !== undefined) {
+                if (Object.prototype.hasOwnProperty.call(newNodeInstance.inputs, name)) {
+                    newNodeInstance.updateInterfacePosition(
+                        newNodeInstance.inputs[name],
+                        intf.side,
+                        intf.sidePosition,
+                    );
+                }
+                if (Object.prototype.hasOwnProperty.call(newNodeInstance.outputs, name)) {
+                    newNodeInstance.updateInterfacePosition(
+                        newNodeInstance.outputs[name],
+                        intf.side,
+                        intf.sidePosition,
+                    );
+                }
+                // If the new node has the same property of the same type as it could be overidden
+            } else if (
+                Object.prototype.hasOwnProperty.call(newNodeInstance.inputs, name) &&
+                newNodeInstance.inputs[name].componentName === intf.componentName
+            ) {
                 newNodeInstance.inputs[name].value = intf.value;
             }
         });

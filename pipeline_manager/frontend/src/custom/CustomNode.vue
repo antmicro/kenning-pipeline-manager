@@ -451,17 +451,7 @@ const interfaceCursorStyle = ref({
 const isPickedInterface = (intf) => intf === chosenInterface;
 
 const assignNewPosition = () => {
-    let sockets;
-    if (chosenInterface.side === 'right') {
-        sockets = displayedRightRows.value;
-    } else if (chosenInterface.side === 'left') {
-        sockets = displayedLeftRows.value;
-    }
-
-    if (sockets[newSocketIndex] !== undefined) {
-        sockets[newSocketIndex].sidePosition = chosenInterface.sidePosition;
-    }
-    chosenInterface.sidePosition = newSocketIndex;
+    props.node.updateInterfacePosition(chosenInterface, chosenInterface.side, newSocketIndex, true);
 };
 
 const dragInterface = (ev) => {
@@ -608,20 +598,10 @@ const toggleGroup = (intf) => {
 
 /* eslint-disable no-param-reassign */
 const switchSides = (intf) => {
-    // Switching side of an interface and if the opposite place is occupied then then
-    // the interface is moved to the last row
     if (intf.side === 'left') {
-        const l = displayedLeftRows.value.indexOf(intf);
-        if (displayedRightRows.value[l]) {
-            intf.sidePosition = displayedRightRows.value.length;
-        }
-        intf.side = 'right';
+        props.node.updateInterfacePosition(intf, 'right');
     } else {
-        const r = displayedRightRows.value.indexOf(intf);
-        if (displayedLeftRows.value[r]) {
-            intf.sidePosition = displayedLeftRows.value.length;
-        }
-        intf.side = 'left';
+        props.node.updateInterfacePosition(intf, 'left');
     }
 };
 </script>
