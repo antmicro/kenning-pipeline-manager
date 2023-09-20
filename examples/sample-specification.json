@@ -20,8 +20,7 @@
             "name": "SaveVideo",
             "extends": ["Filesystem-base"],
             "interfaces": [
-                {"name": "color", "type": "Image", "direction": "input"},
-                {"name": "binary", "type": "BinaryImage", "direction": "input"}
+                {"name": "frames", "type": ["Image", "BinaryImage"], "direction": "input"}
             ]
         },
         {
@@ -86,9 +85,24 @@
             "interfaces": [{"name": "kernel", "type": "BinaryImage", "direction": "output"}]
         },
         {
+            "category": "Processing/Color images",
+            "isCategory": true,
+            "interfaces": [
+                {"name": "input 1", "type": "Image", "direction": "input"},
+                {"name": "output 1", "type": "Image", "direction": "output"}
+            ]
+        },
+        {
+            "category": "Processing/Binary images",
+            "isCategory": true,
+            "interfaces": [
+                {"name": "input 1", "type": "BinaryImage", "direction": "input"},
+                {"name": "output 1", "type": "BinaryImage", "direction": "output"}
+            ]
+        },
+        {
             "name": "Filter2D",
-            "layer": "processing",
-            "category": "Processing",
+            "extends": ["Color images"],
             "description": "Node that applies a *2D* filter.",
             "properties": [
                 {"name": "iterations", "type": "integer", "default": 1},
@@ -100,15 +114,15 @@
                 }
             ],
             "interfaces": [
-                {"name": "image", "type": "Image", "direction": "input"},
-                {"name": "kernel", "type": "Image", "direction": "input"},
-                {"name": "output", "type": "Image", "direction": "output"}
+                {"name": "kernel", "type": "Image", "direction": "input"}
             ]
         },
         {
             "name": "Threshold",
-            "layer": "processing",
-            "category": "Processing",
+            "extends": ["Binary images"],
+            "interfaces": [
+                {"name": "input 1", "type": "Image", "direction": "input", "override": true}
+            ],
             "properties": [
                 {"name": "threshold_value", "type": "integer", "default": 1},
                 {
@@ -117,80 +131,58 @@
                     "values": ["Binary", "Truncate", "Otsu"],
                     "default": "constant"
                 }
-            ],
-            "interfaces": [
-                {"name": "image", "type": "Image", "direction": "input"},
-                {"name": "output", "type": "BinaryImage", "direction": "output"}
             ]
         },
         {
             "name": "CannyEdgeDetection",
-            "layer": "processing",
-            "category": "Processing",
+            "extends": ["Color images"],
+            "category": "Processing/Color images",
             "properties": [
                 {"name": "sigma", "type": "text", "default": "1.4"},
                 {"name": "kernel size", "type": "integer", "default": 3}
-            ],
-            "interfaces": [
-                {"name": "input", "type": "Image", "direction": "input"},
-                {"name": "output", "type": "Image", "direction": "output"}
             ]
         },
         {
             "name": "Scale",
-            "layer": "processing",
-            "category": "Processing",
+            "extends": ["Color images"],
+            "category": "Processing/Color images",
             "properties": [
                 {"name": "Scaling factor", "type": "text", "default": "1.75"}
-            ],
-            "interfaces": [
-                {"name": "input", "type": "Image", "direction": "input"},
-                {"name": "output", "type": "Image", "direction": "output"}
             ]
         },
         {
             "name": "Logical AND",
-            "layer": "processing",
-            "category": "Processing",
+            "extends": ["Binary images"],
+            "category": "Processing/Binary images",
             "interfaces": [
-                {"name": "input 1", "type": "BinaryImage", "direction": "input"},
-                {"name": "input 2", "type": "BinaryImage", "direction": "input"},
-                {"name": "output", "type": "BinaryImage", "direction": "output"}
+                {"name": "input 2", "type": "BinaryImage", "direction": "input"}
             ]
         },
         {
             "name": "Logical OR",
-            "layer": "processing",
-            "category": "Processing",
+            "extends": ["Binary images"],
+            "category": "Processing/Binary images",
             "interfaces": [
-                {"name": "input 1", "type": "BinaryImage", "direction": "input"},
-                {"name": "input 2", "type": "BinaryImage", "direction": "input"},
-                {"name": "output", "type": "BinaryImage", "direction": "output"}
+                {"name": "input 2", "type": "BinaryImage", "direction": "input"}
             ]
         },
         {
             "name": "Logical NOT",
-            "layer": "processing",
-            "category": "Processing",
-            "interfaces": [
-                {"name": "input", "type": "BinaryImage", "direction": "input"},
-                {"name": "output", "type": "BinaryImage", "direction": "output"}
-            ]
+            "extends": ["Binary images"],
+            "category": "Processing/Binary images"
         },
         {
             "name": "Logical XOR",
-            "layer": "processing",
-            "category": "Processing",
+            "extends": ["Binary images"],
+            "category": "Processing/Binary images",
             "interfaces": [
-                {"name": "input 1", "type": "BinaryImage", "direction": "input"},
-                {"name": "input 2", "type": "BinaryImage", "direction": "input"},
-                {"name": "output", "type": "BinaryImage", "direction": "output"}
+                {"name": "input 2", "type": "BinaryImage", "direction": "input"}
             ]
         },
         {
             "name": "Morphological operation",
-            "layer": "processing",
-            "category": "Processing",
+            "extends": ["Binary images"],
+            "category": "Processing/Binary images",
             "properties": [
                 {
                     "name": "Enable operations", "type": "bool", "default": true, "group": [
@@ -211,21 +203,15 @@
                 }
             ],
             "interfaces": [
-                {"name": "image", "type": "BinaryImage", "direction": "input"},
-                {"name": "kernel", "type": "BinaryImage", "direction": "input"},
-                {"name": "output", "type": "BinaryImage", "direction": "output"}
+                {"name": "kernel", "type": "BinaryImage", "direction": "input"}
             ]
         },
         {
             "name": "RemoveColor",
-            "layer": "processing",
-            "category": "Processing",
+            "extends": ["Color images"],
+            "category": "Processing/Color images",
             "properties": [
                 {"name": "color", "type": "hex", "default": "0xFFFF", "min": "0xFF"}
-            ],
-            "interfaces": [
-                {"name": "input", "type": "BinaryImage", "direction": "input"},
-                {"name": "output", "type": "BinaryImage", "direction": "output"}
             ]
         }
     ],
