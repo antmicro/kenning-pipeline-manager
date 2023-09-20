@@ -492,10 +492,16 @@ export default {
                     </div>
                 </div>
 
-                <div ref="palette" class="hoverbox" v-if="!hideHud">
-                    <button @click="() => togglePanel(panels.palette)">
-                        <Cube :active="paletteOpen" />
-                    </button>
+                <div
+                    ref="palette"
+                    v-if="!hideHud"
+                    class="hoverbox"
+                    role="button"
+                    @click="() => togglePanel(panels.palette)"
+                    @pointerover="() => panels.palette.hover = true"
+                    @pointerleave="() => panels.palette.hover = false"
+                >
+                    <Cube :hover="panels.palette.hover" class="small_svg"/>
                     <div class="tooltip" v-if="paletteOpen">
                         <span>Hide node browser</span>
                     </div>
