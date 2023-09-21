@@ -209,6 +209,8 @@ export default function createPipelineManagerGraph(graph) {
         connectionsToRestore.forEach((conn) => this.internalAddConnection(conn));
 
         commitTransaction();
+
+        return newNodeInstance;
     };
 
     graph.updateInterfaces = function updateInterfaces() {
