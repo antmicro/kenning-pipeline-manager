@@ -686,12 +686,12 @@ class SpecificationBuilder(object):
                     f"{json.dumps(node, indent=4)}"
                 )
             if '/' in node['category']:
-                categoryparent, categoryname = node['category'].rsplit('/', 1)
+                categoryparent, nodename = node['category'].rsplit('/', 1)
             else:
                 categoryparent = ""
-                categoryname = node['category']
+                nodename = node['category']
             self.add_node_type_as_category(
-                categoryname=categoryname,
+                categoryname=nodename,
                 categoryparent=categoryparent,
                 layer=get_optional(node, "layer"),
                 extends=get_optional(node, "extends")
