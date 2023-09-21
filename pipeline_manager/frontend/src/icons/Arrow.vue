@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
 <template>
     <svg
         class="arrow"
-        :class="[rotate, scale, { 'hoverable': hoverable } ]"
+        :class="[rotate, scale, { 'hoverable': hoverable, 'noninteractable': noninteractable } ]"
         width="16"
         height="18"
         viewBox="0 0 16 18"
@@ -17,7 +17,7 @@ SPDX-License-Identifier: Apache-2.0
     >
         <path
             class="highlighted"
-            :class="[color]"
+            :class="[color, { 'noninteractable': noninteractable }]"
             d="M16 18L7.33664 9.00005L16 4.78745e-05L8.65202 4.77869e-05L1.07327e-07 9.00005L8.65202 18L16 18Z"
             fill="#6F6F6F"
             stroke-width="0"
@@ -41,6 +41,10 @@ export default {
             required: false,
         },
         hoverable: {
+            type: Boolean,
+            default: false,
+        },
+        noninteractable: {
             type: Boolean,
             default: false,
         },
@@ -90,5 +94,9 @@ export default {
 
 .hoverable:hover > .highlighted {
     fill: $green;
+}
+
+.noninteractable {
+    pointer-events: none;
 }
 </style>
