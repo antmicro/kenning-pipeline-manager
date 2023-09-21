@@ -64,6 +64,39 @@ def specification_invalid_nodes_without_name():
 
 
 @pytest.fixture
+def specification_invalid_node_as_category_not_extending():
+    return {
+        'nodes': [
+            {
+                'category': 'a/B',
+                'isCategory': True
+            },
+            {
+                'name': 'Q',
+                'category': 'a/B'
+            }
+        ]
+    }
+
+
+@pytest.fixture
+def specification_invalid_node_as_category_different_category_path():
+    return {
+        'nodes': [
+            {
+                'category': 'a/B',
+                'isCategory': True
+            },
+            {
+                'name': 'Q',
+                'category': 'c/d',
+                'extends': ['B']
+            }
+        ]
+    }
+
+
+@pytest.fixture
 def specification_valid_nodes_without_properties():
     return {
         'nodes': [
@@ -117,6 +150,67 @@ def specification_valid_nodes_only_name_and_category():
     }
 
 
+@pytest.fixture
+def specification_valid_node_as_category_with_inheriting():
+    return {
+        'nodes': [
+            {
+                'category': 'TestNode',
+                'isCategory': True
+            },
+            {
+                'name': 'ChildNode',
+                'extends': ['TestNode']
+            }
+        ]
+    }
+
+
+@pytest.fixture
+def specification_valid_node_as_category_with_inheriting_nested():
+    return {
+        'nodes': [
+            {
+                'category': 'a/B',
+                'isCategory': True
+            },
+            {
+                'category': 'a/B/c/D',
+                'isCategory': True,
+                'extends': ['B']
+            },
+            {
+                'name': 'Q',
+                'extends': ['B']
+            },
+            {
+                'name': 'Y',
+                'extends': ['D']
+            }
+        ]
+    }
+
+
+@pytest.fixture
+def specification_valid_node_as_category_other_category_with_same_name():
+    return {
+        'nodes': [
+            {
+                'category': 'a/B',
+                'isCategory': True
+            },
+            {
+                'name': 'Q',
+                'extends': ['B']
+            },
+            {
+                'name': 'Z',
+                'category': 'c/B'
+            }
+        ]
+    }
+
+
 @pytest.mark.parametrize('example', example_pairs())
 def test_all_existing_examples(example):
     """
@@ -133,7 +227,10 @@ def test_all_existing_examples(example):
         'specification_valid_nodes_without_properties',
         'specification_valid_nodes_without_interfaces',
         'specification_valid_nodes_without_layer',
-        'specification_valid_nodes_only_name_and_category'
+        'specification_valid_nodes_only_name_and_category',
+        'specification_valid_node_as_category_with_inheriting',
+        'specification_valid_node_as_category_with_inheriting_nested',
+        'specification_valid_node_as_category_other_category_with_same_name'
     ]
 )
 def test_valid_specification(
@@ -149,6 +246,8 @@ def test_valid_specification(
         'specification_invalid_property_type',
         'specification_invalid_property_value',
         'specification_invalid_nodes_without_name',
+        'specification_invalid_node_as_category_not_extending',
+        'specification_invalid_node_as_category_different_category_path'
     ]
 )
 def test_invalid_specification(
