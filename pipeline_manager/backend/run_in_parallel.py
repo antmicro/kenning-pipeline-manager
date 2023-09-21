@@ -11,13 +11,17 @@ communicating with it.
 
 import logging
 from multiprocessing import Process
+from pathlib import Path
 
 from pipeline_manager_backend_communication.misc_structures import Status
 
 from pipeline_manager.backend.state_manager import global_state_manager
 
 
-def server_process_handler(backend_host: str, backend_port: int):
+def server_process_handler(
+        frontend_path: Path,
+        backend_host: str,
+        backend_port: int):
     """
     Function ran as a process target, responsible for initializing the tcp
     server, waiting for the client connection and running the backend
@@ -41,10 +45,13 @@ def server_process_handler(backend_host: str, backend_port: int):
                     'External application did not connect')
 
     from pipeline_manager.backend.app import app
+    app.static_folder = Path(frontend_path).resolve()
+    app.template_folder = Path(frontend_path).resolve()
     app.run(backend_host, backend_port, threaded=False)
 
 
 def start_server_in_parallel(
+        frontend_path: Path,
         tcp_server_host: str = '127.0.0.1',
         tcp_server_port: int = 9000,
         backend_host: str = '127.0.0.1',
@@ -57,6 +64,8 @@ def start_server_in_parallel(
 
     Parameters
     ----------
+    frontend_path : Path,
+        Path where the built frontend files are stored.
     tcp_server_host : str
         IPv4 of the server that is going to be used for the
         TCP server socket.
@@ -77,7 +86,7 @@ def start_server_in_parallel(
 
     global_state_manager.server_process = Process(
         target=server_process_handler,
-        args=(backend_host, backend_port))
+        args=(frontend_path, backend_host, backend_port))
     global_state_manager.server_process.start()
 
 
