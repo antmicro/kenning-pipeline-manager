@@ -26,7 +26,13 @@ from creating and deleting connections or altering nodes' values if the editor i
             @pointerdown.left="onMouseDown"
             :class="{ greyedout_arrow: highlighted, picked: picked }"
         >
-            <Arrow v-if="displayArrow" color="black" scale="big" :rotate="arrowRotation" />
+            <Arrow
+                v-if="displayArrow"
+                noninteractable="true"
+                color="black"
+                scale="big"
+                :rotate="arrowRotation"
+            />
         </div>
 
         <!-- @keydown.stop is added so that events are not bubbled up to the editor -->
@@ -142,6 +148,3 @@ export default defineComponent({
     },
 });
 </script>
-
-<style lang="scss" scoped>
-</style>

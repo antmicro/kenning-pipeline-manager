@@ -41,6 +41,7 @@ export function useTemporaryConnection() {
             temporaryConnection.value = {
                 status: TemporaryConnectionState.NONE,
                 from: hoveringOver.value,
+                to: hoveringOver.value,
             };
 
             temporaryConnection.value.mx = undefined;
