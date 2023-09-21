@@ -30,7 +30,7 @@ from moving or deleting the nodes.
         <div
             class="__title"
             @pointerdown.left.exact="onMouseDown"
-            @pointerdown.left.self.stop="startDragWrapper($event)"
+            @pointerdown.left="startDragWrapper($event)"
             @pointerdown.right="openContextMenuTitle"
         >
             <img
@@ -38,8 +38,7 @@ from moving or deleting the nodes.
                 v-if="iconPath !== undefined"
                 :src="iconPath"
             >
-            <div v-if="!renaming" class="__title-label">
-                {{ nodeTitle }}
+            <div v-if="!renaming" class="__title-label" v-html="nodeTitle">
             </div>
             <input
                 v-else
@@ -59,6 +58,7 @@ from moving or deleting the nodes.
                 :items="contextMenuTitleItems"
                 :urls="nodeURLs"
                 :style="contextMenuStyle"
+                @pointerdown.left.stop
                 @click="onContextMenuTitleClick"
             />
         </div>
@@ -295,7 +295,7 @@ const nodeTitle = computed(() => {
     if (props.node.title === props.node.type || props.node.title === '') {
         return props.node.type;
     }
-    return `${props.node.title} (${props.node.type})`;
+    return `${props.node.title} <pre class="subtitle">${props.node.type}</pre>`;
 });
 
 const select = () => {
