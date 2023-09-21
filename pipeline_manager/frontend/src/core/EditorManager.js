@@ -728,15 +728,15 @@ export default class EditorManager {
         // Validating category nodes
         const { nodes } = specification;
         const categoryNodes = nodes.filter((node) => node.isCategory);
-        const definedCategories = new Set();
+        const definedCategories = {};
 
         // Finding muliple category nodes defining the same category
         const errors = [];
         categoryNodes.forEach((node) => {
-            if (definedCategories.has(node.name)) {
+            if (node.name in definedCategories) {
                 errors.push(`Category '${node.category}' has multiple nodes defining it.`);
             } else {
-                definedCategories.add(node.name);
+                definedCategories[node.name] = node.category.split('/').slice(0, -1).join('/');
             }
         });
 
@@ -748,10 +748,12 @@ export default class EditorManager {
 
             for (let i = categories.length - 1; i >= 0; i -= 1) {
                 const categoryNodeName = categories[i];
+                const remainingCategories = categories.slice(0, i).join('/');
 
                 if (
-                    definedCategories.has(categoryNodeName) &&
-                    node.name !== categoryNodeName
+                    categoryNodeName in definedCategories &&
+                    node.name !== categoryNodeName &&
+                    remainingCategories === definedCategories[categoryNodeName]
                 ) {
                     if (node.extends === undefined || !node.extends.includes(categoryNodeName)) {
                         errors.push(`Node '${node.name}' does not extend its category node '${categoryNodeName}'.`);
@@ -764,7 +766,7 @@ export default class EditorManager {
             // category prefix with the category node
             for (let i = 0; i < (node.extends ?? []).length; i += 1) {
                 const extendedNode = node.extends[i];
-                if (definedCategories.has(extendedNode)) {
+                if (extendedNode in definedCategories) {
                     if (!categories.includes(extendedNode)) {
                         errors.push(
                             `Node '${node.name}' extends from a category node '${extendedNode}' but is not in its category`,
