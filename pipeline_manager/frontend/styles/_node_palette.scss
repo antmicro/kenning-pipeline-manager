@@ -62,6 +62,7 @@
 
     .nodes {
         overflow-y: auto;
+        overflow-x: hidden;
     }
 
     & h1 {
@@ -80,7 +81,7 @@
 .__entry {
     gap: 1em;
     padding: 0 1em;
-    width: 100%;
+    width: auto;
 
     font-size: $fs-small;
     margin-top: -1px;
@@ -96,6 +97,7 @@
     display: flex;
     align-items: center;
     cursor: grab;
+    overflow: hidden;
 
     & > .__title-icon {
         flex-grow: 0;
@@ -107,6 +109,7 @@
 
     & > .__title-label {
         flex-grow: 1;
+        width: max-content;
 
         & > span {
             color: $green;
