@@ -315,7 +315,8 @@ export default defineComponent({
 
             (list ?? []).forEach((eName) => {
                 const button = new ButtonInterface(eName, () => {
-                    graph.value.replaceNode(node.value, eName);
+                    const newNode = graph.value.replaceNode(node.value, eName);
+                    graph.value.sidebar.nodeId = newNode.id;
                 });
                 button.componentName = 'ButtonInterface';
                 buttons.value.push(button);
