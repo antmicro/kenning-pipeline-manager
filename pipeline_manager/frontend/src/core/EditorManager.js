@@ -767,7 +767,10 @@ export default class EditorManager {
             for (let i = 0; i < (node.extends ?? []).length; i += 1) {
                 const extendedNode = node.extends[i];
                 if (extendedNode in definedCategories) {
-                    if (!categories.includes(extendedNode)) {
+                    const commonPrefix = definedCategories[extendedNode] !== '' ?
+                        `${definedCategories[extendedNode]}/${extendedNode}` : extendedNode;
+
+                    if (!node.category.includes(commonPrefix)) {
                         errors.push(
                             `Node '${node.name}' extends from a category node '${extendedNode}' but is not in its category`,
                         );
