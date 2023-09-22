@@ -445,7 +445,7 @@ class SpecificationBuilder(object):
             self,
             name: str,
             interfacename: str,
-            interfacetype: Union[str, List[str]],
+            interfacetype: Optional[Union[str, List[str]]],
             direction: str,
             side: Optional[str] = None,
             maxcount: Optional[int] = None,
@@ -459,7 +459,7 @@ class SpecificationBuilder(object):
             Name of the node type
         interfacename: str
             Name of the interface
-        interfacetype: Union[str, List[str]]
+        interfacetype: Optional[Union[str, List[str]]]
             List of matching types for interfaces
         direction: str
             Direction of the connection
@@ -485,9 +485,11 @@ class SpecificationBuilder(object):
 
         interface = {
             "name": interfacename,
-            "type": [typ.lower() for typ in interfacetype] if isinstance(interfacetype, list) else interfacetype.lower(),  # noqa: E501
             "direction": direction
         }
+
+        if interfacetype is not None:
+            interface["type"] = [typ for typ in interfacetype] if isinstance(interfacetype, list) else interfacetype  # noqa: E501
 
         set_if_not_none(interface, "side", side)
         set_if_not_none(interface, "maxConnectionsCount", maxcount)
