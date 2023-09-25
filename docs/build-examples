@@ -55,8 +55,16 @@ def main(argv):
         dir_name = str(spec.stem).replace('-specification', '')
         try:
             with open(dataflow, 'r') as f:
-                title = json.load(f)['graph']['name']
-        except (KeyError, FileNotFoundError):
+                json_dataflow = json.load(f)
+            if 'name' in json_dataflow['graph']:
+                title = json_dataflow['graph']['name']
+            else:
+                # Get name from subgraph marked as entryGraph
+                title = [
+                    subgraph for subgraph in json_dataflow['subgraphs']
+                    if subgraph['id'] == json_dataflow['graph']['entryGraph']
+                ][0]['name']
+        except (KeyError, IndexError, FileNotFoundError):
             print(
                 f'The dataflow file {dataflow} is invalid '
                 'or misses graph name'
