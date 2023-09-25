@@ -502,13 +502,9 @@ export default class EditorManager {
      *
      * @returns Serialized dataflow.
      */
-    saveDataflow(readonly, hideHud, position, graphname) {
+    saveDataflow(readonly, hideHud, position) {
         const save = this.baklavaView.editor.save();
         save.version = this.specificationVersion;
-
-        if (graphname !== undefined) {
-            save.graph.name = graphname;
-        }
 
         if (!position) {
             delete save.graph.panning;
@@ -827,5 +823,12 @@ export default class EditorManager {
      */
     returnFromSubgraph() {
         this.baklavaView.editor.backFromSubgraph(this.baklavaView.displayedGraph);
+    }
+
+    /**
+     * Updates name of currently displayed graph
+     */
+    updateSubgraphName(name) {
+        this.editor.updateCurrentSubgraphName(name);
     }
 }
