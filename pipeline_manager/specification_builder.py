@@ -449,7 +449,8 @@ class SpecificationBuilder(object):
             direction: str,
             side: Optional[str] = None,
             maxcount: Optional[int] = None,
-            override: Optional[bool] = None):
+            override: Optional[bool] = None,
+            array: Optional[List[int]] = None):
         """
         Adds interface to the node type.
 
@@ -469,6 +470,9 @@ class SpecificationBuilder(object):
             The maximum connections to the given interface
         override: Optional[bool]
             Determines whether interface should be overriden
+        array : Optional[List[int]]
+            Creates an array of interfaces with given name.
+            Accepts two integers - minimal and maximal value
         """
         if 'interfaces' not in self._nodes[name]:
             self._nodes[name]['interfaces'] = []
@@ -494,6 +498,7 @@ class SpecificationBuilder(object):
         set_if_not_none(interface, "side", side)
         set_if_not_none(interface, "maxConnectionsCount", maxcount)
         set_if_not_none(interface, "override", override)
+        set_if_not_none(interface, "array", array)
 
         self._nodes[name]['interfaces'].append(interface)
 
@@ -731,13 +736,14 @@ class SpecificationBuilder(object):
         if "interfaces" in node:
             for interface in node["interfaces"]:
                 self.add_node_type_interface(
-                    nodename,
-                    interface["name"],
-                    [typ.lower() for typ in interface["type"]] if isinstance(interface["type"], list) else interface["type"].lower(),  # noqa: E501
-                    interface["direction"],
-                    get_optional(interface, "side"),
-                    get_optional(interface, "maxConnectionsCount"),
-                    get_optional(interface, "override"),
+                    name=nodename,
+                    interfacename=interface["name"],
+                    interfacetype=[typ.lower() for typ in interface["type"]] if isinstance(interface["type"], list) else interface["type"].lower(),  # noqa: E501
+                    direction=interface["direction"],
+                    side=get_optional(interface, "side"),
+                    maxcount=get_optional(interface, "maxConnectionsCount"),
+                    override=get_optional(interface, "override"),
+                    array=get_optional(interface, "array")
                 )
         if "properties" in node:
             for property in node["properties"]:
