@@ -102,17 +102,17 @@ export default {
                 hideHud: false,
                 position: false,
                 savename: 'save',
-                graphname: newValue ?? '',
             };
         },
         graphName(newValue) {
+            this.editorManager.updateSubgraphName(newValue);
+
             // Resetting the save configuration
             this.saveConfiguration = {
                 readonly: false,
                 hideHud: false,
                 position: false,
                 savename: 'save',
-                graphname: newValue ?? '',
             };
         },
     },
@@ -138,7 +138,6 @@ export default {
                 hideHud: false,
                 position: false,
                 savename: 'save',
-                graphname: graphName ?? '',
             },
             /* create instance of external manager to control
             connection, dataflow and specification
@@ -330,7 +329,6 @@ export default {
                 this.saveConfiguration.readonly,
                 this.saveConfiguration.hideHud,
                 this.saveConfiguration.position,
-                this.saveConfiguration.graphname,
             ), null, 4)], {
                 type: 'application/json',
             });
