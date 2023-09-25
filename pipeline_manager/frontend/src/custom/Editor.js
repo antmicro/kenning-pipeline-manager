@@ -314,7 +314,7 @@ export default class PipelineManagerEditor extends Editor {
             return errors;
         }
         this.events.loaded.emit();
-        this.graphName = state.graph.name;
+        this.graphName = entryGraph.name;
         this.readonly = readonlySetting;
 
         if (state.graph.entryGraph !== undefined) {
@@ -488,6 +488,7 @@ export default class PipelineManagerEditor extends Editor {
 
         this._graph = subgraphNode.subgraph;
         this._switchGraph(subgraphNode.subgraph);
+        this.graphName = this._graph.name;
         suppressHistoryLogging(false);
         nextTick().then(() => {
             const graph = this.graph.save();
@@ -571,6 +572,7 @@ export default class PipelineManagerEditor extends Editor {
 
         this._graph = newGraph;
         this._switchGraph(this._graph);
+        this.graphName = this._graph.name;
 
         suppressHistoryLogging(false);
     }
@@ -598,5 +600,9 @@ export default class PipelineManagerEditor extends Editor {
             )[0];
             node.position = updatedState.position;
         });
+    }
+
+    updateCurrentSubgraphName(name) {
+        this._graph.name = name;
     }
 }
