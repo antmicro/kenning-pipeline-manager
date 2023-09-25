@@ -40,7 +40,7 @@ export default class ExternalApplicationManager {
         const connected = response.status === HTTPCodes.OK;
 
         if (!connected) {
-            NotificationHandler.showToast('error', data);
+            NotificationHandler.terminalLog('error', data);
         }
         this.externalApplicationConnected = connected;
     }
@@ -82,14 +82,14 @@ export default class ExternalApplicationManager {
                 NotificationHandler.showToast('info', 'Specification loaded successfully');
             } else if (data.type === PMMessageType.ERROR) {
                 message = data.content;
-                NotificationHandler.showToast('error', message);
+                NotificationHandler.terminalLog('error', message);
             } else if (data.type === PMMessageType.WARNING) {
                 message = data.content;
-                NotificationHandler.showToast('warning', message);
+                NotificationHandler.terminalLog('warning', message);
             }
         } else if (response.status === HTTPCodes.ServiceUnavailable) {
             message = await response.text();
-            NotificationHandler.showToast('error', message);
+            NotificationHandler.terminalLog('error', message);
         }
     }
 
@@ -115,7 +115,7 @@ export default class ExternalApplicationManager {
         if (response.status === HTTPCodes.ServiceUnavailable) {
             // The connection was closed
             const data = await response.text();
-            NotificationHandler.showToast('error', data);
+            NotificationHandler.terminalLog('error', data);
             return;
         }
 
@@ -137,7 +137,7 @@ export default class ExternalApplicationManager {
                     data = await response.json();
                 } else if (response.status === HTTPCodes.ServiceUnavailable) {
                     data = await response.text();
-                    NotificationHandler.showToast('error', data);
+                    NotificationHandler.terminalLog('error', data);
                     progressBar.style.width = '0%';
                     return;
                 }
@@ -189,7 +189,7 @@ export default class ExternalApplicationManager {
             }
         } else if (response.status === HTTPCodes.ServiceUnavailable) {
             const data = await response.text();
-            NotificationHandler.showToast('error', data);
+            NotificationHandler.terminalLog('error', data);
         }
     }
 
