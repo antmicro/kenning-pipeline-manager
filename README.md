@@ -21,11 +21,11 @@ Pipeline Manager aims to simplify the process of developing graph-based graphica
 
 Pipeline Manager requires `npm`, `python` and `pip` for installing dependencies, building and (optionally) running - use package manager to install those packages.
 
-The backend of the application has a list of requirements in the `requirements.txt` file.
+The backend of the application has a list of requirements in the `pyproject.toml` file.
 They can be installed using `pip`:
 
 ```
-pip install -r requirements.txt
+pip install .
 ```
 
 All of `npm` modules needed for the frontend of the application are installed automatically during build.
