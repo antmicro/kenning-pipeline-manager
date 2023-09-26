@@ -181,9 +181,11 @@ export default function createPipelineManagerGraph(graph) {
                 if (Object.prototype.hasOwnProperty.call(newNodeInstance.inputs, name)) {
                     if (conn.from === intf) {
                         const newConn = new Connection(newNodeInstance.inputs[name], conn.to);
+                        newConn.anchors = conn.anchors;
                         connectionsToRestore.push(newConn);
                     } else if (conn.to === intf) {
                         const newConn = new Connection(conn.from, newNodeInstance.inputs[name]);
+                        newConn.anchors = conn.anchors;
                         connectionsToRestore.push(newConn);
                     }
                 }
@@ -191,9 +193,11 @@ export default function createPipelineManagerGraph(graph) {
                 if (Object.prototype.hasOwnProperty.call(newNodeInstance.outputs, name)) {
                     if (conn.from === intf) {
                         const newConn = new Connection(newNodeInstance.outputs[name], conn.to);
+                        newConn.anchors = conn.anchors;
                         connectionsToRestore.push(newConn);
                     } else if (conn.to === intf) {
                         const newConn = new Connection(conn.from, newNodeInstance.outputs[name]);
+                        newConn.anchors = conn.anchors;
                         connectionsToRestore.push(newConn);
                     }
                 }
