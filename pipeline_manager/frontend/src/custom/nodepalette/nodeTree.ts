@@ -47,7 +47,7 @@ interface NodeCategory {
     subcategories: NodeSubcategories,
     nodes: Nodes | Record<string, never>,
     // For now it is assumed there there is only one category node
-    categoryNodes: Nodes | Record<string, never>,
+    categoryNode: NodeType | undefined,
     hitSubstring: string,
     mask: boolean,
 }
@@ -85,20 +85,19 @@ const parseCategories = (categoriesNames: Set<string>) => {
  * @param category Single category entry
  */
 const setDefaultNames = (category: [string, NodeCategory]) => {
-    const [categoryName, categoryNode] = category;
-    categoryNode.hitSubstring = categoryName;
-    if (categoryNode.nodes.nodeTypes !== undefined) {
-        Object.entries(categoryNode.nodes.nodeTypes).forEach(([, nodeType]) => {
-            nodeType.hitSubstring = nodeType.title;
-        });
+    const [name, node] = category;
+    node.hitSubstring = name;
+    if (node.categoryNode !== undefined) {
+        node.categoryNode.hitSubstring = node.categoryNode.title;
     }
-    if (categoryNode.categoryNodes.nodeTypes !== undefined) {
-        Object.entries(categoryNode.categoryNodes.nodeTypes).forEach(([, nodeType]) => {
+
+    if (node.nodes.nodeTypes !== undefined) {
+        Object.entries(node.nodes.nodeTypes).forEach(([, nodeType]) => {
             nodeType.hitSubstring = nodeType.title;
         });
     }
 
-    Object.entries(categoryNode.subcategories).forEach((subTree) => setDefaultNames(subTree));
+    Object.entries(node.subcategories).forEach((subTree) => setDefaultNames(subTree));
 };
 
 /* eslint-disable no-param-reassign */
@@ -108,13 +107,12 @@ const setDefaultNames = (category: [string, NodeCategory]) => {
  */
 const setMasksToTrue = (category: NodeCategory) => {
     category.mask = true;
+    if (category.categoryNode !== undefined) {
+        category.categoryNode.mask = true;
+    }
+
     if (category.nodes.nodeTypes !== undefined) {
         Object.values(category.nodes.nodeTypes).forEach((nodeType) => {
-            nodeType.mask = true;
-        });
-    }
-    if (category.categoryNodes.nodeTypes !== undefined) {
-        Object.values(category.categoryNodes.nodeTypes).forEach((nodeType) => {
             nodeType.mask = true;
         });
     }
@@ -160,14 +158,11 @@ const categorizeNodes = (categoryTree: CategoryTree, nodes: Array<Nodes>, prefix
                 nodeTypes: {},
             };
 
-            const categoryNodes: Nodes = {
-                categoryName: (hitNodes as Nodes).categoryName,
-                nodeTypes: {},
-            };
+            let categoryNode;
 
             allNames.forEach((nodeName) => {
                 if (categoryNames.includes(nodeName)) {
-                    categoryNodes.nodeTypes[nodeName] = (hitNodes as Nodes).nodeTypes[nodeName];
+                    categoryNode = (hitNodes as Nodes).nodeTypes[nodeName];
                 } else {
                     nonCategoryNodes.nodeTypes[nodeName] = (hitNodes as Nodes).nodeTypes[nodeName];
                 }
@@ -176,7 +171,7 @@ const categorizeNodes = (categoryTree: CategoryTree, nodes: Array<Nodes>, prefix
             nodeTree[category] = {
                 subcategories: categorizeNodes(subcategories, nodes, name),
                 nodes: nonCategoryNodes,
-                categoryNodes,
+                categoryNode,
                 hitSubstring: category,
                 mask: true,
             };
@@ -184,7 +179,7 @@ const categorizeNodes = (categoryTree: CategoryTree, nodes: Array<Nodes>, prefix
             nodeTree[category] = {
                 subcategories: categorizeNodes(subcategories, nodes, name),
                 nodes: {},
-                categoryNodes: {},
+                categoryNode: undefined,
                 hitSubstring: category,
                 mask: true,
             };
