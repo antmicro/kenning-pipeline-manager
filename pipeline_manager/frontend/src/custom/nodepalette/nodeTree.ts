@@ -92,6 +92,11 @@ const setDefaultNames = (category: [string, NodeCategory]) => {
             nodeType.hitSubstring = nodeType.title;
         });
     }
+    if (categoryNode.categoryNodes.nodeTypes !== undefined) {
+        Object.entries(categoryNode.categoryNodes.nodeTypes).forEach(([, nodeType]) => {
+            nodeType.hitSubstring = nodeType.title;
+        });
+    }
 
     Object.entries(categoryNode.subcategories).forEach((subTree) => setDefaultNames(subTree));
 };
@@ -105,6 +110,11 @@ const setMasksToTrue = (category: NodeCategory) => {
     category.mask = true;
     if (category.nodes.nodeTypes !== undefined) {
         Object.values(category.nodes.nodeTypes).forEach((nodeType) => {
+            nodeType.mask = true;
+        });
+    }
+    if (category.categoryNodes.nodeTypes !== undefined) {
+        Object.values(category.categoryNodes.nodeTypes).forEach((nodeType) => {
             nodeType.mask = true;
         });
     }
@@ -193,29 +203,31 @@ const categorizeNodes = (categoryTree: CategoryTree, nodes: Array<Nodes>, prefix
  *
  * @param treeNode NodeSubcategories instance.
  * @param filter String which is used for filtering
+ * @param forceMask whether the whole substree should be expanded
  * @returns Boolean value whether at least one of the categories in the tree has
  * mask set to true.
  */
-const updateMasks = (treeNode: NodeSubcategories, filter: string): boolean =>
+const updateMasks = (treeNode: NodeSubcategories, filter: string, forceMask: boolean): boolean =>
     Object.entries(treeNode).map(([categoryName, node]) => {
-        const categoryResult = fuzzysort.single(filter, categoryName);
+        const threshold = -50;
 
-        if (categoryResult !== null) {
-            setMasksToTrue(node);
+        let categoryMatches = false;
+        const categoryResult = fuzzysort.single(filter, categoryName);
+        if (categoryResult !== null && categoryResult.score > threshold) {
             node.hitSubstring = fuzzysort.highlight(categoryResult, '<span>', '</span>') ?? '';
+            categoryMatches = true;
         } else {
             node.hitSubstring = categoryName;
         }
 
-        if (node.nodes.nodeTypes !== undefined) {
-            node.mask = Object.values(node.nodes.nodeTypes)
+        let entryMatches = false;
+        if (node.nodes.nodeTypes !== undefined && Object.keys(node.nodes.nodeTypes).length !== 0) {
+            entryMatches = Object.values(node.nodes.nodeTypes)
                 .map((nt) => {
-                    const threshold = -50;
                     const entryResult = fuzzysort.single(filter, nt.title);
-                    nt.mask = (
-                        (entryResult !== null && entryResult.score > threshold) ||
-                        (categoryResult !== null && categoryResult.score > threshold)
-                    );
+                    nt.mask = (entryResult !== null && entryResult.score > threshold) ||
+                        categoryMatches ||
+                        forceMask;
                     if (entryResult !== null) {
                         nt.hitSubstring = fuzzysort.highlight(entryResult, '<span>', '</span>') ?? '';
                     } else {
@@ -224,11 +236,16 @@ const updateMasks = (treeNode: NodeSubcategories, filter: string): boolean =>
                     return nt.mask;
                 })
                 .includes(true);
-        } else {
-            node.mask = false;
         }
 
-        node.mask = updateMasks(node.subcategories, filter) || node.mask;
+        // The node is expanded if any entry in its subtree is highlighted, or a node that
+        // is part of this category is highlighted, or the category is highlighted or
+        // forceMask is true.
+        node.mask = updateMasks(node.subcategories, filter, categoryMatches || forceMask) ||
+            categoryMatches ||
+            entryMatches ||
+            forceMask;
+
         return node.mask;
     }).includes(true);
 
@@ -318,7 +335,7 @@ export default function getNodeTree(nameFilterRef: Ref<string>) {
             Object.entries(parsedTree).forEach((subTree) => setDefaultNames(subTree));
             Object.values(parsedTree).forEach((subTree) => setMasksToTrue(subTree));
         } else {
-            updateMasks(parsedTree, newNameFilter.toLowerCase());
+            updateMasks(parsedTree, newNameFilter.toLowerCase(), false);
         }
     });
 

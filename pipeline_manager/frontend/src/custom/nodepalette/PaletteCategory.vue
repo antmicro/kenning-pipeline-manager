@@ -34,7 +34,7 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
                         :src="getIconPath(node.iconPath)"
                         draggable="false"
                     />
-                    <div class="__title-label" v-html="node.hitSubstring"></div>
+                    <div class="__title-label" v-html="category.hitSubstring"></div>
                     <a
                         v-for="url in node.URLs"
                         :key="url.name"
