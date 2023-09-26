@@ -22,6 +22,7 @@ import Bell from '../icons/Bell.vue';
 import Cube from '../icons/Cube.vue';
 import DropdownItem from './DropdownItem.vue';
 import Cogwheel from '../icons/Cogwheel.vue';
+import Magnifier from '../icons/Magnifier.vue';
 import EditorManager from '../core/EditorManager';
 import NotificationHandler from '../core/notifications';
 import { notificationStore } from '../core/stores';
@@ -47,6 +48,7 @@ export default {
         Bell,
         DropdownItem,
         Notifications,
+        Magnifier,
         Cogwheel,
         Settings,
         Cube,
@@ -121,6 +123,7 @@ export default {
     },
     data() {
         const editorManager = EditorManager.getEditorManagerInstance();
+        console.log(editorManager.editor);
         const graphName = editorManager.baklavaView.editor.graphName ?? '';
         const appName = process.env.VUE_APP_EDITOR_TITLE ?? 'Pipeline Manager';
 
@@ -573,6 +576,13 @@ export default {
             </span>
             <div>
                 <div
+                    ref="searchbar"
+                    class="searchbar"
+                >
+                    <Magnifier :color="'gray'" />
+                    <input class="search-editor-nodes" v-model="searchEditorNodes" placeholder="Search for nodes in the editor" />
+                </div>
+                <div
                     ref="settings"
                     class="hoverbox"
                     role="button"
@@ -821,6 +831,34 @@ $bar-height: 60px;
             }
             &.hoverbox:hover ~ .small_svg {
                 fill: $green;
+            }
+
+            &.searchbar {
+                width: calc(3.75em * 8);
+                padding: 0.1em;
+
+                & > .search-editor-nodes {
+                    background-color: #181818;
+                    flex: 1;
+                    height: 100%;
+                    color: $white;
+                    border: none;
+                    padding: 0em 1em;
+
+                    &:focus {
+                        outline: 1px solid $green;
+                    }
+
+                    &::placeholder {
+                        opacity: 0.5;
+                    }
+                }
+
+                & > svg {
+                    width: 1.2em;
+                    height: 1.2em;
+                    padding: 1em;
+                }
             }
 
         }
