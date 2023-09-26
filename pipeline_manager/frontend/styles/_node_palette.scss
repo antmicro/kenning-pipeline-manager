@@ -99,23 +99,15 @@
         background-color: $gray-700;
         padding-right: 0;
 
-        &>div {
-            flex-grow: 1;
-        }
 
         &>.__entry {
-            border: 0;
-            margin-top: 0;
+            flex-grow: 1;
             border-left: 1px solid #393939;
         }
 
-        &>.__title>span {
+        &>.__title > span {
             color: $green;
         }
-    }
-
-    &>.__category-title {
-        padding-left: 1em;
     }
 
     &>.__url {
