@@ -44,7 +44,7 @@ specification = specification_builder.create_and_validate_spec()
 
 The possible arguments are:
 
-- `workspacedir` - The path to the workspace directory for Pipeline Manager
+- `workspacedir` - The path to the workspace directory for Pipeline Manager, the same that has been provided for the build script
 - `fail_on_warnings` - Whether the creation process should fail on warnings
 - `dump_spec` - A path to where the specification should be dumped as a file before validation.
   Useful for debugging purposes.
@@ -173,3 +173,9 @@ specification_builder.add_node_type_url(
     suffix='wiki/Digital_camera'
 )
 ```
+
+### Saving the specification
+
+In the end, go back to [constructing and validating the specification](#constructing-and-validating-the-specification) and use the method provided there.
+
+Providing the optional `dump_spec` argument can be especially useful for troubleshooting.
