@@ -21,7 +21,7 @@ import {
     AbstractNode, INodeState, IConnectionState, Connection, NodeInterface, Editor,
 } from '@baklavajs/core';
 import {
-    ICommandHandler, ICommand,
+    ICommandHandler, ICommand, useViewModel,
 } from '@baklavajs/renderer-vue';
 import {
     startTransaction, commitTransaction,
@@ -115,6 +115,8 @@ export function useClipboard(
         if (isEmpty.value) {
             return;
         }
+        const { viewModel } = useViewModel();
+        const movementStep = (<any>viewModel.value).movementStep ?? 1;
 
         // Map old IDs to new IDs
         const idmap = new Map<string, string>();
@@ -161,8 +163,8 @@ export function useClipboard(
                 if (ns.position) {
                     consecutivePasteNumber.value += 1;
 
-                    ns.position.x += consecutivePasteNumber.value * 40;
-                    ns.position.y += consecutivePasteNumber.value * 40;
+                    ns.position.x += consecutivePasteNumber.value * Math.max(40, movementStep);
+                    ns.position.y += consecutivePasteNumber.value * Math.max(40, movementStep);
                 }
                 copiedNode.hooks.beforeLoad.unsubscribe(token);
                 return ns;
