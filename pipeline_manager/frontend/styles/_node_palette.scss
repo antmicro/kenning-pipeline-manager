@@ -36,28 +36,6 @@
             padding-top: 1em;
             padding-left: 2em;
         }
-
-        & > .__entry {
-            padding-right: 0;
-
-            & > .node-search {
-                height: 100%;
-                width: 100%;
-                color: $white;
-                border: none;
-                background-color: $gray-700;
-
-                padding-left: 1em;
-
-                &:focus {
-                    outline: 1px solid $green;
-                }
-
-                &::placeholder {
-                    opacity: 0.5;
-                }
-            }
-        }
     }
 
     .nodes {
@@ -69,13 +47,9 @@
         margin: 0;
     }
 
-    & > .nodes {
+    &>.nodes {
         overflow-y: auto;
     }
-}
-
-.__entry:hover {
-    color: $green
 }
 
 .__entry {
@@ -99,7 +73,11 @@
     cursor: grab;
     overflow: hidden;
 
-    & > .__title-icon {
+    &:hover {
+        color: $green
+    }
+
+    &>.__title-icon {
         flex-grow: 0;
         padding: 0;
         height: 2em;
@@ -107,11 +85,11 @@
         pointer-events: none;
     }
 
-    & > .__title-label {
+    &>.__title-label {
         flex-grow: 1;
         width: max-content;
 
-        & > span {
+        &>span {
             color: $green;
         }
     }
@@ -121,24 +99,26 @@
         background-color: $gray-700;
         padding-right: 0;
 
-        & > div {
+        &>div {
             flex-grow: 1;
         }
 
-        & > .__entry {
+        &>.__entry {
+            border: 0;
+            margin-top: 0;
             border-left: 1px solid #393939;
         }
 
-        & > .__title > span {
+        &>.__title>span {
             color: $green;
         }
     }
 
-    & > .__category-title {
+    &>.__category-title {
         padding-left: 1em;
     }
 
-    & > .__url {
+    &>.__url {
         display: inline;
         text-decoration: none;
         color: inherit;
@@ -155,4 +135,25 @@
 .__entry_search {
     @extend .__entry;
     background-color: $gray-700;
+    cursor: auto;
+    padding-right: 0;
+    overflow: visible;
+
+    &>.node-search {
+        height: 100%;
+        width: 100%;
+        color: $white;
+        border: none;
+        background-color: $gray-700;
+
+        padding-left: 1em;
+
+        &:focus {
+            outline: 1px solid $green;
+        }
+
+        &::placeholder {
+            opacity: 0.5;
+        }
+    }
 }
