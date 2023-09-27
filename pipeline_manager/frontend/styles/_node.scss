@@ -98,4 +98,8 @@
             grid-column: 1 / span 2;
         }
     }
+
+    &.--greyed-out {
+        filter: brightness(60%) blur(0.5px);
+    }
 }
