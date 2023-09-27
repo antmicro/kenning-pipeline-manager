@@ -385,6 +385,7 @@ export default function createPipelineManagerGraph(graph) {
 
         // Load state
         this.id = state.id;
+        this.name = state.name ?? undefined;
         this.inputs = state.inputs;
         this.outputs = state.outputs;
 
@@ -530,6 +531,7 @@ export default function createPipelineManagerGraph(graph) {
     graph.save = function save() {
         const state = {
             id: this.id,
+            name: this.name,
             nodes: this.nodes.map((n) => n.save()),
             connections: this.connections.map((c) => ({
                 id: c.id,
