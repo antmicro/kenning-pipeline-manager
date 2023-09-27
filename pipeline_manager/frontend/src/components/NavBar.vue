@@ -728,10 +728,16 @@ $bar-height: 60px;
     .editorTitle {
         cursor: text;
         text-align: right;
+        position: fixed;
+        left: 50vw;
+        transform: translate(-50%, 0);
     }
 
     .editorTitleInput {
         font-size: $fs-small;
+        position: fixed;
+        left: 50vw;
+        transform: translate(-50%, 0);
     }
 
     & > div {
