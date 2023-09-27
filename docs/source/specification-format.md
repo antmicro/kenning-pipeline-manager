@@ -40,7 +40,7 @@ This object specifies additional editor options and contains the following optio
   Default value is `curved`
 * `hideHud` - boolean value determining whether UI elements should be hidden. Components affected by this flag are: popup notifications, navigation bar and terminal window.
   Default value is `false`
-* `layers` - layers specyfing groups of interfaces and nodes that can be hidden in the viewer from settings level.
+* `layers` - layers specifying groups of interfaces and nodes that can be hidden in the viewer from settings level.
   The entries are of type [Layer](#layer).
   By default there are no layers.
 * `urls` - list of URL classes present in the specification and flow.
@@ -155,8 +155,8 @@ This object specifies a single node.
   The rest of the fields can be provided to introduce some common properties of classes inheriting from it.
 * `additionalData` - can be any JSON-like object (array, dictionary, number, string, ...), it is only used for storing some additional, node-specific data, such as comments etc.
 * `description` - description of the node in markdown format that is displayed in a sidebar node.
-* `isCategory` - defines thether the node is both a category and a node.
-  If set to true, then the `name` of the node is infered from the last text segment in `category` parameter.
+* `isCategory` - tells if the node is both a category and a node.
+  If set to true, then the `name` of the node is inferred from the last text segment in `category` parameter.
   If any node has a node category in its `category` path then it has to extend from the nearest ancestor category node.
   Additionally, if a node extends from a category node then it has to be in its subtree.
 
