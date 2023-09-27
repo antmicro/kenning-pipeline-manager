@@ -31,8 +31,11 @@ numfig_format = default_numfig_format
 
 myst_heading_anchors = 6
 
+
 # If you need to add extensions just add to those lists
-extensions = default_extensions
+extensions = list(set(default_extensions + [
+    'sphinx.ext.napoleon'
+]))
 myst_enable_extensions = default_myst_enable_extensions
 myst_fence_as_directive = default_myst_fence_as_directive
 
