@@ -10,9 +10,10 @@ Displays user interface and main details about the Pipeline Manager status.
 -->
 
 <script>
-import { markRaw } from 'vue';
+import { markRaw, ref } from 'vue';
 import { toPng, toSvg } from 'html-to-image';
 import jsonlint from 'jsonlint';
+import { useViewModel } from '@baklavajs/renderer-vue';
 import Logo from '../icons/Logo.vue';
 import Arrow from '../icons/Arrow.vue';
 import Run from '../icons/Run.vue';
@@ -120,10 +121,17 @@ export default {
                 savename: 'save',
             };
         },
+        searchEditorNodesQuery(newValue) {
+            const { viewModel } = useViewModel();
+            if (newValue === '') {
+                viewModel.value.editor.searchQuery = undefined;
+                return;
+            }
+            viewModel.value.editor.searchQuery = newValue.toLowerCase();
+        },
     },
     data() {
         const editorManager = EditorManager.getEditorManagerInstance();
-        console.log(editorManager.editor);
         const graphName = editorManager.baklavaView.editor.graphName ?? '';
         const appName = process.env.VUE_APP_EDITOR_TITLE ?? 'Pipeline Manager';
 
@@ -133,6 +141,8 @@ export default {
         ).setPort(false);
         editorTitleInterface.componentName = 'InputInterface';
         editorTitleInterface.setComponent(markRaw(InputInterfaceComponent));
+
+        const searchEditorNodesQuery = ref('');
 
         return {
             appName,
@@ -153,6 +163,7 @@ export default {
             editTitle: false,
             notificationStore,
             logoHover: false,
+            searchEditorNodesQuery,
             // Toggleable panels and their configuration
             panels: {
                 notifications: {
@@ -580,7 +591,12 @@ export default {
                     class="searchbar"
                 >
                     <Magnifier :color="'gray'" />
-                    <input class="search-editor-nodes" v-model="searchEditorNodes" placeholder="Search for nodes in the editor" />
+                    <input
+                        type="search"
+                        class="search-editor-nodes"
+                        v-model="searchEditorNodesQuery"
+                        placeholder="Search for nodes in the editor"
+                    />
                 </div>
                 <div
                     ref="settings"
@@ -834,7 +850,7 @@ $bar-height: 60px;
             }
 
             &.searchbar {
-                width: calc(3.75em * 8);
+                width: calc(3.75em * 6);
                 padding: 0.1em;
 
                 & > .search-editor-nodes {
