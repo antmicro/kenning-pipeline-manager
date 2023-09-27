@@ -51,6 +51,7 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
                 :key="node.id + counter.toString()"
                 :node="node"
                 :selected="selectedNodes.includes(node)"
+                :greyedOut="greyedOutNodes.includes(node)"
                 :interfaces="highlightInterfaces"
                 @select="selectNode(node)"
             />
@@ -140,6 +141,8 @@ export default defineComponent({
 
         const rectangleSelection = ref(null);
         const selectedNodesCtrlBackup = [];
+
+        const greyedOutNodes = ref([]);
 
         let pressStartTime = 0;
         const longPressMilisTreshold = 100;
@@ -260,6 +263,20 @@ export default defineComponent({
                 document.addEventListener('mouseup', onRightPointerUp);
                 document.addEventListener('mousemove', onPointerMove);
             }
+        });
+
+        watch(props.viewModel, () => {
+            const { searchQuery } = props.viewModel.editor;
+
+            if (searchQuery === undefined || searchQuery === '') {
+                greyedOutNodes.value = [];
+                return;
+            }
+
+            greyedOutNodes.value = graph.value.nodes.filter((node) =>
+                !node.title.toLowerCase().includes(searchQuery) &&
+                !node.type.toLowerCase().includes(searchQuery),
+            );
         });
 
         const clearHighlight = () => {
@@ -680,6 +697,7 @@ export default defineComponent({
             keyUp,
             selectNode,
             rectangleSelection,
+            greyedOutNodes,
             temporaryConnection: temporaryConnection.temporaryConnection,
             mouseWheel: panZoom.onMouseWheel,
             dragging: panZoom.dragging,

@@ -155,6 +155,7 @@ import HexInterfaceComponent from '../interfaces/HexInterface.vue';
 const props = defineProps({
     node: AbstractNode,
     selected: Boolean,
+    greyedOut: Boolean,
     interfaces: Array,
 });
 
@@ -279,6 +280,7 @@ const classes = computed(() => ({
     '--selected': props.selected,
     '--dragging': groupDragMove.dragging.value,
     '--two-column': !!props.node.twoColumn,
+    '--greyed-out': props.greyedOut,
     __readonly: viewModel.value.editor.readonly,
 }));
 
