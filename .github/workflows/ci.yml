@@ -12,13 +12,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout sources
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
-          python-version: 3.9
+          python-version: 3.11
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: pip install -e .
       - name: Install flake8
         run: pip install -U flake8
       - name: Run flake8
@@ -28,11 +28,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout sources
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Setup npm
         uses: actions/setup-node@v3
         with:
-          node-version: 19
+          node-version: 20
       - name: Lint frontend
         run: |
           cd pipeline_manager/frontend
@@ -44,17 +44,17 @@ jobs:
       runs-on: ubuntu-latest
       steps:
         - name: Checkout sources
-          uses: actions/checkout@v3
+          uses: actions/checkout@v4
         - name: Setup npm
           uses: actions/setup-node@v3
           with:
-            node-version: 19
+            node-version: 20
         - name: Setup Python
           uses: actions/setup-python@v4
           with:
-            python-version: 3.9
+            python-version: 3.11
         - name: Install dependencies
-          run: pip install -r requirements.txt
+          run: pip install -e .
         - name: Build server-app
           run: ./build server-app
 
@@ -62,19 +62,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
         - name: Checkout sources
-          uses: actions/checkout@v3
+          uses: actions/checkout@v4
         - name: Setup npm
           uses: actions/setup-node@v3
           with:
-            node-version: 19
+            node-version: 10
         - name: Setup Python
           uses: actions/setup-python@v4
           with:
-            python-version: 3.9
+            python-version: 3.11
         - name: Install dependencies
-          run: pip install -r requirements.txt
-        - name: Install docs dependencies
-          run: pip install -r docs/requirements.txt
+          run: pip install -e ".[docs]"
         - name: Build docs and static demo
           run: |
             cd docs
