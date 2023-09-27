@@ -975,7 +975,7 @@ class SpecificationBuilder(object):
             self,
             workspacedir: Optional[Path] = None,
             fail_on_warnings: bool = True,
-            dump_spec: Optional[Path] = None):
+            dump_spec: Optional[Path] = None) -> Dict:
         """
         Creates a specification and validates it using schema.
 
@@ -988,6 +988,11 @@ class SpecificationBuilder(object):
         dump_spec: Optional[Path]
             Tells where the specification should be dumped to file
             before validation for debugging purposes.
+
+        Returns
+        -------
+        Dict :
+            Built specification, if successful
         """
         import tempfile
         spec = self._construct_specification()
