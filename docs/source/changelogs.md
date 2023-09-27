@@ -11,7 +11,7 @@ This updates changes the existing format of specification and dataflow.
 
 Commit SHA - `0bee99e152a408650590bb6ea4210e96502b33ef`
 
-* Intorduced changes in dataflow and specification formats:
+* Introduced changes in dataflow and specification formats:
   * `type` -> `name` for dataflows for consistency with specification naming
   * `name` -> `instanceName` for dataflows to make it more explicit and avoid conflicts
   * `type` -> `layer` for nodes in specification.
@@ -72,7 +72,7 @@ Commit SHA - `84fe865ca44b3a80b87a2be418eedc1d1c025ee4`
 Commit SHA - `bdc4b2fb998ed9d6318a676d4ac77f92c1603d39`
 
 * Introduced `interfaceGroups` and `enabledInterfaceGroups` keywords that allow defining groups of interfaces.
-* Introfuced arrays of interfaces that can be easily created using `array` keyword.
+* Introduced arrays of interfaces that can be easily created using `array` keyword.
 * Simplified dataflows as interfaces that have no connections are no longer saved into output `.json` files.
 
 ## 20230619.3
@@ -81,7 +81,7 @@ Commit SHA - `84559ae8327d7aa214c388200c5b48d112021679`
 
 * Introduced two new keywords to the specification's `metadata`:
   * `backgroundSize` - defines size of the background grid.
-  It has stricly visual effects.
+  It has strictly visual effects.
   * `movementStep` - minimal node movement step.
 * Added `additionalData` for storing some node-related data, not relevant to {{project}}
 * Changed `connectionSide` to `side` in dataflow and specification
