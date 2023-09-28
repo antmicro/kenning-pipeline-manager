@@ -125,20 +125,22 @@ export default class PipelineManagerEditor extends Editor {
 
     /**
      * Cleans all graphs in the editor.
+     * @param Determines whether the cleaning process should be stored in history
      */
-    deepCleanEditor() {
+    deepCleanEditor(suppresHistory = true) {
         this.subgraphStack.forEach(this.backFromSubgraph.bind(this));
-        this.cleanEditor();
+        this.cleanEditor(suppresHistory);
         this.graphName = undefined;
     }
 
     /**
      * Cleans up the current graph current graph editor.
+     * @param Determines whether the cleaning process should be stored in history
      */
-    cleanEditor() {
+    cleanEditor(suppresHistory = true) {
         const graphInstance = this._graph;
 
-        suppressHistoryLogging(true);
+        suppressHistoryLogging(suppresHistory);
         for (let i = graphInstance.connections.length - 1; i >= 0; i -= 1) {
             graphInstance.removeConnection(graphInstance.connections[i]);
         }

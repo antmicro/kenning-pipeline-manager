@@ -33,6 +33,9 @@ import BlurPanel from './BlurPanel.vue';
 
 import InputInterface from '../interfaces/InputInterface.js';
 import InputInterfaceComponent from '../interfaces/InputInterface.vue';
+import {
+    startTransaction, commitTransaction,
+} from '../core/History.ts';
 
 export default {
     components: {
@@ -208,6 +211,12 @@ export default {
             if (Array.isArray(errors) && errors.length) {
                 NotificationHandler.terminalLog('error', 'Specification is invalid', errors);
             }
+        },
+
+        createNewGraphCallback() {
+            startTransaction();
+            this.editorManager.editor.deepCleanEditor(false);
+            commitTransaction();
         },
 
         /**
@@ -446,23 +455,32 @@ export default {
                     <Logo :hover="logoHover" />
                     <div class="dropdown-wrapper">
                         <DropdownItem
+                            v-if="this.editorManager.specificationLoaded"
+                            id="create-new-graph-button"
+                            text="Create new graph"
+                            type="'button'"
+                            :eventFunction="createNewGraphCallback"
+                        />
+                        <DropdownItem
                             v-if="!this.externalApplicationManager.backendAvailable && !hideHud"
                             text="Load specification"
                             id="load-spec-button"
                             :eventFunction="loadSpecificationCallback"
                         />
                         <DropdownItem
-                            v-if="!hideHud"
+                            v-if="!hideHud && this.editorManager.specificationLoaded"
                             id="load-dataflow-button"
                             text="Load graph file"
                             :eventFunction="loadDataflowCallback"
                         />
                         <DropdownItem
+                            v-if="this.editorManager.specificationLoaded"
                             type="'button'"
                             text="Save graph file"
                             :eventFunction="saveDataflow"
                         />
                         <DropdownItem
+                            v-if="this.editorManager.specificationLoaded"
                             type="'button'"
                             text="Save graph as file as..."
                             :eventFunction="() => {saveMenuShow = !saveMenuShow}"
