@@ -37,10 +37,6 @@ import { computed } from 'vue';
 
 export default {
     props: {
-        active: {
-            type: Boolean,
-            required: true,
-        },
         color: {
             type: String,
             required: false,
