@@ -592,7 +592,6 @@ export default {
                 >
                     <Magnifier :color="'gray'" />
                     <input
-                        type="search"
                         class="search-editor-nodes"
                         v-model="searchEditorNodesQuery"
                         placeholder="Search for nodes in the editor"
