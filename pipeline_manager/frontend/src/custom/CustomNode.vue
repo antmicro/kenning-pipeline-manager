@@ -291,13 +291,16 @@ const styles = computed(() => ({
 }));
 
 const nodeTitle = computed(() => {
+    const title = props.node.highlightedTitle ?? props.node.title;
+    const type = props.node.highlightedType ?? props.node.type;
+
     if (props.node.type.startsWith(IGNORE_TYPE_PREFIX)) {
-        return props.node.title;
+        return title;
     }
     if (props.node.title === props.node.type || props.node.title === '') {
-        return props.node.type;
+        return type;
     }
-    return `${props.node.title} <pre class="subtitle">${props.node.type}</pre>`;
+    return `${title} <pre class="subtitle">${type}</pre>`;
 });
 
 const select = () => {

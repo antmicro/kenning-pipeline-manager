@@ -57,6 +57,14 @@
                 font-size: $fs-small;
                 color: $gray-100;
                 pointer-events: all;
+
+                & > span {
+                    color: $green;
+                }
+            }
+
+            & > span {
+                color: $green;
             }
         }
 

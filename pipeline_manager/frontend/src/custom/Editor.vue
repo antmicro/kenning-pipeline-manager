@@ -89,6 +89,7 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
 /* eslint-disable object-curly-newline */
 import { EditorComponent, useGraph } from '@baklavajs/renderer-vue';
 import { defineComponent, ref, computed, watch, onMounted } from 'vue';
+import fuzzysort from 'fuzzysort';
 import usePanZoom from './panZoom';
 
 import CustomNode from './CustomNode.vue';
@@ -101,8 +102,6 @@ import EditorManager from '../core/EditorManager';
 import CustomSidebar from './CustomSidebar.vue';
 import RectangleSelection from './RectangleSelection.vue';
 import nodeInsideSelection from './rectangleSelection.js';
-import getNodeTree from './nodepalette/nodeTree';
-import fuzzysort from 'fuzzysort';
 
 export default defineComponent({
     extends: EditorComponent,
@@ -267,30 +266,46 @@ export default defineComponent({
             }
         });
 
+        const filterNodes = (searchQuery) => {
+            const threshold = -50;
+
+            const matchingNodes = graph.value.nodes.filter((node) => {
+                const resultTitle = fuzzysort.single(searchQuery, node.title);
+                const resultType = fuzzysort.single(searchQuery, node.type);
+
+                if ((resultTitle !== null && resultTitle.score > threshold) ||
+                    (resultType !== null && resultType.score > threshold)) {
+                    node.highlightedTitle = fuzzysort.highlight(resultTitle, '<span>', '</span>');
+                    node.highlightedType = fuzzysort.highlight(resultType, '<span>', '</span>');
+                    return true;
+                }
+                node.highlightedTitle = node.title;
+                node.highlightedType = node.type;
+                return false;
+            });
+
+            return matchingNodes;
+        };
+
         watch(props.viewModel, () => {
             const { searchQuery } = props.viewModel.editor;
 
             if (searchQuery === undefined || searchQuery === '') {
                 greyedOutNodes.value = [];
+                graph.value.nodes.forEach((node) => {
+                    node.highlightedTitle = node.title;
+                    node.highlightedType = node.type;
+                });
                 return;
             }
-            greyedOutNodes.value = reverseFilterNodes(searchQuery);
+            const matchingNodes = filterNodes(searchQuery);
 
+            const nonMatchingNodes = graph.value.nodes.filter(
+                (node) => !matchingNodes.includes(node),
+            );
+
+            greyedOutNodes.value = nonMatchingNodes;
         });
-
-        const reverseFilterNodes = (searchQuery) => {
-            const threshold = -50;
-            const nodes = graph.value.nodes.filter(node => {
-                const resultTitle = fuzzysort.single(searchQuery, node.title);
-                const resultType = fuzzysort.single(searchQuery, node.type);
-
-                if ((resultTitle === null || resultTitle.score <= threshold) &&
-                    (resultType === null || resultType.score <= threshold)) {
-                    return node;
-                }
-            });
-            return nodes;
-        }
 
         const clearHighlight = () => {
             highlightConnections.value.splice(0, highlightConnections.value.length);
