@@ -13,12 +13,6 @@ SPDX-License-Identifier: Apache-2.0
             </div>
             <Cross tabindex="-1" class="__close" @click="close" />
         </div>
-        Graph name:
-        <component
-            :is="graphname.component"
-            :intf="graphname" class="__name-option"
-            v-model="saveConfiguration.graphname"
-        />
         <component :is="readonly.component" :intf="readonly" />
         <component :is="hideHud.component" :intf="hideHud" />
         <component :is="position.component" :intf="position" />
@@ -67,17 +61,6 @@ export default defineComponent({
     },
     emits: ['update:modelValue'],
     setup(props, { emit }) {
-        const graphname = computed(() => {
-            const option = new InputInterface(
-                'Graph name',
-                'save',
-            ).setPort(false);
-
-            option.componentName = 'InputInterface';
-            option.setComponent(markRaw(InputInterfaceComponent));
-            return option;
-        });
-
         const readonly = computed(() => {
             const option = new CheckboxInterface(
                 'Make graph read only',
@@ -145,7 +128,6 @@ export default defineComponent({
             hideHud,
             position,
             dataflowname,
-            graphname,
             save,
             close,
         };
