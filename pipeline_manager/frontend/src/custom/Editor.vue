@@ -101,6 +101,8 @@ import EditorManager from '../core/EditorManager';
 import CustomSidebar from './CustomSidebar.vue';
 import RectangleSelection from './RectangleSelection.vue';
 import nodeInsideSelection from './rectangleSelection.js';
+import getNodeTree from './nodepalette/nodeTree';
+import fuzzysort from 'fuzzysort';
 
 export default defineComponent({
     extends: EditorComponent,
@@ -272,12 +274,23 @@ export default defineComponent({
                 greyedOutNodes.value = [];
                 return;
             }
+            greyedOutNodes.value = reverseFilterNodes(searchQuery);
 
-            greyedOutNodes.value = graph.value.nodes.filter((node) =>
-                !node.title.toLowerCase().includes(searchQuery) &&
-                !node.type.toLowerCase().includes(searchQuery),
-            );
         });
+
+        const reverseFilterNodes = (searchQuery) => {
+            const threshold = -50;
+            const nodes = graph.value.nodes.filter(node => {
+                const resultTitle = fuzzysort.single(searchQuery, node.title);
+                const resultType = fuzzysort.single(searchQuery, node.type);
+
+                if ((resultTitle === null || resultTitle.score <= threshold) &&
+                    (resultType === null || resultType.score <= threshold)) {
+                    return node;
+                }
+            });
+            return nodes;
+        }
 
         const clearHighlight = () => {
             highlightConnections.value.splice(0, highlightConnections.value.length);
