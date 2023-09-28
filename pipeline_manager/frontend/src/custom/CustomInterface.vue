@@ -28,7 +28,7 @@ from creating and deleting connections or altering nodes' values if the editor i
         >
             <Arrow
                 v-if="displayArrow"
-                noninteractable="true"
+                :noninteractable="true"
                 color="black"
                 scale="big"
                 :rotate="arrowRotation"

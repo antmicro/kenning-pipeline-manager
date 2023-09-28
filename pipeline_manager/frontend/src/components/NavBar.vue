@@ -550,7 +550,7 @@ export default {
                 </div>
                 <div v-if="this.editorManager.editor.isInSubgraph()">
                     <button @click="() => this.editorManager.returnFromSubgraph()">
-                        <Arrow rotate="down" hoverable="true" color="white" />
+                        <Arrow rotate="down" :hoverable="true" color="white" />
                     </button>
                     <div class="tooltip">
                         <span>Return from subgraph editor</span>
