@@ -138,7 +138,7 @@ import Cross from '../icons/Cross.vue';
 import Tooltip from '../components/Tooltip.vue';
 
 import { validateInterfaceGroupsNames } from '../core/interfaceParser';
-import getOptionName from './CustomNode.js';
+import { getOptionName } from './CustomNode.js';
 
 export default defineComponent({
     components: {

@@ -14,7 +14,7 @@
  * @param optionType Name of the option component
  * @returns True if the name should be displayed, false otherwise.
  */
-export default function getOptionName(optionType) {
+export function getOptionName(optionType) {
     switch (optionType) {
         case 'InputInterface':
         case 'SelectInterface':
@@ -29,5 +29,63 @@ export default function getOptionName(optionType) {
         case 'NodeInterface':
         default:
             return false;
+    }
+}
+
+/**
+ * Updates a side and optionally a sidePosition of an interface
+ *
+ * @param node in which the interface is updated
+ * @param intf interface to update
+ * @param newSide new side of the interface
+ * @param newSidePosition new position of the interface. If it is occupied
+ * @param swap if true then if an interface is found in 'newSidePosition' then they
+ * are swapped
+ * then an old interface is moved.
+ */
+/* eslint-disable no-param-reassign */
+export function updateInterfacePosition(
+    node,
+    intf,
+    newSide,
+    newSidePosition = undefined,
+    swap = false,
+) {
+    const oldSidePosition = intf.sidePosition;
+
+    intf.side = newSide;
+    if (newSidePosition !== undefined) {
+        intf.sidePosition = newSidePosition;
+    }
+
+    const found = [
+        ...Object.values(node.inputs),
+        ...Object.values(node.outputs),
+    ].find(
+        (io) => io.id !== intf.id &&
+            io.sidePosition === intf.sidePosition &&
+            io.side === intf.side,
+    );
+
+    if (found !== undefined) {
+        if (newSidePosition !== undefined && swap) {
+            found.sidePosition = oldSidePosition;
+        } else {
+            const intfToMove = newSidePosition === undefined ? intf : found;
+
+            // Finding the first non occupied side position on that side
+            const sameSide = [
+                ...Object.values(node.inputs),
+                ...Object.values(node.outputs),
+            ].filter((io) => io.side === intfToMove.side && !io.hidden);
+            const occupiedPositions = sameSide.map((io) => io.sidePosition);
+
+            let proposedPosition = 0;
+            while (occupiedPositions.includes(proposedPosition)) {
+                proposedPosition += 1;
+            }
+
+            intfToMove.sidePosition = proposedPosition;
+        }
     }
 }

@@ -19,6 +19,7 @@ import {
     SubgraphOutputNode,
 } from './subgraphInterface.js';
 import { startTransaction, commitTransaction } from '../core/History.ts';
+import { updateInterfacePosition } from './CustomNode.js';
 
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-underscore-dangle */
@@ -143,14 +144,16 @@ export default function createPipelineManagerGraph(graph) {
         Object.entries({ ...oldNode.inputs, ...oldNode.outputs }).forEach(([name, intf]) => {
             if (intf.direction !== undefined) {
                 if (Object.prototype.hasOwnProperty.call(newNodeInstance.inputs, name)) {
-                    newNodeInstance.updateInterfacePosition(
+                    updateInterfacePosition(
+                        newNodeInstance,
                         newNodeInstance.inputs[name],
                         intf.side,
                         intf.sidePosition,
                     );
                 }
                 if (Object.prototype.hasOwnProperty.call(newNodeInstance.outputs, name)) {
-                    newNodeInstance.updateInterfacePosition(
+                    updateInterfacePosition(
+                        newNodeInstance,
                         newNodeInstance.outputs[name],
                         intf.side,
                         intf.sidePosition,

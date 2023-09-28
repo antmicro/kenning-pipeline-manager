@@ -35,7 +35,7 @@ import {
     IntegerInterface,
     ButtonInterface,
 } from '@baklavajs/renderer-vue'; // eslint-disable-line object-curly-newline
-import getOptionName from '../custom/CustomNode.js';
+import { getOptionName } from '../custom/CustomNode.js';
 
 export default {
     props: {

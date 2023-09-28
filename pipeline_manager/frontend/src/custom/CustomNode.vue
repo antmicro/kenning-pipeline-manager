@@ -138,7 +138,7 @@ import Bin from '../icons/Bin.vue';
 import Disconnect from '../icons/Disconnect.vue';
 import Sidebar from '../icons/Sidebar.vue';
 import doubleClick from '../core/doubleClick.js';
-import getOptionName from './CustomNode.js';
+import { getOptionName, updateInterfacePosition } from './CustomNode.js';
 import {
     startTransaction, commitTransaction,
 } from '../core/History.ts';
@@ -456,7 +456,13 @@ const interfaceCursorStyle = ref({
 const isPickedInterface = (intf) => intf === chosenInterface;
 
 const assignNewPosition = () => {
-    props.node.updateInterfacePosition(chosenInterface, chosenInterface.side, newSocketIndex, true);
+    updateInterfacePosition(
+        props.node,
+        chosenInterface,
+        chosenInterface.side,
+        newSocketIndex,
+        true,
+    );
 };
 
 const dragInterface = (ev) => {
@@ -604,9 +610,9 @@ const toggleGroup = (intf) => {
 /* eslint-disable no-param-reassign */
 const switchSides = (intf) => {
     if (intf.side === 'left') {
-        props.node.updateInterfacePosition(intf, 'right');
+        updateInterfacePosition(props.node, intf, 'right');
     } else {
-        props.node.updateInterfacePosition(intf, 'left');
+        updateInterfacePosition(props.node, intf, 'left');
     }
 };
 </script>
