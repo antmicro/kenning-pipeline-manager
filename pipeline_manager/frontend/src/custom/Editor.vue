@@ -267,45 +267,6 @@ export default defineComponent({
             }
         });
 
-        const filterNodes = (query) => {
-            const threshold = -50;
-
-            const matchingNodes = graph.value.nodes.filter((node) => {
-                const resultTitle = fuzzysort.single(query, node.title);
-                const resultType = fuzzysort.single(query, node.type);
-
-                if ((resultTitle !== null && resultTitle.score > threshold) ||
-                    (resultType !== null && resultType.score > threshold)) {
-                    node.highlightedTitle = fuzzysort.highlight(resultTitle, '<span>', '</span>');
-                    node.highlightedType = fuzzysort.highlight(resultType, '<span>', '</span>');
-                    return true;
-                }
-                node.highlightedTitle = node.title;
-                node.highlightedType = node.type;
-                return false;
-            });
-
-            return matchingNodes;
-        };
-
-        watch(searchQuery, () => {
-            if (searchQuery.value === undefined || searchQuery.value === '') {
-                greyedOutNodes.value = [];
-                graph.value.nodes.forEach((node) => {
-                    node.highlightedTitle = node.title;
-                    node.highlightedType = node.type;
-                });
-                return;
-            }
-            const matchingNodes = filterNodes(searchQuery.value);
-
-            const nonMatchingNodes = graph.value.nodes.filter(
-                (node) => !matchingNodes.includes(node),
-            );
-
-            greyedOutNodes.value = nonMatchingNodes;
-        });
-
         const clearHighlight = () => {
             highlightConnections.value.splice(0, highlightConnections.value.length);
         };
@@ -432,6 +393,45 @@ export default defineComponent({
                     !ignoredNodesId.value.includes(c.to.nodeId),
             ),
         );
+
+        const filterNodes = (query) => {
+            const threshold = -50;
+
+            const matchingNodes = visibleNodes.value.filter((node) => {
+                const resultTitle = fuzzysort.single(query, node.title);
+                const resultType = fuzzysort.single(query, node.type);
+
+                if ((resultTitle !== null && resultTitle.score > threshold) ||
+                    (resultType !== null && resultType.score > threshold)) {
+                    node.highlightedTitle = fuzzysort.highlight(resultTitle, '<span>', '</span>');
+                    node.highlightedType = fuzzysort.highlight(resultType, '<span>', '</span>');
+                    return true;
+                }
+                node.highlightedTitle = node.title;
+                node.highlightedType = node.type;
+                return false;
+            });
+
+            return matchingNodes;
+        };
+
+        watch(searchQuery, () => {
+            if (searchQuery.value === undefined || searchQuery.value === '') {
+                greyedOutNodes.value = [];
+                visibleNodes.value.forEach((node) => {
+                    node.highlightedTitle = node.title;
+                    node.highlightedType = node.type;
+                });
+                return;
+            }
+            const matchingNodes = filterNodes(searchQuery.value);
+
+            const nonMatchingNodes = visibleNodes.value.filter(
+                (node) => !matchingNodes.includes(node),
+            );
+
+            greyedOutNodes.value = nonMatchingNodes;
+        });
 
         const scale = computed(() => graph.value.scaling);
 
