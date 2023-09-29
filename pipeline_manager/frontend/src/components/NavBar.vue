@@ -924,6 +924,10 @@ $bar-height: 60px;
                 display: flex;
             }
 
+            &.hoverbox:hover {
+                cursor: pointer;
+            }
+
             &.hoverbox:hover > .tooltip {
                 display: flex;
                 z-index: 11;
