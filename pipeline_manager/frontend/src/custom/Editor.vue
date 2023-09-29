@@ -143,6 +143,7 @@ export default defineComponent({
         const rectangleSelection = ref(null);
         const selectedNodesCtrlBackup = [];
 
+        const searchQuery = computed(() => props.viewModel.editor.searchQuery);
         const greyedOutNodes = ref([]);
 
         let pressStartTime = 0;
@@ -266,12 +267,12 @@ export default defineComponent({
             }
         });
 
-        const filterNodes = (searchQuery) => {
+        const filterNodes = (query) => {
             const threshold = -50;
 
             const matchingNodes = graph.value.nodes.filter((node) => {
-                const resultTitle = fuzzysort.single(searchQuery, node.title);
-                const resultType = fuzzysort.single(searchQuery, node.type);
+                const resultTitle = fuzzysort.single(query, node.title);
+                const resultType = fuzzysort.single(query, node.type);
 
                 if ((resultTitle !== null && resultTitle.score > threshold) ||
                     (resultType !== null && resultType.score > threshold)) {
@@ -287,10 +288,8 @@ export default defineComponent({
             return matchingNodes;
         };
 
-        watch(props.viewModel, () => {
-            const { searchQuery } = props.viewModel.editor;
-
-            if (searchQuery === undefined || searchQuery === '') {
+        watch(searchQuery, () => {
+            if (searchQuery.value === undefined || searchQuery.value === '') {
                 greyedOutNodes.value = [];
                 graph.value.nodes.forEach((node) => {
                     node.highlightedTitle = node.title;
@@ -298,7 +297,7 @@ export default defineComponent({
                 });
                 return;
             }
-            const matchingNodes = filterNodes(searchQuery);
+            const matchingNodes = filterNodes(searchQuery.value);
 
             const nonMatchingNodes = graph.value.nodes.filter(
                 (node) => !matchingNodes.includes(node),
