@@ -77,6 +77,7 @@ build-docs-and-static-html:
     <<: *ace
     <<: *common_only
     script:
+        - pip install --no-deps -e .
         - cd docs
         - echo -en "\nhtml_js_files = [ '$ANNOTANT' ]" >> source/conf.py
         - make html latexpdf
