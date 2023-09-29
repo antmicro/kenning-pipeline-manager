@@ -1,5 +1,6 @@
 {
     "graph": {
+        "name": "Example of graph with inheritance",
         "id": "c9d1ebeb-3bfb-4dde-a95f-b1d85a1e382e",
         "nodes": [
             {
@@ -217,8 +218,7 @@
                 "from": "e4872954-5f41-4ecf-98f5-50c1818b48f8",
                 "to": "d1667bc2-3b01-4ece-a1a9-bb43e4e1040b"
             }
-        ],
-        "name": ""
+        ]
     },
     "version": "20230830.11",
     "metadata": {

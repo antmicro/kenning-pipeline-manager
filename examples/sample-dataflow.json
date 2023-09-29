@@ -301,7 +301,7 @@
                 "to": "6efb374c-a115-404e-ade8-0aa05ba93996"
             }
         ],
-        "name": "Sample graph"
+        "name": "Example of a more complex graph with nodes as interfaces, inheritance and more"
     },
     "version": "20230830.11",
     "metadata": {

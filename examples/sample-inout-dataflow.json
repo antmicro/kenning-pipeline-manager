@@ -1,7 +1,7 @@
 {
     "graph": {
         "id": "b68ef578-8890-4bb5-abf4-1eb74db6f663",
-        "name": "In-Out interface type example",
+        "name": "Example of Input-Output interfaces",
         "nodes": [
             {
                 "name": "TestInout",

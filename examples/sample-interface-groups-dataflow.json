@@ -1,7 +1,7 @@
 {
     "graph": {
         "id": "68957efd-6ced-4756-86d4-e4bca26ea536",
-        "name": "Interface grouping example",
+        "name": "Example of interface grouping",
         "nodes": [
             {
                 "name": "TestNode",

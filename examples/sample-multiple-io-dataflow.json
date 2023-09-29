@@ -1,7 +1,7 @@
 {
     "graph": {
         "id": "79040424-1464-40a0-ba97-cc0ba6a1944f",
-        "name": "Multiple Input-Output node example",
+        "name": "Example of Multiple Input-Output node",
         "nodes": [
             {
                 "name": "MultipleIO",
