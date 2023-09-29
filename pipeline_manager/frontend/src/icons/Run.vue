@@ -10,31 +10,45 @@ SPDX-License-Identifier: Apache-2.0
         <path
             d="M4 18.1192V3.29872C4 2.27117 5.10801 1.65193 5.94778 2.21014L17.1651 9.66657C18.2783 10.4065 18.2783 12.0796 17.1651 12.8196L6.82085 19.6957C5.60466 20.5041 4 19.6073 4 18.1192Z"
             fill="#6F6F6F"
-            :class="[color]"
+            :class="hoverStatus"
             class="highlighted"
             stroke-width="0"
         />
     </svg>
 </template>
 
-<script lang="ts">
+<script>
+import { computed } from 'vue';
+
 export default {
     props: {
-        color: {
-            type: String,
+        hover: {
+            type: Boolean,
             required: false,
         },
+    },
+    setup(props) {
+        const hoverStatus = computed(() => ({
+            hovered: props.hover,
+            normal: !props.hover,
+        }));
+
+        return { hoverStatus };
     },
 };
 </script>
 
 <style lang="scss" scoped>
 /* Color */
-.white {
+.normal {
     fill: $white;
 }
 
 .run:hover > .highlighted {
+    fill: $green;
+}
+
+.hovered {
     fill: $green;
 }
 </style>
