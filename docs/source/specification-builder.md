@@ -1,10 +1,10 @@
 # Specification builder
 
-Creating specification, especially in external applications written in Python can be significantly simplified with the `SpecificationBuilder` class.
+Creating a specification, especially in external applications written in Python, can be significantly simplified with the `SpecificationBuilder` class.
 This tool:
 
 * Provides methods to update the contents of the specification
-* Provides an API that allows to modify the specification without worrying about the changes in the format
+* Provides an API that allows modifying the specification without worrying about the changes in the format
 * Provides sanity checks of URLs, prevents duplicates and validates the specification with the frontend.
 
 Note that this chapter only presents the initial steps of constructing a specification in Pipeline Manager.
@@ -30,8 +30,8 @@ specification_builder = SpecificationBuilder(
 )
 ```
 
-The `assets_dir` is a path to additional assets (icons, visualizations) - it is used during validation to inform the user that e.g. paths provided in the specification do not have corresponding files.
-The `check_urls` tells if the `SpecificationBuilder` should check URLs provided in the specification for availability and raise errors when pages are not found.
+`assets_dir` is a path to additional assets (icons, visualizations) - it is used during validation to inform the user that e.g. paths provided in the specification do not have corresponding files.
+`check_urls` determines whether the `SpecificationBuilder` should check URLs provided in the specification for availability and raise errors when pages are not found.
 
 ### Creating node types
 
@@ -44,7 +44,7 @@ specification_builder.add_node_type(
 )
 ```
 
-The method requires name of the node type, and requires it to be unique.
+This method requires a unique name of the node type.
 We can also specify category, parent classes, layer and abstract fields.
 Follow the documentation of the class for more details.
 
@@ -131,7 +131,7 @@ There are some additional arguments, available in the [specification format](./s
 
 ### Adding node type descriptions
 
-Adding descriptions is just a case of providing a node name and a description string.
+Adding descriptions is just a matter of providing a node name and a description string.
 
 ```python
 specification_builder.add_node_description(
@@ -143,7 +143,7 @@ specification_builder.add_node_description(
 ### Adding metadata
 
 Metadata specifies additional editor options, like `connectionStyle` or `movementStep`.
-All parameters are defined in the [specification format](./specification-format.md#metadata)
+All parameters are defined in the [specification format](./specification-format.md#metadata).
 
 ```python
 specification_builder.metadata_add_param(
@@ -154,7 +154,7 @@ specification_builder.metadata_add_param(
 
 ### Adding URLs to node types
 
-To add a URL, first specify the URL group, which is a part of the metadata.
+To add a URL, first specify the URL group, which is part of the metadata.
 The icon argument can be a path to an asset file or a link.
 
 ```python
@@ -166,7 +166,7 @@ specification_builder.metadata_add_url(
 )
 ```
 
-Then, add the node URL, defining the suffix that would be appended to the group URL.
+Then, add the node URL by defining the suffix that will be appended to the group URL.
 
 ```python
 specification_builder.add_node_type_url(
@@ -187,12 +187,12 @@ specification = specification_builder.create_and_validate_spec()
 The possible arguments are:
 
 - `workspacedir` - The path to the workspace directory for Pipeline Manager, the same that has been provided for the build script
-- `fail_on_warnings` - tells if the validation should fail on warnings
+- `fail_on_warnings` - Determines whether the validation should fail on warnings
 - `dump_spec` - A path to where the specification should be dumped as a file before validation.
   Useful for debugging purposes.
 
 The created `specification` upon successful run should contain a full specification based on `SpecificationBuilder`.
-It is a regular Python dictionary that can be saved to JSON file using `json.dump` method.
+It is a regular Python dictionary that can be saved to a JSON file using the `json.dump` method.
 
 ## `SpecificationBuilder` documentation
 
