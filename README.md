@@ -11,7 +11,7 @@ It provides functionality for:
 
 * visualizing and editing dataflows,
 * saving and loading dataflows,
-* communicating with external application to delegate advanced validation, execution of the defined graph and conversions to and from native formats of the graphs.
+* communicating with an external application to delegate advanced validation, execution of the defined graph and conversions to and from native formats of the graphs.
 
 Pipeline Manager aims to simplify the process of developing graph-based graphical interfaces for applications that are modular and have a graph-like nature.
 
@@ -29,9 +29,9 @@ pip install .
 ```
 
 All of `npm` modules needed for the frontend of the application are installed automatically during build.
-They can be found in `./pipeline_manager/frontend/node_modules` directory after the application is built.
+They can be found in the `./pipeline_manager/frontend/node_modules` directory after the application is built.
 
-## Building and Running
+## Building and running
 
 Pipeline Manager can be built in two different ways as:
 
@@ -40,7 +40,7 @@ Pipeline Manager can be built in two different ways as:
 
 ### Static HTML application
 
-To build Pipeline Manager as a static HTML application run  in the root directory:
+To build Pipeline Manager as a static HTML application, in the root directory run:
 
 ```bash
 ./build static-html
@@ -52,18 +52,18 @@ For available flags, run:
 ./build static-html -h
 ```
 
-To run built application open `./pipeline_manager/frontend/dist/index.html` in a preferred browser.
-As an example, if the browser of your choice is `firefox` then you should run:
+To run the built application, open `./pipeline_manager/frontend/dist/index.html` in a preferred browser.
+As an example, if the browser of your choice is `firefox` you should run:
 
 ```bash
 firefox ./pipeline_manager/frontend/dist/index.html
 ```
 
 After running Pipeline Manager you can use sample specification under `./examples/sample_specification.json` to check the visualization and editing of pipelines.
-Additionaly `./examples/sample_dataflow.json` can be used to see how dataflows are stored.
+Additionally, `./examples/sample_dataflow.json` can be used to see how dataflows are stored.
 
-The specification can be loaded in the webpage using `Load specification` option in the main menu.
-The dataflow can be loaded in the webpage using `Load graph file` option in the main menu.
+The specification can be loaded in the webpage using the `Load specification` option in the main menu.
+The dataflow can be loaded in the webpage using the `Load graph file` option in the main menu.
 
 What is more, the specification and the dataflow can be provided as URL arguments:
 
@@ -76,7 +76,7 @@ For example:
 firefox "./pipeline_manager/frontend/dist/index.html?spec=https%3A%2F%2Fraw.githubusercontent.com%2Fantmicro%2Fkenning-pipeline-manager%2Fmain%2Fexamples%2Fsample-specification.json&graph=https%3A%2F%2Fraw.githubusercontent.com%2Fantmicro%2Fkenning-pipeline-manager%2Fmain%2Fexamples%2Fsample-dataflow.json"
 ```
 
-Will fetch and use specification and dataflow from the Github repository for this project.
+Will fetch and use specification and dataflow from the GitHub repository for this project.
 The URLs need to be encoded.
 
 It is possible to add a default specification JSON to the generated HTML.
@@ -123,11 +123,11 @@ After successful build, run:
 firefox ./pipeline-manager-demo/index.html
 ```
 
-You should get the graph view similar to [documentation's demo](https://antmicro.github.io/kenning-pipeline-manager/static-demo/sample).
+You should get a graph view similar to the one in the [documentation's demo](https://antmicro.github.io/kenning-pipeline-manager/static-demo/sample).
 
 ### Web application
 
-To build Pipeline Manager to work with an external application (like Kenning) run in the root directory:
+To build Pipeline Manager to work with an external application (like Kenning), in the root directory run:
 
 ```bash
 ./build server-app
@@ -139,8 +139,8 @@ For available flags, check:
 ./build server-app -h
 ```
 
-In this scenario, backend server is expected to serve the Pipeline Manager content.
-To do that run in the root directory:
+In this scenario, the backend server is expected to serve the Pipeline Manager content.
+To do that, in the root directory run:
 
 ```
 ./run
@@ -153,7 +153,7 @@ In addition to using the sample specification you can also connect the third-par
 
 #### Development
 
-To run a development server which automatically recompiles the project after detecting any changes, run in `./pipeline_manager/frontend` directory:
+To run a development server which automatically recompiles the project after detecting any changes, in `./pipeline_manager/frontend` directory run:
 
 ```
 npm run serve-static
@@ -188,7 +188,7 @@ When running the validation tool for the first time, make sure to include the `-
 
 #### Cleanup
 
-To remove installed `npm` dependencies and the built application, run the following in the root directory:
+To remove the installed `npm` dependencies and the built application, run the following in the root directory:
 
 ```
 ./cleanup
