@@ -6,7 +6,7 @@ This section lists all versions, related features and breaking changes.
 ## 20230830.11
 
 ```{warning}
-This updates changes the existing format of specification and dataflow.
+This update changes the existing format of specification and dataflow.
 ```
 
 Commit SHA - `0bee99e152a408650590bb6ea4210e96502b33ef`
@@ -27,13 +27,13 @@ Commit SHA - `0bee99e152a408650590bb6ea4210e96502b33ef`
 
 Commit SHA - `6ce3bf106353bc58fb8e7217b9bc8aa7db9ebd20`
 
-* Choosing an entry graph that is rendered to the user when loading a subgraph dataflow is now possible using `entryGraph` property.
+* Choosing an entry graph that is rendered to the user when loading a subgraph dataflow is now possible using the `entryGraph` property.
 
 ## 20230824.9
 
 Commit SHA - `de31d01d9b6591993559e3b10851815f3320e545`
 
-* Introduced `description` keyword for nodes that allows displaing markdown-based description in a sidebar.
+* Introduced `description` keyword for nodes that allows displaying Markdown-based description in a sidebar.
 
 ## 20230818.8
 
@@ -48,7 +48,7 @@ Commit SHA - `5946db06d8f42a33934a07fba95634aa8a70c78e`
 * Format of subgraph dataflows and specifications is redesigned.
   Details can be found in [Dataflow format](dataflow-format) and [Specification format](specification-format).
 * Dataflow
-  * `SubgraphIO` was renamed to `interfaces` and its properties are changed.
+  * `SubgraphIO` was renamed to `interfaces` and its properties were changed.
   *  Connections are now defined using `connections` property instead of `nodeInterfaceId` keyword.
 * Specification
   * `id` property for nodes and connections in subgraphs is no longer required.
@@ -101,5 +101,5 @@ Commit SHA - `711ea7224e30d342924319c3964f1cb076939a29`
 Commit SHA - `4e0cf99ccaa5bc3513804e8184b907ed0230985f`
 
 * Introduced versioning for dataflow and specification format, starting with version `20230615.1`.
-  Pipeline Manager saves current version in a dataflow save so that when loading a dataflow an appropriate message is displayed.
-* Implemented a dataflow format converter, that can apply a range of patches so that an obsolete dataflow can be updateded to the current format.
+  Pipeline Manager saves the current version in a dataflow save so that when loading a dataflow an appropriate message is displayed.
+* Implemented a dataflow format converter that can apply a range of patches so that an obsolete dataflow can be updated to the current format.
