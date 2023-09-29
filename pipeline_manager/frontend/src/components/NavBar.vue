@@ -194,6 +194,7 @@ export default {
                     iconRef: 'backend',
                     showTransform: '-89%, 0px',
                     hideTransform: '-89%, -180px',
+                    hover: false,
                 },
                 settings: {
                     isOpen: false,
@@ -205,6 +206,12 @@ export default {
                 },
                 nodesearch: {
                     isOpen: false,
+                    hover: false,
+                },
+                run: {
+                    hover: false,
+                },
+                validate: {
                     hover: false,
                 },
             },
@@ -562,10 +569,15 @@ export default {
                     </div>
                 </div>
 
-                <div v-if="this.externalApplicationManager.backendAvailable">
-                    <button
-                        @click="() => requestDataflowAction('run')">
-                        <Run color="white" />
+                <div
+                    class="hoverbox"
+                    v-if="this.externalApplicationManager.backendAvailable"
+                    @click="() => requestDataflowAction('run')"
+                    @pointerover="() => panels.run.hover = true"
+                    @pointerleave="() => panels.run.hover = false"
+                >
+                    <button>
+                        <Run :hover="panels.run.hover" />
                     </button>
                     <div class="tooltip">
                         <span>Run</span>
@@ -580,9 +592,15 @@ export default {
                         <span>Stop</span>
                     </div>
                 </div>
-                <div v-if="this.externalApplicationManager.backendAvailable">
-                    <button @click="() => requestDataflowAction('validate')">
-                        <Validate color="white" />
+                <div
+                    class="hoverbox"
+                    v-if="this.externalApplicationManager.backendAvailable"
+                    @click="() => requestDataflowAction('validate')"
+                    @pointerover="() => panels.validate.hover = true"
+                    @pointerleave="() => panels.validate.hover = false"
+                >
+                    <button>
+                        <Validate :hover="panels.validate.hover" />
                     </button>
                     <div class="tooltip">
                         <span>Validate</span>
@@ -668,14 +686,26 @@ export default {
                         <span>Hide settings</span>
                     </div>
                 </div>
-                <div v-if="this.externalApplicationManager.backendAvailable" ref="backend">
-                    <button @click="() => togglePanel(panels.backendStatus)">
+                <div
+                    ref="backend"
+                    class="hoverbox"
+                    v-if="this.externalApplicationManager.backendAvailable"
+                    @click="() => togglePanel(panels.backendStatus)"
+                    @pointerover="() => panels.backendStatus.hover = true"
+                    @pointerleave="() => panels.backendStatus.hover = false"
+                >
+                    <button>
                         <Backend
                             v-if="this.externalApplicationManager.externalApplicationConnected"
                             color="connected"
                             :active="backendStatusOpen"
+                            :hover="panels.backendStatus.hover"
                         />
-                        <Backend v-else color="disconnected" :active="backendStatusOpen" />
+                        <Backend
+                            v-else color="disconnected"
+                            :active="backendStatusOpen"
+                            :hover="panels.backendStatus.hover"
+                        />
                     </button>
                     <div class="tooltip" :class="backendStatusTooltipClasses">
                         <span>Backend status</span>
