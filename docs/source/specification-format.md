@@ -13,7 +13,7 @@ The specification consists of:
 
 * `metadata` - object of type [Metadata](#metadata) that specifies editor styling and metadata
 * `nodes` - array that specifies valid nodes, where every element is of type [Node](#node).
-* `subgraphs` - Array of dataflow-like objects defining subgraph nodes, of type [Subgraphs](#subgraphs).
+* `subgraphs` - array of dataflow-like objects defining subgraph nodes, of type [Subgraphs](#subgraphs).
 * `version` - string determining version of the specification.
   Should be set to the newest version described in [Changelogs](#changelogs).
   {{project}} uses that value to check the compatibility of the specification with the current implementation, giving warnings about inconsistency in versions.
@@ -45,7 +45,7 @@ This object specifies additional editor options and contains the following optio
   By default there are no layers.
 * `urls` - list of URL classes present in the specification and flow.
   It is a dictionary, where key is the name of the URL class, and value is of type [URL class specification](#url-class).
-  The given URL classes can be referred later in [Nodes](#node) with proper link suffix.
+  The given URL classes can be referred to later in [Nodes](#node) with proper link suffix.
 * `collapseSidebar` - boolean value determining whether nodes sidebar should be collapsed by default
   Default value is `true`
 * `movementStep` - Defines offset to which nodes snap in the grid.
@@ -100,7 +100,7 @@ Every layer has three properties (at least `name` and one of `nodeLayers` or `no
 #### URL class
 
 URL class provides links with additional information for a given node.
-They are represented in nodes as icons leading to a URL with additional information on node.
+They are represented in nodes as icons leading to a URL with additional information on nodes.
 
 The name of the URL class is specified as key in `urls` entry in metadata.
 
@@ -140,25 +140,25 @@ This object specifies a single node.
   ./build --assets-directory examples/sample-assets static-html static-html examples/sample-specification.json
   ```
   ``````
-* `interfaces` - array representing inputs, outputs and bidirectional ports for node.
+* `interfaces` - array representing inputs, outputs and bidirectional ports for nodes.
   The entries are of type [Interface](#interface).
 * `properties` - array with elements of type [Property](#property),
 * `interfaceGroups` - array with elements of type [Interface Groups](#interface-groups),
-* `defaultInterfaceGroups` - array of objects that specifies which interfaces groups are enabled by default.
+* `defaultInterfaceGroups` - array of objects that specifies which interface groups are enabled by default.
   Every object should contain a `name` and `direction` of an [Interface Groups](#interface-groups).
 * `urls` - a dictionary of [URL class](#url-class) and URL suffixes pairs.
   The key should be a URL class key from `urls` in `metadata`.
   The value of the entry is appended to the URL base from the URL class.
-* `abstract` - boolean telling if the node type is abstract or not.
+* `abstract` - boolean determining whether the node type is abstract or not.
   Abstract node types are used only for inheritance purposes, they do not appear in the final list of available nodes.
   They only have one mandatory field - `name`.
   The rest of the fields can be provided to introduce some common properties of classes inheriting from it.
 * `additionalData` - can be any JSON-like object (array, dictionary, number, string, ...), it is only used for storing some additional, node-specific data, such as comments etc.
 * `description` - description of the node in markdown format that is displayed in a sidebar node.
-* `isCategory` - tells if the node is both a category and a node.
-  If set to true, then the `name` of the node is inferred from the last text segment in `category` parameter.
+* `isCategory` - determines whether the node is both a category and a node.
+  If set to true, then the `name` of the node is inferred from the last text segment in the `category` parameter.
   If any node has a node category in its `category` path then it has to extend from the nearest ancestor category node.
-  Additionally, if a node extends from a category node then it has to be in its subtree.
+  Additionally, if a node extends from a category node, then it has to be in its subtree.
 
 Some or all of the properties above (except for `name`) can be derived from existing node types using the `extends` list - check [Node type inheritance](#node-type-inheritance).
 
@@ -231,8 +231,8 @@ Every interface object has following properties:
   Interfaces with `direction` set to `output` are by default rendered on the right side of the node.
 * `array` (optional) - special keyword to easily define a range of interfaces.
   Value has to be a list with two integer values that specify the range of interfaces.
-  For example for an `example` interface with `array: [0, 2]` two interfaces called `example[0]` and `example[1]` are created.
-* `sidePosition` (optional) - specifies row on which the interface is rendered.
+  For example, for an `example` interface with `array: [0, 2]` two interfaces called `example[0]` and `example[1]` are created.
+* `sidePosition` (optional) - specifies the row on which the interface is rendered.
   Values for interfaces of the same `side` value have to be unique.
   If the value is not provided then rows are automatically provided by iterating from the first upper row.
   This value does not work for `array` keyword, as it produces more than one interface.
@@ -266,7 +266,7 @@ There are nine possible values for the `type` property.
 * `slider` - property is a float with a specified range.
   It requires `min` and `max` properties.
 * `list` - property is a list of arguments of the same type, which can be specified using `dtype`.
-* `hex` - property is a string representing base-16 number which has to match following regex: `/0x[a-fA-F0-9]`. 
+* `hex` - property is a string representing base-16 number which has to match the following regex: `/0x[a-fA-F0-9]`. 
 
 
 Additional properties:
@@ -309,7 +309,7 @@ It is possible to inherit:
 
 From existing node types using the `extends` parameter.
 The parameter accepts a list of node types.
-The node type is computed by iteratively updating node type definition structures, going through all node types in the `extends` list (in the specified order), and then applying parameters from the currenty node type.
+The node type is computed by iteratively updating node type definition structures, going through all node types in the `extends` list (in the specified order), and then applying parameters from the current node type.
 
 Below is a sample specification with used inheritance mechanism:
 
@@ -368,7 +368,7 @@ Node types can not be repeated (explicitly in list or implicitly through inherit
 
 Moreover, it is possible to override inherited properties and interfaces.
 This mechanism requires using the same name and `"override"` attribute set to `true`.
-Only attributes used in child node are overridden, others are inherited without change.
+Only attributes used in the child node are overridden, others are inherited without change.
 For instance:
 
 ```json
@@ -392,7 +392,7 @@ For instance:
 Object similar to a single interface but reserves a range of interfaces.
 `name`, `type`, `direction`, `maxConnectionsCount` and `side` are the same as in a regular [Interface](#interface).
 The only difference is that a range of interfaces has to be defined which describes constraints of an interface.
-For example two interface groups can be defined that have consist of common interfaces and thus cannot coexist.
+For example two interface groups can be defined that consist of common interfaces and thus cannot coexist.
 
 ```json
 "interfaceGroups": [
@@ -414,7 +414,7 @@ The interface group called `1` consists of three ranges of interfaces: `1[1]`, i
 ### Subgraphs
 
 List of graphs defined using `subgraphs` array.
-Each object represent a single subgraph that consists of regular nodes and subgraph interfaces.
+Each object represents a single subgraph that consists of regular nodes and subgraph interfaces.
 Fields `name`, `layer`, `category`, `icon` are defined the same way as in standard nodes.
 Apart from those, subgraph node contains additional properties:
 
