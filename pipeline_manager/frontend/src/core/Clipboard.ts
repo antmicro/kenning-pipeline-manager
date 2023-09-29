@@ -18,7 +18,13 @@ import {
 } from 'vue';
 import { v4 as uuidv4 } from 'uuid';
 import {
-    AbstractNode, INodeState, IConnectionState, Connection, NodeInterface, Editor,
+    AbstractNode,
+    INodeState,
+    IConnectionState,
+    Connection,
+    NodeInterface,
+    Editor,
+    GRAPH_NODE_TYPE_PREFIX,
 } from '@baklavajs/core';
 import {
     ICommandHandler, ICommand, useViewModel,
@@ -42,7 +48,8 @@ export const CLEAR_CLIPBOARD_COMMAND = 'CLEAR_CLIPBOARD';
 /* eslint-disable  @typescript-eslint/no-explicit-any */
 interface PMNodeState extends INodeState<any, any> {
     name: string;
-    graphState: any;
+    subgraph?: string;
+    graphState?: any;
 }
 
 export interface IClipboard {
@@ -84,54 +91,8 @@ export function useClipboard(
 
         connectionBuffer.value = JSON.stringify(connections);
         nodeBuffer.value = JSON.stringify(displayedGraph.value.selectedNodes.map(
-            (n : any) => {
-                const state = n.save();
-                if (n.subgraph !== undefined) {
-                    // Stringify and reparse the state as some objects inside
-                    // are passed by reference and get modified when
-                    // this state gets modified - this causes errors on a dataflow save/load cycle
-                    state.graphState = JSON.parse(JSON.stringify(n.subgraph.save()));
-                    state.graphState.id = uuidv4();
-                    // save the state of the side and sidePostion of interfaces
-                    state.graphState.inputs.forEach((intf: any) => {
-                        const subgraphIntf: any = Object.values(n.inputs).find(
-                            (subIntf: any) => subIntf.id === intf.id,
-                        );
-                        // eslint-disable-next-line no-param-reassign
-                        intf.sidePosition = subgraphIntf.sidePosition;
-                        // eslint-disable-next-line no-param-reassign
-                        intf.side = subgraphIntf.side;
-                        // substitute the ID for a new one to decopule it from the old interfaces
-                        const newId = uuidv4();
-                        state.interfaces.forEach((iface:any) => {
-                        // eslint-disable-next-line no-param-reassign
-                            if (iface.id === intf.id) iface.id = newId;
-                        });
-                        // eslint-disable-next-line no-param-reassign
-                        intf.id = newId;
-                    });
-
-                    // repeat for the outputs
-                    state.graphState.outputs.forEach((intf: any) => {
-                        const subgraphIntf: any = Object.values(n.outputs).find(
-                            (subIntf: any) => subIntf.id === intf.id,
-                        );
-                        // eslint-disable-next-line no-param-reassign
-                        intf.sidePosition = subgraphIntf.sidePosition;
-                        // eslint-disable-next-line no-param-reassign
-                        intf.side = subgraphIntf.side;
-                        const newId = uuidv4();
-                        state.interfaces.forEach((iface:any) => {
-                        // eslint-disable-next-line no-param-reassign
-                            if (iface.id === intf.id) iface.id = newId;
-                        });
-                        // eslint-disable-next-line no-param-reassign
-                        intf.id = newId;
-                    });
-                }
-                return state;
-            }),
-        );
+            (n : any) => n.save(),
+        ));
 
         consecutivePasteNumber.value = 0;
     };
@@ -185,7 +146,13 @@ export function useClipboard(
         commandHandler.executeCommand<ICommand<void>>('START_TRANSACTION');
 
         for (let i = 0; i < parsedNodeBuffer.length; i += 1) {
-            const nodeType = editor.value.nodeTypes.get(parsedNodeBuffer[i].name);
+            let nodeType;
+            if (parsedNodeBuffer[i]?.subgraph !== undefined) {
+                nodeType = editor.value.nodeTypes.get(`${GRAPH_NODE_TYPE_PREFIX}${parsedNodeBuffer[i].name}`);
+            } else {
+                nodeType = editor.value.nodeTypes.get(parsedNodeBuffer[i].name);
+            }
+
             if (!nodeType) {
                 return;
             }
@@ -210,6 +177,7 @@ export function useClipboard(
 
             tapInterfaces(copiedNode.inputs);
             tapInterfaces(copiedNode.outputs);
+
             copiedNode.hooks.beforeLoad.subscribe(token, (nodeState) => {
                 const ns = nodeState as any;
                 if (ns.position) {
@@ -230,48 +198,23 @@ export function useClipboard(
 
             copiedNode = graph.addNode(copiedNode);
             parsedNodeBuffer[i].id = generatedId;
-            copiedNode.load(parsedNodeBuffer[i]);
 
-            // Interfaces need a refresh and their positions need to be updated.
-            // The loads also have duplicated the i/o subgraph nodes,
-            // so a filter is applied
-            if (parsedNodeBuffer[i].graphState !== undefined) {
-                const node = (<any>copiedNode);
-                const ifaceOrPositionErrors = applySidePositions(
-                    Object.fromEntries(parsedNodeBuffer[i].graphState.inputs.map(
-                        (intf: any) => [intf.subgraphNodeId, intf]),
-                    ),
-                    Object.fromEntries(parsedNodeBuffer[i].graphState.outputs.map(
-                        (intf: any) => [intf.subgraphNodeId, intf]),
-                    ),
-                );
-                if (Array.isArray(ifaceOrPositionErrors)) {
-                    throw new Error(
-                        `Internal error occured while processing the pasted node. ` +
-                        `Reason: ${ifaceOrPositionErrors.join('. ')}`,
-                    );
-                }
-                const ifaces = [
-                    ...Object.values((<any>ifaceOrPositionErrors).inputs),
-                    ...Object.values((<any>ifaceOrPositionErrors).outputs),
-                ];
-                const subgraphTypes = [
-                    SUBGRAPH_INPUT_NODE_TYPE,
-                    SUBGRAPH_OUTPUT_NODE_TYPE,
-                    SUBGRAPH_INOUT_NODE_TYPE,
-                ];
-                // eslint-disable-next-line no-underscore-dangle
-                node.subgraph._nodes = node.subgraph._nodes.filter(
-                    (n: any) => (subgraphTypes.includes(n.type) &&
-                        ifaces.find(
-                            (iface: any) => iface.id === n.graphInterfaceId) !== undefined
-                    ) || !subgraphTypes.includes(n.type),
-                );
-                node.updateInterfaces(
-                    (<any>ifaceOrPositionErrors).inputs,
-                    (<any>ifaceOrPositionErrors).outputs,
-                );
+            const assignNewId = (g: any) => {
+                // TODO: Replace all other ids like connections, interfaces and regular nodes.
+                g.nodes.forEach((node: any) => {
+                    if (node.subgraph !== undefined) {
+                        node.graphState.id = uuidv4(); // eslint-disable-line no-param-reassign
+                        assignNewId(node.graphState);
+                    }
+                });
+            };
+
+            if (parsedNodeBuffer[i].subgraph !== undefined) {
+                parsedNodeBuffer[i].graphState.id = uuidv4();
+                assignNewId(parsedNodeBuffer[i].graphState);
             }
+
+            copiedNode.load(parsedNodeBuffer[i]);
             idmap.set(parsedNodeBuffer[i].id, generatedId);
         }
 

@@ -22,15 +22,10 @@ import {
 import { useGraph } from '@baklavajs/renderer-vue';
 
 import { toRaw, nextTick } from 'vue';
-import {
-    SUBGRAPH_INPUT_NODE_TYPE,
-    SUBGRAPH_OUTPUT_NODE_TYPE,
-    SUBGRAPH_INOUT_NODE_TYPE,
-} from './subgraphInterface.js';
 import createPipelineManagerGraph from './CustomGraph.js';
 import LayoutManager from '../core/LayoutManager.js';
 import { suppressHistoryLogging } from '../core/History.ts';
-import { parseInterfaces, applySidePositions } from '../core/interfaceParser.js';
+import { applySidePositions } from '../core/interfaceParser.js';
 import CreateCustomGraphNodeType from './CustomGraphNode.js';
 
 /* eslint-disable no-param-reassign */
@@ -74,17 +69,7 @@ export default class PipelineManagerEditor extends Editor {
         // subgraphs are stored in state.subgraphs, there is no need to store it
         // in nodes itself
         const recurrentSubgraphSave = (node) => {
-            if (node.name?.startsWith(GRAPH_NODE_TYPE_PREFIX)) {
-                node.name = node.name.slice(GRAPH_NODE_TYPE_PREFIX.length);
-                node.subgraph = node.graphState.id;
-                node.graphState.nodes = node.graphState.nodes
-                    .filter((n) =>
-                        ![
-                            SUBGRAPH_INPUT_NODE_TYPE,
-                            SUBGRAPH_OUTPUT_NODE_TYPE,
-                            SUBGRAPH_INOUT_NODE_TYPE,
-                        ].includes(n.type),
-                    );
+            if (node.subgraph !== undefined) {
                 state.subgraphs.push(node.graphState);
                 node.graphState.nodes.forEach(recurrentSubgraphSave);
             }
@@ -204,40 +189,6 @@ export default class PipelineManagerEditor extends Editor {
                 node.graphState.nodes.forEach((n) => {
                     errors.push(...recurrentSubgraphLoad(n));
                 });
-                node.name = `${GRAPH_NODE_TYPE_PREFIX}${node.name}`;
-
-                const interfaces = node.graphState.interfaces.map(
-                    (io) => {
-                        const correspondingInterface = node.interfaces.find(
-                            (intf) => intf.subgraphNodeId === io.id,
-                        );
-                        if (correspondingInterface === undefined) {
-                            errors.push(`No corresponding subgraphNodeId for subgraph interface of id ${io.id} found.`);
-                        }
-
-                        return {
-                            ...io,
-                            ...correspondingInterface,
-                        };
-                    },
-                );
-
-                if (errors.length) {
-                    return errors;
-                }
-
-                const out = parseInterfaces(interfaces, [], []);
-                if (Array.isArray(out) && out.length) {
-                    return out;
-                }
-                const { inputs, outputs } = out;
-
-                node.graphState.inputs = Object.values(inputs);
-                node.graphState.outputs = Object.values(outputs);
-
-                delete node.graphState.interfaces;
-
-                delete node.subgraph;
             }
             return errors;
         };
@@ -452,41 +403,13 @@ export default class PipelineManagerEditor extends Editor {
     }
 
     switchGraph(subgraphNode) {
-        const convertToUpperCase = (str) => `${str[0].toUpperCase()}${str.slice(1)}`;
         if (this._switchGraph === undefined) {
             const { switchGraph } = useGraph();
             this._switchGraph = switchGraph;
         }
         // disable history logging for the switch - don't push nodes being created here
         suppressHistoryLogging(true);
-
-        // Propagate side data back to the subgraph such that if it was changed, the
-        // selector inside would be updated
-        Object.values(subgraphNode.inputs).forEach((intf) => {
-            const subgraphIntf = subgraphNode.subgraph.inputs.find(
-                (subIntf) => subIntf.id === intf.id,
-            );
-            subgraphIntf.sidePosition = intf.sidePosition;
-
-            const subgraphIntfNode = subgraphNode.subgraph.nodes.find(
-                (node) => node.graphInterfaceId === intf.id,
-            );
-
-            subgraphIntfNode.inputs.side.value = convertToUpperCase(intf.side);
-        });
-
-        Object.values(subgraphNode.outputs).forEach((intf) => {
-            const subgraphIntf = subgraphNode.subgraph.outputs.find(
-                (subIntf) => subIntf.id === intf.id,
-            );
-            subgraphIntf.sidePosition = intf.sidePosition;
-
-            const subgraphIntfNode = subgraphNode.subgraph.nodes.find(
-                (node) => node.graphInterfaceId === intf.id,
-            );
-
-            subgraphIntfNode.inputs.side.value = convertToUpperCase(intf.side);
-        });
+        subgraphNode.propagateInterfaces();
 
         this._graph = subgraphNode.subgraph;
         this._switchGraph(subgraphNode.subgraph);

@@ -8,7 +8,9 @@
  * Implements custom version of baklava's Graph object
  */
 
-import { GraphTemplate, DummyConnection, Connection } from '@baklavajs/core';
+import {
+    GraphTemplate, DummyConnection, Connection, GRAPH_NODE_TYPE_PREFIX,
+} from '@baklavajs/core';
 import { v4 as uuidv4 } from 'uuid';
 import {
     SUBGRAPH_INPUT_NODE_TYPE,
@@ -427,6 +429,10 @@ export default function createPipelineManagerGraph(graph) {
         });
 
         state.nodes.forEach((n) => {
+            if (n.subgraph !== undefined) {
+                n.name = `${GRAPH_NODE_TYPE_PREFIX}${n.name}`;
+            }
+
             const nodeInformation = this.editor.nodeTypes.get(n.name);
             if (!nodeInformation) {
                 errors.push(`Node type ${n.name} is not registered`);

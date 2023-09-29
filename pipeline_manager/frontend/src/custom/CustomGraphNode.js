@@ -13,6 +13,11 @@ import {
 } from '@baklavajs/core';
 import { v4 as uuidv4 } from 'uuid';
 import { parseInterfaces } from '../core/interfaceParser.js';
+import {
+    SUBGRAPH_INPUT_NODE_TYPE,
+    SUBGRAPH_OUTPUT_NODE_TYPE,
+    SUBGRAPH_INOUT_NODE_TYPE,
+} from './subgraphInterface.js';
 
 export default function CreateCustomGraphNodeType(template, type) {
     const nt = createGraphNodeType(template);
@@ -21,6 +26,8 @@ export default function CreateCustomGraphNodeType(template, type) {
         type = `${GRAPH_NODE_TYPE_PREFIX}${type}`;
 
         save() {
+            this.propagateInterfaces();
+            this.subgraph.updateInterfaces();
             const state = super.save();
 
             const newInterfaces = [];
@@ -59,7 +66,20 @@ export default function CreateCustomGraphNodeType(template, type) {
             delete state.graphState.inputs;
             delete state.graphState.outputs;
 
+            state.graphState.nodes = state.graphState.nodes
+                .filter((n) =>
+                    ![
+                        SUBGRAPH_INPUT_NODE_TYPE,
+                        SUBGRAPH_OUTPUT_NODE_TYPE,
+                        SUBGRAPH_INOUT_NODE_TYPE,
+                    ].includes(n.type),
+                );
+
+            state.subgraph = state.graphState.id;
+
             state.name = state.type;
+            state.name = state.name.slice(GRAPH_NODE_TYPE_PREFIX.length);
+
             delete state.type;
 
             state.instanceName = state.title === '' ? undefined : state.title;
@@ -68,13 +88,49 @@ export default function CreateCustomGraphNodeType(template, type) {
             return state;
         }
 
+        /* eslint-disable no-param-reassign */
         load(state) {
             this.hooks.beforeLoad.execute(state);
-            const out = parseInterfaces(state.interfaces, [], [], true);
+
+            let errors = [];
+
+            const interfaces = state.graphState.interfaces.map(
+                (io) => {
+                    const correspondingInterface = state.interfaces.find(
+                        (intf) => intf.subgraphNodeId === io.id,
+                    );
+                    if (correspondingInterface === undefined) {
+                        errors.push(`No corresponding subgraphNodeId for subgraph interface of id ${io.id} found.`);
+                    }
+
+                    return {
+                        ...io,
+                        ...correspondingInterface,
+                    };
+                },
+            );
+
+            if (errors.length) {
+                return errors;
+            }
+
+            let out = parseInterfaces(interfaces, [], []);
             if (Array.isArray(out) && out.length) {
                 return out;
             }
-            const { inputs, outputs } = out;
+            let { inputs, outputs } = out;
+
+            state.graphState.inputs = Object.values(inputs);
+            state.graphState.outputs = Object.values(outputs);
+
+            delete state.graphState.interfaces;
+            delete state.subgraph;
+
+            out = parseInterfaces(state.interfaces, [], [], true);
+            if (Array.isArray(out) && out.length) {
+                return out;
+            }
+            ({ inputs, outputs } = out);
 
             /*
                 When the subgraph node is created, it creates a placeholder interfaces
@@ -89,7 +145,6 @@ export default function CreateCustomGraphNodeType(template, type) {
             this.updateInterfaces(inputs, outputs);
             delete state.interfaces; // eslint-disable-line no-param-reassign
 
-            let errors = [];
             if (!this.subgraph) {
                 errors.push('Cannot load a graph node without a graph');
             }
@@ -112,6 +167,38 @@ export default function CreateCustomGraphNodeType(template, type) {
 
             this.events.loaded.emit(this);
             return [];
+        }
+
+        propagateInterfaces() {
+            const convertToUpperCase = (str) => `${str[0].toUpperCase()}${str.slice(1)}`;
+
+            // Propagate side data back to the subgraph such that if it was changed, the
+            // selector inside would be updated
+            Object.values(this.inputs).forEach((intf) => {
+                const subgraphIntf = this.subgraph.inputs.find(
+                    (subIntf) => subIntf.id === intf.id,
+                );
+                subgraphIntf.sidePosition = intf.sidePosition;
+
+                const subgraphIntfNode = this.subgraph.nodes.find(
+                    (node) => node.graphInterfaceId === intf.id,
+                );
+
+                subgraphIntfNode.inputs.side.value = convertToUpperCase(intf.side);
+            });
+
+            Object.values(this.outputs).forEach((intf) => {
+                const subgraphIntf = this.subgraph.outputs.find(
+                    (subIntf) => subIntf.id === intf.id,
+                );
+                subgraphIntf.sidePosition = intf.sidePosition;
+
+                const subgraphIntfNode = this.subgraph.nodes.find(
+                    (node) => node.graphInterfaceId === intf.id,
+                );
+
+                subgraphIntfNode.inputs.side.value = convertToUpperCase(intf.side);
+            });
         }
 
         initialize() {
