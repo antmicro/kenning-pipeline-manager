@@ -10,15 +10,15 @@ You can also select existing nodes and copy and paste them using `ctrl-c` and `c
 
 ![Node context menu](img/node-context-menu.png)
 
-In the upper right corner of each node there is an context menu toggle. It contains following options:
-* `Rename` - Changes instanceName of the node. More details regarding the node naming can be seen in the ['instanceName' field of dataflow format](project:dataflow-format.md#node)
-* `Delete` - Deletes the node from the dataflow. Other way of deleting nodes is to select and press the `Delete` key.
+In the upper right corner of each node there is a context menu toggle. It contains the following options:
+* `Rename` - Changes instanceName of the node. More details regarding node naming can be found in the ['instanceName' field of dataflow format](project:dataflow-format.md#node)
+* `Delete` - Deletes the node from the dataflow. Another way of deleting nodes is to select and press the `Delete` key.
 * Additional, user defined URLs. More details in the [URL specification](project:specification-format.md#url-class)
 
 Scroll lets you to zoom in and out.
 Left-clicking and dragging the editor background allows you to move around the editor area.
 
-Left-clicking on a node lets you to select and drag the node within the editor area. Pressing the `ctrl` key while moving node allows you to align the node to other along some axis.
+Left-clicking on a node allows you to select and drag the node within the editor area. Pressing the `ctrl` key while moving a node allows you to align the node with another one along some axis.
 
 To create a connection, left-click a node's connector and connect it to a connector (of a matching type, see [Specification format](specification-format)) on another node.
 Double left-click on an existing connection removes it.
@@ -31,12 +31,12 @@ On the upper right corner of {{project}} window there is a gear icon toggling se
 * `Connection style` - Switch the style of the connection between `orthogonal` and `curved`
 * `AutoLayout algorithm` - Choose the algorithm for automatic node placement. Autolayout algorithm is triggered in the following situations:
   * When loading the dataflow autolayout is used to place nodes without the `position` parameter set. Dataflow load can be triggered either via external application or
-  choosing the `Load graph file` option. In this case autolayout is applied to both main graph and the nodes in the subgraphs.
-  * By pressing the `Apply autolayout` button in the settings tab. In this case autolayout is applied to entire graph.
+  choosing the `Load graph file` option. In this case autolayout is applied to both the main graph and the nodes in the subgraphs.
+  * By pressing the `Apply autolayout` button in the settings tab. In this case autolayout is applied to the entire graph.
 * `Background grid size` - Sets the size of single grid cell visible in the background
 * `Node movement step` - Sets the minimum step size which can be taken along each axis when moving node.
 * `Center` - Pressing this buttons moves the viewport to the center of graph and sets the zoom level so that whole dataflow is visible
-* `Hide layers` - [Metadata](project:specification-format.md#layer) allows to specify layers for certain set of interface types and connections. Toggling this checkbox allows to hide
+* `Hide layers` - [Metadata](project:specification-format.md#layer) allows to specify layers for a certain set of interface types and connections. Toggling this checkbox allows to hide
 connections belonging to said layer
 
 ## Notifications
