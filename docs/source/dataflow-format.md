@@ -14,7 +14,7 @@ The root of the dataflow format consists of four main attributes.
   For simple types, such as strings or integers, values are changed.
   For arrays and dictionaries, the values are updated (values of existing keys are replaced with new ones, and the new values in arrays are appended to the existing entries).
 * `subgraphs` - List of subgraphs represented by subgraph nodes.
-  The format of subgraphs is specified in [Subgraphs](#subgraphs) section.
+  The format of subgraphs is specified in the [Subgraphs](#subgraphs) section.
 * `version` - string that identifies the version of the specification and dataflow.
   It is used to check compatibility between provided dataflow and the current version of the implementation.
 
@@ -80,7 +80,7 @@ Node having two parameters: `example_text` of value `example_value` and `example
 
 ##### Interface
 
-Each input, output, and inout is described by an object with a following attributes:
+Each input, output, and inout is described by an object with the following attributes:
 
 * `id` - unique value assigned to the property.
   It is used to describe connections in the dataflow.
@@ -439,8 +439,8 @@ The only differences are changes within the `nodes` definition and the addition 
 
 Each subgraph can have `input`, `inout`, or `output` interfaces.
 In the collapsed view, those are visible as regular interfaces of the node representing a subgraph.
-In the subgraph view, each interface is represented by a dedicated node, which is parametrized by a dedicated entry in `interfaces` array.
-Such node allows to configure such parameters as interface name or connection side of its corresponding interface.
+In the subgraph view, each interface is represented by a dedicated node, which is parametrized by a dedicated entry in the `interfaces` array.
+Such node allows configuring parameters such as interface name or connection side of its corresponding interface.
 
 Within the dataflow format, `interfaces` field allows to tie the subgraph node interface (subgraph IO)
 with an interface in the subgraph it is representing. `interfaces` is an array of objects that follows the
