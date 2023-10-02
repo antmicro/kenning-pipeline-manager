@@ -87,8 +87,47 @@ export function useClipboard(
             (n : any) => {
                 const state = n.save();
                 if (n.subgraph !== undefined) {
-                    state.graphState = n.subgraph.save();
+                    // Stringify and reparse the state as some objects inside
+                    // are passed by reference and get modified when
+                    // this state gets modified - this causes errors on a dataflow save/load cycle
+                    state.graphState = JSON.parse(JSON.stringify(n.subgraph.save()));
                     state.graphState.id = uuidv4();
+                    // save the state of the side and sidePostion of interfaces
+                    state.graphState.inputs.forEach((intf: any) => {
+                        const subgraphIntf: any = Object.values(n.inputs).find(
+                            (subIntf: any) => subIntf.id === intf.id,
+                        );
+                        // eslint-disable-next-line no-param-reassign
+                        intf.sidePosition = subgraphIntf.sidePosition;
+                        // eslint-disable-next-line no-param-reassign
+                        intf.side = subgraphIntf.side;
+                        // substitute the ID for a new one to decopule it from the old interfaces
+                        const newId = uuidv4();
+                        state.interfaces.forEach((iface:any) => {
+                        // eslint-disable-next-line no-param-reassign
+                            if (iface.id === intf.id) iface.id = newId;
+                        });
+                        // eslint-disable-next-line no-param-reassign
+                        intf.id = newId;
+                    });
+
+                    // repeat for the outputs
+                    state.graphState.outputs.forEach((intf: any) => {
+                        const subgraphIntf: any = Object.values(n.outputs).find(
+                            (subIntf: any) => subIntf.id === intf.id,
+                        );
+                        // eslint-disable-next-line no-param-reassign
+                        intf.sidePosition = subgraphIntf.sidePosition;
+                        // eslint-disable-next-line no-param-reassign
+                        intf.side = subgraphIntf.side;
+                        const newId = uuidv4();
+                        state.interfaces.forEach((iface:any) => {
+                        // eslint-disable-next-line no-param-reassign
+                            if (iface.id === intf.id) iface.id = newId;
+                        });
+                        // eslint-disable-next-line no-param-reassign
+                        intf.id = newId;
+                    });
                 }
                 return state;
             }),
