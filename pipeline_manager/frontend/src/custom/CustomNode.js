@@ -8,6 +8,9 @@
  * Implements additional functions for CustomNode
  */
 
+import { useViewModel, useGraph } from '@baklavajs/renderer-vue';
+import { GRAPH_NODE_TYPE_PREFIX } from '@baklavajs/core';
+
 /**
  * The function decides whether a name for the option should be displayed.
  *
@@ -87,5 +90,15 @@ export function updateInterfacePosition(
 
             intfToMove.sidePosition = proposedPosition;
         }
+    }
+}
+
+export function removeNode(node) {
+    if (node.type.startsWith(GRAPH_NODE_TYPE_PREFIX)) {
+        const { viewModel } = useViewModel();
+        viewModel.value.editor.unwrapSubgraph(node);
+    } else {
+        const { graph } = useGraph();
+        graph.value.removeNode(node);
     }
 }

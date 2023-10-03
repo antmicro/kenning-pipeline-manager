@@ -138,7 +138,7 @@ import Bin from '../icons/Bin.vue';
 import Disconnect from '../icons/Disconnect.vue';
 import Sidebar from '../icons/Sidebar.vue';
 import doubleClick from '../core/doubleClick.js';
-import { getOptionName, updateInterfacePosition } from './CustomNode.js';
+import { getOptionName, updateInterfacePosition, removeNode } from './CustomNode.js';
 import {
     startTransaction, commitTransaction,
 } from '../core/History.ts';
@@ -281,7 +281,7 @@ const onContextMenuTitleClick = async (action) => {
     switch (action) {
         case 'delete':
             startTransaction();
-            graph.value.removeNode(props.node);
+            removeNode(props.node);
             commitTransaction();
             break;
         case 'rename':
