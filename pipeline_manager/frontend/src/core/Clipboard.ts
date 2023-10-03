@@ -32,6 +32,7 @@ import {
 import {
     startTransaction, commitTransaction,
 } from './History.ts';
+import { removeNode } from '../custom/CustomNode.js';
 
 export const COPY_COMMAND = 'COPY';
 export const DELETE_COMMAND = 'DELETE';
@@ -94,7 +95,7 @@ export function useClipboard(
     const del = () => {
         startTransaction();
         displayedGraph.value.selectedNodes.forEach((node : any) => {
-            displayedGraph.value.removeNode(node);
+            removeNode(node);
         });
         commitTransaction();
     };
