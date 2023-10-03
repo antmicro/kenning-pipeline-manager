@@ -27,6 +27,11 @@ import LayoutManager from '../core/LayoutManager.js';
 import { suppressHistoryLogging } from '../core/History.ts';
 import { applySidePositions } from '../core/interfaceParser.js';
 import CreateCustomGraphNodeType from './CustomGraphNode.js';
+import {
+    SUBGRAPH_INPUT_NODE_TYPE,
+    SUBGRAPH_OUTPUT_NODE_TYPE,
+    SUBGRAPH_INOUT_NODE_TYPE,
+} from './subgraphInterface.js';
 
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-underscore-dangle */
@@ -49,6 +54,8 @@ export default class PipelineManagerEditor extends Editor {
     /* eslint-disable no-underscore-dangle */
 
     subgraphStack = [];
+
+    subgraphNodePositions = new Map();
 
     registerGraph(graph) {
         const customGraph = createPipelineManagerGraph(graph);
@@ -411,6 +418,14 @@ export default class PipelineManagerEditor extends Editor {
         suppressHistoryLogging(true);
         subgraphNode.propagateInterfaces();
 
+        // Restore position of subgraph nodes
+        Object.values(subgraphNode.subgraph.nodes).forEach((n) => {
+            if (n.id in this.subgraphNodePositions) {
+                n.position = this.subgraphNodePositions[n.id];
+                delete this.subgraphNodePositions[n.id];
+            }
+        });
+
         this._graph = subgraphNode.subgraph;
         this._switchGraph(subgraphNode.subgraph);
         this.graphName = this._graph.name;
@@ -500,6 +515,127 @@ export default class PipelineManagerEditor extends Editor {
         this.graphName = this._graph.name;
 
         suppressHistoryLogging(false);
+    }
+
+    findInterface(nodeId, intfId, subgraphNodeId) {
+        const foundNode = this.graph.nodes.find((_node) => _node.id === nodeId);
+        if (!foundNode) {
+            return null;
+        }
+        const foundIntf = Object.values(foundNode.inputs).concat(
+            Object.values(foundNode.outputs),
+        ).find(
+            (intf) => intf.id === intfId,
+        );
+        if (foundIntf) return foundIntf;
+        if (subgraphNodeId) {
+            return Object.values(foundNode.inputs).concat(Object.values(foundNode.outputs)).find(
+                (intf) => intf.subgraphNodeId === subgraphNodeId,
+            );
+        }
+        return null;
+    }
+
+    unwrapSubgraph(node) {
+        // Map subgraph input/output nodes with interfaces
+        const subgraphNodeToNode = new Map();
+        Object.values(node.inputs).forEach((input) => {
+            // Inputs
+            let subgraphInterfaceId = Object.values(node.subgraph.connections).find(
+                (connection) => connection.from.id === input.subgraphNodeId,
+            );
+            if (subgraphInterfaceId) {
+                subgraphNodeToNode[input.id] = {
+                    nodeId: subgraphInterfaceId.to.nodeId,
+                    id: subgraphInterfaceId.to.id,
+                };
+                return;
+            }
+            // Inouts
+            subgraphInterfaceId = Object.values(node.subgraph.connections).find(
+                (connection) => connection.to.id === input.subgraphNodeId,
+            );
+            if (subgraphInterfaceId) {
+                subgraphNodeToNode[input.id] = {
+                    nodeId: subgraphInterfaceId.from.nodeId,
+                    id: subgraphInterfaceId.from.id,
+                };
+            }
+        });
+        Object.values(node.outputs).forEach((output) => {
+            // Outputs
+            const subgraphInterfaceId = Object.values(node.subgraph.connections).find(
+                (connection) => connection.to.id === output.subgraphNodeId,
+            );
+            if (subgraphInterfaceId) {
+                subgraphNodeToNode[output.id] = {
+                    nodeId: subgraphInterfaceId.from.nodeId,
+                    id: subgraphInterfaceId.from.id,
+                };
+            }
+        });
+
+        // Add subgraph node without input/output ones
+        const subgraphTypes = [
+            SUBGRAPH_INOUT_NODE_TYPE, SUBGRAPH_INPUT_NODE_TYPE, SUBGRAPH_OUTPUT_NODE_TYPE];
+        const subgraphNodes = Object.values(node.subgraph._nodes).filter(
+            (n) => !subgraphTypes.includes(n.type),
+        );
+        // Calculate center point of subgraph nodes
+        const meanX = subgraphNodes.map((n) => n.position.x).reduce(
+            (sum, value) => sum + value, 0,
+        ) / subgraphNodes.length;
+        const meanY = subgraphNodes.map((n) => n.position.y).reduce(
+            (sum, value) => sum + value, 0,
+        ) / subgraphNodes.length;
+        // Remove selections
+        this.graph.selectedNodes = [];
+        // Create, reposition and select subgraph nodes
+        subgraphNodes.forEach((subgraphNode) => {
+            if (!subgraphTypes.includes(subgraphNode.type)) {
+                this.subgraphNodePositions[subgraphNode.id] = { ...subgraphNode.position };
+                const addedNode = this.graph.addNode(subgraphNode);
+                if (addedNode) {
+                    // Set position relative to removed node
+                    addedNode.position.x += node.position.x - meanX;
+                    addedNode.position.y += node.position.y - meanY;
+                    this.graph.selectedNodes.push(addedNode);
+                    // Reset connection count
+                    Object.values(addedNode.inputs).concat(
+                        Object.values(addedNode.outputs),
+                    ).forEach(
+                        (intf) => { intf.connectionCount = 0; },
+                    );
+                }
+            }
+        });
+
+        // Create connections from and to subgraph
+        const subgraphNodeConnections = this.graph.connections.filter(
+            (c) => c.from.nodeId === node.id || c.to.nodeId === node.id,
+        );
+        this.graph.removeNode(node);
+        Object.values(node.subgraph.connections).concat(
+            subgraphNodeConnections).forEach((connection) => {
+            if (connection.from.name === 'Connection' || connection.to.name === 'Connection') { return; }
+            let connectionFrom;
+            if (connection.from.id in subgraphNodeToNode) {
+                connectionFrom = subgraphNodeToNode[connection.from.id];
+            } else {
+                connectionFrom = connection.from;
+            }
+            let connectionTo;
+            if (connection.to.id in subgraphNodeToNode) {
+                connectionTo = subgraphNodeToNode[connection.to.id];
+            } else {
+                connectionTo = connection.to;
+            }
+            const foundFrom = this.findInterface(connectionFrom.nodeId, connectionFrom.id);
+            const foundTo = this.findInterface(connectionTo.nodeId, connectionTo.id);
+            if (foundFrom && foundTo) {
+                this.graph.addConnection(foundFrom, foundTo);
+            }
+        });
     }
 
     isInSubgraph() {
