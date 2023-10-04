@@ -10,6 +10,10 @@ import subprocess
 import sys
 from pathlib import Path
 from typing import Optional, List
+import re
+import requests
+from urllib.parse import urlparse
+import os
 
 import pipeline_manager
 from pipeline_manager.specification_reader import \
@@ -257,13 +261,6 @@ def build_frontend(
             json.dump(newspec, minified_spec_file)
             specification = minified_spec_path
 
-    if specification:
-        specification = Path(specification).absolute()
-        config_lines.append(f'VUE_APP_SPECIFICATION_PATH={specification}\n')
-        if dataflow:
-            dataflow = Path(dataflow).absolute()
-            config_lines.append(f'VUE_APP_DATAFLOW_PATH={dataflow}\n')
-
     if single_html:
         config_lines.append('VUE_APP_SINGLEHTML_BUILD=true\n')
 
@@ -279,6 +276,58 @@ def build_frontend(
             f'VUE_APP_JSON_URL_SUBSTITUTES="{json.dumps(urls)}"\n'
         )
 
+    if assets_directory:
+        shutil.copytree(
+            assets_directory,
+            frontend_path / 'assets',
+            dirs_exist_ok=True
+        )
+
+    single_html_spec = None
+    if single_html:
+        # Preprocessing url assets so that they are accessible offline
+        with open(specification, 'r') as specfile:
+            spec = json.load(specfile)
+
+        def store_url_asset(filename):
+            if re.match(r'^https?:\/\/(www\.)?.*$', filename):
+                imgfile = requests.get(filename, timeout=4)
+                suffix = imgfile.headers['Content-Type']
+                if suffix == 'image/svg+xml':
+                    suffix = 'svg'
+                else:
+                    suffix = suffix.split('/')[1]
+
+                new_filename = urlparse(filename).path.split('/')[-1]
+                new_filename = f'{new_filename}.{suffix}'
+                with open(frontend_path / 'assets' / new_filename, 'wb+') as f:
+                    f.write(imgfile.content)
+                return new_filename
+            return filename
+
+        # Retrieving all urls of icons
+        if "urls" in spec["metadata"]:
+            for url in spec["metadata"]["urls"].values():
+                filename = url['icon']
+                url['icon'] = store_url_asset(filename)
+
+        for node in spec["nodes"]:
+            if "icon" in node:
+                filename = node['icon']
+                node['icon'] = store_url_asset(filename)
+
+        single_html_spec = specification.with_suffix('.tmp.json')
+        with open(single_html_spec, 'w') as preprocessed_spec_file:
+            json.dump(spec, preprocessed_spec_file)
+            specification = single_html_spec
+
+    if specification:
+        specification = Path(specification).absolute()
+        config_lines.append(f'VUE_APP_SPECIFICATION_PATH={specification}\n')
+        if dataflow:
+            dataflow = Path(dataflow).absolute()
+            config_lines.append(f'VUE_APP_DATAFLOW_PATH={dataflow}\n')
+
     if config_lines:
         with open(config_path, 'w') as config:
             config.writelines(config_lines)
@@ -290,13 +339,7 @@ def build_frontend(
             shutil.rmtree(output_directory)
         frontend_dist_path = output_directory
 
-    if assets_directory:
-        shutil.copytree(
-            assets_directory,
-            frontend_path / 'assets',
-            dirs_exist_ok=True
-        )
-
+    # Building frontend application
     if build_type == 'static-html':
         exit_status = subprocess.run(
             [
@@ -333,5 +376,6 @@ def build_frontend(
 
     if single_html:
         build_singlehtml(frontend_dist_path, single_html, used_icons)
+        os.remove(single_html_spec)
 
     return 0
