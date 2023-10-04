@@ -8,7 +8,7 @@ import { defineConfig } from '@vue/cli-service';
 import { fileURLToPath } from 'url';
 import path, { dirname } from 'path';
 
-const __filename = fileURLToPath(import.meta.url);
+const __filename = fileURLToPath(import.meta.url); // eslint-disable-line no-underscore-dangle
 
 export default defineConfig({
     publicPath: '',
@@ -47,11 +47,12 @@ export default defineConfig({
             extensions: ['.ts', '.js', '.json'],
         };
 
-        config.module.rules = config.module.rules.filter((rule) => !rule.test.toString().match(/svg/) && !rule.test.toString().match(/png/))
-
+        config.module.rules = config.module.rules.filter(
+            (rule) => !rule.test.toString().match(/(svg|png|jpg|jpeg|gif|webp|avif)/),
+        );
         config.module.rules.push({
-            test: /\.(|svg|png|jpe?g|gif|webp|avif)(\?.*)?$/,
-            type: 'asset/resource',
+            test: /\.(svg|png|jpg|jpeg|gif|webp|avif)(\?.*)?$/,
+            type: 'asset',
             generator: { filename: '[path][name][ext]' },
         });
     },
