@@ -568,7 +568,7 @@ export default defineComponent({
             r.keys().forEach((key) => (cache[key] = r(key))); // eslint-disable-line no-return-assign,max-len
         }
         try {
-            importAll(require.context('../../assets', true, /\.(|svg|png)$/));
+            importAll(require.context('../../assets', true, /\.(svg|png|jpg|jpeg|gif|webp|avif)$/));
         } catch (e) {
             // assets directory not found
         } finally {
