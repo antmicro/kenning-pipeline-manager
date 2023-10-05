@@ -313,8 +313,23 @@ def build_frontend(
 
         for node in spec["nodes"]:
             if "icon" in node:
-                filename = node['icon']
-                node['icon'] = store_url_asset(filename)
+                Path(frontend_path / 'assets').mkdir(
+                    parents=True,
+                    exist_ok=True
+                )
+                if isinstance(node['icon'], str):
+                    filename = node['icon']
+                    node['icon'] = store_url_asset(filename)
+                else:
+                    icongroup, iconsuffix = list(node['icon'].items())[0]
+                    iconprefix = spec["metadata"]["icons"][icongroup]
+                    if iconprefix[-1] != '/':
+                        iconprefix += '/'
+                    if iconsuffix[0] == '/':
+                        iconsuffix = iconsuffix[1:]
+                    filename = iconprefix + iconsuffix
+                    print(filename)
+                    node['icon'] = store_url_asset(filename)
 
         single_html_spec = specification.with_suffix('.tmp.json')
         with open(single_html_spec, 'w') as preprocessed_spec_file:
