@@ -177,6 +177,8 @@ export default class EditorManager {
             return errors;
         }
 
+        this.currentSpecification.nodes = JSON.parse(JSON.stringify(resolvedNodes));
+
         this.baklavaView.editor.registerNodeType(SubgraphInputNode, { category: 'Subgraphs' });
         this.baklavaView.editor.registerNodeType(SubgraphOutputNode, { category: 'Subgraphs' });
         this.baklavaView.editor.registerNodeType(SubgraphInoutNode, { category: 'Subgraphs' });
