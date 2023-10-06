@@ -1102,6 +1102,7 @@ class SpecificationBuilder(object):
     def create_and_validate_spec(
             self,
             workspacedir: Optional[Path] = None,
+            resolved_specification: Optional[Path] = None,
             fail_on_warnings: bool = True,
             sort_spec: bool = False,
             dump_spec: Optional[Path] = None) -> Dict:
@@ -1112,13 +1113,17 @@ class SpecificationBuilder(object):
         ----------
         workspacedir: str
             Path to the workspace directory for Pipeline Manager
+        resolved_specification : Optional[Path] = None
+            Path to specification that has have resolved
+            inheritance, i.e. resolved 'extends' attributes.
+            If none then the specification is not resolved.
         fail_on_warnings: bool
             Tells if the specification creation should fail on warnings
         sort_spec: bool
             True if the entries in the specification should be sorted.
         dump_spec: Optional[Path]
             Tells where the specification should be dumped to file
-            before validation for debugging purposes.
+            before validation and resolving for debugging purposes.
 
         Returns
         -------
@@ -1152,17 +1157,22 @@ class SpecificationBuilder(object):
                     )
             res = validate(
                 specification_path=specpath,
-                workspace_directory=workspacedir
+                workspace_directory=workspacedir,
+                resolved_specification_path=resolved_specification
             )
 
-        if res != 0:
-            raise SpecificationBuilderException(
-                "Builder validation failed."
-            )
-
-        if fail_on_warnings:
-            if self.warnings > 0:
+            if res != 0:
                 raise SpecificationBuilderException(
-                    f"Builder reported {self.warnings} issues, failing..."
+                    "Builder validation failed."
                 )
+
+            if fail_on_warnings:
+                if self.warnings > 0:
+                    raise SpecificationBuilderException(
+                        f"Builder reported {self.warnings} issues, failing..."
+                    )
+
+            if resolved_specification:
+                with open(resolved_specification) as f:
+                    spec = json.load(f)
         return spec
