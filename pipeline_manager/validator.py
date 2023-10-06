@@ -16,6 +16,7 @@ import pipeline_manager
 def validate(
         specification_path: Path,
         dataflow_path: Optional[Path] = None,
+        resolved_specification_path: Optional[Path] = None,
         workspace_directory: Optional[Path] = None) -> int:
     """
     Validates specification, and optionally a graph associated with it.
@@ -24,9 +25,12 @@ def validate(
     ----------
     specification_path: Path
         Path to the specification file
-    dataflow_path: Path
+    dataflow_path: Optional[Path]
         Path to the dataflow file
-    workspace_directory: Path
+    resolved_specification_path: Optional[Path]
+        Destination where the resolved specification is stored.
+        Ignored if None.
+    workspace_directory: Optional[Path]
         Tells where the sources of the frontend (used during validation) are
         stored. Equals None when workspace directory is an actual repository.
 
@@ -53,29 +57,28 @@ def validate(
     if workspace_directory:
         frontend_path = workspace_directory / 'frontend'
 
+    run_command = [
+        "node",
+        "--no-warnings",
+        "--loader",
+        "ts-node/esm",
+        "validator.js",
+        specification_path.absolute(),
+    ]
+
     if dataflow_path:
-        exit_status = subprocess.run(
+        run_command.append(dataflow_path.absolute())
+    if resolved_specification_path:
+        run_command.extend(
             [
-                "node",
-                "--no-warnings",
-                "--loader",
-                "ts-node/esm",
-                "validator.js",
-                specification_path.absolute(),
-                dataflow_path.absolute(),
-            ],
-            cwd=frontend_path,
+                '--resolvedSpecification',
+                resolved_specification_path
+            ]
         )
-    else:
-        exit_status = subprocess.run(
-            [
-                "node",
-                "--no-warnings",
-                "--loader",
-                "ts-node/esm",
-                "validator.js",
-                specification_path.absolute()
-            ],
-            cwd=frontend_path,
-        )
+
+    exit_status = subprocess.run(
+        run_command,
+        cwd=frontend_path,
+    )
+
     return exit_status.returncode
