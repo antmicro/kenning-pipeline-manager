@@ -69,6 +69,32 @@ def set_if_not_none(entry: Dict, key: Any, val: Any):
         entry[key] = val
 
 
+def sort_dict_list(entry: Dict[str, Any], key: str, sort_by: str = False):
+    """
+    Sort list stored as a value for given key. If such key doesn't exist the
+    function returns with no effect.
+
+    Additionally if list is a list of dictionaries sort them by the key given
+    in 'sort_by' argument.
+
+    Parameters
+    ----------
+    entry: Dict[str, Any]
+        Dictionary to look for list to sort.
+    key: str
+        Key which is used to store given list.
+    sort_by: str
+        If sorting list of dictionaries, a field used as sorting key.
+    """
+    if key not in entry:
+        return
+    lst = entry[key]
+    if sort_by:
+        lst.sort(key=lambda v: v[sort_by])
+    else:
+        lst.sort()
+
+
 class SpecificationBuilder(object):
     """
     Creates a specification file and checks validity of files.
@@ -959,22 +985,82 @@ class SpecificationBuilder(object):
             for subgraph in otherspec['subgraphs']:
                 self.add_subgraph_from_spec(subgraph)
 
-    def _construct_specification(self):
+    def _sorted_nodes(self):
+        for node in self._nodes.values():
+            sort_dict_list(node, 'interfaces', sort_by='name')
+            sort_dict_list(node, 'properties', sort_by='name')
+
+            if 'interfaces' in node:
+                for iface in node['interfaces']:
+                    sort_dict_list(iface, 'interfaces')
+
+            if 'properties' in node:
+                for prop in node['properties']:
+                    sort_dict_list(prop, 'values')
+                    sort_dict_list(prop, 'group', sort_by='name')
+
+                    if 'group' in prop:
+                        for group in prop['group']:
+                            sort_dict_list(group, 'values')
+
+        sorted_tuples = sorted(self._nodes.items())
+        return list(zip(*sorted_tuples))[1]
+
+    def _sorted_metadata(self):
+        if 'layers' in self._metadata:
+            sort_dict_list(self._metadata, 'layers', sort_by='name')
+            for layer in self._metadata['layers']:
+                sort_dict_list(layer, 'nodeInterfaces')
+                sort_dict_list(layer, 'nodeLayers')
+        return self._metadata
+
+    def _sorted_subgraphs(self):
+        sort_dict_list(self._subgraphs, 'nodes', sort_by='name')
+        for graph in self._subgraphs.values():
+            sort_dict_list(graph, 'connections', sort_by='from')
+            sort_dict_list(graph, 'interfaces', sort_by='name')
+            sort_dict_list(graph, 'nodes', sort_by='name')
+
+            if 'nodes' in graph:
+                for node in graph['nodes']:
+                    sort_dict_list(node, 'interfaces', sort_by='name')
+                    sort_dict_list(node, 'properties', sort_by='name')
+
+        sorted_tuples = sorted(self._subgraphs.items())
+        return list(zip(*sorted_tuples))[1]
+
+    def _get_metadata(self, sort_spec):
+        if sort_spec:
+            return self._sorted_metadata()
+        return self._metadata
+
+    def _get_nodes(self, sort_spec):
+        if sort_spec:
+            return self._sorted_nodes()
+        return list(self._nodes.values())
+
+    def _get_subgraphs(self, sort_spec):
+        if sort_spec:
+            return self._sorted_subgraphs()
+        return list(self._subgraphs.values())
+
+    def _construct_specification(self, sort_spec):
         """
         Builds specification from the builder data.
         """
         spec = {"version": self.version}
-        spec["nodes"] = list(self._nodes.values())
+        spec["nodes"] = self._get_nodes(sort_spec)
         if self._metadata:
-            spec["metadata"] = self._metadata
+            spec["metadata"] = self._get_metadata(sort_spec)
         if self._subgraphs:
-            spec["subgraphs"] = list(self._subgraphs.values())
+            spec["subgraphs"] = self._get_subgraphs(sort_spec)
         return spec
 
     def create_and_validate_spec(
             self,
             workspacedir: Optional[Path] = None,
             fail_on_warnings: bool = True,
+            sort_spec: bool = False,
             dump_spec: Optional[Path] = None) -> Dict:
         """
         Creates a specification and validates it using schema.
@@ -995,7 +1081,7 @@ class SpecificationBuilder(object):
             Built specification, if successful
         """
         import tempfile
-        spec = self._construct_specification()
+        spec = self._construct_specification(sort_spec)
 
         if workspacedir:
             workspacedir = Path(workspacedir)
@@ -1003,10 +1089,10 @@ class SpecificationBuilder(object):
         with tempfile.TemporaryDirectory() as tmpdir:
             specpath = Path(tmpdir) / 'spec.json'
             with open(Path(tmpdir) / 'spec.json', 'w') as spec_file:
-                json.dump(spec, spec_file, indent=4)
+                json.dump(spec, spec_file, indent=4, sort_keys=True)
             if dump_spec:
                 with open(dump_spec, 'w') as spec_file:
-                    json.dump(spec, spec_file, indent=4)
+                    json.dump(spec, spec_file, indent=4, sort_keys=True)
             res = validate(
                 specification_path=specpath,
                 workspace_directory=workspacedir
