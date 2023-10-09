@@ -96,7 +96,9 @@ SPDX-License-Identifier: Apache-2.0
                 <div class="__title">
                     Description
                 </div>
-                <div class="__markdown-content" v-html="desc"></div>
+                <div class="__markdown-content" >
+                    <span v-html="desc" class="node_description"></span>
+                </div>
             </div>
 
             <div class="__interface_groups" v-if="interfaceGroupsCheckboxes.length">
@@ -160,7 +162,18 @@ export default defineComponent({
         const category = computed(() => graph.value.editor.nodeTypes.get(node.value.type).category);
         const prettyCategory = computed(() => `${category.value.split('/').join(' / ')}`);
 
-        const desc = computed(() => converter.makeHtml(node.value?.description ?? ''));
+        const desc = computed(() => {
+            let html = converter.makeHtml(node.value?.description ?? '');
+            const aTagRe = /<a href="[a-zA-Z0-9-$_.+!*'()/&?=:%]+">/gm;
+            html.match(aTagRe)?.forEach((match) => {
+                const hrefParts = match.split('"');
+                // Forces the link to open in a new tab instad of closing the pipeline manager
+                const newEnd = ` target="_blank"${hrefParts[2]}`;
+                const newHref = [hrefParts[0], hrefParts[1], newEnd].join('"');
+                html = html.replace(match, newHref);
+            });
+            return html;
+        });
         const nodeIcon = computed(() => viewModel.value.editor.getNodeIconPath(node.value?.type));
         const nodeURLs = computed(() => viewModel.value.editor.getNodeURLs(node.value?.type));
 
