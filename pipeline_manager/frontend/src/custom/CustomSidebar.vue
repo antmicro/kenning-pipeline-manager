@@ -92,11 +92,11 @@ SPDX-License-Identifier: Apache-2.0
                 </div>
             </div>
 
-            <div class="__description" v-show="desc">
+            <div v-show="desc">
                 <div class="__title">
                     Description
                 </div>
-                <div class="__description-content" v-html="desc"></div>
+                <div class="__markdown-content" v-html="desc"></div>
             </div>
 
             <div class="__interface_groups" v-if="interfaceGroupsCheckboxes.length">
