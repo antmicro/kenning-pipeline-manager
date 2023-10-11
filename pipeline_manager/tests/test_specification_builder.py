@@ -17,15 +17,18 @@ def specification_builder(
 
 
 @pytest.mark.parametrize('example', example_pairs())
+@pytest.mark.parametrize('sort_spec', [False, True])
 def test_existing_examples(
         example,
         specification_builder: SpecificationBuilder,
-        empty_file_path):
+        empty_file_path,
+        sort_spec):
     """
     Takes all existing configurations from example module and
     checks whether SpecificationBuilder can recreate specifications correctly.
     """
     spec_path, dataflow_path = example
+    print('sort_spec =', sort_spec)
 
     if spec_path.name == 'sample-interface-groups-specification.json':
         pytest.xfail("Groups of interfaces are not yet implemented for Specification Builder")  # noqa: E501
@@ -34,7 +37,7 @@ def test_existing_examples(
         spec = json.load(f)
 
     specification_builder.update_spec_from_other(spec)
-    recreated_spec = specification_builder.create_and_validate_spec()
+    recreated_spec = specification_builder.create_and_validate_spec(sort_spec=sort_spec)  # noqa: E501
 
     with open(empty_file_path, 'w') as f:
         json.dump(recreated_spec, f)
