@@ -6,35 +6,63 @@
 
 import { reactive } from 'vue';
 
+const storageAvailable = (() => {
+    try {
+        const randomKey = Math.random().toString(36);
+        const randomValue = Math.random().toString(36);
+        localStorage.setItem(randomKey, randomValue);
+        localStorage.removeItem(randomKey);
+        return true;
+    } catch {
+        return false;
+    }
+})();
+
+const pmStorage = new Map();
+const get = (key) => {
+    if (storageAvailable) return localStorage.getItem(key);
+    return pmStorage.get(key) ?? null;
+};
+
+const set = (key, value) => {
+    if (storageAvailable) localStorage.setItem(key, value);
+    else pmStorage.set(key, value);
+};
+
+const remove = (key) => {
+    if (storageAvailable) localStorage.removeItem(key);
+    else pmStorage.delete(key);
+};
+
 /* eslint-disable import/prefer-default-export */
 export const notificationStore = reactive({
-    notifications: JSON.parse(localStorage.getItem('notifications')) || [],
+    notifications: JSON.parse(get('notifications')) || [],
     add(notification) {
         const newNotifications = [...this.notifications, notification];
 
-        localStorage.setItem('notifications', JSON.stringify(newNotifications));
+        set('notifications', JSON.stringify(newNotifications));
         this.notifications = newNotifications;
     },
 
     remove() {
-        localStorage.removeItem('notifications');
+        remove('notifications');
         this.notifications = [];
     },
 
     removeOne(index) {
         const newNotifications = this.notifications.filter((_, idx) => index !== idx);
 
-        localStorage.setItem('notifications', JSON.stringify(newNotifications));
+        set('notifications', JSON.stringify(newNotifications));
         this.notifications = newNotifications;
     },
 });
 
 export const terminalStore = reactive({
-    logs: JSON.parse(localStorage.getItem('logs')) || [],
+    logs: JSON.parse(get('logs')) || [],
     add(log) {
         const newNotifications = [...this.logs, log];
 
-        localStorage.setItem('logs', JSON.stringify(newNotifications));
+        set('logs', JSON.stringify(newNotifications));
         this.logs = newNotifications;
     },
 
@@ -74,7 +102,7 @@ export const terminalStore = reactive({
     },
 
     remove() {
-        localStorage.removeItem('logs');
+        remove('logs');
         this.logs = [];
     },
 });
