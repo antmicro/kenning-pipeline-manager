@@ -190,7 +190,7 @@ The possible arguments are:
 - `fail_on_warnings` - Determines whether the validation should fail on warnings
 - `dump_spec` - A path to where the specification should be dumped as a file before validation.
   Useful for debugging purposes.
-- `sort_spec` - Return specification that has has introduced ordering to dictionaries and lists.
+- `sort_spec` - Return specification that has introduced ordering to dictionaries and lists.
   In lists containing dictionaries the unique field of each dictionary is used to sort entries.
 
 The created `specification` upon successful run should contain a full specification based on `SpecificationBuilder`.
