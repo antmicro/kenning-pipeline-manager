@@ -1000,7 +1000,8 @@ class SpecificationBuilder(object):
 
             if 'interfaces' in node:
                 for iface in node['interfaces']:
-                    sort_dict_list(iface, 'interfaces')
+                    if 'type' in iface and not isinstance(iface['type'], str):
+                        sort_dict_list(iface, 'type')
 
             if 'properties' in node:
                 for prop in node['properties']:
