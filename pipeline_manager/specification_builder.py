@@ -985,7 +985,15 @@ class SpecificationBuilder(object):
             for subgraph in otherspec['subgraphs']:
                 self.add_subgraph_from_spec(subgraph)
 
-    def _sorted_nodes(self):
+    def _sorted_nodes(self) -> List[Dict]:
+        """
+        Returns sorted nodes, with sorted contents - dictionaries and lists.
+
+        Returns
+        -------
+        List[Dict] :
+            List of sorted nodes, including their sorted contents.
+        """
         for node in self._nodes.values():
             sort_dict_list(node, 'interfaces', sort_by='name')
             sort_dict_list(node, 'properties', sort_by='name')
@@ -1006,7 +1014,15 @@ class SpecificationBuilder(object):
         sorted_tuples = sorted(self._nodes.items())
         return list(zip(*sorted_tuples))[1]
 
-    def _sorted_metadata(self):
+    def _sorted_metadata(self) -> Dict:
+        """
+        Sorts and returns metadata for the specification.
+
+        Returns
+        -------
+        Dict :
+            Dictionary describing metadata for the specification
+        """
         if 'layers' in self._metadata:
             sort_dict_list(self._metadata, 'layers', sort_by='name')
             for layer in self._metadata['layers']:
@@ -1014,7 +1030,15 @@ class SpecificationBuilder(object):
                 sort_dict_list(layer, 'nodeLayers')
         return self._metadata
 
-    def _sorted_subgraphs(self):
+    def _sorted_subgraphs(self) -> List[Dict]:
+        """
+        Sorts subgraph entries in the specification and returns them.
+
+        Returns
+        -------
+        List[Dict]:
+            A list of dictionaries describing subgraphs.
+        """
         sort_dict_list(self._subgraphs, 'nodes', sort_by='name')
         for graph in self._subgraphs.values():
             sort_dict_list(graph, 'connections', sort_by='from')
@@ -1029,24 +1053,34 @@ class SpecificationBuilder(object):
         sorted_tuples = sorted(self._subgraphs.items())
         return list(zip(*sorted_tuples))[1]
 
-    def _get_metadata(self, sort_spec):
+    def _get_metadata(self, sort_spec: bool) -> Dict:
         if sort_spec:
             return self._sorted_metadata()
         return self._metadata
 
-    def _get_nodes(self, sort_spec):
+    def _get_nodes(self, sort_spec: bool) -> List[Dict]:
         if sort_spec:
             return self._sorted_nodes()
         return list(self._nodes.values())
 
-    def _get_subgraphs(self, sort_spec):
+    def _get_subgraphs(self, sort_spec: bool) -> List[Dict]:
         if sort_spec:
             return self._sorted_subgraphs()
         return list(self._subgraphs.values())
 
-    def _construct_specification(self, sort_spec):
+    def _construct_specification(self, sort_spec: bool) -> Dict:
         """
         Builds specification from the builder data.
+
+        Parameters
+        ----------
+        sort_spec: bool
+            True if the entries in the specification should be sorted.
+
+        Returns
+        -------
+        Dict :
+            Full specification from SpecificationBuilder
         """
         spec = {"version": self.version}
         spec["nodes"] = self._get_nodes(sort_spec)
@@ -1071,6 +1105,8 @@ class SpecificationBuilder(object):
             Path to the workspace directory for Pipeline Manager
         fail_on_warnings: bool
             Tells if the specification creation should fail on warnings
+        sort_spec: bool
+            True if the entries in the specification should be sorted.
         dump_spec: Optional[Path]
             Tells where the specification should be dumped to file
             before validation for debugging purposes.
