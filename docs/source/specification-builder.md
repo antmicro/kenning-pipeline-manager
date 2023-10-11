@@ -190,6 +190,10 @@ The possible arguments are:
 - `fail_on_warnings` - Determines whether the validation should fail on warnings
 - `dump_spec` - A path to where the specification should be dumped as a file before validation.
   Useful for debugging purposes.
+- `sort_spec` - Return specification that has all possible lists sorted. Useful for creating
+  specification that is stored in git repo to obtain better diffs. (To obtain fully sorted
+  specification file it must be ensured that the dictionary keys are also sorted.
+  E.g. in `json.dump()` function the `sort_keys` must be set to `True`.)
 
 The created `specification` upon successful run should contain a full specification based on `SpecificationBuilder`.
 It is a regular Python dictionary that can be saved to a JSON file using the `json.dump` method.
