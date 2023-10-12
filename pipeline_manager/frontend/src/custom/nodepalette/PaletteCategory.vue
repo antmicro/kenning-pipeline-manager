@@ -38,13 +38,13 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
                     >
                         <img
                             class="__title-icon"
-                            v-if="category.iconPath !== undefined"
-                            :src="getIconPath(category.iconPath)"
+                            v-if="category.categoryNode.iconPath !== undefined"
+                            :src="getIconPath(category.categoryNode.iconPath)"
                             draggable="false"
                         />
                         <div class="__title-label" v-html="category.hitSubstring"></div>
                         <a
-                            v-for="url in category.URLs"
+                            v-for="url in category.categoryNode.URLs"
                             :key="url.name"
                             :href="url.url"
                             class="__url"
@@ -127,13 +127,13 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
                 >
                     <img
                         class="__title-icon"
-                        v-if="category.iconPath !== undefined"
-                        :src="getIconPath(category.iconPath)"
+                        v-if="category.categoryNode.iconPath !== undefined"
+                        :src="getIconPath(category.categoryNode.iconPath)"
                         draggable="false"
                     />
                     <div class="__title-label" v-html="category.hitSubstring"></div>
                     <a
-                        v-for="url in category.URLs"
+                        v-for="url in category.categoryNode.URLs"
                         :key="url.name"
                         :href="url.url"
                         class="__url"
