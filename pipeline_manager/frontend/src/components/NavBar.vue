@@ -432,6 +432,13 @@ export default {
                 });
         },
 
+        onClickNodeSearch() {
+            this.togglePanel(this.panels.nodesearch);
+            if (this.panels.nodesearch.isOpen) {
+                this.$nextTick(() => this.$refs.searchbarInput.focus());
+            }
+        },
+
         handleMouseLeave(panel) {
             if (this.hideHud) this.togglePanel(panel, true);
         },
@@ -601,7 +608,7 @@ export default {
                     role="button"
                     @pointerover="() => panels.nodesearch.hover = true"
                     @pointerleave="() => panels.nodesearch.hover = false"
-                    @click="() => togglePanel(panels.nodesearch)"
+                    @click="onClickNodeSearch"
                 >
                     <Magnifier :hover="panels.nodesearch.hover" class="small_svg"/>
                     <div
@@ -618,9 +625,10 @@ export default {
                 <div
                     ref="searchbar"
                     class="searchbar"
-                    v-if="panels.nodesearch.isOpen"
+                    v-show="panels.nodesearch.isOpen"
                 >
                     <input
+                        ref="searchbarInput"
                         class="search-editor-nodes"
                         v-model="searchEditorNodesQuery"
                         placeholder="Search for nodes in the editor"
@@ -870,9 +878,6 @@ $bar-height: 60px;
 
             &.logo:hover > .dropdown-wrapper {
                 display: flex;
-            }
-
-            & > .hoverbox {
             }
 
             &.hoverbox:hover > .tooltip {
