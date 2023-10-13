@@ -163,6 +163,7 @@ export default {
             editTitle: false,
             notificationStore,
             logoHover: false,
+            showSearch: false,
             searchEditorNodesQuery,
             // Toggleable panels and their configuration
             panels: {
@@ -195,6 +196,10 @@ export default {
                     iconRef: 'settings',
                     showTransform: '-495px, 0px',
                     hideTransform: '0px, 0px',
+                    hover: false,
+                },
+                nodesearch: {
+                    isOpen: false,
                     hover: false,
                 },
             },
@@ -572,7 +577,7 @@ export default {
                 </div>
             </div>
             <component
-                v-if="editTitle"
+                v-if="editTitle && !panels.nodesearch.isOpen"
                 :is="editorTitleInterface.component"
                 :intf="editorTitleInterface"
                 class="editorTitleInput"
@@ -580,17 +585,41 @@ export default {
                 v-click-outside="() => { editTitle = false }"
             />
             <span
-                v-else
+                v-if="!editTitle && !panels.nodesearch.isOpen"
                 class="editorTitle"
                 @dblclick="editTitle = true">
                     {{ editorTitle }}
             </span>
-            <div>
+            <div
+                @pointerleave="()=> panels.nodesearch.isOpen =
+                    panels.nodesearch.isOpen && searchEditorNodesQuery != ''
+                "
+            >
                 <div
                     ref="searchbar"
                     class="searchbar"
+                    role="button"
+                    @pointerover="() => panels.nodesearch.hover = true"
+                    @pointerleave="() => panels.nodesearch.hover = false"
+                    @click="() => togglePanel(panels.nodesearch)"
                 >
-                    <Magnifier :color="'gray'" />
+                    <Magnifier :hover="panels.nodesearch.hover" class="small_svg"/>
+                    <div
+                        class="tooltip"
+                        :class="settingsTooltipClasses"
+                        v-if="!panels.nodesearch.isOpen"
+                    >
+                        <span>Show node search bar</span>
+                    </div>
+                    <div class="tooltip" :class="settingsTooltipClasses" v-else>
+                        <span>Hide node search bar</span>
+                    </div>
+                </div>
+                <div
+                    ref="searchbar"
+                    class="searchbar"
+                    v-if="panels.nodesearch.isOpen"
+                >
                     <input
                         class="search-editor-nodes"
                         v-model="searchEditorNodesQuery"
@@ -855,16 +884,18 @@ $bar-height: 60px;
             }
 
             &.searchbar {
-                width: calc(3.75em * 6);
+                width: auto;
                 padding: 0.1em;
 
                 & > .search-editor-nodes {
                     background-color: #181818;
                     flex: 1;
                     height: 100%;
+                    width: calc(3.75em * 6);
                     color: $white;
                     border: none;
                     padding: 0em 1em;
+                    background-color: $gray-600;
 
                     &:focus {
                         outline: 1px solid $green;
@@ -881,7 +912,10 @@ $bar-height: 60px;
                     padding: 1em;
                 }
             }
-
+            &.searchbar:hover > .tooltip {
+                display: flex;
+                z-index: 11;
+            }
         }
     }
 }

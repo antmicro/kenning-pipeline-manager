@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 <template>
     <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
         <circle
-            :class="color"
+            :class="hoverStatus"
             id="magnifier-ellipse"
             cx="8.94758"
             cy="8.93587"
@@ -16,7 +16,7 @@ SPDX-License-Identifier: Apache-2.0
             stroke-width="2.28477"
         />
         <rect
-            :class="color"
+            :class="hoverStatus"
             id="magnifier-rectangle"
             x="13.0214"
             y="13.7031"
@@ -31,19 +31,34 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import { computed } from 'vue';
+
 export default {
     props: {
-        color: {
-            type: String,
+        hover: {
+            type: Boolean,
             required: false,
         },
+    },
+    setup(props) {
+        const hoverStatus = computed(() => ({
+            hovered: props.hover,
+            normal: !props.hover,
+        }));
+
+        return { hoverStatus };
     },
 };
 </script>
 
-<style lang="scss">
-/* Color */
-.gray {
-    stroke: $gray-200;
+<style lang="scss" scoped>
+.normal {
+    stroke: #ffffff;
+    fill: $gray-600;
+}
+
+.hovered {
+    stroke: $green;
+    fill: $gray-600;
 }
 </style>
