@@ -13,6 +13,7 @@ from http import HTTPStatus
 
 from flask import Flask, render_template, request
 from flask_cors import CORS
+from flask_socketio import SocketIO
 from pipeline_manager_backend_communication.misc_structures import MessageType, Status, OutputTuple  # noqa: E501
 
 from pipeline_manager import frontend
@@ -28,6 +29,8 @@ app = Flask(
     template_folder=dist_path
 )
 
+CORS(app)
+socketio = SocketIO(app)
 
 class GetStatusFilter(logging.Filter):
     def filter(self, record):
@@ -35,9 +38,6 @@ class GetStatusFilter(logging.Filter):
 
 
 logging.getLogger("werkzeug").addFilter(GetStatusFilter())
-
-CORS(app)
-
 
 @app.route('/', methods=['GET'])
 def index():
@@ -365,8 +365,8 @@ def main(argv):
             logging.log(logging.WARNING, 'External application did not connect')  # noqa: E501
 
     # for now we have only one thread so the global state can't be corrupted
-    app.run(
-        threaded=False,
+    socketio.run(
+        app,
         port=args.backend_port,
         host=args.backend_host
     )
