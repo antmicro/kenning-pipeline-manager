@@ -4,8 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { io } from 'socket.io-client';
+
 import { backendApiUrl, HTTPCodes, PMMessageType } from './utils';
-import { fetchGET, fetchPOST } from './fetchRequests';
 import NotificationHandler from './notifications';
 import EditorManager from './EditorManager';
 
@@ -18,15 +19,24 @@ export default class ExternalApplicationManager {
 
     idStatusInterval = null;
 
+    socket = null;
+
     timeoutStatusInterval = 500;
+
+    constructor() {
+        this.socket = io(backendApiUrl);
+
+        this.socket.on('connect', () => NotificationHandler.terminalLog('info', 'Initialized connection with backend'));
+        this.socket.on('disconnect', () => NotificationHandler.terminalLog('warning', 'Connection with backend disrupted'));
+    }
 
     /**
      * Function that fetches state of the connection and updates
      * `this.externalApplicationConnected` property.
      */
     async updateConnectionStatus() {
-        const response = await fetchGET('get_status');
-        this.externalApplicationConnected = response.status === HTTPCodes.OK;
+        const response = await this.socket.emitWithAck('get_status');
+        this.externalApplicationConnected = HTTPCodes.OK === response.status;
     }
 
     /**
@@ -35,12 +45,11 @@ export default class ExternalApplicationManager {
      * This function updates `this.externalApplicationConnected` property
      */
     async openTCP() {
-        const response = await fetchGET('connect');
-        const data = await response.text();
+        const response = await this.socket.emitWithAck('external_app_connect');
         const connected = response.status === HTTPCodes.OK;
 
         if (!connected) {
-            NotificationHandler.terminalLog('error', data);
+            NotificationHandler.terminalLog('error', response.data);
         }
         this.externalApplicationConnected = connected;
     }
@@ -51,12 +60,10 @@ export default class ExternalApplicationManager {
      * Otherwise the specification is passed to the editor that renders a new environment.
      */
     async requestSpecification() {
-        const response = await fetchGET('request_specification');
-        let message = 'Unknown error';
+        const response = await this.socket.emitWithAck('request_specification');
+        const { data, status } = response;
 
-        if (response.status === HTTPCodes.OK) {
-            const data = await response.json();
-
+        if (status === HTTPCodes.OK) {
             if (data.type === PMMessageType.OK) {
                 const specification = data.content;
 
@@ -74,22 +81,17 @@ export default class ExternalApplicationManager {
                         warnings,
                     );
                 }
-                if (Array.isArray(errors) && errors.length) {
-                    NotificationHandler.terminalLog('error', 'Specification is invalid', errors);
-                    return;
-                }
 
                 NotificationHandler.showToast('info', 'Specification loaded successfully');
-            } else if (data.type === PMMessageType.ERROR) {
-                message = data.content;
-                NotificationHandler.terminalLog('error', message);
             } else if (data.type === PMMessageType.WARNING) {
-                message = data.content;
+                const message = data.content;
                 NotificationHandler.terminalLog('warning', message);
+            } else if (data.type === PMMessageType.ERROR) {
+                const message = data.content;
+                NotificationHandler.terminalLog('error', message);
             }
-        } else if (response.status === HTTPCodes.ServiceUnavailable) {
-            message = await response.text();
-            NotificationHandler.terminalLog('error', message);
+        } else if (status === HTTPCodes.ServiceUnavailable) {
+            NotificationHandler.terminalLog('error', data);
         }
     }
 
@@ -108,20 +110,15 @@ export default class ExternalApplicationManager {
             NotificationHandler.showToast('info', 'Running dataflow');
         }
 
-        const formData = new FormData();
-        formData.append('dataflow', dataflow);
+        let { status, data } = await this.socket.emitWithAck('dataflow_action_request', action, dataflow);
 
-        let response = await fetchPOST(`dataflow_action_request/${action}`, formData);
-        if (response.status === HTTPCodes.ServiceUnavailable) {
+        if (status === HTTPCodes.ServiceUnavailable) {
             // The connection was closed
-            const data = await response.text();
             NotificationHandler.terminalLog('error', data);
             return;
         }
 
         // Status is HTTPCodes.OK so a message from the application is received.
-        let data = await response.json();
-
         if (action === 'run') {
             const progressBar = document.querySelector('.progress-bar');
             progressBar.style.width = '0%';
@@ -132,11 +129,8 @@ export default class ExternalApplicationManager {
                 const progress = data.content;
                 progressBar.style.width = `${progress}%`;
 
-                response = await fetchGET(`receive_message`);
-                if (response.status === HTTPCodes.OK) {
-                    data = await response.json();
-                } else if (response.status === HTTPCodes.ServiceUnavailable) {
-                    data = await response.text();
+                ({ status, data } = await this.socket.emitWithAck('receive_message'));
+                if (status === HTTPCodes.ServiceUnavailable) {
                     NotificationHandler.terminalLog('error', data);
                     progressBar.style.width = '0%';
                     return;
@@ -159,36 +153,27 @@ export default class ExternalApplicationManager {
      * so that it can be loaded into the editor.
      * It the validation is successful it is loaded as the current dataflow.
      * Otherwise the user is alerted with a feedback message.
+     *
+     * @param dataflow Dataflow to be impported
      */
-    async importDataflow() {
-        const file = document.getElementById('request-dataflow-button').files[0];
-        if (!file) return;
+    async importDataflow(dataflow) {
+        const { status, data } = await this.socket.emitWithAck('dataflow_action_request', 'import', dataflow);
 
-        const formData = new FormData();
-        formData.append('external_application_dataflow', file);
-
-        const response = await fetchPOST('import_dataflow', formData);
-        let message = 'Imported dataflow';
-
-        if (response.status === HTTPCodes.OK) {
-            const data = await response.json();
-
+        if (status === HTTPCodes.OK) {
             if (data.type === PMMessageType.OK) {
-                this.editorManager.loadDataflow(data.content).then(({ errors }) => {
-                    if (Array.isArray(errors) && errors.length) {
-                        NotificationHandler.terminalLog('error', 'Dataflow is invalid', errors);
-                    } else {
-                        NotificationHandler.showToast('info', message);
-                    }
-                });
+                const errors = await this.editorManager.loadDataflow(data.content);
+                if (Array.isArray(errors) && errors.length) {
+                    NotificationHandler.terminalLog('error', 'Dataflow is invalid', errors);
+                } else {
+                    NotificationHandler.showToast('info', 'Imported dataflow');
+                }
             } else if (data.type === PMMessageType.ERROR) {
-                message = data.content;
+                const message = data.content;
                 NotificationHandler.terminalLog('error', `Error occured: ${data.content}`, message);
             } else if (data.type === PMMessageType.WARNING) {
-                NotificationHandler.terminalLog('warning', `Warning: ${data.content}`, message);
+                NotificationHandler.terminalLog('warning', `Warning: ${data.content}`, 'Imported dataflow');
             }
-        } else if (response.status === HTTPCodes.ServiceUnavailable) {
-            const data = await response.text();
+        } else if (status === HTTPCodes.ServiceUnavailable) {
             NotificationHandler.terminalLog('error', data);
         }
     }
@@ -201,19 +186,9 @@ export default class ExternalApplicationManager {
     async checkConnectionStatus() {
         await this.updateConnectionStatus();
         if (!this.externalApplicationConnected) {
-            await this.invokeFetchAction(this.initializeConnection, false);
+            this.stopStatusInterval();
+            await this.initializeConnection(false);
         }
-    }
-
-    /**
-     * Wraps fetch functions and stops status checking before creating a fetch request.
-     * After processing the request, the status checking is restored.
-     * This function should be used to call any action with fetch request in it.
-     */
-    async invokeFetchAction(fetchCall, ...args) {
-        this.stopStatusInterval();
-        await fetchCall.apply(this, args);
-        this.startStatusInterval();
     }
 
     /**
@@ -262,5 +237,7 @@ export default class ExternalApplicationManager {
         if (this.externalApplicationConnected) {
             await this.requestSpecification();
         }
+
+        this.startStatusInterval();
     }
 }

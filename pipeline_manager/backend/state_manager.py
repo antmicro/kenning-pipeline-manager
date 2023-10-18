@@ -5,7 +5,9 @@
 import json
 from importlib.resources import open_text
 
-from pipeline_manager_backend_communication.communication_backend import CommunicationBackend  # noqa: E501
+from pipeline_manager_backend_communication.communication_backend import (
+    CommunicationBackend,
+)
 
 from pipeline_manager.resources import schemas
 
@@ -17,11 +19,12 @@ class PMStateManager:
     This class should not be imported directly, but rather
     `global_state_manager` object should be imported to use this class.
     """
+
     def __init__(
-            self,
-            tcp_server_port: int = 9000,
-            tcp_server_host: str = '127.0.0.1',
-            ) -> None:
+        self,
+        tcp_server_port: int = 9000,
+        tcp_server_host: str = "127.0.0.1",
+    ) -> None:
         """
         Creates a state manager
 
@@ -40,13 +43,13 @@ class PMStateManager:
         self.server_process = None
 
         self.schema = None
-        self.schema_filename = 'unresolved_specification_schema.json'
+        self.schema_filename = "unresolved_specification_schema.json"
 
     def reinitialize(
-            self,
-            tcp_server_port: int,
-            tcp_server_host: str,
-            ) -> None:
+        self,
+        tcp_server_port: int,
+        tcp_server_host: str,
+    ) -> None:
         """
         Reinitialize the configuration of the state
 
@@ -66,7 +69,8 @@ class PMStateManager:
             self.server.disconnect()
         self.server = None
 
-    def get_tcp_server(self) -> CommunicationBackend:
+    @property
+    def tcp_server(self) -> CommunicationBackend:
         """
         Returns initialized CommunicationBackend
 
@@ -77,8 +81,7 @@ class PMStateManager:
         """
         if not self.server:
             self.server = CommunicationBackend(
-                self.tcp_server_host,
-                self.tcp_server_port
+                self.tcp_server_host, self.tcp_server_port
             )
         return self.server
 
@@ -92,10 +95,7 @@ class PMStateManager:
             Dataflow specification schema
         """
         if not self.schema:
-            with open_text(
-                schemas,
-                self.schema_filename
-            ) as f:
+            with open_text(schemas, self.schema_filename) as f:
                 self.schema = json.load(f)
         return self.schema
 

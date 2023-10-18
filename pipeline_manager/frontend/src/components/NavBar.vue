@@ -373,16 +373,18 @@ export default {
 
         async requestDataflowAction(action) {
             if (!this.externalApplicationManager.backendAvailable) return;
-            await this.externalApplicationManager.invokeFetchAction(
-                this.externalApplicationManager.requestDataflowAction,
-                action,
-            );
+            await this.externalApplicationManager.requestDataflowAction(action);
         },
-        async importDataflow() {
+        importDataflow() {
             if (!this.externalApplicationManager.backendAvailable) return;
-            await this.externalApplicationManager.invokeFetchAction(
-                this.externalApplicationManager.importDataflow,
-            );
+            const file = document.getElementById('request-dataflow-button').files[0];
+            if (!file) return;
+
+            const fileReader = new FileReader();
+            fileReader.onload = async () => {
+                await this.externalApplicationManager.importDataflow(fileReader.result);
+            };
+            fileReader.readAsText(file);
         },
 
         exportToPng() {
@@ -449,9 +451,7 @@ export default {
     async mounted() {
         // Create connection on page load
         if (this.externalApplicationManager.backendAvailable) {
-            this.externalApplicationManager.invokeFetchAction(
-                this.externalApplicationManager.initializeConnection,
-            );
+            this.externalApplicationManager.initializeConnection();
         }
     },
 };

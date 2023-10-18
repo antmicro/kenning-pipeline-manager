@@ -19,9 +19,8 @@ from pipeline_manager.backend.state_manager import global_state_manager
 
 
 def server_process_handler(
-        frontend_path: Path,
-        backend_host: str,
-        backend_port: int):
+    frontend_path: Path, backend_host: str, backend_port: int
+):
     """
     Function ran as a process target, responsible for initializing the tcp
     server, waiting for the client connection and running the backend
@@ -34,29 +33,32 @@ def server_process_handler(
         Port of the backend of Pipeline Manager
     """
 
-    tcp_server = global_state_manager.get_tcp_server()
+    tcp_server = global_state_manager.tcp_server
     tcp_server.initialize_server()
 
-    logging.log(logging.INFO, 'Connect the application to run start.')
+    logging.log(logging.INFO, "Connect the application to run start.")
     out = tcp_server.wait_for_client()
 
     if out.status != Status.CLIENT_CONNECTED:
-        logging.log(logging.WARNING,
-                    'External application did not connect')
+        logging.log(logging.WARNING, "External application did not connect")
 
-    from pipeline_manager.backend.app import app
+    from pipeline_manager.backend.socketio import create_socketio
+
+    socketio, app = create_socketio()
+
     app.static_folder = Path(frontend_path).resolve()
     app.template_folder = Path(frontend_path).resolve()
-    app.run(backend_host, backend_port, threaded=False)
+    socketio.run(app, backend_host, backend_port)
 
 
 def start_server_in_parallel(
-        frontend_path: Path,
-        tcp_server_host: str = '127.0.0.1',
-        tcp_server_port: int = 9000,
-        backend_host: str = '127.0.0.1',
-        backend_port: int = 5000,
-        verbosity: str = 'INFO'):
+    frontend_path: Path,
+    tcp_server_host: str = "127.0.0.1",
+    tcp_server_port: int = 9000,
+    backend_host: str = "127.0.0.1",
+    backend_port: int = 5000,
+    verbosity: str = "INFO",
+):
     """
     Wrapper function that starts a Pipeline Manager process in the background
     when called. The process can be stopped after calling
@@ -86,7 +88,8 @@ def start_server_in_parallel(
 
     global_state_manager.server_process = Process(
         target=server_process_handler,
-        args=(frontend_path, backend_host, backend_port))
+        args=(frontend_path, backend_host, backend_port),
+    )
     global_state_manager.server_process.start()
 
 
@@ -97,5 +100,5 @@ def stop_parallel_server():
     global_state_manager.server_process.terminate()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     start_server_in_parallel()
