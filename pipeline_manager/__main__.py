@@ -3,22 +3,22 @@
 # SPDX-License-Identifier: Apache-2.0
 import argparse
 import sys
-from pipeline_manager.scripts.build import script_build
-from pipeline_manager.scripts.cleanup import script_cleanup
-from pipeline_manager.scripts.run import script_run
-from pipeline_manager.scripts.validate import script_validate
 
 
 def script_handler(argv, command):
     ret = 0
 
     if command == 'build':
+        from pipeline_manager.scripts.build import script_build
         ret = script_build()
     if command == 'run':
+        from pipeline_manager.scripts.run import script_run
         ret = script_run(argv)
     if command == 'validate':
+        from pipeline_manager.scripts.validate import script_validate
         ret = script_validate()
     if command == 'cleanup':
+        from pipeline_manager.scripts.cleanup import script_cleanup
         ret = script_cleanup(argv)
 
     return ret
