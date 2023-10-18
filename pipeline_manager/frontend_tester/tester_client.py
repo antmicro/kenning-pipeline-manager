@@ -41,21 +41,21 @@ from pipeline_manager.utils.logger import string_to_verbosity
 
 from pipeline_manager_backend_communication.communication_backend import (
     CommunicationBackend,
-)  # noqa: E501
+)
 from pipeline_manager_backend_communication.misc_structures import (
     MessageType,
-)  # noqa: E501
+)
 
 
 def get_node_properties(node_type: str, dataflow: Dict) -> Dict:
     """
-    Function that reads properties of a `type` node in `dataflow`.
+    Function that reads properties of a `name` node in `dataflow`.
     It is assumed for now that we have only such node in the `dataflow`.
 
     Parameters
     ----------
     node_type : str
-        Properties of the `type` node are going to be read and returned
+        Properties of the `name` node are going to be read and returned
         as a dictionary.
     dataflow : Dict
         Dataflow that was sent by Pipeline Manager.
@@ -63,20 +63,20 @@ def get_node_properties(node_type: str, dataflow: Dict) -> Dict:
     Returns
     -------
     Dict :
-        Dictionary that has all properties of a `type` node.
+        Dictionary that has all properties of a `name` node.
     """
     dataflow = json.loads(dataflow)
     nodes = dataflow["graph"]["nodes"]
     description_node = None
 
     for node in nodes:
-        if node["type"] == node_type:
+        if node["name"] == node_type:
             description_node = node
             break
 
     properties = {}
     for prop in description_node["properties"]:
-        properties[prop['name']] = prop["value"]
+        properties[prop["name"]] = prop["value"]
 
     return properties
 
@@ -104,10 +104,10 @@ def get_effects(node_type: str, dataflow: Dict) -> List:
     socket_id = None
 
     for node in nodes:
-        if node["type"] == node_type:
-            for io in node['interfaces']:
-                if io['direction'] == 'output':
-                    socket_id = io['id']
+        if node["name"] == node_type:
+            for io in node["interfaces"]:
+                if io["direction"] == "output":
+                    socket_id = io["id"]
                     break
 
     connected_nodes_id = []
@@ -118,9 +118,9 @@ def get_effects(node_type: str, dataflow: Dict) -> List:
     connected_nodes = []
     for node in nodes:
         try:
-            for io in node['interfaces']:
-                if io['name'] == 'effect':
-                    if io['id'] in connected_nodes_id:
+            for io in node["interfaces"]:
+                if io["name"] == "Effect":
+                    if io["id"] in connected_nodes_id:
                         connected_nodes.append(node)
         except KeyError:
             pass
@@ -129,10 +129,9 @@ def get_effects(node_type: str, dataflow: Dict) -> List:
     for node in connected_nodes:
         parsed_nodes.append(
             {
-                "type": node["type"],
+                "name": node["name"],
                 "properties": {
-                    prop['name']: prop["value"]
-                    for prop in node["properties"]
+                    prop["name"]: prop["value"] for prop in node["properties"]
                 },
             }
         )
@@ -228,7 +227,9 @@ def run_validate_response(
     except Exception:
         client.send_message(
             MessageType.ERROR,
-            f"No description for {str(message_type)} provided".encode(encoding="UTF-8"),  # noqa: E501
+            f"No description for {str(message_type)} provided".encode(
+                encoding="UTF-8"
+            ),
         )
         return
     if properties["Disconnect"]:
@@ -253,7 +254,7 @@ def run_validate_response(
 
     effects = get_effects(title, data)
     for effect in effects:
-        if effect["type"] == "Disconnect":
+        if effect["name"] == "Disconnect":
             if effect["properties"]["Should disconnect"]:
                 time.sleep(effect["properties"]["Time offset"])
                 logging.log(logging.INFO, "Disconnecting!")
@@ -286,7 +287,9 @@ def export_response(
     except Exception:
         client.send_message(
             MessageType.ERROR,
-            f"No description for {str(message_type)} provided".encode(encoding="UTF-8"),  # noqa: E501
+            f"No description for {str(message_type)} provided".encode(
+                encoding="UTF-8"
+            ),
         )
         return
     if properties["Disconnect"]:
