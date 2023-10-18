@@ -28,6 +28,9 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
         @keydown="keyDown"
         @keyup="keyUp"
         @mouseleave="onRightPointerUp"
+        @drop.prevent="onDrop"
+        @dragenter.prevent
+        @dragover.prevent
         oncontextmenu="return false;"
     >
         <slot name="background">
@@ -562,6 +565,96 @@ export default defineComponent({
             NotificationHandler.restoreShowNotification();
         });
 
+        const onDrop = async (event) => {
+            event.preventDefault();
+            event.dataTransfer.dropEffect = 'copy';
+            const files = [];
+            if (event.dataTransfer.items) {
+                [...event.dataTransfer.items].filter(
+                    (item) => item.kind === 'file',
+                ).forEach(
+                    (item) => files.push(item.getAsFile()),
+                );
+            } else {
+                files.push(...event.dataTransfer.files);
+            }
+            if (files.length > 1) {
+                NotificationHandler.showToast(
+                    'warning',
+                    'More than one file dropped, processing only the first one',
+                );
+            } else if (files.length === 0) {
+                NotificationHandler.showToast(
+                    'warning',
+                    'Drag&Drop is only supported only for files',
+                );
+            }
+            const reader = new FileReader();
+            reader.addEventListener('load', (ev) => {
+                const file = ev.target.result;
+                let data;
+                try {
+                    data = JSON.parse(file);
+                } catch (SyntaxError) {
+                    NotificationHandler.showToast(
+                        'error',
+                        'Dropped file is not in JSON format',
+                    );
+                    return;
+                }
+
+                if (data.graph) { // Load Dataflow
+                    editorManager.loadDataflow(data).then(({ errors, warnings }) => {
+                        if (Array.isArray(warnings) && warnings.length) {
+                            NotificationHandler.terminalLog(
+                                'warning',
+                                'Issue when loading dataflow',
+                                warnings,
+                            );
+                        }
+                        if (Array.isArray(errors) && errors.length) {
+                            const messageTitle = process.env.VUE_APP_GRAPH_DEVELOPMENT_MODE === 'true' ?
+                                'Softload enabled, errors found while loading the dataflow' :
+                                'Dataflow is invalid';
+                            NotificationHandler.terminalLog('error', messageTitle, errors);
+                        }
+                    });
+                    return;
+                }
+
+                if (data.nodes) { // Load Specification
+                    const specErrors = editorManager.validateSpecification(data);
+                    if (specErrors.length) {
+                        NotificationHandler.terminalLog('error', 'Specification is invalid', specErrors);
+                        return;
+                    }
+                    const { loadError, loadWarn } = editorManager.updateEditorSpecification(data);
+                    if (Array.isArray(loadWarn) && loadWarn.length) {
+                        NotificationHandler.terminalLog(
+                            'warning',
+                            'Issue when loading specification',
+                            loadWarn,
+                        );
+                    }
+                    if (Array.isArray(loadError) && loadError.length) {
+                        NotificationHandler.terminalLog('error', 'Specification is invalid', loadError);
+                    }
+                    return;
+                }
+
+                NotificationHandler.showToast(
+                    'error',
+                    'File is neither specification nor dataflow',
+                );
+            });
+            reader.onerror = (er) => NotificationHandler.terminalLog(
+                'error',
+                'File cannot be loaded',
+                er.message,
+            );
+            reader.readAsText(files[0]);
+        };
+
         const cache = {};
         // Importing all assets to a cache so that they can be accessed dynamically during runtime
         function importAll(r) {
@@ -581,6 +674,7 @@ export default defineComponent({
             selectedNodes,
             nodeContainerStyle,
             onRightPointerUp,
+            onDrop,
             nodes,
             keyDown,
             keyUp,
