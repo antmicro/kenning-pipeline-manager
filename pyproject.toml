@@ -26,6 +26,7 @@ dependencies = [
     "Flask==2.2.2",
     "Flask-Cors==3.0.10",
     "Flask-SocketIO==5.3.6",
+    "Flask-JSONRPC==2.2.2",
     "itsdangerous==2.1.2",
     "Jinja2==3.1.2",
     "jsonschema @ git+https://github.com/python-jsonschema/jsonschema@eb8255a473b4f6e9439322f9ec93e345bc7f17d6",
