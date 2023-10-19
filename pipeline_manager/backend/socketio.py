@@ -1,17 +1,72 @@
 import json
 from http import HTTPStatus
-from typing import Any, Dict, Tuple
+from typing import Dict, Tuple
 
 from flask import Flask
 from flask_socketio import SocketIO
+from pipeline_manager_backend_communication.json_rpc_base import JSONRPCBase  # noqa: E501
 from pipeline_manager_backend_communication.misc_structures import (
-    MessageType,
     OutputTuple,
     Status,
 )
+from jsonrpc.jsonrpc2 import JSONRPC20Response
+from jsonrpc.exceptions import JSONRPCDispatchException
 
 from pipeline_manager.backend.app import create_app
 from pipeline_manager.backend.state_manager import global_state_manager
+
+
+class BackendMethods:
+    """
+    Object containing all JSON-RPC methods for backend
+    """
+
+    def get_status(self) -> Dict:
+        """
+        Event that returns connection status.
+
+        Returns
+        -------
+        Dict :
+            Returned value depending on the status of the connection.
+        """
+        tcp_server = global_state_manager.tcp_server
+        return {'status': {'connected': tcp_server.connected}}
+
+    def external_app_connect(self) -> Dict:
+        """
+        Event used to start a two-way communication TCP server that listens on
+        a host and port specified by `host` and `port`.
+
+        It returns once an external application is connected to it.
+
+        If a connection already exists and a new request is made to this
+        endpoint this function does not return an error.
+
+        Responses
+        ---------
+        Dict :
+            Returned value depending on the status of the connection.
+
+        Raises
+        ------
+        JSONRPCDispatchException :
+            Exception raised when service is unavailable
+        """
+        tcp_server = global_state_manager.tcp_server
+
+        if tcp_server.connected:
+            return {}
+        else:
+            tcp_server.disconnect()
+            tcp_server.initialize_server()
+            out = tcp_server.wait_for_client()
+        if out.status == Status.CLIENT_CONNECTED:
+            return {}
+        raise JSONRPCDispatchException(
+            message='External application did not connect',
+            code=HTTPStatus.SERVICE_UNAVAILABLE.value
+        )
 
 
 def create_socketio() -> Tuple[SocketIO, Flask]:
@@ -28,219 +83,100 @@ def create_socketio() -> Tuple[SocketIO, Flask]:
 
     socketio = SocketIO(app)
 
-    def response_wrapper(
-        output_message: OutputTuple,
-    ) -> Tuple[Any, HTTPStatus]:
+    communication_backend = JSONRPCBase()
+    communication_backend.register_methods(BackendMethods(), 'backend')
+
+    def json_rpc_response_wrapper(
+        content: OutputTuple, status: HTTPStatus, _id: int,
+    ) -> Dict:
         """
-        Helper function used to create HTTP responses based on the flow
-        of the communication with the external application.
+        Converts OutputTuple and HTTPStatus into valid JSON-RPC format.
 
         Parameters
         ----------
-        output_message : OutputTuple
-            Output of `wait_for_message()` function. It is used to used
-            to create a response based on the content and status of
-            the output.
+        content : OutputTuple
+            MessageType and content received from external app
+        status : HTTPStatus
+            Status of received message
+        _id : int
+            ID of JSON-RPC request
+        """
+        if isinstance(content, Exception):
+            return JSONRPC20Response(
+                _id=_id,
+                error={
+                    'message': str(content),
+                    'code': status.value,
+                }
+            ).data
+        if content is None:
+            return JSONRPC20Response(
+                _id=_id,
+                error={
+                    'message': 'Empty message received',
+                    'code': status.value,
+                }
+            ).data
+        return json.loads(content[1])
+
+    @socketio.on("backend-api")
+    def backend_api(json_rpc_request: Dict) -> Dict:
+        """
+        Event managing backend's JSON-RPC methods.
+
+        Parameters
+        ----------
+        json_rpc_request : Dict
+            Request in JSON-RPC format
 
         Returns
         -------
-        Tuple[Any, HTTPStatus] :
-            Tuple where the first element depends on the second element
-            The second element is the status code. It can be either:
-
-                - HTTPStatus.OK if the request was successful. Then the first
-                element contains a dictionary with keys `type` and `content`
-                that convey the original Pipeline Manager message.
-                - HTTPStatus.SERVICE_UNAVAILABLE if external application was
-                disconnected or an error was raised during the request
-                handling. The first element contains the error message.
+        Dict :
+            Response in JSON-RPC format
         """
-        if output_message.status == Status.DATA_READY:
-            mess_type, content = output_message.data
-
-            try:
-                content = json.loads(content)
-            except json.JSONDecodeError:
-                content = content.decode("UTF-8")
-
-            return {
-                "type": mess_type.value,
-                "content": content,
-            }, HTTPStatus.OK
-        if output_message.status == Status.CONNECTION_CLOSED:
-            return (
-                "External application is disconnected",
-                HTTPStatus.SERVICE_UNAVAILABLE,
-            )
-        return "Unknown error", HTTPStatus.SERVICE_UNAVAILABLE
-
-    def wrap_output(f):
-        """
-        Decorator that wraps returned tumple of the f function
-        into a dictonary with to attributes.
-        """
-
-        def wrapper(*args, **kwargs):
-            result = f(*args, **kwargs)
-            return {
-                "data": result[0],
-                "status": result[1],
-            }
-
-        return wrapper
-
-    @socketio.on("get_status")
-    @wrap_output
-    def get_status() -> bool:
-        """
-        Event that returns connection status.
-
-        Returns
-        -------
-        Tuple[Any, HTTPStatus] :
-            Returned value depending on the status of the connection.
-        """
-        tcp_server = global_state_manager.tcp_server
-        if tcp_server.connected:
-            return 'External application connected', HTTPStatus.OK
-        else:
-            return 'External application disconnected', HTTPStatus.SERVICE_UNAVAILABLE  # noqa: E501
-
-    @socketio.on("external_app_connect")
-    @wrap_output
-    def external_app_connect() -> Dict[str, Any]:
-        """
-        Event used to start a two-way communication TCP server that listens on
-        a host and port specified by `host` and `port`.
-
-        It returns once an external application is connected to it.
-
-        If a connection already exists and a new request is made to this
-        endpoint this function does not return an error.
-
-        Responses
-        ---------
-        Tuple[Any, HTTPStatus] :
-            Returned value depending on the status of the connection.
-        """
-        tcp_server = global_state_manager.tcp_server
-
-        if tcp_server.connected:
-            return "External application already connected", HTTPStatus.OK
-        else:
-            tcp_server.disconnect()
-            tcp_server.initialize_server()
-            out = tcp_server.wait_for_client()
-        if out.status == Status.CLIENT_CONNECTED:
-            return "External application connected", HTTPStatus.OK
-        return (
-            "External application did not connect",
-            HTTPStatus.SERVICE_UNAVAILABLE,
+        resp = communication_backend.generate_json_rpc_response(
+            json_rpc_request
         )
+        return resp.data
 
-    @socketio.on("request_specification")
-    @wrap_output
-    def request_specification() -> Tuple[Any, HTTPStatus]:
+    @socketio.on("api")
+    def api(json_rpc_request: Dict) -> Dict:
         """
-        Event used to request a dataflow specification
-        from the external application.
-
-        A communication has to be established first with a `connect`
-        event first.
-
-        Returns
-        ---------
-        Tuple[Any, HTTPStatus] :
-            If the request was successful the first element contains
-            a dictionary with keys `type` and `content` that convey
-            the original Pipeline Manager message. Otherwise the first
-            element contains an error message.
-        """
-        tcp_server = global_state_manager.tcp_server
-
-        if not tcp_server.connected:
-            return (
-                "External application is disconnected",
-                HTTPStatus.SERVICE_UNAVAILABLE,
-            )
-
-        out = tcp_server.send_message(MessageType.SPECIFICATION)
-        if out.status != Status.DATA_SENT:
-            return (
-                "Error while sending a message to the external application",
-                HTTPStatus.SERVICE_UNAVAILABLE,
-            )
-
-        out = tcp_server.wait_for_message()
-        return response_wrapper(out)
-
-    @socketio.on("receive_message")
-    @wrap_output
-    def receive_message() -> Tuple[Any, HTTPStatus]:
-        """
-        General purpose event that returns a single message
-        from the application created by `response_wrapper`.
-        """
-        tcp_server = global_state_manager.tcp_server
-        out = tcp_server.wait_for_message()
-        return response_wrapper(out)
-
-    @socketio.on("dataflow_action_request")
-    @wrap_output
-    def dataflow_action_request(
-        request_type: str, dataflow: str
-    ) -> Tuple[Any, HTTPStatus]:
-        """
-        Event that is used to request a certain action on
-        a dataflow that is sent as a prameter dataflow.
+        Event redirecting JSON-RPC requests to external application.
 
         Parameters
         ----------
-        request_type : str
-            Type of the action that is performed on the attached dataflow.
-            For now supported actions are `run`, `validate`, `export`
-            and `import`
-        dataflow : str
-            Dataflow that is being processed
+        json_rpc_request : Dict
+            Request in JSON-RPC format
 
         Returns
-        ---------
-        Tuple[Any, HTTPStatus] :
-            If the request was successful the first element contains a
-            dictionary with keys `type` and `content` that convey
-            the original Pipeline Manager message.
-            Otherwise the first element contains an error message.
+        -------
+        Dict :
+            Response in JSON-RPC format
         """
         tcp_server = global_state_manager.tcp_server
-
         if not tcp_server.connected:
-            return (
-                "External application is disconnected",
-                HTTPStatus.SERVICE_UNAVAILABLE,
-            )
-
-        request_type_to_message_type = {
-            "validate": MessageType.VALIDATE,
-            "run": MessageType.RUN,
-            "export": MessageType.EXPORT,
-            "import": MessageType.IMPORT,
-        }
-
-        try:
-            message_type = request_type_to_message_type[request_type]
-            out = tcp_server.send_message(
-                message_type, dataflow.encode(encoding="UTF-8")
-            )
-        except KeyError:
-            return "No request type specified", HTTPStatus.SERVICE_UNAVAILABLE
-
+            return JSONRPC20Response(
+                _id=json_rpc_request['id'],
+                error={
+                    'message': 'External application is disconnected',
+                    'code': HTTPStatus.SERVICE_UNAVAILABLE.value,
+                }
+            ).data
+        out = tcp_server.send_jsonrpc_message(json_rpc_request)
         if out.status != Status.DATA_SENT:
-            return (
-                "Error while sending a message to the external application",
-                HTTPStatus.SERVICE_UNAVAILABLE,
-            )
-
-        out = tcp_server.wait_for_message()
-        return response_wrapper(out)
+            return JSONRPC20Response(
+                _id=json_rpc_request['id'],
+                error={
+                    'message': 'Error while sending a message to the external application',  # noqa: E501
+                    'code': HTTPStatus.SERVICE_UNAVAILABLE.value,
+                }
+            ).data
+        response = tcp_server.wait_for_message()
+        return json_rpc_response_wrapper(
+            response.data,
+            response.status,
+            int(json_rpc_request['id'])
+        )
 
     return socketio, app
