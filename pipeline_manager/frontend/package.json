@@ -23,6 +23,7 @@
         "epic-spinners": "^2.0.0",
         "fuzzysort": "^2.0.4",
         "html-to-image": "^1.11.11",
+        "json-rpc-2.0": "^1.6.0",
         "json-source-map": "^0.6.1",
         "patch-package": "^7.0.2",
         "raw-loader": "^4.0.2",
