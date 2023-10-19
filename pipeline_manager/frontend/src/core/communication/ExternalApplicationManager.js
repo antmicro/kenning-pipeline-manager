@@ -4,11 +4,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { io } from 'socket.io-client';
-
-import { backendApiUrl, HTTPCodes, PMMessageType } from './utils';
-import NotificationHandler from './notifications';
-import EditorManager from './EditorManager';
+import { backendApiUrl, PMMessageType } from '../utils';
+import jsonRPC from './rpcCommunication';
+import NotificationHandler from '../notifications';
+import EditorManager from '../EditorManager';
 
 export default class ExternalApplicationManager {
     externalApplicationConnected = false;
@@ -19,24 +18,20 @@ export default class ExternalApplicationManager {
 
     idStatusInterval = null;
 
-    socket = null;
-
     timeoutStatusInterval = 500;
-
-    constructor() {
-        this.socket = io(backendApiUrl);
-
-        this.socket.on('connect', () => NotificationHandler.terminalLog('info', 'Initialized connection with backend'));
-        this.socket.on('disconnect', () => NotificationHandler.terminalLog('warning', 'Connection with backend disrupted'));
-    }
 
     /**
      * Function that fetches state of the connection and updates
      * `this.externalApplicationConnected` property.
      */
     async updateConnectionStatus() {
-        const response = await this.socket.emitWithAck('get_status');
-        this.externalApplicationConnected = HTTPCodes.OK === response.status;
+        try {
+            const response = await jsonRPC.request('get_status');
+            this.externalApplicationConnected = response.status.connected;
+        } catch (error) {
+            NotificationHandler.terminalLog('error', error.message);
+            this.externalApplicationConnected = false;
+        }
     }
 
     /**
@@ -45,13 +40,13 @@ export default class ExternalApplicationManager {
      * This function updates `this.externalApplicationConnected` property
      */
     async openTCP() {
-        const response = await this.socket.emitWithAck('external_app_connect');
-        const connected = response.status === HTTPCodes.OK;
-
-        if (!connected) {
-            NotificationHandler.terminalLog('error', response.data);
+        try {
+            await jsonRPC.request('external_app_connect');
+            this.externalApplicationConnected = true;
+        } catch (error) {
+            NotificationHandler.terminalLog('error', error.message);
+            this.externalApplicationConnected = false;
         }
-        this.externalApplicationConnected = connected;
     }
 
     /**
@@ -60,10 +55,10 @@ export default class ExternalApplicationManager {
      * Otherwise the specification is passed to the editor that renders a new environment.
      */
     async requestSpecification() {
-        const response = await this.socket.emitWithAck('request_specification');
-        const { data, status } = response;
+        let message = 'Unknown error';
+        try {
+            const data = await jsonRPC.request('request_specification');
 
-        if (status === HTTPCodes.OK) {
             if (data.type === PMMessageType.OK) {
                 const specification = data.content;
 
@@ -84,14 +79,15 @@ export default class ExternalApplicationManager {
 
                 NotificationHandler.showToast('info', 'Specification loaded successfully');
             } else if (data.type === PMMessageType.WARNING) {
-                const message = data.content;
+                message = data.content;
                 NotificationHandler.terminalLog('warning', message);
             } else if (data.type === PMMessageType.ERROR) {
-                const message = data.content;
+                message = data.content;
                 NotificationHandler.terminalLog('error', message);
             }
-        } else if (status === HTTPCodes.ServiceUnavailable) {
-            NotificationHandler.terminalLog('error', data);
+        } catch (error) {
+            message = error.message;
+            NotificationHandler.terminalLog('error', message);
         }
     }
 
@@ -103,17 +99,19 @@ export default class ExternalApplicationManager {
      * @param action Type of the requested action.
      */
     async requestDataflowAction(action) {
-        const dataflow = JSON.stringify(this.editorManager.saveDataflow());
+        const dataflow = this.editorManager.saveDataflow();
         if (!dataflow) return;
 
         if (action === 'run') {
             NotificationHandler.showToast('info', 'Running dataflow');
         }
 
-        let { status, data } = await this.socket.emitWithAck('dataflow_action_request', action, dataflow);
-
-        if (status === HTTPCodes.ServiceUnavailable) {
+        let data;
+        try {
+            data = await jsonRPC.request(`${action}_dataflow`, { dataflow });
+        } catch (error) {
             // The connection was closed
+            data = error.message;
             NotificationHandler.terminalLog('error', data);
             return;
         }
@@ -129,8 +127,10 @@ export default class ExternalApplicationManager {
                 const progress = data.content;
                 progressBar.style.width = `${progress}%`;
 
-                ({ status, data } = await this.socket.emitWithAck('receive_message'));
-                if (status === HTTPCodes.ServiceUnavailable) {
+                try {
+                    data = await jsonRPC.request(`receive_message`);
+                } catch (error) {
+                    data = error.message;
                     NotificationHandler.terminalLog('error', data);
                     progressBar.style.width = '0%';
                     return;
@@ -156,10 +156,18 @@ export default class ExternalApplicationManager {
      *
      * @param dataflow Dataflow to be impported
      */
-    async importDataflow(dataflow) {
-        const { status, data } = await this.socket.emitWithAck('dataflow_action_request', 'import', dataflow);
+    async importDataflow() {
+        const file = document.getElementById('request-dataflow-button').files[0];
+        if (!file) return;
 
-        if (status === HTTPCodes.OK) {
+        const dataflow = JSON.parse(await file.text());
+        if (!dataflow) {
+            NotificationHandler.showToast('error', 'File cannot be loaded');
+            return;
+        }
+
+        try {
+            const data = await jsonRPC.request('import_dataflow', { external_application_dataflow: dataflow });
             if (data.type === PMMessageType.OK) {
                 const errors = await this.editorManager.loadDataflow(data.content);
                 if (Array.isArray(errors) && errors.length) {
@@ -173,7 +181,8 @@ export default class ExternalApplicationManager {
             } else if (data.type === PMMessageType.WARNING) {
                 NotificationHandler.terminalLog('warning', `Warning: ${data.content}`, 'Imported dataflow');
             }
-        } else if (status === HTTPCodes.ServiceUnavailable) {
+        } catch (error) {
+            const data = error.message;
             NotificationHandler.terminalLog('error', data);
         }
     }

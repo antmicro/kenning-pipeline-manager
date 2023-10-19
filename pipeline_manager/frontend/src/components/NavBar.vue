@@ -27,7 +27,7 @@ import Magnifier from '../icons/Magnifier.vue';
 import EditorManager from '../core/EditorManager';
 import NotificationHandler from '../core/notifications';
 import { notificationStore } from '../core/stores';
-import ExternalApplicationManager from '../core/ExternalApplicationManager';
+import ExternalApplicationManager from '../core/communication/ExternalApplicationManager';
 import Notifications from './Notifications.vue';
 import Settings from './Settings.vue';
 import SaveMenu from './SaveMenu.vue';
