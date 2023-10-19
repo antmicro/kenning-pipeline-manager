@@ -1,0 +1,75 @@
+{
+  "$id": "common_types",
+  "$defs": {
+    "empty": {
+      "description": "Empty or missing object definition",
+      "type": "object",
+      "properties": {},
+      "additionalProperties": false
+    },
+    "null_or_empty": {
+      "description": "Empty or missing object definition",
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {},
+      "additionalProperties": false
+    },
+    "dataflow_object": {
+      "description": "",
+      "type": "object",
+      "properties": {
+        "dataflow": {
+          "description": "",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false
+    },
+    "external_endpoint_return_type": {
+      "description": "",
+      "type": "object",
+      "properties": {
+        "type": {
+          "description": "",
+          "type": "number"
+        },
+        "content": {
+          "description": "",
+          "type": [
+            "object",
+            "string"
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "type"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "number",
+                "exclusiveMinimum": 1
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "content": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "content"
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

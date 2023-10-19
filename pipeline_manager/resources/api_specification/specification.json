@@ -1,0 +1,120 @@
+{
+  "frontend_endpoints": {
+    "get_status": {
+      "params": {
+        "$ref": "common_types#/$defs/null_or_empty"
+      },
+      "returns": {
+        "description": "",
+        "type": "object",
+        "properties": {
+          "status": {
+            "description": "",
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "backend_endpoints": {
+    "get_status": {
+      "params": {
+        "$ref": "common_types#/$defs/null_or_empty"
+      },
+      "returns": {
+        "description": "",
+        "type": "object",
+        "properties": {
+          "status": {
+            "description": "",
+            "type": "object",
+            "properties": {
+              "connected": {
+                "description": "",
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "connected"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "external_app_connect": {
+      "params": {
+        "$ref": "common_types#/$defs/null_or_empty"
+      },
+      "returns": {
+        "$ref": "common_types#/$defs/empty"
+      }
+    }
+  },
+  "external_endpoints": {
+    "import_dataflow": {
+      "params": {
+        "description": "",
+        "type": "object",
+        "properties": {
+          "external_application_dataflow": {
+            "description": "",
+            "type": "object"
+          }
+        },
+        "required": [
+          "external_application_dataflow"
+        ],
+        "additionalProperties": false
+      },
+      "returns": {
+        "$ref": "common_types#/$defs/external_endpoint_return_type"
+      }
+    },
+    "request_specification": {
+      "params": {
+        "$ref": "common_types#/$defs/null_or_empty"
+      },
+      "returns": {
+        "$ref": "common_types#/$defs/external_endpoint_return_type"
+      }
+    },
+    "validate_dataflow": {
+      "params": {
+        "$ref": "common_types#/$defs/dataflow_object"
+      },
+      "returns": {
+        "$ref": "common_types#/$defs/external_endpoint_return_type"
+      }
+    },
+    "run_dataflow": {
+      "params": {
+        "$ref": "common_types#/$defs/dataflow_object"
+      },
+      "returns": {
+        "$ref": "common_types#/$defs/external_endpoint_return_type"
+      }
+    },
+    "export_dataflow": {
+      "params": {
+        "$ref": "common_types#/$defs/dataflow_object"
+      },
+      "returns": {
+        "$ref": "common_types#/$defs/external_endpoint_return_type"
+      }
+    },
+    "receive_message": {
+      "params": {
+        "$ref": "common_types#/$defs/null_or_empty"
+      },
+      "returns": {
+        "$ref": "common_types#/$defs/external_endpoint_return_type"
+      }
+    }
+  }
+}
