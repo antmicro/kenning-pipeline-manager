@@ -9,6 +9,7 @@ Can be used by other applications to quickly form the specification
 for the Pipeline Manager server.
 """
 
+import logging
 import requests
 from typing import Optional, Dict, Any, List, Union
 from urllib3.exceptions import (
@@ -375,8 +376,8 @@ class SpecificationBuilder(object):
                     allow_redirects=True
                 )
                 if response.status_code != 200:
-                    print(
-                        f'WARN: Icon for node type {name} does not work (HTTP status: {response.status_code}):  {full_url}'  # noqa: E501
+                    logging.warning(
+                        f'Icon for node type {name} does not work (HTTP status: {response.status_code}):  {full_url}'  # noqa: E501
                     )
                     self.warnings += 1
             except (
@@ -386,20 +387,20 @@ class SpecificationBuilder(object):
                     TimeoutError,
                     ReadTimeoutError,
                     ConnectTimeoutError):
-                print(
-                    f'WARN: Icon for node type {name} does not work (timeout):  {full_url}'  # noqa: E501
+                logging.warning(
+                    f'Icon for node type {name} does not work (timeout):  {full_url}'  # noqa: E501
                 )
                 self.warnings += 1
             except requests.exceptions.MissingSchema:
-                print(
-                    f'WARN: Icon for node type {name} has invalid URL:  {full_url}'  # noqa: E501
+                logging.warning(
+                    f'Icon for node type {name} has invalid URL:  {full_url}'  # noqa: E501
                 )
                 self.warnings += 1
             except Exception as ex:
-                print(
+                logging.warning(
                     f'WARN: Failed to check icon URL:  {full_url}'
                 )
-                print(ex)
+                logging.warning(ex)
                 self.warnings += 1
         self._nodes[name]["icon"] = iconpath
 
@@ -425,16 +426,16 @@ class SpecificationBuilder(object):
                 f"URL class {urlgroup} is not available in metadata"
             )
         if self.check_urls:
-            full_url = self._metadata['urls'][urlgroup]['url'] + suffix
-            response = self.session.get(
-                full_url,
-                timeout=4,
-                allow_redirects=True
-            )
             try:
+                full_url = self._metadata['urls'][urlgroup]['url'] + suffix
+                response = self.session.get(
+                    full_url,
+                    timeout=4,
+                    allow_redirects=True
+                )
                 if response.status_code != 200:
-                    print(
-                        f'WARN: URL for node type {name} does not work (HTTP status: {response.status_code}):  {full_url}'  # noqa: E501
+                    logging.warning(
+                        f'URL for node type {name} does not work (HTTP status: {response.status_code}):  {full_url}'  # noqa: E501
                     )
                     self.warnings += 1
             except (
@@ -444,15 +445,15 @@ class SpecificationBuilder(object):
                     TimeoutError,
                     ReadTimeoutError,
                     ConnectTimeoutError):
-                print(
-                    f'WARN: URL for node type {name} does not work (timeout):  {full_url}'  # noqa: E501
+                logging.warning(
+                    f'URL for node type {name} does not work (timeout):  {full_url}'  # noqa: E501
                 )
                 self.warnings += 1
             except Exception as ex:
-                print(
+                logging.warning(
                     f'WARN: Failed to check URL:  {full_url}'
                 )
-                print(ex)
+                logging.warning(ex)
                 self.warnings += 1
 
         self._nodes[name]["urls"][urlgroup] = suffix
