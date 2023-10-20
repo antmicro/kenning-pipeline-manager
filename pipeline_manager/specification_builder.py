@@ -142,6 +142,9 @@ class SpecificationBuilder(object):
         self.warnings = 0
         self.assets_dir = Path(assets_dir) if assets_dir else None
 
+        if self.check_urls:
+            self.session = requests.Session()
+
     def register_category(self, categorypath: str):
         """
         Adds a category to the set of available categories.
@@ -366,7 +369,7 @@ class SpecificationBuilder(object):
 
         if self.check_urls:
             try:
-                response = requests.head(
+                response = self.session.get(
                     full_url,
                     timeout=4,
                     allow_redirects=True
@@ -423,7 +426,11 @@ class SpecificationBuilder(object):
             )
         if self.check_urls:
             full_url = self._metadata['urls'][urlgroup]['url'] + suffix
-            response = requests.head(full_url, timeout=4, allow_redirects=True)
+            response = self.session.get(
+                full_url,
+                timeout=4,
+                allow_redirects=True
+            )
             try:
                 if response.status_code != 200:
                     print(
