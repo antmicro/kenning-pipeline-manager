@@ -28,7 +28,7 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
         @keydown="keyDown"
         @keyup="keyUp"
         @mouseleave="onRightPointerUp"
-        @drop.prevent="onDrop"
+        @drop.prevent="!readonly && onDrop($event)"
         @dragenter.prevent
         @dragover.prevent
         oncontextmenu="return false;"
