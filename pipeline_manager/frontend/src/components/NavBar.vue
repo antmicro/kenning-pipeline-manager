@@ -70,6 +70,9 @@ export default {
         hideHud() {
             return this.editorManager.baklavaView.hideHud;
         },
+        readonly() {
+            return this.editorManager.baklavaView.editor.readonly;
+        },
         settingsOpen() {
             return this.panels.settings.isOpen;
         },
@@ -541,7 +544,7 @@ export default {
 
                 <div
                     ref="palette"
-                    v-if="!hideHud"
+                    v-if="!hideHud && !readonly"
                     class="hoverbox"
                     role="button"
                     @click="() => togglePanel(panels.palette)"
