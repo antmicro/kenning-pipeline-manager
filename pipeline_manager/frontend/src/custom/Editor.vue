@@ -415,7 +415,11 @@ export default defineComponent({
             return matchingNodes;
         };
 
-        watch(searchQuery, () => {
+        const nodeTitles = computed(() =>
+            nodes.value.map((n) => n.title),
+        );
+
+        watch([searchQuery, nodeTitles], () => {
             if (searchQuery.value === undefined || searchQuery.value === '') {
                 greyedOutNodes.value = [];
                 visibleNodes.value.forEach((node) => {
