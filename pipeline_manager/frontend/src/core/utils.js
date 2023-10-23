@@ -20,11 +20,6 @@ export const HTTPCodes = {
 export const PMMessageType = {
     OK: 0,
     ERROR: 1,
-    VALIDATE: 2,
-    SPECIFICATION: 3,
-    RUN: 4,
-    IMPORT: 5,
-    EXPORT: 6,
-    PROGRESS: 7,
-    WARNING: 8,
+    PROGRESS: 2,
+    WARNING: 3,
 };
