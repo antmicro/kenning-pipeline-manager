@@ -97,21 +97,21 @@ export default class ConnectionRenderer {
         const fromNode = graph.findNodeById(ncFrom.nodeId);
         const toNode = graph.findNodeById(ncTo.nodeId);
 
-        const fromNodeNeighbours = [
-            ...Object.values(fromNode.inputs),
-            ...Object.values(fromNode.outputs),
-        ].filter((c) => c.side === ncFrom.side && c.port);
-        const toNodeNeighbours = [
-            ...Object.values(toNode.inputs),
-            ...Object.values(toNode.outputs),
-        ].filter((c) => c.side === ncTo.side && c.port);
+        const fromPosition = ncFrom.sidePosition;
+        const toPosition = ncTo.sidePosition;
 
-        const fromIndex = fromNodeNeighbours.indexOf(ncFrom);
-        const toIndex = toNodeNeighbours.indexOf(ncTo);
-
-        const shiftIndex = (fromIndex + toIndex) / 2;
+        const shiftIndex = (fromPosition + toPosition) / 2;
 
         if (this.randomizedOffset) {
+            const fromNodeNeighbours = [
+                ...Object.values(fromNode.inputs),
+                ...Object.values(fromNode.outputs),
+            ].filter((c) => c.side === ncFrom.side && c.port);
+            const toNodeNeighbours = [
+                ...Object.values(toNode.inputs),
+                ...Object.values(toNode.outputs),
+            ].filter((c) => c.side === ncTo.side && c.port);
+
             // the string is a sum of utf16 representation of each character
             const toRandomIndex =
                 [...ncTo.id].reduce((accumulator, char) => accumulator + char.charCodeAt(0), 0) ??
