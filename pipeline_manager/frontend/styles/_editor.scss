@@ -101,6 +101,20 @@
             pointer-events: none;
         }
     }
+
+    & > .baklava-num-input {
+        & > .__button {
+            &.--inc {
+                border-bottom-right-radius: var(--baklava-control-border-radius);
+                border-top-right-radius: var(--baklava-control-border-radius);
+            }
+
+            &.--dec {
+                border-bottom-left-radius: var(--baklava-control-border-radius);
+                border-top-left-radius: var(--baklava-control-border-radius);
+            }
+        }
+    }
 }
 
 .baklava-checkbox .__checkmark-container > svg > path {
