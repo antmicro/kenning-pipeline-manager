@@ -14,6 +14,7 @@ import re
 import requests
 from urllib.parse import urlparse
 import os
+import filecmp
 
 import pipeline_manager
 from pipeline_manager.specification_reader import \
@@ -128,7 +129,7 @@ def build_prepare(
     if workspace_directory:
         workspace_directory.mkdir(parents=True, exist_ok=True)
 
-        if len(list(workspace_directory.glob('*'))) == 0:
+        if (len_work := len(list(workspace_directory.glob('*')))) == 0:
             shutil.copytree(
                 frontend_path,
                 workspace_directory / 'frontend',
@@ -137,6 +138,35 @@ def build_prepare(
                 resources_path,
                 workspace_directory / 'resources',
                 dirs_exist_ok=True)
+        elif len_work > 0:
+            def _check_subdir(diff: filecmp.dircmp, current_path: Path):
+                # if those files aren't ignored,
+                # the sync will always trigger since
+                # the time signature of the file changes
+                ignored_files = [
+                    '.env.local',
+                    '.env.static.local',
+                    'node_modules',
+                ]
+                changed_sources = list(filter(
+                    lambda x: x not in ignored_files,
+                    diff.diff_files
+                ))
+                for i in changed_sources:
+                    src = frontend_path / current_path / i
+                    dst = workspace_directory / 'frontend' / current_path / i
+                    shutil.copy(src, dst)
+                if diff.subdirs is not {}:
+                    for name, subdir in diff.subdirs.items():
+                        if name not in ignored_files:
+                            _check_subdir(subdir, current_path / name)
+
+            root_diff = filecmp.dircmp(
+                workspace_directory / 'frontend',
+                frontend_path
+            )
+            _check_subdir(root_diff, Path(''))
+
     else:
         workspace_directory = project_path / 'pipeline_manager'
     frontend_path = workspace_directory / 'frontend'
