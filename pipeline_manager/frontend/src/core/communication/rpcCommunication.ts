@@ -9,6 +9,7 @@ import {
     JSONRPCServer,
     JSONRPCClient,
     JSONRPCRequest,
+    JSONRPCResponse,
     JSONRPCServerMiddleware,
     JSONRPCServerMiddlewareNext,
     createJSONRPCErrorResponse,
@@ -77,6 +78,7 @@ const commonHeaders = {
     'Access-Control-Allow-Origin': 'http://localhost',
     'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
 };
+const requestSchema = new Map<number | string, SpecType>();
 
 let socket: Socket;
 let jsonRPCServer: JSONRPCServerAndClient;
@@ -102,17 +104,17 @@ function createServer() {
             const schema = endpoints[request.method];
             const valid = ajv.validate(schema.params, request.params ?? {});
             if (!valid) return Promise.reject(new Error('Request does not match specification'));
+            if (request.id) {
+                requestSchema.set(request.id, schema);
+            }
 
             // sending request
-            const endpoint = (endpoints === backendEndpoints) ? 'backend-api' : 'api';
-            const jsonRPCResponse = await socket.emitWithAck(endpoint, request);
-
-            // response validation
-            if (jsonRPCResponse.result) {
-                const validResponse = ajv.validate(schema.returns, jsonRPCResponse.result);
-                if (!validResponse) return Promise.reject(new Error('Response does not match specification'));
+            const endpoint = (endpoints === backendEndpoints) ? 'backend-api' : 'external-api';
+            try {
+                socket.emit(endpoint, request);
+            } catch (exception) {
+                return Promise.reject(exception);
             }
-            jsonRPCServer.client.receive(jsonRPCResponse);
             return Promise.resolve();
         }, createID),
     );
@@ -131,9 +133,29 @@ function createServer() {
         jsonRPCServer.rejectAllPendingRequests('WebSocket disconnected');
     });
 
-    socket.on('api', async (data: JSONRPCRequest, callback) => {
+    socket.on('api', async (data: JSONRPCRequest) => {
         const response = await jsonRPCServer.server.receive(data);
-        callback(JSON.stringify(response));
+        const send = await socket.emitWithAck('external-api', response);
+        if (!send) NotificationHandler.terminalLog('error', 'Response to external app was not send', null);
+    });
+    socket.on('api-response', (response: JSONRPCResponse) => {
+        // response validation
+        if (response.result && response.id && requestSchema.has(response.id)) {
+            const validResponse = ajv.validate(
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                requestSchema.get(response.id)!.returns,
+                response.result,
+            );
+            if (!validResponse) {
+                jsonRPCServer.client.receive(
+                    createJSONRPCErrorResponse(
+                        response.id, 1, 'Response does not match specification',
+                    ),
+                );
+                return;
+            }
+        }
+        jsonRPCServer.client.receive(response);
     });
 }
 
