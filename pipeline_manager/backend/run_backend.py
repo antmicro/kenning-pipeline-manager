@@ -11,6 +11,7 @@ from pathlib import Path
 from pipeline_manager_backend_communication.misc_structures import Status
 
 from pipeline_manager.backend.flask import dist_path
+from pipeline_manager.backend.tcp_socket import start_socket_thread
 from pipeline_manager.backend.socketio import create_socketio
 from pipeline_manager.backend.state_manager import global_state_manager
 from pipeline_manager.utils.logger import string_to_verbosity
@@ -100,6 +101,8 @@ def main(argv):
                 logging.WARNING,
                 "External application did not connect"
             )
+
+        start_socket_thread(socketio)
 
     socketio.run(app, port=args.backend_port, host=args.backend_host)
 
