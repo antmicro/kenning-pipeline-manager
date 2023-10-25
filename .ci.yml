@@ -61,6 +61,7 @@ pytest:
     <<: *ace
     <<: *common_only
     script:
+        - pip3 install "Flask-SocketIO==5.3.6"
         - python3 -m pytest
 
 check-links:
