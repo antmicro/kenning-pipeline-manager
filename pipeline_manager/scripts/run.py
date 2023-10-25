@@ -5,7 +5,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import sys
-from pipeline_manager.backend.main import main
+from pipeline_manager.backend.run_backend import main
 
 
 def script_run(argv):

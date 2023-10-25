@@ -12,7 +12,7 @@ from pipeline_manager_backend_communication.misc_structures import (
 from jsonrpc.jsonrpc2 import JSONRPC20Response
 from jsonrpc.exceptions import JSONRPCDispatchException
 
-from pipeline_manager.backend.app import create_app
+from pipeline_manager.backend.flask import create_app
 from pipeline_manager.backend.state_manager import global_state_manager
 
 

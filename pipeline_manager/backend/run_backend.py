@@ -10,7 +10,7 @@ from pathlib import Path
 
 from pipeline_manager_backend_communication.misc_structures import Status
 
-from pipeline_manager.backend.app import dist_path
+from pipeline_manager.backend.flask import dist_path
 from pipeline_manager.backend.socketio import create_socketio
 from pipeline_manager.backend.state_manager import global_state_manager
 from pipeline_manager.utils.logger import string_to_verbosity
