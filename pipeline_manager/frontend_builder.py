@@ -78,7 +78,8 @@ def build_singlehtml(
 
 def build_prepare(
         workspace_directory: Optional[Path] = None,
-        skip_install_deps: bool = False):
+        skip_install_deps: bool = False,
+        skip_frontend_copying: bool = False):
     """
     Prepares the workspace directory for building.
 
@@ -92,6 +93,9 @@ def build_prepare(
         Path where the frontend should be built
     skip_install_deps: bool
         Tells whether npm install should be skipped or not
+    skip_frontend_copying: bool
+        Skips the diffing of the frontend directory allowing for changes
+        in the workspace directory.
 
     Returns
     -------
@@ -138,7 +142,7 @@ def build_prepare(
                 resources_path,
                 workspace_directory / 'resources',
                 dirs_exist_ok=True)
-        elif len_work > 0:
+        elif len_work > 0 and not skip_frontend_copying:
             def _check_subdir(diff: filecmp.dircmp, current_path: Path):
                 # if those files aren't ignored,
                 # the sync will always trigger since
@@ -194,7 +198,8 @@ def build_frontend(
         single_html: Optional[Path] = None,
         minify_specification: bool = False,
         graph_development_mode: bool = False,
-        skip_install_deps: bool = False):
+        skip_install_deps: bool = False,
+        skip_frontend_copying: bool = False):
     """
     Builds the frontend for the Pipeline Manager.
 
@@ -234,7 +239,9 @@ def build_frontend(
         as much of the graph as possible for development/debugging purposes.
     skip_install_deps: bool
         Tells if npm install should be skipped or not
-
+    skip_frontend_copying: bool
+        Skips the diffing of the frontend directory allowing for changes
+        in the workspace directory.
     Returns
     -------
     int: 0 if successfull, EINVAL if arguments are conflicting or invalid
@@ -242,7 +249,8 @@ def build_frontend(
 
     exit_status, workspace_directory = build_prepare(
         workspace_directory,
-        skip_install_deps
+        skip_install_deps,
+        skip_frontend_copying
     )
     if exit_status != 0:
         return exit_status
