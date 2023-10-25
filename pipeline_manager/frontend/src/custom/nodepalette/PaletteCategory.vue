@@ -43,24 +43,6 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
                             draggable="false"
                         />
                         <div class="__title-label" v-html="category.hitSubstring"></div>
-                        <a
-                            v-for="url in category.categoryNode.URLs"
-                            :key="url.name"
-                            :href="url.url"
-                            class="__url"
-                            @pointerdown.stop
-                            @pointerover="(ev) => onPointerOver(ev, url.name)"
-                            @pointerleave="onPointerLeave"
-                            target="_blank"
-                            draggable="false"
-                        >
-                            <img
-                                v-if="url.icon !== undefined"
-                                :src="getIconPath(url.icon)"
-                                :alt="url.name"
-                                draggable="false"
-                            />
-                        </a>
                     </div>
                 </template>
                 <div v-else class="__title" v-html="category.hitSubstring"></div>
@@ -70,36 +52,46 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
                     <div
                         v-for="[nt, node] in sortedEntries(category.nodes.nodeTypes)"
                         class="__entry __node-entry"
-                        :style="padding(depth + 1)"
                         v-show="node.mask"
+                        :style="padding(depth + 1)"
                         :key="nt"
-                        @pointerdown="onDragStart(nt, node, node.iconPath)"
                     >
-                        <img
-                            class="__title-icon"
-                            v-if="node.iconPath !== undefined"
-                            :src="getIconPath(node.iconPath)"
-                            draggable="false"
-                        />
-                        <div class="__title-label" v-html="node.hitSubstring"></div>
-                        <a
-                            v-for="url in node.URLs"
-                            :key="url.name"
-                            :href="url.url"
-                            class="__url"
-                            @pointerdown.stop
-                            @pointerover="(ev) => onPointerOver(ev, url.name)"
-                            @pointerleave="onPointerLeave"
-                            target="_blank"
-                            draggable="false"
+                        <div
+                            @pointerdown="onDragStart(nt, node, node.iconPath)"
+                            class="__entry __node-entry"
                         >
                             <img
-                                v-if="url.icon !== undefined"
-                                :src="getIconPath(url.icon)"
-                                :alt="url.name"
+                                class="__title-icon"
+                                v-if="node.iconPath !== undefined"
+                                :src="getIconPath(node.iconPath)"
                                 draggable="false"
                             />
-                        </a>
+                            <div class="__title-label" v-html="node.hitSubstring"></div>
+                        </div>
+                        <div
+                            ref="settings"
+                            role="button"
+                            @click="() => showMenu ? showMenu = false : showMenu=node.title"
+                        >
+                            <Cogwheel class="small_svg" />
+                        </div>
+                        <div
+                            style='
+                                position: absolute;
+                                flex-direction: row;
+                                left: 100%;
+                                width: 18em;
+                                background-color: #181818;
+                                border-bottom: 1px solid #737373;
+                                z-index: 9999;
+                            '
+                            v-if="node !== undefined && showMenu === node.title"
+                        >
+                            <LinkMenu
+                                :node='node'
+                                v-if="node !== undefined && showMenu === node.title"
+                            />
+                        </div>
                     </div>
                 </div>
                 <PaletteCategory
@@ -132,24 +124,6 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
                         draggable="false"
                     />
                     <div class="__title-label" v-html="category.hitSubstring"></div>
-                    <a
-                        v-for="url in category.categoryNode.URLs"
-                        :key="url.name"
-                        :href="url.url"
-                        class="__url"
-                        @pointerdown.stop
-                        @pointerover="(ev) => onPointerOver(ev, url.name)"
-                        @pointerleave="onPointerLeave"
-                        target="_blank"
-                        draggable="false"
-                    >
-                        <img
-                            v-if="url.icon !== undefined"
-                            :src="getIconPath(url.icon)"
-                            :alt="url.name"
-                            draggable="false"
-                        />
-                    </a>
                 </div>
             </template>
             <div v-else class="__title" v-html="category.hitSubstring"></div>
@@ -158,12 +132,14 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
 </template>
 
 <script>
-import { defineComponent, ref, watch } from 'vue'; // eslint-disable-line object-curly-newline
+import { defineComponent, ref, watch, computed } from 'vue'; // eslint-disable-line object-curly-newline
 import { useViewModel } from '@baklavajs/renderer-vue';
 import Arrow from '../../icons/Arrow.vue';
+import Cogwheel from '../../icons/Cogwheel.vue';
+import LinkMenu from '../LinkMenu.vue';
 
 export default defineComponent({
-    components: { Arrow },
+    components: { Arrow, LinkMenu, Cogwheel },
     props: {
         nodeTree: {
             required: true,
@@ -278,6 +254,8 @@ export default defineComponent({
             __category: emptyCategory(category),
         });
 
+        const showMenu = ref(false);
+
         return {
             padding,
             mask,
@@ -290,6 +268,7 @@ export default defineComponent({
             isCategoryNode,
             emptyCategory,
             categoryClasses,
+            showMenu,
         };
     },
 });
