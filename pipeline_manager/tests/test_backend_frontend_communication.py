@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-import multiprocessing
+import threading
 from http import HTTPStatus
 from typing import NamedTuple, Dict
 from jsonrpc.jsonrpc2 import JSONRPC20Request, JSONRPC20Response
@@ -67,7 +67,7 @@ def connect_success():
 @pytest.fixture
 def request_specification_success(sample_specification):
     return SingleRequest(
-        "api",
+        "external-api",
         JSONRPC20Response(
             _id=1, result={
                 'type': MessageType.OK.value,
@@ -81,7 +81,7 @@ def request_specification_success(sample_specification):
 @pytest.fixture
 def request_specification_unavailable():
     return SingleRequest(
-        "api",
+        "external-api",
         JSONRPC20Response(
             _id=1,
             error={
@@ -96,7 +96,7 @@ def request_specification_unavailable():
 @pytest.fixture
 def dataflow_run(sample_dataflow):
     return SingleRequest(
-        "api",
+        "external-api",
         JSONRPC20Response(
             _id=1, result={'type': MessageType.OK.value},
         ),
@@ -111,7 +111,7 @@ def dataflow_run(sample_dataflow):
 @pytest.fixture
 def dataflow_validate(sample_dataflow):
     return SingleRequest(
-        "api",
+        "external-api",
         JSONRPC20Response(
             _id=1, result={'type': MessageType.OK.value},
         ),
@@ -126,7 +126,7 @@ def dataflow_validate(sample_dataflow):
 @pytest.fixture
 def dataflow_export(sample_dataflow):
     return SingleRequest(
-        "api",
+        "external-api",
         JSONRPC20Response(
             _id=1, result={'type': MessageType.OK.value},
         ),
@@ -141,7 +141,7 @@ def dataflow_export(sample_dataflow):
 @pytest.fixture
 def dataflow_import(sample_dataflow, sample_specification):
     return SingleRequest(
-        "api",
+        "external-api",
         JSONRPC20Response(
             _id=1, result={
                 'type': MessageType.OK.value,
@@ -175,7 +175,12 @@ def get_status_disconnected():
 
 
 def emit_request(request: SingleRequest, app_client) -> Dict:
-    return app_client.emit(request.name, request.arguments.data, callback=True)
+    app_client.emit(request.name, request.arguments.data, callback=True)
+    while True:
+        messages = app_client.get_received()
+        if messages:
+            return messages[-1]['args'][0]
+        time.sleep(0.1)
 
 
 # ---------------
@@ -211,11 +216,11 @@ def test_connecting_multiple_times(
             application_client.port, application_client.host
         )
 
-        for event in events:
+        for i, event in enumerate(events):
             responses.append(emit_request(event, app_client))
 
-    responses = (multiprocessing.Manager()).list()
-    process = multiprocessing.Process(
+    responses = []
+    process = threading.Thread(
         target=connect_and_request, args=(app_client, responses)
     )
     process.start()
@@ -264,8 +269,8 @@ def test_single_event_connected_valid(
         for event in [connect_success, single_event]:
             responses.append(emit_request(event, app_client))
 
-    responses = (multiprocessing.Manager()).list()
-    process = multiprocessing.Process(
+    responses = []
+    process = threading.Thread(
         target=connect_and_request, args=(app_client, responses)
     )
     process.start()
