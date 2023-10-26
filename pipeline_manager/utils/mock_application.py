@@ -2,8 +2,8 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-import json
 import time
+from typing import Dict
 
 from pipeline_manager_backend_communication.communication_backend import CommunicationBackend  # noqa: E501
 from pipeline_manager_backend_communication.misc_structures import MessageType, Status  # noqa: E501
@@ -16,6 +16,7 @@ class MockApplicationClient(object):
 
     This application is not meant to perform any sophisticated processing.
     """
+
     def __init__(
             self,
             host: str,
@@ -54,7 +55,8 @@ class MockApplicationClient(object):
         """
         while True:
             try:
-                out = self.client.initialize_client()
+                out = self.client.initialize_client(
+                    self.Methods(self.sample_specification))
                 if out.status == Status.CLIENT_CONNECTED:
                     return
             except ConnectionRefusedError:
@@ -69,36 +71,37 @@ class MockApplicationClient(object):
         """
         status, message = self.client.wait_for_message()
         if status == Status.DATA_READY:
-            message_type, data = message
-            if message_type == MessageType.VALIDATE:
-                self.client.send_message(
-                    MessageType.OK,
-                    'Validation was successful'.encode(encoding='UTF-8')
-                )
-            elif message_type == MessageType.SPECIFICATION:
-                self.client.send_message(
-                    MessageType.OK,
-                    json.dumps(
-                        self.sample_specification
-                    ).encode(encoding='UTF-8')
-                )
-            elif message_type == MessageType.RUN:
-                self.client.send_message(
-                    MessageType.OK,
-                    'Run was successful'.encode(encoding='UTF-8')
-                )
-            elif message_type == MessageType.IMPORT:
-                self.client.send_message(
-                    MessageType.OK,
-                    json.dumps(
-                        self.sample_dataflow
-                    ).encode(encoding='UTF-8')
-                )
-            elif message_type == MessageType.EXPORT:
-                self.client.send_message(
-                    MessageType.OK,
-                    'Export was successful'.encode(encoding='UTF-8')
-                )
+            response = self.client.generate_json_rpc_response(message[1])
+            self.client.send_jsonrpc_message(response.json)
+
+    class Methods:
+        """
+        Class containing all JSON-RPC methods of Mocked Application.
+        """
+
+        def __init__(self, sample_specification):
+            self.sample_specification = sample_specification
+
+        def validate_dataflow(self, dataflow: Dict) -> Dict:
+            return {'type': MessageType.OK.value}
+
+        def request_specification(self) -> Dict:
+            return {
+                'type': MessageType.OK.value,
+                'content': self.sample_specification,
+            }
+
+        def run_dataflow(self, dataflow: Dict) -> Dict:
+            return {'type': MessageType.OK.value}
+
+        def import_dataflow(self, external_application_dataflow: Dict) -> Dict:
+            return {
+                'type': MessageType.OK.value,
+                'content': self.sample_specification,
+            }
+
+        def export_dataflow(self, dataflow: Dict) -> Dict:
+            return {'type': MessageType.OK.value}
 
     def answer_empty(self) -> None:
         """
