@@ -1,120 +1,247 @@
 {
-  "frontend_endpoints": {
-    "get_status": {
-      "params": {
-        "$ref": "common_types#/$defs/null_or_empty"
-      },
-      "returns": {
-        "description": "",
-        "type": "object",
-        "properties": {
-          "status": {
-            "description": "",
-            "type": "string"
-          }
-        },
-        "additionalProperties": false
-      }
-    }
-  },
-  "backend_endpoints": {
-    "get_status": {
-      "params": {
-        "$ref": "common_types#/$defs/null_or_empty"
-      },
-      "returns": {
-        "description": "",
-        "type": "object",
-        "properties": {
-          "status": {
-            "description": "",
-            "type": "object",
-            "properties": {
-              "connected": {
-                "description": "",
-                "type": "boolean"
-              }
+    "frontend_endpoints": {
+        "get_status": {
+            "params": {
+                "$ref": "common_types#/$defs/null_or_empty"
             },
-            "required": [
-              "connected"
-            ],
-            "additionalProperties": false
-          }
+            "returns": {
+                "description": "",
+                "type": "object",
+                "properties": {
+                    "status": {
+                        "description": "",
+                        "type": "string"
+                    }
+                },
+                "additionalProperties": false
+            }
         },
-        "required": [
-          "status"
-        ],
-        "additionalProperties": false
-      }
-    },
-    "external_app_connect": {
-      "params": {
-        "$ref": "common_types#/$defs/null_or_empty"
-      },
-      "returns": {
-        "$ref": "common_types#/$defs/empty"
-      }
-    }
-  },
-  "external_endpoints": {
-    "import_dataflow": {
-      "params": {
-        "description": "",
-        "type": "object",
-        "properties": {
-          "external_application_dataflow": {
-            "description": "",
-            "type": "object"
-          }
+        "modify_properties": {
+            "description": "Procedure to alter properties of a node",
+            "params": {
+                "allOf": [{ "$ref": "common_types#/$defs/node_object" }],
+                "type": "object",
+                "properties": {
+                    "properties": {
+                        "type": "array",
+                        "description": "Properties to change specified by either a name of id",
+                        "items": {
+                            "type": "object",
+                            "oneOf": [
+                                {
+                                    "properties": {
+                                        "id": {
+                                            "description": "Id of the property to alter",
+                                            "type": "string"
+                                        },
+                                        "new_value": {
+                                            "description": "New value of the property"
+                                        }
+                                    },
+                                    "required": ["id", "new_value"],
+                                    "additionalProperties": false
+                                },
+                                {
+                                    "properties": {
+                                        "name": {
+                                            "description": "Name of the property to alter",
+                                            "type": "string"
+                                        },
+                                        "new_value": {
+                                            "description": "New value of the property"
+                                        }
+                                    },
+                                    "required": ["name", "new_value"],
+                                    "additionalProperties": false
+                                }
+                            ]
+                        }
+                    }
+                },
+                "unevaluatedProperties": false,
+                "required": ["properties"]
+            },
+            "returns": {
+                "$ref": "common_types#/$defs/null_or_empty"
+            }
         },
-        "required": [
-          "external_application_dataflow"
-        ],
-        "additionalProperties": false
-      },
-      "returns": {
-        "$ref": "common_types#/$defs/external_endpoint_return_type"
-      }
+        "get_node": {
+            "params": {
+                "allOf": [{ "$ref": "common_types#/$defs/node_object" }],
+                "description": "Procedure to read node state"
+            },
+            "returns": {
+                "type": "object",
+                "properties": {
+                    "node": {
+                        "description": "State of the node",
+                        "type": "object"
+                    }
+                },
+                "additionalProperties": false,
+                "required": ["node"]
+            }
+        },
+        "get_properties": {
+            "params": {
+                "allOf": [{ "$ref": "common_types#/$defs/node_object" }],
+                "type": "object",
+                "properties": {
+                    "properties": {
+                        "type": ["array", "null"],
+                        "description": "Properties which values are going to be read specified by either a name of id. If undefined then all properties are returned",
+                        "items": {
+                            "type": "object",
+                            "oneOf": [
+                                {
+                                    "properties": {
+                                        "id": {
+                                            "description": "Id of the property to read",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": ["id"],
+                                    "additionalProperties": false
+                                },
+                                {
+                                    "properties": {
+                                        "name": {
+                                            "description": "Name of the property to read",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": ["name"],
+                                    "additionalProperties": false
+                                }
+                            ]
+                        }
+                    }
+                },
+                "description": "Procedure to alter values of a node",
+                "unevaluatedProperties": false
+            },
+            "returns": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "description": "Values of the searched properties",
+                    "properties": {
+                        "id": {
+                            "description": "Id of the property",
+                            "type": "string"
+                        },
+                        "name": {
+                            "description": "Name of the property",
+                            "type": "string"
+                        },
+                        "value": {
+                            "description": "Value of the property. Its type depends on the property"
+                        }
+                    },
+                    "required": ["id", "name", "value"],
+                    "additionalProperties": false
+                }
+            }
+        }
     },
-    "request_specification": {
-      "params": {
-        "$ref": "common_types#/$defs/null_or_empty"
-      },
-      "returns": {
-        "$ref": "common_types#/$defs/external_endpoint_return_type"
-      }
+    "backend_endpoints": {
+        "get_status": {
+            "params": {
+                "$ref": "common_types#/$defs/null_or_empty"
+            },
+            "returns": {
+                "description": "",
+                "type": "object",
+                "properties": {
+                    "status": {
+                        "description": "",
+                        "type": "object",
+                        "properties": {
+                            "connected": {
+                                "description": "",
+                                "type": "boolean"
+                            }
+                        },
+                        "required": [
+                            "connected"
+                        ],
+                        "additionalProperties": false
+                    }
+                },
+                "required": [
+                    "status"
+                ],
+                "additionalProperties": false
+            }
+        },
+        "external_app_connect": {
+            "params": {
+                "$ref": "common_types#/$defs/null_or_empty"
+            },
+            "returns": {
+                "$ref": "common_types#/$defs/empty"
+            }
+        }
     },
-    "validate_dataflow": {
-      "params": {
-        "$ref": "common_types#/$defs/dataflow_object"
-      },
-      "returns": {
-        "$ref": "common_types#/$defs/external_endpoint_return_type"
-      }
-    },
-    "run_dataflow": {
-      "params": {
-        "$ref": "common_types#/$defs/dataflow_object"
-      },
-      "returns": {
-        "$ref": "common_types#/$defs/external_endpoint_return_type"
-      }
-    },
-    "export_dataflow": {
-      "params": {
-        "$ref": "common_types#/$defs/dataflow_object"
-      },
-      "returns": {
-        "$ref": "common_types#/$defs/external_endpoint_return_type"
-      }
-    },
-    "receive_message": {
-      "params": {
-        "$ref": "common_types#/$defs/null_or_empty"
-      },
-      "returns": {
-        "$ref": "common_types#/$defs/external_endpoint_return_type"
-      }
+    "external_endpoints": {
+        "import_dataflow": {
+            "params": {
+                "description": "",
+                "type": "object",
+                "properties": {
+                    "external_application_dataflow": {
+                        "description": "",
+                        "type": "object"
+                    }
+                },
+                "required": [
+                    "external_application_dataflow"
+                ],
+                "additionalProperties": false
+            },
+            "returns": {
+                "$ref": "common_types#/$defs/external_endpoint_return_type"
+            }
+        },
+        "request_specification": {
+            "params": {
+                "$ref": "common_types#/$defs/null_or_empty"
+            },
+            "returns": {
+                "$ref": "common_types#/$defs/external_endpoint_return_type"
+            }
+        },
+        "validate_dataflow": {
+            "params": {
+                "$ref": "common_types#/$defs/dataflow_object"
+            },
+            "returns": {
+                "$ref": "common_types#/$defs/external_endpoint_return_type"
+            }
+        },
+        "run_dataflow": {
+            "params": {
+                "$ref": "common_types#/$defs/dataflow_object"
+            },
+            "returns": {
+                "$ref": "common_types#/$defs/external_endpoint_return_type"
+            }
+        },
+        "export_dataflow": {
+            "params": {
+                "$ref": "common_types#/$defs/dataflow_object"
+            },
+            "returns": {
+                "$ref": "common_types#/$defs/external_endpoint_return_type"
+            }
+        },
+        "receive_message": {
+            "params": {
+                "$ref": "common_types#/$defs/null_or_empty"
+            },
+            "returns": {
+                "$ref": "common_types#/$defs/external_endpoint_return_type"
+            }
+        }
     }
-  }
 }
