@@ -69,6 +69,7 @@ check-links:
     <<: *ace
     <<: *common_only
     script:
+        - pip install --no-deps -e .
         - cd docs
         - make linkcheck
     allow_failure: true
