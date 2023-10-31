@@ -1,15 +1,16 @@
 {
     "frontend_endpoints": {
         "get_status": {
+            "description": "Returns status of frontend application",
             "params": {
                 "$ref": "common_types#/$defs/null_or_empty"
             },
             "returns": {
-                "description": "",
+                "description": "Structure of returned values",
                 "type": "object",
                 "properties": {
                     "status": {
-                        "description": "",
+                        "description": "Frontend's status",
                         "type": "string"
                     }
                 },
@@ -29,6 +30,7 @@
                             "type": "object",
                             "oneOf": [
                                 {
+                                    "type": "object",
                                     "properties": {
                                         "id": {
                                             "description": "Id of the property to alter",
@@ -42,6 +44,7 @@
                                     "additionalProperties": false
                                 },
                                 {
+                                    "type": "object",
                                     "properties": {
                                         "name": {
                                             "description": "Name of the property to alter",
@@ -66,9 +69,9 @@
             }
         },
         "get_node": {
+            "description": "Procedure to read node state",
             "params": {
-                "allOf": [{ "$ref": "common_types#/$defs/node_object" }],
-                "description": "Procedure to read node state"
+                "allOf": [{ "$ref": "common_types#/$defs/node_object" }]
             },
             "returns": {
                 "type": "object",
@@ -83,6 +86,7 @@
             }
         },
         "get_properties": {
+            "description": "Procedure to alter values of a node",
             "params": {
                 "allOf": [{ "$ref": "common_types#/$defs/node_object" }],
                 "type": "object",
@@ -94,6 +98,7 @@
                             "type": "object",
                             "oneOf": [
                                 {
+                                    "type": "object",
                                     "properties": {
                                         "id": {
                                             "description": "Id of the property to read",
@@ -104,6 +109,7 @@
                                     "additionalProperties": false
                                 },
                                 {
+                                    "type": "object",
                                     "properties": {
                                         "name": {
                                             "description": "Name of the property to read",
@@ -117,7 +123,6 @@
                         }
                     }
                 },
-                "description": "Procedure to alter values of a node",
                 "unevaluatedProperties": false
             },
             "returns": {
@@ -164,19 +169,20 @@
     },
     "backend_endpoints": {
         "get_status": {
+            "description": "Returns status of connection with external application",
             "params": {
                 "$ref": "common_types#/$defs/null_or_empty"
             },
             "returns": {
-                "description": "",
+                "description": "Describtion of backend status",
                 "type": "object",
                 "properties": {
                     "status": {
-                        "description": "",
+                        "description": "Status",
                         "type": "object",
                         "properties": {
                             "connected": {
-                                "description": "",
+                                "description": "Connection with external application",
                                 "type": "boolean"
                             }
                         },
@@ -193,6 +199,7 @@
             }
         },
         "external_app_connect": {
+            "description": "Request to wait till connection with external application is established",
             "params": {
                 "$ref": "common_types#/$defs/null_or_empty"
             },
@@ -203,12 +210,13 @@
     },
     "external_endpoints": {
         "import_dataflow": {
+            "description": "Request to convert dataflow in external app to Pipeline Manager format and import it",
             "params": {
-                "description": "",
+                "description": "Parameters for request",
                 "type": "object",
                 "properties": {
                     "external_application_dataflow": {
-                        "description": "",
+                        "description": "JSON with dataflow in external application format",
                         "type": "object"
                     }
                 },
@@ -222,6 +230,7 @@
             }
         },
         "request_specification": {
+            "description": "Request specification used by external application",
             "params": {
                 "$ref": "common_types#/$defs/null_or_empty"
             },
@@ -230,14 +239,16 @@
             }
         },
         "validate_dataflow": {
+            "description": "Request external application to validate dataflow",
             "params": {
-                "$ref": "common_types#/$defs/dataflow_object"
+                  "$ref": "common_types#/$defs/dataflow_object"
             },
             "returns": {
-                "$ref": "common_types#/$defs/external_endpoint_return_type"
+                  "$ref": "common_types#/$defs/external_endpoint_return_type"
             }
         },
         "run_dataflow": {
+            "description": "Request external application to run dataflow",
             "params": {
                 "$ref": "common_types#/$defs/dataflow_object"
             },
@@ -246,6 +257,7 @@
             }
         },
         "export_dataflow": {
+            "description": "Request external application to export dataflow",
             "params": {
                 "$ref": "common_types#/$defs/dataflow_object"
             },
