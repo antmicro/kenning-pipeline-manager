@@ -16,6 +16,8 @@ from antmicro_sphinx_utils.defaults import (
     antmicro_latex
 )
 
+from pipeline_manager.utils.sphinx_jsonschema_spec import generate_schema_md
+
 # -- General configuration ----------------------------------------------------
 
 # General information about the project.
@@ -41,7 +43,8 @@ myst_fence_as_directive = default_myst_fence_as_directive
 
 myst_substitutions = {
     "project": project,
-    "examples": 'To see the work of the frontend, check HTML documentation or follow [Building and Running](project-readme.md#building-and-running).'  # noqa: E501
+    "examples": 'To see the work of the frontend, check HTML documentation or follow [Building and Running](project-readme.md#building-and-running).',  # noqa: E501
+    "api_specification": generate_schema_md(),
 }
 
 html_build_dir = Path(os.environ['BUILDDIR']) / 'html'
@@ -69,6 +72,12 @@ html_last_updated_fmt = today_fmt
 
 html_show_sphinx = False
 
+html_static_path = ['_static']
+
+html_css_files = (
+    'css/styles.css',
+)
+
 (
     html_logo,
     html_theme_options,
@@ -85,9 +94,16 @@ html_title = project
     latex_logo,
     latex_additional_files
 ) = antmicro_latex(basic_filename, authors, project)
+latex_elements.update({
+    'maxlistdepth': '10'
+})
 
 myst_url_schemes = {
     "http": None,
     "https": None,
     "resource": "{{path}}"
 }
+
+mermaid_cmd = './mmdc'
+mermaid_params = ['--cssFile', 'source/_static/css/styles.css']
+mermaid_d3_zoom = True
