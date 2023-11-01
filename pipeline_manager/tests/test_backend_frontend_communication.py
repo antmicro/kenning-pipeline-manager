@@ -216,8 +216,9 @@ def test_connecting_multiple_times(
             application_client.port, application_client.host
         )
 
-        for i, event in enumerate(events):
+        for _, event in enumerate(events):
             responses.append(emit_request(event, app_client))
+            time.sleep(0.1)
 
     responses = []
     process = threading.Thread(
