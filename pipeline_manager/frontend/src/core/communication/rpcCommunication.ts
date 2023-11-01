@@ -20,7 +20,7 @@ import NotificationHandler from '../notifications';
 import { backendApiUrl } from '../utils';
 import commonTypesSchema from '../../../../resources/api_specification/common_types.json' assert { type: 'json' };
 import specificationSchema from '../../../../resources/api_specification/specification.json' assert { type: 'json' };
-import * as receiveMessage from './receiveMessage';
+import * as receiveMessage from './remoteProcedures';
 
 type SpecType = {
     params: object,
@@ -56,7 +56,7 @@ const validateServerRequestResponse = (
     }
     return next(request, serverParams).then((response) => {
         // response validation
-        if (response?.result) {
+        if (response?.result !== undefined) {
             const validResponse = ajv.validate(schema.returns, response.result);
             if (!validResponse) {
                 if (request.id) {
