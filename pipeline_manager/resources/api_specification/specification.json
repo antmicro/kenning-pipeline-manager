@@ -142,6 +142,24 @@
                     "additionalProperties": false
                 }
             }
+        },
+        "progress": {
+            "description": "Notification with progress of job ran by external application",
+            "params": {
+                "description": "Parameters for notification",
+                "type": "object",
+                "properties": {
+                    "progress": {
+                        "description": "Progress of job ran be external application",
+                        "type": "number"
+                    }
+                },
+                "required": [
+                    "progress"
+                ],
+                "additionalProperties": false
+            },
+            "returns": null
         }
     },
     "backend_endpoints": {
@@ -230,14 +248,6 @@
         "export_dataflow": {
             "params": {
                 "$ref": "common_types#/$defs/dataflow_object"
-            },
-            "returns": {
-                "$ref": "common_types#/$defs/external_endpoint_return_type"
-            }
-        },
-        "receive_message": {
-            "params": {
-                "$ref": "common_types#/$defs/null_or_empty"
             },
             "returns": {
                 "$ref": "common_types#/$defs/external_endpoint_return_type"
