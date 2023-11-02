@@ -20,11 +20,11 @@ import NotificationHandler from '../notifications';
 import { backendApiUrl } from '../utils';
 import commonTypesSchema from '../../../../resources/api_specification/common_types.json' assert { type: 'json' };
 import specificationSchema from '../../../../resources/api_specification/specification.json' assert { type: 'json' };
-import * as receiveMessage from './remoteProcedures';
+import * as remoteProcedures from './remoteProcedures';
 
 type SpecType = {
     params: object,
-    returns: object,
+    returns: object | null, // null when method is a notification
 };
 const ajv = new Ajv2019({
     schemas: [commonTypesSchema],
@@ -38,37 +38,38 @@ const externalEndpoints: { [key: string]: SpecType } = specificationSchema.exter
 /**
  * Middleware that validates received requests.
  */
-const validateServerRequestResponse = (
+const validateServerRequestResponse = async (
     next: JSONRPCServerMiddlewareNext<void>,
     request: JSONRPCRequest,
     serverParams: void,
-) => {
+): Promise<JSONRPCResponse | null> => {
     // request validation
     if (!(request.method in frontendEndpoints)) {
-        if (request.id) return createJSONRPCErrorResponse(request.id, 1, 'Requested method does not exist');
+        if (request.id !== undefined) return createJSONRPCErrorResponse(request.id, 1, 'Requested method does not exist');
         throw new Error('Requested method does not exist');
     }
     const schema = frontendEndpoints[request.method];
     const valid = ajv.validate(schema.params, request.params ?? {});
     if (!valid) {
-        if (request.id) return createJSONRPCErrorResponse(request.id, 1, 'Request does not match specification');
+        if (request.id !== undefined) return createJSONRPCErrorResponse(request.id, 1, 'Request does not match specification');
         throw new Error('Request does not match specification');
     }
-    return next(request, serverParams).then((response) => {
-        // response validation
-        if (response?.result !== undefined) {
-            const validResponse = ajv.validate(schema.returns, response.result);
-            if (!validResponse) {
-                if (request.id) {
-                    return createJSONRPCErrorResponse(
-                        request.id, 1, 'Response does not match specification',
-                    );
-                }
-                throw new Error('Response does not match specification');
+    const response = await next(request, serverParams);
+    if (request.id === undefined) return null;
+
+    // response validation
+    if (response?.result !== undefined && schema.returns !== null) {
+        const validResponse = ajv.validate(schema.returns, response.result);
+        if (!validResponse) {
+            if (request.id !== undefined) {
+                return createJSONRPCErrorResponse(
+                    request.id, 1, 'Response does not match specification',
+                );
             }
+            throw new Error('Response does not match specification');
         }
-        return response;
-    });
+    }
+    return response;
 };
 
 let jsonRPCID = 1;
@@ -122,8 +123,11 @@ function createServer() {
     jsonRPCServer.server.applyMiddleware(
         validateServerRequestResponse as JSONRPCServerMiddleware<void>);
     // Register JSON-RPC methods
-    Object.entries(receiveMessage).forEach(([name, func]) => {
-        if (typeof (func) === 'function') jsonRPCServer.addMethod(name, func);
+    Object.entries(remoteProcedures).forEach(([name, func]) => {
+        if (typeof (func) === 'function' && name in frontendEndpoints) jsonRPCServer.addMethod(name, func);
+        else if (typeof (func) === 'function') {
+            NotificationHandler.showToast('warning', `Function ${name} was not registered as RPC method`);
+        }
     });
 
     // Define SocketIO events
@@ -135,15 +139,17 @@ function createServer() {
 
     socket.on('api', async (data: JSONRPCRequest) => {
         const response = await jsonRPCServer.server.receive(data);
-        const send = await socket.emitWithAck('external-api', response);
-        if (!send) NotificationHandler.terminalLog('error', 'Response to external app was not send', null);
+        if (response) {
+            const send = await socket.emitWithAck('external-api', response);
+            if (!send) NotificationHandler.terminalLog('error', 'Response to external app was not send', null);
+        }
     });
     socket.on('api-response', (response: JSONRPCResponse) => {
         // response validation
-        if (response.result && response.id && requestSchema.has(response.id)) {
+        if (response.result && response.id && requestSchema.get(response.id)?.returns) {
             const validResponse = ajv.validate(
                 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                requestSchema.get(response.id)!.returns,
+                requestSchema.get(response.id)!.returns!,
                 response.result,
             );
             if (!validResponse) {
