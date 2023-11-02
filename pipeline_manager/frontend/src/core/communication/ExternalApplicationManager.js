@@ -100,10 +100,12 @@ export default class ExternalApplicationManager {
      */
     async requestDataflowAction(action) {
         const dataflow = this.editorManager.saveDataflow();
+        const progressBar = document.querySelector('.progress-bar');
         if (!dataflow) return;
 
         if (action === 'run') {
             NotificationHandler.showToast('info', 'Running dataflow');
+            progressBar.style.width = '0%';
         }
 
         let data;
@@ -113,31 +115,11 @@ export default class ExternalApplicationManager {
             // The connection was closed
             data = error.message;
             NotificationHandler.terminalLog('error', data);
+            if (action === 'run') progressBar.style.width = '0%';
             return;
         }
 
         // Status is HTTPCodes.OK so a message from the application is received.
-        if (action === 'run') {
-            const progressBar = document.querySelector('.progress-bar');
-            progressBar.style.width = '0%';
-
-            /* eslint-disable no-await-in-loop */
-            while (data.type === PMMessageType.PROGRESS) {
-                // Information about the progress
-                const progress = data.content;
-                progressBar.style.width = `${progress}%`;
-
-                try {
-                    data = await jsonRPC.request(`receive_message`);
-                } catch (error) {
-                    data = error.message;
-                    NotificationHandler.terminalLog('error', data);
-                    progressBar.style.width = '0%';
-                    return;
-                }
-            }
-            progressBar.style.width = '0%';
-        }
         if (data.type === PMMessageType.OK) {
             NotificationHandler.showToast('info', data.content);
         } else if (data.type === PMMessageType.ERROR) {
@@ -145,6 +127,7 @@ export default class ExternalApplicationManager {
         } else if (data.type === PMMessageType.WARNING) {
             NotificationHandler.terminalLog('warning', `Warning: ${data.content}`, data.content);
         }
+        if (action === 'run') progressBar.style.width = '0%';
     }
 
     /**
