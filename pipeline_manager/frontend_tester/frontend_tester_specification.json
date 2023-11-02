@@ -137,6 +137,34 @@
                     "direction": "input"
                 }
             ]
+        },
+        {
+            "name": "SendRequestToFrontend",
+            "category": "API",
+            "properties": [
+                {
+                    "name": "Method",
+                    "type": "text",
+                    "default": "get_status"
+                },
+                {
+                    "name": "Params",
+                    "type": "text",
+                    "default": "{}"
+                },
+                {
+                    "name": "Disconnect",
+                    "type": "bool",
+                    "default": false
+                }
+            ],
+            "interfaces": [
+                {
+                    "name": "Effect",
+                    "type": "Effect",
+                    "direction": "output"
+                }
+            ]
         }
     ]
 }
