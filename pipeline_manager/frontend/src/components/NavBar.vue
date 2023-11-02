@@ -636,7 +636,7 @@ export default {
             >
                 <div
                     ref="searchbar"
-                    class="searchbar"
+                    class="searchbar hoverbox"
                     role="button"
                     @pointerover="() => panels.nodesearch.hover = true"
                     @pointerleave="() => panels.nodesearch.hover = false"
