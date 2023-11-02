@@ -184,3 +184,13 @@ export async function get_node(
         node: node.save(),
     };
 }
+
+/**
+ * Sets width of progress bar.
+ */
+export function progress(params: {progress: number}) {
+    const progressBar = document.querySelector<HTMLDivElement>('.progress-bar');
+    if (!progressBar) throw new Error('Progress bar does not exist');
+    if (params.progress > 100 || params.progress < 0) throw new Error(`Progress has to be in [0, 100]. Received: ${params.progress}`);
+    progressBar.style.width = `${params.progress}%`;
+}
