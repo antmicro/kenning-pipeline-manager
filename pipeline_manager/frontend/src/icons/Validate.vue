@@ -46,14 +46,6 @@ export default {
     fill: $white;
 }
 
-.validate:hover > .highlighted {
-    fill: $green;
-}
-
-.validate:hover > {
-    cursor: pointer;
-}
-
 .hovered {
     fill: $green;
 }

@@ -51,7 +51,4 @@ export default {
 .hovered {
     fill: $green;
 }
-.green {
-    fill: $green;
-}
 </style>

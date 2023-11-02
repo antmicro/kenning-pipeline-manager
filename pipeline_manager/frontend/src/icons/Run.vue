@@ -44,10 +44,6 @@ export default {
     fill: $white;
 }
 
-.run:hover > .highlighted {
-    fill: $green;
-}
-
 .hovered {
     fill: $green;
 }
