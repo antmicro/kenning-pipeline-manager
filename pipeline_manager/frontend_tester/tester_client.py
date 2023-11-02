@@ -29,11 +29,12 @@ data sent to it. It simply returns a received file.
 """
 
 import argparse
+import threading
 import json
 import logging
 import time
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Union
 import sys
 
 from pipeline_manager import frontend_tester
@@ -45,6 +46,10 @@ from pipeline_manager_backend_communication.communication_backend import (
 from pipeline_manager_backend_communication.misc_structures import (
     MessageType,
 )
+
+RUN = "RunBehaviour"
+VALIDATE = "ValidationBehaviour"
+SEND_REQUEST = "SendRequestToFrontend"
 
 
 def get_node_properties(node_type: str, dataflow: Dict) -> Dict:
@@ -65,7 +70,6 @@ def get_node_properties(node_type: str, dataflow: Dict) -> Dict:
     Dict :
         Dictionary that has all properties of a `name` node.
     """
-    dataflow = json.loads(dataflow)
     nodes = dataflow["graph"]["nodes"]
     description_node = None
 
@@ -98,7 +102,6 @@ def get_effects(node_type: str, dataflow: Dict) -> List:
     List :
         List of nodes connected to `type` node.
     """
-    dataflow = json.loads(dataflow)
     nodes = dataflow["graph"]["nodes"]
     connections = dataflow["graph"]["connections"]
     socket_id = None
@@ -155,156 +158,193 @@ def _text_to_message_type(text: str) -> MessageType:
     return {"OK": MessageType.OK, "ERROR": MessageType.ERROR}[text]
 
 
-def import_response(
-    message_type: MessageType, data: bytes, client: CommunicationBackend
-) -> None:
-    """
-    Callback that responses to Import request.
+class RPCMethods:
+    def __init__(
+        self,
+        specification: Dict,
+        client: CommunicationBackend,
+        out_path: str
+    ):
+        self.specification = specification
+        self.client = client
+        self.out_path = out_path
 
-    Parameters
-    ----------
-    message_type : MessageType
-        Message type of the request.
-    data : bytes
-        Content of the request.
-    client : CommunicationBackend
-        Client connected to Pipeline Manager
-    """
-    client.send_message(MessageType.OK, data)
+    def import_dataflow(self, dataflow: Dict) -> Dict:
+        """
+        RPC method that responses to Import request.
 
+        Parameters
+        ----------
+        dataflow : Dict
+            Content of the request.
 
-def specification_response(
-    message_type: MessageType,
-    data: bytes,
-    client: CommunicationBackend,
-    specification: Dict,
-) -> None:
-    """
-    Callback that responses to Specification request.
+        Returns
+        -------
+        Dict
+            Method's response
+        """
+        return {'type': MessageType.OK.value, 'content': dataflow}
 
-    Parameters
-    ----------
-    message_type : MessageType
-        Message type of the request.
-    data : bytes
-        Content of the request.
-    client : CommunicationBackend
-        Client connected to Pipeline Manager
-    specification : Dict
-        Specification that is send back to Pipeline Manager
-    """
-    logging.log(logging.INFO, "Sending specification.")
-    client.send_message(
-        MessageType.OK, json.dumps(specification).encode(encoding="UTF-8")
-    )
+    def request_specification(self) -> Dict:
+        """
+        RPC method that responses to Specification request.
 
+        Returns
+        -------
+        Dict
+            Method's response
+        """
+        logging.log(logging.INFO, "Sending specification.")
+        return {
+            'type': MessageType.OK.value,
+            'content': self.specification,
+        }
 
-def run_validate_response(
-    message_type: MessageType,
-    data: bytes,
-    client: CommunicationBackend,
-) -> None:
-    """
-    Callback that responses to Run and Validation requests.
+    def run_dataflow(self, dataflow: Dict) -> Dict:
+        """
+        RPC method that responses to Run request.
 
-    Parameters
-    ----------
-    message_type : MessageType
-        Message type of the request.
-    data : bytes
-        Content of the request.
-    client : CommunicationBackend
-        Client connected to Pipeline Manager
-    """
-    message_type_to_node_title = {
-        MessageType.RUN: "RunBehaviour",
-        MessageType.VALIDATE: "ValidationBehaviour",
-    }
+        Parameters
+        ----------
+        dataflow : Dict
+            Content of the request.
 
-    try:
-        title = message_type_to_node_title[message_type]
-        properties = get_node_properties(title, data)
-    except Exception:
-        client.send_message(
-            MessageType.ERROR,
-            f"No description for {str(message_type)} provided".encode(
-                encoding="UTF-8"
-            ),
-        )
-        return
-    if properties["Disconnect"]:
-        client.disconnect()
-        return
+        Returns
+        -------
+        Dict
+            Method's response
+        """
+        return self._run_validate_response([RUN, SEND_REQUEST], dataflow)
 
-    if message_type == MessageType.RUN:
-        steps = properties["ProgressMessages"]
-        time_offset = properties["Duration"] / steps
-        for i in range(1, steps + 1):
-            progress = str(i / steps * 100)
-            logging.log(logging.INFO, f"Progress: {progress}")
-            client.send_message(MessageType.PROGRESS, progress.encode("UTF-8"))
-            time.sleep(time_offset)
-    else:
+    def validate_dataflow(self, dataflow: Dict) -> Dict:
+        """
+        RPC method that responses to Validate request.
+
+        Parameters
+        ----------
+        dataflow : Dict
+            Content of the request.
+
+        Returns
+        -------
+        Dict
+            Method's response
+        """
+        return self._run_validate_response(VALIDATE, dataflow)
+
+    def _run_validate_response(
+        self,
+        title: Union[str, List[str]],
+        data: Dict,
+    ) -> Dict:
+        """
+        Method that responses to Run and Validation requests.
+
+        Parameters
+        ----------
+        title : Union[str, List[str]]
+            Message type of the request.
+        data : bytes
+            Content of the request.
+
+        Returns
+        -------
+        Dict
+            Method's response
+        """
+        if not isinstance(title, List):
+            title = [title]
+        properties = None
+        found = None
+        for t in title:
+            try:
+                properties = get_node_properties(t, data)
+                found = t
+            except Exception:
+                continue
+            break
+        if not properties:
+            raise Exception(f"No description for {title} provided")
+        if properties["Disconnect"]:
+            self.client.disconnect()
+            return {}
+
+        if found == RUN:
+            steps = properties["ProgressMessages"]
+            time_offset = properties["Duration"] / steps
+            for i in range(1, steps + 1):
+                progress = i / steps * 100
+                logging.log(logging.INFO, f"Progress: {progress}")
+                self.client.notify('progress', {'progress': progress})
+                time.sleep(time_offset)
+        elif found == SEND_REQUEST:
+            method = properties["Method"]
+            params = json.loads(properties["Params"])
+            response = self.client.request(method, params, non_blocking=False)
+            if "result" in response:
+                properties["Message"] = json.dumps(response["result"])
+                properties["MessageType"] = "OK"
+            else:
+                properties["Message"] = json.dumps(response["error"])
+                properties["MessageType"] = "ERROR"
+        else:
+            time.sleep(properties["Duration"])
+
+        def delayed_effect(client, title, data):
+            effects = get_effects(title, data)
+            for effect in effects:
+                if effect["name"] == "Disconnect":
+                    if effect["properties"]["Should disconnect"]:
+                        time.sleep(effect["properties"]["Time offset"])
+                        logging.log(logging.INFO, "Disconnecting!")
+                        client.disconnect()
+        threading.Thread(
+            target=delayed_effect, args=(self.client, found, data)
+        ).start()
+
+        return {
+            'type': _text_to_message_type(properties["MessageType"]).value,
+            'content': properties["Message"],
+        }
+
+    def export_dataflow(
+        self,
+        dataflow: Dict,
+    ) -> Dict:
+        """
+        RPC method that responses to Export requests.
+
+        Parameters
+        ----------
+        dataflow : Dict
+            Content of the request.
+
+        Returns
+        -------
+        Dict
+            Method's response
+        """
+        node_type = "ExportBehaviour"
+        try:
+            properties = get_node_properties(node_type, dataflow)
+        except Exception:
+            raise Exception("No description for export_dataflow provided")
+        if properties["Disconnect"]:
+            self.client.disconnect()
+            return {}
+
         time.sleep(properties["Duration"])
 
-    client.send_message(
-        _text_to_message_type(properties["MessageType"]),
-        properties["Message"].encode(encoding="UTF-8"),
-    )
-
-    effects = get_effects(title, data)
-    for effect in effects:
-        if effect["name"] == "Disconnect":
-            if effect["properties"]["Should disconnect"]:
-                time.sleep(effect["properties"]["Time offset"])
-                logging.log(logging.INFO, "Disconnecting!")
-                client.disconnect()
-
-
-def export_response(
-    message_type: MessageType,
-    data: bytes,
-    client: CommunicationBackend,
-    output_path: Path,
-) -> None:
-    """
-    Callback that responses to Export requests.
-
-    Parameters
-    ----------
-    message_type : MessageType
-        Message type of the request.
-    data : bytes
-        Content of the request.
-    client : CommunicationBackend
-        Client connected to Pipeline Manager
-    output_path : Path
-        Path where the exported dataflow is saved.
-    """
-    node_type = "ExportBehaviour"
-    try:
-        properties = get_node_properties(node_type, data)
-    except Exception:
-        client.send_message(
-            MessageType.ERROR,
-            f"No description for {str(message_type)} provided".encode(
-                encoding="UTF-8"
-            ),
+        with open(self.out_path, "w") as f:
+            json.dump(dataflow, f, indent=4)
+        logging.log(
+            logging.INFO,
+            f"Exported dataflow stored in {self.output_path}"
         )
-        return
-    if properties["Disconnect"]:
-        client.disconnect()
-        return
-
-    time.sleep(properties["Duration"])
-
-    with open(output_path, "w") as f:
-        json.dump(json.loads(data), f, indent=4)
-    logging.log(logging.INFO, f"Exported dataflow stored in {output_path}")
-    client.send_message(
-        _text_to_message_type(properties["MessageType"]),
-        properties["Message"].encode(encoding="UTF-8"),
-    )
+        return {
+            'type': _text_to_message_type(properties["MessageType"]).value,
+            'content': properties["Message"].encode(encoding="UTF-8"),
+        }
 
 
 def main(argv):
@@ -343,9 +383,6 @@ def main(argv):
     args, _ = parser.parse_known_args(argv[1:])
     logging.basicConfig(level=string_to_verbosity(args.verbosity))
 
-    client = CommunicationBackend(args.host, args.port)
-    client.initialize_client()
-
     if args.specification_path is None:
         spec_path = Path(frontend_tester.__file__).parent
         spec_path = spec_path / "frontend_tester_specification.json"
@@ -354,20 +391,15 @@ def main(argv):
     with open(spec_path) as f:
         specification = json.load(f)
 
-    client.register_callback(MessageType.IMPORT, import_response)
-    client.register_callback(
-        MessageType.SPECIFICATION, specification_response, specification
-    )
-    client.register_callback(MessageType.RUN, run_validate_response)
-    client.register_callback(MessageType.VALIDATE, run_validate_response)
-    client.register_callback(
-        MessageType.EXPORT,
-        export_response,
-        args.output_path
-    )
+    client = CommunicationBackend(args.host, args.port)
+    client.initialize_client(RPCMethods(
+        specification,
+        client,
+        args.output_path,
+    ))
 
-    while client.connected:
-        _, _ = client.wait_for_message()
+    client.start_json_rpc_client(separate_thread=True)
+    client.client_thread.join()
 
 
 if __name__ == "__main__":
