@@ -185,10 +185,22 @@ export async function get_node(
     };
 }
 
+let runInProgress = false;
+export const runInfo: {inProgress: boolean} = {
+    get inProgress() {
+        return runInProgress;
+    },
+    set inProgress(inProgress) {
+        runInProgress = inProgress;
+    },
+};
 /**
  * Sets width of progress bar.
  */
 export function progress(params: {progress: number}) {
+    if (!runInProgress) {
+        throw new Error('No run in progress');
+    }
     const progressBar = document.querySelector<HTMLDivElement>('.progress-bar');
     if (!progressBar) throw new Error('Progress bar does not exist');
     if (params.progress > 100 || params.progress < 0) throw new Error(`Progress has to be in [0, 100]. Received: ${params.progress}`);
