@@ -83,6 +83,7 @@ export default defineComponent({
         });
 
         const removeAnchor = (idx) => {
+            graph.value.events.removeAnchor.emit([props.connection, idx]);
             props.connection.anchors.splice(idx, 1);
         };
 
@@ -100,6 +101,7 @@ export default defineComponent({
                 y: (ev.offsetY / graph.value.scaling) - graph.value.panning.y,
                 id: Date.now(),
             });
+            graph.value.events.addAnchor.emit([props.connection, index]);
         };
 
         const transform = (x, y) => {

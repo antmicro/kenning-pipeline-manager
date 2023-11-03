@@ -158,6 +158,36 @@ class ConnectionStep extends Step {
     }
 }
 
+class AnchorStep extends Step {
+    anchor: any = undefined;
+
+    constructor(type: string, topic: any, tid: string = uuidv4()) {
+        if (tid === '') tid = uuidv4(); // eslint-disable-line no-param-reassign
+        super(type, topic, tid);
+    }
+
+    add(graph: Ref<Graph>) {
+        if (this.anchor !== undefined) {
+            const conn = graph.value.connections.find(
+                (n) => n.from === this.anchor[0].from && n.to === this.anchor[0].to,
+            );
+            if (conn !== undefined) if ((<any>conn).anchors === undefined) (<any>conn).anchors = [];
+            (<any>conn).anchors.splice(
+                this.anchor[2], 0, this.anchor[1],
+            );
+        }
+    }
+
+    remove(graph: Ref<Graph>) {
+        if (this.anchor !== undefined) {
+            const conn = graph.value.connections.find(
+                (n) => n.from === this.anchor[0].from && n.to === this.anchor[0].to,
+            );
+            if (conn !== undefined) (<any>conn).anchors.splice(this.anchor[2], 1);
+        }
+    }
+}
+
 export function suppressHistoryLogging(value: boolean) {
     suppressingHistory.value = value;
 }
@@ -185,6 +215,8 @@ export function useHistory(graph: Ref<Graph>, commandHandler: ICommandHandler): 
         g.events.removeNode.unsubscribe(tok);
         g.events.addConnection.unsubscribe(tok);
         g.events.removeConnection.unsubscribe(tok);
+        g.events.addAnchor.unsubscribe(tok);
+        g.events.removeAnchor.unsubscribe(tok);
     };
 
     // Switch all the events to any new graph that's displayed
@@ -245,10 +277,34 @@ export function useHistory(graph: Ref<Graph>, commandHandler: ICommandHandler): 
                     undoneHistory.set(newGraph.id, []);
                 }
             });
+            newGraph.events.addAnchor.subscribe(token, (tuple: any) => {
+                if (!suppressingHistory.value) {
+                    const historyItem = history.get(newGraph.id);
+                    if (!historyItem) return;
+                    const idx = Math.trunc((tuple[1] - 1) / 3);
+                    const conn = tuple[0];
+                    const step = new AnchorStep('add', conn.anchors[idx].id.toString(), transactionId.value);
+                    historyItem.push(step);
+                    step.anchor = [conn, conn.anchors[idx], idx];
+                    undoneHistory.set(newGraph.id, []);
+                }
+            });
+            newGraph.events.removeAnchor.subscribe(token, (tuple: any) => {
+                if (!suppressingHistory.value) {
+                    const historyItem = history.get(newGraph.id);
+                    if (!historyItem) return;
+                    const idx = tuple[1];
+                    const conn = tuple[0];
+                    const step = new AnchorStep('rem', conn.anchors[idx].id.toString(), transactionId.value);
+                    historyItem.push(step);
+                    step.anchor = [conn, conn.anchors[idx], idx];
+                    undoneHistory.set(newGraph.id, []);
+                }
+            });
         }
     };
 
-    watch(graph, (newGraph, oldGraph) => graphSwitch(newGraph, oldGraph), { flush: 'post' });
+    watch(graph, (newGraph, oldGraph) => graphSwitch(newGraph, oldGraph), { flush: 'post', immediate: true });
 
     const singleStepTransaction = (mainHistory: Step[], auxiliaryHistory:Step[]) => {
         const step : Step | undefined = mainHistory.pop();

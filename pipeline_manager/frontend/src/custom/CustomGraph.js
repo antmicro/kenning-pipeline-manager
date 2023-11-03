@@ -12,6 +12,7 @@ import {
     GraphTemplate, DummyConnection, Connection, GRAPH_NODE_TYPE_PREFIX,
 } from '@baklavajs/core';
 import { v4 as uuidv4 } from 'uuid';
+import { BaklavaEvent } from '@baklavajs/events';
 import {
     SUBGRAPH_INPUT_NODE_TYPE,
     SUBGRAPH_INOUT_NODE_TYPE,
@@ -26,6 +27,10 @@ import { updateInterfacePosition } from './CustomNode.js';
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-underscore-dangle */
 export default function createPipelineManagerGraph(graph) {
+    // Add an event for adding an anchor to the graph
+    graph.events.addAnchor = new BaklavaEvent();
+    graph.events.removeAnchor = new BaklavaEvent();
+
     graph.checkConnection = function checkConnection(from, to) {
         if (!from || !to) {
             return { connectionAllowed: false, error: 'Invalid from and to references.' };
