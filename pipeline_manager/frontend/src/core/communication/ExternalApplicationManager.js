@@ -6,10 +6,11 @@
 
 import { backendApiUrl, PMMessageType } from '../utils';
 import jsonRPC from './rpcCommunication';
+import { runInfo } from './remoteProcedures';
 import NotificationHandler from '../notifications';
 import EditorManager from '../EditorManager';
 
-export default class ExternalApplicationManager {
+class ExternalApplicationManager {
     externalApplicationConnected = false;
 
     backendAvailable = backendApiUrl !== null;
@@ -104,6 +105,11 @@ export default class ExternalApplicationManager {
         if (!dataflow) return;
 
         if (action === 'run') {
+            if (runInfo.inProgress) {
+                NotificationHandler.showToast('error', 'Previous run has not finished, cannot process this request');
+                return;
+            }
+            runInfo.inProgress = true;
             NotificationHandler.showToast('info', 'Running dataflow');
             progressBar.style.width = '0%';
         }
@@ -115,7 +121,10 @@ export default class ExternalApplicationManager {
             // The connection was closed
             data = error.message;
             NotificationHandler.terminalLog('error', data);
-            if (action === 'run') progressBar.style.width = '0%';
+            if (action === 'run') {
+                progressBar.style.width = '0%';
+                runInfo.inProgress = false;
+            }
             return;
         }
 
@@ -127,7 +136,10 @@ export default class ExternalApplicationManager {
         } else if (data.type === PMMessageType.WARNING) {
             NotificationHandler.terminalLog('warning', `Warning: ${data.content}`, data.content);
         }
-        if (action === 'run') progressBar.style.width = '0%';
+        if (action === 'run') {
+            progressBar.style.width = '0%';
+            runInfo.inProgress = false;
+        }
     }
 
     /**
@@ -232,4 +244,11 @@ export default class ExternalApplicationManager {
 
         this.startStatusInterval();
     }
+}
+
+let externalApplicationManager;
+
+export default function getExternalApplicationManager() {
+    if (!externalApplicationManager) externalApplicationManager = new ExternalApplicationManager();
+    return externalApplicationManager;
 }
