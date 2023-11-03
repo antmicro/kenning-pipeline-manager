@@ -85,11 +85,12 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
                                 border-bottom: 1px solid #737373;
                                 z-index: 9999;
                             '
-                            v-if="node !== undefined && showMenu === node.title"
+                            class='icondiv'
                         >
                             <LinkMenu
-                                :node='node'
-                                v-if="node !== undefined && showMenu === node.title"
+                                :node='showMenu'
+                                style='width: 18em'
+                                v-if="showMenu !== false && showMenu.hitSubstring === node.hitSubstring"
                             />
                         </div>
                     </div>
@@ -132,7 +133,7 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
 </template>
 
 <script>
-import { defineComponent, ref, watch, computed } from 'vue'; // eslint-disable-line object-curly-newline
+import { defineComponent, ref, watch, computed, inject } from 'vue'; // eslint-disable-line object-curly-newline
 import { useViewModel } from '@baklavajs/renderer-vue';
 import Arrow from '../../icons/Arrow.vue';
 import Cogwheel from '../../icons/Cogwheel.vue';
@@ -254,7 +255,7 @@ export default defineComponent({
             __category: emptyCategory(category),
         });
 
-        const showMenu = ref(false);
+        const showMenu = inject("menu");
 
         return {
             padding,

@@ -52,7 +52,7 @@ Inherits from baklavajs/packages/renderer-vue/src/nodepalette/NodePalette.vue
 </template>
 
 <script>
-import { computed, defineComponent, inject, ref } from 'vue'; // eslint-disable-line object-curly-newline
+import { computed, defineComponent, provide, inject, ref, watch, onMounted } from 'vue'; // eslint-disable-line object-curly-newline
 import { useViewModel, useTransform } from '@baklavajs/renderer-vue';
 import { usePointer } from '@vueuse/core';
 import PaletteCategory from './PaletteCategory.vue';
@@ -136,9 +136,23 @@ export default defineComponent({
             document.addEventListener('keydown', dragEndDeselectNode);
         };
         const nodeSearch = ref('');
+        const scroll = ref(0);
+        const showMenu = ref(false);
+        provide("menu", showMenu);
 
         const nodeTree = computed(() => getNodeTree(nodeSearch));
         const collapse = computed(() => viewModel.value.collapseSidebar);
+
+        onMounted(()=>{
+            let nodesContainer = computed(()=> document.querySelector(".nodes"))
+            nodesContainer.value.addEventListener("scroll", (event) => {
+                scroll.value = event.target.scrollTop;
+                const iconMenus = document.getElementsByClassName("icondiv");
+                for (let i = 0; i < iconMenus.length; i++) {
+                    iconMenus[i].style.translate="0px -" + scroll.value.toString()+"px";
+                }
+            });
+        });
 
         return {
             draggedNodeStyles,
@@ -149,6 +163,7 @@ export default defineComponent({
             tooltip,
             nodeSearch,
             paletteRef,
+            scroll,
         };
     },
 });
