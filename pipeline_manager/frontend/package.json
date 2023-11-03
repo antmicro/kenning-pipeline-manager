@@ -27,7 +27,7 @@
         "json-source-map": "^0.6.1",
         "patch-package": "^7.0.2",
         "raw-loader": "^4.0.2",
-        "sass": "^1.62.0",
+        "sass": "^1.69.5",
         "sass-loader": "^13.2.2",
         "showdown": "^2.1.0",
         "socket.io-client": "^4.7.2",
