@@ -870,6 +870,11 @@ $bar-height: 60px;
                 width: 1.2em;
                 height: 1.2em;
             }
+            & > .smaller_svg {
+                display: block;
+                width: 1em;
+                height: 1em;
+            }
 
             & > .dropdown-wrapper {
                 user-select: none;

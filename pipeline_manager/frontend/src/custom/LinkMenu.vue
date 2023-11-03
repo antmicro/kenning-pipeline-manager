@@ -1,4 +1,3 @@
-
 <!--
 Copyright (c) 2022-2023 Antmicro <www.antmicro.com>
 
@@ -16,7 +15,7 @@ from creating and deleting connections or altering nodes' values if the editor i
     <transition name="slide-fade">
         <div ref="el">
                 <a
-                    v-for="url in node.URLs"
+                    v-for="url in nodeRef.URLs"
                     :key="url.name"
                     :href="url.url"
                     class="__url"
@@ -39,25 +38,24 @@ from creating and deleting connections or altering nodes' values if the editor i
 
 <script>
 import { defineComponent, ref } from 'vue';
-import { Components, useViewModel } from '@baklavajs/renderer-vue';
+import { useViewModel } from '@baklavajs/renderer-vue';
 
 export default defineComponent({
-    extends: Components.ContextMenu,
     props: {
         node: {
-            required: true
+            required: true,
         },
     },
-    setup(props, context) {
+    setup(props) {
         const el = ref(null);
         const { viewModel } = useViewModel();
         const getIconPath = (name) => viewModel.value.cache[`./${name}`] ?? name;
-        const node = ref(props.node);
+        const nodeRef = ref(props.node);
 
         return {
             el,
             getIconPath,
-            node
+            nodeRef,
         };
     },
 });
@@ -79,6 +77,7 @@ a {
             margin: 1em 1em 1em 1em;
             width: auto;
             height: 100%;
+            max-height: 1.75em;
         }
 
         > span {

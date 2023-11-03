@@ -71,26 +71,34 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
                         <div
                             ref="settings"
                             role="button"
-                            @click="() => showMenu ? showMenu = false : showMenu=node.title"
+                            style='cursor: pointer;'
+                            @click="() => {
+                                showMenu.hitSubstring === node.hitSubstring ?
+                                showMenu=false : showMenu=node
+                            }"
                         >
-                            <Cogwheel class="small_svg" />
+                            <VerticalEllipsis class="smaller_svg" style='right: 100%;' />
                         </div>
                         <div
                             style='
                                 position: absolute;
-                                flex-direction: row;
                                 left: 100%;
-                                width: 18em;
+                                max-width: 18em;
                                 background-color: #181818;
                                 border-bottom: 1px solid #737373;
                                 z-index: 9999;
+                                transform: translate(0%,50%)
+                                           translate(0,-1.75em)
+                                           translate(0, -4px);
                             '
                             class='icondiv'
                         >
                             <LinkMenu
                                 :node='showMenu'
                                 style='width: 18em'
-                                v-if="showMenu !== false && showMenu.hitSubstring === node.hitSubstring"
+                                v-if="showMenu !== false &&
+                                      showMenu.hitSubstring === node.hitSubstring"
+                                v-click-outside="closeMenu"
                             />
                         </div>
                     </div>
@@ -133,14 +141,16 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
 </template>
 
 <script>
-import { defineComponent, ref, watch, computed, inject } from 'vue'; // eslint-disable-line object-curly-newline
+import { defineComponent, ref, watch, inject } from 'vue'; // eslint-disable-line object-curly-newline
 import { useViewModel } from '@baklavajs/renderer-vue';
 import Arrow from '../../icons/Arrow.vue';
-import Cogwheel from '../../icons/Cogwheel.vue';
+import VerticalEllipsis from '../../icons/VerticalEllipsis.vue';
 import LinkMenu from '../LinkMenu.vue';
 
 export default defineComponent({
-    components: { Arrow, LinkMenu, Cogwheel },
+    components: {
+        Arrow, LinkMenu, VerticalEllipsis,
+    },
     props: {
         nodeTree: {
             required: true,
@@ -255,7 +265,10 @@ export default defineComponent({
             __category: emptyCategory(category),
         });
 
-        const showMenu = inject("menu");
+        const showMenu = inject('menu');
+        const closeMenu = () => {
+            if (showMenu.value) showMenu.value = false;
+        };
 
         return {
             padding,
@@ -270,6 +283,7 @@ export default defineComponent({
             emptyCategory,
             categoryClasses,
             showMenu,
+            closeMenu,
         };
     },
 });
