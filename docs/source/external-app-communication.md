@@ -16,7 +16,7 @@ The `size` and `content` are stored in big-endian.
 
 ### Communication structure
 
-By default, {{project}} in `server-app` mode will wait for external application to connect and then request the specification.
+By default, {{project}} in `server-app` mode will wait for an external application to connect and then request the specification.
 If connection is established successfully, {{project}} frontend will check if external application is still connected every 0.5 second.
 Apart from that, both {{project}} frontend and external application can send requests which pass through {{project}} backend.
 
@@ -41,7 +41,7 @@ sequenceDiagram
     Frontend->>+Backend: request_specification
     Backend->>External App: request_specification
     External App->>Backend: specification
-    Backend->>-Frontend: MessageType.OK + sepcification
+    Backend->>-Frontend: MessageType.OK + specification
     loop Every 0.5s
         Frontend->>Backend: get_status
         Backend->>Frontend: 
@@ -62,20 +62,23 @@ sequenceDiagram
 As {{project}} part of communication is done with SocketIO, it is based on events, which are precisely defined for both sides and can trigger different actions.
 
 Frontend listens to:
-- **api** -- received messages are JSON-RPC requests, they are validated with [specification](#frontend-api), executed and generated responds are resend,
-- **api-response** -- received messages are JSON-RPC responses, they are also validated and returned as result of previous request.
+
+* **api** -- received messages are JSON-RPC requests, they are validated with [specification](#frontend-api), executed and generated responds are resend,
+* **api-response** -- received messages are JSON-RPC responses, they are also validated and returned as result of previous request.
 
 Backend implements the following events:
-- **backend-api** -- receives all JSON-RPC requests, runs methods and responds,
-- **external-api** -- redirects messages to external application through BSD socket.
+
+* **backend-api** -- receives all JSON-RPC requests, runs methods and responds,
+* **external-api** -- redirects messages to external application through BSD socket.
 
 On the other hand, communication between backend and external application is done through BSD socket.
-To managed it, both sides run socket listener in separate thread, which waits for messages and responds or redirects them.
+To manage this, both sides run socket listener in a separate thread, which waits for messages and responds or redirects them.
 
-Following diagram describes communication structure, where:
-- blue lines describe [Backend API](backend-api) request from frontend,
-- red lines describe [External App API](external-app-api) request from frontend,
-- purple lines describe [Frontend API](frontend-api) request from external application. 
+Following communication structure diagram below, we have:
+
+* blue lines describing [Backend API](backend-api) request from frontend,
+* red lines describing [External App API](external-app-api) request from frontend,
+* purple lines describing [Frontend API](frontend-api) request from external application.
 
 ```{mermaid}
 :caption: Communication structure diagram
@@ -110,12 +113,12 @@ C4Deployment
         }
     }
     %% frontend to backend request
-    Rel(front-socket, flask-backend-api, "JSON-RPC reuqest")
+    Rel(front-socket, flask-backend-api, "JSON-RPC request")
     Rel(flask-backend-api, front-response-api, "JSON-RPC response")
     UpdateRelStyle(front-socket, flask-backend-api, $lineColor="var(--md-code-hl-keyword-color)", $textColor="var(--md-code-hl-keyword-color)", $offsetY="-15")
     UpdateRelStyle(flask-backend-api, front-response-api, $lineColor="var(--md-code-hl-keyword-color)", $textColor="var(--md-code-hl-keyword-color)", $offsetX="-50", $offsetY="55")
     %% frontent to external app request
-    Rel(front-socket, flask-external-api, "JSON-RPC reuqest")
+    Rel(front-socket, flask-external-api, "JSON-RPC request")
     Rel(flask-external-api, pmbc-listener, "Redirected requests and responses")
     Rel(pmbc-listener, back-socket, "JSON-RPC response")
     Rel(back-socket, front-response-api, "Redirected response")
@@ -154,8 +157,8 @@ Its `content` may vary depending on the answered request.
 (message-type-progress)=
 ### PROGRESS
 
-Message of optional `type` `PROGRESS` (2) is used to inform {{project}} about the status of a running dataflow. The
-`PROGRESS` message type can only be used once a message of type `RUN` is received and can be sent multiple times before sending a final response message of type either `ERROR` or `OK` that indicates the end of the run.
+Message of optional `type` `PROGRESS` (2) is used to inform {{project}} about the status of a running dataflow.
+The `PROGRESS` message type can only be used once a message of type `RUN` is received and can be sent multiple times before sending a final response message of type either `ERROR` or `OK` that indicates the end of the run.
 The progress information is conveyed in `content` using a number ranging `0 - 100` encoded in UTF-8 that signals the percentage of completion of the run.
 See [RUN](#run-dataflow) for more information.
 
