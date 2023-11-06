@@ -17,6 +17,23 @@ from antmicro_sphinx_utils.defaults import (
 )
 
 from pipeline_manager.utils.sphinx_jsonschema_spec import generate_schema_md
+from sphinxcontrib import mermaid
+
+
+_original_figure_wrapper = mermaid.figure_wrapper
+
+
+def figure_wrapper(directive, node, caption):
+    """
+    Figure wrapper ensuring that width of Mermaid diagrams is not constrained.
+    """
+    figure = _original_figure_wrapper(directive, node, caption)
+    figure["width"] = "auto"
+    return figure
+
+
+mermaid.figure_wrapper = figure_wrapper
+
 
 # -- General configuration ----------------------------------------------------
 
