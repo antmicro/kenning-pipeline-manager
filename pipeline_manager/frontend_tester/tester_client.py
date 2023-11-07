@@ -216,6 +216,19 @@ class RPCMethods:
         """
         return self._run_validate_response([RUN, SEND_REQUEST], dataflow)
 
+    def stop_dataflow(self) -> Dict:
+        """
+        RPC method that responses to Run request.
+
+        Returns
+        -------
+        Dict
+            Method's response
+        """
+        return {
+            'type': MessageType.OK.value,
+        }
+
     def validate_dataflow(self, dataflow: Dict) -> Dict:
         """
         RPC method that responses to Validate request.
