@@ -114,9 +114,21 @@ class ExternalApplicationManager {
             progressBar.style.width = '0%';
         }
 
+        if (action === 'stop') {
+            if (!runInfo.inProgress) {
+                NotificationHandler.showToast('error', 'Nothing to stop, no ongoing jobs running');
+                return;
+            }
+            NotificationHandler.showToast('info', 'Stopping dataflow');
+        }
+
         let data;
         try {
-            data = await jsonRPC.request(`${action}_dataflow`, { dataflow });
+            if (action !== 'stop') {
+                data = await jsonRPC.request(`${action}_dataflow`, { dataflow });
+            } else {
+                data = await jsonRPC.request(`${action}_dataflow`);
+            }
         } catch (error) {
             // The connection was closed
             data = error.message;
@@ -136,7 +148,7 @@ class ExternalApplicationManager {
         } else if (data.type === PMMessageType.WARNING) {
             NotificationHandler.terminalLog('warning', `Warning: ${data.content}`, data.content);
         }
-        if (action === 'run') {
+        if (action === 'run' || action === 'stop') {
             progressBar.style.width = '0%';
             runInfo.inProgress = false;
         }
