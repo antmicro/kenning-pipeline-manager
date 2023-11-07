@@ -94,6 +94,9 @@ class MockApplicationClient(object):
         def run_dataflow(self, dataflow: Dict) -> Dict:
             return {'type': MessageType.OK.value}
 
+        def stop_dataflow(self) -> Dict:
+            return {'type': MessageType.OK.value}
+
         def import_dataflow(self, external_application_dataflow: Dict) -> Dict:
             return {
                 'type': MessageType.OK.value,
