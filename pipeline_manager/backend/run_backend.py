@@ -104,7 +104,12 @@ def main(argv):
 
         start_socket_thread(socketio)
 
-    socketio.run(app, port=args.backend_port, host=args.backend_host)
+    socketio.run(
+        app,
+        port=args.backend_port,
+        host=args.backend_host,
+        allow_unsafe_werkzeug=True
+    )
 
 
 if __name__ == "__main__":
