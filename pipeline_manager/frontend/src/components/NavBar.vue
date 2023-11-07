@@ -21,6 +21,7 @@ import Validate from '../icons/Validate.vue';
 import Backend from '../icons/Backend.vue';
 import Bell from '../icons/Bell.vue';
 import Cube from '../icons/Cube.vue';
+import StopDataflow from '../icons/StopDataflow.vue';
 import DropdownItem from './DropdownItem.vue';
 import Cogwheel from '../icons/Cogwheel.vue';
 import Magnifier from '../icons/Magnifier.vue';
@@ -44,6 +45,7 @@ export default {
         Logo,
         Arrow,
         Run,
+        StopDataflow,
         Validate,
         Backend,
         Bell,
@@ -567,6 +569,15 @@ export default {
                     </button>
                     <div class="tooltip">
                         <span>Run</span>
+                    </div>
+                </div>
+                <div v-if="this.externalApplicationManager.backendAvailable">
+                    <button
+                        @click="() => requestDataflowAction('stop')">
+                        <StopDataflow color="white" />
+                    </button>
+                    <div class="tooltip">
+                        <span>Stop</span>
                     </div>
                 </div>
                 <div v-if="this.externalApplicationManager.backendAvailable">
