@@ -43,12 +43,15 @@ def server_process_handler(
         logging.log(logging.WARNING, "External application did not connect")
 
     from pipeline_manager.backend.socketio import create_socketio
+    from pipeline_manager.backend.tcp_socket import start_socket_thread
 
     socketio, app = create_socketio()
 
     app.static_folder = Path(frontend_path).resolve()
     app.template_folder = Path(frontend_path).resolve()
-    socketio.run(app, backend_host, backend_port)
+
+    start_socket_thread(socketio)
+    socketio.run(app, backend_host, backend_port, allow_unsafe_werkzeug=True)
 
 
 def start_server_in_parallel(
