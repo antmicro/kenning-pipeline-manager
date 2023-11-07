@@ -256,6 +256,15 @@
                 "$ref": "common_types#/$defs/external_endpoint_return_type"
             }
         },
+        "stop_dataflow": {
+            "description": "Request external application to run dataflow",
+            "params": {
+                "$ref": "common_types#/$defs/null_or_empty"
+            },
+            "returns": {
+                "$ref": "common_types#/$defs/external_endpoint_return_type"
+            }
+        },
         "export_dataflow": {
             "description": "Request external application to export dataflow",
             "params": {
