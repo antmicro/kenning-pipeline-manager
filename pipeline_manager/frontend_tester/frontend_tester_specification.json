@@ -48,6 +48,23 @@
             ]
         },
         {
+            "name": "StopBehaviour",
+            "category": "Descriptions",
+            "properties": [
+                {
+                    "name": "MessageType",
+                    "type": "select",
+                    "values": ["ERROR", "OK"],
+                    "default": "OK"
+                },
+                {
+                    "name": "Message",
+                    "type": "text",
+                    "default": "Everything went fine!"
+                }
+            ]
+        },
+        {
             "name": "ValidationBehaviour",
             "category": "Descriptions",
             "properties": [
