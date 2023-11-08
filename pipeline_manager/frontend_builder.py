@@ -16,6 +16,8 @@ from urllib.parse import urlparse
 import os
 import filecmp
 
+from importlib import resources as importlib_resources
+from pipeline_manager import resources
 import pipeline_manager
 from pipeline_manager.specification_reader import \
     minify_specification as minify_spec, retrieve_used_icons  # noqa: E501
@@ -197,7 +199,8 @@ def build_frontend(
         minify_specification: bool = False,
         graph_development_mode: bool = False,
         skip_install_deps: bool = False,
-        skip_frontend_copying: bool = False):
+        skip_frontend_copying: bool = False,
+        favicon_path: Optional[Path] = None):
     """
     Builds the frontend for the Pipeline Manager.
 
@@ -240,6 +243,9 @@ def build_frontend(
     skip_frontend_copying: bool
         Skips the diffing of the frontend directory allowing for changes
         in the workspace directory.
+    favicon_path: Optional[Path]
+        Path to the Kenning Pipeline Manager favicon in SVG format.
+        If None, a default favicon is used.
     Returns
     -------
     int: 0 if successfull, EINVAL if arguments are conflicting or invalid
@@ -319,6 +325,14 @@ def build_frontend(
             frontend_path / 'assets',
             dirs_exist_ok=True
         )
+
+    if favicon_path is None:
+        favicon_path = importlib_resources.files(resources) / 'favicon.svg'
+    elif favicon_path.suffix != ".svg":
+        logging.error(
+            f"Only .svg format is supported for favicon, currently provided file:  {favicon_path}"  # noqa: E501
+        )
+        return errno.EINVAL
 
     single_html_spec = None
     if single_html:
@@ -422,6 +436,8 @@ def build_frontend(
 
         if exit_status.returncode != 0:
             return exit_status.returncode
+
+    shutil.copy(favicon_path, frontend_dist_path / "favicon.svg")
 
     if single_html:
         build_singlehtml(frontend_dist_path, single_html, used_icons)
