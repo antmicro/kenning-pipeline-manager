@@ -28,6 +28,30 @@
             },
             "default": {}
         },
+        "navbarItems": {
+            "type": "array",
+            "description": "List of buttons displayed in the application navbar",
+            "items": {
+                "type": "object",
+                "description": "Description of a single button.",
+                "properties": {
+                    "name": {
+                        "description": "Name displayed in the tooltip",
+                        "type": "string"
+                    },
+                    "iconName": {
+                        "description": "Name of the icon displayed in the navbar. Name should correspond to a file in the asset directory or to an icon in `frontend/src/icons`",
+                        "type": "string"
+                    },
+                    "procedureName": {
+                        "description": "Name of the procedure used when button is pressed. The currently displayed graph is used as an argument",
+                        "type": "string"
+                    }
+                },
+                "required": ["name", "iconName", "procedureName"],
+                "additionalProperties": false
+            }
+        },
         "allowLoopbacks": {
             "type": "boolean",
             "description": "Flag allowing connections with endpoints at the same node",
