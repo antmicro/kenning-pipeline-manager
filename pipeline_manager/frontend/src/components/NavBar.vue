@@ -167,9 +167,12 @@ export default {
             saveMenuShow: false,
             editTitle: false,
             notificationStore,
-            logoHover: false,
             showSearch: false,
             searchEditorNodesQuery,
+            hoverInfo: {
+                isHovered: false,
+                hoveredPanel: undefined,
+            },
             // Toggleable panels and their configuration
             panels: {
                 notifications: {
@@ -178,7 +181,6 @@ export default {
                     iconRef: 'notifications',
                     showTransform: '-495px, 0px',
                     hideTransform: '0px, 0px',
-                    hover: false,
                 },
                 palette: {
                     isOpen: true,
@@ -186,7 +188,6 @@ export default {
                     iconRef: 'palette',
                     showTransform: '0px, 0px',
                     hideTransform: '-450px, 0px',
-                    hover: false,
                 },
                 backendStatus: {
                     isOpen: false,
@@ -194,7 +195,6 @@ export default {
                     iconRef: 'backend',
                     showTransform: '-89%, 0px',
                     hideTransform: '-89%, -180px',
-                    hover: false,
                 },
                 settings: {
                     isOpen: false,
@@ -202,17 +202,9 @@ export default {
                     iconRef: 'settings',
                     showTransform: '-495px, 0px',
                     hideTransform: '0px, 0px',
-                    hover: false,
                 },
                 nodesearch: {
                     isOpen: false,
-                    hover: false,
-                },
-                run: {
-                    hover: false,
-                },
-                validate: {
-                    hover: false,
                 },
             },
         };
@@ -456,6 +448,22 @@ export default {
         handleMouseLeave(panel) {
             if (this.hideHud) this.togglePanel(panel, true);
         },
+
+        updateHoverInfo(name) {
+            this.hoverInfo.hoveredPanel = name;
+            this.hoverInfo.isHovered = true;
+        },
+
+        resetHoverInfo(name) {
+            if (this.hoverInfo.hoveredPanel === name) {
+                this.hoverInfo.hoveredPanel = undefined;
+                this.hoverInfo.isHovered = false;
+            }
+        },
+
+        isHovered(name) {
+            return this.hoverInfo.hoveredPanel === name && this.hoverInfo.isHovered;
+        },
     },
     async mounted() {
         // Create connection on page load
@@ -487,10 +495,10 @@ export default {
             <div>
                 <div
                     class="logo"
-                    @pointerover="() => logoHover = true"
-                    @pointerleave="() => logoHover = false"
+                    @pointerover="() => updateHoverInfo('logo')"
+                    @pointerleave="() => resetHoverInfo('logo')"
                 >
-                    <Logo :hover="logoHover" />
+                    <Logo :hover="isHovered('logo')" />
                     <div class="dropdown-wrapper">
                         <DropdownItem
                             v-if="this.editorManager.specificationLoaded"
@@ -557,10 +565,10 @@ export default {
                     class="hoverbox"
                     role="button"
                     @click="() => togglePanel(panels.palette)"
-                    @pointerover="() => panels.palette.hover = true"
-                    @pointerleave="() => panels.palette.hover = false"
+                    @pointerover="() => updateHoverInfo('palette')"
+                    @pointerleave="() => resetHoverInfo('palette')"
                 >
-                    <Cube :hover="panels.palette.hover" class="small_svg"/>
+                    <Cube :hover="isHovered('palette')" class="small_svg"/>
                     <div class="tooltip" v-if="paletteOpen">
                         <span>Hide node browser</span>
                     </div>
@@ -573,20 +581,25 @@ export default {
                     class="hoverbox"
                     v-if="this.externalApplicationManager.backendAvailable"
                     @click="() => requestDataflowAction('run')"
-                    @pointerover="() => panels.run.hover = true"
-                    @pointerleave="() => panels.run.hover = false"
+                    @pointerover="() => updateHoverInfo('run')"
+                    @pointerleave="() => resetHoverInfo('run')"
                 >
                     <button>
-                        <Run :hover="panels.run.hover" />
+                        <Run :hover="isHovered('run')" />
                     </button>
                     <div class="tooltip">
                         <span>Run</span>
                     </div>
                 </div>
-                <div v-if="this.externalApplicationManager.backendAvailable">
-                    <button
-                        @click="() => requestDataflowAction('stop')">
-                        <StopDataflow color="white" />
+                <div
+                    class="hoverbox"
+                    v-if="this.externalApplicationManager.backendAvailable"
+                    @click="() => requestDataflowAction('stop')"
+                    @pointerover="() => updateHoverInfo('stop')"
+                    @pointerleave="() => resetHoverInfo('stop')"
+                >
+                    <button>
+                        <StopDataflow :hover="isHovered('stop')" color="white" />
                     </button>
                     <div class="tooltip">
                         <span>Stop</span>
@@ -596,11 +609,11 @@ export default {
                     class="hoverbox"
                     v-if="this.externalApplicationManager.backendAvailable"
                     @click="() => requestDataflowAction('validate')"
-                    @pointerover="() => panels.validate.hover = true"
-                    @pointerleave="() => panels.validate.hover = false"
+                    @pointerover="() => updateHoverInfo('validate')"
+                    @pointerleave="() => resetHoverInfo('validate')"
                 >
                     <button>
-                        <Validate :hover="panels.validate.hover" />
+                        <Validate :hover="isHovered('validate')" />
                     </button>
                     <div class="tooltip">
                         <span>Validate</span>
@@ -638,11 +651,11 @@ export default {
                     ref="searchbar"
                     class="searchbar hoverbox"
                     role="button"
-                    @pointerover="() => panels.nodesearch.hover = true"
-                    @pointerleave="() => panels.nodesearch.hover = false"
+                    @pointerover="() => updateHoverInfo('search')"
+                    @pointerleave="() => resetHoverInfo('search')"
                     @click="onClickNodeSearch"
                 >
-                    <Magnifier :hover="panels.nodesearch.hover" class="small_svg"/>
+                    <Magnifier :hover="isHovered('search')" class="small_svg"/>
                     <div
                         class="tooltip"
                         :class="settingsTooltipClasses"
@@ -671,10 +684,10 @@ export default {
                     class="hoverbox"
                     role="button"
                     @click="() => togglePanel(panels.settings)"
-                    @pointerover="() => panels.settings.hover = true"
-                    @pointerleave="() => panels.settings.hover = false"
+                    @pointerover="() => updateHoverInfo('settings')"
+                    @pointerleave="() => resetHoverInfo('settings')"
                 >
-                    <Cogwheel :hover="panels.settings.hover" class="small_svg" />
+                    <Cogwheel :hover="isHovered('settings')" class="small_svg" />
                     <div
                         class="tooltip"
                         :class="settingsTooltipClasses"
@@ -691,20 +704,20 @@ export default {
                     class="hoverbox"
                     v-if="this.externalApplicationManager.backendAvailable"
                     @click="() => togglePanel(panels.backendStatus)"
-                    @pointerover="() => panels.backendStatus.hover = true"
-                    @pointerleave="() => panels.backendStatus.hover = false"
+                    @pointerover="() => updateHoverInfo('backendStatus')"
+                    @pointerleave="() => resetHoverInfo('backendStatus')"
                 >
                     <button>
                         <Backend
                             v-if="this.externalApplicationManager.externalApplicationConnected"
                             color="connected"
                             :active="backendStatusOpen"
-                            :hover="panels.backendStatus.hover"
+                            :hover="isHovered('backendStatus')"
                         />
                         <Backend
                             v-else color="disconnected"
                             :active="backendStatusOpen"
-                            :hover="panels.backendStatus.hover"
+                            :hover="isHovered('backendStatus')"
                         />
                     </button>
                     <div class="tooltip" :class="backendStatusTooltipClasses">
@@ -731,16 +744,16 @@ export default {
                     class="hoverbox"
                     role="button"
                     @click="() => togglePanel(panels.notifications)"
-                    @pointerover="() => panels.notifications.hover = true"
-                    @pointerleave="() => panels.notifications.hover = false"
+                    @pointerover="() => updateHoverInfo('notifications')"
+                    @pointerleave="() => resetHoverInfo('notifications')"
                 >
                     <Bell
                         v-if="this.notificationStore.notifications.length > 0"
                         color="green"
-                        :hover="panels.notifications.hover"
+                        :hover="isHovered('notifications')"
                         class="small_svg"
                     />
-                    <Bell v-else class="small_svg" :hover="panels.notifications.hover"/>
+                    <Bell v-else class="small_svg" :hover="isHovered('notifications')"/>
                     <div
                         class="tooltip"
                         v-if="notificationsOpen"
