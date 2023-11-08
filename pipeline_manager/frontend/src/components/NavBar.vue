@@ -519,37 +519,67 @@ export default {
                 >
                     <Logo :hover="isHovered('logo')" />
                     <div class="dropdown-wrapper">
-                        <DropdownItem
+                        <template
                             v-if="this.editorManager.specificationLoaded"
-                            id="create-new-graph-button"
-                            text="Create new graph"
-                            type="'button'"
-                            :eventFunction="createNewGraphCallback"
-                        />
-                        <DropdownItem
-                            v-if="!this.externalApplicationManager.backendAvailable && !hideHud"
-                            text="Load specification"
-                            id="load-spec-button"
-                            :eventFunction="loadSpecificationCallback"
-                        />
-                        <DropdownItem
-                            v-if="!hideHud && this.editorManager.specificationLoaded"
-                            id="load-dataflow-button"
-                            text="Load graph file"
-                            :eventFunction="loadDataflowCallback"
-                        />
-                        <DropdownItem
-                            v-if="this.editorManager.specificationLoaded"
-                            type="'button'"
-                            text="Save graph file"
-                            :eventFunction="saveDataflow"
-                        />
-                        <DropdownItem
-                            v-if="this.editorManager.specificationLoaded"
-                            type="'button'"
-                            text="Save graph as file as..."
-                            :eventFunction="() => {saveMenuShow = !saveMenuShow}"
-                        />
+                        >
+                            <DropdownItem
+                                id="create-new-graph-button"
+                                text="Create new graph"
+                                type="'button'"
+                                :eventFunction="createNewGraphCallback"
+                            />
+
+                            <template
+                                v-if="this.externalApplicationManager.externalApplicationConnected"
+                            >
+                                <DropdownItem
+                                    text="Load file"
+                                    id="request-dataflow-button"
+                                    :eventFunction="importDataflow"
+                                />
+                                <DropdownItem
+                                    text="Save file"
+                                    type="button"
+                                    :eventFunction="(
+                                        async () => requestDataflowAction('dataflow_export')
+                                    )"
+                                />
+                            </template>
+                            <hr />
+                        </template>
+
+                        <template
+                            v-if="!this.externalApplicationManager.backendAvailable"
+                        >
+                            <DropdownItem
+                                v-if="!hideHud"
+                                text="Load specification"
+                                id="load-spec-button"
+                                :eventFunction="loadSpecificationCallback"
+                            />
+                            <hr />
+                        </template>
+
+                        <template v-if="this.editorManager.specificationLoaded">
+                            <DropdownItem
+                                v-if="!hideHud"
+                                id="load-dataflow-button"
+                                text="Load graph file"
+                                :eventFunction="loadDataflowCallback"
+                            />
+                            <DropdownItem
+                                type="'button'"
+                                text="Save graph file"
+                                :eventFunction="saveDataflow"
+                            />
+                            <DropdownItem
+                                type="'button'"
+                                text="Save graph as file as..."
+                                :eventFunction="() => {saveMenuShow = !saveMenuShow}"
+                            />
+                            <hr />
+                        </template>
+
                         <DropdownItem
                             type="'button'"
                             text="Export graph to PNG"
@@ -560,23 +590,6 @@ export default {
                             text="Export graph to SVG"
                             :eventFunction="exportToSvg"
                         />
-                        <div
-                            v-if="this.externalApplicationManager.externalApplicationConnected"
-                        >
-                            <hr />
-                            <DropdownItem
-                                text="Load file"
-                                id="request-dataflow-button"
-                                :eventFunction="importDataflow"
-                            />
-                            <DropdownItem
-                                text="Save file"
-                                type="button"
-                                :eventFunction="(
-                                    async () => requestDataflowAction('dataflow_export')
-                                )"
-                            />
-                        </div>
                     </div>
                 </div>
 
