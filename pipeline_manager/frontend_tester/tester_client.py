@@ -168,6 +168,8 @@ class RPCMethods:
         self.specification = specification
         self.client = client
         self.out_path = out_path
+        self.last_dataflow = None
+        self.running = False
 
     def import_dataflow(self, dataflow: Dict) -> Dict:
         """
@@ -225,8 +227,28 @@ class RPCMethods:
         Dict
             Method's response
         """
+        if self.last_dataflow is not None:
+            properties = None
+            try:
+                properties = get_node_properties(
+                    'StopBehaviour',
+                    self.last_dataflow
+                )
+            except Exception:
+                pass
+            type = MessageType.OK.value
+            content = "Everything went fine!"
+            if properties is not None:
+                if "MessageType" in properties:
+                    type = _text_to_message_type(
+                        properties["MessageType"]
+                    ).value
+                if "Message" in properties:
+                    content = properties["Message"]
+        self.running = False
         return {
-            'type': MessageType.OK.value,
+            'type': type,
+            'content': content
         }
 
     def validate_dataflow(self, dataflow: Dict) -> Dict:
@@ -265,6 +287,7 @@ class RPCMethods:
         Dict
             Method's response
         """
+        self.last_dataflow = data
         if not isinstance(title, List):
             title = [title]
         properties = None
@@ -283,9 +306,12 @@ class RPCMethods:
             return {}
 
         if found == RUN:
+            self.running = True
             steps = properties["ProgressMessages"]
             time_offset = properties["Duration"] / steps
             for i in range(1, steps + 1):
+                if not self.running:
+                    break
                 progress = i / steps * 100
                 logging.log(logging.INFO, f"Progress: {progress}")
                 self.client.notify('progress', {'progress': progress})
@@ -315,6 +341,8 @@ class RPCMethods:
             target=delayed_effect, args=(self.client, found, data)
         ).start()
 
+        if self.running:
+            self.running = False
         return {
             'type': _text_to_message_type(properties["MessageType"]).value,
             'content': properties["Message"],
