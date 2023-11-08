@@ -34,6 +34,8 @@ import Settings from './Settings.vue';
 import SaveMenu from './SaveMenu.vue';
 import BlurPanel from './BlurPanel.vue';
 
+import icons from '../icons';
+
 import InputInterface from '../interfaces/InputInterface.js';
 import InputInterfaceComponent from '../interfaces/InputInterface.vue';
 import { brokenImage } from '../../../resources/broken_image.js';
@@ -41,6 +43,7 @@ import {
     startTransaction, commitTransaction,
 } from '../core/History.ts';
 
+/* eslint-disable no-param-reassign */
 export default {
     components: {
         Logo,
@@ -102,6 +105,19 @@ export default {
             return {
                 last: this.hideHud && !this.externalApplicationManager.backendAvailable,
             };
+        },
+        navbarItems() {
+            const { navbarItems } = this.editorManager.baklavaView;
+            navbarItems.forEach((item) => {
+                // If there is no such icon then assets are checked and used as a fallback
+                if (icons[item.iconName] === undefined) {
+                    item.icon = markRaw(icons.Placeholder);
+                    item.iconName = this.editorManager.baklavaView.cache[`./${item.iconName}`];
+                } else {
+                    item.icon = markRaw(icons[item.iconName]);
+                }
+            });
+            return navbarItems;
         },
     },
     watch: {
@@ -261,7 +277,6 @@ export default {
             document.getElementById('load-spec-button').value = '';
         },
 
-        /* eslint-disable no-param-reassign */
         togglePanel(panel, disable = false) {
             const panelSelector = document.querySelector(panel.class);
             const iconRef = this.$refs[panel.iconRef];
@@ -377,9 +392,9 @@ export default {
             NotificationHandler.showToast('info', 'Dataflow saved');
         },
 
-        async requestDataflowAction(action) {
+        async requestDataflowAction(procedureName) {
             if (!this.externalApplicationManager.backendAvailable) return;
-            await this.externalApplicationManager.requestDataflowAction(action);
+            await this.externalApplicationManager.requestDataflowAction(procedureName);
         },
         importDataflow() {
             if (!this.externalApplicationManager.backendAvailable) return;
@@ -557,7 +572,9 @@ export default {
                             <DropdownItem
                                 text="Save file"
                                 type="button"
-                                :eventFunction="() => requestDataflowAction('export')"
+                                :eventFunction="(
+                                    async () => requestDataflowAction('export_dataflow')
+                                )"
                             />
                         </div>
                     </div>
@@ -581,52 +598,41 @@ export default {
                     </div>
                 </div>
 
-                <div
-                    class="hoverbox"
-                    v-if="this.externalApplicationManager.backendAvailable"
-                    @click="() => requestDataflowAction('run')"
-                    @pointerover="() => updateHoverInfo('run')"
-                    @pointerleave="() => resetHoverInfo('run')"
-                >
-                    <button>
-                        <Run :hover="isHovered('run')" />
-                    </button>
-                    <div class="tooltip">
-                        <span>Run</span>
+                <template v-if="this.externalApplicationManager.backendAvailable">
+                    <div
+                        v-for="actionItem in navbarItems" v-bind:key="actionItem.name"
+                        class="hoverbox"
+                        role="button"
+                        @click="(async () => requestDataflowAction(actionItem.procedureName))"
+                        @pointerover="() => updateHoverInfo(actionItem.name)"
+                        @pointerleave="() => resetHoverInfo(actionItem.name)"
+                    >
+                        <!-- imgURI is used for Placeholder Icon to retrieve the image -->
+                        <component
+                            class="small_svg"
+                            :is="actionItem.icon"
+                            :hover="isHovered(actionItem.name)"
+                            :imgURI="actionItem.iconName"
+                        />
+                        <div class="tooltip">
+                            <span>{{ actionItem.name }}</span>
+                        </div>
                     </div>
-                </div>
+                </template>
                 <div
+                    v-if="this.editorManager.editor.isInSubgraph()"
                     class="hoverbox"
-                    v-if="this.externalApplicationManager.backendAvailable"
-                    @click="() => requestDataflowAction('stop')"
-                    @pointerover="() => updateHoverInfo('stop')"
-                    @pointerleave="() => resetHoverInfo('stop')"
+                    role="button"
+                    @click="() => this.editorManager.returnFromSubgraph()"
+                    @pointerover="() => updateHoverInfo('subgraphReturn')"
+                    @pointerleave="() => resetHoverInfo('subgraphReturn')"
                 >
-                    <button>
-                        <StopDataflow :hover="isHovered('stop')" color="white" />
-                    </button>
-                    <div class="tooltip">
-                        <span>Stop</span>
-                    </div>
-                </div>
-                <div
-                    class="hoverbox"
-                    v-if="this.externalApplicationManager.backendAvailable"
-                    @click="() => requestDataflowAction('validate')"
-                    @pointerover="() => updateHoverInfo('validate')"
-                    @pointerleave="() => resetHoverInfo('validate')"
-                >
-                    <button>
-                        <Validate :hover="isHovered('validate')" />
-                    </button>
-                    <div class="tooltip">
-                        <span>Validate</span>
-                    </div>
-                </div>
-                <div v-if="this.editorManager.editor.isInSubgraph()">
-                    <button @click="() => this.editorManager.returnFromSubgraph()">
-                        <Arrow rotate="down" :hoverable="true" color="white" />
-                    </button>
+                    <Arrow
+                        rotate="down"
+                        :hover="isHovered('subgraphReturn')"
+                        color="white"
+                        class="small_svg"
+                    />
                     <div class="tooltip">
                         <span>Return from subgraph editor</span>
                     </div>
@@ -851,7 +857,6 @@ $bar-height: 60px;
             align-items: center;
             position: relative;
             box-sizing: border-box;
-
             border-left: 1px solid $gray-500;
 
             &:last-child {
