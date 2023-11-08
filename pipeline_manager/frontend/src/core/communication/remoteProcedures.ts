@@ -14,6 +14,7 @@
  */
 
 import { useViewModel } from '@baklavajs/renderer-vue';
+import EditorManager from '../EditorManager';
 
 /* eslint-disable import/prefer-default-export */
 /* eslint-disable camelcase */
@@ -205,4 +206,9 @@ export function progress(params: {progress: number}) {
     if (!progressBar) throw new Error('Progress bar does not exist');
     if (params.progress > 100 || params.progress < 0) throw new Error(`Progress has to be in [0, 100]. Received: ${params.progress}`);
     progressBar.style.width = `${params.progress}%`;
+}
+
+export function update_metadata(params: {metadata: any }) {
+    const editorManager = EditorManager.getEditorManagerInstance();
+    editorManager.updateMetadata(params.metadata, true);
 }
