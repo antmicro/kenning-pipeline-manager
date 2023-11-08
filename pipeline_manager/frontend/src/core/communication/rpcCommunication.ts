@@ -35,6 +35,20 @@ const frontendEndpoints: { [key: string]: SpecType } = specificationSchema.front
 const backendEndpoints: { [key: string]: SpecType } = specificationSchema.backend_endpoints;
 const externalEndpoints: { [key: string]: SpecType } = specificationSchema.external_endpoints;
 
+// This should become part of the testing suite at some point
+let invalidDefinition;
+try {
+    [frontendEndpoints, backendEndpoints, externalEndpoints].forEach((endpoints) => {
+        Object.entries(endpoints).forEach(([definitionName, definition]) => {
+            invalidDefinition = definitionName;
+            ajv.compile(definition.params);
+            ajv.compile(definition.returns ?? {});
+        });
+    });
+} catch (exception) {
+    throw new Error(`Procedures specification schema '${invalidDefinition}' is incorrect: ${exception}`);
+}
+
 /**
  * Middleware that validates received requests.
  */
