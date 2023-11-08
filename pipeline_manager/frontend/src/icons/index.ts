@@ -14,6 +14,7 @@ import Run from './Run.vue';
 import Sidebar from './Sidebar.vue';
 import StopDataflow from './StopDataflow.vue';
 import Validate from './Validate.vue';
+import Placeholder from './Placeholder.vue';
 
 export default {
     Arrow,
@@ -28,6 +29,7 @@ export default {
     Logo,
     Magnifier,
     Pencil,
+    Placeholder,
     Run,
     Sidebar,
     StopDataflow,

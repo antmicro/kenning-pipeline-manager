@@ -31,6 +31,8 @@ import {
     SubgraphOutputNode,
 } from '../custom/subgraphInterface.js';
 
+import { defaultNavbarItems } from './navbarItems.ts';
+
 /* eslint-disable lines-between-class-members */
 /**
  * Readonly helper class that reads and stores default values from metadata schema.
@@ -74,6 +76,7 @@ export default class EditorManager {
         this.baklavaView.collapseSidebar = this.defaultMetadata.collapseSidebar;
         this.baklavaView.movementStep = this.defaultMetadata.movementStep;
         this.baklavaView.editor.allowLoopbacks = this.defaultMetadata.allowLoopbacks;
+        this.baklavaView.navbarItems = [...defaultNavbarItems];
         this.baklavaView.cache = {};
 
         // hideHud and readonly are set to true so that there is no dissappearning UI
@@ -381,6 +384,10 @@ export default class EditorManager {
             Object.entries(metadata.icons).forEach(([iconName, state]) => {
                 this.baklavaView.editor.baseIconUrls.set(iconName, state);
             });
+        }
+
+        if (metadata && 'navbarItems' in metadata) {
+            this.baklavaView.navbarItems = metadata.navbarItems;
         }
 
         this.baklavaView.editor.readonly = metadata?.readonly ?? this.defaultMetadata.readonly;
