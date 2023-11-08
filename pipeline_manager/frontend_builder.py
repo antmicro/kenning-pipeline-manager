@@ -4,10 +4,10 @@
 
 import base64
 import errno
+import logging
 import json
 import shutil
 import subprocess
-import sys
 from pathlib import Path
 from typing import Optional, List
 import re
@@ -119,14 +119,12 @@ def build_prepare(
     # check if building is happening in repo, if not ask the user to provide
     # the necessary directory paths
     elif not workspace_directory:
-        print(
+        logging.error(
             'The build script requires providing workspace path for storing '
-            'frontend sources for building purposes',
-            file=sys.stderr
+            'frontend sources for building purposes'
         )
-        print(
-            'Please provide it --workspace-directory',
-            file=sys.stderr
+        logging.error(
+            'Please provide it --workspace-directory'
         )
         return errno.EINVAL, workspace_directory
 
@@ -282,9 +280,8 @@ def build_frontend(
     used_icons = None
     if minify_specification:
         if not (specification and dataflow):
-            print(
-                "Cannot minify the specification without the dataflow.",
-                file=sys.stderr
+            logging.error(
+                "Cannot minify the specification without the dataflow."
             )
             return errno.EINVAL
         with open(specification, 'r') as specfile:
@@ -295,7 +292,9 @@ def build_frontend(
         used_icons = retrieve_used_icons(newspec)
         minified_spec_path = specification.with_suffix('.min.json')
         with open(minified_spec_path, 'w') as minified_spec_file:
-            print(f"Writing minimized specification to:  {minified_spec_path}")
+            logging.info(
+                f"Writing minimized specification to:  {minified_spec_path}"
+            )
             json.dump(newspec, minified_spec_file)
             specification = minified_spec_path
 
@@ -366,7 +365,6 @@ def build_frontend(
                     if iconsuffix[0] == '/':
                         iconsuffix = iconsuffix[1:]
                     filename = iconprefix + iconsuffix
-                    print(filename)
                     node['icon'] = store_url_asset(filename)
 
         single_html_spec = specification.with_suffix('.tmp.json')
@@ -412,15 +410,13 @@ def build_frontend(
             cwd=frontend_path
         )
         if exit_status.returncode == errno.EACCES:
-            print(
+            logging.error(
                 'The build script requires providing workspace path for '
-                'storing frontend sources and a path for the built frontend',
-                file=sys.stderr
+                'storing frontend sources and a path for the built frontend'
             )
-            print(
+            logging.error(
                 'Please provide them with --workspace-directory and '
-                '--output-directory',
-                file=sys.stderr
+                '--output-directory'
             )
             return exit_status.returncode
 
