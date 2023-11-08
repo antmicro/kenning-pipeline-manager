@@ -12,7 +12,7 @@ SPDX-License-Identifier: Apache-2.0
             clip-rule="evenodd"
             d="M12.5 20C16.6421 20 20 16.6421 20 12.5C20 8.35786 16.6421 5 12.5 5C8.35786 5 5 8.35786 5 12.5C5 16.6421 8.35786 20 12.5 20ZM16 11H9V14H16V11Z"
             fill="#6F6F6F"
-            :class="[color]"
+            :class="[hoverStatus]"
             class="highlighted"
             stroke-width="0"
         />
@@ -20,14 +20,24 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script lang="ts">
-export default {
+import { computed, defineComponent } from 'vue';
+
+export default defineComponent({
     props: {
-        color: {
-            type: String,
+        hover: {
+            type: Boolean,
             required: false,
         },
     },
-};
+    setup(props) {
+        const hoverStatus = computed(() => ({
+            hovered: props.hover,
+            white: !props.hover,
+        }));
+
+        return { hoverStatus };
+    },
+});
 </script>
 
 <style lang="scss" scoped>
@@ -36,7 +46,7 @@ export default {
     fill: $white;
 }
 
-.stopdataflow:hover > .highlighted {
+.hovered {
     fill: $green;
 }
 </style>
