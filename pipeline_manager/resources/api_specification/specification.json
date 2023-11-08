@@ -1,22 +1,5 @@
 {
     "frontend_endpoints": {
-        "get_status": {
-            "description": "Returns status of frontend application",
-            "params": {
-                "$ref": "common_types#/$defs/null_or_empty"
-            },
-            "returns": {
-                "description": "Structure of returned values",
-                "type": "object",
-                "properties": {
-                    "status": {
-                        "description": "Frontend's status",
-                        "type": "string"
-                    }
-                },
-                "additionalProperties": false
-            }
-        },
         "modify_properties": {
             "description": "Procedure to alter properties of a node",
             "params": {
@@ -162,6 +145,21 @@
                 "required": [
                     "progress"
                 ],
+                "additionalProperties": false
+            },
+            "returns": null
+        },
+        "update_metadata": {
+            "description": "Updates the editor's metadata",
+            "params": {
+                "type": "object",
+                "properties": {
+                    "metadata": {
+                        "description": "JSON with metadata description in PM format",
+                        "type": "object"
+                    }
+                },
+                "required": ["metadata"],
                 "additionalProperties": false
             },
             "returns": null
