@@ -29,6 +29,14 @@ class ExternalApplicationManager {
     async updateConnectionStatus() {
         try {
             const response = await jsonRPC.request('status_get');
+
+            // If external-app disconnects while running, the progress bar needs to be reset.
+            if (this.externalApplicationConnected !== response.status.connected) {
+                const progressBar = document.querySelector('.progress-bar');
+                progressBar.style.width = '0%';
+                runInfo.inProgress = false;
+            }
+
             this.externalApplicationConnected = response.status.connected;
         } catch (error) {
             NotificationHandler.terminalLog('error', 'Checking status', error.message);
@@ -98,14 +106,14 @@ class ExternalApplicationManager {
      * to the backend based on the action argument.
      * The user is alerted with a feedback message.
      *
-     * @param action Type of the requested action.
+     * @param procedureName Name of the requested procedure.
      */
-    async requestDataflowAction(action) {
+    async requestDataflowAction(procedureName) {
         const dataflow = this.editorManager.saveDataflow();
         const progressBar = document.querySelector('.progress-bar');
         if (!dataflow) return;
 
-        if (action === 'run') {
+        if (procedureName === 'dataflow_run') {
             if (runInfo.inProgress) {
                 NotificationHandler.showToast('error', 'Previous run has not finished, cannot process this request');
                 return;
@@ -115,7 +123,7 @@ class ExternalApplicationManager {
             progressBar.style.width = '0%';
         }
 
-        if (action === 'stop') {
+        if (procedureName === 'dataflow_stop') {
             if (!runInfo.inProgress) {
                 NotificationHandler.showToast('error', 'Nothing to stop, no ongoing jobs running');
                 return;
@@ -125,16 +133,16 @@ class ExternalApplicationManager {
 
         let data;
         try {
-            if (action !== 'stop') {
-                data = await jsonRPC.request(`dataflow_${action}`, { dataflow });
+            if (procedureName !== 'dataflow_stop') {
+                data = await jsonRPC.request(procedureName, { dataflow });
             } else {
-                data = await jsonRPC.request(`dataflow_${action}`);
+                data = await jsonRPC.request(procedureName);
             }
         } catch (error) {
             // The connection was closed
             data = error.message;
             NotificationHandler.terminalLog('error', data);
-            if (action === 'run') {
+            if (procedureName === 'dataflow_run') {
                 progressBar.style.width = '0%';
                 runInfo.inProgress = false;
             }
@@ -149,7 +157,7 @@ class ExternalApplicationManager {
         } else if (data.type === PMMessageType.WARNING) {
             NotificationHandler.terminalLog('warning', `Warning: ${data.content}`, data.content);
         }
-        if (action === 'run' || action === 'stop') {
+        if (procedureName === 'dataflow_run' || procedureName === 'dataflow_stop') {
             progressBar.style.width = '0%';
             runInfo.inProgress = false;
         }
