@@ -65,6 +65,11 @@ def script_build():
         help='Skip comparing and copying of the frontend/ directory',
         action='store_true'
     )
+    base_parser.add_argument(
+        '--favicon-path',
+        help='Path to the SVG file with favicon for the web page',
+        type=Path
+    )
     subparsers = parser.add_subparsers(
         title='build_type',
         help='Build type of the frontend application',
