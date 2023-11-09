@@ -326,7 +326,7 @@ export default {
 
             const fileReader = new FileReader();
 
-            fileReader.onload = () => {
+            fileReader.onload = async () => {
                 let dataflow = null;
                 try {
                     dataflow = jsonlint.parse(fileReader.result);
@@ -346,6 +346,10 @@ export default {
                     }
                     return;
                 }
+
+                await this.externalApplicationManager.notifyAboutChange('dataflow_changed', {
+                    dataflow,
+                });
 
                 this.loadDataflow(dataflow);
             };
