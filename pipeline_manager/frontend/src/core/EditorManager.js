@@ -56,6 +56,8 @@ export default class EditorManager {
 
     currentSpecification = undefined;
 
+    updatedMetadata = {};
+
     constructor() {
         this.baklavaView.connectionRenderer = new ConnectionRenderer(
             this.baklavaView,
@@ -136,7 +138,7 @@ export default class EditorManager {
 
         this.currentSpecification = dataflowSpecification;
         if (!lazyLoad) {
-            errors.push(...this.updateMetadata(metadata));
+            errors.push(...this.updateMetadata(metadata, false, true));
             errors.push(...this.updateGraphSpecification(dataflowSpecification));
         }
 
@@ -330,9 +332,16 @@ export default class EditorManager {
      *
      * @param metadata metadata to load
      * @param overriding tells whether the metadata is updated on dataflow loading
+     * @param loading resets updated metadata, should be used when loading new dataflow
      *
      */
-    updateMetadata(metadata = undefined, overriding = false) {
+    updateMetadata(metadata = undefined, overriding = false, loading = false) {
+        if (loading) this.updatedMetadata = {};
+        let newMetadata;
+        if (metadata !== undefined) {
+            metadata = { ...this.updatedMetadata, ...metadata };
+            newMetadata = JSON.parse(JSON.stringify(metadata));
+        }
         if (metadata === undefined && this.currentSpecification) {
             metadata = this.currentSpecification.metadata ?? {};
         }
@@ -396,6 +405,7 @@ export default class EditorManager {
         this.baklavaView.editor.layoutManager.useAlgorithm(
             metadata?.layout ?? this.defaultMetadata.layout,
         );
+        if (newMetadata) this.updatedMetadata = newMetadata;
 
         return [];
     }
@@ -534,7 +544,7 @@ export default class EditorManager {
             [this.baklavaView.settings.background.gridSize, 'backgroundSize'],
             [this.baklavaView.connectionRenderer.randomizedOffset, 'randomizedOffset'],
         ].forEach(([currVal, name]) => {
-            const m = this.currentSpecification.metadata ?? {};
+            const m = this.currentSpecification?.metadata ?? {};
             const dm = this.defaultMetadata;
 
             if (currVal !== (m[name] ?? dm[name])) {
@@ -561,59 +571,72 @@ export default class EditorManager {
      * If the array is empty, the loading was successful.
      */
     async loadDataflow(dataflow) {
-        const validationErrors = this.validateDataflow(dataflow);
-        if (validationErrors.length) {
-            return { errors: validationErrors, warnings: [] };
-        }
-
+        let { notifyWhenChanged } = this;
+        // Turn off notification during dataflow loading
+        this.updateMetadata({ notifyWhenChanged: false }, true);
         try {
-            if (typeof dataflow === 'string' || dataflow instanceof String) {
-                dataflow = jsonlint.parse(dataflow);
+            const validationErrors = this.validateDataflow(dataflow);
+            if (validationErrors.length) {
+                return { errors: validationErrors, warnings: [] };
             }
 
-            const specificationVersion = dataflow.version;
-            const warnings = [];
-            if (specificationVersion === undefined) {
-                warnings.push(
-                    `Current format specification version is ${this.specificationVersion}. It may result in an unexpected behaviour`,
-                );
-            } else if (specificationVersion !== this.specificationVersion) {
-                warnings.push(
-                    `Dataflow format specification version (${specificationVersion}) differs from the current format specification version (${this.specificationVersion}). It may result in unexpected behaviour.`,
-                );
-            }
-
-            if ('metadata' in dataflow && this.currentSpecification !== undefined) {
-                const errors = this.validateMetadata(dataflow.metadata);
-                if (Array.isArray(errors) && errors.length) {
-                    return { errors, warnings };
+            try {
+                if (typeof dataflow === 'string' || dataflow instanceof String) {
+                    dataflow = jsonlint.parse(dataflow);
                 }
 
-                this.updateMetadata(dataflow.metadata, true);
-            } else {
-                this.updateMetadata();
-            }
-            if (this.baklavaView.displayedGraph !== undefined) {
-                // Delete baklava internal history listeners
-                this.baklavaView.history.unsubscribeFromGraphEvents(
+                const specificationVersion = dataflow.version;
+                const warnings = [];
+                if (specificationVersion === undefined) {
+                    warnings.push(
+                        `Current format specification version is ${this.specificationVersion}. It may result in an unexpected behaviour`,
+                    );
+                } else if (specificationVersion !== this.specificationVersion) {
+                    warnings.push(
+                        `Dataflow format specification version (${specificationVersion}) differs from the current format specification version (${this.specificationVersion}). It may result in unexpected behaviour.`,
+                    );
+                }
+
+                if ('metadata' in dataflow && this.currentSpecification !== undefined) {
+                    const errors = this.validateMetadata(dataflow.metadata);
+                    if (Array.isArray(errors) && errors.length) {
+                        return { errors, warnings };
+                    }
+                    notifyWhenChanged = dataflow.metadata.notifyWhenChanged ?? notifyWhenChanged;
+
+                    this.updateMetadata(
+                        { ...dataflow.metadata, notifyWhenChanged: false },
+                        true,
+                        true,
+                    );
+                } else {
+                    this.updateMetadata({ notifyWhenChanged: false }, true, true);
+                }
+                if (this.baklavaView.displayedGraph !== undefined) {
+                    // Delete baklava internal history listeners
+                    this.baklavaView.history.unsubscribeFromGraphEvents(
+                        this.baklavaView.displayedGraph,
+                        Symbol('HistoryToken'),
+                    );
+                }
+                const errors = { errors: await this.baklavaView.editor.load(dataflow), warnings };
+                this.baklavaView.history.graphSwitch(
                     this.baklavaView.displayedGraph,
-                    Symbol('HistoryToken'),
+                    this.baklavaView.displayedGraph,
                 );
+                return errors;
+            } catch (err) {
+                return {
+                    errors: [
+                        'Unrecognized format. Make sure that the passed dataflow is correct.',
+                        err.toString(),
+                    ],
+                    warnings: [],
+                };
             }
-            const errors = { errors: await this.baklavaView.editor.load(dataflow), warnings };
-            this.baklavaView.history.graphSwitch(
-                this.baklavaView.displayedGraph,
-                this.baklavaView.displayedGraph,
-            );
-            return errors;
-        } catch (err) {
-            return {
-                errors: [
-                    'Unrecognized format. Make sure that the passed dataflow is correct.',
-                    err.toString(),
-                ],
-                warnings: [],
-            };
+        } finally {
+            // Restore previous state or use value from loaded dataflow
+            this.updateMetadata({ notifyWhenChanged }, true);
         }
     }
 
@@ -832,5 +855,11 @@ export default class EditorManager {
      */
     updateSubgraphName(name) {
         this.editor.updateCurrentSubgraphName(name);
+    }
+
+    get notifyWhenChanged() {
+        return this.updatedMetadata.notifyWhenChanged ??
+            this.currentSpecification?.metadata?.notifyWhenChanged ??
+            this.defaultMetadata.notifyWhenChanged;
     }
 }
