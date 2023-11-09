@@ -36,6 +36,7 @@ import {
     ButtonInterface,
 } from '@baklavajs/renderer-vue'; // eslint-disable-line object-curly-newline
 import { getOptionName } from '../custom/CustomNode.js';
+import getExternalApplicationManager from '../core/communication/ExternalApplicationManager';
 
 export default {
     props: {
@@ -44,6 +45,15 @@ export default {
         },
     },
     setup(props) {
+        const externalApplicationManager = getExternalApplicationManager();
+        const metadataChanged = (name, value) => {
+            externalApplicationManager.notifyAboutChange('metadata_changed', {
+                metadata: {
+                    [name]: value,
+                },
+            });
+        };
+
         const connectionStyleOption = computed(() => {
             const items = [
                 { text: 'Curved', value: 'curved' },
@@ -56,6 +66,7 @@ export default {
             ).setPort(false);
             option.events.setValue.subscribe(this, (v) => {
                 props.viewModel.connectionRenderer.style = v; // eslint-disable-line vue/no-mutating-props,max-len,no-param-reassign
+                metadataChanged('connectionStyle', v);
             });
             option.componentName = 'SelectInterface';
             return option;
@@ -68,6 +79,7 @@ export default {
             ).setPort(false);
             option.events.setValue.subscribe(this, (v) => {
                 props.viewModel.connectionRenderer.randomizedOffset = v; // eslint-disable-line vue/no-mutating-props,max-len,no-param-reassign
+                metadataChanged('randomizedOffset', v);
             });
             option.componentName = 'CheckboxInterface';
             return option;
@@ -80,6 +92,7 @@ export default {
             ).setPort(false);
             option.events.setValue.subscribe(this, (v) => {
                 props.viewModel.settings.background.gridSize = v; // eslint-disable-line vue/no-mutating-props,max-len,no-param-reassign
+                metadataChanged('backgroundSize', v);
             });
             option.componentName = 'IntegerInterface';
             return option;
@@ -92,6 +105,7 @@ export default {
             ).setPort(false);
             option.events.setValue.subscribe(this, (v) => {
                 props.viewModel.movementStep = v; // eslint-disable-line vue/no-mutating-props,max-len,no-param-reassign
+                metadataChanged('movementStep', v);
             });
             option.componentName = 'IntegerInterface';
             return option;
@@ -109,6 +123,7 @@ export default {
             ).setPort(false);
             option.events.setValue.subscribe(this, (v) => {
                 layoutManager.useAlgorithm(v);
+                metadataChanged('layout', v);
             });
             option.componentName = 'SelectInterface';
             return option;
@@ -125,6 +140,7 @@ export default {
         const center = computed(() => {
             const button = new ButtonInterface('Center', () => {
                 props.viewModel.editor.centerZoom();
+                externalApplicationManager.notifyAboutChange('apply_center');
             });
             button.componentName = 'ButtonInterface';
             return button;
