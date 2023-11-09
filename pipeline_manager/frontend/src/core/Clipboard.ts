@@ -32,12 +32,6 @@ import {
 import {
     startTransaction, commitTransaction,
 } from './History.ts';
-import {
-    SUBGRAPH_INPUT_NODE_TYPE,
-    SUBGRAPH_OUTPUT_NODE_TYPE,
-    SUBGRAPH_INOUT_NODE_TYPE,
-} from '../custom/subgraphInterface.js';
-import { applySidePositions } from './interfaceParser.js';
 
 export const COPY_COMMAND = 'COPY';
 export const DELETE_COMMAND = 'DELETE';
