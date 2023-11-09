@@ -143,7 +143,9 @@ import {
     startTransaction, commitTransaction,
 } from '../core/History.ts';
 
+import EditorManager from '../core/EditorManager';
 import NotificationHandler from '../core/notifications.js';
+import getExternalApplicationManager from '../core/communication/ExternalApplicationManager';
 
 import InputInterfaceComponent from '../interfaces/InputInterface.vue';
 import ListInterfaceComponent from '../interfaces/ListInterface.vue';
@@ -184,6 +186,57 @@ const displayedInputs = computed(() => Object.values(props.node.inputs).filter((
 const displayedOutputs = computed(() =>
     Object.values(props.node.outputs).filter((ni) => !ni.hidden),
 );
+
+const editorManager = EditorManager.getEditorManagerInstance();
+const externalApplicationManager = getExternalApplicationManager();
+// Watch properties
+Object.entries(props.node.inputs).forEach(([name, input]) => {
+    if (externalApplicationManager.backendAvailable && name.startsWith('property_')) {
+        let firstWatch = true;
+        watch(input, async (value) => {
+            if (firstWatch || !editorManager.notifyWhenChanged) {
+                firstWatch = false;
+                return;
+            }
+            const data = {
+                graph_id: props.node.graphInstance.id,
+                node_id: props.node.id,
+                properties: [],
+            };
+            data.properties.push({
+                id: value.id,
+                new_value: value.value,
+            });
+            await externalApplicationManager.notifyAboutChange('properties_changed', data);
+        });
+    }
+});
+
+// Send message about changed position
+const notifyPositionChanged = (position) => {
+    externalApplicationManager.notifyAboutChange('position_changed', {
+        graph_id: props.node.graphInstance.id,
+        node_id: props.node.id,
+        position: {
+            x: position.x,
+            y: position.y,
+        },
+    });
+};
+// Create watcher for position
+const startPostionWatcher = (position) => watch(position, (value) => {
+    if (!editorManager.notifyWhenChanged) return;
+    notifyPositionChanged(value);
+});
+if (externalApplicationManager.backendAvailable) {
+    let stopPositionWatcher = startPostionWatcher(props.node.position);
+    // Restart watcher when position is replaced
+    watch(() => props.node.position, (value) => {
+        stopPositionWatcher();
+        notifyPositionChanged(value);
+        stopPositionWatcher = startPostionWatcher(value);
+    });
+}
 
 const focusOnRename = () => {
     renameField.value.focus();
