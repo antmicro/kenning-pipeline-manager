@@ -20,6 +20,24 @@ import EditorManager from '../EditorManager';
 /* eslint-disable camelcase */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+const editorManager = EditorManager.getEditorManagerInstance();
+
+/**
+ * Finds graph of id `graph_id`.
+ * An error with appropriate message is thrown if any error occurs.
+ *
+ * @param graph_id Id of a graph to find
+ * @returns found graph
+ */
+function getGraph(graph_id: string): any {
+    const { viewModel } = useViewModel();
+    const graph = [...viewModel.value.editor.graphs].find((g) => g.id === graph_id);
+    if (graph === undefined) {
+        throw new Error(`Graph with id '${graph_id}' does not exist.`);
+    }
+    return graph;
+}
+
 /**
  * Finds node of id `node_id` in graph of id `graph_id`.
  * An error with appropriate message is thrown if any error occurs.
@@ -29,14 +47,9 @@ import EditorManager from '../EditorManager';
  * @returns found node
  */
 function getNode(graph_id: string, node_id: string): any {
-    const { viewModel } = useViewModel();
-    const graph = [...viewModel.value.editor.graphs].find((g) => g.id === graph_id);
+    const graph = getGraph(graph_id);
 
-    if (graph === undefined) {
-        throw new Error(`Graph with id '${graph_id}' does not exist.`);
-    }
-
-    const node = graph.nodes.find((n) => n.id === node_id);
+    const node = graph.nodes.find((n: any) => n.id === node_id);
     if (node === undefined) {
         throw new Error(`Node with id '${node_id}' does not exist.`);
     }
@@ -79,6 +92,34 @@ function getProperty(node: any, id?: string, name?: string) {
     return prop;
 }
 
+/**
+ * Finds connection between interfaces with id `from` and `to` in graph of id `graph_id`.
+ * An error with appropriate message is thrown if any error occurs.
+ *
+ * @param graph_id Id of a graph to find
+ * @param from Id of a first interface
+ * @param to Id of a second interface
+ * @returns found node
+ */
+function getConnection(graph_id: string, from: string, to: string): any {
+    const graph = getGraph(graph_id);
+
+    const connection = graph.connections.find((c: any) => c.from.id === from && c.to.id === to);
+    if (connection === undefined) {
+        throw new Error(`Connection from ${from} to ${to} does not exist.`);
+    }
+    return connection;
+}
+
+/**
+ * @returns currently used dataflow
+ */
+export function get_dataflow() {
+    return {
+        dataflow: editorManager.saveDataflow(),
+    };
+}
+
 type ModifyPropertiesParamsType = {
     graph_id: string,
     node_id: string,
@@ -93,9 +134,9 @@ type ModifyPropertiesParamsType = {
  * Updates values of properties specified in `params`.
  * An error with appropriate message is thrown if any error occurs.
  */
-export async function modify_properties(
+export function modify_properties(
     params: ModifyPropertiesParamsType,
-): Promise<undefined> {
+) {
     const node = getNode(params.graph_id, params.node_id);
 
     // First iteration to validate that every property exists
@@ -110,6 +151,100 @@ export async function modify_properties(
         const prop = getProperty(node, property.id, property.name);
         prop.value = property.new_value;
     }
+}
+
+type ModifyPositionParamsType = {
+    graph_id: string,
+    node_id: string,
+    position: {
+        x: number,
+        y: number,
+    }
+};
+
+/**
+ * Updates values of properties specified in `params`.
+ * An error with appropriate message is thrown if any error occurs.
+ */
+export function modify_position(
+    params: ModifyPositionParamsType,
+) {
+    const node = getNode(params.graph_id, params.node_id);
+
+    node.position.x = params.position.x;
+    node.position.y = params.position.y;
+}
+
+type ModifyNodesParamsType = {
+    graph_id: string,
+    nodes: {
+        added: any[],
+        deleted: string[],
+    },
+    remove_with_connections: boolean,
+}
+
+/**
+ * Creates and deletes nodes based on received `params`.
+ */
+export async function modify_nodes(params: ModifyNodesParamsType) {
+    const { viewModel } = useViewModel();
+    const graph = getGraph(params.graph_id);
+    params.nodes.added.forEach((n) => {
+        const info = viewModel.value.editor.nodeTypes.get(n.name);
+        if (!info) {
+            throw new Error(`Node type not found for name ${n.name}`);
+        } else {
+            const node = new info.type(); // eslint-disable-line new-cap
+            node.id = n.id;
+            graph.addNode(node);
+            const errors = node.load(n);
+            if (Array.isArray(errors) && errors.length) throw new Error(errors.join('\n'));
+        }
+    });
+
+    params.nodes.deleted.forEach((n) => {
+        const node = getNode(params.graph_id, n);
+        if (params.remove_with_connections ?? true) {
+            graph.removeNode(node);
+        } else {
+            graph.removeNodeOnly(node);
+        }
+    });
+}
+
+type ModifyConnectionsParamsType = {
+    graph_id: string,
+    connections: {
+        added: any[],
+        deleted: {from: string, to: string}[],
+    },
+}
+
+/**
+ * Creates and deletes connections based on received `params`.
+ */
+export async function modify_connections(params: ModifyConnectionsParamsType) {
+    const graph = getGraph(params.graph_id);
+
+    params.connections.added.forEach((c) => {
+        const fromIntf = graph.findNodeInterface(c.from);
+        if (!fromIntf) throw new Error(`Interface with id ${c.from} does not exist`);
+        const toIntf = graph.findNodeInterface(c.to);
+        if (!toIntf) throw new Error(`Interface with id ${c.to} does not exist`);
+        const connection = graph.addConnection(fromIntf, toIntf);
+        if (!connection) throw new Error(`Connection from ${c.from} to ${c.to} cannot be created`);
+    });
+    params.connections.deleted.forEach((c) => {
+        graph.removeConnection(getConnection(params.graph_id, c.from, c.to));
+    });
+}
+
+/**
+ * Loads received dataflow.
+ */
+export function modify_dataflow(params: { dataflow: any }) {
+    editorManager.loadDataflow(params.dataflow);
 }
 
 type GetPropertiesParamsType = {
@@ -197,6 +332,7 @@ export const runInfo: {inProgress: boolean} = {
 };
 /**
  * Sets width of progress bar.
+ * If there is not run in progress, throws error.
  */
 export function progress(params: {progress: number}) {
     if (!runInProgress) {
@@ -208,7 +344,16 @@ export function progress(params: {progress: number}) {
     progressBar.style.width = `${params.progress}%`;
 }
 
-export function update_metadata(params: {metadata: any }) {
-    const editorManager = EditorManager.getEditorManagerInstance();
+/**
+ * Updates the editor's metadata.
+ */
+export function update_metadata(params: { metadata: any }) {
     editorManager.updateMetadata(params.metadata, true);
+}
+
+/**
+ * Triggers action centering the editor.
+ */
+export function action_center() {
+    editorManager.baklavaView.editor.centerZoom();
 }
