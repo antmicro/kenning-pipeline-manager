@@ -99,6 +99,20 @@ def create_socketio() -> socketio.AsyncServer:
     json_rpc_backend = JSONRPCBase()
     json_rpc_backend.register_methods(BackendMethods(), 'backend')
 
+    @sio.on('connect')
+    def _connect(sid, environ, auth):
+        """
+        Special event used when socket connects.
+        """
+        global_state_manager.connected_frontends += 1
+
+    @sio.on('disconnect')
+    def _disconnect(sid):
+        """
+        Special event used when socket disconnects.
+        """
+        global_state_manager.connected_frontends -= 1
+
     @sio.on("backend-api")
     async def backend_api(sid, json_rpc_request: Dict):
         """
