@@ -102,6 +102,7 @@ import EditorManager from '../core/EditorManager';
 import CustomSidebar from './CustomSidebar.vue';
 import RectangleSelection from './RectangleSelection.vue';
 import nodeInsideSelection from './rectangleSelection.js';
+import getExternalApplicationManager from '../core/communication/ExternalApplicationManager';
 
 export default defineComponent({
     extends: EditorComponent,
@@ -393,6 +394,68 @@ export default defineComponent({
                     !ignoredNodesId.value.includes(c.to.nodeId),
             ),
         );
+
+        const externalApplicationManager = getExternalApplicationManager();
+        if (externalApplicationManager.backendAvailable) {
+            watch(visibleNodes, async (value, old) => {
+                if (!editorManager.notifyWhenChanged) return;
+                const newIds = Object.values(value).map((n) => n.id);
+                const oldIds = Object.values(old).map((n) => n.id);
+                const nodesAdded = [];
+                Object.values(value).forEach((node) => {
+                    if (!(oldIds.includes(node.id))) {
+                        nodesAdded.push(node.save());
+                    }
+                });
+                const nodesDeleted = [];
+                Object.values(old).forEach((node) => {
+                    if (!(newIds.includes(node.id))) {
+                        nodesDeleted.push(node.id);
+                    }
+                });
+                const data = {
+                    graph_id: graph.value.id,
+                    nodes: {
+                        added: nodesAdded,
+                        deleted: nodesDeleted,
+                    },
+                };
+                await externalApplicationManager.notifyAboutChange('nodes_changed', data);
+            });
+
+            watch(visibleConnections, async (value, old) => {
+                if (!editorManager.notifyWhenChanged) return;
+                const newIds = Object.values(value).map((n) => n.id);
+                const oldIds = Object.values(old).map((n) => n.id);
+                const connectionsAdded = [];
+                Object.values(value).forEach((connection) => {
+                    if (!(oldIds.includes(connection.id))) {
+                        connectionsAdded.push({
+                            id: connection.id,
+                            from: connection.from.id,
+                            to: connection.to.id,
+                        });
+                    }
+                });
+                const connectionsDeleted = [];
+                Object.values(old).forEach((connection) => {
+                    if (!(newIds.includes(connection.id))) {
+                        connectionsDeleted.push({
+                            from: connection.from.id,
+                            to: connection.to.id,
+                        });
+                    }
+                });
+                const data = {
+                    graph_id: graph.value.id,
+                    connections: {
+                        added: connectionsAdded,
+                        deleted: connectionsDeleted,
+                    },
+                };
+            await externalApplicationManager.notifyAboutChange('connections_changed', data);
+            });
+        }
 
         const filterNodes = (query) => {
             const threshold = -50;
