@@ -7,9 +7,10 @@ import asyncio
 import threading
 from typing import Dict
 from socketio import AsyncServer
+from jsonrpc.jsonrpc2 import JSONRPC20Response
 
 from pipeline_manager.backend.state_manager import global_state_manager
-from pipeline_manager_backend_communication.misc_structures import Status
+from pipeline_manager_backend_communication.misc_structures import Status, CustomErrorCode  # noqa: E501
 from pipeline_manager_backend_communication.communication_backend import CommunicationBackend  # noqa: E501
 
 _THREAD: threading.Thread = None
@@ -28,7 +29,7 @@ async def manage_socket_messages(
     ----------
     tcp_server : CommunicationBackend
         Server managing socket
-    socketio : SocketIo
+    socketio : AsyncServer
         WebSocket connected to frontend
     """
     while True:
@@ -40,6 +41,17 @@ async def manage_socket_messages(
                 data = json.loads(
                     message.data[1].encode(tcp_server.encoding_format)
                 )
+
+            # Send error response if frontend is not connected
+            if global_state_manager.connected_frontends == 0 and 'id' in data:
+                tcp_server.send_jsonrpc_message(JSONRPC20Response(
+                    _id=data['id'],
+                    error={
+                        'code': CustomErrorCode.EXTERNAL_APPLICATION_NOT_CONNECTED.value,  # noqa: E501
+                        'message': 'Application is not connected',
+                    }
+                ).data)
+
             if message.data[0] is None:
                 # Message has no method -- it is response
                 event = 'api-response'
@@ -60,7 +72,7 @@ def start_socket_thread(socketio: AsyncServer):
 
     Parameters
     ----------
-    socketio : SocketIo
+    socketio : AsyncServer
         WebSocket connected to frontend
     """
     global _THREAD
