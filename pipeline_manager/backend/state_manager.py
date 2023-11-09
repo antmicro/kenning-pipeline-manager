@@ -46,6 +46,8 @@ class PMStateManager:
         self.schema = None
         self.schema_filename = "unresolved_specification_schema.json"
 
+        self.connected_frontends = 0
+
     def reinitialize(
         self,
         tcp_server_port: int,
