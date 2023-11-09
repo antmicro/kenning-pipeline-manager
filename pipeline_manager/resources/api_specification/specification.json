@@ -1,51 +1,54 @@
 {
     "frontend_endpoints": {
+        "get_dataflow": {
+            "description": "Returns dataflow used by frontend",
+            "params": {
+                "$ref": "common_types#/$defs/null_or_empty"
+            },
+            "returns": {
+                "$ref": "common_types#/$defs/dataflow_object"
+            }
+        },
         "modify_properties": {
             "description": "Procedure to alter properties of a node",
             "params": {
-                "allOf": [{ "$ref": "common_types#/$defs/node_object" }],
-                "type": "object",
-                "properties": {
-                    "properties": {
-                        "type": "array",
-                        "description": "Properties to change specified by either a name of id",
-                        "items": {
-                            "type": "object",
-                            "oneOf": [
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "id": {
-                                            "description": "Id of the property to alter",
-                                            "type": "string"
-                                        },
-                                        "new_value": {
-                                            "description": "New value of the property"
-                                        }
-                                    },
-                                    "required": ["id", "new_value"],
-                                    "additionalProperties": false
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "name": {
-                                            "description": "Name of the property to alter",
-                                            "type": "string"
-                                        },
-                                        "new_value": {
-                                            "description": "New value of the property"
-                                        }
-                                    },
-                                    "required": ["name", "new_value"],
-                                    "additionalProperties": false
-                                }
-                            ]
-                        }
-                    }
-                },
-                "unevaluatedProperties": false,
-                "required": ["properties"]
+                "$ref": "common_types#/$defs/properties_diff"
+            },
+            "returns": {
+                "$ref": "common_types#/$defs/null_or_empty"
+            }
+        },
+        "modify_position": {
+            "description": "Procedure to alter position of a node",
+            "params": {
+                "$ref": "common_types#/$defs/position_diff"
+            },
+            "returns": {
+                "$ref": "common_types#/$defs/null_or_empty"
+            }
+        },
+        "modify_nodes": {
+            "description": "Procedure to add and delete nodes",
+            "params": {
+                "$ref": "common_types#/$defs/nodes_diff"
+            },
+            "returns": {
+                "$ref": "common_types#/$defs/null_or_empty"
+            }
+        },
+        "modify_connections": {
+            "description": "Procedure to add and delete connections",
+            "params": {
+                "$ref": "common_types#/$defs/connections_diff"
+            },
+            "returns": {
+                "$ref": "common_types#/$defs/null_or_empty"
+            }
+        },
+        "modify_dataflow": {
+            "description": "Procedure to add and delete nodes",
+            "params": {
+                "$ref": "common_types#/$defs/dataflow_object"
             },
             "returns": {
                 "$ref": "common_types#/$defs/null_or_empty"
@@ -152,15 +155,14 @@
         "update_metadata": {
             "description": "Updates the editor's metadata",
             "params": {
-                "type": "object",
-                "properties": {
-                    "metadata": {
-                        "description": "JSON with metadata description in PM format",
-                        "type": "object"
-                    }
-                },
-                "required": ["metadata"],
-                "additionalProperties": false
+                "$ref": "common_types#/$defs/metadata"
+            },
+            "returns": null
+        },
+        "action_center": {
+            "description": "Center the editor",
+            "params": {
+                "$ref": "common_types#/$defs/null_or_empty"
             },
             "returns": null
         }
@@ -227,6 +229,14 @@
                 "$ref": "common_types#/$defs/external_endpoint_return_type"
             }
         },
+        "request_config": {
+            "params": {
+                "$ref": "common_types#/$defs/null_or_empty"
+            },
+            "returns": {
+                "$ref": "common_types#/$defs/external_endpoint_return_type"
+            }
+        },
         "request_specification": {
             "description": "Request specification used by external application",
             "params": {
@@ -270,6 +280,78 @@
             },
             "returns": {
                 "$ref": "common_types#/$defs/external_endpoint_return_type"
+            }
+        },
+        "frontend_connected": {
+            "description": "Request send when Pipeline Manager frontend connects to backend",
+            "params": {
+                "$ref": "common_types#/$defs/null_or_empty"
+            },
+            "returns": {
+                "$ref": "common_types#/$defs/null_or_empty"
+            }
+        },
+        "properties_changed": {
+            "description": "Request send when properties of any node changes",
+            "params": {
+                "$ref": "common_types#/$defs/properties_diff"
+            },
+            "returns": {
+                "$ref": "common_types#/$defs/null_or_empty"
+            }
+        },
+        "position_changed": {
+            "description": "Request send when position of any node changes",
+            "params": {
+                "$ref": "common_types#/$defs/position_diff"
+            },
+            "returns": {
+                "$ref": "common_types#/$defs/null_or_empty"
+            }
+        },
+        "nodes_changed": {
+            "description": "Request send when node was added or deleted",
+            "params": {
+                "$ref": "common_types#/$defs/nodes_diff"
+            },
+            "returns": {
+                "$ref": "common_types#/$defs/null_or_empty"
+            }
+        },
+        "connections_changed": {
+            "description": "Request send when connection was added or deleted",
+            "params": {
+                "$ref": "common_types#/$defs/connections_diff"
+            },
+            "returns": {
+                "$ref": "common_types#/$defs/null_or_empty"
+            }
+        },
+        "dataflow_changed": {
+            "description": "Request send when whole dataflow changed, e.g. when dataflow is loaded",
+            "params": {
+                "$ref": "common_types#/$defs/dataflow_object"
+            },
+            "returns": {
+                "$ref": "common_types#/$defs/null_or_empty"
+            }
+        },
+        "metadata_changed": {
+            "description": "Request send when metadata was changed",
+            "params": {
+                "$ref": "common_types#/$defs/metadata"
+            },
+            "returns": {
+                "$ref": "common_types#/$defs/null_or_empty"
+            }
+        },
+        "apply_center": {
+            "description": "Request send when editor was centerd",
+            "params": {
+                "$ref": "common_types#/$defs/null_or_empty"
+            },
+            "returns": {
+                "$ref": "common_types#/$defs/null_or_empty"
             }
         }
     }

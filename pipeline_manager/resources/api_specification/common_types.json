@@ -21,7 +21,6 @@
                 "graph_id": {
                     "description": "Id of the graph",
                     "type": "string"
-
                 },
                 "node_id": {
                     "description": "Id of the node",
@@ -39,6 +38,167 @@
                     "type": "object"
                 }
             },
+            "additionalProperties": false
+        },
+        "properties_diff": {
+            "description": "Schema that represents differences in properties of the node",
+            "allOf": [{ "$ref": "common_types#/$defs/node_object" }],
+            "type": "object",
+            "properties": {
+                "properties": {
+                    "type": "array",
+                    "description": "Properties to change specified by either a name or id",
+                    "items": {
+                        "type": "object",
+                        "oneOf": [
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "id": {
+                                        "description": "Id of the property to alter",
+                                        "type": "string"
+                                    },
+                                    "new_value": {
+                                        "description": "New value of the property"
+                                    }
+                                },
+                                "required": ["id", "new_value"],
+                                "additionalProperties": false
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "description": "Name of the property to alter",
+                                        "type": "string"
+                                    },
+                                    "new_value": {
+                                        "description": "New value of the property"
+                                    }
+                                },
+                                "required": ["name", "new_value"],
+                                "additionalProperties": false
+                            }
+                        ]
+                    }
+                }
+            },
+            "unevaluatedProperties": false,
+            "required": ["properties"]
+        },
+        "position_diff": {
+            "description": "Schema that represent differences in position of the node",
+            "allOf": [{ "$ref": "common_types#/$defs/node_object" }],
+            "type": "object",
+            "properties": {
+                "position": {
+                    "type": "object",
+                    "description": "Position to change specified by either a name or id",
+                    "properties": {
+                        "x": {
+                            "description": "X coordinate",
+                            "type": "number"
+                        },
+                        "y": {
+                            "description": "Y coordinate",
+                            "type": "number"
+                        }
+                    }
+                }
+            },
+            "unevaluatedProperties": false,
+            "required": ["position"]
+        },
+        "nodes_diff": {
+            "description": "Schema that represents nodes' differences in a graph",
+            "type": "object",
+            "properties": {
+                "graph_id": {
+                    "description": "Id of the graph",
+                    "type": "string"
+                },
+                "nodes": {
+                    "description": "",
+                    "type": "object",
+                    "properties": {
+                        "added": {
+                            "description": "List with created nodes",
+                            "type": "array",
+                            "items": {
+                                "description": "JSON with node definition",
+                                "type": "object"
+                            }
+                        },
+                        "deleted": {
+                            "description": "List with removed nodes",
+                            "type": "array",
+                            "items": {
+                                "description": "ID of node to delete",
+                                "type": "string"
+                            }
+                        }
+                    }
+                },
+                "remove_with_connections": {
+                    "description": "Should node be removed with connections",
+                    "type": "boolean"
+                }
+            },
+            "required": ["graph_id", "nodes"]
+        },
+        "connections_diff": {
+            "description": "Schema that represents connections' differences in a graph",
+            "type": "object",
+            "properties": {
+                "graph_id": {
+                    "description": "Id of the graph",
+                    "type": "string"
+                },
+                "connections": {
+                    "description": "",
+                    "type": "object",
+                    "properties": {
+                        "added": {
+                            "description": "List with created connections",
+                            "type": "array",
+                            "items": {
+                                "description": "JSON with connection definition",
+                                "type": "object"
+                            }
+                        },
+                        "deleted": {
+                            "description": "List with removed connections",
+                            "type": "array",
+                            "items": {
+                                "description": "Connection defined with its beggining and end",
+                                "type": "object",
+                                "properties": {
+                                    "from": {
+                                        "description": "ID of output interface",
+                                        "type": "string"
+                                    },
+                                    "to": {
+                                        "description": "ID of input interface",
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "required": ["graph_id", "connections"]
+        },
+        "metadata": {
+            "description": "Type with PM metadata",
+            "type": "object",
+            "properties": {
+                "metadata": {
+                    "description": "JSON with metadata description in PM format",
+                    "type": "object"
+                }
+            },
+            "required": ["metadata"],
             "additionalProperties": false
         },
         "external_endpoint_return_type": {
