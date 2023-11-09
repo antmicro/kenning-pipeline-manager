@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { JSONRPCErrorCode } from 'json-rpc-2.0';
 import { backendApiUrl, PMMessageType } from '../utils';
 import jsonRPC from './rpcCommunication';
 import { runInfo } from './remoteProcedures';
@@ -195,6 +196,28 @@ class ExternalApplicationManager {
     }
 
     /**
+     * Send information to external application about changed values (like nodes, connections,
+     * positions, properties).
+     *
+     * @param method Name of the JSON-RPC method.
+     * @param changedProperties Params of the send request, should contain changed values.
+     */
+    async notifyAboutChange(method, changedProperties) {
+        if (
+            this.backendAvailable && this.externalApplicationConnected &&
+            this.editorManager.notifyWhenChanged
+        ) {
+            try {
+                await jsonRPC.request(method, changedProperties);
+            } catch (error) {
+                NotificationHandler.terminalLog(
+                    'warning', 'Error when notifing about change', error.message,
+                );
+            }
+        }
+    }
+
+    /**
      * Function that is used by setInterval() to periodically check the status
      * of the TCP connection. If the connection is not alive, then `initializeConnection`
      * is invoked.
@@ -204,6 +227,7 @@ class ExternalApplicationManager {
             /* eslint-disable-next-line no-await-in-loop */
             await this.updateConnectionStatus();
             if (!this.externalApplicationConnected) {
+                runInfo.inProgress = false;
                 /* eslint-disable-next-line no-await-in-loop */
                 await this.initializeConnection(false, true);
             }
@@ -253,6 +277,15 @@ class ExternalApplicationManager {
         }
         if (this.externalApplicationConnected) {
             await this.requestSpecification();
+        }
+        if (this.externalApplicationConnected) {
+            try {
+                await jsonRPC.request('frontend_connected');
+            } catch (error) {
+                if (error.code !== JSONRPCErrorCode.MethodNotFound) {
+                    NotificationHandler.terminalLog('warning', error.message, error.data);
+                }
+            }
         }
 
         if (startInterval) this.startStatusInterval();
