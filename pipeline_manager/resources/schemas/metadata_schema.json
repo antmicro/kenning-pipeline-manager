@@ -149,7 +149,7 @@
         "randomizedOffset": {
             "type": "boolean",
             "description": "Determines whether connections should have randomized, but deterministic offset",
-            "default": "false"
+            "default": false
         },
         "icons": {
             "type": "object",
@@ -160,6 +160,11 @@
                     "description": "URL prefix for a given icon class"
                 }
             }
+        },
+        "notifyWhenChanged": {
+            "type": "boolean",
+            "description": "Determines whether external application should be informed about changes in dataflow. Works only when Pipeline Manager is run in server-app mode",
+            "default": false
         }
     },
     "additionalProperties": false
