@@ -611,6 +611,10 @@ export default defineComponent({
                 }
             }
             NotificationHandler.restoreShowNotification();
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('preview')) {
+                props.viewModel.hideHud = urlParams.get('preview') === 'true';
+            }
         });
 
         const onDrop = async (event) => {
