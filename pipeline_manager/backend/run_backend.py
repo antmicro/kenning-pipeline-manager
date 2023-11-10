@@ -4,20 +4,24 @@
 
 import argparse
 import logging
-import os
 import sys
+import socketio
 from pathlib import Path
+from asgiref.wsgi import WsgiToAsgi
+from flask import Flask
+from uvicorn import run
+from uvicorn.protocols.websockets.websockets_impl import WebSocketProtocol
 
 from pipeline_manager_backend_communication.misc_structures import Status
 
-from pipeline_manager.backend.flask import dist_path
+from pipeline_manager.backend.flask import dist_path, create_app
 from pipeline_manager.backend.tcp_socket import start_socket_thread
 from pipeline_manager.backend.socketio import create_socketio
 from pipeline_manager.backend.state_manager import global_state_manager
 from pipeline_manager.utils.logger import string_to_verbosity
 
 
-def main(argv):
+def create_backend(argv):
     parser = argparse.ArgumentParser(argv[0])
     parser.add_argument(
         "--tcp-server-host",
@@ -57,6 +61,11 @@ def main(argv):
         "for an external application to connect before running the backend",
     )
     parser.add_argument(
+        "--skip-frontend",
+        action="store_true",
+        help="Creates server without frontend",
+    )
+    parser.add_argument(
         "--verbosity",
         help="Verbosity level",
         choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
@@ -66,7 +75,8 @@ def main(argv):
     args, _ = parser.parse_known_args(argv[1:])
     logging.basicConfig(level=string_to_verbosity(args.verbosity))
 
-    if not os.path.exists(dist_path) and not args.frontend_directory:
+    if not args.skip_frontend and not dist_path.exists() and \
+            not args.frontend_directory:
         logging.log(
             logging.ERROR,
             "Frontend files have not been found in the default directory.",
@@ -78,21 +88,23 @@ def main(argv):
         )
         return
 
-    socketio, app = create_socketio()
-    if args.frontend_directory:
-        app.static_folder = Path(os.getcwd()) / args.frontend_directory
-        app.template_folder = Path(os.getcwd()) / args.frontend_directory
+    sio = create_socketio()
+    app = None
+    if not args.skip_frontend:
+        app = create_app()
+        if args.frontend_directory:
+            app.static_folder = args.frontend_directory.absolute()
+            app.template_folder = args.frontend_directory.absolute()
 
     global_state_manager.reinitialize(
         args.tcp_server_port, args.tcp_server_host
     )
+    tcp_server = global_state_manager.tcp_server
+    tcp_server.initialize_server()
     if not args.skip_connecting:
         logging.info(
             f"Waiting for connection from third-party application on {args.tcp_server_host}, port {args.tcp_server_port}"  # noqa: E501
         )
-        tcp_server = global_state_manager.tcp_server
-
-        tcp_server.initialize_server()
         logging.log(logging.INFO, "Connect the application to run start.")
         out = tcp_server.wait_for_client()
 
@@ -101,15 +113,31 @@ def main(argv):
                 logging.WARNING,
                 "External application did not connect"
             )
+        start_socket_thread(sio)
 
-        start_socket_thread(socketio)
+    return sio, app, args
 
-    socketio.run(
-        app,
-        port=args.backend_port,
-        host=args.backend_host,
-        allow_unsafe_werkzeug=True
+
+def run_uvicorn(
+    flask_app: Flask,
+    sio: socketio.AsyncServer,
+    host: str, port: int,
+):
+    flask_asgi = WsgiToAsgi(flask_app)
+    app_asgi = socketio.ASGIApp(sio, other_asgi_app=flask_asgi)
+    run(
+        app_asgi,
+        host=host,
+        port=port,
+        ws=WebSocketProtocol,
+        loop="asyncio",
     )
+
+
+def main(argv):
+    sio, app, args = create_backend(argv)
+
+    run_uvicorn(app, sio, args.backend_host, args.backend_port)
 
 
 if __name__ == "__main__":
