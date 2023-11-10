@@ -42,16 +42,19 @@ def server_process_handler(
     if out.status != Status.CLIENT_CONNECTED:
         logging.log(logging.WARNING, "External application did not connect")
 
+    from pipeline_manager.backend.flask import create_app
     from pipeline_manager.backend.socketio import create_socketio
     from pipeline_manager.backend.tcp_socket import start_socket_thread
+    from pipeline_manager.backend.run_backend import run_uvicorn
 
-    socketio, app = create_socketio()
+    app = create_app()
+    sio = create_socketio()
 
     app.static_folder = Path(frontend_path).resolve()
     app.template_folder = Path(frontend_path).resolve()
 
-    start_socket_thread(socketio)
-    socketio.run(app, backend_host, backend_port, allow_unsafe_werkzeug=True)
+    start_socket_thread(sio)
+    run_uvicorn(app, sio, backend_host, backend_port)
 
 
 def start_server_in_parallel(
