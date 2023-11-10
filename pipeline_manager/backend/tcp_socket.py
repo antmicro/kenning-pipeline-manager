@@ -3,9 +3,10 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import json
+import asyncio
 import threading
 from typing import Dict
-from flask_socketio import SocketIO
+from socketio import AsyncServer
 
 from pipeline_manager.backend.state_manager import global_state_manager
 from pipeline_manager_backend_communication.misc_structures import Status
@@ -14,9 +15,9 @@ from pipeline_manager_backend_communication.communication_backend import Communi
 _THREAD: threading.Thread = None
 
 
-def manage_socket_messages(
+async def manage_socket_messages(
     tcp_server: CommunicationBackend,
-    socketio: SocketIO
+    socketio: AsyncServer,
 ):
     """
     Function receiving messages from socket and redirecting it to WebSocket.
@@ -45,12 +46,12 @@ def manage_socket_messages(
             else:
                 # Message has methods -- it is request
                 event = 'api'
-            socketio.emit(event, data)
+            await socketio.emit(event, data)
         elif message.status == Status.CONNECTION_CLOSED:
             break
 
 
-def start_socket_thread(socketio: SocketIO):
+def start_socket_thread(socketio: AsyncServer):
     """
     Starts thread with function redirecting messages from external app
     to frontend.
@@ -66,7 +67,8 @@ def start_socket_thread(socketio: SocketIO):
     if _THREAD and _THREAD.is_alive():
         raise Exception("Previous thread is still alive")
     _THREAD = threading.Thread(
-        target=manage_socket_messages,
-        args=(global_state_manager.tcp_server, socketio)
+        target=lambda: asyncio.run(
+            manage_socket_messages(global_state_manager.tcp_server, socketio)
+        )
     )
     _THREAD.start()
