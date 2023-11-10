@@ -10,8 +10,8 @@ from pipeline_manager_backend_communication.misc_structures import (
 )
 from jsonrpc.jsonrpc2 import JSONRPC20Response
 from jsonrpc.exceptions import JSONRPCDispatchException
+import socketio
 
-from pipeline_manager.backend.flask import create_app
 from pipeline_manager.backend.tcp_socket import start_socket_thread
 from pipeline_manager.backend.state_manager import global_state_manager
 
@@ -28,9 +28,8 @@ def create_socketio() -> Tuple[SocketIO, Flask]:
     Tuple[SocketIO, Flask] :
         Returns a socketio instance and flask instance that was used
     """
-    app = create_app()
 
-    socketio = SocketIO(app)
+    sio = socketio.AsyncServer(async_mode='asgi')
 
     class BackendMethods:
         """
@@ -80,7 +79,7 @@ def create_socketio() -> Tuple[SocketIO, Flask]:
             if out.status == Status.CLIENT_CONNECTED:
                 # Socket reconnected, new thread
                 # receiving messages has to be spawned
-                start_socket_thread(socketio)
+                start_socket_thread(sio)
                 return {}
             raise JSONRPCDispatchException(
                 message='External application did not connect',
@@ -90,8 +89,8 @@ def create_socketio() -> Tuple[SocketIO, Flask]:
     json_rpc_backend = JSONRPCBase()
     json_rpc_backend.register_methods(BackendMethods(), 'backend')
 
-    @socketio.on("backend-api")
-    def backend_api(json_rpc_request: Dict):
+    @sio.on("backend-api")
+    async def backend_api(sid, json_rpc_request: Dict):
         """
         Event managing backend's JSON-RPC methods.
 
@@ -103,11 +102,11 @@ def create_socketio() -> Tuple[SocketIO, Flask]:
         resp = json_rpc_backend.generate_json_rpc_response(
             json_rpc_request
         )
-        socketio.emit('api-response', resp.data)
+        await sio.emit('api-response', resp.data)
         return True
 
-    @socketio.on("external-api")
-    def api(json_rpc_message: Dict):
+    @sio.on("external-api")
+    async def api(sid, json_rpc_message: Dict):
         """
         Event redirecting JSON-RPC messages to external application.
 
@@ -120,7 +119,7 @@ def create_socketio() -> Tuple[SocketIO, Flask]:
         is_request = 'method' in json_rpc_message
         if not tcp_server.connected:
             if is_request:
-                socketio.emit('api-response', JSONRPC20Response(
+                await sio.emit('api-response', JSONRPC20Response(
                     _id=json_rpc_message['id'],
                     error={
                         'message': 'External application is disconnected',
@@ -131,7 +130,7 @@ def create_socketio() -> Tuple[SocketIO, Flask]:
         out = tcp_server.send_jsonrpc_message(json_rpc_message)
         if out.status != Status.DATA_SENT:
             if is_request:
-                socketio.emit('api-response', JSONRPC20Response(
+                await sio.emit('api-response', JSONRPC20Response(
                         _id=json_rpc_message['id'],
                         error={
                             'message': 'Error while sending a message to the external application',  # noqa: E501
@@ -142,4 +141,4 @@ def create_socketio() -> Tuple[SocketIO, Flask]:
             return False
         return True
 
-    return socketio, app
+    return sio
