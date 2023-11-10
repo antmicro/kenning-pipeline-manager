@@ -95,7 +95,7 @@ C4Deployment
             }
         }
         Deployment_Node(back, "Backend", "") {
-            Deployment_Node(flask, "Flask-SocketIO events", "") {
+            Deployment_Node(flask, "Python-SocketIO events", "") {
                 Container(flask-backend-api, "backend-api")
                 Container(flask-external-api, "external-api")
             }
