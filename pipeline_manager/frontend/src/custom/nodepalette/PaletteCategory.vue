@@ -87,7 +87,7 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
                     <div
                         v-for="[nt, node] in sortedEntries(category.nodes.nodeTypes)"
                         class="__entry __node-entry"
-                        style="width: 100%"
+                        style="width: 100%;"
                         v-show="node.mask"
                         :style="padding(depth + 1)"
                         :key="nt"
@@ -107,13 +107,15 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
                         <div
                             ref="settings"
                             role="button"
-                            style='cursor: pointer; float: right;margin-left: auto; right: 85%'
-                            @click="() => {
+                            style='cursor: pointer; right: 85%'
+                            @pointerdown.stop=""
+                            @click.stop="() => {
                                 showMenu.hitSubstring === node.hitSubstring ?
                                 showMenu=false : showMenu=node
                             }"
+                            v-if="node.URLs.length !== 0"
                         >
-                            <VerticalEllipsis class="smaller_svg" style='right: 100%;' />
+                            <VerticalEllipsis class="smaller_svg" />
                         </div>
                         <div
                             style='

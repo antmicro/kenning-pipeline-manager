@@ -84,6 +84,9 @@ a {
             vertical-align: middle;
             font-size: $fs-small;
         }
+        &:hover > span {
+            color: $green;
+        }
     }
 }
 
