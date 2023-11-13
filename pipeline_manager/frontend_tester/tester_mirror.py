@@ -32,7 +32,7 @@ class RPCMethodsBase:
         self.client_origin = client_origin
         self.client_copy = client_copy
 
-    def request_specification(self) -> Dict:
+    def specification_get(self) -> Dict:
         """
         RPC method that responses to Specification request.
 
@@ -47,7 +47,7 @@ class RPCMethodsBase:
             'content': self.specification,
         }
 
-    def validate_dataflow(self, dataflow: Dict) -> Dict:
+    def dataflow_validate(self, dataflow: Dict) -> Dict:
         """
         RPC method that responses to Validate request.
 
@@ -64,8 +64,8 @@ class RPCMethodsBase:
         Dict
             Method's response
         """
-        response_origin = self.client_origin.request('get_dataflow')
-        response_copy = self.client_copy.request('get_dataflow')
+        response_origin = self.client_origin.request('graph_get')
+        response_copy = self.client_copy.request('graph_get')
         # Ignore connections ID
         for connection in chain(
             response_origin['result']['dataflow']['graph']['connections'],
@@ -96,9 +96,9 @@ class RPCMethodsBase:
             f'{response_copy.get("error", "")}',
         }
 
-    def frontend_connected(self) -> Dict:
+    def frontend_on_connect(self) -> Dict:
         """
-        RPC method that responses to frontend_connected request.
+        RPC method that responses to frontend_on_connect request.
 
         Send current Dataflow from original Pipeline Manager to its copy.
 
@@ -107,9 +107,9 @@ class RPCMethodsBase:
         Dict
             Method's response
         """
-        response = self.client_origin.request('get_dataflow')
+        response = self.client_origin.request('graph_get')
         if 'result' in response:
-            self._redirect_changed('modify_dataflow', **{
+            self._redirect_changed('graph_change', **{
                 'dataflow': response['result']['dataflow']
             })
         elif 'error' in response:
@@ -139,7 +139,7 @@ class RPCMethodsBase:
 
 
 class RPCMethodsCopy(RPCMethodsBase):
-    def request_specification(self) -> Dict:
+    def specification_get(self) -> Dict:
         """
         RPC method that responses to Specification request.
 
@@ -151,7 +151,7 @@ class RPCMethodsCopy(RPCMethodsBase):
         Dict
             Method's response
         """
-        response = super().request_specification()
+        response = super().specification_get()
         metadata = response['content'].get('metadata', {})
         metadata['notifyWhenChanged'] = False
         response['content']['metadata'] = metadata
@@ -159,7 +159,7 @@ class RPCMethodsCopy(RPCMethodsBase):
 
 
 class RPCMethodsOriginal(RPCMethodsBase):
-    def request_specification(self) -> Dict:
+    def specification_get(self) -> Dict:
         """
         RPC method that responses to Specification request.
 
@@ -171,36 +171,36 @@ class RPCMethodsOriginal(RPCMethodsBase):
         Dict
             Method's response
         """
-        response = super().request_specification()
+        response = super().specification_get()
         metadata = response['content'].get('metadata', {})
         metadata['notifyWhenChanged'] = True
         response['content']['metadata'] = metadata
         return response
 
     # Methods receiving and redirecting requests with changed values
-    def properties_changed(self, **kwargs) -> Dict:
-        return self._redirect_changed('modify_properties', **kwargs)
+    def properties_on_change(self, **kwargs) -> Dict:
+        return self._redirect_changed('properties_change', **kwargs)
 
-    def position_changed(self, **kwargs) -> Dict:
-        return self._redirect_changed('modify_position', **kwargs)
+    def position_on_change(self, **kwargs) -> Dict:
+        return self._redirect_changed('position_change', **kwargs)
 
-    def nodes_changed(self, **kwargs) -> Dict:
+    def nodes_on_change(self, **kwargs) -> Dict:
         # Make sure only nodes are removed
         # connections have designated event
         kwargs['remove_with_connections'] = False
         return self._redirect_changed('nodes_change', **kwargs)
 
-    def connections_changed(self, **kwargs) -> Dict:
-        return self._redirect_changed('modify_connections', **kwargs)
+    def connections_on_change(self, **kwargs) -> Dict:
+        return self._redirect_changed('connections_change', **kwargs)
 
-    def dataflow_changed(self, **kwargs) -> Dict:
-        return self._redirect_changed('modify_dataflow', **kwargs)
+    def graph_on_change(self, **kwargs) -> Dict:
+        return self._redirect_changed('graph_change', **kwargs)
 
-    def metadata_changed(self, **kwargs) -> Dict:
-        return self._redirect_changed('update_metadata', **kwargs)
+    def metadata_on_change(self, **kwargs) -> Dict:
+        return self._redirect_changed('metadata_change', **kwargs)
 
-    def apply_center(self) -> Dict:
-        return self._redirect_changed('action_center')
+    def viewport_on_center(self) -> Dict:
+        return self._redirect_changed('viewport_center')
 
 
 def main(argv):

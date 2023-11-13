@@ -47,7 +47,7 @@ export default {
     setup(props) {
         const externalApplicationManager = getExternalApplicationManager();
         const metadataChanged = (name, value) => {
-            externalApplicationManager.notifyAboutChange('metadata_changed', {
+            externalApplicationManager.notifyAboutChange('metadata_on_change', {
                 metadata: {
                     [name]: value,
                 },
@@ -140,7 +140,7 @@ export default {
         const center = computed(() => {
             const button = new ButtonInterface('Center', () => {
                 props.viewModel.editor.centerZoom();
-                externalApplicationManager.notifyAboutChange('apply_center');
+                externalApplicationManager.notifyAboutChange('viewport_on_center');
             });
             button.componentName = 'ButtonInterface';
             return button;

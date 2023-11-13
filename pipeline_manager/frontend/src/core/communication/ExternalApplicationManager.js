@@ -28,7 +28,7 @@ class ExternalApplicationManager {
      */
     async updateConnectionStatus() {
         try {
-            const response = await jsonRPC.request('get_status');
+            const response = await jsonRPC.request('status_get');
             this.externalApplicationConnected = response.status.connected;
         } catch (error) {
             NotificationHandler.terminalLog('error', 'Checking status', error.message);
@@ -59,7 +59,7 @@ class ExternalApplicationManager {
     async requestSpecification() {
         let message = 'Unknown error';
         try {
-            const data = await jsonRPC.request('request_specification');
+            const data = await jsonRPC.request('specification_get');
 
             if (data.type === PMMessageType.OK) {
                 const specification = data.content;
@@ -126,9 +126,9 @@ class ExternalApplicationManager {
         let data;
         try {
             if (action !== 'stop') {
-                data = await jsonRPC.request(`${action}_dataflow`, { dataflow });
+                data = await jsonRPC.request(`dataflow_${action}`, { dataflow });
             } else {
-                data = await jsonRPC.request(`${action}_dataflow`);
+                data = await jsonRPC.request(`dataflow_${action}`);
             }
         } catch (error) {
             // The connection was closed
@@ -175,7 +175,7 @@ class ExternalApplicationManager {
         }
 
         try {
-            const data = await jsonRPC.request('import_dataflow', { external_application_dataflow: dataflow });
+            const data = await jsonRPC.request('dataflow_import', { external_application_dataflow: dataflow });
             if (data.type === PMMessageType.OK) {
                 const errors = await this.editorManager.loadDataflow(data.content);
                 if (Array.isArray(errors) && errors.length) {
@@ -280,7 +280,7 @@ class ExternalApplicationManager {
         }
         if (this.externalApplicationConnected) {
             try {
-                await jsonRPC.request('frontend_connected');
+                await jsonRPC.request('frontend_on_connect');
             } catch (error) {
                 if (error.code !== JSONRPCErrorCode.MethodNotFound) {
                     NotificationHandler.terminalLog('warning', error.message, error.data);

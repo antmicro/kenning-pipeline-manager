@@ -347,7 +347,7 @@ export default {
                     return;
                 }
 
-                await this.externalApplicationManager.notifyAboutChange('dataflow_changed', {
+                await this.externalApplicationManager.notifyAboutChange('graph_on_change', {
                     dataflow,
                 });
 

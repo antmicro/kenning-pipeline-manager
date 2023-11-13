@@ -162,7 +162,7 @@
                 {
                     "name": "Method",
                     "type": "text",
-                    "default": "get_status"
+                    "default": "status_get"
                 },
                 {
                     "name": "Params",

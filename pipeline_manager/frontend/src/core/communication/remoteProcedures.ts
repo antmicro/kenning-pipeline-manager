@@ -114,7 +114,7 @@ function getConnection(graph_id: string, from: string, to: string): any {
 /**
  * @returns currently used dataflow
  */
-export function get_dataflow() {
+export function graph_get() {
     return {
         dataflow: editorManager.saveDataflow(),
     };
@@ -134,7 +134,7 @@ type ModifyPropertiesParamsType = {
  * Updates values of properties specified in `params`.
  * An error with appropriate message is thrown if any error occurs.
  */
-export function modify_properties(
+export function properties_change(
     params: ModifyPropertiesParamsType,
 ) {
     const node = getNode(params.graph_id, params.node_id);
@@ -166,7 +166,7 @@ type ModifyPositionParamsType = {
  * Updates values of properties specified in `params`.
  * An error with appropriate message is thrown if any error occurs.
  */
-export function modify_position(
+export function position_change(
     params: ModifyPositionParamsType,
 ) {
     const node = getNode(params.graph_id, params.node_id);
@@ -187,7 +187,7 @@ type ModifyNodesParamsType = {
 /**
  * Creates and deletes nodes based on received `params`.
  */
-export async function modify_nodes(params: ModifyNodesParamsType) {
+export async function nodes_change(params: ModifyNodesParamsType) {
     const { viewModel } = useViewModel();
     const graph = getGraph(params.graph_id);
     params.nodes.added.forEach((n) => {
@@ -224,7 +224,7 @@ type ModifyConnectionsParamsType = {
 /**
  * Creates and deletes connections based on received `params`.
  */
-export async function modify_connections(params: ModifyConnectionsParamsType) {
+export async function connections_change(params: ModifyConnectionsParamsType) {
     const graph = getGraph(params.graph_id);
 
     params.connections.added.forEach((c) => {
@@ -243,7 +243,7 @@ export async function modify_connections(params: ModifyConnectionsParamsType) {
 /**
  * Loads received dataflow.
  */
-export function modify_dataflow(params: { dataflow: any }) {
+export function graph_change(params: { dataflow: any }) {
     editorManager.loadDataflow(params.dataflow);
 }
 
@@ -266,7 +266,7 @@ type GetPropertiesReturnType = {
  * Returns an array of properties specified in `params`.
  * An error with appropriate message is thrown if any error occurs.
  */
-export async function get_properties(
+export async function properties_get(
     params: GetPropertiesParamsType,
 ): Promise<GetPropertiesReturnType> {
     const node = getNode(params.graph_id, params.node_id);
@@ -311,7 +311,7 @@ type GetNodeParamsType = {
  * Returns a serialized node state specified in `params`.
  * An error with appropriate message is thrown if any error occurs.
  */
-export async function get_node(
+export async function node_get(
     params: GetNodeParamsType,
 ): Promise<{ node: any }> {
     const node = getNode(params.graph_id, params.node_id);
@@ -334,7 +334,7 @@ export const runInfo: {inProgress: boolean} = {
  * Sets width of progress bar.
  * If there is not run in progress, throws error.
  */
-export function progress(params: {progress: number}) {
+export function progress_change(params: {progress: number}) {
     if (!runInProgress) {
         throw new Error('No run in progress');
     }
@@ -347,13 +347,13 @@ export function progress(params: {progress: number}) {
 /**
  * Updates the editor's metadata.
  */
-export function update_metadata(params: { metadata: any }) {
+export function metadata_change(params: { metadata: any }) {
     editorManager.updateMetadata(params.metadata, true);
 }
 
 /**
  * Triggers action centering the editor.
  */
-export function action_center() {
+export function viewport_center() {
     editorManager.baklavaView.editor.centerZoom();
 }

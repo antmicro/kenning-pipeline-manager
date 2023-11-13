@@ -1,6 +1,6 @@
 {
     "frontend_endpoints": {
-        "get_dataflow": {
+        "graph_get": {
             "description": "Returns dataflow used by frontend",
             "params": {
                 "$ref": "common_types#/$defs/null_or_empty"
@@ -9,52 +9,7 @@
                 "$ref": "common_types#/$defs/dataflow_object"
             }
         },
-        "modify_properties": {
-            "description": "Procedure to alter properties of a node",
-            "params": {
-                "$ref": "common_types#/$defs/properties_diff"
-            },
-            "returns": {
-                "$ref": "common_types#/$defs/null_or_empty"
-            }
-        },
-        "modify_position": {
-            "description": "Procedure to alter position of a node",
-            "params": {
-                "$ref": "common_types#/$defs/position_diff"
-            },
-            "returns": {
-                "$ref": "common_types#/$defs/null_or_empty"
-            }
-        },
-        "modify_nodes": {
-            "description": "Procedure to add and delete nodes",
-            "params": {
-                "$ref": "common_types#/$defs/nodes_diff"
-            },
-            "returns": {
-                "$ref": "common_types#/$defs/null_or_empty"
-            }
-        },
-        "modify_connections": {
-            "description": "Procedure to add and delete connections",
-            "params": {
-                "$ref": "common_types#/$defs/connections_diff"
-            },
-            "returns": {
-                "$ref": "common_types#/$defs/null_or_empty"
-            }
-        },
-        "modify_dataflow": {
-            "description": "Procedure to add and delete nodes",
-            "params": {
-                "$ref": "common_types#/$defs/dataflow_object"
-            },
-            "returns": {
-                "$ref": "common_types#/$defs/null_or_empty"
-            }
-        },
-        "get_node": {
+        "node_get": {
             "description": "Procedure to read node state",
             "params": {
                 "allOf": [{ "$ref": "common_types#/$defs/node_object" }]
@@ -71,7 +26,7 @@
                 "required": ["node"]
             }
         },
-        "get_properties": {
+        "properties_get": {
             "description": "Procedure to alter values of a node",
             "params": {
                 "allOf": [{ "$ref": "common_types#/$defs/node_object" }],
@@ -134,7 +89,52 @@
                 }
             }
         },
-        "progress": {
+        "properties_change": {
+            "description": "Procedure to alter properties of a node",
+            "params": {
+                "$ref": "common_types#/$defs/properties_diff"
+            },
+            "returns": {
+                "$ref": "common_types#/$defs/null_or_empty"
+            }
+        },
+        "position_change": {
+            "description": "Procedure to alter position of a node",
+            "params": {
+                "$ref": "common_types#/$defs/position_diff"
+            },
+            "returns": {
+                "$ref": "common_types#/$defs/null_or_empty"
+            }
+        },
+        "nodes_change": {
+            "description": "Procedure to add and delete nodes",
+            "params": {
+                "$ref": "common_types#/$defs/nodes_diff"
+            },
+            "returns": {
+                "$ref": "common_types#/$defs/null_or_empty"
+            }
+        },
+        "connections_change": {
+            "description": "Procedure to add and delete connections",
+            "params": {
+                "$ref": "common_types#/$defs/connections_diff"
+            },
+            "returns": {
+                "$ref": "common_types#/$defs/null_or_empty"
+            }
+        },
+        "graph_change": {
+            "description": "Procedure to add and delete nodes",
+            "params": {
+                "$ref": "common_types#/$defs/dataflow_object"
+            },
+            "returns": {
+                "$ref": "common_types#/$defs/null_or_empty"
+            }
+        },
+        "progress_change": {
             "description": "Notification with progress of job ran by external application",
             "params": {
                 "description": "Parameters for notification",
@@ -152,14 +152,14 @@
             },
             "returns": null
         },
-        "update_metadata": {
+        "metadata_change": {
             "description": "Updates the editor's metadata",
             "params": {
                 "$ref": "common_types#/$defs/metadata"
             },
             "returns": null
         },
-        "action_center": {
+        "viewport_center": {
             "description": "Center the editor",
             "params": {
                 "$ref": "common_types#/$defs/null_or_empty"
@@ -168,7 +168,7 @@
         }
     },
     "backend_endpoints": {
-        "get_status": {
+        "status_get": {
             "description": "Returns status of connection with external application",
             "params": {
                 "$ref": "common_types#/$defs/null_or_empty"
@@ -209,7 +209,16 @@
         }
     },
     "external_endpoints": {
-        "import_dataflow": {
+        "specification_get": {
+            "description": "Request specification used by external application",
+            "params": {
+                "$ref": "common_types#/$defs/null_or_empty"
+            },
+            "returns": {
+                "$ref": "common_types#/$defs/external_endpoint_return_type"
+            }
+        },
+        "dataflow_import": {
             "description": "Request to convert dataflow in external app to Pipeline Manager format and import it",
             "params": {
                 "description": "Parameters for request",
@@ -229,33 +238,16 @@
                 "$ref": "common_types#/$defs/external_endpoint_return_type"
             }
         },
-        "request_config": {
-            "params": {
-                "$ref": "common_types#/$defs/null_or_empty"
-            },
-            "returns": {
-                "$ref": "common_types#/$defs/external_endpoint_return_type"
-            }
-        },
-        "request_specification": {
-            "description": "Request specification used by external application",
-            "params": {
-                "$ref": "common_types#/$defs/null_or_empty"
-            },
-            "returns": {
-                "$ref": "common_types#/$defs/external_endpoint_return_type"
-            }
-        },
-        "validate_dataflow": {
+        "dataflow_validate": {
             "description": "Request external application to validate dataflow",
             "params": {
-                  "$ref": "common_types#/$defs/dataflow_object"
+                "$ref": "common_types#/$defs/dataflow_object"
             },
             "returns": {
-                  "$ref": "common_types#/$defs/external_endpoint_return_type"
+                "$ref": "common_types#/$defs/external_endpoint_return_type"
             }
         },
-        "run_dataflow": {
+        "dataflow_run": {
             "description": "Request external application to run dataflow",
             "params": {
                 "$ref": "common_types#/$defs/dataflow_object"
@@ -264,7 +256,7 @@
                 "$ref": "common_types#/$defs/external_endpoint_return_type"
             }
         },
-        "stop_dataflow": {
+        "dataflow_stop": {
             "description": "Request external application to run dataflow",
             "params": {
                 "$ref": "common_types#/$defs/null_or_empty"
@@ -273,7 +265,7 @@
                 "$ref": "common_types#/$defs/external_endpoint_return_type"
             }
         },
-        "export_dataflow": {
+        "dataflow_export": {
             "description": "Request external application to export dataflow",
             "params": {
                 "$ref": "common_types#/$defs/dataflow_object"
@@ -282,7 +274,7 @@
                 "$ref": "common_types#/$defs/external_endpoint_return_type"
             }
         },
-        "frontend_connected": {
+        "frontend_on_connect": {
             "description": "Request send when Pipeline Manager frontend connects to backend",
             "params": {
                 "$ref": "common_types#/$defs/null_or_empty"
@@ -291,7 +283,7 @@
                 "$ref": "common_types#/$defs/null_or_empty"
             }
         },
-        "properties_changed": {
+        "properties_on_change": {
             "description": "Request send when properties of any node changes",
             "params": {
                 "$ref": "common_types#/$defs/properties_diff"
@@ -300,7 +292,7 @@
                 "$ref": "common_types#/$defs/null_or_empty"
             }
         },
-        "position_changed": {
+        "position_on_change": {
             "description": "Request send when position of any node changes",
             "params": {
                 "$ref": "common_types#/$defs/position_diff"
@@ -309,7 +301,7 @@
                 "$ref": "common_types#/$defs/null_or_empty"
             }
         },
-        "nodes_changed": {
+        "nodes_on_change": {
             "description": "Request send when node was added or deleted",
             "params": {
                 "$ref": "common_types#/$defs/nodes_diff"
@@ -318,7 +310,7 @@
                 "$ref": "common_types#/$defs/null_or_empty"
             }
         },
-        "connections_changed": {
+        "connections_on_change": {
             "description": "Request send when connection was added or deleted",
             "params": {
                 "$ref": "common_types#/$defs/connections_diff"
@@ -327,7 +319,7 @@
                 "$ref": "common_types#/$defs/null_or_empty"
             }
         },
-        "dataflow_changed": {
+        "graph_on_change": {
             "description": "Request send when whole dataflow changed, e.g. when dataflow is loaded",
             "params": {
                 "$ref": "common_types#/$defs/dataflow_object"
@@ -336,7 +328,7 @@
                 "$ref": "common_types#/$defs/null_or_empty"
             }
         },
-        "metadata_changed": {
+        "metadata_on_change": {
             "description": "Request send when metadata was changed",
             "params": {
                 "$ref": "common_types#/$defs/metadata"
@@ -345,7 +337,7 @@
                 "$ref": "common_types#/$defs/null_or_empty"
             }
         },
-        "apply_center": {
+        "viewport_on_center": {
             "description": "Request send when editor was centerd",
             "params": {
                 "$ref": "common_types#/$defs/null_or_empty"

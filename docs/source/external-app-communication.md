@@ -32,18 +32,18 @@ sequenceDiagram
         participant External App
     end
     Note over Frontend,Backend: SocketIO
-    Frontend->>Backend: get_status
+    Frontend->>Backend: status_get
     Backend->>Frontend: 
     Frontend->>+Backend: external_app_connect
     Note over Backend,External App: BSD socket
     External App->>Backend: connect_socket
     Backend->>-Frontend: MessageType.OK
-    Frontend->>+Backend: request_specification
-    Backend->>External App: request_specification
+    Frontend->>+Backend: specification_get
+    Backend->>External App: specification_get
     External App->>Backend: specification
     Backend->>-Frontend: MessageType.OK + specification
     loop Every 0.5s
-        Frontend->>Backend: get_status
+        Frontend->>Backend: status_get
         Backend->>Frontend: 
     end
     par Frontend request
@@ -195,7 +195,7 @@ They are described in [Backend API](backend-api).
 ```python
 # Class containing all implemented methods
 class RPCMethods:
-    def request_specification(self) -> Dict:
+    def specification_get(self) -> Dict:
         # ...
         return {'type': MessageType.OK.value, 'content': specification}
 
@@ -205,8 +205,8 @@ class RPCMethods:
 Defined methods have to have appropriate (matching with specification) name, input and output.
 
 ```python
-    # Function name matches with the import_dataflow endpoint from External App API
-    def import_dataflow(self, external_application_dataflow: Dict) -> Dict:
+    # Function name matches with the dataflow_import endpoint from External App API
+    def dataflow_import(self, external_application_dataflow: Dict) -> Dict:
         # Function will receive one parameter, it's name has to be the same
         # as the one from API specification `params`
         # ...
@@ -215,12 +215,12 @@ Defined methods have to have appropriate (matching with specification) name, inp
             'content': pipeline_manager_dataflow
         }
 
-    def validate_dataflow(self, dataflow: Dict) -> Dict:
+    def dataflow_validate(self, dataflow: Dict) -> Dict:
         # ...
         # Returned object has to match API specification `returns`
         return {'type': MessageType.OK.value}
 
-    def run_dataflow(self, **kwargs: Dict) -> Dict:
+    def dataflow_run(self, **kwargs: Dict) -> Dict:
         # All params can also be retreived as one dictionary
         print(kwargs['dataflow'])
         # ...
@@ -230,7 +230,7 @@ Defined methods have to have appropriate (matching with specification) name, inp
 Moreover, every uncaught exception will be classified as error.
 
 ```python
-    def export_dataflow(self, dataflow: Dict) -> Dict:
+    def dataflow_export(self, dataflow: Dict) -> Dict:
         # ...
         raise Exception('Something went very, very bad...')
 ```
@@ -279,18 +279,18 @@ Requesting can be done in blocking and non-blocking manner.
 First one waits until the response is received and returns it.
 
 ```python
-response = client.request('get_status', non_blocking=False)
+response = client.request('status_get', non_blocking=False)
 ```
 
 Non-blocking option returns request's ID which later can be used to retrieve response.
 
 ```python
-_id = client.request('get_status', non_blocking=True)
+_id = client.request('status_get', non_blocking=True)
 # ...
 response = client.response_for_id(_id)
 ```
 
-Both methods sent [get_status](#frontend-get-status) request to frontend application and receive following response:
+Both methods sent [status-get](#frontend-status-get) request to frontend application and receive following response:
 
 ```json
 {

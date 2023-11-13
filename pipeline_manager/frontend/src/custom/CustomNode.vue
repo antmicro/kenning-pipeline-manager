@@ -207,14 +207,14 @@ Object.entries(props.node.inputs).forEach(([name, input]) => {
                 id: value.id,
                 new_value: value.value,
             });
-            await externalApplicationManager.notifyAboutChange('properties_changed', data);
+            await externalApplicationManager.notifyAboutChange('properties_on_change', data);
         });
     }
 });
 
 // Send message about changed position
 const notifyPositionChanged = (position) => {
-    externalApplicationManager.notifyAboutChange('position_changed', {
+    externalApplicationManager.notifyAboutChange('position_on_change', {
         graph_id: props.node.graphInstance.id,
         node_id: props.node.id,
         position: {

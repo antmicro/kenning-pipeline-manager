@@ -171,7 +171,7 @@ class RPCMethods:
         self.last_dataflow = None
         self.running = False
 
-    def import_dataflow(self, dataflow: Dict) -> Dict:
+    def dataflow_import(self, dataflow: Dict) -> Dict:
         """
         RPC method that responses to Import request.
 
@@ -187,7 +187,7 @@ class RPCMethods:
         """
         return {'type': MessageType.OK.value, 'content': dataflow}
 
-    def request_specification(self) -> Dict:
+    def specification_get(self) -> Dict:
         """
         RPC method that responses to Specification request.
 
@@ -202,7 +202,7 @@ class RPCMethods:
             'content': self.specification,
         }
 
-    def run_dataflow(self, dataflow: Dict) -> Dict:
+    def dataflow_run(self, dataflow: Dict) -> Dict:
         """
         RPC method that responses to Run request.
 
@@ -218,7 +218,7 @@ class RPCMethods:
         """
         return self._run_validate_response([RUN, SEND_REQUEST], dataflow)
 
-    def stop_dataflow(self) -> Dict:
+    def dataflow_stop(self) -> Dict:
         """
         RPC method that responses to Run request.
 
@@ -251,7 +251,7 @@ class RPCMethods:
             'content': content
         }
 
-    def validate_dataflow(self, dataflow: Dict) -> Dict:
+    def dataflow_validate(self, dataflow: Dict) -> Dict:
         """
         RPC method that responses to Validate request.
 
@@ -314,7 +314,7 @@ class RPCMethods:
                     break
                 progress = i / steps * 100
                 logging.log(logging.INFO, f"Progress: {progress}")
-                self.client.notify('progress', {'progress': progress})
+                self.client.notify('progress_change', {'progress': progress})
                 time.sleep(time_offset)
         elif found == SEND_REQUEST:
             method = properties["Method"]
@@ -348,7 +348,7 @@ class RPCMethods:
             'content': properties["Message"],
         }
 
-    def export_dataflow(
+    def dataflow_export(
         self,
         dataflow: Dict,
     ) -> Dict:
@@ -369,7 +369,7 @@ class RPCMethods:
         try:
             properties = get_node_properties(node_type, dataflow)
         except Exception:
-            raise Exception("No description for export_dataflow provided")
+            raise Exception("No description for dataflow_export provided")
         if properties["Disconnect"]:
             self.client.disconnect()
             return {}

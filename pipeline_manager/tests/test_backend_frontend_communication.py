@@ -99,7 +99,7 @@ def request_specification_success(sample_specification):
                 'content': sample_specification,
             },
         ),
-        JSONRPC20Request(_id=_curr_id(), method='request_specification')
+        JSONRPC20Request(_id=_curr_id(), method='specification_get')
     )
 
 
@@ -114,7 +114,7 @@ def request_specification_unavailable():
                 'message': 'External application is disconnected'
             }
         ),
-        JSONRPC20Request(_id=_curr_id(), method='request_specification')
+        JSONRPC20Request(_id=_curr_id(), method='specification_get')
     )
 
 
@@ -127,7 +127,7 @@ def dataflow_run(sample_dataflow):
         ),
         JSONRPC20Request(
             _id=_curr_id(),
-            method='run_dataflow',
+            method='dataflow_run',
             params={'dataflow': sample_dataflow},
         )
     )
@@ -142,7 +142,7 @@ def dataflow_validate(sample_dataflow):
         ),
         JSONRPC20Request(
             _id=_curr_id(),
-            method='validate_dataflow',
+            method='dataflow_validate',
             params={'dataflow': sample_dataflow},
         )
     )
@@ -157,7 +157,7 @@ def dataflow_export(sample_dataflow):
         ),
         JSONRPC20Request(
             _id=_curr_id(),
-            method='export_dataflow',
+            method='dataflow_export',
             params={'dataflow': sample_dataflow},
         )
     )
@@ -175,7 +175,7 @@ def dataflow_import(sample_dataflow, sample_specification):
         ),
         JSONRPC20Request(
             _id=_curr_id(),
-            method='import_dataflow',
+            method='dataflow_import',
             params={'external_application_dataflow': sample_dataflow},
         )
     )
@@ -188,7 +188,7 @@ def get_status_connected():
         JSONRPC20Response(
             _id=_curr_id(), result={'status': {'connected': True}}
         ),
-        JSONRPC20Request(_id=_curr_id(), method='get_status')
+        JSONRPC20Request(_id=_curr_id(), method='status_get')
     )
 
 
@@ -199,7 +199,7 @@ def get_status_disconnected():
         JSONRPC20Response(
             _id=_curr_id(), result={'status': {'connected': False}}
         ),
-        JSONRPC20Request(_id=_curr_id(), method='get_status')
+        JSONRPC20Request(_id=_curr_id(), method='status_get')
     )
 
 

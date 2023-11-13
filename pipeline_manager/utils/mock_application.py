@@ -90,28 +90,28 @@ class MockApplicationClient(object):
         def __init__(self, sample_specification):
             self.sample_specification = sample_specification
 
-        def validate_dataflow(self, dataflow: Dict) -> Dict:
+        def dataflow_validate(self, dataflow: Dict) -> Dict:
             return {'type': MessageType.OK.value}
 
-        def request_specification(self) -> Dict:
+        def specification_get(self) -> Dict:
             return {
                 'type': MessageType.OK.value,
                 'content': self.sample_specification,
             }
 
-        def run_dataflow(self, dataflow: Dict) -> Dict:
+        def dataflow_run(self, dataflow: Dict) -> Dict:
             return {'type': MessageType.OK.value}
 
-        def stop_dataflow(self) -> Dict:
+        def dataflow_stop(self) -> Dict:
             return {'type': MessageType.OK.value}
 
-        def import_dataflow(self, external_application_dataflow: Dict) -> Dict:
+        def dataflow_import(self, external_application_dataflow: Dict) -> Dict:
             return {
                 'type': MessageType.OK.value,
                 'content': self.sample_specification,
             }
 
-        def export_dataflow(self, dataflow: Dict) -> Dict:
+        def dataflow_export(self, dataflow: Dict) -> Dict:
             return {'type': MessageType.OK.value}
 
     def answer_empty(self) -> None:

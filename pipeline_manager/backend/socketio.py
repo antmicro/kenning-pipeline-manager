@@ -37,7 +37,7 @@ def create_socketio() -> socketio.AsyncServer:
         Object containing all JSON-RPC methods for backend
         """
 
-        def get_status(self) -> Dict:
+        def status_get(self) -> Dict:
             """
             Event that returns connection status.
 

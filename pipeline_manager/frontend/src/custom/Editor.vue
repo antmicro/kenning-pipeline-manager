@@ -420,7 +420,7 @@ export default defineComponent({
                         deleted: nodesDeleted,
                     },
                 };
-                await externalApplicationManager.notifyAboutChange('nodes_changed', data);
+                await externalApplicationManager.notifyAboutChange('nodes_on_change', data);
             });
 
             watch(visibleConnections, async (value, old) => {
@@ -453,7 +453,7 @@ export default defineComponent({
                         deleted: connectionsDeleted,
                     },
                 };
-            await externalApplicationManager.notifyAboutChange('connections_changed', data);
+                await externalApplicationManager.notifyAboutChange('connections_on_change', data);
             });
         }
 
