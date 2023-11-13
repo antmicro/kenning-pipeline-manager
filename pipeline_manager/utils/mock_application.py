@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import time
+import socketio
 from typing import Dict
 
 from pipeline_manager_backend_communication.communication_backend import CommunicationBackend  # noqa: E501
@@ -20,7 +21,8 @@ class MockApplicationClient(object):
     def __init__(
             self,
             host: str,
-            port: int,
+            backend_port: int,
+            external_port: int,
             sample_specification: dict,
             sample_dataflow: dict) -> None:
         """
@@ -28,7 +30,9 @@ class MockApplicationClient(object):
         ----------
         host : str
             IPv4 of the TCP server socket to connect to.
-        port : int
+        backend_port : int
+            Application port of the backend server
+        external_port : int
             Application port of the TCP server socket
         sample_specification : dict
             Sample specification that is used to handle
@@ -38,12 +42,16 @@ class MockApplicationClient(object):
             IMPORT messages type.
         """
         self.host = host
-        self.port = port
+        self.backend_port = backend_port
+        self.external_port = external_port
         self.sample_specification = sample_specification
         self.sample_dataflow = sample_dataflow
 
+        self.sio = socketio.SimpleClient()
+        self.sio.connect(f'http://{self.host}:{self.backend_port}')
+
         self.connecting_time_offset = 0.1
-        self.client = CommunicationBackend(host, port)
+        self.client = CommunicationBackend(host, external_port)
 
     def try_connecting(self) -> None:
         """
@@ -118,6 +126,26 @@ class MockApplicationClient(object):
                 MessageType.OK,
                 bytes()
             )
+
+    def emit(self, event: str, data: Dict) -> Dict:
+        """
+        Emits request and waits for the response.
+
+        Parameters
+        ----------
+        event : str
+            Name of the event that should be emitted
+        data : Dict
+            Content of the emitted request
+
+        Returns
+        -------
+        Dict
+            Response to the emmited request
+        """
+        self.sio.emit(event, data)
+        response = self.sio.receive()
+        return response[1]
 
     def disconnect(self) -> None:
         """
