@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import threading
+import multiprocessing
 from http import HTTPStatus
 from typing import NamedTuple, Dict
 from jsonrpc.jsonrpc2 import JSONRPC20Request, JSONRPC20Response
@@ -15,23 +16,34 @@ from pipeline_manager_backend_communication.misc_structures import (
 )  # noqa: E501
 from pipeline_manager.utils.mock_application import MockApplicationClient
 from pipeline_manager.backend.state_manager import global_state_manager
-from pipeline_manager.backend.socketio import create_socketio
+from pipeline_manager.backend.run_backend import create_backend, run_uvicorn
 
 
 @pytest.fixture
 def app_client():
-    socketio, app = create_socketio()
-    app.testing = True
-    return socketio.test_client(app)
+    sio, app, _ = create_backend(
+        ['', '--tcp-server-port', '12312',
+         '--skip-frontend', '--skip-connecting']
+    )
+    server = multiprocessing.Process(
+        target=run_uvicorn,
+        args=(app, sio, "127.0.0.1", 32123),
+    )
+    server.start()
+    time.sleep(1)
+    yield
+    server.terminate()
+    server.join()
 
 
 @pytest.fixture
 def application_client(sample_specification, sample_dataflow):
     application_client = MockApplicationClient(
-        "127.0.0.1", 12312, sample_specification, sample_dataflow
+        "127.0.0.1", 32123, 12312, sample_specification, sample_dataflow
     )
     yield application_client
     application_client.disconnect()
+    application_client.sio.disconnect()
 
 
 # Requests Fixtures
@@ -55,53 +67,66 @@ class SingleRequest(NamedTuple):
     arguments: JSONRPC20Request
 
 
+_id = 0.5
+
+
+def _curr_id():
+    """
+    Function returning sequence of numbers:
+    1, 1, 2, 2, 3, 3, ...
+    """
+    global _id
+    _id += 0.5
+    return int(_id)
+
+
 @pytest.fixture
 def connect_success():
-    return SingleRequest(
+    return lambda: SingleRequest(
         "backend-api",
-        JSONRPC20Response(_id=1, result={}),
-        JSONRPC20Request(_id=1, method='external_app_connect')
+        JSONRPC20Response(_id=_curr_id(), result={}),
+        JSONRPC20Request(_id=_curr_id(), method='external_app_connect')
     )
 
 
 @pytest.fixture
 def request_specification_success(sample_specification):
-    return SingleRequest(
+    return lambda: SingleRequest(
         "external-api",
         JSONRPC20Response(
-            _id=1, result={
+            _id=_curr_id(), result={
                 'type': MessageType.OK.value,
                 'content': sample_specification,
             },
         ),
-        JSONRPC20Request(_id=1, method='request_specification')
+        JSONRPC20Request(_id=_curr_id(), method='request_specification')
     )
 
 
 @pytest.fixture
 def request_specification_unavailable():
-    return SingleRequest(
+    return lambda: SingleRequest(
         "external-api",
         JSONRPC20Response(
-            _id=1,
+            _id=_curr_id(),
             error={
                 'code': HTTPStatus.SERVICE_UNAVAILABLE.value,
                 'message': 'External application is disconnected'
             }
         ),
-        JSONRPC20Request(_id=1, method='request_specification')
+        JSONRPC20Request(_id=_curr_id(), method='request_specification')
     )
 
 
 @pytest.fixture
 def dataflow_run(sample_dataflow):
-    return SingleRequest(
+    return lambda: SingleRequest(
         "external-api",
         JSONRPC20Response(
-            _id=1, result={'type': MessageType.OK.value},
+            _id=_curr_id(), result={'type': MessageType.OK.value},
         ),
         JSONRPC20Request(
-            _id=1,
+            _id=_curr_id(),
             method='run_dataflow',
             params={'dataflow': sample_dataflow},
         )
@@ -110,13 +135,13 @@ def dataflow_run(sample_dataflow):
 
 @pytest.fixture
 def dataflow_validate(sample_dataflow):
-    return SingleRequest(
+    return lambda: SingleRequest(
         "external-api",
         JSONRPC20Response(
-            _id=1, result={'type': MessageType.OK.value},
+            _id=_curr_id(), result={'type': MessageType.OK.value},
         ),
         JSONRPC20Request(
-            _id=1,
+            _id=_curr_id(),
             method='validate_dataflow',
             params={'dataflow': sample_dataflow},
         )
@@ -125,13 +150,13 @@ def dataflow_validate(sample_dataflow):
 
 @pytest.fixture
 def dataflow_export(sample_dataflow):
-    return SingleRequest(
+    return lambda: SingleRequest(
         "external-api",
         JSONRPC20Response(
-            _id=1, result={'type': MessageType.OK.value},
+            _id=_curr_id(), result={'type': MessageType.OK.value},
         ),
         JSONRPC20Request(
-            _id=1,
+            _id=_curr_id(),
             method='export_dataflow',
             params={'dataflow': sample_dataflow},
         )
@@ -140,16 +165,16 @@ def dataflow_export(sample_dataflow):
 
 @pytest.fixture
 def dataflow_import(sample_dataflow, sample_specification):
-    return SingleRequest(
+    return lambda: SingleRequest(
         "external-api",
         JSONRPC20Response(
-            _id=1, result={
+            _id=_curr_id(), result={
                 'type': MessageType.OK.value,
                 'content': sample_specification,
             },
         ),
         JSONRPC20Request(
-            _id=1,
+            _id=_curr_id(),
             method='import_dataflow',
             params={'external_application_dataflow': sample_dataflow},
         )
@@ -158,29 +183,28 @@ def dataflow_import(sample_dataflow, sample_specification):
 
 @pytest.fixture
 def get_status_connected():
-    return SingleRequest(
+    return lambda: SingleRequest(
         "backend-api",
-        JSONRPC20Response(_id=1, result={'status': {'connected': True}}),
-        JSONRPC20Request(_id=1, method='get_status')
+        JSONRPC20Response(
+            _id=_curr_id(), result={'status': {'connected': True}}
+        ),
+        JSONRPC20Request(_id=_curr_id(), method='get_status')
     )
 
 
 @pytest.fixture
 def get_status_disconnected():
-    return SingleRequest(
+    return lambda: SingleRequest(
         "backend-api",
-        JSONRPC20Response(_id=1, result={'status': {'connected': False}}),
-        JSONRPC20Request(_id=1, method='get_status')
+        JSONRPC20Response(
+            _id=_curr_id(), result={'status': {'connected': False}}
+        ),
+        JSONRPC20Request(_id=_curr_id(), method='get_status')
     )
 
 
-def emit_request(request: SingleRequest, app_client) -> Dict:
-    app_client.emit(request.name, request.arguments.data, callback=True)
-    while True:
-        messages = app_client.get_received()
-        if messages:
-            return messages[-1]['args'][0]
-        time.sleep(0.1)
+def emit_request(request: SingleRequest, app: MockApplicationClient) -> Dict:
+    return app.emit(request.name, request.arguments.data)
 
 
 # ---------------
@@ -203,31 +227,40 @@ def test_connecting_multiple_times(
     and then connects once again.
     """
     events = [
-        connect_success,
-        get_status_disconnected,
-        request_specification_unavailable,
-        connect_success,
-        get_status_connected,
-        request_specification_success,
+        connect_success(),
+        get_status_disconnected(),
+        request_specification_unavailable(),
+        connect_success(),
+        get_status_connected(),
+        request_specification_success(),
     ]
+    event_disconnected = threading.Event()
+    event_spec_requested = threading.Event()
 
-    def connect_and_request(app_client, responses):
+    def connect_and_request(app, responses):
         global_state_manager.reinitialize(
-            application_client.port, application_client.host
+            application_client.external_port, application_client.host
         )
 
-        for _, event in enumerate(events):
-            responses.append(emit_request(event, app_client))
-            time.sleep(0.1)
+        for i, event in enumerate(events):
+            if i == 2:
+                event_disconnected.wait()
+            responses.append(emit_request(event, app))
+
+            if i == 2:
+                event_spec_requested.set()
 
     responses = []
     process = threading.Thread(
-        target=connect_and_request, args=(app_client, responses)
+        target=connect_and_request, args=(application_client, responses)
     )
     process.start()
+    time.sleep(1)
 
     application_client.try_connecting()
     application_client.disconnect()
+    event_disconnected.set()
+    event_spec_requested.wait()
     time.sleep(1)
     application_client.try_connecting()
     application_client.answer_valid()
@@ -261,20 +294,22 @@ def test_single_event_connected_valid(
     The expected behaviour is described by `single_event` fixture.
     """
     single_event = request.getfixturevalue(single_event)
+    events = [connect_success(), single_event()]
 
-    def connect_and_request(app_client, responses):
+    def connect_and_request(app, responses):
         global_state_manager.reinitialize(
-            application_client.port, application_client.host
+            application_client.external_port, application_client.host
         )
 
-        for event in [connect_success, single_event]:
-            responses.append(emit_request(event, app_client))
+        for event in events:
+            responses.append(emit_request(event, app))
 
     responses = []
     process = threading.Thread(
-        target=connect_and_request, args=(app_client, responses)
+        target=connect_and_request, args=(application_client, responses)
     )
     process.start()
+    time.sleep(1)
 
     application_client.try_connecting()
     application_client.answer_valid()
@@ -282,10 +317,10 @@ def test_single_event_connected_valid(
     process.join()
 
     data = responses[0]
-    assert connect_success.expected_data.data == data
+    assert events[0].expected_data.data == data
 
     data = responses[1]
-    assert single_event.expected_data.data == data
+    assert events[1].expected_data.data == data
 
 
 # ---------------
@@ -293,9 +328,14 @@ def test_single_event_connected_valid(
 
 # get_status
 # ---------------
-def test_get_status_disconnected(app_client, get_status_disconnected):
-    response = emit_request(get_status_disconnected, app_client)
-    assert response == get_status_disconnected.expected_data.data
+def test_get_status_disconnected(
+    app_client,
+    application_client,
+    get_status_disconnected,
+):
+    request = get_status_disconnected()
+    response = emit_request(request, application_client)
+    assert response == request.expected_data.data
 
 
 # ---------------
@@ -305,32 +345,46 @@ def test_get_status_disconnected(app_client, get_status_disconnected):
 # ---------------
 def test_request_specification_disconnected(
     app_client,
+    application_client,
     request_specification_unavailable,
 ):
-    response = emit_request(request_specification_unavailable, app_client)
-    assert response == request_specification_unavailable.expected_data.data
+    request = request_specification_unavailable()
+    response = emit_request(request, application_client)
+    assert response == request.expected_data.data
 
 
 # dataflow_action_request
 # ---------------
-def test_run_dataflow_request_disconnected(app_client, dataflow_run):
-    response = emit_request(dataflow_run, app_client)
+def test_run_dataflow_request_disconnected(
+    app_client,
+    application_client,
+    dataflow_run,
+):
+    response = emit_request(dataflow_run(), application_client)
     assert (
         "External application is disconnected" == response["error"]["message"]
         and response["error"]["code"] == HTTPStatus.SERVICE_UNAVAILABLE
     )
 
 
-def test_validate_dataflow_request_disconnected(app_client, dataflow_validate):
-    response = emit_request(dataflow_validate, app_client)
+def test_validate_dataflow_request_disconnected(
+    app_client,
+    application_client,
+    dataflow_validate,
+):
+    response = emit_request(dataflow_validate(), application_client)
     assert (
         "External application is disconnected" == response["error"]["message"]
         and response["error"]["code"] == HTTPStatus.SERVICE_UNAVAILABLE
     )
 
 
-def test_export_dataflow_request_disconnected(app_client, dataflow_export):
-    response = emit_request(dataflow_export, app_client)
+def test_export_dataflow_request_disconnected(
+    app_client,
+    application_client,
+    dataflow_export,
+):
+    response = emit_request(dataflow_export(), application_client)
     assert (
         "External application is disconnected" == response["error"]["message"]
         and response["error"]["code"] == HTTPStatus.SERVICE_UNAVAILABLE
