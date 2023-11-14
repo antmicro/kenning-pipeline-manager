@@ -44,33 +44,17 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
                         />
                         <div class="__title-label" v-html="category.hitSubstring"></div>
                         <div
+                            class="__vertical_ellipsis"
                             ref="settings"
                             role="button"
-                            style='cursor: pointer;'
                             @pointerdown.stop=""
-                            @click.stop="() => {
-                                showMenu.hitSubstring === category.hitSubstring ?
-                                showMenu=false : showMenu=category
-                            }"
+                            @click.stop="() => showMenuClick(category)"
                             v-if="category.categoryNode.URLs.length !== 0"
                         >
                             <VerticalEllipsis class="smaller_svg" />
                         </div>
                     </div>
-                    <div
-                        style='
-                            position: absolute;
-                            left: 100%;
-                            max-width: 18em;
-                            background-color: #181818;
-                            border-bottom: 1px solid #737373;
-                            z-index: 9999;
-                            transform: translate(0%,50%)
-                                       translate(0,-1.75em)
-                                       translate(0, -4px);
-                        '
-                        class='icondiv'
-                    >
+                    <div class='__icondiv'>
                         <LinkMenu
                             :node='showMenu.categoryNode'
                             style='width: 18em'
@@ -105,32 +89,16 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
                             <div class="__title-label" v-html="node.hitSubstring"></div>
                         </div>
                         <div
+                            class="__vertical_ellipsis"
                             ref="settings"
                             role="button"
-                            style='cursor: pointer; right: 85%'
                             @pointerdown.stop=""
-                            @click.stop="() => {
-                                showMenu.hitSubstring === node.hitSubstring ?
-                                showMenu=false : showMenu=node
-                            }"
+                            @click.stop="() => showMenuClick(node)"
                             v-if="node.URLs.length !== 0"
                         >
                             <VerticalEllipsis class="smaller_svg" />
                         </div>
-                        <div
-                            style='
-                                position: absolute;
-                                left: 100%;
-                                max-width: 18em;
-                                background-color: #181818;
-                                border-bottom: 1px solid #737373;
-                                z-index: 9999;
-                                transform: translate(0%,50%)
-                                           translate(0,-1.75em)
-                                           translate(0, -4px);
-                            '
-                            class='icondiv'
-                        >
+                        <div class='__icondiv'>
                             <LinkMenu
                                 :node='showMenu'
                                 style='width: 18em'
@@ -172,33 +140,17 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
                     />
                     <div class="__title-label" v-html="category.hitSubstring"></div>
                     <div
+                        class="__vertical_ellipsis"
                         ref="settings"
                         role="button"
-                        style='cursor: pointer;'
                         @pointerdown.stop=""
-                        @click.stop="() => {
-                            showMenu.hitSubstring === category.hitSubstring ?
-                            showMenu=false : showMenu=category
-                        }"
+                        @click.stop="() => showMenuClick(category)"
                         v-if="category.categoryNode.URLs.length !== 0"
                     >
                         <VerticalEllipsis class="smaller_svg" />
                     </div>
                 </div>
-                <div
-                    style='
-                        position: absolute;
-                        left: 100%;
-                        max-width: 18em;
-                        background-color: #181818;
-                        border-bottom: 1px solid #737373;
-                        z-index: 9999;
-                        transform: translate(0%,50%)
-                                   translate(0,-1.75em)
-                                   translate(0, -4px);
-                    '
-                    class='icondiv'
-                >
+                <div class='__icondiv'>
                     <LinkMenu
                         :node='showMenu.categoryNode'
                         style='width: 18em'
@@ -339,6 +291,9 @@ export default defineComponent({
         });
 
         const showMenu = inject('menu');
+        const showMenuClick = (menu) => {
+            showMenu.value = (showMenu.hitSubstring === menu.hitSubstring) ? false : menu;
+        };
         const closeMenu = () => {
             if (showMenu.value) showMenu.value = false;
         };
@@ -356,6 +311,7 @@ export default defineComponent({
             emptyCategory,
             categoryClasses,
             showMenu,
+            showMenuClick,
             closeMenu,
         };
     },
