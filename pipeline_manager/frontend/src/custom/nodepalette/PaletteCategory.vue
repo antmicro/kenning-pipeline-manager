@@ -292,7 +292,7 @@ export default defineComponent({
 
         const showMenu = inject('menu');
         const showMenuClick = (menu) => {
-            showMenu.value = (showMenu.hitSubstring === menu.hitSubstring) ? false : menu;
+            showMenu.value = (showMenu.value.hitSubstring === menu.hitSubstring) ? false : menu;
         };
         const closeMenu = () => {
             if (showMenu.value) showMenu.value = false;
