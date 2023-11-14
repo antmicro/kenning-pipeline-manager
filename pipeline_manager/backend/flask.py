@@ -7,10 +7,11 @@ import os
 
 from flask import Flask, render_template
 from flask_cors import CORS
+from pathlib import Path
 
 from pipeline_manager import frontend
 
-dist_path = os.path.join(os.path.dirname(frontend.__file__), "dist")
+dist_path = Path(os.path.dirname(frontend.__file__)) / "dist"
 
 
 def create_app() -> Flask:
