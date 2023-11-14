@@ -147,7 +147,7 @@ export default defineComponent({
             const nodesContainer = computed(() => document.querySelector('.nodes'));
             nodesContainer.value.addEventListener('scroll', (event) => {
                 scroll.value = event.target.scrollTop;
-                const iconMenus = document.getElementsByClassName('icondiv');
+                const iconMenus = document.getElementsByClassName('__icondiv');
                 for (let i = 0; i < iconMenus.length; i += 1) {
                     iconMenus[i].style.translate = `0px -${scroll.value.toString()}px`;
                 }
