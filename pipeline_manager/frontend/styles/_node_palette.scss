@@ -122,6 +122,28 @@
             display: block;
         }
     }
+
+    &.__node-entry {
+        width: 100%;
+        flex-grow: 1;
+        justify-content: space-between;
+    }
+
+    .__vertical_ellipsis {
+        cursor: pointer !important;
+    }
+
+    &>.__icondiv {
+        position: absolute;
+        left: 100%;
+        max-width: 18em;
+        background-color: #181818;
+        border-bottom: 1px solid #737373;
+        z-index: 9999;
+        transform: translate(0%,50%)
+                   translate(0,-1.75em)
+                   translate(0, -4px);
+    }
 }
 
 .__entry_search {
