@@ -570,5 +570,13 @@ export default function createPipelineManagerGraph(graph) {
         }
     };
 
+    graph.removeNodeOnly = function removeNodeOnly(node) {
+        this._nodes.splice(this.nodes.indexOf(node), 1);
+        this.events.removeNode.emit(node);
+        node.onDestroy();
+        this.nodeEvents.removeTarget(node);
+        this.nodeHooks.removeTarget(node);
+    };
+
     return graph;
 }
