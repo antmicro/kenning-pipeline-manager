@@ -380,11 +380,11 @@ class RPCMethods:
             json.dump(dataflow, f, indent=4)
         logging.log(
             logging.INFO,
-            f"Exported dataflow stored in {self.output_path}"
+            f"Exported dataflow stored in {self.out_path}"
         )
         return {
             'type': _text_to_message_type(properties["MessageType"]).value,
-            'content': properties["Message"].encode(encoding="UTF-8"),
+            'content': properties["Message"],
         }
 
 
