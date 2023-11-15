@@ -149,15 +149,15 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
                     >
                         <VerticalEllipsis class="smaller_svg" />
                     </div>
-                </div>
-                <div class='__icondiv'>
-                    <LinkMenu
-                        :node='showMenu.categoryNode'
-                        style='width: 18em'
-                        v-if="showMenu !== false &&
-                              showMenu.hitSubstring === category.hitSubstring"
-                        v-click-outside="closeMenu"
-                    />
+                    <div class='__icondiv'>
+                        <LinkMenu
+                            :node='showMenu.categoryNode'
+                            style='width: 18em'
+                            v-if="showMenu !== false &&
+                                  showMenu.hitSubstring === category.hitSubstring"
+                            v-click-outside="closeMenu"
+                        />
+                    </div>
                 </div>
             </template>
             <div v-else class="__title" v-html="category.hitSubstring"></div>
