@@ -72,3 +72,11 @@ def start_socket_thread(socketio: AsyncServer):
         )
     )
     _THREAD.start()
+
+
+def join_listener_thread():
+    """
+    Waits till end of the listener thread.
+    """
+    if _THREAD and _THREAD.is_alive():
+        _THREAD.join()
