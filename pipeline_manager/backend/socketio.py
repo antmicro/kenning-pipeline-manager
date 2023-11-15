@@ -2,7 +2,6 @@ from http import HTTPStatus
 from typing import Dict, Tuple
 
 from flask import Flask
-from flask_socketio import SocketIO
 from engineio.payload import Payload
 from pipeline_manager_backend_communication.json_rpc_base import JSONRPCBase  # noqa: E501
 from pipeline_manager_backend_communication.misc_structures import (
@@ -18,7 +17,7 @@ from pipeline_manager.backend.state_manager import global_state_manager
 Payload.max_decode_packets = 500
 
 
-def create_socketio() -> Tuple[SocketIO, Flask]:
+def create_socketio() -> Tuple[socketio.AsyncServer, Flask]:
     """
     Wraps the flask instance with socketio events used to communicate
     with frontend application
