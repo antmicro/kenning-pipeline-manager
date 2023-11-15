@@ -44,6 +44,19 @@ export default {
         const editorManager = EditorManager.getEditorManagerInstance();
         const counter = ref(0);
 
+        const cache = {};
+        // Importing all assets to a cache so that they can be accessed dynamically during runtime
+        function importAll(r) {
+            r.keys().forEach((key) => (cache[key] = r(key))); // eslint-disable-line no-return-assign,max-len
+        }
+        try {
+            importAll(require.context('../../assets', true, /\.(svg|png|jpg|jpeg|gif|webp|avif)$/));
+        } catch (e) {
+            // assets directory not found
+        } finally {
+            editorManager.baklavaView.cache = cache;
+        }
+
         const hideHud = computed(() => editorManager.baklavaView.hideHud);
 
         const handleLoadWait = () => {
