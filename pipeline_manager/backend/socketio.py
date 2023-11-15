@@ -1,7 +1,6 @@
 from http import HTTPStatus
-from typing import Dict, Tuple
+from typing import Dict
 
-from flask import Flask
 from engineio.payload import Payload
 from pipeline_manager_backend_communication.json_rpc_base import JSONRPCBase  # noqa: E501
 from pipeline_manager_backend_communication.misc_structures import (
@@ -13,21 +12,22 @@ import asyncio
 import socketio
 import threading
 
-from pipeline_manager.backend.tcp_socket import start_socket_thread
+from pipeline_manager.backend.tcp_socket import (
+    start_socket_thread, join_listener_thread
+)
 from pipeline_manager.backend.state_manager import global_state_manager
 
 Payload.max_decode_packets = 500
 
 
-def create_socketio() -> Tuple[socketio.AsyncServer, Flask]:
+def create_socketio() -> socketio.AsyncServer:
     """
-    Wraps the flask instance with socketio events used to communicate
-    with frontend application
+    Creates python-socketio asynchronous server.
 
     Returns
     -------
-    Tuple[SocketIO, Flask] :
-        Returns a socketio instance and flask instance that was used
+    socketio.AsyncServer :
+        Returns a socketio instance
     """
 
     sio = socketio.AsyncServer(async_mode='asgi')
@@ -75,17 +75,26 @@ def create_socketio() -> Tuple[socketio.AsyncServer, Flask]:
                 return {}
             else:
                 tcp_server.disconnect()
+                join_listener_thread()
                 tcp_server.initialize_server()
-                out = tcp_server.wait_for_client()
+                out = tcp_server.wait_for_client(
+                    tcp_server.receive_message_timeout
+                )
+                while out.status == Status.NOTHING and \
+                        not global_state_manager.server_should_stop:
+                    out = tcp_server.wait_for_client(
+                        tcp_server.receive_message_timeout
+                    )
             if out.status == Status.CLIENT_CONNECTED:
                 # Socket reconnected, new thread
                 # receiving messages has to be spawned
                 start_socket_thread(sio)
                 return {}
-            raise JSONRPCDispatchException(
-                message='External application did not connect',
-                code=HTTPStatus.SERVICE_UNAVAILABLE.value
-            )
+            if not global_state_manager.server_should_stop:
+                raise JSONRPCDispatchException(
+                    message='External application did not connect',
+                    code=HTTPStatus.SERVICE_UNAVAILABLE.value
+                )
 
     json_rpc_backend = JSONRPCBase()
     json_rpc_backend.register_methods(BackendMethods(), 'backend')
