@@ -9,7 +9,9 @@ from pipeline_manager_backend_communication.misc_structures import (
 )
 from jsonrpc.jsonrpc2 import JSONRPC20Response
 from jsonrpc.exceptions import JSONRPCDispatchException
+import asyncio
 import socketio
+import threading
 
 from pipeline_manager.backend.tcp_socket import start_socket_thread
 from pipeline_manager.backend.state_manager import global_state_manager
@@ -98,10 +100,16 @@ def create_socketio() -> Tuple[socketio.AsyncServer, Flask]:
         json_rpc_request : Dict
             Request in JSON-RPC format
         """
-        resp = json_rpc_backend.generate_json_rpc_response(
-            json_rpc_request
-        )
-        await sio.emit('api-response', resp.data)
+        async def _action():
+            resp = json_rpc_backend.generate_json_rpc_response(
+                json_rpc_request
+            )
+            await sio.emit('api-response', resp.data)
+
+        if json_rpc_request['method'] == 'external_app_connect':
+            threading.Thread(target=lambda: asyncio.run(_action())).start()
+        else:
+            await _action()
         return True
 
     @sio.on("external-api")
