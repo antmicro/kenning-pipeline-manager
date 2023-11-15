@@ -19,7 +19,7 @@ class ExternalApplicationManager {
 
     idStatusInterval = null;
 
-    timeoutStatusInterval = 500;
+    timeoutStatusInterval = 1500;
 
     /**
      * Function that fetches state of the connection and updates
@@ -30,7 +30,7 @@ class ExternalApplicationManager {
             const response = await jsonRPC.request('get_status');
             this.externalApplicationConnected = response.status.connected;
         } catch (error) {
-            NotificationHandler.terminalLog('error', error.message);
+            NotificationHandler.terminalLog('error', 'Checking status', error.message);
             this.externalApplicationConnected = false;
         }
     }
@@ -45,7 +45,7 @@ class ExternalApplicationManager {
             await jsonRPC.request('external_app_connect');
             this.externalApplicationConnected = true;
         } catch (error) {
-            NotificationHandler.terminalLog('error', error.message);
+            NotificationHandler.terminalLog('warning', 'Connecting with external app', error.message);
             this.externalApplicationConnected = false;
         }
     }
@@ -200,10 +200,15 @@ class ExternalApplicationManager {
      * is invoked.
      */
     async checkConnectionStatus() {
-        await this.updateConnectionStatus();
-        if (!this.externalApplicationConnected) {
-            this.stopStatusInterval();
-            await this.initializeConnection(false);
+        while (this.interval) {
+            /* eslint-disable-next-line no-await-in-loop */
+            await this.updateConnectionStatus();
+            if (!this.externalApplicationConnected) {
+                /* eslint-disable-next-line no-await-in-loop */
+                await this.initializeConnection(false, true);
+            }
+            /* eslint-disable-next-line no-await-in-loop,no-promise-executor-return */
+            await new Promise((r) => setTimeout(r, this.timeoutStatusInterval));
         }
     }
 
@@ -212,20 +217,8 @@ class ExternalApplicationManager {
      */
     startStatusInterval() {
         if (this.idStatusInterval === null) {
-            this.idStatusInterval = setInterval(
-                () => this.checkConnectionStatus(),
-                this.timeoutStatusInterval,
-            );
-        }
-    }
-
-    /**
-     * Stops status checking.
-     */
-    stopStatusInterval() {
-        if (this.idStatusInterval !== null) {
-            clearInterval(this.idStatusInterval);
-            this.idStatusInterval = null;
+            this.interval = true;
+            this.idStatusInterval = this.checkConnectionStatus();
         }
     }
 
@@ -241,20 +234,28 @@ class ExternalApplicationManager {
      * @param checkConnection True if should check connection status beforehand. Used to reduce
      * the number of requests if the status of the connection is known.
      */
-    async initializeConnection(checkConnection = true) {
+    async initializeConnection(checkConnection = true, startInterval = true) {
         if (checkConnection) {
             await this.updateConnectionStatus();
         }
 
         if (!this.externalApplicationConnected) {
             NotificationHandler.showToast('info', 'Waiting for the application to connect...');
-            await this.openTCP();
+            do {
+                /* eslint-disable-next-line no-await-in-loop */
+                await this.openTCP();
+                if (!this.externalApplicationConnected) {
+                    NotificationHandler.showToast('info', 'Application cannot connect, retrying...');
+                    /* eslint-disable-next-line no-await-in-loop,no-promise-executor-return */
+                    await new Promise((r) => setTimeout(r, 2 * this.timeoutStatusInterval));
+                }
+            } while (!this.externalApplicationConnected);
         }
         if (this.externalApplicationConnected) {
             await this.requestSpecification();
         }
 
-        this.startStatusInterval();
+        if (startInterval) this.startStatusInterval();
     }
 }
 
