@@ -7,14 +7,13 @@ import logging
 import sys
 import socketio
 from pathlib import Path
-from asgiref.wsgi import WsgiToAsgi
-from flask import Flask
+from fastapi import FastAPI
 from uvicorn import run
 from uvicorn.protocols.websockets.websockets_impl import WebSocketProtocol
 
 from pipeline_manager_backend_communication.misc_structures import Status
 
-from pipeline_manager.backend.flask import dist_path, create_app
+from pipeline_manager.backend.fastapi import create_app, dist_path
 from pipeline_manager.backend.tcp_socket import start_socket_thread
 from pipeline_manager.backend.socketio import create_socketio
 from pipeline_manager.backend.state_manager import global_state_manager
@@ -91,10 +90,7 @@ def create_backend(argv):
     sio = create_socketio()
     app = None
     if not args.skip_frontend:
-        app = create_app()
-        if args.frontend_directory:
-            app.static_folder = args.frontend_directory.absolute()
-            app.template_folder = args.frontend_directory.absolute()
+        app = create_app(args.frontend_directory)
 
     global_state_manager.reinitialize(
         args.tcp_server_port, args.tcp_server_host
@@ -119,12 +115,11 @@ def create_backend(argv):
 
 
 def run_uvicorn(
-    flask_app: Flask,
+    app: FastAPI,
     sio: socketio.AsyncServer,
     host: str, port: int,
 ):
-    flask_asgi = WsgiToAsgi(flask_app)
-    app_asgi = socketio.ASGIApp(sio, other_asgi_app=flask_asgi)
+    app_asgi = socketio.ASGIApp(sio, other_asgi_app=app)
     run(
         app_asgi,
         host=host,
