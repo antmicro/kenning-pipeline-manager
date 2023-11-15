@@ -56,6 +56,8 @@ This object specifies additional editor options and contains the following optio
   Default value is `NoLayout`
 * `icons` - contains definition of icon classes.
   Icon classes are key-value pairs, where key is the name of the icon class, and value is the URL prefix that is used to compute the actual path.
+* `navbarItems` - list of buttons that are displayed in the navbar in `server-app` mode, that allow for calling custom procedures.
+  The entries are of type [Navbar item](#navbar-item).
 
 An example:
 
@@ -120,6 +122,27 @@ It consists of the following properties:
 * `interfaceConnectionPattern` - describes how the connection line should look like.
   The possible variants are `solid`, `dashed` and `dotted`.
 * `interfaceConnectionColor` - describes the color of connection lines, should be a hexadecimal number representing RGB values.
+
+#### Navbar item
+
+Describes a list of custom buttons displayed in the navbar.
+Every element consists of the following properties:
+
+* `name` - displayed as a tooltip to the user when the button is hovered.
+  Names have to be unique.
+* `iconName` - name of the icon that is used.
+  It can be either a file in the assets directory, or an icon described in `/pipeline-manager/pipeline_manager/frontend/src/icons/index.ts`.
+* `procedureName` - name of the procedure to be called.
+  It is assumed that the procedure does not need any arguments, or takes one argument which is the currently displayed dataflow.
+
+Example of a button that is used to run the current graph using a dedicated procedure `dataflow_run` looks as follows:
+```json
+{
+    "name": "Run",
+    "iconName": "Run",
+    "procedureName": "dataflow_run"
+}
+```
 
 ### Node
 
@@ -266,7 +289,7 @@ There are nine possible values for the `type` property.
 * `slider` - property is a float with a specified range.
   It requires `min` and `max` properties.
 * `list` - property is a list of arguments of the same type, which can be specified using `dtype`.
-* `hex` - property is a string representing base-16 number which has to match the following regex: `/0x[a-fA-F0-9]`. 
+* `hex` - property is a string representing base-16 number which has to match the following regex: `/0x[a-fA-F0-9]`.
 
 
 Additional properties:
