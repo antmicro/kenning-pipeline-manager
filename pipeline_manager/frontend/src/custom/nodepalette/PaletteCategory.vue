@@ -16,7 +16,7 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
         v-show="category.mask"
         :key="name"
     >
-        <template v-if="emptyCategory(category)">
+        <template v-if="notEmptyCategory(category)">
             <div
                 class="__entry __category"
                 @click="onMouseDown(i)"
@@ -220,7 +220,7 @@ export default defineComponent({
             }
         };
 
-        const emptyCategory = (category) => {
+        const notEmptyCategory = (category) => {
             if (category.nodes.nodeTypes === undefined) {
                 return Object.keys(category.subcategories).length !== 0;
             }
@@ -274,10 +274,10 @@ export default defineComponent({
         const sortedEntries = (obj, sortSubcategories = false) =>
             Object.entries(obj).sort(([a, aNode], [b, bNode]) => {
                 if (sortSubcategories) {
-                    if (emptyCategory(aNode) && !emptyCategory(bNode)) {
+                    if (notEmptyCategory(aNode) && !notEmptyCategory(bNode)) {
                         return 1;
                     }
-                    if (!emptyCategory(aNode) && emptyCategory(bNode)) {
+                    if (!notEmptyCategory(aNode) && notEmptyCategory(bNode)) {
                         return -1;
                     }
                 }
@@ -286,8 +286,8 @@ export default defineComponent({
             });
 
         const categoryClasses = (category) => ({
-            __entry: emptyCategory(category),
-            __category: emptyCategory(category),
+            __entry: notEmptyCategory(category),
+            __category: notEmptyCategory(category),
         });
 
         const showMenu = inject('menu');
@@ -308,7 +308,7 @@ export default defineComponent({
             onPointerOver,
             onPointerLeave,
             isCategoryNode,
-            emptyCategory,
+            notEmptyCategory,
             categoryClasses,
             showMenu,
             showMenuClick,
