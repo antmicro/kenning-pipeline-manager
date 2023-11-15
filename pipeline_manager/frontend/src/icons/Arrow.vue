@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
 <template>
     <svg
         class="arrow"
-        :class="[rotate, scale, { 'hoverable': hoverable, 'noninteractable': noninteractable } ]"
+        :class="[rotate, scale, { 'noninteractable': noninteractable } ]"
         width="16"
         height="18"
         viewBox="0 0 16 18"
@@ -17,7 +17,7 @@ SPDX-License-Identifier: Apache-2.0
     >
         <path
             class="highlighted"
-            :class="[color, { 'noninteractable': noninteractable }]"
+            :class="[color, hoverStatus, { 'noninteractable': noninteractable }]"
             d="M16 18L7.33664 9.00005L16 4.78745e-05L8.65202 4.77869e-05L1.07327e-07 9.00005L8.65202 18L16 18Z"
             fill="#6F6F6F"
             stroke-width="0"
@@ -26,7 +26,9 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script lang="ts">
-export default {
+import { computed, defineComponent } from 'vue';
+
+export default defineComponent({
     props: {
         color: {
             type: String,
@@ -40,7 +42,7 @@ export default {
             type: String,
             required: false,
         },
-        hoverable: {
+        hover: {
             type: Boolean,
             default: false,
         },
@@ -49,7 +51,15 @@ export default {
             default: false,
         },
     },
-};
+    setup(props) {
+        const hoverStatus = computed(() => ({
+            hovered: props.hover,
+            normal: !props.hover,
+        }));
+
+        return { hoverStatus };
+    },
+});
 </script>
 
 <style lang="scss" scoped>
@@ -92,7 +102,7 @@ export default {
     scale: 0.6;
 }
 
-.hoverable:hover > .highlighted {
+.hovered {
     fill: $green;
 }
 
