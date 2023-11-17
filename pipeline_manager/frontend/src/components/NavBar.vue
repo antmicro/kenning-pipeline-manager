@@ -304,7 +304,8 @@ export default {
             const icon = this.$refs[panel.iconRef];
 
             const currentElement = event.target;
-            if (icon.contains(currentElement) || icon === currentElement) {
+            if (currentElement instanceof Node && (icon.contains(currentElement)
+                                                   || icon === currentElement)) {
                 return;
             }
 
