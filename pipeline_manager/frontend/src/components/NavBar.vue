@@ -36,6 +36,7 @@ import BlurPanel from './BlurPanel.vue';
 
 import InputInterface from '../interfaces/InputInterface.js';
 import InputInterfaceComponent from '../interfaces/InputInterface.vue';
+import { brokenImage } from '../../../resources/broken_image.js';
 import {
     startTransaction, commitTransaction,
 } from '../core/History.ts';
@@ -398,7 +399,7 @@ export default {
             // Exclude node palette
             const filter = (node) => !node.classList?.contains('baklava-node-palette');
 
-            toPng(nodeEditor, { filter })
+            toPng(nodeEditor, { filter, imagePlaceholder: brokenImage })
                 .then((dataUrl) => {
                     const downloadLink = document.createElement('a');
                     downloadLink.download = 'dataflow.png';
@@ -422,8 +423,7 @@ export default {
             const nodeEditor = document.querySelector('.inner-editor');
             // Exclude node palette
             const filter = (node) => !node.classList?.contains('baklava-node-palette');
-
-            toSvg(nodeEditor, { filter })
+            toSvg(nodeEditor, { filter, imagePlaceholder: brokenImage })
                 .then((dataUrl) => {
                     const downloadLink = document.createElement('a');
                     downloadLink.download = 'dataflow.svg';
