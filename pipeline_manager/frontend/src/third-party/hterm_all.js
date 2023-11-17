@@ -2692,7 +2692,7 @@ lib.PreferenceManager.prototype.readStorage = function(callback = undefined) {
       }
 
       if (pendingChildren == 0 && callback) {
-        setTimeout(callback);
+        setTimeout(callback, 100);
       }
     });
 };
