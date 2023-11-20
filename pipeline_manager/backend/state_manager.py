@@ -40,7 +40,7 @@ class PMStateManager:
         self.tcp_server_port = tcp_server_port
         self.tcp_server_host = tcp_server_host
         self.server = None
-        self.server_process = None
+        self.server_processes = []
         self.server_should_stop = False
 
         self.schema = None
@@ -48,7 +48,7 @@ class PMStateManager:
 
         self.connected_frontends = 0
 
-    def reinitialize(
+    async def reinitialize(
         self,
         tcp_server_port: int,
         tcp_server_host: str,
@@ -69,7 +69,7 @@ class PMStateManager:
         self.tcp_server_host = tcp_server_host
 
         if self.server:
-            self.server.disconnect()
+            await self.server.disconnect()
         self.server = None
 
     @property
