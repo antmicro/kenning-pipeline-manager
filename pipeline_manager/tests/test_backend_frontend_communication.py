@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-import threading
+import asyncio
 import multiprocessing
 from http import HTTPStatus
 from typing import NamedTuple, Dict
@@ -10,6 +10,7 @@ from jsonrpc.jsonrpc2 import JSONRPC20Request, JSONRPC20Response
 import time
 
 import pytest
+import pytest_asyncio
 
 from pipeline_manager_backend_communication.misc_structures import (
     MessageType,
@@ -27,7 +28,7 @@ def app_client():
     )
     server = multiprocessing.Process(
         target=run_uvicorn,
-        args=(app, sio, "127.0.0.1", 32123),
+        args=(app, sio, "127.0.0.1", 32123, "127.0.0.1", 12312),
     )
     server.start()
     time.sleep(1)
@@ -36,14 +37,15 @@ def app_client():
     server.join()
 
 
-@pytest.fixture
-def application_client(sample_specification, sample_dataflow):
+@pytest_asyncio.fixture
+async def application_client(sample_specification, sample_dataflow):
     application_client = MockApplicationClient(
         "127.0.0.1", 32123, 12312, sample_specification, sample_dataflow
     )
+    await application_client.connect_socketio()
     yield application_client
-    application_client.disconnect()
-    application_client.sio.disconnect()
+    await application_client.disconnect()
+    await application_client.sio.disconnect()
 
 
 # Requests Fixtures
@@ -203,8 +205,11 @@ def get_status_disconnected():
     )
 
 
-def emit_request(request: SingleRequest, app: MockApplicationClient) -> Dict:
-    return app.emit(request.name, request.arguments.data)
+async def emit_request(
+    request: SingleRequest,
+    app: MockApplicationClient,
+) -> Dict:
+    return await app.emit(request.name, request.arguments.data)
 
 
 # ---------------
@@ -212,7 +217,8 @@ def emit_request(request: SingleRequest, app: MockApplicationClient) -> Dict:
 
 # Multi-request tests
 # ---------------
-def test_connecting_multiple_times(
+@pytest.mark.asyncio
+async def test_connecting_multiple_times(
     app_client,
     application_client,
     sample_specification,
@@ -234,43 +240,43 @@ def test_connecting_multiple_times(
         get_status_connected(),
         request_specification_success(),
     ]
-    event_disconnected = threading.Event()
-    event_spec_requested = threading.Event()
+    event_disconnected = asyncio.Event()
+    event_spec_requested = asyncio.Event()
 
-    def connect_and_request(app, responses):
-        global_state_manager.reinitialize(
+    async def connect_and_request(app, responses):
+        await global_state_manager.reinitialize(
             application_client.external_port, application_client.host
         )
 
         for i, event in enumerate(events):
             if i == 2:
-                event_disconnected.wait()
-            responses.append(emit_request(event, app))
+                await event_disconnected.wait()
+            responses.append(await emit_request(event, app))
 
             if i == 2:
                 event_spec_requested.set()
 
     responses = []
-    process = threading.Thread(
-        target=connect_and_request, args=(application_client, responses)
+    task = asyncio.create_task(
+        connect_and_request(application_client, responses)
     )
-    process.start()
-    time.sleep(1)
+    await asyncio.sleep(1)
 
-    application_client.try_connecting()
-    application_client.disconnect()
+    await application_client.try_connecting()
+    await application_client.disconnect()
     event_disconnected.set()
-    event_spec_requested.wait()
-    time.sleep(1)
-    application_client.try_connecting()
-    application_client.answer_valid()
+    await event_spec_requested.wait()
+    await asyncio.sleep(1)
+    await application_client.try_connecting()
+    await application_client.answer_valid()
 
-    process.join()
+    await task
 
     for event, response in zip(events, responses):
         assert event.expected_data.data == response
 
 
+@pytest.mark.asyncio
 @pytest.mark.parametrize(
     "single_event",
     [
@@ -281,7 +287,7 @@ def test_connecting_multiple_times(
         "dataflow_import",
     ],
 )
-def test_single_event_connected_valid(
+async def test_single_event_connected_valid(
     app_client, application_client, connect_success, single_event, request
 ):
     """
@@ -296,25 +302,24 @@ def test_single_event_connected_valid(
     single_event = request.getfixturevalue(single_event)
     events = [connect_success(), single_event()]
 
-    def connect_and_request(app, responses):
-        global_state_manager.reinitialize(
+    async def connect_and_request(app, responses):
+        await global_state_manager.reinitialize(
             application_client.external_port, application_client.host
         )
 
         for event in events:
-            responses.append(emit_request(event, app))
+            responses.append(await emit_request(event, app))
 
     responses = []
-    process = threading.Thread(
-        target=connect_and_request, args=(application_client, responses)
+    task = asyncio.create_task(
+        connect_and_request(application_client, responses)
     )
-    process.start()
-    time.sleep(1)
+    await asyncio.sleep(1)
 
-    application_client.try_connecting()
-    application_client.answer_valid()
+    await application_client.try_connecting()
+    await application_client.answer_valid()
 
-    process.join()
+    await task
 
     data = responses[0]
     assert events[0].expected_data.data == data
@@ -328,13 +333,14 @@ def test_single_event_connected_valid(
 
 # get_status
 # ---------------
-def test_get_status_disconnected(
+@pytest.mark.asyncio
+async def test_get_status_disconnected(
     app_client,
     application_client,
     get_status_disconnected,
 ):
     request = get_status_disconnected()
-    response = emit_request(request, application_client)
+    response = await emit_request(request, application_client)
     assert response == request.expected_data.data
 
 
@@ -343,48 +349,52 @@ def test_get_status_disconnected(
 
 # request_specification
 # ---------------
-def test_request_specification_disconnected(
+@pytest.mark.asyncio
+async def test_request_specification_disconnected(
     app_client,
     application_client,
     request_specification_unavailable,
 ):
     request = request_specification_unavailable()
-    response = emit_request(request, application_client)
+    response = await emit_request(request, application_client)
     assert response == request.expected_data.data
 
 
 # dataflow_action_request
 # ---------------
-def test_run_dataflow_request_disconnected(
+@pytest.mark.asyncio
+async def test_run_dataflow_request_disconnected(
     app_client,
     application_client,
     dataflow_run,
 ):
-    response = emit_request(dataflow_run(), application_client)
+    response = await emit_request(dataflow_run(), application_client)
     assert (
         "External application is disconnected" == response["error"]["message"]
         and response["error"]["code"] == HTTPStatus.SERVICE_UNAVAILABLE
     )
 
 
-def test_validate_dataflow_request_disconnected(
+@pytest.mark.asyncio
+async def test_validate_dataflow_request_disconnected(
     app_client,
     application_client,
     dataflow_validate,
 ):
-    response = emit_request(dataflow_validate(), application_client)
+    response = await emit_request(dataflow_validate(), application_client)
     assert (
         "External application is disconnected" == response["error"]["message"]
         and response["error"]["code"] == HTTPStatus.SERVICE_UNAVAILABLE
     )
 
 
-def test_export_dataflow_request_disconnected(
+@pytest.mark.asyncio
+async def test_export_dataflow_request_disconnected(
     app_client,
     application_client,
     dataflow_export,
 ):
-    response = emit_request(dataflow_export(), application_client)
+    response = await emit_request(dataflow_export(), application_client)
     assert (
         "External application is disconnected" == response["error"]["message"]
         and response["error"]["code"] == HTTPStatus.SERVICE_UNAVAILABLE
