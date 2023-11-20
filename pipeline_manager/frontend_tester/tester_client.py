@@ -28,11 +28,10 @@ its specification
 data sent to it. It simply returns a received file.
 """
 
+import asyncio
 import argparse
-import threading
 import json
 import logging
-import time
 from pathlib import Path
 from typing import Dict, List, Union
 import sys
@@ -267,7 +266,7 @@ class RPCMethods:
         """
         return self._run_validate_response(VALIDATE, dataflow)
 
-    def _run_validate_response(
+    async def _run_validate_response(
         self,
         title: Union[str, List[str]],
         data: Dict,
@@ -302,7 +301,7 @@ class RPCMethods:
         if not properties:
             raise Exception(f"No description for {title} provided")
         if properties["Disconnect"]:
-            self.client.disconnect()
+            await self.client.disconnect()
             return {}
 
         if found == RUN:
@@ -314,12 +313,15 @@ class RPCMethods:
                     break
                 progress = i / steps * 100
                 logging.log(logging.INFO, f"Progress: {progress}")
-                self.client.notify('progress_change', {'progress': progress})
-                time.sleep(time_offset)
+                await self.client.notify(
+                    'progress_change',
+                    {'progress': progress}
+                )
+                await asyncio.sleep(time_offset)
         elif found == SEND_REQUEST:
             method = properties["Method"]
             params = json.loads(properties["Params"])
-            response = self.client.request(method, params, non_blocking=False)
+            response = await self.client.request(method, params)
             if "result" in response:
                 properties["Message"] = json.dumps(response["result"])
                 properties["MessageType"] = "OK"
@@ -327,19 +329,19 @@ class RPCMethods:
                 properties["Message"] = json.dumps(response["error"])
                 properties["MessageType"] = "ERROR"
         else:
-            time.sleep(properties["Duration"])
+            await asyncio.sleep(properties["Duration"])
 
-        def delayed_effect(client, title, data):
+        async def delayed_effect(client, title, data):
             effects = get_effects(title, data)
             for effect in effects:
                 if effect["name"] == "Disconnect":
                     if effect["properties"]["Should disconnect"]:
-                        time.sleep(effect["properties"]["Time offset"])
+                        await asyncio.sleep(
+                            effect["properties"]["Time offset"]
+                        )
                         logging.log(logging.INFO, "Disconnecting!")
-                        client.disconnect()
-        threading.Thread(
-            target=delayed_effect, args=(self.client, found, data)
-        ).start()
+                        await client.disconnect()
+        asyncio.create_task(delayed_effect(self.client, found, data))
 
         if self.running:
             self.running = False
@@ -348,7 +350,7 @@ class RPCMethods:
             'content': properties["Message"],
         }
 
-    def dataflow_export(
+    async def dataflow_export(
         self,
         dataflow: Dict,
     ) -> Dict:
@@ -374,7 +376,7 @@ class RPCMethods:
             self.client.disconnect()
             return {}
 
-        time.sleep(properties["Duration"])
+        await asyncio.sleep(properties["Duration"])
 
         with open(self.out_path, "w") as f:
             json.dump(dataflow, f, indent=4)
@@ -424,6 +426,10 @@ def main(argv):
     args, _ = parser.parse_known_args(argv[1:])
     logging.basicConfig(level=string_to_verbosity(args.verbosity))
 
+    asyncio.run(_main(args))
+
+
+async def _main(args: argparse.Namespace):
     if args.specification_path is None:
         spec_path = Path(frontend_tester.__file__).parent
         spec_path = spec_path / "frontend_tester_specification.json"
@@ -432,15 +438,18 @@ def main(argv):
     with open(spec_path) as f:
         specification = json.load(f)
 
-    client = CommunicationBackend(args.host, args.port)
-    client.initialize_client(RPCMethods(
+    client = CommunicationBackend(
+        args.host,
+        args.port,
+        add_signal_handler=True,
+    )
+    await client.initialize_client(RPCMethods(
         specification,
         client,
         args.output_path,
     ))
 
-    client.start_json_rpc_client(separate_thread=True)
-    client.client_thread.join()
+    await client.start_json_rpc_client()
 
 
 if __name__ == "__main__":
