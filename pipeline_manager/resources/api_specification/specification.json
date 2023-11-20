@@ -206,6 +206,25 @@
             "returns": {
                 "$ref": "common_types#/$defs/empty"
             }
+        },
+        "connected_frontends_get": {
+            "description": "Request the number of connected fronteds",
+            "params": {
+                "$ref": "common_types#/$defs/null_or_empty"
+            },
+            "returns": {
+                "type": "object",
+                "properties": {
+                    "connections": {
+                        "type": "number",
+                        "description": "Number of connections"
+                    }
+                },
+                "additionalProperties": false,
+                "required": [
+                    "connections"
+                ]
+            }
         }
     },
     "external_endpoints": {
