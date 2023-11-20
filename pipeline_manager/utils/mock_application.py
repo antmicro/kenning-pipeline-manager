@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-import time
+import asyncio
 import socketio
 from typing import Dict
 
@@ -47,13 +47,18 @@ class MockApplicationClient(object):
         self.sample_specification = sample_specification
         self.sample_dataflow = sample_dataflow
 
-        self.sio = socketio.SimpleClient()
-        self.sio.connect(f'http://{self.host}:{self.backend_port}')
+        self.sio = socketio.AsyncSimpleClient()
 
         self.connecting_time_offset = 0.1
         self.client = CommunicationBackend(host, external_port)
 
-    def try_connecting(self) -> None:
+    async def connect_socketio(self):
+        """
+        Function that connects SocketIO client to backend server.
+        """
+        await self.sio.connect(f'http://{self.host}:{self.backend_port}')
+
+    async def try_connecting(self) -> None:
         """
         Function that tries to connect to TCP server.
 
@@ -63,24 +68,24 @@ class MockApplicationClient(object):
         """
         while True:
             try:
-                out = self.client.initialize_client(
+                out = await self.client.initialize_client(
                     self.Methods(self.sample_specification))
                 if out.status == Status.CLIENT_CONNECTED:
                     return
             except ConnectionRefusedError:
-                time.sleep(self.connecting_time_offset)
+                await asyncio.sleep(self.connecting_time_offset)
 
-    def answer_valid(self) -> None:
+    async def answer_valid(self) -> None:
         """
         Waits for an incoming message, reads it and based on the
         `MessageType` sends an appropriate message.
 
         It is used to simulate a regular application that waits for requests.
         """
-        status, message = self.client.wait_for_message()
+        status, message = await self.client.wait_for_message()
         if status == Status.DATA_READY:
-            response = self.client.generate_json_rpc_response(message[1])
-            self.client.send_jsonrpc_message(response.json)
+            response = await self.client.generate_json_rpc_response(message[1])
+            await self.client.send_jsonrpc_message(response.json)
 
     class Methods:
         """
@@ -114,20 +119,7 @@ class MockApplicationClient(object):
         def dataflow_export(self, dataflow: Dict) -> Dict:
             return {'type': MessageType.OK.value}
 
-    def answer_empty(self) -> None:
-        """
-        Waits for an incoming message, reads it and answers with
-        an empty message of type `MessageType.OK`.
-        """
-        status, message = self.client.wait_for_message()
-        if status == Status.DATA_READY:
-            message_type, data = message
-            self.client.send_message(
-                MessageType.OK,
-                bytes()
-            )
-
-    def emit(self, event: str, data: Dict) -> Dict:
+    async def emit(self, event: str, data: Dict) -> Dict:
         """
         Emits request and waits for the response.
 
@@ -143,12 +135,12 @@ class MockApplicationClient(object):
         Dict
             Response to the emmited request
         """
-        self.sio.emit(event, data)
-        response = self.sio.receive()
+        await self.sio.emit(event, data)
+        response = await self.sio.receive()
         return response[1]
 
-    def disconnect(self) -> None:
+    async def disconnect(self) -> None:
         """
         Disconnects the application from the TCP server.
         """
-        self.client.disconnect()
+        await self.client.disconnect()
