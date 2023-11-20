@@ -94,7 +94,7 @@ export default function CreateCustomGraphNodeType(template, type) {
 
             let errors = [];
 
-            const interfaces = state.graphState.interfaces.map(
+            const interfaces = (state.graphState.interfaces ?? state.interfaces).map(
                 (io) => {
                     const correspondingInterface = state.interfaces.find(
                         (intf) => intf.subgraphNodeId === io.id,
