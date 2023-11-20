@@ -23,3 +23,8 @@ export const PMMessageType = {
     PROGRESS: 2,
     WARNING: 3,
 };
+
+export const JSONRPCCustomErrorCode = {
+    EXCEPTION_RAISED: -1,
+    EXTERNAL_APPLICATION_NOT_CONNECTED: -2,
+};
