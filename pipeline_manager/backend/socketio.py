@@ -8,12 +8,10 @@ from pipeline_manager_backend_communication.misc_structures import (
 )
 from jsonrpc.jsonrpc2 import JSONRPC20Response
 from jsonrpc.exceptions import JSONRPCDispatchException
-import asyncio
 import socketio
-import threading
 
 from pipeline_manager.backend.tcp_socket import (
-    start_socket_thread, join_listener_thread
+    start_socket_task, join_listener_task
 )
 from pipeline_manager.backend.state_manager import global_state_manager
 
@@ -49,7 +47,7 @@ def create_socketio() -> socketio.AsyncServer:
             tcp_server = global_state_manager.tcp_server
             return {'status': {'connected': tcp_server.connected}}
 
-        def external_app_connect(self) -> Dict:
+        async def external_app_connect(self) -> Dict:
             """
             Event used to start a two-way communication TCP server that
             listens on a host and port specified by `host` and `port`.
@@ -74,27 +72,38 @@ def create_socketio() -> socketio.AsyncServer:
             if tcp_server.connected:
                 return {}
             else:
-                tcp_server.disconnect()
-                join_listener_thread()
-                tcp_server.initialize_server()
-                out = tcp_server.wait_for_client(
+                await tcp_server.disconnect()
+                await join_listener_task()
+                await tcp_server.initialize_server()
+                out = await tcp_server.wait_for_client(
                     tcp_server.receive_message_timeout
                 )
-                while out.status == Status.NOTHING and \
+                while out.status != Status.CLIENT_CONNECTED and \
                         not global_state_manager.server_should_stop:
-                    out = tcp_server.wait_for_client(
+                    out = await tcp_server.wait_for_client(
                         tcp_server.receive_message_timeout
                     )
             if out.status == Status.CLIENT_CONNECTED:
                 # Socket reconnected, new thread
                 # receiving messages has to be spawned
-                start_socket_thread(sio)
+                start_socket_task(sio)
                 return {}
             if not global_state_manager.server_should_stop:
                 raise JSONRPCDispatchException(
                     message='External application did not connect',
                     code=HTTPStatus.SERVICE_UNAVAILABLE.value
                 )
+
+        def connected_frontends_get(self):
+            """
+            Event that returns number of connections with SocketIO.
+
+            Returns
+            -------
+            Dict
+                Returned number of connections.
+            """
+            return {'connections': global_state_manager.connected_frontends}
 
     json_rpc_backend = JSONRPCBase()
     json_rpc_backend.register_methods(BackendMethods(), 'backend')
@@ -123,16 +132,10 @@ def create_socketio() -> socketio.AsyncServer:
         json_rpc_request : Dict
             Request in JSON-RPC format
         """
-        async def _action():
-            resp = json_rpc_backend.generate_json_rpc_response(
-                json_rpc_request
-            )
-            await sio.emit('api-response', resp.data)
-
-        if json_rpc_request['method'] == 'external_app_connect':
-            threading.Thread(target=lambda: asyncio.run(_action())).start()
-        else:
-            await _action()
+        resp = await json_rpc_backend.generate_json_rpc_response(
+            json_rpc_request
+        )
+        await sio.emit('api-response', resp.data, to=sid)
         return True
 
     @sio.on("external-api")
@@ -155,9 +158,9 @@ def create_socketio() -> socketio.AsyncServer:
                         'message': 'External application is disconnected',
                         'code': HTTPStatus.SERVICE_UNAVAILABLE.value,
                     }
-                ).data)
+                ).data, to=sid)
             return False
-        out = tcp_server.send_jsonrpc_message(json_rpc_message)
+        out = await tcp_server.send_jsonrpc_message(json_rpc_message)
         if out.status != Status.DATA_SENT:
             if is_request:
                 await sio.emit('api-response', JSONRPC20Response(
@@ -166,7 +169,8 @@ def create_socketio() -> socketio.AsyncServer:
                             'message': 'Error while sending a message to the external application',  # noqa: E501
                             'code': HTTPStatus.SERVICE_UNAVAILABLE.value,
                         }
-                    ).data
+                    ).data,
+                    to=sid,
                 )
             return False
         return True
