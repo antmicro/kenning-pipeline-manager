@@ -5,7 +5,7 @@
  */
 
 import { JSONRPCErrorCode } from 'json-rpc-2.0';
-import { backendApiUrl, PMMessageType } from '../utils';
+import { backendApiUrl, PMMessageType, JSONRPCCustomErrorCode } from '../utils';
 import jsonRPC from './rpcCommunication';
 import { runInfo } from './remoteProcedures';
 import NotificationHandler from '../notifications';
@@ -290,7 +290,8 @@ class ExternalApplicationManager {
             try {
                 await jsonRPC.request('frontend_on_connect');
             } catch (error) {
-                if (error.code !== JSONRPCErrorCode.MethodNotFound) {
+                if (error.code !== JSONRPCErrorCode.MethodNotFound &&
+                    error.code !== JSONRPCCustomErrorCode.EXTERNAL_APPLICATION_NOT_CONNECTED) {
                     NotificationHandler.terminalLog('warning', error.message, error.data);
                 }
             }
