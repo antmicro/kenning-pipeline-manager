@@ -1,12 +1,12 @@
 # Mirror Pipeline Manager application
 
-Build Pipeline Manager and run it.
+Build Pipeline Manager.
 
 ```bash
-./build server-app && ./run
+./build server-app
 ```
 
-Run Mirror Pipeline Manager, it will automatically start the second instance that will mirror changes from first the Pipeline Manager.
+Run Mirror Pipeline Manager, it will automatically start both instances and wait until they are open in the browser. Then external application will be started that mirrors changes from the first Pipeline Manager.
 
 ```bash
 python -m pipeline_manager.frontend_tester.tester_mirror
