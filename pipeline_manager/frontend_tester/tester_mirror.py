@@ -1,13 +1,19 @@
+# Copyright (c) 2020-2023 Antmicro <www.antmicro.com>
+#
+# SPDX-License-Identifier: Apache-2.0
+
+import asyncio
 import argparse
 import json
 import logging
 import sys
-import time
+import socketio
 from pathlib import Path
 from typing import Dict
 from deepdiff.diff import DeepDiff
 from importlib.resources import files
 from itertools import chain
+from jsonrpc.jsonrpc2 import JSONRPC20Request
 
 from pipeline_manager import frontend_tester, frontend
 from pipeline_manager.utils.logger import string_to_verbosity
@@ -47,7 +53,7 @@ class RPCMethodsBase:
             'content': self.specification,
         }
 
-    def dataflow_validate(self, dataflow: Dict) -> Dict:
+    async def dataflow_validate(self, dataflow: Dict) -> Dict:
         """
         RPC method that responses to Validate request.
 
@@ -64,8 +70,8 @@ class RPCMethodsBase:
         Dict
             Method's response
         """
-        response_origin = self.client_origin.request('graph_get')
-        response_copy = self.client_copy.request('graph_get')
+        response_origin = await self.client_origin.request('graph_get')
+        response_copy = await self.client_copy.request('graph_get')
         # Ignore connections ID
         for connection in chain(
             response_origin['result']['dataflow']['graph']['connections'],
@@ -96,7 +102,7 @@ class RPCMethodsBase:
             f'{response_copy.get("error", "")}',
         }
 
-    def frontend_on_connect(self) -> Dict:
+    async def frontend_on_connect(self) -> Dict:
         """
         RPC method that responses to frontend_on_connect request.
 
@@ -107,16 +113,16 @@ class RPCMethodsBase:
         Dict
             Method's response
         """
-        response = self.client_origin.request('graph_get')
+        response = await self.client_origin.request('graph_get')
         if 'result' in response:
-            self._redirect_changed('graph_change', **{
+            await self._redirect_changed('graph_change', **{
                 'dataflow': response['result']['dataflow']
             })
         elif 'error' in response:
             raise Exception(response['error']['message'])
         return {}
 
-    def _redirect_changed(self, method: str, **kwargs) -> Dict:
+    async def _redirect_changed(self, method: str, **kwargs) -> Dict:
         """
         Redirects request to Pipeline Manager copy with changed method.
 
@@ -132,7 +138,7 @@ class RPCMethodsBase:
         Dict
             Response to the redirected request
         """
-        respose = self.client_copy.request(method, kwargs, non_blocking=False)
+        respose = await self.client_copy.request(method, kwargs)
         if 'error' in respose:
             raise Exception(respose['error']['message'])
         return respose['result']
@@ -178,29 +184,29 @@ class RPCMethodsOriginal(RPCMethodsBase):
         return response
 
     # Methods receiving and redirecting requests with changed values
-    def properties_on_change(self, **kwargs) -> Dict:
-        return self._redirect_changed('properties_change', **kwargs)
+    async def properties_on_change(self, **kwargs) -> Dict:
+        return await self._redirect_changed('properties_change', **kwargs)
 
-    def position_on_change(self, **kwargs) -> Dict:
-        return self._redirect_changed('position_change', **kwargs)
+    async def position_on_change(self, **kwargs) -> Dict:
+        return await self._redirect_changed('position_change', **kwargs)
 
-    def nodes_on_change(self, **kwargs) -> Dict:
+    async def nodes_on_change(self, **kwargs) -> Dict:
         # Make sure only nodes are removed
         # connections have designated event
         kwargs['remove_with_connections'] = False
-        return self._redirect_changed('nodes_change', **kwargs)
+        return await self._redirect_changed('nodes_change', **kwargs)
 
-    def connections_on_change(self, **kwargs) -> Dict:
-        return self._redirect_changed('connections_change', **kwargs)
+    async def connections_on_change(self, **kwargs) -> Dict:
+        return await self._redirect_changed('connections_change', **kwargs)
 
-    def graph_on_change(self, **kwargs) -> Dict:
-        return self._redirect_changed('graph_change', **kwargs)
+    async def graph_on_change(self, **kwargs) -> Dict:
+        return await self._redirect_changed('graph_change', **kwargs)
 
-    def metadata_on_change(self, **kwargs) -> Dict:
-        return self._redirect_changed('metadata_change', **kwargs)
+    async def metadata_on_change(self, **kwargs) -> Dict:
+        return await self._redirect_changed('metadata_change', **kwargs)
 
-    def viewport_on_center(self) -> Dict:
-        return self._redirect_changed('viewport_center')
+    async def viewport_on_center(self) -> Dict:
+        return await self._redirect_changed('viewport_center')
 
 
 def main(argv):
@@ -228,6 +234,12 @@ def main(argv):
         type=int,
         help="The port of the second Pipeline Manager Server",
         default=None,
+    )
+    parser.add_argument(
+        "--backend-port",
+        type=int,
+        help="The port of the first Pipeline Manager Backend",
+        default=5000,
     )
     parser.add_argument(
         "--backend-port-second",
@@ -265,8 +277,53 @@ def main(argv):
     if not args.frontend_path:
         args.frontend_path = files(frontend) / 'dist'
 
+    try:
+        asyncio.run(_main(args, specification))
+    except asyncio.CancelledError:
+        pass
+
+
+async def wait_for_frontend(host: str, port: int):
+    """
+    Waits until frontend connects to the serever.
+
+    It creates SocketIO connection with server and
+    asks how many connections are established.
+
+    Parameters
+    ----------
+    host : str
+        Server's adress
+    port : int
+        Server's port
+    """
+    async with socketio.AsyncSimpleClient() as sio:
+        await sio.connect(f'http://{host}:{port}')
+        wait = True
+        _id = 1
+        while wait:
+            await asyncio.sleep(1.)
+            await sio.emit('backend-api', JSONRPC20Request(
+                _id=_id,
+                method='connected_frontends_get',
+            ).data)
+            response = await sio.receive()
+            _id += 1
+            wait = response[1]['result']['connections'] < 2
+
+
+async def _main(args: argparse.Namespace, specification: Dict):
+    # Start first PM
+    await start_server_in_parallel(
+        args.frontend_path,
+        args.host,
+        args.port,
+        args.host,
+        args.backend_port,
+        args.verbosity,
+    )
     # Start second PM
-    start_server_in_parallel(
+    await start_server_in_parallel(
         args.frontend_path,
         args.host,
         args.port_second,
@@ -274,29 +331,42 @@ def main(argv):
         args.backend_port_second,
         args.verbosity,
     )
+    await asyncio.sleep(3)
+    # Wait for frontends
+    logging.info(
+        'Wating for frontends to connect, please open browser on '
+        f'http://{args.host}:{args.backend_port} and '
+        f'http://{args.host}:{args.backend_port_second}'
+    )
+    await asyncio.gather(
+        wait_for_frontend(args.host, args.backend_port),
+        wait_for_frontend(args.host, args.backend_port_second),
+    )
 
-    # Set smaller timeout to enhance reaction time
-    client_first = CommunicationBackend(
-        args.host, args.port, receive_message_timeout=0.01)
+    client_first = CommunicationBackend(args.host, args.port)
     client_second = CommunicationBackend(args.host, args.port_second)
-    # Start second PM backend
-    client_second.initialize_client(RPCMethodsCopy(
-        specification,
-        client_first,
-        client_second,
-    ))
-    client_second.start_json_rpc_client(separate_thread=True)
-
-    time.sleep(0.5)
     # Start first PM backend
-    client_first.initialize_client(RPCMethodsOriginal(
+    await client_first.initialize_client(RPCMethodsOriginal(
         specification,
         client_first,
         client_second,
     ))
-    client_first.start_json_rpc_client(separate_thread=True)
-    client_first.client_thread.join()
-    client_second.client_thread.join()
+    task_first = client_first.loop.create_task(
+        client_first.start_json_rpc_client()
+    )
+    await asyncio.sleep(0.5)
+
+    # Start second PM backend
+    await client_second.initialize_client(RPCMethodsCopy(
+        specification,
+        client_first,
+        client_second,
+    ))
+    task_second = client_second.loop.create_task(
+        client_second.start_json_rpc_client()
+    )
+
+    await asyncio.gather(task_first, task_second)
 
 
 if __name__ == "__main__":
