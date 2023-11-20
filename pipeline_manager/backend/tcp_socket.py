@@ -4,7 +4,6 @@
 
 import json
 import asyncio
-import threading
 from typing import Dict
 from socketio import AsyncServer
 from jsonrpc.jsonrpc2 import JSONRPC20Response
@@ -13,7 +12,7 @@ from pipeline_manager.backend.state_manager import global_state_manager
 from pipeline_manager_backend_communication.misc_structures import Status, CustomErrorCode  # noqa: E501
 from pipeline_manager_backend_communication.communication_backend import CommunicationBackend  # noqa: E501
 
-_THREAD: threading.Thread = None
+_TASK: asyncio.Task = None
 
 
 async def manage_socket_messages(
@@ -33,7 +32,7 @@ async def manage_socket_messages(
         WebSocket connected to frontend
     """
     while True:
-        message = tcp_server.wait_for_message()
+        message = await tcp_server.wait_for_message()
         if message.status == Status.DATA_READY:
             if isinstance(message.data[1], Dict):
                 data = message.data[1]
@@ -63,7 +62,9 @@ async def manage_socket_messages(
             break
 
 
-def start_socket_thread(socketio: AsyncServer):
+def start_socket_task(
+    socketio: AsyncServer,
+):
     """
     Starts thread with function redirecting messages from external app
     to frontend.
@@ -75,20 +76,17 @@ def start_socket_thread(socketio: AsyncServer):
     socketio : AsyncServer
         WebSocket connected to frontend
     """
-    global _THREAD
-    if _THREAD and _THREAD.is_alive():
-        raise Exception("Previous thread is still alive")
-    _THREAD = threading.Thread(
-        target=lambda: asyncio.run(
-            manage_socket_messages(global_state_manager.tcp_server, socketio)
-        )
+    global _TASK
+    if _TASK and not _TASK.done():
+        raise Exception("Previous listener is still alive")
+    _TASK = asyncio.create_task(
+        manage_socket_messages(global_state_manager.tcp_server, socketio)
     )
-    _THREAD.start()
 
 
-def join_listener_thread():
+async def join_listener_task():
     """
     Waits till end of the listener thread.
     """
-    if _THREAD and _THREAD.is_alive():
-        _THREAD.join()
+    if _TASK and not _TASK.done():
+        await _TASK
