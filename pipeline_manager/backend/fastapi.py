@@ -11,7 +11,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from pathlib import Path
 from typing import Optional
 
-from pipeline_manager.backend.state_manager import global_state_manager
 from pipeline_manager import frontend
 
 dist_path = Path(os.path.dirname(frontend.__file__)) / "dist"
@@ -36,10 +35,5 @@ def create_app(frontend_dir: Optional[Path] = None):
         allow_methods=["GET"],
         max_age=None,
     )
-
-    @app.on_event("shutdown")
-    def shutdown():
-        global_state_manager.server_should_stop = True
-        global_state_manager.tcp_server.disconnect()
 
     return app
