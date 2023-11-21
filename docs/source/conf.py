@@ -4,6 +4,7 @@
 
 import os
 import json
+import urllib.parse
 from pathlib import Path
 from datetime import datetime
 
@@ -68,15 +69,24 @@ html_build_dir = Path(os.environ['BUILDDIR']) / 'html'
 
 if html_build_dir.is_dir():
     exampleentries = ['To see the work of the frontend check one of the below examples:\n']  # noqa: E501
-    for example in (html_build_dir / 'static-demo').iterdir():
-        relexample = example.relative_to(html_build_dir)
+    static_demo_dir = html_build_dir / 'static-demo'
+    for example in (static_demo_dir / 'graphs').glob('*-dataflow.json'):
+        relexample = example.relative_to(static_demo_dir)
+        graphname = example.stem.replace('-dataflow', '')
+        spec = example.parent / f'{graphname}-specification.json'
+        relspec = spec.relative_to(static_demo_dir)
         title = ""
         try:
-            with open(example / "graph.json", 'r') as f:
+            with open(example, 'r') as f:
                 title = json.load(f)['graph']['name']
         except (KeyError, FileNotFoundError):
-            title = relexample.stem
-        exampleentries.append(f'* [{title}](resource:{relexample}/index.html) ([Graph](resource:{relexample}/graph.json), [Spec](resource:{relexample}/spec.json))')  # noqa: E501
+            title = relexample.stem.replace('-dataflow', '')
+        params = {
+            "spec": f"relative://{relspec}",
+            "graph": f"relative://{relexample}"
+        }
+        encoded_pm_params = urllib.parse.urlencode(params)
+        exampleentries.append(f'* [{title}](demo:static-demo/index.html?{encoded_pm_params}) ([Graph](resource:static-demo/{relexample}), [Spec](resource:static-demo/{relspec}))')  # noqa: E501
     myst_substitutions["examples"] = '\n'.join(exampleentries)
 
 today_fmt = '%Y-%m-%d'
@@ -118,7 +128,8 @@ latex_elements.update({
 myst_url_schemes = {
     "http": None,
     "https": None,
-    "resource": "{{path}}"
+    "resource": "{{path}}",
+    "demo": "{{path}}?{{query}}"
 }
 
 mermaid_cmd = './mmdc'
