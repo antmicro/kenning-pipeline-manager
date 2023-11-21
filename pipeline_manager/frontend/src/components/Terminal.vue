@@ -115,20 +115,9 @@ export default {
 
 <style lang="scss" scoped>
 .terminal-container {
-    min-height: 0px;
+    position: relative;
+    width: 100%;
+    height: 100%;
     background-color: $gray-600;
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-
-    & > .command-results {
-        flex: 1;
-        padding: 0 $spacing-xxl;
-        overflow-y: scroll;
-
-        & {
-            margin-right: $spacing-m;
-        }
-    }
 }
 </style>
