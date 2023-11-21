@@ -37,13 +37,13 @@ function createInterface(io, hidden, name = undefined) {
  * Returns a prepared graph interface state that is passed to baklava contructor
  *
  * @param io configuration of the interface
- * @param hidden whether th interface should be hidden. For example groups of interfaces
- * are hidden by default
+ * @param _hidden whether the interface should be hidden. Unused in this method, kept
+ * to be compliant with createInterface
  * @param {*} name custom name for the interface that should be used instead of the one coming
  * from `io`
  * @returns baklava interface constructor
  */
-function createGraphInterface(io, hidden, name = undefined) {
+function createGraphInterface(io, _hidden, name = undefined) {
     const intf = {};
 
     Object.assign(intf, io);
