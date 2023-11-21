@@ -353,7 +353,7 @@ export default class EditorManager {
 
         if (overriding) {
             const updatedMetadata = JSON.parse(
-                JSON.stringify(this.currentSpecification.metadata ?? {}),
+                JSON.stringify(this.currentSpecification?.metadata ?? {}),
             );
 
             Object.entries(metadata).forEach(([key, value]) => {
