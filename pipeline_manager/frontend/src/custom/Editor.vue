@@ -546,7 +546,10 @@ export default defineComponent({
          * @returns a translated URL
          */
         function parseLocation(loc) {
-            const jsonsubs = process.env.VUE_APP_JSON_URL_SUBSTITUTES ?? '{"https": "https://{}", "http": "http://{}"}';
+            const urlparent = document.location.href.split('/').slice(0, -1).join('/');
+            const relativeurl = `${urlparent}/{}`;
+            const defaultsubs = `{"https": "https://{}", "http": "http://{}", "relative": "${relativeurl}"}`;
+            const jsonsubs = process.env.VUE_APP_JSON_URL_SUBSTITUTES ?? defaultsubs;
             const subs = JSON.parse(jsonsubs);
             const parts = loc.split('//');
 
@@ -556,7 +559,6 @@ export default defineComponent({
             const specifiedUrl = parts.slice(1).join('');
 
             if (!Object.keys(subs).includes(key)) return undefined;
-
             return subs[key].replace('{}', specifiedUrl);
         }
 
@@ -607,7 +609,8 @@ export default defineComponent({
             if (!defaultSpecification) {
                 // Try loading default specification and/or dataflow from URLs provided in an
                 // escaped form in the page's URL
-                const urlParams = new URLSearchParams(window.location.search);
+                const escapedsearch = window.location.search.replace(/&amp;/g, '&');
+                const urlParams = new URLSearchParams(escapedsearch);
                 if (urlParams.has('spec')) {
                     emit('loadWait');
                     specText = await loadJsonFromRemoteLocation(urlParams.get('spec'));
@@ -642,7 +645,8 @@ export default defineComponent({
                 if (defaultDataflow) {
                     dataflow = require(process.env.VUE_APP_DATAFLOW_PATH); // eslint-disable-line global-require,max-len,import/no-dynamic-require
                 } else {
-                    const urlParams = new URLSearchParams(window.location.search);
+                    const escapedsearch = window.location.search.replace(/&amp;/g, '&');
+                    const urlParams = new URLSearchParams(escapedsearch);
                     if (urlParams.has('graph')) {
                         emit('loadWait');
                         dataflow = await loadJsonFromRemoteLocation(urlParams.get('graph'));
