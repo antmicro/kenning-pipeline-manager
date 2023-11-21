@@ -20,6 +20,7 @@ import argparse
 sys.path.append(str(Path(__file__).parent.parent.absolute()))
 
 from pipeline_manager.frontend_builder import build_prepare, build_frontend  # noqa: E402
+from pipeline_manager.validator import validate
 
 
 def main(argv):
@@ -42,6 +43,16 @@ def main(argv):
 
     build_prepare()
 
+    build_frontend(
+        build_type='static-html',
+        mode='production',
+        output_directory=args.output_dir,
+        skip_install_deps=True
+    )
+
+    graphs_dir = args.output_dir / 'graphs'
+    graphs_dir.mkdir(parents=True, exist_ok=True)
+
     all_specs = args.examples_dir.rglob('*-specification.json')
     for spec in all_specs:
         dataflow = Path(str(spec).replace('specification', 'dataflow'))
@@ -51,40 +62,22 @@ def main(argv):
             print(f'The specification {spec} misses its corresponding dataflow.')
             print('Please provide an example dataflow')
             return errno.EINVAL
-        title = ""
-        dir_name = str(spec.stem).replace('-specification', '')
-        try:
-            with open(dataflow, 'r') as f:
-                json_dataflow = json.load(f)
-            if 'name' in json_dataflow['graph']:
-                title = json_dataflow['graph']['name']
-            else:
-                # Get name from subgraph marked as entryGraph
-                title = [
-                    subgraph for subgraph in json_dataflow['subgraphs']
-                    if subgraph['id'] == json_dataflow['graph']['entryGraph']
-                ][0]['name']
-        except (KeyError, IndexError, FileNotFoundError):
-            print(
-                f'The dataflow file {dataflow} is invalid '
-                'or misses graph name'
-            )
-            return errno.ENOENT
-
-        print(f'### Building {title} ###')
-        build_frontend(
-            build_type='static-html',
-            editor_title=title,
-            specification=spec,
-            dataflow=dataflow,
-            mode='production',
-            output_directory=args.output_dir / dir_name,
-            skip_install_deps=True
+        status = validate(
+            specification_path=spec,
+            dataflow_path=dataflow,
+        )
+        if status != 0:
+            print('The graph with:\n')
+            print(f'* Specification:  {spec}')
+            print(f'* Dataflow:  {dataflow}')
+            print('Is invalid. Please check the errors for details')
+            return status
+        shutil.copy(
+            spec.absolute(), graphs_dir / spec.name
         )
         shutil.copy(
-            spec.absolute(), args.output_dir / dir_name / "spec.json"
+            dataflow, graphs_dir / dataflow.name
         )
-        shutil.copy(dataflow, args.output_dir / dir_name / "graph.json")
 
 
 if __name__ == '__main__':
