@@ -33,6 +33,7 @@ module.exports = {
         'vue/multi-word-component-names': 0,
         quotes: ['error', 'single', { allowTemplateLiterals: true }],
         'import/extensions': ['error', { js: 'ignorePackages', json: 'ignorePackages', ts: 'ignorePackages' }],
+        'no-unused-vars': ['error', {'vars': 'all', 'args': 'all', 'argsIgnorePattern': '^_'}],
     },
     ignorePatterns: ["src/third-party/hterm_all.js"],
 };
