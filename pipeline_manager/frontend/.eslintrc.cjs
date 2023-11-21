@@ -34,4 +34,5 @@ module.exports = {
         quotes: ['error', 'single', { allowTemplateLiterals: true }],
         'import/extensions': ['error', { js: 'ignorePackages', json: 'ignorePackages', ts: 'ignorePackages' }],
     },
+    ignorePatterns: ["src/third-party/hterm_all.js"],
 };
