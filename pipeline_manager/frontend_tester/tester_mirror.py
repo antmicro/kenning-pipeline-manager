@@ -138,10 +138,10 @@ class RPCMethodsBase:
         Dict
             Response to the redirected request
         """
-        respose = await self.client_copy.request(method, kwargs)
-        if 'error' in respose:
-            raise Exception(respose['error']['message'])
-        return respose['result']
+        response = await self.client_copy.request(method, kwargs)
+        if 'error' in response:
+            raise Exception(response['error']['message'])
+        return response['result']
 
 
 class RPCMethodsCopy(RPCMethodsBase):
@@ -293,7 +293,7 @@ async def wait_for_frontend(host: str, port: int):
     Parameters
     ----------
     host : str
-        Server's adress
+        Server's address
     port : int
         Server's port
     """
@@ -334,7 +334,7 @@ async def _main(args: argparse.Namespace, specification: Dict):
     await asyncio.sleep(3)
     # Wait for frontends
     logging.info(
-        'Wating for frontends to connect, please open browser on '
+        'Waiting for frontends to connect, please open browser on '
         f'http://{args.host}:{args.backend_port} and '
         f'http://{args.host}:{args.backend_port_second}'
     )
