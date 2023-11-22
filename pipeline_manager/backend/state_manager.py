@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import json
+import asyncio
 from importlib.resources import open_text
 
 from pipeline_manager_backend_communication.communication_backend import (
@@ -47,6 +48,11 @@ class PMStateManager:
         self.schema_filename = "unresolved_specification_schema.json"
 
         self.connected_frontends = 0
+
+        # Semaphore used to request connecting to the external application
+        # It is used so that different frontend instances do not interfere
+        # with each other
+        self.connecting_token = asyncio.Semaphore(1)
 
     async def reinitialize(
         self,

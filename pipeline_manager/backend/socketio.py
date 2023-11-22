@@ -69,20 +69,21 @@ def create_socketio() -> socketio.AsyncServer:
             """
             tcp_server = global_state_manager.tcp_server
 
-            if tcp_server.connected:
-                return {}
-            else:
-                await tcp_server.disconnect()
-                await join_listener_task()
-                await tcp_server.initialize_server()
-                out = await tcp_server.wait_for_client(
-                    tcp_server.receive_message_timeout
-                )
-                while out.status != Status.CLIENT_CONNECTED and \
-                        not global_state_manager.server_should_stop:
+            async with global_state_manager.connecting_token:
+                if tcp_server.connected:
+                    return {}
+                else:
+                    await tcp_server.disconnect()
+                    await join_listener_task()
+                    await tcp_server.initialize_server()
                     out = await tcp_server.wait_for_client(
                         tcp_server.receive_message_timeout
                     )
+                    while out.status != Status.CLIENT_CONNECTED and \
+                            not global_state_manager.server_should_stop:
+                        out = await tcp_server.wait_for_client(
+                            tcp_server.receive_message_timeout
+                        )
             if out.status == Status.CLIENT_CONNECTED:
                 # Socket reconnected, new thread
                 # receiving messages has to be spawned
