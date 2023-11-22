@@ -60,6 +60,12 @@ def create_backend(argv):
         help="Creates server without frontend",
     )
     parser.add_argument(
+        "--lazy-server-init",
+        action="store_true",
+        help="Connects to the third-party application after the first "
+        "frontend connects",
+    )
+    parser.add_argument(
         "--verbosity",
         help="Verbosity level",
         choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
@@ -97,9 +103,10 @@ def run_uvicorn(
     port: int,
     tcp_host: str,
     tcp_port: int,
+    lazy_server_init: bool
 ):
     async def _startup():
-        await startup(sio, tcp_host, tcp_port)
+        await startup(sio, tcp_host, tcp_port, lazy_server_init)
     app_asgi = socketio.ASGIApp(
         sio,
         other_asgi_app=app,
@@ -119,9 +126,13 @@ async def startup(
     sio: socketio.AsyncServer,
     host: str,
     port: int,
+    lazy_server_init: bool
 ):
     await global_state_manager.reinitialize(port, host)
     await global_state_manager.tcp_server.initialize_server()
+
+    if lazy_server_init:
+        return
 
     # Initial listener for external app
     from pipeline_manager.backend.tcp_socket import start_socket_task
