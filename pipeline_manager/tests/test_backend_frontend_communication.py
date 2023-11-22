@@ -24,11 +24,11 @@ from pipeline_manager.backend.run_backend import create_backend, run_uvicorn
 def app_client():
     sio, app, _ = create_backend(
         ['', '--tcp-server-port', '12312',
-         '--skip-frontend', '--skip-connecting']
+         '--skip-frontend', '--skip-connecting', '--lazy-server-init']
     )
     server = multiprocessing.Process(
         target=run_uvicorn,
-        args=(app, sio, "127.0.0.1", 32123, "127.0.0.1", 12312),
+        args=(app, sio, "127.0.0.1", 32123, "127.0.0.1", 12312, True),
     )
     server.start()
     time.sleep(1)
