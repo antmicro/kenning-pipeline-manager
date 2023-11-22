@@ -16,6 +16,10 @@ from pipeline_manager.backend.socketio import create_socketio
 from pipeline_manager.backend.state_manager import global_state_manager
 from pipeline_manager.utils.logger import string_to_verbosity
 
+from pipeline_manager_backend_communication.misc_structures import (
+    Status,
+)
+
 
 def create_backend(argv):
     parser = argparse.ArgumentParser(argv[0])
@@ -118,6 +122,29 @@ async def startup(
 ):
     await global_state_manager.reinitialize(port, host)
     await global_state_manager.tcp_server.initialize_server()
+
+    # Initial listener for external app
+    from pipeline_manager.backend.tcp_socket import start_socket_task
+    import asyncio
+
+    async def init_connection():
+        async with global_state_manager.connecting_token:
+            tcp_server = global_state_manager.tcp_server
+
+            out = await tcp_server.wait_for_client(
+                tcp_server.receive_message_timeout
+            )
+            while out.status != Status.CLIENT_CONNECTED and \
+                    not global_state_manager.server_should_stop:
+                out = await tcp_server.wait_for_client(
+                    tcp_server.receive_message_timeout
+                )
+            if out.status == Status.CLIENT_CONNECTED:
+                # Socket reconnected, new thread
+                # receiving messages has to be spawned
+                start_socket_task(sio)
+
+    asyncio.create_task(init_connection())
 
 
 async def shutdown():
