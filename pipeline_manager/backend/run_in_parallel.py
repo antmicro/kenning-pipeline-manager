@@ -19,7 +19,7 @@ from pipeline_manager.backend.state_manager import global_state_manager
 
 def server_process_handler(
     frontend_path: Path, backend_host: str, backend_port: int,
-    tcp_host: str, tcp_port: int,
+    tcp_host: str, tcp_port: int, lazy_server_init: bool = False
 ):
     """
     Function ran as a process target, responsible for initializing the tcp
@@ -42,7 +42,15 @@ def server_process_handler(
     app.static_folder = Path(frontend_path).resolve()
     app.template_folder = Path(frontend_path).resolve()
 
-    run_uvicorn(app, sio, backend_host, backend_port, tcp_host, tcp_port)
+    run_uvicorn(
+        app,
+        sio,
+        backend_host,
+        backend_port,
+        tcp_host,
+        tcp_port,
+        lazy_server_init
+    )
 
 
 async def start_server_in_parallel(
@@ -52,6 +60,7 @@ async def start_server_in_parallel(
     backend_host: str = "127.0.0.1",
     backend_port: int = 5000,
     verbosity: str = "INFO",
+    lazy_server_init: bool = False
 ):
     """
     Wrapper function that starts a Pipeline Manager process in the background
@@ -75,6 +84,10 @@ async def start_server_in_parallel(
     verbosity: str
         Logging verbosity level. Available options:
         ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']
+    lazy_server_init: bool
+        Tells whether the connection with the third-party
+        application should be established after connecting with
+        the frontend (True) or immediately upon start (False)
     """
 
     logging.basicConfig(level=verbosity)
@@ -83,7 +96,7 @@ async def start_server_in_parallel(
     global_state_manager.server_processes.append(Process(
         target=server_process_handler,
         args=(frontend_path, backend_host, backend_port,
-              tcp_server_host, tcp_server_port),
+              tcp_server_host, tcp_server_port, lazy_server_init),
     ))
     global_state_manager.server_processes[-1].start()
 
