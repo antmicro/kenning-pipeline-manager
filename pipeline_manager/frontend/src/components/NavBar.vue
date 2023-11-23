@@ -532,6 +532,7 @@ export default {
                             <template
                                 v-if="this.externalApplicationManager.externalApplicationConnected"
                             >
+                                <hr />
                                 <DropdownItem
                                     text="Load file"
                                     id="request-dataflow-button"
