@@ -249,22 +249,29 @@ const contextMenuTitleX = ref(0);
 const contextMenuTitleY = ref(0);
 const contextMenuTitleItems = computed(() => {
     const items = [];
-    if (!viewModel.value.editor.readonly) {
-        items.push(
-            { value: 'rename', label: 'Rename', icon: Pencil },
-            { value: 'delete', label: 'Delete', icon: Bin },
-            { value: 'disconnect', label: 'Disconnect', icon: Disconnect },
-        );
-    }
-
     if (!viewModel.value.hideHud) {
         items.push({ value: 'sidebar', label: 'Details', icon: Sidebar });
     }
-
-    items.push(...nodeURLs);
-
+    if (!viewModel.value.editor.readonly) {
+        items.push({ value: 'rename', label: 'Rename', icon: Pencil });
+    }
     if (props.node.type.startsWith(GRAPH_NODE_TYPE_PREFIX)) {
         items.push({ value: 'editSubgraph', label: 'Edit Subgraph' });
+    }
+    if (items.length > 1) {
+        items.at(-1).endSection = true;
+    }
+
+    items.push(...nodeURLs);
+    if (items.length > 1) {
+        items.at(-1).endSection = true;
+    }
+
+    if (!viewModel.value.editor.readonly) {
+        items.push(
+            { value: 'disconnect', label: 'Disconnect', icon: Disconnect },
+            { value: 'delete', label: 'Delete', icon: Bin },
+        );
     }
 
     return items;
