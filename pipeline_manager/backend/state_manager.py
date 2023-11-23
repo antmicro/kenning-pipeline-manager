@@ -5,6 +5,7 @@
 import json
 import asyncio
 from importlib.resources import open_text
+from typing import Optional
 
 from pipeline_manager_backend_communication.communication_backend import (
     CommunicationBackend,
@@ -51,8 +52,8 @@ class PMStateManager:
 
         # Semaphore used to request connecting to the external application
         # It is used so that different frontend instances do not interfere
-        # with each other
-        self.connecting_token = asyncio.Semaphore(1)
+        # with each other, initialized on server startup
+        self.connecting_token: Optional[asyncio.Semaphore] = None
 
     async def reinitialize(
         self,
