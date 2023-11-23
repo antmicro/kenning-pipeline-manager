@@ -61,7 +61,7 @@ async def start_server_in_parallel(
     backend_port: int = 5000,
     verbosity: str = "INFO",
     lazy_server_init: bool = False
-):
+) -> int:
     """
     Wrapper function that starts a Pipeline Manager process in the background
     when called. The process can be stopped after calling
@@ -88,17 +88,24 @@ async def start_server_in_parallel(
         Tells whether the connection with the third-party
         application should be established after connecting with
         the frontend (True) or immediately upon start (False)
+
+    Returns
+    -------
+    int
+        Index of the server process
     """
 
     logging.basicConfig(level=verbosity)
     await global_state_manager.reinitialize(tcp_server_port, tcp_server_host)
 
+    index = len(global_state_manager.server_processes)
     global_state_manager.server_processes.append(Process(
         target=server_process_handler,
         args=(frontend_path, backend_host, backend_port,
               tcp_server_host, tcp_server_port, lazy_server_init),
     ))
     global_state_manager.server_processes[-1].start()
+    return index
 
 
 def stop_parallel_server(process_index: int):
