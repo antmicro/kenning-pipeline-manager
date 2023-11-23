@@ -162,12 +162,12 @@
                 {
                     "name": "Method",
                     "type": "text",
-                    "default": "status_get"
+                    "default": "progress_change"
                 },
                 {
                     "name": "Params",
                     "type": "text",
-                    "default": "{}"
+                    "default": "{\"progress\": 50.0}"
                 },
                 {
                     "name": "Disconnect",
