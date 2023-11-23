@@ -573,7 +573,7 @@ export default {
                                 text="Save file"
                                 type="button"
                                 :eventFunction="(
-                                    async () => requestDataflowAction('export_dataflow')
+                                    async () => requestDataflowAction('dataflow_export')
                                 )"
                             />
                         </div>
