@@ -52,6 +52,7 @@ from creating and deleting connections or altering nodes' values if the editor i
                     </div>
                     <div class="text">{{ item.name }}</div>
                 </a>
+                <hr v-if="item.endSection" :key="`hr-${index}`" />
             </template>
         </div>
     </transition>
