@@ -99,14 +99,15 @@ def create_backend(argv):
 def run_uvicorn(
     app: FastAPI,
     sio: socketio.AsyncServer,
-    host: str,
-    port: int,
-    tcp_host: str,
-    tcp_port: int,
-    lazy_server_init: bool
+    backend_host: str,
+    backend_port: int,
+    tcp_server_host: str,
+    tcp_server_port: int,
+    lazy_server_init: bool,
+    **kwargs
 ):
     async def _startup():
-        await startup(sio, tcp_host, tcp_port, lazy_server_init)
+        await startup(sio, tcp_server_host, tcp_server_port, lazy_server_init)
     app_asgi = socketio.ASGIApp(
         sio,
         other_asgi_app=app,
@@ -115,8 +116,8 @@ def run_uvicorn(
     )
     run(
         app_asgi,
-        host=host,
-        port=port,
+        host=backend_host,
+        port=backend_port,
         ws=WebSocketProtocol,
         loop="uvloop",
     )
@@ -128,6 +129,8 @@ async def startup(
     port: int,
     lazy_server_init: bool
 ):
+    import asyncio
+    global_state_manager.connecting_token = asyncio.Semaphore(1)
     await global_state_manager.reinitialize(port, host)
     await global_state_manager.tcp_server.initialize_server()
 
@@ -136,7 +139,6 @@ async def startup(
 
     # Initial listener for external app
     from pipeline_manager.backend.tcp_socket import start_socket_task
-    import asyncio
 
     async def init_connection():
         async with global_state_manager.connecting_token:
@@ -166,10 +168,7 @@ async def shutdown():
 def main(argv):
     sio, app, args = create_backend(argv)
 
-    run_uvicorn(
-        app, sio, args.backend_host, args.backend_port,
-        args.tcp_server_host, args.tcp_server_port,
-    )
+    run_uvicorn(app, sio, **args.__dict__)
 
 
 if __name__ == "__main__":
