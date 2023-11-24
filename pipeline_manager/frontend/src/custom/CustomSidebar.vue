@@ -150,7 +150,10 @@ export default defineComponent({
     setup() {
         const { graph } = useGraph();
         const { viewModel } = useViewModel();
-        const converter = new showdown.Converter();
+        const converter = new showdown.Converter({
+            smartIndentationFix: true,
+            simpleLineBreaks: true,
+        });
 
         const width = ref(300);
 
