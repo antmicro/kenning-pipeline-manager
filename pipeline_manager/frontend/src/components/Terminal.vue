@@ -55,7 +55,7 @@ export default {
             });
             // for now configure the terminal as read-only
             this.onVTKeystroke = (_string) => {};
-            this.io.sendString = this.io.print;
+            this.io.sendString = (_string) => {};
             this.setCursorVisible(false);
             this.installKeyboard();
         };
