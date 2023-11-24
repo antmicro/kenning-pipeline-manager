@@ -10598,7 +10598,7 @@ hterm.PreferenceManager.defaultPreferences = {
   'mouse-paste-button': hterm.PreferenceManager.definePref_(
       'Mouse button paste',
       hterm.PreferenceManager.Categories.CopyPaste,
-      null, [null, 0, 1, 2, 3, 4, 5, 6],
+      null, [null, 'no-button', 0, 1, 2, 3, 4, 5, 6],
       `The mouse button to use for pasting.\n` +
       `\n` +
       `For autodetect, we'll use the middle mouse button for non-X11 ` +
@@ -10611,6 +10611,8 @@ hterm.PreferenceManager.defaultPreferences = {
       `2 == right (secondary) button.\n` +
       `\n` +
       `This option is independent of the setting for right-click paste.\n` +
+      `\n` +
+      `If set to 'no-button' then no paste button is used.` +
       `\n` +
       `Note: The primary & secondary buttons are handled for you with left ` +
       `& right handed mice.`,
@@ -15363,6 +15365,11 @@ hterm.Terminal.prototype.syncMousePasteButton = function() {
   const button = this.prefs_.get('mouse-paste-button');
   if (typeof button == 'number') {
     this.mousePasteButton = button;
+    return;
+  }
+
+  // If the button is set to undefined, then there is no button that pastes
+  if (button === "no-button") {
     return;
   }
 
