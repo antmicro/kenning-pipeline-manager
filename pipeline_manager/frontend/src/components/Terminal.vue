@@ -21,6 +21,9 @@ import { hterm, lib } from '../third-party/hterm_all';
 const htermSettings = {
     'background-color': '#1d1d1d',
     'cursor-color': 'white',
+    'mouse-right-click-paste': false,
+    'pass-meta-v': false,
+    'mouse-paste-button': 'no-button',
 };
 
 const setHTermPreferences = () => {
