@@ -16,8 +16,10 @@
     & > div {
         display: block;
         vertical-align: bottom;
-        overflow: visible;
         width: 30%;
+    }
+    span {
+        max-width: 30vh;
     }
     & > .node_description {
         display: block;
@@ -25,10 +27,7 @@
         margin-left: 1em;
         margin-right: 1em;
         width: auto;
-    }
-
-    p {
-        word-wrap: normal;
+        overflow-wrap: break-word;
     }
 
     code {
