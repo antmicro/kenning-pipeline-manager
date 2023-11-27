@@ -72,7 +72,7 @@ Backend implements the following events:
 * **external-api** -- redirects messages to external application through BSD socket.
 
 On the other hand, communication between backend and external application is done through BSD socket.
-To manage this, both sides run socket listener in a separate thread, which waits for messages and responds or redirects them.
+To manage this, both sides run socket listener as separate coroutine task, which waits for messages and responds or redirects them.
 
 Following communication structure diagram below, we have:
 
@@ -99,7 +99,7 @@ C4Deployment
                 Container(flask-backend-api, "backend-api")
                 Container(flask-external-api, "external-api")
             }
-            Deployment_Node(flask-thread, "Separate thread", "") {
+            Deployment_Node(flask-task, "Coroutine task", "") {
                 Container(back-socket, "BSD socket listener")
             }
         }
@@ -107,7 +107,7 @@ C4Deployment
     Deployment_Node(pmbc, "Pipeline Manager Backend Communication", "") {
         Deployment_Node(pmbc-socket, "Socket", "") {
             Container(pmbc-socket, "BSD socket")
-            Deployment_Node(pmbc-thread, "Separate thread", "") {
+            Deployment_Node(pmbc-task, "Coroutine task", "") {
                 Container(pmbc-listener, "BSD socket listener")
             }
         }
@@ -235,6 +235,14 @@ Moreover, every uncaught exception will be classified as error.
         raise Exception('Something went very, very bad...')
 ```
 
+RPC methods can also be asynchronous. It is automatically detected by server and awaited.
+
+```python
+    async def dataflow_stop(self) -> Dict:
+        # ...
+        return {'type': MessageType.OK.value}
+```
+
 Therefore, the following JSON-RPC error message will be returned to frontend application.
 
 ```json
@@ -260,37 +268,26 @@ port = 5000
 client = CommunicationBackend(host, port)
 # Registering implemented methods and
 # connecting to Pipeline Manager
-client.initialize_client(RPCMethods())
+await client.initialize_client(RPCMethods())
 ```
 
 Once the connection is established, the application can start listening for the incoming requests.
-It can be done in two ways:
-* listening on active thread -- client will run until the connection is closed and won't be able to send requests,
-* listening on separate thread -- client will have the possibility to send and receive requests. 
 
 ```python
-client.start_json_rpc_client(separate_thread=True)
+await client.start_json_rpc_client()
 ```
+
+These methods can be wrapped into the `async` function and run with `asyncio.run` function.
 
 ### Sending JSON-RPC requests to {{project}}
 
-To send request, client has to be started on separate thread (with `separate_thread=True`).
-Requesting can be done in blocking and non-blocking manner.
-First one waits until the response is received and returns it.
+Sending requests is defined as coroutine which has to be awaited.
 
 ```python
-response = client.request('status_get', non_blocking=False)
+response = await client.request('status_get')
 ```
 
-Non-blocking option returns request's ID which later can be used to retrieve response.
-
-```python
-_id = client.request('status_get', non_blocking=True)
-# ...
-response = client.response_for_id(_id)
-```
-
-Both methods sent [status-get](#frontend-status-get) request to frontend application and receive following response:
+This method sends [status-get](#frontend-status-get) request to frontend application and receive following response:
 
 ```json
 {
