@@ -9,23 +9,28 @@ Resizable terminal panel that handles the user interactions
 -->
 
 <template>
-    <div ref="terminalWrapper" class="terminal-wrapper">
+    <div ref="terminalWrapper" class="terminal-wrapper" :style="terminalWrapperStyles">
         <div class="container">
-            <div ref="resizer" class="resizer" />
+            <div ref="resizer" class="resizer" :style="resizerStyles"/>
             <div class="tab">
-                <button class="tab-item" @click="togglePipelineManagerTerminal">
-                    <span ref="pipelineSpan">Terminal</span>
+                <button
+                    v-for="terminal in terminalNames"
+                    :key="terminal"
+                    class="tab-item"
+                    @click="toggleTerminalPanel(terminal)"
+                >
+                    <span :class="pipelineSpanClasses(terminal)">{{ terminal }}</span>
                 </button>
             </div>
 
             <div class="button-wrapper">
-                <button v-if="this.isPipelineManagerTerminalOpen" @click="clearTerminalOutput">
+                <button v-if="isTerminalPanelOpened" @click="clearTerminalOutput(activeTerminal)">
                     <Bin/>
                     <span>Clear terminal</span>
                 </button>
-                <button @click="togglePipelineManagerTerminal">
+                <button @click="toggleTerminalPanel(undefined)">
                     <Arrow
-                        v-if="!this.isPipelineManagerTerminalOpen"
+                        v-if="!isTerminalPanelOpened"
                         color="white"
                         scale="small"
                         rotate="up"
@@ -34,58 +39,101 @@ Resizable terminal panel that handles the user interactions
                 </button>
             </div>
         </div>
-        <Terminal v-if="this.isPipelineManagerTerminalOpen" />
+        <Terminal :terminalInstance=activeTerminal v-if="isTerminalPanelOpened" />
     </div>
 </template>
 
-<script>
+<script lang="ts">
+import {
+    defineComponent,
+    onMounted,
+    ref,
+    computed,
+    StyleValue,
+} from 'vue';
+
 import Terminal from './Terminal.vue';
 import Arrow from '../icons/Arrow.vue';
 import Bin from '../icons/Bin.vue';
 import { mouseDownHandler } from '../core/events';
-import { terminalStore } from '../core/stores';
+import { terminalStore, MAIN_TERMINAL } from '../core/stores';
 
-export default {
+export default defineComponent({
     components: {
         Arrow,
         Bin,
         Terminal,
     },
-    data() {
-        return {
-            isPipelineManagerTerminalOpen: false, // toggle state of pipeline terminal
-        };
-    },
-    mounted() {
-        this.$refs.resizer.addEventListener('mousedown', mouseDownHandler);
-    },
-    methods: {
-        togglePipelineManagerTerminal() {
-            // Get height of terminal panel before change
-            const terminalWrapperHeight = this.$refs.terminalWrapper.clientHeight;
-            // 360px height for commands + 35px for termianl tabs = 395px
+    setup() {
+        const resizer = ref<HTMLElement | null>(null);
+        const terminalWrapper = ref<HTMLElement | null>(null);
+
+        const activeTerminal = ref<string | undefined>(undefined);
+        const isTerminalPanelOpened = ref<boolean>(false);
+
+        const pipelineSpanClasses = (terminal: string) => ({
+            active: isTerminalPanelOpened.value && terminal === activeTerminal.value,
+        });
+
+        const terminalWrapperStyles = computed(() => {
+            const terminalWrapperHeight = terminalWrapper.value?.clientHeight ?? 0;
             const minTerminalPanelHeight = 395;
 
-            this.isPipelineManagerTerminalOpen = !this.isPipelineManagerTerminalOpen;
-
-            if (this.isPipelineManagerTerminalOpen) {
-                this.$refs.terminalWrapper.style.height =
-                    terminalWrapperHeight > minTerminalPanelHeight
-                        ? `${terminalWrapperHeight}px`
-                        : `${minTerminalPanelHeight}px`;
-                this.$refs.resizer.style.pointerEvents = 'all';
-                this.$refs.pipelineSpan.classList.add('active');
-            } else {
-                this.$refs.resizer.style.pointerEvents = 'none';
-                this.$refs.terminalWrapper.style.height = 'unset';
-                this.$refs.pipelineSpan.classList.remove('active');
+            if (isTerminalPanelOpened.value) {
+                return {
+                    height: `${Math.max(terminalWrapperHeight, minTerminalPanelHeight)}px`,
+                };
             }
-        },
-        clearTerminalOutput() {
-            terminalStore.remove();
-        },
+            return {
+                height: 'unset',
+            };
+        });
+
+        const resizerStyles = computed(() => ({
+            'pointer-events': (isTerminalPanelOpened.value ? 'all' : 'none'),
+        }) as StyleValue);
+
+        const toggleTerminalPanel = (terminal: string | undefined) => {
+            if (terminal === undefined && !isTerminalPanelOpened.value) {
+                activeTerminal.value = MAIN_TERMINAL;
+                isTerminalPanelOpened.value = true;
+            } else if (terminal === activeTerminal.value || terminal === undefined) {
+                activeTerminal.value = undefined;
+                isTerminalPanelOpened.value = false;
+            } else {
+                activeTerminal.value = terminal;
+                isTerminalPanelOpened.value = true;
+            }
+        };
+
+        const clearTerminalOutput = (terminal?: string) => {
+            if (terminal !== undefined) {
+                terminalStore.remove(terminal);
+            } else {
+                terminalStore.remove();
+            }
+        };
+
+        onMounted(() => {
+            resizer.value!.addEventListener('mousedown', mouseDownHandler);
+        });
+
+        const terminalNames = computed(() => Object.keys(terminalStore.logs));
+
+        return {
+            toggleTerminalPanel,
+            clearTerminalOutput,
+            terminalNames,
+            activeTerminal,
+            isTerminalPanelOpened,
+            resizer,
+            terminalWrapper,
+            pipelineSpanClasses,
+            terminalWrapperStyles,
+            resizerStyles,
+        };
     },
-};
+});
 </script>
 
 <style lang="scss" scoped>
@@ -108,6 +156,7 @@ export default {
     background-color: $gray-600;
     /* Calculation to prevent panel overflow */
     width: calc(100% - 2 * #{$spacing-xxl});
+    border-bottom: 1px solid $gray-500;
     display: flex;
     padding: 0 $spacing-xxl;
     align-items: center;

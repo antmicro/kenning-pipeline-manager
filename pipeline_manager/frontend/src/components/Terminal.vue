@@ -22,7 +22,13 @@ import { terminalStore } from '../core/stores';
 import { hterm, lib } from '../third-party/hterm_all';
 
 export default defineComponent({
-    setup() {
+    props: {
+        terminalInstance: {
+            required: true,
+            type: String,
+        },
+    },
+    setup(props) {
         let term;
         const htermSettings = {
             'background-color': '#1d1d1d',
@@ -41,6 +47,8 @@ export default defineComponent({
             });
         };
 
+        const logs = computed(() => terminalStore.logs[props.terminalInstance]);
+
         onMounted(async () => {
             // wait for hterm.js library to load
             // (glatosinski: we may later need to move it to some global scope)
@@ -51,7 +59,7 @@ export default defineComponent({
 
             term.onTerminalReady = function onTerminalReady() {
                 // load logs that have existed already in the storage.
-                terminalStore.logs.forEach((log, index) => {
+                logs.value.forEach((log, index) => {
                     if (index > 0) this.io.println('\r\n\r\n');
                     this.io.println(log.replace(/\n/g, '\r\n'));
                 });
@@ -65,8 +73,6 @@ export default defineComponent({
             term.decorate(document.querySelector('#hterm-terminal'));
         });
 
-        const logs = computed(() => terminalStore.logs);
-
         const printLog = (log) => {
             if (term === undefined) return;
             term.io.println(log.replace(/\n/g, '\r\n'));
@@ -77,20 +83,27 @@ export default defineComponent({
             term.clearHome();
         };
 
+        // If a terminal instance was changed, then all messages should be written
+        let flush = false;
+        watch(() => props.terminalInstance, () => {
+            clearLog();
+            flush = true;
+        });
+
         watch(logs, (val, oldval) => {
-            if (val === undefined) {
+            if (val === undefined || val.length === 0) {
                 clearLog();
-            }
-            if (val.length === 0) {
-                clearLog();
+                flush = false;
+                return;
             }
             val.forEach((log, index) => {
-                if (oldval !== undefined && log === oldval[index]) {
+                if (!flush && oldval !== undefined && log === oldval[index]) {
                     return;
                 }
                 if (index > 0) printLog('\n\n');
                 printLog(log);
             });
+            flush = false;
         }, {
             immediate: true,
             deep: true,
