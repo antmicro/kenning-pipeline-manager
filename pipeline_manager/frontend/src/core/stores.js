@@ -57,13 +57,20 @@ export const notificationStore = reactive({
     },
 });
 
-export const terminalStore = reactive({
-    logs: JSON.parse(get('logs')) || [],
-    add(log) {
-        const newNotifications = [...this.logs, log];
+export const MAIN_TERMINAL = 'Terminal';
 
-        set('logs', JSON.stringify(newNotifications));
-        this.logs = newNotifications;
+export const terminalStore = reactive({
+    logs: {
+        Terminal: JSON.parse(get(`logs`)) || [],
+    },
+    add(log, instance = MAIN_TERMINAL) {
+        const newNotifications = [...this.logs[instance], log];
+
+        // Update localStorage only for the main terminal
+        if (instance === MAIN_TERMINAL) {
+            set(`logs`, JSON.stringify(newNotifications));
+        }
+        this.logs[instance] = newNotifications;
     },
 
     /**
@@ -82,7 +89,7 @@ export const terminalStore = reactive({
      * @param {string} title title of the message
      * @param {Array[string] | string | undefined} messages messages of the message
      */
-    addParsed(title, messages) {
+    addParsed(title, messages, instance = MAIN_TERMINAL) {
         let parsedMessage = title;
         if (messages) {
             if (typeof messages === 'string' || messages instanceof String) {
@@ -98,11 +105,27 @@ export const terminalStore = reactive({
         } else {
             parsedMessage += '.';
         }
-        this.add(parsedMessage);
+        this.add(parsedMessage, instance);
     },
 
-    remove() {
-        remove('logs');
-        this.logs = [];
+    remove(instance = MAIN_TERMINAL) {
+        if (instance === MAIN_TERMINAL) {
+            remove(`logs`);
+        }
+        this.logs[instance] = [];
+    },
+
+    /**
+     * Creates a new terminal instance.
+     * If such terminal already exisists, then false is returned.
+     *
+     * @param {string} Unique name of the terminal instance to be created.
+     * @returns returns true if terminal was created, false otherwise.
+     */
+    createTerminalInstance(name) {
+        if (Object.keys(this.logs).includes(name)) return false;
+
+        this.logs[name] = [];
+        return true;
     },
 });
