@@ -165,6 +165,44 @@
                 "$ref": "common_types#/$defs/null_or_empty"
             },
             "returns": null
+        },
+        "terminal_add": {
+            "description": "Create new terminal instance",
+            "params": {
+                "description": "Parameters for request",
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "description": "Unique name for the new terminal instance. This name is used for any communication.",
+                        "type": "string"
+                    }
+                },
+                "required": ["name"]
+            },
+            "returns": {
+                "$ref": "common_types#/$defs/null_or_empty"
+            }
+        },
+        "terminal_write": {
+            "description": "Writes a message line to a terminal instance",
+            "params": {
+                "description": "Parameters for request",
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "description": "Name of the terminal to which the message is written.",
+                        "type": "string"
+                    },
+                    "message": {
+                        "description": "Message to be written to the terminal",
+                        "type": "string"
+                    }
+                },
+                "required": ["name", "message"]
+            },
+            "returns": {
+                "$ref": "common_types#/$defs/null_or_empty"
+            }
         }
     },
     "backend_endpoints": {
