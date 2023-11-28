@@ -15,6 +15,7 @@
 
 import { useViewModel } from '@baklavajs/renderer-vue';
 import EditorManager from '../EditorManager';
+import { terminalStore } from '../stores';
 
 /* eslint-disable import/prefer-default-export */
 /* eslint-disable camelcase */
@@ -356,4 +357,33 @@ export function metadata_change(params: { metadata: any }) {
  */
 export function viewport_center() {
     editorManager.baklavaView.editor.centerZoom();
+}
+
+type TerminalAdd = {
+    name: string,
+};
+
+/**
+ * Creates new terminal instance
+ */
+export function terminal_add(params: TerminalAdd) {
+    const status = terminalStore.createTerminalInstance(params.name);
+    if (status === false) {
+        throw new Error(`Terminal instance of name '${params.name}' already exisits`);
+    }
+}
+
+type TerminalWrite = {
+    name: string,
+    message: string
+};
+
+/**
+ * Writes a single message to a chosen terminal
+ */
+export function terminal_write(params: TerminalWrite) {
+    if (!(params.name in terminalStore.logs)) {
+        terminalStore.createTerminalInstance(params.name);
+    }
+    terminalStore.add(params.message, params.name);
 }
