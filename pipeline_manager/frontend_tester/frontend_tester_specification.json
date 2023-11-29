@@ -183,5 +183,29 @@
                 }
             ]
         }
-    ]
+    ],
+    "metadata": {
+        "navbarItems": [
+            {
+                "name": "Run",
+                "iconName": "Run",
+                "procedureName": "dataflow_run"
+            },
+            {
+                "name": "Run API test",
+                "iconName": "Run",
+                "procedureName": "custom_api_test"
+            },
+            {
+                "name": "Validate",
+                "iconName": "Validate",
+                "procedureName": "dataflow_validate"
+            },
+            {
+                "name": "Stop",
+                "iconName": "StopDataflow",
+                "procedureName": "dataflow_stop"
+            }
+        ]
+    }
 }
