@@ -28,15 +28,38 @@ export function useTemporaryConnection() {
 
     const temporaryConnection = ref(null);
     const hoveringOver = ref(null);
+    let hoveringOverElement = null;
 
     const onMouseMove = (ev) => {
         if (temporaryConnection.value) {
-            temporaryConnection.value.mx = ev.offsetX / graph.value.scaling - graph.value.panning.x;
-            temporaryConnection.value.my = ev.offsetY / graph.value.scaling - graph.value.panning.y;
+            // Touch does not support hover, check if event pointing on interface
+            if (ev.pointerType === 'touch') {
+                const element = document.elementFromPoint(ev.clientX, ev.clientY);
+                // Hover out, trigger pointerout
+                if (hoveringOverElement && hoveringOverElement !== element) {
+                    hoveringOverElement.dispatchEvent(new PointerEvent('pointerout'));
+                    hoveringOverElement = null;
+                }
+                // Hover over port, trigger pointerover
+                if (element && element.classList.contains('__port')) {
+                    element.dispatchEvent(new PointerEvent('pointerover'));
+                    hoveringOverElement = element;
+                }
+                temporaryConnection.value.mx =
+                    ev.clientX / graph.value.scaling - graph.value.panning.x;
+                temporaryConnection.value.my =
+                    ev.clientY / graph.value.scaling - graph.value.panning.y;
+            } else {
+                temporaryConnection.value.mx =
+                    ev.offsetX / graph.value.scaling - graph.value.panning.x;
+                temporaryConnection.value.my =
+                    ev.offsetY / graph.value.scaling - graph.value.panning.y;
+            }
         }
     };
 
-    const onMouseDown = () => {
+    const onMouseDown = (ev) => {
+        hoveringOverElement = ev.target;
         if (hoveringOver.value) {
             temporaryConnection.value = {
                 status: TemporaryConnectionState.NONE,
