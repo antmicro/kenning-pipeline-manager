@@ -23,7 +23,7 @@ The specification consists of:
 
 This object specifies additional editor options and contains the following optional properties:
 
-* `interfaces`  - dictionary which defines interface and connection styling for particular interface types.
+* `interfaces` - dictionary which defines interface and connection styling for particular interface types.
   The key in the dictionary is the name of the interface type, and the value is of type [Interface style](#interface-style).
 * `allowLoopbacks` - boolean value that determines whether connections with endpoints at the same node are allowed.
   Default value is `false`.
@@ -123,6 +123,7 @@ It consists of the following properties:
   The possible variants are `solid`, `dashed` and `dotted`.
 * `interfaceConnectionColor` - describes the color of connection lines, should be a hexadecimal number representing RGB values.
 
+(metadata-navbar-item)=
 #### Navbar item
 
 Describes a list of custom buttons displayed in the navbar.
@@ -132,7 +133,7 @@ Every element consists of the following properties:
   Names have to be unique.
 * `iconName` - name of the icon that is used.
   It can be either a file in the assets directory, or an icon described in `/pipeline-manager/pipeline_manager/frontend/src/icons/index.ts`.
-* `procedureName` - name of the procedure to be called.
+* `procedureName` - name of the procedure (either defined in [specification](#api-specification) or [custom one](#api-custom-procedure)) to be called.
   It is assumed that the procedure does not need any arguments, or takes one argument which is the currently displayed dataflow.
 
 Example of a button that is used to run the current graph using a dedicated procedure `dataflow_run` looks as follows:

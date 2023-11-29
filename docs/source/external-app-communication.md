@@ -160,7 +160,7 @@ Its `content` may vary depending on the answered request.
 Message of optional `type` `PROGRESS` (2) is used to inform {{project}} about the status of a running dataflow.
 The `PROGRESS` message type can only be used once a message of type `RUN` is received and can be sent multiple times before sending a final response message of type either `ERROR` or `OK` that indicates the end of the run.
 The progress information is conveyed in `content` using a number ranging `0 - 100` encoded in UTF-8 that signals the percentage of completion of the run.
-See [RUN](#run-dataflow) for more information.
+See [RUN](#external-dataflow-run) for more information.
 
 ### WARNING
 
@@ -169,10 +169,17 @@ It optionally includes an answer to a previous request.
 Its `content` may vary depending on the answered request.
 
 
+(api-specification)=
 ## API Specification
 
 {{api_specification}}
 
+(api-custom-procedure)=
+### Custom procedures
+
+External application can define new remote procedures, which will be called by custom [Navbar button](#metadata-navbar-item).
+To use it, procedure's name has to start with `custom_` prefix and `procedureName` of Navbar button has to contain this name.
+Custom procedure will behave like normal message with [dataflow_run](#external-dataflow-run) method.
 
 ## Implementing a Python-based client for {{project}}
 
@@ -223,6 +230,11 @@ Defined methods have to have appropriate (matching with specification) name, inp
     def dataflow_run(self, **kwargs: Dict) -> Dict:
         # All params can also be retreived as one dictionary
         print(kwargs['dataflow'])
+        # ...
+        return {'type': MessageType.OK.value}
+
+    # Custom procedure example
+    def custom_build(self, dataflow: Dict) -> Dict:
         # ...
         return {'type': MessageType.OK.value}
 ```
@@ -284,17 +296,19 @@ These methods can be wrapped into the `async` function and run with `asyncio.run
 Sending requests is defined as coroutine which has to be awaited.
 
 ```python
-response = await client.request('status_get')
+response = await client.request('graph_get')
 ```
 
-This method sends [status-get](#frontend-status-get) request to frontend application and receive following response:
+This method sends [graph-get](#frontend-graph-get) request to frontend application and receive following response:
 
 ```json
 {
     "id": 1,
     "jsonrpc": "2.0",
     "result": {
-        "status": "healthy"
+        "dataflow": {
+            // ...
+        }
     }
 }
 ```
