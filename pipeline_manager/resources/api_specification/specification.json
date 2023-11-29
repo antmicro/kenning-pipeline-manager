@@ -203,6 +203,31 @@
             "returns": {
                 "$ref": "common_types#/$defs/null_or_empty"
             }
+        },
+        "notification_send": {
+            "description": "Sends a notification to the frontend. It will display the message both in the notifications and in the default terminal",
+            "params": {
+                "description": "Parameters for notification",
+                "type": "object",
+                "properties": {
+                    "type": {
+                        "description": "Type of the notification.",
+                        "enum": ["error", "warning", "info"]
+                    },
+                    "title": {
+                        "description": "Title of the notification, appearing both in the terminal and notification",
+                        "type": "string"
+                    },
+                    "details": {
+                        "description": "Details of the notification, displayed only in the terminal",
+                        "type": "string"
+                    }
+                },
+                "required": ["type", "title", "details"]
+            },
+            "returns": {
+                "$ref": "common_types#/$defs/null_or_empty"
+            }
         }
     },
     "backend_endpoints": {
