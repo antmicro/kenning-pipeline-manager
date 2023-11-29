@@ -10,7 +10,7 @@ Displays user interface and main details about the Pipeline Manager status.
 -->
 
 <script>
-import { markRaw, ref } from 'vue';
+import { markRaw, ref, provide } from 'vue';
 import { toPng, toSvg } from 'html-to-image';
 import jsonlint from 'jsonlint';
 import { useViewModel } from '@baklavajs/renderer-vue';
@@ -34,6 +34,7 @@ import Notifications from './Notifications.vue';
 import Settings from './Settings.vue';
 import SaveMenu from './SaveMenu.vue';
 import BlurPanel from './BlurPanel.vue';
+import CustomSidebar from '../custom/CustomSidebar.vue';
 
 import icons from '../icons';
 
@@ -62,6 +63,7 @@ export default {
         Cube,
         SaveMenu,
         BlurPanel,
+        CustomSidebar,
     },
     computed: {
         dataflowGraphName() {
@@ -174,6 +176,10 @@ export default {
 
         const searchEditorNodesQuery = ref('');
 
+        // Mock hoeredOver to suppress warning when creating Side Panel
+        // hoveredOver over is needed only for temporary connections, which are not used here
+        provide('hoveredOver', () => {});
+
         return {
             appName,
             graphName,
@@ -200,6 +206,7 @@ export default {
             showSearch: false,
             crossIcon: markRaw(icons.Cross),
             searchEditorNodesQuery,
+            navbarGuard: false,
             hoverInfo: {
                 isHovered: false,
                 hoveredPanel: undefined,
@@ -214,7 +221,7 @@ export default {
                     hideTransform: '0px, 0px',
                 },
                 palette: {
-                    isOpen: true,
+                    isOpen: !this.$isMobile,
                     class: '.baklava-node-palette',
                     iconRef: 'palette',
                     showTransform: '0px, 0px',
@@ -535,8 +542,24 @@ export default {
             }
         },
 
-        handleMouseLeave(panel) {
-            if (this.hideHud) this.togglePanel(panel, true);
+        openNavbar() {
+            this.navbarGuard = true;
+            this.$refs.navbar.classList.add('isHovered');
+        },
+
+        handleMouseLeave(ev) {
+            if (!this.$refs.navbar.classList.contains('isHovered')) return;
+            // check if event targets UI, if not hide NavBar
+            if ((this.hideHud || this.$isMobile) && !ev.target.closest('.baklava-node-palette')) {
+                // Ignore first event to prevent NavBar from hidding when side bar is opened
+                if (this.navbarGuard) {
+                    this.navbarGuard = false;
+                } else {
+                    this.togglePanel(this.panels.palette, true);
+                    this.$refs.navbar.classList.remove('isHovered');
+                    this.editorManager.baklavaView.displayedGraph.sidebar.visible = false;
+                }
+            }
         },
 
         updateHoverInfo(name) {
@@ -586,331 +609,336 @@ export default {
         </BlurPanel>
     </Transition>
     <div class="wrapper"
-        v-show="!preview"
-        :class="!hideHud ? 'wrapper-hud' : 'wrapper-hidden'"
-        @mouseleave="() => handleMouseLeave(panels.settings)"
+        v-click-outside="(ev) => handleMouseLeave(ev)"
     >
-        <div class="container">
-            <div>
-                <div
-                    class="logo"
-                    @pointerover="() => updateHoverInfo('logo')"
-                    @pointerleave="() => resetHoverInfo('logo')"
-                >
-                    <Logo :hover="isHovered('logo')" />
-                    <div class="dropdown-wrapper">
-                        <template
-                            v-if="this.editorManager.specificationLoaded"
-                        >
-                            <DropdownItem
-                                id="create-new-graph-button"
-                                text="Create new graph"
-                                type="'button'"
-                                :eventFunction="createNewGraphCallback"
-                            />
+        <div ref="navbar" class="wrapper"
+            v-show="!preview"
+            :class="(!hideHud && !$isMobile) ? 'wrapper-hud' : 'wrapper-hidden'"
+            @pointerenter="$event.target.classList.add('isHovered')"
+        >
+            <div class="container">
+                <div>
+                    <div
+                        class="logo"
+                        @pointerover="() => updateHoverInfo('logo')"
+                        @pointerleave="() => resetHoverInfo('logo')"
+                    >
+                        <Logo :hover="isHovered('logo')" />
+                        <div class="dropdown-wrapper">
+                            <template
+                                v-if="this.editorManager.specificationLoaded"
+                            >
+                                <DropdownItem
+                                    id="create-new-graph-button"
+                                    text="Create new graph"
+                                    type="'button'"
+                                    :eventFunction="createNewGraphCallback"
+                                />
+
+                                <!-- eslint-disable-next-line max-len -->
+                                <template v-if="this.externalApplicationManager.externalApplicationConnected">
+                                    <hr />
+                                    <DropdownItem
+                                        text="Load file"
+                                        id="request-dataflow-button"
+                                        :eventFunction="importDataflow"
+                                    />
+                                    <DropdownItem
+                                        text="Save file"
+                                        type="button"
+                                        :eventFunction="(async () => requestDataflowExport(false))"
+                                    />
+                                    <DropdownItem
+                                        text="Save file as..."
+                                        type="button"
+                                        :eventFunction="(async () => requestDataflowExport(true))"
+                                    />
+                                </template>
+                                <hr />
+                            </template>
 
                             <template
-                                v-if="this.externalApplicationManager.externalApplicationConnected"
+                                v-if="!this.externalApplicationManager.backendAvailable"
                             >
+                                <DropdownItem
+                                    v-if="!hideHud"
+                                    text="Load specification"
+                                    id="load-spec-button"
+                                    :eventFunction="loadSpecificationCallback"
+                                />
                                 <hr />
-                                <DropdownItem
-                                    text="Load file"
-                                    id="request-dataflow-button"
-                                    :eventFunction="importDataflow"
-                                />
-                                <DropdownItem
-                                    text="Save file"
-                                    type="button"
-                                    :eventFunction="(async () => requestDataflowExport(false))"
-                                />
-                                <DropdownItem
-                                    text="Save file as..."
-                                    type="button"
-                                    :eventFunction="(async () => requestDataflowExport(true))"
-                                />
                             </template>
-                            <hr />
-                        </template>
 
-                        <template
-                            v-if="!this.externalApplicationManager.backendAvailable"
-                        >
-                            <DropdownItem
-                                v-if="!hideHud"
-                                text="Load specification"
-                                id="load-spec-button"
-                                :eventFunction="loadSpecificationCallback"
-                            />
-                            <hr />
-                        </template>
+                            <template v-if="this.editorManager.specificationLoaded">
+                                <DropdownItem
+                                    v-if="!hideHud"
+                                    id="load-dataflow-button"
+                                    text="Load graph file"
+                                    :eventFunction="loadDataflowCallback"
+                                />
+                                <DropdownItem
+                                    type="'button'"
+                                    text="Save graph file"
+                                    :eventFunction="saveDataflow"
+                                />
+                                <DropdownItem
+                                    type="'button'"
+                                    text="Save graph as file as..."
+                                    :eventFunction="() => {
+                                        this.saveConfiguration.readonly = false,
+                                        this.saveConfiguration.hideHud = false,
+                                        this.saveConfiguration.position = false,
+                                        this.saveConfiguration.savename = 'save',
+                                        this.saveConfiguration.saveCallback = this.saveDataflow,
+                                        saveMenuShow = !saveMenuShow
+                                    }"
+                                />
+                                <hr />
+                            </template>
 
-                        <template v-if="this.editorManager.specificationLoaded">
                             <DropdownItem
-                                v-if="!hideHud"
-                                id="load-dataflow-button"
-                                text="Load graph file"
-                                :eventFunction="loadDataflowCallback"
+                                type="'button'"
+                                text="Export graph to PNG"
+                                :eventFunction="exportToPng"
                             />
                             <DropdownItem
                                 type="'button'"
-                                text="Save graph file"
-                                :eventFunction="saveDataflow"
+                                text="Export graph to SVG"
+                                :eventFunction="exportToSvg"
                             />
-                            <DropdownItem
-                                type="'button'"
-                                text="Save graph as file as..."
-                                :eventFunction="() => {
-                                    this.saveConfiguration.readonly = false,
-                                    this.saveConfiguration.hideHud = false,
-                                    this.saveConfiguration.position = false,
-                                    this.saveConfiguration.savename = 'save',
-                                    this.saveConfiguration.saveCallback = this.saveDataflow,
-                                    saveMenuShow = !saveMenuShow
-                                }"
-                            />
-                            <hr />
-                        </template>
-
-                        <DropdownItem
-                            type="'button'"
-                            text="Export graph to PNG"
-                            :eventFunction="exportToPng"
-                        />
-                        <DropdownItem
-                            type="'button'"
-                            text="Export graph to SVG"
-                            :eventFunction="exportToSvg"
-                        />
+                        </div>
                     </div>
-                </div>
 
-                <div
-                    ref="palette"
-                    v-if="!hideHud && !readonly"
-                    class="hoverbox"
-                    role="button"
-                    @click="() => togglePanel(panels.palette)"
-                    @pointerover="() => updateHoverInfo('palette')"
-                    @pointerleave="() => resetHoverInfo('palette')"
-                >
-                    <Cube :hover="isHovered('palette')" class="small_svg"/>
-                    <div class="tooltip" v-if="paletteOpen">
-                        <span>Hide node browser</span>
-                    </div>
-                    <div class="tooltip" v-if="!paletteOpen">
-                        <span>Show node browser</span>
-                    </div>
-                </div>
-
-                <template v-if="this.externalApplicationManager.backendAvailable">
                     <div
-                        v-for="actionItem in navbarItems" v-bind:key="actionItem.name"
-                        v-bind:id="`navbar-button-${actionItem.procedureName}`"
+                        ref="palette"
+                        v-if="!hideHud && !readonly"
                         class="hoverbox"
                         :class="{
                             'button-in-progress': isInProgress(actionItem.procedureName),
                         }"
                         role="button"
-                        @click="(async () => requestDataflowAction(actionItem.procedureName))"
-                        @pointerover="() => updateHoverInfo(actionItem.name)"
-                        @pointerleave="() => resetHoverInfo(actionItem.name)"
+                        @click="() => togglePanel(panels.palette)"
+                        @pointerover="() => updateHoverInfo('palette')"
+                        @pointerleave="() => resetHoverInfo('palette')"
                     >
-                        <!-- imgURI is used for Placeholder Icon to retrieve the image -->
-                        <component
-                            class="small_svg"
-                            :is="actionItem.icon"
-                            :hover="isHovered(actionItem.name)"
-                            :imgURI="actionItem.iconName"
-                        />
-                        <component
-                            v-if="
-                                isStoppable(actionItem.procedureName)
-                                && isInProgress(actionItem.procedureName)
-                            "
-                            class="small_svg_stop"
-                            :is="crossIcon"
-                            :hover="isHovered(actionItem.name)"
-                            :imgURI="'Cross'"
-                        />
-                        <div class="progress-bar" />
-                        <div class="tooltip">
+                        <Cube :hover="isHovered('palette')" class="small_svg"/>
+                        <div class="tooltip" v-if="paletteOpen">
+                            <span>Hide node browser</span>
+                        </div>
+                        <div class="tooltip" v-if="!paletteOpen">
+                            <span>Show node browser</span>
+                        </div>
+                    </div>
+
+                    <template v-if="this.externalApplicationManager.backendAvailable">
+                        <div
+                            v-for="actionItem in navbarItems" v-bind:key="actionItem.name"
+                            v-bind:id="`navbar-button-${actionItem.procedureName}`"
+                            class="hoverbox"
+                            role="button"
+                            @click="(async () => requestDataflowAction(actionItem.procedureName))"
+                            @pointerover="() => updateHoverInfo(actionItem.name)"
+                            @pointerleave="() => resetHoverInfo(actionItem.name)"
+                        >
+                            <!-- imgURI is used for Placeholder Icon to retrieve the image -->
+                            <component
+                                class="small_svg"
+                                :is="actionItem.icon"
+                                :hover="isHovered(actionItem.name)"
+                                :imgURI="actionItem.iconName"
+                            />
+                            <component
+                                v-if="
+                                    isStoppable(actionItem.procedureName)
+                                    && isInProgress(actionItem.procedureName)
+                                "
+                                class="small_svg_stop"
+                                :is="crossIcon"
+                                :hover="isHovered(actionItem.name)"
+                                :imgURI="'Cross'"
+                            />
+                            <div class="progress-bar" />
                             <span>
                                 {{ isStoppable(actionItem.procedureName) &&
                                    isInProgress(actionItem.procedureName) ? 'Stop ' : '' }}
                                 {{ actionItem.name }}
                             </span>
                         </div>
-                    </div>
-                </template>
-                <div
-                    v-if="this.editorManager.editor.isInSubgraph()"
-                    class="hoverbox"
-                    role="button"
-                    @click="() => this.editorManager.returnFromSubgraph()"
-                    @pointerover="() => updateHoverInfo('subgraphReturn')"
-                    @pointerleave="() => resetHoverInfo('subgraphReturn')"
-                >
-                    <Arrow
-                        rotate="down"
-                        :hover="isHovered('subgraphReturn')"
-                        color="white"
-                        class="small_svg"
-                    />
-                    <div class="tooltip">
-                        <span>Return from subgraph editor</span>
-                    </div>
-                </div>
-            </div>
-            <component
-                v-if="editTitle && !panels.nodesearch.isOpen"
-                :is="editorTitleInterface.component"
-                :intf="editorTitleInterface"
-                class="editorTitleInput"
-                v-model="graphName"
-                v-click-outside="() => { editTitle = false }"
-            />
-            <span
-                v-if="!editTitle && !panels.nodesearch.isOpen"
-                class="editorTitle"
-                @dblclick="editTitle = true">
-                    {{ editorTitle }}
-            </span>
-            <div
-                @pointerleave="()=> panels.nodesearch.isOpen =
-                    panels.nodesearch.isOpen && searchEditorNodesQuery != ''
-                "
-            >
-                <div
-                    ref="searchbar"
-                    class="searchbar hoverbox"
-                    role="button"
-                    @pointerover="() => updateHoverInfo('search')"
-                    @pointerleave="() => resetHoverInfo('search')"
-                    @click="onClickNodeSearch"
-                >
-                    <Magnifier :hover="isHovered('search')" class="small_svg"/>
+                    </template>
                     <div
-                        class="tooltip"
-                        :class="settingsTooltipClasses"
-                        v-if="!panels.nodesearch.isOpen"
+                        v-if="this.editorManager.editor.isInSubgraph()"
+                        class="hoverbox"
+                        role="button"
+                        @click="() => this.editorManager.returnFromSubgraph()"
+                        @pointerover="() => updateHoverInfo('subgraphReturn')"
+                        @pointerleave="() => resetHoverInfo('subgraphReturn')"
                     >
-                        <span>Show node search bar</span>
-                    </div>
-                    <div class="tooltip" :class="settingsTooltipClasses" v-else>
-                        <span>Hide node search bar</span>
-                    </div>
-                </div>
-                <div
-                    ref="searchbar"
-                    class="searchbar"
-                    v-show="panels.nodesearch.isOpen"
-                >
-                    <input
-                        ref="searchbarInput"
-                        class="search-editor-nodes"
-                        v-model="searchEditorNodesQuery"
-                        placeholder="Search for nodes in the editor"
-                    />
-                </div>
-                <div
-                    ref="settings"
-                    class="hoverbox"
-                    role="button"
-                    @click="() => togglePanel(panels.settings)"
-                    @pointerover="() => updateHoverInfo('settings')"
-                    @pointerleave="() => resetHoverInfo('settings')"
-                >
-                    <Cogwheel :hover="isHovered('settings')" class="small_svg" />
-                    <div
-                        class="tooltip"
-                        :class="settingsTooltipClasses"
-                        v-if="!panels.settings.isOpen"
-                    >
-                        <span>Show settings</span>
-                    </div>
-                    <div class="tooltip" :class="settingsTooltipClasses" v-else>
-                        <span>Hide settings</span>
-                    </div>
-                </div>
-                <div
-                    ref="backend"
-                    class="hoverbox"
-                    v-if="this.externalApplicationManager.backendAvailable"
-                    @click="() => togglePanel(panels.backendStatus)"
-                    @pointerover="() => updateHoverInfo('backendStatus')"
-                    @pointerleave="() => resetHoverInfo('backendStatus')"
-                >
-                    <button>
-                        <Backend
-                            v-if="this.externalApplicationManager.externalApplicationConnected"
-                            color="connected"
-                            :active="backendStatusOpen"
-                            :hover="isHovered('backendStatus')"
+                        <Arrow
+                            rotate="down"
+                            :hover="isHovered('subgraphReturn')"
+                            color="white"
+                            class="small_svg"
                         />
-                        <Backend
-                            v-else color="disconnected"
-                            :active="backendStatusOpen"
-                            :hover="isHovered('backendStatus')"
-                        />
-                    </button>
-                    <div class="tooltip" :class="backendStatusTooltipClasses">
-                        <span>Backend status</span>
-                    </div>
-                    <div
-                        v-click-outside="(ev) => clickOutside(ev, panels.backendStatus)"
-                        class="backend-status"
-                    >
-                        <div>
-                            <span>Client status:</span>
-                            <span
-                                v-if="this.externalApplicationManager.externalApplicationConnected"
-                                class="connected"
-                                >Connected</span
-                            >
-                            <span v-else class="disconnected">Disconnected</span>
+                        <div class="tooltip">
+                            <span>Return from subgraph editor</span>
                         </div>
                     </div>
                 </div>
+                <component
+                    v-if="editTitle && !panels.nodesearch.isOpen"
+                    :is="editorTitleInterface.component"
+                    :intf="editorTitleInterface"
+                    class="editorTitleInput"
+                    v-model="graphName"
+                    v-click-outside="() => { editTitle = false }"
+                />
+                <span
+                    v-if="!editTitle && !panels.nodesearch.isOpen"
+                    class="editorTitle"
+                    @dblclick="editTitle = true">
+                        {{ editorTitle }}
+                </span>
                 <div
-                    ref="notifications"
-                    v-if="!hideHud"
-                    class="hoverbox"
-                    role="button"
-                    @click="() => togglePanel(panels.notifications)"
-                    @pointerover="() => updateHoverInfo('notifications')"
-                    @pointerleave="() => resetHoverInfo('notifications')"
+                    @pointerleave="()=> panels.nodesearch.isOpen =
+                        panels.nodesearch.isOpen && searchEditorNodesQuery != ''
+                    "
                 >
-                    <Bell
-                        v-if="this.notificationStore.notifications.length > 0"
-                        color="green"
-                        :hover="isHovered('notifications')"
-                        class="small_svg"
-                    />
-                    <Bell v-else class="small_svg" :hover="isHovered('notifications')"/>
                     <div
-                        class="tooltip"
-                        v-if="notificationsOpen"
-                        :class="notificationsTooltipClasses"
+                        ref="searchbar"
+                        class="searchbar hoverbox"
+                        role="button"
+                        @pointerover="() => updateHoverInfo('search')"
+                        @pointerleave="() => resetHoverInfo('search')"
+                        v-click-outside="() => this.$isMobile ?
+                            panels.nodesearch.isOpen = false : null"
                     >
-                        <span>Hide notifications</span>
+                        <Magnifier
+                            :hover="isHovered('search')"
+                            class="small_svg"
+                            @click="onClickNodeSearch"
+                        />
+                        <div
+                            class="tooltip"
+                            :class="settingsTooltipClasses"
+                            v-if="!panels.nodesearch.isOpen"
+                        >
+                            <span>Show node search bar</span>
+                        </div>
+                        <div class="tooltip" :class="settingsTooltipClasses" v-else>
+                            <span>Hide node search bar</span>
+                        </div>
+                        <input
+                            ref="searchbarInput"
+                            class="search-editor-nodes"
+                            v-show="panels.nodesearch.isOpen"
+                            v-model="searchEditorNodesQuery"
+                            placeholder="Search for nodes in the editor"
+                        />
                     </div>
-                    <div class="tooltip" v-else :class="notificationsTooltipClasses">
-                        <span>Show notifications</span>
+                    <div
+                        ref="settings"
+                        class="hoverbox"
+                        role="button"
+                        @click="() => togglePanel(panels.settings)"
+                        @pointerover="() => updateHoverInfo('settings')"
+                        @pointerleave="() => resetHoverInfo('settings')"
+                    >
+                        <Cogwheel :hover="isHovered('settings')" class="small_svg" />
+                        <div
+                            class="tooltip"
+                            :class="settingsTooltipClasses"
+                            v-if="!panels.settings.isOpen"
+                        >
+                            <span>Show settings</span>
+                        </div>
+                        <div class="tooltip" :class="settingsTooltipClasses" v-else>
+                            <span>Hide settings</span>
+                        </div>
+                    </div>
+                    <div
+                        ref="backend"
+                        class="hoverbox"
+                        v-if="this.externalApplicationManager.backendAvailable"
+                        @click="() => togglePanel(panels.backendStatus)"
+                        @pointerover="() => updateHoverInfo('backendStatus')"
+                        @pointerleave="() => resetHoverInfo('backendStatus')"
+                    >
+                        <button>
+                            <Backend
+                                v-if="this.externalApplicationManager.externalApplicationConnected"
+                                color="connected"
+                                :active="backendStatusOpen"
+                                :hover="isHovered('backendStatus')"
+                            />
+                            <Backend
+                                v-else color="disconnected"
+                                :active="backendStatusOpen"
+                                :hover="isHovered('backendStatus')"
+                            />
+                        </button>
+                        <div class="tooltip" :class="backendStatusTooltipClasses">
+                            <span>Backend status</span>
+                        </div>
+                        <div
+                            v-click-outside="(ev) => clickOutside(ev, panels.backendStatus)"
+                            class="backend-status"
+                        >
+                            <div>
+                                <span>Client status:</span>
+                                <!-- eslint-disable-next-line max-len -->
+                                <span v-if="this.externalApplicationManager.externalApplicationConnected"
+                                    class="connected"
+                                    >Connected</span
+                                >
+                                <span v-else class="disconnected">Disconnected</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div
+                        ref="notifications"
+                        v-if="!hideHud"
+                        class="hoverbox"
+                        role="button"
+                        @click="() => togglePanel(panels.notifications)"
+                        @pointerover="() => updateHoverInfo('notifications')"
+                        @pointerleave="() => resetHoverInfo('notifications')"
+                    >
+                        <Bell
+                            v-if="this.notificationStore.notifications.length > 0"
+                            color="green"
+                            :hover="isHovered('notifications')"
+                            class="small_svg"
+                        />
+                        <Bell v-else class="small_svg" :hover="isHovered('notifications')"/>
+                        <div
+                            class="tooltip"
+                            v-if="notificationsOpen"
+                            :class="notificationsTooltipClasses"
+                        >
+                            <span>Hide notifications</span>
+                        </div>
+                        <div class="tooltip" v-else :class="notificationsTooltipClasses">
+                            <span>Show notifications</span>
+                        </div>
                     </div>
                 </div>
             </div>
+            <div class="progress-bar" />
         </div>
         <Notifications v-click-outside="(ev) => clickOutside(ev, panels.notifications)" />
         <Settings
             v-click-outside="(ev) => clickOutside(ev, panels.settings)"
             :viewModel="editorManager.baklavaView"
         />
+        <CustomSidebar
+            v-if="!hideHud"
+            @sidebar-open="openNavbar"
+        />
     </div>
 </template>
 
 <style lang="scss" scoped>
-$bar-height: 60px;
-
+$compress-max-width: 515px;
 .wrapper {
     z-index: 2;
 }
@@ -922,12 +950,13 @@ $bar-height: 60px;
 .wrapper-hidden {
     position: absolute;
     width: 100%;
-    top: -$bar-height;
-    padding-bottom: 90px;
+    top: -$navbar-height;
+    padding-bottom: calc($navbar-height * 1.5);
     transition: 0.2s;
 
-    &:hover {
-        transform: translateY($bar-height);
+    &.isHovered {
+        transform: translateY($navbar-height);
+        padding-bottom: 0;
     }
 }
 
@@ -935,7 +964,7 @@ $bar-height: 60px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    height: $bar-height;
+    height: $navbar-height;
     background-color: $gray-600;
     border: 1px solid $gray-500;
     border-left: 0;
@@ -943,17 +972,21 @@ $bar-height: 60px;
 
     .editorTitle {
         cursor: text;
-        text-align: right;
-        position: fixed;
-        left: 50vw;
-        transform: translate(-50%, 0);
+        text-align: center;
+        padding: 0 $spacing-s;
+
+        @media screen and (max-width: $compress-max-width) {
+            display: none;
+        }
     }
 
     .editorTitleInput {
         font-size: $fs-small;
-        position: fixed;
-        left: 50vw;
-        transform: translate(-50%, 0);
+        padding: 0 $spacing-s;
+
+        @media screen and (max-width: $compress-max-width) {
+            display: none;
+        }
     }
 
     .progress-bar {
@@ -1129,7 +1162,8 @@ $bar-height: 60px;
                     background-color: #181818;
                     flex: 1;
                     height: 100%;
-                    width: calc(3.75em * 6);
+                    max-width: calc(3.75em * 6);
+                    min-width: 0;
                     color: $white;
                     border: none;
                     padding: 0em 1em;
@@ -1142,6 +1176,14 @@ $bar-height: 60px;
                     &::placeholder {
                         opacity: 0.5;
                     }
+
+                    // on smaller screens display search bellow NavBar
+                    @media screen and (max-width: $compress-max-width) {
+                        position: absolute;
+                        top: calc($navbar-height + 1px);
+                        left: -100%;
+                        max-width: 40vw;
+                    }
                 }
 
                 & > svg {
@@ -1153,6 +1195,10 @@ $bar-height: 60px;
             &.searchbar:hover > .tooltip {
                 display: flex;
                 z-index: 11;
+
+                @media screen and (max-width: $compress-max-width) {
+                    display: none;
+                }
             }
         }
     }
