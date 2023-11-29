@@ -215,7 +215,7 @@ class RPCMethods:
         Dict
             Method's response
         """
-        return self._run_validate_response([RUN, SEND_REQUEST], dataflow)
+        return self._run_validate_response(RUN, dataflow)
 
     def dataflow_stop(self) -> Dict:
         """
@@ -265,6 +265,9 @@ class RPCMethods:
             Method's response
         """
         return self._run_validate_response(VALIDATE, dataflow)
+
+    def custom_api_test(self, dataflow: Dict) -> Dict:
+        return self._run_validate_response(SEND_REQUEST, dataflow)
 
     async def _run_validate_response(
         self,
