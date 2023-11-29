@@ -12,6 +12,7 @@ import App from './App.vue';
 import RouterVue from './router/router';
 import '../styles/style.scss';
 import 'vue-toastification/dist/index.css';
+import { longPress, longPressToRight } from './custom/directives';
 
 const options = {
     timeout: 5000,
@@ -24,6 +25,11 @@ const app = createApp(App);
 app.use(vClickOutside);
 app.use(RouterVue);
 app.use(Toast, options);
+/* eslint-disable no-restricted-globals */
+app.config.globalProperties.$isMobile = Math.min(screen.width, screen.height) <= 800;
+// Register custom directives
+app.directive('long-press', longPress);
+app.directive('long-press-to-right', longPressToRight);
 
 document.title = process.env.VUE_APP_EDITOR_TITLE ?? 'Pipeline Manager';
 
