@@ -37,10 +37,6 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
             <background />
         </slot>
 
-        <slot name="sidebar" v-if="!hideHud">
-            <CustomSidebar />
-        </slot>
-
         <slot name="palette" v-if="!(readonly || hideHud)">
             <NodePalette />
         </slot>
@@ -99,7 +95,6 @@ import NodePalette from './nodepalette/NodePalette.vue';
 import { useTemporaryConnection } from './temporaryConnection';
 import NotificationHandler from '../core/notifications';
 import EditorManager from '../core/EditorManager';
-import CustomSidebar from './CustomSidebar.vue';
 import RectangleSelection from './RectangleSelection.vue';
 import nodeInsideSelection from './rectangleSelection.js';
 import getExternalApplicationManager from '../core/communication/ExternalApplicationManager';
@@ -111,7 +106,6 @@ export default defineComponent({
         PipelineManagerConnection,
         TemporaryConnection,
         NodePalette,
-        CustomSidebar,
         RectangleSelection,
     },
     emits: ['loadWait', 'loadFinish'],
@@ -180,11 +174,13 @@ export default defineComponent({
             });
         };
 
+        let pointersDown = 0;
         const onPointerDown = (ev) => {
+            pointersDown += 1;
             if (ev.target === el.value) {
                 panZoom.onPointerDown(ev);
             }
-            temporaryConnection.onMouseDown();
+            temporaryConnection.onMouseDown(ev);
 
             pressStartTime = new Date();
         };
@@ -219,8 +215,11 @@ export default defineComponent({
                 unselectAllNodes();
             }
 
-            document.removeEventListener('mouseup', onPointerUp);
-            document.removeEventListener('mousemove', onPointerMove);
+            if (pointersDown === 1) {
+                document.removeEventListener('pointerup', onPointerUp);
+                document.removeEventListener('pointermove', onPointerMove);
+            }
+            pointersDown -= 1;
         };
 
         const onRightPointerUp = (ev) => {
@@ -233,8 +232,8 @@ export default defineComponent({
             }
             rectangleSelection.value.onPointerUp();
 
-            document.removeEventListener('mouseup', onRightPointerUp);
-            document.removeEventListener('mousemove', onPointerMove);
+            document.removeEventListener('pointerup', onRightPointerUp);
+            document.removeEventListener('pointermove', onPointerMove);
         };
 
         const onRightPointerDownCtrl = (ev) => {
@@ -247,24 +246,24 @@ export default defineComponent({
             appendSelectMultipleNodes();
             rectangleSelection.value.onPointerUp();
 
-            document.removeEventListener('mouseup', onRightPointerUpCtrl);
-            document.removeEventListener('mousemove', onPointerMove);
+            document.removeEventListener('pointerup', onRightPointerUpCtrl);
+            document.removeEventListener('pointermove', onPointerMove);
         };
 
-        document.addEventListener('mousedown', (ev) => {
+        document.addEventListener('pointerdown', (ev) => {
             if (ev.button === 0 && !ev.shiftKey) {
                 onPointerDown(ev);
-                document.addEventListener('mouseup', onPointerUp);
-                document.addEventListener('mousemove', onPointerMove);
+                document.addEventListener('pointerup', onPointerUp);
+                document.addEventListener('pointermove', onPointerMove);
             }
             if (ev.button === 2 && ev.ctrlKey) {
                 onRightPointerDownCtrl(ev);
-                document.addEventListener('mouseup', onRightPointerUpCtrl);
-                document.addEventListener('mousemove', onPointerMove);
+                document.addEventListener('pointerup', onRightPointerUpCtrl);
+                document.addEventListener('pointermove', onPointerMove);
             } else if (ev.button === 2) {
                 onRightPointerDown(ev);
-                document.addEventListener('mouseup', onRightPointerUp);
-                document.addEventListener('mousemove', onPointerMove);
+                document.addEventListener('pointerup', onRightPointerUp);
+                document.addEventListener('pointermove', onPointerMove);
             }
         });
 
