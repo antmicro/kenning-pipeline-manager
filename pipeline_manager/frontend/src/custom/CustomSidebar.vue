@@ -15,7 +15,10 @@ SPDX-License-Identifier: Apache-2.0
     />
     <div
         class="baklava-sidebar"
-        :class="{ '--open': graph.sidebar.visible }"
+        :class="{
+            '--open': graph.sidebar.visible,
+            'hidden-navbar': $isMobile,
+        }"
         :style="styles"
     >
         <div class="__resizer" @mousedown="startResize" />
@@ -147,7 +150,8 @@ export default defineComponent({
         CheckboxInterface,
         Tooltip,
     },
-    setup() {
+    emits: ['sidebar-open'],
+    setup(_props, { emit }) {
         const { graph } = useGraph();
         const { viewModel } = useViewModel();
         const converter = new showdown.Converter({
@@ -182,11 +186,15 @@ export default defineComponent({
 
         const getIconPath = (name) => viewModel.value.cache[`./${name}`] ?? name;
         const nodeIconPath = computed(() => getIconPath(nodeIcon.value));
+        const sidebarVisible = computed(() => graph.value.sidebar.visible);
 
         watch(node, () => {
             if (node.value === undefined) {
                 graph.value.sidebar.visible = false;
             }
+        });
+        watch(sidebarVisible, (newValue) => {
+            if (newValue) emit('sidebar-open');
         });
 
         const tooltipRef = ref(null);
