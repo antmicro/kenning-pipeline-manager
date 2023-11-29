@@ -138,6 +138,10 @@
     border: 1px solid $gray-500;
     cursor: pointer;
 
+    &.hidden-navbar {
+        translate: 0 $navbar-height;
+    }
+
     & > .item {
         display: flex;
         gap: 1em;
