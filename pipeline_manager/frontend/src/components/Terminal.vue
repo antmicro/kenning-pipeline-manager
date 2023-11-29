@@ -36,6 +36,8 @@ export default defineComponent({
             'mouse-right-click-paste': false,
             'pass-meta-v': false,
             'mouse-paste-button': 'no-button',
+            'pass-on-drop': false,
+            'shift-insert-paste': false,
         };
 
         const setHTermPreferences = () => {
@@ -70,6 +72,9 @@ export default defineComponent({
                 this.io.sendString = (_string) => {};
                 this.setCursorVisible(false);
                 this.installKeyboard();
+                // Disable virtual keyboard for mobile devices
+                // eslint-disable-next-line no-underscore-dangle
+                this.scrollPort_.screen_.setAttribute('contenteditable', 'false');
             };
             // pin hterm.js in the template
             term.decorate(document.querySelector('#hterm-terminal'));
