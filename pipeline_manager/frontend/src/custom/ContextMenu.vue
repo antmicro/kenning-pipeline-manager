@@ -94,7 +94,7 @@ export default defineComponent({
                     // outside of the context menu. Otherwise `onClick` is fired.
                     if (!elements.includes(el.value)) {
                         window.removeEventListener('wheel', closeContextMenu);
-                        window.removeEventListener('mousedown', closeContextMenu);
+                        window.removeEventListener('pointerdown', closeContextMenu);
                         context.emit('update:modelValue', false);
                     }
                     justOpened.value = true;
@@ -105,7 +105,7 @@ export default defineComponent({
         };
 
         window.addEventListener('wheel', closeContextMenu);
-        window.addEventListener('mousedown', closeContextMenu);
+        window.addEventListener('pointerdown', closeContextMenu);
 
         const onClick = (item) => {
             context.emit('click', item.value);

@@ -12,7 +12,11 @@ Inherits from baklavajs/packages/renderer-vue/src/nodepalette/NodePalette.vue
 
 <template>
     <!-- eslint-disable vue/no-multiple-template-root -->
-    <div class="baklava-node-palette" ref="paletteRef">
+    <div
+        ref="paletteRef"
+        class="baklava-node-palette"
+        :class="{'hidden-navbar': $isMobile}"
+    >
         <div class="search-bar">
             <div class="palette-title">
                 <span>Nodes browser</span>

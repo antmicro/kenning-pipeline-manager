@@ -19,7 +19,8 @@ Inherits from baklavajs/renderer-vue/src/connection/ConnectionView.vue
         <template v-if="hasAnchors">
             <g
                 v-for="(d, index) in parsedNewD"
-                @pointerdown.left.exact="onMouseDown"
+                @mousedown.left.exact="onMouseDown"
+                @pointerdown="(ev) => { if(ev.pointerType === 'touch') onMouseDown(ev) }"
                 @pointerdown.left.ctrl.exact="(ev) => onMouseShiftDown(ev, index)"
             >
             <path :d="d" class="connection-wrapper baklava-connection"></path>
@@ -35,7 +36,8 @@ Inherits from baklavajs/renderer-vue/src/connection/ConnectionView.vue
     </g>
     <g
         v-else
-        @pointerdown.left.exact="onMouseDown"
+        @mousedown.left.exact="onMouseDown"
+        @pointerdown="(ev) => { if(ev.pointerType === 'touch') onMouseDown(ev) }"
         @pointerdown.left.ctrl.exact="(ev) => onMouseShiftDown(ev, 0)"
     >
         <path :d="parsedNewD" class="connection-wrapper baklava-connection"></path>
