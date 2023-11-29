@@ -112,8 +112,10 @@ class ExternalApplicationManager {
         const dataflow = this.editorManager.saveDataflow();
         const progressBar = document.querySelector('.progress-bar');
         if (!dataflow) return;
+        const validatedProcedureName = (jsonRPC.customMethodRegex.test(procedureName)) ?
+            jsonRPC.customMethodReplace : procedureName;
 
-        if (procedureName === 'dataflow_run') {
+        if (validatedProcedureName === 'dataflow_run') {
             if (runInfo.inProgress) {
                 NotificationHandler.showToast('error', 'Previous run has not finished, cannot process this request');
                 return;
@@ -123,7 +125,7 @@ class ExternalApplicationManager {
             progressBar.style.width = '0%';
         }
 
-        if (procedureName === 'dataflow_stop') {
+        if (validatedProcedureName === 'dataflow_stop') {
             if (!runInfo.inProgress) {
                 NotificationHandler.showToast('error', 'Nothing to stop, no ongoing jobs running');
                 return;
@@ -133,16 +135,16 @@ class ExternalApplicationManager {
 
         let data;
         try {
-            if (procedureName !== 'dataflow_stop') {
+            if (validatedProcedureName !== 'dataflow_stop') {
                 data = await jsonRPC.request(procedureName, { dataflow });
             } else {
-                data = await jsonRPC.request(procedureName);
+                data = await jsonRPC.request(validatedProcedureName);
             }
         } catch (error) {
             // The connection was closed
             data = error.message;
             NotificationHandler.terminalLog('error', data);
-            if (procedureName === 'dataflow_run') {
+            if (validatedProcedureName === 'dataflow_run') {
                 progressBar.style.width = '0%';
                 runInfo.inProgress = false;
             }
@@ -157,7 +159,7 @@ class ExternalApplicationManager {
         } else if (data.type === PMMessageType.WARNING) {
             NotificationHandler.terminalLog('warning', `Warning: ${data.content}`, data.content);
         }
-        if (procedureName === 'dataflow_run' || procedureName === 'dataflow_stop') {
+        if (validatedProcedureName === 'dataflow_run' || validatedProcedureName === 'dataflow_stop') {
             progressBar.style.width = '0%';
             runInfo.inProgress = false;
         }

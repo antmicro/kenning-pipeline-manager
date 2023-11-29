@@ -22,6 +22,14 @@ import commonTypesSchema from '../../../../resources/api_specification/common_ty
 import specificationSchema from '../../../../resources/api_specification/specification.json' assert { type: 'json' };
 import * as remoteProcedures from './remoteProcedures';
 
+const customMethodRegex = /^custom_.*$/;
+const customMethodReplace = 'dataflow_run';
+class CustomJSONRPCServerAndClient extends JSONRPCServerAndClient {
+    customMethodRegex: RegExp | null = null;
+
+    customMethodReplace: string | null = null;
+}
+
 type SpecType = {
     params: object,
     returns: object | null, // null when method is a notification
@@ -96,7 +104,7 @@ const commonHeaders = {
 const requestSchema = new Map<number | string, SpecType>();
 
 let socket: Socket;
-let jsonRPCServer: JSONRPCServerAndClient;
+let jsonRPCServer: CustomJSONRPCServerAndClient;
 /**
  * Function that creates JSON-RPC client-server and defines how messages are send and received.
  */
@@ -110,13 +118,15 @@ function createServer() {
     jsonRPCServer = new JSONRPCServerAndClient(
         new JSONRPCServer(),
         new JSONRPCClient(async (request: JSONRPCRequest) => {
+            const method = (customMethodRegex.test(request.method)) ?
+                customMethodReplace : request.method;
             // request validation
-            if (!(request.method in externalEndpoints) && !(request.method in backendEndpoints)) {
+            if (!(method in externalEndpoints) && !(method in backendEndpoints)) {
                 throw new Error('Requested method not known');
             }
-            const endpoints = (request.method in externalEndpoints) ?
+            const endpoints = (method in externalEndpoints) ?
                 externalEndpoints : backendEndpoints;
-            const schema = endpoints[request.method];
+            const schema = endpoints[method];
             const valid = ajv.validate(schema.params, request.params ?? {});
             if (!valid) return Promise.reject(new Error('Request does not match specification'));
             if (request.id) {
@@ -132,7 +142,7 @@ function createServer() {
             }
             return Promise.resolve();
         }, createID),
-    );
+    ) as CustomJSONRPCServerAndClient;
     // Add middlewares
     jsonRPCServer.server.applyMiddleware(
         validateServerRequestResponse as JSONRPCServerMiddleware<void>);
@@ -177,6 +187,8 @@ function createServer() {
         }
         jsonRPCServer.client.receive(response);
     });
+    jsonRPCServer.customMethodRegex = customMethodRegex;
+    jsonRPCServer.customMethodReplace = customMethodReplace;
 }
 
 const obj = {
