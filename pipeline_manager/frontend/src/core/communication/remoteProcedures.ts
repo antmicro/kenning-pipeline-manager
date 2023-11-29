@@ -15,6 +15,7 @@
 
 import { useViewModel } from '@baklavajs/renderer-vue';
 import EditorManager from '../EditorManager';
+import NotificationHandler from '../notifications';
 import { terminalStore } from '../stores';
 
 /* eslint-disable import/prefer-default-export */
@@ -386,4 +387,14 @@ export function terminal_write(params: TerminalWrite) {
         terminalStore.createTerminalInstance(params.name);
     }
     terminalStore.add(params.message, params.name);
+}
+
+type Notification = {
+    type: string,
+    title: string
+    details: string
+};
+
+export function notification_send(params: Notification) {
+    NotificationHandler.terminalLog(params.type, params.title, params.details);
 }
