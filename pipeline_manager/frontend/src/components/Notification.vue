@@ -93,7 +93,7 @@ export default {
         flex-direction: column;
         flex-grow: 1;
         font-size: $fs-small;
-        width: 100%;
+        min-width: 0;
 
         & > .message {
             overflow: hidden;

@@ -60,20 +60,22 @@ export default {
 
 <style lang="scss" scoped>
 .notifications {
+    $notification-maxwidth: calc(100vw - 2 * $spacing-xxl);
     /* Set height to 100 view port minus height of navigation bar and paddings
     and minus the terminal panel */
-    height: calc(100vh - 120px - 35px);
+    height: calc(100% - 120px - $terminal-container-height);
     width: 435px;
+    max-width: $notification-maxwidth;
     background-color: $gray-600;
     opacity: 0.9;
     position: absolute;
     /* Height of navigation bar*/
-    top: 60px;
+    top: $navbar-height;
     /* As defeault notification panel is hidden (minus value)
       panel width (435px) + 2 * padding (30px) = 495px
     */
     right: -495px;
-    z-index: 2;
+    z-index: 4;
     padding: $spacing-xxl;
     overflow-y: auto;
 
@@ -97,6 +99,9 @@ export default {
     & > .panel {
         display: grid;
         grid-row-gap: $spacing-l;
+        ul {
+            max-width: $notification-maxwidth;
+        }
     }
 }
 </style>

@@ -199,15 +199,21 @@ export default {
 
 <style lang="scss">
 .settings-panel {
+    $settings-width: 435px;
+    $settings-maxwidth: calc(100vw - 2 * $spacing-l);
+
     background-color: #{$gray-600}E6;
     position: absolute;
     padding: $spacing-l;
     color: white;
+    top: calc($navbar-height + 1px);
     right: -495px;
-    width: 435px;
+    width: $settings-width;
     // viewport - terminal - navbar - padding
-    max-height: calc(100vh - 60px - 35px - 2 * $spacing-l);
+    max-height: calc(100% - $navbar-height - $terminal-container-height - 2 * $spacing-l);
     min-height: fit-content;
+    max-width: $settings-maxwidth;
+    z-index: 4;
     overflow-y: auto;
 
     & > .setting-header {
@@ -228,6 +234,7 @@ export default {
         user-select: none;
 
         & > div {
+            max-width: $settings-maxwidth;
             & > .option-label {
                 padding-bottom: $spacing-s;
                 color: $white;

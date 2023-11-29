@@ -140,7 +140,7 @@ export default defineComponent({
 .terminal-wrapper {
     z-index: 3;
     position: absolute;
-    min-height: 35px;
+    min-height: $terminal-container-height;
     border-top: 1px solid $gray-500;
     bottom: 0;
     width: 100%;
@@ -151,8 +151,8 @@ export default defineComponent({
 
 .container {
     position: relative;
-    height: 35px;
-    min-height: 35px;
+    height: $terminal-container-height;
+    min-height: $terminal-container-height;
     background-color: $gray-600;
     /* Calculation to prevent panel overflow */
     width: calc(100% - 2 * #{$spacing-xxl});
