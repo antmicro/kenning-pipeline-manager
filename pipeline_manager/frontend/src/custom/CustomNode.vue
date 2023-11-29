@@ -29,9 +29,11 @@ from moving or deleting the nodes.
         </div>
         <div
             class="__title"
+            ref="titleRef"
             @pointerdown.left.exact="onMouseDown"
             @pointerdown.left="startDragWrapper($event)"
             @pointerdown.right="openContextMenuTitle"
+            v-long-press:500="openContextMenuTitle"
         >
             <img
                 class="__title-icon"
@@ -80,6 +82,7 @@ from moving or deleting the nodes.
                         v-if="output"
                         @pointerdown.left.shift="pickInterface(output, $event)"
                         @pointerdown.right.exact="openContextMenuInterface(output, $event)"
+                        v-long-press-to-right:500
                         :node="node"
                         :intf="output"
                         :highlighted="props.interfaces.includes(output)"
@@ -98,7 +101,8 @@ from moving or deleting the nodes.
                         :key="input.id"
                         v-if="input"
                         @pointerdown.left.shift="pickInterface(input, $event)"
-                        @pointerdown.right.exact="openContextMenuInterface(input, $event)"
+                        @pointerdown.right="openContextMenuInterface(input, $event)"
+                        v-long-press-to-right:500
                         :node="node"
                         :intf="input"
                         :highlighted="props.interfaces.includes(input)"
@@ -176,6 +180,7 @@ const contextMenuStyle = computed(() => ({
 const IGNORE_TYPE_PREFIX = '_';
 
 const nodeRef = ref(null);
+const titleRef = ref(null);
 const renaming = ref(false);
 const renameField = ref(null);
 const tempName = ref('');
@@ -569,16 +574,16 @@ const dropInterface = () => {
         display: 'none',
     };
 
-    document.removeEventListener('mousemove', dragInterface);
-    document.removeEventListener('mouseup', dropInterface);
+    document.removeEventListener('pointermove', dragInterface);
+    document.removeEventListener('pointerup', dropInterface);
 };
 
 const pickInterface = (intf, ev) => {
     chosenInterface = intf;
     dragInterface(ev);
 
-    document.addEventListener('mousemove', dragInterface);
-    document.addEventListener('mouseup', dropInterface);
+    document.addEventListener('pointermove', dragInterface);
+    document.addEventListener('pointerup', dropInterface);
 };
 
 // Interface context menu
