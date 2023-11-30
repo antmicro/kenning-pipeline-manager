@@ -616,6 +616,7 @@ export default {
                 <template v-if="this.externalApplicationManager.backendAvailable">
                     <div
                         v-for="actionItem in navbarItems" v-bind:key="actionItem.name"
+                        v-bind:id="`navbar-button-${actionItem.procedureName}`"
                         class="hoverbox"
                         role="button"
                         @click="(async () => requestDataflowAction(actionItem.procedureName))"
@@ -629,6 +630,7 @@ export default {
                             :hover="isHovered(actionItem.name)"
                             :imgURI="actionItem.iconName"
                         />
+                        <div class="progress-bar" />
                         <div class="tooltip">
                             <span>{{ actionItem.name }}</span>
                         </div>
@@ -792,7 +794,6 @@ export default {
                 </div>
             </div>
         </div>
-        <div class="progress-bar" />
         <Notifications v-click-outside="(ev) => clickOutside(ev, panels.notifications)" />
         <Settings
             v-click-outside="(ev) => clickOutside(ev, panels.settings)"
@@ -806,15 +807,6 @@ $bar-height: 60px;
 
 .wrapper {
     z-index: 2;
-
-    & > .progress-bar {
-        position: absolute;
-        height: 5px;
-        bottom: 0;
-        z-index: 5;
-        transform: translateY(100%);
-        background-color: $green;
-    }
 }
 
 .wrapper-hud {
@@ -856,6 +848,35 @@ $bar-height: 60px;
         position: fixed;
         left: 50vw;
         transform: translate(-50%, 0);
+    }
+
+    .progress-bar {
+        position: absolute;
+        height: calc(60px * 0.2);
+        left: 0;
+        bottom: 0;
+        border-radius: 3px;
+        z-index: 5;
+        background-color: $green;
+
+        &.animate {
+            animation: pulse ease-in-out 2s infinite;
+
+            @keyframes pulse {
+                0% {
+                    left: 0;
+                    width: 0;
+                }
+                50% {
+                    width: 100%;
+                    left: 0;
+                }
+                100% {
+                    left: 100%;
+                    width: 0%;
+                }
+            }
+        }
     }
 
     & > div {
