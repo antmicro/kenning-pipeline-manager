@@ -167,7 +167,7 @@
                 {
                     "name": "Params",
                     "type": "text",
-                    "default": "{\"progress\": 50.0}"
+                    "default": "{\"progress\": 50.0, \"method\": \"custom_api_test\"}"
                 },
                 {
                     "name": "Disconnect",
