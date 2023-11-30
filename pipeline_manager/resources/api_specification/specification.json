@@ -188,7 +188,7 @@
             }
         },
         "terminal_write": {
-            "description": "Writes a message line to a terminal instance",
+            "description": "Writes a message line to a terminal instance. Allows to send both text and hterm's control sequences. For more details on available control sequences check [hterm Control Sequences](https://chromium.googlesource.com/apps/libapps/+/master/hterm/doc/ControlSequences.md).\n\n```{warning}\nSince data is sent in JSON format, the hexadecimal values need to be escaped with `\\u`, not `\\x`, e.g. `\\u001b[38:2:238:178:17mexample`.\n```",
             "params": {
                 "description": "Parameters for request",
                 "type": "object",
