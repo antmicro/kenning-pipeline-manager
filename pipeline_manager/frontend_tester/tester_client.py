@@ -215,7 +215,9 @@ class RPCMethods:
         Dict
             Method's response
         """
-        return self._run_validate_response(RUN, dataflow)
+        return self._run_validate_response(
+            RUN, dataflow, self.dataflow_run.__name__,
+        )
 
     def dataflow_stop(self) -> Dict:
         """
@@ -264,15 +266,33 @@ class RPCMethods:
         Dict
             Method's response
         """
-        return self._run_validate_response(VALIDATE, dataflow)
+        return self._run_validate_response(
+            VALIDATE, dataflow, self.dataflow_validate.__name__,
+        )
 
     def custom_api_test(self, dataflow: Dict) -> Dict:
-        return self._run_validate_response(SEND_REQUEST, dataflow)
+        """
+        RPC method that responses to custom button Run API.
+
+        Parameters
+        ----------
+        dataflow : Dict
+            Content of the request.
+
+        Returns
+        -------
+        Dict
+            Method's response
+        """
+        return self._run_validate_response(
+            SEND_REQUEST, dataflow, self.custom_api_test.__name__,
+        )
 
     async def _run_validate_response(
         self,
         title: Union[str, List[str]],
         data: Dict,
+        method_name: str,
     ) -> Dict:
         """
         Method that responses to Run and Validation requests.
@@ -283,6 +303,8 @@ class RPCMethods:
             Message type of the request.
         data : bytes
             Content of the request.
+        method_name : str
+            Name of the method used to start this job
 
         Returns
         -------
@@ -318,7 +340,7 @@ class RPCMethods:
                 logging.log(logging.INFO, f"Progress: {progress}")
                 await self.client.notify(
                     'progress_change',
-                    {'progress': progress}
+                    {'progress': progress, 'method': method_name}
                 )
                 await asyncio.sleep(time_offset)
         elif found == SEND_REQUEST:
@@ -331,6 +353,12 @@ class RPCMethods:
             else:
                 properties["Message"] = json.dumps(response["error"])
                 properties["MessageType"] = "ERROR"
+        elif found == VALIDATE:
+            await self.client.notify(
+                'progress_change',
+                {'progress': -1, 'method': method_name}
+            )
+            await asyncio.sleep(properties["Duration"])
         else:
             await asyncio.sleep(properties["Duration"])
 
