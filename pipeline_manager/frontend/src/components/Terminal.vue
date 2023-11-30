@@ -18,7 +18,7 @@ Container for the hterm.js terminal.
 import {
     defineComponent, computed, onMounted, watch,
 } from 'vue';
-import { terminalStore } from '../core/stores';
+import { terminalStore, MAIN_TERMINAL } from '../core/stores';
 import { hterm, lib } from '../third-party/hterm_all';
 
 export default defineComponent({
@@ -59,10 +59,12 @@ export default defineComponent({
 
             term.onTerminalReady = function onTerminalReady() {
                 // load logs that have existed already in the storage.
-                logs.value.forEach((log, index) => {
-                    if (index > 0) this.io.println('\r\n\r\n');
-                    this.io.println(log.replace(/\n/g, '\r\n'));
-                });
+                if (props.terminalInstance === MAIN_TERMINAL) {
+                    logs.value.forEach((log, index) => {
+                        if (index > 0) this.io.print('\r\n\r\n');
+                        this.io.print(log.replace(/\n/g, '\r\n'));
+                    });
+                }
                 // for now configure the terminal as read-only
                 this.onVTKeystroke = (_string) => {};
                 this.io.sendString = (_string) => {};
@@ -75,7 +77,7 @@ export default defineComponent({
 
         const printLog = (log) => {
             if (term === undefined) return;
-            term.io.println(log.replace(/\n/g, '\r\n'));
+            term.io.print(props.terminalInstance === MAIN_TERMINAL ? log.replace(/\n/g, '\r\n') : log);
         };
 
         const clearLog = () => {
@@ -100,7 +102,7 @@ export default defineComponent({
                 if (!flush && oldval !== undefined && log === oldval[index]) {
                     return;
                 }
-                if (index > 0) printLog('\n\n');
+                if (index > 0 && props.terminalInstance === MAIN_TERMINAL) printLog('\n\n');
                 printLog(log);
             });
             flush = false;
