@@ -90,6 +90,8 @@ export default defineComponent({
         watch(() => props.terminalInstance, () => {
             clearLog();
             flush = true;
+            // Stop escape sequences from other terminals
+            printLog('\u001b[0m');
         });
 
         watch(logs, (val, oldval) => {
