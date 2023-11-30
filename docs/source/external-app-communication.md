@@ -3,7 +3,7 @@
 The communication with an external application is based on a [JSON-RPC](https://www.jsonrpc.org/specification), BSD sockets and SocketIO.
 {{project}} implements a TCP server that is listening on a specified port and waiting for the client to connect.
 {{project}} frontend sends JSON-RPC requests to this server through SocketIO, which redirects messages to connected client for specific actions described in this chapter.
-External application can also request actions from {{project}} in similar manner. 
+External application can also request actions from {{project}} in similar manner.
 
 ## Communication protocol
 
@@ -178,8 +178,19 @@ Its `content` may vary depending on the answered request.
 ### Custom procedures
 
 External application can define new remote procedures, which will be called by custom [Navbar button](#metadata-navbar-item).
-To use it, procedure's name has to start with `custom_` prefix and `procedureName` of Navbar button has to contain this name.
-Custom procedure will behave like normal message with [dataflow_run](#external-dataflow-run) method.
+To use it, procedure's name has to start with `custom_` prefix, e.g. `custom_simulate_design`.
+
+Such remote procedures can be called from the frontend using custom Navbar buttons defined in the [metadata's `navbarItems` field](metadata-navbar-item), e.g.:
+
+```json
+{
+    "name": "Simulate design",
+    "iconName": "Run",
+    "procedureName": "custom_simulate_design"
+}
+```
+
+Custom procedure has the same parameters and return type as [dataflow_run](#external-dataflow-run) method.
 
 ## Implementing a Python-based client for {{project}}
 
@@ -271,7 +282,7 @@ Therefore, the following JSON-RPC error message will be returned to frontend app
 
 TCP client, that connects to {{project}} using `host` and `port` parameters provided has to be created.
 It has to be initialized with object containing JSON-RPC methods.
- 
+
 ```python
 host = '127.0.0.1'
 port = 5000
