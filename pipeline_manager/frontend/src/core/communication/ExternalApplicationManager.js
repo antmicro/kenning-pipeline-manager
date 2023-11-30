@@ -7,7 +7,7 @@
 import { JSONRPCErrorCode } from 'json-rpc-2.0';
 import { backendApiUrl, PMMessageType, JSONRPCCustomErrorCode } from '../utils';
 import jsonRPC from './rpcCommunication';
-import { runInfo } from './remoteProcedures';
+import runInfo from './runInformation';
 import NotificationHandler from '../notifications';
 import EditorManager from '../EditorManager';
 
@@ -34,7 +34,7 @@ class ExternalApplicationManager {
             if (this.externalApplicationConnected !== response.status.connected) {
                 const progressBar = document.querySelector('.progress-bar');
                 progressBar.style.width = '0%';
-                runInfo.inProgress = false;
+                runInfo.forEach((_v, k) => { runInfo.get(k).inProgress = false; });
             }
 
             this.externalApplicationConnected = response.status.connected;
@@ -110,23 +110,22 @@ class ExternalApplicationManager {
      */
     async requestDataflowAction(procedureName) {
         const dataflow = this.editorManager.saveDataflow();
-        const progressBar = document.querySelector('.progress-bar');
+        const runProcedureInfo = runInfo.get(procedureName);
         if (!dataflow) return;
         const validatedProcedureName = (jsonRPC.customMethodRegex.test(procedureName)) ?
             jsonRPC.customMethodReplace : procedureName;
 
         if (validatedProcedureName === 'dataflow_run') {
-            if (runInfo.inProgress) {
+            if (runProcedureInfo.inProgress) {
                 NotificationHandler.showToast('error', 'Previous run has not finished, cannot process this request');
                 return;
             }
-            runInfo.inProgress = true;
             NotificationHandler.showToast('info', 'Running dataflow');
-            progressBar.style.width = '0%';
         }
+        runProcedureInfo.inProgress = true;
 
         if (validatedProcedureName === 'dataflow_stop') {
-            if (!runInfo.inProgress) {
+            if (!runInfo.dataflow_run.inProgress) {
                 NotificationHandler.showToast('error', 'Nothing to stop, no ongoing jobs running');
                 return;
             }
@@ -144,10 +143,7 @@ class ExternalApplicationManager {
             // The connection was closed
             data = error.message;
             NotificationHandler.terminalLog('error', data);
-            if (validatedProcedureName === 'dataflow_run') {
-                progressBar.style.width = '0%';
-                runInfo.inProgress = false;
-            }
+            runProcedureInfo.inProgress = false;
             return;
         }
 
@@ -159,10 +155,7 @@ class ExternalApplicationManager {
         } else if (data.type === PMMessageType.WARNING) {
             NotificationHandler.terminalLog('warning', `Warning: ${data.content}`, data.content);
         }
-        if (validatedProcedureName === 'dataflow_run' || validatedProcedureName === 'dataflow_stop') {
-            progressBar.style.width = '0%';
-            runInfo.inProgress = false;
-        }
+        runProcedureInfo.inProgress = false;
     }
 
     /**
@@ -237,7 +230,7 @@ class ExternalApplicationManager {
             /* eslint-disable-next-line no-await-in-loop */
             await this.updateConnectionStatus();
             if (!this.externalApplicationConnected) {
-                runInfo.inProgress = false;
+                runInfo.forEach((_v, k) => { runInfo.get(k).inProgress = false; });
                 /* eslint-disable-next-line no-await-in-loop */
                 await this.initializeConnection(false, true);
             }
