@@ -135,7 +135,7 @@ class ExternalApplicationManager {
 
         let data;
         try {
-            if (validatedProcedureName !== 'dataflow_stop') {
+            if (validatedProcedureName !== 'dataflow_stop' && validatedProcedureName.startsWith('dataflow_')) {
                 data = await jsonRPC.request(procedureName, { dataflow });
             } else {
                 data = await jsonRPC.request(validatedProcedureName);
