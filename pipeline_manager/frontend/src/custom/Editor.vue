@@ -680,7 +680,9 @@ export default defineComponent({
             NotificationHandler.restoreShowNotification();
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.has('preview')) {
-                props.viewModel.hideHud = urlParams.get('preview') === 'true';
+                const setting = urlParams.get('preview') === 'true';
+                props.viewModel.hideHud = setting;
+                props.viewModel.editor.readonly = setting;
             }
         });
 
