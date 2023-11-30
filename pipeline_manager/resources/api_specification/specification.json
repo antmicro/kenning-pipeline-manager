@@ -140,13 +140,17 @@
                 "description": "Parameters for notification",
                 "type": "object",
                 "properties": {
+                    "method": {
+                        "description": "Name of the method used to run the job",
+                        "type": "string"
+                    },
                     "progress": {
-                        "description": "Progress of job ran be external application",
+                        "description": "Progress of job ran be external application. If between 0 and 100 progress will be set and if -1, animation will ran.",
                         "type": "number"
                     }
                 },
                 "required": [
-                    "progress"
+                    "progress", "method"
                 ],
                 "additionalProperties": false
             },
