@@ -14,6 +14,7 @@
  */
 
 import { useViewModel } from '@baklavajs/renderer-vue';
+import runInfo from './runInformation';
 import EditorManager from '../EditorManager';
 import NotificationHandler from '../notifications';
 import { terminalStore } from '../stores';
@@ -323,27 +324,22 @@ export async function node_get(
     };
 }
 
-let runInProgress = false;
-export const runInfo: {inProgress: boolean} = {
-    get inProgress() {
-        return runInProgress;
-    },
-    set inProgress(inProgress) {
-        runInProgress = inProgress;
-    },
-};
 /**
  * Sets width of progress bar.
  * If there is not run in progress, throws error.
  */
-export function progress_change(params: {progress: number}) {
-    if (!runInProgress) {
+export function progress_change(params: {progress: number, method: string}) {
+    const procedureInfo = runInfo.get(params.method);
+    if (!procedureInfo.inProgress) {
         throw new Error('No run in progress');
     }
-    const progressBar = document.querySelector<HTMLDivElement>('.progress-bar');
-    if (!progressBar) throw new Error('Progress bar does not exist');
-    if (params.progress > 100 || params.progress < 0) throw new Error(`Progress has to be in [0, 100]. Received: ${params.progress}`);
-    progressBar.style.width = `${params.progress}%`;
+    if (params.progress === -1) {
+        procedureInfo.progressBar.classList.add('animate');
+        return;
+    }
+    if (params.progress > 100 || params.progress < 0) throw new Error(`Progress has to be in [0, 100] or -1. Received: ${params.progress}`);
+    procedureInfo.progressBar.style.width = `${params.progress}%`;
+    procedureInfo.progressBar.classList.remove('animate');
 }
 
 /**
