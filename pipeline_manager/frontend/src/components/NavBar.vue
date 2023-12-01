@@ -129,6 +129,16 @@ export default {
             });
             return navbarItems;
         },
+        leftButtonsQuantity() {
+            return 2 + (
+                (this.externalApplicationManager.backendAvailable) ? this.navbarItems.length : 0
+            ) + (
+                (this.editorManager.editor.isInSubgraph()) ? 1 : 0
+            );
+        },
+        rightButtonsQuantity() {
+            return 3 + ((this.externalApplicationManager.backendAvailable) ? 1 : 0);
+        },
     },
     watch: {
         dataflowGraphName(newValue) {
@@ -617,7 +627,7 @@ export default {
             @pointerenter="$event.target.classList.add('isHovered')"
         >
             <div class="container">
-                <div>
+                <div :style="{'flex-grow': leftButtonsQuantity}">
                     <div
                         class="logo"
                         @pointerover="() => updateHoverInfo('logo')"
@@ -713,9 +723,6 @@ export default {
                         ref="palette"
                         v-if="!hideHud && !readonly"
                         class="hoverbox"
-                        :class="{
-                            'button-in-progress': isInProgress(actionItem.procedureName),
-                        }"
                         role="button"
                         @click="() => togglePanel(panels.palette)"
                         @pointerover="() => updateHoverInfo('palette')"
@@ -735,6 +742,9 @@ export default {
                             v-for="actionItem in navbarItems" v-bind:key="actionItem.name"
                             v-bind:id="`navbar-button-${actionItem.procedureName}`"
                             class="hoverbox"
+                            :class="{
+                                'button-in-progress': isInProgress(actionItem.procedureName),
+                            }"
                             role="button"
                             @click="(async () => requestDataflowAction(actionItem.procedureName))"
                             @pointerover="() => updateHoverInfo(actionItem.name)"
@@ -758,11 +768,13 @@ export default {
                                 :imgURI="'Cross'"
                             />
                             <div class="progress-bar" />
-                            <span>
-                                {{ isStoppable(actionItem.procedureName) &&
-                                   isInProgress(actionItem.procedureName) ? 'Stop ' : '' }}
-                                {{ actionItem.name }}
-                            </span>
+                            <div class="tooltip">
+                                <span>
+                                    {{ isStoppable(actionItem.procedureName) &&
+                                       isInProgress(actionItem.procedureName) ? 'Stop ' : '' }}
+                                    {{ actionItem.name }}
+                                </span>
+                            </div>
                         </div>
                     </template>
                     <div
@@ -799,6 +811,10 @@ export default {
                         {{ editorTitle }}
                 </span>
                 <div
+                    :style="{
+                        'flex-grow': rightButtonsQuantity,
+                        'justify-content': 'right',
+                    }"
                     @pointerleave="()=> panels.nodesearch.isOpen =
                         panels.nodesearch.isOpen && searchEditorNodesQuery != ''
                     "
@@ -948,15 +964,20 @@ $compress-max-width: 515px;
 }
 
 .wrapper-hidden {
+    $navbar-padding-bottom: calc($navbar-height * 1.5);
     position: absolute;
     width: 100%;
     top: -$navbar-height;
-    padding-bottom: calc($navbar-height * 1.5);
+    padding-bottom: $navbar-padding-bottom;
     transition: 0.2s;
 
     &.isHovered {
         transform: translateY($navbar-height);
         padding-bottom: 0;
+    }
+
+    &:not(.isHovered) > .progress-bar {
+        bottom: calc($navbar-padding-bottom + 1px);
     }
 }
 
@@ -1022,17 +1043,21 @@ $compress-max-width: 515px;
         display: inherit;
         align-items: center;
         height: 100%;
+        // flex-grow: 1;
+        flex-shrink: 1;
+        // min-width: 1;
 
         & > div {
             display: flex;
-            width: 3.75em;
+            max-width: 3.75em;
             height: 3.75em;
-            padding: 1em;
+            // padding: 1em;
             justify-content: center;
             align-items: center;
             position: relative;
             box-sizing: border-box;
             border-left: 1px solid $gray-500;
+            flex-grow: 1;
 
             &:last-child {
                 border-right: 1px solid $gray-500;
@@ -1156,7 +1181,7 @@ $compress-max-width: 515px;
 
             &.searchbar {
                 width: auto;
-                padding: 0.1em;
+                // padding: 0.1em;
 
                 & > .search-editor-nodes {
                     background-color: #181818;
@@ -1189,7 +1214,7 @@ $compress-max-width: 515px;
                 & > svg {
                     width: 1.2em;
                     height: 1.2em;
-                    padding: 1em;
+                    // padding: 1em;
                 }
             }
             &.searchbar:hover > .tooltip {
