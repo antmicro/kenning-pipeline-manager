@@ -341,8 +341,13 @@ export default class PipelineManagerEditor extends Editor {
         const terminalHeight =
             document.getElementsByClassName('terminal-wrapper')[0]?.offsetHeight ?? 0;
         const navbarHeight = document.getElementsByClassName('wrapper')[0]?.offsetHeight ?? 0;
-        const sideBarWidth =
+        let sideBarWidth =
             document.getElementsByClassName('baklava-node-palette')[0]?.offsetWidth ?? 0;
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('preview')) {
+            const setting = urlParams.get('preview') === 'true';
+            if (setting) sideBarWidth = 0;
+        }
 
         const editorHeight = window.innerHeight - terminalHeight - navbarHeight;
         const editorWidth = window.innerWidth - sideBarWidth;
