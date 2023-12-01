@@ -11,6 +11,23 @@ import runInfo from './runInformation';
 import NotificationHandler from '../notifications';
 import EditorManager from '../EditorManager';
 
+// Default external application capabilities
+const defaultAppCapabilities = {};
+
+/**
+ * Creates notifications based on response received from external application
+ */
+function handleExternalAppResponse(response) {
+    // Status is HTTPCodes.OK so a message from the application is received.
+    if (response.type === PMMessageType.OK) {
+        NotificationHandler.showToast('info', response.content);
+    } else if (response.type === PMMessageType.ERROR) {
+        NotificationHandler.terminalLog('error', `Error occured: ${response.content}`, response.content);
+    } else if (response.type === PMMessageType.WARNING) {
+        NotificationHandler.terminalLog('warning', `Warning: ${response.content}`, response.content);
+    }
+}
+
 class ExternalApplicationManager {
     externalApplicationConnected = false;
 
@@ -21,6 +38,8 @@ class ExternalApplicationManager {
     idStatusInterval = null;
 
     timeoutStatusInterval = 1500;
+
+    appCapabilities = {};
 
     /**
      * Function that fetches state of the connection and updates
@@ -101,6 +120,16 @@ class ExternalApplicationManager {
         }
     }
 
+    async requestAppCapabilities() {
+        try {
+            const appCapabilities = await jsonRPC.request('app_capabilities_get');
+            this.appCapabilities = { ...defaultAppCapabilities, ...appCapabilities };
+        } catch (error) {
+            this.appCapabilities = { ...defaultAppCapabilities };
+            NotificationHandler.terminalLog('warning', 'Application capabilities cannot be retreived, using defaults', error.message);
+        }
+    }
+
     /**
      * Event handler that loads a current dataflow from the editor and sends a request
      * to the backend based on the action argument.
@@ -124,17 +153,9 @@ class ExternalApplicationManager {
         }
         runProcedureInfo.inProgress = true;
 
-        if (validatedProcedureName === 'dataflow_stop') {
-            if (!runInfo.dataflow_run.inProgress) {
-                NotificationHandler.showToast('error', 'Nothing to stop, no ongoing jobs running');
-                return;
-            }
-            NotificationHandler.showToast('info', 'Stopping dataflow');
-        }
-
         let data;
         try {
-            if (validatedProcedureName !== 'dataflow_stop' && validatedProcedureName.startsWith('dataflow_')) {
+            if (validatedProcedureName.startsWith('dataflow_')) {
                 data = await jsonRPC.request(procedureName, { dataflow });
             } else {
                 data = await jsonRPC.request(validatedProcedureName);
@@ -147,15 +168,29 @@ class ExternalApplicationManager {
             return;
         }
 
-        // Status is HTTPCodes.OK so a message from the application is received.
-        if (data.type === PMMessageType.OK) {
-            NotificationHandler.showToast('info', data.content);
-        } else if (data.type === PMMessageType.ERROR) {
-            NotificationHandler.terminalLog('error', `Error occured: ${data.content}`, data.content);
-        } else if (data.type === PMMessageType.WARNING) {
-            NotificationHandler.terminalLog('warning', `Warning: ${data.content}`, data.content);
-        }
+        handleExternalAppResponse(data);
         runProcedureInfo.inProgress = false;
+    }
+
+    /**
+     * Event handler that check if remote procedure is running and send stop request.
+     * The user is alerted with a feedback message.
+     *
+     * @param procedureName Name of the requested procedure.
+     */
+    // eslint-disable-next-line class-methods-use-this
+    async requestDataflowStop(procedureName) {
+        if (!runInfo.get(procedureName).inProgress) {
+            NotificationHandler.showToast('error', 'Nothing to stop, no ongoing jobs running');
+            return;
+        }
+
+        try {
+            const response = await jsonRPC.request('dataflow_stop', { method: procedureName });
+            handleExternalAppResponse(response);
+        } catch (error) {
+            NotificationHandler.terminalLog('error', error.message);
+        }
     }
 
     /**
@@ -279,7 +314,10 @@ class ExternalApplicationManager {
             } while (!this.externalApplicationConnected);
         }
         if (this.externalApplicationConnected) {
-            await this.requestSpecification();
+            await Promise.all([
+                this.requestSpecification(),
+                this.requestAppCapabilities(),
+            ]);
         }
         if (this.externalApplicationConnected) {
             try {
