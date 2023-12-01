@@ -28,6 +28,7 @@ import Magnifier from '../icons/Magnifier.vue';
 import EditorManager from '../core/EditorManager';
 import NotificationHandler from '../core/notifications';
 import { notificationStore } from '../core/stores';
+import runInfo from '../core/communication/runInformation';
 import getExternalApplicationManager from '../core/communication/ExternalApplicationManager';
 import Notifications from './Notifications.vue';
 import Settings from './Settings.vue';
@@ -185,6 +186,7 @@ export default {
             editTitle: false,
             notificationStore,
             showSearch: false,
+            crossIcon: markRaw(icons.Cross),
             searchEditorNodesQuery,
             hoverInfo: {
                 isHovered: false,
@@ -395,7 +397,17 @@ export default {
 
         async requestDataflowAction(procedureName) {
             if (!this.externalApplicationManager.backendAvailable) return;
-            await this.externalApplicationManager.requestDataflowAction(procedureName);
+            if (
+                this.isInProgress(procedureName) &&
+                this.externalApplicationManager.appCapabilities.stoppable_methods.includes(
+                    procedureName)
+            ) {
+                await this.externalApplicationManager.requestDataflowStop(procedureName);
+            } else if (!this.isInProgress(procedureName)) {
+                await this.externalApplicationManager.requestDataflowAction(procedureName);
+            } else {
+                NotificationHandler.terminalLog('warning', `Method ${procedureName} cannot be stopped`);
+            }
         },
         importDataflow() {
             if (!this.externalApplicationManager.backendAvailable) return;
@@ -483,6 +495,15 @@ export default {
 
         isHovered(name) {
             return this.hoverInfo.hoveredPanel === name && this.hoverInfo.isHovered;
+        },
+
+        isInProgress(procedure) {
+            return runInfo.get(procedure).inProgress;
+        },
+
+        isStoppable(procedure) {
+            return this.externalApplicationManager
+                .appCapabilities.stoppable_methods?.includes(procedure) ?? true;
         },
     },
     async mounted() {
@@ -618,6 +639,9 @@ export default {
                         v-for="actionItem in navbarItems" v-bind:key="actionItem.name"
                         v-bind:id="`navbar-button-${actionItem.procedureName}`"
                         class="hoverbox"
+                        :class="{
+                            'button-in-progress': isInProgress(actionItem.procedureName),
+                        }"
                         role="button"
                         @click="(async () => requestDataflowAction(actionItem.procedureName))"
                         @pointerover="() => updateHoverInfo(actionItem.name)"
@@ -630,9 +654,23 @@ export default {
                             :hover="isHovered(actionItem.name)"
                             :imgURI="actionItem.iconName"
                         />
+                        <component
+                            v-if="
+                                isStoppable(actionItem.procedureName)
+                                && isInProgress(actionItem.procedureName)
+                            "
+                            class="small_svg_stop"
+                            :is="crossIcon"
+                            :hover="isHovered(actionItem.name)"
+                            :imgURI="'Cross'"
+                        />
                         <div class="progress-bar" />
                         <div class="tooltip">
-                            <span>{{ actionItem.name }}</span>
+                            <span>
+                                {{ isStoppable(actionItem.procedureName) &&
+                                   isInProgress(actionItem.procedureName) ? 'Stop ' : '' }}
+                                {{ actionItem.name }}
+                            </span>
                         </div>
                     </div>
                 </template>
@@ -920,6 +958,14 @@ $bar-height: 60px;
                 width: 1em;
                 height: 1em;
             }
+            & > .small_svg_stop {
+                position: absolute;
+                width: 0.8em;
+                height: 0.8em;
+                top: 8%;
+                right: 8%;
+                stroke: $gray-100;
+            }
 
             & > .dropdown-wrapper {
                 user-select: none;
@@ -987,16 +1033,24 @@ $bar-height: 60px;
                 display: flex;
             }
 
-            &.hoverbox:hover {
-                cursor: pointer;
-            }
+            &.hoverbox {
+                & > .small_svg {
+                    fill: $white;
+                }
 
-            &.hoverbox:hover > .tooltip {
-                display: flex;
-                z-index: 11;
-            }
-            &.hoverbox:hover ~ .small_svg {
-                fill: $green;
+                &:hover {
+                    cursor: pointer;
+                    & > .small_svg {
+                        fill: $green;
+                    }
+                    & > .small_svg_stop {
+                        stroke: $red-dark;
+                    }
+                    .tooltip {
+                        display: flex;
+                        z-index: 11;
+                    }
+                }
             }
 
             &.searchbar {
