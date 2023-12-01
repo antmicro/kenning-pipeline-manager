@@ -172,11 +172,16 @@ export default {
             graphName,
             editorManager,
             editorTitleInterface,
+            /* Object used to pass information to SaveMenu component about
+                saving configuration. If any option is set to undefined then
+                it will be not displayed in the SaveMenu.
+            */
             saveConfiguration: {
                 readonly: false,
                 hideHud: false,
                 position: false,
                 savename: 'save',
+                saveCallback: this.saveDataflow,
             },
             /* create instance of external manager to control
             connection, dataflow and specification
@@ -409,6 +414,41 @@ export default {
                 NotificationHandler.terminalLog('warning', `Method ${procedureName} cannot be stopped`);
             }
         },
+
+        async requestDataflowExport() {
+            if (!this.externalApplicationManager.backendAvailable) return;
+            const result = await this.externalApplicationManager.requestDataflowExport();
+
+            if (result !== false) {
+                this.saveConfiguration.readonly = undefined;
+                this.saveConfiguration.hideHud = undefined;
+                this.saveConfiguration.position = undefined;
+                this.saveConfiguration.savename = result.savename ?? 'savename';
+                this.saveConfiguration.saveCallback =
+                    () => {
+                        const linkElement = document.createElement('a');
+                        let mimeType;
+                        // It is either a string or an object
+                        if (typeof result.content === 'string') {
+                            mimeType = 'application/octet-stream';
+                            linkElement.href = `data:${mimeType};base64,${result.content}`;
+                        } else {
+                            mimeType = 'application/json';
+                            linkElement.href = window.URL.createObjectURL(
+                                new Blob(
+                                    [JSON.stringify(result.content)],
+                                    { type: mimeType }),
+                            );
+                        }
+
+                        linkElement.download = this.saveConfiguration.savename;
+                        linkElement.click();
+                        NotificationHandler.showToast('info', 'Exported dataflow saved');
+                    };
+                this.saveMenuShow = true;
+            }
+        },
+
         importDataflow() {
             if (!this.externalApplicationManager.backendAvailable) return;
             const file = document.getElementById('request-dataflow-button').files[0];
@@ -524,7 +564,6 @@ export default {
                 v-model="saveMenuShow"
                 :viewModel="editorManager.baklavaView"
                 :saveConfiguration="saveConfiguration"
-                :saveCallback="saveDataflow"
             />
         </BlurPanel>
     </Transition>
@@ -563,9 +602,7 @@ export default {
                                 <DropdownItem
                                     text="Save file"
                                     type="button"
-                                    :eventFunction="(
-                                        async () => requestDataflowAction('dataflow_export')
-                                    )"
+                                    :eventFunction="(async () => requestDataflowExport())"
                                 />
                             </template>
                             <hr />
@@ -598,7 +635,14 @@ export default {
                             <DropdownItem
                                 type="'button'"
                                 text="Save graph as file as..."
-                                :eventFunction="() => {saveMenuShow = !saveMenuShow}"
+                                :eventFunction="() => {
+                                    this.saveConfiguration.readonly = false,
+                                    this.saveConfiguration.hideHud = false,
+                                    this.saveConfiguration.position = false,
+                                    this.saveConfiguration.savename = 'save',
+                                    this.saveConfiguration.saveCallback = this.saveDataflow,
+                                    saveMenuShow = !saveMenuShow
+                                }"
                             />
                             <hr />
                         </template>
