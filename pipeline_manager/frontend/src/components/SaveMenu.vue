@@ -13,9 +13,12 @@ SPDX-License-Identifier: Apache-2.0
             </div>
             <Cross tabindex="-1" class="__close" @click="close" />
         </div>
-        <component :is="readonly.component" :intf="readonly" />
-        <component :is="hideHud.component" :intf="hideHud" />
-        <component :is="position.component" :intf="position" />
+        <component
+            v-for="option in additionalOptions"
+            :key="option.id"
+            :is="option.component"
+            :intf="option"
+        />
         File name:
         <component
             :is="dataflowname.component"
@@ -51,10 +54,6 @@ export default defineComponent({
             required: true,
             type: Object,
         },
-        saveCallback: {
-            required: true,
-            type: Function,
-        },
     },
     components: {
         Cross,
@@ -62,6 +61,8 @@ export default defineComponent({
     emits: ['update:modelValue'],
     setup(props, { emit }) {
         const readonly = computed(() => {
+            if (props.saveConfiguration.readonly === undefined) return undefined;
+
             const option = new CheckboxInterface(
                 'Make graph read only',
                 props.saveConfiguration.readonly,
@@ -74,6 +75,8 @@ export default defineComponent({
         });
 
         const hideHud = computed(() => {
+            if (props.saveConfiguration.hideHud === undefined) return undefined;
+
             const option = new CheckboxInterface(
                 'Disable HUD',
                 props.saveConfiguration.hideHud,
@@ -86,6 +89,8 @@ export default defineComponent({
         });
 
         const position = computed(() => {
+            if (props.saveConfiguration.position === undefined) return undefined;
+
             const option = new CheckboxInterface(
                 'Preserve current view location',
                 props.saveConfiguration.position,
@@ -116,17 +121,23 @@ export default defineComponent({
 
         const save = computed(() => {
             const button = new ButtonInterface('Save', () => {
-                props.saveCallback();
+                props.saveConfiguration.saveCallback();
                 close();
             });
             button.componentName = 'ButtonInterface';
             return button;
         });
 
+        const additionalOptions = computed(() => {
+            const displayableOptions = [];
+            [readonly, hideHud, position].forEach((option) => {
+                if (option.value !== undefined) displayableOptions.push(option.value);
+            });
+            return displayableOptions;
+        });
+
         return {
-            readonly,
-            hideHud,
-            position,
+            additionalOptions,
             dataflowname,
             save,
             close,
