@@ -389,7 +389,29 @@
                 "$ref": "common_types#/$defs/dataflow_object"
             },
             "returns": {
-                "$ref": "common_types#/$defs/external_endpoint_return_type"
+                "description": "Common type returned by external app",
+                "type": "object",
+                "properties": {
+                    "type": {
+                        "description": "[MessageType](message-type) specifing success or error",
+                        "type": "number"
+                    },
+                    "content": {
+                        "description": "Exported dataflow, which is then saved by the frontend user. Should be either a json object, or a base64 encoded string. If any error occurred then it should contain a proper message.",
+                        "type": [
+                            "object",
+                            "string"
+                        ]
+                    },
+                    "filename": {
+                        "description": "Suggested filename used to save the file",
+                        "type": "string"
+                    }
+                },
+                "additionalProperties": false,
+                "required": [
+                    "type"
+                ]
             }
         },
         "frontend_on_connect": {
