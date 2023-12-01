@@ -74,6 +74,13 @@ export default {
             const normalizedGraphName = this.graphName.trim();
             return normalizedGraphName === '' ? this.appName : normalizedGraphName;
         },
+        preview() {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('preview')) {
+                return urlParams.get('preview') === 'true';
+            }
+            return false;
+        },
         hideHud() {
             return this.editorManager.baklavaView.hideHud;
         },
@@ -580,6 +587,7 @@ export default {
         </BlurPanel>
     </Transition>
     <div class="wrapper"
+        v-show="!preview"
         :class="!hideHud ? 'wrapper-hud' : 'wrapper-hidden'"
         @mouseleave="() => handleMouseLeave(panels.settings)"
     >
