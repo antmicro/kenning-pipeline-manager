@@ -304,6 +304,27 @@
                 "$ref": "common_types#/$defs/external_endpoint_return_type"
             }
         },
+        "app_capabilities_get": {
+            "description": "Request external application capabilities",
+            "params": {
+                "$ref": "common_types#/$defs/null_or_empty"
+            },
+            "returns": {
+                "description": "External application capabilities",
+                "type": "object",
+                "properties": {
+                    "stoppable_methods": {
+                        "description": "List with methods that can be stoped with [dataflow_stop](#external-dataflow-stop) request",
+                        "type": "array",
+                        "items": {
+                            "description": "Name of the stoppable method",
+                            "type": "string"
+                        }
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
         "dataflow_import": {
             "description": "Request to convert dataflow in external app to Pipeline Manager format and import it",
             "params": {
@@ -345,7 +366,18 @@
         "dataflow_stop": {
             "description": "Request external application to run dataflow",
             "params": {
-                "$ref": "common_types#/$defs/null_or_empty"
+                "description": "Parameters for stoping dataflow",
+                "type": "object",
+                "properties": {
+                    "method": {
+                        "description": "Name of the method used to start run",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "method"
+                ],
+                "additionalProperties": false
             },
             "returns": {
                 "$ref": "common_types#/$defs/external_endpoint_return_type"
