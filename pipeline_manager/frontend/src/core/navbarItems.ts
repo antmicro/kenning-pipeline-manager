@@ -16,9 +16,4 @@ export const defaultNavbarItems: NavbarItem[] = [
         iconName: 'Validate',
         procedureName: 'dataflow_validate',
     },
-    {
-        name: 'Stop',
-        iconName: 'StopDataflow',
-        procedureName: 'dataflow_stop',
-    },
 ];
