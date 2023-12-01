@@ -33,6 +33,7 @@ import argparse
 import json
 import logging
 from pathlib import Path
+from collections import defaultdict
 from typing import Dict, List, Union
 import sys
 
@@ -168,7 +169,22 @@ class RPCMethods:
         self.client = client
         self.out_path = out_path
         self.last_dataflow = None
-        self.running = False
+        self.running = defaultdict(lambda: False)
+
+    def app_capabilities_get(self) -> Dict:
+        """
+        RPC method that responses to App Capabalities request.
+
+        Returns
+        -------
+        Dict
+            Application capabalities
+        """
+        return {
+            'stoppable_methods': [
+                'dataflow_run',
+            ]
+        }
 
     def dataflow_import(self, dataflow: Dict) -> Dict:
         """
@@ -219,15 +235,25 @@ class RPCMethods:
             RUN, dataflow, self.dataflow_run.__name__,
         )
 
-    def dataflow_stop(self) -> Dict:
+    def dataflow_stop(self, method: str) -> Dict:
         """
         RPC method that responses to Run request.
+
+        Parameters
+        ---------
+        method : str
+            Name of the method that should be stopped.
 
         Returns
         -------
         Dict
             Method's response
         """
+        if method != self.dataflow_run.__name__:
+            return {
+                'type': MessageType.ERROR.value,
+                'content': 'Only dataflow_run can be stopped',
+            }
         if self.last_dataflow is not None:
             properties = None
             try:
@@ -246,7 +272,7 @@ class RPCMethods:
                     ).value
                 if "Message" in properties:
                     content = properties["Message"]
-        self.running = False
+        self.running[method] = False
         return {
             'type': type,
             'content': content
@@ -330,11 +356,11 @@ class RPCMethods:
             return {}
 
         if found == RUN:
-            self.running = True
+            self.running[method_name] = True
             steps = properties["ProgressMessages"]
             time_offset = properties["Duration"] / steps
             for i in range(1, steps + 1):
-                if not self.running:
+                if not self.running[method_name]:
                     break
                 progress = i / steps * 100
                 logging.log(logging.INFO, f"Progress: {progress}")
@@ -374,8 +400,8 @@ class RPCMethods:
                         await client.disconnect()
         asyncio.create_task(delayed_effect(self.client, found, data))
 
-        if self.running:
-            self.running = False
+        if self.running[method_name]:
+            self.running[method_name] = False
         return {
             'type': _text_to_message_type(properties["MessageType"]).value,
             'content': properties["Message"],
