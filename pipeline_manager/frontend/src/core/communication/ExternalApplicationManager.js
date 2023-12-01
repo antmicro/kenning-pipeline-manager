@@ -130,6 +130,33 @@ class ExternalApplicationManager {
         }
     }
 
+    async requestDataflowExport() {
+        const dataflow = this.editorManager.saveDataflow();
+        if (!dataflow) return false;
+
+        let data;
+        try {
+            data = await jsonRPC.request('dataflow_export', { dataflow });
+        } catch (error) {
+            // The connection was closed
+            data = error.message;
+            NotificationHandler.terminalLog('error', data);
+            return false;
+        }
+
+        // Status is HTTPCodes.OK so a message from the application is received.
+        if (data.type === PMMessageType.OK) {
+            return data;
+        }
+
+        if (data.type === PMMessageType.ERROR) {
+            NotificationHandler.terminalLog('error', `Error occured: ${data.content}`, data.content);
+        } else if (data.type === PMMessageType.WARNING) {
+            NotificationHandler.terminalLog('warning', `Warning: ${data.content}`, data.content);
+        }
+        return false;
+    }
+
     /**
      * Event handler that loads a current dataflow from the editor and sends a request
      * to the backend based on the action argument.
