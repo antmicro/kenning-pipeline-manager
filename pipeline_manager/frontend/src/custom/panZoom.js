@@ -62,10 +62,10 @@ export default function usePanZoom() {
     };
 
     const getCoordsFromCache = () => ({
-        ax: pointerCache[0].offsetX,
-        ay: pointerCache[0].offsetY,
-        bx: pointerCache[1].offsetX,
-        by: pointerCache[1].offsetY,
+        ax: pointerCache[0].clientX,
+        ay: pointerCache[0].clientY,
+        bx: pointerCache[1].clientX,
+        by: pointerCache[1].clientY,
     });
 
     const onPointerDown = (ev) => {
