@@ -120,6 +120,10 @@ class ExternalApplicationManager {
         }
     }
 
+    /**
+    * Provides capabilities of the third-party app connected via server
+    * to Pipeline Manager's frontend.
+    */
     async requestAppCapabilities() {
         try {
             const appCapabilities = await jsonRPC.request('app_capabilities_get');
@@ -130,6 +134,9 @@ class ExternalApplicationManager {
         }
     }
 
+    /**
+    * Handles dataflow export.
+    */
     async requestDataflowExport() {
         const dataflow = this.editorManager.saveDataflow();
         if (!dataflow) return false;
