@@ -189,6 +189,15 @@
             "type": "boolean",
             "description": "Determines whether external application should be informed about changes in dataflow. Works only when Pipeline Manager is run in server-app mode",
             "default": false
+        },
+        "logLevel": {
+            "description": "Verbosity of pop-up notifications",
+            "enum": [
+                "INFO",
+                "WARNING",
+                "ERROR"
+            ],
+            "default": "WARNING"
         }
     },
     "additionalProperties": false
