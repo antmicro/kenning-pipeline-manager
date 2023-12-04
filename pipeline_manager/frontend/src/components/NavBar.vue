@@ -415,7 +415,26 @@ export default {
             }
         },
 
-        async requestDataflowExport() {
+        saveDataflowInCustomFormat(filename, filecontent) {
+            const saveElement = document.createElement('a');
+            let mimeType;
+            if (typeof filecontent === 'string') {
+                mimeType = 'application/octet-stream';
+                saveElement.href = `data:${mimeType};base64,${filecontent}`;
+            } else {
+                mimeType = 'application/json';
+                saveElement.href = window.URL.createObjectURL(
+                    new Blob(
+                        [JSON.stringify(filecontent)],
+                        { type: mimeType }),
+                );
+            }
+            saveElement.download = filename;
+            saveElement.click();
+            NotificationHandler.showToast('info', `File saved successfully: ${filename}`);
+        },
+
+        async requestDataflowExport(prompt = true) {
             if (!this.externalApplicationManager.backendAvailable) return;
             const result = await this.externalApplicationManager.requestDataflowExport();
 
@@ -424,28 +443,21 @@ export default {
                 this.saveConfiguration.hideHud = undefined;
                 this.saveConfiguration.position = undefined;
                 this.saveConfiguration.savename = result.savename ?? 'savename';
-                this.saveConfiguration.saveCallback =
-                    () => {
-                        const linkElement = document.createElement('a');
-                        let mimeType;
-                        // It is either a string or an object
-                        if (typeof result.content === 'string') {
-                            mimeType = 'application/octet-stream';
-                            linkElement.href = `data:${mimeType};base64,${result.content}`;
-                        } else {
-                            mimeType = 'application/json';
-                            linkElement.href = window.URL.createObjectURL(
-                                new Blob(
-                                    [JSON.stringify(result.content)],
-                                    { type: mimeType }),
+                if (prompt) {
+                    this.saveConfiguration.saveCallback =
+                        () => {
+                            this.saveDataflowInCustomFormat(
+                                this.saveConfiguration.savename,
+                                result.content,
                             );
-                        }
-
-                        linkElement.download = this.saveConfiguration.savename;
-                        linkElement.click();
-                        NotificationHandler.showToast('info', 'Exported dataflow saved');
-                    };
-                this.saveMenuShow = true;
+                        };
+                    this.saveMenuShow = true;
+                } else {
+                    this.saveDataflowInCustomFormat(
+                        this.saveConfiguration.savename,
+                        result.content,
+                    );
+                }
             }
         },
 
@@ -602,7 +614,12 @@ export default {
                                 <DropdownItem
                                     text="Save file"
                                     type="button"
-                                    :eventFunction="(async () => requestDataflowExport())"
+                                    :eventFunction="(async () => requestDataflowExport(false))"
+                                />
+                                <DropdownItem
+                                    text="Save file as..."
+                                    type="button"
+                                    :eventFunction="(async () => requestDataflowExport(true))"
                                 />
                             </template>
                             <hr />
