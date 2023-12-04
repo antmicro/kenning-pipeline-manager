@@ -186,7 +186,7 @@ export default {
 
         const searchEditorNodesQuery = ref('');
 
-        // Mock hoeredOver to suppress warning when creating Side Panel
+        // Mock hoveredOver to suppress warning when creating Side Panel
         // hoveredOver over is needed only for temporary connections, which are not used here
         provide('hoveredOver', () => {});
 
@@ -920,12 +920,14 @@ export default {
                         @pointerleave="() => resetHoverInfo('notifications')"
                     >
                         <Bell
-                            v-if="this.notificationStore.notifications.length > 0"
-                            color="green"
+                            id="navbar-bell"
+                            :color="
+                                (this.notificationStore.notifications.length > 0) ?
+                                'green' : 'gray'
+                            "
                             :hover="isHovered('notifications')"
                             class="small_svg"
                         />
-                        <Bell v-else class="small_svg" :hover="isHovered('notifications')"/>
                         <div
                             class="tooltip"
                             v-if="notificationsOpen"
@@ -1043,15 +1045,12 @@ $compress-max-width: 515px;
         display: inherit;
         align-items: center;
         height: 100%;
-        // flex-grow: 1;
         flex-shrink: 1;
-        // min-width: 1;
 
         & > div {
             display: flex;
             max-width: 3.75em;
             height: 3.75em;
-            // padding: 1em;
             justify-content: center;
             align-items: center;
             position: relative;
@@ -1181,7 +1180,6 @@ $compress-max-width: 515px;
 
             &.searchbar {
                 width: auto;
-                // padding: 0.1em;
 
                 & > .search-editor-nodes {
                     background-color: #181818;
