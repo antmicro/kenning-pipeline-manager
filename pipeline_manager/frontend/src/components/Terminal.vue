@@ -87,7 +87,7 @@ export default defineComponent({
 
         const clearLog = () => {
             if (term === undefined) return;
-            term.clearHome();
+            term.wipeContents();
         };
 
         // If a terminal instance was changed, then all messages should be written
