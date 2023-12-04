@@ -411,8 +411,7 @@ export default {
             if (!this.externalApplicationManager.backendAvailable) return;
             if (
                 this.isInProgress(procedureName) &&
-                this.externalApplicationManager.appCapabilities.stoppable_methods.includes(
-                    procedureName)
+                this.isStoppable(procedureName)
             ) {
                 await this.externalApplicationManager.requestDataflowStop(procedureName);
             } else if (!this.isInProgress(procedureName)) {
