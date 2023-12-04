@@ -37,6 +37,7 @@ import {
 } from '@baklavajs/renderer-vue'; // eslint-disable-line object-curly-newline
 import { getOptionName } from '../custom/CustomNode.js';
 import getExternalApplicationManager from '../core/communication/ExternalApplicationManager';
+import { LOG_LEVEL } from '../core/notifications';
 
 export default {
     props: {
@@ -173,11 +174,25 @@ export default {
             return options.value;
         });
 
+        const logLevel = computed(() => {
+            const select = new SelectInterface(
+                'Verbosity of notifications',
+                props.viewModel.logLevel,
+                Object.keys(LOG_LEVEL).map((s) => s.toUpperCase()),
+            ).setPort(false);
+            select.events.setValue.subscribe(this, (v) => {
+                props.viewModel.logLevel = v; // eslint-disable-line vue/no-mutating-props,max-len,no-param-reassign
+            });
+            select.componentName = 'SelectInterface';
+            return select;
+        });
+
         const readonlyOptions = computed(() => {
             if (props.viewModel.editor.readonly) {
                 return [];
             }
             return [
+                logLevel.value,
                 connectionStyleOption.value,
                 LayoutOption.value,
                 LayoutApply.value,
