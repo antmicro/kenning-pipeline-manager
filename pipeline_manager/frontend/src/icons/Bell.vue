@@ -8,11 +8,7 @@ SPDX-License-Identifier: Apache-2.0
 <template>
     <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg" >
         <path
-            :class="[color]"
-            d="M21 18.5C21 20.433 19.433 22 17.5 22C15.567 22 14 20.433 14 18.5C14 16.567 15.567 15 17.5 15C19.433 15 21 16.567 21 18.5Z"
-            fill="#6F6F6F"
-        />
-        <path
+            class="indicator"
             :class="[color]"
             d="M21 18.5C21 20.433 19.433 22 17.5 22C15.567 22 14 20.433 14 18.5C14 16.567 15.567 15 17.5 15C19.433 15 21 16.567 21 18.5Z"
             fill="#6F6F6F"
@@ -58,8 +54,12 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.normal{
+.normal {
     fill: #FFFFFF;
+}
+
+.gray {
+    fill: $gray-200;
 }
 
 .hovered {
@@ -67,5 +67,24 @@ export default {
 }
 .green {
     fill: $green;
+}
+
+.animate {
+    animation: blink 2 cubic-bezier(0.68, -0.55, 0.27, 1.55) 1.5s;
+}
+
+@keyframes blink {
+    0% {
+        fill: $green;
+    }
+    40% {
+        fill: $gold;
+    }
+    60% {
+        fill: $gold;
+    }
+    100% {
+        fill: $green;
+    }
 }
 </style>
