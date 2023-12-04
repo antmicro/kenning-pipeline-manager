@@ -5,7 +5,7 @@ Copyright (c) 2022-2023 [Antmicro](https://www.antmicro.com)
 Pipeline Manager is a data-based, application-agnostic web application for creating, visualizing and managing dataflows in various applications.
 It does not assume any properties of the application it is working with, thanks to which fast integration with various formats is possible.
 
-[Pipeline Manager documentation](https://antmicro.github.io/kenning-pipeline-manager/) | [Demo application](https://antmicro.github.io/kenning-pipeline-manager/static-demo/sample)
+[Pipeline Manager documentation](https://antmicro.github.io/kenning-pipeline-manager/) | [Demo application](https://antmicro.github.io/kenning-pipeline-manager/static-demo/index.html?spec=relative%3A%2F%2Fgraphs%2Fsample-specification.json&amp;graph=relative%3A%2F%2Fgraphs%2Fsample-dataflow.json)
 
 It provides functionality for:
 
@@ -123,7 +123,7 @@ After successful build, run:
 firefox ./pipeline-manager-demo/index.html
 ```
 
-You should get a graph view similar to the one in the [documentation's demo](https://antmicro.github.io/kenning-pipeline-manager/static-demo/sample).
+You should get a graph view similar to the one in the [documentation's demo](https://antmicro.github.io/kenning-pipeline-manager/static-demo/index.html?spec=relative%3A%2F%2Fgraphs%2Fsample-specification.json&amp;graph=relative%3A%2F%2Fgraphs%2Fsample-dataflow.json).
 
 ### Web application
 
