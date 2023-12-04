@@ -78,6 +78,7 @@ export default class EditorManager {
         this.baklavaView.editor.allowLoopbacks = this.defaultMetadata.allowLoopbacks;
         this.baklavaView.navbarItems = [...defaultNavbarItems];
         this.baklavaView.cache = {};
+        this.baklavaView.logLevel = this.defaultMetadata.logLevel;
 
         // hideHud and readonly are set to true so that there is no dissappearning UI
         this.baklavaView.hideHud = true;
@@ -412,6 +413,7 @@ export default class EditorManager {
         this.baklavaView.editor.layoutManager.useAlgorithm(
             metadata?.layout ?? this.defaultMetadata.layout,
         );
+        this.baklavaView.logLevel = metadata?.logLevel ?? this.defaultMetadata.logLevel;
         if (newMetadata) this.updatedMetadata = newMetadata;
 
         return [];
