@@ -13,6 +13,7 @@
 import { createToastInterface, POSITION } from 'vue-toastification';
 import { notificationStore, terminalStore } from './stores.js';
 import Notification from '../components/Notification.vue';
+import EditorManager from './EditorManager';
 
 const toast = createToastInterface({
     timeout: 5000,
@@ -20,6 +21,12 @@ const toast = createToastInterface({
     icon: false,
     closeButton: false,
 });
+
+export const LOG_LEVEL = {
+    info: 0,
+    warning: 1,
+    error: 2,
+};
 
 export default class NotificationHandler {
     static NotificationHandler = true;
@@ -64,8 +71,16 @@ export default class NotificationHandler {
             },
         };
 
-        if (NotificationHandler.showNotifications) {
+        if (
+            LOG_LEVEL[type] >= LOG_LEVEL[
+                EditorManager.getEditorManagerInstance().baklavaView.logLevel?.toLowerCase()
+            ] && NotificationHandler.showNotifications
+        ) {
             toast(content);
+        } else {
+            const bell = document.querySelector('#navbar-bell>.indicator');
+            bell.classList.remove('animate');
+            setTimeout(() => bell.classList.add('animate'), 300);
         }
         notificationStore.add({ type, message });
     }
