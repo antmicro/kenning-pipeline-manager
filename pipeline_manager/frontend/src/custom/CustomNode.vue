@@ -328,7 +328,11 @@ const onContextMenuTitleClick = async (action) => {
 };
 
 const openContextMenuTitle = (ev) => {
-    if (showContextMenuTitle.value === false) {
+    if (
+        !editorManager.baklavaView.editor.readonly
+        && !editorManager.baklavaView.hideHud
+        && showContextMenuTitle.value === false
+    ) {
         contextMenuTitleX.value = ev.offsetX;
         contextMenuTitleY.value = ev.offsetY;
         showContextMenuTitle.value = true;
