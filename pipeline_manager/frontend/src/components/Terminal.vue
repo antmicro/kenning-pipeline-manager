@@ -51,6 +51,11 @@ export default defineComponent({
 
         const logs = computed(() => terminalStore.logs[props.terminalInstance]);
 
+        const printLog = (log) => {
+            if (term === undefined) return;
+            term.io.print(props.terminalInstance === MAIN_TERMINAL ? log.replace(/\n/g, '\r\n') : log);
+        };
+
         onMounted(async () => {
             // wait for hterm.js library to load
             // (glatosinski: we may later need to move it to some global scope)
@@ -61,10 +66,10 @@ export default defineComponent({
 
             term.onTerminalReady = function onTerminalReady() {
                 // load logs that have existed already in the storage.
-                if (props.terminalInstance === MAIN_TERMINAL) {
+                if (logs.value !== undefined) {
                     logs.value.forEach((log, index) => {
-                        if (index > 0) this.io.print('\r\n\r\n');
-                        this.io.print(log.replace(/\n/g, '\r\n'));
+                        if (index > 0 && props.terminalInstance === MAIN_TERMINAL) printLog('\n\n');
+                        printLog(log);
                     });
                 }
                 // for now configure the terminal as read-only
@@ -80,14 +85,10 @@ export default defineComponent({
             term.decorate(document.querySelector('#hterm-terminal'));
         });
 
-        const printLog = (log) => {
-            if (term === undefined) return;
-            term.io.print(props.terminalInstance === MAIN_TERMINAL ? log.replace(/\n/g, '\r\n') : log);
-        };
-
         const clearLog = () => {
             if (term === undefined) return;
             term.wipeContents();
+            term.scrollHome();
         };
 
         // If a terminal instance was changed, then all messages should be written
