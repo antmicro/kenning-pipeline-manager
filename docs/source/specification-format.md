@@ -46,7 +46,7 @@ This object specifies additional editor options and contains the following optio
 * `urls` - list of URL classes present in the specification and flow.
   It is a dictionary, where key is the name of the URL class, and value is of type [URL class specification](#url-class).
   The given URL classes can be referred to later in [Nodes](#node) with proper link suffix.
-* `collapseSidebar` - boolean value determining whether nodes sidebar should be collapsed by default
+* `collapseSidebar` - boolean value determining whether nodes sidebar should be collapsed by default.
   Default value is `true`
 * `movementStep` - Defines offset to which nodes snap in the grid.
   Default value is `1`.
@@ -58,6 +58,8 @@ This object specifies additional editor options and contains the following optio
   Icon classes are key-value pairs, where key is the name of the icon class, and value is the URL prefix that is used to compute the actual path.
 * `navbarItems` - list of buttons that are displayed in the navbar in `server-app` mode, that allow for calling custom procedures.
   The entries are of type [Navbar item](#navbar-item).
+* `logLevel` - string specifying minimum level of verbosity notification has to have to be displayed.
+  It can be one of `INFO`, `WARNING`, `ERROR`.
 
 An example:
 
