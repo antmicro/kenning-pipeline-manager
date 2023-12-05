@@ -1,10 +1,5 @@
 {
     "version": "20230830.11",
-    "metadata": {
-        "interfaces": {
-            "Dataset": "#FF0000"
-        }
-    },
     "nodes": [
         {
             "name": "RunBehaviour",
@@ -185,6 +180,9 @@
         }
     ],
     "metadata": {
+        "interfaces": {
+            "Dataset": "#FF0000"
+        },
         "navbarItems": [
             {
                 "name": "Run",
