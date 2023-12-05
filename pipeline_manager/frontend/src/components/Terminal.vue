@@ -63,6 +63,9 @@ export default defineComponent({
             // configure hterm.js style and instantiate the terminal
             setHTermPreferences();
             term = new hterm.Terminal();
+            // Disable virtual keyboard for mobile devices
+            // eslint-disable-next-line no-underscore-dangle
+            term.scrollPort_.contenteditable = false;
 
             term.onTerminalReady = function onTerminalReady() {
                 // load logs that have existed already in the storage.
@@ -77,9 +80,6 @@ export default defineComponent({
                 this.io.sendString = (_string) => {};
                 this.setCursorVisible(false);
                 this.installKeyboard();
-                // Disable virtual keyboard for mobile devices
-                // eslint-disable-next-line no-underscore-dangle
-                this.scrollPort_.screen_.setAttribute('contenteditable', 'false');
             };
             // pin hterm.js in the template
             term.decorate(document.querySelector('#hterm-terminal'));
