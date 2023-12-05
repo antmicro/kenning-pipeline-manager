@@ -12221,6 +12221,8 @@ hterm.ScrollPort = function(rowProvider) {
   /** @type {?Element} */
   this.screen_ = null;
 
+  this.contenteditable = 'true';
+
   // Collection of active timeout handles.
   this.timeouts_ = {};
 
@@ -12706,7 +12708,7 @@ hterm.ScrollPort.prototype.paintIframeContents_ = function() {
   // Some of these attributes are standard while others are browser specific,
   // but should be safely ignored by other browsers.
   this.screen_ = doc.createElement('x-screen');
-  this.screen_.setAttribute('contenteditable', 'true');
+  this.screen_.setAttribute('contenteditable', this.contenteditable);
   this.screen_.setAttribute('spellcheck', 'false');
   this.screen_.setAttribute('autocomplete', 'off');
   this.screen_.setAttribute('autocorrect', 'off');
