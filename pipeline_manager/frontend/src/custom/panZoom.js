@@ -42,7 +42,7 @@ export default function usePanZoom() {
             zoomLimit * graph.value.size().graphHeight > editorHeight / newScale);
 
         if (
-            (allowZoomOut) ||
+            graph.value.size().graphHeight === -Infinity || (allowZoomOut) ||
             (!allowZoomOut && newScale > graph.value.scaling)
         ) {
             graph.value.scaling = newScale;
