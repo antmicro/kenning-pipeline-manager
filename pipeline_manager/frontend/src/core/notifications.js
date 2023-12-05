@@ -79,8 +79,10 @@ export default class NotificationHandler {
             toast(content);
         } else {
             const bell = document.querySelector('#navbar-bell>.indicator');
-            bell.classList.remove('animate');
-            setTimeout(() => bell.classList.add('animate'), 300);
+            if (bell) {
+                bell.classList.remove('animate');
+                setTimeout(() => bell.classList.add('animate'), 300);
+            }
         }
         notificationStore.add({ type, message });
     }
