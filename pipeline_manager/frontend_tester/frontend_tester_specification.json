@@ -2,6 +2,36 @@
     "version": "20230830.11",
     "nodes": [
         {
+            "name": "TerminalStressTest",
+            "category": "API",
+            "properties": [
+                {
+                    "name": "TerminalName",
+                    "type": "text",
+                    "default": "Stress test"
+                },
+                {
+                    "name": "MessageLength",
+                    "type": "integer",
+                    "default": 10
+                },
+                {
+                    "name": "MessageRate",
+                    "type": "slider",
+                    "min": 0.001,
+                    "max": 1,
+                    "default": 0.5
+                }
+            ],
+            "interfaces": [
+                {
+                    "name": "Effect",
+                    "type": "Effect",
+                    "direction": "output"
+                }
+            ]
+        },
+        {
             "name": "RunBehaviour",
             "category": "Descriptions",
             "properties": [
@@ -193,6 +223,11 @@
                 "name": "Run API test",
                 "iconName": "Run",
                 "procedureName": "custom_api_test"
+            },
+            {
+                "name": "Perform terminal stress test",
+                "iconName": "Run",
+                "procedureName": "custom_terminal_stress_test"
             },
             {
                 "name": "Validate",

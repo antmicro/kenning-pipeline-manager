@@ -34,7 +34,9 @@ import json
 import logging
 from pathlib import Path
 from collections import defaultdict
+import random
 from typing import Dict, List, Union
+import string
 import sys
 
 from pipeline_manager import frontend_tester
@@ -50,6 +52,7 @@ from pipeline_manager_backend_communication.misc_structures import (
 RUN = "RunBehaviour"
 VALIDATE = "ValidationBehaviour"
 SEND_REQUEST = "SendRequestToFrontend"
+STRESS_TEST_REQUEST = "TerminalStressTest"
 
 
 def get_node_properties(node_type: str, dataflow: Dict) -> Dict:
@@ -183,6 +186,7 @@ class RPCMethods:
         return {
             'stoppable_methods': [
                 'dataflow_run',
+                'custom_terminal_stress_test'
             ]
         }
 
@@ -249,7 +253,8 @@ class RPCMethods:
         Dict
             Method's response
         """
-        if method != self.dataflow_run.__name__:
+        if (method != self.dataflow_run.__name__ and
+                method != self.custom_terminal_stress_test.__name__):
             return {
                 'type': MessageType.ERROR.value,
                 'content': 'Only dataflow_run can be stopped',
@@ -294,6 +299,26 @@ class RPCMethods:
         """
         return self._run_validate_response(
             VALIDATE, dataflow, self.dataflow_validate.__name__,
+        )
+
+    def custom_terminal_stress_test(self, dataflow: Dict) -> Dict:
+        """
+        RPC method that sends random messages to a chosen terminal
+
+        Parameters
+        ----------
+        dataflow : Dict
+            Content of the request.
+
+        Returns
+        -------
+        Dict
+            Method's reponse
+        """
+        return self._run_validate_response(
+            STRESS_TEST_REQUEST,
+            dataflow,
+            self.custom_terminal_stress_test.__name__,
         )
 
     def custom_api_test(self, dataflow: Dict) -> Dict:
@@ -351,11 +376,36 @@ class RPCMethods:
             break
         if not properties:
             raise Exception(f"No description for {title} provided")
-        if properties["Disconnect"]:
+        if 'Disconnect' in properties and properties["Disconnect"]:
             await self.client.disconnect()
             return {}
 
-        if found == RUN:
+        if found == STRESS_TEST_REQUEST:
+            self.running[method_name] = True
+            terminal_name = properties["TerminalName"]
+            message_length = properties["MessageLength"]
+            rate = properties["MessageRate"]
+
+            await self.client.notify(
+                'progress_change',
+                {'progress': -1, 'method': method_name}
+            )
+
+            counter = 0
+            while self.running[method_name]:
+                random_message = ''.join(random.choices(
+                    string.ascii_uppercase + string.digits,
+                    k=message_length
+                ))
+                await self.client.notify(
+                    'terminal_write',
+                    {
+                        'name': terminal_name,
+                        'message': f'Message {counter}: {random_message}\r\n'}
+                )
+                counter += 1
+                await asyncio.sleep(rate)
+        elif found == RUN:
             self.running[method_name] = True
             steps = properties["ProgressMessages"]
             time_offset = properties["Duration"] / steps
@@ -402,9 +452,15 @@ class RPCMethods:
 
         if self.running[method_name]:
             self.running[method_name] = False
+
+        if "MessageType" in properties and "content" in properties:
+            return {
+                'type': _text_to_message_type(properties["MessageType"]).value,
+                'content': properties["Message"],
+            }
         return {
-            'type': _text_to_message_type(properties["MessageType"]).value,
-            'content': properties["Message"],
+            'type': _text_to_message_type('OK').value,
+            'content': 'No message provided'
         }
 
     async def dataflow_export(
