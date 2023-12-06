@@ -21,7 +21,7 @@ Inherits from baklavajs/renderer-vue/src/connection/ConnectionView.vue
                 v-for="(d, index) in parsedNewD"
                 @mousedown.left.exact="onMouseDown"
                 @pointerdown="(ev) => { if(ev.pointerType === 'touch') onMouseDown(ev) }"
-                @pointerdown.left.ctrl.exact="(ev) => onMouseShiftDown(ev, index)"
+                @pointerdown.left.ctrl.exact="(ev) => onMouseCtrlDown(ev, index)"
             >
             <path :d="d" class="connection-wrapper baklava-connection"></path>
             <path :d="d" class="baklava-connection" :class="cssClasses" :style="style"></path>
@@ -38,7 +38,7 @@ Inherits from baklavajs/renderer-vue/src/connection/ConnectionView.vue
         v-else
         @mousedown.left.exact="onMouseDown"
         @pointerdown="(ev) => { if(ev.pointerType === 'touch') onMouseDown(ev) }"
-        @pointerdown.left.ctrl.exact="(ev) => onMouseShiftDown(ev, 0)"
+        @pointerdown.left.ctrl.exact="(ev) => onMouseCtrlDown(ev, 0)"
     >
         <path :d="parsedNewD" class="connection-wrapper baklava-connection"></path>
         <path :d="parsedNewD" class="baklava-connection" :class="cssClasses" :style="style"></path>
@@ -85,12 +85,16 @@ export default defineComponent({
         });
 
         const removeAnchor = (idx) => {
+            if (viewModel.value.editor.readonly) return;
             graph.value.events.removeAnchor.emit([props.connection, idx]);
             props.connection.anchors.splice(idx, 1);
         };
 
-        const onMouseShiftDown = (ev, index) => {
-            if (viewModel.value.connectionRenderer.style !== 'orthogonal') return;
+        const onMouseCtrlDown = (ev, index) => {
+            if (
+                viewModel.value.editor.readonly ||
+                viewModel.value.connectionRenderer.style !== 'orthogonal'
+            ) return;
             if (props.connection.anchors === undefined) {
                 props.connection.anchors = [];
             }
@@ -141,7 +145,7 @@ export default defineComponent({
             cssClasses,
             parsedNewD,
             onMouseDown,
-            onMouseShiftDown,
+            onMouseCtrlDown,
             style,
             hasAnchors,
             removeAnchor,
