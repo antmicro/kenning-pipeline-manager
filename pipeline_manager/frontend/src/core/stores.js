@@ -38,10 +38,9 @@ const remove = (key) => {
 export const notificationStore = reactive({
     notifications: JSON.parse(get('notifications')) || [],
     add(notification) {
-        const newNotifications = [...this.notifications, notification];
+        this.notifications.push(notification);
 
-        set('notifications', JSON.stringify(newNotifications));
-        this.notifications = newNotifications;
+        set('notifications', JSON.stringify(this.notifications));
     },
 
     remove() {
@@ -64,13 +63,12 @@ export const terminalStore = reactive({
         Terminal: JSON.parse(get(`logs`)) || [],
     },
     add(log, instance = MAIN_TERMINAL) {
-        const newNotifications = [...this.logs[instance], log];
+        this.logs[instance].push(log);
 
         // Update localStorage only for the main terminal
         if (instance === MAIN_TERMINAL) {
-            set(`logs`, JSON.stringify(newNotifications));
+            set(`logs`, JSON.stringify(this.logs[instance]));
         }
-        this.logs[instance] = newNotifications;
     },
 
     /**
