@@ -50,10 +50,22 @@ export default defineComponent({
         };
 
         const logs = computed(() => terminalStore.logs[props.terminalInstance]);
+        const logsLength = computed(() => logs.value.length);
 
         const printLog = (log) => {
             if (term === undefined) return;
             term.io.print(props.terminalInstance === MAIN_TERMINAL ? log.replace(/\n/g, '\r\n') : log);
+        };
+
+        let renderIndex = 0;
+
+        const clearLog = () => {
+            if (term === undefined) return;
+            // This line console logs' "Couldn't fetch row index:"
+            term.wipeContents();
+            term.scrollHome();
+            printLog('\u001b[0m');
+            renderIndex = 0;
         };
 
         onMounted(async () => {
@@ -69,12 +81,6 @@ export default defineComponent({
 
             term.onTerminalReady = function onTerminalReady() {
                 // load logs that have existed already in the storage.
-                if (logs.value !== undefined) {
-                    logs.value.forEach((log, index) => {
-                        if (index > 0 && props.terminalInstance === MAIN_TERMINAL) printLog('\n\n');
-                        printLog(log);
-                    });
-                }
                 // for now configure the terminal as read-only
                 this.onVTKeystroke = (_string) => {};
                 this.io.sendString = (_string) => {};
@@ -83,40 +89,45 @@ export default defineComponent({
             };
             // pin hterm.js in the template
             term.decorate(document.querySelector('#hterm-terminal'));
-        });
 
-        const clearLog = () => {
-            if (term === undefined) return;
-            term.wipeContents();
-            term.scrollHome();
-        };
-
-        // If a terminal instance was changed, then all messages should be written
-        let flush = false;
-        watch(() => props.terminalInstance, () => {
-            clearLog();
-            flush = true;
-            // Stop escape sequences from other terminals
-            printLog('\u001b[0m');
-        });
-
-        watch(logs, (val, oldval) => {
-            if (val === undefined || val.length === 0) {
-                clearLog();
-                flush = false;
-                return;
+            if (logs.value !== undefined) {
+                logs.value.forEach((log, _) => {
+                    if (renderIndex > 0 && props.terminalInstance === MAIN_TERMINAL) printLog('\n\n');
+                    printLog(log);
+                    renderIndex += 1;
+                });
             }
-            val.forEach((log, index) => {
-                if (!flush && oldval !== undefined && log === oldval[index]) {
-                    return;
-                }
-                if (index > 0 && props.terminalInstance === MAIN_TERMINAL) printLog('\n\n');
-                printLog(log);
-            });
-            flush = false;
-        }, {
-            immediate: true,
-            deep: true,
+
+            // This watcher needs to be set inside of mount function as it has
+            // to be turned after the async initialisation is done.
+            watch(
+                [() => props.terminalInstance, logsLength],
+                ([newIns, newLen], [oldIns, oldLen]) => {
+                    let terminalSwitched = false;
+
+                    // If the instance of the terminal changed
+                    if (oldIns !== newIns) {
+                        clearLog();
+                        terminalSwitched = true;
+                    }
+
+                    // If terminal was cleared, new content appeared or the instance was changed
+                    if (oldLen !== newLen || terminalSwitched) {
+                        const currentLogs = terminalStore.logs[props.terminalInstance];
+
+                        // If terminal was cleared
+                        if (newLen === 0 && !terminalSwitched) {
+                            clearLog();
+                        } else {
+                            currentLogs.slice(renderIndex).forEach((log, _) => {
+                                if (renderIndex > 0 && newIns === MAIN_TERMINAL) printLog('\n\n');
+                                printLog(log);
+                                renderIndex += 1;
+                            });
+                        }
+                    }
+                },
+            );
         });
     },
 });
