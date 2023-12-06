@@ -18,7 +18,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <script lang="ts">
 import { computed, ref, defineComponent } from 'vue';
-import { useGraph } from '@baklavajs/renderer-vue';
+import { useGraph, useViewModel } from '@baklavajs/renderer-vue';
 import useDragMove from '../custom/useDragMove';
 
 export default defineComponent({
@@ -35,6 +35,7 @@ export default defineComponent({
     setup(props) {
         // any definition is an ad-hoc solution as we don't have our graph definition
         const { graph } = useGraph() as { graph: any };
+        const { viewModel } = useViewModel() as { viewModel: any };
         const radius = 7.5;
         const styles = computed(() => ({
             cx: `${(props.position.x + graph.value.panning.x) * graph.value.scaling}px`,
@@ -51,6 +52,7 @@ export default defineComponent({
         };
 
         const startDrag = (ev: PointerEvent) => {
+            if (viewModel.value.editor.readonly) return;
             dragMove.onPointerDown(ev);
             document.addEventListener('pointermove', dragMove.onPointerMove);
             document.addEventListener('pointerup', stopDrag);
