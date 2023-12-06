@@ -93,6 +93,8 @@ export function useClipboard(
     };
 
     const del = () => {
+        const { viewModel } = useViewModel() as { viewModel: any };
+        if (viewModel.value.editor.readonly) return;
         startTransaction();
         displayedGraph.value.selectedNodes.forEach((node : any) => {
             removeNode(node);
@@ -121,10 +123,10 @@ export function useClipboard(
     };
 
     const paste = () => {
-        if (isEmpty.value) {
+        const { viewModel } = useViewModel() as { viewModel: any };
+        if (isEmpty.value || viewModel.value.editor.readonly) {
             return;
         }
-        const { viewModel } = useViewModel();
         const movementStep = (<any>viewModel.value).movementStep ?? 1;
 
         // Map old IDs to new IDs
