@@ -384,7 +384,7 @@ class RPCMethods:
             self.running[method_name] = True
             terminal_name = properties["TerminalName"]
             message_length = properties["MessageLength"]
-            rate = properties["MessageRate"]
+            rate = properties["MessagesPerSecond"]
 
             await self.client.notify(
                 'progress_change',
@@ -394,17 +394,17 @@ class RPCMethods:
             counter = 0
             while self.running[method_name]:
                 random_message = ''.join(random.choices(
-                    string.ascii_uppercase + string.digits,
+                    list(string.ascii_uppercase + string.digits) + ['\r\n'],
                     k=message_length
                 ))
                 await self.client.notify(
                     'terminal_write',
                     {
                         'name': terminal_name,
-                        'message': f'Message {counter}: {random_message}\r\n'}
+                        'message': f'{random_message}'}
                 )
                 counter += 1
-                await asyncio.sleep(rate)
+                await asyncio.sleep(1 / rate)
         elif found == RUN:
             self.running[method_name] = True
             steps = properties["ProgressMessages"]
