@@ -16,6 +16,11 @@
                     "default": 10
                 },
                 {
+                    "name": "AddMessageID",
+                    "type": "bool",
+                    "default": false
+                },
+                {
                     "name": "MessagesPerSecond",
                     "type": "number",
                     "min": 0.0001,

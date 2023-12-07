@@ -38,6 +38,7 @@ import random
 from typing import Dict, List, Union
 import string
 import sys
+from datetime import datetime
 
 from pipeline_manager import frontend_tester
 from pipeline_manager.utils.logger import string_to_verbosity
@@ -385,6 +386,7 @@ class RPCMethods:
             terminal_name = properties["TerminalName"]
             message_length = properties["MessageLength"]
             rate = properties["MessagesPerSecond"]
+            add_message_id = properties["AddMessageID"]
 
             await self.client.notify(
                 'progress_change',
@@ -397,11 +399,15 @@ class RPCMethods:
                     list(string.ascii_uppercase + string.digits) + ['\r\n'],
                     k=message_length
                 ))
+                if add_message_id:
+                    curr_time = datetime.now().strftime("%H:%M:%S.%f")
+                    random_message = f"\r\nMessage {counter} [{curr_time}] :  {random_message}"  # noqa: E501
                 await self.client.notify(
                     'terminal_write',
                     {
                         'name': terminal_name,
-                        'message': f'{random_message}'}
+                        'message': random_message
+                    }
                 )
                 counter += 1
                 await asyncio.sleep(1 / rate)
