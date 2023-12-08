@@ -191,13 +191,13 @@ class RPCMethods:
             ]
         }
 
-    def dataflow_import(self, dataflow: Dict) -> Dict:
+    def dataflow_import(self, external_application_dataflow: Dict) -> Dict:
         """
         RPC method that responses to Import request.
 
         Parameters
         ----------
-        dataflow : Dict
+        external_application_dataflow : Dict
             Content of the request.
 
         Returns
@@ -205,7 +205,10 @@ class RPCMethods:
         Dict
             Method's response
         """
-        return {'type': MessageType.OK.value, 'content': dataflow}
+        return {
+            'type': MessageType.OK.value,
+            'content': external_application_dataflow,
+        }
 
     def specification_get(self) -> Dict:
         """
