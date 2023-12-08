@@ -28,6 +28,21 @@ function handleExternalAppResponse(response) {
     }
 }
 
+/**
+ * Creates notifications based on specifiation.
+ * Returns `true` if error appeared.
+ */
+function handleSpecificationResult({ errors, warnings }, errorTitle, warningTitle) {
+    if (Array.isArray(warnings) && warnings.length) {
+        NotificationHandler.terminalLog('warning', warningTitle, warnings);
+    }
+    if (Array.isArray(errors) && errors.length) {
+        NotificationHandler.terminalLog('error', errorTitle, errors);
+        return true;
+    }
+    return false;
+}
+
 class ExternalApplicationManager {
     externalApplicationConnected = false;
 
@@ -91,20 +106,16 @@ class ExternalApplicationManager {
             if (data.type === PMMessageType.OK) {
                 const specification = data.content;
 
-                let { errors, warnings } = this.editorManager.validateSpecification(specification);
-                if (Array.isArray(errors) && errors.length) {
-                    NotificationHandler.terminalLog('error', 'Specification is invalid', errors);
-                    return;
-                }
-                ({ errors, warnings } =
-                    this.editorManager.updateEditorSpecification(specification));
-                if (Array.isArray(warnings) && warnings.length) {
-                    NotificationHandler.terminalLog(
-                        'warning',
-                        'Warnings when loading specification',
-                        warnings,
-                    );
-                }
+                if (handleSpecificationResult(
+                    this.editorManager.validateSpecification(specification),
+                    'Warnings when validating specification',
+                    'Specification is invalid',
+                )) return;
+                if (handleSpecificationResult(
+                    this.editorManager.updateEditorSpecification(specification),
+                    'Warnings when loading specification',
+                    'Errors when loading specification',
+                )) return;
 
                 NotificationHandler.showToast('info', 'Specification loaded successfully');
             } else if (data.type === PMMessageType.WARNING) {
