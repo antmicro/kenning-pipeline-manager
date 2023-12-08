@@ -30,7 +30,6 @@ class RunInfo {
         const progressBar = document.querySelector<HTMLDivElement>(
             `#navbar-button-${this.procedureName} > .progress-bar`,
         );
-        if (!progressBar) throw new Error(`Progress bar does not exist for method: ${this.procedureName}`);
         return progressBar;
     }
 
@@ -43,8 +42,10 @@ class RunInfo {
 
     set inProgress(value) {
         const { progressBar } = this;
-        if (!value) progressBar.classList.remove('animate');
-        progressBar.style.width = '0%';
+        if (progressBar) {
+            if (!value) progressBar.classList.remove('animate');
+            progressBar.style.width = '0%';
+        }
         this.pr_inProgress = value;
     }
 }
