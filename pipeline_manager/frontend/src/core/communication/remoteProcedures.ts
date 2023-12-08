@@ -333,6 +333,7 @@ export function progress_change(params: {progress: number, method: string}) {
     if (!procedureInfo.inProgress) {
         throw new Error('No run in progress');
     }
+    if (!procedureInfo.progressBar) throw new Error(`Progress bar does not exist for method: ${params.method}`);
     if (params.progress === -1) {
         procedureInfo.progressBar.classList.add('animate');
         return;
