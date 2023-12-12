@@ -48,7 +48,7 @@ class PMStateManager:
         self.schema = None
         self.schema_filename = "unresolved_specification_schema.json"
 
-        self.connected_frontends = 0
+        self._connected_sockets = []
 
         # Semaphore used to request connecting to the external application
         # It is used so that different frontend instances do not interfere
@@ -94,6 +94,45 @@ class PMStateManager:
                 self.tcp_server_host, self.tcp_server_port
             )
         return self.server
+
+    def add_socket(self, sid: str):
+        """
+        Add connected socket
+
+        Parameters
+        ----------
+        sid : str
+            Session ID of connected socket
+        """
+        self._connected_sockets.append(sid)
+
+    def remove_socket(self, sid):
+        """
+        Remove disconnected socket
+
+        Parameters
+        ----------
+        sid : str
+            Session ID of disconnected socket
+        """
+        if sid in self._connected_sockets:
+            self._connected_sockets.remove(sid)
+
+    @property
+    def connected_frontends(self) -> int:
+        """
+        Number of connected frontends
+        """
+        return len(self._connected_sockets)
+
+    @property
+    def last_socket(self) -> any:
+        """
+        Session ID of last connected socket
+        """
+        if self._connected_sockets:
+            return self._connected_sockets[-1]
+        return None
 
     def get_schema(self) -> dict:
         """
