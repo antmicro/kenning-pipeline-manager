@@ -27,4 +27,5 @@ export const PMMessageType = {
 export const JSONRPCCustomErrorCode = {
     EXCEPTION_RAISED: -1,
     EXTERNAL_APPLICATION_NOT_CONNECTED: -2,
+    NEWER_SESSION_AVAILABLE: -3,
 };
