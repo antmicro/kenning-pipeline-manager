@@ -54,10 +54,20 @@ async def manage_socket_messages(
             if message.data[0] is None:
                 # Message has no method -- it is response
                 event = 'api-response'
+                key = 'result'
             else:
                 # Message has methods -- it is request
                 event = 'api'
-            await socketio.emit(event, data)
+                key = 'params'
+            # Get Session ID or fallback to the newest one
+            if 'error' in data:
+                key = 'error'
+            if key in data and 'sid' in data[key]:
+                sid = data[key].pop('sid')
+            else:
+                sid = global_state_manager.last_socket
+
+            await socketio.emit(event, data, to=sid)
         elif message.status == Status.CONNECTION_CLOSED:
             break
 
