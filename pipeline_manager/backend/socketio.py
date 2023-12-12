@@ -1,12 +1,12 @@
 from http import HTTPStatus
-from typing import Dict
+from typing import Dict, Callable, Any
 
 from engineio.payload import Payload
 from pipeline_manager_backend_communication.json_rpc_base import JSONRPCBase  # noqa: E501
 from pipeline_manager_backend_communication.misc_structures import (
-    Status,
+    Status, CustomErrorCode,
 )
-from jsonrpc.jsonrpc2 import JSONRPC20Response
+from jsonrpc.jsonrpc2 import JSONRPC20Response, JSONRPC20Request
 from jsonrpc.exceptions import JSONRPCDispatchException
 import socketio
 
@@ -29,6 +29,40 @@ def create_socketio() -> socketio.AsyncServer:
     """
 
     sio = socketio.AsyncServer(async_mode='asgi')
+
+    def reject_old_sessions_requests(
+        func: Callable[[str, Dict], Any],
+    ) -> Callable[[str, Dict], Any]:
+        """
+        Decorator checking if a received message is a request
+        and came from the newest session.
+
+        If not, error response is sent back, apart from two types of messages:
+        * status_get - to maintain connection,
+        * dataflow_stop - to enable stopping long runs.
+        """
+        async def _func(sid, json_rpc_request):
+            if (
+                sid != global_state_manager.last_socket
+                and 'method' in json_rpc_request
+                and json_rpc_request['method'] not in (
+                    'status_get', 'dataflow_stop',
+                )
+            ):
+                await sio.emit(
+                    'api-response',
+                    JSONRPC20Response(
+                        _id=json_rpc_request['id'],
+                        error={
+                            'code': CustomErrorCode.NEWER_SESSION_AVAILABLE.value,  # noqa: E501
+                            'message': 'The newer session is opened, this request was ignored',  # noqa: E501
+                        }
+                    ).data,
+                    to=sid,
+                )
+                return True
+            return await func(sid, json_rpc_request)
+        return _func
 
     class BackendMethods:
         """
@@ -110,20 +144,53 @@ def create_socketio() -> socketio.AsyncServer:
     json_rpc_backend.register_methods(BackendMethods(), 'backend')
 
     @sio.on('connect')
-    def _connect(sid, environ, auth):
+    async def _connect(sid, environ, auth):
         """
         Special event used when socket connects.
         """
-        global_state_manager.connected_frontends += 1
+        print(sid, global_state_manager.connected_frontends)
+        if global_state_manager.connected_frontends > 0:
+            notification = JSONRPC20Request(
+                    method='notification_send',
+                    params={
+                        'type': 'warning',
+                        'title': 'Newer session connected',
+                        'details': 'Further messages will be ignored',
+                    },
+                ).data
+            del notification['id']
+            await sio.emit(
+                'api',
+                notification,
+                to=global_state_manager.last_socket,
+            )
+        global_state_manager.add_socket(sid)
 
     @sio.on('disconnect')
-    def _disconnect(sid):
+    async def _disconnect(sid):
         """
         Special event used when socket disconnects.
         """
-        global_state_manager.connected_frontends -= 1
+        prev_socket = global_state_manager.last_socket
+        global_state_manager.remove_socket(sid)
+        if prev_socket == sid:
+            notification = JSONRPC20Request(
+                    method='notification_send',
+                    params={
+                        'type': 'warning',
+                        'title': 'This session is the newest one',
+                        'details': 'Messages will no longer be ignored',
+                    },
+                ).data
+            del notification['id']
+            await sio.emit(
+                'api',
+                notification,
+                to=global_state_manager.last_socket,
+            )
 
     @sio.on("backend-api")
+    @reject_old_sessions_requests
     async def backend_api(sid, json_rpc_request: Dict):
         """
         Event managing backend's JSON-RPC methods.
@@ -140,6 +207,7 @@ def create_socketio() -> socketio.AsyncServer:
         return True
 
     @sio.on("external-api")
+    @reject_old_sessions_requests
     async def api(sid, json_rpc_message: Dict):
         """
         Event redirecting JSON-RPC messages to external application.
@@ -161,7 +229,10 @@ def create_socketio() -> socketio.AsyncServer:
                     }
                 ).data, to=sid)
             return False
-        out = await tcp_server.send_jsonrpc_message(json_rpc_message)
+        out = await tcp_server.send_jsonrpc_message_with_sid(
+            json_rpc_message,
+            sid,
+        )
         if out.status != Status.DATA_SENT:
             if is_request:
                 await sio.emit('api-response', JSONRPC20Response(
