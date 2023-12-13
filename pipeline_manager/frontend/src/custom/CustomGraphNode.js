@@ -213,7 +213,7 @@ export default function CreateCustomGraphNodeType(template, type) {
             const errors = graph.load(state);
             if (errors.length) {
                 throw new Error(
-                    `Internal error occured while initializing ${graph.type} graph. ` +
+                    `Internal error occurred while initializing ${graph.type} graph. ` +
                     `Reason: ${errors.join('. ')}`,
                 );
             }

@@ -71,7 +71,7 @@ export default {
     position: absolute;
     /* Height of navigation bar*/
     top: $navbar-height;
-    /* As defeault notification panel is hidden (minus value)
+    /* As default notification panel is hidden (minus value)
       panel width (435px) + 2 * padding (30px) = 495px
     */
     right: -495px;

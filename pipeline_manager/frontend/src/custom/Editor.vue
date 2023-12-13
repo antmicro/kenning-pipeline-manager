@@ -142,7 +142,7 @@ export default defineComponent({
         const greyedOutNodes = ref([]);
 
         let pressStartTime = 0;
-        const longPressMilisTreshold = 100;
+        const longPressMilisThreshold = 100;
 
         const unselectAllNodes = () => {
             /* eslint-disable vue/no-mutating-props,no-param-reassign */
@@ -210,7 +210,7 @@ export default defineComponent({
             // handle press & hold
             const currentTime = new Date();
             const elapsedTime = currentTime - pressStartTime;
-            if (elapsedTime < longPressMilisTreshold
+            if (elapsedTime < longPressMilisThreshold
                 && ev.target === el.value) {
                 unselectAllNodes();
             }
@@ -226,7 +226,7 @@ export default defineComponent({
             // handle press & hold right mouse button
             const currentTime = new Date();
             const elapsedTime = currentTime - pressStartTime;
-            if (elapsedTime >= longPressMilisTreshold
+            if (elapsedTime >= longPressMilisThreshold
                 && ev.target === el.value) {
                 appendSelectMultipleNodes();
             }

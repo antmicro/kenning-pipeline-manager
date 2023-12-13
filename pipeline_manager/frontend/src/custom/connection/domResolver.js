@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-// Baklava file that is not exported so it has to be copy-pased here locally into the project
+// Baklava file that is not exported so it has to be copy-pasted here locally into the project
 
 export default function getDomElements(ni) {
     const interfaceDOM = document.getElementById(ni.id);

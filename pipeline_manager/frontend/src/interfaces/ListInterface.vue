@@ -58,8 +58,8 @@ export default defineComponent({
              *
              */
             set: (val) => {
-                const splitted = val.trim().split(/\s+/);
-                const parsed = splitted.map((e) => {
+                const split = val.trim().split(/\s+/);
+                const parsed = split.map((e) => {
                     switch (dtype) {
                         case 'string':
                             return e.toString();

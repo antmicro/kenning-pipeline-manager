@@ -79,7 +79,7 @@ class NodeStep extends Step {
                 );
                 if (Array.isArray(ifaceOrPositionErrors)) {
                     throw new Error(
-                        `Internal error occured while processing history stacks. ` +
+                        `Internal error occurred while processing history stacks. ` +
                         `Reason: ${ifaceOrPositionErrors.join('. ')}`,
                     );
                 }

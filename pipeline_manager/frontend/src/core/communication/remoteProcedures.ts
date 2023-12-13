@@ -5,7 +5,7 @@
  */
 
 /*
- * This module containes all possible JSON-RPC requests that frontend can
+ * This module contains all possible JSON-RPC requests that frontend can
  * receive and process.
  *
  * Each exported function is automatically registered as JSON-RPC method
@@ -367,7 +367,7 @@ type TerminalAdd = {
 export function terminal_add(params: TerminalAdd) {
     const status = terminalStore.createTerminalInstance(params.name);
     if (status === false) {
-        throw new Error(`Terminal instance of name '${params.name}' already exisits`);
+        throw new Error(`Terminal instance of name '${params.name}' already exists`);
     }
 }
 

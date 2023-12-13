@@ -106,7 +106,7 @@ export default class EditorManager {
      * and its plugins are reinitialized and then the specification is loaded.
      *
      * @param dataflowSpecification Specification to load, can be either an object or a string
-     * @param lazyLoad Decides wether to actually load the specification or just store
+     * @param lazyLoad Decides whether to actually load the specification or just store
      * it and check its versioning. Can be used when loading parts of specification manually.
      * @returns An object consisting of errors and warnings arrays. If any array is empty
      * the updating process was successful.
@@ -760,7 +760,7 @@ export default class EditorManager {
         const categoryNodes = nodes.filter((node) => node.isCategory);
         const definedCategories = {};
 
-        // Finding muliple category nodes defining the same category
+        // Finding multiple category nodes defining the same category
         const errors = [];
         categoryNodes.forEach((node) => {
             if (node.name in definedCategories) {

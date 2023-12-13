@@ -7,7 +7,7 @@
 
 /*
  * Custom pipeline editor - Implements logic for adding, removing, editing nodes and
- * conections between them.
+ * connections between them.
  * Inherits from baklavajs/core/src/editor.ts
  */
 
@@ -119,9 +119,9 @@ export default class PipelineManagerEditor extends Editor {
      * Cleans all graphs in the editor.
      * @param Determines whether the cleaning process should be stored in history
      */
-    deepCleanEditor(suppresHistory = true) {
+    deepCleanEditor(suppressHistory = true) {
         this.subgraphStack.forEach(this.backFromSubgraph.bind(this));
-        this.cleanEditor(suppresHistory);
+        this.cleanEditor(suppressHistory);
         this.graphName = undefined;
     }
 
@@ -129,10 +129,10 @@ export default class PipelineManagerEditor extends Editor {
      * Cleans up the current graph current graph editor.
      * @param Determines whether the cleaning process should be stored in history
      */
-    cleanEditor(suppresHistory = true) {
+    cleanEditor(suppressHistory = true) {
         const graphInstance = this._graph;
 
-        suppressHistoryLogging(suppresHistory);
+        suppressHistoryLogging(suppressHistory);
         for (let i = graphInstance.connections.length - 1; i >= 0; i -= 1) {
             graphInstance.removeConnection(graphInstance.connections[i]);
         }
@@ -461,7 +461,7 @@ export default class PipelineManagerEditor extends Editor {
         // Updates information of the graph about its interfaces
         this._graph.updateInterfaces();
 
-        // applySidePositions needs a map, not an arrray
+        // applySidePositions needs a map, not an array
         const ifaceOrPositionErrors = applySidePositions(
             Object.fromEntries(this._graph.inputs.map((intf) => [intf.subgraphNodeId, intf])),
             Object.fromEntries(this._graph.outputs.map((intf) => [intf.subgraphNodeId, intf])),
@@ -469,7 +469,7 @@ export default class PipelineManagerEditor extends Editor {
 
         if (Array.isArray(ifaceOrPositionErrors)) {
             throw new Error(
-                `Internal error occured while returning back from a subgraph. ` +
+                `Internal error occurred while returning back from a subgraph. ` +
                 `Reason: ${ifaceOrPositionErrors.join('. ')}`,
             );
         }

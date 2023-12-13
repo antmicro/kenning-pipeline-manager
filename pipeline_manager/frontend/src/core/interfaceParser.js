@@ -7,7 +7,7 @@
 import { v4 as uuidv4 } from 'uuid';
 
 /**
- * Returns a prepared interface that is passed to baklava contructor
+ * Returns a prepared interface that is passed to baklava constructor
  *
  * @param io configuration of the interface
  * @param hidden whether th interface should be hidden. For example groups of interfaces
@@ -34,7 +34,7 @@ function createInterface(io, hidden, name = undefined) {
 }
 
 /**
- * Returns a prepared graph interface state that is passed to baklava contructor
+ * Returns a prepared graph interface state that is passed to baklava constructor
  *
  * @param io configuration of the interface
  * @param _hidden whether the interface should be hidden. Unused in this method, kept
@@ -66,7 +66,7 @@ function createGraphInterface(io, _hidden, name = undefined) {
  *
  * @param interfaces list of interfaces from specification that is going to be parsed
  * @param interfaceGroup determines whether `interfaces` are interface groups. If true the
- * additionaly field `.interfaces` is parsed.
+ * additionally field `.interfaces` is parsed.
  * @returns parsed interfaces that can be passed to baklavajs if the interfaces were valid.
  * Otherwise an array of errors is returned.
  */
@@ -428,7 +428,7 @@ export function parseInterfaces(
         return parsedSides;
     }
 
-    const interfaceCreater = subgraphInterfaces ? createGraphInterface : createInterface;
+    const interfaceCreator = subgraphInterfaces ? createGraphInterface : createInterface;
 
     const stripName = (name) => name.slice(name.indexOf('_') + 1);
 
@@ -444,13 +444,13 @@ export function parseInterfaces(
         // It is an interface group
         if (intf.interfaces !== undefined) {
             // Adding interfaces groups, hidden by default
-            createdInterfaces.inputs[name] = interfaceCreater(
+            createdInterfaces.inputs[name] = interfaceCreator(
                 intf,
                 !enabledInterfaceGroupsNames.includes(name),
                 stripName(name),
             );
         } else {
-            createdInterfaces.inputs[name] = interfaceCreater(
+            createdInterfaces.inputs[name] = interfaceCreator(
                 intf,
                 false,
                 stripName(name),
@@ -462,13 +462,13 @@ export function parseInterfaces(
         // It is an interface group
         if (intf.interfaces !== undefined) {
             // Adding interfaces groups, hidden by default
-            createdInterfaces.outputs[name] = interfaceCreater(
+            createdInterfaces.outputs[name] = interfaceCreator(
                 intf,
                 !enabledInterfaceGroupsNames.includes(name),
                 stripName(name),
             );
         } else {
-            createdInterfaces.outputs[name] = interfaceCreater(
+            createdInterfaces.outputs[name] = interfaceCreator(
                 intf,
                 false,
                 stripName(name),

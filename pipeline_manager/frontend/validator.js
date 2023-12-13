@@ -5,7 +5,7 @@
  */
 
 /**
- * Funcionality used as a node script to validate specification and dataflows
+ * Functionality used as a node script to validate specification and dataflows
  * without having to run the application in a browser.
  *
  * Returns:
@@ -36,7 +36,7 @@ const {
     },
 });
 
-console.warn = function() {}; // Supressing baklavajs logging
+console.warn = function() {}; // Suppressing baklavajs logging
 
 function printHelp() {
     console.log(

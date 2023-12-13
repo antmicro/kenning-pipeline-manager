@@ -35,7 +35,7 @@ Inherits from baklavajs/packages/renderer-vue/src/nodepalette/NodePalette.vue
                 :nodeSearch="nodeSearch"
             />
         </div>
-        <!-- Heigth of the sidebar is 60 so we need to substract that -->
+        <!-- Height of the sidebar is 60 so we need to subtract that -->
         <Tooltip
             v-show="tooltip.visible"
             :text="tooltip.text"

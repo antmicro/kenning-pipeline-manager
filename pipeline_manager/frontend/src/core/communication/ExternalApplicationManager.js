@@ -22,7 +22,7 @@ function handleExternalAppResponse(response) {
     if (response.type === PMMessageType.OK) {
         NotificationHandler.showToast('info', response.content);
     } else if (response.type === PMMessageType.ERROR) {
-        NotificationHandler.terminalLog('error', `Error occured: ${response.content}`, response.content);
+        NotificationHandler.terminalLog('error', `Error occurred: ${response.content}`, response.content);
     } else if (response.type === PMMessageType.WARNING) {
         NotificationHandler.terminalLog('warning', `Warning: ${response.content}`, response.content);
     }
@@ -142,7 +142,7 @@ class ExternalApplicationManager {
             this.appCapabilities = { ...defaultAppCapabilities, ...appCapabilities };
         } catch (error) {
             this.appCapabilities = { ...defaultAppCapabilities };
-            NotificationHandler.terminalLog('warning', 'Application capabilities cannot be retreived, using defaults', error.message);
+            NotificationHandler.terminalLog('warning', 'Application capabilities cannot be retrieved, using defaults', error.message);
         }
     }
 
@@ -169,7 +169,7 @@ class ExternalApplicationManager {
         }
 
         if (data.type === PMMessageType.ERROR) {
-            NotificationHandler.terminalLog('error', `Error occured: ${data.content}`, data.content);
+            NotificationHandler.terminalLog('error', `Error occurred: ${data.content}`, data.content);
         } else if (data.type === PMMessageType.WARNING) {
             NotificationHandler.terminalLog('warning', `Warning: ${data.content}`, data.content);
         }
@@ -269,7 +269,7 @@ class ExternalApplicationManager {
                 }
             } else if (data.type === PMMessageType.ERROR) {
                 const message = data.content;
-                NotificationHandler.terminalLog('error', `Error occured: ${data.content}`, message);
+                NotificationHandler.terminalLog('error', `Error occurred: ${data.content}`, message);
             } else if (data.type === PMMessageType.WARNING) {
                 NotificationHandler.terminalLog('warning', `Warning: ${data.content}`, 'Imported dataflow');
             }

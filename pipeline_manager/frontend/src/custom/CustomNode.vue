@@ -229,17 +229,17 @@ const notifyPositionChanged = (position) => {
     });
 };
 // Create watcher for position
-const startPostionWatcher = (position) => watch(position, (value) => {
+const startPositionWatcher = (position) => watch(position, (value) => {
     if (!editorManager.notifyWhenChanged) return;
     notifyPositionChanged(value);
 });
 if (externalApplicationManager.backendAvailable) {
-    let stopPositionWatcher = startPostionWatcher(props.node.position);
+    let stopPositionWatcher = startPositionWatcher(props.node.position);
     // Restart watcher when position is replaced
     watch(() => props.node.position, (value) => {
         stopPositionWatcher();
         notifyPositionChanged(value);
-        stopPositionWatcher = startPostionWatcher(value);
+        stopPositionWatcher = startPositionWatcher(value);
     });
 }
 
@@ -574,7 +574,7 @@ const dropInterface = () => {
     interfaceCursorStyle.value = {
         top: '0px',
         left: '0px',
-        rigth: '0px',
+        right: '0px',
         display: 'none',
     };
 

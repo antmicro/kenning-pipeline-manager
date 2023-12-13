@@ -174,7 +174,7 @@ export default defineComponent({
             const aTagRe = /<a href="[a-zA-Z0-9-$_.+!*'()/&?=:%]+">/gm;
             html.match(aTagRe)?.forEach((match) => {
                 const hrefParts = match.split('"');
-                // Forces the link to open in a new tab instad of closing the pipeline manager
+                // Forces the link to open in a new tab instead of closing the pipeline manager
                 const newEnd = ` target="_blank"${hrefParts[2]}`;
                 const newHref = [hrefParts[0], hrefParts[1], newEnd].join('"');
                 html = html.replace(match, newHref);

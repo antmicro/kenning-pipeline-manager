@@ -54,9 +54,9 @@ export default defineComponent({
                 if (!val.startsWith('0x') && swapPrefix.test(val)) {
                     const match = val.match(swapPrefix);
                     validatedVal = val.replace(swapPrefix, '0x$1$2');
-                    const additionalLenght = ((match[1] ?? '').length) + ((match[2] ?? '').length);
+                    const additionalLength = ((match[1] ?? '').length) + ((match[2] ?? '').length);
                     cursorPosition = 2;
-                    if (additionalLenght > 0) cursorPosition += additionalLenght;
+                    if (additionalLength > 0) cursorPosition += additionalLength;
                     else if (props.modelValue.length > validatedVal.length
                             || props.modelValue === '') {
                         cursorPosition += 1;

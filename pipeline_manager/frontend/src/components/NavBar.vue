@@ -561,7 +561,7 @@ export default {
             if (!this.$refs.navbar.classList.contains('isHovered')) return;
             // check if event targets UI, if not hide NavBar
             if ((this.hideHud || this.$isMobile) && !ev.target.closest('.baklava-node-palette')) {
-                // Ignore first event to prevent NavBar from hidding when side bar is opened
+                // Ignore first event to prevent NavBar from hiding when side bar is opened
                 if (this.navbarGuard) {
                     this.navbarGuard = false;
                 } else {

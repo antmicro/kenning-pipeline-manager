@@ -25,7 +25,7 @@ import HexInterface from '../interfaces/HexInterface.js';
 /**
  * @param properties coming from the specification
  * @returns object that can be used to create properties or an array of errors
- * if any occured.
+ * if any occurred.
  */
 function parseProperties(properties) {
     const parsedProperties = {};
@@ -218,7 +218,7 @@ function detectDiscrepancies(parsedState, inputs, outputs) {
 
 /**
  * @param {*} state state to be loaded. Should be a valid dataflow
- * @returns state that can be given to baklavajs, or an array of errors if any occured
+ * @returns state that can be given to baklavajs, or an array of errors if any occurred
  */
 function parseNodeState(state) {
     const newState = { ...state };

@@ -166,7 +166,7 @@ export default function createPipelineManagerGraph(graph) {
                         intf.sidePosition,
                     );
                 }
-                // If the new node has the same property of the same type as it could be overidden
+                // If the new node has the same property of the same type as it could be overridden
             } else if (
                 Object.prototype.hasOwnProperty.call(newNodeInstance.inputs, name) &&
                 newNodeInstance.inputs[name].componentName === intf.componentName
@@ -231,7 +231,7 @@ export default function createPipelineManagerGraph(graph) {
         const { inputs } = this;
         const inputNodes = this.nodes.filter((n) => n.type === SUBGRAPH_INPUT_NODE_TYPE);
 
-        // If a side is switched then it is possible that there already exsists
+        // If a side is switched then it is possible that there already exists
         // an interface with the same sidePosition.
         // This function is used to set a new sidePosition for such interface.
         const needsNewSidePosition = (io, newSide) => {
