@@ -332,16 +332,6 @@ async def _main(args: argparse.Namespace, specification: Dict):
         args.verbosity,
     )
     await asyncio.sleep(3)
-    # Wait for frontends
-    logging.info(
-        'Waiting for frontends to connect, please open browser on '
-        f'http://{args.host}:{args.backend_port} and '
-        f'http://{args.host}:{args.backend_port_second}'
-    )
-    await asyncio.gather(
-        wait_for_frontend(args.host, args.backend_port),
-        wait_for_frontend(args.host, args.backend_port_second),
-    )
 
     client_first = CommunicationBackend(args.host, args.port)
     client_second = CommunicationBackend(args.host, args.port_second)
