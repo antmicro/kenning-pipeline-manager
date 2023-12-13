@@ -12,19 +12,10 @@ FRONTEND_DIR=$PROJECT_DIR/pipeline_manager/frontend
 
 cd $FRONTEND_DIR
 
-LINT_OUTPUT_FILENAME=$(mktemp)
+npx --no-install eslint --version >/dev/null 2>&1
 
-trap "rm $LINT_OUTPUT_FILENAME" EXIT
-
-npm run lint >$LINT_OUTPUT_FILENAME 2>&1
-
-RETURN_VALUE=$?
-
-if [ $RETURN_VALUE -eq 127 ]; then
+if [ $? -eq 1 ]; then
     npm install
-    npm run lint
-    exit $?
-else
-    cat $LINT_OUTPUT_FILENAME
-    exit $RETURN_VALUE
 fi
+
+npm run lint
