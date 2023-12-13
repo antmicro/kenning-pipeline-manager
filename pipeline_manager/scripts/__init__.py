@@ -3,5 +3,5 @@
 # SPDX-License-Identifier: Apache-2.0
 
 """
-Module contains scripts for building and running Pipeline Manager
+Module contains scripts for building and running Pipeline Manager.
 """

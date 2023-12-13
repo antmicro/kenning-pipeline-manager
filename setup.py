@@ -4,18 +4,23 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-from setuptools import setup
+"""
+Main build script.
+"""
 
 import distutils.command.build
 
+from setuptools import setup
 
-# Override build command
+
 class BuildCommand(distutils.command.build.build):
+    """
+    Overrides build command.
+    """
+
     def initialize_options(self):
         distutils.command.build.build.initialize_options(self)
-        self.build_base = 'build-dir'
+        self.build_base = "build-dir"
 
 
-setup(
-    cmdclass={"build": BuildCommand}
-)
+setup(cmdclass={"build": BuildCommand})

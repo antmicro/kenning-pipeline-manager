@@ -241,7 +241,7 @@
                 "$ref": "common_types#/$defs/null_or_empty"
             },
             "returns": {
-                "description": "Describtion of backend status",
+                "description": "Description of backend status",
                 "type": "object",
                 "properties": {
                     "status": {
@@ -314,7 +314,7 @@
                 "type": "object",
                 "properties": {
                     "stoppable_methods": {
-                        "description": "List with methods that can be stoped with [dataflow_stop](#external-dataflow-stop) request",
+                        "description": "List with methods that can be stopped with [dataflow_stop](#external-dataflow-stop) request",
                         "type": "array",
                         "items": {
                             "description": "Name of the stoppable method",
@@ -366,7 +366,7 @@
         "dataflow_stop": {
             "description": "Request external application to run dataflow",
             "params": {
-                "description": "Parameters for stoping dataflow",
+                "description": "Parameters for stopping dataflow",
                 "type": "object",
                 "properties": {
                     "method": {
@@ -393,7 +393,7 @@
                 "type": "object",
                 "properties": {
                     "type": {
-                        "description": "[MessageType](message-type) specifing success or error",
+                        "description": "[MessageType](message-type) specifying success or error",
                         "type": "number"
                     },
                     "content": {
@@ -478,7 +478,7 @@
             }
         },
         "viewport_on_center": {
-            "description": "Request send when editor was centerd",
+            "description": "Request send when editor was centered",
             "params": {
                 "$ref": "common_types#/$defs/null_or_empty"
             },

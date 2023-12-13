@@ -2,8 +2,19 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
+"""
+Collects basic information about specification, additional necessary files
+(such as icons etc.).
+"""
 
-def collect_dependencies(resolved_names, specification_nodes_map, curr_name):
+from typing import Dict, List
+
+
+def collect_dependencies(
+    resolved_names: List,
+    specification_nodes_map: Dict[str, object],
+    curr_name: str,
+) -> None:
     """
     Performs quick recursive collection of base type for the current type.
 
@@ -22,13 +33,11 @@ def collect_dependencies(resolved_names, specification_nodes_map, curr_name):
     if "extends" in specification_nodes_map[curr_name]:
         for partype in specification_nodes_map[curr_name]["extends"]:
             collect_dependencies(
-                resolved_names,
-                specification_nodes_map,
-                partype
+                resolved_names, specification_nodes_map, partype
             )
 
 
-def minify_specification(specification, dataflow):
+def minify_specification(specification: Dict, dataflow: Dict) -> Dict:
     """
     Creates a minimal specification for a given dataflow.
 
@@ -44,16 +53,17 @@ def minify_specification(specification, dataflow):
 
     Returns
     -------
-    Dict : Updated specification
+    Dict
+        Updated specification
     """
     used_names = []
 
     def getNodeName(node):
-        # Category nodes have to be takin into accont
+        # Category nodes have to be takin into account
         if "name" in node:
             return node["name"]
         else:
-            return node["category"].split('/')[-1]
+            return node["category"].split("/")[-1]
 
     for node in dataflow["graph"]["nodes"]:
         if getNodeName(node) not in used_names:
@@ -75,23 +85,25 @@ def minify_specification(specification, dataflow):
     return specification
 
 
-def retrieve_used_icons(specification) -> list[str]:
+def retrieve_used_icons(specification: Dict) -> List[str]:
     """
-    Retrives names of used icons from the dataflow
+    Retrieves names of used icons from the dataflow.
 
     Parameters
     ----------
     specification: Dict
         Minified specification
+
     Returns
     -------
-    List : names of used icons
+    List[str]
+        names of used icons
     """
     icon_names = []
 
     if "urls" in specification["metadata"]:
         for url in specification["metadata"]["urls"].values():
-            icon_names.append(url['icon'])
+            icon_names.append(url["icon"])
 
     for node in specification["nodes"]:
         if "icon" in node:

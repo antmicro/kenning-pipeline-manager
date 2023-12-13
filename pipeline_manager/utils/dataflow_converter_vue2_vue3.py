@@ -3,8 +3,9 @@
 # SPDX-License-Identifier: Apache-2.0
 
 """
-Version: 1
 Script that convert old dataflow format (Vue2-based) to a new one (Vue3-based).
+
+Version: 1
 Usage of the script:
 
 ```
@@ -24,18 +25,30 @@ from typing import Any, NamedTuple, Optional
 
 
 class Interface(NamedTuple):
+    """
+    Represents single interface in the dataflow.
+    """
+
     name: str
     id: str
     value: Any
 
 
 class Connection(NamedTuple):
+    """
+    Represents single connection in the dataflow.
+    """
+
     id: str
     from_node: str
     to_node: str
 
 
 class Node(NamedTuple):
+    """
+    Represents single node in the dataflow.
+    """
+
     type: str
     id: str
     parameters: list[Interface]
@@ -52,7 +65,7 @@ def from_old(dataflow: dict) -> tuple[list[Node], list[Connection]]:
     """
     Parses dataflow saved in format compatible with project built with Vue2
     so that it can be converted into a dataflow compatible
-    with version of the project for Vue3
+    with version of the project for Vue3.
 
     Parameters
     ----------
@@ -62,7 +75,7 @@ def from_old(dataflow: dict) -> tuple[list[Node], list[Connection]]:
 
     Returns
     -------
-    tuple[list[Node], list[Connection]]:
+    tuple[list[Node], list[Connection]]
         Parsed nodes and connections.
     """
     nodes = dataflow["nodes"]
@@ -86,13 +99,9 @@ def from_old(dataflow: dict) -> tuple[list[Node], list[Connection]]:
         for interface in node["interfaces"]:
             name, state = interface
             if state["isInput"]:
-                inputs.append(
-                    Interface(name, state["id"], "")
-                )
+                inputs.append(Interface(name, state["id"], ""))
             else:
-                outputs.append(
-                    Interface(name, state["id"], "")
-                )
+                outputs.append(Interface(name, state["id"], ""))
 
         parsed_node = Node(
             node["type"],
@@ -153,14 +162,9 @@ def to_new(nodes: list[Node], connections: list[Connection]) -> dict:
             "type": node.type,
             "id": node.id,
             "position": {"x": node.pos_x, "y": node.pos_y},
-            "inputs": {
-                input.name: {"id": input.id}
-                for input in node.inputs
-            },
+            "inputs": {input.name: {"id": input.id} for input in node.inputs},
             "properties": {
-                parameter.name: {
-                    "id": parameter.id, "value": parameter.value
-                }
+                parameter.name: {"id": parameter.id, "value": parameter.value}
                 for parameter in node.parameters
             },
             "outputs": {
@@ -194,18 +198,16 @@ def to_new(nodes: list[Node], connections: list[Connection]) -> dict:
     }
 
 
-def main(argv):
+def main(argv):  # noqa: D103
     parser = argparse.ArgumentParser(argv[0])
     parser.add_argument(
-        "dataflow",
-        type=Path,
-        help="Input dataflow in old format"
+        "dataflow", type=Path, help="Input dataflow in old format"
     )
     parser.add_argument(
         "--output",
         type=Path,
         default="out.json",
-        help="Output with updated dataflow format"
+        help="Output with updated dataflow format",
     )
 
     args, _ = parser.parse_known_args(argv[1:])

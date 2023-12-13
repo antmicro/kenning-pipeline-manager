@@ -3,5 +3,5 @@
 # SPDX-License-Identifier: Apache-2.0
 
 """
-Set of sample specifications and dataflows
+Set of sample specifications and dataflows.
 """

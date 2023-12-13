@@ -1,9 +1,21 @@
+#!/usr/bin/env python3
+
+# Copyright (c) 2022-2023 Antmicro <www.antmicro.com>
+#
+# SPDX-License-Identifier: Apache-2.0
+
+"""
+Creates documentation entries from JSON schema files.
+"""
+
 import json
-import jsonschema2md
 from importlib import resources
-from typing import List, Dict
+from typing import Dict, List
+
+import jsonschema2md
 
 from pipeline_manager.resources import api_specification
+
 PARSER = jsonschema2md.Parser()
 
 
@@ -19,7 +31,7 @@ def _parse_type(schema: Dict):
         Specification in jsonschema format
     """
     for key, value in schema.items():
-        if key == 'type' and isinstance(value, List):
+        if key == "type" and isinstance(value, List):
             schema[key] = f"[{', '.join(value)}]"
         elif isinstance(value, Dict):
             _parse_type(value)
@@ -27,14 +39,16 @@ def _parse_type(schema: Dict):
 
 def generate_for_endpoints(spec: Dict, reference_prefix: str) -> List[str]:
     """
-    Generate Markdown with API specification for endpoints
-    from choosen service.
+    Generates Markdown with API specification for endpoints
+    from chosen service.
 
     Parameters
     ----------
     spec : Dict
-        Sepcification with endpoints containing `params`,
+        Specification with endpoints containing `params`,
         `results` and `description`
+    reference_prefix : str
+        Prefix for the MyST reference.
 
     Returns
     -------
@@ -44,12 +58,12 @@ def generate_for_endpoints(spec: Dict, reference_prefix: str) -> List[str]:
     results = []
     for name, schema in spec.items():
         results.append(f'({reference_prefix}-{name.replace("_", "-")})=\n')
-        results.append(f'#### {name}\n\n')
-        if 'description' in schema:
-            results.append(schema['description'] + '\n\n')
-        results.extend(PARSER._parse_object(schema['params'], 'params'))
-        if 'returns' in schema and schema['returns']:
-            results.extend(PARSER._parse_object(schema['returns'], 'result'))
+        results.append(f"#### {name}\n\n")
+        if "description" in schema:
+            results.append(schema["description"] + "\n\n")
+        results.extend(PARSER._parse_object(schema["params"], "params"))
+        if "returns" in schema and schema["returns"]:
+            results.extend(PARSER._parse_object(schema["returns"], "result"))
 
     return results
 
@@ -65,37 +79,53 @@ def generate_schema_md() -> str:
         Markdown with API specification
     """
     results: List[str] = []
-    spec_path = resources.files(api_specification) / 'specification.json'
-    with open(spec_path, 'r') as fd:
+    spec_path = resources.files(api_specification) / "specification.json"
+    with open(spec_path, "r") as fd:
         specification = json.load(fd)
     _parse_type(specification)
     for ref, header, content in (
-        ('(frontend-api)=\n', '### Frontend API\n\n',
-         generate_for_endpoints(
-            specification['frontend_endpoints'], 'frontend')),
-        ('(backend-api)=\n', '### Backend API\n\n',
-         generate_for_endpoints(
-            specification['backend_endpoints'], 'bakend')),
-        ('(external-app-api)=\n', '### External App API\n\n',
-         generate_for_endpoints(
-            specification['external_endpoints'], 'external')),
+        (
+            "(frontend-api)=\n",
+            "### Frontend API\n\n",
+            generate_for_endpoints(
+                specification["frontend_endpoints"], "frontend"
+            ),
+        ),
+        (
+            "(backend-api)=\n",
+            "### Backend API\n\n",
+            generate_for_endpoints(
+                specification["backend_endpoints"], "backend"
+            ),
+        ),
+        (
+            "(external-app-api)=\n",
+            "### External App API\n\n",
+            generate_for_endpoints(
+                specification["external_endpoints"], "external"
+            ),
+        ),
     ):
         results.append(ref)
         results.append(header)
         results.extend(content)
 
-    types_path = resources.files(api_specification) / 'common_types.json'
-    with open(types_path, 'r') as fd:
+    types_path = resources.files(api_specification) / "common_types.json"
+    with open(types_path, "r") as fd:
         common_types = json.load(fd)
     _parse_type(common_types)
-    results.append('(api-common-types)=\n')
-    results.append('### Common Types\n\n')
-    for name, definition in common_types['$defs'].items():
-        results.append(f'(mmon_types#/$defs/{name})=\n\n')
-        results.append(f'#### {name}\n\n')
+    results.append("(api-common-types)=\n")
+    results.append("### Common Types\n\n")
+    for name, definition in common_types["$defs"].items():
+        results.append(f"(mmon_types#/$defs/{name})=\n\n")
+        results.append(f"#### {name}\n\n")
         results.extend(PARSER._parse_object(definition, None))
 
-    return ''.join([
-        result.replace(':', '', 1) if result.lstrip().startswith('- :')
-        else result for result in results
-    ])
+    return "".join(
+        [
+            result.replace(":", "", 1)
+            if result.lstrip().startswith("- :")
+            else result
+            for result in results
+        ]
+    )

@@ -2,6 +2,10 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
+"""
+A script for converting older versions of dataflow to newer versions.
+"""
+
 import argparse
 import json
 import logging
@@ -25,7 +29,7 @@ python -m pipeline_manager.utils.dataflow_format_converter \
 
 def dataflow_ver_20230615_1(dataflow: dict) -> dict:
     """
-    Converts dataflows to version 20230615.1
+    Converts dataflows to version 20230615.1.
 
     Parameters
     ----------
@@ -42,34 +46,45 @@ def dataflow_ver_20230615_1(dataflow: dict) -> dict:
 
 
 def dataflow_ver_20230830_11(dataflow: dict) -> dict:
-    dataflow["version"] = '20230830.11'
+    """
+    Converts dataflows to version 20230830.11.
+
+    Parameters
+    ----------
+    dataflow : dict
+        Dataflow to be converted
+
+    Returns
+    -------
+    dict
+        Converted dataflow to the next version
+    """
+    dataflow["version"] = "20230830.11"
 
     def parse_graph(graph):
-        for node in graph['nodes']:
-            if 'name' in node:
-                node['instanceName'] = node['name']
-                del node['name']
+        for node in graph["nodes"]:
+            if "name" in node:
+                node["instanceName"] = node["name"]
+                del node["name"]
 
-            node['name'] = node['type']
-            del node['type']
+            node["name"] = node["type"]
+            del node["type"]
 
-    parse_graph(dataflow['graph'])
-    if 'graphTemplateInstances' in dataflow:
-        for subgraph in dataflow['graphTemplateInstances']:
+    parse_graph(dataflow["graph"])
+    if "graphTemplateInstances" in dataflow:
+        for subgraph in dataflow["graphTemplateInstances"]:
             parse_graph(subgraph)
 
-    dataflow['subgraphs'] = dataflow['graphTemplateInstances']
-    del dataflow['graphTemplateInstances']
+    dataflow["subgraphs"] = dataflow["graphTemplateInstances"]
+    del dataflow["graphTemplateInstances"]
 
     return dataflow
 
 
-def main(argv):
+def main(argv):  # noqa: D103
     parser = argparse.ArgumentParser(argv[0])
     parser.add_argument(
-        "dataflow",
-        type=Path,
-        help="Input dataflow to be converted"
+        "dataflow", type=Path, help="Input dataflow to be converted"
     )
     parser.add_argument(
         "--from-version",

@@ -396,7 +396,7 @@
                     "type": ["number", "string"]
                 },
                 "max": {
-                    "description": "Maxiumum value of a range for slider, number, integer and hex type",
+                    "description": "Maximum value of a range for slider, number, integer and hex type",
                     "type": ["number", "string"]
                 },
                 "values": {

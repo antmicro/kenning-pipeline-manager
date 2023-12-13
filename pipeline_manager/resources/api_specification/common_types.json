@@ -170,7 +170,7 @@
                             "description": "List with removed connections",
                             "type": "array",
                             "items": {
-                                "description": "Connection defined with its beggining and end",
+                                "description": "Connection defined with its beginning and end",
                                 "type": "object",
                                 "properties": {
                                     "from": {
@@ -206,7 +206,7 @@
             "type": "object",
             "properties": {
                 "type": {
-                    "description": "[MessageType](message-type) specifing success, error or progress",
+                    "description": "[MessageType](message-type) specifying success, error or progress",
                     "type": "number"
                 },
                 "content": {

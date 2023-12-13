@@ -2,31 +2,37 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
+"""
+Provides methods for building Pipeline Manager's frontend.
+"""
+
 import base64
 import errno
-import logging
+import filecmp
 import json
+import logging
+import os
+import re
 import shutil
 import subprocess
-from pathlib import Path
-from typing import Optional, List
-import re
-import requests
-from urllib.parse import urlparse
-import os
-import filecmp
-
 from importlib import resources as importlib_resources
-from pipeline_manager import resources
+from pathlib import Path
+from typing import List, Optional, Tuple
+from urllib.parse import urlparse
+
+import requests
+
 import pipeline_manager
-from pipeline_manager.specification_reader import \
-    minify_specification as minify_spec, retrieve_used_icons  # noqa: E501
+from pipeline_manager import resources
+from pipeline_manager.specification_reader import (
+    minify_specification as minify_spec,  # noqa: E501
+)
+from pipeline_manager.specification_reader import retrieve_used_icons
 
 
 def build_singlehtml(
-        dist_path: Path,
-        single_html_path: Path,
-        used_icons: Optional[List]):
+    dist_path: Path, single_html_path: Path, used_icons: Optional[List]
+):
     """
     Creates a single, self-contained HTML from the dist directory.
 
@@ -79,9 +85,10 @@ def build_singlehtml(
 
 
 def build_prepare(
-        workspace_directory: Optional[Path] = None,
-        skip_install_deps: bool = False,
-        skip_frontend_copying: bool = False):
+    workspace_directory: Optional[Path] = None,
+    skip_install_deps: bool = False,
+    skip_frontend_copying: bool = False,
+) -> Tuple[int, Path]:
     """
     Prepares the workspace directory for building.
 
@@ -91,7 +98,7 @@ def build_prepare(
 
     Parameters
     ----------
-    workspace_directory: Path
+    workspace_directory: Optional[Path]
         Path where the frontend should be built
     skip_install_deps: bool
         Tells whether npm install should be skipped or not
@@ -101,64 +108,65 @@ def build_prepare(
 
     Returns
     -------
-    int :
+    int
         0 if successful, other value means error from npm.
-    Path:
+    Path
         path to the workspace directory
     """
     project_path = Path(__file__).parent.parent.absolute()
-    frontend_path = project_path / 'pipeline_manager/frontend'
-    resources_path = project_path / 'pipeline_manager/resources'
+    frontend_path = project_path / "pipeline_manager/frontend"
+    resources_path = project_path / "pipeline_manager/resources"
 
     # change project path to current working directory if project is
     # installed in other location, but we are in the repo directory
-    if (Path.cwd() / 'pipeline_manager/frontend').is_dir() \
-            and Path(pipeline_manager.__file__).samefile(Path.cwd() / 'pipeline_manager/__init__.py'):  # noqa E501
+    if (Path.cwd() / "pipeline_manager/frontend").is_dir() and Path(
+        pipeline_manager.__file__
+    ).samefile(Path.cwd() / "pipeline_manager/__init__.py"):  # noqa E501
         project_path = Path.cwd().absolute()
-        frontend_path = project_path / 'pipeline_manager/frontend'
-        resources_path = project_path / 'pipeline_manager/resources'
+        frontend_path = project_path / "pipeline_manager/frontend"
+        resources_path = project_path / "pipeline_manager/resources"
 
     # check if building is happening in repo, if not ask the user to provide
     # the necessary directory paths
     elif not workspace_directory:
         logging.error(
-            'The build script requires providing workspace path for storing '
-            'frontend sources for building purposes'
+            "The build script requires providing workspace path for storing "
+            "frontend sources for building purposes"
         )
-        logging.error(
-            'Please provide it --workspace-directory'
-        )
+        logging.error("Please provide it --workspace-directory")
         return errno.EINVAL, workspace_directory
 
     if workspace_directory:
         workspace_directory.mkdir(parents=True, exist_ok=True)
 
-        if (len_work := len(list(workspace_directory.glob('*')))) == 0:
+        if (len_work := len(list(workspace_directory.glob("*")))) == 0:
             shutil.copytree(
                 frontend_path,
-                workspace_directory / 'frontend',
-                dirs_exist_ok=True)
+                workspace_directory / "frontend",
+                dirs_exist_ok=True,
+            )
             shutil.copytree(
                 resources_path,
-                workspace_directory / 'resources',
-                dirs_exist_ok=True)
+                workspace_directory / "resources",
+                dirs_exist_ok=True,
+            )
         elif len_work > 0 and not skip_frontend_copying:
+
             def _check_subdir(diff: filecmp.dircmp, current_path: Path):
                 # if those files aren't ignored,
                 # the sync will always trigger since
                 # the time signature of the file changes
                 ignored_files = [
-                    '.env.local',
-                    '.env.static.local',
-                    'node_modules',
+                    ".env.local",
+                    ".env.static.local",
+                    "node_modules",
                 ]
-                changed_sources = list(filter(
-                    lambda x: x not in ignored_files,
-                    diff.diff_files
-                ))
+                changed_sources = list(
+                    filter(lambda x: x not in ignored_files, diff.diff_files)
+                )
                 for i in changed_sources:
                     src = frontend_path / current_path / i
-                    dst = workspace_directory / 'frontend' / current_path / i
+                    dst = workspace_directory / "frontend" / current_path / i
                     shutil.copy(src, dst)
                 if diff.subdirs is not {}:
                     for name, subdir in diff.subdirs.items():
@@ -166,41 +174,38 @@ def build_prepare(
                             _check_subdir(subdir, current_path / name)
 
             root_diff = filecmp.dircmp(
-                workspace_directory / 'frontend',
-                frontend_path
+                workspace_directory / "frontend", frontend_path
             )
-            _check_subdir(root_diff, Path(''))
+            _check_subdir(root_diff, Path(""))
 
     else:
-        workspace_directory = project_path / 'pipeline_manager'
-    frontend_path = workspace_directory / 'frontend'
+        workspace_directory = project_path / "pipeline_manager"
+    frontend_path = workspace_directory / "frontend"
 
     if skip_install_deps:
         return 0, workspace_directory
-    exit_status = subprocess.run(
-        ['npm', 'install'],
-        cwd=frontend_path
-    )
+    exit_status = subprocess.run(["npm", "install"], cwd=frontend_path)
     return exit_status.returncode, workspace_directory
 
 
 def build_frontend(
-        build_type: str,
-        assets_directory: Optional[Path] = None,
-        json_url_specification: Optional[Path] = None,
-        editor_title: Optional[str] = None,
-        specification: Optional[Path] = None,
-        dataflow: Optional[Path] = None,
-        mode: str = 'production',
-        output_directory: Optional[Path] = None,
-        workspace_directory: Optional[Path] = None,
-        clean_build: bool = False,
-        single_html: Optional[Path] = None,
-        minify_specification: bool = False,
-        graph_development_mode: bool = False,
-        skip_install_deps: bool = False,
-        skip_frontend_copying: bool = False,
-        favicon_path: Optional[Path] = None):
+    build_type: str,
+    assets_directory: Optional[Path] = None,
+    json_url_specification: Optional[Path] = None,
+    editor_title: Optional[str] = None,
+    specification: Optional[Path] = None,
+    dataflow: Optional[Path] = None,
+    mode: str = "production",
+    output_directory: Optional[Path] = None,
+    workspace_directory: Optional[Path] = None,
+    clean_build: bool = False,
+    single_html: Optional[Path] = None,
+    minify_specification: bool = False,
+    graph_development_mode: bool = False,
+    skip_install_deps: bool = False,
+    skip_frontend_copying: bool = False,
+    favicon_path: Optional[Path] = None,
+) -> int:
     """
     Builds the frontend for the Pipeline Manager.
 
@@ -211,7 +216,9 @@ def build_frontend(
         (for server-based application)
     assets_directory: Optional[Path]
         Path to the directory with additional static files, i.e. icons
-    editor_title: str
+    json_url_specification: Optional[Path]
+        Path to JSON with specification of URI schemes for the frontend.
+    editor_title: Optional[str]
         Title of the built page and editor
     specification: Optional[Path]
         Path to the specification file
@@ -246,26 +253,27 @@ def build_frontend(
     favicon_path: Optional[Path]
         Path to the Kenning Pipeline Manager favicon in SVG format.
         If None, a default favicon is used.
+
     Returns
     -------
-    int: 0 if successfull, EINVAL if arguments are conflicting or invalid
+    int
+        0 if successful, EINVAL if arguments are conflicting or invalid
     """
-
     exit_status, workspace_directory = build_prepare(
-        workspace_directory,
-        skip_install_deps,
-        skip_frontend_copying
+        workspace_directory, skip_install_deps, skip_frontend_copying
     )
     if exit_status != 0:
         return exit_status
 
-    frontend_path = workspace_directory / 'frontend'
+    frontend_path = workspace_directory / "frontend"
 
-    config_path = frontend_path / '.env.static.local' if \
-        build_type == 'static-html' else \
-        frontend_path / '.env.local'
+    config_path = (
+        frontend_path / ".env.static.local"
+        if build_type == "static-html"
+        else frontend_path / ".env.local"
+    )
 
-    frontend_dist_path = (frontend_path / 'dist').resolve()
+    frontend_dist_path = (frontend_path / "dist").resolve()
 
     config_lines = []
 
@@ -275,12 +283,12 @@ def build_frontend(
         dataflow = Path(dataflow).absolute()
 
     if editor_title:
-        config_lines.append(f'VUE_APP_EDITOR_TITLE={editor_title}\n')
+        config_lines.append(f"VUE_APP_EDITOR_TITLE={editor_title}\n")
 
     urls = None
     if json_url_specification:
         json_url_specification = Path(json_url_specification).absolute()
-        with open(json_url_specification, 'r') as f:
+        with open(json_url_specification, "r") as f:
             urls = json.load(f)
 
     used_icons = None
@@ -290,14 +298,14 @@ def build_frontend(
                 "Cannot minify the specification without the dataflow."
             )
             return errno.EINVAL
-        with open(specification, 'r') as specfile:
+        with open(specification, "r") as specfile:
             spec = json.load(specfile)
-        with open(dataflow, 'r') as dataflowfile:
+        with open(dataflow, "r") as dataflowfile:
             dataflowstruct = json.load(dataflowfile)
         newspec = minify_spec(spec, dataflowstruct)
         used_icons = retrieve_used_icons(newspec)
-        minified_spec_path = specification.with_suffix('.min.json')
-        with open(minified_spec_path, 'w') as minified_spec_file:
+        minified_spec_path = specification.with_suffix(".min.json")
+        with open(minified_spec_path, "w") as minified_spec_file:
             logging.info(
                 f"Writing minimized specification to:  {minified_spec_path}"
             )
@@ -305,14 +313,14 @@ def build_frontend(
             specification = minified_spec_path
 
     if single_html:
-        config_lines.append('VUE_APP_SINGLEHTML_BUILD=true\n')
+        config_lines.append("VUE_APP_SINGLEHTML_BUILD=true\n")
 
     if graph_development_mode:
-        config_lines.append('VUE_APP_GRAPH_DEVELOPMENT_MODE=true\n')
+        config_lines.append("VUE_APP_GRAPH_DEVELOPMENT_MODE=true\n")
 
     config_lines.append(f'NODE_ENV="{mode}"\n')
-    if mode == 'development':
-        config_lines.append('VUE_APP_VERBOSE=true\n')
+    if mode == "development":
+        config_lines.append("VUE_APP_VERBOSE=true\n")
 
     if urls is not None:
         config_lines.append(
@@ -321,13 +329,11 @@ def build_frontend(
 
     if assets_directory:
         shutil.copytree(
-            assets_directory,
-            frontend_path / 'assets',
-            dirs_exist_ok=True
+            assets_directory, frontend_path / "assets", dirs_exist_ok=True
         )
 
     if favicon_path is None:
-        favicon_path = importlib_resources.files(resources) / 'favicon.svg'
+        favicon_path = importlib_resources.files(resources) / "favicon.svg"
     elif favicon_path.suffix != ".svg":
         logging.error(
             f"Only .svg format is supported for favicon, currently provided file:  {favicon_path}"  # noqa: E501
@@ -337,21 +343,21 @@ def build_frontend(
     single_html_spec = None
     if single_html:
         # Preprocessing url assets so that they are accessible offline
-        with open(specification, 'r') as specfile:
+        with open(specification, "r") as specfile:
             spec = json.load(specfile)
 
         def store_url_asset(filename):
-            if re.match(r'^https?:\/\/(www\.)?.*$', filename):
+            if re.match(r"^https?:\/\/(www\.)?.*$", filename):
                 imgfile = requests.get(filename, timeout=4)
-                suffix = imgfile.headers['Content-Type']
-                if suffix == 'image/svg+xml':
-                    suffix = 'svg'
+                suffix = imgfile.headers["Content-Type"]
+                if suffix == "image/svg+xml":
+                    suffix = "svg"
                 else:
-                    suffix = suffix.split('/')[1]
+                    suffix = suffix.split("/")[1]
 
-                new_filename = urlparse(filename).path.split('/')[-1]
-                new_filename = f'{new_filename}.{suffix}'
-                with open(frontend_path / 'assets' / new_filename, 'wb+') as f:
+                new_filename = urlparse(filename).path.split("/")[-1]
+                new_filename = f"{new_filename}.{suffix}"
+                with open(frontend_path / "assets" / new_filename, "wb+") as f:
                     f.write(imgfile.content)
                 return new_filename
             return filename
@@ -359,42 +365,41 @@ def build_frontend(
         # Retrieving all urls of icons
         if "urls" in spec["metadata"]:
             for url in spec["metadata"]["urls"].values():
-                filename = url['icon']
-                url['icon'] = store_url_asset(filename)
+                filename = url["icon"]
+                url["icon"] = store_url_asset(filename)
 
         for node in spec["nodes"]:
             if "icon" in node:
-                Path(frontend_path / 'assets').mkdir(
-                    parents=True,
-                    exist_ok=True
+                Path(frontend_path / "assets").mkdir(
+                    parents=True, exist_ok=True
                 )
-                if isinstance(node['icon'], str):
-                    filename = node['icon']
-                    node['icon'] = store_url_asset(filename)
+                if isinstance(node["icon"], str):
+                    filename = node["icon"]
+                    node["icon"] = store_url_asset(filename)
                 else:
-                    icongroup, iconsuffix = list(node['icon'].items())[0]
+                    icongroup, iconsuffix = list(node["icon"].items())[0]
                     iconprefix = spec["metadata"]["icons"][icongroup]
-                    if iconprefix[-1] != '/':
-                        iconprefix += '/'
-                    if iconsuffix[0] == '/':
+                    if iconprefix[-1] != "/":
+                        iconprefix += "/"
+                    if iconsuffix[0] == "/":
                         iconsuffix = iconsuffix[1:]
                     filename = iconprefix + iconsuffix
-                    node['icon'] = store_url_asset(filename)
+                    node["icon"] = store_url_asset(filename)
 
-        single_html_spec = specification.with_suffix('.tmp.json')
-        with open(single_html_spec, 'w') as preprocessed_spec_file:
+        single_html_spec = specification.with_suffix(".tmp.json")
+        with open(single_html_spec, "w") as preprocessed_spec_file:
             json.dump(spec, preprocessed_spec_file)
             specification = single_html_spec
 
     if specification:
         specification = Path(specification).absolute()
-        config_lines.append(f'VUE_APP_SPECIFICATION_PATH={specification}\n')
+        config_lines.append(f"VUE_APP_SPECIFICATION_PATH={specification}\n")
         if dataflow:
             dataflow = Path(dataflow).absolute()
-            config_lines.append(f'VUE_APP_DATAFLOW_PATH={dataflow}\n')
+            config_lines.append(f"VUE_APP_DATAFLOW_PATH={dataflow}\n")
 
     if config_lines:
-        with open(config_path, 'w') as config:
+        with open(config_path, "w") as config:
             config.writelines(config_lines)
 
     if output_directory:
@@ -405,32 +410,40 @@ def build_frontend(
         frontend_dist_path = output_directory
 
     # Building frontend application
-    if build_type == 'static-html':
+    if build_type == "static-html":
         exit_status = subprocess.run(
             [
-                'npm', 'run', 'build-static-html',
-                '--', '--dest', f'{frontend_dist_path}'
+                "npm",
+                "run",
+                "build-static-html",
+                "--",
+                "--dest",
+                f"{frontend_dist_path}",
             ],
-            cwd=frontend_path
+            cwd=frontend_path,
         )
         if exit_status.returncode != 0:
             return exit_status.returncode
-    if build_type == 'server-app':
+    if build_type == "server-app":
         exit_status = subprocess.run(
             [
-                'npm', 'run', 'build-server-app',
-                '--', '--dest', f'{frontend_dist_path}'
+                "npm",
+                "run",
+                "build-server-app",
+                "--",
+                "--dest",
+                f"{frontend_dist_path}",
             ],
-            cwd=frontend_path
+            cwd=frontend_path,
         )
         if exit_status.returncode == errno.EACCES:
             logging.error(
-                'The build script requires providing workspace path for '
-                'storing frontend sources and a path for the built frontend'
+                "The build script requires providing workspace path for "
+                "storing frontend sources and a path for the built frontend"
             )
             logging.error(
-                'Please provide them with --workspace-directory and '
-                '--output-directory'
+                "Please provide them with --workspace-directory and "
+                "--output-directory"
             )
             return exit_status.returncode
 

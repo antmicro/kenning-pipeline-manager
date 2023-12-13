@@ -28,20 +28,17 @@ its specification
 data sent to it. It simply returns a received file.
 """
 
-import asyncio
 import argparse
+import asyncio
 import json
 import logging
-from pathlib import Path
-from collections import defaultdict
 import random
-from typing import Dict, List, Union
 import string
 import sys
+from collections import defaultdict
 from datetime import datetime
-
-from pipeline_manager import frontend_tester
-from pipeline_manager.utils.logger import string_to_verbosity
+from pathlib import Path
+from typing import Dict, List, Union
 
 from pipeline_manager_backend_communication.communication_backend import (
     CommunicationBackend,
@@ -49,6 +46,9 @@ from pipeline_manager_backend_communication.communication_backend import (
 from pipeline_manager_backend_communication.misc_structures import (
     MessageType,
 )
+
+from pipeline_manager import frontend_tester
+from pipeline_manager.utils.logger import string_to_verbosity
 
 RUN = "RunBehaviour"
 VALIDATE = "ValidationBehaviour"
@@ -71,7 +71,7 @@ def get_node_properties(node_type: str, dataflow: Dict) -> Dict:
 
     Returns
     -------
-    Dict :
+    Dict
         Dictionary that has all properties of a `name` node.
     """
     nodes = dataflow["graph"]["nodes"]
@@ -103,7 +103,7 @@ def get_effects(node_type: str, dataflow: Dict) -> List:
 
     Returns
     -------
-    List :
+    List
         List of nodes connected to `type` node.
     """
     nodes = dataflow["graph"]["nodes"]
@@ -156,18 +156,19 @@ def _text_to_message_type(text: str) -> MessageType:
 
     Returns
     -------
-    MessageType :
+    MessageType
         Mapped text representation
     """
     return {"OK": MessageType.OK, "ERROR": MessageType.ERROR}[text]
 
 
 class RPCMethods:
+    """
+    Implementation of RPC callbacks.
+    """
+
     def __init__(
-        self,
-        specification: Dict,
-        client: CommunicationBackend,
-        out_path: str
+        self, specification: Dict, client: CommunicationBackend, out_path: str
     ):
         self.specification = specification
         self.client = client
@@ -185,9 +186,9 @@ class RPCMethods:
             Application capabalities
         """
         return {
-            'stoppable_methods': [
-                'dataflow_run',
-                'custom_terminal_stress_test'
+            "stoppable_methods": [
+                "dataflow_run",
+                "custom_terminal_stress_test",
             ]
         }
 
@@ -206,8 +207,8 @@ class RPCMethods:
             Method's response
         """
         return {
-            'type': MessageType.OK.value,
-            'content': external_application_dataflow,
+            "type": MessageType.OK.value,
+            "content": external_application_dataflow,
         }
 
     def specification_get(self) -> Dict:
@@ -221,8 +222,8 @@ class RPCMethods:
         """
         logging.log(logging.INFO, "Sending specification.")
         return {
-            'type': MessageType.OK.value,
-            'content': self.specification,
+            "type": MessageType.OK.value,
+            "content": self.specification,
         }
 
     def dataflow_run(self, dataflow: Dict) -> Dict:
@@ -240,7 +241,9 @@ class RPCMethods:
             Method's response
         """
         return self._run_validate_response(
-            RUN, dataflow, self.dataflow_run.__name__,
+            RUN,
+            dataflow,
+            self.dataflow_run.__name__,
         )
 
     def dataflow_stop(self, method: str) -> Dict:
@@ -248,7 +251,7 @@ class RPCMethods:
         RPC method that responses to Run request.
 
         Parameters
-        ---------
+        ----------
         method : str
             Name of the method that should be stopped.
 
@@ -257,18 +260,19 @@ class RPCMethods:
         Dict
             Method's response
         """
-        if (method != self.dataflow_run.__name__ and
-                method != self.custom_terminal_stress_test.__name__):
+        if (
+            method != self.dataflow_run.__name__
+            and method != self.custom_terminal_stress_test.__name__
+        ):
             return {
-                'type': MessageType.ERROR.value,
-                'content': 'Only dataflow_run can be stopped',
+                "type": MessageType.ERROR.value,
+                "content": "Only dataflow_run can be stopped",
             }
         if self.last_dataflow is not None:
             properties = None
             try:
                 properties = get_node_properties(
-                    'StopBehaviour',
-                    self.last_dataflow
+                    "StopBehaviour", self.last_dataflow
                 )
             except Exception:
                 pass
@@ -282,10 +286,7 @@ class RPCMethods:
                 if "Message" in properties:
                     content = properties["Message"]
         self.running[method] = False
-        return {
-            'type': type,
-            'content': content
-        }
+        return {"type": type, "content": content}
 
     def dataflow_validate(self, dataflow: Dict) -> Dict:
         """
@@ -302,12 +303,14 @@ class RPCMethods:
             Method's response
         """
         return self._run_validate_response(
-            VALIDATE, dataflow, self.dataflow_validate.__name__,
+            VALIDATE,
+            dataflow,
+            self.dataflow_validate.__name__,
         )
 
     def custom_terminal_stress_test(self, dataflow: Dict) -> Dict:
         """
-        RPC method that sends random messages to a chosen terminal
+        RPC method that sends random messages to a chosen terminal.
 
         Parameters
         ----------
@@ -317,7 +320,7 @@ class RPCMethods:
         Returns
         -------
         Dict
-            Method's reponse
+            Method's response
         """
         return self._run_validate_response(
             STRESS_TEST_REQUEST,
@@ -340,7 +343,9 @@ class RPCMethods:
             Method's response
         """
         return self._run_validate_response(
-            SEND_REQUEST, dataflow, self.custom_api_test.__name__,
+            SEND_REQUEST,
+            dataflow,
+            self.custom_api_test.__name__,
         )
 
     async def _run_validate_response(
@@ -356,7 +361,7 @@ class RPCMethods:
         ----------
         title : Union[str, List[str]]
             Message type of the request.
-        data : bytes
+        data : Dict
             Content of the request.
         method_name : str
             Name of the method used to start this job
@@ -365,6 +370,11 @@ class RPCMethods:
         -------
         Dict
             Method's response
+
+        Raises
+        ------
+        Exception
+           Raised when any of the fields in Validation node are incorrect
         """
         self.last_dataflow = data
         if not isinstance(title, List):
@@ -380,7 +390,7 @@ class RPCMethods:
             break
         if not properties:
             raise Exception(f"No description for {title} provided")
-        if 'Disconnect' in properties and properties["Disconnect"]:
+        if "Disconnect" in properties and properties["Disconnect"]:
             await self.client.disconnect()
             return {}
 
@@ -392,25 +402,24 @@ class RPCMethods:
             add_message_id = properties["AddMessageID"]
 
             await self.client.notify(
-                'progress_change',
-                {'progress': -1, 'method': method_name}
+                "progress_change", {"progress": -1, "method": method_name}
             )
 
             counter = 0
             while self.running[method_name]:
-                random_message = ''.join(random.choices(
-                    list(string.ascii_uppercase + string.digits) + ['\r\n'],
-                    k=message_length
-                ))
+                random_message = "".join(
+                    random.choices(
+                        list(string.ascii_uppercase + string.digits)
+                        + ["\r\n"],
+                        k=message_length,
+                    )
+                )
                 if add_message_id:
                     curr_time = datetime.now().strftime("%H:%M:%S.%f")
                     random_message = f"\r\nMessage {counter} [{curr_time}] :  {random_message}"  # noqa: E501
                 await self.client.notify(
-                    'terminal_write',
-                    {
-                        'name': terminal_name,
-                        'message': random_message
-                    }
+                    "terminal_write",
+                    {"name": terminal_name, "message": random_message},
                 )
                 counter += 1
                 await asyncio.sleep(1 / rate)
@@ -424,8 +433,8 @@ class RPCMethods:
                 progress = i / steps * 100
                 logging.log(logging.INFO, f"Progress: {progress}")
                 await self.client.notify(
-                    'progress_change',
-                    {'progress': progress, 'method': method_name}
+                    "progress_change",
+                    {"progress": progress, "method": method_name},
                 )
                 await asyncio.sleep(time_offset)
         elif found == SEND_REQUEST:
@@ -440,8 +449,7 @@ class RPCMethods:
                 properties["MessageType"] = "ERROR"
         elif found == VALIDATE:
             await self.client.notify(
-                'progress_change',
-                {'progress': -1, 'method': method_name}
+                "progress_change", {"progress": -1, "method": method_name}
             )
             await asyncio.sleep(properties["Duration"])
         else:
@@ -457,6 +465,7 @@ class RPCMethods:
                         )
                         logging.log(logging.INFO, "Disconnecting!")
                         await client.disconnect()
+
         asyncio.create_task(delayed_effect(self.client, found, data))
 
         if self.running[method_name]:
@@ -464,12 +473,12 @@ class RPCMethods:
 
         if "MessageType" in properties and "content" in properties:
             return {
-                'type': _text_to_message_type(properties["MessageType"]).value,
-                'content': properties["Message"],
+                "type": _text_to_message_type(properties["MessageType"]).value,
+                "content": properties["Message"],
             }
         return {
-            'type': _text_to_message_type('OK').value,
-            'content': 'No message provided'
+            "type": _text_to_message_type("OK").value,
+            "content": "No message provided",
         }
 
     async def dataflow_export(
@@ -488,6 +497,11 @@ class RPCMethods:
         -------
         Dict
             Method's response
+
+        Raises
+        ------
+        Exception
+            Raised when no data for exporting is provided
         """
         node_type = "ExportBehaviour"
         try:
@@ -503,16 +517,15 @@ class RPCMethods:
         with open(self.out_path, "w") as f:
             json.dump(dataflow, f, indent=4)
         logging.log(
-            logging.INFO,
-            f"Exported dataflow stored in {self.out_path}"
+            logging.INFO, f"Exported dataflow stored in {self.out_path}"
         )
         return {
-            'type': _text_to_message_type(properties["MessageType"]).value,
-            'content': dataflow
+            "type": _text_to_message_type(properties["MessageType"]).value,
+            "content": dataflow,
         }
 
 
-def main(argv):
+def main(argv):  # noqa: D103
     parser = argparse.ArgumentParser(argv[0])
     parser.add_argument(
         "--host",
@@ -565,11 +578,13 @@ async def _main(args: argparse.Namespace):
         args.port,
         add_signal_handler=True,
     )
-    await client.initialize_client(RPCMethods(
-        specification,
-        client,
-        args.output_path,
-    ))
+    await client.initialize_client(
+        RPCMethods(
+            specification,
+            client,
+            args.output_path,
+        )
+    )
 
     await client.start_json_rpc_client()
 

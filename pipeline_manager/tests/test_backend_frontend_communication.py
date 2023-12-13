@@ -4,27 +4,35 @@
 
 import asyncio
 import multiprocessing
-from http import HTTPStatus
-from typing import NamedTuple, Dict
-from jsonrpc.jsonrpc2 import JSONRPC20Request, JSONRPC20Response
 import time
+from http import HTTPStatus
+from typing import Dict, NamedTuple
 
 import pytest
 import pytest_asyncio
-
+from jsonrpc.jsonrpc2 import JSONRPC20Request, JSONRPC20Response
 from pipeline_manager_backend_communication.misc_structures import (
     MessageType,
-)  # noqa: E501
-from pipeline_manager.utils.mock_application import MockApplicationClient
-from pipeline_manager.backend.state_manager import global_state_manager
+)
+
 from pipeline_manager.backend.run_backend import create_backend, run_uvicorn
+from pipeline_manager.backend.state_manager import global_state_manager
+
+# noqa: E501
+from pipeline_manager.utils.mock_application import MockApplicationClient
 
 
 @pytest.fixture
 def app_client():
     sio, app, _ = create_backend(
-        ['', '--tcp-server-port', '12312',
-         '--skip-frontend', '--skip-connecting', '--lazy-server-init']
+        [
+            "",
+            "--tcp-server-port",
+            "12312",
+            "--skip-frontend",
+            "--skip-connecting",
+            "--lazy-server-init",
+        ]
     )
     server = multiprocessing.Process(
         target=run_uvicorn,
@@ -87,7 +95,7 @@ def connect_success():
     return lambda: SingleRequest(
         "backend-api",
         JSONRPC20Response(_id=_curr_id(), result={}),
-        JSONRPC20Request(_id=_curr_id(), method='external_app_connect')
+        JSONRPC20Request(_id=_curr_id(), method="external_app_connect"),
     )
 
 
@@ -96,12 +104,13 @@ def request_specification_success(sample_specification):
     return lambda: SingleRequest(
         "external-api",
         JSONRPC20Response(
-            _id=_curr_id(), result={
-                'type': MessageType.OK.value,
-                'content': sample_specification,
+            _id=_curr_id(),
+            result={
+                "type": MessageType.OK.value,
+                "content": sample_specification,
             },
         ),
-        JSONRPC20Request(_id=_curr_id(), method='specification_get')
+        JSONRPC20Request(_id=_curr_id(), method="specification_get"),
     )
 
 
@@ -112,11 +121,11 @@ def request_specification_unavailable():
         JSONRPC20Response(
             _id=_curr_id(),
             error={
-                'code': HTTPStatus.SERVICE_UNAVAILABLE.value,
-                'message': 'External application is disconnected'
-            }
+                "code": HTTPStatus.SERVICE_UNAVAILABLE.value,
+                "message": "External application is disconnected",
+            },
         ),
-        JSONRPC20Request(_id=_curr_id(), method='specification_get')
+        JSONRPC20Request(_id=_curr_id(), method="specification_get"),
     )
 
 
@@ -125,13 +134,14 @@ def dataflow_run(sample_dataflow):
     return lambda: SingleRequest(
         "external-api",
         JSONRPC20Response(
-            _id=_curr_id(), result={'type': MessageType.OK.value},
+            _id=_curr_id(),
+            result={"type": MessageType.OK.value},
         ),
         JSONRPC20Request(
             _id=_curr_id(),
-            method='dataflow_run',
-            params={'dataflow': sample_dataflow},
-        )
+            method="dataflow_run",
+            params={"dataflow": sample_dataflow},
+        ),
     )
 
 
@@ -140,13 +150,14 @@ def dataflow_validate(sample_dataflow):
     return lambda: SingleRequest(
         "external-api",
         JSONRPC20Response(
-            _id=_curr_id(), result={'type': MessageType.OK.value},
+            _id=_curr_id(),
+            result={"type": MessageType.OK.value},
         ),
         JSONRPC20Request(
             _id=_curr_id(),
-            method='dataflow_validate',
-            params={'dataflow': sample_dataflow},
-        )
+            method="dataflow_validate",
+            params={"dataflow": sample_dataflow},
+        ),
     )
 
 
@@ -155,13 +166,14 @@ def dataflow_export(sample_dataflow):
     return lambda: SingleRequest(
         "external-api",
         JSONRPC20Response(
-            _id=_curr_id(), result={'type': MessageType.OK.value},
+            _id=_curr_id(),
+            result={"type": MessageType.OK.value},
         ),
         JSONRPC20Request(
             _id=_curr_id(),
-            method='dataflow_export',
-            params={'dataflow': sample_dataflow},
-        )
+            method="dataflow_export",
+            params={"dataflow": sample_dataflow},
+        ),
     )
 
 
@@ -170,16 +182,17 @@ def dataflow_import(sample_dataflow, sample_specification):
     return lambda: SingleRequest(
         "external-api",
         JSONRPC20Response(
-            _id=_curr_id(), result={
-                'type': MessageType.OK.value,
-                'content': sample_specification,
+            _id=_curr_id(),
+            result={
+                "type": MessageType.OK.value,
+                "content": sample_specification,
             },
         ),
         JSONRPC20Request(
             _id=_curr_id(),
-            method='dataflow_import',
-            params={'external_application_dataflow': sample_dataflow},
-        )
+            method="dataflow_import",
+            params={"external_application_dataflow": sample_dataflow},
+        ),
     )
 
 
@@ -188,9 +201,9 @@ def get_status_connected():
     return lambda: SingleRequest(
         "backend-api",
         JSONRPC20Response(
-            _id=_curr_id(), result={'status': {'connected': True}}
+            _id=_curr_id(), result={"status": {"connected": True}}
         ),
-        JSONRPC20Request(_id=_curr_id(), method='status_get')
+        JSONRPC20Request(_id=_curr_id(), method="status_get"),
     )
 
 
@@ -199,9 +212,9 @@ def get_status_disconnected():
     return lambda: SingleRequest(
         "backend-api",
         JSONRPC20Response(
-            _id=_curr_id(), result={'status': {'connected': False}}
+            _id=_curr_id(), result={"status": {"connected": False}}
         ),
-        JSONRPC20Request(_id=_curr_id(), method='status_get')
+        JSONRPC20Request(_id=_curr_id(), method="status_get"),
     )
 
 

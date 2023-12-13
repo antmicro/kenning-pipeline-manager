@@ -4,8 +4,13 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
+"""
+A command for validating specification and dataflow.
+"""
+
 import sys
+
 from pipeline_manager.__main__ import script_handler
 
-if __name__ == '__main__':
-    sys.exit(script_handler(sys.argv, 'validate'))
+if __name__ == "__main__":
+    sys.exit(script_handler(sys.argv, "validate"))

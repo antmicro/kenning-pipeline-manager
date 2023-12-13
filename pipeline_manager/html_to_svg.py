@@ -8,11 +8,12 @@
 Script for converting input HTML file to interactive SVG file.
 """
 
-import base64
 import argparse
+import base64
+from pathlib import Path
 
 
-def html_to_svg(input_html, output_svg):
+def html_to_svg(input_html: Path, output_svg: Path):
     """
     Creates an interactive SVG file from input HTML file.
 
@@ -25,7 +26,6 @@ def html_to_svg(input_html, output_svg):
     output_svg: Path
         Path to the output SVG file
     """
-
     template = """
 <svg version="1.1" xmlns="http://www.w3.org/2000/svg">
     <style>
@@ -56,7 +56,7 @@ def html_to_svg(input_html, output_svg):
         f.write(template.format(b.decode()))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Converter from HTML to interactive SVG"
     )
@@ -64,10 +64,7 @@ if __name__ == '__main__':
         "input_html",
         help="Input html",
     )
-    parser.add_argument(
-        "output_svg",
-        help="Output svg file"
-    )
+    parser.add_argument("output_svg", help="Output svg file")
 
     args = parser.parse_args()
 

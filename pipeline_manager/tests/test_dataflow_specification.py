@@ -4,25 +4,25 @@
 
 import pytest
 
-from pipeline_manager.validator import validate
 from pipeline_manager.tests.conftest import check_validation, example_pairs
+from pipeline_manager.validator import validate
 
 
 @pytest.fixture
 def specification_invalid_property_type():
     return {
-        'nodes': [
+        "nodes": [
             {
-                'name': 'TestNode',
-                'layer': 'TestNode',
-                'category': 'TestNode',
-                'properties': [
+                "name": "TestNode",
+                "layer": "TestNode",
+                "category": "TestNode",
+                "properties": [
                     {
-                        'name': 'TestProperty',
-                        'type': 'InvalidType',
+                        "name": "TestProperty",
+                        "type": "InvalidType",
                     }
                 ],
-                'interfaces': []
+                "interfaces": [],
             }
         ]
     }
@@ -31,19 +31,19 @@ def specification_invalid_property_type():
 @pytest.fixture
 def specification_invalid_property_value():
     return {
-        'nodes': [
+        "nodes": [
             {
-                'name': 'TestNode',
-                'layer': 'TestNode',
-                'category': 'TestNode',
-                'properties': [
+                "name": "TestNode",
+                "layer": "TestNode",
+                "category": "TestNode",
+                "properties": [
                     {
-                        'name': 'TestProperty',
-                        'type': 'select',
-                        'values': 'Invalid'
+                        "name": "TestProperty",
+                        "type": "select",
+                        "values": "Invalid",
                     }
                 ],
-                'interfaces': [],
+                "interfaces": [],
             }
         ]
     }
@@ -52,12 +52,12 @@ def specification_invalid_property_value():
 @pytest.fixture
 def specification_invalid_nodes_without_name():
     return {
-        'nodes': [
+        "nodes": [
             {
-                'layer': 'TestNode',
-                'category': 'TestNode',
-                'properties': [],
-                'interfaces': []
+                "layer": "TestNode",
+                "category": "TestNode",
+                "properties": [],
+                "interfaces": [],
             }
         ]
     }
@@ -66,15 +66,9 @@ def specification_invalid_nodes_without_name():
 @pytest.fixture
 def specification_invalid_node_as_category_not_extending():
     return {
-        'nodes': [
-            {
-                'category': 'a/B',
-                'isCategory': True
-            },
-            {
-                'name': 'Q',
-                'category': 'a/B'
-            }
+        "nodes": [
+            {"category": "a/B", "isCategory": True},
+            {"name": "Q", "category": "a/B"},
         ]
     }
 
@@ -82,16 +76,9 @@ def specification_invalid_node_as_category_not_extending():
 @pytest.fixture
 def specification_invalid_node_as_category_different_category_path():
     return {
-        'nodes': [
-            {
-                'category': 'a/B',
-                'isCategory': True
-            },
-            {
-                'name': 'Q',
-                'category': 'c/d',
-                'extends': ['B']
-            }
+        "nodes": [
+            {"category": "a/B", "isCategory": True},
+            {"name": "Q", "category": "c/d", "extends": ["B"]},
         ]
     }
 
@@ -99,12 +86,12 @@ def specification_invalid_node_as_category_different_category_path():
 @pytest.fixture
 def specification_valid_nodes_without_properties():
     return {
-        'nodes': [
+        "nodes": [
             {
-                'name': 'TestNode',
-                'layer': 'TestNode',
-                'category': 'TestNode',
-                'interfaces': []
+                "name": "TestNode",
+                "layer": "TestNode",
+                "category": "TestNode",
+                "interfaces": [],
             }
         ]
     }
@@ -113,12 +100,12 @@ def specification_valid_nodes_without_properties():
 @pytest.fixture
 def specification_valid_nodes_without_interfaces():
     return {
-        'nodes': [
+        "nodes": [
             {
-                'name': 'TestNode',
-                'layer': 'TestNode',
-                'category': 'TestNode',
-                'properties': []
+                "name": "TestNode",
+                "layer": "TestNode",
+                "category": "TestNode",
+                "properties": [],
             }
         ]
     }
@@ -127,12 +114,12 @@ def specification_valid_nodes_without_interfaces():
 @pytest.fixture
 def specification_valid_nodes_without_layer():
     return {
-        'nodes': [
+        "nodes": [
             {
-                'name': 'TestNode',
-                'category': 'TestNode',
-                'properties': [],
-                'interfaces': []
+                "name": "TestNode",
+                "category": "TestNode",
+                "properties": [],
+                "interfaces": [],
             }
         ]
     }
@@ -141,10 +128,10 @@ def specification_valid_nodes_without_layer():
 @pytest.fixture
 def specification_valid_nodes_only_name_and_category():
     return {
-        'nodes': [
+        "nodes": [
             {
-                'name': 'TestNode',
-                'category': 'TestNode',
+                "name": "TestNode",
+                "category": "TestNode",
             }
         ]
     }
@@ -153,15 +140,9 @@ def specification_valid_nodes_only_name_and_category():
 @pytest.fixture
 def specification_valid_node_as_category_with_inheriting():
     return {
-        'nodes': [
-            {
-                'category': 'TestNode',
-                'isCategory': True
-            },
-            {
-                'name': 'ChildNode',
-                'extends': ['TestNode']
-            }
+        "nodes": [
+            {"category": "TestNode", "isCategory": True},
+            {"name": "ChildNode", "extends": ["TestNode"]},
         ]
     }
 
@@ -169,24 +150,11 @@ def specification_valid_node_as_category_with_inheriting():
 @pytest.fixture
 def specification_valid_node_as_category_with_inheriting_nested():
     return {
-        'nodes': [
-            {
-                'category': 'a/B',
-                'isCategory': True
-            },
-            {
-                'category': 'a/B/c/D',
-                'isCategory': True,
-                'extends': ['B']
-            },
-            {
-                'name': 'Q',
-                'extends': ['B']
-            },
-            {
-                'name': 'Y',
-                'extends': ['D']
-            }
+        "nodes": [
+            {"category": "a/B", "isCategory": True},
+            {"category": "a/B/c/D", "isCategory": True, "extends": ["B"]},
+            {"name": "Q", "extends": ["B"]},
+            {"name": "Y", "extends": ["D"]},
         ]
     }
 
@@ -194,27 +162,18 @@ def specification_valid_node_as_category_with_inheriting_nested():
 @pytest.fixture
 def specification_valid_node_as_category_other_category_with_same_name():
     return {
-        'nodes': [
-            {
-                'category': 'a/B',
-                'isCategory': True
-            },
-            {
-                'name': 'Q',
-                'extends': ['B']
-            },
-            {
-                'name': 'Z',
-                'category': 'c/B'
-            }
+        "nodes": [
+            {"category": "a/B", "isCategory": True},
+            {"name": "Q", "extends": ["B"]},
+            {"name": "Z", "category": "c/B"},
         ]
     }
 
 
-@pytest.mark.parametrize('example', example_pairs())
+@pytest.mark.parametrize("example", example_pairs())
 def test_all_existing_examples(example):
     """
-    Tests all exsiting pairs of specification and dataflow files in
+    Tests all existing pairs of specification and dataflow files in
     examples module. It is assumed that each pair is in format
     (*-specification.json, *-dataflow.json).
     """
@@ -223,36 +182,36 @@ def test_all_existing_examples(example):
 
 
 @pytest.mark.parametrize(
-    'valid_specification', [
-        'specification_valid_nodes_without_properties',
-        'specification_valid_nodes_without_interfaces',
-        'specification_valid_nodes_without_layer',
-        'specification_valid_nodes_only_name_and_category',
-        'specification_valid_node_as_category_with_inheriting',
-        'specification_valid_node_as_category_with_inheriting_nested',
-        'specification_valid_node_as_category_other_category_with_same_name'
-    ]
+    "valid_specification",
+    [
+        "specification_valid_nodes_without_properties",
+        "specification_valid_nodes_without_interfaces",
+        "specification_valid_nodes_without_layer",
+        "specification_valid_nodes_only_name_and_category",
+        "specification_valid_node_as_category_with_inheriting",
+        "specification_valid_node_as_category_with_inheriting_nested",
+        "specification_valid_node_as_category_other_category_with_same_name",
+    ],
 )
 def test_valid_specification(
-        prepare_validation_environment,
-        valid_specification,
-        request):
+    prepare_validation_environment, valid_specification, request
+):
     valid_specification = request.getfixturevalue(valid_specification)
     assert check_validation(valid_specification) == 0
 
 
 @pytest.mark.parametrize(
-    'invalid_specification', [
-        'specification_invalid_property_type',
-        'specification_invalid_property_value',
-        'specification_invalid_nodes_without_name',
-        'specification_invalid_node_as_category_not_extending',
-        'specification_invalid_node_as_category_different_category_path'
-    ]
+    "invalid_specification",
+    [
+        "specification_invalid_property_type",
+        "specification_invalid_property_value",
+        "specification_invalid_nodes_without_name",
+        "specification_invalid_node_as_category_not_extending",
+        "specification_invalid_node_as_category_different_category_path",
+    ],
 )
 def test_invalid_specification(
-        prepare_validation_environment,
-        invalid_specification,
-        request):
+    prepare_validation_environment, invalid_specification, request
+):
     invalid_specification = request.getfixturevalue(invalid_specification)
     assert check_validation(invalid_specification) == 1

@@ -2,12 +2,21 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
+"""
+A test class mimicking the Pipeline Manager client.
+"""
+
 import asyncio
-import socketio
 from typing import Dict
 
-from pipeline_manager_backend_communication.communication_backend import CommunicationBackend  # noqa: E501
-from pipeline_manager_backend_communication.misc_structures import MessageType, Status  # noqa: E501
+import socketio
+from pipeline_manager_backend_communication.communication_backend import (
+    CommunicationBackend,  # noqa: E501
+)
+from pipeline_manager_backend_communication.misc_structures import (  # noqa: E501
+    MessageType,
+    Status,
+)
 
 
 class MockApplicationClient(object):
@@ -19,12 +28,13 @@ class MockApplicationClient(object):
     """
 
     def __init__(
-            self,
-            host: str,
-            backend_port: int,
-            external_port: int,
-            sample_specification: dict,
-            sample_dataflow: dict) -> None:
+        self,
+        host: str,
+        backend_port: int,
+        external_port: int,
+        sample_specification: dict,
+        sample_dataflow: dict,
+    ) -> None:
         """
         Parameters
         ----------
@@ -56,7 +66,7 @@ class MockApplicationClient(object):
         """
         Function that connects SocketIO client to backend server.
         """
-        await self.sio.connect(f'http://{self.host}:{self.backend_port}')
+        await self.sio.connect(f"http://{self.host}:{self.backend_port}")
 
     async def try_connecting(self) -> None:
         """
@@ -69,7 +79,8 @@ class MockApplicationClient(object):
         while True:
             try:
                 out = await self.client.initialize_client(
-                    self.Methods(self.sample_specification))
+                    self.Methods(self.sample_specification)
+                )
                 if out.status == Status.CLIENT_CONNECTED:
                     return
             except ConnectionRefusedError:
@@ -84,7 +95,7 @@ class MockApplicationClient(object):
         """
         status, message = await self.client.wait_for_message()
         if status == Status.DATA_READY:
-            sid = message[1]['params'].pop('sid')
+            sid = message[1]["params"].pop("sid")
             response = await self.client.generate_json_rpc_response(message[1])
             await self.client.send_jsonrpc_message_with_sid(response.data, sid)
 
@@ -97,28 +108,28 @@ class MockApplicationClient(object):
             self.sample_specification = sample_specification
 
         def dataflow_validate(self, dataflow: Dict) -> Dict:
-            return {'type': MessageType.OK.value}
+            return {"type": MessageType.OK.value}
 
         def specification_get(self) -> Dict:
             return {
-                'type': MessageType.OK.value,
-                'content': self.sample_specification,
+                "type": MessageType.OK.value,
+                "content": self.sample_specification,
             }
 
         def dataflow_run(self, dataflow: Dict) -> Dict:
-            return {'type': MessageType.OK.value}
+            return {"type": MessageType.OK.value}
 
         def dataflow_stop(self) -> Dict:
-            return {'type': MessageType.OK.value}
+            return {"type": MessageType.OK.value}
 
         def dataflow_import(self, external_application_dataflow: Dict) -> Dict:
             return {
-                'type': MessageType.OK.value,
-                'content': self.sample_specification,
+                "type": MessageType.OK.value,
+                "content": self.sample_specification,
             }
 
         def dataflow_export(self, dataflow: Dict) -> Dict:
-            return {'type': MessageType.OK.value}
+            return {"type": MessageType.OK.value}
 
     async def emit(self, event: str, data: Dict) -> Dict:
         """
@@ -134,7 +145,7 @@ class MockApplicationClient(object):
         Returns
         -------
         Dict
-            Response to the emmited request
+            Response to the emitted request
         """
         await self.sio.emit(event, data)
         response = await self.sio.receive()

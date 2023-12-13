@@ -6,16 +6,16 @@ import json
 import tempfile
 from importlib.resources import files
 from pathlib import Path
-from pipeline_manager.frontend_builder import build_prepare
-from pipeline_manager.validator import validate
 
 import pytest
 
 import examples
+from pipeline_manager.frontend_builder import build_prepare
 from pipeline_manager.resources import schemas
+from pipeline_manager.validator import validate
 
 
-@pytest.fixture(scope='session', autouse=True)
+@pytest.fixture(scope="session", autouse=True)
 def prepare_validation_environment():
     build_prepare()
 
@@ -42,7 +42,7 @@ def sample_specification(sample_specification_path) -> dict:
     in `sample_specification_path`.
 
     Returns
-    ------
+    -------
     dict :
         Sample specification
     """
@@ -73,7 +73,7 @@ def sample_dataflow(sample_dataflow_path: Path) -> dict:
     in `sample_dataflow_path`.
 
     Returns
-    ------
+    -------
     dict :
         Sample specification
     """
@@ -99,8 +99,8 @@ def unresolved_specification_schema_path() -> Path:
 
 @pytest.fixture
 def unresolved_specification_schema(
-        unresolved_specification_schema_path
-        ) -> Path:
+    unresolved_specification_schema_path
+) -> Path:
     """
     Fixture that returns path to `unresolved_specification_schema.json`
     in `resources` directory.
@@ -162,9 +162,7 @@ def specification_schema_path() -> Path:
 
 
 @pytest.fixture
-def specification_schema(
-        specification_schema_path
-        ) -> Path:
+def specification_schema(specification_schema_path) -> Path:
     """
     Fixture that returns path to `specification_schema.json`
     in `resources` directory.
@@ -205,8 +203,8 @@ def example_pairs():
     ]
 
     for spec in specifications:
-        prefix = spec.rstrip('specification.json')
-        corresponding_dataflow = prefix + 'dataflow.json'
+        prefix = spec.rstrip("specification.json")
+        corresponding_dataflow = prefix + "dataflow.json"
 
         if corresponding_dataflow in dataflows:
             yield (
@@ -217,8 +215,8 @@ def example_pairs():
 
 def check_validation(spec):
     with tempfile.TemporaryDirectory() as tmpdir:
-        specpath = Path(tmpdir) / 'spec.json'
-        with open(specpath, 'w') as specfile:
+        specpath = Path(tmpdir) / "spec.json"
+        with open(specpath, "w") as specfile:
             json.dump(spec, specfile)
         res = validate(specpath)
     return res
