@@ -23,6 +23,6 @@ repos:
     - id: eslint
       name: eslint
       entry: ./.github/scripts/lint-frontend.sh
+      types_or: [javascript, ts, json, html, scss, vue]
       language: system
-      types: [text]
       pass_filenames: false
