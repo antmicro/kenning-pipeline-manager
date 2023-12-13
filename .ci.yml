@@ -18,22 +18,12 @@ stages:
     - build
     - docs
 
-flake8:
+pre-commit:
     stage: lint
     <<: *ace
     <<: *common_only
     script:
-        - flake8 .
-
-eslint:
-    stage: lint
-    <<: *ace
-    <<: *common_only
-    script:
-        - cd pipeline_manager/frontend
-        - npm install
-        - npm run lint
-        - test $(git status --porcelain | wc -l) -eq 0 || { git diff; false; }
+        - pre-commit run --all-files
 
 build-server-app:
     stage: build
