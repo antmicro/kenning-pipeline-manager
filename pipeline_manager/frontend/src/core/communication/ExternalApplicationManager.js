@@ -88,7 +88,8 @@ class ExternalApplicationManager {
             await jsonRPC.request('external_app_connect');
             this.externalApplicationConnected = true;
         } catch (error) {
-            NotificationHandler.terminalLog('warning', 'Connecting with external app', error.message);
+            const errorCode = error.code ?? JSONRPCCustomErrorCode.EXCEPTION_RAISED;
+            NotificationHandler.terminalLog(errorCode !== JSONRPCCustomErrorCode.NEWER_SESSION_AVAILABLE ? 'warning' : 'info', 'Connecting with external app', error.message);
             this.externalApplicationConnected = false;
         }
     }
