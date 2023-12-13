@@ -21,7 +21,7 @@ If connection is established successfully, {{project}} frontend will check if ex
 Apart from that, both {{project}} frontend and external application can send requests which pass through {{project}} backend.
 
 ```{mermaid}
-:caption: Communication sequence diagram 
+:caption: Communication sequence diagram
 :alt: Communication sequence diagram
 sequenceDiagram
     box Pipeline Manager
@@ -33,7 +33,7 @@ sequenceDiagram
     end
     Note over Frontend,Backend: SocketIO
     Frontend->>Backend: status_get
-    Backend->>Frontend: 
+    Backend->>Frontend:
     Frontend->>+Backend: external_app_connect
     Note over Backend,External App: BSD socket
     External App->>Backend: connect_socket
@@ -44,7 +44,7 @@ sequenceDiagram
     Backend->>-Frontend: MessageType.OK + specification
     loop Every 0.5s
         Frontend->>Backend: status_get
-        Backend->>Frontend: 
+        Backend->>Frontend:
     end
     par Frontend request
         Frontend->>+Backend: request
@@ -117,7 +117,7 @@ C4Deployment
     Rel(flask-backend-api, front-response-api, "JSON-RPC response")
     UpdateRelStyle(front-socket, flask-backend-api, $lineColor="var(--md-code-hl-keyword-color)", $textColor="var(--md-code-hl-keyword-color)", $offsetY="-15")
     UpdateRelStyle(flask-backend-api, front-response-api, $lineColor="var(--md-code-hl-keyword-color)", $textColor="var(--md-code-hl-keyword-color)", $offsetX="-50", $offsetY="55")
-    %% frontent to external app request
+    %% frontend to external app request
     Rel(front-socket, flask-external-api, "JSON-RPC request")
     Rel(flask-external-api, pmbc-listener, "Redirected requests and responses")
     Rel(pmbc-listener, back-socket, "JSON-RPC response")
@@ -126,7 +126,7 @@ C4Deployment
     UpdateRelStyle(flask-external-api, pmbc-listener, $lineColor="var(--md-code-hl-name-color)", $textColor="var(--md-code-hl-name-color)", $offsetX="-10", $offsetY="-10")
     UpdateRelStyle(pmbc-listener, back-socket, $lineColor="var(--md-code-hl-number-color)", $textColor="var(--md-code-hl-number-color)", $offsetX="25", $offsetY="-25")
     UpdateRelStyle(back-socket, front-response-api, $lineColor="var(--md-code-hl-number-color)", $textColor="var(--md-code-hl-number-color)", $offsetX="-10", $offsetY="20")
-    %% external app to frontent request
+    %% external app to frontend request
     Rel(pmbc-socket, back-socket, "JSON-RPC request")
     Rel(back-socket, front-api, "Redirected request")
     Rel(front-api, flask-external-api, "JSON-RPC response")
@@ -239,7 +239,7 @@ Defined methods have to have appropriate (matching with specification) name, inp
         return {'type': MessageType.OK.value}
 
     def dataflow_run(self, **kwargs: Dict) -> Dict:
-        # All params can also be retreived as one dictionary
+        # All params can also be retrieved as one dictionary
         print(kwargs['dataflow'])
         # ...
         return {'type': MessageType.OK.value}
