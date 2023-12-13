@@ -1,19 +1,30 @@
+# Copyright (c) 2022-2023 Antmicro <www.antmicro.com>
+#
+# SPDX-License-Identifier: Apache-2.0
+
+"""
+Provides methods for setting up asynchronous server for Pipeline Manager.
+"""
 from http import HTTPStatus
-from typing import Dict, Callable, Any
+from typing import Any, Callable, Dict
 
-from engineio.payload import Payload
-from pipeline_manager_backend_communication.json_rpc_base import JSONRPCBase  # noqa: E501
-from pipeline_manager_backend_communication.misc_structures import (
-    Status, CustomErrorCode,
-)
-from jsonrpc.jsonrpc2 import JSONRPC20Response, JSONRPC20Request
-from jsonrpc.exceptions import JSONRPCDispatchException
 import socketio
-
-from pipeline_manager.backend.tcp_socket import (
-    start_socket_task, join_listener_task
+from engineio.payload import Payload
+from jsonrpc.exceptions import JSONRPCDispatchException
+from jsonrpc.jsonrpc2 import JSONRPC20Request, JSONRPC20Response
+from pipeline_manager_backend_communication.json_rpc_base import (
+    JSONRPCBase,  # noqa: E501
 )
+from pipeline_manager_backend_communication.misc_structures import (
+    CustomErrorCode,
+    Status,
+)
+
 from pipeline_manager.backend.state_manager import global_state_manager
+from pipeline_manager.backend.tcp_socket import (
+    join_listener_task,
+    start_socket_task,
+)
 
 Payload.max_decode_packets = 500
 
@@ -24,11 +35,10 @@ def create_socketio() -> socketio.AsyncServer:
 
     Returns
     -------
-    socketio.AsyncServer :
+    socketio.AsyncServer
         Returns a socketio instance
     """
-
-    sio = socketio.AsyncServer(async_mode='asgi')
+    sio = socketio.AsyncServer(async_mode="asgi")
 
     def reject_old_sessions_requests(
         func: Callable[[str, Dict], Any],
@@ -41,32 +51,36 @@ def create_socketio() -> socketio.AsyncServer:
         * status_get - to maintain connection,
         * dataflow_stop - to enable stopping long runs.
         """
+
         async def _func(sid, json_rpc_request):
             if (
                 sid != global_state_manager.last_socket
-                and 'method' in json_rpc_request
-                and json_rpc_request['method'] not in (
-                    'status_get', 'dataflow_stop',
+                and "method" in json_rpc_request
+                and json_rpc_request["method"]
+                not in (
+                    "status_get",
+                    "dataflow_stop",
                 )
             ):
                 await sio.emit(
-                    'api-response',
+                    "api-response",
                     JSONRPC20Response(
-                        _id=json_rpc_request['id'],
+                        _id=json_rpc_request["id"],
                         error={
-                            'code': CustomErrorCode.NEWER_SESSION_AVAILABLE.value,  # noqa: E501
-                            'message': 'The newer session is opened, this request was ignored',  # noqa: E501
-                        }
+                            "code": CustomErrorCode.NEWER_SESSION_AVAILABLE.value,  # noqa: E501
+                            "message": "The newer session is opened, this request was ignored",  # noqa: E501
+                        },
                     ).data,
                     to=sid,
                 )
                 return True
             return await func(sid, json_rpc_request)
+
         return _func
 
     class BackendMethods:
         """
-        Object containing all JSON-RPC methods for backend
+        Object containing all JSON-RPC methods for backend.
         """
 
         def status_get(self) -> Dict:
@@ -75,11 +89,11 @@ def create_socketio() -> socketio.AsyncServer:
 
             Returns
             -------
-            Dict :
+            Dict
                 Returned value depending on the status of the connection.
             """
             tcp_server = global_state_manager.tcp_server
-            return {'status': {'connected': tcp_server.connected}}
+            return {"status": {"connected": tcp_server.connected}}
 
         async def external_app_connect(self) -> Dict:
             """
@@ -91,9 +105,9 @@ def create_socketio() -> socketio.AsyncServer:
             If a connection already exists and a new request is made to this
             endpoint this function does not return an error.
 
-            Responses
-            ---------
-            Dict :
+            Returns
+            -------
+            Dict
                 Returned value depending on the status of the connection.
 
             Raises
@@ -113,8 +127,10 @@ def create_socketio() -> socketio.AsyncServer:
                     out = await tcp_server.wait_for_client(
                         tcp_server.receive_message_timeout
                     )
-                    while out.status != Status.CLIENT_CONNECTED and \
-                            not global_state_manager.server_should_stop:
+                    while (
+                        out.status != Status.CLIENT_CONNECTED
+                        and not global_state_manager.server_should_stop
+                    ):
                         out = await tcp_server.wait_for_client(
                             tcp_server.receive_message_timeout
                         )
@@ -125,11 +141,11 @@ def create_socketio() -> socketio.AsyncServer:
                 return {}
             if not global_state_manager.server_should_stop:
                 raise JSONRPCDispatchException(
-                    message='External application did not connect',
-                    code=HTTPStatus.SERVICE_UNAVAILABLE.value
+                    message="External application did not connect",
+                    code=HTTPStatus.SERVICE_UNAVAILABLE.value,
                 )
 
-        def connected_frontends_get(self):
+        def connected_frontends_get(self) -> Dict:
             """
             Event that returns number of connections with SocketIO.
 
@@ -138,96 +154,118 @@ def create_socketio() -> socketio.AsyncServer:
             Dict
                 Returned number of connections.
             """
-            return {'connections': global_state_manager.connected_frontends}
+            return {"connections": global_state_manager.connected_frontends}
 
     json_rpc_backend = JSONRPCBase()
-    json_rpc_backend.register_methods(BackendMethods(), 'backend')
+    json_rpc_backend.register_methods(BackendMethods(), "backend")
 
-    @sio.on('connect')
+    @sio.on("connect")
     async def _connect(sid, environ, auth):
         """
         Special event used when socket connects.
         """
-        print(sid, global_state_manager.connected_frontends)
         if global_state_manager.connected_frontends > 0:
             notification = JSONRPC20Request(
-                    method='notification_send',
-                    params={
-                        'type': 'warning',
-                        'title': 'Newer session connected',
-                        'details': 'Further messages will be ignored',
-                    },
-                ).data
-            del notification['id']
+                method="notification_send",
+                params={
+                    "type": "warning",
+                    "title": "Newer session connected",
+                    "details": "Further messages will be ignored",
+                },
+            ).data
+            del notification["id"]
             await sio.emit(
-                'api',
+                "api",
                 notification,
                 to=global_state_manager.last_socket,
             )
         global_state_manager.add_socket(sid)
 
-    @sio.on('disconnect')
-    async def _disconnect(sid):
+    @sio.on("disconnect")
+    async def _disconnect(sid: str):
         """
         Special event used when socket disconnects.
+
+        Parameters
+        ----------
+        sid : str
+            Id of session
         """
         prev_socket = global_state_manager.last_socket
         global_state_manager.remove_socket(sid)
         if prev_socket == sid:
             notification = JSONRPC20Request(
-                    method='notification_send',
-                    params={
-                        'type': 'warning',
-                        'title': 'This session is the newest one',
-                        'details': 'Messages will no longer be ignored',
-                    },
-                ).data
-            del notification['id']
+                method="notification_send",
+                params={
+                    "type": "warning",
+                    "title": "This session is the newest one",
+                    "details": "Messages will no longer be ignored",
+                },
+            ).data
+            del notification["id"]
             await sio.emit(
-                'api',
+                "api",
                 notification,
                 to=global_state_manager.last_socket,
             )
 
     @sio.on("backend-api")
     @reject_old_sessions_requests
-    async def backend_api(sid, json_rpc_request: Dict):
+    async def backend_api(sid: str, json_rpc_request: Dict) -> bool:
         """
         Event managing backend's JSON-RPC methods.
 
         Parameters
         ----------
+        sid : str
+            Id of session
         json_rpc_request : Dict
             Request in JSON-RPC format
+
+        Returns
+        -------
+        bool
+            True if successful
         """
         resp = await json_rpc_backend.generate_json_rpc_response(
             json_rpc_request
         )
-        await sio.emit('api-response', resp.data, to=sid)
+        await sio.emit("api-response", resp.data, to=sid)
         return True
 
     @sio.on("external-api")
     @reject_old_sessions_requests
-    async def api(sid, json_rpc_message: Dict):
+    async def api(sid: str, json_rpc_message: Dict) -> bool:
         """
         Event redirecting JSON-RPC messages to external application.
 
         Parameters
         ----------
-        json_rpc_request : Dict
+        sid: str
+            Session id
+        json_rpc_message : Dict
             Request in JSON-RPC format
+
+        Returns
+        -------
+        bool
+            True if successful, False if there are errors in communication
         """
         tcp_server = global_state_manager.tcp_server
-        is_request = 'method' in json_rpc_message
+        is_request = "method" in json_rpc_message
         if not tcp_server.connected:
             if is_request:
-                await sio.emit('api-response', JSONRPC20Response(
-                    _id=json_rpc_message['id'],
-                    error={
-                        'message': 'External application is disconnected',
-                        'code': HTTPStatus.SERVICE_UNAVAILABLE.value,
-                    }
-                ).data, to=sid)
+                await sio.emit(
+                    "api-response",
+                    JSONRPC20Response(
+                        _id=json_rpc_message["id"],
+                        error={
+                            "message": "External application is disconnected",
+                            "code": HTTPStatus.SERVICE_UNAVAILABLE.value,
+                        },
+                    ).data,
+                    to=sid,
+                )
             return False
         out = await tcp_server.send_jsonrpc_message_with_sid(
             json_rpc_message,
@@ -235,12 +273,14 @@ def create_socketio() -> socketio.AsyncServer:
         )
         if out.status != Status.DATA_SENT:
             if is_request:
-                await sio.emit('api-response', JSONRPC20Response(
-                        _id=json_rpc_message['id'],
+                await sio.emit(
+                    "api-response",
+                    JSONRPC20Response(
+                        _id=json_rpc_message["id"],
                         error={
-                            'message': 'Error while sending a message to the external application',  # noqa: E501
-                            'code': HTTPStatus.SERVICE_UNAVAILABLE.value,
-                        }
+                            "message": "Error while sending a message to the external application",  # noqa: E501
+                            "code": HTTPStatus.SERVICE_UNAVAILABLE.value,
+                        },
                     ).data,
                     to=sid,
                 )

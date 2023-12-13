@@ -2,8 +2,12 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-import json
+"""
+Provides a singleton class representing the state of Pipeline Manager server.
+"""
+
 import asyncio
+import json
 from importlib.resources import open_text
 from typing import Optional
 
@@ -28,7 +32,7 @@ class PMStateManager:
         tcp_server_host: str = "127.0.0.1",
     ) -> None:
         """
-        Creates a state manager
+        Creates a state manager.
 
         Parameters
         ----------
@@ -61,7 +65,7 @@ class PMStateManager:
         tcp_server_host: str,
     ) -> None:
         """
-        Reinitialize the configuration of the state
+        Reinitialize the configuration of the state.
 
         Parameters
         ----------
@@ -82,7 +86,7 @@ class PMStateManager:
     @property
     def tcp_server(self) -> CommunicationBackend:
         """
-        Returns initialized CommunicationBackend
+        Returns initialized CommunicationBackend.
 
         Returns
         -------
@@ -97,7 +101,7 @@ class PMStateManager:
 
     def add_socket(self, sid: str):
         """
-        Add connected socket
+        Adds connected socket.
 
         Parameters
         ----------
@@ -106,9 +110,9 @@ class PMStateManager:
         """
         self._connected_sockets.append(sid)
 
-    def remove_socket(self, sid):
+    def remove_socket(self, sid: str):
         """
-        Remove disconnected socket
+        Removes disconnected socket.
 
         Parameters
         ----------
@@ -121,14 +125,14 @@ class PMStateManager:
     @property
     def connected_frontends(self) -> int:
         """
-        Number of connected frontends
+        Number of connected frontends.
         """
         return len(self._connected_sockets)
 
     @property
     def last_socket(self) -> any:
         """
-        Session ID of last connected socket
+        Session ID of last connected socket.
         """
         if self._connected_sockets:
             return self._connected_sockets[-1]
@@ -136,7 +140,7 @@ class PMStateManager:
 
     def get_schema(self) -> dict:
         """
-        Returns dataflow specification schema
+        Returns dataflow specification schema.
 
         Returns
         -------

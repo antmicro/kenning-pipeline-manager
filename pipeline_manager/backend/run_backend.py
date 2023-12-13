@@ -2,12 +2,20 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
+"""
+Provides methods for starting Pipeline Manager server.
+"""
+
 import argparse
 import logging
 import sys
-import socketio
 from pathlib import Path
+
+import socketio
 from fastapi import FastAPI
+from pipeline_manager_backend_communication.misc_structures import (
+    Status,
+)
 from uvicorn import run
 from uvicorn.protocols.websockets.websockets_impl import WebSocketProtocol
 
@@ -16,12 +24,8 @@ from pipeline_manager.backend.socketio import create_socketio
 from pipeline_manager.backend.state_manager import global_state_manager
 from pipeline_manager.utils.logger import string_to_verbosity
 
-from pipeline_manager_backend_communication.misc_structures import (
-    Status,
-)
 
-
-def create_backend(argv):
+def create_backend(argv):  # noqa: D103
     parser = argparse.ArgumentParser(argv[0])
     parser.add_argument(
         "--tcp-server-host",
@@ -38,7 +42,7 @@ def create_backend(argv):
     parser.add_argument(
         "--backend-host",
         type=str,
-        help="The adress of the backend of Pipeline Manager",
+        help="The address of the backend of Pipeline Manager",
         default="127.0.0.1",
     )
     parser.add_argument(
@@ -75,8 +79,11 @@ def create_backend(argv):
     args, _ = parser.parse_known_args(argv[1:])
     logging.basicConfig(level=string_to_verbosity(args.verbosity))
 
-    if not args.skip_frontend and not dist_path.exists() and \
-            not args.frontend_directory:
+    if (
+        not args.skip_frontend
+        and not dist_path.exists()
+        and not args.frontend_directory
+    ):
         logging.log(
             logging.ERROR,
             "Frontend files have not been found in the default directory.",
@@ -104,10 +111,37 @@ def run_uvicorn(
     tcp_server_host: str,
     tcp_server_port: int,
     lazy_server_init: bool,
-    **kwargs
+    **kwargs,
 ):
+    """
+    Runs uvicorn-based server for the frontend.
+
+    Parameters
+    ----------
+    app : FastAPI
+        Application to run
+    sio : socketio.AsyncServer
+        Asynchronous server base
+    backend_host : str
+        Host address
+    backend_port : int
+        Application port
+    tcp_server_host : str
+        Address for the third-party app
+    tcp_server_port : int
+        Port for the third-party app communication
+    lazy_server_init : bool
+        Tells whether server should immediately request connection
+        with the third-party app (False) or skip waiting and progress
+        with setting up other tasks and connect when the third-party
+        app is ready (True)
+    **kwargs
+        Kwargs for the function
+    """
+
     async def _startup():
         await startup(sio, tcp_server_host, tcp_server_port, lazy_server_init)
+
     app_asgi = socketio.ASGIApp(
         sio,
         other_asgi_app=app,
@@ -124,12 +158,31 @@ def run_uvicorn(
 
 
 async def startup(
-    sio: socketio.AsyncServer,
-    host: str,
-    port: int,
-    lazy_server_init: bool
-):
+    sio: socketio.AsyncServer, host: str, port: int, lazy_server_init: bool
+) -> None:
+    """
+    Starts up the asynchronous server for Pipeline Manager.
+
+    Parameters
+    ----------
+    sio : socketio.AsyncServer
+        Asynchronous server to initialize connection
+    host : str
+        Host address
+    port : int
+        Port of the application
+    lazy_server_init : bool
+        Tells whether server should immediately request connection
+        with the third-party app (False) or skip waiting and progress
+        with setting up other tasks and connect when the third-party
+        app is ready (True)
+
+    Returns
+    -------
+    None
+    """
     import asyncio
+
     global_state_manager.connecting_token = asyncio.Semaphore(1)
     await global_state_manager.reinitialize(port, host)
     await global_state_manager.tcp_server.initialize_server()
@@ -147,8 +200,10 @@ async def startup(
             out = await tcp_server.wait_for_client(
                 tcp_server.receive_message_timeout
             )
-            while out.status != Status.CLIENT_CONNECTED and \
-                    not global_state_manager.server_should_stop:
+            while (
+                out.status != Status.CLIENT_CONNECTED
+                and not global_state_manager.server_should_stop
+            ):
                 out = await tcp_server.wait_for_client(
                     tcp_server.receive_message_timeout
                 )
@@ -161,11 +216,14 @@ async def startup(
 
 
 async def shutdown():
+    """
+    Shuts down the Pipeline Manager's server.
+    """
     global_state_manager.server_should_stop = True
     await global_state_manager.tcp_server.disconnect()
 
 
-def main(argv):
+def main(argv):  # noqa: D103
     sio, app, args = create_backend(argv)
 
     run_uvicorn(app, sio, **args.__dict__)
