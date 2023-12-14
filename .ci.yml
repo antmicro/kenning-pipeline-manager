@@ -25,6 +25,14 @@ pre-commit:
     script:
         - pre-commit run --all-files
 
+commit-lint:
+    stage: lint
+    <<: *ace
+    only:
+        - merge_requests
+    script:
+        - ./.github/scripts/lint-commits.sh origin/$CI_MERGE_REQUEST_TARGET_BRANCH_NAME $CI_COMMIT_SHA
+
 build-server-app:
     stage: build
     <<: *ace
