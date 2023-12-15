@@ -273,15 +273,13 @@ export default defineComponent({
             line-height: $terminal-container-height;
             &.active {
                 background-color: #{$gray-400};
-
-                & > span {
-                    color: $green;
-                }
             }
 
             &:not(.active):hover {
                 background-color: #{$gray-500};
+            }
 
+            &.active:hover {
                 & > span {
                     color: $green;
                 }
