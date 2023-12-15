@@ -8,7 +8,7 @@ on:
 
 jobs:
 
-  BackendLinting:
+  PreCommit:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout sources
@@ -19,26 +19,8 @@ jobs:
           python-version: 3.11
       - name: Install dependencies
         run: pip install -e .
-      - name: Install flake8
-        run: pip install -U flake8
-      - name: Run flake8
-        run: flake8 pipeline_manager
-
-  FrontendLinting:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout sources
-        uses: actions/checkout@v4
-      - name: Setup npm
-        uses: actions/setup-node@v3
-        with:
-          node-version: 20
-      - name: Lint frontend
-        run: |
-          cd pipeline_manager/frontend
-          npm install
-          npm run lint
-          test $(git status --porcelain | wc -l) -eq 0 || { git diff; false; }
+      - name: Run pre-commit
+        uses: pre-commit/action@v3.0.0
 
   BuildServerApp:
       runs-on: ubuntu-latest
