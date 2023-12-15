@@ -33,7 +33,7 @@ sequenceDiagram
     end
     Note over Frontend,Backend: SocketIO
     Frontend->>Backend: status_get
-    Backend->>Frontend:
+    Backend->>Frontend: status
     Frontend->>+Backend: external_app_connect
     Note over Backend,External App: BSD socket
     External App->>Backend: connect_socket
@@ -44,7 +44,7 @@ sequenceDiagram
     Backend->>-Frontend: MessageType.OK + specification
     loop Every 0.5s
         Frontend->>Backend: status_get
-        Backend->>Frontend:
+        Backend->>Frontend: status
     end
     par Frontend request
         Frontend->>+Backend: request
