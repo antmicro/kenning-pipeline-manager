@@ -7,6 +7,7 @@ import Cross from './Cross.vue';
 import Cube from './Cube.vue';
 import Disconnect from './Disconnect.vue';
 import ExclamationMark from './ExclamationMark.vue';
+import Indicator from './Indicator.vue';
 import Logo from './Logo.vue';
 import Magnifier from './Magnifier.vue';
 import Pencil from './Pencil.vue';
@@ -26,6 +27,7 @@ export default {
     Cube,
     Disconnect,
     ExclamationMark,
+    Indicator,
     Logo,
     Magnifier,
     Pencil,
