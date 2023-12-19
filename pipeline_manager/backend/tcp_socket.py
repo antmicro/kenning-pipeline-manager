@@ -77,6 +77,7 @@ async def manage_socket_messages(
                 key = "error"
             if key in data and "sid" in data[key]:
                 sid = data[key].pop("sid")
+                data[key] = data[key][key]
             else:
                 sid = global_state_manager.last_socket
 

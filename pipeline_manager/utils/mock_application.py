@@ -96,6 +96,7 @@ class MockApplicationClient(object):
         status, message = await self.client.wait_for_message()
         if status == Status.DATA_READY:
             sid = message[1]["params"].pop("sid")
+            message[1]["params"] = message[1]["params"]["params"]
             response = await self.client.generate_json_rpc_response(message[1])
             await self.client.send_jsonrpc_message_with_sid(response.data, sid)
 
