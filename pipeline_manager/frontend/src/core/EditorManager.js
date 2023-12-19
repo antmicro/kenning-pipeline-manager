@@ -54,7 +54,7 @@ export default class EditorManager {
 
     baklavaView = useBaklava(this.editor);
 
-    specificationLoaded = false;
+    specificationLoaded = ref(false);
 
     currentSpecification = undefined;
 
@@ -79,10 +79,6 @@ export default class EditorManager {
         this.baklavaView.navbarItems = [...defaultNavbarItems];
         this.baklavaView.cache = {};
         this.baklavaView.logLevel = this.defaultMetadata.logLevel;
-
-        // hideHud and readonly are set to true so that there is no dissappearning UI
-        this.baklavaView.hideHud = true;
-        this.baklavaView.editor.readonly = true;
 
         this.specificationVersion = unresolvedSpecificationSchema.version;
         this.baklavaView.commandHandler = useCommandHandler();
@@ -146,7 +142,7 @@ export default class EditorManager {
             errors.push(...this.updateGraphSpecification(dataflowSpecification));
         }
 
-        if (!errors.length) {
+        if (errors.length === 0) {
             this.specificationLoaded = true;
         }
         return { errors, warnings };
@@ -392,7 +388,7 @@ export default class EditorManager {
         }
 
         this.baklavaView.editor.readonly = metadata?.readonly ?? this.defaultMetadata.readonly;
-        this.baklavaView.hideHud = metadata?.hideHud ?? this.defaultMetadata.hideHud;
+        this.baklavaView.editor.hideHud = metadata?.hideHud ?? this.defaultMetadata.hideHud;
 
         this.editor.allowLoopbacks =
             metadata?.allowLoopbacks ?? this.defaultMetadata.allowLoopbacks;

@@ -38,14 +38,14 @@ import {
 export default class PipelineManagerEditor extends Editor {
     preview = false;
 
-    _hidehud = false;
+    _hideHud = false;
 
-    get hidehud() {
-        return this._hidehud || this.preview;
+    get hideHud() {
+        return this._hideHud || this.preview;
     }
 
-    set hidehud(val) {
-        this._hidehud = val;
+    set hideHud(val) {
+        this._hideHud = val;
     }
 
     _readonly = false;

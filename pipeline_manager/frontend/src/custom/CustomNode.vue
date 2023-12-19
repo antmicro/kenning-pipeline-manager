@@ -254,7 +254,7 @@ const contextMenuTitleX = ref(0);
 const contextMenuTitleY = ref(0);
 const contextMenuTitleItems = computed(() => {
     const items = [];
-    if (!viewModel.value.hideHud) {
+    if (!viewModel.value.editor.hideHud) {
         items.push({ value: 'sidebar', label: 'Details', icon: Sidebar });
     }
     if (!viewModel.value.editor.readonly) {
@@ -329,8 +329,8 @@ const onContextMenuTitleClick = async (action) => {
 
 const openContextMenuTitle = (ev) => {
     if (
-        !editorManager.baklavaView.editor.readonly
-        && !editorManager.baklavaView.hideHud
+        !editorManager.editor.readonly
+        && !editorManager.editor.hideHud
         && showContextMenuTitle.value === false
     ) {
         contextMenuTitleX.value = ev.offsetX;
