@@ -19,7 +19,7 @@ The entrypoint of the application.
                 @loadWait="handleLoadWait"
                 @loadFinish="handleLoadFinish"
             />
-            <TerminalPanel v-if="!hideHud" />
+            <TerminalPanel v-if="counter === 0 && !hideHud" />
         </div>
     </div>
 </template>
@@ -57,7 +57,7 @@ export default {
             editorManager.baklavaView.cache = cache;
         }
 
-        const hideHud = computed(() => editorManager.baklavaView.hideHud);
+        const hideHud = computed(() => editorManager.editor.hideHud);
 
         const handleLoadWait = () => {
             counter.value += 1;
