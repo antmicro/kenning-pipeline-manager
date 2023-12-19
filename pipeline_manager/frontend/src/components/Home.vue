@@ -14,10 +14,10 @@ The entrypoint of the application.
         <div id="container">
             <NavBar />
             <Editor
-                class="inner-editor"
-                :view-model="editorManager.baklavaView"
-                @loadWait="handleLoadWait"
-                @loadFinish="handleLoadFinish"
+            class="inner-editor"
+            :view-model="editorManager.baklavaView"
+            @loadWait="handleLoadWait"
+            @loadFinish="handleLoadFinish"
             />
             <TerminalPanel v-if="counter === 0 && !hideHud" />
         </div>
@@ -57,7 +57,7 @@ export default {
             editorManager.baklavaView.cache = cache;
         }
 
-        const hideHud = computed(() => editorManager.editor.hideHud);
+        const hideHud = computed(() => editorManager.baklavaView.editor.hideHud);
 
         const handleLoadWait = () => {
             counter.value += 1;

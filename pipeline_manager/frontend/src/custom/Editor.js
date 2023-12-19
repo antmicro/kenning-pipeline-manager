@@ -36,7 +36,27 @@ import {
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-underscore-dangle */
 export default class PipelineManagerEditor extends Editor {
-    readonly = false;
+    preview = false;
+
+    _hidehud = false;
+
+    get hidehud() {
+        return this._hidehud || this.preview;
+    }
+
+    set hidehud(val) {
+        this._hidehud = val;
+    }
+
+    _readonly = false;
+
+    get readonly() {
+        return this._readonly || this.preview;
+    }
+
+    set readonly(val) {
+        this._readonly = val;
+    }
 
     allowLoopbacks = false;
 
@@ -341,9 +361,12 @@ export default class PipelineManagerEditor extends Editor {
         const terminalHeight =
             document.getElementsByClassName('terminal-wrapper')[0]?.offsetHeight ?? 0;
         const navbarHeight = document.getElementsByClassName('wrapper')[0]?.offsetHeight ?? 0;
-        const nodePalette = document.getElementsByClassName('baklava-node-palette')[0];
-        const paletteRect = nodePalette.getBoundingClientRect();
-        const sideBarWidth = Math.max(paletteRect.right, 0);
+        const nodePalette = document.getElementsByClassName('baklava-node-palette');
+        let sideBarWidth = 0;
+        if (nodePalette.length !== 0) {
+            const paletteRect = nodePalette[0].getBoundingClientRect();
+            sideBarWidth = Math.max(paletteRect.right, 0);
+        }
 
         const editorHeight = window.innerHeight - terminalHeight - navbarHeight;
         const editorWidth = window.innerWidth - sideBarWidth;
