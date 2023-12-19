@@ -67,7 +67,7 @@ export default {
     },
     computed: {
         dataflowGraphName() {
-            return this.editorManager.baklavaView.editor.graphName;
+            return this.editorManager.editor.graphName;
         },
         editorTitle() {
             if (this.graphName === undefined) {
@@ -84,10 +84,10 @@ export default {
             return false;
         },
         hideHud() {
-            return this.editorManager.baklavaView.hideHud;
+            return this.editorManager.editor.hideHud;
         },
         readonly() {
-            return this.editorManager.baklavaView.editor.readonly;
+            return this.editorManager.editor.readonly;
         },
         settingsOpen() {
             return this.panels.settings.isOpen;

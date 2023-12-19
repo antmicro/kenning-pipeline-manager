@@ -37,7 +37,10 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
             <background />
         </slot>
 
-        <slot name="palette" v-if="!(readonly || hideHud)">
+        <slot
+            name="palette"
+            v-if="specificationLoaded && !(readonly || hideHud)"
+        >
             <NodePalette />
         </slot>
 
@@ -128,12 +131,13 @@ export default defineComponent({
         const panZoom = usePanZoom();
         const temporaryConnection = useTemporaryConnection();
         const editorManager = EditorManager.getEditorManagerInstance();
+        const specificationLoaded = computed(() => editorManager.specificationLoaded);
 
         const highlightConnections = ref([]);
         const highlightInterfaces = ref([]);
 
         const readonly = computed(() => props.viewModel.editor.readonly);
-        const hideHud = computed(() => props.viewModel.hideHud);
+        const hideHud = computed(() => props.viewModel.editor.hideHud);
 
         const rectangleSelection = ref(null);
         const selectedNodesCtrlBackup = [];
@@ -601,19 +605,24 @@ export default defineComponent({
 
         /* eslint-disable no-lonely-if */
         onMounted(async () => {
+            emit('loadWait');
             NotificationHandler.setShowNotification(false);
             editorManager.updateMetadata({}); // Defaulting metadata values
+
+            let urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('preview')) {
+                const setting = urlParams.get('preview') === 'true';
+                props.viewModel.editor.preview = setting;
+            }
 
             let specText;
             if (!defaultSpecification) {
                 // Try loading default specification and/or dataflow from URLs provided in an
                 // escaped form in the page's URL
                 const escapedsearch = window.location.search.replace(/&amp;/g, '&');
-                const urlParams = new URLSearchParams(escapedsearch);
+                urlParams = new URLSearchParams(escapedsearch);
                 if (urlParams.has('spec')) {
-                    emit('loadWait');
                     specText = await loadJsonFromRemoteLocation(urlParams.get('spec'));
-                    emit('loadFinish');
                     if (specText === undefined) {
                         NotificationHandler.terminalLog(
                             'error',
@@ -637,6 +646,7 @@ export default defineComponent({
 
                 if (errors.length) {
                     NotificationHandler.restoreShowNotification();
+                    emit('loadFinish');
                     return;
                 }
 
@@ -645,11 +655,9 @@ export default defineComponent({
                     dataflow = require(process.env.VUE_APP_DATAFLOW_PATH); // eslint-disable-line global-require,max-len,import/no-dynamic-require
                 } else {
                     const escapedsearch = window.location.search.replace(/&amp;/g, '&');
-                    const urlParams = new URLSearchParams(escapedsearch);
+                    urlParams = new URLSearchParams(escapedsearch);
                     if (urlParams.has('graph')) {
-                        emit('loadWait');
                         dataflow = await loadJsonFromRemoteLocation(urlParams.get('graph'));
-                        emit('loadFinish');
                         if (!dataflow) {
                             NotificationHandler.terminalLog(
                                 'error',
@@ -677,12 +685,7 @@ export default defineComponent({
                 }
             }
             NotificationHandler.restoreShowNotification();
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.has('preview')) {
-                const setting = urlParams.get('preview') === 'true';
-                props.viewModel.hideHud = setting;
-                props.viewModel.editor.readonly = setting;
-            }
+            emit('loadFinish');
         });
 
         const onDrop = async (event) => {
@@ -801,6 +804,7 @@ export default defineComponent({
             visibleConnections,
             visibleNodes,
             highlightInterfaces,
+            specificationLoaded,
         };
     },
 });
