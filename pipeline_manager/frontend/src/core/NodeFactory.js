@@ -343,6 +343,7 @@ export function NodeFactory(
             this.layer = layer;
             this.parentSave = this.save;
             this.parentLoad = this.load;
+            this.title = name;
 
             /**
              * Toggles interface groups and removes any connections attached
