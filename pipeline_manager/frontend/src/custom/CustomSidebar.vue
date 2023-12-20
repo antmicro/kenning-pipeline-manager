@@ -134,11 +134,12 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { computed, defineComponent, watch, ref, nextTick } from 'vue'; // eslint-disable-line object-curly-newline
-import { useGraph, useViewModel, CheckboxInterface, ButtonInterface } from '@baklavajs/renderer-vue'; // eslint-disable-line object-curly-newline
+import { CheckboxInterface, ButtonInterface } from '@baklavajs/renderer-vue'; // eslint-disable-line object-curly-newline
 import showdown from 'showdown';
 import CustomInterface from './CustomInterface.vue';
 import Cross from '../icons/Cross.vue';
 import Tooltip from '../components/Tooltip.vue';
+import EditorManager from '../core/EditorManager';
 
 import { validateInterfaceGroupsNames } from '../core/interfaceParser';
 import { getOptionName } from './CustomNode.js';
@@ -152,8 +153,10 @@ export default defineComponent({
     },
     emits: ['sidebar-open'],
     setup(_props, { emit }) {
-        const { graph } = useGraph();
-        const { viewModel } = useViewModel();
+        const editorManager = EditorManager.getEditorManagerInstance();
+        const viewModel = computed(() => editorManager.baklavaView);
+        const graph = computed(() => viewModel.value.displayedGraph);
+
         const converter = new showdown.Converter({
             smartIndentationFix: true,
             simpleLineBreaks: true,
