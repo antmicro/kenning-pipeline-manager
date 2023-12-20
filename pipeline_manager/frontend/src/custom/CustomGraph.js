@@ -147,6 +147,11 @@ export default function createPipelineManagerGraph(graph) {
         const newNode = this.editor.nodeTypes.get(newNodeName);
         const newNodeInstance = new newNode.type(); // eslint-disable-line new-cap
 
+        // Restoring a custom title of the node
+        if (oldNode.title !== oldNode.type) {
+            newNodeInstance.title = oldNode.title;
+        }
+
         // Restoring properties and interfaces
         Object.entries({ ...oldNode.inputs, ...oldNode.outputs }).forEach(([name, intf]) => {
             if (intf.direction !== undefined) {
