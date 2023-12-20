@@ -127,6 +127,10 @@
                 & > .__property-name {
                     font-size: 0.9em;
                 }
+
+                & * {
+                    box-sizing: border-box;
+                }
             }
 
             & > .__property:last-child {
