@@ -19,14 +19,12 @@ List of notitications that creates a `Notification` component for each message r
         </div>
         <div class="panel">
             <ul>
-                <li
-                    v-for="(notification, index) in notificationStore.notifications"
-                    v-bind:key="index"
-                >
+                <!-- Iterating in reverse so that the newest messages are rendered first -->
+                <li v-for="index in notificationsLength" :key="index">
                     <Notification
-                        :type="notification.type"
-                        :message="`${notification.message}`"
-                        :index="index"
+                        :type="notifications[notificationsLength - index].type"
+                        :message="`${notifications[notificationsLength - index].message}`"
+                        :index="notificationsLength - index"
                         border="border"
                     />
                 </li>
@@ -44,6 +42,14 @@ export default {
     components: {
         Cross,
         Notification,
+    },
+    computed: {
+        notifications() {
+            return notificationStore.notifications;
+        },
+        notificationsLength() {
+            return notificationStore.notifications.length;
+        },
     },
     data() {
         return {
