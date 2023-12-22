@@ -139,6 +139,38 @@ export default {
         rightButtonsQuantity() {
             return 3 + ((this.externalApplicationManager.backendAvailable) ? 1 : 0);
         },
+        isNavBarCompressed() {
+            return (
+                this.isMounted &&
+                this.windowWidth <
+                (this.leftButtonsQuantity + this.rightButtonsQuantity) * this.buttonWidth
+                + this.searchbarWidthMultiplcity * this.buttonWidth // searchbar width
+                + 0.5 * this.buttonWidth // offset
+            );
+        },
+        mobileClasses() {
+            return { 'compressed-mobile': this.isNavBarCompressed };
+        },
+        nodesearchInputStyles() {
+            return {
+                width: `${this.searchbarWidthMultiplcity * this.buttonWidth}px`,
+            };
+        },
+        leftContainerStyles() {
+            if (this.isNavBarCompressed) {
+                return { 'flex-grow': this.leftButtonsQuantity };
+            }
+            return {};
+        },
+        rightContainerStyles() {
+            if (this.isNavBarCompressed) {
+                return {
+                    'flex-grow': this.rightButtonsQuantity,
+                    'justify-content': 'right',
+                };
+            }
+            return { 'justify-content': 'right' };
+        },
     },
     watch: {
         dataflowGraphName(newValue) {
@@ -217,6 +249,10 @@ export default {
             crossIcon: markRaw(icons.Cross),
             searchEditorNodesQuery,
             navbarGuard: false,
+            isMounted: false,
+            windowWidth: 0,
+            buttonWidth: 0,
+            searchbarWidthMultiplcity: 4,
             hoverInfo: {
                 isHovered: false,
                 hoveredPanel: undefined,
@@ -583,7 +619,6 @@ export default {
                 this.hoverInfo.isHovered = false;
             }
         },
-
         isHovered(name) {
             return this.hoverInfo.hoveredPanel === name && this.hoverInfo.isHovered;
         },
@@ -598,9 +633,18 @@ export default {
         },
     },
     async mounted() {
+        this.isMounted = true;
+        this.buttonWidth = this.$refs.palette.offsetWidth;
+        this.windowWidth = window.innerWidth;
+
+        window.addEventListener('resize', () => {
+            this.windowWidth = window.innerWidth;
+            this.buttonWidth = this.$refs.palette.offsetWidth;
+        });
+
         // Create connection on page load
         if (this.externalApplicationManager.backendAvailable) {
-            this.externalApplicationManager.initializeConnection();
+            await this.externalApplicationManager.initializeConnection();
         }
     },
 };
@@ -627,9 +671,9 @@ export default {
             @pointerenter="$event.target.classList.add('isHovered')"
         >
             <div class="container">
-                <div :style="{'flex-grow': leftButtonsQuantity}">
+                <div :style="leftContainerStyles">
                     <div
-                        class="logo"
+                        :class="['logo', mobileClasses]"
                         @pointerover="() => updateHoverInfo('logo')"
                         @pointerleave="() => resetHoverInfo('logo')"
                     >
@@ -722,17 +766,17 @@ export default {
                     <div
                         ref="palette"
                         v-if="!hideHud && !readonly"
-                        class="hoverbox"
+                        :class="['hoverbox', mobileClasses]"
                         role="button"
                         @click="() => togglePanel(panels.palette)"
                         @pointerover="() => updateHoverInfo('palette')"
                         @pointerleave="() => resetHoverInfo('palette')"
                     >
                         <Cube :hover="isHovered('palette')" class="small_svg"/>
-                        <div class="tooltip" v-if="paletteOpen">
+                        <div :class="['tooltip', mobileClasses]" v-if="paletteOpen">
                             <span>Hide node browser</span>
                         </div>
-                        <div class="tooltip" v-if="!paletteOpen">
+                        <div :class="['tooltip', mobileClasses]" v-if="!paletteOpen">
                             <span>Show node browser</span>
                         </div>
                     </div>
@@ -741,10 +785,9 @@ export default {
                         <div
                             v-for="actionItem in navbarItems" v-bind:key="actionItem.name"
                             v-bind:id="`navbar-button-${actionItem.procedureName}`"
-                            class="hoverbox"
-                            :class="{
+                            :class="['hoverbox', mobileClasses, {
                                 'button-in-progress': isInProgress(actionItem.procedureName),
-                            }"
+                            }]"
                             role="button"
                             @click="(async () => requestDataflowAction(actionItem.procedureName))"
                             @pointerover="() => updateHoverInfo(actionItem.name)"
@@ -768,7 +811,7 @@ export default {
                                 :imgURI="'Cross'"
                             />
                             <div class="progress-bar" />
-                            <div class="tooltip">
+                            <div :class="['tooltip', mobileClasses]">
                                 <span>
                                     {{ isStoppable(actionItem.procedureName) &&
                                        isInProgress(actionItem.procedureName) ? 'Stop ' : '' }}
@@ -779,7 +822,7 @@ export default {
                     </template>
                     <div
                         v-if="this.editorManager.editor.isInSubgraph()"
-                        class="hoverbox"
+                        :class="['hoverbox', mobileClasses]"
                         role="button"
                         @click="() => this.editorManager.returnFromSubgraph()"
                         @pointerover="() => updateHoverInfo('subgraphReturn')"
@@ -791,7 +834,7 @@ export default {
                             color="white"
                             class="small_svg"
                         />
-                        <div class="tooltip">
+                        <div :class="['tooltip', mobileClasses]">
                             <span>Return from subgraph editor</span>
                         </div>
                     </div>
@@ -800,60 +843,57 @@ export default {
                     v-if="editTitle && !panels.nodesearch.isOpen"
                     :is="editorTitleInterface.component"
                     :intf="editorTitleInterface"
-                    class="editorTitleInput"
+                    :class="['editorTitleInput', mobileClasses]"
                     v-model="graphName"
                     v-click-outside="() => { editTitle = false }"
                 />
                 <span
                     v-if="!editTitle && !panels.nodesearch.isOpen"
-                    class="editorTitle"
+                    :class="['editorTitle', mobileClasses]"
                     @dblclick="editTitle = true">
                         {{ editorTitle }}
                 </span>
-                <div
-                    :style="{
-                        'flex-grow': rightButtonsQuantity,
-                        'justify-content': 'right',
-                    }"
-                    @pointerleave="()=> panels.nodesearch.isOpen =
-                        panels.nodesearch.isOpen && searchEditorNodesQuery != ''
-                    "
-                >
+                <div :style="rightContainerStyles">
                     <div
                         ref="searchbar"
-                        class="searchbar hoverbox"
+                        :class="['hoverbox', mobileClasses]"
                         role="button"
                         @pointerover="() => updateHoverInfo('search')"
-                        @pointerleave="() => resetHoverInfo('search')"
-                        v-click-outside="() => this.$isMobile ?
-                            panels.nodesearch.isOpen = false : null"
+                        @pointerleave="() => {
+                            resetHoverInfo('search');
+                        }"
+                        @click="onClickNodeSearch"
+                        v-click-outside="() => panels.nodesearch.isOpen =
+                            panels.nodesearch.isOpen && searchEditorNodesQuery != ''"
                     >
                         <Magnifier
                             :hover="isHovered('search')"
                             class="small_svg"
-                            @click="onClickNodeSearch"
                         />
                         <div
-                            class="tooltip"
-                            :class="settingsTooltipClasses"
+                        :class="['tooltip', mobileClasses, settingsTooltipClasses]"
                             v-if="!panels.nodesearch.isOpen"
                         >
                             <span>Show node search bar</span>
                         </div>
-                        <div class="tooltip" :class="settingsTooltipClasses" v-else>
+                        <div :class="['tooltip', mobileClasses, settingsTooltipClasses]" v-else>
                             <span>Hide node search bar</span>
                         </div>
+                    </div>
+                    <div
+                        v-show="panels.nodesearch.isOpen"
+                        :style="nodesearchInputStyles"
+                        :class="['search-editor-nodes', mobileClasses]"
+                    >
                         <input
                             ref="searchbarInput"
-                            class="search-editor-nodes"
-                            v-show="panels.nodesearch.isOpen"
                             v-model="searchEditorNodesQuery"
-                            placeholder="Search for nodes in the editor"
+                            placeholder="Search for nodes"
                         />
                     </div>
                     <div
                         ref="settings"
-                        class="hoverbox"
+                        :class="['hoverbox', mobileClasses]"
                         role="button"
                         @click="() => togglePanel(panels.settings)"
                         @pointerover="() => updateHoverInfo('settings')"
@@ -861,38 +901,37 @@ export default {
                     >
                         <Cogwheel :hover="isHovered('settings')" class="small_svg" />
                         <div
-                            class="tooltip"
-                            :class="settingsTooltipClasses"
+                            :class="['tooltip', mobileClasses, settingsTooltipClasses]"
                             v-if="!panels.settings.isOpen"
                         >
                             <span>Show settings</span>
                         </div>
-                        <div class="tooltip" :class="settingsTooltipClasses" v-else>
+                        <div :class="['tooltip', mobileClasses, settingsTooltipClasses]" v-else>
                             <span>Hide settings</span>
                         </div>
                     </div>
                     <div
                         ref="backend"
-                        class="hoverbox"
+                        :class="['hoverbox', mobileClasses]"
                         v-if="this.externalApplicationManager.backendAvailable"
                         @click="() => togglePanel(panels.backendStatus)"
                         @pointerover="() => updateHoverInfo('backendStatus')"
                         @pointerleave="() => resetHoverInfo('backendStatus')"
                     >
-                        <button>
-                            <Backend
-                                v-if="this.externalApplicationManager.externalApplicationConnected"
-                                color="connected"
-                                :active="backendStatusOpen"
-                                :hover="isHovered('backendStatus')"
-                            />
-                            <Backend
-                                v-else color="disconnected"
-                                :active="backendStatusOpen"
-                                :hover="isHovered('backendStatus')"
-                            />
-                        </button>
-                        <div class="tooltip" :class="backendStatusTooltipClasses">
+                        <Backend
+                            v-if="this.externalApplicationManager.externalApplicationConnected"
+                            color="connected"
+                            class="small_svg"
+                            :active="backendStatusOpen"
+                            :hover="isHovered('backendStatus')"
+                        />
+                        <Backend
+                            v-else color="disconnected"
+                            class="small_svg"
+                            :active="backendStatusOpen"
+                            :hover="isHovered('backendStatus')"
+                        />
+                        <div :class="['tooltip', mobileClasses, backendStatusTooltipClasses]">
                             <span>Backend status</span>
                         </div>
                         <div
@@ -913,7 +952,7 @@ export default {
                     <div
                         ref="notifications"
                         v-if="!hideHud"
-                        class="hoverbox"
+                        :class="['hoverbox', mobileClasses]"
                         role="button"
                         @click="() => togglePanel(panels.notifications)"
                         @pointerover="() => updateHoverInfo('notifications')"
@@ -929,13 +968,14 @@ export default {
                             class="small_svg"
                         />
                         <div
-                            class="tooltip"
                             v-if="notificationsOpen"
-                            :class="notificationsTooltipClasses"
+                            :class="['tooltip', mobileClasses, notificationsTooltipClasses]"
                         >
                             <span>Hide notifications</span>
                         </div>
-                        <div class="tooltip" v-else :class="notificationsTooltipClasses">
+                        <div
+                            v-else :class="['tooltip', mobileClasses, notificationsTooltipClasses]"
+                        >
                             <span>Show notifications</span>
                         </div>
                     </div>
@@ -956,7 +996,6 @@ export default {
 </template>
 
 <style lang="scss" scoped>
-$compress-max-width: 515px;
 .wrapper {
     z-index: 2;
 }
@@ -994,11 +1033,15 @@ $compress-max-width: 515px;
     border-right: 0;
 
     .editorTitle {
+        width: auto;
+        text-wrap: wrap;
+        flex-grow: 1;
+
         cursor: text;
         text-align: center;
         padding: 0 $spacing-s;
 
-        @media screen and (max-width: $compress-max-width) {
+        &.compressed-mobile {
             display: none;
         }
     }
@@ -1006,8 +1049,9 @@ $compress-max-width: 515px;
     .editorTitleInput {
         font-size: $fs-small;
         padding: 0 $spacing-s;
+        flex-grow: 1;
 
-        @media screen and (max-width: $compress-max-width) {
+        &.compressed-mobile {
             display: none;
         }
     }
@@ -1043,20 +1087,26 @@ $compress-max-width: 515px;
 
     & > div {
         display: inherit;
-        align-items: center;
-        height: 100%;
-        flex-shrink: 1;
+        flex-grow: 1;
 
         & > div {
+            flex-grow: 0;
             display: flex;
-            max-width: 3.75em;
+            width: 3.75em;
             height: 3.75em;
+
             justify-content: center;
             align-items: center;
             position: relative;
             box-sizing: border-box;
             border-left: 1px solid $gray-500;
-            flex-grow: 1;
+
+            // If the navbar is compressed, the navbar button should shrink
+            &.compressed-mobile {
+                width: auto;
+                flex-grow: 1;
+                max-width: 3.75em;
+            }
 
             &:last-child {
                 border-right: 1px solid $gray-500;
@@ -1068,11 +1118,6 @@ $compress-max-width: 515px;
                 height: 1.6875em;
             }
 
-            & > button > svg {
-                display: block;
-                width: 1.4em;
-                height: 1.4em;
-            }
             & > .small_svg {
                 display: block;
                 width: 1.2em;
@@ -1145,13 +1190,13 @@ $compress-max-width: 515px;
                 transform: translate(-50%, 25%);
                 pointer-events: none;
                 white-space: nowrap;
-            }
 
-            & > .last {
-                transform: translate(-75%, 25%);
-            }
-            & > .first {
-                transform: translate(-25%, 25%);
+                &.last {
+                    transform: translate(-75%, 25%);
+                }
+                &.first {
+                    transform: translate(-25%, 25%);
+                }
             }
 
             &.logo:hover > .dropdown-wrapper {
@@ -1165,62 +1210,54 @@ $compress-max-width: 515px;
 
                 &:hover {
                     cursor: pointer;
+
                     & > .small_svg {
                         fill: $green;
                     }
+
                     & > .small_svg_stop {
                         stroke: $red-dark;
                     }
-                    .tooltip {
-                        display: flex;
-                        z-index: 11;
+
+                    & > .tooltip {
+                        &:not(.compressed-mobile) {
+                            display: flex;
+                            z-index: 11;
+                        }
                     }
                 }
             }
 
-            &.searchbar {
-                width: auto;
+            &.search-editor-nodes {
+                max-width: calc(3.75em * 4);
 
-                & > .search-editor-nodes {
-                    background-color: #181818;
-                    flex: 1;
+                & > input {
+                    width: 100%;
                     height: 100%;
-                    max-width: calc(3.75em * 6);
-                    min-width: 0;
+                    padding: 0 0.5em;
+
                     color: $white;
                     border: none;
-                    padding: 0em 1em;
                     background-color: $gray-600;
 
                     &:focus {
                         outline: 1px solid $green;
+                        z-index: 12;
                     }
 
                     &::placeholder {
                         opacity: 0.5;
                     }
-
-                    // on smaller screens display search bellow NavBar
-                    @media screen and (max-width: $compress-max-width) {
-                        position: absolute;
-                        top: calc($navbar-height + 1px);
-                        left: -100%;
-                        max-width: 40vw;
-                    }
                 }
 
-                & > svg {
-                    width: 1.2em;
-                    height: 1.2em;
-                    // padding: 1em;
-                }
-            }
-            &.searchbar:hover > .tooltip {
-                display: flex;
-                z-index: 11;
+                // on smaller screens display search bellow NavBar
+                &.compressed-mobile {
+                    position: absolute;
+                    top: calc($navbar-height + 1px);
+                    max-width: 40vw;
 
-                @media screen and (max-width: $compress-max-width) {
-                    display: none;
+                    border: 1px solid $gray-500;
+                    box-sizing: border-box;
                 }
             }
         }
