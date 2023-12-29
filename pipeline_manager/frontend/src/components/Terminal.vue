@@ -9,14 +9,12 @@ Container for the hterm.js terminal.
 -->
 
 <template>
-    <div class="terminal-container">
-        <div id="hterm-terminal"></div>
-    </div>
+    <div id="hterm-terminal"></div>
 </template>
 
 <script>
 import {
-    defineComponent, computed, onMounted, watch,
+    defineComponent, computed, onMounted, watch, nextTick,
 } from 'vue';
 import { terminalStore, MAIN_TERMINAL } from '../core/stores';
 import { hterm, lib } from '../third-party/hterm_all';
@@ -24,7 +22,6 @@ import { hterm, lib } from '../third-party/hterm_all';
 export default defineComponent({
     props: {
         terminalInstance: {
-            required: true,
             type: String,
         },
     },
@@ -50,7 +47,13 @@ export default defineComponent({
         };
 
         const logs = computed(() => terminalStore.logs[props.terminalInstance]);
-        const logsLength = computed(() => logs.value.length);
+
+        const logsLength = computed(() => {
+            if (logs.value === undefined) {
+                return 0;
+            }
+            return logs.value.length;
+        });
 
         const printLog = (log) => {
             if (term === undefined) return;
@@ -60,12 +63,13 @@ export default defineComponent({
         let renderIndex = 0;
 
         const clearLog = () => {
+            renderIndex = 0;
             if (term === undefined) return;
+
+            printLog('\u001b[0m');
+            term.scrollHome();
             // This line console logs' "Couldn't fetch row index:"
             term.wipeContents();
-            term.scrollHome();
-            printLog('\u001b[0m');
-            renderIndex = 0;
         };
 
         onMounted(async () => {
@@ -82,49 +86,37 @@ export default defineComponent({
             term.onTerminalReady = function onTerminalReady() {
                 // load logs that have existed already in the storage.
                 // for now configure the terminal as read-only
-                this.onVTKeystroke = (_string) => {};
                 this.io.sendString = (_string) => {};
+                this.onVTKeystroke = (_string) => {};
                 this.setCursorVisible(false);
                 this.installKeyboard();
             };
             // pin hterm.js in the template
             term.decorate(document.querySelector('#hterm-terminal'));
 
-            if (logs.value !== undefined) {
-                logs.value.forEach((log, _) => {
-                    if (renderIndex > 0 && props.terminalInstance === MAIN_TERMINAL) printLog('\n\n');
-                    printLog(log);
-                    renderIndex += 1;
-                });
-            }
-
-            // This watcher needs to be set inside of mount function as it has
-            // to be turned after the async initialisation is done.
             watch(
                 [() => props.terminalInstance, logsLength],
-                ([newIns, newLen], [oldIns, oldLen]) => {
-                    let terminalSwitched = false;
+                async ([newIns, newLen], [oldIns, oldLen]) => {
+                    if (newIns === undefined) {
+                        return;
+                    }
+                    // Wait for the next tick to make sure that the terminal is rendered
+                    // Otherwise hterm may throw errors related to the dom not being ready
+                    await nextTick();
 
                     // If the instance of the terminal changed
-                    if (oldIns !== newIns) {
+                    if (oldIns !== newIns || newLen === 0) {
                         clearLog();
-                        terminalSwitched = true;
                     }
 
-                    // If terminal was cleared, new content appeared or the instance was changed
-                    if (oldLen !== newLen || terminalSwitched) {
-                        const currentLogs = terminalStore.logs[props.terminalInstance];
+                    if (oldLen !== newLen || oldIns !== newIns) {
+                        const currentLogs = terminalStore.logs[newIns];
 
-                        // If terminal was cleared
-                        if (newLen === 0 && !terminalSwitched) {
-                            clearLog();
-                        } else {
-                            currentLogs.slice(renderIndex).forEach((log, _) => {
-                                if (renderIndex > 0 && newIns === MAIN_TERMINAL) printLog('\n\n');
-                                printLog(log);
-                                renderIndex += 1;
-                            });
-                        }
+                        currentLogs.slice(renderIndex).forEach((log, _) => {
+                            if (renderIndex > 0 && newIns === MAIN_TERMINAL) printLog('\n\n');
+                            printLog(log);
+                            renderIndex += 1;
+                        });
                     }
                 },
             );
@@ -134,7 +126,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.terminal-container {
+#hterm-terminal {
     position: relative;
     width: 100%;
     height: 100%;
