@@ -111,7 +111,7 @@ export default defineComponent({
         NodePalette,
         RectangleSelection,
     },
-    emits: ['loadWait', 'loadFinish'],
+    emits: ['loadFinish'],
     setup(props, { emit }) {
         const {
             el,
@@ -605,7 +605,6 @@ export default defineComponent({
 
         /* eslint-disable no-lonely-if */
         onMounted(async () => {
-            emit('loadWait');
             NotificationHandler.setShowNotification(false);
             editorManager.updateMetadata({}); // Defaulting metadata values
 
