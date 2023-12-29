@@ -51,7 +51,7 @@ Resizable terminal panel that handles the user interactions
                 </button>
             </div>
         </div>
-        <Terminal :terminalInstance=activeTerminal v-if="isTerminalPanelOpened" />
+        <Terminal :terminalInstance="activeTerminal" v-show="isTerminalPanelOpened" />
     </div>
 </template>
 
