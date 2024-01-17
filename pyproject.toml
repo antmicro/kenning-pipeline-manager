@@ -33,7 +33,11 @@ dependencies = [
     "six==1.16.0",
     "Werkzeug==2.2.2",
     "beautifulsoup4==4.12.2",
-    "pipeline-manager-backend-communication @ git+https://github.com/antmicro/kenning-pipeline-manager-backend-communication.git"
+]
+
+[project.optional-dependencies]
+backend-communication = [
+    "pipeline-manager-backend-communication @ git+https://github.com/antmicro/kenning-pipeline-manager-backend-communication.git",
 ]
 
 [project.urls]
