@@ -757,7 +757,7 @@ export default {
                             />
                             <DropdownItem
                                 type="'button'"
-                                text="Export graph to SVG"
+                                text="Export graph to HTML-based SVG"
                                 :eventFunction="exportToSvg"
                             />
                         </div>
