@@ -5,6 +5,7 @@
  */
 
 import { JSONRPCErrorCode } from 'json-rpc-2.0';
+import { charset } from 'mime-types';
 import { backendApiUrl, PMMessageType, JSONRPCCustomErrorCode } from '../utils';
 import jsonRPC from './rpcCommunication';
 import runInfo from './runInformation';
@@ -252,18 +253,35 @@ class ExternalApplicationManager {
         const file = document.getElementById('request-dataflow-button').files[0];
         if (!file) return;
 
-        const dataflow = JSON.parse(await file.text());
+        const reader = new FileReader();
+        const encoding = charset(file.type);
+        const readerPromise = new Promise((resolve) => {
+            reader.onloadend = () => {
+                resolve(
+                    (encoding) ? reader.result : reader.result.replace(/data:.*;base64,/, ''),
+                );
+            };
+        });
+        // Read file as text if possible, otherwise return base64 string
+        if (encoding) {
+            reader.readAsText(file, encoding);
+        } else {
+            reader.readAsDataURL(file);
+        }
+        const dataflow = await readerPromise;
         if (!dataflow) {
             NotificationHandler.showToast('error', 'File cannot be loaded');
             return;
         }
 
         try {
-            const data = await jsonRPC.request('dataflow_import', { external_application_dataflow: dataflow });
+            const data = await jsonRPC.request('dataflow_import', { external_application_dataflow: dataflow, mime: file.type, base64: !encoding });
             if (data.type === PMMessageType.OK) {
-                const errors = await this.editorManager.loadDataflow(data.content);
+                const { errors, warnings } = await this.editorManager.loadDataflow(data.content);
                 if (Array.isArray(errors) && errors.length) {
                     NotificationHandler.terminalLog('error', 'Dataflow is invalid', errors);
+                } else if (Array.isArray(warnings) && warnings.length) {
+                    NotificationHandler.terminalLog('warning', 'Dataflow imported with warning', warnings);
                 } else {
                     NotificationHandler.showToast('info', 'Imported dataflow');
                 }
