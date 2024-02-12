@@ -7,6 +7,7 @@ A test class mimicking the Pipeline Manager client.
 """
 
 import asyncio
+import json
 from typing import Dict
 
 import socketio
@@ -16,6 +17,9 @@ from pipeline_manager_backend_communication.communication_backend import (
 from pipeline_manager_backend_communication.misc_structures import (  # noqa: E501
     MessageType,
     Status,
+)
+from pipeline_manager_backend_communication.utils import (
+    convert_message_to_string,
 )
 
 
@@ -123,10 +127,15 @@ class MockApplicationClient(object):
         def dataflow_stop(self) -> Dict:
             return {"type": MessageType.OK.value}
 
-        def dataflow_import(self, external_application_dataflow: Dict) -> Dict:
+        def dataflow_import(
+            self, external_application_dataflow: str, mime: str, base64: bool
+        ) -> Dict:
+            external_application_dataflow = convert_message_to_string(
+                external_application_dataflow, base64, mime
+            )
             return {
                 "type": MessageType.OK.value,
-                "content": self.sample_specification,
+                "content": json.loads(external_application_dataflow),
             }
 
         def dataflow_export(self, dataflow: Dict) -> Dict:
