@@ -46,6 +46,9 @@ from pipeline_manager_backend_communication.communication_backend import (
 from pipeline_manager_backend_communication.misc_structures import (
     MessageType,
 )
+from pipeline_manager_backend_communication.utils import (
+    convert_message_to_string,
+)
 
 from pipeline_manager import frontend_tester
 from pipeline_manager.utils.logger import string_to_verbosity
@@ -192,23 +195,38 @@ class RPCMethods:
             ]
         }
 
-    def dataflow_import(self, external_application_dataflow: Dict) -> Dict:
+    def dataflow_import(
+        self,
+        external_application_dataflow: str,
+        mime: str,
+        base64: bool,
+    ) -> Dict:
         """
         RPC method that responses to Import request.
 
         Parameters
         ----------
-        external_application_dataflow : Dict
+        external_application_dataflow : str
             Content of the request.
+        mime : str
+            MIME type.
+        base64 : bool
+            Whether dataflow is in base64 format.
 
         Returns
         -------
         Dict
             Method's response
         """
+        dataflow = convert_message_to_string(
+            external_application_dataflow,
+            base64,
+            mime,
+        )
+        dataflow = json.loads(dataflow)
         return {
             "type": MessageType.OK.value,
-            "content": external_application_dataflow,
+            "content": dataflow,
         }
 
     def specification_get(self) -> Dict:
