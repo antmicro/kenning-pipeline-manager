@@ -332,12 +332,22 @@
                 "type": "object",
                 "properties": {
                     "external_application_dataflow": {
-                        "description": "JSON with dataflow in external application format",
-                        "type": "object"
+                        "description": "Dataflow in external application format. If loaded file cannot be represented as text, it will be sent as base64 string. To make sure received data are in readable format `convert_message_to_string` from `pipeline_manager_backend_communication.utils` can be used. Optionally, for conversion to bytes `convert_message_to_bytes` function is available",
+                        "type": "string"
+                    },
+                    "mime": {
+                        "description": "MIME type",
+                        "type": "string"
+                    },
+                    "base64": {
+                        "description": "Specifies whether `external_application_dataflow` is in byte64 format",
+                        "type": "boolean"
                     }
                 },
                 "required": [
-                    "external_application_dataflow"
+                    "external_application_dataflow",
+                    "mime",
+                    "base64"
                 ],
                 "additionalProperties": false
             },
