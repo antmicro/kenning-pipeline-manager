@@ -3,9 +3,14 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import asyncio
+import base64
+import json
 import multiprocessing
+import random
+import string
 import time
 from http import HTTPStatus
+from pathlib import Path
 from typing import Dict, NamedTuple
 
 import pytest
@@ -185,13 +190,81 @@ def dataflow_import(sample_dataflow, sample_specification):
             _id=_curr_id(),
             result={
                 "type": MessageType.OK.value,
-                "content": sample_specification,
+                "content": sample_dataflow,
             },
         ),
         JSONRPC20Request(
             _id=_curr_id(),
             method="dataflow_import",
-            params={"external_application_dataflow": sample_dataflow},
+            params={
+                "external_application_dataflow": json.dumps(sample_dataflow),
+                "mime": "application/json",
+                "base64": False,
+            },
+        ),
+    )
+
+
+@pytest.fixture
+def dataflow_import_error0(sample_dataflow, sample_specification):
+    return lambda: SingleRequest(
+        "external-api",
+        JSONRPC20Response(
+            _id=_curr_id(),
+            error={"code": -1, "message": "ignored"},
+        ),
+        JSONRPC20Request(
+            _id=_curr_id(),
+            method="dataflow_import",
+            params={
+                "external_application_dataflow": Path(__file__).read_text(),
+                "mime": "application/x-python",
+                "base64": False,
+            },
+        ),
+    )
+
+
+@pytest.fixture
+def dataflow_import_error1(sample_dataflow, sample_specification):
+    return lambda: SingleRequest(
+        "external-api",
+        JSONRPC20Response(
+            _id=_curr_id(),
+            error={"code": -1, "message": "ignored"},
+        ),
+        JSONRPC20Request(
+            _id=_curr_id(),
+            method="dataflow_import",
+            params={
+                "external_application_dataflow": (
+                    "".join(random.choices(string.printable, k=1024))
+                ),
+                "mime": "text/plain",
+                "base64": False,
+            },
+        ),
+    )
+
+
+@pytest.fixture
+def dataflow_import_error2(sample_dataflow, sample_specification):
+    return lambda: SingleRequest(
+        "external-api",
+        JSONRPC20Response(
+            _id=_curr_id(),
+            error={"code": -1, "message": "ignored"},
+        ),
+        JSONRPC20Request(
+            _id=_curr_id(),
+            method="dataflow_import",
+            params={
+                "external_application_dataflow": base64.b64encode(
+                    random.randbytes(1024)
+                ).decode(),
+                "mime": "application/octet-stream",
+                "base64": True,
+            },
         ),
     )
 
@@ -298,6 +371,9 @@ async def test_connecting_multiple_times(
         "dataflow_validate",
         "dataflow_export",
         "dataflow_import",
+        "dataflow_import_error0",
+        "dataflow_import_error1",
+        "dataflow_import_error2",
     ],
 )
 async def test_single_event_connected_valid(
@@ -338,7 +414,12 @@ async def test_single_event_connected_valid(
     assert events[0].expected_data.data == data
 
     data = responses[1]
-    assert events[1].expected_data.data == data
+    expected_data = events[1].expected_data.data
+    if "error" in expected_data:
+        # Ignore error message
+        del data["error"]["message"]
+        del expected_data["error"]["message"]
+    assert expected_data == data
 
 
 # ---------------
