@@ -224,7 +224,7 @@ Defined methods have to have appropriate (matching with specification) name, inp
 
 ```python
     # Function name matches with the dataflow_import endpoint from External App API
-    def dataflow_import(self, external_application_dataflow: Dict) -> Dict:
+    def dataflow_import(self, external_application_dataflow: str) -> Dict:
         # Function will receive one parameter, it's name has to be the same
         # as the one from API specification `params`
         # ...
