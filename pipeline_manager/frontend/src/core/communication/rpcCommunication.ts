@@ -103,6 +103,7 @@ const commonHeaders = {
 };
 const requestSchema = new Map<number | string, SpecType>();
 
+const MAX_MESSAGE_LENGTH = 256 * 1024;
 let socket: Socket;
 let jsonRPCServer: CustomJSONRPCServerAndClient;
 /**
@@ -135,8 +136,24 @@ function createServer() {
 
             // sending request
             const endpoint = (endpoints === backendEndpoints) ? 'backend-api' : 'external-api';
+            const stringify = JSON.stringify(request);
             try {
-                socket.emit(endpoint, request);
+                // Emit request in chunks
+                if (stringify.length > MAX_MESSAGE_LENGTH) {
+                    const messageID = request.id ?? crypto.randomUUID();
+                    for (let i = 0; i < stringify.length; i += MAX_MESSAGE_LENGTH) {
+                        socket.emit(endpoint, {
+                            id: messageID,
+                            chunk: stringify.substring(
+                                i, Math.min(i + MAX_MESSAGE_LENGTH, stringify.length),
+                            ),
+                            end: i + MAX_MESSAGE_LENGTH >= stringify.length,
+                        });
+                    }
+                // Emit whole request
+                } else {
+                    socket.emit(endpoint, request);
+                }
             } catch (exception) {
                 return Promise.reject(exception);
             }
