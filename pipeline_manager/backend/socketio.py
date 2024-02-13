@@ -5,6 +5,9 @@
 """
 Provides methods for setting up asynchronous server for Pipeline Manager.
 """
+
+import json
+from collections import defaultdict
 from http import HTTPStatus
 from typing import Any, Callable, Dict
 
@@ -39,6 +42,7 @@ def create_socketio() -> socketio.AsyncServer:
         Returns a socketio instance
     """
     sio = socketio.AsyncServer(async_mode="asgi")
+    CHUNKS = []
 
     def reject_old_sessions_requests(
         func: Callable[[str, Dict], Any],
@@ -77,6 +81,33 @@ def create_socketio() -> socketio.AsyncServer:
             return await func(sid, json_rpc_request)
 
         return _func
+
+    def collect_chunks(
+        func: Callable[[str, Dict], Any],
+    ) -> Callable[[str, Dict], Any]:
+        """
+        Decorator implementing support for chunked messages.
+        """
+        chunks = defaultdict(lambda: defaultdict(lambda: []))
+        CHUNKS.append(chunks)
+
+        async def event_handler(sid, json_rpc_request):
+            if "chunk" in json_rpc_request:
+                chunks[sid][json_rpc_request["id"]].append(
+                    json_rpc_request["chunk"]
+                )
+                if json_rpc_request.get("end", False):
+                    await func(
+                        sid,
+                        json.loads(
+                            "".join(chunks[sid][json_rpc_request["id"]])
+                        ),
+                    )
+                    del chunks[sid][json_rpc_request["id"]]
+            else:
+                await func(sid, json_rpc_request)
+
+        return event_handler
 
     class BackendMethods:
         """
@@ -208,8 +239,13 @@ def create_socketio() -> socketio.AsyncServer:
                 notification,
                 to=global_state_manager.last_socket,
             )
+        # Cleanup partial messages
+        for chunks in CHUNKS:
+            if sid in chunks:
+                del chunks[sid]
 
     @sio.on("backend-api")
+    @collect_chunks
     @reject_old_sessions_requests
     async def backend_api(sid: str, json_rpc_request: Dict) -> bool:
         """
@@ -234,6 +270,7 @@ def create_socketio() -> socketio.AsyncServer:
         return True
 
     @sio.on("external-api")
+    @collect_chunks
     @reject_old_sessions_requests
     async def api(sid: str, json_rpc_message: Dict) -> bool:
         """
