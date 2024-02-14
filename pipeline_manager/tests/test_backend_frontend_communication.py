@@ -172,12 +172,36 @@ def dataflow_export(sample_dataflow):
         "external-api",
         JSONRPC20Response(
             _id=_curr_id(),
-            result={"type": MessageType.OK.value},
+            result={"type": MessageType.OK.value, "content": sample_dataflow},
         ),
         JSONRPC20Request(
             _id=_curr_id(),
             method="dataflow_export",
             params={"dataflow": sample_dataflow},
+        ),
+    )
+
+
+@pytest.fixture
+def large_random_data():
+    return {"test": random.randbytes(1024**2).decode(errors="replace")}
+
+
+@pytest.fixture
+def dataflow_export_large(sample_dataflow, large_random_data):
+    return lambda: SingleRequest(
+        "external-api",
+        JSONRPC20Response(
+            _id=_curr_id(),
+            result={
+                "type": MessageType.OK.value,
+                "content": large_random_data,
+            },
+        ),
+        JSONRPC20Request(
+            _id=_curr_id(),
+            method="dataflow_export",
+            params={"dataflow": large_random_data},
         ),
     )
 
@@ -370,6 +394,7 @@ async def test_connecting_multiple_times(
         "dataflow_run",
         "dataflow_validate",
         "dataflow_export",
+        "dataflow_export_large",
         "dataflow_import",
         "dataflow_import_error0",
         "dataflow_import_error1",
