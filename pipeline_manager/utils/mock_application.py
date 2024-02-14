@@ -139,7 +139,10 @@ class MockApplicationClient(object):
             }
 
         def dataflow_export(self, dataflow: Dict) -> Dict:
-            return {"type": MessageType.OK.value}
+            return {
+                "type": MessageType.OK.value,
+                "content": dataflow,
+            }
 
     async def emit(self, event: str, data: Dict) -> Dict:
         """
@@ -157,7 +160,22 @@ class MockApplicationClient(object):
         Dict
             Response to the emitted request
         """
-        await self.sio.emit(event, data)
+        CHUNK_SIZE = 256 * 1024
+        data_str = json.dumps(data)
+        if len(data_str) > CHUNK_SIZE:
+            for i in range(0, len(data_str), CHUNK_SIZE):
+                await self.sio.emit(
+                    event,
+                    {
+                        "id": data["id"],
+                        "chunk": data_str[
+                            i : min(i + CHUNK_SIZE, len(data_str))
+                        ],
+                        "end": i + CHUNK_SIZE >= len(data_str),
+                    },
+                )
+        else:
+            await self.sio.emit(event, data)
         response = await self.sio.receive()
         return response[1]
 
