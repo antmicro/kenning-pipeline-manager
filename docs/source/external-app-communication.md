@@ -224,10 +224,22 @@ Defined methods have to have appropriate (matching with specification) name, inp
 
 ```python
     # Function name matches with the dataflow_import endpoint from External App API
-    def dataflow_import(self, external_application_dataflow: str) -> Dict:
+    def dataflow_import(self, external_application_dataflow: str, mime: str, base64: bool) -> Dict:
         # Function will receive one parameter, it's name has to be the same
-        # as the one from API specification `params`
+        # as the one from API specification `params`.
+        # Optional, but you can convert the received file to string format
+        # with `convert_message_to_string`
+        # from pipeline_manager_backend_communication.utils import (
+        #     convert_message_to_string
+        # )
+        data_as_string = convert_message_to_string(
+            external_application_dataflow,
+            base64,
+            mime
+        )
         # ...
+        # pipeline_manager_dataflow here is the converted input file to the
+        # Pipeline Manager's graph representation
         return {
             'type': MessageType.OK.value,
             'content': pipeline_manager_dataflow
