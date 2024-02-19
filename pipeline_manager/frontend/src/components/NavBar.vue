@@ -501,7 +501,7 @@ export default {
                 this.saveConfiguration.readonly = undefined;
                 this.saveConfiguration.hideHud = undefined;
                 this.saveConfiguration.position = undefined;
-                this.saveConfiguration.savename = result.savename ?? 'savename';
+                this.saveConfiguration.savename = result.filename ?? 'savename';
                 if (prompt) {
                     this.saveConfiguration.saveCallback =
                         () => {
