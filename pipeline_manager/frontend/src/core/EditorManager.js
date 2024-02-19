@@ -112,7 +112,11 @@ export default class EditorManager {
         if (!dataflowSpecification) return ['No specification passed'];
 
         if (typeof dataflowSpecification === 'string' || dataflowSpecification instanceof String) {
-            dataflowSpecification = jsonlint.parse(dataflowSpecification);
+            try {
+                dataflowSpecification = jsonlint.parse(dataflowSpecification);
+            } catch (error) {
+                return { errors: [error], warnings: [] };
+            }
         }
 
         if (this.specificationLoaded) {
