@@ -21,7 +21,7 @@ from moving or deleting the nodes.
         :class="classes"
         :style="styles"
         :data-node-type="node.type"
-        @pointerdown.left.self="select()"
+        @pointerdown.left.self="(ev) => select(ev)"
         oncontextmenu="return false;"
     >
         <div class="interface-cursor">
@@ -372,8 +372,8 @@ const nodeTitle = computed(() => {
     return `${title} <pre class="subtitle">${type}</pre>`;
 });
 
-const select = () => {
-    emit('select');
+const select = (event) => {
+    emit('select', event);
 };
 
 let abortDrag;
@@ -396,7 +396,7 @@ stopDrag = () => {
 
 const startDrag = (ev) => {
     if (!graph.value.selectedNodes.includes(props.node)) {
-        select();
+        select(ev);
     }
 
     groupDragMove.onPointerDown(ev);
