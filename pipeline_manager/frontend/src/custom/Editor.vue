@@ -52,7 +52,7 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
                 :selected="selectedNodes.includes(node)"
                 :greyedOut="greyedOutNodes.includes(node)"
                 :interfaces="highlightInterfaces"
-                @select="selectNode(node)"
+                @select="(ev) => selectNode(node, ev)"
             />
         </div>
 
@@ -122,7 +122,6 @@ export default defineComponent({
             nodeContainerStyle,
             keyDown,
             keyUp,
-            selectNode,
         } = EditorComponent.setup(props);
 
         const connRefs = ref([]);
@@ -165,6 +164,16 @@ export default defineComponent({
                     graph.value.selectedNodes.push(node);
                 }
             });
+        };
+
+        const selectNode = (node, event) => {
+            // If select was triggered by event check if CTRL is pressed,
+            // otherwise use default method
+            if ((event && !(event.ctrlKey)) || (!event && !props.viewModel.commandHandler.pressedKeys.includes('Control'))) {
+                unselectAllNodes();
+            }
+
+            props.viewModel.displayedGraph.selectedNodes.push(node);
         };
 
         const selectMultipleNodes = () => {
