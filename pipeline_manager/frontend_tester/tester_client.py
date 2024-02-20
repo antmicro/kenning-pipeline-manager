@@ -540,7 +540,9 @@ class RPCMethods:
         return {
             "type": _text_to_message_type(properties["MessageType"]).value,
             "content": dataflow,
-            "filename": "external_application_dataflow",
+            "filename": properties["DefaultFilename"]
+            if "DefaultFilename" in properties
+            else "pipeline.json",
         }
 
 

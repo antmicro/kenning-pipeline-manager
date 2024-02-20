@@ -156,6 +156,11 @@
                     "name": "Message",
                     "type": "text",
                     "default": "Everything went fine!"
+                },
+                {
+                    "name": "DefaultFilename",
+                    "type": "text",
+                    "default": "pipeline.json"
                 }
             ],
             "interfaces": []
