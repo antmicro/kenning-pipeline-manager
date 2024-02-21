@@ -7,6 +7,8 @@
             "category": "Test",
             "properties": [],
             "interfaces": [
+                {"name": "input 0", "type": "0", "direction": "input"},
+                {"name": "output 0", "type": "0", "direction": "output"},
                 {"name": "input 1", "type": "1", "direction": "input"},
                 {"name": "output 1", "type": "1", "direction": "output"},
                 {"name": "input [2,1]", "type": ["2", "1"], "direction": "input"},
@@ -27,6 +29,7 @@
     "metadata": {
         "twoColumn": true,
         "interfaces": {
+            "0": {},
             "1": {
                 "interfaceColor": "#9400D3",
                 "interfaceConnectionColor": "#9400D3"
