@@ -11,8 +11,8 @@ export default class BaklavaInterfaceTypes {
 
     defaultStyle = {
         interfaceConnectionPattern: 'solid',
-        interfaceConnectionColor: '#FFFFFF',
-        interfaceColor: '#FFFFFF',
+        interfaceConnectionColor: '#FFFFFF', // $white
+        interfaceColor: '#00E58D', // $green
     };
 
     /**
@@ -95,10 +95,7 @@ export default class BaklavaInterfaceTypes {
         this.types = {};
         if (metadata?.interfaces) {
             Object.entries(metadata.interfaces).forEach(([type, io]) => {
-                this.types[type] = { name: type };
-                this.types[type].interfaceConnectionPattern = io.interfaceConnectionPattern;
-                this.types[type].interfaceConnectionColor = io.interfaceConnectionColor;
-                this.types[type].interfaceColor = io.interfaceColor;
+                this.types[type] = { ...io, name: type };
             });
         }
     }
