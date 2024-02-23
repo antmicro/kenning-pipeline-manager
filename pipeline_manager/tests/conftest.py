@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2023 Antmicro <www.antmicro.com>
+# Copyright (c) 2022-2024 Antmicro <www.antmicro.com>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -6,6 +6,7 @@ import json
 import tempfile
 from importlib.resources import files
 from pathlib import Path
+from typing import Optional
 
 import pytest
 
@@ -213,10 +214,33 @@ def example_pairs():
             )
 
 
-def check_validation(spec):
+def check_validation(spec: str, dataflow: Optional[str] = None) -> int:
+    """
+    Validate specification and dataflow if provided.
+
+    Parameters
+    ----------
+    spec : str
+        Dataflow specification in JSON format to be validated.
+    dataflow : Optional[str]
+        Dataflow in JSON format to be validated.
+
+    Returns
+    -------
+    int :
+        Exit code of the validation process, 0 if successful.
+    """
+    dataflow_path = None
     with tempfile.TemporaryDirectory() as tmpdir:
-        specpath = Path(tmpdir) / "spec.json"
-        with open(specpath, "w") as specfile:
+        spec_path = Path(tmpdir) / "spec.json"
+        dataflow_path = None
+        with open(spec_path, "w") as specfile:
             json.dump(spec, specfile)
-        res = validate(specpath)
+        if dataflow is not None:
+            dataflow_path = Path(tmpdir) / "dataflow.json"
+            with open(dataflow_path, "w") as dataflowfile:
+                json.dump(dataflow, dataflowfile)
+        res = validate(
+            specification_path=spec_path, dataflow_path=dataflow_path
+        )
     return res
