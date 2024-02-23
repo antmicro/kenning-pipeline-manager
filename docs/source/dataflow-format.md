@@ -20,7 +20,7 @@ The root of the dataflow format consists of four main attributes.
 
 ### Graph
 
-The graph format has following attributes:
+The graph format has the following attributes:
 
 * `id` - unique value that identifies the graph.
 * `name` - human-readable name of the graph.
@@ -42,16 +42,16 @@ Each node has:
 * `instanceName` - optional field defining a node's title rendered to the user.
   If set, `instancename (name)` will be displayed, otherwise, just the `name` will be rendered.
 * `properties` - list describing the node's parameterized values.
-  Every element is of type [Property](#property)
+  Every element is of type [Property](#property).
 * `interfaces` - list describing the node's interfaces.
-  Every element is of type [Interface](#interface)
+  Every element is of type [Interface](#interface).
 * `width` - the node's width in the editor.
 * `twoColumn` - boolean value.
-  If set to `true`, then input and output sockets are both rendered in the top part of the node and properties are displayed below.
+  If set to `true`, the interfaces on opposite sides will be arranged parallel to each otherl. Otherwise, each interface will be positioned on a separate line.
 * `subgraph` - optional field defining the `id` of the subgraph that this node represents.
   It refers to one of the [Subgraphs](#subgraphs) entries from `subgraphs` with a matching `id`.
 * `enabledInterfaceGroups` - optional array describing enabled interface groups.
-  Every element is of type [Enabled Interface Groups](#enabled-interface-groups)
+  Every element is of type [Enabled Interface Groups](#enabled-interface-groups).
 
 ##### Property
 
@@ -97,8 +97,8 @@ Object that describes a singular connection.
 It has three attributes:
 
 * `id` - unique value assigned to the connection
-* `from` - the connection's output socket id
-* `to` - the connection's input socket id.
+* `from` - the connection's output interface id
+* `to` - the connection's input interface id.
 * `anchors` - optional list of [Anchor](#anchor) objects.
 
 ##### Anchor
