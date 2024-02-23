@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Antmicro <www.antmicro.com>
+ * Copyright (c) 2022-2024 Antmicro <www.antmicro.com>
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -57,6 +57,10 @@ if (positionals.length === 0) {
 
 
 fs.readFile(positionals[0], async function (err, spec) {
+    if (err) {
+        console.log(`\x1b[31mError reading specification file: ${err}\x1b[0m`);
+        process.exit(1);
+    }
     const instance = EditorManager.getEditorManagerInstance();
     let validationError = instance.validateSpecification(spec.toString());
     if (Array.isArray(validationError) && validationError.length) {
@@ -87,7 +91,10 @@ fs.readFile(positionals[0], async function (err, spec) {
     if (positionals.length >= 2) {
         console.log('\n-----\n')
         fs.readFile(positionals[1], async function (err, dataflow) {
-
+            if (err) {
+                console.log(`\x1b[31mError reading dataflow file: ${err}\x1b[0m`);
+                process.exit(2);
+            }
             ({ errors, warnings } = await instance.loadDataflow(dataflow.toString()));
             if (Array.isArray(warnings) && warnings.length) {
                 console.log('Dataflow warnings:')
