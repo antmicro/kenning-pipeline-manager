@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright (c) 2022-2023 Antmicro <www.antmicro.com>
+# Copyright (c) 2022-2024 Antmicro <www.antmicro.com>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -26,7 +26,10 @@ def script_build():  # noqa: D103
     base_parser.add_argument(
         "--assets-directory", help="Path to directory with assets"
     )
-    base_parser.add_argument("--editor-title", help="Title of the editor")
+    base_parser.add_argument(
+        "--editor-title",
+        help="Set the title for the constructed page and visual editor",
+    )
     base_parser.add_argument(
         "--output-directory",
         help="Directory where the built frontend should be stored",
