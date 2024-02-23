@@ -30,8 +30,6 @@ dependencies = [
     "json-rpc==1.15.0",
     "MarkupSafe==2.1.1",
     "pyrsistent==0.18.1",
-    "pytest==7.4.0",
-    "pytest-asyncio==0.21.1",
     "python-socketio[asyncio_client]==5.10.0",
     "referencing==0.29.0",
     "requests==2.28.2",
@@ -40,6 +38,10 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+test = [
+    "pytest==7.4.0",
+    "pytest-asyncio==0.21.1",
+]
 docs = [
     "antmicro-sphinx-utils @ git+https://github.com/antmicro/antmicro-sphinx-utils.git",
     "sphinxcontrib-napoleon",

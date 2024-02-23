@@ -59,7 +59,7 @@ pytest:
     <<: *ace
     <<: *common_only
     script:
-        - pip3 install -e ".[backend-communication]"
+        - pip3 install -e ".[test,backend-communication]"
         - python3 -m pytest
 
 check-links:
