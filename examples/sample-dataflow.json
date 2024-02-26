@@ -143,7 +143,7 @@
                     {
                         "name": "threshold_type",
                         "id": "67d1cbf1-bd36-46db-984d-6bb874f80a2c",
-                        "value": "constant"
+                        "value": "Binary"
                     }
                 ],
                 "enabledInterfaceGroups": [],
