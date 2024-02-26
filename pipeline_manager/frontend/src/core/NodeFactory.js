@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Antmicro <www.antmicro.com>
+ * Copyright (c) 2022-2024 Antmicro <www.antmicro.com>
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -212,6 +212,8 @@ function detectDiscrepancies(parsedState, inputs, outputs) {
             const propertyType = inputs[ioName].type;
             if (!checkType(propertyType, parsedValue)) {
                 errors.push(`Property '${name}' type mismatch! ${propertyType} expected, ${typeof parsedValue} found.`);
+            } else if (propertyType === 'select' && !inputs[ioName].items.includes(parsedValue)) {
+                errors.push(`Property '${name}' value mismatch! ${parsedValue} not found in ${inputs[ioName].items}`);
             }
         }
     });
