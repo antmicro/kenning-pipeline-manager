@@ -134,6 +134,7 @@ function createProperties(properties) {
         }
         if (intf !== undefined) {
             intf.hidden = hidden;
+            intf.type = propType;
         }
 
         return intf;
@@ -170,22 +171,47 @@ function createProperties(properties) {
 function detectDiscrepancies(parsedState, inputs, outputs) {
     let errors = [];
 
+    const checkType = (propType, value) => {
+        switch (propType) {
+            case 'constant':
+            case 'select':
+                return true;
+            case 'text':
+            case 'hex':
+                return typeof value === 'string';
+            case 'number':
+            case 'integer':
+            case 'slider':
+                return typeof value === 'number';
+            case 'bool':
+                return typeof value === 'boolean';
+            default:
+                return false;
+        }
+    };
+
     // Checking for existence of interfaces defined
     Object.keys({
         ...parsedState.inputs,
         ...parsedState.outputs,
     }).forEach((ioName) => {
+        const name = ioName.slice(ioName.indexOf('_') + 1);
+        const direction = ioName.slice(0, ioName.indexOf('_'));
         if (
             !Object.prototype.hasOwnProperty.call(inputs, ioName) &&
             !Object.prototype.hasOwnProperty.call(outputs, ioName)
         ) {
-            const direction = ioName.slice(0, ioName.indexOf('_'));
-            const name = ioName.slice(ioName.indexOf('_') + 1);
-
             if (direction === 'property') {
                 errors.push(`Property named '${name}' not found in specification!`);
             } else {
                 errors.push(`Interface named '${name}' of direction '${direction}' not found in specification!`);
+            }
+        } else if (direction === 'property') {
+            // Verifying property type defined in the node and the value passed
+            const parsedValue = parsedState.inputs[ioName].value;
+            const propertyType = inputs[ioName].type;
+            if (!checkType(propertyType, parsedValue)) {
+                errors.push(`Property '${name}' type mismatch! ${propertyType} expected, ${typeof parsedValue} found.`);
             }
         }
     });
