@@ -45,7 +45,7 @@ test = [
 docs = [
     "antmicro-sphinx-utils @ git+https://github.com/antmicro/antmicro-sphinx-utils.git",
     "sphinxcontrib-napoleon",
-    "jsonschema2md",
+    "jsonschema2md>=1.1.0",
 ]
 backend-communication = [
     "pipeline-manager-backend-communication @ git+https://github.com/antmicro/kenning-pipeline-manager-backend-communication.git",

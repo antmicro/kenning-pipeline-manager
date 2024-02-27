@@ -11,6 +11,7 @@ Creates documentation entries from JSON schema files.
 import json
 from importlib import resources
 from typing import Dict, List
+from urllib.parse import quote
 
 import jsonschema2md
 
@@ -117,7 +118,7 @@ def generate_schema_md() -> str:
     results.append("(api-common-types)=\n")
     results.append("### Common Types\n\n")
     for name, definition in common_types["$defs"].items():
-        results.append(f"(mmon_types#/$defs/{name})=\n\n")
+        results.append(f"({quote(f'mmon_types#/$defs/{name}')})=\n\n")
         results.append(f"#### {name}\n\n")
         results.extend(PARSER._parse_object(definition, None))
 
