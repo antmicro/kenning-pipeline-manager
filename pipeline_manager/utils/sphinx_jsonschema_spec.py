@@ -9,6 +9,7 @@ Creates documentation entries from JSON schema files.
 """
 
 import json
+import re
 from importlib import resources
 from typing import Dict, List
 from urllib.parse import quote
@@ -62,10 +63,10 @@ def generate_for_endpoints(spec: Dict, reference_prefix: str) -> List[str]:
         results.append(f"#### {name}\n\n")
         if "description" in schema:
             results.append(schema["description"] + "\n\n")
-        results.extend(PARSER._parse_object(schema["params"], "params"))
+        if "params" in schema:
+            results.extend(PARSER._parse_object(schema["params"], "params"))
         if "returns" in schema and schema["returns"]:
             results.extend(PARSER._parse_object(schema["returns"], "result"))
-
     return results
 
 
@@ -121,6 +122,14 @@ def generate_schema_md() -> str:
         results.append(f"({quote(f'mmon_types#/$defs/{name}')})=\n\n")
         results.append(f"#### {name}\n\n")
         results.extend(PARSER._parse_object(definition, None))
+
+    for idx, item in enumerate(results):
+        # NOTE: Modify regex if specification changes
+        occurrences = re.findall(r"\[common_types#/\$defs/(\w+)\]", item)
+        for occurrence in occurrences:
+            results[idx] = item.replace(
+                f"[common_types#/$defs/{occurrence}]", f"[{occurrence}]"
+            )
 
     return "".join(
         [
