@@ -1,5 +1,5 @@
 <!--
-Copyright (c) 2022-2023 Antmicro <www.antmicro.com>
+Copyright (c) 2022-2024 Antmicro <www.antmicro.com>
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -293,6 +293,9 @@ const onContextMenuTitleClick = async (action) => {
     switch (action) {
         case 'delete':
             startTransaction();
+            graph.value.selectedNodes.forEach((node) => {
+                removeNode(node);
+            });
             removeNode(props.node);
             commitTransaction();
             break;
