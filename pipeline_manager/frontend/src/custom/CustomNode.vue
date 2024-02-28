@@ -307,10 +307,16 @@ const onContextMenuTitleClick = async (action) => {
             break;
         case 'disconnect': {
             startTransaction();
+            let interfaces = [...displayedInputs.value, ...displayedOutputs.value];
+            graph.value.selectedNodes.forEach((node) => {
+                interfaces = interfaces.concat(
+                    Object.entries(node.inputs).filter(([name, ni]) => !ni.hidden && !name.startsWith('property_')).map(([, ni]) => ni),
+                    Object.values(node.outputs).filter((ni) => !ni.hidden),
+                );
+            });
             const nodeConnections = graph.value.connections.filter(
                 (c) =>
-                    (displayedInputs.value.find((i) => i === c.from || i === c.to) !== undefined) ||
-                    (displayedOutputs.value.find((i) => i === c.from || i === c.to) !== undefined),
+                    (interfaces.find((i) => i === c.from || i === c.to) !== undefined),
             );
             nodeConnections.forEach((c) => {
                 graph.value.removeConnection(c);
