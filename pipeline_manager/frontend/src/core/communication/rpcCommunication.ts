@@ -181,8 +181,14 @@ function createServer() {
     socket.on('api', async (data: JSONRPCRequest) => {
         const response = await jsonRPCServer.server.receive(data);
         if (response) {
-            const send = await socket.emitWithAck('external-api', response);
-            if (!send) NotificationHandler.terminalLog('error', 'Response to external app was not send', null);
+            try {
+                const ack = await socket.emitWithAck('external-api', response);
+                if (ack !== undefined && !ack) {
+                    NotificationHandler.terminalLog('error', 'Response to external app was not send', null);
+                }
+            } catch (error) {
+                NotificationHandler.terminalLog('error', `Response to ${data.method} request cannot be send`, error);
+            }
         }
     });
     socket.on('api-response', (response: JSONRPCResponse) => {
