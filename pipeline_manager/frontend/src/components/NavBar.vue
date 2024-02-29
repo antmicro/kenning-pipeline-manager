@@ -1,5 +1,5 @@
 <!--
-Copyright (c) 2022-2023 Antmicro <www.antmicro.com>
+Copyright (c) 2022-2024 Antmicro <www.antmicro.com>
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -302,12 +302,12 @@ export default {
          * @param {string} specText specification to validate and load
          */
         loadSpecification(specText) {
-            let { errors, warnings } = this.editorManager.validateSpecification(specText);
-            if (Array.isArray(errors) && errors.length) {
-                NotificationHandler.terminalLog('error', 'Specification is invalid', errors);
+            const validationErrors = this.editorManager.validateSpecification(specText);
+            if (Array.isArray(validationErrors) && validationErrors.length) {
+                NotificationHandler.terminalLog('error', 'Specification is invalid', validationErrors);
                 return;
             }
-            ({ errors, warnings } = this.editorManager.updateEditorSpecification(specText));
+            const { errors, warnings } = this.editorManager.updateEditorSpecification(specText);
             if (Array.isArray(warnings) && warnings.length) {
                 NotificationHandler.terminalLog(
                     'warning',
