@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2023 Antmicro <www.antmicro.com>
+# Copyright (c) 2022-2024 Antmicro <www.antmicro.com>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -80,6 +80,40 @@ def specification_invalid_node_as_category_different_category_path():
             {"category": "a/B", "isCategory": True},
             {"name": "Q", "category": "c/d", "extends": ["B"]},
         ]
+    }
+
+
+@pytest.fixture
+def dataflow_valid_node_property_text():
+    return {
+        "graph": {
+            "connections": [],
+            "id": "78cc86c4-9ad0-4a8f-88cb-71ee28c48659",
+            "nodes": [
+                {
+                    "name": "SaveVideo",
+                    "id": "fc7d1706-6240-41e2-a8da-91c8577e09f9",
+                    "position": {"x": 2100, "y": 200},
+                    "interfaces": [
+                        {
+                            "direction": "input",
+                            "id": "6efb374c-a115-404e-ade8-0aa05ba93996",
+                            "name": "frames",
+                            "side": "left",
+                            "sidePosition": 0,
+                        }
+                    ],
+                    "properties": [
+                        {
+                            "id": "3039e744-9941-47c5-8902-f260e6c29a35",
+                            "name": "filename",
+                            "value": "/some/file/path",
+                        }
+                    ],
+                    "twoColumn": True,
+                }
+            ],
+        }
     }
 
 
@@ -208,6 +242,7 @@ def test_valid_specification(
         "specification_invalid_nodes_without_name",
         "specification_invalid_node_as_category_not_extending",
         "specification_invalid_node_as_category_different_category_path",
+        "dataflow_valid_node_property_text",
     ],
 )
 def test_invalid_specification(
