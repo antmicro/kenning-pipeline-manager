@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Antmicro <www.antmicro.com>
+ * Copyright (c) 2022-2024 Antmicro <www.antmicro.com>
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -123,6 +123,7 @@ export default class EditorManager {
             this.baklavaView.editor.unregisterGraphs();
             this.baklavaView.editor.cleanEditor();
             this.baklavaView.editor.unregisterNodes();
+            this.specificationLoaded = false;
         }
 
         const warnings = [];
