@@ -11,6 +11,13 @@
         "metadata": {
             "$ref": "metadata_schema"
         },
+        "include": {
+            "description": "List of paths to other specifications that should be included",
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        },
         "nodes": {
             "description": "Definition of the available nodes",
             "type": "array",
