@@ -97,7 +97,7 @@ import TemporaryConnection from './connection/TemporaryConnection.vue';
 import NodePalette from './nodepalette/NodePalette.vue';
 import { useTemporaryConnection } from './temporaryConnection';
 import NotificationHandler from '../core/notifications';
-import EditorManager from '../core/EditorManager';
+import EditorManager, { loadJsonFromRemoteLocation } from '../core/EditorManager';
 import RectangleSelection from './RectangleSelection.vue';
 import nodeInsideSelection from './rectangleSelection.js';
 import getExternalApplicationManager from '../core/communication/ExternalApplicationManager';
@@ -553,68 +553,6 @@ export default defineComponent({
             return errors;
         }
 
-        /**
-         * Translates the provided url according to
-         * the optional substitution spec provided at compile time.
-         *
-         * @param {string} loc the encoded URL location of the resource
-         * @returns a translated URL
-         */
-        function parseLocation(loc) {
-            const urlparent = document.location.href.split('/').slice(0, -1).join('/');
-            const relativeurl = `${urlparent}/{}`;
-            const defaultsubs = `{"https": "https://{}", "http": "http://{}", "relative": "${relativeurl}"}`;
-            const jsonsubs = process.env.VUE_APP_JSON_URL_SUBSTITUTES ?? defaultsubs;
-            const subs = JSON.parse(jsonsubs);
-            const parts = loc.split('//');
-
-            if (parts.length < 2) return undefined;
-
-            const key = parts[0].substring(0, parts[0].length - 1);
-            const specifiedUrl = parts.slice(1).join('');
-
-            if (!Object.keys(subs).includes(key)) return undefined;
-            return subs[key].replace('{}', specifiedUrl);
-        }
-
-        /**
-         * Loads the JSON file from the remote location given in URL.
-         *
-         * @param {string} location the URL location of the resource
-         * @returns a string with JSON data or undefined if the
-         * downloading/parsing of the JSON failed
-         */
-        async function loadJsonFromRemoteLocation(customLocation) {
-            const location = parseLocation(customLocation);
-            if (location === undefined) {
-                NotificationHandler.terminalLog(
-                    'error',
-                    `Could not download the resource from:  ${customLocation}.`,
-                );
-                return undefined;
-            }
-            let fetchedContent;
-            try {
-                fetchedContent = await fetch(location, { mode: 'cors' });
-            } catch (error) {
-                NotificationHandler.terminalLog(
-                    'error',
-                    `Could not download the resource from:  ${location}. Reason: ${error.message}`,
-                );
-                return undefined;
-            }
-            try {
-                const jsonContent = await fetchedContent.json();
-                return jsonContent;
-            } catch (error) {
-                NotificationHandler.terminalLog(
-                    'error',
-                    `Could not parse the JSON resource from: ${location}. Reason: ${error.message}`,
-                );
-                return undefined;
-            }
-        }
-
         /* eslint-disable no-lonely-if */
         onMounted(async () => {
             NotificationHandler.setShowNotification(false);
@@ -633,12 +571,18 @@ export default defineComponent({
                 const escapedsearch = window.location.search.replace(/&amp;/g, '&');
                 urlParams = new URLSearchParams(escapedsearch);
                 if (urlParams.has('spec')) {
-                    specText = await loadJsonFromRemoteLocation(urlParams.get('spec'));
-                    if (specText === undefined) {
+                    const [status, ret] = await loadJsonFromRemoteLocation(urlParams.get('spec'));
+                    if (status === false) {
+                        NotificationHandler.terminalLog(
+                            'error',
+                            ret,
+                        );
                         NotificationHandler.terminalLog(
                             'error',
                             `Failed to load the specification file from: ${urlParams.get('spec')}`,
                         );
+                    } else {
+                        specText = ret;
                     }
                 }
             } else {
@@ -668,12 +612,18 @@ export default defineComponent({
                     const escapedsearch = window.location.search.replace(/&amp;/g, '&');
                     urlParams = new URLSearchParams(escapedsearch);
                     if (urlParams.has('graph')) {
-                        dataflow = await loadJsonFromRemoteLocation(urlParams.get('graph'));
-                        if (!dataflow) {
+                        const [status, ret] = await loadJsonFromRemoteLocation(urlParams.get('graph'));
+                        if (status === false) {
+                            NotificationHandler.terminalLog(
+                                'error',
+                                ret,
+                            );
                             NotificationHandler.terminalLog(
                                 'error',
                                 `Failed to load the graph file from: ${urlParams.get('graph')}`,
                             );
+                        } else {
+                            dataflow = ret;
                         }
                     }
                 }

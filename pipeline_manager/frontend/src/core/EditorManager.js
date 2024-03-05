@@ -45,6 +45,56 @@ class Metadata {
     }
 }
 
+/**
+ * Translates the provided url according to
+ * the optional substitution spec provided at compile time.
+ *
+ * @param loc the encoded URL location of the resource
+ * @returns a translated URL
+ */
+function parseLocation(loc) {
+    const urlparent = document.location.href.split('/').slice(0, -1).join('/');
+    const relativeurl = `${urlparent}/{}`;
+    const defaultsubs = `{"https": "https://{}", "http": "http://{}", "relative": "${relativeurl}"}`;
+    const jsonsubs = process.env.VUE_APP_JSON_URL_SUBSTITUTES ?? defaultsubs;
+    const subs = JSON.parse(jsonsubs);
+    const parts = loc.split('//');
+
+    if (parts.length < 2) return undefined;
+
+    const key = parts[0].substring(0, parts[0].length - 1);
+    const specifiedUrl = parts.slice(1).join('');
+
+    if (!Object.keys(subs).includes(key)) return undefined;
+    return subs[key].replace('{}', specifiedUrl);
+}
+
+/**
+ * Loads the JSON file from the remote location given in URL.
+ *
+ * @param customLocation the URL location of the resource
+ * @returns a tuple of a boolean and a JSON object or an error message.
+ * The boolean is true if the JSON was successfully loaded and parsed
+ */
+export async function loadJsonFromRemoteLocation(customLocation) {
+    const location = parseLocation(customLocation);
+    if (location === undefined) {
+        return [false, `Could not download the resource from:  ${customLocation}.`];
+    }
+    let fetchedContent;
+    try {
+        fetchedContent = await fetch(location, { mode: 'cors' });
+    } catch (error) {
+        return [false, `Could not download the resource from:  ${location}. Reason: ${error.message}`];
+    }
+    try {
+        const jsonContent = await fetchedContent.json();
+        return [true, jsonContent];
+    } catch (error) {
+        return [false, `Could not parse the JSON resource from: ${location}. Reason: ${error.message}`];
+    }
+}
+
 export default class EditorManager {
     static instance;
 
