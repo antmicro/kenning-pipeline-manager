@@ -179,7 +179,7 @@ export default class EditorManager {
 
         const warnings = [];
         const errors = [];
-        const { metadata, version } = dataflowSpecification; // eslint-disable-line object-curly-newline,max-len
+        const { version } = dataflowSpecification; // eslint-disable-line object-curly-newline,max-len
         if (!this.currentSpecification) {
             if (version === undefined) {
                 warnings.push(
@@ -195,14 +195,100 @@ export default class EditorManager {
         this.unresolvedSpecification = JSON.parse(JSON.stringify(dataflowSpecification));
         this.currentSpecification = dataflowSpecification;
         if (!lazyLoad) {
-            errors.push(...this.updateMetadata(metadata, false, true));
-            errors.push(...this.updateGraphSpecification(dataflowSpecification));
+            const {
+                errors: newErrors, warnings: newWarnings,
+            } = await this.updateGraphSpecification(dataflowSpecification);
+            errors.push(...newErrors);
+            warnings.push(...newWarnings);
         }
 
         if (errors.length === 0) {
             this.specificationLoaded = true;
         }
+
         return { errors, warnings };
+    }
+
+    /**
+     * Downloads nested imports from the specification and returns an object
+     * consisting of nodes, subgraphs, errors and warnings arrays.
+     *
+     * @param specification Specification to load
+     * @param visited Set of visited specifications to detect circular imports
+     * @returns An object consisting of metadata, nodes, subgraphs, errors and warnings arrays.
+     */
+    async downloadNestedImports(specification, visited = new Set()) {
+        const ret = {
+            include: (specification.include !== undefined) ? specification.include : [],
+            nodes: (specification.nodes !== undefined) ? specification.nodes : [],
+            subgraphs: (specification.subgraphs !== undefined) ? specification.subgraphs : [],
+            metadata: (specification.metadata !== undefined) ? specification.metadata : {},
+            errors: [],
+            warnings: [],
+        };
+
+        // Download specifications and verify for circular imports
+        const specs = [];
+        const currentImports = new Set();
+        await Promise.all(ret.include.map(async (spec) => {
+            if (currentImports.has(spec)) {
+                ret.warnings.push(`Specification is included multiply times, skipping ${spec}`);
+                return;
+            }
+            currentImports.add(spec);
+
+            if (visited.has(spec)) {
+                ret.errors.push(`Circular dependency detected in included specification ${spec}`);
+                return;
+            }
+
+            if (!this.globalVisitedSpecs.has(spec)) {
+                this.globalVisitedSpecs.add(spec);
+                const [status, val] = await loadJsonFromRemoteLocation(spec);
+                if (status === false) {
+                    ret.errors.push(`Could not load the included specification from ${spec}. Reason: ${val}`);
+                } else {
+                    specs.push(
+                        {
+                            specification: val,
+                            visited: new Set([...visited, spec]), // Detect circular imports
+                        },
+                    );
+                }
+            }
+        }));
+
+        if (ret.errors.length) {
+            return ret;
+        }
+
+        // Download nested imports
+        await Promise.all(specs.map(async ({ specification: spec, visited: specsVisited }) => {
+            const {
+                metadata, nodes, subgraphs, errors, warnings,
+            } = await this.downloadNestedImports(spec, specsVisited);
+            ret.errors.push(...errors);
+            ret.warnings.push(...warnings);
+            ret.nodes.push(...nodes);
+            ret.subgraphs.push(...subgraphs);
+
+            // Unpack all metadata variables into imports_metadata
+            Object.entries(metadata).forEach(([key, value]) => {
+                if (key in ret.metadata) {
+                    if (Array.isArray(ret.metadata[key])) {
+                        // Array merge
+                        ret.metadata[key] = [...ret.metadata[key], ...value];
+                    } else if (typeof ret.metadata[key] === 'object') {
+                        // Object merge, but prefer the value from the current specification
+                        ret.metadata[key] = { ...value, ...ret.metadata[key] };
+                    }
+                } else {
+                    // Simple type assign if the key is not present in the current metadata
+                    ret.metadata[key] = value;
+                }
+            });
+        }));
+        return ret;
     }
 
     /**
@@ -211,14 +297,23 @@ export default class EditorManager {
      * @returns An object consisting of errors and warnings arrays. If any array is empty
      * the updating process was successful.
      */
-    updateGraphSpecification(dataflowSpecification = undefined) {
+    async updateGraphSpecification(dataflowSpecification = undefined) {
         if (dataflowSpecification === undefined) {
             dataflowSpecification = this.currentSpecification;
         }
 
-        if (!dataflowSpecification) return ['No specification to load provided.'];
+        if (!dataflowSpecification) return { errors: ['No specification to load provided.'], warnings: [] };
 
-        const { subgraphs, nodes, metadata } = dataflowSpecification; // eslint-disable-line object-curly-newline,max-len
+        this.globalVisitedSpecs = new Set();
+        const { metadata, nodes, subgraphs, errors, warnings } = await this.downloadNestedImports(dataflowSpecification); // eslint-disable-line object-curly-newline,max-len
+        if (errors.length) {
+            return { errors, warnings };
+        }
+
+        errors.push(...this.updateMetadata(metadata, false, true));
+        if (errors.length) {
+            return { errors, warnings };
+        }
 
         let resolvedNodes = [];
 
@@ -226,14 +321,14 @@ export default class EditorManager {
             const preprocessedNodes = this.preprocessNodes(nodes);
             resolvedNodes = this.resolveInheritance(preprocessedNodes);
         } catch (e) {
-            return [e.message];
+            return { errors: [e.message], warnings };
         }
 
-        let errors = this.validateResolvedSpecification(
+        errors.push(...this.validateResolvedSpecification(
             { subgraphs, nodes: resolvedNodes, metadata },
-        );
+        ));
         if (errors.length) {
-            return errors;
+            return { errors, warnings };
         }
 
         this.currentSpecification.nodes = JSON.parse(JSON.stringify(resolvedNodes));
@@ -283,7 +378,6 @@ export default class EditorManager {
             }
         });
 
-        errors = [];
         resolvedNodes.forEach((node) => {
             const myNode = NodeFactory(
                 node.name,
@@ -331,7 +425,7 @@ export default class EditorManager {
         });
 
         if (errors.length) {
-            return errors;
+            return { errors, warnings };
         }
 
         if (subgraphs !== undefined) {
@@ -358,7 +452,7 @@ export default class EditorManager {
             });
         }
 
-        return errors;
+        return { errors, warnings };
     }
 
     /**
