@@ -114,7 +114,7 @@ class ExternalApplicationManager {
                     'Specification is invalid',
                 )) return;
                 if (handleSpecificationResult(
-                    this.editorManager.updateEditorSpecification(specification),
+                    await this.editorManager.updateEditorSpecification(specification),
                     'Warnings when loading specification',
                     'Errors when loading specification',
                 )) return;

@@ -315,17 +315,18 @@ export default {
                 NotificationHandler.terminalLog('error', 'Specification is invalid', validationErrors);
                 return;
             }
-            const { errors, warnings } = this.editorManager.updateEditorSpecification(specText);
-            if (Array.isArray(warnings) && warnings.length) {
-                NotificationHandler.terminalLog(
-                    'warning',
-                    'Issue when loading specification',
-                    warnings,
-                );
-            }
-            if (Array.isArray(errors) && errors.length) {
-                NotificationHandler.terminalLog('error', 'Specification is invalid', errors);
-            }
+            this.editorManager.updateEditorSpecification(specText).then(({ errors, warnings }) => {
+                if (Array.isArray(warnings) && warnings.length) {
+                    NotificationHandler.terminalLog(
+                        'warning',
+                        'Issue when loading specification',
+                        warnings,
+                    );
+                }
+                if (Array.isArray(errors) && errors.length) {
+                    NotificationHandler.terminalLog('error', 'Specification is invalid', errors);
+                }
+            });
         },
 
         createNewGraphCallback() {

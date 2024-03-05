@@ -530,7 +530,7 @@ export default defineComponent({
          *
          * @param specification The object holding the parsed specification file
          */
-        function updateEditorSpecification(specification) {
+        async function updateEditorSpecification(specification) {
             let errors = editorManager.validateSpecification(specification);
             let warnings;
             if (errors.length) {
@@ -538,7 +538,7 @@ export default defineComponent({
                 return errors;
             }
 
-            ({ errors, warnings } = editorManager.updateEditorSpecification(specification)); // eslint-disable-line prefer-const,max-len
+            ({ errors, warnings } = await editorManager.updateEditorSpecification(specification)); // eslint-disable-line prefer-const,max-len
             if (Array.isArray(warnings) && warnings.length) {
                 NotificationHandler.terminalLog(
                     'warning',
@@ -597,7 +597,7 @@ export default defineComponent({
             }
 
             if (specText !== undefined) {
-                let errors = updateEditorSpecification(specText);
+                let errors = await updateEditorSpecification(specText);
 
                 if (errors.length) {
                     NotificationHandler.restoreShowNotification();
@@ -707,17 +707,18 @@ export default defineComponent({
                         NotificationHandler.terminalLog('error', 'Specification is invalid', specErrors);
                         return;
                     }
-                    const { loadError, loadWarn } = editorManager.updateEditorSpecification(data);
-                    if (Array.isArray(loadWarn) && loadWarn.length) {
-                        NotificationHandler.terminalLog(
-                            'warning',
-                            'Issue when loading specification',
-                            loadWarn,
-                        );
-                    }
-                    if (Array.isArray(loadError) && loadError.length) {
-                        NotificationHandler.terminalLog('error', 'Specification is invalid', loadError);
-                    }
+                    editorManager.updateEditorSpecification(data).then(({ errors, warnings }) => {
+                        if (Array.isArray(warnings) && warnings.length) {
+                            NotificationHandler.terminalLog(
+                                'warning',
+                                'Issue when loading specification',
+                                warnings,
+                            );
+                        }
+                        if (Array.isArray(errors) && errors.length) {
+                            NotificationHandler.terminalLog('error', 'Specification is invalid', errors);
+                        }
+                    });
                     return;
                 }
 

@@ -70,7 +70,7 @@ fs.readFile(positionals[0], async function (err, spec) {
         process.exit(1);
     }
 
-    let { errors, warnings } = instance.updateEditorSpecification(spec.toString());
+    let { errors, warnings } = await instance.updateEditorSpecification(spec.toString());
     if (Array.isArray(warnings) && warnings.length) {
         console.log('Specification warnings:')
         warnings.forEach((warning) => console.log(`* \t\x1b[33m${warning}\x1b[0m`))

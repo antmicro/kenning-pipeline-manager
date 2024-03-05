@@ -159,7 +159,7 @@ export default class EditorManager {
      * the updating process was successful.
      */
     /* eslint-disable no-underscore-dangle,no-param-reassign */
-    updateEditorSpecification(dataflowSpecification, lazyLoad = false) {
+    async updateEditorSpecification(dataflowSpecification, lazyLoad = false) {
         if (!dataflowSpecification) return ['No specification passed'];
 
         if (typeof dataflowSpecification === 'string' || dataflowSpecification instanceof String) {
