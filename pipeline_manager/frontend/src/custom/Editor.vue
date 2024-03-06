@@ -1,5 +1,5 @@
 <!--
-Copyright (c) 2022-2023 Antmicro <www.antmicro.com>
+Copyright (c) 2022-2024 Antmicro <www.antmicro.com>
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -39,7 +39,7 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
 
         <slot
             name="palette"
-            v-if="specificationLoaded && !(readonly || hideHud)"
+            v-if="!(readonly || hideHud)"
         >
             <NodePalette />
         </slot>
@@ -130,7 +130,6 @@ export default defineComponent({
         const panZoom = usePanZoom();
         const temporaryConnection = useTemporaryConnection();
         const editorManager = EditorManager.getEditorManagerInstance();
-        const specificationLoaded = computed(() => editorManager.specificationLoaded);
 
         const highlightConnections = ref([]);
         const highlightInterfaces = ref([]);
@@ -812,7 +811,6 @@ export default defineComponent({
             visibleConnections,
             visibleNodes,
             highlightInterfaces,
-            specificationLoaded,
         };
     },
 });

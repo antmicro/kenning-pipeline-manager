@@ -1,5 +1,5 @@
 <!--
-Copyright (c) 2022-2023 Antmicro <www.antmicro.com>
+Copyright (c) 2022-2024 Antmicro <www.antmicro.com>
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -9,7 +9,7 @@ Component representing single node's type category/subcategory.
 It groups the nodes of the same subcategory in the block that can be collapsed.
 -->
 
-<template>
+<template v-if="specificationLoaded">
     <!-- eslint-disable vue/no-multiple-template-root -->
     <div
         v-for="([name, category], i) in sortedEntries(nodeTree, true)"
@@ -166,11 +166,12 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
 </template>
 
 <script>
-import { defineComponent, ref, watch, inject } from 'vue'; // eslint-disable-line object-curly-newline
+import { defineComponent, computed, ref, watch, inject } from 'vue'; // eslint-disable-line object-curly-newline
 import { useViewModel } from '@baklavajs/renderer-vue';
 import Arrow from '../../icons/Arrow.vue';
 import VerticalEllipsis from '../../icons/VerticalEllipsis.vue';
 import LinkMenu from '../LinkMenu.vue';
+import EditorManager from '../../core/EditorManager';
 
 export default defineComponent({
     components: {
@@ -298,6 +299,9 @@ export default defineComponent({
             if (showMenu.value) showMenu.value = false;
         };
 
+        const editorManager = EditorManager.getEditorManagerInstance();
+        const specificationLoaded = computed(() => editorManager.specificationLoaded.value);
+
         return {
             padding,
             mask,
@@ -313,6 +317,7 @@ export default defineComponent({
             showMenu,
             showMenuClick,
             closeMenu,
+            specificationLoaded,
         };
     },
 });
