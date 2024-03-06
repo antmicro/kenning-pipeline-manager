@@ -84,6 +84,62 @@ def specification_invalid_node_as_category_different_category_path():
 
 
 @pytest.fixture
+def specification_invalid_same_node_name():
+    return {
+        "nodes": [
+            {
+                "name": "TestNode",
+            },
+            {
+                "name": "TestNode",
+            },
+        ]
+    }
+
+
+@pytest.fixture
+def specification_invalid_same_node_name_and_category():
+    return {
+        "nodes": [
+            {
+                "name": "TestNode",
+                "category": "TestNode",
+            },
+            {
+                "name": "TestNode",
+                "category": "TestNode",
+            },
+        ]
+    }
+
+
+@pytest.fixture
+def specification_invalid_same_node_name_different_category():
+    return {
+        "nodes": [
+            {
+                "name": "TestNode",
+                "category": "TestNodeFirst",
+            },
+            {
+                "name": "TestNode",
+                "category": "TestNodeSecond",
+            },
+        ]
+    }
+
+
+@pytest.fixture
+def specification_invalid_same_category():
+    return {
+        "nodes": [
+            {"category": "a/B", "isCategory": True},
+            {"category": "a/B", "isCategory": True},
+        ]
+    }
+
+
+@pytest.fixture
 def dataflow_valid_node_property_text():
     return {
         "graph": {
@@ -242,6 +298,10 @@ def test_valid_specification(
         "specification_invalid_nodes_without_name",
         "specification_invalid_node_as_category_not_extending",
         "specification_invalid_node_as_category_different_category_path",
+        "specification_invalid_same_node_name",
+        "specification_invalid_same_node_name_and_category",
+        "specification_invalid_same_node_name_different_category",
+        "specification_invalid_same_category",
         "dataflow_valid_node_property_text",
     ],
 )

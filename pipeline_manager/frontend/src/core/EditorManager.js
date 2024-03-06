@@ -314,9 +314,10 @@ export default class EditorManager {
     }
 
     /**
-     * Preprocess nodes to be later passed to `resolveInheritance` function
+     * Preprocess nodes to be later passed to `resolveInheritance` function.
      *
-     * @param nodes coming from specification
+     * @param nodes coming from specification.
+     * @throws Error if a category node has a name different than the last part of its category.
      */
     preprocessNodes(nodes) { // eslint-disable-line class-methods-use-this
         nodes.forEach((node) => {
@@ -338,7 +339,6 @@ export default class EditorManager {
      * @param metadata metadata to load
      * @param overriding tells whether the metadata is updated on dataflow loading
      * @param loading resets updated metadata, should be used when loading new dataflow
-     *
      */
     updateMetadata(metadata = undefined, overriding = false, loading = false) {
         if (loading) this.updatedMetadata = {};
@@ -774,6 +774,7 @@ export default class EditorManager {
         // Nodes have to extend the first category node in their category path.
         // For example, if we have two category nodes A and C and we have a node e
         // which has a category 'A/b/C/d/e' then it has to extend C (and C has to extend A)
+        const nodeNames = new Set();
         nodes.forEach((node) => {
             const categories = node.category.split('/');
 
@@ -809,6 +810,12 @@ export default class EditorManager {
                     }
                 }
             }
+
+            // Finding multiple nodes with the same name
+            if (nodeNames.has(node.name)) {
+                errors.push(`Node '${node.name}' is defined multiple times`);
+            }
+            nodeNames.add(node.name);
         });
         return errors;
     }
