@@ -140,6 +140,11 @@ def specification_invalid_same_category():
 
 
 @pytest.fixture
+def specification_invalid_empty():
+    return {}
+
+
+@pytest.fixture
 def dataflow_valid_node_property_text():
     return {
         "graph": {
@@ -302,6 +307,7 @@ def test_valid_specification(
         "specification_invalid_same_node_name_and_category",
         "specification_invalid_same_node_name_different_category",
         "specification_invalid_same_category",
+        "specification_invalid_empty",
         "dataflow_valid_node_property_text",
     ],
 )

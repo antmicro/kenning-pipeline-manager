@@ -319,9 +319,6 @@
             }
         }
     },
-    "required": [
-        "nodes"
-    ],
     "unevaluatedProperties": false,
     "$defs": {
         "interface": {
