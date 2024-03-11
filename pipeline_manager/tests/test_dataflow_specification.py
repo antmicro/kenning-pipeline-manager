@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import pytest
+from pytest_httpserver import HTTPServer
 
 from pipeline_manager.tests.conftest import check_validation, example_pairs
 from pipeline_manager.validator import validate
@@ -145,6 +146,65 @@ def specification_invalid_empty():
 
 
 @pytest.fixture
+def specification_invalid_empty_include():
+    return {"include": []}
+
+
+@pytest.fixture
+def specification_invalid_include_doesnt_exist():
+    return {
+        "include": ["localhost:1234/this-does-not-exist/specification.json"]
+    }
+
+
+@pytest.fixture
+def specification_invalid_recursive_include(httpserver: HTTPServer):
+    include_specification = {
+        "include": [httpserver.url_for("/specification.json")],
+        "nodes": [
+            {"category": "a/B", "isCategory": True},
+            {"name": "Q", "extends": ["B"]},
+            {"name": "Z", "category": "c/B"},
+        ],
+    }
+
+    httpserver.expect_request("/specification.json").respond_with_json(
+        include_specification
+    )
+
+    return {
+        "include": [
+            httpserver.url_for("/specification.json"),
+        ],
+    }
+
+
+@pytest.fixture
+def specification_invalid_repeating_node_declarations(httpserver: HTTPServer):
+    include_specification = {
+        "nodes": [
+            {"category": "a/B", "isCategory": True},
+            {"name": "Q", "extends": ["B"]},
+            {"name": "Z", "category": "c/B"},
+        ]
+    }
+
+    httpserver.expect_request("/specification.json").respond_with_json(
+        include_specification
+    )
+    httpserver.expect_request("/second-specification.json").respond_with_json(
+        include_specification
+    )
+
+    return {
+        "include": [
+            httpserver.url_for("/specification.json"),
+            httpserver.url_for("/second-specification.json"),
+        ],
+    }
+
+
+@pytest.fixture
 def dataflow_valid_node_property_text():
     return {
         "graph": {
@@ -265,6 +325,80 @@ def specification_valid_node_as_category_other_category_with_same_name():
     }
 
 
+@pytest.fixture
+def specification_valid_nodes_in_include(httpserver: HTTPServer):
+    include_specification = {
+        "nodes": [
+            {"category": "a/B", "isCategory": True},
+            {"name": "Q", "extends": ["B"]},
+            {"name": "Z", "category": "c/B"},
+        ]
+    }
+
+    httpserver.expect_request("/specification.json").respond_with_json(
+        include_specification
+    )
+
+    return {
+        "include": [
+            httpserver.url_for("/specification.json"),
+        ],
+    }
+
+
+@pytest.fixture
+def specification_valid_repeating_include(httpserver: HTTPServer):
+    include_specification = {
+        "nodes": [
+            {"category": "a/B", "isCategory": True},
+            {"name": "Q", "extends": ["B"]},
+            {"name": "Z", "category": "c/B"},
+        ]
+    }
+
+    httpserver.expect_request("/specification.json").respond_with_json(
+        include_specification
+    )
+
+    # We expect warning here instead of an error
+    return {
+        "include": [
+            httpserver.url_for("/specification.json"),
+            httpserver.url_for("/specification.json"),
+        ],
+    }
+
+
+@pytest.fixture
+def specification_valid_nested_repeating_include(httpserver: HTTPServer):
+    include_specification = {
+        "nodes": [
+            {"category": "a/B", "isCategory": True},
+            {"name": "Q", "extends": ["B"]},
+            {"name": "Z", "category": "c/B"},
+        ]
+    }
+
+    second_specification = {
+        "include": [httpserver.url_for("/specification.json")],
+    }
+
+    httpserver.expect_request("/specification.json").respond_with_json(
+        include_specification
+    )
+    httpserver.expect_request("/second-specification.json").respond_with_json(
+        second_specification
+    )
+
+    # We expect skip of the nested `/specification.json` loading
+    return {
+        "include": [
+            httpserver.url_for("/specification.json"),
+            httpserver.url_for("/second-specification.json"),
+        ],
+    }
+
+
 @pytest.mark.parametrize("example", example_pairs())
 def test_all_existing_examples(example):
     """
@@ -286,6 +420,9 @@ def test_all_existing_examples(example):
         "specification_valid_node_as_category_with_inheriting",
         "specification_valid_node_as_category_with_inheriting_nested",
         "specification_valid_node_as_category_other_category_with_same_name",
+        "specification_valid_repeating_include",
+        "specification_valid_nodes_in_include",
+        "specification_valid_nested_repeating_include",
     ],
 )
 def test_valid_specification(
@@ -308,6 +445,9 @@ def test_valid_specification(
         "specification_invalid_same_node_name_different_category",
         "specification_invalid_same_category",
         "specification_invalid_empty",
+        "specification_invalid_empty_include",
+        "specification_invalid_include_doesnt_exist",
+        "specification_invalid_recursive_include",
         "dataflow_valid_node_property_text",
     ],
 )
