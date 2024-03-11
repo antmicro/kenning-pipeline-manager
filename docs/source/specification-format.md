@@ -14,6 +14,7 @@ The specification consists of:
 * `metadata` - object of type [Metadata](#metadata) that specifies editor styling and metadata
 * `nodes` - array that specifies valid nodes, where every element is of type [Node](#node).
 * `subgraphs` - array of dataflow-like objects defining subgraph nodes, of type [Subgraphs](#subgraphs).
+* `include` - array of string objects pointing to a remote url to the specifications to include.
 * `version` - string determining version of the specification.
   Should be set to the newest version described in [Changelogs](#changelogs).
   {{project}} uses that value to check the compatibility of the specification with the current implementation, giving warnings about inconsistency in versions.
