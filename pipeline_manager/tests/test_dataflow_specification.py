@@ -151,6 +151,11 @@ def specification_invalid_empty_include():
 
 
 @pytest.fixture
+def specification_invalid_empty_nodes():
+    return {"nodes": []}
+
+
+@pytest.fixture
 def specification_invalid_include_doesnt_exist():
     return {
         "include": ["localhost:1234/this-does-not-exist/specification.json"]
@@ -446,6 +451,7 @@ def test_valid_specification(
         "specification_invalid_same_category",
         "specification_invalid_empty",
         "specification_invalid_empty_include",
+        "specification_invalid_empty_nodes",
         "specification_invalid_include_doesnt_exist",
         "specification_invalid_recursive_include",
         "dataflow_valid_node_property_text",

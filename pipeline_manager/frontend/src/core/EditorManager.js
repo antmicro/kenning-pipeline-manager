@@ -909,10 +909,6 @@ export default class EditorManager {
     }
 
     validateResolvedSpecification(specification) {
-        // Do not allow empty nodes array
-        if (!specification.nodes.length) {
-            specification.nodes = undefined;
-        }
         const validationErrors = this.validateSpecification(specification, specificationSchema);
         if (validationErrors.length) return validationErrors;
 
