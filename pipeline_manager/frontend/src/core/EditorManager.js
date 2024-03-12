@@ -90,13 +90,13 @@ export async function loadJsonFromRemoteLocation(customLocation) {
     try {
         fetchedContent = await fetch(location, { mode: 'cors' });
     } catch (error) {
-        return [false, `Could not download the resource from:  ${location}. Reason: ${error.message}`];
+        return [false, error.message];
     }
     try {
         const jsonContent = await fetchedContent.json();
         return [true, jsonContent];
     } catch (error) {
-        return [false, `Could not parse the JSON resource from: ${location}. Reason: ${error.message}`];
+        return [false, error.message];
     }
 }
 
