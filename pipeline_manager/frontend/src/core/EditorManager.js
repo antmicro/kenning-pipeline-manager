@@ -297,10 +297,10 @@ export default class EditorManager {
             // Unpack all metadata variables into imports_metadata
             Object.entries(metadata).forEach(([key, value]) => {
                 if (key in ret.metadata) {
-                    if (Array.isArray(ret.metadata[key])) {
+                    if (Array.isArray(ret.metadata[key]) && Array.isArray(value)) {
                         // Array merge
                         ret.metadata[key] = [...ret.metadata[key], ...value];
-                    } else if (typeof ret.metadata[key] === 'object') {
+                    } else if (typeof ret.metadata[key] === 'object' && typeof value === 'object') {
                         // Object merge, but prefer the value from the current specification
                         ret.metadata[key] = { ...value, ...ret.metadata[key] };
                     }
@@ -493,6 +493,7 @@ export default class EditorManager {
      * @param metadata metadata to load
      * @param overriding tells whether the metadata is updated on dataflow loading
      * @param loading resets updated metadata, should be used when loading new dataflow
+     * @returns An array of errors that occurred during the metadata loading.
      */
     updateMetadata(metadata = undefined, overriding = false, loading = false) {
         if (loading) this.updatedMetadata = {};
