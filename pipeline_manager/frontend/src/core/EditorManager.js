@@ -200,9 +200,26 @@ export default class EditorManager {
         this.unresolvedSpecification = JSON.parse(JSON.stringify(dataflowSpecification));
         this.currentSpecification = dataflowSpecification;
         if (!lazyLoad) {
+            // Preprocess includes
+            this.globalVisitedSpecs = new Set();
+            const unresolvedSpecification = await this.downloadNestedImports(dataflowSpecification); // eslint-disable-line object-curly-newline,max-len
+            errors.push(...unresolvedSpecification.errors);
+            warnings.push(...unresolvedSpecification.warnings);
+            if (errors.length) {
+                return { errors, warnings };
+            }
+
+            // Update metadata
+            const { metadata } = unresolvedSpecification;
+            errors.push(...this.updateMetadata(metadata, false, true));
+            if (errors.length) {
+                return { errors, warnings };
+            }
+
+            // Update graph specification
             const {
                 errors: newErrors, warnings: newWarnings,
-            } = await this.updateGraphSpecification(dataflowSpecification);
+            } = await this.updateGraphSpecification(unresolvedSpecification);
             errors.push(...newErrors);
             warnings.push(...newWarnings);
         }
@@ -302,23 +319,12 @@ export default class EditorManager {
      * @returns An object consisting of errors and warnings arrays. If any array is empty
      * the updating process was successful.
      */
-    async updateGraphSpecification(dataflowSpecification = undefined) {
-        if (dataflowSpecification === undefined) {
-            dataflowSpecification = this.currentSpecification;
-        }
+    async updateGraphSpecification(dataflowSpecification) {
+        const warnings = [];
 
-        if (!dataflowSpecification) return { errors: ['No specification to load provided.'], warnings: [] };
+        if (!dataflowSpecification) return { errors: ['No specification passed'], warnings };
 
-        this.globalVisitedSpecs = new Set();
-        const { metadata, nodes, subgraphs, errors, warnings } = await this.downloadNestedImports(dataflowSpecification); // eslint-disable-line object-curly-newline,max-len
-        if (errors.length) {
-            return { errors, warnings };
-        }
-
-        errors.push(...this.updateMetadata(metadata, false, true));
-        if (errors.length) {
-            return { errors, warnings };
-        }
+        const { nodes, subgraphs, metadata } = dataflowSpecification;
 
         let resolvedNodes = [];
 
@@ -329,6 +335,7 @@ export default class EditorManager {
             return { errors: [e.message], warnings };
         }
 
+        const errors = [];
         errors.push(...this.validateResolvedSpecification(
             { subgraphs, nodes: resolvedNodes, metadata },
         ));
