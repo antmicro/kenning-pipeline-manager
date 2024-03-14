@@ -205,12 +205,27 @@ export default class EditorManager {
                 return { errors, warnings };
             }
 
+            // Include graphs
+            const {
+                graphs, errors: includeGraphsErrors,
+            } = await EditorManager.includeGraphs(unresolvedSpecification.includeGraphs ?? []);
+
+            errors.push(...includeGraphsErrors);
+            if (errors.length) {
+                return { errors, warnings };
+            }
+
             // Update metadata
             const { metadata } = unresolvedSpecification;
             errors.push(...this.updateMetadata(metadata, false, true));
             if (errors.length) {
                 return { errors, warnings };
             }
+
+            unresolvedSpecification.graphs = [
+                ...(unresolvedSpecification.graphs ?? []),
+                ...graphs,
+            ];
 
             // Update graph specification
             const {
@@ -284,6 +299,69 @@ export default class EditorManager {
                 specification = EditorManager.mergeObjects(specification, newSpecification);
             }));
         return { specification, errors };
+    }
+
+    /**
+     * Downloads included dataflows from the specification and converts them to the
+     * graphs format to be included into the specification.
+     *
+     * @param includeGraphs Array of included graphs
+     * @returns Array of subgraphs and an array of errors that occurred during the process.
+     */
+    static async includeGraphs(includeGraphs) {
+        const errors = [];
+        const graphs = [];
+
+        if (includeGraphs.length === 0) {
+            return { graphs, errors };
+        } if (includeGraphs.length !== new Set(includeGraphs).size) {
+            errors.push('Duplicate subgraph includes detected. Aborting.');
+            return { graphs, errors };
+        }
+
+        await Promise.all(includeGraphs.map(async (dataflow) => {
+            const [status, val] = await loadJsonFromRemoteLocation(dataflow.url);
+            if (status === false) {
+                errors.push(`Could not load the included dataflow from ${dataflow}. Reason: ${val}`);
+                return;
+            }
+            if (val.graphs.length !== 1) {
+                errors.push(`Only single graph dataflows are supported. Aborting loading subgraph include from ${dataflow.url}.`);
+                return;
+            }
+
+            let targetGraph;
+            if (val.entryGraph === undefined) {
+                targetGraph = val.graphs[0]; // eslint-disable-line prefer-destructuring
+            } else {
+                targetGraph = val.graphs.find((graph) => graph.id === val.entryGraph);
+            }
+
+            targetGraph.name = dataflow.name ?? val.graph.name;
+            targetGraph.category = dataflow.category ?? undefined;
+
+            if (targetGraph.name === undefined) {
+                errors.push(`Included subgraph from ${dataflow.url} does not have a name defined.`);
+                return;
+            }
+
+            if (graphs.find((graph) => graph.name === targetGraph.name) !== undefined) {
+                errors.push(`Included graph from ${dataflow.url} has a duplicate name`);
+                return;
+            }
+
+            // Filter out additional properties and use defaults
+            const validationErrors = EditorManager.validateJSONWithSchema(
+                targetGraph, graphSchema,
+            );
+            if (validationErrors.length) {
+                errors.push(...validationErrors);
+                return;
+            }
+
+            graphs.push(targetGraph);
+        }));
+        return { graphs, errors };
     }
 
     /**
@@ -426,8 +504,8 @@ export default class EditorManager {
 
                 this.baklavaView.editor.addGraphTemplate(
                     myGraph,
-                    myGraph.category,
-                    myGraph.name,
+                    graph.category,
+                    graph.name,
                 );
             });
         }
@@ -820,10 +898,10 @@ export default class EditorManager {
      * @param data Specification file to validate. Can be either a parsed JSON object
      * or a textual file
      * @param schema Schema to use
+     * @param additionalAjvOptions Additional options to pass to the Ajv constructor
      * @returns An array of errors. If the array is empty, the validation was successful.
      */
-    /* eslint-disable class-methods-use-this */
-    validateJSONWithSchema(data, schema) {
+    static validateJSONWithSchema(data, schema, additionalAjvOptions = {}) {
         const ajv = new Ajv2019({
             allowUnionTypes: true,
             formats: {
@@ -836,6 +914,7 @@ export default class EditorManager {
                 dataflowSchema,
                 graphSchema,
             ],
+            ...additionalAjvOptions,
         });
         ajv.addKeyword('version');
 
@@ -889,6 +968,10 @@ export default class EditorManager {
                     return `${errorPrefix} ${path} ${error.message} - ${stringify(
                         error.params.allowedValue,
                     )}`;
+                case 'unevaluatedProperties':
+                    return `${errorPrefix} ${path} ${error.message} - ${stringify(
+                        error.params.unevaluatedProperty,
+                    )}}`;
                 // Those errors are not informative at all
                 case 'not':
                 case 'oneOf':
@@ -977,7 +1060,7 @@ export default class EditorManager {
      */
     /* eslint-disable class-methods-use-this */
     validateSpecification(specification, schema = unresolvedSpecificationSchema) {
-        return this.validateJSONWithSchema(specification, schema);
+        return EditorManager.validateJSONWithSchema(specification, schema);
     }
 
     /**
@@ -987,7 +1070,7 @@ export default class EditorManager {
      * @return An array of errors. If the array is empty, the validation was successful.
      */
     validateMetadata(jsonmetadata) {
-        return this.validateJSONWithSchema(jsonmetadata, metadataSchema);
+        return EditorManager.validateJSONWithSchema(jsonmetadata, metadataSchema);
     }
 
     /**
@@ -997,7 +1080,7 @@ export default class EditorManager {
      * @return An array of errors. If the array is empty, the validation was successful.
      */
     validateDataflow(jsonmetadata) {
-        return this.validateJSONWithSchema(jsonmetadata, dataflowSchema);
+        return EditorManager.validateJSONWithSchema(jsonmetadata, dataflowSchema);
     }
 
     /**
