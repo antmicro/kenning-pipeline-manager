@@ -23,7 +23,7 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
             'baklava-ignore-mouse': !!temporaryConnection || dragging,
             '--temporary-connection': !!temporaryConnection,
         }"
-        :style="`--scale: ${this.scale}`"
+        :style="`--scale: ${this.scale}; cursor: ${dragging ? 'move' : 'default'}`"
         @wheel.self="mouseWheel"
         @keydown="keyDown"
         @keyup="keyUp"
