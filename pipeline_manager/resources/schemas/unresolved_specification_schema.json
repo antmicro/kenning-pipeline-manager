@@ -18,6 +18,38 @@
                 "type": "string"
             }
         },
+        "includeGraphs": {
+            "description": "List of paths to dataflow files that should be included as graphs",
+            "type": "array",
+            "items": {
+                "description": "Definition of the graphs included from the dataflow file",
+                "type": "object",
+                "properties": {
+                    "category": {
+                        "description": "Category of the graph in the node palette. If no category is provided 'default' is used",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "name": {
+                        "description": "Name of the subgraph",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "url": {
+                        "description": "URL of the dataflow file",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "url"
+                ],
+                "additionalProperties": false
+            }
+        },
         "nodes": {
             "description": "Definition of the available nodes",
             "type": "array",
