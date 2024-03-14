@@ -23,7 +23,7 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
             'baklava-ignore-mouse': !!temporaryConnection || dragging,
             '--temporary-connection': !!temporaryConnection,
         }"
-        :style="`--scale: ${this.scale}; cursor: ${dragging ? 'move' : 'default'}`"
+        :style="editorStyle"
         @wheel.self="mouseWheel"
         @keydown="keyDown"
         @keyup="keyUp"
@@ -139,12 +139,18 @@ export default defineComponent({
 
         const rectangleSelection = ref(null);
         const selectedNodesCtrlBackup = [];
+        const scale = computed(() => graph.value.scaling);
 
         const searchQuery = computed(() => props.viewModel.editor.searchQuery);
         const greyedOutNodes = ref([]);
 
         let pressStartTime = 0;
         const longPressMilisThreshold = 100;
+
+        const editorStyle = computed(() => ({
+            '--scale': scale.value,
+            cursor: panZoom.dragging.value ? 'move' : 'default',
+        }));
 
         const unselectAllNodes = () => {
             /* eslint-disable vue/no-mutating-props,no-param-reassign */
@@ -511,8 +517,6 @@ export default defineComponent({
             greyedOutNodes.value = nonMatchingNodes;
         });
 
-        const scale = computed(() => graph.value.scaling);
-
         const defaultSpecification = process.env.VUE_APP_SPECIFICATION_PATH !== undefined;
         const defaultDataflow = process.env.VUE_APP_DATAFLOW_PATH !== undefined;
         const verboseLoad =
@@ -811,6 +815,7 @@ export default defineComponent({
             visibleConnections,
             visibleNodes,
             highlightInterfaces,
+            editorStyle,
         };
     },
 });
