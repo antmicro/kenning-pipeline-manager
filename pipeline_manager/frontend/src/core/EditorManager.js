@@ -293,22 +293,7 @@ export default class EditorManager {
             ret.warnings.push(...warnings);
             ret.nodes.push(...nodes);
             ret.subgraphs.push(...subgraphs);
-
-            // Unpack all metadata variables into imports_metadata
-            Object.entries(metadata).forEach(([key, value]) => {
-                if (key in ret.metadata) {
-                    if (Array.isArray(ret.metadata[key]) && Array.isArray(value)) {
-                        // Array merge
-                        ret.metadata[key] = [...ret.metadata[key], ...value];
-                    } else if (typeof ret.metadata[key] === 'object' && typeof value === 'object') {
-                        // Object merge, but prefer the value from the current specification
-                        ret.metadata[key] = { ...value, ...ret.metadata[key] };
-                    }
-                } else {
-                    // Simple type assign if the key is not present in the current metadata
-                    ret.metadata[key] = value;
-                }
-            });
+            ret.metadata = EditorManager.mergeMetadata(ret.metadata, metadata);
         }));
         return ret;
     }
@@ -509,24 +494,9 @@ export default class EditorManager {
         if (!metadata) return ['No specification to load provided.'];
 
         if (overriding) {
-            const updatedMetadata = JSON.parse(
-                JSON.stringify(this.currentSpecification?.metadata ?? {}),
+            metadata = EditorManager.mergeMetadata(
+                metadata, this.currentSpecification?.metadata ?? {},
             );
-
-            Object.entries(metadata).forEach(([key, value]) => {
-                if (Array.isArray(value)) {
-                    updatedMetadata[key] = [...updatedMetadata[key], ...value];
-                } else if (typeof value === 'object') {
-                    updatedMetadata[key] = {
-                        ...updatedMetadata[key],
-                        ...value,
-                    };
-                } else {
-                    updatedMetadata[key] = value;
-                }
-            });
-
-            metadata = updatedMetadata;
         }
 
         this.baklavaView.interfaceTypes.readInterfaceTypes(metadata);
@@ -825,6 +795,40 @@ export default class EditorManager {
             EditorManager.instance = new EditorManager();
         }
         return EditorManager.instance;
+    }
+
+    /**
+     * Static helper function to merge two metadata instances into a single.
+     * The following rules are applied:
+     * - If the property is an array then it is concatenated
+     * - If the property is an object then it is merged with preference to the first metadata
+     * - If the property is a simple type then it is overwritten with the first metadata
+     * - On type mismatch (array/object), the first metadata is used
+     *
+     * @param primaryMetadata First metadata to merge
+     * @param secondaryMetadata Second metadata to merge
+     * @returns Merged metadata
+     */
+    static mergeMetadata(primaryMetadata, secondaryMetadata) {
+        // Check if any of the metadata is undefined
+        if (primaryMetadata === undefined || primaryMetadata === {}) {
+            return JSON.parse(JSON.stringify(secondaryMetadata ?? {}));
+        } if (secondaryMetadata === undefined || secondaryMetadata === {}) {
+            return JSON.parse(JSON.stringify(primaryMetadata));
+        }
+
+        // Merge metadata
+        const mergedMetadata = JSON.parse(JSON.stringify(secondaryMetadata));
+        Object.entries(primaryMetadata).forEach(([key, value]) => {
+            if (Array.isArray(value) && Array.isArray(mergedMetadata[key])) {
+                mergedMetadata[key] = [...value, ...mergedMetadata[key]];
+            } else if (typeof value === 'object' && typeof mergedMetadata[key] === 'object') {
+                mergedMetadata[key] = { ...mergedMetadata[key], ...value };
+            } else {
+                mergedMetadata[key] = value;
+            }
+        });
+        return mergedMetadata;
     }
 
     /**
