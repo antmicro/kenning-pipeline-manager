@@ -18,7 +18,6 @@ import subprocess
 from importlib import resources as importlib_resources
 from pathlib import Path
 from typing import List, Optional, Tuple
-from urllib.parse import urlparse
 
 import requests
 
@@ -346,8 +345,14 @@ def build_frontend(
         with open(specification, "r") as specfile:
             spec = json.load(specfile)
 
-        def store_url_asset(filename):
+        filename_to_hash = {}
+        hash_counter = 0
+
+        def store_url_asset(filename: str) -> str:
             if re.match(r"^https?:\/\/(www\.)?.*$", filename):
+                nonlocal hash_counter
+                nonlocal filename_to_hash
+
                 imgfile = requests.get(filename, timeout=4)
                 suffix = imgfile.headers["Content-Type"]
                 if suffix == "image/svg+xml":
@@ -355,11 +360,21 @@ def build_frontend(
                 else:
                     suffix = suffix.split("/")[1]
 
-                new_filename = urlparse(filename).path.split("/")[-1]
-                new_filename = f"{new_filename}.{suffix}"
-                with open(frontend_path / "assets" / new_filename, "wb+") as f:
+                # Extracted filename from url has to include the whole
+                # path, as otherwise it would be impossible to distinguish
+                # between different files with the same name coming from
+                # different directories
+                # Using the hash so that the filenames are not too long
+                if filename in filename_to_hash:
+                    hash = filename_to_hash[filename]
+                else:
+                    hash = f"{hash_counter}.{suffix}"
+                    filename_to_hash[filename] = hash
+                    hash_counter += 1
+
+                with open(frontend_path / "assets" / hash, "wb+") as f:
                     f.write(imgfile.content)
-                return new_filename
+                return hash
             return filename
 
         # Retrieving all urls of icons
