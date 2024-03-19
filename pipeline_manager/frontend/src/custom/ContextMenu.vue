@@ -20,6 +20,14 @@ from creating and deleting connections or altering nodes' values if the editor i
             :class="classes"
             :style="styles"
         >
+            <template v-if="itemsWithHoverProperty.length === 0">
+                <div
+                    class="readonly item"
+                    style="cursor: default"
+                >
+                    <div class="text"><i>No resources</i></div>
+                </div>
+            </template>
             <template v-for="(item, index) in itemsWithHoverProperty">
                 <div
                     v-if="item.url === undefined"
