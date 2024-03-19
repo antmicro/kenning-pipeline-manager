@@ -91,7 +91,7 @@ def specification_valid_nodes_in_include(httpserver: HTTPServer):
 
 
 @pytest.fixture
-def specification_valid_repeating_include(httpserver: HTTPServer):
+def specification_invalid_repeating_include(httpserver: HTTPServer):
     include_specification = {
         "nodes": [
             {"category": "a/B", "isCategory": True},
@@ -146,7 +146,6 @@ def specification_valid_nested_repeating_include(httpserver: HTTPServer):
     "valid_specification",
     [
         "specification_valid_nodes_in_include",
-        "specification_valid_repeating_include",
         "specification_valid_nested_repeating_include",
     ],
 )
@@ -161,6 +160,7 @@ def test_valid_specification(
     "invalid_specification",
     [
         "specification_invalid_empty_include",
+        "specification_invalid_repeating_include",
         "specification_invalid_include_doesnt_exist",
         "specification_invalid_recursive_include",
         "specification_invalid_repeating_node_declarations",

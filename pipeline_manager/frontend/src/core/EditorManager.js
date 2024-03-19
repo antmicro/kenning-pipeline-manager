@@ -202,7 +202,6 @@ export default class EditorManager {
             this.globalVisitedSpecs = new Set();
             const unresolvedSpecification = await this.downloadNestedImports(dataflowSpecification); // eslint-disable-line object-curly-newline,max-len
             errors.push(...unresolvedSpecification.errors);
-            warnings.push(...unresolvedSpecification.warnings);
             if (errors.length) {
                 return { errors, warnings };
             }
@@ -231,11 +230,11 @@ export default class EditorManager {
 
     /**
      * Downloads nested imports from the specification and returns an object
-     * consisting of nodes, subgraphs, errors and warnings arrays.
+     * consisting of nodes, subgraphs, and errors arrays.
      *
      * @param specification Specification to load
      * @param visited Set of visited specifications to detect circular imports
-     * @returns An object consisting of metadata, nodes, subgraphs, errors and warnings arrays.
+     * @returns An object consisting of metadata, nodes, subgraphs, an errors.
      */
     async downloadNestedImports(specification, visited = new Set()) {
         const ret = {
@@ -244,7 +243,6 @@ export default class EditorManager {
             subgraphs: (specification.subgraphs !== undefined) ? specification.subgraphs : [],
             metadata: (specification.metadata !== undefined) ? specification.metadata : {},
             errors: [],
-            warnings: [],
         };
 
         // Download specifications and verify for circular imports
@@ -252,7 +250,7 @@ export default class EditorManager {
         const currentImports = new Set();
         await Promise.all(ret.include.map(async (spec) => {
             if (currentImports.has(spec)) {
-                ret.warnings.push(`Specification is included multiply times, skipping ${spec}`);
+                ret.errors.push(`Specification is included multiple times, skipping ${spec}`);
                 return;
             }
             currentImports.add(spec);
@@ -285,10 +283,9 @@ export default class EditorManager {
         // Download nested imports
         await Promise.all(specs.map(async ({ specification: spec, visited: specsVisited }) => {
             const {
-                metadata, nodes, subgraphs, errors, warnings,
+                metadata, nodes, subgraphs, errors,
             } = await this.downloadNestedImports(spec, specsVisited);
             ret.errors.push(...errors);
-            ret.warnings.push(...warnings);
             ret.nodes.push(...nodes);
             ret.subgraphs.push(...subgraphs);
             ret.metadata = EditorManager.mergeMetadata(ret.metadata, metadata);
