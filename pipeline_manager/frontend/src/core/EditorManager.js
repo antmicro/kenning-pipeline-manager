@@ -284,7 +284,7 @@ export default class EditorManager {
                     specification: newSpecification, errors: newErrors,
                 } = await this.downloadNestedImports(spec, specTrace);
                 errors.push(...newErrors);
-                specification = EditorManager.mergeMetadata(specification, newSpecification);
+                specification = EditorManager.mergeObjects(specification, newSpecification);
             }));
         return { specification, errors };
     }
@@ -485,8 +485,8 @@ export default class EditorManager {
         if (!metadata) return ['No specification to load provided.'];
 
         if (overriding) {
-            metadata = EditorManager.mergeMetadata(
-                metadata, this.currentSpecification?.metadata ?? {},
+            metadata = EditorManager.mergeObjects(
+                this.currentSpecification?.metadata ?? {}, metadata,
             );
         }
 
@@ -789,37 +789,36 @@ export default class EditorManager {
     }
 
     /**
-     * Static helper function to merge two metadata instances into a single.
+     * Static helper function to merge two object instances into a single.
      * The following rules are applied:
      * - If the property is an array then it is concatenated
-     * - If the property is an object then it is merged with preference to the first metadata
-     * - If the property is a simple type then it is overwritten with the first metadata
-     * - On type mismatch (array/object), the first metadata is used
+     * - If the property is an object then it is merged with preference to the first object
+     * - If the property is a simple type then it is overwritten with the first object
+     * - On type mismatch (array/object), the first object is used
      *
-     * @param primaryMetadata First metadata to merge
-     * @param secondaryMetadata Second metadata to merge
-     * @returns Merged metadata
+     * @param primaryObject First object to merge
+     * @param secondaryObject Second object to merge
+     * @returns Primary object with merged properties from the secondary object
      */
-    static mergeMetadata(primaryMetadata, secondaryMetadata) {
-        // Check if any of the metadata is undefined
-        if (primaryMetadata === undefined || primaryMetadata === {}) {
-            return JSON.parse(JSON.stringify(secondaryMetadata ?? {}));
-        } if (secondaryMetadata === undefined || secondaryMetadata === {}) {
-            return JSON.parse(JSON.stringify(primaryMetadata));
+    static mergeObjects(primaryObject, secondaryObject) {
+        // Check if any of the object is undefined
+        secondaryObject = secondaryObject ?? {};
+        if (primaryObject === undefined || primaryObject === {}) {
+            return secondaryObject;
         }
 
-        // Merge metadata
-        const mergedMetadata = JSON.parse(JSON.stringify(secondaryMetadata));
-        Object.entries(primaryMetadata).forEach(([key, value]) => {
-            if (Array.isArray(value) && Array.isArray(mergedMetadata[key])) {
-                mergedMetadata[key] = [...value, ...mergedMetadata[key]];
-            } else if (typeof value === 'object' && typeof mergedMetadata[key] === 'object') {
-                mergedMetadata[key] = { ...mergedMetadata[key], ...value };
+        // Merge object
+        Object.entries(secondaryObject).forEach(([key, value]) => {
+            if (Array.isArray(value) && Array.isArray(primaryObject[key])) {
+                primaryObject[key].push(...value);
+            } else if (typeof value === 'object' && typeof primaryObject[key] === 'object') {
+                // For example, metadata is an object and it has to be merged instead of overwritten
+                primaryObject[key] = EditorManager.mergeObjects(primaryObject[key], value);
             } else {
-                mergedMetadata[key] = value;
+                primaryObject[key] = value;
             }
         });
-        return mergedMetadata;
+        return primaryObject;
     }
 
     /**
