@@ -53,14 +53,12 @@ class Metadata {
  * @returns a translated URL
  */
 function parseLocation(loc) {
-    let defaultsubs;
+    let relativeurl = '{}';
     if (typeof document !== 'undefined') {
         const urlparent = document.location.href.split('/').slice(0, -1).join('/');
-        const relativeurl = `${urlparent}/{}`;
-        defaultsubs = `{"https": "https://{}", "http": "http://{}", "relative": "${relativeurl}"}`;
-    } else {
-        defaultsubs = `{"https": "https://{}", "http": "http://{}", "relative": "{}"}`;
+        relativeurl = `${urlparent}/{}`;
     }
+    const defaultsubs = `{"https": "https://{}", "http": "http://{}", "relative": "${relativeurl}"}`;
     const jsonsubs = process.env.VUE_APP_JSON_URL_SUBSTITUTES ?? defaultsubs;
     const subs = JSON.parse(jsonsubs);
     const parts = loc.split('//');
