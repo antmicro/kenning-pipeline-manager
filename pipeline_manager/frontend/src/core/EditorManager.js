@@ -200,8 +200,10 @@ export default class EditorManager {
         if (!lazyLoad) {
             // Preprocess includes
             this.globalVisitedSpecs = new Set();
-            const unresolvedSpecification = await this.downloadNestedImports(dataflowSpecification); // eslint-disable-line object-curly-newline,max-len
-            errors.push(...unresolvedSpecification.errors);
+            const {
+                specification: unresolvedSpecification, errors: includeErrors,
+            } = await this.downloadNestedImports(dataflowSpecification);
+            errors.push(...includeErrors);
             if (errors.length) {
                 return { errors, warnings };
             }
@@ -232,65 +234,59 @@ export default class EditorManager {
      * Downloads nested imports from the specification and returns an object
      * consisting of nodes, subgraphs, and errors arrays.
      *
-     * @param specification Specification to load
-     * @param visited Set of visited specifications to detect circular imports
-     * @returns An object consisting of metadata, nodes, subgraphs, an errors.
+     * @param specification Specification to load.
+     * @param trace Set of visited specifications to detect circular imports.
+     * @returns Merged specification and errors.
      */
-    async downloadNestedImports(specification, visited = new Set()) {
-        const ret = {
-            include: (specification.include !== undefined) ? specification.include : [],
-            nodes: (specification.nodes !== undefined) ? specification.nodes : [],
-            subgraphs: (specification.subgraphs !== undefined) ? specification.subgraphs : [],
-            metadata: (specification.metadata !== undefined) ? specification.metadata : {},
-            errors: [],
-        };
+    async downloadNestedImports(specification, trace = new Set()) {
+        const errors = [];
 
         // Download specifications and verify for circular imports
-        const specs = [];
+        const specificationAndTrace = [];
         const currentImports = new Set();
-        await Promise.all(ret.include.map(async (spec) => {
-            if (currentImports.has(spec)) {
-                ret.errors.push(`Specification is included multiple times, skipping ${spec}`);
+        const include = specification.include ?? [];
+        await Promise.all(include.map(async (specificationUrl) => {
+            if (currentImports.has(specificationUrl)) {
+                errors.push(`Specification is included multiple times, skipping ${specificationUrl}`);
                 return;
             }
-            currentImports.add(spec);
-
-            if (visited.has(spec)) {
-                ret.errors.push(`Circular dependency detected in included specification ${spec}`);
+            if (trace.has(specificationUrl)) {
+                errors.push(`Circular dependency detected in included specification ${specificationUrl}`);
                 return;
             }
+            currentImports.add(specificationUrl);
 
-            if (!this.globalVisitedSpecs.has(spec)) {
-                this.globalVisitedSpecs.add(spec);
-                const [status, val] = await loadJsonFromRemoteLocation(spec);
+            if (!this.globalVisitedSpecs.has(specificationUrl)) {
+                this.globalVisitedSpecs.add(specificationUrl);
+                const [status, val] = await loadJsonFromRemoteLocation(specificationUrl);
                 if (status === false) {
-                    ret.errors.push(`Could not load the included specification from ${spec}. Reason: ${val}`);
+                    errors.push(`Could not load the included specification from ${specificationUrl}. Reason: ${val}`);
                 } else {
-                    specs.push(
+                    specificationAndTrace.push(
                         {
                             specification: val,
-                            visited: new Set([...visited, spec]), // Detect circular imports
+                            trace: new Set([...trace, specificationUrl]), // Detect circular imports
                         },
                     );
                 }
             }
         }));
 
-        if (ret.errors.length) {
-            return ret;
+        if (errors.length) {
+            return { specification, errors };
         }
 
         // Download nested imports
-        await Promise.all(specs.map(async ({ specification: spec, visited: specsVisited }) => {
-            const {
-                metadata, nodes, subgraphs, errors,
-            } = await this.downloadNestedImports(spec, specsVisited);
-            ret.errors.push(...errors);
-            ret.nodes.push(...nodes);
-            ret.subgraphs.push(...subgraphs);
-            ret.metadata = EditorManager.mergeMetadata(ret.metadata, metadata);
-        }));
-        return ret;
+        await Promise.all(specificationAndTrace.map(
+            async ({ specification: spec, trace: specTrace },
+            ) => {
+                const {
+                    specification: newSpecification, errors: newErrors,
+                } = await this.downloadNestedImports(spec, specTrace);
+                errors.push(...newErrors);
+                specification = EditorManager.mergeMetadata(specification, newSpecification);
+            }));
+        return { specification, errors };
     }
 
     /**
