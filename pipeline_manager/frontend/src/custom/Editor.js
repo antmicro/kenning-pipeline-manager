@@ -399,6 +399,10 @@ export default class PipelineManagerEditor extends Editor {
         }
     }
 
+    nodeURLsEmpty() {
+        return this.nodeURLs.size === 0;
+    }
+
     getNodeURLs(nodeName) {
         const urls = this.nodeURLs.get(nodeName) || {};
 
