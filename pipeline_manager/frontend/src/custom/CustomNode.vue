@@ -30,6 +30,7 @@ from moving or deleting the nodes.
         <div
             class="__title"
             ref="titleRef"
+            :style="nodeTitleStyle"
             @pointerdown.left.exact="onMouseDown"
             @pointerdown.left="startDragWrapper($event)"
             @pointerdown.right="openContextMenuTitle"
@@ -186,6 +187,7 @@ const renameField = ref(null);
 const tempName = ref('');
 
 const nodeURLs = viewModel.value.editor.getNodeURLs(props.node.type);
+const displayNoResources = !viewModel.value.editor.nodeURLsEmpty();
 
 const displayedInputs = computed(() => Object.values(props.node.inputs).filter((ni) => !ni.hidden));
 const displayedOutputs = computed(() =>
@@ -268,11 +270,11 @@ const contextMenuTitleItems = computed(() => {
     }
 
     items.push(...nodeURLs);
-    if (items.length > 1) {
-        items.at(-1).endSection = true;
-    }
 
     if (!viewModel.value.editor.readonly) {
+        if (items.length > 1) {
+            items.at(-1).endSection = true;
+        }
         items.push(
             { value: 'disconnect', label: 'Disconnect', icon: Disconnect },
             { value: 'delete', label: 'Delete', icon: Bin },
@@ -336,11 +338,16 @@ const onContextMenuTitleClick = async (action) => {
     }
 };
 
+const canOpenContextMenu = computed(() =>
+    (contextMenuTitleItems.value.length === 0 && displayNoResources)
+        || contextMenuTitleItems.value.length > 0,
+);
+
 const openContextMenuTitle = (ev) => {
     if (
-        !editorManager.editor.readonly
-        && !editorManager.editor.hideHud
-        && showContextMenuTitle.value === false
+        canOpenContextMenu.value &&
+        showContextMenuTitle.value === false
+
     ) {
         contextMenuTitleX.value = ev.offsetX;
         contextMenuTitleY.value = ev.offsetY;
@@ -531,6 +538,24 @@ const interfaceCursorStyle = ref({
     display: 'none',
 });
 
+const nodeTitleStyle = computed(() => {
+    if (!viewModel.value.editor.readonly) {
+        return {
+            cursor: 'drag',
+        };
+    }
+
+    if (canOpenContextMenu.value) {
+        return {
+            cursor: 'pointer',
+        };
+    }
+
+    return {
+        cursor: 'default',
+    };
+});
+
 const isPickedInterface = (intf) => intf === chosenInterface;
 
 const assignNewPosition = () => {
@@ -710,11 +735,4 @@ const switchSides = (intf) => {
     }
 }
 
-.baklava-node {
-    &.__readonly  {
-        > .__title {
-            cursor: auto;
-        }
-    }
-}
 </style>
