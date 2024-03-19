@@ -153,8 +153,10 @@
         color: inherit;
         font-size: 0.875em;
 
-        &:hover {
-            color: var(--baklava-control-color-primary);
+        &:not(.readonly) {
+            &:hover {
+                color: var(--baklava-control-color-primary);
+            }
         }
 
         & > .icon {
