@@ -775,11 +775,9 @@ export default {
                         @pointerleave="() => resetHoverInfo('palette')"
                     >
                         <Cube :hover="isHovered('palette')" class="small_svg"/>
-                        <div :class="['tooltip', mobileClasses]" v-if="paletteOpen">
-                            <span>Hide node browser</span>
-                        </div>
-                        <div :class="['tooltip', mobileClasses]" v-if="!paletteOpen">
-                            <span>Show node browser</span>
+                        <div :class="['tooltip', mobileClasses]">
+                            <span v-if="paletteOpen">Hide node browser</span>
+                            <span v-else>Show node browser</span>
                         </div>
                     </div>
 
@@ -872,14 +870,9 @@ export default {
                             :hover="isHovered('search')"
                             class="small_svg"
                         />
-                        <div
-                        :class="['tooltip', mobileClasses, settingsTooltipClasses]"
-                            v-if="!panels.nodesearch.isOpen"
-                        >
-                            <span>Show node search bar</span>
-                        </div>
-                        <div :class="['tooltip', mobileClasses, settingsTooltipClasses]" v-else>
-                            <span>Hide node search bar</span>
+                        <div :class="['tooltip', mobileClasses, settingsTooltipClasses]">
+                            <span v-if="!panels.nodesearch.isOpen">Show node search bar</span>
+                            <span v-else>Hide node search bar</span>
                         </div>
                     </div>
                     <div
@@ -903,14 +896,9 @@ export default {
                         v-click-outside="() => panels.settings.isOpen = false"
                     >
                         <Cogwheel :hover="isHovered('settings')" class="small_svg" />
-                        <div
-                            :class="['tooltip', mobileClasses, settingsTooltipClasses]"
-                            v-if="!panels.settings.isOpen"
-                        >
-                            <span>Show settings</span>
-                        </div>
-                        <div :class="['tooltip', mobileClasses, settingsTooltipClasses]" v-else>
-                            <span>Hide settings</span>
+                        <div :class="['tooltip', mobileClasses, settingsTooltipClasses]">
+                            <span v-if="!panels.settings.isOpen">Show settings</span>
+                            <span v-else>Hide settings</span>
                         </div>
                     </div>
                     <div
