@@ -809,7 +809,7 @@ class SpecificationBuilder(object):
         """
         Adds single node type defined in JSON-like format.
         """
-        if "isCategory" in node and node["isCategory"]:
+        if node.get("isCategory", False):
             if "category" not in node:
                 raise SpecificationBuilderException(
                     "The given category node specification is invalid - it is "
@@ -853,49 +853,47 @@ class SpecificationBuilder(object):
             )
         if "description" in node:
             self.add_node_description(nodename, node["description"])
-        if "interfaces" in node:
-            for interface in node["interfaces"]:
-                self.add_node_type_interface(
-                    name=nodename,
-                    interfacename=interface["name"],
-                    interfacetype=[typ.lower() for typ in interface["type"]]
-                    if isinstance(interface["type"], list)
-                    else interface["type"].lower(),  # noqa: E501
-                    direction=interface["direction"],
-                    side=get_optional(interface, "side"),
-                    maxcount=get_optional(interface, "maxConnectionsCount"),
-                    override=get_optional(interface, "override"),
-                    array=get_optional(interface, "array"),
-                )
-        if "properties" in node:
-            for property in node["properties"]:
-                self.add_node_type_property(
-                    nodename,
-                    property["name"],
-                    property["type"],
-                    property["default"],
-                    get_optional(property, "description"),
-                    get_optional(property, "min"),
-                    get_optional(property, "max"),
-                    get_optional(property, "values"),
-                    get_optional(property, "dtype"),
-                    get_optional(property, "override"),
-                )
-                if "group" in property:
-                    for childprop in property["group"]:
-                        self.add_node_type_property_group(
-                            nodename,
-                            property["name"],
-                            childprop["name"],
-                            childprop["type"],
-                            childprop["default"],
-                            get_optional(childprop, "description"),
-                            get_optional(childprop, "min"),
-                            get_optional(childprop, "max"),
-                            get_optional(childprop, "values"),
-                            get_optional(childprop, "dtype"),
-                            get_optional(property, "override"),
-                        )
+        for interface in node.get("interfaces", []):
+            self.add_node_type_interface(
+                name=nodename,
+                interfacename=interface["name"],
+                interfacetype=[typ.lower() for typ in interface["type"]]
+                if isinstance(interface["type"], list)
+                else interface["type"].lower(),  # noqa: E501
+                direction=interface["direction"],
+                side=get_optional(interface, "side"),
+                maxcount=get_optional(interface, "maxConnectionsCount"),
+                override=get_optional(interface, "override"),
+                array=get_optional(interface, "array"),
+            )
+        for property in node.get("properties", []):
+            self.add_node_type_property(
+                nodename,
+                property["name"],
+                property["type"],
+                property["default"],
+                get_optional(property, "description"),
+                get_optional(property, "min"),
+                get_optional(property, "max"),
+                get_optional(property, "values"),
+                get_optional(property, "dtype"),
+                get_optional(property, "override"),
+            )
+            if "group" in property:
+                for childprop in property["group"]:
+                    self.add_node_type_property_group(
+                        nodename,
+                        property["name"],
+                        childprop["name"],
+                        childprop["type"],
+                        childprop["default"],
+                        get_optional(childprop, "description"),
+                        get_optional(childprop, "min"),
+                        get_optional(childprop, "max"),
+                        get_optional(childprop, "values"),
+                        get_optional(childprop, "dtype"),
+                        get_optional(property, "override"),
+                    )
 
     def add_subgraph_from_spec(self, subgraph):
         """
@@ -1014,7 +1012,7 @@ class SpecificationBuilder(object):
         if (
             groupname in self._metadata["urls"]
             and self._metadata["urls"][groupname] != entry
-        ):  # noqa: E501
+        ):
             raise SpecificationBuilderException(
                 f'URL group {groupname} already exists and is different:\n'
                 f'Current:\n{self._metadata["urls"][groupname]}\nNew:\n{entry}'
@@ -1022,9 +1020,19 @@ class SpecificationBuilder(object):
 
         self._metadata["urls"][groupname] = entry
 
-    def metadata_add_param(self, paramname: str, paramvalue: Any):
+    def metadata_add_param(
+        self, paramname: str, paramvalue: Any, metadata: Optional[Dict] = None
+    ):
         """
         Sets parameter in metadata.
+        Modifies the metadata dictionary in place.
+
+        The following rules apply:
+        * If the parameter is a list and the value is a list, the parameter
+        is extended by the value.
+        * If the parameter is a dictionary and the value is a dictionary, the
+        parameter is recursively updated by the value.
+        * Otherwise, the parameter is set to the value.
 
         Parameters
         ----------
@@ -1032,20 +1040,22 @@ class SpecificationBuilder(object):
             Name of the metadata parameter
         paramvalue: Any
             Value of the parameter
-
-        Raises
-        ------
-        SpecificationBuilderException
-            Raised when specification is not valid or when warnings appeared.
+        metadata: Optional[Dict]
+            Metadata dictionary to modify. if None, the class metadata is used
         """
-        if (
-            paramname in self._metadata
-            and self._metadata[paramname] != paramvalue
-        ):
-            raise SpecificationBuilderException(
-                f"Changing metadata parameter {paramname}: {self._metadata[paramname]} to {paramvalue}"  # noqa: E501
-            )
-        self._metadata[paramname] = paramvalue
+        metadata = metadata if metadata else self._metadata
+        current_value = metadata.get(paramname, None)
+        if isinstance(current_value, list) and isinstance(paramvalue, list):
+            metadata[paramname].extend(paramvalue)
+        elif isinstance(current_value, dict) and isinstance(paramvalue, dict):
+            for key, val in paramvalue.items():
+                self.metadata_add_param(
+                    key,
+                    val,
+                    metadata[paramname],
+                )
+        else:
+            metadata[paramname] = paramvalue
 
     def update_spec_from_other(self, otherspec: Any):
         """
@@ -1057,44 +1067,44 @@ class SpecificationBuilder(object):
         otherspec: Any
             JSON-like structure with other specification
         """
-        if "metadata" in otherspec:
-            metadata = otherspec["metadata"]
-            for prop, propvalue in metadata.items():
-                if prop == "interfaces":
-                    for interfacename, interfacestyle in propvalue.items():
-                        self.metadata_add_interface_styling(
-                            interfacename.lower(),
-                            get_optional(interfacestyle, "interfaceColor"),
-                            get_optional(
-                                interfacestyle, "interfaceConnectionPattern"
-                            ),  # noqa: E501
-                            get_optional(
-                                interfacestyle, "interfaceConnectionColor"
-                            ),  # noqa: E501
-                        )
-                elif prop == "urls":
-                    for urlname, urlentry in propvalue.items():
-                        self.metadata_add_url(
-                            urlname,
-                            urlentry["name"],
-                            urlentry["icon"],
-                            urlentry["url"],
-                        )
-                elif prop == "layers":
-                    for layer in propvalue:
-                        self.metadata_add_layer(
-                            layer["name"],
-                            get_optional(layer, "nodeLayers"),
-                            get_optional(layer, "nodeInterfaces"),
-                        )
-                else:
-                    self.metadata_add_param(prop, propvalue)
-        if "nodes" in otherspec:
-            for node in otherspec["nodes"]:
-                self.add_node_type_from_spec(node)
-        if "subgraphs" in otherspec:
-            for subgraph in otherspec["subgraphs"]:
-                self.add_subgraph_from_spec(subgraph)
+        for include in otherspec.get("include", []):
+            include = requests.get(include).json()
+            self.update_spec_from_other(include)
+        metadata = otherspec.get("metadata", {})
+        for prop, propvalue in metadata.items():
+            if prop == "interfaces":
+                for interfacename, interfacestyle in propvalue.items():
+                    self.metadata_add_interface_styling(
+                        interfacename.lower(),
+                        get_optional(interfacestyle, "interfaceColor"),
+                        get_optional(
+                            interfacestyle, "interfaceConnectionPattern"
+                        ),
+                        get_optional(
+                            interfacestyle, "interfaceConnectionColor"
+                        ),
+                    )
+            elif prop == "urls":
+                for urlname, urlentry in propvalue.items():
+                    self.metadata_add_url(
+                        urlname,
+                        urlentry["name"],
+                        urlentry["icon"],
+                        urlentry["url"],
+                    )
+            elif prop == "layers":
+                for layer in propvalue:
+                    self.metadata_add_layer(
+                        layer["name"],
+                        get_optional(layer, "nodeLayers"),
+                        get_optional(layer, "nodeInterfaces"),
+                    )
+            else:
+                self.metadata_add_param(prop, propvalue)
+        for node in otherspec.get("nodes", []):
+            self.add_node_type_from_spec(node)
+        for subgraph in otherspec.get("subgraphs", []):
+            self.add_subgraph_from_spec(subgraph)
 
     def _sorted_nodes(self) -> List[Dict]:
         """
