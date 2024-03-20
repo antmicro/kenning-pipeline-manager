@@ -335,6 +335,33 @@ export default {
         },
 
         /**
+         * Helper function that saves a blob to a file.
+         *
+         * @param {Blob} blob The blob to save.
+         * @param {string} filename The name of the file to save.
+         */
+        saveBlob(blob, filename) {
+            const linkElement = document.createElement('a');
+            linkElement.href = window.URL.createObjectURL(blob);
+            linkElement.download = filename;
+            linkElement.click();
+        },
+
+        /**
+         * Event handler that that saves a current speciciation to a `specification.json` file.
+         */
+        saveSpecification() {
+            const blob = new Blob(
+                [
+                    JSON.stringify(this.editorManager.saveSpecification(), null, 4),
+                ],
+                { type: 'application/json' },
+            );
+            this.saveBlob(blob, this.saveConfiguration.savename);
+            NotificationHandler.showToast('info', 'Specification saved');
+        },
+
+        /**
          * Event handler that loads a specification passed by the user
          * and tries to load it into a new environment it.
          */
@@ -461,6 +488,7 @@ export default {
             fileReader.readAsText(file);
             document.getElementById('load-dataflow-button').value = '';
         },
+
         /**
          * Event handler that that saves a current dataflow to a `save.json` file.
          */
@@ -472,11 +500,7 @@ export default {
             ), null, 4)], {
                 type: 'application/json',
             });
-
-            const linkElement = document.createElement('a');
-            linkElement.href = window.URL.createObjectURL(blob);
-            linkElement.download = this.saveConfiguration.savename;
-            linkElement.click();
+            this.saveBlob(blob, this.saveConfiguration.savename);
             NotificationHandler.showToast('info', 'Dataflow saved');
         },
 
@@ -740,13 +764,25 @@ export default {
                             </template>
 
                             <template
-                                v-if="!this.externalApplicationManager.backendAvailable"
+                                v-if="!this.externalApplicationManager.backendAvailable && !hideHud"
                             >
                                 <DropdownItem
-                                    v-if="!hideHud"
                                     text="Load specification"
                                     id="load-spec-button"
                                     :eventFunction="loadSpecificationCallback"
+                                />
+                                <DropdownItem
+                                    v-if="this.editorManager.specificationLoaded"
+                                    text="Save specification as..."
+                                    type="'button'"
+                                    :eventFunction="() => {
+                                        Object.keys(this.saveConfiguration).forEach(
+                                            (i) => this.saveConfiguration[i] = undefined
+                                        ),
+                                        this.saveConfiguration.savename = 'specification',
+                                        this.saveConfiguration.saveCallback = this.saveSpecification,   // eslint-disable-line max-len
+                                        saveMenuShow = !saveMenuShow
+                                    }"
                                 />
                                 <hr />
                             </template>
@@ -767,6 +803,9 @@ export default {
                                     type="'button'"
                                     text="Save graph as file as..."
                                     :eventFunction="() => {
+                                        Object.keys(this.saveConfiguration).forEach(
+                                            (i) => this.saveConfiguration[i] = undefined
+                                        ),
                                         this.saveConfiguration.readonly = false,
                                         this.saveConfiguration.hideHud = false,
                                         this.saveConfiguration.position = false,

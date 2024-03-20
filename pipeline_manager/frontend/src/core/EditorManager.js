@@ -57,6 +57,7 @@ export default class EditorManager {
     specificationLoaded = ref(false);
 
     currentSpecification = undefined;
+    unresolvedSpecification = undefined;
 
     updatedMetadata = {};
 
@@ -141,6 +142,7 @@ export default class EditorManager {
             }
         }
 
+        this.unresolvedSpecification = JSON.parse(JSON.stringify(dataflowSpecification));
         this.currentSpecification = dataflowSpecification;
         if (!lazyLoad) {
             errors.push(...this.updateMetadata(metadata, false, true));
@@ -306,11 +308,7 @@ export default class EditorManager {
             });
         }
 
-        if (errors.length) {
-            return errors;
-        }
-
-        return [];
+        return errors;
     }
 
     /**
@@ -512,6 +510,15 @@ export default class EditorManager {
         ).map((node) => recurrentMerge(node.name));
 
         return mergedNodes;
+    }
+
+    /**
+     * Serializes and returns current specification in Pipeline Manager format.
+     *
+     * @returns Serialized specification.
+     */
+    saveSpecification() {
+        return JSON.parse(JSON.stringify(this.unresolvedSpecification));
     }
 
     /**
