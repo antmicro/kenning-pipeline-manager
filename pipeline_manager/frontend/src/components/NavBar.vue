@@ -851,7 +851,7 @@ export default {
                 <span
                     v-if="!editTitle && !panels.nodesearch.isOpen"
                     :class="['editorTitle', mobileClasses]"
-                    @dblclick="editTitle = true">
+                    @dblclick="editTitle = !readonly">
                         {{ editorTitle }}
                 </span>
                 <div :style="rightContainerStyles">
