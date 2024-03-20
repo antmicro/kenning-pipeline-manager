@@ -987,7 +987,7 @@ export default {
 
 <style lang="scss" scoped>
 .wrapper {
-    z-index: 2;
+    z-index: 5;
 }
 
 .wrapper-hud {
