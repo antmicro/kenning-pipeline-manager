@@ -865,7 +865,7 @@ export default {
                         }"
                         @click="onClickNodeSearch"
                         v-click-outside="() => panels.nodesearch.isOpen =
-                            panels.nodesearch.isOpen && searchEditorNodesQuery != ''"
+                            searchEditorNodesQuery != ''"
                     >
                         <Magnifier
                             :hover="isHovered('search')"
@@ -899,6 +899,7 @@ export default {
                         @click="() => togglePanel(panels.settings)"
                         @pointerover="() => updateHoverInfo('settings')"
                         @pointerleave="() => resetHoverInfo('settings')"
+                        v-click-outside="() => panels.settings.isOpen = false"
                     >
                         <Cogwheel :hover="isHovered('settings')" class="small_svg" />
                         <div
