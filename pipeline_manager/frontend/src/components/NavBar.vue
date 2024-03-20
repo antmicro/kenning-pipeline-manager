@@ -684,6 +684,7 @@ export default {
                             >
                                 <DropdownItem
                                     id="create-new-graph-button"
+                                    v-if="!readonly"
                                     text="Create new graph"
                                     type="'button'"
                                     :eventFunction="createNewGraphCallback"
