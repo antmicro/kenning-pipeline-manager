@@ -9,12 +9,13 @@ SPDX-License-Identifier: Apache-2.0
     <Tooltip
         ref="tooltipRef"
         :left="tooltip.left"
-        :top="tooltip.top - 60"
+        :top="tooltip.top"
         :text="tooltip.text"
         v-show="tooltip.visible"
     />
     <div
         class="baklava-sidebar"
+        ref="sidebarRef"
         :class="{
             '--open': graph.sidebar.visible,
             '--hidehud': editorManager.editor.hideHud,
@@ -206,6 +207,7 @@ export default defineComponent({
 
         const tooltipRef = ref(null);
         const tooltip = ref(null);
+        const sidebarRef = ref(null);
 
         tooltip.value = {
             top: 0,
@@ -253,15 +255,18 @@ export default defineComponent({
             graph.value.sidebar.visible = false;
         };
 
-        const onMouseMove = (event) => {
-            width.value -= event.movementX;
+        const onMouseMove = (ev) => {
+            ev.preventDefault();
+            width.value -= ev.movementX;
         };
 
         const startResize = () => {
+            width.value = sidebarRef.value.offsetWidth;
             window.addEventListener('mousemove', onMouseMove);
             window.addEventListener(
                 'mouseup',
-                () => {
+                (ev) => {
+                    ev.preventDefault();
                     window.removeEventListener('mousemove', onMouseMove);
                 },
                 { once: true },
@@ -379,6 +384,7 @@ export default defineComponent({
             onPointerOver,
             onPointerLeave,
             tooltipRef,
+            sidebarRef,
             toggleGroup,
             getOptionName,
             prettyCategory,
