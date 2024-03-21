@@ -3,10 +3,12 @@ import Backend from './Backend.vue';
 import Bell from './Bell.vue';
 import Bin from './Bin.vue';
 import Cogwheel from './Cogwheel.vue';
+import Collapse from './Collapse.vue';
 import Cross from './Cross.vue';
 import Cube from './Cube.vue';
 import Disconnect from './Disconnect.vue';
 import ExclamationMark from './ExclamationMark.vue';
+import Expand from './Expand.vue';
 import Indicator from './Indicator.vue';
 import Logo from './Logo.vue';
 import Magnifier from './Magnifier.vue';
@@ -23,10 +25,12 @@ export default {
     Bell,
     Bin,
     Cogwheel,
+    Collapse,
     Cross,
     Cube,
     Disconnect,
     ExclamationMark,
+    Expand,
     Indicator,
     Logo,
     Magnifier,

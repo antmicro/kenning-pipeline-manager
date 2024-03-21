@@ -14,8 +14,11 @@ import { markRaw, ref, provide } from 'vue';
 import { toPng, toSvg } from 'html-to-image';
 import jsonlint from 'jsonlint';
 import { useViewModel } from '@baklavajs/renderer-vue';
+import { api as fullscreen } from 'vue-fullscreen';
 import Logo from '../icons/Logo.vue';
 import Arrow from '../icons/Arrow.vue';
+import Expand from '../icons/Expand.vue';
+import Collapse from '../icons/Collapse.vue';
 import Run from '../icons/Run.vue';
 import Validate from '../icons/Validate.vue';
 import Backend from '../icons/Backend.vue';
@@ -56,6 +59,8 @@ export default {
         Backend,
         Bell,
         DropdownItem,
+        Expand,
+        Collapse,
         Notifications,
         Magnifier,
         Cogwheel,
@@ -290,6 +295,9 @@ export default {
                 nodesearch: {
                     isOpen: false,
                 },
+                fullscreen: {
+                    isOpen: fullscreen.isFullscreen,
+                },
             },
         };
     },
@@ -363,6 +371,19 @@ export default {
 
                 iconRef.classList.toggle('open', isPanelOpen);
             }
+        },
+
+        /**
+         * Toggle fullscreen mode.
+         *
+         * For iframe, the allow="fullscreen" attribute must be set.
+         */
+        toggleFullscreen() {
+            if (!fullscreen.isEnabled) {
+                NotificationHandler.showToast('error', 'Fullscreen is not supported');
+                return;
+            }
+            fullscreen.toggle();
         },
 
         clickOutside(event, panel) {
@@ -643,6 +664,11 @@ export default {
             if (this.$refs.palette) this.buttonWidth = this.$refs.palette.offsetWidth;
         });
 
+        // Listen for fullscreen change
+        document.addEventListener('fullscreenchange', () => {
+            this.panels.fullscreen.isOpen = !fullscreen.isFullscreen;
+        });
+
         // Create connection on page load
         if (this.externalApplicationManager.backendAvailable) {
             await this.externalApplicationManager.initializeConnection();
@@ -885,6 +911,25 @@ export default {
                             v-model="searchEditorNodesQuery"
                             placeholder="Search for nodes"
                         />
+                    </div>
+                    <div
+                        ref="fullscreen"
+                        :class="['hoverbox', mobileClasses]"
+                        role="button"
+                        @click="toggleFullscreen"
+                        @pointerover="() => updateHoverInfo('Fullscreen')"
+                        @pointerleave="() => resetHoverInfo('Fullscreen')"
+                    >
+                        <Expand
+                            :hover="isHovered('Fullscreen')"
+                            class="small_svg"
+                            v-if="!panels.fullscreen.isOpen"
+                        />
+                        <Collapse :hover="isHovered('Fullscreen')" class="small_svg" v-else />
+                        <div :class="['tooltip', mobileClasses, settingsTooltipClasses]">
+                            <span v-if="!panels.fullscreen.isOpen">Enable fullscreen</span>
+                            <span v-else>Disable fullscreen</span>
+                        </div>
                     </div>
                     <div
                         ref="settings"
