@@ -256,9 +256,7 @@ const contextMenuTitleX = ref(0);
 const contextMenuTitleY = ref(0);
 const contextMenuTitleItems = computed(() => {
     const items = [];
-    if (!viewModel.value.editor.hideHud) {
-        items.push({ value: 'sidebar', label: 'Details', icon: Sidebar });
-    }
+    items.push({ value: 'sidebar', label: 'Details', icon: Sidebar });
     if (!viewModel.value.editor.readonly) {
         items.push({ value: 'rename', label: 'Rename', icon: Pencil });
     }
