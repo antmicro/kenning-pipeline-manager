@@ -19,7 +19,7 @@ export default function usePanZoom() {
     // Limit for zooming that does not allow for zomming if
     // `zoomLimit` number of graphs would fit into the editor
     // vertically or horizontally
-    const zoomLimit = 3;
+    const zoomLimit = 2;
 
     const panningRef = computed(() => graph.value.panning);
     const dragMove = useDragMove(panningRef);
@@ -46,8 +46,8 @@ export default function usePanZoom() {
             zoomLimit * graph.value.size().graphHeight > editorHeight / newScale);
 
         if (
-            graph.value.size().graphHeight === -Infinity || (allowZoomOut) ||
-            (!allowZoomOut && newScale > graph.value.scaling)
+            (allowZoomOut) ||
+            (newScale > graph.value.scaling && graph.value.size().graphHeight !== -Infinity)
         ) {
             graph.value.scaling = newScale;
             graph.value.panning.x += diff[0];
@@ -61,7 +61,8 @@ export default function usePanZoom() {
         if (ev.deltaMode === 1) {
             scrollAmount *= 32; // Firefox fix, multiplier is trial & error
         }
-        const newScale = graph.value.scaling * (1 - scrollAmount / 3000);
+        // Limit the zooming to 1.5x of the original size
+        const newScale = Math.min(graph.value.scaling * (1 - scrollAmount / 3000), 1.5);
         applyZoom(ev.clientX, ev.clientY, newScale);
     };
 
