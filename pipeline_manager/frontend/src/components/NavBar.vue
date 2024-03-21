@@ -366,9 +366,8 @@ export default {
         },
 
         clickOutside(event, panel) {
-            if (this.hideHud) { return; }
-
             const icon = this.$refs[panel.iconRef];
+            if (!icon) return;
 
             const currentElement = event.target;
             if (currentElement instanceof Node && (icon.contains(currentElement)
@@ -639,7 +638,7 @@ export default {
 
         window.addEventListener('resize', () => {
             this.windowWidth = window.innerWidth;
-            this.buttonWidth = this.$refs.palette.offsetWidth;
+            if (this.$refs.palette) this.buttonWidth = this.$refs.palette.offsetWidth;
         });
 
         // Create connection on page load
@@ -991,7 +990,6 @@ export default {
             :viewModel="editorManager.baklavaView"
         />
         <CustomSidebar
-            v-if="!hideHud"
             @sidebar-open="openNavbar"
         />
     </div>
