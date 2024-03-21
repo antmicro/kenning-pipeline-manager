@@ -22,6 +22,10 @@
     transition: transform 0.4s;
     overflow-y: scroll;
 
+    &.--hidehud {
+        height: calc(100% - $navbar-height);
+    }
+
     &.--open {
         transform: translateX(0);
         transition: transform 0.2s;

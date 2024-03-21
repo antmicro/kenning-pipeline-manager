@@ -1,5 +1,5 @@
 <!--
-Copyright (c) 2022-2023 Antmicro <www.antmicro.com>
+Copyright (c) 2022-2024 Antmicro <www.antmicro.com>
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -17,6 +17,7 @@ SPDX-License-Identifier: Apache-2.0
         class="baklava-sidebar"
         :class="{
             '--open': graph.sidebar.visible,
+            '--hidehud': editorManager.editor.hideHud,
             'hidden-navbar': $isMobile,
         }"
         :style="styles"
@@ -57,7 +58,7 @@ SPDX-License-Identifier: Apache-2.0
                     {{ prettyCategory }}
                 </div>
             </div>
-            <div v-if="!readonly" class="__replace">
+            <div v-if="!editorManager.editor.readonly" class="__replace">
                 <div class="__replace_entry" v-if="replacementParents.length">
                     <div class="__replace_title">Generalize:</div>
                     <div
@@ -106,7 +107,7 @@ SPDX-License-Identifier: Apache-2.0
 
             <div
                 class="__interface_groups"
-                v-if="interfaceGroupsCheckboxes.length > 0 && !readonly"
+                v-if="interfaceGroupsCheckboxes.length > 0 && !editorManager.editor.readonly"
             >
                 <div class="__title">Interface Groups</div>
                 <div
@@ -153,11 +154,6 @@ export default defineComponent({
         CustomInterface,
         CheckboxInterface,
         Tooltip,
-    },
-    computed: {
-        readonly() {
-            return this.editorManager.editor.readonly;
-        },
     },
     emits: ['sidebar-open'],
     setup(_props, { emit }) {
