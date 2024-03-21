@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Antmicro <www.antmicro.com>
+ * Copyright (c) 2022-2024 Antmicro <www.antmicro.com>
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -38,7 +38,16 @@ export default function useDragMove(
     const draggingStartPosition = ref<coordinates | null>(null);
     const movementStepEnabled = ref<boolean>(true);
 
-    const dragging = computed(() => !!draggingStartPoint.value);
+    const dragging = computed(() => {
+        // If we didn't move, then we are not dragging
+        if (!!draggingStartPoint.value && draggingStartPosition.value) {
+            return (
+                draggingStartPosition.value.x !== positionRef.value.x
+                || draggingStartPosition.value.y !== positionRef.value.y
+            );
+        }
+        return false;
+    });
 
     /* eslint-disable arrow-body-style */
     const calculatePosition = (pos: number, kind: 'x' | 'y', align = false, gridSnap = false) => {
