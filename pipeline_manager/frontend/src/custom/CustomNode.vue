@@ -447,9 +447,7 @@ const startDragWrapper = (ev) => {
 };
 
 const openDoubleClick = doubleClick(700, () => {
-    if (!viewModel.value.editor.readonly) {
-        openSidebar();
-    }
+    openSidebar();
 });
 
 /* eslint-disable vue/no-mutating-props,no-param-reassign */
