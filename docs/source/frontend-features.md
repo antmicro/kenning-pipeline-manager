@@ -50,6 +50,20 @@ connections belonging to said layer
 
 During pipeline development or execution, notifications can display various messages to the user.
 
+## Full screen
+
+![Full screen button](img/fullscreen.png)
+
+Near the settings tab, there is a full screen icon. Clicking it will expand the {{project}} window to full screen.
+Note that this feature may be disabled during embedding {{project}} in an external application, make sure to allow full screen mode.
+
+For example, in the case of embedding {{project}} in an iframe, the `allow="fullscreen"` attribute must be set:
+```html
+<iframe src="https://url" allow="fullscreen">
+  <p>Your browser does not support iframes.</p>
+</iframe>
+```
+
 ## Editor menu
 
 ![Front end menu](img/frontend-menu.png)
