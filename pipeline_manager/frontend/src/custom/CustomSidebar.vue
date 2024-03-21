@@ -57,7 +57,7 @@ SPDX-License-Identifier: Apache-2.0
                     {{ prettyCategory }}
                 </div>
             </div>
-            <div class="__replace">
+            <div v-if="!readonly" class="__replace">
                 <div class="__replace_entry" v-if="replacementParents.length">
                     <div class="__replace_title">Generalize:</div>
                     <div
@@ -104,7 +104,10 @@ SPDX-License-Identifier: Apache-2.0
                 </div>
             </div>
 
-            <div class="__interface_groups" v-if="interfaceGroupsCheckboxes.length">
+            <div
+                class="__interface_groups"
+                v-if="interfaceGroupsCheckboxes.length > 0 && !readonly"
+            >
                 <div class="__title">Interface Groups</div>
                 <div
                     v-for="intfG in interfaceGroupsCheckboxes"
@@ -150,6 +153,11 @@ export default defineComponent({
         CustomInterface,
         CheckboxInterface,
         Tooltip,
+    },
+    computed: {
+        readonly() {
+            return this.editorManager.editor.readonly;
+        },
     },
     emits: ['sidebar-open'],
     setup(_props, { emit }) {
@@ -378,10 +386,10 @@ export default defineComponent({
             toggleGroup,
             getOptionName,
             prettyCategory,
-
             replacementParents,
             replacementChildren,
             replacementSiblings,
+            editorManager,
         };
     },
 });
