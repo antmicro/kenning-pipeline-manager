@@ -1,5 +1,5 @@
 <!--
-Copyright (c) 2022-2023 Antmicro <www.antmicro.com>
+Copyright (c) 2022-2024 Antmicro <www.antmicro.com>
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -64,6 +64,7 @@ import {
     computed,
     StyleValue,
     watch,
+    nextTick,
 } from 'vue';
 
 import Terminal from './Terminal.vue';
@@ -72,6 +73,7 @@ import Indicator from '../icons/Indicator.vue';
 import Bin from '../icons/Bin.vue';
 import { mouseDownHandler } from '../core/events';
 import { terminalStore, MAIN_TERMINAL } from '../core/stores';
+import getExternalApplicationManager from '../core/communication/ExternalApplicationManager';
 
 export default defineComponent({
     components: {
@@ -174,6 +176,8 @@ export default defineComponent({
             });
         };
 
+        const externalApplicationManager = getExternalApplicationManager();
+
         const toggleTerminalPanel = (terminal: string | undefined) => {
             if (terminal === undefined && !isTerminalPanelOpened.value) {
                 activeTerminal.value = MAIN_TERMINAL;
@@ -186,6 +190,12 @@ export default defineComponent({
                 activeTerminal.value = terminal;
                 isTerminalPanelOpened.value = true;
                 setReadMessages(terminal);
+            }
+            if (
+                (externalApplicationManager.appCapabilities.writable_terminal ?? [])
+                    .includes(terminal)
+            ) {
+                nextTick().then(() => document.getElementById('hterm-terminal')?.focus());
             }
         };
 
