@@ -39,6 +39,7 @@ dependencies = [
 
 [project.optional-dependencies]
 test = [
+    "pexpect==4.8.0",
     "pytest==7.4.0",
     "pytest-asyncio==0.21.1",
 ]
