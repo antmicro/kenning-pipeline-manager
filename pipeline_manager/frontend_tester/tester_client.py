@@ -38,8 +38,11 @@ import sys
 from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
+from queue import Queue
+from threading import Thread
 from typing import Dict, List, Union
 
+import pexpect
 from pipeline_manager_backend_communication.communication_backend import (
     CommunicationBackend,
 )
@@ -170,6 +173,8 @@ class RPCMethods:
     Implementation of RPC callbacks.
     """
 
+    WRITABLE_TERMINAL = "WritableTerminal"
+
     def __init__(
         self, specification: Dict, client: CommunicationBackend, out_path: str
     ):
@@ -178,6 +183,58 @@ class RPCMethods:
         self.out_path = out_path
         self.last_dataflow = None
         self.running = defaultdict(lambda: False)
+
+        self.run = True
+        self.input_queue = Queue(-1)
+        self.loop = asyncio.get_event_loop()
+
+        def writable_terminal_management():
+            """
+            Manages subprocess input and output.
+            """
+            shell = pexpect.spawn("bash")
+            while self.run:
+                if not self.input_queue.empty():
+                    shell.send(self.input_queue.get(False))
+                try:
+                    char = shell.read_nonblocking(1024, timeout=0.1)
+                    asyncio.run_coroutine_threadsafe(
+                        self.client.request(
+                            "terminal_write",
+                            {
+                                "name": self.WRITABLE_TERMINAL,
+                                "message": char.decode(errors="replace"),
+                            },
+                        ),
+                        self.loop,
+                    )
+                except pexpect.exceptions.TIMEOUT:
+                    pass
+                except pexpect.exceptions.EOF:
+                    shell.close()
+                    return
+
+        self.reader_thread = Thread(target=writable_terminal_management)
+
+    def terminal_read(
+        self,
+        name: str,
+        message: str,
+    ) -> None:
+        """
+        RPC method providing messages from writable terminal.
+
+        Parameters
+        ----------
+        name : str
+            Name of te terminal
+        message : str
+            Terminal input
+        """
+        if name != self.WRITABLE_TERMINAL:
+            logging.warn("Input from readonly terminal!")
+            return
+        self.input_queue.put(message)
 
     def app_capabilities_get(self) -> Dict:
         """
@@ -192,7 +249,8 @@ class RPCMethods:
             "stoppable_methods": [
                 "dataflow_run",
                 "custom_terminal_stress_test",
-            ]
+            ],
+            "writable_terminal": [self.WRITABLE_TERMINAL],
         }
 
     def dataflow_import(
@@ -345,6 +403,27 @@ class RPCMethods:
             dataflow,
             self.custom_terminal_stress_test.__name__,
         )
+
+    async def custom_create_writable_terminal(self, dataflow: Dict) -> Dict:
+        """
+        RPC method that creates writable terminal.
+
+        Parameters
+        ----------
+        dataflow : Dict
+            Content of the request.
+
+        Returns
+        -------
+        Dict
+            Method's response
+        """
+        if not self.reader_thread.is_alive():
+            await self.client.request(
+                "terminal_add", {"name": self.WRITABLE_TERMINAL}
+            )
+            self.reader_thread.start()
+        return {"type": MessageType.OK.value}
 
     def custom_api_test(self, dataflow: Dict) -> Dict:
         """
@@ -599,15 +678,17 @@ async def _main(args: argparse.Namespace):
         args.port,
         add_signal_handler=True,
     )
-    await client.initialize_client(
-        RPCMethods(
-            specification,
-            client,
-            args.output_path,
-        )
+    methods = RPCMethods(
+        specification,
+        client,
+        args.output_path,
     )
+    await client.initialize_client(methods)
 
-    await client.start_json_rpc_client()
+    try:
+        await client.start_json_rpc_client()
+    finally:
+        methods.run = False
 
 
 if __name__ == "__main__":
