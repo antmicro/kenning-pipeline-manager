@@ -18,6 +18,7 @@ import {
 } from 'vue';
 import { terminalStore, MAIN_TERMINAL } from '../core/stores';
 import { hterm, lib } from '../third-party/hterm_all';
+import getExternalApplicationManager from '../core/communication/ExternalApplicationManager';
 
 export default defineComponent({
     props: {
@@ -72,6 +73,11 @@ export default defineComponent({
             term.wipeContents();
         };
 
+        const externalApplicationManager = getExternalApplicationManager();
+        const writableTerminal = () => (
+            externalApplicationManager.appCapabilities.writable_terminal ?? []
+        ).includes(props.terminalInstance);
+
         onMounted(async () => {
             // wait for hterm.js library to load
             // (glatosinski: we may later need to move it to some global scope)
@@ -86,9 +92,21 @@ export default defineComponent({
             term.onTerminalReady = function onTerminalReady() {
                 // load logs that have existed already in the storage.
                 // for now configure the terminal as read-only
-                this.io.sendString = (_string) => {};
-                this.onVTKeystroke = (_string) => {};
-                this.setCursorVisible(false);
+                this.io.sendString = (string) => {
+                    if (writableTerminal()) {
+                        externalApplicationManager.requestTerminalRead(
+                            props.terminalInstance,
+                            string,
+                        );
+                    }
+                };
+                this.onVTKeystroke = (string) => {
+                    if (writableTerminal()) {
+                        externalApplicationManager.requestTerminalRead(
+                            props.terminalInstance, string,
+                        );
+                    }
+                };
                 this.installKeyboard();
             };
             // pin hterm.js in the template
@@ -99,6 +117,16 @@ export default defineComponent({
                 async ([newIns, newLen], [oldIns, oldLen]) => {
                     if (newIns === undefined) {
                         return;
+                    }
+
+                    if (writableTerminal()) {
+                        // eslint-disable-next-line no-underscore-dangle
+                        term.scrollPort_.contenteditable = true;
+                        term.setCursorVisible(true);
+                    } else {
+                        // eslint-disable-next-line no-underscore-dangle
+                        term.scrollPort_.contenteditable = false;
+                        term.setCursorVisible(false);
                     }
                     // Wait for the next tick to make sure that the terminal is rendered
                     // Otherwise hterm may throw errors related to the dom not being ready
