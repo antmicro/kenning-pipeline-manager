@@ -320,6 +320,26 @@ class ExternalApplicationManager {
     }
 
     /**
+     * Send information to external application about input received by writable terminal.
+     *
+     * @param terminal Name Name of the terminal
+     * @param message Input provided for the terminal
+     */
+    async requestTerminalRead(terminalName, message) {
+        if (!(
+            this.backendAvailable && this.externalApplicationConnected &&
+            this.editorManager.notifyWhenChanged
+        )) {
+            return;
+        }
+        try {
+            await jsonRPC.request('terminal_read', { name: terminalName, message });
+        } catch (error) {
+            NotificationHandler.terminalLog('warning', 'Error when sending terminal input', error.message);
+        }
+    }
+
+    /**
      * Function that is used by setInterval() to periodically check the status
      * of the TCP connection. If the connection is not alive, then `initializeConnection`
      * is invoked.
