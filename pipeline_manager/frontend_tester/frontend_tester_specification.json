@@ -243,6 +243,11 @@
                 "name": "Validate",
                 "iconName": "Validate",
                 "procedureName": "dataflow_validate"
+            },
+            {
+                "name": "Create writable terminal",
+                "iconName": "Backend",
+                "procedureName": "custom_create_writable_terminal"
             }
         ]
     }
