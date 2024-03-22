@@ -716,7 +716,7 @@ export default {
     <div class="wrapper"
         v-click-outside="(ev) => handleMouseLeave(ev)"
     >
-        <div ref="navbar" class="wrapper"
+        <div ref="navbar" class="wrapper prevent-select"
             v-show="!preview"
             :class="(!hideHud && !$isMobile) ? 'wrapper-hud' : 'wrapper-hidden'"
             @pointerenter="$event.target.classList.add('isHovered')"
@@ -1342,5 +1342,11 @@ span {
     font-size: $fs-small;
     color: $white;
     user-select: none;
+}
+
+.prevent-select {
+    -webkit-user-select: none; /* Safari */
+    -ms-user-select: none; /* IE 10 and IE 11 */
+    user-select: none; /* Standard syntax */
 }
 </style>
