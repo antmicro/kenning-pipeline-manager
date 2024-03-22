@@ -320,6 +320,14 @@
                             "description": "Name of the stoppable method",
                             "type": "string"
                         }
+                    },
+                    "writable_terminal": {
+                        "description": "List with terminals' names which can receive input",
+                        "type": "array",
+                        "items": {
+                            "description": "Name of the writable terminal",
+                            "type": "string"
+                        }
                     }
                 },
                 "additionalProperties": false
@@ -491,6 +499,27 @@
             "description": "Request send when editor was centered",
             "params": {
                 "$ref": "common_types#/$defs/null_or_empty"
+            },
+            "returns": {
+                "$ref": "common_types#/$defs/null_or_empty"
+            }
+        },
+        "terminal_read": {
+            "description": "Request sent by the frontend when terminal received an input",
+            "params": {
+                "description": "Parameters for request",
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "description": "Name of the terminal to which the message was written. It has to be specified in [writable_terminal](external-app-capabilities-get)",
+                        "type": "string"
+                    },
+                    "message": {
+                        "description": "Terminal input",
+                        "type": "string"
+                    }
+                },
+                "required": ["name", "message"]
             },
             "returns": {
                 "$ref": "common_types#/$defs/null_or_empty"
