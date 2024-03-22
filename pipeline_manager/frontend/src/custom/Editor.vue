@@ -717,11 +717,6 @@ export default defineComponent({
                     'warning',
                     'More than one file dropped, processing only the first one',
                 );
-            } else if (files.length === 0) {
-                NotificationHandler.showToast(
-                    'warning',
-                    'Drag&Drop is only supported only for files',
-                );
             }
             const reader = new FileReader();
             reader.addEventListener('load', (ev) => {
