@@ -25,6 +25,10 @@ export default function usePanZoom() {
     const dragMove = useDragMove(panningRef);
 
     const applyZoom = (centerX, centerY, newScale) => {
+        if (newScale <= 0) {
+            return;
+        }
+
         const currentPoint = [
             centerX / graph.value.scaling - graph.value.panning.x,
             centerY / graph.value.scaling - graph.value.panning.y,
