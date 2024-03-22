@@ -14,7 +14,7 @@ SPDX-License-Identifier: Apache-2.0
         v-show="tooltip.visible"
     />
     <div
-        class="baklava-sidebar"
+        class="baklava-sidebar prevent-select"
         ref="sidebarRef"
         :class="{
             '--open': graph.sidebar.visible,
@@ -396,3 +396,16 @@ export default defineComponent({
     },
 });
 </script>
+<style lang="scss" scoped>
+.prevent-select {
+    -webkit-user-select: none; /* Safari */
+    -ms-user-select: none; /* IE 10 and IE 11 */
+    user-select: none; /* Standard syntax */
+
+    & > .__content {
+        -webkit-user-select: text; /* Safari */
+        -ms-user-select: text; /* IE 10 and IE 11 */
+        user-select: text; /* Standard syntax */
+    }
+}
+</style>
