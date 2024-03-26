@@ -327,8 +327,7 @@ class ExternalApplicationManager {
      */
     async requestTerminalRead(terminalName, message) {
         if (!(
-            this.backendAvailable && this.externalApplicationConnected &&
-            this.editorManager.notifyWhenChanged
+            this.backendAvailable && this.externalApplicationConnected
         )) {
             return;
         }
