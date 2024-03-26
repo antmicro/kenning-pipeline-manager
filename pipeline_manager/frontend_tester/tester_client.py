@@ -418,12 +418,16 @@ class RPCMethods:
         Dict
             Method's response
         """
-        if not self.reader_thread.is_alive():
-            await self.client.request(
-                "terminal_add", {"name": self.WRITABLE_TERMINAL}
-            )
-            self.reader_thread.start()
-        return {"type": MessageType.OK.value}
+        if self.reader_thread.is_alive():
+            return {
+                "type": MessageType.ERROR.value,
+                "content": "Writable terminal already exists",
+            }
+        await self.client.request(
+            "terminal_add", {"name": self.WRITABLE_TERMINAL}
+        )
+        self.reader_thread.start()
+        return {"type": MessageType.OK.value, "content": "Terminal created"}
 
     def custom_api_test(self, dataflow: Dict) -> Dict:
         """
