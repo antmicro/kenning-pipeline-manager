@@ -85,6 +85,11 @@ export default {
     padding: $spacing-xxl;
     overflow-y: auto;
 
+    // Prevent selection of text
+    -webkit-user-select: none; /* Safari */
+    -ms-user-select: none; /* IE 10 and IE 11 */
+    user-select: none; /* Standard syntax */
+
     & > .info {
         display: flex;
         align-items: center;
@@ -107,6 +112,11 @@ export default {
         grid-row-gap: $spacing-l;
         ul {
             max-width: $notification-maxwidth;
+        }
+        li {
+            -webkit-user-select: text; /* Safari */
+            -ms-user-select: text; /* IE 10 and IE 11 */
+            user-select: text; /* Standard syntax */
         }
     }
 }
