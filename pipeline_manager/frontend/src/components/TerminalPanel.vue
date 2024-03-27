@@ -187,9 +187,12 @@ export default defineComponent({
                 activeTerminal.value = undefined;
                 isTerminalPanelOpened.value = false;
             } else {
+                // Keep the current terminal height when switching between terminals
+                const terminalHeight = terminalWrapper.value?.style.height ?? 'unset';
                 activeTerminal.value = terminal;
                 isTerminalPanelOpened.value = true;
                 setReadMessages(terminal);
+                if (terminalHeight !== 'unset') terminalWrapperStyles.value.height = terminalHeight;
             }
             if (
                 (externalApplicationManager.appCapabilities.writable_terminal ?? [])
