@@ -107,6 +107,10 @@ export default defineComponent({
                         );
                     }
                 };
+                this.io.onTerminalResize = () => {
+                    // Focus the terminal when it is resized
+                    this.focus();
+                };
                 this.installKeyboard();
             };
             // pin hterm.js in the template
