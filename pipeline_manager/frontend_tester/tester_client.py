@@ -250,7 +250,6 @@ class RPCMethods:
                 "dataflow_run",
                 "custom_terminal_stress_test",
             ],
-            "writable_terminal": [self.WRITABLE_TERMINAL],
         }
 
     def dataflow_import(
@@ -424,7 +423,7 @@ class RPCMethods:
                 "content": "Writable terminal already exists",
             }
         await self.client.request(
-            "terminal_add", {"name": self.WRITABLE_TERMINAL}
+            "terminal_add", {"name": self.WRITABLE_TERMINAL, "readonly": False}
         )
         self.reader_thread.start()
         return {"type": MessageType.OK.value, "content": "Terminal created"}

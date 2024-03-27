@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Antmicro <www.antmicro.com>
+ * Copyright (c) 2022-2024 Antmicro <www.antmicro.com>
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -359,13 +359,14 @@ export function viewport_center() {
 
 type TerminalAdd = {
     name: string,
+    readonly: boolean,
 };
 
 /**
  * Creates new terminal instance
  */
 export function terminal_add(params: TerminalAdd) {
-    const status = terminalStore.createTerminalInstance(params.name);
+    const status = terminalStore.createTerminalInstance(params.name, params.readonly);
     if (status === false) {
         throw new Error(`Terminal instance of name '${params.name}' already exists`);
     }

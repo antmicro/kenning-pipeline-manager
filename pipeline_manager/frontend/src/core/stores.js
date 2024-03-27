@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Antmicro <www.antmicro.com>
+ * Copyright (c) 2022-2024 Antmicro <www.antmicro.com>
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -59,8 +59,12 @@ export const notificationStore = reactive({
 export const MAIN_TERMINAL = 'Terminal';
 
 export const terminalStore = reactive({
+    // Object
     logs: {
         Terminal: JSON.parse(get(`logs`)) || [],
+    },
+    readOnly: {
+        Terminal: true,
     },
     add(log, instance = MAIN_TERMINAL) {
         this.logs[instance].push(log);
@@ -69,6 +73,9 @@ export const terminalStore = reactive({
         if (instance === MAIN_TERMINAL) {
             set(`logs`, JSON.stringify(this.logs[instance]));
         }
+    },
+    isReadOnly(instance = MAIN_TERMINAL) {
+        return this.readOnly[instance];
     },
 
     /**
@@ -109,8 +116,10 @@ export const terminalStore = reactive({
     remove(instance = MAIN_TERMINAL) {
         if (instance === MAIN_TERMINAL) {
             remove(`logs`);
+            remove(`readOnly`);
         }
         this.logs[instance] = [];
+        this.readOnly[instance] = true;
     },
 
     /**
@@ -118,12 +127,14 @@ export const terminalStore = reactive({
      * If such terminal already exisists, then false is returned.
      *
      * @param {string} Unique name of the terminal instance to be created.
+     * @param {boolean} If true, then the terminal instance will be only for read.
      * @returns returns true if terminal was created, false otherwise.
      */
-    createTerminalInstance(name) {
+    createTerminalInstance(name, readOnly = true) {
         if (Object.keys(this.logs).includes(name)) return false;
 
         this.logs[name] = [];
+        this.readOnly[name] = readOnly;
         return true;
     },
 });

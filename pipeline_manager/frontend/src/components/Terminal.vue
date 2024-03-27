@@ -74,9 +74,6 @@ export default defineComponent({
         };
 
         const externalApplicationManager = getExternalApplicationManager();
-        const writableTerminal = () => (
-            externalApplicationManager.appCapabilities.writable_terminal ?? []
-        ).includes(props.terminalInstance);
 
         onMounted(async () => {
             // wait for hterm.js library to load
@@ -93,7 +90,7 @@ export default defineComponent({
                 // load logs that have existed already in the storage.
                 // for now configure the terminal as read-only
                 this.io.sendString = (string) => {
-                    if (writableTerminal()) {
+                    if (!terminalStore.isReadOnly(props.terminalInstance)) {
                         externalApplicationManager.requestTerminalRead(
                             props.terminalInstance,
                             string,
@@ -101,7 +98,7 @@ export default defineComponent({
                     }
                 };
                 this.onVTKeystroke = (string) => {
-                    if (writableTerminal()) {
+                    if (!terminalStore.isReadOnly(props.terminalInstance)) {
                         externalApplicationManager.requestTerminalRead(
                             props.terminalInstance, string,
                         );
@@ -123,14 +120,14 @@ export default defineComponent({
                         return;
                     }
 
-                    if (writableTerminal()) {
-                        // eslint-disable-next-line no-underscore-dangle
-                        term.scrollPort_.contenteditable = true;
-                        term.setCursorVisible(true);
-                    } else {
+                    if (terminalStore.readOnly[props.terminalInstance]) {
                         // eslint-disable-next-line no-underscore-dangle
                         term.scrollPort_.contenteditable = false;
                         term.setCursorVisible(false);
+                    } else {
+                        // eslint-disable-next-line no-underscore-dangle
+                        term.scrollPort_.contenteditable = true;
+                        term.setCursorVisible(true);
                     }
                     // Wait for the next tick to make sure that the terminal is rendered
                     // Otherwise hterm may throw errors related to the dom not being ready

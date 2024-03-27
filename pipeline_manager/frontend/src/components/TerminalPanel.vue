@@ -73,7 +73,6 @@ import Indicator from '../icons/Indicator.vue';
 import Bin from '../icons/Bin.vue';
 import { mouseDownHandler } from '../core/events';
 import { terminalStore, MAIN_TERMINAL } from '../core/stores';
-import getExternalApplicationManager from '../core/communication/ExternalApplicationManager';
 
 export default defineComponent({
     components: {
@@ -176,8 +175,6 @@ export default defineComponent({
             });
         };
 
-        const externalApplicationManager = getExternalApplicationManager();
-
         const toggleTerminalPanel = (terminal: string | undefined) => {
             if (terminal === undefined && !isTerminalPanelOpened.value) {
                 activeTerminal.value = MAIN_TERMINAL;
@@ -194,10 +191,9 @@ export default defineComponent({
                 setReadMessages(terminal);
                 if (terminalHeight !== 'unset') terminalWrapperStyles.value.height = terminalHeight;
             }
-            if (
-                (externalApplicationManager.appCapabilities.writable_terminal ?? [])
-                    .includes(terminal)
-            ) {
+            // Focus on terminal if it is not readonly
+            if (activeTerminal.value !== undefined &&
+            !terminalStore.isReadOnly(activeTerminal.value)) {
                 nextTick().then(() => document.getElementById('hterm-terminal')?.focus());
             }
         };

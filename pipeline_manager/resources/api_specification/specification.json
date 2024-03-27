@@ -179,6 +179,11 @@
                     "name": {
                         "description": "Unique name for the new terminal instance. This name is used for any communication.",
                         "type": "string"
+                    },
+                    "readonly": {
+                        "description": "Specifies whether the terminal should be read-only, or editable by user",
+                        "type": "boolean",
+                        "default": true
                     }
                 },
                 "required": ["name"]
@@ -318,14 +323,6 @@
                         "type": "array",
                         "items": {
                             "description": "Name of the stoppable method",
-                            "type": "string"
-                        }
-                    },
-                    "writable_terminal": {
-                        "description": "List with terminals' names which can receive input",
-                        "type": "array",
-                        "items": {
-                            "description": "Name of the writable terminal",
                             "type": "string"
                         }
                     }
@@ -511,7 +508,7 @@
                 "type": "object",
                 "properties": {
                     "name": {
-                        "description": "Name of the terminal to which the message was written. It has to be specified in [writable_terminal](external-app-capabilities-get)",
+                        "description": "Name of the terminal to which the message was written. Terminal has to be not read-only",
                         "type": "string"
                     },
                     "message": {
