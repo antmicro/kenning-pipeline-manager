@@ -187,34 +187,57 @@ class RPCMethods:
         self.run = True
         self.input_queue = Queue(-1)
         self.loop = asyncio.get_event_loop()
+        self.reader_thread = None
 
-        def writable_terminal_management():
-            """
-            Manages subprocess input and output.
-            """
-            shell = pexpect.spawn("bash")
-            while self.run:
-                if not self.input_queue.empty():
-                    shell.send(self.input_queue.get(False))
-                try:
-                    char = shell.read_nonblocking(1024, timeout=0.1)
-                    asyncio.run_coroutine_threadsafe(
-                        self.client.request(
-                            "terminal_write",
-                            {
-                                "name": self.WRITABLE_TERMINAL,
-                                "message": char.decode(errors="replace"),
-                            },
-                        ),
-                        self.loop,
-                    )
-                except pexpect.exceptions.TIMEOUT:
-                    pass
-                except pexpect.exceptions.EOF:
-                    shell.close()
-                    return
+    def writable_terminal_management(self):
+        """
+        Manages subprocess input and output.
+        """
+        shell = pexpect.spawn("bash")
+        while self.run:
+            if not self.input_queue.empty():
+                shell.send(self.input_queue.get(False))
+            try:
+                char = shell.read_nonblocking(1024, timeout=0.1)
+                asyncio.run_coroutine_threadsafe(
+                    self.client.request(
+                        "terminal_write",
+                        {
+                            "name": self.WRITABLE_TERMINAL,
+                            "message": char.decode(errors="replace"),
+                        },
+                    ),
+                    self.loop,
+                )
+            except pexpect.exceptions.TIMEOUT:
+                pass
+            except pexpect.exceptions.EOF:
+                shell.close()
+                return
 
-        self.reader_thread = Thread(target=writable_terminal_management)
+    async def start_writable_terminal(self) -> Dict:
+        """
+        Creates a new writable terminal, if it hasn't been opened yet.
+
+        Returns
+        -------
+        Dict
+            Message whether the terminal is created and running
+        """
+        if self.reader_thread:
+            if self.reader_thread.is_alive():
+                return {
+                    "type": MessageType.ERROR.value,
+                    "content": "Writable terminal already exists",
+                }
+            else:
+                self.reader_thread.join()
+        self.reader_thread = Thread(target=self.writable_terminal_management)
+        self.reader_thread.start()
+        await self.client.request(
+            "terminal_add", {"name": self.WRITABLE_TERMINAL, "readonly": False}
+        )
+        return {"type": MessageType.OK.value, "content": "Terminal created"}
 
     def terminal_read(
         self,
@@ -417,16 +440,7 @@ class RPCMethods:
         Dict
             Method's response
         """
-        if self.reader_thread.is_alive():
-            return {
-                "type": MessageType.ERROR.value,
-                "content": "Writable terminal already exists",
-            }
-        await self.client.request(
-            "terminal_add", {"name": self.WRITABLE_TERMINAL, "readonly": False}
-        )
-        self.reader_thread.start()
-        return {"type": MessageType.OK.value, "content": "Terminal created"}
+        return await self.start_writable_terminal()
 
     def custom_api_test(self, dataflow: Dict) -> Dict:
         """
