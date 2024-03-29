@@ -27,7 +27,7 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
         @wheel.self="mouseWheel"
         @keydown="keyDown"
         @keyup="keyUp"
-        @mouseleave="onRightPointerUp"
+        @mouseleave="!readonly && onRightPointerUp"
         @drop.prevent="!readonly && onDrop($event)"
         @dragenter.prevent
         @dragover.prevent
@@ -269,10 +269,16 @@ export default defineComponent({
         };
 
         document.addEventListener('pointerdown', (ev) => {
+            // Dragging
             if (ev.button === 0 && !ev.shiftKey) {
                 onPointerDown(ev);
                 document.addEventListener('pointerup', onPointerUp);
                 document.addEventListener('pointermove', onPointerMove);
+            }
+
+            // Rectangle selection
+            if (readonly.value) {
+                return;
             }
             if (ev.button === 2 && ev.ctrlKey) {
                 onRightPointerDownCtrl(ev);
