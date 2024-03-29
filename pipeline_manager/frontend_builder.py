@@ -204,6 +204,8 @@ def build_frontend(
     skip_install_deps: bool = False,
     skip_frontend_copying: bool = False,
     favicon_path: Optional[Path] = None,
+    communication_server_host: Optional[str] = None,
+    communication_server_port: Optional[int] = None,
 ) -> int:
     """
     Builds the frontend for the Pipeline Manager.
@@ -252,6 +254,14 @@ def build_frontend(
     favicon_path: Optional[Path]
         Path to the Kenning Pipeline Manager favicon in SVG format.
         If None, a default favicon is used.
+    communication_server_host: Optional[str]
+        Hostname of the communication server. Should be used if the
+        frontend application is server on different HTTP server than
+        the communication server.
+    communication_server_port: Optional[int]
+        Port of the communication server. Should be used if the
+        frontend application is server on different HTTP server than
+        the communication server.
 
     Returns
     -------
@@ -316,6 +326,14 @@ def build_frontend(
 
     if graph_development_mode:
         config_lines.append("VUE_APP_GRAPH_DEVELOPMENT_MODE=true\n")
+
+    if communication_server_host and communication_server_port:
+        config_lines.append(
+            f"VUE_APP_COMMUNICATION_SERVER_HOST={communication_server_host}\n"
+        )
+        config_lines.append(
+            f"VUE_APP_COMMUNICATION_SERVER_PORT={communication_server_port}\n"
+        )
 
     config_lines.append(f'NODE_ENV="{mode}"\n')
     if mode == "development":

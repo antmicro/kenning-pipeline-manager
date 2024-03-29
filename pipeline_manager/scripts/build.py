@@ -111,11 +111,21 @@ def script_build():  # noqa: D103
         action="store_true",
     )
 
-    subparsers.add_parser(
+    server_app_args = subparsers.add_parser(
         "server-app",
         help="Builds frontend for a server-based application",
         parents=[base_parser],
         add_help=False,
+    )
+    server_app_args.add_argument(
+        "--communication-server-host",
+        help="Host address of the communication server",
+        type=str,
+    )
+    server_app_args.add_argument(
+        "--communication-server-port",
+        help="Port of the communication server",
+        type=int,
     )
 
     args = parser.parse_args()
