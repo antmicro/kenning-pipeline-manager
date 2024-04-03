@@ -696,7 +696,7 @@ export default {
 
         // Create connection on page load
         if (this.externalApplicationManager.backendAvailable) {
-            await this.externalApplicationManager.initializeConnection();
+            this.externalApplicationManager.startStatusInterval();
         }
     },
 };

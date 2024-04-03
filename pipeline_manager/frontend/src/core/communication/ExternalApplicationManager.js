@@ -362,7 +362,7 @@ class ExternalApplicationManager {
             if (!this.externalApplicationConnected) {
                 runInfo.forEach((_v, k) => { runInfo.get(k).inProgress = false; });
                 /* eslint-disable-next-line no-await-in-loop */
-                await this.initializeConnection(false, true);
+                await this.initializeConnection(false);
             }
             /* eslint-disable-next-line no-await-in-loop,no-promise-executor-return */
             await new Promise((r) => setTimeout(r, this.timeoutStatusInterval));
@@ -391,7 +391,7 @@ class ExternalApplicationManager {
      * @param checkConnection True if should check connection status beforehand. Used to reduce
      * the number of requests if the status of the connection is known.
      */
-    async initializeConnection(checkConnection = true, startInterval = true) {
+    async initializeConnection(checkConnection = true) {
         if (checkConnection) {
             await this.updateConnectionStatus();
         }
@@ -441,8 +441,6 @@ class ExternalApplicationManager {
                 }
             }
         }
-
-        if (startInterval) this.startStatusInterval();
     }
 }
 
