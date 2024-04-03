@@ -215,9 +215,9 @@ function createServer() {
 }
 
 const obj = {
-    get jsonPRC() {
+    get jsonRPC() {
         if (!jsonRPCServer) createServer();
         return jsonRPCServer;
     },
 };
-export default obj.jsonPRC;
+export default obj.jsonRPC;
