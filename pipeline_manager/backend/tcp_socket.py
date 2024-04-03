@@ -93,7 +93,7 @@ def start_socket_task(
     Starts thread with function redirecting messages from external app
     to frontend.
 
-    If previously satarted thread is still alive, exception will be raised.
+    If previously started thread is still alive, exception will be raised.
 
     Parameters
     ----------
