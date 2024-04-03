@@ -44,6 +44,8 @@ function handleSpecificationResult({ errors, warnings }, errorTitle, warningTitl
     return false;
 }
 
+const startTimeoutStatusInterval = 1500;
+
 class ExternalApplicationManager {
     externalApplicationConnected = false;
 
@@ -53,7 +55,7 @@ class ExternalApplicationManager {
 
     idStatusInterval = null;
 
-    timeoutStatusInterval = 1500;
+    timeoutStatusInterval = startTimeoutStatusInterval;
 
     appCapabilities = {};
 
@@ -65,6 +67,11 @@ class ExternalApplicationManager {
         try {
             const response = await jsonRPC.request('status_get');
 
+            // If the application was connected and the connection was lost, a warning is displayed.
+            if (!response.status.connected && this.externalApplicationConnected) {
+                NotificationHandler.terminalLog('warning', 'External application was disconnected');
+            }
+
             // If external-app disconnects while running, the progress bar needs to be reset.
             if (this.externalApplicationConnected !== response.status.connected) {
                 const progressBar = document.querySelector('.progress-bar');
@@ -74,7 +81,7 @@ class ExternalApplicationManager {
 
             this.externalApplicationConnected = response.status.connected;
         } catch (error) {
-            NotificationHandler.terminalLog('error', 'Checking status', error.message);
+            NotificationHandler.terminalLog('error', 'External application is not connected', error.message);
             this.externalApplicationConnected = false;
         }
     }
@@ -83,15 +90,20 @@ class ExternalApplicationManager {
      * Event handler that asks the backend to open a TCP socket that can be connected to.
      * If the external application did not connect the user is alertd with a feedback message.
      * This function updates `this.externalApplicationConnected` property
+     *
+     * @returns {null | [string, string]} Null if the connection was successful, otherwise a tuple
+     * containing the toast type and the message.
      */
     async openTCP() {
         try {
             await jsonRPC.request('external_app_connect');
             this.externalApplicationConnected = true;
+            return null;
         } catch (error) {
-            const errorCode = error.code ?? JSONRPCCustomErrorCode.EXCEPTION_RAISED;
-            NotificationHandler.terminalLog(errorCode !== JSONRPCCustomErrorCode.NEWER_SESSION_AVAILABLE ? 'warning' : 'info', 'Connecting with external app', error.message);
             this.externalApplicationConnected = false;
+            const errorCode = error.code ?? JSONRPCCustomErrorCode.EXCEPTION_RAISED;
+            const messageType = (errorCode !== JSONRPCCustomErrorCode.NEWER_SESSION_AVAILABLE) ? 'warning' : 'info';
+            return [messageType, error.message];
         }
     }
 
@@ -210,7 +222,7 @@ class ExternalApplicationManager {
         } catch (error) {
             // The connection was closed
             data = error.message;
-            NotificationHandler.terminalLog('error', data);
+            NotificationHandler.terminalLog('error', 'Cannot create a request', data);
             runProcedureInfo.inProgress = false;
             return;
         }
@@ -385,16 +397,33 @@ class ExternalApplicationManager {
         }
 
         if (!this.externalApplicationConnected) {
-            NotificationHandler.showToast('info', 'Waiting for the application to connect...');
+            NotificationHandler.showToast('info', 'Waiting for external application to connect');
             do {
                 /* eslint-disable-next-line no-await-in-loop */
-                await this.openTCP();
-                if (!this.externalApplicationConnected) {
-                    NotificationHandler.showToast('info', 'Application cannot connect, retrying...');
+                const message = await this.openTCP();
+
+                if (message !== null) {
+                    NotificationHandler.terminalLog(
+                        'warning',
+                        `Cannot initialize connection. Retrying in ${this.timeoutStatusInterval / 1000.0}s`,
+                        message[1],
+                    );
                     /* eslint-disable-next-line no-await-in-loop,no-promise-executor-return */
-                    await new Promise((r) => setTimeout(r, 2 * this.timeoutStatusInterval));
+                    await new Promise((r) => setTimeout(r, this.timeoutStatusInterval));
+
+                    // Setting a maximum buffer length
+                    this.timeoutStatusInterval = Math.min(
+                        (2 ** 4) * startTimeoutStatusInterval,
+                        2 * this.timeoutStatusInterval,
+                    );
+                } else {
+                    NotificationHandler.terminalLog(
+                        'info',
+                        `External application connected successfully`,
+                    );
                 }
             } while (!this.externalApplicationConnected);
+            this.timeoutStatusInterval = startTimeoutStatusInterval;
         }
         if (this.externalApplicationConnected) {
             await Promise.all([
