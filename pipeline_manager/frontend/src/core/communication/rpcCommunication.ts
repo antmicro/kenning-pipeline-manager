@@ -125,6 +125,12 @@ function createServer() {
             if (!(method in externalEndpoints) && !(method in backendEndpoints)) {
                 throw new Error('Requested method not known');
             }
+            if (socket.disconnected) {
+                return Promise.reject(
+                    new Error('WebSocket is disconnected. Make sure the communication server is available.'),
+                );
+            }
+
             const endpoints = (method in externalEndpoints) ?
                 externalEndpoints : backendEndpoints;
             const schema = endpoints[method];
