@@ -849,8 +849,9 @@ export default {
 
                     <template v-if="this.externalApplicationManager.backendAvailable">
                         <div
-                            v-for="actionItem in navbarItems" v-bind:key="actionItem.name"
-                            v-bind:id="`navbar-button-${actionItem.procedureName}`"
+                            v-for="actionItem in navbarItems"
+                            :key="actionItem.name"
+                            :id="`navbar-button-${actionItem.procedureName}`"
                             :class="['hoverbox', mobileClasses, {
                                 'button-in-progress': isInProgress(actionItem.procedureName),
                             }]"
@@ -874,7 +875,6 @@ export default {
                                 class="small_svg_stop"
                                 :is="crossIcon"
                                 :hover="isHovered(actionItem.name)"
-                                :imgURI="'Cross'"
                             />
                             <div class="progress-bar" />
                             <div :class="['tooltip', mobileClasses]">

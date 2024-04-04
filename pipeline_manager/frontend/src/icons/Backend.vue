@@ -49,11 +49,13 @@ export default {
     props: {
         color: {
             type: String,
-            required: true,
+            required: false,
+            default: 'normal',
         },
         active: {
             type: Boolean,
-            required: true,
+            required: false,
+            default: false,
         },
         hover: {
             type: Boolean,
