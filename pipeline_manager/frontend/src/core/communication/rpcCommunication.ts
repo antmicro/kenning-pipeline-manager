@@ -178,9 +178,9 @@ function createServer() {
     });
 
     // Define SocketIO events
-    socket.on('connect', () => NotificationHandler.terminalLog('info', 'Initialized connection with backend', null));
+    socket.on('connect', () => NotificationHandler.terminalLog('info', 'Initialized connection with communication server', null));
     socket.on('disconnect', () => {
-        NotificationHandler.terminalLog('warning', 'Connection with backend disrupted', null);
+        NotificationHandler.terminalLog('warning', 'Connection with communication server disrupted', null);
         jsonRPCServer.rejectAllPendingRequests('WebSocket disconnected');
     });
 

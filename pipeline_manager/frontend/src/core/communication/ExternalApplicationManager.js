@@ -21,7 +21,7 @@ const defaultAppCapabilities = {};
 function handleExternalAppResponse(response) {
     // Status is HTTPCodes.OK so a message from the application is received.
     if (response.type === PMMessageType.OK) {
-        NotificationHandler.showToast('info', response.content);
+        NotificationHandler.terminalLog('info', response.content);
     } else if (response.type === PMMessageType.ERROR) {
         NotificationHandler.terminalLog('error', `Error occurred: ${response.content}`, response.content);
     } else if (response.type === PMMessageType.WARNING) {
@@ -131,7 +131,7 @@ class ExternalApplicationManager {
                     'Errors when loading specification',
                 )) return;
 
-                NotificationHandler.showToast('info', 'Specification loaded successfully');
+                NotificationHandler.terminalLog('info', 'Specification loaded successfully');
             } else if (data.type === PMMessageType.WARNING) {
                 message = data.content;
                 NotificationHandler.terminalLog('warning', message);
@@ -397,8 +397,12 @@ class ExternalApplicationManager {
         }
 
         if (!this.externalApplicationConnected) {
-            NotificationHandler.showToast('info', 'Waiting for external application to connect');
             do {
+                NotificationHandler.terminalLog(
+                    'info',
+                    `Trying to establish connection with external application`,
+                );
+
                 /* eslint-disable-next-line no-await-in-loop */
                 const message = await this.openTCP();
 
