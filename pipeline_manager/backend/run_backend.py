@@ -111,6 +111,7 @@ def run_uvicorn(
     tcp_server_host: str,
     tcp_server_port: int,
     lazy_server_init: bool,
+    verbosity: str = "INFO",
     **kwargs,
 ):
     """
@@ -135,6 +136,8 @@ def run_uvicorn(
         with the third-party app (False) or skip waiting and progress
         with setting up other tasks and connect when the third-party
         app is ready (True)
+    verbosity : str
+        Verbosity level for the logger
     **kwargs
         Kwargs for the function
     """
@@ -153,6 +156,7 @@ def run_uvicorn(
         host=backend_host,
         port=backend_port,
         ws=WebSocketProtocol,
+        log_level=verbosity.lower(),
         loop="uvloop",
     )
 
