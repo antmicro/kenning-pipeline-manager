@@ -144,11 +144,11 @@ function createProperties(properties) {
 
     Object.entries(properties).forEach(([pname, p]) => {
         if (p.group !== undefined) {
-            const checkbox = getIntf(p);
-
-            checkbox.group = Object.keys(p.group);
-
-            tempProperties[pname] = () => checkbox;
+            tempProperties[pname] = (() => {
+                const groupedProperty = getIntf(p);
+                groupedProperty.group = Object.keys(p.group);
+                return groupedProperty;
+            });
             Object.entries(p.group).forEach(([pgroupname, pgroup]) => {
                 tempProperties[pgroupname] = () => getIntf(pgroup);
             });
