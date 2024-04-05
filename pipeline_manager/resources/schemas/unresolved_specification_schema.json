@@ -53,7 +53,6 @@
         "nodes": {
             "description": "Definition of the available nodes",
             "type": "array",
-            "minItems": 1,
             "items": {
                 "$ref": "#/$defs/node"
             }

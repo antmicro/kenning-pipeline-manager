@@ -12,7 +12,7 @@ for the Pipeline Manager server.
 import json
 import logging
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import requests
 from urllib3.exceptions import (
@@ -155,6 +155,8 @@ class SpecificationBuilder(object):
         self._nodes = dict()
         self._nodelayers = set()
         self._categories = set()
+        self._includes = set()
+        self._includeSubgraphs = dict()
         self._subgraphs = dict()
         self._metadata = dict()
         self.warnings = 0
@@ -916,6 +918,47 @@ class SpecificationBuilder(object):
             )
         self._subgraphs[subgraph["name"]] = subgraph
 
+    def add_include(self, include: str):
+        """
+        Adds include defined by url to the specification.
+
+        Parameters
+        ----------
+        include: str
+            URL to the specification to include
+
+        Raises
+        ------
+        SpecificationBuilderException
+            Raised when include already exists.
+        """
+        if include in self._includes:
+            raise SpecificationBuilderException(
+                f"Include {include} already exists."
+            )
+        self._includes.add(include)
+
+    def add_include_subgraph(self, dataflow: Dict[Tuple[str, str], str]):
+        """
+        Adds dataflow to the include subgraph defined by url.
+
+        Parameters
+        ----------
+        dataflow: Dict[Tuple[str, str], str]
+            Dataflow to include. Keys are tuples of node names and node urls
+
+        Raises
+        ------
+        SpecificationBuilderException
+            Raised when included subgraph already exists
+        """
+        dataflow_key = (dataflow.get("name", "default"), dataflow["url"])
+        if dataflow_key in self._includeSubgraphs:
+            raise SpecificationBuilderException(
+                f"Include subgraph {dataflow_key} already exists."
+            )
+        self._includeSubgraphs[dataflow_key] = dataflow
+
     def metadata_add_interface_styling(
         self,
         interfacename: str,
@@ -1078,9 +1121,6 @@ class SpecificationBuilder(object):
         otherspec: Any
             JSON-like structure with other specification
         """
-        for include in otherspec.get("include", []):
-            include = requests.get(include).json()
-            self.update_spec_from_other(include)
         metadata = otherspec.get("metadata", {})
         for prop, propvalue in metadata.items():
             if prop == "interfaces":
@@ -1116,6 +1156,10 @@ class SpecificationBuilder(object):
             self.add_node_type_from_spec(node)
         for subgraph in otherspec.get("graphs", []):
             self.add_subgraph_from_spec(subgraph)
+        for include in otherspec.get("include", []):
+            self.add_include(include)
+        for includeSubgraph in otherspec.get("includeSubgraph", []):
+            self.add_include_subgraph(includeSubgraph)
 
     def _sorted_nodes(self) -> List[Dict]:
         """
@@ -1145,7 +1189,8 @@ class SpecificationBuilder(object):
                             sort_dict_list(group, "values")
 
         sorted_tuples = sorted(self._nodes.items())
-        return list(zip(*sorted_tuples))[1]
+        sorted_nodes = list(zip(*sorted_tuples))
+        return sorted_nodes[1] if sorted_nodes else []
 
     def _sorted_metadata(self) -> Dict:
         """
@@ -1201,6 +1246,16 @@ class SpecificationBuilder(object):
             return self._sorted_subgraphs()
         return list(self._subgraphs.values())
 
+    def _get_includes(self, sort_spec: bool) -> List[str]:
+        if sort_spec:
+            return sorted(self._includes)
+        return list(self._includes)
+
+    def _get_include_subgraphs(self, sort_spec: bool) -> List[Dict]:
+        if sort_spec:
+            return sorted(self._includeSubgraphs.values())
+        return list(self._includeSubgraphs.values())
+
     def _construct_specification(self, sort_spec: bool) -> Dict:
         """
         Builds specification from the builder data.
@@ -1221,6 +1276,10 @@ class SpecificationBuilder(object):
             spec["metadata"] = self._get_metadata(sort_spec)
         if self._subgraphs:
             spec["graphs"] = self._get_subgraphs(sort_spec)
+        if self._includes:
+            spec["include"] = self._get_includes(sort_spec)
+        if self._includeSubgraphs:
+            spec["includeSubgraph"] = self._get_include_subgraphs(sort_spec)
         return spec
 
     def create_and_validate_spec(
