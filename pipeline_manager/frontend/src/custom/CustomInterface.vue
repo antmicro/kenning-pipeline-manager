@@ -1,5 +1,5 @@
 <!--
-Copyright (c) 2022-2023 Antmicro <www.antmicro.com>
+Copyright (c) 2022-2024 Antmicro <www.antmicro.com>
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -78,10 +78,13 @@ export default defineComponent({
         props.intf.events.beforeSetValue.subscribe(token, (_, prevent) => {
             if (viewModel.value.editor.readonly) {
                 prevent();
-            } else if (props.intf.group) {
-                props.toggleGroup(props.intf);
             }
         });
+
+        if (props.intf.group) {
+            props.toggleGroup(props.intf);
+            props.intf.events.setValue.subscribe(token, () => props.toggleGroup(props.intf));
+        }
 
         const startHoverWrapper = () => {
             if (!viewModel.value.editor.readonly) {

@@ -702,7 +702,7 @@ watch(showContextMenuInterface, () => {
 
 const toggleGroup = (intf) => {
     intf.group.forEach((name) => {
-        props.node.inputs[name].hidden = intf.value;
+        props.node.inputs[name].hidden = !intf.value;
     });
 };
 
