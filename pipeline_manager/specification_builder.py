@@ -604,11 +604,7 @@ class SpecificationBuilder(object):
         interface = {"name": interfacename, "direction": direction}
 
         if interfacetype is not None:
-            interface["type"] = (
-                [typ for typ in interfacetype]
-                if isinstance(interfacetype, list)
-                else interfacetype
-            )  # noqa: E501
+            interface["type"] = interfacetype
 
         set_if_not_none(interface, "side", side)
         set_if_not_none(interface, "maxConnectionsCount", maxcount)
