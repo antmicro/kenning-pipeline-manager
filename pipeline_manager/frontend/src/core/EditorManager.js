@@ -708,7 +708,7 @@ export default class EditorManager {
     async loadDataflow(dataflow) {
         let { notifyWhenChanged } = this;
         // Turn off notification during dataflow loading
-        this.updateMetadata({ notifyWhenChanged: false }, true);
+        this.updateMetadata({ notifyWhenChanged: false }, true, true);
         try {
             const validationErrors = this.validateDataflow(dataflow);
             if (validationErrors.length) {
@@ -744,8 +744,6 @@ export default class EditorManager {
                         true,
                         true,
                     );
-                } else {
-                    this.updateMetadata({ notifyWhenChanged: false }, true, true);
                 }
                 if (this.baklavaView.displayedGraph !== undefined) {
                     // Delete baklava internal history listeners
