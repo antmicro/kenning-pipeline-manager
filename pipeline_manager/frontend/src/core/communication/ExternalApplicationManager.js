@@ -81,7 +81,6 @@ class ExternalApplicationManager {
 
             this.externalApplicationConnected = response.status.connected;
         } catch (error) {
-            NotificationHandler.terminalLog('error', 'External application is not connected', error.message);
             this.externalApplicationConnected = false;
         }
     }
@@ -407,19 +406,8 @@ class ExternalApplicationManager {
                 const message = await this.openTCP();
 
                 if (message !== null) {
-                    NotificationHandler.terminalLog(
-                        'warning',
-                        `Cannot initialize connection. Retrying in ${this.timeoutStatusInterval / 1000.0}s`,
-                        message[1],
-                    );
                     /* eslint-disable-next-line no-await-in-loop,no-promise-executor-return */
                     await new Promise((r) => setTimeout(r, this.timeoutStatusInterval));
-
-                    // Setting a maximum buffer length
-                    this.timeoutStatusInterval = Math.min(
-                        (2 ** 4) * startTimeoutStatusInterval,
-                        2 * this.timeoutStatusInterval,
-                    );
                 } else {
                     NotificationHandler.terminalLog(
                         'info',
