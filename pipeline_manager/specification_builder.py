@@ -143,14 +143,21 @@ class SpecificationBuilder(object):
             for validity and availability
         """
         self.version = spec_version
+        self.assets_dir = Path(assets_dir) if assets_dir else None
+        self.check_urls = check_urls
+
+        self.reset()
+
+    def reset(self):
+        """
+        Resets all fields for the specification.
+        """
         self._nodes = dict()
         self._nodelayers = set()
         self._categories = set()
         self._subgraphs = dict()
         self._metadata = dict()
-        self.check_urls = check_urls
         self.warnings = 0
-        self.assets_dir = Path(assets_dir) if assets_dir else None
 
         if self.check_urls:
             self.session = requests.Session()
