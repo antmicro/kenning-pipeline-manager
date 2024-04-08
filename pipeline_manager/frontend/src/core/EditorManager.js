@@ -702,10 +702,11 @@ export default class EditorManager {
      * to Baklava format is done )
      *
      * @param dataflow Dataflow to load. Can be eithe an object or a string
+     * @param preventCentering Boolean Blocks view in the same spot.
      * @returns An array of errors that occurred during the dataflow loading.
      * If the array is empty, the loading was successful.
      */
-    async loadDataflow(dataflow) {
+    async loadDataflow(dataflow, preventCentering = false) {
         let { notifyWhenChanged } = this;
         // Turn off notification during dataflow loading
         this.updateMetadata({ notifyWhenChanged: false }, true, true);
@@ -752,7 +753,10 @@ export default class EditorManager {
                         Symbol('HistoryToken'),
                     );
                 }
-                const errors = { errors: await this.baklavaView.editor.load(dataflow), warnings };
+                const errors = {
+                    errors: await this.baklavaView.editor.load(dataflow, preventCentering),
+                    warnings,
+                };
                 this.baklavaView.history.graphSwitch(
                     this.baklavaView.displayedGraph,
                     this.baklavaView.displayedGraph,
