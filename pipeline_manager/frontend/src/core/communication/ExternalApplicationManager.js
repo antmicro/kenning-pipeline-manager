@@ -124,11 +124,13 @@ class ExternalApplicationManager {
                     'Warnings when validating specification',
                     'Specification is invalid',
                 )) return;
+                const graph = this.editorManager.saveDataflow();
                 if (handleSpecificationResult(
                     await this.editorManager.updateEditorSpecification(specification),
                     'Warnings when loading specification',
                     'Errors when loading specification',
                 )) return;
+                await this.editorManager.loadDataflow(graph, true);
 
                 NotificationHandler.terminalLog('info', 'Specification loaded successfully');
             } else if (data.type === PMMessageType.WARNING) {
