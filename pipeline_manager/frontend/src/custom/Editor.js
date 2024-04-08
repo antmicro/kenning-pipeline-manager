@@ -189,7 +189,7 @@ export default class PipelineManagerEditor extends Editor {
         this.events.registerNodeType.emit({ type, options });
     }
 
-    async load(state) {
+    async load(state, preventCentering = false) {
         // All subgraphs should be unregistered to avoid conflicts later when trying to
         // load into subgraph (in that case there may be two subgraphs with the same ID, one
         // of them from the previous session).
@@ -338,7 +338,7 @@ export default class PipelineManagerEditor extends Editor {
         if (scaling !== undefined) {
             this._graph.scaling = scaling;
         }
-        if (scaling === undefined && panning === undefined) {
+        if (!preventCentering && scaling === undefined && panning === undefined) {
             this.centerZoom();
         }
         return errors;
