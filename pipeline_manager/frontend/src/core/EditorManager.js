@@ -485,8 +485,10 @@ export default class EditorManager {
         if (!metadata) return ['No specification to load provided.'];
 
         if (overriding) {
+            // this.currentSpecification?.metadata should not be over overridden, that is why
+            // it needs to be copied before merging
             metadata = EditorManager.mergeObjects(
-                this.currentSpecification?.metadata ?? {}, metadata,
+                JSON.parse(JSON.stringify(this.currentSpecification?.metadata ?? {})), metadata,
             );
         }
 
@@ -805,7 +807,7 @@ export default class EditorManager {
     static mergeObjects(primaryObject, secondaryObject) {
         // Check if any of the object is undefined
         secondaryObject = secondaryObject ?? {};
-        if (primaryObject === undefined || primaryObject === {}) {
+        if (primaryObject === undefined || Object.keys(primaryObject).length === 0) {
             return secondaryObject;
         }
 
