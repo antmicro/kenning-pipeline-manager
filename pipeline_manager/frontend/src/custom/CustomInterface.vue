@@ -74,8 +74,8 @@ export default defineComponent({
 
         const { viewModel } = useViewModel();
 
-        const token = Symbol(null);
-        props.intf.events.beforeSetValue.subscribe(token, (_, prevent) => {
+        props.intf.events.beforeSetValue.unsubscribe(props.intf);
+        props.intf.events.beforeSetValue.subscribe(props.intf, (_, prevent) => {
             if (viewModel.value.editor.readonly) {
                 prevent();
             }
@@ -83,7 +83,8 @@ export default defineComponent({
 
         if (props.intf.group) {
             props.toggleGroup(props.intf);
-            props.intf.events.setValue.subscribe(token, () => props.toggleGroup(props.intf));
+            props.intf.events.setValue.unsubscribe(props.intf);
+            props.intf.events.setValue.subscribe(props.intf, () => props.toggleGroup(props.intf));
         }
 
         const startHoverWrapper = () => {

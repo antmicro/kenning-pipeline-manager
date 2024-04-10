@@ -632,6 +632,15 @@ export function NodeFactory(
 
             this.twoColumn = twoColumn;
         },
+        onDestroy() {
+            [...Object.values(this.inputs), ...Object.values(this.outputs)].forEach((io) => {
+                Object.values(io.events).forEach((event) => {
+                    // We need to unsubscribe from all events to avoid memory leaks
+                    // On token mismatch, the event will not be unsubscribed
+                    event.unsubscribe(io);
+                });
+            });
+        },
     });
 
     return node;
