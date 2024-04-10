@@ -337,7 +337,7 @@ export default class EditorManager {
                 targetGraph = val.graphs.find((graph) => graph.id === val.entryGraph);
             }
 
-            targetGraph.name = dataflow.name ?? val.graph.name;
+            targetGraph.name = dataflow.name ?? targetGraph.name;
             targetGraph.category = dataflow.category ?? undefined;
 
             if (targetGraph.name === undefined) {
@@ -778,7 +778,7 @@ export default class EditorManager {
         // Turn off notification during dataflow loading
         this.updateMetadata({ notifyWhenChanged: false }, true, true);
         try {
-            const validationErrors = this.validateDataflow(dataflow);
+            const validationErrors = EditorManager.validateDataflow(dataflow);
             if (validationErrors.length) {
                 return { errors: validationErrors, warnings: [] };
             }
@@ -801,7 +801,7 @@ export default class EditorManager {
                 }
 
                 if ('metadata' in dataflow && this.currentSpecification !== undefined) {
-                    const errors = this.validateMetadata(dataflow.metadata);
+                    const errors = EditorManager.validateMetadata(dataflow.metadata);
                     if (Array.isArray(errors) && errors.length) {
                         return { errors, warnings };
                     }
@@ -985,7 +985,8 @@ export default class EditorManager {
     }
 
     validateResolvedSpecification(specification) {
-        const validationErrors = this.validateSpecification(specification, specificationSchema);
+        const validationErrors = EditorManager.validateSpecification(
+            specification, specificationSchema);
         if (validationErrors.length) return validationErrors;
 
         // Validating category nodes
@@ -1058,8 +1059,7 @@ export default class EditorManager {
      * @param specification Specification to validate
      * @returns An array of errors. If the array is empty, the validation was successful.
      */
-    /* eslint-disable class-methods-use-this */
-    validateSpecification(specification, schema = unresolvedSpecificationSchema) {
+    static validateSpecification(specification, schema = unresolvedSpecificationSchema) {
         return EditorManager.validateJSONWithSchema(specification, schema);
     }
 
@@ -1069,7 +1069,7 @@ export default class EditorManager {
      * @param jsonmetadata metadata in JSON format to validate
      * @return An array of errors. If the array is empty, the validation was successful.
      */
-    validateMetadata(jsonmetadata) {
+    static validateMetadata(jsonmetadata) {
         return EditorManager.validateJSONWithSchema(jsonmetadata, metadataSchema);
     }
 
@@ -1079,7 +1079,7 @@ export default class EditorManager {
      * @param jsonmetadata dataflow in JSON format to validate
      * @return An array of errors. If the array is empty, the validation was successful.
      */
-    validateDataflow(jsonmetadata) {
+    static validateDataflow(jsonmetadata) {
         return EditorManager.validateJSONWithSchema(jsonmetadata, dataflowSchema);
     }
 

@@ -305,7 +305,7 @@ export default {
          * @param {string} specText specification to validate and load
          */
         loadSpecification(specText) {
-            const validationErrors = this.editorManager.validateSpecification(specText);
+            const validationErrors = EditorManager.validateSpecification(specText);
             if (Array.isArray(validationErrors) && validationErrors.length) {
                 NotificationHandler.terminalLog('error', 'Specification is invalid', validationErrors);
                 return;

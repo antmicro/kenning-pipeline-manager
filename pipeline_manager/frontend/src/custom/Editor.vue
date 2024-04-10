@@ -537,7 +537,7 @@ export default defineComponent({
          * @param specification The object holding the parsed specification file
          */
         async function updateEditorSpecification(specification) {
-            let errors = editorManager.validateSpecification(specification);
+            let errors = EditorManager.validateSpecification(specification);
             let warnings;
             if (errors.length) {
                 NotificationHandler.terminalLog('error', 'Specification is invalid', errors);
@@ -689,7 +689,7 @@ export default defineComponent({
                 }
 
                 if (data.nodes) { // Load Specification
-                    const specErrors = editorManager.validateSpecification(data);
+                    const specErrors = EditorManager.validateSpecification(data);
                     if (specErrors.length) {
                         NotificationHandler.terminalLog('error', 'Specification is invalid', specErrors);
                         return;

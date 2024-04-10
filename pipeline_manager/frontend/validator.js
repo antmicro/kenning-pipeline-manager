@@ -61,8 +61,7 @@ fs.readFile(positionals[0], async function (err, spec) {
         console.log(`\x1b[31mError reading specification file: ${err}\x1b[0m`);
         process.exit(1);
     }
-    const instance = EditorManager.getEditorManagerInstance();
-    let validationError = instance.validateSpecification(spec.toString());
+    let validationError = EditorManager.validateSpecification(spec.toString());
     if (Array.isArray(validationError) && validationError.length) {
         console.log('Specification errors:')
         validationError.forEach((error) => console.log(`* \t\x1b[31m${error}\x1b[0m`))
@@ -70,6 +69,7 @@ fs.readFile(positionals[0], async function (err, spec) {
         process.exit(1);
     }
 
+    const instance = EditorManager.getEditorManagerInstance();
     let { errors, warnings } = await instance.updateEditorSpecification(spec.toString());
     if (Array.isArray(warnings) && warnings.length) {
         console.log('Specification warnings:')

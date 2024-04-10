@@ -120,7 +120,7 @@ class ExternalApplicationManager {
                 const specification = data.content;
 
                 if (handleSpecificationResult(
-                    this.editorManager.validateSpecification(specification),
+                    EditorManager.validateSpecification(specification),
                     'Warnings when validating specification',
                     'Specification is invalid',
                 )) return;
