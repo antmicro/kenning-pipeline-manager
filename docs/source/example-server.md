@@ -7,21 +7,21 @@ To be able to test the front end, start with building the front end in the `serv
 In the root of the project, run:
 
 ```bash
-./build server-app
+python -m pipeline_manager build server-app
 ```
 
 ``````{note}
 If the specification requires additional assets (e.g. icons), provide them with `--assets-directory <path-to-assets>` flag, for example:
 
 ```bash
-./build --assets-directory examples/sample-assets server-app
+python -m pipeline_manager build server-app --assets-directory examples/sample-assets
 ```
 ``````
 
 Now, start the {{project}} server application:
 
 ```bash
-python -m pipeline_manager.backend.app --verbosity INFO
+python -m pipeline_manager run --verbosity INFO
 ```
 
 Once the server has started, it waits for the third-party application to connect to.
