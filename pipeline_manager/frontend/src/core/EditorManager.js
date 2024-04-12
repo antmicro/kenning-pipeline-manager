@@ -31,8 +31,6 @@ import {
     SubgraphOutputNode,
 } from '../custom/subgraphInterface.js';
 
-import { defaultNavbarItems } from './navbarItems.ts';
-
 /* eslint-disable lines-between-class-members */
 /**
  * Readonly helper class that reads and stores default values from metadata schema.
@@ -130,7 +128,7 @@ export default class EditorManager {
         this.baklavaView.collapseSidebar = this.defaultMetadata.collapseSidebar;
         this.baklavaView.movementStep = this.defaultMetadata.movementStep;
         this.baklavaView.editor.allowLoopbacks = this.defaultMetadata.allowLoopbacks;
-        this.baklavaView.navbarItems = [...defaultNavbarItems];
+        this.baklavaView.navbarItems = this.defaultMetadata.navbarItems;
         this.baklavaView.cache = {};
         this.baklavaView.logLevel = this.defaultMetadata.logLevel;
 
