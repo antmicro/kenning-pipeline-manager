@@ -88,15 +88,18 @@ Depending the application's mode (`static-html` or `server-app`), the following 
 
 ## Working with the server
 
-![Run and Validate](img/frontend-run-validation.png) ![Server status](img/frontend-server-status.png)
+When {{project}} works in the `server-app` mode, it is connected to an external application, making it possible to manipulate or execute a graph as well as save and load files in the application's native format.
 
-When {{project}} works in the `server-app` mode, it is connected to an external application, making it possible to run or validate a graph as well as save and load files in the application's native format.
+![Server status](img/frontend-server-status.png)
 
-The command executed by the `Play` icon depends on the implementation of the application - for [Kenning](https://github.com/antmicro/kenning), it either compiles and evaluates the model, or runs the Kenning Flow application.
+Status of the connection is displayed in the upper right corner of the editor.
+The color of the icon indicates the status of the connection with the server:
 
-The second icon lets the user validate a graph before running it by allowing the third-party application to run more thorough tests of the visualized pipeline.
+* `Red` - No connection with the server.
+* `Green` - Connection with the server is established.
 
-The third icon displays the status of the third-party application (red means disconnected, green means connected).
+Extrnal application may deliver additional features by providing additional buttons in the editor menu.
+More details can be found in the [Specification format](project:specification-format.md#navbar-item) section.
 
 ## Testing the front-end features
 
