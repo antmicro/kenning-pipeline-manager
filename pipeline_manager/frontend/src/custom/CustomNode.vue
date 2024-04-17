@@ -46,7 +46,7 @@ from moving or deleting the nodes.
             <input
                 v-else
                 type="text"
-                class="dark-input"
+                class="baklava-input"
                 v-model="tempName"
                 placeholder="Node Name"
                 ref="renameField"
