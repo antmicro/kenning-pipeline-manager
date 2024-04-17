@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Antmicro <www.antmicro.com>
+ * Copyright (c) 2022-2024 Antmicro <www.antmicro.com>
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -175,6 +175,14 @@ export default class ConnectionRenderer {
         const nc = new NormalizedConnection(x1, y1, x2, y2, connection);
         const sideMargin = 10 * graph.scaling;
 
+        if (nc.from.id === nc.to.id) {
+            // The same interface
+            const shift = this.getShift(nc.from, nc.to, graph, graph.scaling) + 30 * graph.scaling;
+            const x = nc.from.side === 'right' ? nc.x1 + shift : nc.x1 - shift;
+            return `M ${nc.x1} ${nc.y1}
+            A ${sideMargin} ${sideMargin / 2} 0 0 0 ${x} ${nc.y1}
+            A ${sideMargin} ${sideMargin / 2} 0 0 0 ${nc.x1} ${nc.y1}`;
+        }
         if (nc.from.side === 'left' && nc.to.side === 'left') {
             const leftRx = sideMargin;
             const leftRy = Math.abs(nc.y1 - nc.y2) / 2;
