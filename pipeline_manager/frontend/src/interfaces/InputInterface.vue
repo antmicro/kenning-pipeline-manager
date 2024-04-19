@@ -40,7 +40,6 @@ export default defineComponent({
             get: () => props.modelValue,
             set: (val) => {
                 emit('update:modelValue', val);
-                el.value.value = props.intf.value;
             },
         });
         return { v, el };
