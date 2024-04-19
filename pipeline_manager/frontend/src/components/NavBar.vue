@@ -35,7 +35,9 @@ import runInfo from '../core/communication/runInformation';
 import getExternalApplicationManager from '../core/communication/ExternalApplicationManager';
 import Notifications from './Notifications.vue';
 import Settings from './Settings.vue';
-import SaveMenu from './SaveMenu.vue';
+import {
+    ParentMenu, SaveMenu,
+} from './menu';
 import BlurPanel from './BlurPanel.vue';
 import CustomSidebar from '../custom/CustomSidebar.vue';
 import { saveSpecificationConfiguration, saveGraphConfiguration } from './saveConfiguration.ts';
@@ -66,6 +68,7 @@ export default {
         Cogwheel,
         Settings,
         Cube,
+        ParentMenu,
         SaveMenu,
         BlurPanel,
         CustomSidebar,
@@ -232,6 +235,17 @@ export default {
             graphName,
             editorManager,
             editorTitleInterface,
+            /* Object used to pass information to ParentMenu component about
+                saving configuration. If any option is set to undefined then
+                it will be not displayed in the ParentMenu.
+            */
+            saveConfiguration: {
+                readonly: false,
+                hideHud: false,
+                position: false,
+                savename: 'save',
+                saveCallback: this.saveDataflow,
+            },
             /* create instance of external manager to control
             connection, dataflow and specification
             */
@@ -687,12 +701,16 @@ export default {
 <template>
     <Transition name="fade" @click.self="saveMenuShow = false">
         <BlurPanel v-show="saveMenuShow">
-            <SaveMenu
+            <ParentMenu
                 v-show="saveMenuShow"
                 v-model="saveMenuShow"
-                :viewModel="editorManager.baklavaView"
+                :title="'Save configuration'"
+            >
+                <SaveMenu
                 :saveConfiguration="saveConfiguration"
+                    v-model="saveMenuShow"
             />
+            </ParentMenu>
         </BlurPanel>
     </Transition>
     <div class="wrapper"

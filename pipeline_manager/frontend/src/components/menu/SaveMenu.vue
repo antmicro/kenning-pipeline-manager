@@ -6,13 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <!-- eslint-disable vue/no-mutating-props -->
 <template>
-    <div class="popup-menu">
-        <div class="__header">
-            <div class="__header-title">
-                Save configuration
-            </div>
-            <Cross tabindex="-1" class="__close" @click="close" />
-        </div>
+    <div class="save-menu">
         <component
             v-for="option in additionalOptions"
             :key="option.id"
@@ -30,12 +24,12 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent, computed } from 'vue';
-import Cross from '../icons/Cross.vue';
+import { defineComponent, computed, markRaw } from 'vue';
 
-import InputInterface from '../interfaces/InputInterface.js';
-import ButtonInterface from '../interfaces/ButtonInterface.js';
-import CheckboxInterface from '../interfaces/CheckboxInterface.js';
+import InputInterface from '../../interfaces/InputInterface.js';
+import InputInterfaceComponent from '../../interfaces/InputInterface.vue';
+import ButtonInterface from '../../interfaces/ButtonInterface.js';
+import CheckboxInterface from '../../interfaces/CheckboxInterface.js';
 
 export default defineComponent({
     props: {
@@ -43,20 +37,18 @@ export default defineComponent({
             type: Boolean,
             default: false,
         },
-        viewModel: {
-            required: true,
-            type: Object,
-        },
         saveConfiguration: {
             required: true,
             type: Object,
         },
     },
-    components: {
-        Cross,
-    },
-    emits: ['update:modelValue'],
     setup(props, { emit }) {
+        const close = () => {
+            if (props.modelValue) {
+                emit('update:modelValue', false);
+            }
+        };
+
         const readonly = computed(() => {
             if (props.saveConfiguration.readonly === undefined) return undefined;
 
@@ -101,14 +93,10 @@ export default defineComponent({
                 'File name',
                 'save',
             );
+            option.componentName = 'InputInterface';
+            option.setComponent(markRaw(InputInterfaceComponent));
             return option;
         });
-
-        const close = () => {
-            if (props.modelValue) {
-                emit('update:modelValue', false);
-            }
-        };
 
         const save = computed(() => {
             const button = new ButtonInterface('Save', () => {
@@ -130,50 +118,20 @@ export default defineComponent({
             additionalOptions,
             dataflowname,
             save,
-            close,
         };
     },
 });
 </script>
 
 <style lang="scss">
-    .popup-menu {
-        position: absolute;
-        background-color: #{$gray-600}E6;
-        border: 1px solid $green;
-        border-radius: 10px;
-        color: white;
-        user-select: none;
-
-        left: 50vw;
-        top: 50vh;
-        transform: translate(-50%, -50%);
-        padding: 1em;
-
+    .save-menu {
         display: flex;
         flex-direction: column;
         gap: 1em;
 
         height: max-content;
 
-        & > .__header {
-            display: flex;
-            align-items: center;
-
-            & > .__header-title {
-                font-size: $fs-small;
-                flex-grow: 1;
-            }
-
-            & > .__close {
-                flex-grow: 0;
-                user-select: none;
-                outline: none;
-                cursor: pointer;
-            }
-        }
-
-        & > .__name-option {
+        .__name-option {
             & > .baklava-input {
                 // Padding is included into width
                 box-sizing: border-box;
