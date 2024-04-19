@@ -78,7 +78,8 @@ export function parseProperties(properties) {
 }
 
 /**
- * @param properties that are validated and parsed
+ * @param properties that are validated and parsed. The format
+ * should be the same as the one returned by parseProperties.
  * @returns created properties
  */
 export function createProperties(properties) {
@@ -758,6 +759,36 @@ export class CustomNode extends Node {
 }
 
 /**
+ * @param parsedInterfaces that are validated and parsed. The format
+ * should be the same as the one returned by parseInterfaces.
+ * @returns created interfaces
+ */
+export const createBaklavaInterfaces = (parsedInterfaces) => {
+    function createBaklavaInterface(intf) {
+        return () => {
+            const baklavaIntf = new NodeInterface(intf.name);
+            Object.assign(baklavaIntf, intf);
+            return baklavaIntf;
+        };
+    }
+
+    // Creating interfaces for baklavajs
+    const inputs = Object.fromEntries(
+        Object.entries(parsedInterfaces.inputs).map(
+            ([n, intf]) => [n, createBaklavaInterface(intf)],
+        ),
+    );
+
+    const outputs = Object.fromEntries(
+        Object.entries(parsedInterfaces.outputs).map(
+            ([n, intf]) => [n, createBaklavaInterface(intf)],
+        ),
+    );
+
+    return [inputs, outputs];
+};
+
+/**
  * Class factory that creates a class for a custom Node that is described by the arguments.
  * It can be later registered so that the user can use it and save the editor.
  * `inputs`, `properties` and `outputs` formats are described in the documentation.
@@ -796,29 +827,7 @@ export function CustomNodeFactory(
     if (Array.isArray(parsedInterfaces) && parsedInterfaces.length) {
         return parsedInterfaces.map((error) => `Node ${name} invalid. ${error}`);
     }
-
-    function createBaklavaInterface(intf) {
-        return () => {
-            const baklavaIntf = new NodeInterface(intf.name);
-            Object.assign(baklavaIntf, intf);
-            return baklavaIntf;
-        };
-    }
-
-    // Creating interfaces for baklavajs
-    const inputs = Object.fromEntries(
-        Object.entries(parsedInterfaces.inputs).map(([n, intf]) => [
-            n,
-            createBaklavaInterface(intf),
-        ]),
-    );
-
-    const newOutputs = Object.fromEntries(
-        Object.entries(parsedInterfaces.outputs).map(([n, intf]) => [
-            n,
-            createBaklavaInterface(intf),
-        ]),
-    );
+    const [inputs, newOutputs] = createBaklavaInterfaces(parsedInterfaces);
 
     const parsedProperties = parseProperties([...properties, ...generatedProperties.value]);
     // If parsedProperties returns an array, it is an array of errors
