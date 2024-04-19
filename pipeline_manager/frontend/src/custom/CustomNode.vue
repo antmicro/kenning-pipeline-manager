@@ -162,6 +162,9 @@ import EditorManager from '../core/EditorManager';
 import NotificationHandler from '../core/notifications.js';
 import getExternalApplicationManager from '../core/communication/ExternalApplicationManager';
 
+import { customNodeConfiguration } from '../core/nodeCreation/Configuration.ts';
+import { configurationState, menuState } from '../core/nodeCreation/ConfigurationState.ts';
+
 // Baklavajs implementation
 
 const props = defineProps({
@@ -263,6 +266,20 @@ const contextMenuTitleY = ref(0);
 const contextMenuTitleItems = computed(() => {
     const items = [];
     items.push({ value: 'sidebar', label: 'Details', icon: icons.Sidebar });
+    if (props.node.type === configurationState.nodeData?.name) {
+        items.push(
+            { value: 'finalize', label: 'Finalize' },
+        );
+        items.push(
+            { value: 'configure', label: 'Configure' },
+        );
+        items.push(
+            { value: 'property', label: 'Add property' },
+        );
+        items.push(
+            { value: 'interface', label: 'Add interface', endSection: true },
+        );
+    }
     if (!viewModel.value.editor.readonly) {
         items.push({ value: 'rename', label: 'Rename', icon: icons.Pencil });
     }
@@ -350,11 +367,24 @@ const onContextMenuTitleClick = async (action) => {
             }
             break;
         }
-        case 'unwrap': {
+        case 'unwrap':
             startTransaction();
             removeNode(props.node, true);
             commitTransaction();
-        }
+            break;
+        case 'finalize':
+            customNodeConfiguration.finalize();
+            break;
+        case 'configure':
+            menuState.configurationMenu.visible = true;
+            menuState.configurationMenu.addNode = false;
+            break;
+        case 'property':
+            menuState.propertyMenu = true;
+            break;
+        case 'interface':
+            menuState.interfaceMenu = true;
+            break;
     }
 };
 
@@ -526,10 +556,14 @@ const getRows = (sockets) => {
 const displayedRightRows = computed(() => getRows(displayedRightSockets.value));
 const displayedLeftRows = computed(() => getRows(displayedLeftSockets.value));
 
-displayedProperties.value.forEach((prop) => {
-    if (prop.setDefaultComponent !== undefined) {
-        prop.setDefaultComponent();
-    }
+watch(displayedProperties, () => {
+    displayedProperties.value.forEach((prop) => {
+        if (prop.setDefaultComponent !== undefined) {
+            prop.setDefaultComponent();
+        }
+    });
+}, {
+    immediate: true,
 });
 
 const path = viewModel.value.editor.getNodeIconPath(props.node.type);

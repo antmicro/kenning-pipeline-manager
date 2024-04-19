@@ -36,8 +36,10 @@ import getExternalApplicationManager from '../core/communication/ExternalApplica
 import Notifications from './Notifications.vue';
 import Settings from './Settings.vue';
 import {
-    ParentMenu, SaveMenu,
+    ParentMenu, SaveMenu, NodeConfigurationMenu, PropertyConfigurationMenu,
+    InterfaceConfigurationMenu,
 } from './menu';
+import { menuState } from '../core/nodeCreation/ConfigurationState.ts';
 import BlurPanel from './BlurPanel.vue';
 import CustomSidebar from '../custom/CustomSidebar.vue';
 import { saveSpecificationConfiguration, saveGraphConfiguration } from './saveConfiguration.ts';
@@ -70,6 +72,9 @@ export default {
         Cube,
         ParentMenu,
         SaveMenu,
+        NodeConfigurationMenu,
+        PropertyConfigurationMenu,
+        InterfaceConfigurationMenu,
         BlurPanel,
         CustomSidebar,
     },
@@ -239,13 +244,7 @@ export default {
                 saving configuration. If any option is set to undefined then
                 it will be not displayed in the ParentMenu.
             */
-            saveConfiguration: {
-                readonly: false,
-                hideHud: false,
-                position: false,
-                savename: 'save',
-                saveCallback: this.saveDataflow,
-            },
+            menuState,
             /* create instance of external manager to control
             connection, dataflow and specification
             */
@@ -342,6 +341,11 @@ export default {
             startTransaction();
             this.editorManager.editor.deepCleanEditor(false);
             commitTransaction();
+        },
+
+        createNewNodeCallback() {
+            this.menuState.configurationMenu.visible = !this.menuState.configurationMenu.visible;
+            this.menuState.configurationMenu.addNode = true;
         },
 
         /**
@@ -707,12 +711,46 @@ export default {
                 :title="'Save configuration'"
             >
                 <SaveMenu
-                :saveConfiguration="saveConfiguration"
+                    :saveConfiguration="saveConfiguration"
                     v-model="saveMenuShow"
-            />
+                />
             </ParentMenu>
         </BlurPanel>
     </Transition>
+    <Transition name="fade" @click.self="menuState.configurationMenu.visible = false">
+        <BlurPanel v-show="menuState.configurationMenu.visible">
+            <ParentMenu
+                v-if="menuState.configurationMenu.visible"
+                v-model="menuState.configurationMenu.visible"
+                :title="'Node configuration'"
+            >
+                <NodeConfigurationMenu/>
+            </ParentMenu>
+        </BlurPanel>
+    </Transition>
+    <Transition name="fade" @click.self="menuState.propertyMenu = false">
+        <BlurPanel v-show="menuState.propertyMenu">
+            <ParentMenu
+                v-if="menuState.propertyMenu"
+                v-model="menuState.propertyMenu"
+                :title="'Add property'"
+            >
+                <PropertyConfigurationMenu/>
+            </ParentMenu>
+        </BlurPanel>
+    </Transition>
+    <Transition name="fade" @click.self="menuState.interfaceMenu = false">
+        <BlurPanel v-show="menuState.interfaceMenu">
+            <ParentMenu
+                v-if="menuState.interfaceMenu"
+                v-model="menuState.interfaceMenu"
+                :title="'Add interface'"
+            >
+                <InterfaceConfigurationMenu/>
+            </ParentMenu>
+        </BlurPanel>
+    </Transition>
+
     <div class="wrapper"
         v-click-outside="(ev) => handleMouseLeave(ev)"
     >
@@ -739,6 +777,14 @@ export default {
                                     text="Create new graph"
                                     type="'button'"
                                     :eventFunction="createNewGraphCallback"
+                                />
+
+                                <DropdownItem
+                                    id="create-new-node-button"
+                                    v-if="!readonly"
+                                    text="Create new node"
+                                    type="'button'"
+                                    :eventFunction="createNewNodeCallback"
                                 />
 
                                 <!-- eslint-disable-next-line max-len -->
