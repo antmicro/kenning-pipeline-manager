@@ -100,6 +100,35 @@ export class NodeConfiguration {
         }
     }
 
+    private registerNewNodeConfiguration(newNodeData?: NodeDataConfiguration) {
+        if (newNodeData === undefined) {
+            newNodeData = this.nodeData; // eslint-disable-line no-param-reassign
+        }
+
+        const editorManager = EditorManager.getEditorManagerInstance();
+
+        // If there was a node registered, unregister it
+        if (
+            this.currentNodeType !== undefined &&
+            editorManager.baklavaView.editor.nodeTypes.has(this.currentNodeType)
+        ) {
+            // eslint-disable-next-line no-underscore-dangle
+            const errors = editorManager._unregisterNodeType(this.currentNodeType);
+            if (errors.length) return errors;
+        }
+
+        // eslint-disable-next-line no-underscore-dangle
+        const errors = editorManager._registerNodeType({
+            name: newNodeData.name,
+            layer: newNodeData.layer,
+            category: newNodeData.category,
+            properties: this.properties,
+            interfaces: this.interfaces,
+        });
+        if (errors.length) return errors;
+        return [];
+    }
+
     /**
      * Modifies the configuration of the custom node.
      * It first validates the configuration and if it is correct, it adjusts the existing nodes
@@ -127,28 +156,8 @@ export class NodeConfiguration {
         }
 
         // If there was a node registered, unregister it
-        if (
-            this.currentNodeType !== undefined &&
-            editorManager.baklavaView.editor.nodeTypes.has(this.currentNodeType)
-        ) {
-            // eslint-disable-next-line no-underscore-dangle
-            const errors = editorManager._unregisterNodeType(this.currentNodeType);
-            if (errors.length) {
-                return errors;
-            }
-        }
-
-        // eslint-disable-next-line no-underscore-dangle
-        const errors = editorManager._registerNodeType({
-            name: newNodeData.name,
-            layer: newNodeData.layer,
-            category: newNodeData.category,
-            properties: this.properties,
-            interfaces: this.interfaces,
-        });
-        if (errors.length) {
-            return errors;
-        }
+        const errors = this.registerNewNodeConfiguration(newNodeData);
+        if (errors.length) return errors;
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const nodes: any[] = displayedGraph.nodes.filter(
@@ -219,8 +228,9 @@ export class NodeConfiguration {
             NotificationHandler.terminalLog('error', 'Invalid properties', parsedProperties);
             return;
         }
-        const createdProperties = (createProperties(parsedProperties) as CreatedInterfaces);
+        this.registerNewNodeConfiguration();
 
+        const createdProperties = (createProperties(parsedProperties) as CreatedInterfaces);
         nodes.forEach((node) => {
             const state = node.save();
 
@@ -271,6 +281,7 @@ export class NodeConfiguration {
             NotificationHandler.terminalLog('error', 'Invalid interfaces', parsedInterfaces);
             return;
         }
+        this.registerNewNodeConfiguration();
 
         const [inputs, outputs] =
             createBaklavaInterfaces(parsedInterfaces) as [CreatedInterfaces, CreatedInterfaces];
