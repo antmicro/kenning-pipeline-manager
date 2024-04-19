@@ -12,7 +12,7 @@ SPDX-License-Identifier: Apache-2.0
         <div class="panel">
             <div v-for="option in settingOptions" :key="option.id">
                 <div class="option-label">
-                    {{ getOptionName(option) ? `${option.name}:` : '' }}
+                    {{ getOptionName(option.componentName) ? `${option.name}:` : '' }}
                 </div>
                 <component :is="option.component" :intf="option" tabindex="-1"></component>
             </div>
