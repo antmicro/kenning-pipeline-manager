@@ -443,7 +443,114 @@ export default class EditorManager {
     }
 
     /**
-     * Reads and validates part of specification related to nodes and graphs
+     * Validates the node specification passed in `nodeSpecification` and if
+     * it is correct adds it to the unresolved specification.
+     * If there is no current specification loaded then a new one is created.
+     * The node specification should be in the format of the node schema.
+     *
+     * @param {object} nodeSpecification Node specification to add
+     * @returns An object consisting of errors and warnings arrays. If both arrays are empty
+     * the updating process was successful.
+     */
+    addNodeToGraphSpecification(nodeSpecification) {
+        let validationErrors = this.validateNode(nodeSpecification);
+        if (validationErrors.length) return validationErrors;
+
+        if (this.currentSpecification === undefined) {
+            const newSpecification = {
+                nodes: [nodeSpecification],
+            };
+
+            return this.updateGraphSpecification(newSpecification);
+        }
+
+        validationErrors = this._registerNodeType(nodeSpecification);
+        if (validationErrors.length) {
+            return { errors: validationErrors, warnings: [] };
+        }
+
+        this.unresolvedSpecification.nodes.push(nodeSpecification);
+        return { errors: [], warnings: [] };
+    }
+
+    /**
+     * Creates a new nodeType and registers it in the editor.
+     * If the nodeType is not valid then an array of errors is returned.
+     * If the nodeType is valid then it is registered in the editor and an empty array is returned.
+     *
+     * @param {object} node Node to register
+     * @param {boolean} twoColumn Whether the node should be displayed in two columns
+     * @returns An array of errors that occurred during the node registration.
+     */
+    _registerNodeType(node, twoColumn = false) {
+        if (this.baklavaView.editor.nodeTypes.has(node.name)) {
+            return [`Node of type ${node.name} is already registered`];
+        }
+
+        const myNode = CustomNodeFactory(
+            node.name,
+            node.layer,
+            node.interfaces ?? [],
+            node.properties ?? [],
+            node.interfaceGroups ?? [],
+            node.defaultInterfaceGroups ?? [],
+            twoColumn ?? false,
+            node.description ?? '',
+            node.extends ?? [],
+            node.extending ?? [],
+            node.siblings ?? [],
+            node.width ?? 300,
+        );
+
+        // If my node is any array then it is an array of errors
+        if (Array.isArray(myNode) && myNode.length) {
+            return myNode;
+        }
+
+        this.baklavaView.editor.registerNodeType(myNode, {
+            title: node.name,
+            category: node.category,
+            isCategory: node.isCategory ?? false,
+            color: node.color,
+        });
+        if ('icon' in node) {
+            if (typeof node.icon === 'string') {
+                this.baklavaView.editor.nodeIcons.set(node.name, node.icon);
+            } else {
+                const baseName = Object.keys(node.icon)[0];
+                const suffix = Object.values(node.icon)[0];
+                const baseUrl = this.baklavaView.editor.baseIconUrls.get(baseName);
+                this.baklavaView.editor.nodeIcons.set(node.name, `${baseUrl}/${suffix}`);
+            }
+        }
+        if ('urls' in node) {
+            Object.entries(node.urls).forEach(([urlName, url]) => {
+                if (!this.baklavaView.editor.nodeURLs.has(node.name)) {
+                    this.baklavaView.editor.nodeURLs.set(node.name, {});
+                }
+                this.baklavaView.editor.nodeURLs.get(node.name)[urlName] = url;
+            });
+        }
+        return [];
+    }
+
+    /**
+     * Unregisters a node type
+     * If there is no such node type then an array of errors is returned.
+     *
+     * @param {object} nodeType Node to unregister
+     * @returns An array of errors that occurred during the node unregistration.
+     */
+    _unregisterNodeType(nodeType) {
+        if (this.baklavaView.editor.nodeTypes.has(nodeType)) {
+            this.baklavaView.editor.unregisterNodeType(nodeType);
+            return [];
+        }
+        return [`Node of type ${nodeType} is not registered`];
+    }
+
+    /**
+     * Reads and validates part of specification related to nodes and subgraphs
      * @param dataflowSpecification Specification to load
      * @param includedGraphs Graphs included in the specification
      * @returns An object consisting of errors and warnings arrays. If any array is empty
@@ -518,50 +625,7 @@ export default class EditorManager {
         });
 
         resolvedNodes.forEach((node) => {
-            const myNode = CustomNodeFactory(
-                node.name,
-                node.layer,
-                node.interfaces ?? [],
-                node.properties ?? [],
-                node.interfaceGroups ?? [],
-                node.defaultInterfaceGroups ?? [],
-                metadata?.twoColumn ?? false,
-                node.description ?? '',
-                node.extends ?? [],
-                node.extending ?? [],
-                node.siblings ?? [],
-                node.width ?? 300,
-            );
-
-            // If my node is any array then it is an array of errors
-            if (Array.isArray(myNode) && myNode.length) {
-                errors.push(...myNode);
-                return;
-            }
-            this.baklavaView.editor.registerNodeType(myNode, {
-                title: node.name,
-                category: node.category,
-                isCategory: node.isCategory ?? false,
-                color: node.color,
-            });
-            if ('icon' in node) {
-                if (typeof node.icon === 'string') {
-                    this.baklavaView.editor.nodeIcons.set(node.name, node.icon);
-                } else {
-                    const baseName = Object.keys(node.icon)[0];
-                    const suffix = Object.values(node.icon)[0];
-                    const baseUrl = this.baklavaView.editor.baseIconUrls.get(baseName);
-                    this.baklavaView.editor.nodeIcons.set(node.name, `${baseUrl}/${suffix}`);
-                }
-            }
-            if ('urls' in node) {
-                Object.entries(node.urls).forEach(([urlName, url]) => {
-                    if (!this.baklavaView.editor.nodeURLs.has(node.name)) {
-                        this.baklavaView.editor.nodeURLs.set(node.name, {});
-                    }
-                    this.baklavaView.editor.nodeURLs.get(node.name)[urlName] = url;
-                });
-            }
+            errors.push(...this._registerNodeType(node, metadata?.twoColumn ?? false));
         });
 
         if (errors.length) {
@@ -1114,6 +1178,8 @@ export default class EditorManager {
     static validateJSONWithSchema(data, schema, additionalAjvOptions = {}) {
         const ajv = new Ajv2019({
             allowUnionTypes: true,
+            // Schema used in compile() may be already included in `schemas`.
+            addUsedSchema: false,
             formats: {
                 hex: /^0x[a-fA-F0-9]+$/,
             },
@@ -1276,6 +1342,43 @@ export default class EditorManager {
             });
         }
         return errors;
+    }
+
+    /**
+     * Validates a single node passed in `nodeSpecification` using jsonSchema.
+     *
+     * @param nodeSpecification Node to validate
+     * @returns An array of errors. If the array is empty, the validation was successful.
+     */
+    /* eslint-disable class-methods-use-this */
+    validateNode(nodeSpecification, schema = unresolvedSpecificationSchema.$defs.node) {
+        return EditorManager.validateJSONWithSchema(nodeSpecification, schema);
+    }
+
+    /**
+     * Validates a single property passed in `propertySpecification` using jsonSchema.
+     *
+     * @param propertySpecification Property to validate
+     * @returns An array of errors. If the array is empty, the validation was successful.
+     */
+    validateNodeProperty(
+        propertySpecification,
+        schema = unresolvedSpecificationSchema.$defs.property,
+    ) {
+        return EditorManager.validateJSONWithSchema(propertySpecification, schema);
+    }
+
+    /**
+     * Validates a single interface passed in `interfaceSpecification` using jsonSchema.
+     *
+     * @param interfaceSpecification Interface to validate
+     * @returns An array of errors. If the array is empty, the validation was successful.
+     */
+    validateNodeInterface(
+        interfaceSpecification,
+        schema = unresolvedSpecificationSchema.$defs.interface,
+    ) {
+        return EditorManager.validateJSONWithSchema(interfaceSpecification, schema);
     }
 
     /**
