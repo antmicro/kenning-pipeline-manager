@@ -16,6 +16,9 @@ import {
     ICommandHandler, ICommand,
 } from '@baklavajs/renderer-vue';
 
+import { applySidePositions } from './interfaceParser.js';
+import { configurationState } from './nodeCreation/ConfigurationState.ts';
+
 export const suppressingHistory: Ref<boolean> = ref(false);
 const transactionId: Ref<string> = ref('');
 
@@ -239,6 +242,10 @@ export function useHistory(graph: Ref<any>, commandHandler: ICommandHandler): IH
                 if (historyItem) history.set(currentId, historyItem);
             }
             newGraph.events.addNode.subscribe(token, (node : any) => {
+                // Suppressing node that are being created as its hard
+                // to keep the history trace consistent
+                if (configurationState.nodeData?.name === node.type) return;
+
                 if (!suppressingHistory.value) {
                     const historyItem = history.get(newGraph.id);
                     if (!historyItem) return;
@@ -248,6 +255,10 @@ export function useHistory(graph: Ref<any>, commandHandler: ICommandHandler): IH
             });
             newGraph.events.removeNode.subscribe(token, (node : any) => {
                 if (!suppressingHistory.value) {
+                    // Suppressing node that are being created as its hard
+                    // to keep the history trace consistent
+                    if (configurationState.nodeData?.name === node.type) return;
+
                     const historyItem = history.get(newGraph.id);
                     if (!historyItem) return;
                     const step = new NodeStep('rem', node.id.toString(), transactionId.value);
