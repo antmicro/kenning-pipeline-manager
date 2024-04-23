@@ -236,6 +236,7 @@
             },
             {
                 "name": "Perform terminal stress test",
+                "stopName": "Stop terminal stress test",
                 "iconName": "Run",
                 "procedureName": "custom_terminal_stress_test"
             },
