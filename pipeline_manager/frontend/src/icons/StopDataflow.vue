@@ -7,16 +7,16 @@ SPDX-License-Identifier: Apache-2.0
 <!-- eslint-disable max-len -->
 <template>
     <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg" class="stopdataflow">
-        <path
-            fill-rule="evenodd"
-            clip-rule="evenodd"
-            d="M12.5 20C16.6421 20 20 16.6421 20 12.5C20 8.35786 16.6421 5 12.5 5C8.35786 5 5 8.35786 5 12.5C5 16.6421 8.35786 20 12.5 20ZM16 11H9V14H16V11Z"
-            fill="#6F6F6F"
-            :class="[hoverStatus]"
-            class="highlighted"
-            stroke-width="0"
-        />
-    </svg>
+  <path
+     fill-rule="evenodd"
+     clip-rule="evenodd"
+     d="m 11,20.553914 c 5.276436,0 9.553914,-4.277478 9.553914,-9.553914 0,-5.2764865 -4.277478,-9.553914 -9.553914,-9.553914 -5.2764865,0 -9.553914,4.2774275 -9.553914,9.553914 0,5.276436 4.2774275,9.553914 9.553914,9.553914 z M 15.458494,9.089217 H 6.5415069 v 3.821566 h 8.9169871 z"
+     fill="#6F6F6F"
+     :class="[hoverStatus]"
+     class="highlighted"
+     stroke-width="0"
+    />
+</svg>
 </template>
 
 <script lang="ts">
