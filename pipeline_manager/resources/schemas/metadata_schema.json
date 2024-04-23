@@ -39,6 +39,10 @@
                         "description": "Name displayed in the tooltip",
                         "type": "string"
                     },
+                    "stopName": {
+                        "description": "Name displayed in the tooltip when the corresponding procedure is running and is stoppable. If not specified simply Stop is added as a prefix to the name",
+                        "type": "string"
+                    },
                     "iconName": {
                         "description": "Name of the icon displayed in the navbar. Name should correspond to a file in the asset directory or to an icon in `frontend/src/icons`",
                         "type": "string"
