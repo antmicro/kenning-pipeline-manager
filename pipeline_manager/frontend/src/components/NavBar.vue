@@ -24,7 +24,7 @@ import Validate from '../icons/Validate.vue';
 import Backend from '../icons/Backend.vue';
 import Bell from '../icons/Bell.vue';
 import Cube from '../icons/Cube.vue';
-import StopDataflow from '../icons/StopDataflow.vue';
+import CassetteStop from '../icons/CassetteStop.vue';
 import DropdownItem from './DropdownItem.vue';
 import Cogwheel from '../icons/Cogwheel.vue';
 import Magnifier from '../icons/Magnifier.vue';
@@ -54,7 +54,7 @@ export default {
         Logo,
         Arrow,
         Run,
-        StopDataflow,
+        CassetteStop,
         Validate,
         Backend,
         Bell,
@@ -678,6 +678,17 @@ export default {
             return this.externalApplicationManager
                 .appCapabilities.stoppable_methods?.includes(procedure) ?? true;
         },
+
+        getNavbarActionTooltip(actionItem) {
+            if (
+                this.isStoppable(actionItem.procedureName) &&
+                this.isInProgress(actionItem.procedureName)
+            ) {
+                if (actionItem.stopName !== undefined) return actionItem.stopName;
+                return `Stop ${actionItem.name}`;
+            }
+            return actionItem.name;
+        },
     },
     async mounted() {
         this.isMounted = true;
@@ -861,27 +872,25 @@ export default {
                             @pointerleave="() => resetHoverInfo(actionItem.name)"
                         >
                             <!-- imgURI is used for Placeholder Icon to retrieve the image -->
+                            <CassetteStop
+                                v-if="
+                                    isStoppable(actionItem.procedureName)
+                                    && isInProgress(actionItem.procedureName)
+                                "
+                                class="small_svg"
+                                :hover="isHovered(actionItem.name)"
+                            />
                             <component
+                                v-else
                                 class="small_svg"
                                 :is="actionItem.icon"
                                 :hover="isHovered(actionItem.name)"
                                 :imgURI="actionItem.iconName"
                             />
-                            <component
-                                v-if="
-                                    isStoppable(actionItem.procedureName)
-                                    && isInProgress(actionItem.procedureName)
-                                "
-                                class="small_svg_stop"
-                                :is="crossIcon"
-                                :hover="isHovered(actionItem.name)"
-                            />
                             <div class="progress-bar" />
                             <div :class="['tooltip', mobileClasses]">
                                 <span>
-                                    {{ isStoppable(actionItem.procedureName) &&
-                                       isInProgress(actionItem.procedureName) ? 'Stop ' : '' }}
-                                    {{ actionItem.name }}
+                                    {{ getNavbarActionTooltip(actionItem) }}
                                 </span>
                             </div>
                         </div>
