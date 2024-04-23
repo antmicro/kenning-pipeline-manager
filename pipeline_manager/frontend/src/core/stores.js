@@ -116,10 +116,8 @@ export const terminalStore = reactive({
     remove(instance = MAIN_TERMINAL) {
         if (instance === MAIN_TERMINAL) {
             remove(`logs`);
-            remove(`readOnly`);
         }
         this.logs[instance] = [];
-        this.readOnly[instance] = true;
     },
 
     /**
