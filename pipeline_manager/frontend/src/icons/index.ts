@@ -18,12 +18,14 @@ import Sidebar from './Sidebar.vue';
 import StopDataflow from './StopDataflow.vue';
 import Validate from './Validate.vue';
 import Placeholder from './Placeholder.vue';
+import CassetteStop from './CassetteStop.vue';
 
 export default {
     Arrow,
     Backend,
     Bell,
     Bin,
+    CassetteStop,
     Cogwheel,
     Collapse,
     Cross,
