@@ -134,6 +134,8 @@ Every element consists of the following properties:
 
 * `name` - displayed as a tooltip to the user when the button is hovered.
   Names have to be unique.
+* `stopName` - name displayed in the tooltip when the corresponding procedure is running and is stoppable.
+  If not specified simply 'Stop' is added as a prefix to the name.
 * `iconName` - name of the icon that is used.
   It can be either a file in the assets directory, or an icon described in `/pipeline-manager/pipeline_manager/frontend/src/icons/index.ts`.
 * `procedureName` - name of the procedure (either a built-in [API procedure](#api-specification) or a [custom procedure](#api-custom-procedure)) to be called.
@@ -143,6 +145,7 @@ Example of a button that is used to run the current graph using a dedicated proc
 ```json
 {
     "name": "Run",
+    "stopName": "Stop",
     "iconName": "Run",
     "procedureName": "dataflow_run"
 }

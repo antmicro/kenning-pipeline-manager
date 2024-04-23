@@ -185,6 +185,7 @@ Such remote procedures can be called from the frontend using custom Navbar butto
 ```json
 {
     "name": "Simulate design",
+    "stopName": "Stop simulation",
     "iconName": "Run",
     "procedureName": "custom_simulate_design"
 }
