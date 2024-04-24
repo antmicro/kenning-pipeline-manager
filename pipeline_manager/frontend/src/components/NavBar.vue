@@ -176,6 +176,9 @@ export default {
             }
             return { 'justify-content': 'right' };
         },
+        activeNavItems() {
+            return this.activeNavbarItemsNames;
+        },
     },
     watch: {
         dataflowGraphName(newValue) {
@@ -208,6 +211,10 @@ export default {
             }
             viewModel.value.editor.searchQuery = newValue.toLowerCase();
         },
+        navbarItems(newValue) {
+            // Setup initial navbarItems
+            this.activeNavbarItemsNames = newValue.map((item) => item.procedureName);
+        },
     },
     data() {
         const editorManager = EditorManager.getEditorManagerInstance();
@@ -222,6 +229,8 @@ export default {
         editorTitleInterface.setComponent(markRaw(InputInterfaceComponent));
 
         const searchEditorNodesQuery = ref('');
+        // Setup custom hook, which is executed when procedure starts or stops running
+        runInfo.setHook(this.updateActiveNavItems);
 
         // Mock hoveredOver to suppress warning when creating Side Panel
         // hoveredOver over is needed only for temporary connections, which are not used here
@@ -247,6 +256,7 @@ export default {
             connection, dataflow and specification
             */
             externalApplicationManager: getExternalApplicationManager(),
+            activeNavbarItemsNames: [],
             saveMenuShow: false,
             editTitle: false,
             notificationStore,
@@ -512,9 +522,12 @@ export default {
                 this.isStoppable(procedureName)
             ) {
                 await this.externalApplicationManager.requestDataflowStop(procedureName);
-            } else if (!this.isInProgress(procedureName)) {
+                return;
+            }
+            const activeAction = this.activeNavbarItemsNames.includes(procedureName);
+            if (activeAction && !this.isInProgress(procedureName)) {
                 await this.externalApplicationManager.requestDataflowAction(procedureName);
-            } else {
+            } else if (activeAction) {
                 NotificationHandler.terminalLog('warning', `Method ${procedureName} cannot be stopped`);
             }
         },
@@ -655,9 +668,11 @@ export default {
             }
         },
 
-        updateHoverInfo(name) {
-            this.hoverInfo.hoveredPanel = name;
-            this.hoverInfo.isHovered = true;
+        updateHoverInfo(name, isRunnable = false) {
+            if (!isRunnable || this.activeNavbarItemsNames.includes(name)) {
+                this.hoverInfo.hoveredPanel = name;
+                this.hoverInfo.isHovered = true;
+            }
         },
 
         resetHoverInfo(name) {
@@ -688,6 +703,18 @@ export default {
                 return `Stop ${actionItem.name}`;
             }
             return actionItem.name;
+        },
+
+        updateActiveNavItems() {
+            const { navbarItems } = this;
+            let activeItems = new Set(navbarItems.map((item) => item.procedureName));
+            navbarItems.filter((item) => this.isInProgress(item.procedureName)).forEach((item) => {
+                // Intersection of current activeItems and items allowToRunInParallelWith
+                activeItems = new Set(
+                    (item.allowToRunInParallelWith ?? []).filter((name) => activeItems.has(name)),
+                );
+            });
+            this.activeNavbarItemsNames = Array.from(activeItems);
         },
     },
     async mounted() {
@@ -863,13 +890,19 @@ export default {
                             v-for="actionItem in navbarItems"
                             :key="actionItem.name"
                             :id="`navbar-button-${actionItem.procedureName}`"
-                            :class="['hoverbox', mobileClasses, {
+                            :class="[
+                                (
+                                    (activeNavItems.includes(actionItem.procedureName)
+                                    || isInProgress(actionItem.procedureName))
+                                    ? 'hoverbox' : 'box'
+                                ),
+                                mobileClasses, {
                                 'button-in-progress': isInProgress(actionItem.procedureName),
                             }]"
                             role="button"
                             @click="(async () => requestDataflowAction(actionItem.procedureName))"
-                            @pointerover="() => updateHoverInfo(actionItem.name)"
-                            @pointerleave="() => resetHoverInfo(actionItem.name)"
+                            @pointerover="() => updateHoverInfo(actionItem.procedureName, true)"
+                            @pointerleave="() => resetHoverInfo(actionItem.procedureName)"
                         >
                             <!-- imgURI is used for Placeholder Icon to retrieve the image -->
                             <CassetteStop
@@ -884,7 +917,7 @@ export default {
                                 v-else
                                 class="small_svg"
                                 :is="actionItem.icon"
-                                :hover="isHovered(actionItem.name)"
+                                :hover="isHovered(actionItem.procedureName)"
                                 :imgURI="actionItem.iconName"
                             />
                             <div class="progress-bar" />
@@ -1287,22 +1320,12 @@ export default {
                 display: flex;
             }
 
-            &.hoverbox {
+            &.box, &.hoverbox {
                 & > .small_svg {
                     fill: $white;
                 }
 
                 &:hover {
-                    cursor: pointer;
-
-                    & > .small_svg {
-                        fill: $green;
-                    }
-
-                    & > .small_svg_stop {
-                        stroke: $red-dark;
-                    }
-
                     & > .tooltip {
                         &:not(.compressed-mobile) {
                             display: flex;
@@ -1310,6 +1333,20 @@ export default {
                         }
                     }
                 }
+            }
+            &.hoverbox:hover {
+                cursor: pointer;
+
+                & > .small_svg {
+                    fill: $green;
+                }
+
+                & > .small_svg_stop {
+                    stroke: $red-dark;
+                }
+            }
+            &.box > .small_svg {
+                filter: brightness(50%);
             }
 
             &.search-editor-nodes {
