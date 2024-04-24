@@ -227,18 +227,30 @@
             {
                 "name": "Run",
                 "iconName": "Run",
-                "procedureName": "dataflow_run"
+                "procedureName": "dataflow_run",
+                "allowToRunInParallelWith": [
+                    "dataflow_validate",
+                    "custom_create_writable_terminal"
+                ]
             },
             {
                 "name": "Run API test",
                 "iconName": "Run",
-                "procedureName": "custom_api_test"
+                "procedureName": "custom_api_test",
+                "allowToRunInParallelWith": [
+                    "dataflow_validate",
+                    "custom_create_writable_terminal"
+                ]
             },
             {
                 "name": "Perform terminal stress test",
                 "stopName": "Stop terminal stress test",
                 "iconName": "Run",
-                "procedureName": "custom_terminal_stress_test"
+                "procedureName": "custom_terminal_stress_test",
+                "allowToRunInParallelWith": [
+                    "dataflow_validate",
+                    "custom_create_writable_terminal"
+                ]
             },
             {
                 "name": "Validate",
