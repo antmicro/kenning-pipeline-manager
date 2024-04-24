@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Antmicro <www.antmicro.com>
+ * Copyright (c) 2022-2024 Antmicro <www.antmicro.com>
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -11,6 +11,8 @@
  */
 class RunInfo {
     procedureName;
+
+    hook: (() => undefined) | undefined = undefined;
 
     /** @private */
     private pr_inProgress = false;
@@ -47,6 +49,9 @@ class RunInfo {
             progressBar.style.width = '0%';
         }
         this.pr_inProgress = value;
+        if (this.hook !== undefined) {
+            this.hook();
+        }
     }
 }
 
@@ -74,4 +79,29 @@ class DefaultMap<K, V> extends Map<K, V> {
     }
 }
 
-export default new DefaultMap<string, RunInfo>((key) => new RunInfo(key));
+/**
+ * @extends {DefaultMap<string, RunInfo>}
+ *
+ * DefaultMap with custom hook run when RunInfo inProgress changes value.
+ */
+class RunInfoMap extends DefaultMap<string, RunInfo> {
+    hook: (() => undefined) | undefined = undefined;
+
+    get(key: string): RunInfo {
+        if (!super.has(key)) {
+            const newValue = this.defaultFactory(key);
+            newValue.hook = this.hook;
+            super.set(key, newValue);
+        }
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        return super.get(key)!;
+    }
+
+    setHook(hook: () => undefined) {
+        this.hook = hook;
+        // eslint-disable-next-line no-param-reassign
+        this.forEach((v) => { v.hook = hook; });
+    }
+}
+
+export default new RunInfoMap((key) => new RunInfo(key));
