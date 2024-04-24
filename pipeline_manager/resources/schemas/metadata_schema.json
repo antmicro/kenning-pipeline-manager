@@ -50,6 +50,15 @@
                     "procedureName": {
                         "description": "Name of the procedure used when button is pressed. The currently displayed graph is used as an argument",
                         "type": "string"
+                    },
+                    "allowToRunInParallelWith": {
+                        "description": "List of procedures which can be run when this `navbarItem` is still running",
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "description": "`procedureName` of `navbarItem`"
+                        },
+                        "default": []
                     }
                 },
                 "required": ["name", "iconName", "procedureName"],
