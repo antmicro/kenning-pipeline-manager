@@ -13,7 +13,7 @@ import {
 } from '@baklavajs/core';
 import { v4 as uuidv4 } from 'uuid';
 import { parseInterfaces } from '../core/interfaceParser.js';
-import { updateSubgraphInterfaces } from '../core/NodeFactory.js';
+import { calculateExternalInterfaces } from '../core/NodeFactory.js';
 
 export default function CreateCustomGraphNodeType(template, type) {
     const nt = createGraphNodeType(template);
@@ -30,7 +30,6 @@ export default function CreateCustomGraphNodeType(template, type) {
             [...this.subgraph.inputs, ...this.subgraph.outputs].forEach((io) => {
                 newInterfaces.push({
                     name: io.externalName,
-                    // externalName: io.externalName ?? undefined,
                     id: io.id,
                     subgraphNodeId: io.subgraphNodeId,
                     direction: io.direction,
@@ -63,63 +62,58 @@ export default function CreateCustomGraphNodeType(template, type) {
         load(state) {
             this.hooks.beforeLoad.execute(state);
 
-            let errors = [];
-
             state.idMap = new Map();
             const createNewId = (oldId) => {
                 const newId = uuidv4();
                 state.idMap.set(oldId, newId);
                 return newId;
             };
-            state.graphState.interfaces = (state.graphState.interfaces ?? state.interfaces).map(
-                (io) => {
-                    const correspondingInterface = state.interfaces.find(
-                        (intf) => intf.subgraphNodeId === io.id,
-                    );
-                    if (correspondingInterface === undefined) {
-                        errors.push(`No corresponding subgraphNodeId for subgraph interface of id ${io.id} found.`);
-                    }
 
-                    return {
+            // If the node is a subgraph node, we don't need to update its ID
+            state.graphState.nodes.forEach((node) => {
+                if (node.subgraph === undefined) {
+                    node.interfaces = node.interfaces.map((io) => ({
                         ...io,
-                        ...correspondingInterface,
-                        id: createNewId(correspondingInterface.id),
-                    };
-                },
+                        id: createNewId(io.id),
+                    }));
+                }
+            },
             );
-
-            if (errors.length) {
-                return errors;
-            }
-
-            // Adjusting the IDs of the interfaces in the graph state
+            state.graphState.connections = state.graphState.connections.map((c) => ({
+                ...c,
+                from: state.idMap.get(c.from) ?? c.from,
+                to: state.idMap.get(c.to) ?? c.to,
+            }));
             state.interfaces = state.interfaces.map((io) => ({
                 ...io,
-                id: state.idMap.get(io.id),
+                id: state.idMap.get(io.id) ?? io.id,
             }));
 
-            let out = parseInterfaces(state.graphState.interfaces, [], []);
+            const out = parseInterfaces(state.interfaces, [], []);
             if (Array.isArray(out) && out.length) {
                 return out;
             }
             let { inputs, outputs } = out;
 
-            state.graphState.inputs = Object.values(inputs);
-            state.graphState.outputs = Object.values(outputs);
+            inputs = Object.values(inputs);
+            outputs = Object.values(outputs);
+            state.graphState.inputs = inputs;
+            state.graphState.outputs = outputs;
 
             delete state.graphState.interfaces;
             delete state.subgraph;
 
             // Loading the subgraph of the graph
-            errors = this.subgraph.load(state.graphState);
+            const errors = this.subgraph.load(state.graphState);
             if (errors.length) {
                 return errors;
             }
-            inputs = [];
-            outputs = [];
-            updateSubgraphInterfaces(inputs, outputs, this.subgraph.nodes);
-            inputs = Object.fromEntries(inputs.map((i) => [i.name, i]));
-            outputs = Object.fromEntries(outputs.map((i) => [i.name, i]));
+
+            // Update interfaces based on nodes and external names
+            const evaluatedIntf = calculateExternalInterfaces(
+                state.graphState.nodes, state.graphState.connections, inputs, outputs);
+            inputs = Object.fromEntries(evaluatedIntf.inputs.map((i) => [i.name, i]));
+            outputs = Object.fromEntries(evaluatedIntf.outputs.map((i) => [i.name, i]));
 
             /*
                 When the subgraph node is created, it creates a placeholder interfaces
@@ -195,6 +189,13 @@ export default function CreateCustomGraphNodeType(template, type) {
 
             this._title = this.template.name; // eslint-disable-line no-underscore-dangle
             this.events.update.emit(null);
+
+            // We need to update the interfaces after the graph is loaded
+            // because graph template may not have all the information regarding node interfaces
+            const newState = super.save();
+            const evaluatedIntf = calculateExternalInterfaces(
+                newState.graphState.nodes, newState.graphState.connections);
+            this.updateInterfaces(evaluatedIntf.inputs, evaluatedIntf.outputs);
         }
 
         updateInterfaces(newInputs, newOutputs) {

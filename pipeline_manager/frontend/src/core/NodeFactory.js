@@ -420,9 +420,7 @@ export function NodeFactory(
                             }
 
                             const intfName = ioName.slice(ioState.direction.length + 1);
-                            const externalName = (
-                                ioState.externalName ? ioState.externalName : intfName
-                            );
+                            const externalName = ioState.externalName ?? intfName;
                             newInterfaces.push({
                                 name: intfName,
                                 externalName,
@@ -618,10 +616,12 @@ export function NodeFactory(
                     if (ioState.direction === 'input' || ioState.direction === 'inout') {
                         this.inputs[ioName].side = ioState.side;
                         this.inputs[ioName].sidePosition = ioState.sidePosition;
+                        this.inputs[ioName].externalName = ioState.externalName;
                         occupied[ioState.side].push(ioState.sidePosition);
                     } else if (ioState.direction === 'output') {
                         this.outputs[ioName].side = ioState.side;
                         this.outputs[ioName].sidePosition = ioState.sidePosition;
+                        this.outputs[ioName].externalName = ioState.externalName;
                         occupied[ioState.side].push(ioState.sidePosition);
                     }
                 });
@@ -704,16 +704,16 @@ export function updateSubgraphInterfaces(inputs, outputs, nodes) {
             newContainer.push({
                 id: intf.id,
                 subgraphNodeId: intf.nodeId,
-                name: intf.name,
-                externalName: intf.externalName,
+                name: intf.externalName ?? intf.name,
+                externalName: intf.externalName ?? intf.name,
                 side: intf.side,
                 direction: intf.direction,
                 sidePosition: i++, // TODO: Make side-position calculation more sophisticated, e.g. last position of the side
             });
         } else {
             container[idx].direction = intf.direction;
-            container[idx].name = intf.name;
-            container[idx].externalName = intf.externalName;
+            container[idx].name = intf.externalName ?? intf.name;
+            container[idx].externalName = container[idx].name;
             container[idx].side = intf.side;
             newContainer.push(container[idx]);
         }
@@ -727,19 +727,19 @@ export function updateSubgraphInterfaces(inputs, outputs, nodes) {
 }
 
 /**
- * Function creating the subgraph template as defined in specification
+ * Function calculating external interfaces of the subgraph
  *
  * @param nodes Nodes of the subgraph
  * @param connections Connections inside the subgraph
- * @param name Default name that will be displayed in editor
- * @param editor PipelineManagerEditor instance
- * @returns Graph template that will be used to define the subgraph node
+ * @param inputs List of inputs of the subgraph
+ * @param outputs List of outputs of the subgraph
+ * @returns List of external interfaces
  */
-export function SubgraphFactory(nodes, connections, name, editor) {
+export function calculateExternalInterfaces(nodes, connections, inputs = [], outputs = []) {
     const parsedState = nodes.map(parseNodeState);
     const errorMessages = parsedState.filter((n) => Array.isArray(n) && n.length);
     if (errorMessages.length) {
-        return errorMessages.map((error) => `Node '${name}' invalid. ${error}`);
+        return errorMessages.map((error) => `Node  invalid. ${error}`);
     }
 
     // Count connections for each interface and initialize variable
@@ -752,9 +752,26 @@ export function SubgraphFactory(nodes, connections, name, editor) {
         (node) => Object.entries({ ...node.inputs, ...node.outputs })).flat(),
     ].forEach(([, intf]) => { intf.connectionCount = countedIntfConnections[intf.id] ?? 0; });
 
-    const inputs = [];
-    const outputs = [];
     updateSubgraphInterfaces(inputs, outputs, parsedState);
+
+    return { inputs, outputs, nodes: parsedState };
+}
+
+/**
+ * Function creating the subgraph template as defined in specification
+ *
+ * @param nodes Nodes of the subgraph
+ * @param connections Connections inside the subgraph
+ * @param name Default name that will be displayed in editor
+ * @param editor PipelineManagerEditor instance
+ * @returns Graph template that will be used to define the subgraph node
+ */
+export function SubgraphFactory(nodes, connections, name, editor) {
+    const ret = calculateExternalInterfaces(nodes, connections);
+    if (Array.isArray(ret)) {
+        return ret;
+    }
+    const { inputs, outputs, nodes: parsedState } = ret;
 
     const state = {
         name,
