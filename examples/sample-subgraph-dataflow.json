@@ -1,34 +1,37 @@
 {
     "subgraphs": [
         {
-            "id": "97abeeb5-61a1-4918-8816-5e74ba4e8be4",
+            "id": "569edd54-0f42-4c24-a809-1509febbe23a",
             "nodes": [
                 {
-                    "id": "72aa86ac-bcfd-48ba-ab0b-7c05c039ea48",
+                    "id": "1212de63-daad-4ace-bc4b-df562b3a6b0e",
                     "position": {
-                        "x": 749,
-                        "y": 393
+                        "x": 600,
+                        "y": 500
                     },
                     "width": 200,
                     "twoColumn": false,
                     "interfaces": [
                         {
                             "name": "Input",
-                            "id": "a1f8ecf9-3ba5-49e0-b971-e4b522d39b41",
+                            "externalName": "Subgraph Input 1",
+                            "id": "9db11824-0058-4213-a719-27af7c18a71d",
                             "direction": "input",
                             "side": "left",
                             "sidePosition": 0
                         },
                         {
                             "name": "Inout",
-                            "id": "2ba9f981-a5ca-490c-a03f-3055c15ed27e",
+                            "externalName": "Subgraph Inout 1",
+                            "id": "9ee6f424-00b2-4d25-8288-e0a88a1c1402",
                             "direction": "inout",
                             "side": "right",
                             "sidePosition": 0
                         },
                         {
                             "name": "Output",
-                            "id": "43bbaa63-f1c4-4ef6-b8b6-3f543fec36d1",
+                            "externalName": "Subgraph Output 1",
+                            "id": "82fcb5be-2733-45f0-85fe-0f69ee339d30",
                             "direction": "output",
                             "side": "right",
                             "sidePosition": 1
@@ -36,69 +39,38 @@
                     ],
                     "properties": [],
                     "enabledInterfaceGroups": [],
-                    "name": "Test node #1"
+                    "name": "Test node #1",
+                    "instanceName": "Foo"
                 },
                 {
-                    "id": "fcfc1ea4-7780-4dff-882c-38928640bcad",
+                    "id": "ecc91a3e-70c6-4197-a8bb-6513f9426b83",
                     "position": {
-                        "x": 1558,
-                        "y": 360
+                        "x": 1100,
+                        "y": 270
                     },
                     "width": 200,
                     "twoColumn": false,
                     "interfaces": [
                         {
                             "name": "Input",
-                            "id": "eb61a53c-b40e-4cde-a37e-2640e2953439",
+                            "externalName": "Subgraph Input 2",
+                            "id": "d6874fec-ff47-4268-9bbe-fa99569b4b17",
                             "direction": "input",
                             "side": "left",
                             "sidePosition": 0
                         },
                         {
                             "name": "Inout",
-                            "id": "3c848a6b-f7b0-434b-a806-896ea46dc535",
+                            "externalName": "Subgraph Inout 2",
+                            "id": "0aef6d82-e34d-4b44-bbbc-dfab58697a75",
                             "direction": "inout",
                             "side": "right",
                             "sidePosition": 0
                         },
                         {
                             "name": "Output",
-                            "id": "43b80380-300f-4b51-a11d-cf9d2aa5bd4a",
-                            "direction": "output",
-                            "side": "right",
-                            "sidePosition": 1
-                        }
-                    ],
-                    "properties": [],
-                    "enabledInterfaceGroups": [],
-                    "name": "Test node #1"
-                },
-                {
-                    "id": "47f9b554-26a8-4c36-933f-118d353c038a",
-                    "position": {
-                        "x": 1166,
-                        "y": 380
-                    },
-                    "width": 200,
-                    "twoColumn": false,
-                    "interfaces": [
-                        {
-                            "name": "Input",
-                            "id": "ddbe6411-1af7-455d-94de-6e543a0b944b",
-                            "direction": "input",
-                            "side": "left",
-                            "sidePosition": 0
-                        },
-                        {
-                            "name": "Inout",
-                            "id": "a3670f41-fda9-4370-a98c-9e1031f837d6",
-                            "direction": "inout",
-                            "side": "right",
-                            "sidePosition": 0
-                        },
-                        {
-                            "name": "Output",
-                            "id": "62bf28f9-54b1-445d-9884-31b53a3f5d84",
+                            "externalName": "Subgraph Output 2",
+                            "id": "6669273b-0a62-4535-b4e2-bd799b86532c",
                             "direction": "output",
                             "side": "right",
                             "sidePosition": 1
@@ -111,210 +83,49 @@
             ],
             "connections": [
                 {
-                    "id": "ae7e9717-3e79-4486-b4de-39bf237e692f",
-                    "from": "43bbaa63-f1c4-4ef6-b8b6-3f543fec36d1",
-                    "to": "ddbe6411-1af7-455d-94de-6e543a0b944b"
-                },
-                {
-                    "id": "7b0390b5-e0ac-42d5-a18a-bcc084e7d59a",
-                    "from": "62bf28f9-54b1-445d-9884-31b53a3f5d84",
-                    "to": "eb61a53c-b40e-4cde-a37e-2640e2953439"
-                },
-                {
-                    "id": "a561a214-0748-4562-b673-2209aad3c687",
-                    "from": "cd623eed-54a8-4d3b-b414-2b60869a23f3",
-                    "to": "a1f8ecf9-3ba5-49e0-b971-e4b522d39b41"
-                },
-                {
-                    "id": "33171c75-e991-4832-9c8b-8ebaded6da06",
-                    "from": "a3670f41-fda9-4370-a98c-9e1031f837d6",
-                    "to": "50bfe451-ccb5-4a32-80a4-ea3b3202c54b"
-                },
-                {
-                    "id": "42475e1a-9175-44b6-8a76-957406b45357",
-                    "from": "43b80380-300f-4b51-a11d-cf9d2aa5bd4a",
-                    "to": "9a003337-3d15-4bbb-8e18-2d7bad8eb022"
-                }
-            ],
-            "scaling": 0.3412784398699892,
-            "panning": {
-                "x": 935.047619047619,
-                "y": 639.5492063492063
-            },
-            "interfaces": [
-                {
-                    "id": "cd623eed-54a8-4d3b-b414-2b60869a23f3",
-                    "nodePosition": {
-                        "x": 144,
-                        "y": 444
-                    }
-                },
-                {
-                    "id": "50bfe451-ccb5-4a32-80a4-ea3b3202c54b",
-                    "nodePosition": {
-                        "x": 1643,
-                        "y": 707
-                    }
-                },
-                {
-                    "id": "9a003337-3d15-4bbb-8e18-2d7bad8eb022",
-                    "nodePosition": {
-                        "x": 2213,
-                        "y": 517
-                    }
-                }
-            ],
-            "name": "Subgraph #1"
-        },
-        {
-            "id": "c84e5d7e-7713-4528-a5a7-9cad25209bb0",
-            "nodes": [
-                {
-                    "id": "9cc0788d-38a5-43e0-a480-ea4adf070978",
-                    "position": {
-                        "x": 884,
-                        "y": 261
-                    },
-                    "width": 200,
-                    "twoColumn": false,
-                    "interfaces": [
-                        {
-                            "name": "Input",
-                            "id": "5d7fc255-bf5e-44ab-9c08-d81806b809ca",
-                            "direction": "input",
-                            "side": "left",
-                            "sidePosition": 0
-                        },
-                        {
-                            "name": "Inout",
-                            "id": "06144692-e66d-45d5-9142-70feff09abfb",
-                            "direction": "inout",
-                            "side": "right",
-                            "sidePosition": 0
-                        },
-                        {
-                            "name": "Output",
-                            "id": "c1fea113-7a15-48f0-a72a-79fba7ef0387",
-                            "direction": "output",
-                            "side": "right",
-                            "sidePosition": 1
-                        }
-                    ],
-                    "properties": [],
-                    "enabledInterfaceGroups": [],
-                    "name": "Test node #1"
-                },
-                {
-                    "id": "98571611-c27f-4a87-90a0-f1e44c69b45e",
-                    "position": {
-                        "x": 1381,
-                        "y": 282
-                    },
-                    "width": 200,
-                    "twoColumn": false,
-                    "interfaces": [
-                        {
-                            "name": "Input",
-                            "id": "e2ea6cd2-9a41-4f3b-a12b-3b1370526ae8",
-                            "direction": "input",
-                            "side": "left",
-                            "sidePosition": 0
-                        },
-                        {
-                            "name": "Inout",
-                            "id": "3b889b0a-ab70-4308-9ea2-5cf38c52f431",
-                            "direction": "inout",
-                            "side": "right",
-                            "sidePosition": 0
-                        },
-                        {
-                            "name": "Output",
-                            "id": "a18ee2f2-ded8-4a3b-9f6f-6016545d65ef",
-                            "direction": "output",
-                            "side": "right",
-                            "sidePosition": 1
-                        }
-                    ],
-                    "properties": [
-                        {
-                            "name": "Sample option",
-                            "id": "89c71d25-7add-45f9-80c3-291a3fe169ed",
-                            "value": "Option 1"
-                        }
-                    ],
-                    "enabledInterfaceGroups": [],
-                    "name": "Test node #2"
-                }
-            ],
-            "connections": [
-                {
-                    "id": "a671540a-cfbe-4e53-915b-50c08edf0566",
-                    "from": "c1fea113-7a15-48f0-a72a-79fba7ef0387",
-                    "to": "e2ea6cd2-9a41-4f3b-a12b-3b1370526ae8"
-                },
-                {
-                    "id": "846c455f-3ed0-46bd-81ba-2720544388fb",
-                    "from": "4f089550-4628-4924-ad7e-3cc4ce4b718c",
-                    "to": "5d7fc255-bf5e-44ab-9c08-d81806b809ca"
-                },
-                {
-                    "id": "92da6d54-47b5-496d-adae-426733479aa0",
-                    "from": "a18ee2f2-ded8-4a3b-9f6f-6016545d65ef",
-                    "to": "000f80bd-c6c9-4052-8c36-6659fa086c42"
+                    "id": "27e6834d-1558-4778-8d82-853d21718181",
+                    "from": "82fcb5be-2733-45f0-85fe-0f69ee339d30",
+                    "to": "d6874fec-ff47-4268-9bbe-fa99569b4b17"
                 }
             ],
             "scaling": 1,
             "panning": {
                 "x": 0,
                 "y": 0
-            },
-            "interfaces": [
-                {
-                    "id": "4f089550-4628-4924-ad7e-3cc4ce4b718c",
-                    "nodePosition": {
-                        "x": 292,
-                        "y": 287
-                    }
-                },
-                {
-                    "id": "000f80bd-c6c9-4052-8c36-6659fa086c42",
-                    "nodePosition": {
-                        "x": 1836,
-                        "y": 269
-                    }
-                }
-            ],
-            "name": "Subgraph #2"
+            }
         },
         {
-            "id": "9c4d5349-9d3b-401f-86bb-021b7b3e5b81",
+            "id": "40a30253-a806-4c36-906b-cbfd670d66ed",
             "nodes": [
                 {
-                    "id": "bfeb3891-53ce-476d-bc0b-a27e99428c10",
+                    "id": "22132bcb-05c0-4b30-b137-943bb418bdeb",
                     "position": {
-                        "x": 919,
-                        "y": 241
+                        "x": 600,
+                        "y": 200
                     },
                     "width": 200,
                     "twoColumn": false,
                     "interfaces": [
                         {
                             "name": "Input",
-                            "id": "3c643e48-52f0-4dea-97e0-42c732cbe2e4",
+                            "externalName": "Subgraph Input 1",
+                            "id": "b7c7d2a1-7c35-446c-be75-7116d768675c",
                             "direction": "input",
                             "side": "left",
                             "sidePosition": 0
                         },
                         {
                             "name": "Inout",
-                            "id": "bf735164-99fd-47e9-ba38-d26356eb5628",
+                            "externalName": "Subgraph Inout 1",
+                            "id": "99f445df-4b17-433e-bfaa-1a34db437027",
                             "direction": "inout",
                             "side": "right",
                             "sidePosition": 0
                         },
                         {
                             "name": "Output",
-                            "id": "a57c30cc-85d7-46e7-a48f-33d5aeb2c039",
+                            "externalName": "Subgraph Output 1",
+                            "id": "8eed590b-8411-4ea2-8050-29ec2bb207e6",
                             "direction": "output",
                             "side": "right",
                             "sidePosition": 1
@@ -325,142 +136,268 @@
                     "name": "Test node #1"
                 },
                 {
-                    "id": "ea3463d7-b4d5-4531-9ecb-e1f3d524f0aa",
+                    "id": "129c6246-d874-48cd-a33c-2927961d42e8",
                     "position": {
-                        "x": 1525,
-                        "y": 182
+                        "x": 1200,
+                        "y": 400
                     },
                     "width": 200,
                     "twoColumn": false,
                     "interfaces": [
                         {
                             "name": "Input",
-                            "id": "3937a772-dd2e-4037-950a-0ac150539bb9",
+                            "externalName": "Subgraph Input 2",
+                            "id": "f56e769b-aa4e-4cda-b6d5-da7c4e48e39f",
                             "direction": "input",
                             "side": "left",
                             "sidePosition": 0
                         },
                         {
                             "name": "Inout",
-                            "id": "16946d84-2ede-44b0-b8b0-fd3664e7aedf",
+                            "externalName": "Subgraph Inout 2",
+                            "id": "7afe4e9b-74a2-4dc4-8b2a-008fc2789f63",
+                            "direction": "inout",
+                            "side": "left",
+                            "sidePosition": 1
+                        },
+                        {
+                            "name": "Output",
+                            "externalName": "Subgraph Output 2",
+                            "id": "52b07fe6-c1af-4480-bf2e-d0608e2e777c",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 0
+                        }
+                    ],
+                    "properties": [
+                        {
+                            "name": "Sample option",
+                            "id": "9ed1e992-15f9-4c1b-825c-40fc0e31a79d",
+                            "value": "Option 4"
+                        }
+                    ],
+                    "enabledInterfaceGroups": [],
+                    "name": "Test node #2"
+                }
+            ],
+            "connections": [
+                {
+                    "id": "c15f2559-c23a-4864-98ee-95049a48ce66",
+                    "from": "8eed590b-8411-4ea2-8050-29ec2bb207e6",
+                    "to": "f56e769b-aa4e-4cda-b6d5-da7c4e48e39f"
+                }
+            ],
+            "scaling": 1,
+            "panning": {
+                "x": 0,
+                "y": 0
+            }
+        },
+        {
+            "id": "9c4d5349-9d3b-401f-86bb-021b7b3e5b81",
+            "nodes": [
+                {
+                    "id": "79a96644-9ff1-47e4-8226-335614efd103",
+                    "position": {
+                        "x": 572,
+                        "y": 139
+                    },
+                    "width": 200,
+                    "twoColumn": false,
+                    "interfaces": [
+                        {
+                            "name": "Input",
+                            "externalName": "Input",
+                            "id": "69cfb668-bdbe-42ba-8870-85ea699673c6",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 0
+                        },
+                        {
+                            "name": "Inout",
+                            "externalName": "Inout",
+                            "id": "e0c36ee6-e4a1-4c0a-baef-cc5bbf92a5df",
                             "direction": "inout",
                             "side": "right",
                             "sidePosition": 0
                         },
                         {
                             "name": "Output",
-                            "id": "4f1d2b5b-583c-4e5f-a925-94659482322d",
+                            "externalName": "Output",
+                            "id": "b5b158b5-f65a-4f89-8aea-e2e4e6250352",
                             "direction": "output",
                             "side": "right",
                             "sidePosition": 1
                         }
                     ],
-                    "properties": [
-                        {
-                            "name": "Sample option",
-                            "id": "d536c9b8-bbb9-496d-81ab-d3946ff7cf79",
-                            "value": "Option 2"
-                        }
-                    ],
+                    "properties": [],
                     "enabledInterfaceGroups": [],
-                    "name": "Test node #2"
+                    "name": "Test node #1",
+                    "instanceName": "Test node #1"
                 },
                 {
-                    "id": "4ece9e09-100e-45aa-9203-1c00241c2580",
+                    "id": "b57ae965-dbe7-4da7-8b6e-e8d3c3e743ab",
                     "position": {
-                        "x": 520,
-                        "y": 263
+                        "x": 1050,
+                        "y": 113
                     },
                     "width": 200,
                     "twoColumn": false,
                     "interfaces": [
                         {
-                            "name": "Subgraph input",
-                            "id": "4817aef3-f8e9-4771-9bed-1989357393e6",
-                            "subgraphNodeId": "cd623eed-54a8-4d3b-b414-2b60869a23f3",
-                            "direction": "input",
-                            "side": "right",
-                            "sidePosition": 0
-                        },
-                        {
-                            "name": "Subgraph inout",
-                            "id": "e9cebd1e-995c-4fc0-be4e-5df6273ba01b",
-                            "subgraphNodeId": "50bfe451-ccb5-4a32-80a4-ea3b3202c54b",
-                            "direction": "inout",
-                            "side": "right",
-                            "sidePosition": 1
-                        },
-                        {
-                            "name": "Subgraph output",
-                            "id": "a00f133c-3bd4-4c1e-89ac-903cfe868cbc",
-                            "subgraphNodeId": "9a003337-3d15-4bbb-8e18-2d7bad8eb022",
-                            "direction": "output",
-                            "side": "right",
-                            "sidePosition": 2
-                        }
-                    ],
-                    "name": "Test subgraph node #1",
-                    "instanceName": "Test subgraph node #1",
-                    "subgraph": "97abeeb5-61a1-4918-8816-5e74ba4e8be4"
-                },
-                {
-                    "id": "16ad1f85-41bf-4fbc-a8bb-0b8841a2a13d",
-                    "position": {
-                        "x": 1963,
-                        "y": 257
-                    },
-                    "width": 200,
-                    "twoColumn": false,
-                    "interfaces": [
-                        {
-                            "name": "Subgraph input",
-                            "id": "e3176efa-fd16-4480-936f-3c85e0365be1",
-                            "subgraphNodeId": "4f089550-4628-4924-ad7e-3cc4ce4b718c",
+                            "name": "Input",
+                            "externalName": "Input",
+                            "id": "750b94e7-9053-40f2-83e6-7493356a584e",
                             "direction": "input",
                             "side": "left",
                             "sidePosition": 0
                         },
                         {
-                            "name": "Subgraph output",
-                            "id": "481d1b0a-34fb-4d29-a288-f70658dc30ac",
-                            "subgraphNodeId": "000f80bd-c6c9-4052-8c36-6659fa086c42",
+                            "name": "Inout",
+                            "externalName": "Inout",
+                            "id": "194c1bdc-8126-4bcf-bbe7-77cb9d722e7a",
+                            "direction": "inout",
+                            "side": "left",
+                            "sidePosition": 1
+                        },
+                        {
+                            "name": "Output",
+                            "externalName": "Output",
+                            "id": "dd60c5a5-a502-4b2b-8de2-49cc7e28397b",
                             "direction": "output",
                             "side": "right",
                             "sidePosition": 0
                         }
                     ],
+                    "properties": [
+                        {
+                            "name": "Sample option",
+                            "id": "cf4a260b-dced-4122-9b08-c8da86bc900d",
+                            "value": "Option 2"
+                        }
+                    ],
+                    "enabledInterfaceGroups": [],
+                    "name": "Test node #2",
+                    "instanceName": "Test node #2"
+                },
+                {
+                    "id": "0bfba841-a1e8-429c-aa8a-d98338339960",
+                    "position": {
+                        "x": 129,
+                        "y": 208
+                    },
+                    "width": 200,
+                    "twoColumn": false,
+                    "interfaces": [
+                        {
+                            "name": "Subgraph Input 1",
+                            "id": "9db11824-0058-4213-a719-27af7c18a71d",
+                            "subgraphNodeId": "1212de63-daad-4ace-bc4b-df562b3a6b0e",
+                            "direction": "input",
+                            "side": "right",
+                            "sidePosition": 2
+                        },
+                        {
+                            "name": "Subgraph Inout 1",
+                            "id": "9ee6f424-00b2-4d25-8288-e0a88a1c1402",
+                            "subgraphNodeId": "1212de63-daad-4ace-bc4b-df562b3a6b0e",
+                            "direction": "inout",
+                            "side": "right",
+                            "sidePosition": 0
+                        },
+                        {
+                            "name": "Subgraph Inout 2",
+                            "id": "0aef6d82-e34d-4b44-bbbc-dfab58697a75",
+                            "subgraphNodeId": "ecc91a3e-70c6-4197-a8bb-6513f9426b83",
+                            "direction": "inout",
+                            "side": "right",
+                            "sidePosition": 1
+                        },
+                        {
+                            "name": "Subgraph Output 2",
+                            "id": "6669273b-0a62-4535-b4e2-bd799b86532c",
+                            "subgraphNodeId": "ecc91a3e-70c6-4197-a8bb-6513f9426b83",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 3
+                        }
+                    ],
+                    "subgraph": "569edd54-0f42-4c24-a809-1509febbe23a",
+                    "name": "Test subgraph node #1",
+                    "instanceName": "Test subgraph node #1"
+                },
+                {
+                    "id": "174b1b6d-99db-46d3-bb38-9b36b9930870",
+                    "position": {
+                        "x": 1490,
+                        "y": 246
+                    },
+                    "width": 200,
+                    "twoColumn": false,
+                    "interfaces": [
+                        {
+                            "name": "Subgraph Input 1",
+                            "id": "b7c7d2a1-7c35-446c-be75-7116d768675c",
+                            "subgraphNodeId": "22132bcb-05c0-4b30-b137-943bb418bdeb",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 0
+                        },
+                        {
+                            "name": "Subgraph Inout 1",
+                            "id": "99f445df-4b17-433e-bfaa-1a34db437027",
+                            "subgraphNodeId": "22132bcb-05c0-4b30-b137-943bb418bdeb",
+                            "direction": "inout",
+                            "side": "right",
+                            "sidePosition": 0
+                        },
+                        {
+                            "name": "Subgraph Inout 2",
+                            "id": "7afe4e9b-74a2-4dc4-8b2a-008fc2789f63",
+                            "subgraphNodeId": "129c6246-d874-48cd-a33c-2927961d42e8",
+                            "direction": "inout",
+                            "side": "left",
+                            "sidePosition": 1
+                        },
+                        {
+                            "name": "Subgraph Output 2",
+                            "id": "52b07fe6-c1af-4480-bf2e-d0608e2e777c",
+                            "subgraphNodeId": "129c6246-d874-48cd-a33c-2927961d42e8",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 1
+                        }
+                    ],
+                    "subgraph": "40a30253-a806-4c36-906b-cbfd670d66ed",
                     "name": "Test subgraph node #2",
-                    "instanceName": "Test subgraph node #2",
-                    "subgraph": "c84e5d7e-7713-4528-a5a7-9cad25209bb0"
+                    "instanceName": "Test subgraph node #2"
                 }
             ],
             "connections": [
                 {
-                    "id": "eeef52d3-b05a-4bd0-b31d-6e2e76e6f087",
-                    "from": "bf735164-99fd-47e9-ba38-d26356eb5628",
-                    "to": "3937a772-dd2e-4037-950a-0ac150539bb9"
+                    "id": "90e3a49c-b388-4832-bb68-d447379c55ab",
+                    "from": "e0c36ee6-e4a1-4c0a-baef-cc5bbf92a5df",
+                    "to": "750b94e7-9053-40f2-83e6-7493356a584e"
                 },
                 {
-                    "id": "13a9d8af-43e7-4952-94bc-a25bde5bf374",
-                    "from": "a00f133c-3bd4-4c1e-89ac-903cfe868cbc",
-                    "to": "3c643e48-52f0-4dea-97e0-42c732cbe2e4"
+                    "id": "c3578b94-b7e0-4908-9940-09bcede1430a",
+                    "from": "6669273b-0a62-4535-b4e2-bd799b86532c",
+                    "to": "69cfb668-bdbe-42ba-8870-85ea699673c6"
                 },
                 {
-                    "id": "e3bb1516-1890-43f1-b88c-af7f0270107f",
-                    "from": "16946d84-2ede-44b0-b8b0-fd3664e7aedf",
-                    "to": "e3176efa-fd16-4480-936f-3c85e0365be1"
+                    "id": "c2b9f036-e2be-4c88-9692-48746c0bfb53",
+                    "from": "dd60c5a5-a502-4b2b-8de2-49cc7e28397b",
+                    "to": "b7c7d2a1-7c35-446c-be75-7116d768675c"
                 }
             ],
-            "scaling": 0.44097060195986937,
+            "scaling": 0.7929515418502202,
             "panning": {
-                "x": 360.31746031746025,
-                "y": 665.7280423280424
-            },
-            "name": "Subgraph usage example"
+                "x": 399,
+                "y": 248
+            }
         }
     ],
     "graph": {
-        "name": "Example of subgraphs",
         "entryGraph": "9c4d5349-9d3b-401f-86bb-021b7b3e5b81"
     },
     "version": "20230830.11"
