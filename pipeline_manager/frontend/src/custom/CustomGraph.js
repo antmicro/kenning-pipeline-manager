@@ -13,15 +13,8 @@ import {
 } from '@baklavajs/core';
 import { v4 as uuidv4 } from 'uuid';
 import { BaklavaEvent } from '@baklavajs/events';
-import {
-    SUBGRAPH_INPUT_NODE_TYPE,
-    SUBGRAPH_INOUT_NODE_TYPE,
-    SUBGRAPH_OUTPUT_NODE_TYPE,
-    SubgraphInoutNode,
-    SubgraphInputNode,
-    SubgraphOutputNode,
-} from './subgraphInterface.js';
 import { startTransaction, commitTransaction } from '../core/History.ts';
+import { updateSubgraphInterfaces } from '../core/NodeFactory.js';
 import { updateInterfacePosition } from './CustomNode.js';
 
 /* eslint-disable no-param-reassign */
@@ -233,122 +226,7 @@ export default function createPipelineManagerGraph(graph) {
     };
 
     graph.updateInterfaces = function updateInterfaces() {
-        const { inputs } = this;
-        const inputNodes = this.nodes.filter((n) => n.type === SUBGRAPH_INPUT_NODE_TYPE);
-
-        // If a side is switched then it is possible that there already exists
-        // an interface with the same sidePosition.
-        // This function is used to set a new sidePosition for such interface.
-        const needsNewSidePosition = (io, newSide) => {
-            if (io.side !== newSide) {
-                return [...this.inputs, ...this.outputs]
-                    .filter((intf) => intf.side === newSide)
-                    .find((intf) => intf.sidePosition === io.sidePosition) !== undefined;
-            }
-            return false;
-        };
-
-        const getMaxSidePosition = (newSide) => [...this.inputs, ...this.outputs]
-            .filter((intf) => intf.side === newSide)
-            .map((intf) => intf.sidePosition ?? 0)
-            .reduce((a, b) => Math.max(a, b), -Infinity);
-
-        inputNodes.forEach((n) => {
-            const idx = inputs.findIndex((x) => x.id === n.graphInterfaceId);
-
-            if (idx === -1) {
-                inputs.push({
-                    id: n.graphInterfaceId,
-                    subgraphNodeId: n.outputs.placeholder.id,
-                    name: n.inputs.name.value,
-                    side: n.inputs.side.value.toLowerCase(),
-                    direction: 'input',
-                    nodePosition: n.position,
-                    sidePosition: undefined,
-                });
-            } else {
-                // To avoid redundancy the information about direction is not saved to subgraphIO
-                // in the dataflow, and therefore the information does not make it here.
-                // These values can be hardcoded easily here and this line prevents data duplication
-                // in the dataflow.
-                if (needsNewSidePosition(inputs[idx], n.inputs.side.value.toLowerCase())) {
-                    inputs[idx].sidePosition = getMaxSidePosition(
-                        n.inputs.side.value.toLowerCase(),
-                    ) + 1;
-                }
-
-                inputs[idx].direction = 'input';
-                inputs[idx].name = n.inputs.name.value;
-                inputs[idx].side = n.inputs.side.value.toLowerCase();
-                inputs[idx].nodePosition = n.position;
-            }
-        });
-
-        const { outputs } = this;
-        const outputNodes = this.nodes.filter((n) => n.type === SUBGRAPH_OUTPUT_NODE_TYPE);
-        outputNodes.forEach((n) => {
-            const idx = outputs.findIndex((x) => x.id === n.graphInterfaceId);
-
-            if (idx === -1) {
-                outputs.push({
-                    id: n.graphInterfaceId,
-                    subgraphNodeId: n.inputs.placeholder.id,
-                    name: n.inputs.name.value,
-                    side: n.inputs.side.value.toLowerCase(),
-                    direction: 'output',
-                    nodePosition: n.position,
-                    sidePosition: undefined,
-                });
-            } else {
-                if (needsNewSidePosition(outputs[idx], n.inputs.side.value.toLowerCase())) {
-                    const a = getMaxSidePosition(
-                        n.inputs.side.value.toLowerCase(),
-                    ) + 1;
-                    outputs[idx].sidePosition = a;
-                }
-
-                outputs[idx].direction = 'output';
-                outputs[idx].name = n.inputs.name.value;
-                outputs[idx].side = n.inputs.side.value.toLowerCase();
-                outputs[idx].nodePosition = n.position;
-            }
-        });
-
-        const inoutNodes = this.nodes.filter((n) => n.type === SUBGRAPH_INOUT_NODE_TYPE);
-        inoutNodes.forEach((n) => {
-            const idx = inputs.findIndex((x) => x.id === n.graphInterfaceId);
-
-            if (idx === -1) {
-                inputs.push({
-                    id: n.graphInterfaceId,
-                    subgraphNodeId: n.inputs.placeholder.id,
-                    name: n.inputs.name.value,
-                    side: n.inputs.side.value.toLowerCase(),
-                    direction: 'inout',
-                    nodePosition: n.position,
-                    sidePosition: undefined,
-                });
-            } else {
-                if (needsNewSidePosition(inputs[idx], n.inputs.side.value.toLowerCase())) {
-                    inputs[idx].sidePosition = getMaxSidePosition(
-                        n.inputs.side.value.toLowerCase(),
-                    ) + 1;
-                }
-
-                inputs[idx].direction = 'inout';
-                inputs[idx].name = n.inputs.name.value;
-                inputs[idx].side = n.inputs.side.value.toLowerCase();
-                inputs[idx].nodePosition = n.position;
-            }
-        });
-
-        // Filtering interfaces that were removed and do not have corresponding nodes
-        this.inputs = inputs.filter(
-            (inp) => undefined !== this.nodes.find((n) => n.graphInterfaceId === inp.id),
-        );
-        this.outputs = outputs.filter(
-            (inp) => undefined !== this.nodes.find((n) => n.graphInterfaceId === inp.id),
-        );
+        updateSubgraphInterfaces(this.inputs, this.outputs, this.nodes);
     };
 
     graph.addNode = function addNode(node) {

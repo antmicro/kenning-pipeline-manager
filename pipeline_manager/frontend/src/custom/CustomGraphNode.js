@@ -13,6 +13,7 @@ import {
 } from '@baklavajs/core';
 import { v4 as uuidv4 } from 'uuid';
 import { parseInterfaces } from '../core/interfaceParser.js';
+import { updateSubgraphInterfaces } from '../core/NodeFactory.js';
 
 export default function CreateCustomGraphNodeType(template, type) {
     const nt = createGraphNodeType(template);
@@ -109,11 +110,16 @@ export default function CreateCustomGraphNodeType(template, type) {
             delete state.graphState.interfaces;
             delete state.subgraph;
 
-            out = parseInterfaces(state.interfaces, [], [], true);
-            if (Array.isArray(out) && out.length) {
-                return out;
+            // Loading the subgraph of the graph
+            errors = this.subgraph.load(state.graphState);
+            if (errors.length) {
+                return errors;
             }
-            ({ inputs, outputs } = out);
+            inputs = [];
+            outputs = [];
+            updateSubgraphInterfaces(inputs, outputs, this.subgraph.nodes);
+            inputs = Object.fromEntries(inputs.map((i) => [i.name, i]));
+            outputs = Object.fromEntries(outputs.map((i) => [i.name, i]));
 
             /*
                 When the subgraph node is created, it creates a placeholder interfaces
@@ -134,12 +140,6 @@ export default function CreateCustomGraphNodeType(template, type) {
             if (!this.template) {
                 errors.push('Unable to load graph node without graph template');
             }
-            if (errors.length) {
-                return errors;
-            }
-
-            // Loading the subgraph of the graph
-            errors = this.subgraph.load(state.graphState);
             if (errors.length) {
                 return errors;
             }

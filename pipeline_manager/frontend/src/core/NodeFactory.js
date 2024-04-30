@@ -673,35 +673,95 @@ export function NodeFactory(
     return node;
 }
 
+export function updateSubgraphInterfaces(inputs, outputs, nodes) {
+    // Interfaces that are not connected to any other interface
+    const INTERFACE_PREFIXES = ['input_', 'inout_', 'output_'];
+    const noConnectionsIntf = [
+        ...nodes.map((node) => Object.entries({ ...node.inputs, ...node.outputs })).flat(),
+    ].filter(([key]) => INTERFACE_PREFIXES.some((prefix) => key.startsWith(prefix)))
+        .filter(([, intf]) => intf.externalName && intf.connectionCount === 0);
+
+    // Filter out repeated external names
+    const countedIntfNames = Object.create(null);
+    noConnectionsIntf.forEach(
+        ([, intf]) => {
+            const currentValue = countedIntfNames[intf.externalName] ?? 0;
+            countedIntfNames[intf.externalName] = currentValue + 1;
+        },
+    );
+    const externalInterfaces = (
+        noConnectionsIntf.filter(([, intf]) => countedIntfNames[intf.externalName] === 1)
+    );
+
+    let i = 0;
+    const newInputs = [];
+    const newOutputs = [];
+    externalInterfaces.forEach(([, intf]) => {
+        const container = intf.direction === 'output' ? outputs : inputs;
+        const newContainer = intf.direction === 'output' ? newOutputs : newInputs;
+        const idx = container.findIndex((x) => x.id === intf.id);
+        if (idx === -1) {
+            newContainer.push({
+                id: intf.id,
+                subgraphNodeId: intf.nodeId,
+                name: intf.name,
+                externalName: intf.externalName,
+                side: intf.side,
+                direction: intf.direction,
+                sidePosition: i++, // TODO: Make side-position calculation more sophisticated, e.g. last position of the side
+            });
+        } else {
+            container[idx].direction = intf.direction;
+            container[idx].name = intf.name;
+            container[idx].externalName = intf.externalName;
+            container[idx].side = intf.side;
+            newContainer.push(container[idx]);
+        }
+    });
+
+    // Clear inputs and outputs, and then push new ones
+    inputs.splice(0, inputs.length);
+    outputs.splice(0, outputs.length);
+    newInputs.forEach((input) => inputs.push(input));
+    newOutputs.forEach((output) => outputs.push(output));
+}
+
 /**
  * Function creating the subgraph template as defined in specification
  *
  * @param nodes Nodes of the subgraph
  * @param connections Connections inside the subgraph
- * @param interfaces Inputs and outputs
  * @param name Default name that will be displayed in editor
  * @param editor PipelineManagerEditor instance
  * @returns Graph template that will be used to define the subgraph node
  */
-export function SubgraphFactory(nodes, connections, interfaces, name, editor) {
-    const { inputs, outputs } = parseInterfaces(interfaces, [], [], true);
-
-    const graphInputs = Object.values(inputs);
-    const graphOutputs = Object.values(outputs);
-
+export function SubgraphFactory(nodes, connections, name, editor) {
     const parsedState = nodes.map(parseNodeState);
     const errorMessages = parsedState.filter((n) => Array.isArray(n) && n.length);
-
     if (errorMessages.length) {
         return errorMessages.map((error) => `Node '${name}' invalid. ${error}`);
     }
+
+    // Count connections for each interface and initialize variable
+    const countedIntfConnections = Object.create(null);
+    connections.forEach((conn) => {
+        countedIntfConnections[conn.from] = (countedIntfConnections[conn.from] ?? 0) + 1;
+        countedIntfConnections[conn.to] = (countedIntfConnections[conn.to] ?? 0) + 1;
+    });
+    [...parsedState.map(
+        (node) => Object.entries({ ...node.inputs, ...node.outputs })).flat(),
+    ].forEach(([, intf]) => { intf.connectionCount = countedIntfConnections[intf.id] ?? 0; });
+
+    const inputs = [];
+    const outputs = [];
+    updateSubgraphInterfaces(inputs, outputs, parsedState);
 
     const state = {
         name,
         nodes: parsedState,
         connections,
-        inputs: graphInputs,
-        outputs: graphOutputs,
+        inputs,
+        outputs,
     };
 
     return new GraphTemplate(state, editor);
