@@ -21,11 +21,36 @@ from creating and deleting connections or altering nodes' values if the editor i
         <div
             class="__port"
             v-if="intf.port"
-            @pointerover="startHoverWrapper"
-            @pointerout="endHoverWrapper"
+            @mouseenter="startHoverWrapper"
+            @mouseleave="endHoverWrapper"
             @pointerdown.left="onMouseDown"
-            :class="{ greyedout_arrow: highlighted, picked: picked }"
+            :class="{ greyedout_arrow: highlighted, picked: picked, '__square': squared }"
         >
+            <div
+                v-if="squared && (hovered || editExternalName)"
+                :class="{
+                '__port_name_left': intf.side === 'left',
+                '__port_name_right': intf.side === 'right'
+                }"
+            >
+                <input
+                    v-if="editExternalName"
+                    v-model="intf.externalName"
+                    ref="externalNameInput"
+                    type="text"
+                    class="__port_input"
+                    placeholder="External name"
+                    @focusout="() => { editExternalName = false; }"
+                    @keydown.enter.stop="(e) => { e.target.blur(); }"
+                />
+                <span
+                    v-else
+                    @pointerdown.left.stop="enableExternalNameEdit"
+                    @keydown.stop
+                >
+                    {{ intf.externalName }}
+                </span>
+            </div>
             <Arrow
                 v-if="displayArrow"
                 :noninteractable="true"
@@ -45,15 +70,17 @@ from creating and deleting connections or altering nodes' values if the editor i
             @keydown.stop
             :tabindex="tabindexValue"
         />
-        <span v-else class="align-middle">
+        <span v-else>
             {{ intf.name }}
         </span>
     </div>
 </template>
 
 <script>
-import { defineComponent, computed } from 'vue';
-import { Components, useViewModel } from '@baklavajs/renderer-vue';
+import {
+    defineComponent, ref, computed, nextTick,
+} from 'vue';
+import { Components, useViewModel, TextInterface } from '@baklavajs/renderer-vue';
 import Arrow from '../icons/Arrow.vue';
 import doubleClick from '../core/doubleClick';
 
@@ -70,8 +97,9 @@ export default defineComponent({
         Arrow,
     },
     setup(props) {
-        /* eslint-disable object-curly-newline,no-unused-vars */
-        const { el, isConnected, showComponent, startHover, endHover, openSidebar } =
+        const {
+            el, isConnected, showComponent, startHover, endHover, openSidebar,
+        } =
             Components.NodeInterface.setup(props);
 
         const { viewModel } = useViewModel();
@@ -89,13 +117,16 @@ export default defineComponent({
             props.intf.events.setValue.subscribe(props.intf, () => props.toggleGroup(props.intf));
         }
 
+        const hovered = ref(false);
         const startHoverWrapper = () => {
+            hovered.value = true;
             if (!viewModel.value.editor.readonly) {
                 startHover();
             }
         };
 
         const endHoverWrapper = () => {
+            hovered.value = false;
             if (!viewModel.value.editor.readonly) {
                 endHover();
             }
@@ -136,20 +167,47 @@ export default defineComponent({
             '--connected': isConnected.value,
             __readonly: viewModel.value.editor.readonly,
         }));
+        const squared = computed(() => {
+            const sq = !isConnected.value && viewModel.value.editor.subgraphStack.length > 0;
+            if (sq && props.intf.externalName === undefined) {
+                props.intf.externalName = props.intf.name;
+            }
+            return sq;
+        });
+
+        // External name editing
+        const externalNameComponent = new TextInterface('External name', props.intf.externalName).setPort(false);
+        externalNameComponent.componentName = 'TextInterface';
+
+        const editExternalName = ref(false);
+        const externalNameInput = ref(null);
+        const enableExternalNameEdit = (e) => {
+            editExternalName.value = true;
+            e.preventDefault();
+            nextTick().then(() => {
+                externalNameInput.value.focus();
+                externalNameInput.value.select();
+            });
+        };
 
         return {
+            arrowRotation,
+            displayArrow,
+            editExternalName,
             el,
+            enableExternalNameEdit,
+            endHover,
+            endHoverWrapper,
+            externalNameInput,
+            hovered,
             isConnected,
             newClasses,
-            showComponent,
-            startHover,
-            endHover,
-            openSidebar,
-            startHoverWrapper,
-            endHoverWrapper,
-            displayArrow,
-            arrowRotation,
             onMouseDown,
+            openSidebar,
+            showComponent,
+            squared,
+            startHover,
+            startHoverWrapper,
         };
     },
 });

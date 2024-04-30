@@ -3,8 +3,9 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
+@use 'sass:color';
 
- :root {
+:root {
     // Controls
     --baklava-control-color-primary: #{$green};
     --baklava-control-color-error: #{$red};
@@ -80,15 +81,83 @@
         height: 1em;
     }
 
-    & > .__port {
+    & > .__port,
+    & > .__square {
         background-color: $green;
         width: 1em;
         height: 1em;
         top: calc(50% - 0.5em);
 
-        & > svg {
+        &>svg {
+            position: absolute;
+            top: 0;
+            left: 0;
             height: 1em;
             width: 1em;
+        }
+    }
+
+    & > .__square {
+        border-radius: 10%;
+
+        & > .__port_name_left,
+        & > .__port_name_right {
+            position: relative;
+            height: 1em;
+            width: fit-content;
+            top: -0.15em;
+
+            & > span {
+                padding: 0 0.3em 0 0.3em;
+                border-radius: 5px;
+                background-color: color.adjust($green, $alpha: -0.5);
+            }
+
+            & > input {
+                color: $white;
+                background-color: color.adjust($gray-500, $alpha: -0.3);
+                position: relative;
+                outline: none;
+                border: none;
+                border-radius: 5px;
+            }
+            & > input:focus {
+                outline: solid 2px $green;
+            }
+        }
+
+        & > .__port_name_left {
+            left: 0;
+            translate: -100%;
+            & > span,
+            & > input {
+                margin-left: 0;
+            }
+            & > span { margin-right: 0.15em; }
+            & > input { margin-right: 0.3em; }
+        }
+
+        & > .__port_name_right {
+            left: 100%;
+            & > span,
+            & > input {
+                margin-right: 0;
+            }
+            & > span { margin-left: 0.15em; }
+            & > input { margin-left: 0.3em; }
+        }
+
+        &.__port_input {
+            position: relative;
+            top: -0.15em;
+            height: 1em;
+            width: fit-content;
+
+            background-color: #00000000;
+            border: none;
+            border-radius: 10%;
+            color: $white;
+            caret-color: $white;
         }
     }
 
@@ -153,10 +222,8 @@
         color: inherit;
         font-size: 0.875em;
 
-        &:not(.readonly) {
-            &:hover {
-                color: var(--baklava-control-color-primary);
-            }
+        &:hover {
+            color: var(--baklava-control-color-primary);
         }
 
         & > .icon {
@@ -165,6 +232,12 @@
             width: auto;
             height: 1.25em;
             width: 1.25em;
+
+            &:not(.readonly) {
+                    &:hover {
+                            color: var(--baklava-control-color-primary);
+                    }
+            }
 
             & > img {
                 height: 1.25em;
