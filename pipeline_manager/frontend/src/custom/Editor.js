@@ -25,13 +25,7 @@ import { toRaw, nextTick } from 'vue';
 import createPipelineManagerGraph from './CustomGraph.js';
 import LayoutManager from '../core/LayoutManager.js';
 import { suppressHistoryLogging } from '../core/History.ts';
-import { applySidePositions } from '../core/interfaceParser.js';
 import CreateCustomGraphNodeType from './CustomGraphNode.js';
-import {
-    SUBGRAPH_INPUT_NODE_TYPE,
-    SUBGRAPH_OUTPUT_NODE_TYPE,
-    SUBGRAPH_INOUT_NODE_TYPE,
-} from './subgraphInterface.js';
 
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-underscore-dangle */
@@ -493,18 +487,6 @@ export default class PipelineManagerEditor extends Editor {
         // Updates information of the graph about its interfaces
         this._graph.updateInterfaces();
 
-        // applySidePositions needs a map, not an array
-        const ifaceOrPositionErrors = applySidePositions(
-            Object.fromEntries(this._graph.inputs.map((intf) => [intf.subgraphNodeId, intf])),
-            Object.fromEntries(this._graph.outputs.map((intf) => [intf.subgraphNodeId, intf])),
-        );
-
-        if (Array.isArray(ifaceOrPositionErrors)) {
-            throw new Error(
-                `Internal error occurred while returning back from a subgraph. ` +
-                `Reason: ${ifaceOrPositionErrors.join('. ')}`,
-            );
-        }
 
         // Updating interfaces of a graph node
         Object.values(subgraphNode.inputs).forEach((k) => {

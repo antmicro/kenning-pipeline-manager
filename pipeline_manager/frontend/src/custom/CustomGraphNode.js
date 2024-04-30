@@ -13,11 +13,6 @@ import {
 } from '@baklavajs/core';
 import { v4 as uuidv4 } from 'uuid';
 import { parseInterfaces } from '../core/interfaceParser.js';
-import {
-    SUBGRAPH_INPUT_NODE_TYPE,
-    SUBGRAPH_OUTPUT_NODE_TYPE,
-    SUBGRAPH_INOUT_NODE_TYPE,
-} from './subgraphInterface.js';
 
 export default function CreateCustomGraphNodeType(template, type) {
     const nt = createGraphNodeType(template);
@@ -46,34 +41,8 @@ export default function CreateCustomGraphNodeType(template, type) {
             delete state.inputs;
             delete state.outputs;
 
-            // After entering the edit subgraph mode, subgraph interfaces will contain
-            // redundant information, such as side, nodePosition etc.
-            // (these are already defined in state.interfaces) so they should be filtered out
-            state.graphState.interfaces = [];
-            state.graphState.inputs.forEach((input) =>
-                state.graphState.interfaces.push({
-                    id: input.subgraphNodeId,
-                    nodePosition: input.nodePosition,
-                }),
-            );
-            state.graphState.outputs.forEach((output) =>
-                state.graphState.interfaces.push({
-                    id: output.subgraphNodeId,
-                    nodePosition: output.nodePosition,
-                }),
-            );
-
             delete state.graphState.inputs;
             delete state.graphState.outputs;
-
-            state.graphState.nodes = state.graphState.nodes
-                .filter((n) =>
-                    ![
-                        SUBGRAPH_INPUT_NODE_TYPE,
-                        SUBGRAPH_OUTPUT_NODE_TYPE,
-                        SUBGRAPH_INOUT_NODE_TYPE,
-                    ].includes(n.type),
-                );
 
             state.subgraph = state.graphState.id;
 
@@ -183,34 +152,24 @@ export default function CreateCustomGraphNodeType(template, type) {
         }
 
         propagateInterfaces() {
-            const convertToUpperCase = (str) => `${str[0].toUpperCase()}${str.slice(1)}`;
-
             // Propagate side data back to the subgraph such that if it was changed, the
             // selector inside would be updated
             Object.values(this.inputs).forEach((intf) => {
                 const subgraphIntf = this.subgraph.inputs.find(
                     (subIntf) => subIntf.id === intf.id,
                 );
-                subgraphIntf.sidePosition = intf.sidePosition;
-
-                const subgraphIntfNode = this.subgraph.nodes.find(
-                    (node) => node.graphInterfaceId === intf.id,
-                );
-
-                subgraphIntfNode.inputs.side.value = convertToUpperCase(intf.side);
+                if (subgraphIntf !== undefined) {
+                    subgraphIntf.side = intf.side;
+                }
             });
 
             Object.values(this.outputs).forEach((intf) => {
                 const subgraphIntf = this.subgraph.outputs.find(
                     (subIntf) => subIntf.id === intf.id,
                 );
-                subgraphIntf.sidePosition = intf.sidePosition;
-
-                const subgraphIntfNode = this.subgraph.nodes.find(
-                    (node) => node.graphInterfaceId === intf.id,
-                );
-
-                subgraphIntfNode.inputs.side.value = convertToUpperCase(intf.side);
+                if (subgraphIntf !== undefined) {
+                    subgraphIntf.side = intf.side;
+                }
             });
         }
 

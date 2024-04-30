@@ -25,11 +25,6 @@ import metadataSchema from '../../../resources/schemas/metadata_schema.json' ass
 import dataflowSchema from '../../../resources/schemas/dataflow_schema.json' assert { type: 'json' };
 import graphSchema from '../../../resources/schemas/graph_schema.json' assert { type: 'json' };
 import ConnectionRenderer from './ConnectionRenderer.js';
-import {
-    SubgraphInoutNode,
-    SubgraphInputNode,
-    SubgraphOutputNode,
-} from '../custom/subgraphInterface.js';
 
 /* eslint-disable lines-between-class-members */
 /**
@@ -319,10 +314,6 @@ export default class EditorManager {
 
         this.currentSpecification.nodes = JSON.parse(JSON.stringify(resolvedNodes));
 
-        this.baklavaView.editor.registerNodeType(SubgraphInputNode, { category: 'Subgraphs' });
-        this.baklavaView.editor.registerNodeType(SubgraphOutputNode, { category: 'Subgraphs' });
-        this.baklavaView.editor.registerNodeType(SubgraphInoutNode, { category: 'Subgraphs' });
-
         // Resolving siblings, parents and children
 
         // Resolving children
@@ -419,7 +410,6 @@ export default class EditorManager {
                 const mySubgraph = SubgraphFactory(
                     subgraph.nodes,
                     subgraph.connections,
-                    subgraph.interfaces,
                     subgraph.name,
                     this.baklavaView.editor,
                 );

@@ -1,10 +1,8 @@
 /*
- * Copyright (c) 2022-2023 Antmicro <www.antmicro.com>
+ * Copyright (c) 2022-2024 Antmicro <www.antmicro.com>
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-
-import { v4 as uuidv4 } from 'uuid';
 
 /**
  * Returns a prepared interface that is passed to baklava constructor
@@ -26,34 +24,6 @@ function createInterface(io, hidden, name = undefined) {
     }
     intf.componentName = 'NodeInterface';
     intf.hidden = hidden;
-
-    // Readonly values used for detecting whether there were any changes to the interface
-    intf.originalSide = intf.side;
-    intf.originalSidePosition = intf.sidePosition;
-    return intf;
-}
-
-/**
- * Returns a prepared graph interface state that is passed to baklava constructor
- *
- * @param io configuration of the interface
- * @param _hidden whether the interface should be hidden. Unused in this method, kept
- * to be compliant with createInterface
- * @param {*} name custom name for the interface that should be used instead of the one coming
- * from `io`
- * @returns baklava interface constructor
- */
-function createGraphInterface(io, _hidden, name = undefined) {
-    const intf = {};
-
-    Object.assign(intf, io);
-    intf.name = name ?? io.name;
-    intf.id = io.id ?? uuidv4();
-    if (intf.type !== undefined) {
-        intf.type = typeof io.type === 'string' || io.type instanceof String ? [io.type] : io.type;
-    }
-
-    intf.nodePosition = io.nodePosition ?? { x: 0, y: 0 };
 
     // Readonly values used for detecting whether there were any changes to the interface
     intf.originalSide = intf.side;
@@ -333,7 +303,6 @@ export function parseInterfaces(
     interfaces,
     interfaceGroups,
     defaultInterfaceGroups,
-    subgraphInterfaces = false,
 ) {
     let errors = [];
 
@@ -428,8 +397,6 @@ export function parseInterfaces(
         return parsedSides;
     }
 
-    const interfaceCreator = subgraphInterfaces ? createGraphInterface : createInterface;
-
     const stripName = (name) => name.slice(name.indexOf('_') + 1);
 
     const createdInterfaces = {
@@ -444,13 +411,13 @@ export function parseInterfaces(
         // It is an interface group
         if (intf.interfaces !== undefined) {
             // Adding interfaces groups, hidden by default
-            createdInterfaces.inputs[name] = interfaceCreator(
+            createdInterfaces.inputs[name] = createInterface(
                 intf,
                 !enabledInterfaceGroupsNames.includes(name),
                 stripName(name),
             );
         } else {
-            createdInterfaces.inputs[name] = interfaceCreator(
+            createdInterfaces.inputs[name] = createInterface(
                 intf,
                 false,
                 stripName(name),
@@ -462,13 +429,13 @@ export function parseInterfaces(
         // It is an interface group
         if (intf.interfaces !== undefined) {
             // Adding interfaces groups, hidden by default
-            createdInterfaces.outputs[name] = interfaceCreator(
+            createdInterfaces.outputs[name] = createInterface(
                 intf,
                 !enabledInterfaceGroupsNames.includes(name),
                 stripName(name),
             );
         } else {
-            createdInterfaces.outputs[name] = interfaceCreator(
+            createdInterfaces.outputs[name] = createInterface(
                 intf,
                 false,
                 stripName(name),

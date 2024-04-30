@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Antmicro <www.antmicro.com>
+ * Copyright (c) 2022-2024 Antmicro <www.antmicro.com>
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -9,11 +9,6 @@ import { watch, Ref, WatchStopHandle } from 'vue';
 import fuzzysort from 'fuzzysort';
 
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import {
-    SUBGRAPH_INPUT_NODE_TYPE,
-    SUBGRAPH_OUTPUT_NODE_TYPE,
-    SUBGRAPH_INOUT_NODE_TYPE, // @ts-ignore
-} from '../subgraphInterface.js'; // @ts-ignore
 import checkRecursion from './checkRecursion.js';
 
 interface NodeURL {
@@ -263,22 +258,7 @@ export default function getNodeTree(nameFilterRef: Ref<string>) {
             nodeTypesInCategory = nodeTypesInCategory.filter(
                 ([nt]) => !checkRecursion(editor, viewModel.value.displayedGraph, nt),
             );
-        } else {
-            // if we are not in a subgraph, don't show subgraph input & output nodes
-            nodeTypesInCategory = nodeTypesInCategory.filter(
-                ([nt]) =>
-                    ![
-                        SUBGRAPH_INPUT_NODE_TYPE,
-                        SUBGRAPH_OUTPUT_NODE_TYPE,
-                        SUBGRAPH_INOUT_NODE_TYPE,
-                    ].includes(nt),
-            );
         }
-
-        // Filter out nodes added by baklava
-        nodeTypesInCategory = nodeTypesInCategory.filter(
-            ([nt]) => !['__baklava_SubgraphInputNode', '__baklava_SubgraphOutputNode'].includes(nt),
-        );
 
         const nodesURLs = Object.fromEntries(
             nodeTypesInCategory.map((n) => {

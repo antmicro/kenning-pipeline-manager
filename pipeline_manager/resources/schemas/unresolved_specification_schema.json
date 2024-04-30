@@ -311,9 +311,9 @@
                         "description": "Definition of available interfaces of the node",
                         "type": "array",
                         "items": {
-                            "type": "object",
                             "$ref": "#/$defs/interface"
-                        }
+                        },
+                        "default": []
                     }
                 },
                 "additionalProperties": false

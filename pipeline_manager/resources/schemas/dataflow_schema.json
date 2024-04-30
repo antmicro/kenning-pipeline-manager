@@ -13,49 +13,7 @@
         "subgraphs": {
             "type": "array",
             "items": {
-                "allOf": [
-                    {
-                        "$ref": "graph_schema"
-                    },
-                    {
-                        "type": "object",
-                        "properties": {
-                            "interfaces": {
-                                "type": "array",
-                                "items": {
-                                    "type": "object",
-                                    "properties": {
-                                        "id": {
-                                            "type": "string",
-                                            "description": "Unique identifier of the interface within the subgraph"
-                                        },
-                                        "nodePosition": {
-                                            "type": "object",
-                                            "properties": {
-                                                "x": {
-                                                    "description": "x coordinate of the top left interface corner",
-                                                    "type": "number"
-                                                },
-                                                "y": {
-                                                    "description": "y coordinate of the top left interface corner",
-                                                    "type": "number"
-                                                }
-                                            },
-                                            "required": [
-                                                "x",
-                                                "y"
-                                            ]
-                                        }
-                                    },
-                                    "required": [
-                                        "id",
-                                        "nodePosition"
-                                    ]
-                                }
-                            }
-                        }
-                    }
-                ]
+                "$ref": "graph_schema"
             }
         },
         "graph": {
