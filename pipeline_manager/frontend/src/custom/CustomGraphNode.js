@@ -28,7 +28,8 @@ export default function CreateCustomGraphNodeType(template, type) {
             const newInterfaces = [];
             [...this.subgraph.inputs, ...this.subgraph.outputs].forEach((io) => {
                 newInterfaces.push({
-                    name: io.name,
+                    name: io.externalName,
+                    // externalName: io.externalName ?? undefined,
                     id: io.id,
                     subgraphNodeId: io.subgraphNodeId,
                     direction: io.direction,
@@ -152,8 +153,7 @@ export default function CreateCustomGraphNodeType(template, type) {
         }
 
         propagateInterfaces() {
-            // Propagate side data back to the subgraph such that if it was changed, the
-            // selector inside would be updated
+            // Propagate side data back to the subgraph such that if it was changed
             Object.values(this.inputs).forEach((intf) => {
                 const subgraphIntf = this.subgraph.inputs.find(
                     (subIntf) => subIntf.id === intf.id,

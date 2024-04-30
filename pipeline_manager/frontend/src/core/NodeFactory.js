@@ -419,8 +419,13 @@ export function NodeFactory(
                                 });
                             }
 
+                            const intfName = ioName.slice(ioState.direction.length + 1);
+                            const externalName = (
+                                ioState.externalName ? ioState.externalName : intfName
+                            );
                             newInterfaces.push({
-                                name: ioName.slice(ioState.direction.length + 1),
+                                name: intfName,
+                                externalName,
                                 id: ioState.id,
                                 direction: ioState.direction,
                                 side: ioState.side,

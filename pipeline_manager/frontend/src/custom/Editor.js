@@ -487,41 +487,44 @@ export default class PipelineManagerEditor extends Editor {
         // Updates information of the graph about its interfaces
         this._graph.updateInterfaces();
 
+        const ifaceOrPositionErrors = [
+            ...this._graph.inputs,
+            ...this._graph.outputs,
+        ];
 
         // Updating interfaces of a graph node
-        Object.values(subgraphNode.inputs).forEach((k) => {
-            if (!Object.keys(ifaceOrPositionErrors.inputs).includes(k.subgraphNodeId)) {
-                subgraphNode.removeInput(k.name);
-            }
-        });
-        Object.entries(ifaceOrPositionErrors.inputs).forEach(([id, intf]) => {
-            const foundIntf = Object.values(subgraphNode.inputs).find(
-                (io) => io.subgraphNodeId === id,
+        Object.values({ ...subgraphNode.inputs, ...subgraphNode.outputs }).forEach((nodeIntf) => {
+            const x = ifaceOrPositionErrors.find(
+                (intf) => (
+                    intf.subgraphNodeId === nodeIntf.subgraphNodeId &&
+                    intf.externalName === nodeIntf.name
+                ),
             );
-            if (foundIntf === undefined) {
-                const baklavaIntf = new NodeInterface(intf.name);
-                Object.assign(baklavaIntf, intf);
-                subgraphNode.addInput(intf.name, baklavaIntf);
-            } else {
-                Object.assign(foundIntf, intf);
+            if (x === undefined) {
+                if (nodeIntf.isInput) subgraphNode.removeInput(nodeIntf.name);
+                else subgraphNode.removeOutput(nodeIntf.name);
             }
         });
-
-        Object.values(subgraphNode.outputs).forEach((k) => {
-            if (!Object.keys(ifaceOrPositionErrors.outputs).includes(k.subgraphNodeId)) {
-                subgraphNode.removeOutput(k.name);
-            }
-        });
-        Object.entries(ifaceOrPositionErrors.outputs).forEach(([id, intf]) => {
-            const foundIntf = Object.values(subgraphNode.outputs).find(
-                (io) => io.subgraphNodeId === id,
+        ifaceOrPositionErrors.forEach((subIntf) => {
+            const existingIntfs = (subIntf.direction === 'output') ? subgraphNode.outputs : subgraphNode.inputs;
+            const x = Object.values(existingIntfs).find(
+                (nodeIntf) => ((
+                    nodeIntf.subgraphNodeId === subIntf.subgraphNodeId &&
+                    nodeIntf.name === subIntf.externalName
+                )),
             );
-            if (foundIntf === undefined) {
-                const baklavaIntf = new NodeInterface(intf.name);
-                Object.assign(baklavaIntf, intf);
-                subgraphNode.addOutput(intf.name, baklavaIntf);
+            if (x === undefined) {
+                const baklavaIntf = new NodeInterface(subIntf.externalName);
+                Object.assign(baklavaIntf, subIntf);
+                baklavaIntf.name = subIntf.externalName;
+                if (subIntf.direction === 'output') {
+                    subgraphNode.addOutput(subIntf.externalName, baklavaIntf);
+                } else {
+                    subgraphNode.addInput(subIntf.externalName, baklavaIntf);
+                }
             } else {
-                Object.assign(foundIntf, intf);
+                Object.assign(x, subIntf);
+                x.name = subIntf.externalName;
             }
         });
 
@@ -590,12 +593,7 @@ export default class PipelineManagerEditor extends Editor {
             }
         });
 
-        // Add subgraph node without input/output ones
-        const subgraphTypes = [
-            SUBGRAPH_INOUT_NODE_TYPE, SUBGRAPH_INPUT_NODE_TYPE, SUBGRAPH_OUTPUT_NODE_TYPE];
-        const subgraphNodes = Object.values(node.subgraph._nodes).filter(
-            (n) => !subgraphTypes.includes(n.type),
-        );
+        const subgraphNodes = Object.values(node.subgraph._nodes);
         // Calculate center point of subgraph nodes
         const meanX = subgraphNodes.map((n) => n.position.x).reduce(
             (sum, value) => sum + value, 0,
@@ -607,21 +605,19 @@ export default class PipelineManagerEditor extends Editor {
         this.graph.selectedNodes = [];
         // Create, reposition and select subgraph nodes
         subgraphNodes.forEach((subgraphNode) => {
-            if (!subgraphTypes.includes(subgraphNode.type)) {
-                this.subgraphNodePositions[subgraphNode.id] = { ...subgraphNode.position };
-                const addedNode = this.graph.addNode(subgraphNode);
-                if (addedNode) {
-                    // Set position relative to removed node
-                    addedNode.position.x += node.position.x - meanX;
-                    addedNode.position.y += node.position.y - meanY;
-                    this.graph.selectedNodes.push(addedNode);
-                    // Reset connection count
-                    Object.values(addedNode.inputs).concat(
-                        Object.values(addedNode.outputs),
-                    ).forEach(
-                        (intf) => { intf.connectionCount = 0; },
-                    );
-                }
+            this.subgraphNodePositions[subgraphNode.id] = { ...subgraphNode.position };
+            const addedNode = this.graph.addNode(subgraphNode);
+            if (addedNode) {
+                // Set position relative to removed node
+                addedNode.position.x += node.position.x - meanX;
+                addedNode.position.y += node.position.y - meanY;
+                this.graph.selectedNodes.push(addedNode);
+                // Reset connection count
+                Object.values(addedNode.inputs).concat(
+                    Object.values(addedNode.outputs),
+                ).forEach(
+                    (intf) => { intf.connectionCount = 0; },
+                );
             }
         });
 

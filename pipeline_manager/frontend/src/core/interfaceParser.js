@@ -49,6 +49,9 @@ function parseSingleInterfaces(interfaces, interfaceGroup = false) {
     };
 
     interfaces.forEach((io) => {
+        // Copy the interface to avoid modifying the original object
+        const tempIO = JSON.parse(JSON.stringify(io));
+
         if (io.array !== undefined) {
             const [left, right] = io.array;
 
@@ -59,7 +62,10 @@ function parseSingleInterfaces(interfaces, interfaceGroup = false) {
                         `Interface named '${name}' of direction '${io.direction}' is a duplicate.`,
                     );
                 }
-                tempParsed[io.direction][`${io.name}[${j}]`] = io;
+                tempIO.externalName = io.externalName ? `${io.externalName}[${j}]` : name;
+
+                // Copy the interface to avoid modifying the assigned object
+                tempParsed[io.direction][name] = JSON.parse(JSON.stringify(tempIO));
             }
         } else {
             if (tempParsed[io.direction][io.name] !== undefined) {
@@ -67,13 +73,14 @@ function parseSingleInterfaces(interfaces, interfaceGroup = false) {
                     `Interface named '${io.name}' of direction '${io.direction}' is a duplicate.`,
                 );
             }
-            tempParsed[io.direction][io.name] = io;
+            tempIO.externalName = io.externalName ?? io.name;
+            tempParsed[io.direction][io.name] = tempIO;
         }
 
         if (interfaceGroup) {
             const newInterfaces = [];
 
-            io.interfaces.forEach((buildingIO) => {
+            tempIO.interfaces.forEach((buildingIO) => {
                 if (buildingIO.array !== undefined) {
                     const [left, right] = buildingIO.array;
 
@@ -86,7 +93,7 @@ function parseSingleInterfaces(interfaces, interfaceGroup = false) {
                     newInterfaces.push(name);
                 }
             });
-            io.interfaces = newInterfaces; // eslint-disable-line no-param-reassign
+            tempIO.interfaces = newInterfaces; // eslint-disable-line no-param-reassign
         }
     });
 
