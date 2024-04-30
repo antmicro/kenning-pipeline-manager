@@ -40,7 +40,7 @@ from creating and deleting connections or altering nodes' values if the editor i
                     type="text"
                     class="__port_input"
                     placeholder="External name"
-                    @focusout="() => { editExternalName = false; }"
+                    @focusout="externalNameFocusOutCallback"
                     @keydown.enter.stop="(e) => { e.target.blur(); }"
                 />
                 <span
@@ -190,6 +190,15 @@ export default defineComponent({
             });
         };
 
+        const externalNameFocusOutCallback = (e) => {
+            editExternalName.value = false;
+            if (e.target.value && e.target.value !== '') {
+                props.intf.externalName = e.target.value;
+            } else {
+                props.intf.externalName = props.intf.name;
+            }
+        };
+
         return {
             arrowRotation,
             displayArrow,
@@ -199,6 +208,7 @@ export default defineComponent({
             endHover,
             endHoverWrapper,
             externalNameInput,
+            externalNameFocusOutCallback,
             hovered,
             isConnected,
             newClasses,
