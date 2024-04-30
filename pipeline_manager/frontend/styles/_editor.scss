@@ -127,6 +127,10 @@
             & > input:focus {
                 outline: solid 2px $green;
             }
+            // Incorrect class for input with red outline
+            & > input.__error {
+                outline: solid 2px $red;
+            }
         }
 
         & > .__port_name_left {

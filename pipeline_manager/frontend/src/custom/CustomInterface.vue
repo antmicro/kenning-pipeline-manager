@@ -38,10 +38,14 @@ from creating and deleting connections or altering nodes' values if the editor i
                     v-model="intf.externalName"
                     ref="externalNameInput"
                     type="text"
+                    spellcheck="false"
+                    autocomplete="off"
                     class="__port_input"
+                    :class="{ '__error': externalNameInputIncorrect }"
                     placeholder="External name"
                     @focusout="externalNameFocusOutCallback"
                     @keydown.enter.stop="(e) => { e.target.blur(); }"
+                    @input="externalNameInputCallback"
                 />
                 <span
                     v-else
@@ -180,23 +184,49 @@ export default defineComponent({
         externalNameComponent.componentName = 'TextInterface';
 
         const editExternalName = ref(false);
+        const externalNameInputIncorrect = ref(false);
         const externalNameInput = ref(null);
+        const externalNames = [];
+
+        const isIncorrectExternalName = (name) => {
+            const sameNames = externalNames.filter((n) => n === name).length;
+            return sameNames !== 0;
+        };
+
         const enableExternalNameEdit = (e) => {
             editExternalName.value = true;
             e.preventDefault();
+
+            // Get the list of external names of the interfaces in the subgraph
+            /* eslint-disable no-underscore-dangle */
+            const nodes = viewModel.value.editor.subgraphStack[0][1].subgraph._nodes;
+            externalNames.splice(0, externalNames.length);
+            nodes.forEach((node) => {
+                Object.values(node.inputs).forEach((intf) => {
+                    externalNames.push(intf.externalName);
+                });
+                Object.values(node.outputs).forEach((intf) => {
+                    externalNames.push(intf.externalName);
+                });
+            });
+            externalNames.splice(externalNames.indexOf(props.intf.externalName), 1);
+
+            // Wait for the next tick to focus the input, so that it is rendered first
             nextTick().then(() => {
                 externalNameInput.value.focus();
                 externalNameInput.value.select();
+                externalNameInputIncorrect.value = isIncorrectExternalName(props.intf.externalName);
             });
         };
 
         const externalNameFocusOutCallback = (e) => {
             editExternalName.value = false;
-            if (e.target.value && e.target.value !== '') {
-                props.intf.externalName = e.target.value;
-            } else {
-                props.intf.externalName = props.intf.name;
-            }
+            externalNameInputIncorrect.value = false;
+            props.intf.externalName = e.target.value ? e.target.value : props.intf.name;
+        };
+
+        const externalNameInputCallback = (e) => {
+            externalNameInputIncorrect.value = isIncorrectExternalName(e.target.value);
         };
 
         return {
@@ -208,6 +238,8 @@ export default defineComponent({
             endHover,
             endHoverWrapper,
             externalNameInput,
+            externalNameInputIncorrect,
+            externalNameInputCallback,
             externalNameFocusOutCallback,
             hovered,
             isConnected,
