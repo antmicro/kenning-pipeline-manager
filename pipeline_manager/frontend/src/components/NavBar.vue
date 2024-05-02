@@ -176,7 +176,7 @@ export default {
             }
             return { 'justify-content': 'right' };
         },
-        activeNavItems() {
+        activeNavbarItems() {
             return this.activeNavbarItemsNames;
         },
     },
@@ -230,7 +230,7 @@ export default {
 
         const searchEditorNodesQuery = ref('');
         // Setup custom hook, which is executed when procedure starts or stops running
-        runInfo.setHook(this.updateActiveNavItems);
+        runInfo.setHook(this.updateActiveNavbarItems);
 
         // Mock hoveredOver to suppress warning when creating Side Panel
         // hoveredOver over is needed only for temporary connections, which are not used here
@@ -705,14 +705,14 @@ export default {
             return actionItem.name;
         },
 
-        updateActiveNavItems() {
+        updateActiveNavbarItems() {
             const { navbarItems } = this;
             let activeItems = new Set(navbarItems.map((item) => item.procedureName));
             navbarItems.filter((item) => this.isInProgress(item.procedureName)).forEach((item) => {
                 // Intersection of current activeItems and items allowToRunInParallelWith
                 activeItems = new Set(
                     (item.allowToRunInParallelWith ?? []).filter((name) => activeItems.has(name)),
-                );
+                ).add(item.procedureName);
             });
             this.activeNavbarItemsNames = Array.from(activeItems);
         },
@@ -892,7 +892,7 @@ export default {
                             :id="`navbar-button-${actionItem.procedureName}`"
                             :class="[
                                 (
-                                    (activeNavItems.includes(actionItem.procedureName)
+                                    (activeNavbarItems.includes(actionItem.procedureName)
                                     || isInProgress(actionItem.procedureName))
                                     ? 'hoverbox' : 'box'
                                 ),
@@ -911,7 +911,7 @@ export default {
                                     && isInProgress(actionItem.procedureName)
                                 "
                                 class="small_svg"
-                                :hover="isHovered(actionItem.name)"
+                                :hover="isHovered(actionItem.procedureName)"
                             />
                             <component
                                 v-else
