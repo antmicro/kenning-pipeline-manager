@@ -191,10 +191,15 @@ export default defineComponent({
         const externalNames = [];
 
         const updateExternalNames = () => {
-            /* eslint-disable no-underscore-dangle */
-            const nodes = viewModel.value.editor.subgraphStack[0][1].subgraph._nodes;
+            const subgraphStackLength = viewModel.value.editor.subgraphStack.length;
             externalNames.splice(0, externalNames.length);
-            nodes.forEach((node) => {
+            if (subgraphStackLength === 0) {
+                return;
+            }
+            const subgraphStack = viewModel.value.editor.subgraphStack[subgraphStackLength - 1][1];
+
+            /* eslint-disable no-underscore-dangle */
+            subgraphStack.subgraph._nodes.forEach((node) => {
                 Object.values(node.inputs).forEach((intf) => {
                     externalNames.push(intf.externalName);
                 });
@@ -210,12 +215,25 @@ export default defineComponent({
             return sameNames !== 0;
         };
 
-        const enableExternalNameEdit = (e) => {
-            editExternalName.value = true;
-            e.preventDefault();
+        const resolveSuffix = (name) => {
+            updateExternalNames();
 
+            // Check if the external name is taken and add a suffix if it is
+            let suffix = 1;
+            let tmpName = name;
+            while (isIncorrectExternalName(tmpName)) {
+                tmpName = `${name}_${suffix}`;
+                suffix += 1;
+            }
+            return tmpName;
+        };
+
+        const enableExternalNameEdit = (e) => {
             // Get the list of external names of the interfaces in the subgraph
             updateExternalNames();
+
+            editExternalName.value = true;
+            e.preventDefault();
 
             // Wait for the next tick to focus the input, so that it is rendered first
             nextTick().then(() => {
@@ -228,23 +246,17 @@ export default defineComponent({
         const externalNameFocusOutCallback = (e) => {
             editExternalName.value = false;
             externalNameInputIncorrect.value = false;
-            updateExternalNames();
-
-            // Check if the external name is taken and add a suffix if it is
-            let suffix = 1;
-            let tmpName = e.target.value ? e.target.value : props.intf.name;
-            e.target.value = tmpName;
-            while (isIncorrectExternalName(tmpName)) {
-                tmpName = `${e.target.value}_${suffix}`;
-                suffix += 1;
-            }
-
-            props.intf.externalName = tmpName;
+            e.target.value = e.target.value ? e.target.value : props.intf.name;
+            props.intf.externalName = resolveSuffix(e.target.value);
         };
 
         const externalNameInputCallback = (e) => {
             externalNameInputIncorrect.value = isIncorrectExternalName(e.target.value);
         };
+
+        // Initialize external name upon interface creation
+        props.intf.externalName = resolveSuffix(
+            props.intf.externalName ? props.intf.externalName : props.intf.name);
 
         return {
             arrowRotation,
