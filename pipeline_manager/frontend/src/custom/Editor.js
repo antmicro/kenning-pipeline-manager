@@ -496,7 +496,6 @@ export default class PipelineManagerEditor extends Editor {
         Object.values({ ...subgraphNode.inputs, ...subgraphNode.outputs }).forEach((nodeIntf) => {
             const x = ifaceOrPositionErrors.find(
                 (intf) => (
-                    intf.subgraphNodeId === nodeIntf.subgraphNodeId &&
                     intf.externalName === nodeIntf.name
                 ),
             );
@@ -509,7 +508,6 @@ export default class PipelineManagerEditor extends Editor {
             const existingIntfs = (subIntf.direction === 'output') ? subgraphNode.outputs : subgraphNode.inputs;
             const x = Object.values(existingIntfs).find(
                 (nodeIntf) => ((
-                    nodeIntf.subgraphNodeId === subIntf.subgraphNodeId &&
                     nodeIntf.name === subIntf.externalName
                 )),
             );
@@ -523,8 +521,11 @@ export default class PipelineManagerEditor extends Editor {
                     subgraphNode.addInput(subIntf.externalName, baklavaIntf);
                 }
             } else {
+                const externalName = (
+                    x.name === subIntf.externalName ? x.externalName : subIntf.externalName);
                 Object.assign(x, subIntf);
                 x.name = subIntf.externalName;
+                x.externalName = externalName;
             }
         });
 
