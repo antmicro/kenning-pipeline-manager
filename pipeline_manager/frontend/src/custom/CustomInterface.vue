@@ -44,8 +44,10 @@ from creating and deleting connections or altering nodes' values if the editor i
                     :class="{ '__error': externalNameInputIncorrect }"
                     placeholder="External name"
                     @focusout="externalNameFocusOutCallback"
-                    @keydown.enter.stop="(e) => { e.target.blur(); }"
+                    @keydown.enter.exact.stop="(e) => { e.target.blur(); }"
                     @input="externalNameInputCallback"
+                    @pointerdown.left.stop="(e) => e.stopPropagation()"
+                    @keydown.ctrl.stop="(e) => e.stopPropagation()"
                 />
                 <span
                     v-else
