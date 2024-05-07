@@ -669,7 +669,8 @@ export default {
         },
 
         updateHoverInfo(name, isRunnable = false) {
-            if (!isRunnable || this.activeNavbarItemsNames.includes(name)) {
+            if (!isRunnable || this.activeNavbarItemsNames.includes(name) ||
+                this.isInProgress(name)) {
                 this.hoverInfo.hoveredPanel = name;
                 this.hoverInfo.isHovered = true;
             }
