@@ -23,7 +23,7 @@ SPDX-License-Identifier: Apache-2.0
         <component
             :is="dataflowname.component"
             :intf="dataflowname" class="__name-option"
-            v-model="saveConfiguration.savename"
+            v-model="saveConfiguration.saveName"
         />
         <component :is="save.component" :intf="save" />
     </div>

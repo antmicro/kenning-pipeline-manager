@@ -38,6 +38,7 @@ import Settings from './Settings.vue';
 import SaveMenu from './SaveMenu.vue';
 import BlurPanel from './BlurPanel.vue';
 import CustomSidebar from '../custom/CustomSidebar.vue';
+import { saveSpecificationConfiguration, saveGraphConfiguration } from './saveConfiguration.ts';
 
 import icons from '../icons';
 
@@ -184,24 +185,16 @@ export default {
         dataflowGraphName(newValue) {
             this.graphName = newValue;
 
-            // Resetting the save configuration
-            this.saveConfiguration = {
-                readonly: false,
-                hideHud: false,
-                position: false,
-                savename: 'save',
-            };
+            // Resetting the save configurations
+            saveSpecificationConfiguration.reset();
+            saveGraphConfiguration.reset();
         },
         graphName(newValue) {
             this.editorManager.updateSubgraphName(newValue);
 
-            // Resetting the save configuration
-            this.saveConfiguration = {
-                readonly: false,
-                hideHud: false,
-                position: false,
-                savename: 'save',
-            };
+            // Resetting the save configurations
+            saveSpecificationConfiguration.reset();
+            saveGraphConfiguration.reset();
         },
         searchEditorNodesQuery(newValue) {
             const { viewModel } = useViewModel();
@@ -241,22 +234,14 @@ export default {
             graphName,
             editorManager,
             editorTitleInterface,
-            /* Object used to pass information to SaveMenu component about
-                saving configuration. If any option is set to undefined then
-                it will be not displayed in the SaveMenu.
-            */
-            saveConfiguration: {
-                readonly: false,
-                hideHud: false,
-                position: false,
-                savename: 'save',
-                saveCallback: this.saveDataflow,
-            },
             /* create instance of external manager to control
             connection, dataflow and specification
             */
             externalApplicationManager: getExternalApplicationManager(),
             activeNavbarItemsNames: [],
+            saveConfiguration: saveGraphConfiguration,
+            saveGraphConfiguration,
+            saveSpecificationConfiguration,
             saveMenuShow: false,
             editTitle: false,
             notificationStore,
@@ -343,33 +328,6 @@ export default {
             startTransaction();
             this.editorManager.editor.deepCleanEditor(false);
             commitTransaction();
-        },
-
-        /**
-         * Helper function that saves a blob to a file.
-         *
-         * @param {Blob} blob The blob to save.
-         * @param {string} filename The name of the file to save.
-         */
-        saveBlob(blob, filename) {
-            const linkElement = document.createElement('a');
-            linkElement.href = window.URL.createObjectURL(blob);
-            linkElement.download = filename;
-            linkElement.click();
-        },
-
-        /**
-         * Event handler that that saves a current speciciation to a `specification.json` file.
-         */
-        saveSpecification() {
-            const blob = new Blob(
-                [
-                    JSON.stringify(this.editorManager.saveSpecification(), null, 4),
-                ],
-                { type: 'application/json' },
-            );
-            this.saveBlob(blob, this.saveConfiguration.savename);
-            NotificationHandler.showToast('info', 'Specification saved');
         },
 
         /**
@@ -500,21 +458,6 @@ export default {
             document.getElementById('load-dataflow-button').value = '';
         },
 
-        /**
-         * Event handler that that saves a current dataflow to a `save.json` file.
-         */
-        saveDataflow() {
-            const blob = new Blob([JSON.stringify(this.editorManager.saveDataflow(
-                this.saveConfiguration.readonly,
-                this.saveConfiguration.hideHud,
-                this.saveConfiguration.position,
-            ), null, 4)], {
-                type: 'application/json',
-            });
-            this.saveBlob(blob, this.saveConfiguration.savename);
-            NotificationHandler.showToast('info', 'Dataflow saved');
-        },
-
         async requestDataflowAction(actionItem) {
             if (!this.externalApplicationManager.backendAvailable) return;
             if (
@@ -534,46 +477,29 @@ export default {
             }
         },
 
-        saveDataflowInCustomFormat(filename, filecontent) {
-            const saveElement = document.createElement('a');
-            let mimeType;
-            if (typeof filecontent === 'string') {
-                mimeType = 'application/octet-stream';
-                saveElement.href = `data:${mimeType};base64,${filecontent}`;
-            } else {
-                mimeType = 'application/json';
-                saveElement.href = window.URL.createObjectURL(
-                    new Blob(
-                        [JSON.stringify(filecontent)],
-                        { type: mimeType }),
-                );
-            }
-            saveElement.download = filename;
-            saveElement.click();
-            NotificationHandler.showToast('info', `File saved successfully: ${filename}`);
-        },
-
         async requestDataflowExport(prompt = true) {
             if (!this.externalApplicationManager.backendAvailable) return;
             const result = await this.externalApplicationManager.requestDataflowExport();
 
             if (result !== false) {
-                this.saveConfiguration.readonly = undefined;
-                this.saveConfiguration.hideHud = undefined;
-                this.saveConfiguration.position = undefined;
-                this.saveConfiguration.savename = result.filename ?? 'savename';
+                // Copy the saveConfiguration object to prevent changing the original object
+                this.saveConfiguration = { ...saveGraphConfiguration };
+                this.saveConfiguration.saveName = (
+                    result.filename ?? saveGraphConfiguration.saveName);
                 if (prompt) {
+                    this.saveConfiguration.readonly = undefined;
+                    this.saveConfiguration.hideHud = undefined;
+                    this.saveConfiguration.position = undefined;
                     this.saveConfiguration.saveCallback =
                         () => {
-                            this.saveDataflowInCustomFormat(
-                                this.saveConfiguration.savename,
+                            this.saveConfiguration.saveCallbackCustomFormat(
                                 result.content,
                             );
+                            this.saveConfiguration = saveGraphConfiguration;
                         };
                     this.saveMenuShow = true;
                 } else {
-                    this.saveDataflowInCustomFormat(
-                        this.saveConfiguration.savename,
+                    this.saveConfiguration.saveCallbackCustomFormat(
                         result.content,
                     );
                 }
@@ -818,12 +744,8 @@ export default {
                                     text="Save specification as..."
                                     type="'button'"
                                     :eventFunction="() => {
-                                        Object.keys(this.saveConfiguration).forEach(
-                                            (i) => this.saveConfiguration[i] = undefined
-                                        ),
-                                        this.saveConfiguration.savename = 'specification',
-                                        this.saveConfiguration.saveCallback = this.saveSpecification,   // eslint-disable-line max-len
                                         saveMenuShow = !saveMenuShow
+                                        saveConfiguration = saveSpecificationConfiguration
                                     }"
                                 />
                                 <hr />
@@ -839,21 +761,14 @@ export default {
                                 <DropdownItem
                                     type="'button'"
                                     text="Save graph file"
-                                    :eventFunction="saveDataflow"
+                                    :eventFunction="() => saveGraphConfiguration.saveCallback()"
                                 />
                                 <DropdownItem
                                     type="'button'"
                                     text="Save graph as file as..."
                                     :eventFunction="() => {
-                                        Object.keys(this.saveConfiguration).forEach(
-                                            (i) => this.saveConfiguration[i] = undefined
-                                        ),
-                                        this.saveConfiguration.readonly = false,
-                                        this.saveConfiguration.hideHud = false,
-                                        this.saveConfiguration.position = false,
-                                        this.saveConfiguration.savename = 'save',
-                                        this.saveConfiguration.saveCallback = this.saveDataflow,
                                         saveMenuShow = !saveMenuShow
+                                        saveConfiguration = saveGraphConfiguration
                                     }"
                                 />
                                 <hr />
