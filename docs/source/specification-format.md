@@ -140,15 +140,33 @@ Every element consists of the following properties:
   It can be either a file in the assets directory, or an icon described in `/pipeline-manager/pipeline_manager/frontend/src/icons/index.ts`.
 * `procedureName` - name of the procedure (either a built-in [API procedure](#api-specification) or a [custom procedure](#api-custom-procedure)) to be called.
   It is assumed that the procedure accepts a does not need any arguments, or takes one argument which is the currently displayed dataflow (similarly to [dataflow_run(#external-dataflow-run)]).
+* `allowToRunInParallelWith` - a list of procedure names that can be started in parallel to the currently running job.
 
 Example of a button that is used to run the current graph using a dedicated procedure `dataflow_run` looks as follows:
+
 ```json
 {
     "name": "Run",
     "stopName": "Stop",
     "iconName": "Run",
-    "procedureName": "dataflow_run"
+    "procedureName": "dataflow_run",
+    "allowToRunInParallelWith": [
+        "dataflow_validate",
+        "custom_lint_files"
+    ]
 }
+```
+
+This will create a button called Run, with the `Run` icon (available built-in icon), which upon clicking will run `dataflow_run` method.
+During execution of the `dataflow_run` method, we can run in parallel `dataflow_validate` and `custom_lint_files` procedures.
+
+```{note}
+By default, only single action can be called from NavBar at a time.
+```
+
+```{warning}
+`allowToRunInParallelWith` is a one-way relation.
+This means that if we have two actions that can be started when the other one is running, then `allowToRunInParallelWith` needs to be defined in both actions.
 ```
 
 ### Node
