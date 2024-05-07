@@ -515,20 +515,22 @@ export default {
             NotificationHandler.showToast('info', 'Dataflow saved');
         },
 
-        async requestDataflowAction(procedureName) {
+        async requestDataflowAction(actionItem) {
             if (!this.externalApplicationManager.backendAvailable) return;
             if (
-                this.isInProgress(procedureName) &&
-                this.isStoppable(procedureName)
+                this.isInProgress(actionItem.procedureName) &&
+                this.isStoppable(actionItem.procedureName)
             ) {
-                await this.externalApplicationManager.requestDataflowStop(procedureName);
+                await this.externalApplicationManager.requestDataflowStop(actionItem.procedureName);
                 return;
             }
-            const activeAction = this.activeNavbarItemsNames.includes(procedureName);
-            if (activeAction && !this.isInProgress(procedureName)) {
-                await this.externalApplicationManager.requestDataflowAction(procedureName);
+            const activeAction = this.activeNavbarItemsNames.includes(actionItem.procedureName);
+            if (activeAction && !this.isInProgress(actionItem.procedureName)) {
+                await this.externalApplicationManager.requestDataflowAction(
+                    actionItem.procedureName,
+                );
             } else if (activeAction) {
-                NotificationHandler.terminalLog('warning', `Method ${procedureName} cannot be stopped`);
+                NotificationHandler.terminalLog('warning', `${actionItem.name} cannot be stopped`);
             }
         },
 
@@ -901,7 +903,7 @@ export default {
                                 'button-in-progress': isInProgress(actionItem.procedureName),
                             }]"
                             role="button"
-                            @click="(async () => requestDataflowAction(actionItem.procedureName))"
+                            @click="(async () => requestDataflowAction(actionItem))"
                             @pointerover="() => updateHoverInfo(actionItem.procedureName, true)"
                             @pointerleave="() => resetHoverInfo(actionItem.procedureName)"
                         >
