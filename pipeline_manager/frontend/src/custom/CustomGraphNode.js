@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Antmicro <www.antmicro.com>
+ * Copyright (c) 2022-2024 Antmicro <www.antmicro.com>
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -94,7 +94,13 @@ export default function CreateCustomGraphNodeType(template, type) {
 
             let errors = [];
 
-            const interfaces = (state.graphState.interfaces ?? state.interfaces).map(
+            state.idMap = new Map();
+            const createNewId = (oldId) => {
+                const newId = uuidv4();
+                state.idMap.set(oldId, newId);
+                return newId;
+            };
+            state.graphState.interfaces = (state.graphState.interfaces ?? state.interfaces).map(
                 (io) => {
                     const correspondingInterface = state.interfaces.find(
                         (intf) => intf.subgraphNodeId === io.id,
@@ -106,6 +112,7 @@ export default function CreateCustomGraphNodeType(template, type) {
                     return {
                         ...io,
                         ...correspondingInterface,
+                        id: createNewId(correspondingInterface.id),
                     };
                 },
             );
@@ -114,7 +121,13 @@ export default function CreateCustomGraphNodeType(template, type) {
                 return errors;
             }
 
-            let out = parseInterfaces(interfaces, [], []);
+            // Adjusting the IDs of the interfaces in the graph state
+            state.interfaces = state.interfaces.map((io) => ({
+                ...io,
+                id: state.idMap.get(io.id),
+            }));
+
+            let out = parseInterfaces(state.graphState.interfaces, [], []);
             if (Array.isArray(out) && out.length) {
                 return out;
             }

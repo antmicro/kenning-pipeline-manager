@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Antmicro <www.antmicro.com>
+ * Copyright (c) 2022-2024 Antmicro <www.antmicro.com>
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -439,7 +439,8 @@ export default function createPipelineManagerGraph(graph) {
         });
 
         state.nodes.forEach((n) => {
-            if (n.subgraph !== undefined) {
+            const isSubgraphNode = n.subgraph !== undefined;
+            if (isSubgraphNode) {
                 n.name = `${GRAPH_NODE_TYPE_PREFIX}${n.name}`;
             }
 
@@ -453,6 +454,14 @@ export default function createPipelineManagerGraph(graph) {
                 const nodeErrors = node.load(n);
                 if (Array.isArray(nodeErrors) && nodeErrors.length) {
                     errors.push(...nodeErrors);
+                }
+
+                if (isSubgraphNode) {
+                    // Remap connections for subgraph node interfaces
+                    state.connections.forEach((c) => {
+                        c.from = n.idMap.get(c.from) ?? c.from;
+                        c.to = n.idMap.get(c.to) ?? c.to;
+                    });
                 }
             }
         });
