@@ -6,25 +6,31 @@
         "interfaces": {
             "description": "Styling of the nodes",
             "type": "object",
-            "properties": {
-                "interfaceColor": {
-                    "type": "string",
-                    "description": "Color of the interface instance"
-                },
-                "interfaceConnectionPattern": {
-                    "description": "Pattern of the connection going from the interface",
-                    "enum": [
-                        "solid",
-                        "dashed"
-                    ],
-                    "default": "solid"
-                },
-                "interfaceConnectionColor": {
-                    "description": "Color of the connection going from the interface",
-                    "type": "string",
-                    "default": "#FFFFFF"
-                },
-                "additionalProperties": false
+            "patternProperties": {
+                "^.*$": {
+                    "type": "object",
+                    "properties": {
+                        "interfaceColor": {
+                            "type": "string",
+                            "description": "Color of the interface instance"
+                        },
+                        "interfaceConnectionPattern": {
+                            "description": "Pattern of the connection going from the interface",
+                            "enum": [
+                                "solid",
+                                "dashed",
+                                "dotted"
+                            ],
+                            "default": "solid"
+                        },
+                        "interfaceConnectionColor": {
+                            "description": "Color of the connection going from the interface",
+                            "type": "string",
+                            "default": "#FFFFFF"
+                        }
+                    },
+                    "additionalProperties": false
+                }
             },
             "default": {}
         },
@@ -61,7 +67,11 @@
                         "default": []
                     }
                 },
-                "required": ["name", "iconName", "procedureName"],
+                "required": [
+                    "name",
+                    "iconName",
+                    "procedureName"
+                ],
                 "additionalProperties": false
             },
             "default": []
@@ -108,27 +118,21 @@
                     },
                     "nodeLayers": {
                         "type": "array",
-                        "description": "Types of nodes that are ignored in this layer"
+                        "description": "Types of nodes that are ignored in this layer",
+                        "items": {
+                            "type": "string"
+                        }
                     },
                     "nodeInterfaces": {
                         "type": "array",
-                        "description": "Types of interfaces that are ignored in this layer"
+                        "description": "Types of interfaces that are ignored in this layer",
+                        "items": {
+                            "type": "string"
+                        }
                     }
                 },
                 "required": [
                     "name"
-                ],
-                "anyOf": [
-                    {
-                        "required": [
-                            "nodeLayers"
-                        ]
-                    },
-                    {
-                        "required": [
-                            "nodeInterfaces"
-                        ]
-                    }
                 ],
                 "additionalProperties": false
             }
