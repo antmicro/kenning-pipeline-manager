@@ -38,8 +38,6 @@
                 "interfaces": []
             }
         ],
-        "connections": [],
-        "inputs": [],
-        "outputs": []
+        "connections": []
     }
 }

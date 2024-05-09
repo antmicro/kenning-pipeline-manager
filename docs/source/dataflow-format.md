@@ -406,9 +406,7 @@ The example dataflow for a specification defined in [Specification format](speci
                 "from": "ni_168064228786641",
                 "to": "ni_168064231007450"
             }
-        ],
-        "inputs": [],
-        "outputs": [],
+        ]
         "panning": {
             "x": 0,
             "y": 0
