@@ -146,22 +146,11 @@
                     },
                     "position": {
                         "description": "Position of a node in an editor",
-                        "type": "object",
-                        "properties": {
-                            "x": {
-                                "description": "X coordinate of node position",
-                                "type": "number"
-                            },
-                            "y": {
-                                "description": "Y coordinate of node position",
-                                "type": "number"
+                        "allOf": [
+                            {
+                                "$ref": "#/$defs/coordinates"
                             }
-                        },
-                        "required": [
-                            "x",
-                            "y"
-                        ],
-                        "additionalProperties": false
+                        ]
                     }
                 },
                 "required": [
@@ -193,22 +182,7 @@
                         "type": "array",
                         "description": "Definition of anchor points that are used for orthogonal connections",
                         "items": {
-                            "type": "object",
-                            "properties": {
-                                "x": {
-                                    "description": "x coordinate of the anchor",
-                                    "type": "number"
-                                },
-                                "y": {
-                                    "description": "y coordinate of the anchor",
-                                    "type": "number"
-                                }
-                            },
-                            "required": [
-                                "x",
-                                "y"
-                            ],
-                            "additionalProperties": false
+                            "$ref": "#/$defs/coordinates"
                         }
                     }
                 },
@@ -221,23 +195,12 @@
             }
         },
         "panning": {
-            "type": "object",
             "description": "Defines the position of the top-left corner in the rendered editor",
-            "properties": {
-                "x": {
-                    "description": "x coordinate of the corner",
-                    "type": "number"
-                },
-                "y": {
-                    "description": "y coordinate of the corner",
-                    "type": "number"
+            "allOf": [
+                {
+                    "$ref": "#/$defs/coordinates"
                 }
-            },
-            "required": [
-                "x",
-                "y"
-            ],
-            "additionalProperties": false
+            ]
         },
         "scaling": {
             "description": "Floating-point number that defines the zoom level in the editor",
@@ -257,6 +220,26 @@
                 "array",
                 "null"
             ]
+        }
+    },
+    "$defs": {
+        "coordinates": {
+            "type": "object",
+            "properties": {
+                "x": {
+                    "description": "x coordinate of the corner",
+                    "type": "number"
+                },
+                "y": {
+                    "description": "y coordinate of the corner",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "x",
+                "y"
+            ],
+            "additionalProperties": false
         }
     },
     "required": [
