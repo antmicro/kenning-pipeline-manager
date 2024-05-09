@@ -1,5 +1,5 @@
 {
-    "$id": "dataflow_schema",
+    "$id": "dataflow_schema.json",
     "description": "Schema used to validate dataflows",
     "type": "object",
     "properties": {
@@ -8,18 +8,18 @@
             "type": "string"
         },
         "metadata": {
-            "$ref": "metadata_schema"
+            "$ref": "metadata_schema.json"
         },
         "subgraphs": {
             "type": "array",
             "items": {
-                "$ref": "graph_schema"
+                "$ref": "graph_schema.json"
             }
         },
         "graph": {
             "oneOf": [
                 {
-                    "$ref": "graph_schema"
+                    "$ref": "graph_schema.json"
                 },
                 {
                     "type": "object",

@@ -1,5 +1,5 @@
 {
-    "$id": "metadata_schema",
+    "$id": "metadata_schema.json",
     "description": "Schema used to validate specification metadata",
     "type": "object",
     "properties": {

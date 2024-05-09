@@ -1,5 +1,5 @@
 {
-    "$id": "graph_schema",
+    "$id": "graph_schema.json",
     "description": "Schema used to validate a single subgraph",
     "type": "object",
     "properties": {

@@ -1,8 +1,8 @@
 {
+    "$id": "specification_schema.json",
     "type": "object",
-    "$id": "specification_schema",
     "description": "Schema used to validate specification that has resolved inheritance",
-    "$ref": "unresolved_specification_schema",
+    "$ref": "unresolved_specification_schema.json",
     "properties": {
         "nodes": {
             "type": "array",
