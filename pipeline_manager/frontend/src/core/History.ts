@@ -269,12 +269,18 @@ export function useHistory(graph: Ref<Graph>, commandHandler: ICommandHandler): 
             });
             newGraph.events.removeConnection.subscribe(token, (conn : any) => {
                 if (!suppressingHistory.value) {
+                    const inTransaction = transactionId.value !== '';
+                    if (!inTransaction) startTransaction();
                     const historyItem = history.get(newGraph.id);
                     if (!historyItem) return;
+                    (conn.anchors ?? []).slice().reverse().forEach((anchor: any) => {
+                        newGraph.events.removeAnchor.emit([conn, conn.anchors.indexOf(anchor)]);
+                    });
                     const step = new ConnectionStep('rem', conn.id.toString(), transactionId.value);
                     historyItem.push(step);
                     step.conn = conn;
                     undoneHistory.set(newGraph.id, []);
+                    if (!inTransaction) commitTransaction();
                 }
             });
             newGraph.events.addAnchor.subscribe(token, (tuple: any) => {
