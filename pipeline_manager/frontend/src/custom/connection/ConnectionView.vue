@@ -19,7 +19,7 @@ Inherits from baklavajs/renderer-vue/src/connection/ConnectionView.vue
         <template v-if="hasAnchors">
             <g
                 v-for="(d, index) in parsedNewD"
-                @mousedown.left.exact="onMouseDown"
+                @pointerdown.left.exact="onMouseDown"
                 @pointerdown="(ev) => { if(ev.pointerType === 'touch') onMouseDown(ev) }"
                 @pointerdown.left.ctrl.exact="(ev) => onMouseCtrlDown(ev, index)"
             >
@@ -36,7 +36,7 @@ Inherits from baklavajs/renderer-vue/src/connection/ConnectionView.vue
     </g>
     <g
         v-else
-        @mousedown.left.exact="onMouseDown"
+        @pointerdown.left.exact="onMouseDown"
         @pointerdown="(ev) => { if(ev.pointerType === 'touch') onMouseDown(ev) }"
         @pointerdown.left.ctrl.exact="(ev) => onMouseCtrlDown(ev, 0)"
     >
@@ -78,8 +78,9 @@ export default defineComponent({
             '--color': connectionStyle.interfaceConnectionColor,
         }));
 
-        const onMouseDown = doubleClick(700, () => {
+        const onMouseDown = doubleClick(700, (ev) => {
             if (!viewModel.value.editor.readonly) {
+                ev.preventDefault();
                 graph.value.removeConnection(props.connection);
             }
         });
@@ -95,6 +96,7 @@ export default defineComponent({
                 viewModel.value.editor.readonly ||
                 viewModel.value.connectionRenderer.style !== 'orthogonal'
             ) return;
+            ev.preventDefault();
             if (props.connection.anchors === undefined) {
                 props.connection.anchors = [];
             }

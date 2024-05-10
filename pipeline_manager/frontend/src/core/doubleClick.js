@@ -16,9 +16,9 @@ export default function doubleClick(timer, callback) {
     let lastClickTime = -doubleClickTimer;
 
     /* eslint-disable vue/no-mutating-props,no-param-reassign */
-    const onMouseDown = () => {
+    const onMouseDown = (ev) => {
         if (Date.now() - lastClickTime < doubleClickTimer) {
-            callback();
+            callback(ev);
         }
         lastClickTime = Date.now();
     };
