@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Antmicro <www.antmicro.com>
+ * Copyright (c) 2022-2024 Antmicro <www.antmicro.com>
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -28,13 +28,7 @@ import NoLayoutAlgorithm from './layoutEngines/noLayoutEngine.js';
 function dataflowToGraph(dataflow) {
     const interfaceToNodeId = new Map();
     dataflow.nodes.forEach((node) => {
-        if (node.interfaces !== undefined) {
-            node.interfaces.forEach((intf) => interfaceToNodeId.set(intf.id, node.id));
-        } else {
-            // Should be the case only for nodes SUBGRAPH_INPUT/OUTPUT/INOUT_NODE_TYPE
-            Object.values(node.inputs).forEach((intf) => interfaceToNodeId.set(intf.id, node.id));
-            Object.values(node.outputs).forEach((intf) => interfaceToNodeId.set(intf.id, node.id));
-        }
+        node.interfaces.forEach((intf) => interfaceToNodeId.set(intf.id, node.id));
     });
 
     const nodes = dataflow.nodes
