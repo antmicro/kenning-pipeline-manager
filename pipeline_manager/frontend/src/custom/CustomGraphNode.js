@@ -27,9 +27,12 @@ export default function CreateCustomGraphNodeType(template, type) {
             const state = super.save();
 
             const newInterfaces = [];
+            const thisInterfaces = Object.values(this.inputs).concat(Object.values(this.outputs));
             [...this.subgraph.inputs, ...this.subgraph.outputs].forEach((io) => {
+                const externalName = thisInterfaces.find((i) => i.id === io.id)?.externalName;
                 newInterfaces.push({
-                    name: io.externalName,
+                    name: io.name,
+                    externalName,
                     id: io.id,
                     subgraphNodeId: io.subgraphNodeId,
                     direction: io.direction,

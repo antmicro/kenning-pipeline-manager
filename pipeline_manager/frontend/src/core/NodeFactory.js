@@ -419,11 +419,9 @@ export function NodeFactory(
                                 });
                             }
 
-                            const intfName = ioName.slice(ioState.direction.length + 1);
-                            const externalName = ioState.externalName ?? intfName;
                             newInterfaces.push({
-                                name: intfName,
-                                externalName,
+                                name: ioName.slice(ioState.direction.length + 1),
+                                externalName: ioState.externalName,
                                 id: ioState.id,
                                 direction: ioState.direction,
                                 side: ioState.side,
@@ -700,18 +698,17 @@ export function updateSubgraphInterfaces(inputs, outputs, nodes) {
         const idx = container.findIndex((x) => x.id === intf.id);
         if (idx === -1) {
             newInterfaces.push({
+                name: intf.externalName,
                 id: intf.id,
                 subgraphNodeId: intf.nodeId,
-                name: intf.externalName ?? intf.name,
-                externalName: intf.externalName ?? intf.name,
+                externalName: undefined,
                 side: intf.side,
                 direction: intf.direction,
                 sidePosition: undefined,
             });
         } else {
             container[idx].direction = intf.direction;
-            container[idx].name = intf.externalName ?? intf.name;
-            container[idx].externalName = container[idx].name;
+            container[idx].name = intf.externalName;
             newInterfaces.push(container[idx]);
         }
     });
@@ -768,10 +765,16 @@ export function updateSubgraphInterfaces(inputs, outputs, nodes) {
  * @returns List of external interfaces
  */
 export function calculateExternalInterfaces(nodes, connections, inputs = [], outputs = []) {
-    const parsedState = nodes.map(parseNodeState);
-    const errorMessages = parsedState.filter((n) => Array.isArray(n) && n.length);
+    const parsedState = nodes.map((node) => {
+        const out = parseNodeState(node);
+        if (Array.isArray(out) && out.length) {
+            return `Node ${node.name} invalid. ${out}`;
+        }
+        return out;
+    });
+    const errorMessages = parsedState.filter((n) => typeof n === 'string');
     if (errorMessages.length) {
-        return errorMessages.map((error) => `Node  invalid. ${error}`);
+        return errorMessages;
     }
 
     // Count connections for each interface and initialize variable

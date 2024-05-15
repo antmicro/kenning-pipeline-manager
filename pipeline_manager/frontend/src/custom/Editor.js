@@ -494,12 +494,7 @@ export default class PipelineManagerEditor extends Editor {
 
         // Updating interfaces of a graph node
         Object.values({ ...subgraphNode.inputs, ...subgraphNode.outputs }).forEach((nodeIntf) => {
-            const x = ifaceOrPositionErrors.find(
-                (intf) => (
-                    intf.externalName === nodeIntf.name
-                ),
-            );
-            if (x === undefined) {
+            if (ifaceOrPositionErrors.find((intf) => (intf.id === nodeIntf.id)) === undefined) {
                 if (nodeIntf.isInput) subgraphNode.removeInput(nodeIntf.name);
                 else subgraphNode.removeOutput(nodeIntf.name);
             }
@@ -507,25 +502,17 @@ export default class PipelineManagerEditor extends Editor {
         ifaceOrPositionErrors.forEach((subIntf) => {
             const existingIntfs = (subIntf.direction === 'output') ? subgraphNode.outputs : subgraphNode.inputs;
             const x = Object.values(existingIntfs).find(
-                (nodeIntf) => ((
-                    nodeIntf.name === subIntf.externalName
-                )),
-            );
+                (nodeIntf) => ((nodeIntf.id === subIntf.id)));
             if (x === undefined) {
-                const baklavaIntf = new NodeInterface(subIntf.externalName);
+                const baklavaIntf = new NodeInterface(subIntf.name);
                 Object.assign(baklavaIntf, subIntf);
-                baklavaIntf.name = subIntf.externalName;
                 if (subIntf.direction === 'output') {
-                    subgraphNode.addOutput(subIntf.externalName, baklavaIntf);
+                    subgraphNode.addOutput(subIntf.name, baklavaIntf);
                 } else {
-                    subgraphNode.addInput(subIntf.externalName, baklavaIntf);
+                    subgraphNode.addInput(subIntf.name, baklavaIntf);
                 }
             } else {
-                const externalName = (
-                    x.name === subIntf.externalName ? x.externalName : subIntf.externalName);
                 Object.assign(x, subIntf);
-                x.name = subIntf.externalName;
-                x.externalName = externalName;
             }
         });
 

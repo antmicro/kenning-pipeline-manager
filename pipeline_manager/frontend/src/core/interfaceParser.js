@@ -62,7 +62,7 @@ function parseSingleInterfaces(interfaces, interfaceGroup = false) {
                         `Interface named '${name}' of direction '${io.direction}' is a duplicate.`,
                     );
                 }
-                tempIO.externalName = io.externalName ? `${io.externalName}[${j}]` : name;
+                tempIO.externalName = io.externalName ? `${io.externalName}[${j}]` : undefined;
 
                 // Copy the interface to avoid modifying the assigned object
                 tempParsed[io.direction][name] = JSON.parse(JSON.stringify(tempIO));
@@ -73,7 +73,6 @@ function parseSingleInterfaces(interfaces, interfaceGroup = false) {
                     `Interface named '${io.name}' of direction '${io.direction}' is a duplicate.`,
                 );
             }
-            tempIO.externalName = io.externalName ?? io.name;
             tempParsed[io.direction][io.name] = tempIO;
         }
 

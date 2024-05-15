@@ -35,7 +35,7 @@ from creating and deleting connections or altering nodes' values if the editor i
             >
                 <input
                     v-if="editExternalName"
-                    v-model="intf.externalName"
+                    v-model="inputExternalName"
                     ref="externalNameInput"
                     type="text"
                     spellcheck="false"
@@ -84,7 +84,7 @@ from creating and deleting connections or altering nodes' values if the editor i
 
 <script>
 import {
-    defineComponent, ref, computed, nextTick,
+    defineComponent, ref, computed, nextTick, watch,
 } from 'vue';
 import { Components, useViewModel, TextInterface } from '@baklavajs/renderer-vue';
 import Arrow from '../icons/Arrow.vue';
@@ -174,10 +174,7 @@ export default defineComponent({
             __readonly: viewModel.value.editor.readonly,
         }));
         const squared = computed(() => {
-            const sq = !isConnected.value && viewModel.value.editor.subgraphStack.length > 0;
-            if (sq && props.intf.externalName === undefined) {
-                props.intf.externalName = props.intf.name;
-            }
+            const sq = !isConnected.value && props.intf.externalName !== undefined;
             return sq;
         });
 
@@ -190,16 +187,17 @@ export default defineComponent({
         const externalNameInput = ref(null);
         const externalNames = [];
 
+        /**
+         * Update the list of external names of the interfaces in the current graph.
+         */
         const updateExternalNames = () => {
             const subgraphStackLength = viewModel.value.editor.subgraphStack.length;
             externalNames.splice(0, externalNames.length);
-            if (subgraphStackLength === 0) {
-                return;
-            }
-            const subgraphStack = viewModel.value.editor.subgraphStack[subgraphStackLength - 1][1];
+            const graph = subgraphStackLength === 0
+                ? viewModel.value.editor.graph
+                : viewModel.value.editor.subgraphStack[subgraphStackLength - 1][1].subgraph;
 
-            /* eslint-disable no-underscore-dangle */
-            subgraphStack.subgraph._nodes.forEach((node) => {
+            graph.nodes.forEach((node) => {
                 Object.values(node.inputs).forEach((intf) => {
                     externalNames.push(intf.externalName);
                 });
@@ -213,19 +211,6 @@ export default defineComponent({
         const isIncorrectExternalName = (name) => {
             const sameNames = externalNames.filter((n) => n === name).length;
             return sameNames !== 0;
-        };
-
-        const resolveSuffix = (name) => {
-            updateExternalNames();
-
-            // Check if the external name is taken and add a suffix if it is
-            let suffix = 1;
-            let tmpName = name;
-            while (isIncorrectExternalName(tmpName)) {
-                tmpName = `${name}_${suffix}`;
-                suffix += 1;
-            }
-            return tmpName;
         };
 
         const enableExternalNameEdit = (e) => {
@@ -246,17 +231,42 @@ export default defineComponent({
         const externalNameFocusOutCallback = (e) => {
             editExternalName.value = false;
             externalNameInputIncorrect.value = false;
-            e.target.value = e.target.value ? e.target.value : props.intf.name;
-            props.intf.externalName = resolveSuffix(e.target.value);
+            props.intf.externalName = e.target.value ? e.target.value : props.intf.name;
         };
 
         const externalNameInputCallback = (e) => {
             externalNameInputIncorrect.value = isIncorrectExternalName(e.target.value);
         };
 
+        /**
+         * Resolve the external name suffix if the name is already taken
+         * @param {string} name - The external name to resolve
+         * @returns {string} - The resolved external name
+         */
+        const resolveSuffix = (name) => {
+            if (name === undefined) {
+                return name;
+            }
+
+            updateExternalNames();
+            // Check if the external name is taken and add a suffix if it is
+            let suffix = 1;
+            let tmpName = name;
+            while (isIncorrectExternalName(tmpName)) {
+                tmpName = `${name}_${suffix}`;
+                suffix += 1;
+            }
+            return tmpName;
+        };
+
         // Initialize external name upon interface creation
-        props.intf.externalName = resolveSuffix(
-            props.intf.externalName ? props.intf.externalName : props.intf.name);
+        props.intf.externalName = resolveSuffix(props.intf.externalName);
+        const inputExternalName = ref(`${props.intf.externalName}`);
+
+        watch(() => props.intf.externalName, () => {
+            props.intf.externalName = resolveSuffix(props.intf.externalName);
+            inputExternalName.value = props.intf.externalName;
+        });
 
         return {
             arrowRotation,
@@ -272,6 +282,7 @@ export default defineComponent({
             externalNameFocusOutCallback,
             hovered,
             isConnected,
+            inputExternalName,
             newClasses,
             onMouseDown,
             openSidebar,

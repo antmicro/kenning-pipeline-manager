@@ -207,7 +207,6 @@
                     "interfaces": [
                         {
                             "name": "Input",
-                            "externalName": "Input",
                             "id": "69cfb668-bdbe-42ba-8870-85ea699673c6",
                             "direction": "input",
                             "side": "left",
@@ -215,7 +214,6 @@
                         },
                         {
                             "name": "Inout",
-                            "externalName": "Inout",
                             "id": "e0c36ee6-e4a1-4c0a-baef-cc5bbf92a5df",
                             "direction": "inout",
                             "side": "right",
@@ -223,7 +221,6 @@
                         },
                         {
                             "name": "Output",
-                            "externalName": "Output",
                             "id": "b5b158b5-f65a-4f89-8aea-e2e4e6250352",
                             "direction": "output",
                             "side": "right",
@@ -246,7 +243,6 @@
                     "interfaces": [
                         {
                             "name": "Input",
-                            "externalName": "Input",
                             "id": "750b94e7-9053-40f2-83e6-7493356a584e",
                             "direction": "input",
                             "side": "left",
@@ -254,7 +250,6 @@
                         },
                         {
                             "name": "Inout",
-                            "externalName": "Inout",
                             "id": "194c1bdc-8126-4bcf-bbe7-77cb9d722e7a",
                             "direction": "inout",
                             "side": "left",
@@ -262,7 +257,6 @@
                         },
                         {
                             "name": "Output",
-                            "externalName": "Output",
                             "id": "dd60c5a5-a502-4b2b-8de2-49cc7e28397b",
                             "direction": "output",
                             "side": "right",
