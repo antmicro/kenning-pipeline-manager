@@ -108,6 +108,10 @@ export default class EditorManager {
     updatedMetadata = {};
 
     constructor() {
+        // Baklava's view registers subgraph input and output nodes
+        // This call un-registers them as obsolete
+        this.editor.unregisterNodes();
+
         this.baklavaView.connectionRenderer = new ConnectionRenderer(
             this.baklavaView,
             this.defaultMetadata.connectionStyle,
