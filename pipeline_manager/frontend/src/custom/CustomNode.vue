@@ -626,7 +626,12 @@ const showContextMenuInterface = ref(false);
 const contextMenuInterfaceX = ref(0);
 const contextMenuInterfaceY = ref(0);
 const contextMenuInterfaceItems = computed(() => {
+    const intfMode = (chosenInterface.externalName === undefined ?
+        { value: 'SetExternalName', label: 'Expose Interface' } :
+        { value: 'UnsetExternalName', label: 'Privatize Interface' }
+    );
     const items = [
+        intfMode,
         { value: 'SpaceUp', label: 'Space Up' },
         { value: 'SpaceDown', label: 'Space Down' },
         { value: 'MoveUp', label: 'Move Up' },
@@ -639,6 +644,12 @@ const contextMenuInterfaceItems = computed(() => {
 /* eslint-disable default-case */
 const onContextMenuInterfaceClick = (action) => {
     switch (action) {
+        case 'SetExternalName':
+            chosenInterface.externalName = chosenInterface.name;
+            break;
+        case 'UnsetExternalName':
+            chosenInterface.externalName = undefined;
+            break;
         case 'MoveUp':
             if (chosenInterface.sidePosition === 0) {
                 chosenInterface = undefined;
@@ -651,25 +662,16 @@ const onContextMenuInterfaceClick = (action) => {
             newSocketIndex = chosenInterface.sidePosition + 1;
             dropInterface();
             break;
-        case 'SpaceUp': {
-            const sockets =
-                chosenInterface.side === 'right'
-                    ? displayedRightRows.value
-                    : displayedLeftRows.value;
-            Object.values(sockets).forEach((intf) => {
-                if (intf !== undefined && intf.sidePosition >= chosenInterface.sidePosition) {
-                    intf.sidePosition += 1; // eslint-disable-line no-param-reassign
-                }
-            });
-            break;
-        }
+        case 'SpaceUp':
         case 'SpaceDown': {
             const sockets =
                 chosenInterface.side === 'right'
                     ? displayedRightRows.value
                     : displayedLeftRows.value;
+            const comparison = action === 'SpaceDown' ? (a, b) => a > b : (a, b) => a >= b;
             Object.values(sockets).forEach((intf) => {
-                if (intf !== undefined && intf.sidePosition > chosenInterface.sidePosition) {
+                if (intf !== undefined &&
+                comparison(intf.sidePosition, chosenInterface.sidePosition)) {
                     intf.sidePosition += 1; // eslint-disable-line no-param-reassign
                 }
             });
