@@ -226,7 +226,7 @@ export default function createPipelineManagerGraph(graph) {
     };
 
     graph.updateInterfaces = function updateInterfaces() {
-        updateSubgraphInterfaces(this.inputs, this.outputs, this.nodes);
+        return updateSubgraphInterfaces(this.inputs, this.outputs, this.nodes);
     };
 
     graph.addNode = function addNode(node) {

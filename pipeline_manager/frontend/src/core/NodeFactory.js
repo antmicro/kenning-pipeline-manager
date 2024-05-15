@@ -681,19 +681,25 @@ export function updateSubgraphInterfaces(inputs, outputs, nodes) {
 
     // Filter out repeated external names
     const countedIntfNames = Object.create(null);
+    const externalInterfaces = [];
     noConnectionsIntf.forEach(
         ([, intf]) => {
-            const currentValue = countedIntfNames[intf.externalName] ?? 0;
-            countedIntfNames[intf.externalName] = currentValue + 1;
+            countedIntfNames[intf.externalName] = (countedIntfNames[intf.externalName] ?? 0) + 1;
+            if (countedIntfNames[intf.externalName] === 1) {
+                externalInterfaces.push(intf);
+            } else {
+                externalInterfaces.push(`Interface '${intf.externalName}' is repeated ${countedIntfNames[intf.externalName]} times.`);
+            }
         },
     );
-    const externalInterfaces = (
-        noConnectionsIntf.filter(([, intf]) => countedIntfNames[intf.externalName] === 1)
-    );
+    const errorMessages = externalInterfaces.filter((n) => typeof n === 'string');
+    if (errorMessages.length) {
+        return errorMessages;
+    }
 
     // Create new inputs and outputs
     const newInterfaces = [];
-    externalInterfaces.forEach(([, intf]) => {
+    externalInterfaces.forEach((intf) => {
         const container = intf.direction === 'output' ? outputs : inputs;
         const idx = container.findIndex((x) => x.id === intf.id);
         if (idx === -1) {
@@ -753,6 +759,7 @@ export function updateSubgraphInterfaces(inputs, outputs, nodes) {
             inputs.push(intf);
         }
     });
+    return [];
 }
 
 /**
@@ -787,7 +794,10 @@ export function calculateExternalInterfaces(nodes, connections, inputs = [], out
         (node) => Object.entries({ ...node.inputs, ...node.outputs })).flat(),
     ].forEach(([, intf]) => { intf.connectionCount = countedIntfConnections[intf.id] ?? 0; });
 
-    updateSubgraphInterfaces(inputs, outputs, parsedState);
+    const out = updateSubgraphInterfaces(inputs, outputs, parsedState);
+    if (Array.isArray(out) && out.length) {
+        return out;
+    }
 
     return { inputs, outputs, nodes: parsedState };
 }

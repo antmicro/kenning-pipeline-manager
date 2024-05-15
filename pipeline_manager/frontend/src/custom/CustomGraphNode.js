@@ -115,6 +115,10 @@ export default function CreateCustomGraphNodeType(template, type) {
             // Update interfaces based on nodes and external names
             const evaluatedIntf = calculateExternalInterfaces(
                 state.graphState.nodes, state.graphState.connections, inputs, outputs);
+            if (Array.isArray(evaluatedIntf) && evaluatedIntf.length) {
+                return evaluatedIntf;
+            }
+
             inputs = Object.fromEntries(evaluatedIntf.inputs.map((i) => [i.name, i]));
             outputs = Object.fromEntries(evaluatedIntf.outputs.map((i) => [i.name, i]));
 
@@ -198,7 +202,11 @@ export default function CreateCustomGraphNodeType(template, type) {
             const newState = super.save();
             const evaluatedIntf = calculateExternalInterfaces(
                 newState.graphState.nodes, newState.graphState.connections);
+            if (Array.isArray(evaluatedIntf) && evaluatedIntf.length) {
+                return evaluatedIntf;
+            }
             this.updateInterfaces(evaluatedIntf.inputs, evaluatedIntf.outputs);
+            return [];
         }
 
         updateInterfaces(newInputs, newOutputs) {
