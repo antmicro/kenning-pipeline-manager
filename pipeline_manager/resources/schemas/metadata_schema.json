@@ -201,7 +201,8 @@
                     "type": "string",
                     "description": "URL prefix for a given icon class"
                 }
-            }
+            },
+            "default": {}
         },
         "notifyWhenChanged": {
             "type": "boolean",
