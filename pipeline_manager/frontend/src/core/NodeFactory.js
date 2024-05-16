@@ -726,39 +726,34 @@ export function updateSubgraphInterfaces(inputs, outputs, nodes) {
     // Calculate min and max side positions for left and right side
     const leftIntf = newInterfaces.filter((x) => x.side === 'left');
     const rightIntf = newInterfaces.filter((x) => x.side === 'right');
-    const maxLeft = leftIntf.reduce((acc, curr) => Math.max(acc, curr.sidePosition ?? 0), 0);
-    const maxRight = rightIntf.reduce((acc, curr) => Math.max(acc, curr.sidePosition ?? 0), 0);
-    const minLeft = leftIntf.reduce(
-        (acc, curr) => Math.min(acc, curr.sidePosition ?? maxLeft), maxLeft);
-    const minRight = rightIntf.reduce(
-        (acc, curr) => Math.min(acc, curr.sidePosition ?? maxRight), maxRight);
-    const leftPosition = { min: minLeft, max: maxLeft - minLeft, container: leftIntf };
-    const rightPosition = { min: minRight, max: maxRight - minRight, container: rightIntf };
+    const rightPosition = {
+        max: rightIntf.reduce((acc, curr) => Math.max(acc, curr.sidePosition ?? -1), -1),
+    };
+    const leftPosition = {
+        max: leftIntf.reduce((acc, curr) => Math.max(acc, curr.sidePosition ?? -1), -1),
+    };
 
     // Assign side positions to new inputs and outputs
     newInterfaces.forEach((intf) => {
-        let position = rightPosition;
-        if (intf.side === 'left') {
-            position = leftPosition;
-        }
-
-        // Assign side position if it is not already assigned
-        // or adjust the side position if it is already assigned
-        if (intf.sidePosition === undefined ||
-            position.container.filter((x) => x.sidePosition === intf.sidePosition).length > 1) {
-            intf.sidePosition = position.max;
+        if (intf.sidePosition === undefined) {
+            const position = intf.side === 'left' ? leftPosition : rightPosition;
             position.max += 1;
-        } else {
-            intf.sidePosition -= position.min;
-        }
-
-        // Push the new input or output to the correct list
-        if (intf.direction === 'output') {
-            outputs.push(intf);
-        } else {
-            inputs.push(intf);
+            intf.sidePosition = position.max;
         }
     });
+
+    // Adjust the side position by the minimum value
+    rightPosition.min = rightIntf.reduce(
+        (acc, curr) => Math.min(acc, curr.sidePosition), rightPosition.max);
+    leftPosition.min = leftIntf.reduce(
+        (acc, curr) => Math.min(acc, curr.sidePosition), leftPosition.max);
+    newInterfaces.forEach((intf) => {
+        const position = intf.side === 'left' ? leftPosition : rightPosition;
+        intf.sidePosition -= position.min;
+        const container = intf.direction === 'output' ? outputs : inputs;
+        container.push(intf);
+    });
+
     return [];
 }
 

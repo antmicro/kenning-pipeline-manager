@@ -155,21 +155,12 @@ export default function CreateCustomGraphNodeType(template, type) {
 
         propagateInterfaces() {
             // Propagate side data back to the subgraph such that if it was changed
-            Object.values(this.inputs).forEach((intf) => {
-                const subgraphIntf = this.subgraph.inputs.find(
-                    (subIntf) => subIntf.id === intf.id,
-                );
+            [...Object.values(this.inputs), ...Object.values(this.outputs)].forEach((intf) => {
+                const container = intf.direction === 'output' ? this.subgraph.outputs : this.subgraph.inputs;
+                const subgraphIntf = container.find((subIntf) => subIntf.id === intf.id);
                 if (subgraphIntf !== undefined) {
                     subgraphIntf.side = intf.side;
-                }
-            });
-
-            Object.values(this.outputs).forEach((intf) => {
-                const subgraphIntf = this.subgraph.outputs.find(
-                    (subIntf) => subIntf.id === intf.id,
-                );
-                if (subgraphIntf !== undefined) {
-                    subgraphIntf.side = intf.side;
+                    subgraphIntf.sidePosition = intf.sidePosition;
                 }
             });
         }
