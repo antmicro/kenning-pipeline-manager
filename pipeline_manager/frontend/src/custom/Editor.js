@@ -495,8 +495,17 @@ export default class PipelineManagerEditor extends Editor {
         // Updating interfaces of a graph node
         Object.values({ ...subgraphNode.inputs, ...subgraphNode.outputs }).forEach((nodeIntf) => {
             if (ifaceOrPositionErrors.find((intf) => (intf.id === nodeIntf.id)) === undefined) {
-                if (nodeIntf.isInput) subgraphNode.removeInput(nodeIntf.name);
-                else subgraphNode.removeOutput(nodeIntf.name);
+                if (nodeIntf.isInput) {
+                    const baklavaIntfKey = Object.entries(subgraphNode.inputs).find(
+                        ([, intf]) => intf.id === nodeIntf.id,
+                    )[0];
+                    subgraphNode.removeInput(baklavaIntfKey);
+                } else {
+                    const baklavaIntfKey = Object.entries(subgraphNode.outputs).find(
+                        ([, intf]) => intf.id === nodeIntf.id,
+                    )[0];
+                    subgraphNode.removeOutput(baklavaIntfKey);
+                }
             }
         });
         ifaceOrPositionErrors.forEach((subIntf) => {
