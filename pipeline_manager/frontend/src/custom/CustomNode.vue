@@ -293,10 +293,13 @@ const onContextMenuTitleClick = async (action) => {
     switch (action) {
         case 'delete':
             startTransaction();
+            // If the node is not selected, select it
+            if (!graph.value.selectedNodes.includes(props.node)) {
+                graph.value.selectedNodes.push(props.node);
+            }
             graph.value.selectedNodes.forEach((node) => {
                 removeNode(node);
             });
-            removeNode(props.node);
             commitTransaction();
             break;
         case 'rename':

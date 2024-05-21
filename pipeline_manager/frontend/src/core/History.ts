@@ -69,24 +69,6 @@ class NodeStep extends Step {
                 this.nodeTuple[1].graphState = this.nodeTuple[2];
                 n.load(this.nodeTuple[1]);
                 n.subgraph.load(this.nodeTuple[2]);
-                const ifaceOrPositionErrors = applySidePositions(
-                    Object.fromEntries(this.nodeTuple[2].inputs.map(
-                        (intf: any) => [intf.subgraphNodeId, intf]),
-                    ),
-                    Object.fromEntries(this.nodeTuple[2].outputs.map(
-                        (intf: any) => [intf.subgraphNodeId, intf]),
-                    ),
-                );
-                if (Array.isArray(ifaceOrPositionErrors)) {
-                    throw new Error(
-                        `Internal error occurred while processing history stacks. ` +
-                        `Reason: ${ifaceOrPositionErrors.join('. ')}`,
-                    );
-                }
-                n.updateInterfaces(
-                    ifaceOrPositionErrors.inputs,
-                    ifaceOrPositionErrors.outputs,
-                );
             }
         }
     }
