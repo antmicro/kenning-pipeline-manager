@@ -45,6 +45,7 @@ interface PMNodeState extends INodeState<any, any> {
     name: string;
     subgraph?: string;
     graphState?: any;
+    interfaces: any[];
 }
 
 export interface IClipboard {
@@ -156,24 +157,7 @@ export function useClipboard(
             /* eslint-disable-next-line new-cap */
             let copiedNode = new nodeType.type();
 
-            const generatedId = copiedNode.id;
             newNodes.push(copiedNode);
-
-            const tapInterfaces = (intfs: Record<string, NodeInterface<any>>) => {
-                Object.values(intfs).forEach((intf) => {
-                    intf.hooks.load.subscribe(token, (intfState) => {
-                        const newIntfId = uuidv4();
-                        idmap.set(intfState.id, newIntfId);
-                        /* eslint-disable-next-line no-param-reassign */
-                        intf.id = newIntfId;
-                        intf.hooks.load.unsubscribe(token);
-                        return intfState;
-                    });
-                });
-            };
-
-            tapInterfaces(copiedNode.inputs);
-            tapInterfaces(copiedNode.outputs);
 
             copiedNode.hooks.beforeLoad.subscribe(token, (nodeState) => {
                 const ns = nodeState as any;
@@ -194,25 +178,56 @@ export function useClipboard(
             });
 
             copiedNode = graph.addNode(copiedNode);
-            parsedNodeBuffer[i].id = generatedId;
 
-            const assignNewId = (g: any) => {
-                // TODO: Replace all other ids like connections, interfaces and regular nodes.
-                g.nodes.forEach((node: any) => {
-                    if (node.subgraph !== undefined) {
-                        node.graphState.id = uuidv4(); // eslint-disable-line no-param-reassign
-                        assignNewId(node.graphState);
-                    }
-                });
+            const mapNewId = (obj: { id: string; [key: string]: any; }) => {
+                /* eslint-disable no-param-reassign */
+                const newId = uuidv4();
+                idmap.set(obj.id, newId);
+                obj.id = newId;
             };
 
-            if (parsedNodeBuffer[i].subgraph !== undefined) {
-                parsedNodeBuffer[i].graphState.id = uuidv4();
-                assignNewId(parsedNodeBuffer[i].graphState);
-            }
+            const assignNewIds = (node: PMNodeState) => {
+                /* eslint-disable no-param-reassign */
 
+                // New node id
+                mapNewId(node);
+
+                if (node.graphState !== undefined) {
+                    mapNewId(node.graphState);
+
+                    node.graphState.nodes.forEach((subNode: PMNodeState) => {
+                        assignNewIds(subNode);
+                    });
+
+                    // If it is a subgraph node, then some interfaces have to have the same IDs
+                    // as the ones in the subgraph
+                    node.interfaces.forEach((intf: any) => {
+                        intf.id = idmap.get(intf.id) ?? intf.id;
+                    });
+
+                    node.graphState.connections.forEach((conn: any) => {
+                        if (
+                            idmap.get(conn.from) === undefined ||
+                            idmap.get(conn.to) === undefined
+                        ) {
+                            throw new Error(
+                                'Error when executing copy and paste. ' +
+                                `Connection from interface ${conn.from} to ${conn.to} is invalid`,
+                            );
+                        }
+                        conn.from = idmap.get(conn.from);
+                        conn.to = idmap.get(conn.to);
+                    });
+                } else {
+                    // If it is a regular node, then interfaces need new IDs.
+                    node.interfaces.forEach((intf: any) => {
+                        mapNewId(intf);
+                    });
+                }
+            };
+
+            assignNewIds(parsedNodeBuffer[i]);
             copiedNode.load(parsedNodeBuffer[i]);
-            idmap.set(parsedNodeBuffer[i].id, generatedId);
         }
 
         for (let i = 0; i < parsedConnectionBuffer.length; i += 1) {

@@ -65,33 +65,6 @@ export default function CreateCustomGraphNodeType(template, type) {
         load(state) {
             this.hooks.beforeLoad.execute(state);
 
-            state.idMap = new Map();
-            const createNewId = (oldId) => {
-                const newId = uuidv4();
-                state.idMap.set(oldId, newId);
-                return newId;
-            };
-
-            // If the node is a subgraph node, we don't need to update its ID
-            state.graphState.nodes.forEach((node) => {
-                if (node.subgraph === undefined) {
-                    node.interfaces = node.interfaces.map((io) => ({
-                        ...io,
-                        id: createNewId(io.id),
-                    }));
-                }
-            },
-            );
-            state.graphState.connections = state.graphState.connections.map((c) => ({
-                ...c,
-                from: state.idMap.get(c.from) ?? c.from,
-                to: state.idMap.get(c.to) ?? c.to,
-            }));
-            state.interfaces = state.interfaces.map((io) => ({
-                ...io,
-                id: state.idMap.get(io.id) ?? io.id,
-            }));
-
             const out = parseInterfaces(state.interfaces, [], []);
             if (Array.isArray(out) && out.length) {
                 return out;

@@ -299,14 +299,6 @@ export default function createPipelineManagerGraph(graph) {
                 if (Array.isArray(nodeErrors) && nodeErrors.length) {
                     errors.push(...nodeErrors);
                 }
-
-                if (isSubgraphNode) {
-                    // Remap connections for subgraph node interfaces
-                    state.connections.forEach((c) => {
-                        c.from = n.idMap.get(c.from) ?? c.from;
-                        c.to = n.idMap.get(c.to) ?? c.to;
-                    });
-                }
             }
         });
 
