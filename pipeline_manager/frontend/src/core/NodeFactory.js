@@ -671,6 +671,20 @@ export function NodeFactory(
     return node;
 }
 
+/**
+ * Function updating subgraph interfaces based on the nodes inside of it.
+ * It creates new inputs and outputs based on the exposed interfaces that are not
+ * connected. It also assigns side positions to the interfaces.
+ *
+ * If there are any errors, they are returned as an array of strings.
+ * If the operation was successful, the new inputs and outputs are returned.
+ *
+ * @param inputs List of inputs of the subgraph
+ * @param outputs List of outputs of the subgraph
+ * @param nodes Nodes of the subgraph
+ *
+ * @returns List of errors or new inputs and outputs
+ */
 export function updateSubgraphInterfaces(inputs, outputs, nodes) {
     // Interfaces that are not connected to any other interface
     const INTERFACE_PREFIXES = ['input_', 'inout_', 'output_'];
@@ -719,20 +733,21 @@ export function updateSubgraphInterfaces(inputs, outputs, nodes) {
         }
     });
 
-    // Clear inputs and outputs
-    inputs.splice(0, inputs.length);
-    outputs.splice(0, outputs.length);
+    const newInterfacesPositionsOrErrors = applySidePositions(newInterfaces, {});
+    if (Array.isArray(newInterfacesPositionsOrErrors) && newInterfacesPositionsOrErrors.length) {
+        return newInterfacesPositionsOrErrors;
+    }
 
-    const newInterfacesPositions = applySidePositions(newInterfaces, {});
-
-    inputs.push(...Object.values(newInterfacesPositions.inputs));
-    outputs.push(...Object.values(newInterfacesPositions.outputs));
-
-    return [];
+    return {
+        inputs: Object.values(newInterfacesPositionsOrErrors.inputs),
+        outputs: Object.values(newInterfacesPositionsOrErrors.outputs),
+    };
 }
 
 /**
- * Function calculating external interfaces of the subgraph
+ * Function calculating and updating external interfaces of the subgraph based on
+ * the nodes, exposed interfaces and connections inside of it. It also validate
+ * the nodes before returning the external interfaces.
  *
  * @param nodes Nodes of the subgraph
  * @param connections Connections inside the subgraph
@@ -768,7 +783,7 @@ export function calculateExternalInterfaces(nodes, connections, inputs = [], out
         return out;
     }
 
-    return { inputs, outputs, nodes: parsedState };
+    return { inputs: out.inputs, outputs: out.outputs, nodes: parsedState };
 }
 
 /**

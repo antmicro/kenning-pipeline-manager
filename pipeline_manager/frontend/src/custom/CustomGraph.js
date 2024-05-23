@@ -226,7 +226,14 @@ export default function createPipelineManagerGraph(graph) {
     };
 
     graph.updateInterfaces = function updateInterfaces() {
-        return updateSubgraphInterfaces(this.inputs, this.outputs, this.nodes);
+        const out = updateSubgraphInterfaces(this.inputs, this.outputs, this.nodes);
+        if (Array.isArray(out) && out.length) {
+            throw new Error(`Error during updating interfaces: ${out.join(', ')}`);
+        }
+
+        this.inputs = out.inputs;
+        this.outputs = out.outputs;
+        return [];
     };
 
     graph.addNode = function addNode(node) {
