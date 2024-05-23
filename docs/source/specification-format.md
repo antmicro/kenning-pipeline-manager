@@ -284,6 +284,9 @@ Every interface object has following properties:
   Values for interfaces of the same `side` value have to be unique.
   If the value is not provided then rows are automatically provided by iterating from the first upper row.
   This value does not work for `array` keyword, as it produces more than one interface.
+* `externalName` (optional) - used for subgraphs only.
+  It specifies the name of the interface in the parent graph.
+  If not provided, the name of the interface in the parent graph is the same as the name of the interface in the subgraph.
 
 ```{note}
 Only interfaces of the same `type` can be connected together.
@@ -462,13 +465,8 @@ The interface group called `1` consists of three ranges of interfaces: `1[1]`, i
 ### Subgraphs
 
 List of graphs defined using `subgraphs` array.
-Each object represents a single subgraph that consists of regular nodes and subgraph interfaces.
-Fields `name`, `layer`, `category`, `icon` are defined the same way as in standard nodes.
-Apart from those, subgraph node contains additional properties:
-
-* `nodes` - List of nodes in a subgraph, specified in [Dataflow format](#dataflow-format)
-* `connections` - List of connections in a subgraph, specified in [Dataflow format](dataflow-format)
-* `interfaces` - List of subgraph interfaces, which are represented as separate nodes, specified in [Node interface](#interface).
+Each object represents a single subgraph that consists of regular nodes and connections.
+The format of the subgraph is described in [Subgraphs](./dataflow-format.md#subgraphs) section.
 
 ## Example
 

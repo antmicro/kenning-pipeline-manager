@@ -3,6 +3,19 @@
 Formats of dataflows and specification is often updated with new features, that makes former formats incompatible with the new ones.
 This section lists all versions, related features and breaking changes.
 
+## 20230523.12
+
+```{warning}
+This update changes the existing format of specification and dataflow.
+```
+
+Commit SHA - `006998910f871da00c49ef00625e5d8bccf3a9c3`
+
+* Introduced changes in dataflow and specification formats:
+  * Removed `interfaces` property from graphs, which were used to define interface nodes for subgraphs.
+  * Instead of "interface nodes", a new property was added to regular interfaces of nodes, called `externalName`.
+  * `externalName`, when not empty, indicates that the interface is an outer interface of the subgraph, which should be exposed with the name from this field.
+
 ## 20230830.11
 
 ```{warning}
@@ -19,7 +32,7 @@ Commit SHA - `0bee99e152a408650590bb6ea4210e96502b33ef`
   * `nodeTypes` -> `nodeLayers` in `layers` keywords in metadata
   * `checkbox` -> `bool` for property type
   * `graphTemplateInstances` -> `subgraphs` for dataflow and specification.
-* Added converter from version `20230824.10` to `20230830.11`
+* Added converter from version `20230824.10` to `20230523.12`
 * Added `abstract` parameter for node types to define abstract types.
 * Added `isCategory` parameter that allows defining category nodes which serve both as a node and category.
 
