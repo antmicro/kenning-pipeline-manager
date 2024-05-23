@@ -286,7 +286,6 @@
                         {
                             "name": "Subgraph Input 1",
                             "id": "9db11824-0058-4213-a719-27af7c18a71d",
-                            "subgraphNodeId": "1212de63-daad-4ace-bc4b-df562b3a6b0e",
                             "direction": "input",
                             "side": "right",
                             "sidePosition": 2
@@ -294,7 +293,6 @@
                         {
                             "name": "Subgraph Inout 1",
                             "id": "9ee6f424-00b2-4d25-8288-e0a88a1c1402",
-                            "subgraphNodeId": "1212de63-daad-4ace-bc4b-df562b3a6b0e",
                             "direction": "inout",
                             "side": "right",
                             "sidePosition": 0
@@ -302,7 +300,6 @@
                         {
                             "name": "Subgraph Inout 2",
                             "id": "0aef6d82-e34d-4b44-bbbc-dfab58697a75",
-                            "subgraphNodeId": "ecc91a3e-70c6-4197-a8bb-6513f9426b83",
                             "direction": "inout",
                             "side": "right",
                             "sidePosition": 1
@@ -310,7 +307,6 @@
                         {
                             "name": "Subgraph Output 2",
                             "id": "6669273b-0a62-4535-b4e2-bd799b86532c",
-                            "subgraphNodeId": "ecc91a3e-70c6-4197-a8bb-6513f9426b83",
                             "direction": "output",
                             "side": "right",
                             "sidePosition": 3
@@ -332,7 +328,6 @@
                         {
                             "name": "Subgraph Input 1",
                             "id": "b7c7d2a1-7c35-446c-be75-7116d768675c",
-                            "subgraphNodeId": "22132bcb-05c0-4b30-b137-943bb418bdeb",
                             "direction": "input",
                             "side": "left",
                             "sidePosition": 0
@@ -340,7 +335,6 @@
                         {
                             "name": "Subgraph Inout 1",
                             "id": "99f445df-4b17-433e-bfaa-1a34db437027",
-                            "subgraphNodeId": "22132bcb-05c0-4b30-b137-943bb418bdeb",
                             "direction": "inout",
                             "side": "right",
                             "sidePosition": 0
@@ -348,7 +342,6 @@
                         {
                             "name": "Subgraph Inout 2",
                             "id": "7afe4e9b-74a2-4dc4-8b2a-008fc2789f63",
-                            "subgraphNodeId": "129c6246-d874-48cd-a33c-2927961d42e8",
                             "direction": "inout",
                             "side": "left",
                             "sidePosition": 1
@@ -356,7 +349,6 @@
                         {
                             "name": "Subgraph Output 2",
                             "id": "52b07fe6-c1af-4480-bf2e-d0608e2e777c",
-                            "subgraphNodeId": "129c6246-d874-48cd-a33c-2927961d42e8",
                             "direction": "output",
                             "side": "right",
                             "sidePosition": 1
