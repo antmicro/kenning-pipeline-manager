@@ -1,5 +1,5 @@
 {
-    "version": "20230830.11",
+    "version": "20230523.12",
     "include": [
         "https://raw.githubusercontent.com/antmicro/kenning-pipeline-manager/main/examples/sample-specification.json",
         "https://raw.githubusercontent.com/antmicro/kenning-pipeline-manager/main/examples/sample-loopback-specification.json",
