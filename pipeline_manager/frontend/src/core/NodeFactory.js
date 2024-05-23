@@ -15,7 +15,7 @@ import {
 import { defineNode, GraphTemplate, NodeInterface } from '@baklavajs/core';
 
 import { updateInterfacePosition } from '../custom/CustomNode.js';
-import { parseInterfaces, validateInterfaceGroups } from './interfaceParser.js';
+import { applySidePositions, parseInterfaces, validateInterfaceGroups } from './interfaceParser.js';
 
 import InputInterface from '../interfaces/InputInterface.js';
 import ListInterface from '../interfaces/ListInterface.js';
@@ -723,36 +723,10 @@ export function updateSubgraphInterfaces(inputs, outputs, nodes) {
     inputs.splice(0, inputs.length);
     outputs.splice(0, outputs.length);
 
-    // Calculate min and max side positions for left and right side
-    const leftIntf = newInterfaces.filter((x) => x.side === 'left');
-    const rightIntf = newInterfaces.filter((x) => x.side === 'right');
-    const rightPosition = {
-        max: rightIntf.reduce((acc, curr) => Math.max(acc, curr.sidePosition ?? -1), -1),
-    };
-    const leftPosition = {
-        max: leftIntf.reduce((acc, curr) => Math.max(acc, curr.sidePosition ?? -1), -1),
-    };
+    const newInterfacesPositions = applySidePositions(newInterfaces, {});
 
-    // Assign side positions to new inputs and outputs
-    newInterfaces.forEach((intf) => {
-        if (intf.sidePosition === undefined) {
-            const position = intf.side === 'left' ? leftPosition : rightPosition;
-            position.max += 1;
-            intf.sidePosition = position.max;
-        }
-    });
-
-    // Adjust the side position by the minimum value
-    rightPosition.min = rightIntf.reduce(
-        (acc, curr) => Math.min(acc, curr.sidePosition), rightPosition.max);
-    leftPosition.min = leftIntf.reduce(
-        (acc, curr) => Math.min(acc, curr.sidePosition), leftPosition.max);
-    newInterfaces.forEach((intf) => {
-        const position = intf.side === 'left' ? leftPosition : rightPosition;
-        intf.sidePosition -= position.min;
-        const container = intf.direction === 'output' ? outputs : inputs;
-        container.push(intf);
-    });
+    inputs.push(...Object.values(newInterfacesPositions.inputs));
+    outputs.push(...Object.values(newInterfacesPositions.outputs));
 
     return [];
 }

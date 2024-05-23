@@ -16,8 +16,6 @@ import {
     ICommandHandler, ICommand,
 } from '@baklavajs/renderer-vue';
 
-import { applySidePositions } from './interfaceParser.js';
-
 export const suppressingHistory: Ref<boolean> = ref(false);
 const transactionId: Ref<string> = ref('');
 
