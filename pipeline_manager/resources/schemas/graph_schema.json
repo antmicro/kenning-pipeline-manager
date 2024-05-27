@@ -43,14 +43,23 @@
                                     "type": "string"
                                 },
                                 "value": {
-                                    "description": "Actual value of the property"
+                                    "description": "Actual value of the property",
+                                    "type": [
+                                        "number",
+                                        "string",
+                                        "boolean",
+                                        "object",
+                                        "array",
+                                        "null"
+                                    ]
                                 }
                             },
                             "required": [
                                 "id",
                                 "name",
                                 "value"
-                            ]
+                            ],
+                            "additionalProperties": false
                         }
                     },
                     "interfaces": {
@@ -95,7 +104,8 @@
                                 "id",
                                 "name",
                                 "direction"
-                            ]
+                            ],
+                            "additionalProperties": false
                         }
                     },
                     "enabledInterfaceGroups": {
@@ -108,9 +118,18 @@
                                     "type": "string"
                                 },
                                 "direction": {
-                                    "enum": ["input", "output", "inout"]
+                                    "enum": [
+                                        "input",
+                                        "output",
+                                        "inout"
+                                    ]
                                 }
-                            }
+                            },
+                            "required": [
+                                "name",
+                                "direction"
+                            ],
+                            "additionalProperties": false
                         }
                     },
                     "width": {
@@ -137,7 +156,12 @@
                                 "description": "Y coordinate of node position",
                                 "type": "number"
                             }
-                        }
+                        },
+                        "required": [
+                            "x",
+                            "y"
+                        ],
+                        "additionalProperties": false
                     }
                 },
                 "required": [
@@ -163,7 +187,7 @@
                     },
                     "to": {
                         "type": "string",
-                        "description": "Identifier of a to connection"
+                        "description": "Identifier of a to interface"
                     },
                     "anchors": {
                         "type": "array",
@@ -183,7 +207,8 @@
                             "required": [
                                 "x",
                                 "y"
-                            ]
+                            ],
+                            "additionalProperties": false
                         }
                     }
                 },
@@ -191,7 +216,8 @@
                     "id",
                     "from",
                     "to"
-                ]
+                ],
+                "additionalProperties": false
             }
         },
         "panning": {
@@ -210,7 +236,8 @@
             "required": [
                 "x",
                 "y"
-            ]
+            ],
+            "additionalProperties": false
         },
         "scaling": {
             "description": "Floating-point number that defines the zoom level in the editor",
@@ -220,7 +247,17 @@
             "type": "string",
             "description": "Name of the graph"
         },
-        "additionalData": {}
+        "additionalData": {
+            "description": "Any JSON data that provides additional information regarding the graph",
+            "type": [
+                "number",
+                "string",
+                "boolean",
+                "object",
+                "array",
+                "null"
+            ]
+        }
     },
     "required": [
         "id",
