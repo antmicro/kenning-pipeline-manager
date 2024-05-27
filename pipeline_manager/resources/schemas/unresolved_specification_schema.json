@@ -268,10 +268,6 @@
                     "description": "Name of the socket displayed in the node",
                     "type": "string"
                 },
-                "externalName": {
-                    "description": "Name of the external socket displayed in the node",
-                    "type": ["string", "null"]
-                },
                 "type": {
                     "description": "Type that defines styling of the input socket. It is also used for validation purposes",
                     "type": [
