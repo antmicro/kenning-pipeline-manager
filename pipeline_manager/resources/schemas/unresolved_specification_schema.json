@@ -30,113 +30,11 @@
             "description": "Definition of the available subgraphs",
             "type": "array",
             "items": {
-                "$ref": "#/$defs/subgraphs"
+                "$ref": "graph_schema.json"
             }
         }
     },
     "$defs": {
-        "subgraphs": {
-            "type": "object",
-            "properties": {
-                "name": {
-                    "description": "Default name displayed as title",
-                    "type": "string"
-                },
-                "layer": {
-                    "description": "Type that defines styling of a node",
-                    "type": "string"
-                },
-                "category": {
-                    "description": "Category of a node in a side bar",
-                    "type": [
-                        "string",
-                        "null"
-                    ]
-                },
-                "nodes": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "properties": {
-                            "name": {
-                                "description": "Name of the type of a node from specification",
-                                "type": "string"
-                            },
-                            "instanceName": {
-                                "description": "Displayed title of a node",
-                                "type": "string"
-                            },
-                            "interfaces": {
-                                "description": "Input/output interfaces. Keys are name of interface, while values are object with a single ID property",
-                                "type": "array"
-                            },
-                            "properties": {
-                                "description": "Value of node properties",
-                                "type": "array"
-                            },
-                            "position": {
-                                "description": "Position of a node in an editor",
-                                "type": "object",
-                                "properties": {
-                                    "x": {
-                                        "description": "X coordinate of node position",
-                                        "type": "number"
-                                    },
-                                    "y": {
-                                        "description": "Y coordinate of node position",
-                                        "type": "number"
-                                    }
-                                },
-                                "required": [
-                                    "x",
-                                    "y"
-                                ],
-                                "additionalProperties": false
-                            },
-                            "width": {
-                                "description": "Displayed width of a node",
-                                "type": "number"
-                            },
-                            "twoColumn": {
-                                "description": "Whether in/out interfaces should be displayed next to each other",
-                                "type": "boolean"
-                            }
-                        },
-                        "additionalProperties": false
-                    }
-                },
-                "connections": {
-                    "description": "Connections within the subgraph",
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "properties": {
-                            "from": {
-                                "description": "ID of starting point interface",
-                                "type": "string"
-                            },
-                            "to": {
-                                "description": "ID of ending point interface",
-                                "type": "string"
-                            }
-                        },
-                        "additionalProperties": false,
-                        "required": [
-                            "from",
-                            "to"
-                        ]
-                    }
-                },
-                "interfaces": {
-                    "description": "Definition of available interfaces of the node",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/$defs/interface"
-                    }
-                }
-            },
-            "additionalProperties": false
-        },
         "node": {
             "allOf": [
                 {
