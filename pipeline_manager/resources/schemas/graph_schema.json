@@ -159,7 +159,6 @@
                 },
                 "required": [
                     "name",
-                    "id",
                     "interfaces"
                 ],
                 "additionalProperties": false
@@ -191,7 +190,6 @@
                     }
                 },
                 "required": [
-                    "id",
                     "from",
                     "to"
                 ],
@@ -247,7 +245,6 @@
         }
     },
     "required": [
-        "id",
         "nodes",
         "connections"
     ]

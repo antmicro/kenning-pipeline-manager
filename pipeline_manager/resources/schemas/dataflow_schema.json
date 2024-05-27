@@ -13,13 +13,13 @@
         "subgraphs": {
             "type": "array",
             "items": {
-                "$ref": "graph_schema.json"
+                "$ref": "#/$defs/graph_with_ids"
             }
         },
         "graph": {
             "oneOf": [
                 {
-                    "$ref": "graph_schema.json"
+                    "$ref": "#/$defs/graph_with_ids"
                 },
                 {
                     "type": "object",
@@ -44,5 +44,58 @@
     "required": [
         "graph"
     ],
-    "unevaluatedProperties": false
+    "unevaluatedProperties": false,
+    "$defs": {
+        "graph_with_ids": {
+            "type": "object",
+            "allOf": [
+                {
+                    "$ref": "graph_schema.json"
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "id": {
+                            "description": "Unique identifier of a graph",
+                            "type": "string"
+                        },
+                        "nodes": {
+                            "description": "Definition of the available nodes with ids set",
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "id": {
+                                        "description": "Unique identifier of a node",
+                                        "type": "string"
+                                    }
+                                },
+                                "required": [
+                                    "id"
+                                ]
+                            }
+                        },
+                        "connections": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "id": {
+                                        "type": "string",
+                                        "description": "Unique identifier of a connection"
+                                    }
+                                },
+                                "required": [
+                                    "id"
+                                ]
+                            }
+                        }
+                    },
+                    "required": [
+                        "id"
+                    ]
+                }
+            ]
+        }
+    }
 }
