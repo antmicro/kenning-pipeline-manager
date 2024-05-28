@@ -10,39 +10,21 @@
         "metadata": {
             "$ref": "metadata_schema.json"
         },
-        "subgraphs": {
+        "graphs": {
             "type": "array",
+            "minItems": 1,
             "items": {
                 "$ref": "#/$defs/graph_with_ids"
-            }
-        },
-        "graph": {
-            "oneOf": [
-                {
-                    "$ref": "#/$defs/graph_with_ids"
-                },
-                {
-                    "type": "object",
-                    "properties": {
-                        "entryGraph": {
-                            "description": "Id of a subgraph that is displayed when a dataflow is loaded. It is only used for subgraphs",
-                            "type": "string"
-                        },
-                        "name": {
-                            "description": "Name of the node type as defined in the specification",
-                            "type": "string"
-                        }
-                    },
-                    "required": [
-                        "entryGraph"
-                    ]
-                }
-            ],
+            },
             "unevaluatedProperties": false
+        },
+        "entryGraph": {
+            "description": "Id of a graph that is displayed when a dataflow is loaded",
+            "type": "string"
         }
     },
     "required": [
-        "graph"
+        "graphs"
     ],
     "unevaluatedProperties": false,
     "$defs": {
@@ -95,7 +77,8 @@
                         "id"
                     ]
                 }
-            ]
+            ],
+            "unevaluatedProperties": false
         }
     }
 }

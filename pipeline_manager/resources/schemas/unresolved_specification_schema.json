@@ -26,16 +26,18 @@
                 "$ref": "#/$defs/node"
             }
         },
-        "subgraphs": {
-            "description": "Definition of the available subgraphs",
+        "graphs": {
+            "description": "Definition of the available graphs",
             "type": "array",
             "items": {
                 "$ref": "graph_schema.json"
-            }
+            },
+            "unevaluatedProperties": false
         }
     },
     "$defs": {
         "node": {
+            "type": "object",
             "allOf": [
                 {
                     "type": "object",
@@ -258,8 +260,7 @@
                         }
                     ]
                 }
-            ],
-            "unevaluatedProperties": false
+            ]
         },
         "interface": {
             "type": "object",
