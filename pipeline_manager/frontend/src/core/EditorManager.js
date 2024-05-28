@@ -18,7 +18,7 @@ import { useClipboard } from './Clipboard.ts';
 import PipelineManagerEditor from '../custom/Editor.js';
 import InterfaceTypes from './InterfaceTypes.js';
 
-import { NodeFactory, SubgraphFactory } from './NodeFactory.js';
+import { NodeFactory, GraphFactory } from './NodeFactory.js';
 import unresolvedSpecificationSchema from '../../../resources/schemas/unresolved_specification_schema.json' assert { type: 'json' };
 import specificationSchema from '../../../resources/schemas/specification_schema.json' assert { type: 'json' };
 import metadataSchema from '../../../resources/schemas/metadata_schema.json' assert { type: 'json' };
@@ -229,7 +229,7 @@ export default class EditorManager {
 
     /**
      * Downloads nested imports from the specification and returns an object
-     * consisting of nodes, subgraphs, and errors arrays.
+     * consisting of nodes, graphs, and errors arrays.
      *
      * @param specification Specification to load.
      * @param trace Set of visited specifications to detect circular imports.
@@ -287,7 +287,7 @@ export default class EditorManager {
     }
 
     /**
-     * Reads and validates part of specification related to nodes and subgraphs
+     * Reads and validates part of specification related to nodes and graphs
      * @param dataflowSpecification Specification to load
      * @returns An object consisting of errors and warnings arrays. If any array is empty
      * the updating process was successful.
@@ -297,7 +297,7 @@ export default class EditorManager {
 
         if (!dataflowSpecification) return { errors: ['No specification passed'], warnings };
 
-        const { nodes, subgraphs, metadata } = dataflowSpecification;
+        const { nodes, graphs, metadata } = dataflowSpecification;
 
         let resolvedNodes = [];
 
@@ -310,7 +310,7 @@ export default class EditorManager {
 
         const errors = [];
         errors.push(...this.validateResolvedSpecification(
-            { subgraphs, nodes: resolvedNodes, metadata },
+            { graphs, nodes: resolvedNodes, metadata },
         ));
         if (errors.length) {
             return { errors, warnings };
@@ -409,25 +409,25 @@ export default class EditorManager {
             return { errors, warnings };
         }
 
-        if (subgraphs !== undefined) {
-            subgraphs.forEach((subgraph) => {
-                const mySubgraph = SubgraphFactory(
-                    subgraph.nodes,
-                    subgraph.connections,
-                    subgraph.name,
+        if (graphs !== undefined) {
+            graphs.forEach((graph) => {
+                const myGraph = GraphFactory(
+                    graph.nodes,
+                    graph.connections,
+                    graph.name,
                     this.baklavaView.editor,
                 );
 
-                // If my subgraph is any array then it is an array of errors
-                if (Array.isArray(mySubgraph) && mySubgraph.length) {
-                    errors.push(...mySubgraph);
+                // If `myGraph` is any array then it is an array of errors
+                if (Array.isArray(myGraph) && myGraph.length) {
+                    errors.push(...myGraph);
                     return;
                 }
 
                 this.baklavaView.editor.addGraphTemplate(
-                    mySubgraph,
-                    subgraph.category,
-                    subgraph.name,
+                    myGraph,
+                    myGraph.category,
+                    myGraph.name,
                 );
             });
         }
@@ -648,15 +648,10 @@ export default class EditorManager {
         save.version = this.specificationVersion;
 
         if (!position) {
-            delete save.graph.panning;
-            delete save.graph.scaling;
-
-            if (save.graph.subgraphs !== undefined) {
-                save.graph.subgraphs.forEach((template) => {
-                    delete template.panning;
-                    delete template.scaling;
-                });
-            }
+            save.graphs.forEach((graph) => {
+                delete graph.panning;
+                delete graph.scaling;
+            });
         }
 
         if (save.metadata === undefined) {

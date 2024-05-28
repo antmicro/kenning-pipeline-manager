@@ -82,32 +82,33 @@ export default class PipelineManagerEditor extends Editor {
         const stackCopy = Array.from(toRaw(this.subgraphStack));
         stackCopy.forEach(this.backFromSubgraph.bind(this));
 
-        const state = { graph: this.graph.save() };
+        const currentGraphState = this.graph.save();
 
-        state.graph.panning = this._graph.panning;
-        state.graph.scaling = this._graph.scaling;
-        state.subgraphs = [];
+        currentGraphState.panning = this._graph.panning;
+        currentGraphState.scaling = this._graph.scaling;
+
+        const dataflowState = { graphs: [] };
+
         // subgraphs are stored in state.subgraphs, there is no need to store it
         // in nodes itself
         const recurrentSubgraphSave = (node) => {
             if (node.subgraph !== undefined) {
-                state.subgraphs.push(node.graphState);
+                dataflowState.graphs.push(node.graphState);
                 node.graphState.nodes.forEach(recurrentSubgraphSave);
             }
             delete node.graphState;
         };
-        state.graph.nodes.forEach(recurrentSubgraphSave);
+        currentGraphState.nodes.forEach(recurrentSubgraphSave);
 
         // Main graph should have no IO
-        delete state.graph.inputs;
-        delete state.graph.outputs;
+        delete currentGraphState.inputs;
+        delete currentGraphState.outputs;
 
-        if (state.subgraphs.length !== 0) {
-            state.subgraphs.push(state.graph);
-            delete state.graph;
-            state.graph = {};
-            state.graph.entryGraph = currentGraphId;
+        if (dataflowState.graphs.length !== 0) {
+            dataflowState.entryGraph = currentGraphId;
         }
+
+        dataflowState.graphs = [currentGraphState, ...dataflowState.graphs];
 
         /* eslint-disable no-unused-vars */
         stackCopy.forEach(([_, subgraphNode]) => {
@@ -117,16 +118,7 @@ export default class PipelineManagerEditor extends Editor {
             }
         });
         /* eslint-enable no-unused-vars */
-
-        if (state.subgraphs.length === 0) {
-            delete state.subgraphs;
-        }
-
-        // Main graph should have no IO
-        delete state.graph.inputs;
-        delete state.graph.outputs;
-
-        return state;
+        return dataflowState;
     }
 
     /**
@@ -195,7 +187,7 @@ export default class PipelineManagerEditor extends Editor {
         const recurrentSubgraphLoad = (node) => {
             const errors = [];
             if (node.subgraph !== undefined) {
-                const fittingTemplate = state.subgraphs.filter(
+                const fittingTemplate = state.graphs.filter(
                     (template) => template.id === node.subgraph,
                 );
                 if (fittingTemplate.length !== 1) {
@@ -223,42 +215,39 @@ export default class PipelineManagerEditor extends Editor {
         this.readonly = true;
         let errors = [];
 
-        let panning;
-        let scaling;
-        let rootGraph;
+        if (!state.graphs.length) {
+            return ['No graphs found'];
+        }
+
         let entryGraph;
-
-        if (state.graph.entryGraph !== undefined) {
-            // multi-graph dataflow
-            const usedSubgraphs = new Set();
-
-            state.subgraphs.forEach((subgraph) => {
-                subgraph.nodes.forEach((n) => {
-                    if (n.subgraph !== undefined) {
-                        usedSubgraphs.add(n.subgraph);
-                    }
-                });
-            });
-            // Finding a root graph by checking which graph is not referenced by any other
-            rootGraph = state.subgraphs.find((subgraph) =>
-                !usedSubgraphs.has(subgraph.id),
+        if (state.entryGraph) {
+            entryGraph = state.graphs.find(
+                (graph) => graph.id === state.entryGraph,
             );
-            if (rootGraph === undefined) {
-                return ['No root graph found. Make sure you graph does not have any reccurency'];
-            }
 
-            entryGraph = state.subgraphs.find(
-                (subgraph) => subgraph.id === state.graph.entryGraph,
-            );
-            if (entryGraph === undefined) {
-                return [`No entry graph found of id '${state.graph.entryGraph}'`];
+            if (!entryGraph) {
+                return [`No entry graph found of id '${state.entryGraph}'`];
             }
-            ({ panning, scaling } = entryGraph);
         } else {
-            // single-graph dataflow
-            rootGraph = state.graph;
-            entryGraph = state.graph;
-            ({ panning, scaling } = state.graph);
+            entryGraph = state.graphs[0]; // eslint-disable-line prefer-destructuring
+        }
+        const { panning, scaling } = entryGraph;
+
+        const usedGraphs = new Set();
+
+        state.graphs.forEach((graph) => {
+            graph.nodes.forEach((n) => {
+                if (n.subgraph !== undefined) {
+                    usedGraphs.add(n.subgraph);
+                }
+            });
+        });
+        // Finding a root graph by checking which graph is not referenced by any other
+        const rootGraph = state.graphs.find((graph) =>
+            !usedGraphs.has(graph.id),
+        );
+        if (rootGraph === undefined) {
+            return ['No root graph found. Make sure you graph does not have any reccurency'];
         }
 
         try {
@@ -296,33 +285,32 @@ export default class PipelineManagerEditor extends Editor {
         // as it changes the way the graph is rendered in the browser
         if (typeof window === 'undefined') return errors;
 
-        if (state.graph.entryGraph !== undefined) {
-            const dfs = (subgraph, path) => {
-                if (subgraph?.nodes !== undefined) {
-                    for (let i = 0; i < subgraph.nodes.length; i += 1) {
-                        if (subgraph.nodes[i].subgraph !== undefined) {
-                            if (subgraph.nodes[i].subgraph.id === state.graph.entryGraph) {
-                                return [...path, subgraph.nodes[i]];
-                            }
-                            const returnedPath = dfs(
-                                subgraph.nodes[i].subgraph,
-                                [...path, subgraph.nodes[i]],
-                            );
-                            if (returnedPath.length) {
-                                return returnedPath;
-                            }
+        const dfs = (subgraph, path) => {
+            if (subgraph?.nodes !== undefined) {
+                for (let i = 0; i < subgraph.nodes.length; i += 1) {
+                    if (subgraph.nodes[i].subgraph !== undefined) {
+                        if (subgraph.nodes[i].subgraph.id === entryGraph.id) {
+                            return [...path, subgraph.nodes[i]];
+                        }
+                        const returnedPath = dfs(
+                            subgraph.nodes[i].subgraph,
+                            [...path, subgraph.nodes[i]],
+                        );
+                        if (returnedPath.length) {
+                            return returnedPath;
                         }
                     }
                 }
-                return [];
-            };
+            }
+            return [];
+        };
 
-            // Finding a path to the defined entry and switching to it sequentially
-            const path = dfs(this._graph, []);
-            path.forEach((node) => {
-                this.switchToSubgraph(node);
-            });
-        }
+        // Finding a path to the defined entry and switching to it sequentially
+        const path = dfs(this._graph, []);
+
+        path.forEach((node) => {
+            this.switchToSubgraph(node);
+        });
 
         if (this.layoutManager.layoutEngine.activeAlgorithm !== 'NoLayout') {
             await nextTick();

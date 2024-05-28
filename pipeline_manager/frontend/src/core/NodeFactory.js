@@ -787,7 +787,7 @@ export function calculateExternalInterfaces(nodes, connections, inputs = [], out
 }
 
 /**
- * Function creating the subgraph template as defined in specification
+ * Function creating a graph template as defined in specification
  *
  * @param nodes Nodes of the subgraph
  * @param connections Connections inside the subgraph
@@ -795,7 +795,7 @@ export function calculateExternalInterfaces(nodes, connections, inputs = [], out
  * @param editor PipelineManagerEditor instance
  * @returns Graph template that will be used to define the subgraph node
  */
-export function SubgraphFactory(nodes, connections, name, editor) {
+export function GraphFactory(nodes, connections, name, editor) {
     const ret = calculateExternalInterfaces(nodes, connections);
     if (Array.isArray(ret)) {
         return ret;
