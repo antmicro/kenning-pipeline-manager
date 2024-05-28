@@ -1,5 +1,6 @@
 {
-    "subgraphs": [
+    "entryGraph": "9c4d5349-9d3b-401f-86bb-021b7b3e5b81",
+    "graphs": [
         {
             "id": "569edd54-0f42-4c24-a809-1509febbe23a",
             "nodes": [
@@ -383,8 +384,5 @@
             }
         }
     ],
-    "graph": {
-        "entryGraph": "9c4d5349-9d3b-401f-86bb-021b7b3e5b81"
-    },
     "version": "20230523.12"
 }

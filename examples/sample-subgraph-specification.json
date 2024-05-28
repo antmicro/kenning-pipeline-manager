@@ -63,7 +63,7 @@
             ]
         }
     ],
-    "subgraphs": [
+    "graphs": [
         {
             "name": "Test subgraph node #1",
             "category": "First Category",

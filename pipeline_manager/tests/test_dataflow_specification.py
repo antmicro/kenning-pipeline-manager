@@ -152,34 +152,36 @@ def specification_invalid_empty_nodes():
 @pytest.fixture
 def dataflow_valid_node_property_text():
     return {
-        "graph": {
-            "connections": [],
-            "id": "78cc86c4-9ad0-4a8f-88cb-71ee28c48659",
-            "nodes": [
-                {
-                    "name": "SaveVideo",
-                    "id": "fc7d1706-6240-41e2-a8da-91c8577e09f9",
-                    "position": {"x": 2100, "y": 200},
-                    "interfaces": [
-                        {
-                            "direction": "input",
-                            "id": "6efb374c-a115-404e-ade8-0aa05ba93996",
-                            "name": "frames",
-                            "side": "left",
-                            "sidePosition": 0,
-                        }
-                    ],
-                    "properties": [
-                        {
-                            "id": "3039e744-9941-47c5-8902-f260e6c29a35",
-                            "name": "filename",
-                            "value": "/some/file/path",
-                        }
-                    ],
-                    "twoColumn": True,
-                }
-            ],
-        }
+        "graphs": [
+            {
+                "connections": [],
+                "id": "78cc86c4-9ad0-4a8f-88cb-71ee28c48659",
+                "nodes": [
+                    {
+                        "name": "SaveVideo",
+                        "id": "fc7d1706-6240-41e2-a8da-91c8577e09f9",
+                        "position": {"x": 2100, "y": 200},
+                        "interfaces": [
+                            {
+                                "direction": "input",
+                                "id": "6efb374c-a115-404e-ade8-0aa05ba93996",
+                                "name": "frames",
+                                "side": "left",
+                                "sidePosition": 0,
+                            }
+                        ],
+                        "properties": [
+                            {
+                                "id": "3039e744-9941-47c5-8902-f260e6c29a35",
+                                "name": "filename",
+                                "value": "/some/file/path",
+                            }
+                        ],
+                        "twoColumn": True,
+                    }
+                ],
+            }
+        ]
     }
 
 

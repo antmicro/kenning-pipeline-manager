@@ -1,0 +1,44 @@
+{
+    "version": "20230523.12",
+    "graphs": [
+        {
+            "id": "2671332237",
+            "nodes": [
+                {
+                    "name": "ExportBehaviour",
+                    "id": "node_168076808526610",
+                    "position": {
+                        "x": 454,
+                        "y": 318
+                    },
+                    "properties": [
+                        {
+                            "name": "Duration",
+                            "id": "8215737084",
+                            "value": 0
+                        },
+                        {
+                            "name": "Disconnect",
+                            "id": "0262676451",
+                            "value": false
+                        },
+                        {
+                            "name": "MessageType",
+                            "id": "4213276720",
+                            "value": "OK"
+                        },
+                        {
+                            "name": "Message",
+                            "id": "5160414148",
+                            "value": "Success export"
+                        }
+                    ],
+                    "width": 200,
+                    "twoColumn": false,
+                    "interfaces": []
+                }
+            ],
+            "connections": []
+        }
+    ]
+}

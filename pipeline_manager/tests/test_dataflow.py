@@ -140,230 +140,244 @@ def dataflow_specification_node_property_select():
 @pytest.fixture
 def dataflow_node_no_property():
     return {
-        "graph": {
-            "connections": [],
-            "id": "78cc86c4-9ad0-4a8f-88cb-71ee28c48659",
-            "nodes": [
-                {
-                    "name": "SaveVideo",
-                    "id": "fc7d1706-6240-41e2-a8da-91c8577e09f9",
-                    "position": {"x": 2100, "y": 200},
-                    "interfaces": [
-                        {
-                            "direction": "input",
-                            "id": "6efb374c-a115-404e-ade8-0aa05ba93996",
-                            "name": "frames",
-                            "side": "left",
-                            "sidePosition": 0,
-                        }
-                    ],
-                    "properties": [],
-                    "twoColumn": True,
-                }
-            ],
-        }
+        "graphs": [
+            {
+                "connections": [],
+                "id": "78cc86c4-9ad0-4a8f-88cb-71ee28c48659",
+                "nodes": [
+                    {
+                        "name": "SaveVideo",
+                        "id": "fc7d1706-6240-41e2-a8da-91c8577e09f9",
+                        "position": {"x": 2100, "y": 200},
+                        "interfaces": [
+                            {
+                                "direction": "input",
+                                "id": "6efb374c-a115-404e-ade8-0aa05ba93996",
+                                "name": "frames",
+                                "side": "left",
+                                "sidePosition": 0,
+                            }
+                        ],
+                        "properties": [],
+                        "twoColumn": True,
+                    }
+                ],
+            }
+        ]
     }
 
 
 @pytest.fixture
 def dataflow_node_property_text():
     return {
-        "graph": {
-            "connections": [],
-            "id": "78cc86c4-9ad0-4a8f-88cb-71ee28c48659",
-            "nodes": [
-                {
-                    "name": "SaveVideo",
-                    "id": "fc7d1706-6240-41e2-a8da-91c8577e09f9",
-                    "position": {"x": 2100, "y": 200},
-                    "interfaces": [
-                        {
-                            "direction": "input",
-                            "id": "6efb374c-a115-404e-ade8-0aa05ba93996",
-                            "name": "frames",
-                            "side": "left",
-                            "sidePosition": 0,
-                        }
-                    ],
-                    "properties": [
-                        {
-                            "id": "3039e744-9941-47c5-8902-f260e6c29a35",
-                            "name": "filename",
-                            "value": "/some/file/path",
-                        }
-                    ],
-                    "twoColumn": True,
-                }
-            ],
-        }
+        "graphs": [
+            {
+                "connections": [],
+                "id": "78cc86c4-9ad0-4a8f-88cb-71ee28c48659",
+                "nodes": [
+                    {
+                        "name": "SaveVideo",
+                        "id": "fc7d1706-6240-41e2-a8da-91c8577e09f9",
+                        "position": {"x": 2100, "y": 200},
+                        "interfaces": [
+                            {
+                                "direction": "input",
+                                "id": "6efb374c-a115-404e-ade8-0aa05ba93996",
+                                "name": "frames",
+                                "side": "left",
+                                "sidePosition": 0,
+                            }
+                        ],
+                        "properties": [
+                            {
+                                "id": "3039e744-9941-47c5-8902-f260e6c29a35",
+                                "name": "filename",
+                                "value": "/some/file/path",
+                            }
+                        ],
+                        "twoColumn": True,
+                    }
+                ],
+            }
+        ]
     }
 
 
 @pytest.fixture
 def dataflow_invalid_node_property_value_boolean():
     return {
-        "graph": {
-            "connections": [],
-            "id": "78cc86c4-9ad0-4a8f-88cb-71ee28c48659",
-            "nodes": [
-                {
-                    "name": "SaveVideo",
-                    "id": "fc7d1706-6240-41e2-a8da-91c8577e09f9",
-                    "position": {"x": 2100, "y": 200},
-                    "interfaces": [
-                        {
-                            "direction": "input",
-                            "id": "6efb374c-a115-404e-ade8-0aa05ba93996",
-                            "name": "frames",
-                            "side": "left",
-                            "sidePosition": 0,
-                        }
-                    ],
-                    "properties": [
-                        {
-                            "id": "3039e744-9941-47c5-8902-f260e6c29a35",
-                            "name": "filename",
-                            "value": True,
-                        }
-                    ],
-                    "twoColumn": True,
-                }
-            ],
-        }
+        "graphs": [
+            {
+                "connections": [],
+                "id": "78cc86c4-9ad0-4a8f-88cb-71ee28c48659",
+                "nodes": [
+                    {
+                        "name": "SaveVideo",
+                        "id": "fc7d1706-6240-41e2-a8da-91c8577e09f9",
+                        "position": {"x": 2100, "y": 200},
+                        "interfaces": [
+                            {
+                                "direction": "input",
+                                "id": "6efb374c-a115-404e-ade8-0aa05ba93996",
+                                "name": "frames",
+                                "side": "left",
+                                "sidePosition": 0,
+                            }
+                        ],
+                        "properties": [
+                            {
+                                "id": "3039e744-9941-47c5-8902-f260e6c29a35",
+                                "name": "filename",
+                                "value": True,
+                            }
+                        ],
+                        "twoColumn": True,
+                    }
+                ],
+            }
+        ]
     }
 
 
 @pytest.fixture
 def dataflow_invalid_node_property_value_integer():
     return {
-        "graph": {
-            "connections": [],
-            "id": "78cc86c4-9ad0-4a8f-88cb-71ee28c48659",
-            "nodes": [
-                {
-                    "name": "SaveVideo",
-                    "id": "fc7d1706-6240-41e2-a8da-91c8577e09f9",
-                    "position": {"x": 2100, "y": 200},
-                    "interfaces": [
-                        {
-                            "direction": "input",
-                            "id": "6efb374c-a115-404e-ade8-0aa05ba93996",
-                            "name": "frames",
-                            "side": "left",
-                            "sidePosition": 0,
-                        }
-                    ],
-                    "properties": [
-                        {
-                            "id": "3039e744-9941-47c5-8902-f260e6c29a35",
-                            "name": "filename",
-                            "value": 888,
-                        }
-                    ],
-                    "twoColumn": True,
-                }
-            ],
-        }
+        "graphs": [
+            {
+                "connections": [],
+                "id": "78cc86c4-9ad0-4a8f-88cb-71ee28c48659",
+                "nodes": [
+                    {
+                        "name": "SaveVideo",
+                        "id": "fc7d1706-6240-41e2-a8da-91c8577e09f9",
+                        "position": {"x": 2100, "y": 200},
+                        "interfaces": [
+                            {
+                                "direction": "input",
+                                "id": "6efb374c-a115-404e-ade8-0aa05ba93996",
+                                "name": "frames",
+                                "side": "left",
+                                "sidePosition": 0,
+                            }
+                        ],
+                        "properties": [
+                            {
+                                "id": "3039e744-9941-47c5-8902-f260e6c29a35",
+                                "name": "filename",
+                                "value": 888,
+                            }
+                        ],
+                        "twoColumn": True,
+                    }
+                ],
+            }
+        ]
     }
 
 
 @pytest.fixture
 def dataflow_valid_node_property_select():
     return {
-        "graph": {
-            "connections": [],
-            "id": "78cc86c4-9ad0-4a8f-88cb-71ee28c48659",
-            "nodes": [
-                {
-                    "name": "SaveVideo",
-                    "id": "fc7d1706-6240-41e2-a8da-91c8577e09f9",
-                    "position": {"x": 2100, "y": 200},
-                    "interfaces": [
-                        {
-                            "direction": "input",
-                            "id": "6efb374c-a115-404e-ade8-0aa05ba93996",
-                            "name": "frames",
-                            "side": "left",
-                            "sidePosition": 0,
-                        }
-                    ],
-                    "properties": [
-                        {
-                            "id": "3039e744-9941-47c5-8902-f260e6c29a35",
-                            "name": "encoding",
-                            "value": "bgr",
-                        }
-                    ],
-                    "twoColumn": True,
-                }
-            ],
-        }
+        "graphs": [
+            {
+                "connections": [],
+                "id": "78cc86c4-9ad0-4a8f-88cb-71ee28c48659",
+                "nodes": [
+                    {
+                        "name": "SaveVideo",
+                        "id": "fc7d1706-6240-41e2-a8da-91c8577e09f9",
+                        "position": {"x": 2100, "y": 200},
+                        "interfaces": [
+                            {
+                                "direction": "input",
+                                "id": "6efb374c-a115-404e-ade8-0aa05ba93996",
+                                "name": "frames",
+                                "side": "left",
+                                "sidePosition": 0,
+                            }
+                        ],
+                        "properties": [
+                            {
+                                "id": "3039e744-9941-47c5-8902-f260e6c29a35",
+                                "name": "encoding",
+                                "value": "bgr",
+                            }
+                        ],
+                        "twoColumn": True,
+                    }
+                ],
+            }
+        ]
     }
 
 
 @pytest.fixture
 def dataflow_invalid_node_property_select_value_text():
     return {
-        "graph": {
-            "connections": [],
-            "id": "78cc86c4-9ad0-4a8f-88cb-71ee28c48659",
-            "nodes": [
-                {
-                    "name": "SaveVideo",
-                    "id": "fc7d1706-6240-41e2-a8da-91c8577e09f9",
-                    "position": {"x": 2100, "y": 200},
-                    "interfaces": [
-                        {
-                            "direction": "input",
-                            "id": "6efb374c-a115-404e-ade8-0aa05ba93996",
-                            "name": "frames",
-                            "side": "left",
-                            "sidePosition": 0,
-                        }
-                    ],
-                    "properties": [
-                        {
-                            "id": "3039e744-9941-47c5-8902-f260e6c29a35",
-                            "name": "encoding",
-                            "value": "option-doesnt-exist",
-                        }
-                    ],
-                    "twoColumn": True,
-                }
-            ],
-        }
+        "graphs": [
+            {
+                "connections": [],
+                "id": "78cc86c4-9ad0-4a8f-88cb-71ee28c48659",
+                "nodes": [
+                    {
+                        "name": "SaveVideo",
+                        "id": "fc7d1706-6240-41e2-a8da-91c8577e09f9",
+                        "position": {"x": 2100, "y": 200},
+                        "interfaces": [
+                            {
+                                "direction": "input",
+                                "id": "6efb374c-a115-404e-ade8-0aa05ba93996",
+                                "name": "frames",
+                                "side": "left",
+                                "sidePosition": 0,
+                            }
+                        ],
+                        "properties": [
+                            {
+                                "id": "3039e744-9941-47c5-8902-f260e6c29a35",
+                                "name": "encoding",
+                                "value": "option-doesnt-exist",
+                            }
+                        ],
+                        "twoColumn": True,
+                    }
+                ],
+            }
+        ]
     }
 
 
 @pytest.fixture
 def dataflow_invalid_node_property_select_value_bool():
     return {
-        "graph": {
-            "connections": [],
-            "id": "78cc86c4-9ad0-4a8f-88cb-71ee28c48659",
-            "nodes": [
-                {
-                    "name": "SaveVideo",
-                    "id": "fc7d1706-6240-41e2-a8da-91c8577e09f9",
-                    "position": {"x": 2100, "y": 200},
-                    "interfaces": [
-                        {
-                            "direction": "input",
-                            "id": "6efb374c-a115-404e-ade8-0aa05ba93996",
-                            "name": "frames",
-                            "side": "left",
-                            "sidePosition": 0,
-                        }
-                    ],
-                    "properties": [
-                        {
-                            "id": "3039e744-9941-47c5-8902-f260e6c29a35",
-                            "name": "encoding",
-                            "value": False,
-                        }
-                    ],
-                    "twoColumn": True,
-                }
-            ],
-        }
+        "graphs": [
+            {
+                "connections": [],
+                "id": "78cc86c4-9ad0-4a8f-88cb-71ee28c48659",
+                "nodes": [
+                    {
+                        "name": "SaveVideo",
+                        "id": "fc7d1706-6240-41e2-a8da-91c8577e09f9",
+                        "position": {"x": 2100, "y": 200},
+                        "interfaces": [
+                            {
+                                "direction": "input",
+                                "id": "6efb374c-a115-404e-ade8-0aa05ba93996",
+                                "name": "frames",
+                                "side": "left",
+                                "sidePosition": 0,
+                            }
+                        ],
+                        "properties": [
+                            {
+                                "id": "3039e744-9941-47c5-8902-f260e6c29a35",
+                                "name": "encoding",
+                                "value": False,
+                            }
+                        ],
+                        "twoColumn": True,
+                    }
+                ],
+            }
+        ]
     }

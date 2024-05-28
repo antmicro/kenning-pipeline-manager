@@ -221,7 +221,9 @@
     ],
     "metadata": {
         "interfaces": {
-            "Dataset": "#FF0000"
+            "Effect": {
+                "interfaceColor": "#FF0000"
+            }
         },
         "navbarItems": [
             {

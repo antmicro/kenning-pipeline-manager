@@ -142,278 +142,279 @@ The example dataflow for a specification defined in [Specification format](speci
 { emphasize-lines="5-44,243-245,248-250,253-255" }
 ```json
 {
-    "graph": {
-        "id": "2035108300",
-        "nodes": [
-            {
-                "name": "Filter2D",
-                "id": "node_168064109167511",
-                "position": {
-                    "x": 544,
-                    "y": 77
+    "graphs": [
+        {
+            "id": "2035108300",
+            "nodes": [
+                {
+                    "name": "Filter2D",
+                    "id": "node_168064109167511",
+                    "position": {
+                        "x": 544,
+                        "y": 77
+                    },
+                    "width": 200,
+                    "twoColumn": false,
+                    "interfaces": [
+                        {
+                            "name": "image",
+                            "id": "ni_168064109167612",
+                            "direction": "input"
+                        },
+                        {
+                            "name": "kernel",
+                            "id": "ni_168064109167613",
+                            "direction": "input"
+                        },
+                        {
+                            "name": "output",
+                            "id": "ni_168064109167714",
+                            "direction": "output"
+                        }
+                    ],
+                    "properties": [
+                        {
+                            "name": "iterations",
+                            "id": "8434027854",
+                            "value": 1
+                        },
+                        {
+                            "name": "border type",
+                            "id": "7165552813",
+                            "value": "constant"
+                        }
+                    ],
+                    "instanceName": "Filter"
                 },
-                "width": 200,
-                "twoColumn": false,
-                "interfaces": [
-                    {
-                        "name": "image",
-                        "id": "ni_168064109167612",
-                        "direction": "input"
+                {
+                    "name": "LoadVideo",
+                    "id": "node_168064220761015",
+                    "position": {
+                        "x": -60,
+                        "y": -36
                     },
-                    {
-                        "name": "kernel",
-                        "id": "ni_168064109167613",
-                        "direction": "input"
-                    },
-                    {
-                        "name": "output",
-                        "id": "ni_168064109167714",
-                        "direction": "output"
-                    }
-                ],
-                "properties": [
-                    {
-                        "name": "iterations",
-                        "id": "8434027854",
-                        "value": 1
-                    },
-                    {
-                        "name": "border type",
-                        "id": "7165552813",
-                        "value": "constant"
-                    }
-                ],
-                "instanceName": "Filter"
-            },
-            {
-                "name": "LoadVideo",
-                "id": "node_168064220761015",
-                "position": {
-                    "x": -60,
-                    "y": -36
+                    "width": 200,
+                    "twoColumn": false,
+                    "interfaces": [
+                        {
+                            "name": "frames",
+                            "id": "ni_168064220761016",
+                            "direction": "output"
+                        }
+                    ],
+                    "properties": [
+                        {
+                            "name": "filename",
+                            "id": "8887517324",
+                            "value": "input.mp4"
+                        }
+                    ]
                 },
-                "width": 200,
-                "twoColumn": false,
-                "interfaces": [
-                    {
-                        "name": "frames",
-                        "id": "ni_168064220761016",
-                        "direction": "output"
-                    }
-                ],
-                "properties": [
-                    {
-                        "name": "filename",
-                        "id": "8887517324",
-                        "value": "input.mp4"
-                    }
-                ]
-            },
-            {
-                "name": "GaussianKernel",
-                "id": "node_168064222522321",
-                "position": {
-                    "x": -65,
-                    "y": 295
+                {
+                    "name": "GaussianKernel",
+                    "id": "node_168064222522321",
+                    "position": {
+                        "x": -65,
+                        "y": 295
+                    },
+                    "width": 200,
+                    "twoColumn": false,
+                    "interfaces": [
+                        {
+                            "name": "kernel",
+                            "id": "ni_168064222522422",
+                            "direction": "output"
+                        }
+                    ],
+                    "properties": [
+                        {
+                            "name": "size",
+                            "id": "1247863780",
+                            "value": 5
+                        },
+                        {
+                            "name": "sigma",
+                            "id": "0187870808",
+                            "value": 1
+                        }
+                    ]
                 },
-                "width": 200,
-                "twoColumn": false,
-                "interfaces": [
-                    {
-                        "name": "kernel",
-                        "id": "ni_168064222522422",
-                        "direction": "output"
-                    }
-                ],
-                "properties": [
-                    {
-                        "name": "size",
-                        "id": "1247863780",
-                        "value": 5
+                {
+                    "name": "Threshold",
+                    "id": "node_168064225320530",
+                    "position": {
+                        "x": 999,
+                        "y": 100
                     },
-                    {
-                        "name": "sigma",
-                        "id": "0187870808",
-                        "value": 1
-                    }
-                ]
-            },
-            {
-                "name": "Threshold",
-                "id": "node_168064225320530",
-                "position": {
-                    "x": 999,
-                    "y": 100
+                    "width": 200,
+                    "twoColumn": false,
+                    "interfaces": [
+                        {
+                            "name": "image",
+                            "id": "ni_168064225320531",
+                            "direction": "input"
+                        },
+                        {
+                            "name": "output",
+                            "id": "ni_168064225320532",
+                            "direction": "output"
+                        }
+                    ],
+                    "properties": [
+                        {
+                            "name": "threshold_value",
+                            "id": "8770324282",
+                            "value": 1
+                        },
+                        {
+                            "name": "threshold_type",
+                            "id": "8305532648",
+                            "value": "Otsu"
+                        }
+                    ]
                 },
-                "width": 200,
-                "twoColumn": false,
-                "interfaces": [
-                    {
-                        "name": "image",
-                        "id": "ni_168064225320531",
-                        "direction": "input"
+                {
+                    "name": "StructuringElement",
+                    "id": "node_168064227787336",
+                    "position": {
+                        "x": 1010,
+                        "y": 409
                     },
-                    {
-                        "name": "output",
-                        "id": "ni_168064225320532",
-                        "direction": "output"
-                    }
-                ],
-                "properties": [
-                    {
-                        "name": "threshold_value",
-                        "id": "8770324282",
-                        "value": 1
-                    },
-                    {
-                        "name": "threshold_type",
-                        "id": "8305532648",
-                        "value": "Otsu"
-                    }
-                ]
-            },
-            {
-                "name": "StructuringElement",
-                "id": "node_168064227787336",
-                "position": {
-                    "x": 1010,
-                    "y": 409
+                    "width": 200,
+                    "twoColumn": false,
+                    "interfaces": [
+                        {
+                            "name": "kernel",
+                            "id": "ni_168064227787437",
+                            "direction": "output"
+                        }
+                    ],
+                    "properties": [
+                        {
+                            "name": "size",
+                            "id": "1587558664",
+                            "value": 5
+                        },
+                        {
+                            "name": "shape",
+                            "id": "1375086555",
+                            "value": "Cross"
+                        }
+                    ]
                 },
-                "width": 200,
-                "twoColumn": false,
-                "interfaces": [
-                    {
-                        "name": "kernel",
-                        "id": "ni_168064227787437",
-                        "direction": "output"
-                    }
-                ],
-                "properties": [
-                    {
-                        "name": "size",
-                        "id": "1587558664",
-                        "value": 5
+                {
+                    "name": "Morphological operation",
+                    "id": "node_168064228786538",
+                    "position": {
+                        "x": 1422,
+                        "y": 54
                     },
-                    {
-                        "name": "shape",
-                        "id": "1375086555",
-                        "value": "Cross"
-                    }
-                ]
-            },
-            {
-                "name": "Morphological operation",
-                "id": "node_168064228786538",
-                "position": {
-                    "x": 1422,
-                    "y": 54
+                    "width": 200,
+                    "twoColumn": false,
+                    "interfaces": [
+                        {
+                            "name": "image",
+                            "id": "ni_168064228786539",
+                            "direction": "input"
+                        },
+                        {
+                            "name": "kernel",
+                            "id": "ni_168064228786540",
+                            "direction": "input"
+                        },
+                        {
+                            "name": "output",
+                            "id": "ni_168064228786641",
+                            "direction": "output"
+                        }
+                    ],
+                    "properties": [
+                        {
+                            "name": "iterations",
+                            "id": "0605526715",
+                            "value": 1
+                        },
+                        {
+                            "name": "border type",
+                            "id": "2810748353",
+                            "value": "constant"
+                        },
+                        {
+                            "name": "operation type",
+                            "id": "8413506138",
+                            "value": "dilation"
+                        }
+                    ]
                 },
-                "width": 200,
-                "twoColumn": false,
-                "interfaces": [
-                    {
-                        "name": "image",
-                        "id": "ni_168064228786539",
-                        "direction": "input"
+                {
+                    "name": "SaveVideo",
+                    "id": "node_168064231007448",
+                    "position": {
+                        "x": 1773,
+                        "y": 76
                     },
-                    {
-                        "name": "kernel",
-                        "id": "ni_168064228786540",
-                        "direction": "input"
-                    },
-                    {
-                        "name": "output",
-                        "id": "ni_168064228786641",
-                        "direction": "output"
-                    }
-                ],
-                "properties": [
-                    {
-                        "name": "iterations",
-                        "id": "0605526715",
-                        "value": 1
-                    },
-                    {
-                        "name": "border type",
-                        "id": "2810748353",
-                        "value": "constant"
-                    },
-                    {
-                        "name": "operation type",
-                        "id": "8413506138",
-                        "value": "dilation"
-                    }
-                ]
-            },
-            {
-                "name": "SaveVideo",
-                "id": "node_168064231007448",
-                "position": {
-                    "x": 1773,
-                    "y": 76
+                    "width": 200,
+                    "twoColumn": false,
+                    "interfaces": [
+                        {
+                            "name": "color",
+                            "id": "ni_168064231007449",
+                            "direction": "input"
+                        },
+                        {
+                            "name": "binary",
+                            "id": "ni_168064231007450",
+                            "direction": "input"
+                        }
+                    ],
+                    "properties": [
+                        {
+                            "name": "filename",
+                            "id": "3087244218",
+                            "value": "output.mp4"
+                        }
+                    ]
+                }
+            ],
+            "connections": [
+                {
+                    "id": "168064222082820",
+                    "from": "ni_168064220761016",
+                    "to": "ni_168064109167612"
                 },
-                "width": 200,
-                "twoColumn": false,
-                "interfaces": [
-                    {
-                        "name": "color",
-                        "id": "ni_168064231007449",
-                        "direction": "input"
-                    },
-                    {
-                        "name": "binary",
-                        "id": "ni_168064231007450",
-                        "direction": "input"
-                    }
-                ],
-                "properties": [
-                    {
-                        "name": "filename",
-                        "id": "3087244218",
-                        "value": "output.mp4"
-                    }
-                ]
-            }
-        ],
-        "connections": [
-            {
-                "id": "168064222082820",
-                "from": "ni_168064220761016",
-                "to": "ni_168064109167612"
+                {
+                    "id": "168064222926625",
+                    "from": "ni_168064222522422",
+                    "to": "ni_168064109167613"
+                },
+                {
+                    "id": "168064225938335",
+                    "from": "ni_168064109167714",
+                    "to": "ni_168064225320531"
+                },
+                {
+                    "id": "168064230015344",
+                    "from": "ni_168064225320532",
+                    "to": "ni_168064228786539"
+                },
+                {
+                    "id": "168064230253147",
+                    "from": "ni_168064227787437",
+                    "to": "ni_168064228786540"
+                },
+                {
+                    "id": "168064231874053",
+                    "from": "ni_168064228786641",
+                    "to": "ni_168064231007450"
+                }
+            ]
+            "panning": {
+                "x": 0,
+                "y": 0
             },
-            {
-                "id": "168064222926625",
-                "from": "ni_168064222522422",
-                "to": "ni_168064109167613"
-            },
-            {
-                "id": "168064225938335",
-                "from": "ni_168064109167714",
-                "to": "ni_168064225320531"
-            },
-            {
-                "id": "168064230015344",
-                "from": "ni_168064225320532",
-                "to": "ni_168064228786539"
-            },
-            {
-                "id": "168064230253147",
-                "from": "ni_168064227787437",
-                "to": "ni_168064228786540"
-            },
-            {
-                "id": "168064231874053",
-                "from": "ni_168064228786641",
-                "to": "ni_168064231007450"
-            }
-        ]
-        "panning": {
-            "x": 0,
-            "y": 0
+            "scaling": 1
         },
-        "scaling": 1
-    },
-    "subgraphs": []
+    ]
 }
 ```
 
@@ -455,7 +456,7 @@ This value determines which graph is rendered to the user when the dataflow is l
 
 ```json
 {
-    "subgraphs": [
+    "graphs": [
         {
             "id": "569edd54-0f42-4c24-a809-1509febbe23a",
             "nodes": [
@@ -839,9 +840,7 @@ This value determines which graph is rendered to the user when the dataflow is l
             }
         }
     ],
-    "graph": {
-        "entryGraph": "9c4d5349-9d3b-401f-86bb-021b7b3e5b81"
-    },
+    "entryGraph": "9c4d5349-9d3b-401f-86bb-021b7b3e5b81",
     "version": "20230523.12"
 }
 ```
