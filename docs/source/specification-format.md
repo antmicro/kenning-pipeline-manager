@@ -13,7 +13,7 @@ The specification consists of:
 
 * `metadata` - object of type [Metadata](#metadata) that specifies editor styling and metadata
 * `nodes` - array that specifies valid nodes, where every element is of type [Node](#node).
-* `subgraphs` - array of dataflow-like objects defining subgraph nodes, of type [Subgraphs](#subgraphs).
+* `graphs` - array of dataflow-like objects defining graph nodes, of type [Graph](project:dataflow-format.md#graph).
 * `include` - array of string objects pointing to a remote url to the specifications to include.
 * `version` - string determining version of the specification.
   Should be set to the newest version described in [Changelogs](#changelogs).
@@ -284,9 +284,10 @@ Every interface object has following properties:
   Values for interfaces of the same `side` value have to be unique.
   If the value is not provided then rows are automatically provided by iterating from the first upper row.
   This value does not work for `array` keyword, as it produces more than one interface.
-* `externalName` (optional) - used for subgraphs only.
-  It specifies the name of the interface in the parent graph.
-  If not provided, the name of the interface in the parent graph is the same as the name of the interface in the subgraph.
+* `externalName` (optional) - used for graph nodes only, to expose an inference of a node within the graph.
+  It specified the name of the interface displayed in the editor.
+  Both the interface of the graph node and the interface of the node within the graph must have the same `id` and `direction` fields.
+  Note that values of `externalName` of the graph node have to be unique.
 
 ```{note}
 Only interfaces of the same `type` can be connected together.
@@ -461,12 +462,6 @@ For example two interface groups can be defined that consist of common interface
 ```
 
 The interface group called `1` consists of three ranges of interfaces: `1[1]`, interfaces `1[3], 1[4], ..., 1[14]` and `1[35], 1[36], ..., 1[47]`.
-
-### Subgraphs
-
-List of graphs defined using `subgraphs` array.
-Each object represents a single subgraph that consists of regular nodes and connections.
-The format of the subgraph is described in [Subgraphs](./dataflow-format.md#subgraphs) section.
 
 ## Example
 
