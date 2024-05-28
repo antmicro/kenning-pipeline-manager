@@ -6,11 +6,13 @@ import json
 import tempfile
 from importlib.resources import files
 from pathlib import Path
-from typing import Optional
+from typing import Generator, List, Optional
 
 import pytest
 
 import examples
+import examples.frontend_tests as frontend_tests
+import pipeline_manager.frontend_tester as frontend_tester
 from pipeline_manager.frontend_builder import build_prepare
 from pipeline_manager.resources import schemas
 from pipeline_manager.validator import validate
@@ -100,7 +102,7 @@ def unresolved_specification_schema_path() -> Path:
 
 @pytest.fixture
 def unresolved_specification_schema(
-    unresolved_specification_schema_path
+    unresolved_specification_schema_path,
 ) -> Path:
     """
     Fixture that returns path to `unresolved_specification_schema.json`
@@ -193,7 +195,19 @@ def empty_file_path() -> Path:
         yield Path(tmp_file.name)
 
 
-def example_pairs():
+def example_pairs() -> Generator[List[List[Path]], None, None]:
+    """
+    Yields pairs of specification and dataflow paths.
+
+    The pairs are taken from:
+    * examples from `examples` directory
+    * examples from `examples/frontend_tests` directory for frontend tester
+
+    Yields
+    ------
+        List[List[Path] :
+            Pair of specification and dataflow paths
+    """
     specifications = [
         str(file)
         for file in Path(examples.__file__).parent.glob("*specification.json")
@@ -203,15 +217,32 @@ def example_pairs():
         for file in Path(examples.__file__).parent.glob("*dataflow.json")
     ]
 
+    pairs: List[List[Path]] = []
+
     for spec in specifications:
         prefix = spec.rstrip("specification.json")
         corresponding_dataflow = prefix + "dataflow.json"
 
         if corresponding_dataflow in dataflows:
-            yield (
-                Path(spec),
-                Path(corresponding_dataflow),
-            )
+            pairs.append([Path(spec), Path(corresponding_dataflow)])
+
+    frontend_tester_dataflows = [
+        str(file)
+        for file in Path(frontend_tests.__file__).parent.glob("*.json")
+    ]
+
+    # There is only one specification and dataflow in the module
+    frontend_tester_specification = list(
+        Path(frontend_tester.__file__).parent.glob("*specification.json")
+    )[0]
+    frontend_tester_dataflows += list(
+        Path(frontend_tester.__file__).parent.glob("*dataflow.json")
+    )
+
+    for dataflow in frontend_tester_dataflows:
+        pairs.append([Path(frontend_tester_specification), Path(dataflow)])
+
+    yield from pairs
 
 
 def check_validation(spec: str, dataflow: Optional[str] = None) -> int:
