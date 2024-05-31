@@ -65,9 +65,10 @@ def minify_specification(specification: Dict, dataflow: Dict) -> Dict:
         else:
             return node["category"].split("/")[-1]
 
-    for node in dataflow["graph"]["nodes"]:
-        if getNodeName(node) not in used_names:
-            used_names.append(getNodeName(node))
+    for graph in dataflow["graphs"]:
+        for node in graph["nodes"]:
+            if getNodeName(node) not in used_names:
+                used_names.append(getNodeName(node))
 
     resolved_names = []
     names_to_nodes = {
