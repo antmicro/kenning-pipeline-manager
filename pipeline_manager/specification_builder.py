@@ -71,7 +71,7 @@ def set_if_not_none(entry: Dict, key: Any, val: Any):
     val: Any
         New value for dictionary's entry
     """
-    if val:
+    if val is not None:
         entry[key] = val
 
 
@@ -864,9 +864,9 @@ class SpecificationBuilder(object):
             iface = None
             if "type" in interface:
                 if isinstance(interface["type"], list):
-                    iface = [typ.lower() for typ in interface["type"]]
+                    iface = [typ for typ in interface["type"]]
                 else:
-                    iface = interface["type"].lower()
+                    iface = interface["type"]
             self.add_node_type_interface(
                 name=nodename,
                 interfacename=interface["name"],
@@ -1114,7 +1114,7 @@ class SpecificationBuilder(object):
                 self.metadata_add_param(prop, propvalue)
         for node in otherspec.get("nodes", []):
             self.add_node_type_from_spec(node)
-        for subgraph in otherspec.get("subgraphs", []):
+        for subgraph in otherspec.get("graphs", []):
             self.add_subgraph_from_spec(subgraph)
 
     def _sorted_nodes(self) -> List[Dict]:
@@ -1220,7 +1220,7 @@ class SpecificationBuilder(object):
         if self._metadata:
             spec["metadata"] = self._get_metadata(sort_spec)
         if self._subgraphs:
-            spec["subgraphs"] = self._get_subgraphs(sort_spec)
+            spec["graphs"] = self._get_subgraphs(sort_spec)
         return spec
 
     def create_and_validate_spec(
