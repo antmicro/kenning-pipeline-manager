@@ -12,7 +12,7 @@ The root of the dataflow format consists of four main attributes.
   In general, values from dataflow's `metadata` override settings from specification.
   For simple types, such as strings or integers, values are changed.
   For arrays and dictionaries, the values are updated (values of existing keys are replaced with new ones, and the new values in arrays are appended to the existing entries).
-* `entryGraph` - string that specifies the ID of the graph from `graphs` list that should be renderer when the dataflow is loaded.
+* `entryGraph` - string that specifies the ID of the graph from `graphs` list that should be rendered when the dataflow is loaded.
   If not specified, the first graph in the list is rendered.
 * `graphs` - array of objects of type [Graph](#graph) that describe available graphs in the dataflow.
   Each graph is a separate entity that can be rendered in the editor.
@@ -97,13 +97,14 @@ Each input, output, and inout is described by an object with the following attri
 * `side` - tells on which side of the node the interface should be placed.
 * `sidePosition` - specifies a row on which the interface is rendered.
   Values for interfaces of the same `side` value have to be unique.
-
-If the node represents a graph (i.e. `subgraph` property is present), the following attribute may be used, to expose an inference of a node within the graph:
 * `externalName` - name of the interface displayed in the editor.
-  Both the interface of the graph node and the interface of the node within the graph must have the same `id` and `direction` fields.
-  Note that values of `externalName` of the subgraph node have to be unique.
+  For every interface in each node, it is possible to make it a graph interface.
+  A graph interface has its own unique external name, which is visible when the graph is nested within another graph.
+  It is used to create multi-layer graphs, with subgraphs that can be connected to others nodes/graphs.
+  Both the interface of the graph node and the interface of the node within the graph have the same `id` and `direction` fields.
+  Note that values of `externalName` within the graph have to be unique.
 
-Example of interface exposing:
+Example of graph interfaces:
 
 { emphasize-lines="4,17,23,30,43-44" }
 ```json

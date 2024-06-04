@@ -284,8 +284,8 @@ Every interface object has following properties:
   Values for interfaces of the same `side` value have to be unique.
   If the value is not provided then rows are automatically provided by iterating from the first upper row.
   This value does not work for `array` keyword, as it produces more than one interface.
-* `externalName` (optional) - used for graph nodes only, to expose an inference of a node within the graph.
-  It specified the name of the interface displayed in the editor.
+* `externalName` (optional) - used for graph nodes only, to expose an interface of a node within the graph.
+  It specifies the name of the interface of the graph.
   Both the interface of the graph node and the interface of the node within the graph must have the same `id` and `direction` fields.
   Note that values of `externalName` of the graph node have to be unique.
 
