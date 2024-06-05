@@ -24,13 +24,13 @@ from creating and deleting connections or altering nodes' values if the editor i
             @mouseenter="startHoverWrapper"
             @mouseleave="endHoverWrapper"
             @pointerdown.left="onMouseDown"
-            :class="{ greyedout_arrow: highlighted, picked: picked, '__square': squared }"
+            :class="{ greyedout_arrow: highlighted, picked: picked, '__square': isExposed }"
         >
             <div
-                v-if="squared && (hovered || editExternalName)"
+                v-if="isExposed && (hovered || editExternalName)"
                 :class="{
-                '__port_name_left': intf.side === 'left',
-                '__port_name_right': intf.side === 'right'
+                    '__port_name_left': intf.side === 'left',
+                    '__port_name_right': intf.side === 'right'
                 }"
             >
                 <input
@@ -173,10 +173,10 @@ export default defineComponent({
             '--connected': isConnected.value,
             __readonly: viewModel.value.editor.readonly,
         }));
-        const squared = computed(() => {
-            const sq = !isConnected.value && props.intf.externalName !== undefined;
-            return sq;
-        });
+
+        const isExposed = computed(() =>
+            props.intf.externalName !== undefined,
+        );
 
         // External name editing
         const externalNameComponent = new TextInterface('External name', props.intf.externalName).setPort(false);
@@ -287,7 +287,7 @@ export default defineComponent({
             onMouseDown,
             openSidebar,
             showComponent,
-            squared,
+            isExposed,
             startHover,
             startHoverWrapper,
         };
