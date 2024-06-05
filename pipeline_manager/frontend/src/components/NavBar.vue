@@ -645,6 +645,10 @@ export default {
             });
             this.activeNavbarItemsNames = Array.from(activeItems);
         },
+        returnFromSubgraph() {
+            this.editorManager.returnFromSubgraph();
+            this.resetHoverInfo('subgraphReturn');
+        },
     },
     async mounted() {
         this.isMounted = true;
@@ -850,7 +854,7 @@ export default {
                         v-if="this.editorManager.editor.isInSubgraph()"
                         :class="['hoverbox', mobileClasses]"
                         role="button"
-                        @click="() => this.editorManager.returnFromSubgraph()"
+                        @click="returnFromSubgraph"
                         @pointerover="() => updateHoverInfo('subgraphReturn')"
                         @pointerleave="() => resetHoverInfo('subgraphReturn')"
                     >
