@@ -688,15 +688,19 @@ export function NodeFactory(
 export function updateSubgraphInterfaces(inputs, outputs, nodes) {
     // Interfaces that are not connected to any other interface
     const INTERFACE_PREFIXES = ['input_', 'inout_', 'output_'];
-    const noConnectionsIntf = [
+    const INCLUDE_CONNECTED = true;
+
+    const exposedIntf = [
         ...nodes.map((node) => Object.entries({ ...node.inputs, ...node.outputs })).flat(),
     ].filter(([key]) => INTERFACE_PREFIXES.some((prefix) => key.startsWith(prefix)))
-        .filter(([, intf]) => intf.externalName && intf.connectionCount === 0);
+        .filter(
+            ([, intf]) => intf.externalName && (intf.connectionCount === 0 || INCLUDE_CONNECTED),
+        );
 
     // Filter out repeated external names
     const countedIntfNames = Object.create(null);
     const externalInterfaces = [];
-    noConnectionsIntf.forEach(
+    exposedIntf.forEach(
         ([, intf]) => {
             countedIntfNames[intf.externalName] = (countedIntfNames[intf.externalName] ?? 0) + 1;
             if (countedIntfNames[intf.externalName] === 1) {

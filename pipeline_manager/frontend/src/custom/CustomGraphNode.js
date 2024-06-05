@@ -157,16 +157,6 @@ export default function CreateCustomGraphNodeType(template, type) {
 
             this._title = this.template.name; // eslint-disable-line no-underscore-dangle
             this.events.update.emit(null);
-
-            // We need to update the interfaces after the graph is loaded
-            // because graph template may not have all the information regarding node interfaces
-            const newState = super.save();
-            const evaluatedIntf = calculateExternalInterfaces(
-                newState.graphState.nodes, newState.graphState.connections);
-            if (Array.isArray(evaluatedIntf) && evaluatedIntf.length) {
-                return evaluatedIntf;
-            }
-            this.updateInterfaces(evaluatedIntf.inputs, evaluatedIntf.outputs);
             return [];
         }
 
@@ -219,6 +209,8 @@ export default function CreateCustomGraphNodeType(template, type) {
                 },
             );
 
+            const newGraphNodeId = uuidv4();
+
             const nodes = this.template.nodes.map((n) => ({
                 ...n,
                 id: createNewId(n.id),
@@ -226,16 +218,18 @@ export default function CreateCustomGraphNodeType(template, type) {
                 outputs: mapNodeInterfaceIds(n.outputs),
             }));
 
+            // All inputs and outputs of a graph node are created
+            // from interfaces of nodes in the subgraph
             const inputs = this.template.inputs.map((i) => ({
                 ...i,
-                id: uuidv4(),
-                subgraphNodeId: createNewId(i.id),
+                id: getNewId(i.id),
+                subgraphNodeId: newGraphNodeId,
             }));
 
             const outputs = this.template.outputs.map((o) => ({
                 ...o,
-                id: uuidv4(),
-                subgraphNodeId: createNewId(o.id),
+                id: getNewId(o.id),
+                subgraphNodeId: newGraphNodeId,
             }));
 
             const connections = this.template.connections.map((c) => ({
@@ -245,7 +239,7 @@ export default function CreateCustomGraphNodeType(template, type) {
             }));
 
             const clonedState = {
-                id: uuidv4(),
+                id: newGraphNodeId,
                 nodes,
                 connections,
                 inputs,
