@@ -31,7 +31,6 @@
                         },
                         {
                             "name": "Output",
-                            "externalName": "Subgraph Output 1",
                             "id": "82fcb5be-2733-45f0-85fe-0f69ee339d30",
                             "direction": "output",
                             "side": "right",
@@ -54,7 +53,6 @@
                     "interfaces": [
                         {
                             "name": "Input",
-                            "externalName": "Subgraph Input 2",
                             "id": "d6874fec-ff47-4268-9bbe-fa99569b4b17",
                             "direction": "input",
                             "side": "left",
@@ -125,7 +123,6 @@
                         },
                         {
                             "name": "Output",
-                            "externalName": "Subgraph Output 1",
                             "id": "8eed590b-8411-4ea2-8050-29ec2bb207e6",
                             "direction": "output",
                             "side": "right",
@@ -147,7 +144,6 @@
                     "interfaces": [
                         {
                             "name": "Input",
-                            "externalName": "Subgraph Input 2",
                             "id": "f56e769b-aa4e-4cda-b6d5-da7c4e48e39f",
                             "direction": "input",
                             "side": "left",

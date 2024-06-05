@@ -80,7 +80,6 @@
                         {
                             "id": "4ae2f357-f6fc-41a9-80a0-5439ef822921",
                             "name": "Output",
-                            "externalName": "Subgraph Output 1",
                             "direction": "output"
                         },
                         {
@@ -106,7 +105,6 @@
                         {
                             "id": "2315f500-e0fd-477f-9d86-d7efc27eac7e",
                             "name": "Input",
-                            "externalName": "Subgraph Input 2",
                             "direction": "input"
                         },
                         {
@@ -160,7 +158,6 @@
                         },
                         {
                             "name": "Output",
-                            "externalName": "Subgraph Output 1",
                             "id": "82e8c0e5-5e03-456f-b5df-7ca058d4c655",
                             "direction": "output"
                         },
@@ -185,7 +182,6 @@
                     "interfaces": [
                         {
                             "name": "Input",
-                            "externalName": "Subgraph Input 2",
                             "id": "24275c67-0642-44c1-84a7-fed4dd9fd6da",
                             "direction": "input"
                         },
