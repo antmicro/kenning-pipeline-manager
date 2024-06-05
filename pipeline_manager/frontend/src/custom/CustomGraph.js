@@ -413,8 +413,6 @@ export default function createPipelineManagerGraph(graph) {
                     y: anchor.y,
                 })),
             })),
-            inputs: this.inputs,
-            outputs: this.outputs,
             scaling: this.scaling,
             panning: this.panning,
         };

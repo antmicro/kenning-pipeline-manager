@@ -100,11 +100,7 @@ export default class PipelineManagerEditor extends Editor {
         };
         currentGraphState.nodes.forEach(recurrentSubgraphSave);
 
-        // Main graph should have no IO
-        delete currentGraphState.inputs;
-        delete currentGraphState.outputs;
-
-        if (dataflowState.graphs.length !== 0) {
+        if (dataflowState.graphs.length) {
             dataflowState.entryGraph = currentGraphId;
         }
 
