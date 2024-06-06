@@ -688,13 +688,12 @@ export function NodeFactory(
 export function updateSubgraphInterfaces(inputs, outputs, nodes) {
     // Interfaces that are not connected to any other interface
     const INTERFACE_PREFIXES = ['input_', 'inout_', 'output_'];
-    const INCLUDE_CONNECTED = true;
 
     const exposedIntf = [
         ...nodes.map((node) => Object.entries({ ...node.inputs, ...node.outputs })).flat(),
     ].filter(([key]) => INTERFACE_PREFIXES.some((prefix) => key.startsWith(prefix)))
         .filter(
-            ([, intf]) => intf.externalName && (intf.connectionCount === 0 || INCLUDE_CONNECTED),
+            ([, intf]) => intf.externalName,
         );
 
     // Filter out repeated external names
