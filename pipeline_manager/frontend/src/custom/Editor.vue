@@ -688,25 +688,6 @@ export default defineComponent({
                     return;
                 }
 
-                if (data.graph) { // Load Dataflow
-                    editorManager.loadDataflow(data).then(({ errors, warnings }) => {
-                        if (Array.isArray(warnings) && warnings.length) {
-                            NotificationHandler.terminalLog(
-                                'warning',
-                                'Issue when loading dataflow',
-                                warnings,
-                            );
-                        }
-                        if (Array.isArray(errors) && errors.length) {
-                            const messageTitle = process.env.VUE_APP_GRAPH_DEVELOPMENT_MODE === 'true' ?
-                                'Softload enabled, errors found while loading the dataflow' :
-                                'Dataflow is invalid';
-                            NotificationHandler.terminalLog('error', messageTitle, errors);
-                        }
-                    });
-                    return;
-                }
-
                 if (data.nodes) { // Load Specification
                     const specErrors = editorManager.validateSpecification(data);
                     if (specErrors.length) {
@@ -723,6 +704,25 @@ export default defineComponent({
                         }
                         if (Array.isArray(errors) && errors.length) {
                             NotificationHandler.terminalLog('error', 'Specification is invalid', errors);
+                        }
+                    });
+                    return;
+                }
+
+                if (data.graphs) { // Load Dataflow
+                    editorManager.loadDataflow(data).then(({ errors, warnings }) => {
+                        if (Array.isArray(warnings) && warnings.length) {
+                            NotificationHandler.terminalLog(
+                                'warning',
+                                'Issue when loading dataflow',
+                                warnings,
+                            );
+                        }
+                        if (Array.isArray(errors) && errors.length) {
+                            const messageTitle = process.env.VUE_APP_GRAPH_DEVELOPMENT_MODE === 'true' ?
+                                'Softload enabled, errors found while loading the dataflow' :
+                                'Dataflow is invalid';
+                            NotificationHandler.terminalLog('error', messageTitle, errors);
                         }
                     });
                     return;
