@@ -388,6 +388,48 @@ export default class ConnectionRenderer {
         const graph = this.viewModel.displayedGraph;
         const nc = new NormalizedConnection(x1, y1, x2, y2, connection);
         const shift = this.getShift(nc.from, nc.to, graph, graph.scaling) + 30 * graph.scaling;
+
+        if (connection.anchors !== undefined && connection.anchors.length) {
+            const anchors = connection.anchors.map((a) => {
+                const tx = (a.x + graph.panning.x) * graph.scaling;
+                const ty = (a.y + graph.panning.y) * graph.scaling;
+                return { x: tx, y: ty };
+            });
+
+            const path = [{ x: nc.x1, y: nc.y1 }];
+            const direction = nc.from.side;
+            const xShift = direction === 'right' ? shift : -shift;
+            path.push({ x: nc.x1 + xShift, y: nc.y1 });
+            anchors.forEach((anchor) => {
+                path.push({
+                    x: path[path.length - 1].x,
+                    y: anchor.y,
+                });
+                path.push({
+                    x: anchor.x,
+                    y: anchor.y,
+                });
+                // NOTE: Duplicate path is for proper anchor position calculation
+                path.push({
+                    x: anchor.x,
+                    y: anchor.y,
+                });
+            });
+            path.push({
+                x: path[path.length - 1].x,
+                y: nc.y2,
+            });
+            path.push({
+                x: nc.x2 + xShift,
+                y: nc.y2,
+            });
+            path.push({
+                x: nc.x2,
+                y: nc.y2,
+            });
+            return path;
+        }
+
         const bottomY = nodeBottomPoint(connection, graph.scaling, graph.panning);
         const y = bottomY + shift;
 
