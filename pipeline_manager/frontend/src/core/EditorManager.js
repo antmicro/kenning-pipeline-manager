@@ -325,6 +325,14 @@ export default class EditorManager {
                 errors.push(`Could not load the included dataflow from ${dataflow}. Reason: ${val}`);
                 return;
             }
+
+            // Validate the fetched dataflow
+            const validationErrors = EditorManager.validateDataflow(val);
+            if (validationErrors.length) {
+                errors.push(...validationErrors);
+                return;
+            }
+
             if (val.graphs.length !== 1) {
                 errors.push(`Only single graph dataflows are supported. Aborting loading subgraph include from ${dataflow.url}.`);
                 return;
@@ -347,15 +355,6 @@ export default class EditorManager {
 
             if (graphs.find((graph) => graph.name === targetGraph.name) !== undefined) {
                 errors.push(`Included graph from ${dataflow.url} has a duplicate name`);
-                return;
-            }
-
-            // Filter out additional properties and use defaults
-            const validationErrors = EditorManager.validateJSONWithSchema(
-                targetGraph, graphSchema,
-            );
-            if (validationErrors.length) {
-                errors.push(...validationErrors);
                 return;
             }
 
@@ -1076,11 +1075,11 @@ export default class EditorManager {
     /**
      * Validates metadata in JSON format using schema from dataflowSchema.
      *
-     * @param jsonmetadata dataflow in JSON format to validate
+     * @param dataflow dataflow in JSON format to validate
      * @return An array of errors. If the array is empty, the validation was successful.
      */
-    static validateDataflow(jsonmetadata) {
-        return EditorManager.validateJSONWithSchema(jsonmetadata, dataflowSchema);
+    static validateDataflow(dataflow) {
+        return EditorManager.validateJSONWithSchema(dataflow, dataflowSchema);
     }
 
     /**
