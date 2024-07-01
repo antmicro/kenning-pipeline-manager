@@ -15,6 +15,7 @@ The specification consists of:
 * `nodes` - array that specifies valid nodes, where every element is of type [Node](#node).
 * `graphs` - array of dataflow-like objects defining graph nodes, of type [Graph](project:dataflow-format.md#graph).
 * `include` - array of string objects pointing to a remote url to the specifications to include.
+* `includeGraphs` - array of objects of type [Included Graph](#included-graphs), that specifies graph instances to be included in the specification from a remote url.
 * `version` - string determining version of the specification.
   Should be set to the newest version described in [Changelogs](#changelogs).
   {{project}} uses that value to check the compatibility of the specification with the current implementation, giving warnings about inconsistency in versions.
@@ -462,6 +463,21 @@ For example two interface groups can be defined that consist of common interface
 ```
 
 The interface group called `1` consists of three ranges of interfaces: `1[1]`, interfaces `1[3], 1[4], ..., 1[14]` and `1[35], 1[36], ..., 1[47]`.
+
+### Included Graphs
+
+Object that specifies a graph instance to be included in the specification.
+The included graphs are available in the node palette and can be used in the editor.
+
+```{note}
+Included graphs cannot consist of more than one graph.
+```
+
+* `name` - name of the included graph, if not passed, the name of the graph is inferred from the graph.
+* `category` - category in which the included graph is placed in the node palette, uses `/` as a delimiter.
+  By default, the category is set to `default`.
+* `url` - URL, where the graph file is located.
+  The file has to be in a valid [dataflow](project:dataflow-format.md) format.
 
 ## Example
 
