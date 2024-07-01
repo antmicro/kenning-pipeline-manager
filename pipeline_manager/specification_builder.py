@@ -156,8 +156,8 @@ class SpecificationBuilder(object):
         self._nodelayers = set()
         self._categories = set()
         self._includes = set()
-        self._includeSubgraphs = dict()
-        self._subgraphs = dict()
+        self._includeGraphs = dict()
+        self._graphs = dict()
         self._metadata = dict()
         self.warnings = 0
 
@@ -908,11 +908,11 @@ class SpecificationBuilder(object):
         """
         Adds subgraph defined in JSON-like format.
         """
-        if subgraph["name"] in self._subgraphs:
+        if subgraph["name"] in self._graphs:
             raise SpecificationBuilderException(
                 f'Subgraph {subgraph["name"]} already exists.'  # noqa: E501
             )
-        self._subgraphs[subgraph["name"]] = subgraph
+        self._graphs[subgraph["name"]] = subgraph
 
     def add_include(self, include: str):
         """
@@ -949,11 +949,11 @@ class SpecificationBuilder(object):
             Raised when included subgraph already exists
         """
         dataflow_key = (dataflow.get("name", "default"), dataflow["url"])
-        if dataflow_key in self._includeSubgraphs:
+        if dataflow_key in self._includeGraphs:
             raise SpecificationBuilderException(
                 f"Include subgraph {dataflow_key} already exists."
             )
-        self._includeSubgraphs[dataflow_key] = dataflow
+        self._includeGraphs[dataflow_key] = dataflow
 
     def metadata_add_interface_styling(
         self,
@@ -1154,8 +1154,8 @@ class SpecificationBuilder(object):
             self.add_subgraph_from_spec(subgraph)
         for include in otherspec.get("include", []):
             self.add_include(include)
-        for includeSubgraph in otherspec.get("includeSubgraph", []):
-            self.add_include_subgraph(includeSubgraph)
+        for includeGraphs in otherspec.get("includeGraphs", []):
+            self.add_include_subgraph(includeGraphs)
 
     def _sorted_nodes(self) -> List[Dict]:
         """
@@ -1204,7 +1204,7 @@ class SpecificationBuilder(object):
                 sort_dict_list(layer, "nodeLayers")
         return self._metadata
 
-    def _sorted_subgraphs(self) -> List[Dict]:
+    def _sorted_graphs(self) -> List[Dict]:
         """
         Sorts subgraph entries in the specification and returns them.
 
@@ -1213,8 +1213,8 @@ class SpecificationBuilder(object):
         List[Dict]
             A list of dictionaries describing subgraphs.
         """
-        sort_dict_list(self._subgraphs, "nodes", sort_by="name")
-        for graph in self._subgraphs.values():
+        sort_dict_list(self._graphs, "nodes", sort_by="name")
+        for graph in self._graphs.values():
             sort_dict_list(graph, "connections", sort_by="from")
             sort_dict_list(graph, "interfaces", sort_by="name")
             sort_dict_list(graph, "nodes", sort_by="name")
@@ -1224,7 +1224,7 @@ class SpecificationBuilder(object):
                     sort_dict_list(node, "interfaces", sort_by="name")
                     sort_dict_list(node, "properties", sort_by="name")
 
-        sorted_tuples = sorted(self._subgraphs.items())
+        sorted_tuples = sorted(self._graphs.items())
         return list(zip(*sorted_tuples))[1]
 
     def _get_metadata(self, sort_spec: bool) -> Dict:
@@ -1237,20 +1237,20 @@ class SpecificationBuilder(object):
             return self._sorted_nodes()
         return list(self._nodes.values())
 
-    def _get_subgraphs(self, sort_spec: bool) -> List[Dict]:
+    def _get_graphs(self, sort_spec: bool) -> List[Dict]:
         if sort_spec:
-            return self._sorted_subgraphs()
-        return list(self._subgraphs.values())
+            return self._sorted_graphs()
+        return list(self._graphs.values())
 
     def _get_includes(self, sort_spec: bool) -> List[str]:
         if sort_spec:
             return sorted(self._includes)
         return list(self._includes)
 
-    def _get_include_subgraphs(self, sort_spec: bool) -> List[Dict]:
+    def _get_include_graphs(self, sort_spec: bool) -> List[Dict]:
         if sort_spec:
-            return sorted(self._includeSubgraphs.values())
-        return list(self._includeSubgraphs.values())
+            return sorted(self._includeGraphs.values())
+        return list(self._includeGraphs.values())
 
     def _construct_specification(self, sort_spec: bool) -> Dict:
         """
@@ -1270,12 +1270,12 @@ class SpecificationBuilder(object):
         spec["nodes"] = self._get_nodes(sort_spec)
         if self._metadata:
             spec["metadata"] = self._get_metadata(sort_spec)
-        if self._subgraphs:
-            spec["graphs"] = self._get_subgraphs(sort_spec)
+        if self._graphs:
+            spec["graphs"] = self._get_graphs(sort_spec)
         if self._includes:
             spec["include"] = self._get_includes(sort_spec)
-        if self._includeSubgraphs:
-            spec["includeSubgraph"] = self._get_include_subgraphs(sort_spec)
+        if self._includeGraphs:
+            spec["includeGraphs"] = self._get_include_graphs(sort_spec)
         return spec
 
     def create_and_validate_spec(
