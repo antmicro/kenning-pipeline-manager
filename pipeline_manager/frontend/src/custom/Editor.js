@@ -544,11 +544,10 @@ export default class PipelineManagerEditor extends Editor {
             this.subgraphNodePositions[subgraphNode.id] = { ...subgraphNode.position };
             const state = subgraphNode.save();
             const addedNode = this.graph.addNode(subgraphNode);
-            addedNode.load(state);
             if (addedNode) {
                 // Set position relative to removed node
-                addedNode.position.x += node.position.x - meanX;
-                addedNode.position.y += node.position.y - meanY;
+                state.position.x += node.position.x - meanX;
+                state.position.y += node.position.y - meanY;
                 this.graph.selectedNodes.push(addedNode);
                 // Reset connections count
                 Object.values(addedNode.inputs).concat(
@@ -557,6 +556,7 @@ export default class PipelineManagerEditor extends Editor {
                     (intf) => { intf.connectionCount = 0; },
                 );
             }
+            addedNode.load(state);
         });
 
         const subgraphNodeConnections = this.graph.connections.filter(
@@ -573,7 +573,24 @@ export default class PipelineManagerEditor extends Editor {
             const toInterface = this.findInterface(connection.to.id);
 
             if (fromInterface && toInterface) {
-                this.graph.addConnection(fromInterface, toInterface);
+                const createdConnection = this.graph.addConnection(fromInterface, toInterface);
+                (connection.anchors ?? []).forEach((anchor, index) => {
+                    let newAnchor;
+                    // Only anchors from within the graph node should be shifted
+                    if (connection in subgraphNodeConnections) {
+                        newAnchor = {
+                            x: anchor.x + node.position.x - meanX,
+                            y: anchor.y + node.position.y - meanY,
+                        };
+                    } else {
+                        newAnchor = {
+                            x: anchor.x,
+                            y: anchor.y,
+                        };
+                    }
+
+                    this.graph.addAnchor(newAnchor, createdConnection, index);
+                });
             }
         });
     }
