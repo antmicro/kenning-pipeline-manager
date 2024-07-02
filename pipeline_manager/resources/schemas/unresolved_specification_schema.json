@@ -30,9 +30,14 @@
             "description": "Definition of the available graphs",
             "type": "array",
             "items": {
-                "$ref": "graph_schema.json"
-            },
-            "unevaluatedProperties": false
+                "type": "object",
+                "allOf": [
+                    {
+                        "$ref": "graph_schema.json"
+                    }
+                ],
+                "unevaluatedProperties": false
+            }
         }
     },
     "$defs": {

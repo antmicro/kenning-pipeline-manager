@@ -14,9 +14,14 @@
             "type": "array",
             "minItems": 1,
             "items": {
-                "$ref": "#/$defs/graph_with_ids"
-            },
-            "unevaluatedProperties": false
+                "type": "object",
+                "allOf": [
+                    {
+                        "$ref": "#/$defs/graph_with_ids"
+                    }
+                ],
+                "unevaluatedProperties": false
+            }
         },
         "entryGraph": {
             "description": "Id of a graph that is displayed when a dataflow is loaded",
