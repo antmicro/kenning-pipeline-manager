@@ -33,7 +33,7 @@
                 "type": "object",
                 "allOf": [
                     {
-                        "$ref": "graph_schema.json"
+                        "$ref": "#/$defs/graph_with_categories"
                     }
                 ],
                 "unevaluatedProperties": false
@@ -510,6 +510,27 @@
                 "default"
             ],
             "unevaluatedProperties": true
+        },
+        "graph_with_categories": {
+            "type": "object",
+            "allOf": [
+                {
+                    "$ref": "graph_schema.json"
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "category": {
+                            "description": "Category of a node in a side bar",
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "category"
+                    ]
+                }
+            ],
+            "unevaluatedProperties": false
         }
     },
     "additionalProperties": false
