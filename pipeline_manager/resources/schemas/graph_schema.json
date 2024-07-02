@@ -95,10 +95,6 @@
                                     "description": "Determines the order of interfaces rendered",
                                     "type": "number"
                                 },
-                                "subgraphNodeId": {
-                                    "description": "Id of a subgraph interface node",
-                                    "type": "string"
-                                },
                                 "externalName": {
                                     "description": "Name of the external socket displayed in the node",
                                     "type": ["string", "null"]

@@ -34,7 +34,6 @@ export default function CreateCustomGraphNodeType(template, type) {
                     name: io.name,
                     externalName,
                     id: io.id,
-                    subgraphNodeId: io.subgraphNodeId,
                     direction: io.direction,
                     side: io.side,
                     sidePosition: io.sidePosition,
@@ -62,7 +61,7 @@ export default function CreateCustomGraphNodeType(template, type) {
         load(state) {
             this.hooks.beforeLoad.execute(state);
 
-            const out = parseInterfaces(state.interfaces, [], []);
+            const out = parseInterfaces(state.interfaces ?? [], [], []);
             if (Array.isArray(out) && out.length) {
                 return out;
             }
@@ -223,13 +222,11 @@ export default function CreateCustomGraphNodeType(template, type) {
             const inputs = this.template.inputs.map((i) => ({
                 ...i,
                 id: getNewId(i.id),
-                subgraphNodeId: newGraphNodeId,
             }));
 
             const outputs = this.template.outputs.map((o) => ({
                 ...o,
                 id: getNewId(o.id),
-                subgraphNodeId: newGraphNodeId,
             }));
 
             const connections = this.template.connections.map((c) => ({

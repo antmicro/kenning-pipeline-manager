@@ -723,7 +723,6 @@ export function updateSubgraphInterfaces(inputs, outputs, nodes) {
             newInterfaces.push({
                 name: intf.externalName,
                 id: intf.id,
-                subgraphNodeId: intf.nodeId,
                 externalName: undefined,
                 side: intf.side,
                 direction: intf.direction,
