@@ -131,6 +131,26 @@ export default function createPipelineManagerGraph(graph) {
         };
     };
 
+    /**
+     * Adds an anchor to the connection and creates an event that
+     * the anchor was added, which is used by history system.
+     *
+     * @param anchor anchor to be added
+     * @param connection connection to which the anchor is added
+     * @param position position of the anchor in the connection
+     */
+    graph.addAnchor = function addAnchor(anchor, connection, position) {
+        const anchorToAdd = {
+            x: anchor.x,
+            y: anchor.y,
+            id: uuidv4(),
+        };
+        if (connection.anchors === undefined) connection.anchors = [];
+
+        connection.anchors.splice(position, 0, anchorToAdd);
+        graph.events.addAnchor.emit([connection, (position * 3 + 1)]);
+    };
+
     // Replaces given instance of a node with a node of type `newNodeName`
     // All properties that are common preserve their values
     // All connections that were connected to the interfaces that are common
@@ -358,7 +378,9 @@ export default function createPipelineManagerGraph(graph) {
                         checkConnectionResult.dummyConnection.to,
                     );
 
-                    conn.anchors = c.anchors?.map((anchor) => ({ ...anchor, id: Date.now() }));
+                    c.anchors?.forEach((anchor, index) => {
+                        graph.addAnchor(anchor, conn, index);
+                    });
                     this.internalAddConnection(conn);
                 }
             }
