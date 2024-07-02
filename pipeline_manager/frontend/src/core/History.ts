@@ -149,7 +149,9 @@ class AnchorStep extends Step {
     add(graph: Ref<Graph>) {
         if (this.anchor !== undefined) {
             const conn = graph.value.connections.find(
-                (n) => n.from === this.anchor[0].from && n.to === this.anchor[0].to,
+                (n) => n.from.id === this.anchor[0].from.id &&
+                n.to.id === this.anchor[0].to.id &&
+                n.id === this.anchor[0].id,
             );
             if (conn !== undefined) if ((<any>conn).anchors === undefined) (<any>conn).anchors = [];
             (<any>conn).anchors.splice(
