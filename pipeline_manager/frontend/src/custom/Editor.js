@@ -516,64 +516,19 @@ export default class PipelineManagerEditor extends Editor {
         suppressHistoryLogging(false);
     }
 
-    findInterface(nodeId, intfId, subgraphNodeId) {
-        const foundNode = this.graph.nodes.find((_node) => _node.id === nodeId);
-        if (!foundNode) {
-            return null;
-        }
-        const foundIntf = Object.values(foundNode.inputs).concat(
-            Object.values(foundNode.outputs),
-        ).find(
-            (intf) => intf.id === intfId,
-        );
-        if (foundIntf) return foundIntf;
-        if (subgraphNodeId) {
-            return Object.values(foundNode.inputs).concat(Object.values(foundNode.outputs)).find(
-                (intf) => intf.subgraphNodeId === subgraphNodeId,
+    findInterface(intfId) {
+        for (let i = 0; i < this.graph.nodes.length; i += 1) {
+            const foundIntf = Object.values(this.graph.nodes[i].inputs).concat(
+                Object.values(this.graph.nodes[i].outputs),
+            ).find(
+                (intf) => intf.id === intfId,
             );
+            if (foundIntf) return foundIntf;
         }
         return null;
     }
 
     unwrapSubgraph(node) {
-        // Map subgraph input/output nodes with interfaces
-        const subgraphNodeToNode = new Map();
-        Object.values(node.inputs).forEach((input) => {
-            // Inputs
-            let subgraphInterfaceId = Object.values(node.subgraph.connections).find(
-                (connection) => connection.from.id === input.subgraphNodeId,
-            );
-            if (subgraphInterfaceId) {
-                subgraphNodeToNode[input.id] = {
-                    nodeId: subgraphInterfaceId.to.nodeId,
-                    id: subgraphInterfaceId.to.id,
-                };
-                return;
-            }
-            // Inouts
-            subgraphInterfaceId = Object.values(node.subgraph.connections).find(
-                (connection) => connection.to.id === input.subgraphNodeId,
-            );
-            if (subgraphInterfaceId) {
-                subgraphNodeToNode[input.id] = {
-                    nodeId: subgraphInterfaceId.from.nodeId,
-                    id: subgraphInterfaceId.from.id,
-                };
-            }
-        });
-        Object.values(node.outputs).forEach((output) => {
-            // Outputs
-            const subgraphInterfaceId = Object.values(node.subgraph.connections).find(
-                (connection) => connection.to.id === output.subgraphNodeId,
-            );
-            if (subgraphInterfaceId) {
-                subgraphNodeToNode[output.id] = {
-                    nodeId: subgraphInterfaceId.from.nodeId,
-                    id: subgraphInterfaceId.from.id,
-                };
-            }
-        });
-
         const subgraphNodes = Object.values(node.subgraph._nodes);
         // Calculate center point of subgraph nodes
         const meanX = subgraphNodes.map((n) => n.position.x).reduce(
@@ -587,13 +542,15 @@ export default class PipelineManagerEditor extends Editor {
         // Create, reposition and select subgraph nodes
         subgraphNodes.forEach((subgraphNode) => {
             this.subgraphNodePositions[subgraphNode.id] = { ...subgraphNode.position };
+            const state = subgraphNode.save();
             const addedNode = this.graph.addNode(subgraphNode);
+            addedNode.load(state);
             if (addedNode) {
                 // Set position relative to removed node
                 addedNode.position.x += node.position.x - meanX;
                 addedNode.position.y += node.position.y - meanY;
                 this.graph.selectedNodes.push(addedNode);
-                // Reset connection count
+                // Reset connections count
                 Object.values(addedNode.inputs).concat(
                     Object.values(addedNode.outputs),
                 ).forEach(
@@ -602,30 +559,21 @@ export default class PipelineManagerEditor extends Editor {
             }
         });
 
-        // Create connections from and to subgraph
         const subgraphNodeConnections = this.graph.connections.filter(
             (c) => c.from.nodeId === node.id || c.to.nodeId === node.id,
         );
         this.graph.removeNode(node);
         Object.values(node.subgraph.connections).concat(
-            subgraphNodeConnections).forEach((connection) => {
+            subgraphNodeConnections,
+        ).forEach((connection) => {
             if (connection.from.name === 'Connection' || connection.to.name === 'Connection') { return; }
-            let connectionFrom;
-            if (connection.from.id in subgraphNodeToNode) {
-                connectionFrom = subgraphNodeToNode[connection.from.id];
-            } else {
-                connectionFrom = connection.from;
-            }
-            let connectionTo;
-            if (connection.to.id in subgraphNodeToNode) {
-                connectionTo = subgraphNodeToNode[connection.to.id];
-            } else {
-                connectionTo = connection.to;
-            }
-            const foundFrom = this.findInterface(connectionFrom.nodeId, connectionFrom.id);
-            const foundTo = this.findInterface(connectionTo.nodeId, connectionTo.id);
-            if (foundFrom && foundTo) {
-                this.graph.addConnection(foundFrom, foundTo);
+
+            // Finding interfaces in newly added nodes that correspond to the ones in the connection
+            const fromInterface = this.findInterface(connection.from.id);
+            const toInterface = this.findInterface(connection.to.id);
+
+            if (fromInterface && toInterface) {
+                this.graph.addConnection(fromInterface, toInterface);
             }
         });
     }
