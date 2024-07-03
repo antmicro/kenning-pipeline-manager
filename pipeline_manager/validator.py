@@ -19,7 +19,7 @@ import pipeline_manager
 
 def validate(
     specification_path: Path,
-    dataflow_path: Optional[Path] = None,
+    dataflow_paths: list[Path] = [],
     resolved_specification_path: Optional[Path] = None,
     workspace_directory: Optional[Path] = None,
 ) -> int:
@@ -30,8 +30,8 @@ def validate(
     ----------
     specification_path: Path
         Path to the specification file
-    dataflow_path: Optional[Path]
-        Path to the dataflow file
+    dataflow_paths: list[Path]
+        List of paths to the dataflow files
     resolved_specification_path: Optional[Path]
         Destination where the resolved specification is stored.
         Ignored if None.
@@ -73,8 +73,8 @@ def validate(
         specification_path.absolute(),
     ]
 
-    if dataflow_path:
-        run_command.append(dataflow_path.absolute())
+    if dataflow_paths:
+        run_command.extend([p.absolute() for p in dataflow_paths])
     if resolved_specification_path:
         run_command.extend(
             ["--resolvedSpecification", resolved_specification_path]
