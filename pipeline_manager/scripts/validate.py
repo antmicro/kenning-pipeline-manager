@@ -31,10 +31,7 @@ def script_validate():
         type=Path,
     )
     validator_parser.add_argument(
-        "dataflow_path",
-        help="Path to dataflow file",
-        nargs="?",
-        type=Path,
+        "dataflow_paths", help="Paths to dataflow file", nargs="*", type=Path
     )
     validator_parser.add_argument(
         "--workspace-directory",
