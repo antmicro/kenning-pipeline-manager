@@ -240,7 +240,8 @@ def check_validation(spec: str, dataflow: Optional[str] = None) -> int:
             dataflow_path = Path(tmpdir) / "dataflow.json"
             with open(dataflow_path, "w") as dataflowfile:
                 json.dump(dataflow, dataflowfile)
+        dataflow_paths = [dataflow_path] if dataflow_path else []
         res = validate(
-            specification_path=spec_path, dataflow_path=dataflow_path
+            specification_path=spec_path, dataflow_paths=dataflow_paths
         )
     return res

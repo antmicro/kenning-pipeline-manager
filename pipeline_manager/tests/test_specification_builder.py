@@ -49,4 +49,4 @@ def test_existing_examples(
     with open(empty_file_path, "w") as f:
         json.dump(recreated_spec, f)
 
-    assert validate(empty_file_path, dataflow_path) == 0
+    assert validate(empty_file_path, [dataflow_path]) == 0

@@ -278,7 +278,7 @@ def test_all_existing_examples(example):
     (*-specification.json, *-dataflow.json).
     """
     spec, dataflow = example
-    assert validate(spec, dataflow) == 0
+    assert validate(spec, [dataflow]) == 0
 
 
 @pytest.mark.parametrize(
