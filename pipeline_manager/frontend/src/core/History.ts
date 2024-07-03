@@ -184,7 +184,7 @@ export function commitTransaction() {
     transactionId.value = '';
 }
 
-export function useHistory(graph: Ref<Graph>, commandHandler: ICommandHandler): IHistory {
+export function useHistory(graph: Ref<any>, commandHandler: ICommandHandler): IHistory {
     const token = Symbol('CustomHistoryToken');
     const maxSteps = 200;
     const history: Map<string, Step[]> = new Map<string, Step[]>();
@@ -311,6 +311,7 @@ export function useHistory(graph: Ref<Graph>, commandHandler: ICommandHandler): 
             mainHistory[mainHistory.length - 1].transactionId === step.transactionId
         ) singleStepTransaction(mainHistory, auxiliaryHistory);
         suppressingHistory.value = false;
+        graph.value.selectedNodes.splice(0, graph.value.selectedNodes.length);
     };
 
     commandHandler.registerCommand<ICommand<void>>('undo', {
