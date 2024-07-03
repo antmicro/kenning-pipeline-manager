@@ -89,11 +89,18 @@ fs.readFile(positionals[0], async function (err, spec) {
     }
 
     if (positionals.length >= 2) {
-        console.log('\n-----\n')
-        fs.readFile(positionals[1], async function (err, dataflow) {
-            if (err) {
-                console.log(`\x1b[31mError reading dataflow file: ${err}\x1b[0m`);
-                process.exit(2);
+        console.log('-----')
+        console.log(`Validating ${positionals.length - 1} dataflows.`)
+        let failing = 0;
+        for (let i = 1; i < positionals.length; i++) {
+            let filename = positionals[i];
+            let dataflow;
+            try {
+                dataflow = fs.readFileSync(filename);
+            } catch (error) {
+                console.log(`\x1b[31mError reading dataflow file: ${error} [file: ${filename}]\x1b[0m`);
+                failing++;
+                continue;
             }
             ({ errors, warnings } = await instance.loadDataflow(dataflow.toString()));
             if (Array.isArray(warnings) && warnings.length) {
@@ -101,15 +108,18 @@ fs.readFile(positionals[0], async function (err, spec) {
                 warnings.forEach((warning) => console.log(`* \t\x1b[33m${warning}\x1b[0m`))
             }
             if (Array.isArray(errors) && errors.length) {
-                console.log('Dataflow errors:')
+                console.log(`\x1b[31mDataflow invalid: ${filename}\x1b[0m`);
+                console.log('\x1b[31mDataflow errors:\x1b[0m')
                 errors.forEach((error) => console.log(`* \t\x1b[31m${error}\x1b[0m`))
-                console.log('\x1b[31mDataflow invalid.\x1b[0m');
-                process.exit(2);
+                failing++;
+                continue;
             }
-            console.log('\x1b[32mDataflow valid.\x1b[0m');
-            process.exit(0);
-        });
-    } else {
-        process.exit(0);
+            console.log(`\x1b[32mDataflow valid: ${filename}\x1b[0m`);
+        }
+        if (failing > 0) {
+            console.log(`\x1b[31mInvalid dataflows: ${failing}\x1b[0m`);
+            process.exit(2);
+        }
     }
+    process.exit(0);
 });
