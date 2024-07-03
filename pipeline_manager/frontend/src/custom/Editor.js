@@ -297,6 +297,11 @@ export default class PipelineManagerEditor extends Editor {
         this.graphName = entryGraph.name;
         this.readonly = readonlySetting;
 
+        // If the editor is run outside of a browser, then
+        // all functionality that is after this line will fail,
+        // as it changes the way the graph is rendered in the browser
+        if (typeof window === 'undefined') return errors;
+
         if (state.graph.entryGraph !== undefined) {
             const dfs = (subgraph, path) => {
                 if (subgraph?.nodes !== undefined) {
