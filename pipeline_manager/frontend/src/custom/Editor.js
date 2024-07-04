@@ -577,7 +577,7 @@ export default class PipelineManagerEditor extends Editor {
                 (connection.anchors ?? []).forEach((anchor, index) => {
                     let newAnchor;
                     // Only anchors from within the graph node should be shifted
-                    if (connection in subgraphNodeConnections) {
+                    if (node.subgraph.connections.includes(connection)) {
                         newAnchor = {
                             x: anchor.x + node.position.x - meanX,
                             y: anchor.y + node.position.y - meanY,
