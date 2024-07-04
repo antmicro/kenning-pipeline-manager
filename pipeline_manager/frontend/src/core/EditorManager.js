@@ -349,12 +349,12 @@ export default class EditorManager {
             targetGraph.category = dataflow.category ?? undefined;
 
             if (targetGraph.name === undefined) {
-                errors.push(`Included subgraph from ${dataflow.url} does not have a name defined.`);
+                errors.push(`Included subgraph from '${dataflow.url}' does not have a name defined.`);
                 return;
             }
 
             if (graphs.find((graph) => graph.name === targetGraph.name) !== undefined) {
-                errors.push(`Included graph from ${dataflow.url} has a duplicate name`);
+                errors.push(`Included graph from '${dataflow.url}' has a duplicate name`);
                 return;
             }
 
@@ -989,7 +989,7 @@ export default class EditorManager {
         if (validationErrors.length) return validationErrors;
 
         // Validating category nodes
-        const { nodes } = specification;
+        const { nodes, graphs } = specification;
         const categoryNodes = nodes.filter((node) => node.isCategory);
         const definedCategories = {};
 
@@ -1048,6 +1048,13 @@ export default class EditorManager {
                 errors.push(`Node '${node.name}' is defined multiple times`);
             }
             nodeNames.add(node.name);
+        });
+
+        graphs.forEach((graph) => {
+            if (nodeNames.has(graph.name)) {
+                errors.push(`Graph node name '${graph.name}' is defined multiple times`);
+            }
+            nodeNames.add(graph.name);
         });
         return errors;
     }
