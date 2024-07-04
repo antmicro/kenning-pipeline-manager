@@ -65,7 +65,7 @@ def main(argv):  # noqa: D103
             return errno.EINVAL
         status = validate(
             specification_path=spec,
-            dataflow_path=dataflow,
+            dataflow_paths=[dataflow],
         )
         if status != 0:
             print("The graph with:\n")
