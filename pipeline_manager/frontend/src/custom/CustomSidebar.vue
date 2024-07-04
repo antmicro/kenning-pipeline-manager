@@ -19,6 +19,7 @@ SPDX-License-Identifier: Apache-2.0
         :class="{
             '--open': graph.sidebar.visible,
             '--hidehud': editorManager.editor.hideHud,
+            '--preview': editorManager.editor.preview,
             'hidden-navbar': $isMobile,
         }"
         :style="styles"
