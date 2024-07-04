@@ -177,10 +177,10 @@ To validate an existing specification, run the following in the root directory:
 ./validate <specification-path>
 ```
 
-To validate an existing specification and dataflow, run the following in the root directory:
+To validate an existing specification and one or more dataflows, run the following in the root directory:
 
 ```
-./validate <specification-path> <dataflow-path>
+./validate <specification-path> <dataflow-path> <dataflow-path> ...
 ```
 
 Replace both `specification-path` and `dataflow-path` with the actual paths to the JSON configuration file you want to validate.
