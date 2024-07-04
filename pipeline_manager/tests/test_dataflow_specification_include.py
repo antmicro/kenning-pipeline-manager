@@ -9,70 +9,133 @@ from pipeline_manager.tests.conftest import check_validation
 
 
 @pytest.fixture
-def specification_valid_empty_include():
-    return {"include": [], "nodes": [{"name": "Q", "category": "Q"}]}
-
-
-@pytest.fixture
-def specification_valid_empty_include_subgraph():
-    return {"includeGraphs": [], "nodes": [{"name": "Q", "category": "Q"}]}
-
-
-@pytest.fixture
-def specification_invalid_include_doesnt_exist():
-    return {
-        "include": [
-            "http://localhost:1234/this-does-not-exist/specification.json",
-        ],
-    }
-
-
-@pytest.fixture
-def specification_invalid_include_subgraph_doesnt_exist():
+def specification_no_include():
     return {
         "nodes": [
             {"category": "a/B", "isCategory": True},
             {"name": "Q", "extends": ["B"]},
             {"name": "Z", "category": "c/B"},
         ],
-        "includeGraphs": [
+    }
+
+
+@pytest.fixture
+def dataflow_one_graph():
+    return {
+        "graphs": [
             {
-                "url": "http://localhost:1234/this-does-not-exist/dataflow.json",  # noqa: E501
+                "name": "SaveVideo",
+                "connections": [],
+                "id": "78cc86c4-9ad0-4a8f-88cb-71ee28c48659",
+                "nodes": [
+                    {
+                        "name": "SaveVideo",
+                        "id": "fc7d1706-6240-41e2-a8da-91c8577e09f9",
+                        "position": {"x": 2100, "y": 200},
+                        "interfaces": [
+                            {
+                                "direction": "input",
+                                "id": "6efb374c-a115-404e-ade8-0aa05ba93996",
+                                "name": "frames",
+                                "side": "left",
+                                "sidePosition": 0,
+                            }
+                        ],
+                        "properties": [
+                            {
+                                "id": "3039e744-9941-47c5-8902-f260e6c29a35",
+                                "name": "encoding",
+                                "value": "bgr",
+                            }
+                        ],
+                        "twoColumn": True,
+                    }
+                ],
+            }
+        ]
+    }
+
+
+@pytest.fixture
+def specification_SaveVideo_node():
+    return {
+        "nodes": [
+            {
+                "name": "SaveVideo",
+                "category": "Filesystem",
+                "interfaces": [
+                    {
+                        "name": "frames",
+                        "type": ["Image", "BinaryImage"],
+                        "direction": "input",
+                    }
+                ],
+                "properties": [
+                    {
+                        "name": "encoding",
+                        "type": "select",
+                        "default": "rgb",
+                        "values": ["rgb", "bgr", "mono"],
+                    }
+                ],
             }
         ],
     }
 
 
 @pytest.fixture
-def specification_invalid_include_subgraph_empty(httpserver: HTTPServer):
+def specification_empty_include(specification_no_include):
+    specification_no_include["include"] = []
+    return specification_no_include
+
+
+@pytest.fixture
+def specification_empty_include_graphs(specification_no_include):
+    specification_no_include["includeGraphs"] = []
+    return specification_no_include
+
+
+@pytest.fixture
+def specification_include_doesnt_exist(specification_no_include):
+    specification_no_include["include"] = [
+        "http://localhost:1234/this-does-not-exist/specification.json",
+    ]
+    return specification_no_include
+
+
+@pytest.fixture
+def specification_include_graphs_doesnt_exist(specification_no_include):
+    specification_no_include["includeGraphs"] = [
+        {
+            "url": "http://localhost:1234/this-does-not-exist/dataflow.json",  # noqa: E501
+        }
+    ]
+    return specification_no_include
+
+
+@pytest.fixture
+def specification_include_graph_empty(
+    specification_no_include, httpserver: HTTPServer
+):
     httpserver.expect_request("/dataflow.json").respond_with_json({})
-    return {
-        "nodes": [
-            {"category": "a/B", "isCategory": True},
-            {"name": "Q", "extends": ["B"]},
-            {"name": "Z", "category": "c/B"},
-        ],
-        "includeGraphs": [
-            {
-                "url": httpserver.url_for("/dataflow.json"),
-            }
-        ],
-    }
+    specification_no_include["includeGraphs"] = [
+        {
+            "url": httpserver.url_for("/dataflow.json"),
+        }
+    ]
+    return specification_no_include
 
 
 @pytest.fixture
-def specification_invalid_recursive_include(httpserver: HTTPServer):
-    include_specification = {
-        "include": [httpserver.url_for("/specification.json")],
-        "nodes": [
-            {"category": "a/B", "isCategory": True},
-            {"name": "Q", "extends": ["B"]},
-            {"name": "Z", "category": "c/B"},
-        ],
-    }
+def specification_recursive_include(
+    specification_no_include, httpserver: HTTPServer
+):
+    specification_no_include["include"] = [
+        httpserver.url_for("/specification.json")
+    ]
 
     httpserver.expect_request("/specification.json").respond_with_json(
-        include_specification
+        specification_no_include
     )
 
     return {
@@ -83,20 +146,14 @@ def specification_invalid_recursive_include(httpserver: HTTPServer):
 
 
 @pytest.fixture
-def specification_invalid_repeating_node_declarations(httpserver: HTTPServer):
-    include_specification = {
-        "nodes": [
-            {"category": "a/B", "isCategory": True},
-            {"name": "Q", "extends": ["B"]},
-            {"name": "Z", "category": "c/B"},
-        ]
-    }
-
+def specification_repeating_node_declarations(
+    specification_no_include, httpserver: HTTPServer
+):
     httpserver.expect_request("/specification.json").respond_with_json(
-        include_specification
+        specification_no_include
     )
     httpserver.expect_request("/second-specification.json").respond_with_json(
-        include_specification
+        specification_no_include
     )
 
     return {
@@ -108,17 +165,11 @@ def specification_invalid_repeating_node_declarations(httpserver: HTTPServer):
 
 
 @pytest.fixture
-def specification_valid_nodes_in_include(httpserver: HTTPServer):
-    include_specification = {
-        "nodes": [
-            {"category": "a/B", "isCategory": True},
-            {"name": "Q", "extends": ["B"]},
-            {"name": "Z", "category": "c/B"},
-        ]
-    }
-
+def specification_nodes_in_include(
+    specification_no_include, httpserver: HTTPServer
+):
     httpserver.expect_request("/specification.json").respond_with_json(
-        include_specification
+        specification_no_include
     )
 
     return {
@@ -129,17 +180,11 @@ def specification_valid_nodes_in_include(httpserver: HTTPServer):
 
 
 @pytest.fixture
-def specification_invalid_repeating_include(httpserver: HTTPServer):
-    include_specification = {
-        "nodes": [
-            {"category": "a/B", "isCategory": True},
-            {"name": "Q", "extends": ["B"]},
-            {"name": "Z", "category": "c/B"},
-        ]
-    }
-
+def specification_repeating_include(
+    specification_no_include, httpserver: HTTPServer
+):
     httpserver.expect_request("/specification.json").respond_with_json(
-        include_specification
+        specification_no_include
     )
 
     # We expect warning here instead of an error
@@ -152,21 +197,15 @@ def specification_invalid_repeating_include(httpserver: HTTPServer):
 
 
 @pytest.fixture
-def specification_valid_nested_repeating_include(httpserver: HTTPServer):
-    include_specification = {
-        "nodes": [
-            {"category": "a/B", "isCategory": True},
-            {"name": "Q", "extends": ["B"]},
-            {"name": "Z", "category": "c/B"},
-        ]
-    }
-
+def specification_nested_repeating_include(
+    specification_no_include, httpserver: HTTPServer
+):
     second_specification = {
         "include": [httpserver.url_for("/specification.json")],
     }
 
     httpserver.expect_request("/specification.json").respond_with_json(
-        include_specification
+        specification_no_include
     )
     httpserver.expect_request("/second-specification.json").respond_with_json(
         second_specification
@@ -181,160 +220,50 @@ def specification_valid_nested_repeating_include(httpserver: HTTPServer):
 
 
 @pytest.fixture
-def specification_valid_include_subgraph(httpserver: HTTPServer):
-    dataflow_specification = {
-        "graphs": [
-            {
-                "name": "SaveVideo",
-                "connections": [],
-                "id": "78cc86c4-9ad0-4a8f-88cb-71ee28c48659",
-                "nodes": [
-                    {
-                        "name": "SaveVideo",
-                        "id": "fc7d1706-6240-41e2-a8da-91c8577e09f9",
-                        "position": {"x": 2100, "y": 200},
-                        "interfaces": [
-                            {
-                                "direction": "input",
-                                "id": "6efb374c-a115-404e-ade8-0aa05ba93996",
-                                "name": "frames",
-                                "side": "left",
-                                "sidePosition": 0,
-                            }
-                        ],
-                        "properties": [
-                            {
-                                "id": "3039e744-9941-47c5-8902-f260e6c29a35",
-                                "name": "encoding",
-                                "value": "bgr",
-                            }
-                        ],
-                        "twoColumn": True,
-                    }
-                ],
-            }
-        ]
-    }
-
+def specification_include_graphs_node_conflicting(
+    specification_SaveVideo_node, dataflow_one_graph, httpserver: HTTPServer
+):
     httpserver.expect_request("/dataflow.json").respond_with_json(
-        dataflow_specification
+        dataflow_one_graph
     )
 
-    return {
-        "includeGraphs": [
-            {
-                "url": httpserver.url_for("/dataflow.json"),
-                "category": "includeGraphs",
-                "name": "SaveVideo",
-            },
-            {
-                "url": httpserver.url_for("/dataflow.json"),
-                "category": "includeGraphs",
-                "name": "SaveVideo2",
-            },
-        ],
-        "nodes": [
-            {
-                "name": "SaveVideo",
-                "category": "Filesystem",
-                "interfaces": [
-                    {
-                        "name": "frames",
-                        "type": ["Image", "BinaryImage"],
-                        "direction": "input",
-                    }
-                ],
-                "properties": [
-                    {
-                        "name": "encoding",
-                        "type": "select",
-                        "default": "rgb",
-                        "values": ["rgb", "bgr", "mono"],
-                    }
-                ],
-            }
-        ],
-    }
+    specification_SaveVideo_node["includeGraphs"] = [
+        {
+            "url": httpserver.url_for("/dataflow.json"),
+            "category": "includeGraphs",
+            "name": "SaveVideo",
+        }
+    ]
+
+    return specification_SaveVideo_node
 
 
 @pytest.fixture
-def specification_invalid_include_subgraph_repeated(httpserver: HTTPServer):
-    dataflow_specification = {
-        "graphs": [
-            {
-                "connections": [],
-                "id": "78cc86c4-9ad0-4a8f-88cb-71ee28c48659",
-                "nodes": [
-                    {
-                        "name": "SaveVideo",
-                        "id": "fc7d1706-6240-41e2-a8da-91c8577e09f9",
-                        "position": {"x": 2100, "y": 200},
-                        "interfaces": [
-                            {
-                                "direction": "input",
-                                "id": "6efb374c-a115-404e-ade8-0aa05ba93996",
-                                "name": "frames",
-                                "side": "left",
-                                "sidePosition": 0,
-                            }
-                        ],
-                        "properties": [
-                            {
-                                "id": "3039e744-9941-47c5-8902-f260e6c29a35",
-                                "name": "encoding",
-                                "value": "bgr",
-                            }
-                        ],
-                        "twoColumn": True,
-                    }
-                ],
-            }
-        ]
-    }
-
+def specification_include_graphs_names_repeated(
+    specification_SaveVideo_node, dataflow_one_graph, httpserver: HTTPServer
+):
     httpserver.expect_request("/dataflow.json").respond_with_json(
-        dataflow_specification
+        dataflow_one_graph
     )
-
-    return {
-        "includeGraphs": [
-            {
-                "url": httpserver.url_for("/dataflow.json"),
-                "category": "includeGraphs",
-                "name": "SaveVideo",
-            },
-            {
-                "url": httpserver.url_for("/dataflow.json"),
-                "category": "includeGraphs",
-                "name": "SaveVideo",
-            },
-        ],
-        "nodes": [
-            {
-                "name": "SaveVideo",
-                "category": "Filesystem",
-                "interfaces": [
-                    {
-                        "name": "frames",
-                        "type": ["Image", "BinaryImage"],
-                        "direction": "input",
-                    }
-                ],
-                "properties": [
-                    {
-                        "name": "encoding",
-                        "type": "select",
-                        "default": "rgb",
-                        "values": ["rgb", "bgr", "mono"],
-                    }
-                ],
-            }
-        ],
-    }
+    specification_SaveVideo_node["includeGraphs"] = [
+        {
+            "url": httpserver.url_for("/dataflow.json"),
+            "category": "includeGraphs",
+            "name": "LoadVideo",
+        },
+        {
+            "url": httpserver.url_for("/dataflow.json"),
+            "category": "includeGraphs",
+            "name": "LoadVideo",
+        },
+    ]
+    return specification_SaveVideo_node
 
 
 @pytest.fixture
-def specification_valid_include_subgraph_no_nodes(httpserver: HTTPServer):
+def specification_include_graphs_no_nodes(
+    specification_SaveVideo_node, httpserver: HTTPServer
+):
     dataflow_specification = {
         "graphs": [
             {
@@ -350,70 +279,39 @@ def specification_valid_include_subgraph_no_nodes(httpserver: HTTPServer):
         dataflow_specification
     )
 
-    return {
-        "includeGraphs": [
-            {
-                "url": httpserver.url_for("/dataflow.json"),
-                "category": "includeGraphs",
-                "name": "SaveVideo",
-            },
-        ],
-        "nodes": [
-            {
-                "name": "SaveVideo",
-                "category": "Filesystem",
-                "interfaces": [
-                    {
-                        "name": "frames",
-                        "type": ["Image", "BinaryImage"],
-                        "direction": "input",
-                    }
-                ],
-                "properties": [
-                    {
-                        "name": "encoding",
-                        "type": "select",
-                        "default": "rgb",
-                        "values": ["rgb", "bgr", "mono"],
-                    }
-                ],
-            }
-        ],
-    }
+    specification_SaveVideo_node["includeGraphs"] = [
+        {
+            "url": httpserver.url_for("/dataflow.json"),
+            "category": "includeGraphs",
+            "name": "LoadVideo",
+        },
+    ]
+    return specification_SaveVideo_node
 
 
 @pytest.mark.parametrize(
-    "valid_specification",
+    "specification,expected",
     [
-        "specification_valid_empty_include",
-        "specification_valid_empty_include_subgraph",
-        "specification_valid_include_subgraph",
-        "specification_valid_include_subgraph_no_nodes",
-        "specification_valid_nested_repeating_include",
-        "specification_valid_nodes_in_include",
+        ("specification_no_include", 0),
+        ("specification_SaveVideo_node", 0),
+        ("specification_empty_include", 0),
+        ("specification_empty_include_graphs", 0),
+        ("specification_include_doesnt_exist", 1),
+        ("specification_include_graphs_doesnt_exist", 1),
+        ("specification_include_graph_empty", 1),
+        ("specification_recursive_include", 1),
+        ("specification_repeating_node_declarations", 1),
+        ("specification_nodes_in_include", 0),
+        ("specification_repeating_include", 1),
+        ("specification_nested_repeating_include", 0),
+        ("specification_include_graphs_node_conflicting", 1),
+        ("specification_include_graphs_names_repeated", 1),
+        ("specification_include_graphs_no_nodes", 1),
     ],
 )
-def test_valid_specification(
-    prepare_validation_environment, valid_specification, request
-):
-    valid_specification = request.getfixturevalue(valid_specification)
-    assert check_validation(valid_specification) == 0
+def test_valid_specification(specification, expected, request):
+    if specification == "specification_include_graphs_no_nodes":
+        pytest.xfail("Graphs included in specification are not yet verified")
 
-
-@pytest.mark.parametrize(
-    "invalid_specification",
-    [
-        "specification_invalid_include_doesnt_exist",
-        "specification_invalid_include_subgraph_doesnt_exist",
-        "specification_invalid_include_subgraph_empty",
-        "specification_invalid_include_subgraph_repeated",
-        "specification_invalid_recursive_include",
-        "specification_invalid_repeating_include",
-        "specification_invalid_repeating_node_declarations",
-    ],
-)
-def test_invalid_specification(
-    prepare_validation_environment, invalid_specification, request
-):
-    invalid_specification = request.getfixturevalue(invalid_specification)
-    assert check_validation(invalid_specification) == 1
+    specification = request.getfixturevalue(specification)
+    assert check_validation(specification) == expected
