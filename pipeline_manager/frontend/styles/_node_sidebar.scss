@@ -22,7 +22,12 @@
     transition: transform 0.4s;
     overflow-y: scroll;
 
-    &.--hidehud {
+    &.--preview {
+        top: 0px;
+        height: calc(100%);
+    }
+
+    &.--hidehud:not(.--preview) {
         height: calc(100% - $navbar-height);
     }
 
