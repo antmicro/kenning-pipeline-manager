@@ -16,6 +16,7 @@ import Pencil from './Pencil.vue';
 import Run from './Run.vue';
 import Sidebar from './Sidebar.vue';
 import StopDataflow from './StopDataflow.vue';
+import Unwrap from './Unwrap.vue';
 import Validate from './Validate.vue';
 import Placeholder from './Placeholder.vue';
 import CassetteStop from './CassetteStop.vue';
@@ -41,5 +42,6 @@ export default {
     Run,
     Sidebar,
     StopDataflow,
+    Unwrap,
     Validate,
 };
