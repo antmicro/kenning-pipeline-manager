@@ -265,14 +265,8 @@ export default function createPipelineManagerGraph(graph) {
         node.registerGraph(this);
 
         if (node.template !== undefined) {
-            const newState = {
-                id: node.template.id ?? uuidv4(),
-                nodes: node.template.nodes,
-                connections: node.template.connections,
-                inputs: node.template.inputs,
-                outputs: node.template.outputs,
-                name: node.template.name,
-            };
+            const newState = JSON.parse(JSON.stringify(node.template.save()));
+            newState.id ??= uuidv4();
             node.template = new GraphTemplate(newState, this.editor);
         }
 
