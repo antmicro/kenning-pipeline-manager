@@ -138,10 +138,7 @@ import useGroupDragMove from './useGroupDragMove';
 import CustomInterface from './CustomInterface.vue';
 import CustomContextMenu from './ContextMenu.vue';
 import { gridSnapper } from '../core/snappers';
-import Pencil from '../icons/Pencil.vue';
-import Bin from '../icons/Bin.vue';
-import Disconnect from '../icons/Disconnect.vue';
-import Sidebar from '../icons/Sidebar.vue';
+import icons from '../icons/index';
 import doubleClick from '../core/doubleClick.js';
 import { getOptionName, updateInterfacePosition, removeNode } from './CustomNode.js';
 import {
@@ -256,9 +253,9 @@ const contextMenuTitleX = ref(0);
 const contextMenuTitleY = ref(0);
 const contextMenuTitleItems = computed(() => {
     const items = [];
-    items.push({ value: 'sidebar', label: 'Details', icon: Sidebar });
+    items.push({ value: 'sidebar', label: 'Details', icon: icons.Sidebar });
     if (!viewModel.value.editor.readonly) {
-        items.push({ value: 'rename', label: 'Rename', icon: Pencil });
+        items.push({ value: 'rename', label: 'Rename', icon: icons.Pencil });
     }
     if (props.node.type.startsWith(GRAPH_NODE_TYPE_PREFIX)) {
         items.push({ value: 'editSubgraph', label: 'Edit Subgraph' });
@@ -274,9 +271,13 @@ const contextMenuTitleItems = computed(() => {
             items.at(-1).endSection = true;
         }
         items.push(
-            { value: 'disconnect', label: 'Disconnect', icon: Disconnect },
-            { value: 'delete', label: 'Delete', icon: Bin },
+            { value: 'disconnect', label: 'Disconnect', icon: icons.Disconnect },
+            { value: 'delete', label: 'Delete', icon: icons.Bin },
         );
+    }
+
+    if (props.node.type.startsWith(GRAPH_NODE_TYPE_PREFIX)) {
+        items.push({ value: 'unwrap', label: 'Unwrap Subgraph', icon: icons.Unwrap });
     }
 
     return items;
@@ -335,6 +336,11 @@ const onContextMenuTitleClick = async (action) => {
                 NotificationHandler.terminalLog('error', 'Dataflow is invalid', errors);
             }
             break;
+        }
+        case 'unwrap': {
+            startTransaction();
+            removeNode(props.node, true);
+            commitTransaction();
         }
     }
 };

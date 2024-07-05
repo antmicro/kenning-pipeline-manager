@@ -93,8 +93,15 @@ export function updateInterfacePosition(
     }
 }
 
-export function removeNode(node) {
-    if (node.type.startsWith(GRAPH_NODE_TYPE_PREFIX)) {
+/**
+ * Wrapper for nodes removal
+ *
+ * @param node node to remove. Can be either a graph node or a regular node
+ * @param unwrapGraph determines whether to unwrap the graph node contents
+ * into the current graph. Can be used only when removing a graph node
+ */
+export function removeNode(node, unwrapGraph = false) {
+    if (node.type.startsWith(GRAPH_NODE_TYPE_PREFIX) && unwrapGraph) {
         const { viewModel } = useViewModel();
         viewModel.value.editor.unwrapSubgraph(node);
     } else {
