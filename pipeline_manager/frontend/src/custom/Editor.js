@@ -69,8 +69,6 @@ export default class PipelineManagerEditor extends Editor {
 
     subgraphStack = [];
 
-    subgraphNodePositions = new Map();
-
     registerGraph(graph) {
         const customGraph = createPipelineManagerGraph(graph);
         super.registerGraph(customGraph);
@@ -429,14 +427,6 @@ export default class PipelineManagerEditor extends Editor {
         suppressHistoryLogging(true);
         subgraphNode.propagateInterfaces();
 
-        // Restore position of subgraph nodes
-        Object.values(subgraphNode.subgraph.nodes).forEach((n) => {
-            if (n.id in this.subgraphNodePositions) {
-                n.position = this.subgraphNodePositions[n.id];
-                delete this.subgraphNodePositions[n.id];
-            }
-        });
-
         this._graph = subgraphNode.subgraph;
         this._switchGraph(subgraphNode.subgraph);
         this.graphName = this._graph.name;
@@ -541,13 +531,12 @@ export default class PipelineManagerEditor extends Editor {
         this.graph.selectedNodes = [];
         // Create, reposition and select subgraph nodes
         subgraphNodes.forEach((subgraphNode) => {
-            this.subgraphNodePositions[subgraphNode.id] = { ...subgraphNode.position };
             const state = subgraphNode.save();
             const addedNode = this.graph.addNode(subgraphNode);
             if (addedNode) {
                 // Set position relative to removed node
-                state.position.x += node.position.x - meanX;
-                state.position.y += node.position.y - meanY;
+                addedNode.position.x += node.position.x - meanX;
+                addedNode.position.y += node.position.y - meanY;
                 this.graph.selectedNodes.push(addedNode);
                 // Reset connections count
                 Object.values(addedNode.inputs).concat(
@@ -555,8 +544,8 @@ export default class PipelineManagerEditor extends Editor {
                 ).forEach(
                     (intf) => { intf.connectionCount = 0; },
                 );
+                addedNode.load(state);
             }
-            addedNode.load(state);
         });
 
         const subgraphNodeConnections = this.graph.connections.filter(
