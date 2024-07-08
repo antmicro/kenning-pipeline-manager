@@ -2,7 +2,16 @@
     "version": "20230523.12",
     "metadata": {
         "allowLoopbacks": true,
-        "layers": []
+        "layers": [],
+        "interfaces": {
+            "Connection-1": {
+                "interfaceColor": "#FF00FF"
+            },
+            "Connection-2": {
+                "interfaceColor": "#FF0000"
+
+            }
+        }
     },
     "nodes": [
         {
@@ -12,19 +21,20 @@
             "interfaces": [
                 {
                     "name": "Input",
-                    "type": "Connection",
+                    "type": "Connection-2",
                     "direction": "input"
                 },
                 {
                     "name": "Output",
-                    "type": "Connection",
+                    "type": "Connection-2",
                     "direction": "output"
                 },
                 {
                     "name": "Inout",
-                    "type": "Connection",
+                    "type": "Connection-2",
                     "direction": "inout",
-                    "side": "right"
+                    "side": "right",
+                    "maxConnectionsCount": 1
                 }
             ]
         },
@@ -47,17 +57,17 @@
             "interfaces": [
                 {
                     "name": "Input",
-                    "type": "Connection",
+                    "type": "Connection-2",
                     "direction": "input"
                 },
                 {
                     "name": "Output",
-                    "type": "Connection",
+                    "type": "Connection-2",
                     "direction": "output"
                 },
                 {
                     "name": "Inout",
-                    "type": "Connection",
+                    "type": "Connection-1",
                     "direction": "inout"
                 }
             ]
