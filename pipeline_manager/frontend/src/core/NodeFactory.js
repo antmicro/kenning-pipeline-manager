@@ -721,19 +721,25 @@ export function updateSubgraphInterfaces(inputs, outputs, nodes) {
         const container = intf.direction === 'output' ? outputs : inputs;
         const idx = container.findIndex((x) => x.id === intf.id);
         if (idx === -1) {
+            // Graph node interface should not inherit some properties that
+            // are node-specific
             newInterfaces.push({
                 name: intf.externalName,
                 id: intf.id,
-                type: intf.type,
                 externalName: undefined,
+                type: intf.type,
                 side: intf.side,
                 direction: intf.direction,
+                maxConnectionsCount: intf.maxConnectionsCount,
                 sidePosition: undefined,
             });
         } else {
             container[idx].direction = intf.direction;
             container[idx].name = intf.externalName;
+
+            // Assigning information that is not dataflow-based
             container[idx].type = intf.type;
+            container[idx].maxConnectionsCount = intf.maxConnectionsCount;
             newInterfaces.push(container[idx]);
         }
     });
@@ -778,10 +784,12 @@ export function calculateExternalInterfaces(nodes, connections, inputs = [], out
         // but are stored in the specification
         (nodeSpecification.interfaces ?? []).forEach((intf) => {
             const container = intf.direction === 'output' ? out.outputs : out.inputs;
+            const intfName = `${intf.direction}_${intf.name}`;
             const intfType = typeof intf.type === 'string' ? [intf.type] : intf.type;
-            container[`${intf.direction}_${intf.name}`].type = intfType;
-        });
 
+            container[intfName].type = intfType;
+            container[intfName].maxConnectionsCount = intf.maxConnectionsCount;
+        });
         return out;
     });
     const errorMessages = parsedState.filter((n) => typeof n === 'string');
