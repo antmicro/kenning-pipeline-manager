@@ -292,7 +292,7 @@ export default function createPipelineManagerGraph(graph) {
         }
 
         // Load state
-        this.id = state.id;
+        this.id = state.id ?? uuidv4();
         this.name = state.name ?? undefined;
 
         state.nodes.forEach((n) => {
@@ -306,13 +306,22 @@ export default function createPipelineManagerGraph(graph) {
                 errors.push(`Node type ${n.name} is not registered`);
             } else {
                 const node = new nodeInformation.type(); // eslint-disable-line new-cap
-                node.id = n.id;
+                const nodeId = node.id;
                 this.addNode(node);
                 const nodeErrors = node.load(n);
                 if (Array.isArray(nodeErrors) && nodeErrors.length) {
                     errors.push(...nodeErrors);
                 }
+
+                // The node state may not have an id, so we it has to be assigned manually
+                // if needed
+                node.id ??= nodeId;
             }
+        });
+
+        // Assigning ids to connections that do not have them
+        state.connections.forEach((c) => {
+            c.id ??= uuidv4();
         });
 
         state.connections.forEach((c) => {
