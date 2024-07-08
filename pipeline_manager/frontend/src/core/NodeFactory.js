@@ -16,6 +16,7 @@ import { defineNode, GraphTemplate, NodeInterface } from '@baklavajs/core';
 
 import { updateInterfacePosition } from '../custom/CustomNode.js';
 import { applySidePositions, parseInterfaces, validateInterfaceGroups } from './interfaceParser.js';
+import Specification from './Specification.js';
 
 import InputInterface from '../interfaces/InputInterface.js';
 import ListInterface from '../interfaces/ListInterface.js';
@@ -732,6 +733,7 @@ export function updateSubgraphInterfaces(inputs, outputs, nodes) {
         } else {
             container[idx].direction = intf.direction;
             container[idx].name = intf.externalName;
+            container[idx].type = intf.type;
             newInterfaces.push(container[idx]);
         }
     });
@@ -764,6 +766,22 @@ export function calculateExternalInterfaces(nodes, connections, inputs = [], out
         if (Array.isArray(out) && out.length) {
             return `Node ${node.name} invalid. ${out}`;
         }
+
+        const nodeSpecification = Specification.getInstance().getNodeSpecification(
+            out.name,
+        );
+        if (nodeSpecification === undefined) {
+            return `Node ${node.name} was not found in the specification`;
+        }
+
+        // Assigning information about interfaces that cannot be inferred from nodes,
+        // but are stored in the specification
+        (nodeSpecification.interfaces ?? []).forEach((intf) => {
+            const container = intf.direction === 'output' ? out.outputs : out.inputs;
+            const intfType = typeof intf.type === 'string' ? [intf.type] : intf.type;
+            container[`${intf.direction}_${intf.name}`].type = intfType;
+        });
+
         return out;
     });
     const errorMessages = parsedState.filter((n) => typeof n === 'string');

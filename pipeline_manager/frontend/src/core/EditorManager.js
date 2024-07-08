@@ -25,6 +25,7 @@ import metadataSchema from '../../../resources/schemas/metadata_schema.json' ass
 import dataflowSchema from '../../../resources/schemas/dataflow_schema.json' assert { type: 'json' };
 import graphSchema from '../../../resources/schemas/graph_schema.json' assert { type: 'json' };
 import ConnectionRenderer from './ConnectionRenderer.js';
+import Specification from './Specification.js';
 
 /* eslint-disable lines-between-class-members */
 /**
@@ -102,8 +103,7 @@ export default class EditorManager {
 
     specificationLoaded = ref(false);
 
-    currentSpecification = undefined;
-    unresolvedSpecification = undefined;
+    specification = Specification.getInstance();
 
     updatedMetadata = {};
 
@@ -180,7 +180,7 @@ export default class EditorManager {
         const warnings = [];
         const errors = [];
         const { version } = dataflowSpecification; // eslint-disable-line object-curly-newline,max-len
-        if (!this.currentSpecification) {
+        if (!this.specification.currentSpecification) {
             if (version === undefined) {
                 warnings.push(
                     `Loaded specification has no version assigned. Please update the specification to version ${this.specificationVersion}.`,
@@ -192,8 +192,10 @@ export default class EditorManager {
             }
         }
 
-        this.unresolvedSpecification = JSON.parse(JSON.stringify(dataflowSpecification));
-        this.currentSpecification = dataflowSpecification;
+        this.specification.unresolvedSpecification = JSON.parse(JSON.stringify(
+            dataflowSpecification,
+        ));
+        this.specification.currentSpecification = dataflowSpecification;
         if (!lazyLoad) {
             // Preprocess includes
             this.globalVisitedSpecs = new Set();
@@ -393,7 +395,8 @@ export default class EditorManager {
             return { errors, warnings };
         }
 
-        this.currentSpecification.nodes = JSON.parse(JSON.stringify(resolvedNodes));
+        this.specification.currentSpecification.nodes = JSON.parse(JSON.stringify(resolvedNodes));
+        this.specification.currentSpecification.graphs = JSON.parse(JSON.stringify(graphs));
 
         // Resolving siblings, parents and children
 
@@ -547,17 +550,19 @@ export default class EditorManager {
             metadata = { ...this.updatedMetadata, ...metadata };
             newMetadata = JSON.parse(JSON.stringify(metadata));
         }
-        if (metadata === undefined && this.currentSpecification) {
-            metadata = this.currentSpecification.metadata ?? {};
+        if (metadata === undefined && this.specification.currentSpecification) {
+            metadata = this.specification.currentSpecification.metadata ?? {};
         }
 
         if (!metadata) return ['No specification to load provided.'];
 
         if (overriding) {
-            // this.currentSpecification?.metadata should not be over overridden, that is why
-            // it needs to be copied before merging
+            // this.specification.currentSpecification?.metadata should not
+            // be over overridden, that is why it needs to be copied before merging
             metadata = EditorManager.mergeObjects(
-                JSON.parse(JSON.stringify(this.currentSpecification?.metadata ?? {})), metadata,
+                JSON.parse(JSON.stringify(
+                    this.specification.currentSpecification?.metadata ?? {},
+                )), metadata,
             );
         }
 
@@ -707,7 +712,7 @@ export default class EditorManager {
      * @returns Serialized specification.
      */
     saveSpecification() {
-        return JSON.parse(JSON.stringify(this.unresolvedSpecification));
+        return JSON.parse(JSON.stringify(this.specification.unresolvedSpecification));
     }
 
     /**
@@ -745,7 +750,7 @@ export default class EditorManager {
             [this.baklavaView.settings.background.gridSize, 'backgroundSize'],
             [this.baklavaView.connectionRenderer.randomizedOffset, 'randomizedOffset'],
         ].forEach(([currVal, name]) => {
-            const m = this.currentSpecification?.metadata ?? {};
+            const m = this.specification.currentSpecification?.metadata ?? {};
             const dm = this.defaultMetadata;
 
             if (currVal !== (m[name] ?? dm[name])) {
@@ -799,7 +804,7 @@ export default class EditorManager {
                     );
                 }
 
-                if ('metadata' in dataflow && this.currentSpecification !== undefined) {
+                if ('metadata' in dataflow && this.specification.currentSpecification !== undefined) {
                     const errors = EditorManager.validateMetadata(dataflow.metadata);
                     if (Array.isArray(errors) && errors.length) {
                         return { errors, warnings };
@@ -1114,7 +1119,7 @@ export default class EditorManager {
 
     get notifyWhenChanged() {
         return this.updatedMetadata.notifyWhenChanged ??
-            this.currentSpecification?.metadata?.notifyWhenChanged ??
+            this.specification.currentSpecification?.metadata?.notifyWhenChanged ??
             this.defaultMetadata.notifyWhenChanged;
     }
 }

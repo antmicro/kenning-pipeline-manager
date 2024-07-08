@@ -85,7 +85,7 @@ fs.readFile(positionals[0], async function (err, spec) {
 
     if (values.resolvedSpecification) {
         // Write resolved specification in a human-readable format
-        fs.writeFileSync(values.resolvedSpecification, JSON.stringify(instance.currentSpecification, null, 4));
+        fs.writeFileSync(values.resolvedSpecification, JSON.stringify(instance.specification.currentSpecification, null, 4));
     }
 
     if (positionals.length >= 2) {
