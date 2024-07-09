@@ -1,6 +1,47 @@
 {
     "version": "20230523.12",
+    "graphs": [
+        {
+            "name": "Test subgraph node #1",
+            "category": "Test Category",
+            "nodes": [
+                {
+                    "id": "1212de63-daad-4ace-bc4b-df562b3a6b0e",
+                    "position": {
+                        "x": 600,
+                        "y": 500
+                    },
+                    "width": 200,
+                    "twoColumn": false,
+                    "interfaces": [
+                        {
+                            "id": "9db11824-0058-4213-a719-27af7c18a71d",
+                            "name": "Interface 1",
+                            "direction": "inout"
+                        }
+                    ],
+                    "properties": [
+                        {"id": "87f8deeb-aa44-4f45-ba4b-d947a4857d4d", "name": "Property 1", "value": "1"},
+                        {"id": "af99eed2-c9e5-49b7-8573-2f40eafe9312", "name": "Property 2", "value": "2"}
+                    ],
+                    "enabledInterfaceGroups": [],
+                    "name": "Test Node",
+                    "instanceName": "Foo"
+                }
+            ],
+            "connections": []
+        }
+    ],
     "nodes": [
+        {
+            "name": "Test Node",
+            "category": "Test Category",
+            "interfaces": [{"name": "Interface 1", "direction": "inout"}],
+            "properties": [
+                {"name": "Property 1", "type": "text", "default": ""},
+                {"name": "Property 2", "type": "text", "default": ""}
+            ]
+        },
         {
             "name": "TerminalStressTest",
             "category": "API",
