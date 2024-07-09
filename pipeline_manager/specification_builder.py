@@ -861,13 +861,17 @@ class SpecificationBuilder(object):
         if "description" in node:
             self.add_node_description(nodename, node["description"])
         for interface in node.get("interfaces", []):
+            iface = None
+            if "type" in interface:
+                if isinstance(interface["type"], list):
+                    iface = [typ.lower() for typ in interface["type"]]
+                else:
+                    iface = interface["type"].lower()
             self.add_node_type_interface(
                 name=nodename,
                 interfacename=interface["name"],
-                interfacetype=[typ.lower() for typ in interface["type"]]
-                if isinstance(interface["type"], list)
-                else interface["type"].lower(),  # noqa: E501
-                direction=interface["direction"],
+                interfacetype=iface,
+                direction=get_optional(interface, "direction"),
                 side=get_optional(interface, "side"),
                 maxcount=get_optional(interface, "maxConnectionsCount"),
                 override=get_optional(interface, "override"),
