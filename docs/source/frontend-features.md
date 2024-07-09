@@ -101,6 +101,59 @@ The color of the icon indicates the status of the connection with the server:
 Extrnal application may deliver additional features by providing additional buttons in the editor menu.
 More details can be found in the [Specification format](project:specification-format.md#navbar-item) section.
 
+## URL parameters for the frontend
+
+The frontend of Pipeline Manager provides a set of URL parameters that can be used to change the specification, graph or default behavior of the application.
+Those arguments need to be encoded - we need to escape all URL-specific characters.
+This can be achieved either with `urllib.parse.urlencode` in Python:
+
+```python
+import urllib.parse
+
+urllib.parse.urlencode({
+    "spec": "https://github.com/antmicro/kenning-pipeline-manager/blob/main/examples/sample-specification.json",
+    "graph": "https://github.com/antmicro/kenning-pipeline-manager/blob/main/examples/sample-dataflow.json"
+})
+
+# RESULT: 'spec=https%3A%2F%2Fgithub.com%2Fantmicro%2Fkenning-pipeline-manager%2Fblob%2Fmain%2Fexamples%2Fsample-specification.json&graph=https%3A%2F%2Fgithub.com%2Fantmicro%2Fkenning-pipeline-manager%2Fblob%2Fmain%2Fexamples%2Fsample-dataflow.json'
+```
+
+or with `encodeURIComponent` in Javascript:
+
+```javascript
+encodeURIComponent("https://github.com/antmicro/kenning-pipeline-manager/blob/main/examples/sample-specification.json")
+
+// RESULT: 'https%3A%2F%2Fgithub.com%2Fantmicro%2Fkenning-pipeline-manager%2Fblob%2Fmain%2Fexamples%2Fsample-specification.json'
+```
+
+Available parameters are as follows:
+
+* `spec` - URL to the specification, by default it can be a HTTP/HTTPS URL.
+* `graph` - URL to the graph, by default it can be a HTTP/HTTPS URL.
+* `preview` - starts Pipeline Manager in read only mode, without HUD
+* `include` - allows to provide includes for the specification.
+
+When it comes to `spec` and `graph`, by default we can use following URI schemes:
+
+* `http://`, `https://`
+* `relative://` - picks a path relative to the Pipeline Manager URL
+
+To add more URI schemes, we need to define `VUE_APP_JSON_URL_SUBSTITUTES` variable holding a dictionary mapping scheme name to appropriate template/prefix.
+
+The JSON for URL substitutes can look as follows:
+
+```json
+{
+    "examples": "https://github.com/antmicro/kenning-pipeline-manager/examples/{}"
+}
+```
+
+And be later be referred to as `examples://sample-specification.json` in URL.
+
+```{note}
+The URI schemes can be passed to `pipeline_manager build` via `--json_url_specification` argument.
+```
+
 ## Testing the front-end features
 
 The best way to test the front-end features is to use the `pipeline_manager.frontend_tester.tester_client`, [Third-party server example](example-server).
