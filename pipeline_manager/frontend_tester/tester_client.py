@@ -80,7 +80,7 @@ def get_node_properties(node_type: str, dataflow: Dict) -> Dict:
     Dict
         Dictionary that has all properties of a `name` node.
     """
-    nodes = dataflow["graph"]["nodes"]
+    nodes = dataflow["graphs"][0]["nodes"]
     description_node = None
 
     for node in nodes:
@@ -112,8 +112,8 @@ def get_effects(node_type: str, dataflow: Dict) -> List:
     List
         List of nodes connected to `type` node.
     """
-    nodes = dataflow["graph"]["nodes"]
-    connections = dataflow["graph"]["connections"]
+    nodes = dataflow["graphs"][0]["nodes"]
+    connections = dataflow["graphs"][0]["connections"]
     socket_id = None
 
     for node in nodes:
@@ -585,7 +585,7 @@ class RPCMethods:
         if self.running[method_name]:
             self.running[method_name] = False
 
-        if "MessageType" in properties and "content" in properties:
+        if "MessageType" in properties and "Message" in properties:
             return {
                 "type": _text_to_message_type(properties["MessageType"]).value,
                 "content": properties["Message"],
