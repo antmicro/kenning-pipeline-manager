@@ -564,7 +564,8 @@ export default defineComponent({
             NotificationHandler.setShowNotification(false);
             editorManager.updateMetadata({}); // Defaulting metadata values
 
-            let urlParams = new URLSearchParams(window.location.search);
+            const escapedsearch = window.location.search.replace(/&amp;/g, '&');
+            const urlParams = new URLSearchParams(escapedsearch);
             if (urlParams.has('preview')) {
                 const setting = urlParams.get('preview') === 'true';
                 props.viewModel.editor.preview = setting;
@@ -573,9 +574,6 @@ export default defineComponent({
             let specText;
             if (!defaultSpecification) {
                 // Try loading default specification and/or dataflow from URLs provided in an
-                // escaped form in the page's URL
-                const escapedsearch = window.location.search.replace(/&amp;/g, '&');
-                urlParams = new URLSearchParams(escapedsearch);
                 if (urlParams.has('spec')) {
                     const [status, ret] = await loadJsonFromRemoteLocation(urlParams.get('spec'));
                     if (status === false) {
@@ -603,6 +601,10 @@ export default defineComponent({
             }
 
             if (specText !== undefined) {
+                if (urlParams.has('include')) {
+                    if (specText.include === undefined) specText.include = [];
+                    specText.include.push(urlParams.get('include'));
+                }
                 let errors = await updateEditorSpecification(specText);
 
                 if (errors.length) {
@@ -615,8 +617,6 @@ export default defineComponent({
                 if (defaultDataflow) {
                     dataflow = require(process.env.VUE_APP_DATAFLOW_PATH); // eslint-disable-line global-require,max-len,import/no-dynamic-require
                 } else {
-                    const escapedsearch = window.location.search.replace(/&amp;/g, '&');
-                    urlParams = new URLSearchParams(escapedsearch);
                     if (urlParams.has('graph')) {
                         const [status, ret] = await loadJsonFromRemoteLocation(urlParams.get('graph'));
                         if (status === false) {
