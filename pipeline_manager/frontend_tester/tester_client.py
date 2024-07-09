@@ -80,7 +80,7 @@ def get_node_properties(node_type: str, dataflow: Dict) -> Dict:
     Dict
         Dictionary that has all properties of a `name` node.
     """
-    nodes = dataflow["graphs"][0]["nodes"]
+    nodes = [node for graph in dataflow["graphs"] for node in graph["nodes"]]
     description_node = None
 
     for node in nodes:
@@ -112,8 +112,13 @@ def get_effects(node_type: str, dataflow: Dict) -> List:
     List
         List of nodes connected to `type` node.
     """
-    nodes = dataflow["graphs"][0]["nodes"]
-    connections = dataflow["graphs"][0]["connections"]
+    nodes = [node for graph in dataflow["graphs"] for node in graph["nodes"]]
+    connections = [
+        connection
+        for graph in dataflow["graphs"]
+        for connection in graph["connections"]
+    ]
+
     socket_id = None
 
     for node in nodes:
