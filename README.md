@@ -68,12 +68,14 @@ The dataflow can be loaded in the webpage using the `Load graph file` option in 
 What is more, the specification and the dataflow can be provided as URL arguments:
 
 * `spec` - should contain URL to the specification file,
-* `graph` - should contain URL to the dataflow file.
+* `graph` - should contain URL to the dataflow file,
+* `preview` - if `true`, the graph is displayed in preview mode (read only, no HUD),
+* `include` - to alter the specification from the level of URL, it is possible to provide a URL to additional includes with this field.
 
 For example:
 
 ```bash
-firefox "./pipeline_manager/frontend/dist/index.html?spec=https%3A%2F%2Fraw.githubusercontent.com%2Fantmicro%2Fkenning-pipeline-manager%2Fmain%2Fexamples%2Fsample-specification.json&graph=https%3A%2F%2Fraw.githubusercontent.com%2Fantmicro%2Fkenning-pipeline-manager%2Fmain%2Fexamples%2Fsample-dataflow.json"
+firefox "https://antmicro.github.io/kenning-pipeline-manager/static-demo/index.html?spec=https%3A%2F%2Fraw.githubusercontent.com%2Fantmicro%2Fkenning-pipeline-manager%2Fmain%2Fexamples%2Fsample-specification.json&graph=https%3A%2F%2Fraw.githubusercontent.com%2Fantmicro%2Fkenning-pipeline-manager%2Fmain%2Fexamples%2Fsample-dataflow.json"
 ```
 
 Will fetch and use specification and dataflow from the GitHub repository for this project.
