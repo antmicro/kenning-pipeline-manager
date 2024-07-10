@@ -5,7 +5,7 @@
 import pytest
 from pytest_httpserver import HTTPServer
 
-from pipeline_manager.tests.conftest import check_validation
+from pipeline_manager.tests.conftest import check_validation, example_pairs
 
 
 @pytest.fixture
@@ -319,3 +319,36 @@ def specification_include_graphs_no_nodes(
 def test_valid_specification(specification, expected, request):
     specification = request.getfixturevalue(specification)
     assert check_validation(specification) == expected
+
+
+@pytest.mark.parametrize("example", example_pairs())
+def test_all_existing_examples_by_include(example, httpserver: HTTPServer):
+    """
+    Tests all existing pairs of specification and dataflow files in
+    examples module. It is assumed that each pair is in format
+    (*-specification.json, *-dataflow.json).
+
+    It included the dataflow as `includeGraphs` in the specification.
+    """
+    import json
+
+    spec, dataflow = example
+
+    with open(spec) as spec, open(dataflow) as dataflow:
+        spec = json.load(spec)
+        dataflow = json.load(dataflow)
+
+    if len(dataflow["graphs"]) > 1:
+        pytest.xfail("Only single graph dataflows are supported.")
+
+    httpserver.expect_request("/dataflow.json").respond_with_json(dataflow)
+
+    spec["includeGraphs"] = [
+        {
+            "url": httpserver.url_for("/dataflow.json"),
+            "category": "includeGraphs",
+            "name": "Dataflow",
+        },
+    ]
+
+    assert check_validation(spec) == 0
