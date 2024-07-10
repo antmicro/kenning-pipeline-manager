@@ -39,6 +39,10 @@ class Metadata {
     }
 }
 
+// If a graph node entry does not have a category assigned, this values is used
+// as a fallback category
+const DEFAULT_GRAPH_NODE_CATEGORY = 'Graphs';
+
 /**
  * Translates the provided url according to
  * the optional substitution spec provided at compile time.
@@ -171,10 +175,7 @@ export default class EditorManager {
         }
 
         if (this.specificationLoaded) {
-            this.baklavaView.editor.unregisterGraphs();
-            this.baklavaView.editor.cleanEditor();
-            this.baklavaView.editor.unregisterNodes();
-            this.specificationLoaded = false;
+            this.clearEditorManagerState();
         }
 
         const warnings = [];
@@ -208,13 +209,22 @@ export default class EditorManager {
             }
 
             // Include graphs
-            const {
-                graphs, errors: includeGraphsErrors,
-            } = await EditorManager.includeGraphs(unresolvedSpecification.includeGraphs ?? []);
+            if (unresolvedSpecification.includeGraphs !== undefined) {
+                const {
+                    graphs, errors: includeGraphsErrors,
+                } = await EditorManager.includeGraphs(unresolvedSpecification.includeGraphs);
 
-            errors.push(...includeGraphsErrors);
-            if (errors.length) {
-                return { errors, warnings };
+                errors.push(...includeGraphsErrors);
+                if (errors.length) {
+                    return { errors, warnings };
+                }
+
+                unresolvedSpecification.graphs = [
+                    ...(unresolvedSpecification.graphs ?? []),
+                    ...graphs,
+                ];
+            } else {
+                unresolvedSpecification.graphs ??= [];
             }
 
             // Update metadata
@@ -223,11 +233,6 @@ export default class EditorManager {
             if (errors.length) {
                 return { errors, warnings };
             }
-
-            unresolvedSpecification.graphs = [
-                ...(unresolvedSpecification.graphs ?? []),
-                ...graphs,
-            ];
 
             // Update graph specification
             const {
@@ -239,9 +244,20 @@ export default class EditorManager {
 
         if (errors.length === 0) {
             this.specificationLoaded = true;
+        } else {
+            this.clearEditorManagerState();
         }
 
         return { errors, warnings };
+    }
+
+    clearEditorManagerState() {
+        this.baklavaView.editor.unregisterGraphs();
+        this.baklavaView.editor.deepCleanEditor();
+        this.baklavaView.editor.unregisterNodes();
+        this.specificationLoaded = false;
+        this.specification.currentSpecification = {};
+        this.specification.unresolvedSpecification = {};
     }
 
     /**
@@ -308,7 +324,7 @@ export default class EditorManager {
      * graphs format to be included into the specification.
      *
      * @param includeGraphs Array of included graphs
-     * @returns Array of subgraphs and an array of errors that occurred during the process.
+     * @returns Array graphs and an array of errors that occurred during the process.
      */
     static async includeGraphs(includeGraphs) {
         const errors = [];
@@ -321,53 +337,52 @@ export default class EditorManager {
             return { graphs, errors };
         }
 
+        const dataflows = [];
         await Promise.all(includeGraphs.map(async (dataflow) => {
             const [status, val] = await loadJsonFromRemoteLocation(dataflow.url);
             if (status === false) {
-                errors.push(`Could not load the included dataflow from ${dataflow}. Reason: ${val}`);
+                errors.push(`Could not load the included dataflow from '${dataflow.url}'. Reason: ${val}`);
                 return;
             }
 
-            // Validate the fetched dataflow
-            const validationErrors = EditorManager.validateDataflow(val);
-            if (validationErrors.length) {
-                errors.push(...validationErrors);
-                return;
+            dataflows.push(val);
+        }));
+
+        if (errors.length) return { graphs, errors };
+
+        for (let i = 0; i < includeGraphs.length; i += 1) {
+            const dataflow = dataflows[i];
+            const dataflowMetadata = includeGraphs[i];
+
+            if (dataflow.graphs.length !== 1) {
+                errors.push(`Only single graph dataflows are supported. Aborting loading subgraph include from ${dataflowMetadata.url}.`);
+                continue; // eslint-disable-line no-continue
             }
 
-            if (val.graphs.length !== 1) {
-                errors.push(`Only single graph dataflows are supported. Aborting loading subgraph include from ${dataflow.url}.`);
-                return;
-            }
-
-            let targetGraph;
-            if (val.entryGraph === undefined) {
-                targetGraph = val.graphs[0]; // eslint-disable-line prefer-destructuring
-            } else {
-                targetGraph = val.graphs.find((graph) => graph.id === val.entryGraph);
-            }
-
-            targetGraph.name = dataflow.name ?? targetGraph.name;
-            targetGraph.category = dataflow.category ?? undefined;
+            const targetGraph = dataflow.graphs[0];
+            targetGraph.name = dataflowMetadata.name ?? targetGraph.name;
 
             if (targetGraph.name === undefined) {
-                errors.push(`Included subgraph from '${dataflow.url}' does not have a name defined.`);
-                return;
+                errors.push(`Included subgraph from ${dataflowMetadata.url} does not have a name defined.`);
+                continue; // eslint-disable-line no-continue
             }
 
             if (graphs.find((graph) => graph.name === targetGraph.name) !== undefined) {
-                errors.push(`Included graph from '${dataflow.url}' has a duplicate name`);
-                return;
+                errors.push(`Included graph from ${dataflowMetadata.url} has a duplicate name`);
+                continue; // eslint-disable-line no-continue
             }
 
+            targetGraph.category = dataflowMetadata.category;
             graphs.push(targetGraph);
-        }));
+        }
+
         return { graphs, errors };
     }
 
     /**
      * Reads and validates part of specification related to nodes and graphs
      * @param dataflowSpecification Specification to load
+     * @param includedGraphs Graphs included in the specification
      * @returns An object consisting of errors and warnings arrays. If any array is empty
      * the updating process was successful.
      */
@@ -490,7 +505,8 @@ export default class EditorManager {
         }
 
         if (graphs !== undefined) {
-            graphs.forEach((graph) => {
+            // eslint-disable-next-line no-restricted-syntax
+            for (const graph of graphs) {
                 const myGraph = GraphFactory(
                     graph.nodes,
                     graph.connections,
@@ -501,18 +517,47 @@ export default class EditorManager {
                 // If `myGraph` is any array then it is an array of errors
                 if (Array.isArray(myGraph) && myGraph.length) {
                     errors.push(...myGraph);
-                    return;
+                    continue; // eslint-disable-line no-continue
                 }
 
                 this.baklavaView.editor.addGraphTemplate(
                     myGraph,
-                    graph.category,
+                    graph.category ?? DEFAULT_GRAPH_NODE_CATEGORY,
                     graph.name,
                 );
-            });
+
+                // Category is not needed when loading a dataflow
+                const graphToValidate = JSON.parse(JSON.stringify(graph));
+                if (Object.prototype.hasOwnProperty.call(graphToValidate, 'category')) {
+                    delete graphToValidate.category;
+                }
+
+                // Validating the graph after it is registered to see if there are any errors
+                // by loading a single graph dataflow
+
+                const {
+                    errors: loadingErrors,
+                    warnings: loadingWarnings,
+                } = await this.loadDataflow({ // eslint-disable-line no-await-in-loop
+                    graphs: [graphToValidate],
+                    version: dataflowSpecification.version,
+                }, true, true);
+
+                // Cleaning the editor after loading the dataflow
+                this.baklavaView.editor.deepCleanEditor();
+                this.baklavaView.editor.unregisterGraphs();
+
+                warnings.push(
+                    ...loadingWarnings.map((warning) => `Graph '${graph.name}' is invalid: ${warning}`),
+                );
+
+                errors.push(
+                    ...loadingErrors.map((error) => `Graph '${graph.name}' is invalid: ${error}`));
+            }
         }
 
-        return { errors, warnings };
+        // Removing duplicate warnings
+        return { errors, warnings: [...new Set(warnings)] };
     }
 
     /**
@@ -581,7 +626,7 @@ export default class EditorManager {
         }
 
         if (metadata && 'navbarItems' in metadata) {
-            this.baklavaView.navbarItems = metadata.navbarItems;
+            this.baklavaView.navbarItems = JSON.parse(JSON.stringify(metadata.navbarItems));
         }
 
         this.baklavaView.editor.readonly = metadata?.readonly ?? this.defaultMetadata.readonly;
@@ -774,10 +819,13 @@ export default class EditorManager {
      *
      * @param dataflow Dataflow to load. Can be eithe an object or a string
      * @param preventCentering Boolean Blocks view in the same spot.
+     * @param loadOnly determines whether to load the graph only without adjusting
+     * the graph rendering. Can be used when validating graphs without their browser
+     * representation.
      * @returns An array of errors that occurred during the dataflow loading.
      * If the array is empty, the loading was successful.
      */
-    async loadDataflow(dataflow, preventCentering = false) {
+    async loadDataflow(dataflow, preventCentering = false, loadOnly = false) {
         let { notifyWhenChanged } = this;
         // Turn off notification during dataflow loading
         this.updateMetadata({ notifyWhenChanged: false }, true, true);
@@ -825,7 +873,11 @@ export default class EditorManager {
                     );
                 }
                 const errors = {
-                    errors: await this.baklavaView.editor.load(dataflow, preventCentering),
+                    errors: await this.baklavaView.editor.load(
+                        dataflow,
+                        preventCentering,
+                        loadOnly,
+                    ),
                     warnings,
                 };
                 this.baklavaView.history.graphSwitch(
@@ -1055,12 +1107,14 @@ export default class EditorManager {
             nodeNames.add(node.name);
         });
 
-        graphs.forEach((graph) => {
-            if (nodeNames.has(graph.name)) {
-                errors.push(`Graph node name '${graph.name}' is defined multiple times`);
-            }
-            nodeNames.add(graph.name);
-        });
+        if (graphs !== undefined) {
+            graphs.forEach((graph) => {
+                if (nodeNames.has(graph.name)) {
+                    errors.push(`Graph node name '${graph.name}' is defined multiple times`);
+                }
+                nodeNames.add(graph.name);
+            });
+        }
         return errors;
     }
 
