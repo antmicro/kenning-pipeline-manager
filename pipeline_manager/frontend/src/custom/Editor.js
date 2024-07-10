@@ -168,7 +168,17 @@ export default class PipelineManagerEditor extends Editor {
         this.events.registerNodeType.emit({ type, options });
     }
 
-    async load(state, preventCentering = false) {
+    /**
+     * Loads the dataflow into the editor.
+     *
+     * @param state dataflow to load
+     * @param preventCentering determines whether to center the graph after loading
+     * @param loadOnly determines whether to load the graph only without adjusting
+     * the graph rendering. Can be used when validating graphs without their browser
+     * representation.
+     * @returns list of errors that occurred during loading
+     */
+    async load(state, preventCentering = false, loadOnly = false) {
         // All subgraphs should be unregistered to avoid conflicts later when trying to
         // load into subgraph (in that case there may be two subgraphs with the same ID, one
         // of them from the previous session).
@@ -274,7 +284,7 @@ export default class PipelineManagerEditor extends Editor {
         // If the editor is run outside of a browser, then
         // all functionality that is after this line will fail,
         // as it changes the way the graph is rendered in the browser
-        if (typeof window === 'undefined') return errors;
+        if (typeof window === 'undefined' || loadOnly) return errors;
 
         const dfs = (subgraph, path) => {
             if (subgraph?.nodes !== undefined) {
