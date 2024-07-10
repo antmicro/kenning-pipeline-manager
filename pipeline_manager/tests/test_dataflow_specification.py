@@ -9,51 +9,11 @@ from pipeline_manager.validator import validate
 
 
 @pytest.fixture
-def specification_invalid_property_type():
+def specification_empty_node():
     return {
         "nodes": [
             {
                 "name": "TestNode",
-                "layer": "TestNode",
-                "category": "TestNode",
-                "properties": [
-                    {
-                        "name": "TestProperty",
-                        "type": "InvalidType",
-                    }
-                ],
-                "interfaces": [],
-            }
-        ]
-    }
-
-
-@pytest.fixture
-def specification_invalid_property_value():
-    return {
-        "nodes": [
-            {
-                "name": "TestNode",
-                "layer": "TestNode",
-                "category": "TestNode",
-                "properties": [
-                    {
-                        "name": "TestProperty",
-                        "type": "select",
-                        "values": "Invalid",
-                    }
-                ],
-                "interfaces": [],
-            }
-        ]
-    }
-
-
-@pytest.fixture
-def specification_invalid_nodes_without_name():
-    return {
-        "nodes": [
-            {
                 "layer": "TestNode",
                 "category": "TestNode",
                 "properties": [],
@@ -64,93 +24,93 @@ def specification_invalid_nodes_without_name():
 
 
 @pytest.fixture
-def specification_invalid_node_as_category_not_extending():
+def specification_invalid_property_type(specification_empty_node):
+    specification_empty_node["nodes"][0]["properties"].append(
+        {
+            "name": "TestProperty",
+            "type": "InvalidType",
+        }
+    )
+    return specification_empty_node
+
+
+@pytest.fixture
+def specification_invalid_property_value(specification_empty_node):
+    specification_empty_node["nodes"][0]["properties"].append(
+        {
+            "name": "TestProperty",
+            "type": "select",
+            "values": "Invalid",
+        }
+    )
+    return specification_empty_node
+
+
+@pytest.fixture
+def specification_nodes_without_name(specification_empty_node):
+    del specification_empty_node["nodes"][0]["name"]
+    return specification_empty_node
+
+
+@pytest.fixture
+def specification_node_as_category_not_extending(specification_empty_node):
+    specification_empty_node["nodes"][0]["isCategory"] = True
+    specification_empty_node["nodes"].append(
+        {"name": "Q", "category": "TestNode"}
+    )
+    return specification_empty_node
+
+
+@pytest.fixture
+def specification_node_as_category_different_category_path(
+    specification_empty_node
+):
+    specification_empty_node["nodes"][0]["isCategory"] = True
+    specification_empty_node["nodes"].append(
+        {"name": "Q", "category": "c/d", "extends": ["TestNode"]},
+    )
+    return specification_empty_node
+
+
+@pytest.fixture
+def specification_same_node(specification_empty_node):
+    specification_empty_node["nodes"].append(
+        specification_empty_node["nodes"][0]
+    )
+    return specification_empty_node
+
+
+@pytest.fixture
+def specification_same_node_name_different_category(specification_empty_node):
+    specification_empty_node["nodes"].append(
+        specification_empty_node["nodes"][0]
+    )
+    specification_empty_node["nodes"][1]["category"] = "OtherCategory"
+    return specification_empty_node
+
+
+@pytest.fixture
+def specification_same_category():
     return {
         "nodes": [
             {"category": "a/B", "isCategory": True},
-            {"name": "Q", "category": "a/B"},
-        ]
-    }
-
-
-@pytest.fixture
-def specification_invalid_node_as_category_different_category_path():
-    return {
-        "nodes": [
-            {"category": "a/B", "isCategory": True},
-            {"name": "Q", "category": "c/d", "extends": ["B"]},
-        ]
-    }
-
-
-@pytest.fixture
-def specification_invalid_same_node_name():
-    return {
-        "nodes": [
-            {
-                "name": "TestNode",
-            },
-            {
-                "name": "TestNode",
-            },
-        ]
-    }
-
-
-@pytest.fixture
-def specification_invalid_same_node_name_and_category():
-    return {
-        "nodes": [
-            {
-                "name": "TestNode",
-                "category": "TestNode",
-            },
-            {
-                "name": "TestNode",
-                "category": "TestNode",
-            },
-        ]
-    }
-
-
-@pytest.fixture
-def specification_invalid_same_node_name_different_category():
-    return {
-        "nodes": [
-            {
-                "name": "TestNode",
-                "category": "TestNodeFirst",
-            },
-            {
-                "name": "TestNode",
-                "category": "TestNodeSecond",
-            },
-        ]
-    }
-
-
-@pytest.fixture
-def specification_invalid_same_category():
-    return {
-        "nodes": [
-            {"category": "a/B", "isCategory": True},
             {"category": "a/B", "isCategory": True},
         ]
     }
 
 
 @pytest.fixture
-def specification_invalid_empty():
+def specification_empty():
     return {}
 
 
 @pytest.fixture
-def specification_invalid_empty_nodes():
+def specification_empty_nodes():
     return {"nodes": []}
 
 
 @pytest.fixture
-def dataflow_valid_node_property_text():
+def dataflow_without_nodes():
     return {
         "graphs": [
             {
@@ -186,90 +146,73 @@ def dataflow_valid_node_property_text():
 
 
 @pytest.fixture
-def specification_valid_nodes_without_properties():
-    return {
-        "nodes": [
-            {
-                "name": "TestNode",
-                "layer": "TestNode",
-                "category": "TestNode",
-                "interfaces": [],
-            }
-        ]
-    }
+def specification_node_without_properties(specification_empty_node):
+    del specification_empty_node["nodes"][0]["properties"]
+    return specification_empty_node
 
 
 @pytest.fixture
-def specification_valid_nodes_without_interfaces():
-    return {
-        "nodes": [
-            {
-                "name": "TestNode",
-                "layer": "TestNode",
-                "category": "TestNode",
-                "properties": [],
-            }
-        ]
-    }
+def specification_node_without_interfaces(specification_empty_node):
+    del specification_empty_node["nodes"][0]["interfaces"]
+    return specification_empty_node
 
 
 @pytest.fixture
-def specification_valid_nodes_without_layer():
-    return {
-        "nodes": [
-            {
-                "name": "TestNode",
-                "category": "TestNode",
-                "properties": [],
-                "interfaces": [],
-            }
-        ]
-    }
+def specification_node_without_layer(specification_empty_node):
+    del specification_empty_node["nodes"][0]["layer"]
+    return specification_empty_node
 
 
 @pytest.fixture
-def specification_valid_nodes_only_name_and_category():
-    return {
-        "nodes": [
-            {
-                "name": "TestNode",
-                "category": "TestNode",
-            }
-        ]
-    }
+def specification_node_only_name_and_category(specification_empty_node):
+    del specification_empty_node["nodes"][0]["interfaces"]
+    del specification_empty_node["nodes"][0]["properties"]
+    del specification_empty_node["nodes"][0]["layer"]
+    return specification_empty_node
 
 
 @pytest.fixture
-def specification_valid_node_as_category_with_inheriting():
-    return {
-        "nodes": [
-            {"category": "TestNode", "isCategory": True},
-            {"name": "ChildNode", "extends": ["TestNode"]},
-        ]
-    }
+def specification_node_as_category_with_inheriting(specification_empty_node):
+    specification_empty_node["nodes"][0]["isCategory"] = True
+    specification_empty_node["nodes"].append(
+        {"name": "ChildNode", "extends": ["TestNode"]}
+    )
+    return specification_empty_node
 
 
 @pytest.fixture
-def specification_valid_node_as_category_with_inheriting_nested():
-    return {
-        "nodes": [
-            {"category": "a/B", "isCategory": True},
-            {"category": "a/B/c/D", "isCategory": True, "extends": ["B"]},
-            {"name": "Q", "extends": ["B"]},
-            {"name": "Y", "extends": ["D"]},
-        ]
-    }
+def specification_node_as_category_with_inheriting_nested(
+    specification_empty_node
+):
+    specification_empty_node["nodes"][0]["isCategory"] = True
+    specification_empty_node["nodes"].append(
+        {
+            "category": "TestNode/Double/Nested",
+            "isCategory": True,
+            "extends": ["TestNode"],
+        }
+    )
+    specification_empty_node["nodes"].append(
+        {"name": "Test1", "extends": ["TestNode"]}
+    )
+    specification_empty_node["nodes"].append(
+        {"name": "Test2", "extends": ["Nested"]}
+    )
+    return specification_empty_node
 
 
 @pytest.fixture
-def specification_valid_node_as_category_other_category_with_same_name():
-    return {
-        "nodes": [
-            {"category": "a/B", "isCategory": True},
-            {"name": "Q", "extends": ["B"]},
-            {"name": "Z", "category": "c/B"},
-        ]
-    }
+def specification_node_as_category_other_category_with_same_name(
+    specification_empty_node
+):
+    specification_empty_node["nodes"][0]["isCategory"] = True
+    specification_empty_node["nodes"].append(
+        {"name": "Test1", "extends": ["TestNode"]}
+    )
+    specification_empty_node["nodes"].append(
+        {"name": "Test2", "category": "Test/TestNode"}
+    )
+    return specification_empty_node
 
 
 @pytest.mark.parametrize("example", example_pairs())
@@ -286,13 +229,13 @@ def test_all_existing_examples(example):
 @pytest.mark.parametrize(
     "valid_specification",
     [
-        "specification_valid_nodes_without_properties",
-        "specification_valid_nodes_without_interfaces",
-        "specification_valid_nodes_without_layer",
-        "specification_valid_nodes_only_name_and_category",
-        "specification_valid_node_as_category_with_inheriting",
-        "specification_valid_node_as_category_with_inheriting_nested",
-        "specification_valid_node_as_category_other_category_with_same_name",
+        "specification_node_without_properties",
+        "specification_node_without_interfaces",
+        "specification_node_without_layer",
+        "specification_node_only_name_and_category",
+        "specification_node_as_category_with_inheriting",
+        "specification_node_as_category_with_inheriting_nested",
+        "specification_node_as_category_other_category_with_same_name",
     ],
 )
 def test_valid_specification(
@@ -307,16 +250,15 @@ def test_valid_specification(
     [
         "specification_invalid_property_type",
         "specification_invalid_property_value",
-        "specification_invalid_nodes_without_name",
-        "specification_invalid_node_as_category_not_extending",
-        "specification_invalid_node_as_category_different_category_path",
-        "specification_invalid_same_node_name",
-        "specification_invalid_same_node_name_and_category",
-        "specification_invalid_same_node_name_different_category",
-        "specification_invalid_same_category",
-        "specification_invalid_empty",
-        "specification_invalid_empty_nodes",
-        "dataflow_valid_node_property_text",
+        "specification_nodes_without_name",
+        "specification_node_as_category_not_extending",
+        "specification_node_as_category_different_category_path",
+        "specification_same_node",
+        "specification_same_node_name_different_category",
+        "specification_same_category",
+        "specification_empty",
+        "specification_empty_nodes",
+        "dataflow_without_nodes",
     ],
 )
 def test_invalid_specification(
