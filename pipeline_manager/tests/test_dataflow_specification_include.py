@@ -267,10 +267,17 @@ def specification_include_graphs_no_nodes(
     dataflow_specification = {
         "graphs": [
             {
-                "name": "Empty",
+                "name": "GraphName",
                 "connections": [],
                 "id": "78cc86c4-9ad0-4a8f-88cb-71ee28c48659",
-                "nodes": [],
+                "nodes": [
+                    {
+                        "name": "ThisNodeDoesNotExist",
+                        "category": "someCategory",
+                        "interfaces": [],
+                        "properties": [],
+                    }
+                ],
             }
         ]
     }
@@ -310,8 +317,5 @@ def specification_include_graphs_no_nodes(
     ],
 )
 def test_valid_specification(specification, expected, request):
-    if specification == "specification_include_graphs_no_nodes":
-        pytest.xfail("Graphs included in specification are not yet verified")
-
     specification = request.getfixturevalue(specification)
     assert check_validation(specification) == expected
