@@ -22,8 +22,8 @@ export default function CreateCustomGraphNodeType(template, type) {
         type = `${GRAPH_NODE_TYPE_PREFIX}${type}`;
 
         save() {
-            this.propagateInterfaces();
-            this.subgraph.updateInterfaces();
+            this.saveInterfacesState();
+            this.subgraph.propagateInterfacesUp();
             const state = super.save();
 
             const newInterfaces = [];
@@ -122,7 +122,7 @@ export default function CreateCustomGraphNodeType(template, type) {
             return [];
         }
 
-        propagateInterfaces() {
+        saveInterfacesState() {
             // Propagate side data back to the subgraph such that if it was changed
             [...Object.values(this.inputs), ...Object.values(this.outputs)].forEach((intf) => {
                 const container = intf.direction === 'output' ? this.subgraph.outputs : this.subgraph.inputs;

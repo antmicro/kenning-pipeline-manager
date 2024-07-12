@@ -425,7 +425,7 @@ export default class PipelineManagerEditor extends Editor {
         }
         // disable history logging for the switch - don't push nodes being created here
         suppressHistoryLogging(true);
-        subgraphNode.propagateInterfaces();
+        subgraphNode.saveInterfacesState();
 
         this._graph = subgraphNode.subgraph;
         this._switchGraph(subgraphNode.subgraph);
@@ -459,7 +459,7 @@ export default class PipelineManagerEditor extends Editor {
         suppressHistoryLogging(true);
 
         // Updates information of the graph about its interfaces
-        this._graph.updateInterfaces();
+        this._graph.propagateInterfacesUp();
 
         const ifaceOrPositionErrors = [
             ...this._graph.inputs,

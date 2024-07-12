@@ -245,7 +245,14 @@ export default function createPipelineManagerGraph(graph) {
         return newNodeInstance;
     };
 
-    graph.updateInterfaces = function updateInterfaces() {
+    /**
+     * Function gather all exposed interfaces and their properties in a graph
+     * and propagates them into the graph node.
+     *
+     * It is used to synchronize exposed interfaces between a graph node and its graph
+     * when coming back from a graph.
+     */
+    graph.propagateInterfacesUp = function propagateInterfacesUp() {
         const out = updateSubgraphInterfaces(this.inputs, this.outputs, this.nodes);
         if (Array.isArray(out) && out.length) {
             throw new Error(`Error during updating interfaces: ${out.join(', ')}`);
@@ -253,7 +260,6 @@ export default function createPipelineManagerGraph(graph) {
 
         this.inputs = out.inputs;
         this.outputs = out.outputs;
-        return [];
     };
 
     graph.addNode = function addNode(node) {
