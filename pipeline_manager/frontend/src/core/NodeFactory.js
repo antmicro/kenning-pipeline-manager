@@ -250,7 +250,7 @@ function detectDiscrepancies(parsedState, inputs, outputs) {
  * @returns state that can be given to baklavajs, or an array of errors if any occurred
  */
 function parseNodeState(state) {
-    const newState = { ...state };
+    const newState = JSON.parse(JSON.stringify(state));
 
     if (newState.interfaces !== undefined) {
         const out = parseInterfaces(newState.interfaces, [], []);
@@ -731,6 +731,7 @@ export function updateSubgraphInterfaces(inputs, outputs, nodes) {
                 side: intf.side,
                 direction: intf.direction,
                 maxConnectionsCount: intf.maxConnectionsCount,
+                connectionCount: intf.connectionCount,
                 sidePosition: undefined,
             });
         } else {
@@ -740,6 +741,7 @@ export function updateSubgraphInterfaces(inputs, outputs, nodes) {
             // Assigning information that is not dataflow-based
             container[idx].type = intf.type;
             container[idx].maxConnectionsCount = intf.maxConnectionsCount;
+            container[idx].connectionCount = intf.connectionCount;
             newInterfaces.push(container[idx]);
         }
     });
