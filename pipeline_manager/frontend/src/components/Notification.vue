@@ -19,7 +19,7 @@ Single notification.
             <span v-if="type === 'error'" :class="type">Error</span>
             <span class="message">{{ message }}</span>
         </div>
-        <button @click="remove"><Cross color="white" /></button>
+        <button @click="remove" tabindex="-1"><Cross color="white"  tabindex="-1"/></button>
     </div>
 </template>
 

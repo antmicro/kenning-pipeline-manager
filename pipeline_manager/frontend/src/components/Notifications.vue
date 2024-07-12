@@ -12,7 +12,7 @@ List of notitications that creates a `Notification` component for each message r
     <div class="notifications">
         <div class="info">
             <span>Notifications ({{ notificationStore.notifications.length }})</span>
-            <button @click="this.removeAll">
+            <button @click="this.removeAll" tabindex="-1">
                 <Cross />
                 Clear all
             </button>

@@ -14,13 +14,13 @@ SPDX-License-Identifier: Apache-2.0
                 <div class="option-label">
                     {{ getOptionName(option) ? `${option.name}:` : '' }}
                 </div>
-                <component :is="option.component" :intf="option"></component>
+                <component :is="option.component" :intf="option" tabindex="-1"></component>
             </div>
 
             <div class="__properties" v-show="disableLayersOptions.length !== 0">
                 <div class="option-label">Hide Layers:</div>
                 <div v-for="option in disableLayersOptions" :key="option.id">
-                    <component :is="option.component" :intf="option"></component>
+                    <component :is="option.component" :intf="option" tabindex="-1"></component>
                 </div>
             </div>
         </div>
