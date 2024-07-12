@@ -7,9 +7,10 @@
 import { NodeInterface } from '@baklavajs/core';
 
 export default class SliderInterface extends NodeInterface {
-    constructor(name, value, min, max) {
+    constructor(name, value, min, max, step) {
         super(name, value);
         this.min = min;
         this.max = max;
+        this.step = step;
     }
 }

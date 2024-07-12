@@ -119,7 +119,7 @@ function createProperties(properties) {
                 if (propDef === undefined) {
                     propDef = p.min;
                 }
-                intf = new SliderInterface(propName, propDef, p.min, p.max).setPort(
+                intf = new SliderInterface(propName, propDef, p.min, p.max, p.step).setPort(
                     false,
                 );
                 intf.componentName = 'SliderInterface';

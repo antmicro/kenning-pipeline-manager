@@ -404,6 +404,10 @@
                     "description": "Maximum value of a range for slider, number, integer and hex type",
                     "type": ["number", "string"]
                 },
+                "step": {
+                    "description": "Step value for slider type",
+                    "type": ["number", "string"]
+                },
                 "values": {
                     "description": "Range of values for the select type",
                     "type": "array"

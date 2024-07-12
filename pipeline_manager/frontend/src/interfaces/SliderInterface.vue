@@ -40,22 +40,63 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent, computed } from 'vue';
+import { defineComponent, computed, toRef } from 'vue';
 import { SliderInterfaceComponent } from '@baklavajs/renderer-vue';
+
+const MAX_STRING_LENGTH = 9;
 
 export default defineComponent({
     extends: SliderInterfaceComponent,
     setup(props) {
-        const percentageFixed = computed(() =>
-            Math.min(
+        const intf = toRef(props, 'intf');
+        const interfaceComponent = SliderInterfaceComponent.setup(props);
+
+        const adjustValue = (value) => {
+            let currentValue = value;
+            if (props.intf.step !== undefined) {
+                currentValue = Math.round((value - props.intf.min) / props.intf.step);
+                currentValue = currentValue * props.intf.step + props.intf.min;
+            }
+            if (currentValue <= props.intf.min) {
+                return props.intf.min;
+            } if (currentValue >= props.intf.max) {
+                return props.intf.max;
+            }
+            return currentValue;
+        };
+
+        const percentageFixed = computed(() => {
+            const adjustedValue = adjustValue(props.intf.value);
+            const range = props.intf.max - props.intf.min;
+            return Math.min(
                 100,
                 Math.max(
                     0,
-                    ((props.intf.value - props.intf.min) * 100) / (props.intf.max - props.intf.min),
+                    ((adjustedValue - props.intf.min) * 100) / range,
                 ),
-            ),
-        );
-        return { ...SliderInterfaceComponent.setup(props), percentageFixed };
+            );
+        });
+
+        const leaveEditMode = () => {
+            const v = parseFloat(interfaceComponent.tempValue.value);
+            if (!interfaceComponent.validate(v)) {
+                interfaceComponent.invalid.value = true;
+            } else {
+                intf.value.value = adjustValue(v);
+                interfaceComponent.editMode.value = false;
+            }
+        };
+
+        const stringRepresentation = computed(() => {
+            // eslint-disable-next-line vue/no-side-effects-in-computed-properties
+            intf.value.value = adjustValue(props.intf.value);
+            const s = props.intf.value.toFixed(3);
+            return s.length > MAX_STRING_LENGTH ? intf.value.value.toExponential(MAX_STRING_LENGTH - 5) : s; // eslint-disable-line max-len
+        });
+
+        return {
+            ...interfaceComponent, percentageFixed, leaveEditMode, stringRepresentation,
+        };
     },
 });
 </script>
