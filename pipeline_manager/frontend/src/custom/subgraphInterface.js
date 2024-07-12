@@ -8,7 +8,8 @@
 import { v4 as uuidv4 } from 'uuid';
 
 import { NodeInterface, defineNode } from '@baklavajs/core';
-import { TextInputInterface, SelectInterface } from '@baklavajs/renderer-vue';
+import { SelectInterface } from '@baklavajs/renderer-vue';
+import InputInterface from '../interfaces/InputInterface.js';
 /* eslint-enable object-curly-newline */
 
 let CounterInput = 0;
@@ -23,7 +24,9 @@ export const SubgraphInputNode = defineNode({
     inputs: {
         name: () => {
             CounterInput += 1;
-            return new TextInputInterface('Name', `Input #${CounterInput}`).setPort(false);
+            const intf = new InputInterface('Name', `Input #${CounterInput}`).setPort(false);
+            intf.componentName = 'InputInterface';
+            return intf;
         },
         side: () => new SelectInterface('Interface side', 'Left', ['Left', 'Right']).setPort(false),
     },
@@ -48,7 +51,9 @@ export const SubgraphOutputNode = defineNode({
     inputs: {
         name: () => {
             CounterOutput += 1;
-            return new TextInputInterface('Name', `Output #${CounterOutput}`).setPort(false);
+            const intf = new InputInterface('Name', `Output #${CounterOutput}`).setPort(false);
+            intf.componentName = 'InputInterface';
+            return intf;
         },
         side: () =>
             new SelectInterface('Interface side', 'Right', ['Left', 'Right']).setPort(false),
@@ -74,7 +79,9 @@ export const SubgraphInoutNode = defineNode({
     inputs: {
         name: () => {
             CounterInout += 1;
-            return new TextInputInterface('Name', `Inout #${CounterInout}`).setPort(false);
+            const intf = new InputInterface('Name', `Inout #${CounterInout}`).setPort(false);
+            intf.componentName = 'InputInterface';
+            return intf;
         },
         side: () => new SelectInterface('Interface side', 'Left', ['Left', 'Right']).setPort(false),
         placeholder: () => {
