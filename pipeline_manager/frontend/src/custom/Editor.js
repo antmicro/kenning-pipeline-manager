@@ -426,6 +426,7 @@ export default class PipelineManagerEditor extends Editor {
         // disable history logging for the switch - don't push nodes being created here
         suppressHistoryLogging(true);
         subgraphNode.saveInterfacesState();
+        subgraphNode.propagateInterfacesDown();
 
         this._graph = subgraphNode.subgraph;
         this._switchGraph(subgraphNode.subgraph);

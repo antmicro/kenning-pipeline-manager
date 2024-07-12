@@ -122,6 +122,31 @@ export default function CreateCustomGraphNodeType(template, type) {
             return [];
         }
 
+        /**
+         * It is used to synchronize interfaces' states when switching to graph of the node.
+         *
+         * Function propagates the information about exposed interfaces from a graph node
+         * to the original interfaces that are being exposed in the subgraph.
+         */
+        propagateInterfacesDown() {
+            const nodeInterfaces = [];
+            this.subgraph.nodes.forEach((node) => {
+                [
+                    ...Object.values(node.inputs),
+                    ...Object.values(node.outputs),
+                ].forEach((intf) => nodeInterfaces.push(intf));
+            });
+
+            [...Object.values(this.inputs), ...Object.values(this.outputs)].forEach((intf) => {
+                const foundIntf = nodeInterfaces.find((nodeIntf) => nodeIntf.id === intf.id);
+                foundIntf.connectionCount = intf.connectionCount;
+            });
+        }
+
+        /**
+         * Saves state of the interfaces in the graph node that should not be propagated down
+         * to the interfaces that are being exposed.
+         */
         saveInterfacesState() {
             // Propagate side data back to the subgraph such that if it was changed
             [...Object.values(this.inputs), ...Object.values(this.outputs)].forEach((intf) => {
