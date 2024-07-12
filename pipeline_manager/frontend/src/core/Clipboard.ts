@@ -227,7 +227,7 @@ export function useClipboard(
             };
 
             assignNewIds(parsedNodeBuffer[i]);
-            copiedNode.load(parsedNodeBuffer[i]);
+            copiedNode.load({ ...parsedNodeBuffer[i], id: copiedNode.id });
         }
 
         for (let i = 0; i < parsedConnectionBuffer.length; i += 1) {
