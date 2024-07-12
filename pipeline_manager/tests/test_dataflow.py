@@ -65,6 +65,11 @@ from pipeline_manager.tests.conftest import check_validation
             "dataflow_graph_incompatible_interfaces_connected_graph_node",
             2,
         ),
+        (
+            "dataflow_specification_node_and_graph_node_maxConnectionsCount_equal_one",
+            "dataflow_graph_too_many_interfaces_connected_graph_node",
+            2,
+        ),
     ],
 )
 def test_dataflow_expected(
@@ -173,6 +178,26 @@ def dataflow_specification_incompatible_node_and_graph_node(
         },
     )
     return dataflow_specification_two_incompatible_nodes
+
+
+@pytest.fixture
+def dataflow_specification_node_and_graph_node_maxConnectionsCount_equal_one(
+    dataflow_specification_incompatible_node_and_graph_node
+):
+    dataflow_specification_incompatible_node_and_graph_node["nodes"][0][
+        "interfaces"
+    ][0]["maxConnectionsCount"] = 1
+    del dataflow_specification_incompatible_node_and_graph_node["nodes"][0][
+        "interfaces"
+    ][0]["type"]
+    dataflow_specification_incompatible_node_and_graph_node["nodes"][1][
+        "interfaces"
+    ][0]["maxConnectionsCount"] = 1
+    del dataflow_specification_incompatible_node_and_graph_node["nodes"][1][
+        "interfaces"
+    ][0]["type"]
+
+    return dataflow_specification_incompatible_node_and_graph_node
 
 
 # ----------------------------------
@@ -335,6 +360,79 @@ def dataflow_graph_incompatible_interfaces_connected_graph_node(
                 }
             ],
             "connections": [],
+        }
+    )
+    dataflow_node_base["graphs"][0]["nodes"].append(
+        {
+            "name": "Subgraph #1",
+            "id": "afe19cad-a7fd-465e-a05a-0b46ece51941",
+            "interfaces": [
+                {
+                    "name": "External Encoding",
+                    "id": "6ba91cca-80d5-4598-a6ab-750ddb6cec83",
+                    "direction": "inout",
+                }
+            ],
+            "position": {"x": 500, "y": 200},
+            "subgraph": "7060fa38-a0fe-4e44-8e5a-de5a2187680f",
+            "twoColumn": False,
+        }
+    )
+    dataflow_node_base["graphs"][0]["connections"].append(
+        {
+            "id": "4b1a3e86-7c0b-411c-a580-b0a4c9fd2582",
+            "from": "6ba91cca-80d5-4598-a6ab-750ddb6cec83",
+            "to": "6efb374c-a115-404e-ade8-0aa05ba93996",
+        }
+    )
+    return dataflow_node_base
+
+
+@pytest.fixture
+def dataflow_graph_too_many_interfaces_connected_graph_node(
+    dataflow_node_base,
+):
+    dataflow_node_base["graphs"].append(
+        {
+            "id": "7060fa38-a0fe-4e44-8e5a-de5a2187680f",
+            "nodes": [
+                {
+                    "name": "EncodeVideo",
+                    "id": "231d20d8-811b-46e8-ba9a-6342032f6c85",
+                    "interfaces": [
+                        {
+                            "name": "encoding",
+                            "externalName": "External Encoding",
+                            "id": "6ba91cca-80d5-4598-a6ab-750ddb6cec83",
+                            "direction": "inout",
+                        }
+                    ],
+                    "position": {"x": 600, "y": 500},
+                    "twoColumn": False,
+                    "properties": [],
+                },
+                {
+                    "name": "EncodeVideo",
+                    "id": "8e81c0ff-0625-4720-8f6e-322a167ab283",
+                    "interfaces": [
+                        {
+                            "name": "encoding",
+                            "id": "51cdbbf8-e78c-4e75-99df-5b841c45d4a3",
+                            "direction": "inout",
+                        }
+                    ],
+                    "position": {"x": 600, "y": 500},
+                    "twoColumn": False,
+                    "properties": [],
+                },
+            ],
+            "connections": [
+                {
+                    "id": "5e03deef-7a6d-4b1b-b0ca-a75b6f1dea25",
+                    "from": "6ba91cca-80d5-4598-a6ab-750ddb6cec83",
+                    "to": "51cdbbf8-e78c-4e75-99df-5b841c45d4a3",
+                }
+            ],
         }
     )
     dataflow_node_base["graphs"][0]["nodes"].append(
