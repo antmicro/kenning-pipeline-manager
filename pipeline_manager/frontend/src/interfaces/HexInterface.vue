@@ -16,6 +16,7 @@ SPDX-License-Identifier: Apache-2.0
             :title="intf.name"
             @keypress="handleRestrictedKeys"
             @blur="handleBlur"
+            tabindex="-1"
         />
     </div>
 </template>

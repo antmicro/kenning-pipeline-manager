@@ -43,6 +43,7 @@ from creating and deleting connections or altering nodes' values if the editor i
             :node="node"
             :intf="intf"
             @keydown.stop
+            :tabindex="tabindexValue"
         />
         <span v-else class="align-middle">
             {{ intf.name }}
@@ -63,6 +64,7 @@ export default defineComponent({
         picked: Boolean,
         switchSides: {},
         toggleGroup: { default: () => {}, required: false },
+        tabindexValue: { default: -1, required: false },
     },
     components: {
         Arrow,

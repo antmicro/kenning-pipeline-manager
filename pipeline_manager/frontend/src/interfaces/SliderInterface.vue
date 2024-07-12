@@ -33,6 +33,7 @@ SPDX-License-Identifier: Apache-2.0
                 style="text-align: right"
                 @blur="leaveEditMode"
                 @keydown.enter="leaveEditMode"
+                tabindex="-1"
             />
         </div>
     </div>

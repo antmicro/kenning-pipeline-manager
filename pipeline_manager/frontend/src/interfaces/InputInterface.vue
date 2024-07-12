@@ -13,6 +13,7 @@ SPDX-License-Identifier: Apache-2.0
             class="baklava-input"
             :placeholder="intf.name"
             :title="intf.name"
+            tabindex="-1"
         />
     </div>
 </template>
