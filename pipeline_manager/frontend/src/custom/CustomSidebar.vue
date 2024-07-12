@@ -44,6 +44,7 @@ SPDX-License-Identifier: Apache-2.0
                     draggable="false"
                     @pointerover="(ev) => onPointerOver(url.name, ev)"
                     @pointerleave="onPointerLeave"
+                    tabindex="-1"
                 >
                     <img
                         v-if="url.icon !== undefined"
@@ -67,13 +68,13 @@ SPDX-License-Identifier: Apache-2.0
                         :key="parent"
                         class="__replace_button"
                     >
-                        <component :is="parent.component" :intf="parent"></component>
+                        <component :is="parent.component" :intf="parent" tabindex="-1" />
                     </div>
                 </div>
                 <div class="__replace_entry" v-if="replacementChildren.length">
                     <div class="__replace_title">Specialize:</div>
                     <div v-for="child in replacementChildren" :key="child" class="__replace_button">
-                        <component :is="child.component" :intf="child"></component>
+                        <component :is="child.component" :intf="child" tabindex="-1" />
                     </div>
                 </div>
                 <div class="__replace_entry" v-if="replacementSiblings.length">
@@ -83,7 +84,7 @@ SPDX-License-Identifier: Apache-2.0
                         :key="sibling"
                         class="__replace_button"
                     >
-                        <component :is="sibling.component" :intf="sibling"></component>
+                        <component :is="sibling.component" :intf="sibling" tabindex="-1" />
                     </div>
                 </div>
             </div>
@@ -93,7 +94,12 @@ SPDX-License-Identifier: Apache-2.0
                     <div class="__property-name">
                         {{ getOptionName(input.componentName) ? `${input.name}:` : '' }}
                     </div>
-                    <CustomInterface :node="node" :intf="input" :toggleGroup="toggleGroup" />
+                    <CustomInterface
+                        :node="node"
+                        :intf="input"
+                        :toggleGroup="toggleGroup"
+                        tabindex="-1"
+                    />
                 </div>
             </div>
 
@@ -123,6 +129,7 @@ SPDX-License-Identifier: Apache-2.0
                         :is="interfaceGroupsButton.component"
                         :intf="interfaceGroupsButton"
                         :class="interfaceGroupsButtonClasses"
+                        tabindex="-1"
                     ></component>
                 </div>
             </div>
@@ -183,7 +190,7 @@ export default defineComponent({
             html.match(aTagRe)?.forEach((match) => {
                 const hrefParts = match.split('"');
                 // Forces the link to open in a new tab instead of closing the pipeline manager
-                const newEnd = ` target="_blank"${hrefParts[2]}`;
+                const newEnd = ` tabindex="-1" target="_blank"${hrefParts[2]}`;
                 const newHref = [hrefParts[0], hrefParts[1], newEnd].join('"');
                 html = html.replace(match, newHref);
             });
