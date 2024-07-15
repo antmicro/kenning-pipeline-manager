@@ -87,6 +87,7 @@ export default defineComponent({
 
         const activeTerminal = ref<string | undefined>(undefined);
         const isTerminalPanelOpened = ref<boolean>(false);
+        const terminalPanelHeight = ref(0);
 
         const arrowHovered = ref(false);
 
@@ -95,12 +96,11 @@ export default defineComponent({
         });
 
         const terminalWrapperStyles = computed(() => {
-            const terminalWrapperHeight = terminalWrapper.value?.clientHeight ?? 0;
             const minTerminalPanelHeight = 395;
 
             if (isTerminalPanelOpened.value) {
                 return {
-                    height: `${Math.max(terminalWrapperHeight, minTerminalPanelHeight)}px`,
+                    height: `${Math.max(terminalPanelHeight.value, minTerminalPanelHeight)}px`,
                 };
             }
             return {
@@ -113,7 +113,10 @@ export default defineComponent({
         }) as StyleValue);
 
         onMounted(() => {
-            resizer.value!.addEventListener('mousedown', mouseDownHandler);
+            const setTerminalHeight = (height: number) => {
+                terminalPanelHeight.value = height;
+            };
+            resizer.value!.addEventListener('mousedown', mouseDownHandler(setTerminalHeight));
         });
 
         const displayedTerminals: Ref<{
