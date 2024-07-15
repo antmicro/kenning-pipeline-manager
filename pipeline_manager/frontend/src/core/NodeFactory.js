@@ -604,23 +604,45 @@ export function NodeFactory(
                     },
                 );
 
+                const occupied = { left: [], right: [] };
+
+                const stateios = { ...parsedState.inputs, ...parsedState.outputs };
+
                 // Assigning sides and sides Positions to interfaces
-                Object.entries({
-                    ...parsedState.inputs,
-                    ...parsedState.outputs,
-                }).forEach(([ioName, ioState]) => {
+                Object.entries(stateios).forEach(([ioName, ioState]) => {
                     if (ioState.direction === 'input' || ioState.direction === 'inout') {
                         this.inputs[ioName].side = ioState.side;
+                        this.inputs[ioName].sidePosition = ioState.sidePosition;
+                        occupied[ioState.side].push(ioState.sidePosition);
                     } else if (ioState.direction === 'output') {
                         this.outputs[ioName].side = ioState.side;
-                    }
-
-                    if (ioState.direction === 'input' || ioState.direction === 'inout') {
-                        this.inputs[ioName].sidePosition = ioState.sidePosition;
-                    } else if (ioState.direction === 'output') {
                         this.outputs[ioName].sidePosition = ioState.sidePosition;
+                        occupied[ioState.side].push(ioState.sidePosition);
                     }
                 });
+
+                const refreshSidePositions = (entries) => {
+                    // When state provided in the graph is incomplete, e.g. it misses
+                    // an interface, we allow it.
+                    // This, however, requires from us that we make sure that newly added
+                    // interfaces (not present in parsedState) are not on conflicting positions
+                    Object.entries(entries).forEach(([ioName, ioState]) => {
+                        if (ioName.startsWith('property_')) return;
+                        // if interface was explicitly defined in the graph file, skip it
+                        if (ioName in stateios) return;
+                        // otherwise, if the interface was implicitly created but it does not
+                        // cover existing interface, skip it
+                        if (!occupied[ioState.side].includes(ioState.sidePosition)) return;
+                        // if the positions are clashing, pick first available max position on
+                        // given side
+                        const maxposition = Math.max(...occupied[ioState.side]);
+                        ioState.sidePosition = maxposition + 1;
+                        occupied[ioState.side].push(maxposition + 1);
+                    });
+                };
+
+                refreshSidePositions(this.inputs);
+                refreshSidePositions(this.outputs);
 
                 // Default position should be undefined instead of (0, 0) so that it can be set
                 // by autolayout
