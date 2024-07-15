@@ -27,8 +27,11 @@ const mouseMoveHandler = (e) => {
 };
 
 const mouseUpHandler = () => {
+    const terminalWrapper = document.querySelector('.terminal-wrapper');
+
     document.removeEventListener('mousemove', mouseMoveHandler);
     document.removeEventListener('mouseup', mouseUpHandler);
+    terminalWrapper.style['pointer-events'] = '';
 };
 
 export const mouseDownHandler = (setHeight) => (e) => {
@@ -43,4 +46,5 @@ export const mouseDownHandler = (setHeight) => (e) => {
 
     document.addEventListener('mousemove', mouseMoveHandler);
     document.addEventListener('mouseup', mouseUpHandler);
+    terminalWrapper.style['pointer-events'] = 'none';
 };
