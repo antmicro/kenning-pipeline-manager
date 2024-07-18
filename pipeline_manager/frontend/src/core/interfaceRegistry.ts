@@ -9,6 +9,7 @@ type NodeInterface = any; // eslint-disable-line @typescript-eslint/no-explicit-
 
 interface registeredInterface {
     sharedInterface: NodeInterface,
+    sharedInterfaceGraphId: string,
     /**
      * List of ids of graphNodes that use the exposed interfaces.
      * The order of the ids determines the order of the graph nodes on a path,
@@ -123,13 +124,14 @@ export class InterfaceRegistry {
      *
      * @param {NodeInterface} intf Interface to register.
      */
-    registerInterface(intf: NodeInterface) {
+    registerInterface(intf: NodeInterface, graphId: string) {
         if (this.exposedInterfaces.has(intf.id)) {
             throw new Error(`Trying to register an interface of id ${intf.id}, but it is already registered.`);
         }
 
         this.exposedInterfaces.set(intf.id, {
             sharedInterface: intf,
+            sharedInterfaceGraphId: graphId,
             graphIds: [],
         });
     }

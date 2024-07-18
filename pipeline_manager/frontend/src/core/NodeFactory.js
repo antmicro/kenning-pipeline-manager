@@ -720,18 +720,20 @@ export function updateSubgraphInterfaces(nodes, inputs = [], outputs = []) {
     // Create new inputs and outputs
     const newInterfaces = [];
     externalInterfaces.forEach((intf) => {
-        // It may happen that the registered interface has the same id, but is a different object,
+        const graphId = nodes[0].graph.id;
+        // It may happen that the registered interface has the same id, but is a reference,
         // for example when dealing with history or clipboard.
-        // TODO: Fix me, all interfaces have the same ids
         if (
             ir.isRegistered(intf.id) &&
-            ir.getRegisteredInterface(intf.id).sharedInterface.id === intf.id
+            ir.getRegisteredInterface(intf.id).sharedInterface !== intf &&
+            ir.getRegisteredInterface(intf.id).sharedInterface.id === intf.id &&
+            ir.getRegisteredInterface(intf.id).sharedInterfaceGraphId === graphId
         ) {
             ir.deleteRegisteredInterface(intf.id);
         }
 
         if (!ir.isRegistered(intf.id)) {
-            ir.registerInterface(intf);
+            ir.registerInterface(intf, graphId);
         }
 
         const container = intf.direction === 'output' ? outputs : inputs;
