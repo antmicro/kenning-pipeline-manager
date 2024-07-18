@@ -23,7 +23,6 @@ import {
     IConnectionState,
     Connection,
     NodeInterface,
-    Editor,
     GRAPH_NODE_TYPE_PREFIX,
 } from '@baklavajs/core';
 import {
@@ -54,7 +53,7 @@ export interface IClipboard {
 
 export function useClipboard(
     displayedGraph: any,
-    editor: Ref<Editor>,
+    editor: Ref<any>,
     commandHandler: ICommandHandler,
 ): IClipboard {
     const token = Symbol('ClipboardToken');
@@ -159,7 +158,7 @@ export function useClipboard(
 
             newNodes.push(copiedNode);
 
-            copiedNode.hooks.beforeLoad.subscribe(token, (nodeState) => {
+            copiedNode.hooks.beforeLoad.subscribe(token, (nodeState: any) => {
                 const ns = nodeState as any;
                 if (ns.position) {
                     consecutivePasteNumber.value += 1;
@@ -203,6 +202,12 @@ export function useClipboard(
                     // as the ones in the subgraph
                     node.interfaces.forEach((intf: any) => {
                         intf.id = idmap.get(intf.id) ?? intf.id;
+
+                        // If the node has any external interfaces, then their names have
+                        // to be resolved as they cannot conflict with the existing ones.
+                        if (intf.externalName !== undefined) {
+                            intf.externalName = graph.resolveNewExposedName(intf.externalName);
+                        }
                     });
 
                     node.graphState.connections.forEach((conn: any) => {
@@ -222,12 +227,24 @@ export function useClipboard(
                     // If it is a regular node, then interfaces need new IDs.
                     node.interfaces.forEach((intf: any) => {
                         mapNewId(intf);
+
+                        // If the node has any external interfaces, then their names have
+                        // to be resolved as they cannot conflict with the existing ones.
+                        if (intf.externalName !== undefined) {
+                            intf.externalName = graph.resolveNewExposedName(intf.externalName);
+                        }
                     });
                 }
             };
 
             assignNewIds(parsedNodeBuffer[i]);
             copiedNode.load({ ...parsedNodeBuffer[i], id: copiedNode.id });
+
+            // If the pasted graph was inside of a graph node, then the graph node has to
+            // have its exposed interfaces refreshed
+            if (displayedGraph.value.graphNode !== undefined) {
+                displayedGraph.value.graphNode.updateExposedInterfaces();
+            }
         }
 
         for (let i = 0; i < parsedConnectionBuffer.length; i += 1) {
