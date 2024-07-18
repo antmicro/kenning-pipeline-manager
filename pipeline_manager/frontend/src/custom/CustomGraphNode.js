@@ -13,7 +13,8 @@ import {
 } from '@baklavajs/core';
 import { v4 as uuidv4 } from 'uuid';
 import { parseInterfaces } from '../core/interfaceParser.js';
-import { calculateExternalInterfaces } from '../core/NodeFactory.js';
+import { updateSubgraphInterfaces } from '../core/NodeFactory.js';
+import { ir } from '../core/interfaceRegistry.ts';
 
 export default function CreateCustomGraphNodeType(template, type) {
     const nt = createGraphNodeType(template);
@@ -24,17 +25,14 @@ export default function CreateCustomGraphNodeType(template, type) {
         title = type;
 
         save() {
-            this.saveInterfacesState();
-            this.subgraph.propagateInterfacesUp();
             const state = super.save();
 
             const newInterfaces = [];
             const thisInterfaces = Object.values(this.inputs).concat(Object.values(this.outputs));
-            [...this.subgraph.inputs, ...this.subgraph.outputs].forEach((io) => {
-                const externalName = thisInterfaces.find((i) => i.id === io.id)?.externalName;
+            thisInterfaces.forEach((io) => {
                 newInterfaces.push({
                     name: io.name,
-                    externalName,
+                    externalName: io.externalName,
                     id: io.id,
                     direction: io.direction,
                     side: io.side,
@@ -71,40 +69,20 @@ export default function CreateCustomGraphNodeType(template, type) {
 
             inputs = Object.values(inputs);
             outputs = Object.values(outputs);
-            state.graphState.inputs = inputs;
-            state.graphState.outputs = outputs;
 
             delete state.graphState.interfaces;
             delete state.subgraph;
 
-            // Loading the subgraph of the graph
+            // Loading the subgraph of the graph node first, before creating
+            // interfaces based on the nodes in the subgraph. Thanks to that
+            // the originally exposed interfaces (coming from regular nodes)
+            // are found first.
             const errors = this.subgraph.load(state.graphState);
             if (errors.length) {
                 return errors;
             }
 
-            // Update interfaces based on nodes and external names
-            const evaluatedIntf = calculateExternalInterfaces(
-                state.graphState.nodes, state.graphState.connections, inputs, outputs);
-            if (Array.isArray(evaluatedIntf) && evaluatedIntf.length) {
-                return evaluatedIntf;
-            }
-
-            inputs = Object.fromEntries(evaluatedIntf.inputs.map((i) => [i.name, i]));
-            outputs = Object.fromEntries(evaluatedIntf.outputs.map((i) => [i.name, i]));
-
-            /*
-                When the subgraph node is created, it creates a placeholder interfaces
-                which are later loaded by super.load, setting proper names and IDs.
-                The name of interface is an ID of input/output in a subgraph (except for
-                '_calculationResults`, which is baklava specific hidden output). IDs of
-                inputs/outputs are also randomly generated IDs, which are later updated, but
-                the names of are not adjusted. We need to tie an input interface with
-                corresponding subgraph input (here it is done by name of subgraph input) and
-                adjust the node's input (and likewise for outputs)
-            */
-            this.updateInterfaces(inputs, outputs);
-            delete state.interfaces; // eslint-disable-line no-param-reassign
+            this.updateExposedInterfaces(inputs, outputs);
 
             if (!this.subgraph) {
                 errors.push('Cannot load a graph node without a graph');
@@ -126,42 +104,43 @@ export default function CreateCustomGraphNodeType(template, type) {
         }
 
         /**
-         * It is used to synchronize interfaces' states when switching to graph of the node.
+         * Function used to update exposed interfaces of the graph node based on the
+         * nodes inside the graph, their interfaces and their external names.
          *
-         * Function propagates the information about exposed interfaces from a graph node
-         * to the original interfaces that are being exposed in the subgraph.
+         * @param {Array} inputs inputs of the graph node. If not provided, the function
+         * will use the current inputs of the graph node.
+         * @param {Array} outputs outputs of the graph node. If not provided, the function
+         * will use the current outputs of the graph node.
          */
-        propagateInterfacesDown() {
-            const nodeInterfaces = [];
-            this.subgraph.nodes.forEach((node) => {
-                [
-                    ...Object.values(node.inputs),
-                    ...Object.values(node.outputs),
-                ].forEach((intf) => nodeInterfaces.push(intf));
-            });
+        updateExposedInterfaces(inputs = undefined, outputs = undefined) {
+            // Update interfaces based on subgraph interfaces and their external names
+            const evaluatedIntf = updateSubgraphInterfaces(
+                this.subgraph.nodes,
+                inputs ?? Object.values(this.inputs),
+                outputs ?? Object.values(this.outputs),
+            );
+            if (Array.isArray(evaluatedIntf) && evaluatedIntf.length) {
+                throw new Error(
+                    `Internal error occurred while exposing an interface.\n` +
+                    `Reason: ${evaluatedIntf.join('. ')}`,
+                );
+            }
 
-            [...Object.values(this.inputs), ...Object.values(this.outputs)].forEach((intf) => {
-                const foundIntf = nodeInterfaces.find((nodeIntf) => nodeIntf.id === intf.id);
-                foundIntf.connectionCount = intf.connectionCount;
-            });
+            // After resolving exposed interfaces, the graph node is updated accordingly.
+            this.updateInterfaces(evaluatedIntf.inputs, evaluatedIntf.outputs);
         }
 
         /**
-         * Saves state of the interfaces in the graph node that should not be propagated down
-         * to the interfaces that are being exposed.
+         * Function called when the node is created using the nodePalette
          */
-        saveInterfacesState() {
-            // Propagate side data back to the subgraph such that if it was changed
-            [...Object.values(this.inputs), ...Object.values(this.outputs)].forEach((intf) => {
-                const container = intf.direction === 'output' ? this.subgraph.outputs : this.subgraph.inputs;
-                const subgraphIntf = container.find((subIntf) => subIntf.id === intf.id);
-                if (subgraphIntf !== undefined) {
-                    subgraphIntf.side = intf.side;
-                    subgraphIntf.sidePosition = intf.sidePosition;
-                }
-            });
+        onPlaced() {
+            this.initialize();
         }
 
+        /**
+         * Creates a new graph node instance based on the template, loads its graph state
+         * and updates exposed interfaces based on the nodes in the subgraph.
+         */
         initialize() {
             if (this.subgraph) {
                 this.subgraph.destroy();
@@ -169,8 +148,6 @@ export default function CreateCustomGraphNodeType(template, type) {
             const graph = new Graph(this.template.editor);
 
             const state = this.prepareSubgraphInstance();
-            this.updateInterfaces(state.inputs, state.outputs);
-
             const errors = graph.load(state);
             if (errors.length) {
                 throw new Error(
@@ -181,31 +158,63 @@ export default function CreateCustomGraphNodeType(template, type) {
 
             graph.template = this.template;
             this.subgraph = graph;
+            graph.graphNode = this;
+
+            this.updateExposedInterfaces([], []);
 
             this._title = this.template.name; // eslint-disable-line no-underscore-dangle
             this.events.update.emit(null);
-            return [];
         }
 
+        /**
+         * Function used to update interfaces of the graph node. It makes use of InterfaceRegistry
+         * object to create interfaces that share part of the state of the exposed interfaces.
+         *
+         * @param {Array} newInputs inputs to be added to the graph node
+         * @param {Array} newOutputs outputs to be added to the graph node
+         */
         updateInterfaces(newInputs, newOutputs) {
-            Object.keys(this.inputs).forEach((key) => {
-                this.removeInterface('input', key);
+            const newInterfaces = [...newInputs, ...newOutputs];
+            const currentInterfaces = { ...this.inputs, ...this.outputs };
+
+            Object.entries(currentInterfaces).forEach(([nodeKey, nodeIntf]) => {
+                // If current interface cannot be found in `newInterfaces`, it means that
+                // it was removed.
+                if (newInterfaces.find((intf) => intf.id === nodeIntf.id) === undefined) {
+                    const container = nodeIntf.direction === 'output' ? 'output' : 'input';
+                    this.removeInterface(container, nodeKey);
+                }
             });
-            Object.values(newInputs).forEach((inputInfo) => {
-                const ni = new NodeInterface(inputInfo.name);
-                Object.assign(ni, inputInfo);
-                this.addInterface('input', inputInfo.name, ni);
-            });
-            Object.keys(this.outputs).forEach((key) => {
-                this.removeInterface('output', key);
-            });
-            Object.values(newOutputs).forEach((outputInfo) => {
-                const ni = new NodeInterface(outputInfo.name);
-                Object.assign(ni, outputInfo);
-                this.addInterface('output', outputInfo.name, ni);
+
+            newInterfaces.forEach((nodeIntf) => {
+                // If new interface cannot be found in the current interfaces, it means that
+                // it has to be created
+                const foundIntf = Object.values(currentInterfaces).find(
+                    (intf) => intf.id === nodeIntf.id,
+                );
+
+                if (foundIntf === undefined) {
+                    const ni = new NodeInterface(nodeIntf.name);
+                    Object.assign(ni, nodeIntf);
+                    ir.pushGraphIdToRegistry(ni.id, this.graph.id);
+                    ir.createSharedInterface(ni);
+
+                    const container = nodeIntf.direction === 'output' ? 'output' : 'input';
+                    this.addInterface(container, `${nodeIntf.direction}_${nodeIntf.name}`, ni);
+                } else {
+                    Object.assign(foundIntf, nodeIntf);
+                }
             });
         }
 
+        /**
+         * The function uses its internal static template to create a new graph state
+         * based on the template. It creates a new graph node ID and maps all interfaces
+         * to new IDs. The function is used to create a new graph state that can be loaded
+         * by the graph node.
+         *
+         * @returns graph state ready to be loaded
+         */
         prepareSubgraphInstance() {
             const idMap = new Map();
 
@@ -245,18 +254,6 @@ export default function CreateCustomGraphNodeType(template, type) {
                 outputs: mapNodeInterfaceIds(n.outputs),
             }));
 
-            // All inputs and outputs of a graph node are created
-            // from interfaces of nodes in the subgraph
-            const inputs = this.template.inputs.map((i) => ({
-                ...i,
-                id: getNewId(i.id),
-            }));
-
-            const outputs = this.template.outputs.map((o) => ({
-                ...o,
-                id: getNewId(o.id),
-            }));
-
             const connections = this.template.connections.map((c) => ({
                 id: createNewId(c.id),
                 from: getNewId(c.from),
@@ -267,8 +264,6 @@ export default function CreateCustomGraphNodeType(template, type) {
                 id: newGraphNodeId,
                 nodes,
                 connections,
-                inputs,
-                outputs,
             };
 
             return clonedState;

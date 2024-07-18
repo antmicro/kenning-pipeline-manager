@@ -13,11 +13,9 @@
 
 /* eslint-disable max-classes-per-file */
 
-import {
-    Editor,
-    GRAPH_NODE_TYPE_PREFIX,
-    NodeInterface,
-} from '@baklavajs/core';
+import { v4 as uuidv4 } from 'uuid';
+
+import { Editor, GRAPH_NODE_TYPE_PREFIX } from '@baklavajs/core';
 
 import { useGraph } from '@baklavajs/renderer-vue';
 
@@ -26,6 +24,7 @@ import createPipelineManagerGraph from './CustomGraph.js';
 import LayoutManager from '../core/LayoutManager.js';
 import { suppressHistoryLogging } from '../core/History.ts';
 import CreateCustomGraphNodeType from './CustomGraphNode.js';
+import { ir } from '../core/interfaceRegistry.ts';
 
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-underscore-dangle */
@@ -174,6 +173,7 @@ export default class PipelineManagerEditor extends Editor {
         // load into subgraph (in that case there may be two subgraphs with the same ID, one
         // of them from the previous session).
         this.unregisterGraphs();
+        ir.clearRegistry();
 
         // There can be only one subgraph node matching to a particular subgraphs
         const usedInstances = new Set();
@@ -253,9 +253,6 @@ export default class PipelineManagerEditor extends Editor {
                 return errors;
             }
 
-            rootGraph.inputs = [];
-            rootGraph.outputs = [];
-
             state = this.hooks.load.execute(state);
             errors = this._graph.load(rootGraph);
         } catch (err) {
@@ -323,6 +320,51 @@ export default class PipelineManagerEditor extends Editor {
             this.centerZoom();
         }
         return errors;
+    }
+
+    privatizeInterface(graphId, intf) {
+        let graph = [...this.graphs].find((g) => g.id === graphId);
+        let graphNode = graph.graphNode; // eslint-disable-line prefer-destructuring
+        if (graphNode === undefined) return;
+
+        const { graphIds, sharedInterface } = ir.getRegisteredInterface(intf.id);
+        const graphIdIdx = graphIds.findIndex((id) => id === graphNode.graph.id);
+        graphIds.splice(graphIdIdx, graphIds.length - graphIdIdx);
+
+        intf.externalName = undefined;
+        graphNode.updateExposedInterfaces();
+
+        // Update all graphs that used this exposed interface
+        for (let i = graphIdIdx + 1; i < graphIds.length; i += 1) {
+            graph = [...this.graphs].find((g) => g.id === graphIds[graphIdIdx]);
+            graphNode = graph.graphNode; // eslint-disable-line prefer-destructuring
+            graphNode.updateExposedInterfaces();
+        }
+
+        // If sharedInterface is the same as the interface that is privatized, it means
+        // that the interface is not shared anymore and its entry should be deleted.
+        if (sharedInterface === intf) {
+            ir.deleteRegisteredInterface(intf.id);
+        }
+    }
+
+    /**
+     * Exposes passed interface under the `name` name. The node that has the interface has to
+     * be in the graph with the `graphId` ID.
+     *
+     * @param {string} graphId graph which has the node with the interface
+     * @param {Object} intf interface to expose
+     * @param {string} name name under which the interface will be exposed. If set to `undefined`,
+     * the interface will be exposed under a random UUID.
+     */
+    exposeInterface(graphId, intf, name = undefined) {
+        const graph = [...this.graphs].find((g) => g.id === graphId);
+        const graphNode = graph.graphNode; // eslint-disable-line prefer-destructuring
+        if (graphNode === undefined) return;
+        intf.externalName = name ?? uuidv4();
+        // After changing the external name, the interface has to be updated in the
+        // graph node to reflect the changes in the graph.
+        graphNode.updateExposedInterfaces();
     }
 
     centerZoom() {
@@ -425,12 +467,11 @@ export default class PipelineManagerEditor extends Editor {
         }
         // disable history logging for the switch - don't push nodes being created here
         suppressHistoryLogging(true);
-        subgraphNode.saveInterfacesState();
-        subgraphNode.propagateInterfacesDown();
 
         this._graph = subgraphNode.subgraph;
         this._switchGraph(subgraphNode.subgraph);
         this.graphName = this._graph.name;
+
         suppressHistoryLogging(false);
         nextTick().then(() => {
             const graph = this.graph.save();
@@ -454,51 +495,10 @@ export default class PipelineManagerEditor extends Editor {
      * and updates the graph node's interfaces accordingly.
      */
     backFromSubgraph() {
-        const [newGraphId, subgraphNode] = this.subgraphStack.pop();
+        const [newGraphId, _] = this.subgraphStack.pop(); // eslint-disable-line no-unused-vars
         const newGraph = [...this.graphs].filter((graph) => graph.id === newGraphId)[0];
 
         suppressHistoryLogging(true);
-
-        // Updates information of the graph about its interfaces
-        this._graph.propagateInterfacesUp();
-
-        const ifaceOrPositionErrors = [
-            ...this._graph.inputs,
-            ...this._graph.outputs,
-        ];
-
-        // Updating interfaces of a graph node
-        Object.values({ ...subgraphNode.inputs, ...subgraphNode.outputs }).forEach((nodeIntf) => {
-            if (ifaceOrPositionErrors.find((intf) => (intf.id === nodeIntf.id)) === undefined) {
-                if (nodeIntf.isInput) {
-                    const baklavaIntfKey = Object.entries(subgraphNode.inputs).find(
-                        ([, intf]) => intf.id === nodeIntf.id,
-                    )[0];
-                    subgraphNode.removeInput(baklavaIntfKey);
-                } else {
-                    const baklavaIntfKey = Object.entries(subgraphNode.outputs).find(
-                        ([, intf]) => intf.id === nodeIntf.id,
-                    )[0];
-                    subgraphNode.removeOutput(baklavaIntfKey);
-                }
-            }
-        });
-        ifaceOrPositionErrors.forEach((subIntf) => {
-            const existingIntfs = (subIntf.direction === 'output') ? subgraphNode.outputs : subgraphNode.inputs;
-            const x = Object.values(existingIntfs).find(
-                (nodeIntf) => ((nodeIntf.id === subIntf.id)));
-            if (x === undefined) {
-                const baklavaIntf = new NodeInterface(subIntf.name);
-                Object.assign(baklavaIntf, subIntf);
-                if (subIntf.direction === 'output') {
-                    subgraphNode.addOutput(subIntf.name, baklavaIntf);
-                } else {
-                    subgraphNode.addInput(subIntf.name, baklavaIntf);
-                }
-            } else {
-                Object.assign(x, subIntf);
-            }
-        });
 
         this._graph = newGraph;
         this._switchGraph(this._graph);

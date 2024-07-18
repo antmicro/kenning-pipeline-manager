@@ -16,12 +16,12 @@ import { defineNode, GraphTemplate, NodeInterface } from '@baklavajs/core';
 
 import { updateInterfacePosition } from '../custom/CustomNode.js';
 import { applySidePositions, parseInterfaces, validateInterfaceGroups } from './interfaceParser.js';
-import Specification from './Specification.js';
 
 import InputInterface from '../interfaces/InputInterface.js';
 import ListInterface from '../interfaces/ListInterface.js';
 import SliderInterface from '../interfaces/SliderInterface.js';
 import HexInterface from '../interfaces/HexInterface.js';
+import { ir } from './interfaceRegistry.ts';
 
 /**
  * @param properties coming from the specification
@@ -246,7 +246,7 @@ function detectDiscrepancies(parsedState, inputs, outputs) {
 }
 
 /**
- * @param {*} state state to be loaded. Should be a valid dataflow
+ * @param state state to be loaded. Should be a valid dataflow
  * @returns state that can be given to baklavajs, or an array of errors if any occurred
  */
 function parseNodeState(state) {
@@ -673,20 +673,22 @@ export function NodeFactory(
 }
 
 /**
- * Function updating subgraph interfaces based on the nodes inside of it.
- * It creates new inputs and outputs based on the exposed interfaces that are not
- * connected. It also assigns side positions to the interfaces.
+ * Function looks for graph node interfaces based on the nodes inside of it.
+ *
+ * It finds all interfaces that have `externalName` property set and registers
+ * them in the InterfaceRegistry, if they are not already registered, so that
+ * they their state can be easily shared and synchronized.
  *
  * If there are any errors, they are returned as an array of strings.
  * If the operation was successful, the new inputs and outputs are returned.
  *
+ * @param nodes Nodes of the subgraph
  * @param inputs List of inputs of the subgraph
  * @param outputs List of outputs of the subgraph
- * @param nodes Nodes of the subgraph
  *
  * @returns List of errors or new inputs and outputs
  */
-export function updateSubgraphInterfaces(inputs, outputs, nodes) {
+export function updateSubgraphInterfaces(nodes, inputs = [], outputs = []) {
     // Interfaces that are not connected to any other interface
     const INTERFACE_PREFIXES = ['input_', 'inout_', 'output_'];
 
@@ -718,30 +720,35 @@ export function updateSubgraphInterfaces(inputs, outputs, nodes) {
     // Create new inputs and outputs
     const newInterfaces = [];
     externalInterfaces.forEach((intf) => {
+        // It may happen that the registered interface has the same id, but is a different object,
+        // for example when dealing with history or clipboard.
+        // TODO: Fix me, all interfaces have the same ids
+        if (
+            ir.isRegistered(intf.id) &&
+            ir.getRegisteredInterface(intf.id).sharedInterface.id === intf.id
+        ) {
+            ir.deleteRegisteredInterface(intf.id);
+        }
+
+        if (!ir.isRegistered(intf.id)) {
+            ir.registerInterface(intf);
+        }
+
         const container = intf.direction === 'output' ? outputs : inputs;
         const idx = container.findIndex((x) => x.id === intf.id);
         if (idx === -1) {
             // Graph node interface should not inherit some properties that
-            // are node-specific
+            // are node-specific, they will be accessed using InterfaceRegistry
             newInterfaces.push({
                 name: intf.externalName,
                 id: intf.id,
                 externalName: undefined,
-                type: intf.type,
                 side: intf.side,
                 direction: intf.direction,
-                maxConnectionsCount: intf.maxConnectionsCount,
-                connectionCount: intf.connectionCount,
                 sidePosition: undefined,
             });
         } else {
-            container[idx].direction = intf.direction;
             container[idx].name = intf.externalName;
-
-            // Assigning information that is not dataflow-based
-            container[idx].type = intf.type;
-            container[idx].maxConnectionsCount = intf.maxConnectionsCount;
-            container[idx].connectionCount = intf.connectionCount;
             newInterfaces.push(container[idx]);
         }
     });
@@ -758,66 +765,6 @@ export function updateSubgraphInterfaces(inputs, outputs, nodes) {
 }
 
 /**
- * Function calculating and updating external interfaces of the subgraph based on
- * the nodes, exposed interfaces and connections inside of it. It also validate
- * the nodes before returning the external interfaces.
- *
- * @param nodes Nodes of the subgraph
- * @param connections Connections inside the subgraph
- * @param inputs List of inputs of the subgraph
- * @param outputs List of outputs of the subgraph
- * @returns List of external interfaces
- */
-export function calculateExternalInterfaces(nodes, connections, inputs = [], outputs = []) {
-    const parsedState = nodes.map((node) => {
-        const out = parseNodeState(node);
-        if (Array.isArray(out) && out.length) {
-            return `Node ${node.name} invalid. ${out}`;
-        }
-
-        const nodeSpecification = Specification.getInstance().getNodeSpecification(
-            out.name,
-        );
-        if (nodeSpecification === undefined) {
-            return `Node ${node.name} was not found in the specification`;
-        }
-
-        // Assigning information about interfaces that cannot be inferred from nodes,
-        // but are stored in the specification
-        (nodeSpecification.interfaces ?? []).forEach((intf) => {
-            const container = intf.direction === 'output' ? out.outputs : out.inputs;
-            const intfName = `${intf.direction}_${intf.name}`;
-            const intfType = typeof intf.type === 'string' ? [intf.type] : intf.type;
-
-            container[intfName].type = intfType;
-            container[intfName].maxConnectionsCount = intf.maxConnectionsCount;
-        });
-        return out;
-    });
-    const errorMessages = parsedState.filter((n) => typeof n === 'string');
-    if (errorMessages.length) {
-        return errorMessages;
-    }
-
-    // Count connections for each interface and initialize variable
-    const countedIntfConnections = Object.create(null);
-    connections.forEach((conn) => {
-        countedIntfConnections[conn.from] = (countedIntfConnections[conn.from] ?? 0) + 1;
-        countedIntfConnections[conn.to] = (countedIntfConnections[conn.to] ?? 0) + 1;
-    });
-    [...parsedState.map(
-        (node) => Object.entries({ ...node.inputs, ...node.outputs })).flat(),
-    ].forEach(([, intf]) => { intf.connectionCount = countedIntfConnections[intf.id] ?? 0; });
-
-    const out = updateSubgraphInterfaces(inputs, outputs, parsedState);
-    if (Array.isArray(out) && out.length) {
-        return out;
-    }
-
-    return { inputs: out.inputs, outputs: out.outputs, nodes: parsedState };
-}
-
-/**
  * Function creating a graph template as defined in specification
  *
  * @param nodes Nodes of the subgraph
@@ -827,18 +774,18 @@ export function calculateExternalInterfaces(nodes, connections, inputs = [], out
  * @returns Graph template that will be used to define the subgraph node
  */
 export function GraphFactory(nodes, connections, name, editor) {
-    const ret = calculateExternalInterfaces(nodes, connections);
-    if (Array.isArray(ret)) {
-        return ret;
+    const parsedState = nodes.map((node) => parseNodeState(node));
+    const errorMessages = parsedState.filter((n) => typeof n === 'string');
+    if (errorMessages.length) {
+        return errorMessages;
     }
-    const { inputs, outputs, nodes: parsedState } = ret;
 
     const state = {
         name,
         nodes: parsedState,
         connections,
-        inputs,
-        outputs,
+        inputs: [],
+        outputs: [],
     };
 
     return new GraphTemplate(state, editor);

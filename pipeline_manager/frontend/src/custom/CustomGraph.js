@@ -14,7 +14,6 @@ import {
 import { v4 as uuidv4 } from 'uuid';
 import { BaklavaEvent } from '@baklavajs/events';
 import { startTransaction, commitTransaction } from '../core/History.ts';
-import { updateSubgraphInterfaces } from '../core/NodeFactory.js';
 import { updateInterfacePosition } from './CustomNode.js';
 
 /* eslint-disable no-param-reassign */
@@ -23,6 +22,9 @@ export default function createPipelineManagerGraph(graph) {
     // Add an event for adding an anchor to the graph
     graph.events.addAnchor = new BaklavaEvent();
     graph.events.removeAnchor = new BaklavaEvent();
+
+    // Graph node that represents the graph itself. Root graph does not have a node graph assigned.
+    graph.graphNode = undefined;
 
     graph.checkConnection = function checkConnection(from, to) {
         if (!from || !to) {
@@ -245,23 +247,6 @@ export default function createPipelineManagerGraph(graph) {
         return newNodeInstance;
     };
 
-    /**
-     * Function gather all exposed interfaces and their properties in a graph
-     * and propagates them into the graph node.
-     *
-     * It is used to synchronize exposed interfaces between a graph node and its graph
-     * when coming back from a graph.
-     */
-    graph.propagateInterfacesUp = function propagateInterfacesUp() {
-        const out = updateSubgraphInterfaces(this.inputs, this.outputs, this.nodes);
-        if (Array.isArray(out) && out.length) {
-            throw new Error(`Error during updating interfaces: ${out.join(', ')}`);
-        }
-
-        this.inputs = out.inputs;
-        this.outputs = out.outputs;
-    };
-
     graph.addNode = function addNode(node) {
         if (this.events.beforeAddNode.emit(node).prevented) {
             return;
@@ -290,6 +275,9 @@ export default function createPipelineManagerGraph(graph) {
         // Remove possibility of removing graphs - this ignores changes made by
         // default switchGraph (unregistering from editor and removing nodes) and
         // allows to later reuse this instance
+
+        // TODO: This causes memory leaks, as when reloading a graph, all non-destroyed
+        // graphs linger are are completely unnaccessible
     };
 
     graph.load = function load(state) {
@@ -306,8 +294,6 @@ export default function createPipelineManagerGraph(graph) {
         // Load state
         this.id = state.id;
         this.name = state.name ?? undefined;
-        this.inputs = state.inputs;
-        this.outputs = state.outputs;
 
         state.nodes.forEach((n) => {
             const isSubgraphNode = n.subgraph !== undefined;
@@ -447,12 +433,69 @@ export default function createPipelineManagerGraph(graph) {
         }
     };
 
+    graph.removeNode = function removeNode(node) {
+        if (this.nodes.includes(node)) {
+            if (this.events.beforeRemoveNode.emit(node).prevented) {
+                return;
+            }
+
+            const interfaces = [...Object.values(node.inputs), ...Object.values(node.outputs)];
+            interfaces.forEach((intf) => {
+                if (intf.externalName) {
+                    this.editor.privatizeInterface(
+                        this.id,
+                        intf,
+                    );
+                }
+            });
+
+            this.connections
+                .filter((c) => interfaces.includes(c.from) || interfaces.includes(c.to))
+                .forEach((c) => this.removeConnection(c));
+            this._nodes.splice(this.nodes.indexOf(node), 1);
+            this.events.removeNode.emit(node);
+            node.onDestroy();
+            this.nodeEvents.removeTarget(node.events);
+            this.nodeHooks.removeTarget(node.hooks);
+        }
+    };
+
     graph.removeNodeOnly = function removeNodeOnly(node) {
         this._nodes.splice(this.nodes.indexOf(node), 1);
         this.events.removeNode.emit(node);
         node.onDestroy();
         this.nodeEvents.removeTarget(node);
         this.nodeHooks.removeTarget(node);
+    };
+
+    graph.obtainExposedNames = function obtainExposedNames() {
+        const exposedNames = [];
+        this._nodes.forEach((node) => {
+            Object.values({ ...node.inputs, ...node.outputs }).forEach((intf) => {
+                if (intf.externalName !== undefined) {
+                    exposedNames.push(intf.externalName);
+                }
+            });
+        });
+        return exposedNames;
+    };
+
+    graph.isIncorrectExternalName = function isIncorrectExternalName(name, exposedNames) {
+        const sameNames = exposedNames.filter((n) => n === name).length;
+        return name.length === 0 || sameNames !== 0;
+    };
+
+    graph.resolveNewExposedName = function resolveNewExposedName(name) {
+        const exposedNames = this.obtainExposedNames();
+
+        // Check if the external name is taken and add a suffix if it is
+        let suffix = 1;
+        let tmpName = name;
+        while (this.isIncorrectExternalName(tmpName, exposedNames)) {
+            tmpName = `${name}_${suffix}`;
+            suffix += 1;
+        }
+        return tmpName;
     };
 
     return graph;
