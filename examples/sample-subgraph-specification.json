@@ -22,12 +22,14 @@
                 {
                     "name": "Input",
                     "type": "Connection-2",
-                    "direction": "input"
+                    "direction": "input",
+                    "maxConnectionsCount": 1
                 },
                 {
                     "name": "Output",
                     "type": "Connection-2",
-                    "direction": "output"
+                    "direction": "output",
+                    "maxConnectionsCount": 1
                 },
                 {
                     "name": "Inout",
@@ -58,17 +60,21 @@
                 {
                     "name": "Input",
                     "type": "Connection-2",
-                    "direction": "input"
+                    "direction": "input",
+                    "maxConnectionsCount": 1
                 },
                 {
                     "name": "Output",
                     "type": "Connection-2",
-                    "direction": "output"
+                    "direction": "output",
+                    "maxConnectionsCount": 1
+
                 },
                 {
                     "name": "Inout",
                     "type": "Connection-1",
-                    "direction": "inout"
+                    "direction": "inout",
+                    "maxConnectionsCount": 1
                 }
             ]
         }
