@@ -273,8 +273,12 @@ const contextMenuTitleItems = computed(() => {
         );
     }
 
-    if (props.node.type.startsWith(GRAPH_NODE_TYPE_PREFIX)) {
-        items.push({ value: 'unwrap', label: 'Unwrap Subgraph', icon: icons.Unwrap });
+    // NOTE: This feature is disabled for now, as it is not fully implemented
+    const SUPPORT_NODE_UNWRAPPING = false;
+    if (SUPPORT_NODE_UNWRAPPING) {
+        if (props.node.type.startsWith(GRAPH_NODE_TYPE_PREFIX)) {
+            items.push({ value: 'unwrap', label: 'Unwrap Subgraph', icon: icons.Unwrap });
+        }
     }
 
     return items;
@@ -643,30 +647,44 @@ const pickInterface = (intf, ev) => {
 const showContextMenuInterface = ref(false);
 const contextMenuInterfaceX = ref(0);
 const contextMenuInterfaceY = ref(0);
-const contextMenuInterfaceItems = computed(() => {
-    const intfMode = (chosenInterface.externalName === undefined ?
-        { value: 'SetExternalName', label: 'Expose Interface' } :
-        { value: 'UnsetExternalName', label: 'Privatize Interface' }
-    );
-    const items = [
-        intfMode,
+
+const createContextMenuInterfaceItems = () => {
+    const items = [];
+
+    if (graph.value.graphNode !== undefined && chosenInterface !== undefined) {
+        const intfMode = (chosenInterface.externalName === undefined ?
+            { value: 'SetExternalName', label: 'Expose Interface' } :
+            { value: 'UnsetExternalName', label: 'Privatize Interface' }
+        );
+        items.push(intfMode);
+    }
+
+    items.push(
         { value: 'SpaceUp', label: 'Space Up' },
         { value: 'SpaceDown', label: 'Space Down' },
         { value: 'MoveUp', label: 'Move Up' },
         { value: 'MoveDown', label: 'Move Down' },
-    ];
+    );
 
     return items;
-});
+};
+
+const contextMenuInterfaceItems = ref(createContextMenuInterfaceItems());
 
 /* eslint-disable default-case */
 const onContextMenuInterfaceClick = (action) => {
     switch (action) {
         case 'SetExternalName':
-            chosenInterface.externalName = chosenInterface.name;
+            viewModel.value.editor.exposeInterface(
+                graph.value.id,
+                chosenInterface,
+            );
             break;
         case 'UnsetExternalName':
-            chosenInterface.externalName = undefined;
+            viewModel.value.editor.privatizeInterface(
+                graph.value.id,
+                chosenInterface,
+            );
             break;
         case 'MoveUp':
             if (chosenInterface.sidePosition === 0) {
@@ -701,6 +719,7 @@ const onContextMenuInterfaceClick = (action) => {
 const openContextMenuInterface = (intf, ev) => {
     if (!viewModel.value.editor.readonly && showContextMenuInterface.value === false) {
         chosenInterface = intf;
+        contextMenuInterfaceItems.value = createContextMenuInterfaceItems();
         if (chosenInterface.side === 'right') {
             contextMenuInterfaceX.value = ev.currentTarget.offsetLeft + 162.5;
             contextMenuInterfaceY.value = ev.currentTarget.offsetTop + 12.5;
