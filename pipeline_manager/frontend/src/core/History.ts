@@ -61,26 +61,14 @@ class NodeStep extends Step {
     add(graph: Ref<Graph>) {
         if (this.nodeTuple[0] !== undefined) {
             const n = graph.value.addNode(this.nodeTuple[0]);
-            if (this.nodeTuple.length <= 2) n.load(this.nodeTuple[1]);
-            else {
-                // eslint-disable-next-line prefer-destructuring
-                this.nodeTuple[1].graphState = this.nodeTuple[2];
-                n.load(this.nodeTuple[1]);
-                n.subgraph.load(this.nodeTuple[2]);
-            }
+            n.load(this.nodeTuple[1]);
         }
     }
 
     remove(graph: Ref<Graph>) {
         const node : any = graph.value.nodes.find((n) => n.id === this.topic);
         if (node !== undefined) {
-            if (node.subgraph !== undefined) {
-                this.nodeTuple = [
-                    node,
-                    node.save(),
-                    node.subgraph.save(),
-                ];
-            } else this.nodeTuple = [node, node.save()];
+            this.nodeTuple = [node, node.save()];
             graph.value.removeNode(node);
         }
     }
@@ -231,13 +219,7 @@ export function useHistory(graph: Ref<any>, commandHandler: ICommandHandler): IH
                     if (!historyItem) return;
                     const step = new NodeStep('rem', node.id.toString(), transactionId.value);
                     historyItem.push(step);
-                    if (node.subgraph !== undefined) {
-                        step.nodeTuple = [
-                            node,
-                            node.save(),
-                            node.subgraph.save(),
-                        ];
-                    } else step.nodeTuple = [node, node.save()];
+                    step.nodeTuple = [node, node.save()];
                     undoneHistory.set(newGraph.id, []);
                 }
             });
