@@ -31,6 +31,16 @@ from pipeline_manager.tests.conftest import check_validation
             0,
         ),
         (
+            "dataflow_specification_node_and_graph_node_maxConnectionsCount_equal_two",
+            "dataflow_two_layer_graph_interfaces_connected_graph_node",
+            0,
+        ),
+        (
+            "dataflow_specification_node_and_graph_node_maxConnectionsCount_equal_three",
+            "dataflow_three_layer_graph_interfaces_connected_graph_node",
+            0,
+        ),
+        (
             "dataflow_specification_node_no_properties",
             "dataflow_valid_node_property_select",
             2,
@@ -67,7 +77,12 @@ from pipeline_manager.tests.conftest import check_validation
         ),
         (
             "dataflow_specification_node_and_graph_node_maxConnectionsCount_equal_one",
-            "dataflow_graph_too_many_interfaces_connected_graph_node",
+            "dataflow_two_layer_graph_interfaces_connected_graph_node",
+            2,
+        ),
+        (
+            "dataflow_specification_node_and_graph_node_maxConnectionsCount_equal_two",
+            "dataflow_three_layer_graph_interfaces_connected_graph_node",
             2,
         ),
     ],
@@ -180,24 +195,39 @@ def dataflow_specification_incompatible_node_and_graph_node(
     return dataflow_specification_two_incompatible_nodes
 
 
+def set_connections_count_del_type(spec, count):
+    for node in spec["nodes"]:
+        for interface in node["interfaces"]:
+            del interface["type"]
+            interface["maxConnectionsCount"] = count
+    return spec
+
+
 @pytest.fixture
 def dataflow_specification_node_and_graph_node_maxConnectionsCount_equal_one(
     dataflow_specification_incompatible_node_and_graph_node
 ):
-    dataflow_specification_incompatible_node_and_graph_node["nodes"][0][
-        "interfaces"
-    ][0]["maxConnectionsCount"] = 1
-    del dataflow_specification_incompatible_node_and_graph_node["nodes"][0][
-        "interfaces"
-    ][0]["type"]
-    dataflow_specification_incompatible_node_and_graph_node["nodes"][1][
-        "interfaces"
-    ][0]["maxConnectionsCount"] = 1
-    del dataflow_specification_incompatible_node_and_graph_node["nodes"][1][
-        "interfaces"
-    ][0]["type"]
+    return set_connections_count_del_type(
+        dataflow_specification_incompatible_node_and_graph_node, 1
+    )
 
-    return dataflow_specification_incompatible_node_and_graph_node
+
+@pytest.fixture
+def dataflow_specification_node_and_graph_node_maxConnectionsCount_equal_two(
+    dataflow_specification_incompatible_node_and_graph_node
+):
+    return set_connections_count_del_type(
+        dataflow_specification_incompatible_node_and_graph_node, 2
+    )
+
+
+@pytest.fixture
+def dataflow_specification_node_and_graph_node_maxConnectionsCount_equal_three(
+    dataflow_specification_incompatible_node_and_graph_node
+):
+    return set_connections_count_del_type(
+        dataflow_specification_incompatible_node_and_graph_node, 3
+    )
 
 
 # ----------------------------------
@@ -389,7 +419,7 @@ def dataflow_graph_incompatible_interfaces_connected_graph_node(
 
 
 @pytest.fixture
-def dataflow_graph_too_many_interfaces_connected_graph_node(
+def dataflow_two_layer_graph_interfaces_connected_graph_node(
     dataflow_node_base,
 ):
     dataflow_node_base["graphs"].append(
@@ -442,6 +472,7 @@ def dataflow_graph_too_many_interfaces_connected_graph_node(
             "interfaces": [
                 {
                     "name": "External Encoding",
+                    "externalName": "External Encoding",
                     "id": "6ba91cca-80d5-4598-a6ab-750ddb6cec83",
                     "direction": "inout",
                 }
@@ -459,3 +490,54 @@ def dataflow_graph_too_many_interfaces_connected_graph_node(
         }
     )
     return dataflow_node_base
+
+
+# ----------------------------------
+# Dataflows with multi-layer graphs
+# ----------------------------------
+
+
+@pytest.fixture
+def dataflow_three_layer_graph_interfaces_connected_graph_node(
+    dataflow_two_layer_graph_interfaces_connected_graph_node
+):
+    dataflow_two_layer_graph_interfaces_connected_graph_node["graphs"].append(
+        {
+            "id": "9c4d5349-9d3b-401f-86bb-021b7b3e5b81",
+            "nodes": [
+                {
+                    "id": "4f3be893-1212-4820-8e5d-cb85535083d7",
+                    "position": {"x": 500, "y": 0},
+                    "interfaces": [
+                        {
+                            "name": "External Encoding",
+                            "id": "6ba91cca-80d5-4598-a6ab-750ddb6cec83",
+                            "direction": "inout",
+                        }
+                    ],
+                    "subgraph": "78cc86c4-9ad0-4a8f-88cb-71ee28c48659",
+                    "name": "Subgraph #1",
+                },
+                {
+                    "id": "9dcc9b2b-2933-467b-9d14-f16e355f0323",
+                    "position": {"x": 500, "y": 600},
+                    "interfaces": [
+                        {
+                            "name": "encoding",
+                            "id": "9ae8e27c-7556-4599-8e93-0dd632399eff",
+                            "direction": "inout",
+                        }
+                    ],
+                    "name": "EncodeVideo",
+                },
+            ],
+            "connections": [
+                {
+                    "id": "b0832022-c1c4-4c69-a1c2-07d328370faa",
+                    "from": "6ba91cca-80d5-4598-a6ab-750ddb6cec83",
+                    "to": "9ae8e27c-7556-4599-8e93-0dd632399eff",
+                }
+            ],
+        }
+    )
+    return dataflow_two_layer_graph_interfaces_connected_graph_node
