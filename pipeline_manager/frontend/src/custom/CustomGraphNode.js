@@ -21,6 +21,8 @@ export default function CreateCustomGraphNodeType(template, type) {
     return class customGraphNodeType extends nt {
         type = `${GRAPH_NODE_TYPE_PREFIX}${type}`;
 
+        title = type;
+
         save() {
             this.saveInterfacesState();
             this.subgraph.propagateInterfacesUp();
@@ -117,6 +119,7 @@ export default function CreateCustomGraphNodeType(template, type) {
             // Default position should be undefined instead of (0, 0) so that it can be set
             // by autolayout
             this.position = state.position;
+            this.title = state.instanceName ?? '';
 
             this.events.loaded.emit(this);
             return [];
