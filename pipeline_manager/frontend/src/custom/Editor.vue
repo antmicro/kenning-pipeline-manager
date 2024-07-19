@@ -86,6 +86,7 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
 
 <script>
 /* eslint-disable object-curly-newline */
+import { GRAPH_NODE_TYPE_PREFIX } from '@baklavajs/core';
 import { EditorComponent, useGraph } from '@baklavajs/renderer-vue';
 import { defineComponent, ref, computed, watch, onMounted } from 'vue';
 import fuzzysort from 'fuzzysort';
@@ -484,8 +485,13 @@ export default defineComponent({
             const threshold = -50;
 
             const matchingNodes = visibleNodes.value.filter((node) => {
+                let { type } = node;
+                if (type.startsWith(GRAPH_NODE_TYPE_PREFIX)) {
+                    type = type.slice(GRAPH_NODE_TYPE_PREFIX.length);
+                }
+
                 const resultTitle = fuzzysort.single(query, node.title);
-                const resultType = fuzzysort.single(query, node.type);
+                const resultType = fuzzysort.single(query, type);
 
                 if ((resultTitle !== null && resultTitle.score > threshold) ||
                     (resultType !== null && resultType.score > threshold)) {

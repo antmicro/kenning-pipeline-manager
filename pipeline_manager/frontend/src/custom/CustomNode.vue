@@ -174,9 +174,6 @@ const contextMenuStyle = computed(() => ({
     transform: `scale(${1 / graph.value.scaling})`,
 }));
 
-// If type start with '_', it is not displayed as node title
-const IGNORE_TYPE_PREFIX = '_';
-
 const nodeRef = ref(null);
 const titleRef = ref(null);
 const renaming = ref(false);
@@ -386,12 +383,24 @@ const nodeTitle = computed(() => {
     const title = props.node.highlightedTitle ?? props.node.title;
     const type = props.node.highlightedType ?? props.node.type;
 
-    if (props.node.type.startsWith(IGNORE_TYPE_PREFIX)) {
+    // Graph node case
+    if (props.node.type.startsWith(GRAPH_NODE_TYPE_PREFIX)) {
+        if (title === '' || title === undefined) {
+            // The highlighted title does not have the GRAPH_NODE_TYPE_PREFIX
+            // because otherwise <span> tags could mangle the name
+            if (props.node.highlightedTitle === props.node.title) {
+                return type.slice(GRAPH_NODE_TYPE_PREFIX.length);
+            }
+            return type;
+        }
+
         return title;
     }
-    if (props.node.title === props.node.type || props.node.title === '') {
+
+    if (title === '' || props.node.title === props.node.type) {
         return type;
     }
+
     return `${title} <pre class="subtitle">${type}</pre>`;
 });
 
