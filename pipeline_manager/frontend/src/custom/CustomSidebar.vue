@@ -34,7 +34,7 @@ SPDX-License-Identifier: Apache-2.0
                     :src="nodeIconPath"
                 />
                 <div class="__node-name">
-                    {{ node.title ? node.title : node.type }}
+                    {{ displayedName }}
                 </div>
                 <a
                     v-for="url in nodeURLs"
@@ -147,6 +147,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { computed, defineComponent, watch, ref, nextTick } from 'vue'; // eslint-disable-line object-curly-newline
+import { GRAPH_NODE_TYPE_PREFIX } from '@baklavajs/core';
 import { CheckboxInterface, ButtonInterface } from '@baklavajs/renderer-vue'; // eslint-disable-line object-curly-newline
 import showdown from 'showdown';
 import CustomInterface from './CustomInterface.vue';
@@ -372,6 +373,16 @@ export default defineComponent({
         const replacementChildren = computed(() => replacementButtons(node.value.extending));
         const replacementSiblings = computed(() => replacementButtons(node.value.siblings));
 
+        const displayedName = computed(() => {
+            if (node.value.title === '' || node.value.title === undefined) {
+                if (node.value.type.startsWith(GRAPH_NODE_TYPE_PREFIX)) {
+                    return node.value.type.slice(GRAPH_NODE_TYPE_PREFIX.length);
+                }
+                return node.value.type;
+            }
+            return node.value.title;
+        });
+
         return {
             graph,
             node,
@@ -400,6 +411,7 @@ export default defineComponent({
             replacementChildren,
             replacementSiblings,
             editorManager,
+            displayedName,
         };
     },
 });
