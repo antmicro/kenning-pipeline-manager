@@ -486,7 +486,8 @@ export default defineComponent({
 
             const matchingNodes = visibleNodes.value.filter((node) => {
                 let { type } = node;
-                if (type.startsWith(GRAPH_NODE_TYPE_PREFIX)) {
+                const isGraphNode = type.startsWith(GRAPH_NODE_TYPE_PREFIX);
+                if (isGraphNode) {
                     type = type.slice(GRAPH_NODE_TYPE_PREFIX.length);
                 }
 
@@ -497,6 +498,10 @@ export default defineComponent({
                     (resultType !== null && resultType.score > threshold)) {
                     node.highlightedTitle = fuzzysort.highlight(resultTitle, '<span>', '</span>');
                     node.highlightedType = fuzzysort.highlight(resultType, '<span>', '</span>');
+
+                    // If the node is a graph node, has a title and query does not match the title,
+                    // do not show the node
+                    if (isGraphNode && node.title !== '' && resultTitle === null) return false;
                     return true;
                 }
                 node.highlightedTitle = node.title;
