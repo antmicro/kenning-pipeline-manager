@@ -13,8 +13,6 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { v4 as uuidv4 } from 'uuid';
-
 import { Editor, GRAPH_NODE_TYPE_PREFIX } from '@baklavajs/core';
 
 import { useGraph } from '@baklavajs/renderer-vue';
@@ -365,13 +363,13 @@ export default class PipelineManagerEditor extends Editor {
      * @param {string} graphId graph which has the node with the interface
      * @param {Object} intf interface to expose
      * @param {string} name name under which the interface will be exposed. If set to `undefined`,
-     * the interface will be exposed under a random UUID.
+     * external name will be inferred from the name of the interface.
      */
     exposeInterface(graphId, intf, name = undefined) {
         const graph = [...this.graphs].find((g) => g.id === graphId);
         const graphNode = graph.graphNode; // eslint-disable-line prefer-destructuring
         if (graphNode === undefined) return;
-        intf.externalName = name ?? uuidv4();
+        intf.externalName = name ?? graph.resolveNewExposedName(intf.name);
         // After changing the external name, the interface has to be updated in the
         // graph node to reflect the changes in the graph.
         graphNode.updateExposedInterfaces();
