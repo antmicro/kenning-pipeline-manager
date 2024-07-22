@@ -61,9 +61,6 @@ export default class PipelineManagerEditor extends Editor {
 
     layoutManager = new LayoutManager();
 
-    /* eslint-disable no-param-reassign */
-    /* eslint-disable no-underscore-dangle */
-
     subgraphStack = [];
 
     registerGraph(graph) {
@@ -489,7 +486,8 @@ export default class PipelineManagerEditor extends Editor {
     }
 
     switchToSubgraph(subgraphNode) {
-        this.subgraphStack.push([this._graph.id, subgraphNode]);
+        // Obtaining the current graph from the graph node and pushing it to the stack
+        this.subgraphStack.push(subgraphNode.graph);
         this.switchGraph(subgraphNode);
     }
 
@@ -503,8 +501,7 @@ export default class PipelineManagerEditor extends Editor {
      * and updates the graph node's interfaces accordingly.
      */
     backFromSubgraph() {
-        const [newGraphId, _] = this.subgraphStack.pop(); // eslint-disable-line no-unused-vars
-        const newGraph = [...this.graphs].filter((graph) => graph.id === newGraphId)[0];
+        const newGraph = this.subgraphStack.pop(); // eslint-disable-line no-unused-vars
 
         suppressHistoryLogging(true);
 
