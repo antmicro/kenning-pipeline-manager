@@ -12,7 +12,7 @@ import logging
 import sys
 from pathlib import Path
 
-# from pipeline_manager.utils.logger import string_to_verbosity
+from pipeline_manager.utils.logger import string_to_verbosity
 
 """
 Script that can be used to apply patches to update an old dataflow
@@ -25,6 +25,14 @@ python -m pipeline_manager.utils.dataflow_format_converter \
     old_format_dataflow.json
 ```
 """
+
+
+class ConversionError(Exception):
+    """
+    Exception raised when conversion fails.
+    """
+
+    pass
 
 
 def dataflow_ver_20230615_1(dataflow: dict) -> dict:
@@ -45,38 +53,41 @@ def dataflow_ver_20230615_1(dataflow: dict) -> dict:
     return dataflow
 
 
-def dataflow_ver_20230830_11(dataflow: dict) -> dict:
+def dataflow_ver_20240723_13(dataflow: dict) -> dict:
     """
-    Converts dataflows to version 20230830.11.
+    Converts dataflows to version 20240723.13.
 
     Parameters
     ----------
     dataflow : dict
         Dataflow to be converted
 
+    Raises
+    ------
+    ConversionError
+        Raised if subgraphs are present in the dataflow, as they
+        are not supported by this converter
+
     Returns
     -------
     dict
         Converted dataflow to the next version
     """
-    dataflow["version"] = "20230830.11"
+    dataflow["version"] = "20240723.13"
+    if "subgraphs" in dataflow:
+        raise ConversionError(
+            "Subgraphs conversion is not supported in version 20240723.13"
+        )
 
-    def parse_graph(graph):
-        for node in graph["nodes"]:
-            if "name" in node:
-                node["instanceName"] = node["name"]
-                del node["name"]
-
-            node["name"] = node["type"]
-            del node["type"]
-
-    parse_graph(dataflow["graph"])
-    if "graphTemplateInstances" in dataflow:
-        for subgraph in dataflow["graphTemplateInstances"]:
-            parse_graph(subgraph)
-
-    dataflow["subgraphs"] = dataflow["graphTemplateInstances"]
-    del dataflow["graphTemplateInstances"]
+    if "graph" in dataflow:
+        main_graph = dataflow["graph"]
+        dataflow["graphs"] = [main_graph]
+        del dataflow["graph"]
+    else:
+        logging.warning(
+            "No 'graph' property to convert. "
+            + "Make sure the dataflow format is correct.",
+        )
 
     return dataflow
 
@@ -107,7 +118,7 @@ def main(argv):  # noqa: D103
         type=str,
     )
     args, _ = parser.parse_known_args(argv[1:])
-    # logging.basicConfig(level=string_to_verbosity(args.verbosity))
+    logging.basicConfig(level=string_to_verbosity(args.verbosity))
 
     args, _ = parser.parse_known_args(argv[1:])
 
@@ -116,7 +127,7 @@ def main(argv):  # noqa: D103
 
     dataflow_patches = {
         "pre-20230615.1": dataflow_ver_20230615_1,
-        "20230824.10": dataflow_ver_20230830_11,
+        "20230830.11": dataflow_ver_20240723_13,
     }
 
     try:
@@ -130,7 +141,7 @@ def main(argv):  # noqa: D103
         dataflow = patch(dataflow)
 
     with open(args.output, "w") as f:
-        json.dump(dataflow, f, indent=4)
+        json.dump(dataflow, f, indent=4, ensure_ascii=False)
 
 
 if __name__ == "__main__":
