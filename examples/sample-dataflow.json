@@ -58,6 +58,11 @@
                             "name": "sigma",
                             "id": "3319d658-e5da-41ef-b580-c94fe0db0bdf",
                             "value": 1
+                        },
+                        {
+                            "name": "tags",
+                            "id": "2a07d4b9-8df7-49b1-b705-40f116536d69",
+                            "value": ["inverse"]
                         }
                     ],
                     "enabledInterfaceGroups": [],

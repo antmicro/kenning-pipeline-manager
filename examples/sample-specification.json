@@ -53,7 +53,8 @@
             "category": "Generators",
             "properties": [
                 {"name": "size", "type": "integer", "default": 5},
-                {"name": "sigma", "type": "number", "default": 1.0}
+                {"name": "sigma", "type": "number", "default": 1.0},
+                {"name": "tags", "type": "list", "dtype": "string", "default": []}
             ],
             "interfaces": [{"name": "kernel", "type": "Image", "direction": "output"}]
         },
