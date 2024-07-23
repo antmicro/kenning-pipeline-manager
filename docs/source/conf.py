@@ -81,12 +81,22 @@ if html_build_dir.is_dir():
         graphname = example.stem.replace("-dataflow", "")
         spec = example.parent / f"{graphname}-specification.json"
         relspec = spec.relative_to(static_demo_dir)
-        title = ""
-        try:
-            with open(example, "r") as f:
-                title = json.load(f)["graph"]["name"]
-        except (KeyError, FileNotFoundError):
-            title = relexample.stem.replace("-dataflow", "")
+        relgraph = example.relative_to(static_demo_dir)
+        title = relexample.stem.replace("-dataflow", "")
+        with open(example, "r") as f:
+            try:
+                data = json.load(f)
+                graph = data["graphs"][0]
+                if "entryGraph" in data:
+                    entrygraph = data["entryGraph"]
+                    for graph in data["graphs"]:
+                        if graph["id"] == entrygraph:
+                            break
+                title = graph["name"]
+            except KeyError:
+                raise Exception(
+                    f"Pair {relgraph} {relspec} does not have base graph name provided"  # noqa: E501
+                )
         params = {
             "spec": f"relative://{relspec}",
             "graph": f"relative://{relexample}",
