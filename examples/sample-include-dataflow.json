@@ -2,6 +2,7 @@
     "graphs": [
         {
             "id": "b592e3fe-e98d-4176-b569-ccf47075e3b0",
+            "name": "Example of the graph with include mechanisms",
             "nodes": [
                 {
                     "id": "e4f7814d-0768-4936-872a-fb3de9b1b71a",

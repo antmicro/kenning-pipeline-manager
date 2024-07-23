@@ -192,6 +192,7 @@
         },
         {
             "id": "9c4d5349-9d3b-401f-86bb-021b7b3e5b81",
+            "name": "Example of the graph with graph nodes",
             "nodes": [
                 {
                     "id": "79a96644-9ff1-47e4-8226-335614efd103",
@@ -372,12 +373,7 @@
                     "from": "dd60c5a5-a502-4b2b-8de2-49cc7e28397b",
                     "to": "b7c7d2a1-7c35-446c-be75-7116d768675c"
                 }
-            ],
-            "scaling": 0.7929515418502202,
-            "panning": {
-                "x": 399,
-                "y": 248
-            }
+            ]
         }
     ],
     "version": "20230523.12"
