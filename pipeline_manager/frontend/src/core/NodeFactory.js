@@ -126,6 +126,9 @@ function createProperties(properties) {
                 intf.componentName = 'SliderInterface';
                 break;
             case 'list':
+                if (propDef === null) {
+                    propDef = [];
+                }
                 intf = new ListInterface(propName, propDef, p.dtype).setPort(false);
                 intf.componentName = 'ListInterface';
                 break;
@@ -186,6 +189,8 @@ function detectDiscrepancies(parsedState, inputs, outputs) {
                 return typeof value === 'number';
             case 'bool':
                 return typeof value === 'boolean';
+            case 'list':
+                return Array.isArray(value);
             default:
                 return false;
         }
@@ -212,9 +217,15 @@ function detectDiscrepancies(parsedState, inputs, outputs) {
             const parsedValue = parsedState.inputs[ioName].value;
             const propertyType = inputs[ioName].type;
             if (!checkType(propertyType, parsedValue)) {
-                errors.push(`Property '${name}' type mismatch! ${propertyType} expected, ${typeof parsedValue} found.`);
+                errors.push(`Property '${name}' type mismatch. ${propertyType} expected, ${typeof parsedValue} found.`);
             } else if (propertyType === 'select' && !inputs[ioName].items.includes(parsedValue)) {
-                errors.push(`Property '${name}' value mismatch! ${parsedValue} not found in ${inputs[ioName].items}`);
+                errors.push(`Property '${name}' value mismatch. ${parsedValue} not found in ${inputs[ioName].items}`);
+            } else if (propertyType === 'list') {
+                const { dtype } = inputs[ioName];
+                const mismatchedElements = parsedValue.filter((val) => typeof val !== dtype); // eslint-disable-line valid-typeof,max-len
+                if (mismatchedElements.length > 0) {
+                    errors.push(`Property '${name}' value mismatch. Items: '${mismatchedElements.join(' ')}' are not of '${dtype}' dtype.`);
+                }
             }
         }
     });
