@@ -531,6 +531,19 @@
                                     "format": "hex"
                                 }
                             }
+                        },
+                        {
+                            "properties": {
+                                "type": {
+                                    "const": "list"
+                                },
+                                "default": {
+                                    "type": ["array", "null"]
+                                }
+                            },
+                            "required": [
+                                "dtype"
+                            ]
                         }
                     ]
                 }
