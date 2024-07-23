@@ -31,6 +31,11 @@ from pipeline_manager.tests.conftest import check_validation
             0,
         ),
         (
+            "dataflow_specification_node_property_list",
+            "dataflow_node_property_list",
+            0,
+        ),
+        (
             "dataflow_specification_node_and_graph_node_maxConnectionsCount_equal_two",
             "dataflow_two_layer_graph_interfaces_connected_graph_node",
             0,
@@ -43,6 +48,11 @@ from pipeline_manager.tests.conftest import check_validation
         (
             "dataflow_specification_node_no_properties",
             "dataflow_valid_node_property_select",
+            2,
+        ),
+        (
+            "dataflow_specification_node_property_list",
+            "dataflow_node_property_list_dtype_mismatch",
             2,
         ),
         (
@@ -138,6 +148,21 @@ def dataflow_specification_node_property_select(
             "type": "select",
             "default": "rgb",
             "values": ["rgb", "bgr", "mono"],
+        }
+    ]
+    return dataflow_specification_node_no_properties
+
+
+@pytest.fixture
+def dataflow_specification_node_property_list(
+    dataflow_specification_node_no_properties
+):
+    dataflow_specification_node_no_properties["nodes"][0]["properties"] = [
+        {
+            "name": "tags",
+            "type": "list",
+            "dtype": "string",
+            "default": [],
         }
     ]
     return dataflow_specification_node_no_properties
@@ -277,6 +302,30 @@ def dataflow_node_property_text(dataflow_node_base):
             "id": "3039e744-9941-47c5-8902-f260e6c29a35",
             "name": "filename",
             "value": "/some/file/path",
+        }
+    )
+    return dataflow_node_base
+
+
+@pytest.fixture
+def dataflow_node_property_list(dataflow_node_base):
+    dataflow_node_base["graphs"][0]["nodes"][0]["properties"].append(
+        {
+            "id": "3039e744-9941-47c5-8902-f260e6c29a35",
+            "name": "tags",
+            "value": ["a", "b"],
+        }
+    )
+    return dataflow_node_base
+
+
+@pytest.fixture
+def dataflow_node_property_list_dtype_mismatch(dataflow_node_base):
+    dataflow_node_base["graphs"][0]["nodes"][0]["properties"].append(
+        {
+            "id": "3039e744-9941-47c5-8902-f260e6c29a35",
+            "name": "tags",
+            "value": ["a", 3],
         }
     )
     return dataflow_node_base
