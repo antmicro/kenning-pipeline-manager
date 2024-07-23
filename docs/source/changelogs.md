@@ -3,6 +3,26 @@
 Formats of dataflows and specification is often updated with new features, that makes former formats incompatible with the new ones.
 This section lists all versions, related features and breaking changes.
 
+## 20240723.13
+
+```{warning}
+This update changes the existing format of specification and dataflow.
+```
+
+Commit SHA - TODO
+
+* Added `includeGraphs` field allowing to include graphs in the specification as subgraphs
+* Added `include` field allowing to include partial specification to the specification
+* Replaced `graph` field with `graphs` list
+* The default graph now can be:
+
+  * the first entry in the `graphs` list
+  * the graph from `graphs`, where `id` of the graph is equal to `entryGraph`
+* Replaced `subgraphs` in specification with `graphs` that have the exact same format as regular graphs
+* Introduced `externalName` for graph nodes
+* Fixed `list` type for properties - now they can be defined as lists in the graph, and display/modified as space-separated entries
+* Improved Markdown-based rendering of description
+
 ## 20230523.12
 
 ```{warning}

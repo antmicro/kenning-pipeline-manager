@@ -310,7 +310,7 @@
             "name": "Example of a more complex graph with nodes as interfaces, inheritance and more"
         }
     ],
-    "version": "20230523.12",
+    "version": "20240723.13",
     "metadata": {
         "movementStep": 100,
         "randomizedOffset": false

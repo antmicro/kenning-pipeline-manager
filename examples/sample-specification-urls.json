@@ -1,0 +1,147 @@
+{
+    "nodes": [
+        {
+            "name": "LoadVideo",
+            "type": "filesystem",
+            "category": "Filesystem",
+            "properties": [
+                {"name": "filename", "type": "text", "default": ""}
+            ],
+            "interfaces": [{"name": "frames", "type": "Image", "direction": "output"}],
+            "urls": {
+                "hwp": "components/analog-devices-adv7282wbcpz-m"
+            },
+            "icon": "detection.svg"
+        },
+        {
+            "name": "SaveVideo",
+            "type": "filesystem",
+            "category": "Filesystem",
+            "properties": [
+                {"name": "filename", "type": "text", "default": ""}
+            ],
+            "interfaces": [
+                {"name": "color", "type": "Image", "direction": "input"},
+                {"name": "binary", "type": "BinaryImage", "direction": "input"}
+            ],
+            "urls": {
+                "hwp": "components/analog-devices-adv7282wbcpz-m",
+                "rdp": "test"
+            },
+            "icon": "detection.svg"
+        },
+        {
+            "name": "GaussianKernel",
+            "type": "kernel",
+            "category": "Generators",
+            "properties": [
+                {"name": "size", "type": "integer", "default": 5},
+                {"name": "sigma", "type": "number", "default": 1.0}
+            ],
+            "interfaces": [{"name": "kernel", "type": "Image", "direction": "output"}]
+        },
+        {
+            "name": "StructuringElement",
+            "type": "kernel",
+            "category": "Generators",
+            "properties": [
+                {"name": "size", "type": "integer", "default": 5},
+                {
+                    "name": "shape",
+                    "type": "select",
+                    "values": ["Rectangle", "Cross", "Ellipse"],
+                    "default": "Cross"
+                }
+            ],
+            "interfaces": [{"name": "kernel", "type": "BinaryImage", "direction": "output"}]
+        },
+        {
+            "name": "Filter2D",
+            "type": "processing",
+            "category": "Processing",
+            "properties": [
+                {"name": "iterations", "type": "integer", "default": 1},
+                {
+                    "name": "border type",
+                    "type": "select",
+                    "values": ["constant", "replicate", "wrap", "reflect"],
+                    "default": "constant"
+                }
+            ],
+            "interfaces": [
+                {"name": "image", "type": "Image", "direction": "input"},
+                {"name": "kernel", "type": "Image", "direction": "input"},
+                {"name": "output", "type": "Image", "direction": "output"}
+            ]
+        },
+        {
+            "name": "Threshold",
+            "type": "processing",
+            "category": "Processing",
+            "properties": [
+                {"name": "threshold_value", "type": "integer", "default": 1},
+                {
+                    "name": "threshold_type",
+                    "type": "select",
+                    "values": ["Binary", "Truncate", "Otsu"],
+                    "default": "constant"
+                }
+            ],
+            "interfaces": [
+                {"name": "image", "type": "Image", "direction": "input"},
+                {"name": "output", "type": "BinaryImage", "direction": "output"}
+            ]
+        },
+        {
+            "name": "Morphological operation",
+            "type": "processing",
+            "category": "Processing",
+            "properties": [
+                {"name": "iterations", "type": "integer", "default": 1},
+                {
+                    "name": "border type",
+                    "type": "select",
+                    "values": ["constant", "replicate", "wrap", "reflect"],
+                    "default": "constant"
+                },
+                {
+                    "name": "operation type",
+                    "type": "select",
+                    "values": ["dilation", "erosion", "closing", "opening"],
+                    "default": "dilation"
+                }
+            ],
+            "interfaces": [
+                {"name": "image", "type": "BinaryImage", "direction": "input"},
+                {"name": "kernel", "type": "BinaryImage", "direction": "input"},
+                {"name": "output", "type": "BinaryImage", "direction": "output"}
+            ]
+        }
+    ],
+    "metadata": {
+        "interfaces": {
+            "BinaryImage": {
+                "interfaceColor": "#FF00FF",
+                "interfaceConnectionPattern": "dashed",
+                "interfaceConnectionColor": "#FF0000"
+            },
+            "Image": {
+                "interfaceConnectionPattern": "dotted",
+                "interfaceConnectionColor": "#FFFF00"
+            }
+        },
+        "connectionStyle": "orthogonal",
+        "urls": {
+            "hwp": {
+              "name": "Open Hardware Portal",
+              "icon": "classification.svg",
+              "url": "https://openhardware.antmicro.com/"
+            },
+            "rdp": {
+              "name": "Renodepedia",
+              "icon": "detection.svg",
+              "url": "https://zephyr-dashboard.renode.io/renodepedia/"
+            }
+          }
+    }
+}

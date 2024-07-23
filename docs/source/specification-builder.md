@@ -20,7 +20,7 @@ Import the package, specify the specification version to use and create an insta
 from pathlib import Path
 from pipeline_manager.specification_builder import SpecificationBuilder
 
-SPECIFICATION_VERSION = '20230523.12'
+SPECIFICATION_VERSION = '20240723.13'
 ASSETS_DIRECTORY = Path("./assets")
 
 specification_builder = SpecificationBuilder(

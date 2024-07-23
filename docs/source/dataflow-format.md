@@ -164,7 +164,7 @@ Example of graph interfaces:
         }
     ],
     "entryGraph": "9c4d5349-9d3b-401f-86bb-021b7b3e5b81",
-    "version": "20230523.12"
+    "version": "20240723.13"
 }
 ```
 
