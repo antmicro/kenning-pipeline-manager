@@ -20,11 +20,11 @@ def specification_no_include():
 
 
 @pytest.fixture
-def dataflow_one_graph():
+def dataflow_one_graph_using_SaveVideo_node():
     return {
         "graphs": [
             {
-                "name": "SaveVideo",
+                "name": "The graph",
                 "connections": [],
                 "id": "78cc86c4-9ad0-4a8f-88cb-71ee28c48659",
                 "nodes": [
@@ -221,10 +221,12 @@ def specification_nested_repeating_include(
 
 @pytest.fixture
 def specification_include_graphs_node_conflicting(
-    specification_SaveVideo_node, dataflow_one_graph, httpserver: HTTPServer
+    specification_SaveVideo_node,
+    dataflow_one_graph_using_SaveVideo_node,
+    httpserver: HTTPServer,
 ):
     httpserver.expect_request("/dataflow.json").respond_with_json(
-        dataflow_one_graph
+        dataflow_one_graph_using_SaveVideo_node
     )
 
     specification_SaveVideo_node["includeGraphs"] = [
@@ -240,10 +242,12 @@ def specification_include_graphs_node_conflicting(
 
 @pytest.fixture
 def specification_include_graphs_names_repeated(
-    specification_SaveVideo_node, dataflow_one_graph, httpserver: HTTPServer
+    specification_SaveVideo_node,
+    dataflow_one_graph_using_SaveVideo_node,
+    httpserver: HTTPServer,
 ):
     httpserver.expect_request("/dataflow.json").respond_with_json(
-        dataflow_one_graph
+        dataflow_one_graph_using_SaveVideo_node
     )
     specification_SaveVideo_node["includeGraphs"] = [
         {
@@ -256,6 +260,40 @@ def specification_include_graphs_names_repeated(
             "category": "includeGraphs",
             "name": "LoadVideo",
         },
+    ]
+    return specification_SaveVideo_node
+
+
+@pytest.fixture
+def specification_include_one_graph(
+    specification_SaveVideo_node,
+    dataflow_one_graph_using_SaveVideo_node,
+    httpserver: HTTPServer,
+):
+    httpserver.expect_request("/dataflow.json").respond_with_json(
+        dataflow_one_graph_using_SaveVideo_node
+    )
+    specification_SaveVideo_node["includeGraphs"] = [
+        {"url": httpserver.url_for("/dataflow.json")},
+    ]
+    return specification_SaveVideo_node
+
+
+@pytest.fixture
+def specification_include_one_graph_with_exposed_interface(
+    specification_SaveVideo_node,
+    dataflow_one_graph_using_SaveVideo_node,
+    httpserver: HTTPServer,
+):
+    dataflow_one_graph_using_SaveVideo_node["graphs"][0]["nodes"][0][
+        "interfaces"
+    ][0]["externalName"] = "Test"
+
+    httpserver.expect_request("/dataflow.json").respond_with_json(
+        dataflow_one_graph_using_SaveVideo_node
+    )
+    specification_SaveVideo_node["includeGraphs"] = [
+        {"url": httpserver.url_for("/dataflow.json")},
     ]
     return specification_SaveVideo_node
 
@@ -310,6 +348,8 @@ def specification_include_graphs_no_nodes(
         ("specification_repeating_node_declarations", 1),
         ("specification_nodes_in_include", 0),
         ("specification_repeating_include", 1),
+        ("specification_include_one_graph", 0),
+        ("specification_include_one_graph_with_exposed_interface", 0),
         ("specification_nested_repeating_include", 0),
         ("specification_include_graphs_node_conflicting", 1),
         ("specification_include_graphs_names_repeated", 1),
