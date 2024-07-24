@@ -330,13 +330,14 @@ export default class PipelineManagerEditor extends Editor {
     privatizeInterface(graphId, intf) {
         let graph = [...this.graphs].find((g) => g.id === graphId);
         let graphNode = graph.graphNode; // eslint-disable-line prefer-destructuring
+
+        intf.externalName = undefined;
         if (graphNode === undefined) return;
 
         const { graphIds, sharedInterface } = ir.getRegisteredInterface(intf.id);
         const graphIdIdx = graphIds.findIndex((id) => id === graphNode.graph.id);
         graphIds.splice(graphIdIdx, graphIds.length - graphIdIdx);
 
-        intf.externalName = undefined;
         graphNode.updateExposedInterfaces();
 
         // Update all graphs that used this exposed interface
@@ -365,8 +366,8 @@ export default class PipelineManagerEditor extends Editor {
     exposeInterface(graphId, intf, name = undefined) {
         const graph = [...this.graphs].find((g) => g.id === graphId);
         const graphNode = graph.graphNode; // eslint-disable-line prefer-destructuring
-        if (graphNode === undefined) return;
         intf.externalName = name ?? graph.resolveNewExposedName(intf.name);
+        if (graphNode === undefined) return;
         // After changing the external name, the interface has to be updated in the
         // graph node to reflect the changes in the graph.
         graphNode.updateExposedInterfaces();
