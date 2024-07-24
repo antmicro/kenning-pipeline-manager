@@ -9,8 +9,6 @@ import { watch, Ref, WatchStopHandle } from 'vue';
 import fuzzysort from 'fuzzysort';
 
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import checkRecursion from './checkRecursion.js';
-
 interface NodeURL {
     icon: string,
     name: string,
@@ -251,14 +249,7 @@ export default function getNodeTree(nameFilterRef: Ref<string>) {
 
     const nodes: Array<Nodes> = [];
     categoryNames.forEach((c) => {
-        let nodeTypesInCategory = nodeTypeEntries.filter(([, ni]) => ni.category === c);
-        if (viewModel.value.displayedGraph.template) {
-            // don't show the graph nodes that directly or indirectly contain
-            // the current subgraph to prevent recursion
-            nodeTypesInCategory = nodeTypesInCategory.filter(
-                ([nt]) => !checkRecursion(editor, viewModel.value.displayedGraph, nt),
-            );
-        }
+        const nodeTypesInCategory = nodeTypeEntries.filter(([, ni]) => ni.category === c);
 
         const nodesURLs = Object.fromEntries(
             nodeTypesInCategory.map((n) => {
