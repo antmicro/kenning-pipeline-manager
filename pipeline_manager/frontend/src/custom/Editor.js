@@ -373,20 +373,18 @@ export default class PipelineManagerEditor extends Editor {
         graphNode.updateExposedInterfaces();
     }
 
-    centerZoom() {
-        if (!Array.isArray(this._graph.nodes) || this._graph.nodes.length === 0) return;
+    /**
+     * Calculates the width, height of the editor and the width of the sidebar.
+     * It is assumed that the view is rendered in the browser,
+     * otherwise an error will be thrown.
+     *
+     * @returns {Object} object with calculated sizes
+     */
+    static editorSize() {
         if (typeof document === 'undefined') {
-            return;
+            throw new Error('The editor is in browserless mode. Cannot obtain editor size.');
         }
 
-        const {
-            graphHeight,
-            graphWidth,
-            leftmostX,
-            topmostY,
-        } = this._graph.size();
-
-        const margin = 100;
         const terminalHeight =
             document.getElementsByClassName('terminal-wrapper')[0]?.offsetHeight ?? 0;
         const navbarHeight = document.getElementsByClassName('wrapper')[0]?.offsetHeight ?? 0;
@@ -399,6 +397,41 @@ export default class PipelineManagerEditor extends Editor {
 
         const editorHeight = window.innerHeight - terminalHeight - navbarHeight;
         const editorWidth = window.innerWidth - sideBarWidth;
+
+        return {
+            editorWidth,
+            editorHeight,
+            sideBarWidth,
+        };
+    }
+
+    /**
+     * Centers the currently displayed graph in the editor.
+     * The function calculates the scaling and panning values to center the graph
+     * in the editor and sets them in the graph.
+     * The function assumes that the editor is rendered in the browser,
+     * otherwise an error will be thrown.
+     */
+    centerZoom() {
+        if (!Array.isArray(this._graph.nodes) || this._graph.nodes.length === 0) return;
+        if (typeof document === 'undefined') {
+            throw new Error('The editor is in browserless mode. Cannot obtain editor size.');
+        }
+
+        const {
+            editorWidth,
+            editorHeight,
+            sideBarWidth,
+        } = PipelineManagerEditor.editorSize();
+
+        const {
+            graphHeight,
+            graphWidth,
+            leftmostX,
+            topmostY,
+        } = this._graph.size();
+
+        const margin = 100;
 
         const scalingY = editorHeight / (graphHeight + 2 * margin);
         const scalingX = editorWidth / (graphWidth + 2 * margin);
@@ -449,7 +482,7 @@ export default class PipelineManagerEditor extends Editor {
         return this.nodeIcons.get(nodeName) || undefined;
     }
 
-    addGraphTemplate(template, category, type) {
+    addGraphTemplate(template, category, type, isCategory = false) {
         if (this.events.beforeAddGraphTemplate.emit(template).prevented) {
             return;
         }
@@ -461,7 +494,11 @@ export default class PipelineManagerEditor extends Editor {
         this.graphTemplateHooks.addTarget(template.hooks);
 
         const customGraphNodeType = CreateCustomGraphNodeType(template, type);
-        this.registerNodeType(customGraphNodeType, { category, title: template.name });
+        this.registerNodeType(customGraphNodeType, {
+            category,
+            title: template.name,
+            isCategory,
+        });
 
         this.events.addGraphTemplate.emit(template);
     }
