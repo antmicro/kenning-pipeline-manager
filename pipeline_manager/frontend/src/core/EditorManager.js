@@ -11,6 +11,7 @@ import jsonMap from 'json-source-map';
 import jsonlint from 'jsonlint';
 
 import { useBaklava, useCommandHandler } from '@baklavajs/renderer-vue';
+import { GRAPH_NODE_TYPE_PREFIX } from '@baklavajs/core';
 import { toRaw, ref } from 'vue';
 import { useHistory } from './History.ts';
 import { useClipboard } from './Clipboard.ts';
@@ -41,7 +42,9 @@ class Metadata {
 
 // If a graph node entry does not have a category assigned, this values is used
 // as a fallback category
-const DEFAULT_GRAPH_NODE_CATEGORY = 'Graphs';
+export const DEFAULT_GRAPH_NODE_CATEGORY = 'Graphs';
+export const DEFAULT_GRAPH_NODE_NAME = 'New Graph Node';
+export const DEFAULT_GRAPH_NODE_TYPE = `${GRAPH_NODE_TYPE_PREFIX}${DEFAULT_GRAPH_NODE_NAME}`;
 
 /**
  * Translates the provided url according to
@@ -557,7 +560,37 @@ export default class EditorManager {
         }
 
         // Removing duplicate warnings
-        return { errors, warnings: [...new Set(warnings)] };
+        const uniqueWarnings = [...new Set(warnings)];
+
+        // Adding a default graph node to the editor so that custom graphs can be created
+        if (this.editor.nodeTypes.has(DEFAULT_GRAPH_NODE_TYPE)) {
+            errors.push(
+                `Node name '${DEFAULT_GRAPH_NODE_NAME}' is reserved by the editor, ` +
+                'but it was included in the specification. ' +
+                'Please change the name of the graph node to avoid conflicts.',
+            );
+            return { errors, warnings: uniqueWarnings };
+        }
+
+        const myGraph = GraphFactory(
+            [],
+            [],
+            DEFAULT_GRAPH_NODE_NAME,
+            this.baklavaView.editor,
+        );
+
+        // If `myGraph` is any array then it is an array of errors
+        if (Array.isArray(myGraph) && myGraph.length) {
+            errors.push(...myGraph);
+        } else {
+            this.baklavaView.editor.addGraphTemplate(
+                myGraph,
+                DEFAULT_GRAPH_NODE_CATEGORY,
+                DEFAULT_GRAPH_NODE_NAME,
+            );
+        }
+
+        return { errors, warnings: uniqueWarnings };
     }
 
     /**
