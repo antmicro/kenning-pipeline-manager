@@ -205,22 +205,6 @@ export default defineComponent({
         const getIconPath = (name) => viewModel.value.cache[`./${name}`] ?? name;
         const isCategoryNode = (category) => category?.categoryNode !== undefined;
 
-        /* eslint-disable vue/no-mutating-props,no-param-reassign */
-        const onPointerOver = (ev, name) => {
-            if (props.tooltip !== undefined) {
-                props.tooltip.left = ev.clientX - ev.offsetX + ev.currentTarget.offsetWidth / 2;
-                props.tooltip.top = ev.clientY - ev.offsetY + ev.currentTarget.offsetHeight;
-                props.tooltip.text = name;
-                props.tooltip.visible = true;
-            }
-        };
-
-        const onPointerLeave = () => {
-            if (props.tooltip !== undefined) {
-                props.tooltip.visible = false;
-            }
-        };
-
         const notEmptyCategory = (category) => {
             if (category.nodes.nodeTypes === undefined) {
                 return Object.keys(category.subcategories).length !== 0;
@@ -286,11 +270,6 @@ export default defineComponent({
                 return a.toLowerCase().localeCompare(b.toLowerCase());
             });
 
-        const categoryClasses = (category) => ({
-            __entry: notEmptyCategory(category),
-            __category: notEmptyCategory(category),
-        });
-
         const showMenu = inject('menu');
         const showMenuClick = (menu) => {
             showMenu.value = (showMenu.value.hitSubstring === menu.hitSubstring) ? false : menu;
@@ -309,11 +288,8 @@ export default defineComponent({
             getRotation,
             sortedEntries,
             getIconPath,
-            onPointerOver,
-            onPointerLeave,
             isCategoryNode,
             notEmptyCategory,
-            categoryClasses,
             showMenu,
             showMenuClick,
             closeMenu,
