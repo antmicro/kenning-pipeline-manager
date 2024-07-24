@@ -1,0 +1,11 @@
+{
+    "version": "20230830.11",
+    "includeGraphs": [
+        {
+            "name": "MultipleIOGraphs",
+            "category": "Test/Graphs",
+            "url": "https://raw.githubusercontent.com/antmicro/kenning-pipeline-manager/main/examples/sample-multiple-io-dataflow.json"
+        }
+    ],
+    "include": ["https://raw.githubusercontent.com/antmicro/kenning-pipeline-manager/main/examples/sample-multiple-io-specification.json"]
+}

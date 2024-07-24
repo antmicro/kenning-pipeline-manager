@@ -1,0 +1,895 @@
+{
+    "graphs": [
+        {
+            "name": "Example of the graph with top-level interfaces exposed",
+            "id": "79040424-1464-40a0-ba97-cc0ba6a1944f",
+            "nodes": [
+                {
+                    "id": "17ed7efe-dde3-4d99-9c9e-2d00b81352a6",
+                    "position": {
+                        "x": -200,
+                        "y": 200
+                    },
+                    "width": 200,
+                    "twoColumn": true,
+                    "interfaces": [
+                        {
+                            "name": "input 0",
+                            "id": "222c48f5-5462-4e49-8a85-134032e3381d",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 0
+                        },
+                        {
+                            "name": "input 1",
+                            "id": "5291a6ef-08ff-4531-bbc2-a756919aebc4",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 1
+                        },
+                        {
+                            "name": "input [2,1]",
+                            "id": "e4a6657b-0f30-477a-958a-8c2f761b54da",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 2
+                        },
+                        {
+                            "name": "input [3,1]",
+                            "id": "51def7f1-371d-46cb-8b9d-40e287ba0dcd",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 3
+                        },
+                        {
+                            "name": "input [4,3,6]",
+                            "id": "0347b652-4e11-44b8-b71a-a71a7a0c9c36",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 4
+                        },
+                        {
+                            "name": "input [5,4,3]",
+                            "id": "c4ea7838-3b84-4c1d-ba75-7debb64ea812",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 5
+                        },
+                        {
+                            "name": "input [6,3]",
+                            "id": "bfc973a8-10b6-4b25-89d8-2cffc99bca74",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 6
+                        },
+                        {
+                            "name": "input [7]",
+                            "id": "ffe137ae-0bc0-44ce-ab23-63c957d4d0e6",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 7
+                        },
+                        {
+                            "name": "output 0",
+                            "id": "e3692648-88fe-4624-95bd-63add08495b4",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 0
+                        },
+                        {
+                            "name": "output 1",
+                            "id": "eb4a91b7-1776-41c3-8c2e-c91a867a5dfc",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 1
+                        },
+                        {
+                            "name": "output [2,1]",
+                            "id": "f7d569b3-223b-438e-bf2b-768526cfe208",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 2
+                        },
+                        {
+                            "name": "output [3,1]",
+                            "id": "ad3dccab-49a4-48a7-af51-83358b94b707",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 3
+                        },
+                        {
+                            "name": "output [4,3,6]",
+                            "id": "73ce7b74-0b16-4b29-9f52-062dad859601",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 4
+                        },
+                        {
+                            "name": "output [5,4,3]",
+                            "id": "ee2b163d-2514-42dd-8929-3b663ffe5616",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 5
+                        },
+                        {
+                            "name": "output [6,3]",
+                            "id": "bd504f84-746a-429c-9efb-eda650147d74",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 6
+                        },
+                        {
+                            "name": "output [7]",
+                            "id": "f2ad83ab-45cc-4175-b87a-7502d92f2726",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 7
+                        }
+                    ],
+                    "properties": [],
+                    "enabledInterfaceGroups": [],
+                    "name": "MultipleIO",
+                    "instanceName": "MultipleIO"
+                },
+                {
+                    "id": "40b09719-c191-458e-8dd9-e773cbb9904f",
+                    "position": {
+                        "x": 300,
+                        "y": 0
+                    },
+                    "width": 200,
+                    "twoColumn": false,
+                    "interfaces": [
+                        {
+                            "name": "input 0",
+                            "id": "909e9bd9-9a08-4a62-b634-e940ec6d6ff2",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 0
+                        },
+                        {
+                            "name": "input 1",
+                            "id": "69e037ab-8e6f-413e-aaed-41e74fc6bcc9",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 1
+                        },
+                        {
+                            "name": "input [2,1]",
+                            "id": "aa16d23b-1630-41d2-99b7-02b71b641ddd",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 2
+                        },
+                        {
+                            "name": "output 0",
+                            "id": "36c8f081-70c1-4d0e-ac38-9adc003ac531",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 0
+                        },
+                        {
+                            "name": "output [2,1]",
+                            "id": "7dc58158-7bb1-4214-9118-7a53e96f40e6",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 2
+                        },
+                        {
+                            "name": "output 1",
+                            "id": "9943c823-0906-48bf-8911-fdd0aa958672",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 1
+                        }
+                    ],
+                    "subgraph": "1185eb1c-6dad-4c9d-98ff-dc31da9c8624",
+                    "name": "MultipleIOGraphs",
+                    "instanceName": "MultipleIOGraphs"
+                },
+                {
+                    "id": "3154509e-e166-49ca-9982-b837080e81ae",
+                    "position": {
+                        "x": 800,
+                        "y": -200
+                    },
+                    "width": 200,
+                    "twoColumn": true,
+                    "interfaces": [
+                        {
+                            "name": "input 0",
+                            "id": "08d5c5ae-829b-4a58-b475-b3f4b1f8e4e7",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 0
+                        },
+                        {
+                            "name": "input 1",
+                            "id": "3ecb2c62-c56a-4e2a-b239-636508f02c3d",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 1
+                        },
+                        {
+                            "name": "input [2,1]",
+                            "id": "40ae09f7-294e-48cb-8535-0e61058a57d7",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 2
+                        },
+                        {
+                            "name": "input [3,1]",
+                            "id": "28e97d6a-4c10-4551-85c8-81358d673dfc",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 3
+                        },
+                        {
+                            "name": "input [4,3,6]",
+                            "id": "cf529eee-f4a8-4102-a77e-841ba33a6d4a",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 4
+                        },
+                        {
+                            "name": "input [5,4,3]",
+                            "id": "f79d8a5c-8ee6-4132-a22e-1d4d84dc4221",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 5
+                        },
+                        {
+                            "name": "input [6,3]",
+                            "id": "752dae1d-a476-4ff3-9918-92547927258b",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 6
+                        },
+                        {
+                            "name": "input [7]",
+                            "id": "b27d932c-8644-4fcd-abe8-682a8b2f3fec",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 7
+                        },
+                        {
+                            "name": "output 0",
+                            "id": "6e697fb7-1a45-4f0a-8820-caed291d9a47",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 0
+                        },
+                        {
+                            "name": "output 1",
+                            "id": "0beca8dc-7615-4450-90fd-473603030b83",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 1
+                        },
+                        {
+                            "name": "output [2,1]",
+                            "id": "2d161fdc-639c-487c-9878-a5e667a1051a",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 2
+                        },
+                        {
+                            "name": "output [3,1]",
+                            "id": "f630be76-59e0-4abb-a5cf-86da912e25e7",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 3
+                        },
+                        {
+                            "name": "output [4,3,6]",
+                            "id": "996df286-270d-4750-bd8c-77478b96b316",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 4
+                        },
+                        {
+                            "name": "output [5,4,3]",
+                            "id": "04270c12-3588-45cb-9258-e5e41daa4437",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 5
+                        },
+                        {
+                            "name": "output [6,3]",
+                            "id": "0ff5b430-3d3c-4e8f-a20d-1d7595862c8e",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 6
+                        },
+                        {
+                            "name": "output [7]",
+                            "id": "d41796e7-4337-4ebb-9ed2-6499e45a041c",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 7
+                        }
+                    ],
+                    "properties": [],
+                    "enabledInterfaceGroups": [],
+                    "name": "MultipleIO",
+                    "instanceName": "MultipleIO"
+                }
+            ],
+            "connections": [
+                {
+                    "id": "abcb0f6c-08df-4db1-8612-2a6901ab47c1",
+                    "from": "7dc58158-7bb1-4214-9118-7a53e96f40e6",
+                    "to": "40ae09f7-294e-48cb-8535-0e61058a57d7"
+                },
+                {
+                    "id": "2f182ae8-0324-4e10-97fb-12f815f0f3c3",
+                    "from": "9943c823-0906-48bf-8911-fdd0aa958672",
+                    "to": "3ecb2c62-c56a-4e2a-b239-636508f02c3d"
+                },
+                {
+                    "id": "daad23ad-030e-4d31-af9f-bf67b104c87c",
+                    "from": "36c8f081-70c1-4d0e-ac38-9adc003ac531",
+                    "to": "08d5c5ae-829b-4a58-b475-b3f4b1f8e4e7"
+                },
+                {
+                    "id": "9230ecbc-8441-4e54-8616-67520bdfc510",
+                    "from": "e3692648-88fe-4624-95bd-63add08495b4",
+                    "to": "909e9bd9-9a08-4a62-b634-e940ec6d6ff2"
+                },
+                {
+                    "id": "a0717b9c-acfd-4975-b9c8-834c3fa4da7b",
+                    "from": "eb4a91b7-1776-41c3-8c2e-c91a867a5dfc",
+                    "to": "69e037ab-8e6f-413e-aaed-41e74fc6bcc9"
+                },
+                {
+                    "id": "da824a6e-6905-417f-ab29-1376cd1af3f7",
+                    "from": "f7d569b3-223b-438e-bf2b-768526cfe208",
+                    "to": "aa16d23b-1630-41d2-99b7-02b71b641ddd"
+                }
+            ]
+        },
+        {
+            "id": "1185eb1c-6dad-4c9d-98ff-dc31da9c8624",
+            "nodes": [
+                {
+                    "id": "68fcacec-0362-4583-a25f-338c9a45fad1",
+                    "position": {
+                        "x": 500,
+                        "y": -100
+                    },
+                    "width": 200,
+                    "twoColumn": true,
+                    "interfaces": [
+                        {
+                            "name": "input 0",
+                            "externalName": "input 0",
+                            "id": "909e9bd9-9a08-4a62-b634-e940ec6d6ff2",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 0
+                        },
+                        {
+                            "name": "input 1",
+                            "externalName": "input 1",
+                            "id": "69e037ab-8e6f-413e-aaed-41e74fc6bcc9",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 1
+                        },
+                        {
+                            "name": "input [2,1]",
+                            "externalName": "input [2,1]",
+                            "id": "aa16d23b-1630-41d2-99b7-02b71b641ddd",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 2
+                        },
+                        {
+                            "name": "input [3,1]",
+                            "id": "04c3944f-0cd9-46f7-abf0-4f6bd8d76ee4",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 3
+                        },
+                        {
+                            "name": "input [4,3,6]",
+                            "id": "932f94bb-f6b3-4b32-ab19-9606ab2caccb",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 4
+                        },
+                        {
+                            "name": "input [5,4,3]",
+                            "id": "3cfccf02-29d1-4e3e-a33a-57e0443ccbeb",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 5
+                        },
+                        {
+                            "name": "input [6,3]",
+                            "id": "e7cae21d-4875-4079-b06f-58c65c3067e0",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 6
+                        },
+                        {
+                            "name": "input [7]",
+                            "id": "1a3dcbf5-7fc1-4541-8e8d-a67526d16fff",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 7
+                        },
+                        {
+                            "name": "output 0",
+                            "id": "41d244d8-c9f5-4b96-af97-dbeb80eb81f5",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 0
+                        },
+                        {
+                            "name": "output 1",
+                            "id": "de70b5d7-6672-44e5-8d2c-0d6cb624b6fe",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 1
+                        },
+                        {
+                            "name": "output [2,1]",
+                            "id": "07e48978-dc9e-444f-be8a-834ba8882fe7",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 2
+                        },
+                        {
+                            "name": "output [3,1]",
+                            "id": "420059fb-8c5d-4fc3-ac2c-aa8be81f00dd",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 3
+                        },
+                        {
+                            "name": "output [4,3,6]",
+                            "id": "59f82b38-3679-4b30-85f3-053f68c0e399",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 4
+                        },
+                        {
+                            "name": "output [5,4,3]",
+                            "id": "ca656923-623b-4a33-9dd9-5d9aeb55089e",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 5
+                        },
+                        {
+                            "name": "output [6,3]",
+                            "id": "c6206963-2a41-4b02-bd3c-8e48ac7d1bd1",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 6
+                        },
+                        {
+                            "name": "output [7]",
+                            "id": "fdf6307c-8f68-4da7-a5fd-d24c8eac7197",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 7
+                        }
+                    ],
+                    "properties": [],
+                    "enabledInterfaceGroups": [],
+                    "name": "MultipleIO",
+                    "instanceName": "MultipleIO"
+                },
+                {
+                    "id": "9b8c86f4-fee8-4f81-8aa2-6fafa1d0d970",
+                    "position": {
+                        "x": 1300,
+                        "y": -500
+                    },
+                    "width": 200,
+                    "twoColumn": true,
+                    "interfaces": [
+                        {
+                            "name": "input 0",
+                            "id": "89aa1dbe-ffb7-4fc3-b5ed-6d8a7a75f6df",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 0
+                        },
+                        {
+                            "name": "input 1",
+                            "id": "acdd7b07-9f59-48d7-a278-636d568661a0",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 1
+                        },
+                        {
+                            "name": "input [2,1]",
+                            "id": "3950110e-23a9-4efe-826c-aaa0bdf72640",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 2
+                        },
+                        {
+                            "name": "input [3,1]",
+                            "id": "b16d8fb3-e746-4aec-b225-1051354753e3",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 3
+                        },
+                        {
+                            "name": "input [4,3,6]",
+                            "id": "5cf3a5fa-643e-4105-881a-2b301b11d8ea",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 4
+                        },
+                        {
+                            "name": "input [5,4,3]",
+                            "id": "60121498-6f5e-41a8-862f-bb173b699509",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 5
+                        },
+                        {
+                            "name": "input [6,3]",
+                            "id": "f02188fd-2a72-4498-9940-cb5a215b93f0",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 6
+                        },
+                        {
+                            "name": "input [7]",
+                            "id": "ed2c9733-d541-4b0c-bf09-5ba360bc285e",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 7
+                        },
+                        {
+                            "name": "output 0",
+                            "externalName": "output 0",
+                            "id": "36c8f081-70c1-4d0e-ac38-9adc003ac531",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 0
+                        },
+                        {
+                            "name": "output 1",
+                            "id": "4d91a9c5-c4b4-4a43-8907-86a273527847",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 1
+                        },
+                        {
+                            "name": "output [2,1]",
+                            "id": "459c3839-f6f9-495f-958c-8addcc48cb6a",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 2
+                        },
+                        {
+                            "name": "output [3,1]",
+                            "id": "ce51ff8a-6a85-4d6f-a349-356e4c1c5d4d",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 3
+                        },
+                        {
+                            "name": "output [4,3,6]",
+                            "id": "bffedc1d-44b8-4ff3-838e-f56220ffb8b5",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 4
+                        },
+                        {
+                            "name": "output [5,4,3]",
+                            "id": "28fc0d5c-a397-459e-80d9-33d98cd7482d",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 5
+                        },
+                        {
+                            "name": "output [6,3]",
+                            "id": "ce148c07-f58e-4f50-92fe-a32e1c935d74",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 6
+                        },
+                        {
+                            "name": "output [7]",
+                            "id": "46a18163-a300-480d-9223-493cb2984f0c",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 7
+                        }
+                    ],
+                    "properties": [],
+                    "enabledInterfaceGroups": [],
+                    "name": "MultipleIO",
+                    "instanceName": "MultipleIO"
+                },
+                {
+                    "id": "11288a6e-096b-4244-b4e0-3222c3f59e44",
+                    "position": {
+                        "x": 1300,
+                        "y": 300
+                    },
+                    "width": 200,
+                    "twoColumn": true,
+                    "interfaces": [
+                        {
+                            "name": "input 0",
+                            "id": "ce8cb94d-8cf0-4a13-9a6b-2843ef3dd00d",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 0
+                        },
+                        {
+                            "name": "input 1",
+                            "id": "4d29ca6b-3e17-4d47-a363-c189eb34d193",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 1
+                        },
+                        {
+                            "name": "input [2,1]",
+                            "id": "01104c95-8744-49de-a4b1-d4faac13956c",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 2
+                        },
+                        {
+                            "name": "input [3,1]",
+                            "id": "5a8cd5c0-acde-4416-b6ad-a2cc0229ef29",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 3
+                        },
+                        {
+                            "name": "input [4,3,6]",
+                            "id": "09f90375-4f2f-41fc-a9b8-02e616f1f469",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 4
+                        },
+                        {
+                            "name": "input [5,4,3]",
+                            "id": "7fcee401-ee49-4579-8c7a-f7ec384184ae",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 5
+                        },
+                        {
+                            "name": "input [6,3]",
+                            "id": "c55a38ab-fdda-4e22-a03d-917914662c45",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 6
+                        },
+                        {
+                            "name": "input [7]",
+                            "id": "d9fd4880-9505-4a79-83d9-f3792cf2c9b0",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 7
+                        },
+                        {
+                            "name": "output 0",
+                            "id": "0b10e219-75c6-449c-89c3-0d1cf18ef2aa",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 0
+                        },
+                        {
+                            "name": "output 1",
+                            "id": "7e6d2d63-7540-46be-ba54-01d41867629b",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 1
+                        },
+                        {
+                            "name": "output [2,1]",
+                            "externalName": "output [2,1]",
+                            "id": "7dc58158-7bb1-4214-9118-7a53e96f40e6",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 2
+                        },
+                        {
+                            "name": "output [3,1]",
+                            "id": "57fa8a0d-dd0e-4c5f-ac1b-f3030d0ec90e",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 3
+                        },
+                        {
+                            "name": "output [4,3,6]",
+                            "id": "e38fcdbb-5683-4b24-a2e5-e3b93e211e0f",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 4
+                        },
+                        {
+                            "name": "output [5,4,3]",
+                            "id": "d6ee3c49-b619-4ba2-90cd-85cb3fe73de2",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 5
+                        },
+                        {
+                            "name": "output [6,3]",
+                            "id": "c4833ff9-7e8d-4690-9171-3b2737eb7e32",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 6
+                        },
+                        {
+                            "name": "output [7]",
+                            "id": "2d9a488c-4abf-42be-b4f3-59bcf68bc95e",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 7
+                        }
+                    ],
+                    "properties": [],
+                    "enabledInterfaceGroups": [],
+                    "name": "MultipleIO",
+                    "instanceName": "MultipleIO"
+                },
+                {
+                    "id": "2c9c9a5b-0185-4613-877c-8b284536cbb5",
+                    "position": {
+                        "x": 1300,
+                        "y": -100
+                    },
+                    "width": 200,
+                    "twoColumn": true,
+                    "interfaces": [
+                        {
+                            "name": "input 0",
+                            "id": "48789b49-2d55-435f-b689-0d831aad486f",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 0
+                        },
+                        {
+                            "name": "input 1",
+                            "id": "54ebef1e-dc3e-478c-8182-38d65d35efc3",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 1
+                        },
+                        {
+                            "name": "input [2,1]",
+                            "id": "a42350bb-0144-4c41-b09d-ba1cf5d1a3da",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 2
+                        },
+                        {
+                            "name": "input [3,1]",
+                            "id": "410cccf5-bbdf-4c65-a532-18e849ca9799",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 3
+                        },
+                        {
+                            "name": "input [4,3,6]",
+                            "id": "5e0d0fe3-3376-4474-9c50-2d4723e73f1f",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 4
+                        },
+                        {
+                            "name": "input [5,4,3]",
+                            "id": "84df6f8e-8125-4c83-91d9-5854fe0bd2f6",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 5
+                        },
+                        {
+                            "name": "input [6,3]",
+                            "id": "967f8b36-2c4b-40e4-8c78-caa82e6cbe88",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 6
+                        },
+                        {
+                            "name": "input [7]",
+                            "id": "761ec1ee-5225-46f6-af69-d8c5981e3b1e",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 7
+                        },
+                        {
+                            "name": "output 0",
+                            "id": "ef27335e-2f86-4544-9616-b2db3f6c6cc5",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 0
+                        },
+                        {
+                            "name": "output 1",
+                            "externalName": "output 1",
+                            "id": "9943c823-0906-48bf-8911-fdd0aa958672",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 1
+                        },
+                        {
+                            "name": "output [2,1]",
+                            "id": "5147f757-63c2-4058-9f81-3e5fc2d1669a",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 2
+                        },
+                        {
+                            "name": "output [3,1]",
+                            "id": "7dd1669a-4b33-414e-bba0-5c2eccf274c0",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 3
+                        },
+                        {
+                            "name": "output [4,3,6]",
+                            "id": "f49b8008-7604-4036-b161-7450594baec2",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 4
+                        },
+                        {
+                            "name": "output [5,4,3]",
+                            "id": "45c57277-efa3-4c75-bb7e-19e6a3ffb9dc",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 5
+                        },
+                        {
+                            "name": "output [6,3]",
+                            "id": "d3165d91-9077-415c-9d5c-08e7a6949805",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 6
+                        },
+                        {
+                            "name": "output [7]",
+                            "id": "a902ea60-747b-4738-bd21-b9dca55ade04",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 7
+                        }
+                    ],
+                    "properties": [],
+                    "enabledInterfaceGroups": [],
+                    "name": "MultipleIO",
+                    "instanceName": "MultipleIO"
+                }
+            ],
+            "connections": [
+                {
+                    "id": "bb92316c-43d2-40c7-b5ac-d10668512f00",
+                    "from": "41d244d8-c9f5-4b96-af97-dbeb80eb81f5",
+                    "to": "89aa1dbe-ffb7-4fc3-b5ed-6d8a7a75f6df"
+                },
+                {
+                    "id": "a08bb68b-562e-4cbd-9d93-be6e80781c9e",
+                    "from": "59f82b38-3679-4b30-85f3-053f68c0e399",
+                    "to": "5e0d0fe3-3376-4474-9c50-2d4723e73f1f"
+                },
+                {
+                    "id": "d1b5ac68-a23f-45cb-b4c0-21eeb848fc38",
+                    "from": "fdf6307c-8f68-4da7-a5fd-d24c8eac7197",
+                    "to": "d9fd4880-9505-4a79-83d9-f3792cf2c9b0"
+                },
+                {
+                    "id": "512a3e14-8f1f-4017-a69c-ac28047d9d37",
+                    "from": "07e48978-dc9e-444f-be8a-834ba8882fe7",
+                    "to": "54ebef1e-dc3e-478c-8182-38d65d35efc3"
+                }
+            ]
+        }
+    ],
+    "entryGraph": "79040424-1464-40a0-ba97-cc0ba6a1944f",
+    "version": "20240723.13"
+}
