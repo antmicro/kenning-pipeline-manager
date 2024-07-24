@@ -70,22 +70,25 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
                 <div v-if="category.nodes.nodeTypes">
                     <div
                         v-for="[nt, node] in sortedEntries(category.nodes.nodeTypes)"
-                        class="__entry __node-entry"
                         style="width: 100%;"
                         v-show="node.mask"
                         :style="padding(depth + 1)"
+                        :class="nodeEntryClasses(nt)"
                         :key="nt"
                     >
                         <div
                             @pointerdown="onDragStart(nt, node, node.iconPath)"
-                            class="__entry __node-entry"
+                            :class="nodeEntryClasses(nt)"
                         >
-                            <img
-                                class="__title-icon"
-                                v-if="node.iconPath !== undefined"
-                                :src="getIconPath(node.iconPath)"
-                                draggable="false"
-                            />
+                            <template v-if="!isDefaultGraphNodeType(nt)">
+                                <img
+                                    class="__title-icon"
+                                    v-if="node.iconPath !== undefined"
+                                    :src="getIconPath(node.iconPath)"
+                                    draggable="false"
+                                />
+                            </template>
+                            <Cross v-else color="white" :rotate="45" class="__title-icon"></Cross>
                             <div class="__title-label" v-html="node.hitSubstring"></div>
                         </div>
                         <div
@@ -122,7 +125,7 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
         <template v-else>
             <template v-if="isCategoryNode(category)">
                 <div
-                    class="__entry __node-entry"
+                    :class="nodeEntryClasses(category.title)"
                     :style="padding(depth)"
                     v-show="category.mask"
                     :key="category.title"
@@ -171,11 +174,12 @@ import { useViewModel } from '@baklavajs/renderer-vue';
 import Arrow from '../../icons/Arrow.vue';
 import VerticalEllipsis from '../../icons/VerticalEllipsis.vue';
 import LinkMenu from '../LinkMenu.vue';
-import EditorManager from '../../core/EditorManager';
+import EditorManager, { DEFAULT_GRAPH_NODE_TYPE } from '../../core/EditorManager';
+import Cross from '../../icons/Cross.vue';
 
 export default defineComponent({
     components: {
-        Arrow, LinkMenu, VerticalEllipsis,
+        Arrow, LinkMenu, VerticalEllipsis, Cross,
     },
     props: {
         nodeTree: {
@@ -281,6 +285,14 @@ export default defineComponent({
         const editorManager = EditorManager.getEditorManagerInstance();
         const specificationLoaded = computed(() => editorManager.specificationLoaded.value);
 
+        const isDefaultGraphNodeType = (name) => name === DEFAULT_GRAPH_NODE_TYPE;
+
+        const nodeEntryClasses = (name) => ({
+            __entry: true,
+            '__node-entry': true,
+            '__default-graph-node-entry': isDefaultGraphNodeType(name),
+        });
+
         return {
             padding,
             mask,
@@ -294,6 +306,8 @@ export default defineComponent({
             showMenuClick,
             closeMenu,
             specificationLoaded,
+            nodeEntryClasses,
+            isDefaultGraphNodeType,
         };
     },
 });
