@@ -8,6 +8,9 @@ On the left side there is a node palette (which can be turned off or on using th
 To add a new node to the graph, click the node in the palette and drag it to the editor.
 You can also select existing nodes and copy and paste them using `ctrl-c` and `ctrl-v` keyboard shortcuts.
 
+After loading a specification, the palette will contain all the nodes defined in it and will be divided into hierarchical categories.
+Additionally, a graph node named `New Graph Node` is always available under a `Graphs` category and can be used to design custom graphs.
+
 ![Node context menu](img/node-context-menu.png)
 
 In the upper right corner of each node there is a context menu toggle. It contains the following options:

@@ -20,6 +20,12 @@ The specification consists of:
   Should be set to the newest version described in [Changelogs](#changelogs).
   {{project}} uses that value to check the compatibility of the specification with the current implementation, giving warnings about inconsistency in versions.
 
+```{note}
+Graph node named `New Graph Node` is available by default after loading a specification.
+It can be used to create new, custom graphs.
+That is why using this name for a graph will result in an error.
+```
+
 (specification-format-metadata)=
 ### Metadata
 
