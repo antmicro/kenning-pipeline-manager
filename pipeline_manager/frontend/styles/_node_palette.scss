@@ -132,6 +132,15 @@
         width: 100%;
         flex-grow: 1;
         justify-content: space-between;
+
+        &.__default-graph-node-entry {
+            background-color: var(--baklava-group-node-title-color-background);
+
+            & >.__title-icon {
+                height: 1em;
+                width: 1em;
+            }
+        }
     }
 
     .__vertical_ellipsis {
