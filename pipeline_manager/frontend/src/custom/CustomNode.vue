@@ -651,7 +651,7 @@ const contextMenuInterfaceY = ref(0);
 const createContextMenuInterfaceItems = () => {
     const items = [];
 
-    if (graph.value.graphNode !== undefined && chosenInterface !== undefined) {
+    if (chosenInterface !== undefined) {
         const intfMode = (chosenInterface.externalName === undefined ?
             { value: 'SetExternalName', label: 'Expose Interface' } :
             { value: 'UnsetExternalName', label: 'Privatize Interface' }
