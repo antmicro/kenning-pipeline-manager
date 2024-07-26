@@ -63,10 +63,11 @@
     width: auto;
 
     font-size: $fs-small;
-    margin-top: -1px;
+    // margin-top: -1px;
 
     border: 1px solid #393939;
     border-right: 0;
+    border-top: 0;
     border-left: 0;
     height: 4em;
 
@@ -134,13 +135,15 @@
         justify-content: space-between;
 
         &.__default-graph-node-entry {
-            background-color: var(--baklava-group-node-title-color-background);
-
             & >.__title-icon {
-                height: 1em;
-                width: 1em;
+                height: 0.75em;
+                width: 0.75em;
             }
         }
+    }
+
+    & > .__node-entry {
+        border-bottom: 0;
     }
 
     .__vertical_ellipsis {
