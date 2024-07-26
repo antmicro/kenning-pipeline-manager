@@ -7,6 +7,7 @@ import { useViewModel } from '@baklavajs/renderer-vue';
 import { INodeTypeInformation } from '@baklavajs/core';
 import { watch, Ref, WatchStopHandle } from 'vue';
 import fuzzysort from 'fuzzysort';
+import { DEFAULT_GRAPH_NODE_TYPE } from '../../core/EditorManager';
 
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 interface NodeURL {
@@ -226,9 +227,9 @@ const updateMasks = (treeNode: NodeSubcategories, filter: string, forceMask: boo
                 .includes(true);
         }
 
-        // The node is expanded if any entry in its subtree is highlighted, or a node that
-        // is part of this category is highlighted, or the category is highlighted or
-        // forceMask is true.
+        // The node is expanded if any entry in its subtree is highlighted,
+        // or a node that is part of this category is highlighted,
+        // or the category is highlighted or forceMask is true.
         node.mask = updateMasks(node.subcategories, filter, categoryMatches || forceMask) ||
             categoryMatches ||
             entryMatches ||
@@ -247,10 +248,15 @@ export default function getNodeTree(nameFilterRef: Ref<string>) {
     const nodeTypeEntries = Array.from(editor.nodeTypes.entries());
     const categoryNames = new Set(nodeTypeEntries.map(([, ni]) => ni.category));
 
+    const topLevelNodeNames = [DEFAULT_GRAPH_NODE_TYPE];
+    const topLevelCategories: Nodes = {
+        categoryName: 'TopLevel',
+        nodeTypes: {},
+    };
+
     const nodes: Array<Nodes> = [];
     categoryNames.forEach((c) => {
-        const nodeTypesInCategory = nodeTypeEntries.filter(([, ni]) => ni.category === c);
-
+        let nodeTypesInCategory = nodeTypeEntries.filter(([, ni]) => ni.category === c);
         const nodesURLs = Object.fromEntries(
             nodeTypesInCategory.map((n) => {
                 const [nodeType] = n; // @ts-ignore Editor has an incorrect type. Ignoring for now
@@ -265,6 +271,14 @@ export default function getNodeTree(nameFilterRef: Ref<string>) {
                 const iconPath = editor.getNodeIconPath(nodeType);
                 return [nodeType, iconPath];
             }),
+        );
+
+        const topLevelCategory = nodeTypesInCategory.filter(
+            ([name, _]) => topLevelNodeNames.includes(name), // eslint-disable-line @typescript-eslint/no-unused-vars,max-len
+        );
+
+        nodeTypesInCategory = nodeTypesInCategory.filter(
+            ([name, _]) => !topLevelNodeNames.includes(name), // eslint-disable-line @typescript-eslint/no-unused-vars,max-len
         );
 
         if (nodeTypesInCategory.length > 0) {
@@ -285,6 +299,18 @@ export default function getNodeTree(nameFilterRef: Ref<string>) {
                 nodeTypes: Object.fromEntries(nodeTypes),
             });
         }
+
+        topLevelCategories.nodeTypes = Object.fromEntries(topLevelCategory.map(
+            ([nodeName, node]) =>
+                [nodeName, {
+                    ...node, // @ts-ignore
+                    isCategory: node.isCategory, // nodeTypes has an incorrect type, Ignoring
+                    mask: true,
+                    hitSubstring: node.title,
+                    iconPath: nodesIconPath[nodeName],
+                    URLs: nodesURLs[nodeName],
+                }],
+        ));
     });
 
     const nodeCategories = new Set(nodes.map((c) => c.categoryName));
@@ -296,14 +322,26 @@ export default function getNodeTree(nameFilterRef: Ref<string>) {
         unWatch();
     }
 
+    const topCategory = {
+        subcategories: parsedTree,
+        nodes: topLevelCategories,
+        categoryNode: undefined,
+        hitSubstring: 'All',
+        mask: true,
+    } as NodeCategory;
+
+    const topSubcategory: NodeSubcategories = {
+        All: topCategory,
+    };
+
     unWatch = watch(nameFilterRef, (newNameFilter) => {
         if (newNameFilter === '') {
-            Object.entries(parsedTree).forEach((subTree) => setDefaultNames(subTree));
-            Object.values(parsedTree).forEach((subTree) => setMasksToTrue(subTree));
+            Object.entries(topSubcategory).forEach((subTree) => setDefaultNames(subTree));
+            Object.values(topSubcategory).forEach((subTree) => setMasksToTrue(subTree));
         } else {
-            updateMasks(parsedTree, newNameFilter.toLowerCase(), false);
+            updateMasks(topSubcategory, newNameFilter.toLowerCase(), false);
         }
     });
 
-    return parsedTree;
+    return topCategory;
 }

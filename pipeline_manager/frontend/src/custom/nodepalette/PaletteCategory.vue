@@ -11,8 +11,56 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
 
 <template v-if="specificationLoaded">
     <!-- eslint-disable vue/no-multiple-template-root -->
+    <div v-show="nodeTree.mask">
+        <div v-if="nodeTree.nodes.nodeTypes">
+            <div
+                v-for="[nt, node] in sortedEntries(nodeTree.nodes.nodeTypes)"
+                style="width: 100%;"
+                v-show="node.mask"
+                :style="padding(depth)"
+                :class="nodeEntryClasses(nt)"
+                :key="nt"
+            >
+                <div
+                    @pointerdown="onDragStart(nt, node, node.iconPath)"
+                    :class="nodeEntryClasses(nt)"
+                >
+                    <template v-if="!isDefaultGraphNodeType(nt)">
+                        <img
+                            class="__title-icon"
+                            v-if="node.iconPath !== undefined"
+                            :src="getIconPath(node.iconPath)"
+                            draggable="false"
+                        />
+                    </template>
+                    <Cross v-else color="white" :rotate="45" class="__title-icon"></Cross>
+                    <div class="__title-label" v-html="node.hitSubstring"></div>
+                </div>
+                <div
+                    class="__vertical_ellipsis"
+                    ref="settings"
+                    role="button"
+                    @pointerdown.stop=""
+                    @click.stop="() => showMenuClick(node)"
+                    v-if="node.URLs.length !== 0"
+                >
+                    <VerticalEllipsis class="smaller_svg" />
+                </div>
+                <div class='__icondiv'>
+                    <LinkMenu
+                        :node='showMenu'
+                        style='width: 18em'
+                        v-if="showMenu !== false &&
+                                showMenu.hitSubstring === node.hitSubstring"
+                        v-click-outside="closeMenu"
+                    />
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div
-        v-for="([name, category], i) in sortedEntries(nodeTree, true)"
+        v-for="([name, category], i) in sortedEntries(nodeTree.subcategories, true)"
         v-show="category.mask"
         :key="name"
     >
@@ -67,53 +115,8 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
                 <div v-else class="__title" v-html="category.hitSubstring"></div>
             </div>
             <div v-show="mask[i]">
-                <div v-if="category.nodes.nodeTypes">
-                    <div
-                        v-for="[nt, node] in sortedEntries(category.nodes.nodeTypes)"
-                        style="width: 100%;"
-                        v-show="node.mask"
-                        :style="padding(depth + 1)"
-                        :class="nodeEntryClasses(nt)"
-                        :key="nt"
-                    >
-                        <div
-                            @pointerdown="onDragStart(nt, node, node.iconPath)"
-                            :class="nodeEntryClasses(nt)"
-                        >
-                            <template v-if="!isDefaultGraphNodeType(nt)">
-                                <img
-                                    class="__title-icon"
-                                    v-if="node.iconPath !== undefined"
-                                    :src="getIconPath(node.iconPath)"
-                                    draggable="false"
-                                />
-                            </template>
-                            <Cross v-else color="white" :rotate="45" class="__title-icon"></Cross>
-                            <div class="__title-label" v-html="node.hitSubstring"></div>
-                        </div>
-                        <div
-                            class="__vertical_ellipsis"
-                            ref="settings"
-                            role="button"
-                            @pointerdown.stop=""
-                            @click.stop="() => showMenuClick(node)"
-                            v-if="node.URLs.length !== 0"
-                        >
-                            <VerticalEllipsis class="smaller_svg" />
-                        </div>
-                        <div class='__icondiv'>
-                            <LinkMenu
-                                :node='showMenu'
-                                style='width: 18em'
-                                v-if="showMenu !== false &&
-                                      showMenu.hitSubstring === node.hitSubstring"
-                                v-click-outside="closeMenu"
-                            />
-                        </div>
-                    </div>
-                </div>
                 <PaletteCategory
-                    :nodeTree="category.subcategories"
+                    :nodeTree="category"
                     :onDragStart="onDragStart"
                     :depth="depth + 1"
                     :defaultCollapse="defaultCollapse"
@@ -225,14 +228,18 @@ export default defineComponent({
             return `padding-left: ${minPadding + depth * paddingDepth}px`;
         };
 
-        const mask = ref(Array(Object.keys(props.nodeTree).length).fill(!props.defaultCollapse));
+        const mask = ref(Array(
+            Object.keys(props.nodeTree.subcategories ?? {}).length,
+        ).fill(!props.defaultCollapse));
         let storedMask = mask.value;
 
         // If the category tree changes the mask needs to get reinitialized
         watch(
             () => props.nodeTree,
             () => {
-                mask.value = Array(Object.keys(props.nodeTree).length).fill(!props.defaultCollapse);
+                mask.value = Array(Object.keys(
+                    props.nodeTree.subcategories ?? {},
+                ).length).fill(!props.defaultCollapse);
             },
         );
 
@@ -242,7 +249,9 @@ export default defineComponent({
             (newValue, oldValue) => {
                 if (newValue !== '' && oldValue === '') {
                     storedMask = mask.value;
-                    mask.value = Array(Object.keys(props.nodeTree).length).fill(true);
+                    mask.value = Array(Object.keys(
+                        props.nodeTree.subcategories ?? {},
+                    ).length).fill(true);
                 } else if (newValue === '' && oldValue !== '') {
                     mask.value = storedMask;
                 }
