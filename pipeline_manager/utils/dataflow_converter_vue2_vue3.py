@@ -21,7 +21,7 @@ import json
 import random
 import sys
 from pathlib import Path
-from typing import Any, NamedTuple, Optional
+from typing import Any, List, NamedTuple, Optional, Tuple
 
 
 class Interface(NamedTuple):
@@ -51,9 +51,9 @@ class Node(NamedTuple):
 
     type: str
     id: str
-    parameters: list[Interface]
-    inputs: list[Interface]
-    outputs: list[Interface]
+    parameters: List[Interface]
+    inputs: List[Interface]
+    outputs: List[Interface]
     pos_x: int
     pos_y: int
     width: int
@@ -61,7 +61,7 @@ class Node(NamedTuple):
     name: Optional[str] = None
 
 
-def from_old(dataflow: dict) -> tuple[list[Node], list[Connection]]:
+def from_old(dataflow: dict) -> Tuple[List[Node], List[Connection]]:
     """
     Parses dataflow saved in format compatible with project built with Vue2
     so that it can be converted into a dataflow compatible
@@ -75,7 +75,7 @@ def from_old(dataflow: dict) -> tuple[list[Node], list[Connection]]:
 
     Returns
     -------
-    tuple[list[Node], list[Connection]]
+    Tuple[List[Node], List[Connection]]
         Parsed nodes and connections.
     """
     nodes = dataflow["nodes"]
@@ -139,16 +139,16 @@ def get_id(size: Optional[int] = 10) -> str:
     return "".join([str(random.choice(range(9))) for _ in range(size)])
 
 
-def to_new(nodes: list[Node], connections: list[Connection]) -> dict:
+def to_new(nodes: List[Node], connections: List[Connection]) -> dict:
     """
     Generates a valid JSON structure compatible with Vue3-based release
     of the project from Vue2-based release of the project.
 
     Parameters
     ----------
-    nodes : list[Node]
+    nodes : List[Node]
         Parsed nodes
-    connections : list[Connection]
+    connections : List[Connection]
         Parsed connections
 
     Returns

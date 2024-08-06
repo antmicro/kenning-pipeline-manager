@@ -12,14 +12,14 @@ import errno
 import subprocess
 import sys
 from pathlib import Path
-from typing import Optional
+from typing import List, Optional
 
 import pipeline_manager
 
 
 def validate(
     specification_path: Path,
-    dataflow_paths: list[Path] = [],
+    dataflow_paths: List[Path] = [],
     resolved_specification_path: Optional[Path] = None,
     workspace_directory: Optional[Path] = None,
 ) -> int:
@@ -30,7 +30,7 @@ def validate(
     ----------
     specification_path: Path
         Path to the specification file
-    dataflow_paths: list[Path]
+    dataflow_paths: List[Path]
         List of paths to the dataflow files
     resolved_specification_path: Optional[Path]
         Destination where the resolved specification is stored.
