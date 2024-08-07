@@ -1,0 +1,249 @@
+{
+    "version": "20240723.13",
+    "nodes": [
+        {
+            "name": "Filesystem-base",
+            "abstract": true,
+            "layer": "filesystem",
+            "category": "Filesystem",
+            "properties": [
+                {"name": "filename", "type": "text", "default": ""}
+            ]
+        },
+        {
+            "name": "LoadVideo",
+            "extends": ["Filesystem-base"],
+            "interfaces": [{"name": "frames", "type": "Image", "direction": "output"}],
+            "description": "### Information \n\n Node used to load a video and parametrize the *filename*.\n\nAdditionally the video can be passed to another node."
+        },
+        {
+            "name": "SaveVideo",
+            "extends": ["Filesystem-base"],
+            "interfaces": [
+                {"name": "frames", "type": ["Image", "BinaryImage"], "direction": "input"}
+            ]
+        },
+        {
+            "name": "SaveFrames",
+            "layer": "filesystem",
+            "category": "Filesystem",
+            "properties": [
+                {"name": "Folder name", "type": "text", "default": ""},
+                {"name": "Name prefix", "type": "text", "default": ""}
+            ],
+            "interfaces": [
+                {"name": "color", "type": "Image", "direction": "input"},
+                {"name": "binary", "type": "BinaryImage", "direction": "input"}
+            ]
+        },
+        {
+            "name": "SaveFrame",
+            "extends": ["Filesystem-base"],
+            "properties": [
+                {"name": "Frame number", "type": "integer", "default": 0}
+            ],
+            "interfaces": [
+                {"name": "color", "type": "Image", "direction": "input"},
+                {"name": "binary", "type": "BinaryImage", "direction": "input"}
+            ]
+        },
+        {
+            "name": "GaussianKernel",
+            "layer": "kernel",
+            "category": "Generators",
+            "properties": [
+                {"name": "size", "type": "integer", "default": 5},
+                {"name": "sigma", "type": "number", "default": 1.0},
+                {"name": "tags", "type": "list", "dtype": "string", "default": []}
+            ],
+            "interfaces": [{"name": "kernel", "type": "Image", "direction": "output"}]
+        },
+        {
+            "name": "SobelKernel",
+            "layer": "kernel",
+            "category": "Generators",
+            "properties": [
+                {"name": "size", "type": "integer", "default": 3}
+            ],
+            "interfaces": [
+                {"name": "Horizontal edge kernel", "type": "Image", "direction": "output"},
+                {"name": "Vertical edge kernel", "type": "Image", "direction": "output"}
+            ]
+        },
+        {
+            "name": "StructuringElement",
+            "layer": "kernel",
+            "category": "Generators",
+            "properties": [
+                {"name": "size", "type": "integer", "default": 5},
+                {
+                    "name": "shape",
+                    "type": "select",
+                    "values": ["Rectangle", "Cross", "Ellipse"],
+                    "default": "Cross"
+                }
+            ],
+            "interfaces": [{"name": "kernel", "type": "BinaryImage", "direction": "output"}]
+        },
+        {
+            "category": "Processing/Color images",
+            "isCategory": true,
+            "interfaces": [
+                {"name": "input 1", "type": "Image", "direction": "input"},
+                {"name": "output 1", "type": "Image", "direction": "output"}
+            ]
+        },
+        {
+            "category": "Processing/Binary images",
+            "isCategory": true,
+            "interfaces": [
+                {"name": "input 1", "type": "BinaryImage", "direction": "input"},
+                {"name": "output 1", "type": "BinaryImage", "direction": "output"}
+            ]
+        },
+        {
+            "name": "Filter2D",
+            "extends": ["Color images"],
+            "description": "Node that applies a *2D* filter.",
+            "properties": [
+                {"name": "iterations", "type": "integer", "default": 1},
+                {
+                    "name": "border type",
+                    "type": "select",
+                    "values": ["constant", "replicate", "wrap", "reflect"],
+                    "default": "constant"
+                }
+            ],
+            "interfaces": [
+                {"name": "kernel", "type": "Image", "direction": "input"}
+            ]
+        },
+        {
+            "name": "Threshold",
+            "extends": ["Binary images"],
+            "interfaces": [
+                {"name": "input 1", "type": "Image", "direction": "input", "override": true}
+            ],
+            "properties": [
+                {"name": "threshold_value", "type": "integer", "default": 1},
+                {
+                    "name": "threshold_type",
+                    "type": "select",
+                    "values": ["Binary", "Truncate", "Otsu"],
+                    "default": "constant"
+                }
+            ]
+        },
+        {
+            "name": "CannyEdgeDetection",
+            "extends": ["Color images"],
+            "category": "Processing/Color images",
+            "properties": [
+                {"name": "sigma", "type": "text", "default": "1.4"},
+                {"name": "kernel size", "type": "integer", "default": 3}
+            ]
+        },
+        {
+            "name": "Scale",
+            "extends": ["Color images"],
+            "category": "Processing/Color images",
+            "properties": [
+                {"name": "Scaling factor", "type": "text", "default": "1.75"}
+            ]
+        },
+        {
+            "name": "Logical AND",
+            "extends": ["Binary images"],
+            "category": "Processing/Binary images",
+            "interfaces": [
+                {"name": "input 2", "type": "BinaryImage", "direction": "input"}
+            ]
+        },
+        {
+            "name": "Logical OR",
+            "extends": ["Binary images"],
+            "category": "Processing/Binary images",
+            "interfaces": [
+                {"name": "input 2", "type": "BinaryImage", "direction": "input"}
+            ]
+        },
+        {
+            "name": "Logical NOT",
+            "extends": ["Binary images"],
+            "category": "Processing/Binary images"
+        },
+        {
+            "name": "Logical XOR",
+            "extends": ["Binary images"],
+            "category": "Processing/Binary images",
+            "interfaces": [
+                {"name": "input 2", "type": "BinaryImage", "direction": "input"}
+            ]
+        },
+        {
+            "name": "Morphological operation",
+            "extends": ["Binary images"],
+            "category": "Processing/Binary images",
+            "properties": [
+                {
+                    "name": "Enable operations", "type": "bool", "default": true, "group": [
+                        {"name": "iterations", "type": "integer", "default": 1},
+                        {
+                            "name": "border type",
+                            "type": "select",
+                            "values": ["constant", "replicate", "wrap", "reflect"],
+                            "default": "constant"
+                        },
+                        {
+                            "name": "operation type",
+                            "type": "select",
+                            "values": ["dilation", "erosion", "closing", "opening"],
+                            "default": "dilation"
+                        }
+                    ]
+                }
+            ],
+            "interfaces": [
+                {"name": "kernel", "type": "BinaryImage", "direction": "input"}
+            ]
+        },
+        {
+            "name": "RemoveColor",
+            "extends": ["Color images"],
+            "category": "Processing/Color images",
+            "properties": [
+                {"name": "color", "type": "hex", "default": "0xFFFF", "min": "0xFF"}
+            ]
+        }
+    ],
+    "metadata": {
+        "twoColumn": true,
+        "interfaces": {
+            "BinaryImage": {
+                "interfaceColor": "#FF00FF",
+                "interfaceConnectionPattern": "dashed",
+                "interfaceConnectionColor": "#FF0000"
+            },
+            "Image": {
+                "interfaceConnectionPattern": "dotted",
+                "interfaceConnectionColor": "#FFFF00"
+            }
+        },
+        "connectionStyle": "orthogonal",
+        "layers": [
+            {
+                "name": "IOs",
+                "nodeLayers": ["filesystem"]
+            },
+            {
+                "name": "Binary imaging",
+                "nodeInterfaces": ["BinaryImage"]
+            },
+            {
+                "name": "Both",
+                "nodeLayers": ["processing"],
+                "nodeInterfaces": ["BinaryImage"]
+            }
+        ]
+    }
+}

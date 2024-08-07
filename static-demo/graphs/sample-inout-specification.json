@@ -1,0 +1,27 @@
+{
+    "version": "20240723.13",
+    "nodes": [
+        {
+            "name": "TestInout",
+            "layer": "filesystem",
+            "category": "Test",
+            "properties": [
+                {"name": "property-1", "type": "text", "default": ""},
+                {"name": "property-2", "type": "text", "default": ""}
+            ],
+            "interfaces": [
+                {"name": "output-2", "type": "TypeTwo", "direction": "output", "side": "right"},
+                {"maxConnectionsCount": 2, "name": "output-1", "type": "TypeTwo", "direction": "output", "side": "left"},
+                {"maxConnectionsCount": 2, "name": "input-1", "type": "TypeTwo", "direction": "input", "side": "left"},
+                {"maxConnectionsCount": 2, "name": "input-2", "type": "TypeTwo", "direction": "input", "side": "right"},
+                {"maxConnectionsCount": 2, "name": "inout-1", "type": "TypeTwo", "direction": "inout", "side": "left"},
+                {"maxConnectionsCount": 2, "name": "inout-2", "type": "TypeTwo", "direction": "inout", "side": "right"}
+            ]
+        }
+    ],
+    "metadata": {
+        "connectionStyle": "orthogonal",
+        "allowLoopbacks": true,
+        "twoColumn": true
+    }
+}
