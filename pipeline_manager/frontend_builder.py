@@ -372,11 +372,17 @@ def build_frontend(
                 nonlocal filename_to_hash
 
                 imgfile = requests.get(filename, timeout=4)
-                suffix = imgfile.headers["Content-Type"]
-                if suffix == "image/svg+xml":
-                    suffix = "svg"
-                else:
-                    suffix = suffix.split("/")[1]
+
+                # If Content-Type is not present in the headers
+                # then the suffix is deduced from the filename
+                try:
+                    suffix = imgfile.headers["Content-Type"]
+                    if suffix == "image/svg+xml":
+                        suffix = "svg"
+                    else:
+                        suffix = suffix.split("/")[1]
+                except KeyError:
+                    suffix = filename.split(".")[-1]
 
                 # Extracted filename from url has to include the whole
                 # path, as otherwise it would be impossible to distinguish
