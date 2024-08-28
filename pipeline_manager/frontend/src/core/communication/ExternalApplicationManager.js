@@ -130,7 +130,14 @@ class ExternalApplicationManager {
                     'Warnings when loading specification',
                     'Errors when loading specification',
                 )) return;
-                await this.editorManager.loadDataflow(graph, true);
+                const errors = await this.editorManager.loadDataflow(graph, true);
+                if (errors.errors.length) {
+                    NotificationHandler.terminalLog(
+                        'error',
+                        `Dataflow doesn't match the updated specification`,
+                        errors.errors,
+                    );
+                }
 
                 NotificationHandler.terminalLog('info', 'Specification loaded successfully');
             } else if (data.type === PMMessageType.WARNING) {
