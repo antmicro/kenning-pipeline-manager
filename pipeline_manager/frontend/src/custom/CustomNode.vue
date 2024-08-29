@@ -41,7 +41,9 @@ from moving or deleting the nodes.
                 v-if="iconPath !== undefined"
                 :src="iconPath"
             >
-            <div v-if="!renaming" class="__title-label" v-html="nodeTitle">
+            <div v-if="!renaming" class="__title-label">
+                {{nodeTitle.title}}
+                <pre class="subtitle" v-if="nodeTitle.subtitle">{{nodeTitle.subtitle}}</pre>
             </div>
             <input
                 v-else
@@ -393,19 +395,19 @@ const nodeTitle = computed(() => {
             // The highlighted title does not have the GRAPH_NODE_TYPE_PREFIX
             // because otherwise <span> tags could mangle the name
             if (props.node.highlightedTitle === props.node.title) {
-                return type.slice(GRAPH_NODE_TYPE_PREFIX.length);
+                return { title: type.slice(GRAPH_NODE_TYPE_PREFIX.length) };
             }
-            return type;
+            return { title: type };
         }
 
-        return title;
+        return { title };
     }
 
     if (title === '' || props.node.title === props.node.type) {
-        return type;
+        return { title: type };
     }
 
-    return `${title} <pre class="subtitle">${type}</pre>`;
+    return { title, subtitle: type };
 });
 
 const select = (event) => {
