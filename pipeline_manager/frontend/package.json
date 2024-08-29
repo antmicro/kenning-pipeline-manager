@@ -20,6 +20,7 @@
         "cytoscape": "^3.25.0",
         "cytoscape-cola": "^2.5.1",
         "cytoscape-dagre": "^2.5.0",
+        "dompurify": "^3.1.6",
         "epic-spinners": "^2.0.0",
         "fuzzysort": "^2.0.4",
         "html-to-image": "^1.11.11",
