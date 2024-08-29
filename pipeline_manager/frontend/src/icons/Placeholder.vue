@@ -11,6 +11,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { watch } from 'vue';
+import DOMPurify from 'dompurify';
 /* eslint-disable no-unused-vars,no-lonely-if,vue/no-setup-props-destructure */
 
 export default {
@@ -33,7 +34,7 @@ export default {
         // Webpack converts svg images to base64, in needs to be converted to a string
         // so that a class 'hovered' can be added to it.
         const svgString = atob(props.imgURI.slice('data:image/svg+xml;base64,'.length));
-        element.innerHTML = svgString;
+        element.innerHTML = DOMPurify.sanitize(svgString, { svg: true });
         const firstChild = element.firstElementChild;
 
         watch(() => props.hover, (newValue, oldValue) => {
