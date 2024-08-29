@@ -34,7 +34,7 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
                         />
                     </template>
                     <Cross v-else color="white" :rotate="45" class="__title-icon"></Cross>
-                    <div class="__title-label" v-html="node.hitSubstring"></div>
+                    <div class="__title-label">{{ node.hitSubstring }}</div>
                 </div>
                 <div
                     class="__vertical_ellipsis"
@@ -90,7 +90,7 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
                             :src="getIconPath(category.categoryNode.iconPath)"
                             draggable="false"
                         />
-                        <div class="__title-label" v-html="category.hitSubstring"></div>
+                        <div class="__title-label">{{ category.hitSubstring }}</div>
                         <div
                             class="__vertical_ellipsis"
                             ref="settings"
@@ -112,7 +112,7 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
                         />
                     </div>
                 </template>
-                <div v-else class="__title" v-html="category.hitSubstring"></div>
+                <div v-else class="__title">{{ category.hitSubstring }}</div>
             </div>
             <div v-show="mask[i]">
                 <PaletteCategory
@@ -144,7 +144,7 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
                         :src="getIconPath(category.categoryNode.iconPath)"
                         draggable="false"
                     />
-                    <div class="__title-label" v-html="category.hitSubstring"></div>
+                    <div class="__title-label">{{ category.hitSubstring }}</div>
                     <div
                         class="__vertical_ellipsis"
                         ref="settings"
@@ -166,7 +166,7 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
                     </div>
                 </div>
             </template>
-            <div v-else class="__title" v-html="category.hitSubstring"></div>
+            <div v-else class="__title">{{ category.hitSubstring }}</div>
         </template>
     </div>
 </template>

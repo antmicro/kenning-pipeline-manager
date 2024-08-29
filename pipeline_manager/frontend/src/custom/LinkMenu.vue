@@ -28,7 +28,7 @@ from creating and deleting connections or altering nodes' values if the editor i
                             :src="getIconPath(url.icon)"
                             draggable="false"
                         />
-                        <span v-html="url.name"></span>
+                        <span>{{ url.name }}</span>
                         <br>
                     </div>
                 </a>

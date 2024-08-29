@@ -10,7 +10,7 @@ A single entry representing available node type in the sidebar.
 <template>
     <div class="__entry __node-entry __dragged" :style="padding">
         <img class="__title-icon" v-if="nodeIcon !== undefined" :src="nodeIcon" draggable="false" />
-        <div class="__title-label" v-html="title"></div>
+        <div class="__title-label">{{ title }}</div>
 
     </div>
 </template>
