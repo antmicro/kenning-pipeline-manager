@@ -34,7 +34,7 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
                         />
                     </template>
                     <Cross v-else color="white" :rotate="45" class="__title-icon"></Cross>
-                    <div class="__title-label">{{ node.hitSubstring }}</div>
+                    <div class="__title-label" v-html="DOMPurify.sanitize(node.hitSubstring)"></div>
                 </div>
                 <div
                     class="__vertical_ellipsis"
@@ -90,7 +90,10 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
                             :src="getIconPath(category.categoryNode.iconPath)"
                             draggable="false"
                         />
-                        <div class="__title-label">{{ category.hitSubstring }}</div>
+                        <div
+                            class="__title-label"
+                            v-html="DOMPurify.sanitize(category.hitSubstring)">
+                        </div>
                         <div
                             class="__vertical_ellipsis"
                             ref="settings"
@@ -144,7 +147,10 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
                         :src="getIconPath(category.categoryNode.iconPath)"
                         draggable="false"
                     />
-                    <div class="__title-label">{{ category.hitSubstring }}</div>
+                    <div
+                        class="__title-label"
+                        v-html="DOMPurify.sanitize(category.hitSubstring)">
+                    </div>
                     <div
                         class="__vertical_ellipsis"
                         ref="settings"
@@ -174,6 +180,7 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
 <script>
 import { defineComponent, computed, ref, watch, inject } from 'vue'; // eslint-disable-line object-curly-newline
 import { useViewModel } from '@baklavajs/renderer-vue';
+import DOMPurify from 'dompurify';
 import Arrow from '../../icons/Arrow.vue';
 import VerticalEllipsis from '../../icons/VerticalEllipsis.vue';
 import LinkMenu from '../LinkMenu.vue';
@@ -207,6 +214,9 @@ export default defineComponent({
             required: true,
         },
     },
+    data: () => ({
+        DOMPurify,
+    }),
     setup(props) {
         const { viewModel } = useViewModel();
         const getIconPath = (name) => viewModel.value.cache[`./${name}`] ?? name;

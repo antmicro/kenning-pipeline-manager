@@ -10,14 +10,14 @@ A single entry representing available node type in the sidebar.
 <template>
     <div class="__entry __node-entry __dragged" :style="padding">
         <img class="__title-icon" v-if="nodeIcon !== undefined" :src="nodeIcon" draggable="false" />
-        <div class="__title-label">{{ title }}</div>
-
+        <div class="__title-label" v-html="titleSanitized"></div>
     </div>
 </template>
 
 <script>
 import { defineComponent, computed } from 'vue';
 import { useViewModel } from '@baklavajs/renderer-vue';
+import DOMPurify from 'dompurify';
 
 export default defineComponent({
     props: {
@@ -49,6 +49,11 @@ export default defineComponent({
             padding,
             getIconPath,
         };
+    },
+    computed: {
+        titleSanitized() {
+            return DOMPurify.sanitize(this.title);
+        },
     },
 });
 </script>
