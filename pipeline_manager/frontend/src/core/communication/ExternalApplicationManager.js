@@ -119,25 +119,7 @@ class ExternalApplicationManager {
             if (data.type === PMMessageType.OK) {
                 const specification = data.content;
 
-                if (handleSpecificationResult(
-                    EditorManager.validateSpecification(specification),
-                    'Warnings when validating specification',
-                    'Specification is invalid',
-                )) return;
-                const graph = this.editorManager.saveDataflow();
-                if (handleSpecificationResult(
-                    await this.editorManager.updateEditorSpecification(specification),
-                    'Warnings when loading specification',
-                    'Errors when loading specification',
-                )) return;
-                const errors = await this.editorManager.loadDataflow(graph, true);
-                if (errors.errors.length) {
-                    NotificationHandler.terminalLog(
-                        'error',
-                        `Dataflow doesn't match the updated specification`,
-                        errors.errors,
-                    );
-                }
+                await this.updateSpecification(specification);
 
                 NotificationHandler.terminalLog('info', 'Specification loaded successfully');
             } else if (data.type === PMMessageType.WARNING) {
@@ -150,6 +132,28 @@ class ExternalApplicationManager {
         } catch (error) {
             message = error.message;
             NotificationHandler.terminalLog('error', message);
+        }
+    }
+
+    async updateSpecification(specification) {
+        if (handleSpecificationResult(
+            EditorManager.validateSpecification(specification),
+            'Warnings when validating specification',
+            'Specification is invalid',
+        )) return;
+        const graph = this.editorManager.saveDataflow();
+        if (handleSpecificationResult(
+            await this.editorManager.updateEditorSpecification(specification),
+            'Warnings when loading specification',
+            'Errors when loading specification',
+        )) return;
+        const errors = await this.editorManager.loadDataflow(graph, true);
+        if (errors.errors.length) {
+            NotificationHandler.terminalLog(
+                'error',
+                `Dataflow doesn't match the updated specification`,
+                errors.errors,
+            );
         }
     }
 
