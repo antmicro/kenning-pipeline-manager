@@ -40,6 +40,17 @@
             },
             "additionalProperties": false
         },
+        "specification_object": {
+            "description": "Definition containing `specification` object",
+            "type": "object",
+            "properties": {
+                "specification": {
+                    "description": "JSON with specification definition in PM format",
+                    "type": "object"
+                }
+            },
+            "additionalProperties": false
+        },
         "properties_diff": {
             "description": "Schema that represents differences in properties of the node",
             "allOf": [{ "$ref": "common_types#/$defs/node_object" }],

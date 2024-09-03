@@ -237,6 +237,15 @@
             "returns": {
                 "$ref": "common_types#/$defs/null_or_empty"
             }
+        },
+        "specification_change": {
+            "description": "Procedure to update specification",
+            "params": {
+                "$ref": "common_types#/$defs/specification_object"
+            },
+            "returns": {
+                "$ref": "common_types#/$defs/null_or_empty"
+            }
         }
     },
     "backend_endpoints": {

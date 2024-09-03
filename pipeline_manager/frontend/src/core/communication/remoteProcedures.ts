@@ -18,6 +18,7 @@ import runInfo from './runInformation';
 import EditorManager from '../EditorManager';
 import NotificationHandler from '../notifications';
 import { terminalStore } from '../stores';
+import getExternalApplicationManager from './ExternalApplicationManager';
 
 /* eslint-disable import/prefer-default-export */
 /* eslint-disable camelcase */
@@ -395,4 +396,9 @@ type Notification = {
 
 export function notification_send(params: Notification) {
     NotificationHandler.terminalLog(params.type, params.title, params.details);
+}
+
+export function specification_change(params: {specification: any}) {
+    const externalApplicationManager = getExternalApplicationManager();
+    externalApplicationManager.updateSpecification(params.specification);
 }
