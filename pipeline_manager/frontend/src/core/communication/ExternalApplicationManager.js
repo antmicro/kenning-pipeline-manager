@@ -7,6 +7,8 @@
 import { JSONRPCErrorCode } from 'json-rpc-2.0';
 import { charset } from 'mime-types';
 import { backendApiUrl, PMMessageType, JSONRPCCustomErrorCode } from '../utils';
+
+// eslint-disable-next-line import/no-cycle
 import jsonRPC from './rpcCommunication';
 import runInfo from './runInformation';
 import NotificationHandler from '../notifications';

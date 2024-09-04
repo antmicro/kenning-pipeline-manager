@@ -18,6 +18,8 @@ import runInfo from './runInformation';
 import EditorManager from '../EditorManager';
 import NotificationHandler from '../notifications';
 import { terminalStore } from '../stores';
+
+// eslint-disable-next-line import/no-cycle
 import getExternalApplicationManager from './ExternalApplicationManager';
 
 /* eslint-disable import/prefer-default-export */

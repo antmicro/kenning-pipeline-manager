@@ -20,6 +20,8 @@ import NotificationHandler from '../notifications';
 import { backendApiUrl } from '../utils';
 import commonTypesSchema from '../../../../resources/api_specification/common_types.json' assert { type: 'json' };
 import specificationSchema from '../../../../resources/api_specification/specification.json' assert { type: 'json' };
+
+// eslint-disable-next-line import/no-cycle
 import * as remoteProcedures from './remoteProcedures';
 
 const customMethodRegex = /^custom_.*$/;
