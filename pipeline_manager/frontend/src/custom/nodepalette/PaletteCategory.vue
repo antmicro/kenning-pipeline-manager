@@ -115,7 +115,11 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
                         />
                     </div>
                 </template>
-                <div v-else class="__title">{{ category.hitSubstring }}</div>
+                <div
+                    v-else
+                    class="__title"
+                    v-html="DOMPurify.sanitize(category.hitSubstring)"
+                ></div>
             </div>
             <div v-show="mask[i]">
                 <PaletteCategory
