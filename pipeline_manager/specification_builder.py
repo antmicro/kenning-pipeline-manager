@@ -810,10 +810,7 @@ class SpecificationBuilder(object):
         )
         self._nodes[name]["properties"].append(prop)
 
-    def add_node_type_from_spec(self, node):
-        """
-        Adds single node type defined in JSON-like format.
-        """
+    def update_node_type_from_spec(self, node):
         if node.get("isCategory", False):
             if "category" not in node:
                 raise SpecificationBuilderException(
@@ -822,16 +819,9 @@ class SpecificationBuilder(object):
                     f"{json.dumps(node, indent=4)}"
                 )
             if "/" in node["category"]:
-                categoryparent, nodename = node["category"].rsplit("/", 1)
+                nodename = node["category"].rsplit("/", 1)[-1]
             else:
-                categoryparent = ""
                 nodename = node["category"]
-            self.add_node_type_as_category(
-                categoryname=nodename,
-                categoryparent=categoryparent,
-                layer=get_optional(node, "layer"),
-                extends=get_optional(node, "extends"),
-            )
         else:
             if "name" not in node:
                 raise SpecificationBuilderException(
@@ -840,13 +830,6 @@ class SpecificationBuilder(object):
                     f"{json.dumps(node, indent=4)}"
                 )
             nodename = node["name"]
-            self.add_node_type(
-                name=nodename,
-                category=get_optional(node, "category"),
-                layer=get_optional(node, "layer"),
-                extends=get_optional(node, "extends"),
-                abstract=get_optional(node, "abstract"),
-            )
         if "icon" in node:
             self.add_node_type_icon(nodename, node["icon"])
         if "urls" in node:
@@ -903,6 +886,45 @@ class SpecificationBuilder(object):
                         get_optional(childprop, "dtype"),
                         get_optional(property, "override"),
                     )
+
+    def add_node_type_from_spec(self, node):
+        """
+        Adds single node type defined in JSON-like format.
+        """
+        if node.get("isCategory", False):
+            if "category" not in node:
+                raise SpecificationBuilderException(
+                    "The given category node specification is invalid - it is "
+                    "missing the 'category' field\n"
+                    f"{json.dumps(node, indent=4)}"
+                )
+            if "/" in node["category"]:
+                categoryparent, nodename = node["category"].rsplit("/", 1)
+            else:
+                categoryparent = ""
+                nodename = node["category"]
+            self.add_node_type_as_category(
+                categoryname=nodename,
+                categoryparent=categoryparent,
+                layer=get_optional(node, "layer"),
+                extends=get_optional(node, "extends"),
+            )
+        else:
+            if "name" not in node:
+                raise SpecificationBuilderException(
+                    "The given node specification is invalid - it is "
+                    "missing the 'name' field\n"
+                    f"{json.dumps(node, indent=4)}"
+                )
+            nodename = node["name"]
+            self.add_node_type(
+                name=nodename,
+                category=get_optional(node, "category"),
+                layer=get_optional(node, "layer"),
+                extends=get_optional(node, "extends"),
+                abstract=get_optional(node, "abstract"),
+            )
+        self.update_node_type_from_spec(node)
 
     def add_subgraph_from_spec(self, subgraph):
         """
@@ -1116,6 +1138,11 @@ class SpecificationBuilder(object):
         ----------
         otherspec: Any
             JSON-like structure with other specification
+
+        Raises
+        ------
+        SpecificationBuilderException
+            Raised when "extends" in any node has non-existent classes
         """
         metadata = otherspec.get("metadata", {})
         for prop, propvalue in metadata.items():
@@ -1148,8 +1175,27 @@ class SpecificationBuilder(object):
                     )
             else:
                 self.metadata_add_param(prop, propvalue)
-        for node in otherspec.get("nodes", []):
-            self.add_node_type_from_spec(node)
+        newnodes = list(otherspec.get("nodes", []))
+        previousmissing = set()
+        missing = set()
+        while len(newnodes) > 0:
+            node = newnodes.pop(0)
+            if extends := get_optional(node, "extends"):
+                for basenode in extends:
+                    if basenode not in self._nodes:
+                        newnodes.append(node)
+                        missing.add(basenode)
+                        break
+                else:
+                    self.add_node_type_from_spec(node)
+            else:
+                self.add_node_type_from_spec(node)
+            if missing == previousmissing and len(missing) > 0:
+                raise SpecificationBuilderException(
+                    f"Classes from other spec are not found:  {missing}"
+                )
+            previousmissing = missing
+            missing = set()
         for subgraph in otherspec.get("graphs", []):
             self.add_subgraph_from_spec(subgraph)
         for include in otherspec.get("include", []):
