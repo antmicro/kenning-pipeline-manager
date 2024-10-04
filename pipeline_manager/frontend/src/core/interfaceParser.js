@@ -51,6 +51,10 @@ function parseSingleInterfaces(interfaces, interfaceGroup = false) {
     };
 
     interfaces.forEach((io) => {
+        // Omitting interfaces that are marked as dynamic, as they are generated
+        // using 'updateDynamicInterfaces function
+        if (Object.prototype.hasOwnProperty.call(io, 'dynamic')) return;
+
         // Copy the interface to avoid modifying the original object
         const tempIO = JSON.parse(JSON.stringify(io));
 
@@ -305,6 +309,60 @@ export function applySidePositions(inputs, outputs) {
                 .filter(([, intf]) => intf.direction === 'output'),
         ),
     };
+}
+
+/**
+ * The function reads provided `parsedInterfaces` and looks for interfaces with `dynamic` attribute.
+ * For such interfaces, a dedicated property is created that controls the number interface
+ * instances. The properties are returned and should be included in node creation.
+ *
+ * @param {Object} interfaces List of interfaces.
+ * @return Object with two properties, success and value. If success is true, value contains
+ * an array of properties that should be included in the node. Otherwise, value contains an array
+ * of errors.
+ */
+export function generateProperties(interfaces) {
+    const errors = [];
+    const properties = [];
+    interfaces.forEach(
+        (intf) => {
+            if (Object.prototype.hasOwnProperty.call(intf, 'dynamic')) {
+                if (
+                    Array.isArray(intf.dynamic) &&
+                    intf.dynamic.length === 2 &&
+                    Number.isInteger(intf.dynamic[0]) &&
+                    Number.isInteger(intf.dynamic[1])
+                ) {
+                    // Property should have limits specified by 'intf.dynamic' value
+                    properties.push({
+                        name: `dynamic-interfaces-${intf.direction}-${intf.name}`,
+                        type: 'integer',
+                        min: intf.dynamic[0],
+                        max: intf.dynamic[1],
+                        default: intf.dynamic[0],
+                    });
+                } else if (intf.dynamic === true) {
+                    // Property should not have limits
+                    properties.push({
+                        name: `dynamic-interfaces-${intf.direction}-${intf.name}`,
+                        type: 'integer',
+                        min: 0,
+                        default: 0,
+                    });
+                } else {
+                    errors.push(
+                        `Interface '${intf.name}' has invalid 'dynamic' attribute. ` +
+                        'It should be either a boolean or an array with two integer elements.',
+                    );
+                }
+            }
+        },
+    );
+
+    if (errors.length) {
+        return { success: false, value: errors };
+    }
+    return { success: true, value: properties };
 }
 
 /**
