@@ -74,7 +74,12 @@ from moving or deleting the nodes.
             <div class="__properties">
                 <div v-for="input in displayedProperties" :key="input.id">
                     {{ getOptionName(input.componentName) ? `${input.name}:` : '' }}
-                    <CustomInterface :node="node" :intf="input" :toggleGroup="toggleGroup" />
+                    <CustomInterface
+                        :node="node"
+                        :intf="input"
+                        :toggleGroup="toggleGroup"
+                        :updateDynamicInterfaces="updateDynamicInterfaces"
+                    />
                 </div>
             </div>
 
@@ -749,6 +754,10 @@ const toggleGroup = (intf) => {
     intf.group.forEach((name) => {
         props.node.inputs[name].hidden = !intf.value;
     });
+};
+
+const updateDynamicInterfaces = (intf) => {
+    props.node.updateDynamicInterfaces(intf);
 };
 
 /* eslint-disable no-param-reassign */

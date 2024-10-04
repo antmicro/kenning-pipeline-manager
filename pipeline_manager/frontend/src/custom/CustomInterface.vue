@@ -99,15 +99,14 @@ export default defineComponent({
         picked: Boolean,
         switchSides: {},
         toggleGroup: { default: () => {}, required: false },
+        updateDynamicInterfaces: { default: () => {}, required: false },
         tabindexValue: { default: -1, required: false },
     },
     components: {
         Arrow,
     },
     setup(props) {
-        const {
-            el, isConnected, showComponent, startHover, endHover, openSidebar,
-        } =
+        const { el, isConnected, showComponent, startHover, endHover, openSidebar } =
             Components.NodeInterface.setup(props);
 
         const { viewModel } = useViewModel();
@@ -131,6 +130,15 @@ export default defineComponent({
             props.toggleGroup(props.intf);
             props.intf.events.setValue.unsubscribe(props.intf);
             props.intf.events.setValue.subscribe(props.intf, () => props.toggleGroup(props.intf));
+        }
+
+        // TODO: Make the prefix global so that it is more explicit
+        if (props.intf.name.startsWith('dynamic-interfaces-')) {
+            props.updateDynamicInterfaces(props.intf);
+            props.intf.events.setValue.unsubscribe(props.intf);
+            props.intf.events.setValue.subscribe(props.intf, () =>
+                props.updateDynamicInterfaces(props.intf),
+            );
         }
 
         const hovered = ref(false);
