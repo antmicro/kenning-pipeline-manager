@@ -72,6 +72,14 @@
         }
     },
     "$defs": {
+        "interfacesRangeArray": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {
+                "type": "number"
+            }
+        },
         "node": {
             "type": "object",
             "allOf": [
@@ -143,15 +151,26 @@
                                         "$ref": "#/$defs/interface"
                                     },
                                     {
+                                        "type": "object",
                                         "properties": {
                                             "array": {
                                                 "description": "Used to define multiple similar interfaces using only one entry",
-                                                "type": "array",
-                                                "minItems": 2,
-                                                "maxItems": 2,
-                                                "items": {
-                                                    "type": "number"
-                                                }
+                                                "$ref": "#/$defs/interfacesRangeArray"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "properties": {
+                                            "dynamic": {
+                                                "description": "Determines whether the interface should have a property assigned to it that determines the number of interfaces created",
+                                                "oneOf": [
+                                                    {
+                                                        "const": true
+                                                    },
+                                                    {
+                                                        "$ref": "#/$defs/interfacesRangeArray"
+                                                    }
+                                                ]
                                             }
                                         }
                                     }
@@ -175,33 +194,37 @@
                                                 "type": "array",
                                                 "items": {
                                                     "type": "object",
-                                                    "properties": {
-                                                        "name": {
-                                                            "description": "Name of the the group of interfaces",
-                                                            "type": "string"
-                                                        },
-                                                        "direction": {
-                                                            "description": "Tells whether the connector is input, output, or both",
-                                                            "enum": [
-                                                                "input",
-                                                                "output",
-                                                                "inout"
-                                                            ]
-                                                        },
-                                                        "array": {
-                                                            "description": "Used to define multiple similar interfaces using only one entry",
-                                                            "type": "array",
-                                                            "minItems": 2,
-                                                            "maxItems": 2,
-                                                            "items": {
-                                                                "type": "number"
+                                                    "allOf": [
+                                                        {
+                                                            "properties": {
+                                                                "array": {
+                                                                    "description": "Used to define multiple similar interfaces using only one entry",
+                                                                    "$ref": "#/$defs/interfacesRangeArray"
+                                                                }
                                                             }
+                                                        },
+                                                        {
+                                                            "properties": {
+                                                                "name": {
+                                                                    "description": "Name of the the group of interfaces",
+                                                                    "type": "string"
+                                                                },
+                                                                "direction": {
+                                                                    "description": "Tells whether the connector is input, output, or both",
+                                                                    "enum": [
+                                                                        "input",
+                                                                        "output",
+                                                                        "inout"
+                                                                    ]
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "name",
+                                                                "direction"
+                                                            ]
                                                         }
-                                                    },
-                                                    "required": [
-                                                        "name"
                                                     ],
-                                                    "additionalProperties": false
+                                                    "unevaluatedProperties": false
                                                 }
                                             }
                                         }
