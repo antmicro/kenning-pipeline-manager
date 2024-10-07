@@ -107,7 +107,9 @@ export default defineComponent({
         Arrow,
     },
     setup(props) {
-        const { el, isConnected, showComponent, startHover, endHover, openSidebar } =
+        const {
+            el, isConnected, showComponent, startHover, endHover, openSidebar,
+        } =
             Components.NodeInterface.setup(props);
 
         const { viewModel } = useViewModel();

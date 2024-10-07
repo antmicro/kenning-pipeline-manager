@@ -392,7 +392,7 @@ const classes = computed(() => ({
 const styles = computed(() => ({
     top: `${props.node.position?.y ?? 0}px`,
     left: `${props.node.position?.x ?? 0}px`,
-    width: `${props.node.width ?? 200}px`,
+    width: `${props.node.width ?? 300}px`,
 }));
 
 const nodeTitle = computed(() => {
