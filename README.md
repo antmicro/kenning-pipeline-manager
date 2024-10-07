@@ -19,7 +19,7 @@ Pipeline Manager aims to simplify the process of developing graph-based graphica
 
 ## Prerequisites
 
-Pipeline Manager requires `npm`, `python` and `pip` for installing dependencies, building and (optionally) running - use package manager to install those packages.
+Pipeline Manager requires `npm` (at least 10.8.2 version is recommended, along with Node.js starting from 20.10.0), `python` and `pip` for installing dependencies, building and (optionally) running - use package manager to install those packages.
 
 The backend of the application has a list of requirements in the `pyproject.toml` file.
 They can be installed using `pip`:
