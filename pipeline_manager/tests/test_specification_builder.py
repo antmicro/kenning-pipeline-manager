@@ -37,6 +37,10 @@ def test_existing_examples(
         pytest.xfail(
             "Groups of interfaces are not yet implemented for Specification Builder"  # noqa: E501
         )
+    elif spec_path.name == "sample-dynamic-interfaces-specification.json":
+        pytest.xfail(
+            "Dynamic interfaces are not yet implemented for Specification Builder"  # noqa: E501
+        )
 
     with open(spec_path, "r") as f:
         spec = json.load(f)
