@@ -328,6 +328,8 @@ export default class PipelineManagerEditor extends Editor {
     }
 
     privatizeInterface(graphId, intf) {
+        if (intf.externalName === undefined) return;
+
         let graph = [...this.graphs].find((g) => g.id === graphId);
         let graphNode = graph.graphNode; // eslint-disable-line prefer-destructuring
 
