@@ -66,7 +66,10 @@ from moving or deleting the nodes.
             />
         </div>
 
-        <div class="__content">
+        <div
+            class="__content"
+            @pointerdown.right="openContextMenuTitle"
+            >
             <!-- Properties -->
             <div class="__properties">
                 <div v-for="input in displayedProperties" :key="input.id">
@@ -352,14 +355,17 @@ const canOpenContextMenu = computed(() =>
         || contextMenuTitleItems.value.length > 0,
 );
 
+const showContextMenuInterface = ref(false);
+
 const openContextMenuTitle = (ev) => {
     if (
         canOpenContextMenu.value &&
-        showContextMenuTitle.value === false
-
+        showContextMenuTitle.value === false &&
+        showContextMenuInterface.value === false
     ) {
+        const target = ev.currentTarget;
         contextMenuTitleX.value = ev.offsetX;
-        contextMenuTitleY.value = ev.offsetY;
+        contextMenuTitleY.value = ev.offsetY + target.offsetTop + 20;
         showContextMenuTitle.value = true;
     }
 };
@@ -645,7 +651,6 @@ const pickInterface = (intf, ev) => {
 
 // Interface context menu
 
-const showContextMenuInterface = ref(false);
 const contextMenuInterfaceX = ref(0);
 const contextMenuInterfaceY = ref(0);
 
