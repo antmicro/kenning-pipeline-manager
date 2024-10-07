@@ -141,6 +141,14 @@ function createProperties(properties) {
         if (intf !== undefined) {
             intf.hidden = hidden;
             intf.type = propType;
+
+            if (p.interfaceMaxConnectionsCount !== undefined) {
+                intf.interfaceMaxConnectionsCount = p.interfaceMaxConnectionsCount;
+            }
+
+            if (p.interfaceType !== undefined) {
+                intf.interfaceType = p.interfaceType;
+            }
         }
 
         return intf;
@@ -347,13 +355,23 @@ class CustomNode extends Node {
         });
     }
 
+    /**
+     * Function for updating dynamic interfaces of the node based on the property passed.
+     *
+     * @param {*} prop property that is responsible for creating dynamic interfaces.
+     * It must have name and value properties.
+     */
     updateDynamicInterfaces(prop) {
         const interfaces = [];
-        const { value } = prop;
+        const { value, interfaceType } = prop;
 
-        // TODO: Generalize the prefix, so no magic split is present
-        const direction = prop.name.split('-')[2];
-        const interfaceName = prop.name.split('-').splice(3).join('-');
+        // The DYNAMIC_INTERFACE_PREFIX is omitted
+        const direction = prop.name
+            .slice(DYNAMIC_INTERFACE_PREFIX.length)
+            .split('-')[0];
+        // The DYNAMIC_INTERFACE_PREFIX and direction are omitted
+        const interfaceName = prop.name
+            .slice(DYNAMIC_INTERFACE_PREFIX.length + 1 + direction.length);
 
         const occupied = { left: [], right: [] };
 
@@ -376,7 +394,6 @@ class CustomNode extends Node {
 
             const container = direction === 'output' ? this.outputs : this.inputs;
 
-            // TODO: interface type is lost in this approach. We need to preserve it
             if (directionIoName in container) {
                 intf.externalName = container[directionIoName].externalName;
                 intf.side = container[directionIoName].side;
@@ -388,7 +405,7 @@ class CustomNode extends Node {
                 !Object.prototype.hasOwnProperty.call(intf, 'side')
             ) {
                 const side = direction === 'output' ? 'right' : 'left';
-                let firstUnoccupied = occupied[side].sort().findIndex(
+                let firstUnoccupied = occupied[side].sort((a, b) => a - b).findIndex(
                     (sidePosition, index) => sidePosition !== index,
                 );
 
@@ -402,6 +419,7 @@ class CustomNode extends Node {
 
                 intf.sidePosition = firstUnoccupied;
                 intf.side = side;
+                intf.type = interfaceType;
 
                 occupied[intf.side].push(firstUnoccupied);
             }
@@ -521,6 +539,10 @@ class CustomNode extends Node {
                     `Interface '${intf.name}' of direction '${intf.direction}' ` +
                     `removed as it was not found in the dataflow.`,
                 );
+
+                // The interface might have to be privatzed
+                this.graph.editor.privatizeInterface(this.graph.id, intf);
+
                 this.removeInput(k);
             }
         });
@@ -552,6 +574,10 @@ class CustomNode extends Node {
                     `Interface '${intf.name}' of direction '${intf.direction}' ` +
                     `removed as it was not found in the dataflow.`,
                 );
+
+                // The interface might have to be privatzed
+                this.graph.editor.privatizeInterface(this.graph.id, intf);
+
                 this.removeOutput(k);
             }
         });

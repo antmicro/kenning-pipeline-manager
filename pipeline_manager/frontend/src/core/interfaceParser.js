@@ -348,6 +348,7 @@ export function generateProperties(interfaces) {
                         default: intf.dynamic[0],
                         // The type of dynamic interfaces is stored as `interfaceType`
                         interfaceType: intf.type,
+                        interfaceMaxConnectionCount: intf.maxConnectionCount,
                     });
                 } else if (intf.dynamic === true) {
                     // Property should not have limits
@@ -358,6 +359,7 @@ export function generateProperties(interfaces) {
                         default: 0,
                         // The type of dynamic interfaces is stored as `interfaceType`
                         interfaceType: intf.type,
+                        interfaceMaxConnectionCount: intf.maxConnectionCount,
                     });
                 } else {
                     errors.push(
