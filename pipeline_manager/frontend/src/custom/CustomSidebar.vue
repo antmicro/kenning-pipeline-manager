@@ -99,6 +99,7 @@ SPDX-License-Identifier: Apache-2.0
                         :node="node"
                         :intf="input"
                         :toggleGroup="toggleGroup"
+                        :updateDynamicInterfaces="updateDynamicInterfaces"
                         tabindex="-1"
                     />
                 </div>
@@ -251,6 +252,10 @@ export default defineComponent({
             intf.group.forEach((name) => {
                 node.value.inputs[name].hidden = intf.value;
             });
+        };
+
+        const updateDynamicInterfaces = (intf) => {
+            node.value.updateDynamicInterfaces(intf);
         };
 
         const onPointerLeave = () => {
@@ -413,6 +418,7 @@ export default defineComponent({
             replacementSiblings,
             editorManager,
             displayedName,
+            updateDynamicInterfaces,
         };
     },
 });

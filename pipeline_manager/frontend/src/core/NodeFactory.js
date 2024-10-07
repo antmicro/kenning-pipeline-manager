@@ -17,7 +17,13 @@ import {
 import { GraphTemplate, NodeInterface, Node } from '@baklavajs/core';
 
 import { updateInterfacePosition } from '../custom/CustomNode.js';
-import { applySidePositions, parseInterfaces, validateInterfaceGroups, generateProperties } from './interfaceParser.js';
+import {
+    applySidePositions,
+    parseInterfaces,
+    validateInterfaceGroups,
+    generateProperties,
+    DYNAMIC_INTERFACE_PREFIX,
+} from './interfaceParser.js';
 
 import InputInterface from '../interfaces/InputInterface.js';
 import ListInterface from '../interfaces/ListInterface.js';
@@ -363,7 +369,10 @@ class CustomNode extends Node {
      */
     updateDynamicInterfaces(prop) {
         const interfaces = [];
-        const { value, interfaceType } = prop;
+        const { value } = prop;
+
+        // The interface metadata has to be obtained from the specification of the property
+        const { interfaceType, interfaceMaxConnectionsCount } = this.inputs[`property_${prop.name}`];
 
         // The DYNAMIC_INTERFACE_PREFIX is omitted
         const direction = prop.name
@@ -420,6 +429,7 @@ class CustomNode extends Node {
                 intf.sidePosition = firstUnoccupied;
                 intf.side = side;
                 intf.type = interfaceType;
+                intf.maxConnectionCount = interfaceMaxConnectionsCount;
 
                 occupied[intf.side].push(firstUnoccupied);
             }
@@ -658,6 +668,14 @@ class CustomNode extends Node {
             errors = [...errors, ...this.updateProperties(parsedState.inputs)];
             errors = errors.map((error) => `Node ${this.type} of id: ${this.id} invalid. ${error}`);
         } else {
+            Object.entries(parsedState.inputs).forEach(([name, intf]) => {
+                if (!name.startsWith('property_')) return;
+
+                if (name.startsWith(`property_${DYNAMIC_INTERFACE_PREFIX}`)) {
+                    this.updateDynamicInterfaces(intf);
+                }
+            });
+
             errors = detectDiscrepancies(parsedState, this.inputs, this.outputs);
             if (Array.isArray(errors) && errors.length) {
                 return errors.map((error) => `Node ${this.type} of id: ${this.id} invalid. ${error}`);
