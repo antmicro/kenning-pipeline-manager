@@ -18,8 +18,8 @@ import Ajv2019 from 'ajv/dist/2019.js';
 import { io, Socket } from 'socket.io-client';
 import NotificationHandler from '../notifications';
 import { backendApiUrl } from '../utils';
-import commonTypesSchema from '../../../../resources/api_specification/common_types.json' assert { type: 'json' };
-import specificationSchema from '../../../../resources/api_specification/specification.json' assert { type: 'json' };
+import commonTypesSchema from '../../../../resources/api_specification/common_types.json' with { type: 'json' };
+import specificationSchema from '../../../../resources/api_specification/specification.json' with { type: 'json' };
 
 // eslint-disable-next-line import/no-cycle
 import * as remoteProcedures from './remoteProcedures';
