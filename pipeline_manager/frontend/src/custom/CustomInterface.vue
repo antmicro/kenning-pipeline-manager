@@ -114,8 +114,15 @@ export default defineComponent({
         const { graph } = useGraph();
 
         props.intf.events.beforeSetValue.unsubscribe(props.intf);
-        props.intf.events.beforeSetValue.subscribe(props.intf, (_, prevent) => {
+        props.intf.events.beforeSetValue.subscribe(props.intf, (value, prevent) => {
             if (viewModel.value.editor.readonly) {
+                prevent();
+            }
+
+            if (
+                (props.intf.min !== undefined && value < props.intf.min) ||
+                (props.intf.max !== undefined && value > props.intf.max)
+            ) {
                 prevent();
             }
         });

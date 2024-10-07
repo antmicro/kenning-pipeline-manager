@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+/* eslint-disable max-classes-per-file */
+
 import {
     CheckboxInterface,
     IntegerInterface,
@@ -12,10 +14,10 @@ import {
     TextInterface,
 } from '@baklavajs/renderer-vue';
 
-import { defineNode, GraphTemplate, NodeInterface } from '@baklavajs/core';
+import { GraphTemplate, NodeInterface, Node } from '@baklavajs/core';
 
 import { updateInterfacePosition } from '../custom/CustomNode.js';
-import { applySidePositions, parseInterfaces, validateInterfaceGroups } from './interfaceParser.js';
+import { applySidePositions, parseInterfaces, validateInterfaceGroups, generateProperties } from './interfaceParser.js';
 
 import InputInterface from '../interfaces/InputInterface.js';
 import ListInterface from '../interfaces/ListInterface.js';
@@ -91,11 +93,11 @@ function createProperties(properties) {
                 intf.componentName = 'InputInterface';
                 break;
             case 'number':
-                intf = new NumberInterface(propName, propDef).setPort(false);
+                intf = new NumberInterface(propName, propDef, p.min, p.max).setPort(false);
                 intf.componentName = 'NumberInterface';
                 break;
             case 'integer':
-                intf = new IntegerInterface(propName, propDef).setPort(false);
+                intf = new IntegerInterface(propName, propDef, p.min, p.max).setPort(false);
                 intf.componentName = 'IntegerInterface';
                 break;
             case 'hex':
@@ -303,6 +305,423 @@ function parseNodeState(state) {
     return newState;
 }
 
+class CustomNode extends Node {
+    inputs = {};
+
+    outputs = {};
+
+    type = undefined;
+
+    constructor(
+        name,
+        layer,
+        inputs,
+        outputs,
+        twoColumn,
+        description = '',
+        nodeExtends = [],
+        nodeExtending = [],
+        nodeSiblings = [],
+        width = 300,
+    ) {
+        super();
+
+        this.description = description;
+        this.extends = nodeExtends;
+        this.extending = nodeExtending;
+        this.siblings = nodeSiblings;
+        this.layer = layer;
+        this.title = name;
+        this.twoColumn = twoColumn;
+        this.type = name;
+        this.width = width;
+
+        Object.keys(inputs).forEach((k) => {
+            const intf = inputs[k]();
+            this.addInput(k, intf);
+        });
+
+        Object.keys(outputs).forEach((k) => {
+            const intf = outputs[k]();
+            this.addOutput(k, intf);
+        });
+    }
+
+    updateDynamicInterfaces(prop) {
+        const interfaces = [];
+        const { value } = prop;
+
+        // TODO: Generalize the prefix, so no magic split is present
+        const direction = prop.name.split('-')[2];
+        const interfaceName = prop.name.split('-').splice(3).join('-');
+
+        const occupied = { left: [], right: [] };
+
+        const stateios = { ...this.inputs, ...this.outputs };
+
+        // Assigning sides and sides Positions to interfaces
+        Object.entries(stateios).forEach(([ioName, ioState]) => {
+            if (ioName.startsWith('property_')) return;
+            occupied[ioState.side].push(ioState.sidePosition);
+        });
+
+        for (let i = 0; i < value; i += 1) {
+            const ioName = `${interfaceName}-${i}`;
+            const directionIoName = `${direction}_${ioName}`;
+
+            const intf = {
+                name: ioName,
+                direction,
+            };
+
+            const container = direction === 'output' ? this.outputs : this.inputs;
+
+            // TODO: interface type is lost in this approach. We need to preserve it
+            if (directionIoName in container) {
+                intf.externalName = container[directionIoName].externalName;
+                intf.side = container[directionIoName].side;
+                intf.sidePosition = container[directionIoName].sidePosition;
+            }
+
+            if (
+                !Object.prototype.hasOwnProperty.call(intf, 'sidePosition') &&
+                !Object.prototype.hasOwnProperty.call(intf, 'side')
+            ) {
+                const side = direction === 'output' ? 'right' : 'left';
+                let firstUnoccupied = occupied[side].sort().findIndex(
+                    (sidePosition, index) => sidePosition !== index,
+                );
+
+                if (firstUnoccupied === -1) {
+                    if (occupied[side].length === 0) {
+                        firstUnoccupied = 0;
+                    } else {
+                        firstUnoccupied = Math.max(...occupied[side]) + 1;
+                    }
+                }
+
+                intf.sidePosition = firstUnoccupied;
+                intf.side = side;
+
+                occupied[intf.side].push(firstUnoccupied);
+            }
+
+            interfaces.push(intf);
+        }
+
+        const out = parseInterfaces(interfaces, [], []);
+        if (Array.isArray(out) && out.length) {
+            throw new Error(`Internal error, node ${this.type} invalid. Reason: ${out.join(' ')}`);
+        }
+        const { inputs: newInputs, outputs: newOutputs } = out;
+
+        // Finding a reactive reference of `this` and using it to bind
+        // the function to the node instance, so that the changes are
+        // reflected in the editor
+        const node = this.graph.nodes.find((n) => n.id === this.id);
+        const reactiveUpdate = this.updateInterfaces.bind(node);
+        reactiveUpdate(newInputs, newOutputs, false, [`${direction}_${interfaceName}`]);
+    }
+
+    toggleInterfaceGroup(intf, visible) {
+        // If the interface is visible and is being disabled
+
+        if (!intf.hidden && !visible) {
+            const connections = this.graphInstance.connections.filter(
+                (c) => c.from === intf || c.to === intf,
+            );
+            connections.forEach((c) => {
+                this.graphInstance.removeConnection(c);
+            });
+        }
+
+        // checking if there is an interface with the same side position
+        if (visible) {
+            updateInterfacePosition(this, intf, intf.side);
+        }
+        // It may also need a new sidePosition
+        intf.hidden = !visible; // eslint-disable-line no-param-reassign
+    }
+
+    save() {
+        const savedState = super.save();
+        const newProperties = [];
+        const newInterfaces = [];
+        const enabledInterfaceGroups = [];
+
+        Object.entries({ ...this.inputs, ...this.outputs }).forEach((io) => {
+            const [ioName, ioState] = io;
+
+            if (ioState.port) {
+                if (!ioState.hidden) {
+                    if (ioState.interfaces) {
+                        // Enabled interface groups
+                        enabledInterfaceGroups.push({
+                            name: ioName.slice(ioState.direction.length + 1),
+                            direction: ioState.direction,
+                        });
+                    }
+
+                    newInterfaces.push({
+                        name: ioName.slice(ioState.direction.length + 1),
+                        externalName: ioState.externalName,
+                        id: ioState.id,
+                        direction: ioState.direction,
+                        side: ioState.side,
+                        sidePosition: ioState.sidePosition,
+                    });
+                }
+            } else {
+                newProperties.push({
+                    name: ioName.slice('property'.length + 1),
+                    id: ioState.id,
+                    value: ioState.value === undefined ? null : ioState.value,
+                });
+            }
+        });
+
+        delete savedState.inputs;
+        delete savedState.outputs;
+        savedState.interfaces = newInterfaces;
+        savedState.properties = newProperties;
+        savedState.enabledInterfaceGroups = enabledInterfaceGroups;
+
+        savedState.name = savedState.type;
+        delete savedState.type;
+
+        savedState.instanceName = savedState.title === '' ? undefined : savedState.title;
+        delete savedState.title;
+
+        return savedState;
+    }
+
+    /**
+     * Function used to update interfaces of a node when loading a dataflow
+     * in a development mode.
+     *
+     * @param {object} stateInputs newInputs of the node
+     * @param {object} stateOutputs newOutputs of the node
+     * @param {boolean} updateInterfaces determines what to do if an interface in either
+     * @param {string[]} include prefixes of names of interfaces that are to be removed. Other
+     * interfaces are left untouched. If set to undefined then all interfaces are updated.
+     * `stateInputs` or `stateOutputs` already exists in the node. If set to `true`, the
+     * interface will be updated with the new values, otherwise it will be left untouched.
+     */
+    updateInterfaces(stateInputs, stateOutputs, updateInterfaces = true, include = undefined) {
+        const errors = [];
+        // Updating interfaces of a graph node
+        Object.entries(this.inputs).forEach(([k, intf]) => {
+            // Process only interfaces, not properties
+            if (intf.direction === undefined) return;
+            if (
+                !Object.keys(stateInputs).includes(k) &&
+                (include === undefined || include.some((prefix) => k.startsWith(prefix)))
+            ) {
+                errors.push(
+                    `Interface '${intf.name}' of direction '${intf.direction}' ` +
+                    `removed as it was not found in the dataflow.`,
+                );
+                this.removeInput(k);
+            }
+        });
+        Object.entries(stateInputs).forEach(([idA, intfA]) => {
+            if (intfA.direction === undefined) return;
+            const foundIntf = Object.entries(this.inputs).find(
+                ([idB, intfB]) => idB === idA && intfB.direction === intfA.direction,
+            );
+            if (foundIntf === undefined) {
+                const baklavaIntf = new NodeInterface(idA);
+                errors.push(
+                    `Interface '${intfA.name}' of direction '${intfA.direction}' ` +
+                    `created as it was not found in the specification.`,
+                );
+                Object.assign(baklavaIntf, intfA);
+                this.addInterface(baklavaIntf.direction, idA, baklavaIntf);
+            } else if (updateInterfaces) {
+                Object.assign(foundIntf[1], intfA);
+            }
+        });
+
+        Object.entries(this.outputs).forEach(([k, intf]) => {
+            // Process only interfaces, not properties
+            if (intf.direction === undefined) return;
+            if (!Object.keys(stateOutputs).includes(k) &&
+                (include === undefined || include.some((prefix) => k.startsWith(prefix)))
+            ) {
+                errors.push(
+                    `Interface '${intf.name}' of direction '${intf.direction}' ` +
+                    `removed as it was not found in the dataflow.`,
+                );
+                this.removeOutput(k);
+            }
+        });
+        Object.entries(stateOutputs).forEach(([idA, intfA]) => {
+            const foundIntf = Object.entries(this.outputs).find(
+                ([idB, intfB]) => idB === idA && intfB.direction === intfA.direction,
+            );
+            if (foundIntf === undefined) {
+                const baklavaIntf = new NodeInterface(idA);
+                errors.push(
+                    `Interface '${intfA.name}' of direction '${intfA.direction}' ` +
+                    `created as it was not found in the specification.`,
+                );
+                Object.assign(baklavaIntf, intfA);
+                this.addInterface(baklavaIntf.direction, idA, baklavaIntf);
+            } else if (updateInterfaces) {
+                Object.assign(foundIntf[1], intfA);
+            }
+        });
+        return errors;
+    }
+
+    updateProperties(stateProperties) {
+        const errors = [];
+        // Updating properties of a graph node
+        Object.entries(this.inputs).forEach(([k, prop]) => {
+            // Process only properties, not interfaces
+            if (prop.direction !== undefined) return;
+            if (!Object.keys(stateProperties).includes(k)) {
+                errors.push(
+                    `Property '${prop.name}' ` +
+                    `removed as it was not found in the dataflow.`,
+                );
+                this.removeInput(k);
+            }
+        });
+        Object.entries(stateProperties).forEach(([idA, propA]) => {
+            if (propA.direction !== undefined) return;
+            const foundProp = Object.entries(this.inputs).find(
+                ([idB]) => idB === idA,
+            );
+            if (foundProp === undefined) {
+                const baklavaProp = new InputInterface(
+                    propA.name,
+                    propA.value,
+                ).setPort(false);
+                baklavaProp.componentName = 'InputInterface';
+                errors.push(
+                    `Property '${propA.name}' ` +
+                    `created as it was not found in the specification.`,
+                );
+                Object.assign(baklavaProp, propA);
+                this.addInput(idA, baklavaProp);
+            }
+        });
+        return errors;
+    }
+
+    load(state) {
+        let parsedState;
+
+        // `parsed` determines whether the state was already parsed before loading
+        // This is caused by the fact that `load` can be used both to load a state
+        // from a dataflow and from an instance of a node
+        if (Object.prototype.hasOwnProperty.call(state, 'parsed') && state.parsed) {
+            parsedState = state;
+        } else {
+            parsedState = parseNodeState(state);
+
+            if (Array.isArray(parsedState) && parsedState.length) {
+                return parsedState.map((error) => `Node ${this.type} of id: ${this.id} invalid. ${error}`);
+            }
+        }
+
+        let errors = [];
+        if (process.env.VUE_APP_GRAPH_DEVELOPMENT_MODE === 'true') {
+            errors = this.updateInterfaces(parsedState.inputs, parsedState.outputs);
+            errors = [...errors, ...this.updateProperties(parsedState.inputs)];
+            errors = errors.map((error) => `Node ${this.type} of id: ${this.id} invalid. ${error}`);
+        } else {
+            errors = detectDiscrepancies(parsedState, this.inputs, this.outputs);
+            if (Array.isArray(errors) && errors.length) {
+                return errors.map((error) => `Node ${this.type} of id: ${this.id} invalid. ${error}`);
+            }
+        }
+
+        super.load(parsedState);
+
+        // Disabling default interface groups if the node has its own state
+        if (Object.keys(parsedState.enabledInterfaceGroups).length) {
+            Object.entries({ ...this.inputs, ...this.outputs }).forEach(([, intf]) => {
+                // If this is an interfaces group
+                if (intf.interfaces !== undefined) {
+                    intf.hidden = true; // eslint-disable-line no-param-reassign
+                }
+            });
+        }
+
+        // Enabling interface groups
+        Object.entries(parsedState.enabledInterfaceGroups).forEach(
+            ([groupName, groupState]) => {
+                if (groupState.direction === 'input' || groupState.direction === 'inout') {
+                    this.inputs[groupName].hidden = false;
+                } else if (groupState.direction === 'output') {
+                    this.outputs[groupName].hidden = false;
+                }
+            },
+        );
+
+        const occupied = { left: [], right: [] };
+
+        const stateios = { ...parsedState.inputs, ...parsedState.outputs };
+
+        // Assigning sides and sides Positions to interfaces
+        Object.entries(stateios).forEach(([ioName, ioState]) => {
+            if (ioState.direction === 'input' || ioState.direction === 'inout') {
+                this.inputs[ioName].side = ioState.side;
+                this.inputs[ioName].sidePosition = ioState.sidePosition;
+                this.inputs[ioName].externalName = ioState.externalName;
+                occupied[ioState.side].push(ioState.sidePosition);
+            } else if (ioState.direction === 'output') {
+                this.outputs[ioName].side = ioState.side;
+                this.outputs[ioName].sidePosition = ioState.sidePosition;
+                this.outputs[ioName].externalName = ioState.externalName;
+                occupied[ioState.side].push(ioState.sidePosition);
+            }
+        });
+
+        const refreshSidePositions = (entries) => {
+            // When state provided in the graph is incomplete, e.g. it misses
+            // an interface, we allow it.
+            // This, however, requires from us that we make sure that newly added
+            // interfaces (not present in parsedState) are not on conflicting positions
+            Object.entries(entries).forEach(([ioName, ioState]) => {
+                if (ioName.startsWith('property_')) return;
+                // if interface was explicitly defined in the graph file, skip it
+                if (ioName in stateios) return;
+                // otherwise, if the interface was implicitly created but it does not
+                // cover existing interface, skip it
+                if (!occupied[ioState.side].includes(ioState.sidePosition)) return;
+                // if the positions are clashing, pick first available max position on
+                // given side
+                const maxposition = Math.max(...occupied[ioState.side]);
+                ioState.sidePosition = maxposition + 1; // eslint-disable-line no-param-reassign
+                occupied[ioState.side].push(maxposition + 1);
+            });
+        };
+
+        refreshSidePositions(this.inputs);
+        refreshSidePositions(this.outputs);
+
+        // Default position should be undefined instead of (0, 0) so that it can be set
+        // by autolayout
+        if (state.position === undefined) {
+            this.position = undefined;
+        }
+        return errors;
+    }
+
+    onDestroy() {
+        [...Object.values(this.inputs), ...Object.values(this.outputs)].forEach((io) => {
+            Object.values(io.events).forEach((event) => {
+                // We need to unsubscribe from all events to avoid memory leaks
+                // On token mismatch, the event will not be unsubscribed
+                event.unsubscribe(io);
+            });
+        });
+    }
+}
+
 /**
  * Class factory that creates a class for a custom Node that is described by the arguments.
  * It can be later registered so that the user can use it and save the editor.
@@ -318,7 +737,7 @@ function parseNodeState(state) {
  * @param {boolean} twoColumn type of layout of the nodes
  * @returns Node based class is successful, otherwise an array of errors is returned.
  */
-export function NodeFactory(
+export function CustomNodeFactory(
     name,
     layer,
     interfaces,
@@ -330,7 +749,13 @@ export function NodeFactory(
     nodeExtends = [],
     nodeExtending = [],
     nodeSiblings = [],
+    width = 300,
 ) {
+    const generatedProperties = generateProperties(interfaces);
+    if (!generatedProperties.success) {
+        return generatedProperties.value.map((error) => `Node ${name} invalid. ${error}`);
+    }
+
     const parsedInterfaces = parseInterfaces(interfaces, interfaceGroups, defaultInterfaceGroups);
     // If parsedInterfaces returns an array, it is an array of errors
     if (Array.isArray(parsedInterfaces) && parsedInterfaces.length) {
@@ -347,340 +772,47 @@ export function NodeFactory(
 
     // Creating interfaces for baklavajs
     const inputs = Object.fromEntries(
-        Object.entries(parsedInterfaces.inputs).map(
-            ([n, intf]) => [n, createBaklavaInterface(intf)],
-        ),
+        Object.entries(parsedInterfaces.inputs).map(([n, intf]) => [
+            n,
+            createBaklavaInterface(intf),
+        ]),
     );
 
-    const outputs = Object.fromEntries(
-        Object.entries(parsedInterfaces.outputs).map(
-            ([n, intf]) => [n, createBaklavaInterface(intf)],
-        ),
+    const newOutputs = Object.fromEntries(
+        Object.entries(parsedInterfaces.outputs).map(([n, intf]) => [
+            n,
+            createBaklavaInterface(intf),
+        ]),
     );
 
-    const parsedProperties = parseProperties(properties);
+    const parsedProperties = parseProperties([...properties, ...generatedProperties.value]);
     // If parsedProperties returns an array, it is an array of errors
     if (Array.isArray(parsedProperties) && parsedProperties.length) {
         return parsedProperties.map((error) => `Node ${name} invalid. ${error}`);
     }
     const createdProperties = createProperties(parsedProperties);
 
-    const node = defineNode({
-        type: name,
+    const newInputs = {
+        ...inputs,
+        ...createdProperties,
+    };
 
-        inputs: {
-            ...inputs,
-            ...createdProperties,
-        },
-        outputs,
-
-        /* eslint-disable no-param-reassign */
-        onCreate() {
-            this.description = description;
-            this.extends = nodeExtends;
-            this.extending = nodeExtending;
-            this.siblings = nodeSiblings;
-            this.layer = layer;
-            this.parentSave = this.save;
-            this.parentLoad = this.load;
-            this.title = name;
-
-            /**
-             * Toggles interface groups and removes any connections attached
-             * to the interface it is toggled to hidden.
-             *
-             * @param intf interface instance of the interface group
-             * @param {bool} visible whether to enable or disable interface group
-             */
-            this.toggleInterfaceGroup = (intf, visible) => {
-                // If the interface is visible and is being disabled
-
-                if (!intf.hidden && !visible) {
-                    const connections = this.graphInstance.connections.filter(
-                        (c) => c.from === intf || c.to === intf,
-                    );
-                    connections.forEach((c) => {
-                        this.graphInstance.removeConnection(c);
-                    });
-                }
-
-                // checking if there is an interface with the same side position
-                if (visible) {
-                    updateInterfacePosition(this, intf, intf.side);
-                }
-                // It may also need a new sidePosition
-                intf.hidden = !visible;
-            };
-
-            this.save = () => {
-                const savedState = this.parentSave();
-                const newProperties = [];
-                const newInterfaces = [];
-                const enabledInterfaceGroups = [];
-
-                Object.entries({ ...this.inputs, ...this.outputs }).forEach((io) => {
-                    const [ioName, ioState] = io;
-
-                    if (ioState.port) {
-                        if (!ioState.hidden) {
-                            if (ioState.interfaces) {
-                                // Enabled interface groups
-                                enabledInterfaceGroups.push({
-                                    name: ioName.slice(ioState.direction.length + 1),
-                                    direction: ioState.direction,
-                                });
-                            }
-
-                            newInterfaces.push({
-                                name: ioName.slice(ioState.direction.length + 1),
-                                externalName: ioState.externalName,
-                                id: ioState.id,
-                                direction: ioState.direction,
-                                side: ioState.side,
-                                sidePosition: ioState.sidePosition,
-                            });
-                        }
-                    } else {
-                        newProperties.push({
-                            name: ioName.slice('property'.length + 1),
-                            id: ioState.id,
-                            value: ioState.value === undefined ? null : ioState.value,
-                        });
-                    }
-                });
-
-                delete savedState.inputs;
-                delete savedState.outputs;
-                savedState.interfaces = newInterfaces;
-                savedState.properties = newProperties;
-                savedState.enabledInterfaceGroups = enabledInterfaceGroups;
-
-                savedState.name = savedState.type;
-                delete savedState.type;
-
-                savedState.instanceName = savedState.title === '' ? undefined : savedState.title;
-                delete savedState.title;
-
-                return savedState;
-            };
-
-            /**
-             * Function used to update interfaces of a node when loading a dataflow
-             * in a development mode.
-             */
-            this.updateInterfaces = (stateInputs, stateOutputs) => {
-                const errors = [];
-                // Updating interfaces of a graph node
-                Object.entries(this.inputs).forEach(([k, intf]) => {
-                    // Process only interfaces, not properties
-                    if (intf.direction === undefined) return;
-                    if (!Object.keys(stateInputs).includes(k)) {
-                        errors.push(
-                            `Interface '${intf.name}' of direction '${intf.direction}' ` +
-                            `removed as it was not found in the dataflow.`,
-                        );
-                        this.removeInput(k);
-                    }
-                });
-                Object.entries(stateInputs).forEach(([idA, intfA]) => {
-                    if (intfA.direction === undefined) return;
-                    const foundIntf = Object.entries(this.inputs).find(
-                        ([idB, intfB]) => idB === idA && intfB.direction === intfA.direction,
-                    );
-                    if (foundIntf === undefined) {
-                        const baklavaIntf = new NodeInterface(idA);
-                        errors.push(
-                            `Interface '${intfA.name}' of direction '${intfA.direction}' ` +
-                            `created as it was not found in the specification.`,
-                        );
-                        Object.assign(baklavaIntf, intfA);
-                        this.addInterface(baklavaIntf.direction, idA, baklavaIntf);
-                    } else {
-                        Object.assign(foundIntf[1], intfA);
-                    }
-                });
-
-                Object.entries(this.outputs).forEach(([k, intf]) => {
-                    // Process only interfaces, not properties
-                    if (intf.direction === undefined) return;
-                    if (!Object.keys(stateOutputs).includes(k)) {
-                        errors.push(
-                            `Interface '${intf.name}' of direction '${intf.direction}' ` +
-                            `removed as it was not found in the dataflow.`,
-                        );
-                        this.removeOutput(k);
-                    }
-                });
-                Object.entries(stateOutputs).forEach(([idA, intfA]) => {
-                    const foundIntf = Object.entries(this.outputs).find(
-                        ([idB, intfB]) => idB === idA && intfB.direction === intfA.direction,
-                    );
-                    if (foundIntf === undefined) {
-                        const baklavaIntf = new NodeInterface(idA);
-                        errors.push(
-                            `Interface '${intfA.name}' of direction '${intfA.direction}' ` +
-                            `created as it was not found in the specification.`,
-                        );
-                        Object.assign(baklavaIntf, intfA);
-                        this.addInterface(baklavaIntf.direction, idA, baklavaIntf);
-                    } else {
-                        Object.assign(foundIntf[1], intfA);
-                    }
-                });
-                return errors;
-            };
-
-            this.updateProperties = (stateProperties) => {
-                const errors = [];
-                // Updating properties of a graph node
-                Object.entries(this.inputs).forEach(([k, prop]) => {
-                    // Process only properties, not interfaces
-                    if (prop.direction !== undefined) return;
-                    if (!Object.keys(stateProperties).includes(k)) {
-                        errors.push(
-                            `Property '${prop.name}' ` +
-                            `removed as it was not found in the dataflow.`,
-                        );
-                        this.removeInput(k);
-                    }
-                });
-                Object.entries(stateProperties).forEach(([idA, propA]) => {
-                    if (propA.direction !== undefined) return;
-                    const foundProp = Object.entries(this.inputs).find(
-                        ([idB]) => idB === idA,
-                    );
-                    if (foundProp === undefined) {
-                        const baklavaProp = new InputInterface(
-                            propA.name,
-                            propA.value,
-                        ).setPort(false);
-                        baklavaProp.componentName = 'InputInterface';
-                        errors.push(
-                            `Property '${propA.name}' ` +
-                            `created as it was not found in the specification.`,
-                        );
-                        Object.assign(baklavaProp, propA);
-                        this.addInput(idA, baklavaProp);
-                    }
-                });
-                return errors;
-            };
-
-            this.load = (state) => {
-                let parsedState;
-
-                // `parsed` determines whether the state was already parsed before loading
-                // This is caused by the fact that `load` can be used both to load a state
-                // from a dataflow and from an instance of a node
-                if (Object.prototype.hasOwnProperty.call(state, 'parsed') && state.parsed) {
-                    parsedState = state;
-                } else {
-                    parsedState = parseNodeState(state);
-
-                    if (Array.isArray(parsedState) && parsedState.length) {
-                        return parsedState.map((error) => `Node ${name} of id: ${this.id} invalid. ${error}`);
-                    }
-                }
-
-                let errors = [];
-                if (process.env.VUE_APP_GRAPH_DEVELOPMENT_MODE === 'true') {
-                    errors = this.updateInterfaces(parsedState.inputs, parsedState.outputs);
-                    errors = [...errors, ...this.updateProperties(parsedState.inputs)];
-                    errors = errors.map((error) => `Node ${name} of id: ${this.id} invalid. ${error}`);
-                } else {
-                    errors = detectDiscrepancies(parsedState, this.inputs, this.outputs);
-                    if (Array.isArray(errors) && errors.length) {
-                        return errors.map((error) => `Node ${name} of id: ${this.id} invalid. ${error}`);
-                    }
-                }
-
-                this.parentLoad(parsedState);
-
-                // Disabling default interface groups if the node has its own state
-                if (Object.keys(parsedState.enabledInterfaceGroups).length) {
-                    Object.entries({ ...this.inputs, ...this.outputs }).forEach(([, intf]) => {
-                        // If this is an interfaces group
-                        if (intf.interfaces !== undefined) {
-                            intf.hidden = true;
-                        }
-                    });
-                }
-
-                // Enabling interface groups
-                Object.entries(parsedState.enabledInterfaceGroups).forEach(
-                    ([groupName, groupState]) => {
-                        if (groupState.direction === 'input' || groupState.direction === 'inout') {
-                            this.inputs[groupName].hidden = false;
-                        } else if (groupState.direction === 'output') {
-                            this.outputs[groupName].hidden = false;
-                        }
-                    },
-                );
-
-                const occupied = { left: [], right: [] };
-
-                const stateios = { ...parsedState.inputs, ...parsedState.outputs };
-
-                // Assigning sides and sides Positions to interfaces
-                Object.entries(stateios).forEach(([ioName, ioState]) => {
-                    if (ioState.direction === 'input' || ioState.direction === 'inout') {
-                        this.inputs[ioName].side = ioState.side;
-                        this.inputs[ioName].sidePosition = ioState.sidePosition;
-                        this.inputs[ioName].externalName = ioState.externalName;
-                        occupied[ioState.side].push(ioState.sidePosition);
-                    } else if (ioState.direction === 'output') {
-                        this.outputs[ioName].side = ioState.side;
-                        this.outputs[ioName].sidePosition = ioState.sidePosition;
-                        this.outputs[ioName].externalName = ioState.externalName;
-                        occupied[ioState.side].push(ioState.sidePosition);
-                    }
-                });
-
-                const refreshSidePositions = (entries) => {
-                    // When state provided in the graph is incomplete, e.g. it misses
-                    // an interface, we allow it.
-                    // This, however, requires from us that we make sure that newly added
-                    // interfaces (not present in parsedState) are not on conflicting positions
-                    Object.entries(entries).forEach(([ioName, ioState]) => {
-                        if (ioName.startsWith('property_')) return;
-                        // if interface was explicitly defined in the graph file, skip it
-                        if (ioName in stateios) return;
-                        // otherwise, if the interface was implicitly created but it does not
-                        // cover existing interface, skip it
-                        if (!occupied[ioState.side].includes(ioState.sidePosition)) return;
-                        // if the positions are clashing, pick first available max position on
-                        // given side
-                        const maxposition = Math.max(...occupied[ioState.side]);
-                        ioState.sidePosition = maxposition + 1;
-                        occupied[ioState.side].push(maxposition + 1);
-                    });
-                };
-
-                refreshSidePositions(this.inputs);
-                refreshSidePositions(this.outputs);
-
-                // Default position should be undefined instead of (0, 0) so that it can be set
-                // by autolayout
-                if (state.position === undefined) {
-                    this.position = undefined;
-                }
-                return errors;
-            };
-
-            this.twoColumn = twoColumn;
-        },
-        onDestroy() {
-            [...Object.values(this.inputs), ...Object.values(this.outputs)].forEach((io) => {
-                Object.values(io.events).forEach((event) => {
-                    // We need to unsubscribe from all events to avoid memory leaks
-                    // On token mismatch, the event will not be unsubscribed
-                    event.unsubscribe(io);
-                });
-            });
-        },
-    });
-
-    return node;
+    return class extends CustomNode {
+        constructor() {
+            super(
+                name,
+                layer,
+                newInputs,
+                newOutputs,
+                twoColumn,
+                description,
+                nodeExtends,
+                nodeExtending,
+                nodeSiblings,
+                width,
+            );
+        }
+    };
 }
 
 /**

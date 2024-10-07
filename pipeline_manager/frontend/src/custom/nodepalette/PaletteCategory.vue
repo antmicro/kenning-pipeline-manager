@@ -25,7 +25,7 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
                     @pointerdown="onDragStart(nt, node, node.iconPath)"
                     :class="nodeEntryClasses(nt)"
                 >
-                    <template v-if="!isDefaultGraphNodeType(nt)">
+                    <template v-if="!isTopLevelNode(nt)">
                         <img
                             class="__title-icon"
                             v-if="node.iconPath !== undefined"
@@ -188,8 +188,9 @@ import DOMPurify from 'dompurify';
 import Arrow from '../../icons/Arrow.vue';
 import VerticalEllipsis from '../../icons/VerticalEllipsis.vue';
 import LinkMenu from '../LinkMenu.vue';
-import EditorManager, { DEFAULT_GRAPH_NODE_TYPE } from '../../core/EditorManager';
+import EditorManager from '../../core/EditorManager';
 import Cross from '../../icons/Cross.vue';
+import { TOP_LEVEL_NODES_NAMES } from './nodeTree';
 
 export default defineComponent({
     components: {
@@ -308,12 +309,12 @@ export default defineComponent({
         const editorManager = EditorManager.getEditorManagerInstance();
         const specificationLoaded = computed(() => editorManager.specificationLoaded.value);
 
-        const isDefaultGraphNodeType = (name) => name === DEFAULT_GRAPH_NODE_TYPE;
+        const isTopLevelNode = (name) => TOP_LEVEL_NODES_NAMES.includes(name);
 
         const nodeEntryClasses = (name) => ({
             __entry: true,
             '__node-entry': true,
-            '__default-graph-node-entry': isDefaultGraphNodeType(name),
+            '__top-level-node-entry': isTopLevelNode(name),
         });
 
         return {
@@ -330,7 +331,7 @@ export default defineComponent({
             closeMenu,
             specificationLoaded,
             nodeEntryClasses,
-            isDefaultGraphNodeType,
+            isTopLevelNode,
         };
     },
 });

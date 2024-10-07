@@ -19,7 +19,7 @@ import { useClipboard } from './Clipboard.ts';
 import PipelineManagerEditor from '../custom/Editor.js';
 import InterfaceTypes from './InterfaceTypes.js';
 
-import { NodeFactory, GraphFactory } from './NodeFactory.js';
+import { CustomNodeFactory, GraphFactory } from './NodeFactory.js';
 import unresolvedSpecificationSchema from '../../../resources/schemas/unresolved_specification_schema.json' with {type: 'json'};
 import specificationSchema from '../../../resources/schemas/specification_schema.json' with {type: 'json'};
 import metadataSchema from '../../../resources/schemas/metadata_schema.json' with {type: 'json'};
@@ -383,6 +383,46 @@ export default class EditorManager {
     }
 
     /**
+     * Registers default nodes, that are always present in the editor.
+     * The default nodes are the graph node and the dynamic interfaces node.
+     * If the nodes are already present in the editor, an error is returned.
+     *
+     * @returns {object} Object consisting of errors and warnings arrays.
+     */
+    registerDefaultNodes() {
+        const errors = [];
+        const warnings = [];
+        // Adding a default graph node to the editor so that custom graphs can be created
+        if (this.editor.nodeTypes.has(DEFAULT_GRAPH_NODE_TYPE)) {
+            errors.push(
+                `Node name '${DEFAULT_GRAPH_NODE_NAME}' is reserved by the editor, ` +
+                'but it was included in the specification. ' +
+                'Please change the name of the graph node to avoid conflicts.',
+            );
+            return { errors, warnings };
+        }
+
+        const myGraph = GraphFactory(
+            [],
+            [],
+            DEFAULT_GRAPH_NODE_NAME,
+            this.baklavaView.editor,
+        );
+
+        // If `myGraph` is any array then it is an array of errors
+        if (Array.isArray(myGraph) && myGraph.length) {
+            errors.push(...myGraph);
+        } else {
+            this.baklavaView.editor.addGraphTemplate(
+                myGraph,
+                DEFAULT_GRAPH_NODE_CATEGORY,
+                DEFAULT_GRAPH_NODE_NAME,
+            );
+        }
+        return { errors, warnings };
+    }
+
+    /**
      * Reads and validates part of specification related to nodes and graphs
      * @param dataflowSpecification Specification to load
      * @param includedGraphs Graphs included in the specification
@@ -458,7 +498,7 @@ export default class EditorManager {
         });
 
         resolvedNodes.forEach((node) => {
-            const myNode = NodeFactory(
+            const myNode = CustomNodeFactory(
                 node.name,
                 node.layer,
                 node.interfaces ?? [],
@@ -562,33 +602,10 @@ export default class EditorManager {
         // Removing duplicate warnings
         const uniqueWarnings = [...new Set(warnings)];
 
-        // Adding a default graph node to the editor so that custom graphs can be created
-        if (this.editor.nodeTypes.has(DEFAULT_GRAPH_NODE_TYPE)) {
-            errors.push(
-                `Node name '${DEFAULT_GRAPH_NODE_NAME}' is reserved by the editor, ` +
-                'but it was included in the specification. ' +
-                'Please change the name of the graph node to avoid conflicts.',
-            );
-            return { errors, warnings: uniqueWarnings };
-        }
-
-        const myGraph = GraphFactory(
-            [],
-            [],
-            DEFAULT_GRAPH_NODE_NAME,
-            this.baklavaView.editor,
-        );
-
-        // If `myGraph` is any array then it is an array of errors
-        if (Array.isArray(myGraph) && myGraph.length) {
-            errors.push(...myGraph);
-        } else {
-            this.baklavaView.editor.addGraphTemplate(
-                myGraph,
-                DEFAULT_GRAPH_NODE_CATEGORY,
-                DEFAULT_GRAPH_NODE_NAME,
-            );
-        }
+        // Registering default categories
+        const { errors: defaultErrors, warnings: defaultWarnings } = this.registerDefaultNodes();
+        errors.push(...defaultErrors);
+        uniqueWarnings.push(...defaultWarnings);
 
         return { errors, warnings: uniqueWarnings };
     }

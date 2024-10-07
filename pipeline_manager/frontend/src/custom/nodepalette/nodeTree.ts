@@ -241,6 +241,11 @@ const updateMasks = (treeNode: NodeSubcategories, filter: string, forceMask: boo
 /* eslint-enable no-param-reassign */
 let unWatch: WatchStopHandle;
 
+const TOP_LEVEL_CATEGORY = 'TopLevel';
+export const TOP_LEVEL_NODES_NAMES = [
+    DEFAULT_GRAPH_NODE_TYPE,
+];
+
 export default function getNodeTree(nameFilterRef: Ref<string>) {
     const { viewModel } = useViewModel();
     const { editor } = viewModel.value;
@@ -248,7 +253,6 @@ export default function getNodeTree(nameFilterRef: Ref<string>) {
     const nodeTypeEntries = Array.from(editor.nodeTypes.entries());
     const categoryNames = new Set(nodeTypeEntries.map(([, ni]) => ni.category));
 
-    const topLevelNodeNames = [DEFAULT_GRAPH_NODE_TYPE];
     const topLevelCategories: Nodes = {
         categoryName: 'TopLevel',
         nodeTypes: {},
@@ -273,12 +277,12 @@ export default function getNodeTree(nameFilterRef: Ref<string>) {
             }),
         );
 
-        const topLevelCategory = nodeTypesInCategory.filter(
-            ([name, _]) => topLevelNodeNames.includes(name), // eslint-disable-line @typescript-eslint/no-unused-vars,max-len
+        const topLevelNodes = nodeTypesInCategory.filter(
+            ([name, _]) => TOP_LEVEL_NODES_NAMES.includes(name), // eslint-disable-line @typescript-eslint/no-unused-vars,max-len
         );
 
         nodeTypesInCategory = nodeTypesInCategory.filter(
-            ([name, _]) => !topLevelNodeNames.includes(name), // eslint-disable-line @typescript-eslint/no-unused-vars,max-len
+            ([name, _]) => !TOP_LEVEL_NODES_NAMES.includes(name), // eslint-disable-line @typescript-eslint/no-unused-vars,max-len
         );
 
         if (nodeTypesInCategory.length > 0) {
@@ -300,17 +304,16 @@ export default function getNodeTree(nameFilterRef: Ref<string>) {
             });
         }
 
-        topLevelCategories.nodeTypes = Object.fromEntries(topLevelCategory.map(
-            ([nodeName, node]) =>
-                [nodeName, {
-                    ...node, // @ts-ignore
-                    isCategory: node.isCategory, // nodeTypes has an incorrect type, Ignoring
-                    mask: true,
-                    hitSubstring: node.title,
-                    iconPath: nodesIconPath[nodeName],
-                    URLs: nodesURLs[nodeName],
-                }],
-        ));
+        topLevelNodes.forEach(([nodeName, node]) => {
+            topLevelCategories.nodeTypes[nodeName] = {
+                ...node, // @ts-ignore
+                isCategory: node.isCategory, // nodeTypes has an incorrect type, Ignoring
+                mask: true,
+                hitSubstring: node.title,
+                iconPath: nodesIconPath[nodeName],
+                URLs: nodesURLs[nodeName],
+            };
+        });
     });
 
     const nodeCategories = new Set(nodes.map((c) => c.categoryName));
@@ -326,7 +329,7 @@ export default function getNodeTree(nameFilterRef: Ref<string>) {
         subcategories: parsedTree,
         nodes: topLevelCategories,
         categoryNode: undefined,
-        hitSubstring: 'All',
+        hitSubstring: TOP_LEVEL_CATEGORY,
         mask: true,
     } as NodeCategory;
 
