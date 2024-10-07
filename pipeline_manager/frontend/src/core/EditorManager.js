@@ -20,11 +20,11 @@ import PipelineManagerEditor from '../custom/Editor.js';
 import InterfaceTypes from './InterfaceTypes.js';
 
 import { NodeFactory, GraphFactory } from './NodeFactory.js';
-import unresolvedSpecificationSchema from '../../../resources/schemas/unresolved_specification_schema.json' assert { type: 'json' };
-import specificationSchema from '../../../resources/schemas/specification_schema.json' assert { type: 'json' };
-import metadataSchema from '../../../resources/schemas/metadata_schema.json' assert { type: 'json' };
-import dataflowSchema from '../../../resources/schemas/dataflow_schema.json' assert { type: 'json' };
-import graphSchema from '../../../resources/schemas/graph_schema.json' assert { type: 'json' };
+import unresolvedSpecificationSchema from '../../../resources/schemas/unresolved_specification_schema.json' with {type: 'json'};
+import specificationSchema from '../../../resources/schemas/specification_schema.json' with {type: 'json'};
+import metadataSchema from '../../../resources/schemas/metadata_schema.json' with {type: 'json'};
+import dataflowSchema from '../../../resources/schemas/dataflow_schema.json' with {type: 'json'};
+import graphSchema from '../../../resources/schemas/graph_schema.json' with {type: 'json'};
 import ConnectionRenderer from './ConnectionRenderer.js';
 import Specification from './Specification.js';
 
