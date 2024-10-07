@@ -1,0 +1,45 @@
+{
+    "version": "20240723.13",
+    "nodes": [
+        {
+            "name": "DynamicInterfaces",
+            "category": "Category",
+            "width": 400,
+            "properties": [
+                {"name": "regular-property", "type": "text", "default": ""}
+            ],
+            "interfaces": [
+                {
+                    "name": "test-interface-1",
+                    "type": ["1"],
+                    "direction":"input",
+                    "dynamic": true,
+                    "maxConnectionsCount": 1
+                },
+                {
+                    "name": "test-interface-2",
+                    "type": ["2"],
+                    "direction":"output",
+                    "dynamic": [2, 3]
+                },
+                {
+                    "name": "regular-intf",
+                    "type": ["1", "2"],
+                    "direction":"inout"
+                }
+            ]
+        }
+    ],
+    "metadata": {
+        "twoColumn": true,
+        "interfaces": {
+            "1": {
+                "interfaceColor": "#FF00FF"
+            },
+            "2": {
+                "interfaceColor": "#FF0000"
+            }
+        },
+        "connectionStyle": "orthogonal"
+    }
+}
