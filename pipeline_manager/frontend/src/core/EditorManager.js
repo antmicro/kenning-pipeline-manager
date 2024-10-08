@@ -850,7 +850,7 @@ export default class EditorManager {
      * error is returned. Dataflow should be passed in PipelineManager format (translation
      * to Baklava format is done )
      *
-     * @param dataflow Dataflow to load. Can be eithe an object or a string
+     * @param dataflow Dataflow to load. Can be either an object or a string
      * @param preventCentering Boolean Blocks view in the same spot.
      * @param loadOnly determines whether to load the graph only without adjusting
      * the graph rendering. Can be used when validating graphs without their browser
