@@ -21,6 +21,7 @@ from creating and deleting connections or altering nodes' values if the editor i
                     class="__url"
                     target="_blank"
                     draggable="false"
+                    @pointerdown.left.stop
                 >
                     <div class="link_item">
                         <img
