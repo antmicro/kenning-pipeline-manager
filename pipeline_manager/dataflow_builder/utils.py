@@ -2,8 +2,11 @@
 
 import logging
 import os
+import uuid
 from pathlib import Path
-from typing import Tuple, Union
+from typing import Dict, Tuple, Union
+
+from pipeline_manager.dataflow_builder.node import Node, NodeConnection
 
 
 def is_proper_input_file(
@@ -50,3 +53,110 @@ def is_proper_input_file(
             return (False, message)
 
     return (True, "File is a proper input.")
+
+
+def get_uuid() -> str:
+    """
+    Generate universally unique identifier in version 4 as a string.
+
+    Returns
+    -------
+    str
+        Generated UUID.
+    """
+    return str(uuid.uuid4())
+
+
+def ensure_connection_is_absent(
+    connection: Union[NodeConnection, str],
+    connections: Dict[str, NodeConnection],
+) -> None:
+    """
+    Check if a connection is absent. Otherwise, an exception is raised.
+
+    Parameters
+    ----------
+    connection : Union[NodeConnection, str]
+        Connection, which presence should be verified. If str is given,
+            only part of check may be performed.
+    connections : Dict[str, NodeConnection]
+        A dictionary of ids and connections between nodes in a dataflow graph.
+
+    Raises
+    ------
+    KeyError
+        Raised if a connection between nodes exists. For `str`.
+    KeyError
+        Raised if a connection between nodes exists.
+            For `Connection` instance.
+
+    Returns
+    -------
+    None
+        Returned to get out of the function.
+    """
+    if isinstance(connection, str):
+        if connection in connections:
+            raise KeyError(
+                f"Connection with id={connection} is present in a dataflow "
+                "graph. Connection with the identical id already exists."
+            )
+        # No more checks are possible solely on an id.
+        return None
+
+    if isinstance(connection, NodeConnection):
+        if connection.id in connections:
+            raise KeyError(
+                f"Connection with id={connection.id} is present "
+                "in a dataflow graph."
+                "Connection with the identical id already exists."
+            )
+
+        # TODO: Check if a connection, based on the same source
+        # and target exists, then raise error if it does.
+        # source = connection.source_node
+        # target = connection.drain_node
+
+
+def get_node_if_present(
+    node: Union[Node, str], nodes: Dict[str, Node], node_name: str
+) -> Node:
+    """
+    Get a node if is present in dataflow graph. Otherwise, raise an error.
+
+    Parameters
+    ----------
+    node : Union[Node, str]
+        Node, which presence is verified.
+    nodes : Dict[str, Node]
+        Dictionary of all available ids and nodes.
+    node_name : str
+        Textual representation. For example, `source` or target
+
+    Returns
+    -------
+    Node
+        _description_
+
+    Raises
+    ------
+    KeyError
+        _description_
+    KeyError
+        _description_
+    """
+    if isinstance(node, str):
+        if node not in nodes:
+            raise KeyError(
+                f"{node_name.title()} node with id={node} is "
+                "absent in the dataflow graph."
+            )
+        node = nodes[node]
+
+    if node.id not in nodes:
+        raise KeyError(
+            f"{node_name.title()} node with id={node} is absent "
+            "in the dataflow graph."
+        )
+
+    return node
