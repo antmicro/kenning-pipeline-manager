@@ -32,13 +32,16 @@ def is_proper_input_file(
     """
     intended_use = intended_use.title()
 
+    if isinstance(file_path, str):
+        file_path = Path(file_path)
+
     file_path = file_path.absolute()
     if not file_path.exists():
         message = f"{intended_use} file not found under {str(file_path)}."
         logging.info(message)
         return (False, message)
 
-    if not os.path.isfile():
+    if not os.path.isfile(file_path):
         message = (
             f"{intended_use} path ({str(file_path)}) does not lead "
             "to a regular file."
@@ -136,14 +139,14 @@ def get_node_if_present(
     Returns
     -------
     Node
-        _description_
+        Handle to the node present in the graph.
 
     Raises
     ------
     KeyError
-        _description_
+        Raised if the node is absent in the graph. For `str`.
     KeyError
-        _description_
+        Raised if the node is absent in the graph. For `Node` instance.
     """
     if isinstance(node, str):
         if node not in nodes:

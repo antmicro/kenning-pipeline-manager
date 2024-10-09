@@ -17,6 +17,6 @@ class NodeConnection:
     Representation of a connection between two nodes in a dataflow graph.
     """
 
-    id: str = str(uuid.uuid4())
     source_node: Node
     drain_node: Node
+    id: str = str(uuid.uuid4())

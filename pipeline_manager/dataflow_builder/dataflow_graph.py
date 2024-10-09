@@ -1,5 +1,6 @@
 """Module with DataflowGraph class for representing a dataflow graph."""
 
+import json
 from typing import Dict, Union
 
 from pipeline_manager.dataflow_builder.node import Node, NodeConnection
@@ -14,6 +15,7 @@ class DataflowGraph:
     """Representation of a dataflow graph."""
 
     def __init__(self):
+        """Initialise a dataflow graph with default, mostly empty, values."""
         self._id = get_uuid()
         self._nodes: Dict[str, Node] = {}
         self._connections: Dict[str, NodeConnection] = {}
@@ -49,5 +51,17 @@ class DataflowGraph:
         self._connections[connection_id] = connection
         return self._connections[connection_id]
 
-    def to_json() -> str:
-        raise NotImplementedError()
+    def to_json(self) -> str:
+        """
+        Convert a dataflow graph to a JSON.
+
+        Returns
+        -------
+        str
+            Representation of the dataflow graph in JSON.
+        """
+        nodes = [node for _, node in self._nodes.items()]
+        connections = [conn for conn in self._connections.items()]
+
+        output = {"id": self._id, "nodes": nodes, "connections": connections}
+        return json.dumps(output)
