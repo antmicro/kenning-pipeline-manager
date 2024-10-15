@@ -4,9 +4,7 @@ import json
 import uuid
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, List, Optional, get_type_hints
-
-# from pipeline_manager.dataflow_builder.utils import snake_case_to_camel_case
+from typing import Any, Dict, List, Optional, Union, get_type_hints
 
 
 @dataclass
@@ -16,7 +14,7 @@ class Vector2:
     x: float = 0.0
     y: float = 0.0
 
-    def to_json(self, as_str: bool = True) -> str:
+    def to_json(self, as_str: bool = True) -> Union[str, Dict]:
         output = {
             "x": self.x,
             "y": self.y,
@@ -60,7 +58,7 @@ class Interface:
     external_name: Optional[str] = None
     id: str = str(uuid.uuid4())
 
-    def to_json(self, as_str: bool) -> str:
+    def to_json(self, as_str: bool) -> Union[str, Dict]:
         output = {
             "name": self.name,
             "direction": self.direction.name.lower(),
@@ -91,7 +89,7 @@ class Node:
     subgraph: Optional[str]
     enabled_interface_groups: Optional[List[Interface]]
 
-    def to_json(self, as_str=True) -> str:
+    def to_json(self, as_str=True) -> Union[str, Dict]:
         output = {}
         for field_name, _ in get_type_hints(self).items():
             field_value = getattr(self, field_name)
