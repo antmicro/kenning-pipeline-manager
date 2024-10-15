@@ -3,7 +3,11 @@
 import json
 from typing import Dict, Union
 
-from pipeline_manager.dataflow_builder.node import Node, NodeConnection
+from pipeline_manager.dataflow_builder.entities import (
+    Node,
+    NodeConnection,
+    Vector2,
+)
 from pipeline_manager.dataflow_builder.utils import (
     ensure_connection_is_absent,
     get_node_if_present,
@@ -21,8 +25,36 @@ class DataflowGraph:
         self._connections: Dict[str, NodeConnection] = {}
 
     def create_node(self) -> Node:
+        """
+        Create and return an node with initialized id and remaining parameters
+        initialized with default values.
+
+        Default values are the following:
+
+        type* -> default value
+        ---
+        `str` -> ""
+        `float` -> `0.0`
+        `bool -> `False`
+        `list` -> `[]` (empty list)
+        `Vector2` -> `(0.0, 0.0)`
+
+        *If `None` is possible, then value is `None`.
+
+        """
         id = get_uuid()
-        self._nodes[id] = Node(id=id)
+        self._nodes[id] = Node(
+            id=id,
+            name="",
+            width=0.0,
+            enabled_interface_groups=None,
+            instance_name=None,
+            interfaces=[],
+            position=Vector2(0, 0),
+            properties=[],
+            subgraph=None,
+            two_column=False,
+        )
         return self._nodes[id]
 
     def create_connection(
@@ -51,17 +83,29 @@ class DataflowGraph:
         self._connections[connection_id] = connection
         return self._connections[connection_id]
 
-    def to_json(self) -> str:
+    def to_json(self, as_str: bool = True) -> Union[str, Dict]:
         """
         Convert a dataflow graph to a JSON.
 
+        Parameters
+        ----------
+        as_str : bool
+            Determine return type. By default, True.
+
         Returns
         -------
-        str
+        Union[str, Dict]
             Representation of the dataflow graph in JSON.
+            If `as_str` is `True`, JSON in str is returned.
+            Otherwise, a Python dictionary is returned.
         """
-        nodes = [node for _, node in self._nodes.items()]
-        connections = [conn for conn in self._connections.items()]
+        nodes = [node.to_json(as_str=False) for _, node in self._nodes.items()]
+        connections = [
+            conn.to_json(as_str=False) for conn in self._connections.items()
+        ]
 
         output = {"id": self._id, "nodes": nodes, "connections": connections}
-        return json.dumps(output)
+
+        if as_str:
+            return json.dumps(output)
+        return output

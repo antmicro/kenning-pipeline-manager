@@ -6,7 +6,7 @@ import uuid
 from pathlib import Path
 from typing import Dict, Tuple, Union
 
-from pipeline_manager.dataflow_builder.node import Node, NodeConnection
+from pipeline_manager.dataflow_builder.entities import Node, NodeConnection
 
 
 def is_proper_input_file(
