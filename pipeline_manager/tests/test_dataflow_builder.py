@@ -46,13 +46,12 @@ def test_adding_node_present_in_specification(builder):
     node.two_column = False
 
     interfaces = []
-    interface = Interface(
-        direction=Direction.OUTPUT, name="frames", side_position=0
-    )
+    interface = Interface(direction=Direction.OUTPUT, name="frames")
     interfaces.append(interface)
 
     properties = []
-    prop = Property(name="filename", value="input4.mp4")
+    prop = Property(name="filename", value="input.mp4")
+    properties.append(prop)
 
     node.interfaces = interfaces
     node.properties = properties

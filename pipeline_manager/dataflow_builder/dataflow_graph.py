@@ -4,6 +4,7 @@ import json
 from typing import Dict, Union
 
 from pipeline_manager.dataflow_builder.entities import (
+    JsonConvertible,
     Node,
     NodeConnection,
     Vector2,
@@ -15,7 +16,7 @@ from pipeline_manager.dataflow_builder.utils import (
 )
 
 
-class DataflowGraph:
+class DataflowGraph(JsonConvertible):
     """Representation of a dataflow graph."""
 
     def __init__(self):
@@ -84,21 +85,6 @@ class DataflowGraph:
         return self._connections[connection_id]
 
     def to_json(self, as_str: bool = True) -> Union[str, Dict]:
-        """
-        Convert a dataflow graph to a JSON.
-
-        Parameters
-        ----------
-        as_str : bool
-            Determine return type. By default, True.
-
-        Returns
-        -------
-        Union[str, Dict]
-            Representation of the dataflow graph in JSON.
-            If `as_str` is `True`, JSON in str is returned.
-            Otherwise, a Python dictionary is returned.
-        """
         nodes = [node.to_json(as_str=False) for _, node in self._nodes.items()]
         connections = [
             conn.to_json(as_str=False) for conn in self._connections.items()

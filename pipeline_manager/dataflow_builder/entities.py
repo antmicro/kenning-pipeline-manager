@@ -2,6 +2,7 @@
 
 import json
 import uuid
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union, get_type_hints
@@ -39,22 +40,60 @@ class Side(Enum):
     RIGHT = 1
 
 
+class JsonConvertible(ABC):
+    """
+    Abstract interface allowing object conversion to the JSON format.
+
+    It ensure implementation of `to_json` method
+    with a uniform signature.
+    """
+
+    @abstractmethod
+    def to_json(self, as_str: bool = True) -> Union[Dict, str]:
+        """
+        Convert a dataflow graph to the JSON format.
+
+        Parameters
+        ----------
+        as_str : bool, optional
+            Determine return type. By default, True.
+
+        Returns
+        -------
+        Union[Dict, str]
+            Representation of the dataflow graph in JSON.
+            If `as_str` is `True`, JSON in str is returned.
+            Otherwise, a Python dictionary is returned.
+        """
+        pass
+
+
 @dataclass
-class Property:
+class Property(JsonConvertible):
     """A property of a node."""
 
     name: str
     value: Any
     id: str = str(uuid.uuid4())
 
+    def to_json(self, as_str: bool = True) -> Union[Dict, str]:
+        output = {
+            "name": self.name,
+            "value": self.value,
+            "id": self.id,
+        }
+        if as_str:
+            return json.dumps(output)
+        return output
+
 
 @dataclass
-class Interface:
+class Interface(JsonConvertible):
     """Representation of a node's interface."""
 
     name: str
     direction: Direction
-    side_position: int
+    side_position: Optional[int] = None
     external_name: Optional[str] = None
     id: str = str(uuid.uuid4())
 
@@ -62,12 +101,15 @@ class Interface:
         output = {
             "name": self.name,
             "direction": self.direction.name.lower(),
-            "sidePosition": self.side_position,  # snake_case to camelCase
             "id": self.id,
         }
 
+        # snake_case to camelCase
+        if self.side_position:
+            output["sidePosition"] = self.side_position
+
         if self.external_name:
-            output["external_name"] = self.external_name
+            output["externalName"] = self.external_name
 
         if as_str:
             return json.dumps(output)
@@ -75,7 +117,7 @@ class Interface:
 
 
 @dataclass
-class Node:
+class Node(JsonConvertible):
     """Representation of a node in a dataflow graph."""
 
     id: str
@@ -111,7 +153,8 @@ class Node:
                 output_list = []
                 for item in field_value:
                     output_list.append(item.to_json(as_str=False))
-                continue
+
+                field_value = output_list
 
             camel_cased_name = snake_case_to_camel_case(field_name)
             output[camel_cased_name] = field_value
@@ -122,7 +165,7 @@ class Node:
 
 
 @dataclass
-class NodeConnection:
+class NodeConnection(JsonConvertible):
     """
     Representation of a connection between two nodes in a dataflow graph.
     """
