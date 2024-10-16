@@ -3,7 +3,7 @@
 import json
 import uuid
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union, get_type_hints
 
@@ -28,16 +28,16 @@ class Vector2:
 class Direction(Enum):
     """Available directions of an interface."""
 
-    INPUT = 0
-    OUTPUT = 1
-    INOUT = 2
+    INPUT = "input"
+    OUTPUT = "output"
+    INOUT = "inout"
 
 
 class Side(Enum):
     """Sides, on which an interface may be located."""
 
-    LEFT = 0
-    RIGHT = 1
+    LEFT = "left"
+    RIGHT = "right"
 
 
 class JsonConvertible(ABC):
@@ -93,21 +93,27 @@ class Interface(JsonConvertible):
 
     name: str
     direction: Direction
+    side: Optional[Side] = None
     side_position: Optional[int] = None
     external_name: Optional[str] = None
     id: str = str(uuid.uuid4())
 
     def to_json(self, as_str: bool) -> Union[str, Dict]:
+        if not self.side:
+            if self.direction in (Direction.INOUT, Direction.INPUT):
+                self.side = Side.LEFT
+            else:
+                self.side = Side.RIGHT
+
         output = {
             "name": self.name,
             "direction": self.direction.name.lower(),
+            "side": self.side.name.lower(),
             "id": self.id,
+            "sidePosition": self.side_position or 0,
         }
 
         # snake_case to camelCase
-        if self.side_position:
-            output["sidePosition"] = self.side_position
-
         if self.external_name:
             output["externalName"] = self.external_name
 
@@ -129,7 +135,7 @@ class Node(JsonConvertible):
     two_column: bool
     instance_name: Optional[str]
     subgraph: Optional[str]
-    enabled_interface_groups: Optional[List[Interface]]
+    enabled_interface_groups: List[Interface] = field(default_factory=list)
 
     def __init__(self, specification: Dict[str, Any], **kwargs):
         is_type_correct = False
@@ -156,6 +162,10 @@ class Node(JsonConvertible):
 
         for key, value in kwargs.items():
             setattr(self, key, value)
+
+    def from_specification(self, definition: Dict[str, Any]):
+        # self.name =
+        raise NotImplementedError()
 
     def to_json(self, as_str=True) -> Union[str, Dict]:
         output = {}
@@ -191,9 +201,9 @@ class Node(JsonConvertible):
 
 
 @dataclass
-class NodeConnection(JsonConvertible):
+class InterfaceConnection(JsonConvertible):
     """
-    Representation of a connection between two nodes in a dataflow graph.
+    Representation of a connection between two interfaces in a dataflow graph.
     """
 
     # `from` is a reserved Python keyword.
@@ -206,8 +216,8 @@ class NodeConnection(JsonConvertible):
         output = {
             # Renamed to the original names.
             "id": self.id,
-            "from": self.from_interface,
-            "to": self.to_interface,
+            "from": self.from_interface.id,
+            "to": self.to_interface.id,
         }
         if self.anchors:
             anchors = [anchor.to_json(as_str=False) for anchor in self.anchors]

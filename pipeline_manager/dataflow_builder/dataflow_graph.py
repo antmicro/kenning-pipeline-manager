@@ -4,10 +4,12 @@ import json
 from typing import Any, Dict, Union
 
 from pipeline_manager.dataflow_builder.entities import (
+    Direction,
     Interface,
+    InterfaceConnection,
     JsonConvertible,
     Node,
-    NodeConnection,
+    Property,
     Vector2,
 )
 from pipeline_manager.dataflow_builder.utils import (
@@ -24,7 +26,7 @@ class DataflowGraph(JsonConvertible):
         """Initialise a dataflow graph with default, mostly empty, values."""
         self._id = get_uuid()
         self._nodes: Dict[str, Node] = {}
-        self._connections: Dict[str, NodeConnection] = {}
+        self._connections: Dict[str, InterfaceConnection] = {}
         self._specification: Dict[str, Any] = specification
 
     def create_node(self, **kwargs: Dict[str, Any]) -> Node:
@@ -32,17 +34,8 @@ class DataflowGraph(JsonConvertible):
         Create the node initialized with the supplied arguments.
         `id` is already initialized.
 
-        Default values are the following:
-
-        type* -> default value
-        ---
-        `str` -> "INVALID_DEFAULT_NAME"
-        `float` -> `0.0`
-        `bool -> `False`
-        `list` -> `[]` (empty list)
-        `Vector2` -> `(0.0, 0.0)`
-
-        *If `None` is possible, then value is `None`.
+        Default values are taken from the specification. They may
+        be overridden by the values supplied in `kwargs`.
 
         Parameters
         ----------
@@ -55,20 +48,67 @@ class DataflowGraph(JsonConvertible):
         Node
             The initialized node that belongs to the dataflow graph.
 
+        Raises
+        ------
+        ValueError
+            Raised if `name` key is missing in the `kwargs` directory
+            or the provided name of the node does not exists in the
+            specification.
         """
+        if "name" not in kwargs:
+            raise ValueError(
+                "Missing parameter `name`, which is required "
+                "to create new node."
+            )
+
+        base_node = None
+        for _node in self._specification["nodes"]:
+            # Not a node but a category.
+            if "name" not in _node:
+                continue
+            if kwargs["name"] == _node["name"]:
+                base_node = _node
+
+        if not base_node:
+            raise ValueError(
+                f"Provided name of the node `{kwargs["name"]}` "
+                "is missing in the specification."
+            )
+
         node_id = get_uuid()
+
+        # Take values for interface initialization from the specification.
+        interfaces = []
+        for interface in base_node["interfaces"]:
+            _interface = Interface(
+                name=interface["name"],
+                direction=Direction(interface["direction"]),
+            )
+            interfaces.append(_interface)
+
+        # Take values for properties initialization from the specification.
+        properties = []
+        if "properties" in base_node:
+            for prop in base_node["properties"]:
+                _property = Property(
+                    name=prop["name"],
+                    value=prop["default"],
+                )
+                properties.append(_property)
+
+        DEFAULT_WIDTH = 200
         parameters = {
             "specification": self._specification,
             "id": node_id,
-            "name": "INVALID_DEFAULT_NAME",
-            "width": 0.0,
-            "enabled_interface_groups": None,
+            "name": base_node["name"],
+            "width": getattr(base_node, "width", DEFAULT_WIDTH),
+            "enabled_interface_groups": [],
             "instance_name": None,
-            "interfaces": [],
+            "interfaces": interfaces,
             "position": Vector2(0, 0),
-            "properties": [],
+            "properties": properties,
             "subgraph": None,
-            "two_column": False,
+            "two_column": self._specification["metadata"]["twoColumn"],
         }
 
         # Override default parameters
@@ -82,12 +122,26 @@ class DataflowGraph(JsonConvertible):
         self,
         from_interface: Union[Interface, str],
         to_interface: Union[Interface, str],
-    ) -> NodeConnection:
+    ) -> InterfaceConnection:
         from_interface = get_interface_if_present(from_interface, self._nodes)
         to_interface = get_interface_if_present(to_interface, self._nodes)
 
+        if from_interface is None:
+            raise ValueError(
+                "Source interface is "
+                "not present in the dataflow graph."
+                f"{from_interface}"
+            )
+
+        if to_interface is None:
+            raise ValueError(
+                "Destination (drain) interface is "
+                "not present in the dataflow graph."
+                f"{to_interface}"
+            )
+
         connection_id = get_uuid()
-        connection = NodeConnection(
+        connection = InterfaceConnection(
             id=connection_id,
             from_interface=from_interface,
             to_interface=to_interface,
@@ -108,7 +162,7 @@ class DataflowGraph(JsonConvertible):
     def to_json(self, as_str: bool = True) -> Union[str, Dict]:
         nodes = [node.to_json(as_str=False) for _, node in self._nodes.items()]
         connections = [
-            conn.to_json(as_str=False) for conn in self._connections.items()
+            conn.to_json(as_str=False) for _, conn in self._connections.items()
         ]
 
         output = {"id": self._id, "nodes": nodes, "connections": connections}

@@ -8,8 +8,8 @@ from typing import Any, Dict, List, Tuple, Union
 
 from pipeline_manager.dataflow_builder.entities import (
     Interface,
+    InterfaceConnection,
     Node,
-    NodeConnection,
 )
 
 
@@ -75,18 +75,18 @@ def get_uuid() -> str:
 
 
 def ensure_connection_is_absent(
-    connection: Union[NodeConnection, str],
-    connections: Dict[str, NodeConnection],
+    connection: Union[InterfaceConnection, str],
+    connections: Dict[str, InterfaceConnection],
 ) -> None:
     """
     Check if a connection is absent. Otherwise, an exception is raised.
 
     Parameters
     ----------
-    connection : Union[NodeConnection, str]
+    connection : Union[InterfaceConnection, str]
         Connection, which presence should be verified. If str is given,
             only part of check may be performed.
-    connections : Dict[str, NodeConnection]
+    connections : Dict[str, InterfaceConnection]
         A dictionary of ids and connections between nodes in a dataflow graph.
 
     Raises
@@ -111,7 +111,7 @@ def ensure_connection_is_absent(
         # No more checks are possible solely on an id.
         return None
 
-    if isinstance(connection, NodeConnection):
+    if isinstance(connection, InterfaceConnection):
         if connection.id in connections:
             raise KeyError(
                 f"Connection with id={connection.id} is present "
@@ -134,7 +134,9 @@ def ensure_connection_is_absent(
 
 
 def filter_connections(
-    attribute_name: str, value: Any, connections: Dict[str, NodeConnection]
+    attribute_name: str,
+    value: Any,
+    connections: Dict[str, InterfaceConnection],
 ) -> List[str]:
     """
     Filter IDs of connection that match the supplied criterion.
@@ -145,7 +147,7 @@ def filter_connections(
         Name of the parameter, by which search should be conducted.
     value : Any
         Value of the parameter, which should be matched.
-    connections : Dict[str, NodeConnection]
+    connections : Dict[str, InterfaceConnection]
         Dictionary of all ids and connections.
 
     Returns
@@ -159,10 +161,10 @@ def filter_connections(
         Raised if the attribute name is not present in the
         `NodeConnection` class.
     """
-    if attribute_name not in NodeConnection.__annotations__:
+    if attribute_name not in InterfaceConnection.__annotations__:
         raise ValueError(
             f"Unknown attribute name `{value}`. "
-            f"Allowed values: {NodeConnection.__annotations__.keys()}"
+            f"Allowed values: {InterfaceConnection.__annotations__.keys()}"
         )
 
     filtered = [

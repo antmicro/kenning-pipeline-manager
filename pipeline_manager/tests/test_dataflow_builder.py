@@ -43,16 +43,11 @@ def test_adding_node_present_in_specification(builder):
         two_column=False,
     )
 
-    interfaces = []
     interface = Interface(direction=Direction.OUTPUT, name="frames")
-    interfaces.append(interface)
+    node.interfaces = [interface]
 
-    properties = []
     prop = Property(name="filename", value="input.mp4")
-    properties.append(prop)
-
-    node.interfaces = interfaces
-    node.properties = properties
+    node.properties = [prop]
 
     assert graph.to_json(as_str=False) == {
         "id": f"{graph._id}",
@@ -71,6 +66,8 @@ def test_adding_node_present_in_specification(builder):
                         "name": "frames",
                         "id": interface.id,
                         "direction": "output",
+                        "side": "right",
+                        "sidePosition": 0,
                     }
                 ],
                 "properties": [
@@ -80,6 +77,7 @@ def test_adding_node_present_in_specification(builder):
                         "value": "input.mp4",
                     }
                 ],
+                "enabledInterfaceGroups": [],
             },
         ],
         "connections": [],
@@ -120,7 +118,69 @@ def test_adding_multiple_nodes(n: int, builder):
 def test_adding_connection(builder):
     """Test if adding a connection between two existing nodes succeeds."""
     graph = builder.create_graph()
-    source = graph.create_node(name="LoadVideo")
-    drain = graph.create_node(name="SaveVideo")
 
-    graph.create_connection(from_interface=source, to_interface=drain)
+    source = graph.create_node(
+        name="LoadVideo",
+    )
+
+    drain = graph.create_node(
+        name="SaveVideo",
+        position=Vector2(2100, 200),
+    )
+
+    connection = graph.create_connection(
+        from_interface=source.interfaces[0],
+        to_interface=drain.interfaces[0],
+    )
+
+    assert graph.to_json(as_str=False) == {
+        "id": f"{graph._id}",
+        "nodes": [
+            {
+                "name": "LoadVideo",
+                "id": source.id,
+                "position": {
+                    "x": 0,
+                    "y": 0,
+                },
+                "width": 200,
+                "twoColumn": True,
+                "interfaces": [
+                    {
+                        "name": "frames",
+                        "id": source.interfaces[0].id,
+                        "direction": "output",
+                        "side": "right",
+                        "sidePosition": 0,
+                    }
+                ],
+                "properties": [],
+                "enabledInterfaceGroups": [],
+            },
+            {
+                "id": drain.id,
+                "position": {"x": 2100, "y": 200},
+                "width": 200,
+                "twoColumn": True,
+                "interfaces": [
+                    {
+                        "name": "frames",
+                        "id": drain.interfaces[0].id,
+                        "direction": "input",
+                        "side": "left",
+                        "sidePosition": 0,
+                    }
+                ],
+                "properties": [],
+                "enabledInterfaceGroups": [],
+                "name": "SaveVideo",
+            },
+        ],
+        "connections": [
+            {
+                "from": source.interfaces[0].id,
+                "id": connection.id,
+                "to": drain.interfaces[0].id,
+            },
+        ],
+    }
