@@ -1,5 +1,6 @@
 """Module with DataflowBuilder class, sharing its API publicly."""
 
+import json
 from pathlib import Path
 from typing import Tuple, Union
 
@@ -17,6 +18,7 @@ class DataflowBuilder:
         override_existing_dataflow: bool = False,
     ) -> None:
         """Initialise class attribute, perform basic checks."""
+        # Handling a dataflow file.
         if isinstance(dataflow_path, str):
             dataflow_path = Path(dataflow_path)
 
@@ -27,12 +29,25 @@ class DataflowBuilder:
                 "Set `override_existing_dataflow=True` to override it."
             )
 
+        # Handle a specification file.
         success, reason = is_proper_input_file(specification_path)
         if not success:
             raise ValueError(f"Invalid `specification_path`: {reason}")
+        self._load_specification(specification_path)
 
         self._graph = None
         self.output_file = dataflow_path
+
+    def _load_specification(self, specification_path: Path) -> None:
+        self._specification = None
+        with open(specification_path, mode="rt", encoding="utf-8") as fd:
+            self._specification = json.loads(fd.read())
+
+        if not self._specification:
+            raise ValueError(
+                "Specification cannot be empty. "
+                f"Currently: {self._specification}"
+            )
 
     def load_dataflow_graph(
         self, graph: Tuple[Path | str | DataflowGraph]
@@ -55,5 +70,5 @@ class DataflowBuilder:
         # FIXME: Validate the graph before loading it.
 
     def create_graph(self) -> DataflowGraph:
-        self._graph = DataflowGraph()
+        self._graph = DataflowGraph(self._specification)
         return self._graph

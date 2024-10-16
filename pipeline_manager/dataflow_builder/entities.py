@@ -131,6 +131,32 @@ class Node(JsonConvertible):
     subgraph: Optional[str]
     enabled_interface_groups: Optional[List[Interface]]
 
+    def __init__(self, specification: Dict[str, Any], **kwargs):
+        is_type_correct = False
+
+        if "nodes" not in specification:
+            raise ValueError(
+                "The provided specification has no nodes defined. "
+                "Missing `nodes` key. "
+                f"Specification: {str(specification)}"
+            )
+
+        for node in specification["nodes"]:
+            if "name" not in node:
+                continue
+            if node["name"] == kwargs["name"]:
+                is_type_correct = True
+                break
+
+        if not is_type_correct:
+            raise ValueError(
+                f"Illegal name of the node `{kwargs["name"]}`, "
+                "which was not defined in the specification. "
+            )
+
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+
     def to_json(self, as_str=True) -> Union[str, Dict]:
         output = {}
         for field_name, _ in get_type_hints(self).items():

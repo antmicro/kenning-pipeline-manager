@@ -1,7 +1,5 @@
 """Module with tests for dataflow building process."""
 
-import json
-
 import pytest
 
 from pipeline_manager.dataflow_builder.dataflow_builder import DataflowBuilder
@@ -28,7 +26,7 @@ def test_creating_empty_graph(builder):
     graph = builder.create_graph()
 
     assert type(graph) == DataflowGraph
-    assert json.loads(graph.to_json()) == {
+    assert graph.to_json(as_str=False) == {
         "id": f"{graph._id}",
         "nodes": [],
         "connections": [],
@@ -38,12 +36,12 @@ def test_creating_empty_graph(builder):
 def test_adding_node_present_in_specification(builder):
     """Test if an node is added correctly to a dataflow graph."""
     graph = builder.create_graph()
-    node = graph.create_node()
-
-    node.name = "LoadVideo"
-    node.position = Vector2(0, 0)
-    node.width = 200
-    node.two_column = False
+    node = graph.create_node(
+        name="LoadVideo",
+        position=Vector2(0, 0),
+        width=200,
+        two_column=False,
+    )
 
     interfaces = []
     interface = Interface(direction=Direction.OUTPUT, name="frames")
@@ -86,3 +84,14 @@ def test_adding_node_present_in_specification(builder):
         ],
         "connections": [],
     }
+
+
+def test_adding_node_absent_in_specification(builder):
+    """
+    Tests if a provided node fails to add because it is not present
+    in specification.
+    """
+    graph = builder.create_graph()
+
+    with pytest.raises(ValueError):
+        graph.create_node(name="Name Not in Specification")
