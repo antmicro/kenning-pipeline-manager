@@ -95,3 +95,32 @@ def test_adding_node_absent_in_specification(builder):
 
     with pytest.raises(ValueError):
         graph.create_node(name="Name Not in Specification")
+
+
+@pytest.mark.parametrize("n", [3, 5, 20, 50])
+def test_adding_multiple_nodes(n: int, builder):
+    """Test if an expected number of nodes is created."""
+    graph = builder.create_graph()
+
+    for _ in range(n):
+        graph.create_node(name="LoadVideo")
+
+    created_nodes = len(graph._nodes)
+    assert created_nodes == n, (
+        f"Expected to created {n} nodes but actually {created_nodes} nodes "
+        "have been created in the internal representation."
+    )
+    nodes_created_in_json = len(graph.to_json(as_str=False)["nodes"])
+    assert nodes_created_in_json == n, (
+        f"Expected to created {n} nodes but actually {nodes_created_in_json} "
+        "nodes have been created in the JSON output."
+    )
+
+
+def test_adding_connection(builder):
+    """Test if adding a connection between two existing nodes succeeds."""
+    graph = builder.create_graph()
+    source = graph.create_node(name="LoadVideo")
+    drain = graph.create_node(name="SaveVideo")
+
+    graph.create_connection(from_interface=source, to_interface=drain)

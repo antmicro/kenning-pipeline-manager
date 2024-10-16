@@ -197,10 +197,25 @@ class NodeConnection(JsonConvertible):
     """
 
     # `from` is a reserved Python keyword.
-    from_node: Node
-    to_node: Node
-    anchors: List[Vector2]
+    from_interface: Interface
+    to_interface: Interface
+    anchors: Optional[List[Vector2]] = None
     id: str = str(uuid.uuid4())
+
+    def to_json(self, as_str: bool = True) -> Dict | str:
+        output = {
+            # Renamed to the original names.
+            "id": self.id,
+            "from": self.from_interface,
+            "to": self.to_interface,
+        }
+        if self.anchors:
+            anchors = [anchor.to_json(as_str=False) for anchor in self.anchors]
+            output["anchors"] = anchors
+
+        if as_str:
+            json.dumps(output)
+        return output
 
 
 # Defining this in utils causes circular dependency.

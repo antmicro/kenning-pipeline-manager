@@ -4,6 +4,7 @@ import json
 from typing import Any, Dict, Union
 
 from pipeline_manager.dataflow_builder.entities import (
+    Interface,
     JsonConvertible,
     Node,
     NodeConnection,
@@ -11,7 +12,7 @@ from pipeline_manager.dataflow_builder.entities import (
 )
 from pipeline_manager.dataflow_builder.utils import (
     ensure_connection_is_absent,
-    get_node_if_present,
+    get_interface_if_present,
     get_uuid,
 )
 
@@ -78,16 +79,18 @@ class DataflowGraph(JsonConvertible):
         return self._nodes[node_id]
 
     def create_connection(
-        self, from_node: Union[Node, str], to_node: Union[Node, str]
+        self,
+        from_interface: Union[Interface, str],
+        to_interface: Union[Interface, str],
     ) -> NodeConnection:
-        from_node = get_node_if_present(from_node, self._nodes)
-        to_node = get_node_if_present(to_node, self._nodes)
+        from_interface = get_interface_if_present(from_interface, self._nodes)
+        to_interface = get_interface_if_present(to_interface, self._nodes)
 
         connection_id = get_uuid()
         connection = NodeConnection(
             id=connection_id,
-            source_node=from_node,
-            drain_node=to_node,
+            from_interface=from_interface,
+            to_interface=to_interface,
         )
 
         ensure_connection_is_absent(

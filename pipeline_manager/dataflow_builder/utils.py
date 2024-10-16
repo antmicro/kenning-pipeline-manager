@@ -4,9 +4,13 @@ import logging
 import os
 import uuid
 from pathlib import Path
-from typing import Dict, Tuple, Union
+from typing import Any, Dict, List, Tuple, Union
 
-from pipeline_manager.dataflow_builder.entities import Node, NodeConnection
+from pipeline_manager.dataflow_builder.entities import (
+    Interface,
+    Node,
+    NodeConnection,
+)
 
 
 def is_proper_input_file(
@@ -115,10 +119,59 @@ def ensure_connection_is_absent(
                 "Connection with the identical id already exists."
             )
 
-        # TODO: Check if a connection, based on the same source
-        # and target exists, then raise error if it does.
-        # source = connection.source_node
-        # target = connection.drain_node
+        common_source = filter_connections(
+            "from_interface", connection.from_interface, connections
+        )
+        common_drain = filter_connections(
+            "to_interface", connection.to_interface, connections
+        )
+        intersection = set(common_source).intersection(common_drain)
+        if intersection:
+            raise ValueError(
+                "The connection between these two interfaces already exists: "
+                + intersection
+            )
+
+
+def filter_connections(
+    attribute_name: str, value: Any, connections: Dict[str, NodeConnection]
+) -> List[str]:
+    """
+    Filter IDs of connection that match the supplied criterion.
+
+    Parameters
+    ----------
+    attribute_name : str
+        Name of the parameter, by which search should be conducted.
+    value : Any
+        Value of the parameter, which should be matched.
+    connections : Dict[str, NodeConnection]
+        Dictionary of all ids and connections.
+
+    Returns
+    -------
+    List[str]
+        List of IDs, where the attribute name matches the expected value.
+
+    Raises
+    ------
+    ValueError
+        Raised if the attribute name is not present in the
+        `NodeConnection` class.
+    """
+    if attribute_name not in NodeConnection.__annotations__:
+        raise ValueError(
+            f"Unknown attribute name `{value}`. "
+            f"Allowed values: {NodeConnection.__annotations__.keys()}"
+        )
+
+    filtered = [
+        id
+        for id, connection in connections.keys()
+        if getattr(connection, attribute_name) == value
+    ]
+
+    return filtered
 
 
 def get_node_if_present(
@@ -134,7 +187,7 @@ def get_node_if_present(
     nodes : Dict[str, Node]
         Dictionary of all available ids and nodes.
     node_name : str
-        Textual representation. For example, `source` or target
+        Text for better error messages. For example, `source` or `target`.
 
     Returns
     -------
@@ -163,3 +216,33 @@ def get_node_if_present(
         )
 
     return node
+
+
+def get_interface_if_present(
+    interface: Union[Interface, str], nodes: Dict[str, Node]
+) -> Tuple[Interface, None]:
+    """
+    Get interface given it is present in the nodes of a dataflow graph.
+
+    Parameters
+    ----------
+    interface : Union[Interface, str]
+        `Interface` instance or id of the sought interface.
+    nodes : Dict[str, Node]
+        All nodes of the dataflow graph.
+
+    Returns
+    -------
+    Tuple[Interface, None]
+        Instance of `Interface` if it is present in the dataflow graph.
+        Otherwise, `None`.
+    """
+    if isinstance(interface, Interface):
+        interface = interface.id
+
+    for _, node in nodes.items():
+        for _interface in node.interfaces:
+            if _interface.id == interface:
+                return _interface
+
+    return None
