@@ -52,28 +52,34 @@ function parseSingleInterfaces(interfaces, interfaceGroup = false) {
         // Copy the interface to avoid modifying the original object
         const tempIO = JSON.parse(JSON.stringify(io));
 
+        const defaultDirection = 'inout';
+        const direction = io.direction ?? defaultDirection;
+        tempIO.direction = direction;
+
         if (io.array !== undefined) {
             const [left, right] = io.array;
 
             for (let j = left; j < right; j += 1) {
                 const name = `${io.name}[${j}]`;
-                if (tempParsed[io.direction][name] !== undefined) {
+
+                if (tempParsed[direction][name] !== undefined) {
                     errors.push(
-                        `Interface named '${name}' of direction '${io.direction}' is a duplicate.`,
+                        `Interface named '${name}' of direction '${direction}' is a duplicate.`,
                     );
                 }
                 tempIO.externalName = io.externalName ? `${io.externalName}[${j}]` : undefined;
 
                 // Copy the interface to avoid modifying the assigned object
-                tempParsed[io.direction][name] = JSON.parse(JSON.stringify(tempIO));
+                tempParsed[direction][name] = JSON.parse(JSON.stringify(tempIO));
             }
         } else {
-            if (tempParsed[io.direction][io.name] !== undefined) {
+            if (tempParsed[direction][io.name] !== undefined) {
                 errors.push(
-                    `Interface named '${io.name}' of direction '${io.direction}' is a duplicate.`,
+                    `Interface named '${io.name}' of direction '${direction}' is a duplicate.`,
                 );
             }
-            tempParsed[io.direction][io.name] = tempIO;
+
+            tempParsed[direction][io.name] = tempIO;
         }
 
         if (interfaceGroup) {
