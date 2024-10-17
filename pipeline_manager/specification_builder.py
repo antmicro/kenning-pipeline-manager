@@ -550,7 +550,7 @@ class SpecificationBuilder(object):
         name: str,
         interfacename: str,
         interfacetype: Optional[Union[str, List[str]]],
-        direction: str,
+        direction: str = "inout",
         side: Optional[str] = None,
         maxcount: Optional[int] = None,
         override: Optional[bool] = None,
@@ -568,7 +568,7 @@ class SpecificationBuilder(object):
         interfacetype: Optional[Union[str, List[str]]]
             List of matching types for interfaces
         direction: str
-            Direction of the connection
+            Direction of the connection, by default "inout".
         side: Optional[str]
             On which side the interface should be placed by default
         maxcount: Optional[int]
