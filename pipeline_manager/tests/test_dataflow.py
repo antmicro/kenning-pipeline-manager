@@ -10,6 +10,12 @@ from pipeline_manager.tests.conftest import check_validation
 @pytest.mark.parametrize(
     "specification,dataflow,expected",
     [
+        ("specification_without_explicit_direction", "dataflow_node_base", 0),
+        (
+            "specification_without_explicit_direction",
+            "dataflow_employing_nodes_without_specified_direction_of_interface",
+            0,
+        ),
         (
             "dataflow_specification_node_no_properties",
             "dataflow_node_no_property",
@@ -123,9 +129,37 @@ def dataflow_specification_node_no_properties():
                         "direction": "input",
                     }
                 ],
-            }
+            },
         ]
     }
+
+
+@pytest.fixture
+def specification_without_explicit_direction(
+    dataflow_specification_node_no_properties
+):
+    dataflow_specification_node_no_properties["nodes"].append(
+        {
+            "name": "CloneVideo",
+            "category": "Filesystem",
+            "interfaces": [
+                {
+                    "name": "in_frames",
+                    "type": ["Image", "BinaryImage"],
+                },
+                {
+                    "name": "inout_frames",
+                    "type": ["Image", "BinaryImage"],
+                },
+                {
+                    "name": "out_frames",
+                    "type": ["Image", "BinaryImage"],
+                    "direction": "output",
+                },
+            ],
+        }
+    )
+    return dataflow_specification_node_no_properties
 
 
 @pytest.fixture
@@ -590,3 +624,33 @@ def dataflow_three_layer_graph_interfaces_connected_graph_node(
         }
     )
     return dataflow_two_layer_graph_interfaces_connected_graph_node
+
+
+@pytest.fixture
+def dataflow_employing_nodes_without_specified_direction_of_interface(
+    dataflow_node_base
+):
+    """
+    Test if placing a component, without explicitly provided direction
+    in specification, gets parsed correctly.
+    """
+    dataflow_node_base["graphs"][0]["nodes"].append(
+        {
+            "name": "CloneVideo",
+            "id": "fc7d1706-6200-997a-a8da-91c8577e0955",
+            "position": {"x": 1000, "y": 200},
+            "interfaces": [
+                {
+                    "direction": "inout",
+                    "id": "64fba0ab-a115-404e-ade8-0aa05ba93992",
+                    "name": "inout_frames",
+                    "side": "right",
+                    "sidePosition": 1,
+                },
+            ],
+            "properties": [],
+            "twoColumn": True,
+        }
+    )
+
+    return dataflow_node_base
