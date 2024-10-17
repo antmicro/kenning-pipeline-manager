@@ -18,7 +18,7 @@ import EditorManager from '../EditorManager';
 const defaultAppCapabilities = {};
 
 /**
- * Creates notifications based on response received from external application
+ * Creates notifications based on response received from external application.
  */
 function handleExternalAppResponse(response) {
     // Status is HTTPCodes.OK so a message from the application is received.
@@ -32,7 +32,7 @@ function handleExternalAppResponse(response) {
 }
 
 /**
- * Creates notifications based on specifiation.
+ * Creates notifications based on specification.
  * Returns `true` if error appeared.
  */
 function handleSpecificationResult({ errors, warnings }, errorTitle, warningTitle) {
@@ -62,7 +62,7 @@ class ExternalApplicationManager {
     appCapabilities = {};
 
     /**
-     * Function that fetches state of the connection and updates
+     * Function that fetches state of the connection and updates.
      * `this.externalApplicationConnected` property.
      */
     async updateConnectionStatus() {
@@ -89,7 +89,7 @@ class ExternalApplicationManager {
 
     /**
      * Event handler that asks the backend to open a TCP socket that can be connected to.
-     * If the external application did not connect the user is alertd with a feedback message.
+     * If the external application did not connect the user is alerted with a feedback message.
      * This function updates `this.externalApplicationConnected` property
      *
      * @returns {null | [string, string]} Null if the connection was successful, otherwise a tuple
@@ -184,7 +184,7 @@ class ExternalApplicationManager {
         try {
             data = await jsonRPC.request('dataflow_export', { dataflow });
         } catch (error) {
-            // The connection was closed
+            // The connection was closed.
             data = error.message;
             NotificationHandler.terminalLog('error', data);
             return false;
