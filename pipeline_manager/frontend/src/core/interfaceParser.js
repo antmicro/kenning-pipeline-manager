@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+const defaultDirection = 'inout';
+
 /**
  * Returns a prepared interface that is passed to baklava constructor
  *
@@ -52,7 +54,6 @@ function parseSingleInterfaces(interfaces, interfaceGroup = false) {
         // Copy the interface to avoid modifying the original object
         const tempIO = JSON.parse(JSON.stringify(io));
 
-        const defaultDirection = 'inout';
         const direction = io.direction ?? defaultDirection;
         tempIO.direction = direction;
 
@@ -86,15 +87,16 @@ function parseSingleInterfaces(interfaces, interfaceGroup = false) {
             const newInterfaces = [];
 
             tempIO.interfaces.forEach((buildingIO) => {
+                const bdirection = buildingIO.direction ?? defaultDirection;
                 if (buildingIO.array !== undefined) {
                     const [left, right] = buildingIO.array;
 
                     for (let j = left; j < right; j += 1) {
-                        const name = `${buildingIO.direction}_${buildingIO.name}[${j}]`;
+                        const name = `${bdirection}_${buildingIO.name}[${j}]`;
                         newInterfaces.push(name);
                     }
                 } else {
-                    const name = `${buildingIO.direction}_${buildingIO.name}`;
+                    const name = `${bdirection}_${buildingIO.name}`;
                     newInterfaces.push(name);
                 }
             });
@@ -105,12 +107,13 @@ function parseSingleInterfaces(interfaces, interfaceGroup = false) {
     // Removing inout with duplicate names
     const filteredTempInouts = Object.fromEntries(
         Object.entries(tempParsed.inout).filter(([name, state]) => {
+            const direction = state.direction ?? defaultDirection;
             const duplicate =
                 Object.keys(tempParsed.output).includes(name) ||
                 Object.keys(tempParsed.input).includes(name);
             if (duplicate) {
                 errors.push(
-                    `Interface named '${name}' of direction '${state.direction}' ` +
+                    `Interface named '${name}' of direction '${direction}' ` +
                         `is a duplicate. There already exists an input or output of this name.`,
                 );
             }
@@ -217,7 +220,7 @@ export function applySidePositions(inputs, outputs) {
         if (intf.side === 'right' || (intf.side === undefined && intf.direction === 'output')) {
             tempParsedSides.right[name] = { ...intf };
             tempParsedSides.right[name].side = 'right';
-        } else if (intf.side === 'left' || (intf.side === undefined && (intf.direction === 'input' || intf.direction === 'inout'))) {
+        } else if (intf.side === 'left' || (intf.side === undefined && intf.direction !== 'output')) {
             tempParsedSides.left[name] = { ...intf };
             tempParsedSides.left[name].side = 'left';
         }
@@ -295,7 +298,7 @@ export function applySidePositions(inputs, outputs) {
     return {
         inputs: Object.fromEntries(
             Object.entries({ ...tempParsedSides.left, ...tempParsedSides.right })
-                .filter(([, intf]) => intf.direction === 'input' || intf.direction === 'inout'),
+                .filter(([, intf]) => intf.direction !== 'output'),
         ),
         outputs: Object.fromEntries(
             Object.entries({ ...tempParsedSides.left, ...tempParsedSides.right })
@@ -328,29 +331,31 @@ export function parseInterfaces(
 
     // Checking for integrity of interface groups
     interfaceGroups.forEach((intfG) => {
+        const directionG = intfG.direction ?? defaultDirection;
         intfG.interfaces.forEach((intf) => {
+            const direction = intf.direction ?? defaultDirection;
             if (intf.array !== undefined) {
                 const [left, right] = intf.array;
 
                 for (let j = left; j < right; j += 1) {
-                    const name = `${intf.direction}_${intf.name}[${j}]`;
+                    const name = `${direction}_${intf.name}[${j}]`;
                     if (
                         !Object.keys({ ...tempParsed.input, ...tempParsed.output }).includes(name)
                     ) {
                         errors.push(
-                            `Interface named '${intf.name}[${j}]' of direction '${intf.direction}' ` +
+                            `Interface named '${intf.name}[${j}]' of direction '${direction}' ` +
                                 `used for interface group '${intfG.name}' of direction ` +
-                                `'${intfG.direction}' does not exist.`,
+                                `'${directionG}' does not exist.`,
                         );
                     }
                 }
             } else {
-                const name = `${intf.direction}_${intf.name}`;
+                const name = `${direction}_${intf.name}`;
                 if (!Object.keys({ ...tempParsed.input, ...tempParsed.output }).includes(name)) {
                     errors.push(
-                        `Interface named '${intf.name}' of direction '${intf.direction}' ` +
+                        `Interface named '${intf.name}' of direction '${direction}' ` +
                             `used for interface group '${intfG.name}' of direction ` +
-                            `'${intfG.direction}' does not exist.`,
+                            `'${directionG}' does not exist.`,
                     );
                 }
             }
@@ -378,7 +383,7 @@ export function parseInterfaces(
 
     // Detecting integrity of enabled interface groups
     const enabledInterfaceGroupsNames = defaultInterfaceGroups.map(
-        (group) => `${group.direction}_${group.name}`,
+        (group) => `${group.direction ?? defaultDirection}_${group.name}`,
     );
 
     errors = validateInterfaceGroups(
