@@ -44,7 +44,7 @@ def test_adding_node_present_in_specification(builder):
     )
 
     interface = Interface(direction=Direction.OUTPUT, name="frames")
-    node.interfaces = [interface]
+    interface = node.add_interface(interface)
 
     prop = Property(name="filename", value="input.mp4")
     node.properties = [prop]

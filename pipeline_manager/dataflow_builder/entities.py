@@ -137,6 +137,59 @@ class Node(JsonConvertible):
     subgraph: Optional[str]
     enabled_interface_groups: List[Interface] = field(default_factory=list)
 
+    # Attributes starting with a name starting with _ (underscore),
+    # are not added to JSON file.
+    _left_interfaces: int = 0
+    _right_interfaces: int = 0
+
+    def add_interface(self, interface: Interface) -> Interface:
+        """
+        Add an interface to a node.
+
+        The method should be preferred over directly inserting an interface,
+        as this sets `side_position` of the interface and performs the check
+        whether the provided interface already exists.
+
+        Parameters
+        ----------
+        interface : Interface
+            Interface instance to be added.
+
+        Returns
+        -------
+        Interface
+            Interface residing in a node. It is the same interface as
+            the one passed on by parameters of the method.
+
+        Raises
+        ------
+        ValueError
+            Raised if an interface already belongs to the node.
+        """
+        if not interface.side:
+            # "input" and "inout" interfaces should be to the left.
+            if interface.direction in (Direction.INPUT, Direction.INOUT):
+                interface.side = Side.LEFT
+            # "output" interfaces should be to the right.
+            else:
+                interface.side = Side.RIGHT
+
+        if interface in self.interfaces:
+            raise ValueError(
+                f"The interface with id `{interface.id}` already exists in "
+                f" the node with id `{self.id}`. Aborted adding the interface."
+            )
+
+        if interface.side == Side.LEFT:
+            interface.side_position = self._left_interfaces
+            self._left_interfaces += 1
+        else:
+            interface.side_position = self._right_interfaces
+            self._right_interfaces += 1
+
+        self.interfaces.append(interface)
+        return self.interfaces[-1]
+
     def __init__(self, specification: Dict[str, Any], **kwargs):
         is_type_correct = False
 
@@ -171,6 +224,11 @@ class Node(JsonConvertible):
         output = {}
         for field_name, _ in get_type_hints(self).items():
             field_value = getattr(self, field_name)
+
+            # Attributes starting with a name starting with _ (underscore),
+            # are not added to JSON file.
+            if field_name.startswith("_"):
+                continue
 
             if field_value is None:
                 continue
