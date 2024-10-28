@@ -1,12 +1,12 @@
 """Module with tests for dataflow building process."""
 
+from typing import Dict, Tuple
+
 import pytest
 
 from pipeline_manager.dataflow_builder.dataflow_builder import DataflowBuilder
 from pipeline_manager.dataflow_builder.dataflow_graph import DataflowGraph
 from pipeline_manager.dataflow_builder.entities import (
-    Direction,
-    Interface,
     Property,
     Vector2,
 )
@@ -15,9 +15,8 @@ from pipeline_manager.dataflow_builder.entities import (
 @pytest.fixture
 def builder() -> DataflowBuilder:
     return DataflowBuilder(
-        dataflow_path="/dev/null",
-        specification_path="examples/sample-specification.json",
-        override_existing_dataflow=True,
+        input_dataflow=None,
+        specification="examples/sample-specification.json",
     )
 
 
@@ -43,9 +42,6 @@ def test_adding_node_present_in_specification(builder):
         two_column=False,
     )
 
-    interface = Interface(direction=Direction.OUTPUT, name="frames")
-    interface = node.add_interface(interface)
-
     prop = Property(name="filename", value="input.mp4")
     node.properties = [prop]
 
@@ -64,7 +60,7 @@ def test_adding_node_present_in_specification(builder):
                 "interfaces": [
                     {
                         "name": "frames",
-                        "id": interface.id,
+                        "id": node.interfaces[0].id,
                         "direction": "output",
                         "side": "right",
                         "sidePosition": 0,
@@ -115,8 +111,12 @@ def test_adding_multiple_nodes(n: int, builder):
     )
 
 
-def test_adding_connection(builder):
-    """Test if adding a connection between two existing nodes succeeds."""
+@pytest.fixture
+def single_connection_graph(builder) -> Tuple[DataflowGraph, Dict]:
+    """
+    Fixture providing a valid graph with two node a single connection
+    between them.
+    """
     graph = builder.create_graph()
 
     source = graph.create_node(
@@ -133,7 +133,7 @@ def test_adding_connection(builder):
         to_interface=drain.interfaces[0],
     )
 
-    assert graph.to_json(as_str=False) == {
+    expected = {
         "id": f"{graph._id}",
         "nodes": [
             {
@@ -184,3 +184,28 @@ def test_adding_connection(builder):
             },
         ],
     }
+
+    return graph, expected
+
+
+def test_adding_connection(single_connection_graph):
+    """Test if adding a connection between two existing nodes succeeds."""
+    graph, expected = single_connection_graph
+    assert graph.to_json(as_str=False) == expected
+
+
+def test_if_adding_duplicate_connection_fails(single_connection_graph):
+    """Test if adding a connection between two existing nodes succeeds."""
+    graph, expected = single_connection_graph
+    assert graph.to_json(as_str=False) == expected
+
+    # TODO: Replace with user-friendly node selection.
+    nodes = [value for _, value in graph._nodes.items()]
+    from_node = nodes[0]
+    to_node = nodes[1]
+
+    with pytest.raises(ValueError):
+        graph.create_connection(
+            from_interface=from_node.interfaces[0],
+            to_interface=to_node.interfaces[0],
+        )

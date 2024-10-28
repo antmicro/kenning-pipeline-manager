@@ -1,7 +1,8 @@
 """Module with DataflowGraph class for representing a dataflow graph."""
 
 import json
-from typing import Any, Dict, Union
+from pathlib import Path
+from typing import Any, Dict, Optional, Union
 
 from pipeline_manager.dataflow_builder.entities import (
     Direction,
@@ -22,8 +23,13 @@ from pipeline_manager.dataflow_builder.utils import (
 class DataflowGraph(JsonConvertible):
     """Representation of a dataflow graph."""
 
-    def __init__(self, specification: Dict[str, Any]):
+    def __init__(
+        self,
+        specification: Dict[str, Any],
+        dataflow: Optional[Dict[str, Any]] = None,
+    ):
         """Initialise a dataflow graph with default, mostly empty, values."""
+        # FIXME: Initialise graph with dataflow.
         self._id = get_uuid()
         self._nodes: Dict[str, Node] = {}
         self._connections: Dict[str, InterfaceConnection] = {}
@@ -81,6 +87,7 @@ class DataflowGraph(JsonConvertible):
         interfaces = []
         for interface in base_node["interfaces"]:
             _interface = Interface(
+                id=get_uuid(),
                 name=interface["name"],
                 direction=Direction(interface["direction"]),
             )
@@ -137,7 +144,26 @@ class DataflowGraph(JsonConvertible):
             raise ValueError(
                 "Destination (drain) interface is "
                 "not present in the dataflow graph."
-                f"{to_interface}"
+                f"{to_interface}. Aborted creation a connection."
+            )
+
+        if from_interface.direction == Direction.INPUT:
+            raise ValueError(
+                "Direction of the `from` interface cannot be `input`."
+                "Aborted creating a connection."
+            )
+
+        if to_interface.direction == Direction.OUTPUT:
+            raise ValueError(
+                "Direction of the `to` interface cannot be `output`."
+                "Aborted creation a connection."
+            )
+
+        if from_interface.type != to_interface.type:
+            raise ValueError(
+                "Mismatch between `from` interface with type = "
+                f"{from_interface.type} and `to` interface with type = "
+                f"{to_interface.type}."
             )
 
         connection_id = get_uuid()
@@ -151,10 +177,6 @@ class DataflowGraph(JsonConvertible):
             connection=connection,
             connections=self._connections,
         )
-
-        # TODO: Implement the following checks:
-        # interfaces exist
-        # interfaces have the same data type
 
         self._connections[connection_id] = connection
         return self._connections[connection_id]
@@ -170,3 +192,36 @@ class DataflowGraph(JsonConvertible):
         if as_str:
             return json.dumps(output)
         return output
+
+    def save(self, output_file: Path, safe_mode: bool = True):
+        """
+        Save graph to a JSON file.
+
+        Parameters
+        ----------
+        output_file : Path
+            Path to an output JSON file. File may not exist.
+        safe_mode : bool
+            In safe mode, a dataflow is validated before being saved.
+        """
+        if safe_mode:
+            self.validate()
+        with open(output_file, "wt", encoding="utf-8") as fd:
+            fd.write(self.to_json(as_str=True))
+
+    def validate(self):
+        raise NotImplementedError()
+
+        # Sava dataflow to a temp file.
+        temp_dataflow_file = Path("temp_dataflow.json")
+        # Enabling safe mode here would lead to infinite circular recursion.
+        self.save(output_file=temp_dataflow_file, safe_mode=False)
+
+        # `self.save()` cannot be used as it saves the dataflow only.
+        # temp_specification_path =
+
+        # result = validate(
+        #     dataflow_paths=temp_dataflow_file,
+        #     specification_path=
+
+        # )

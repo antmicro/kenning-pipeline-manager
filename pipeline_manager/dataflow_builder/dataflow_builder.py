@@ -13,62 +13,67 @@ class DataflowBuilder:
 
     def __init__(
         self,
-        dataflow_path: Union[Path, str],
-        specification_path: Union[Path, str],
-        override_existing_dataflow: bool = False,
+        input_dataflow: Union[Path, str, DataflowGraph, None],
+        specification: Union[Path, str],
+        # override_existing_dataflow: bool = False,
     ) -> None:
         """Initialise class attribute, perform basic checks."""
-        # Handling a dataflow file.
-        if isinstance(dataflow_path, str):
-            dataflow_path = Path(dataflow_path)
+        # # Handling a resulting dataflow file.
+        # if isinstance(output_dataflow, str):
+        #     output_dataflow = Path(output_dataflow)
 
-        dataflow_path = dataflow_path.resolve()
-        if dataflow_path.exists() and not override_existing_dataflow:
-            raise FileExistsError(
-                f"Specification file {dataflow_path} already exists. "
-                "Set `override_existing_dataflow=True` to override it."
-            )
+        # output_dataflow = output_dataflow.resolve()
+        # if output_dataflow.exists() and not override_existing_dataflow:
+        #     raise FileExistsError(
+        #         f"Specification file {output_dataflow} already exists. "
+        #         "Set `override_existing_dataflow=True` to override it."
+        #     )
+        # self.output_file = output_dataflow
+
+        # Handling an initial dataflow file.
+        self._graph = None
+        if input_dataflow is not None:
+            self._graph = self._load_dataflow_graph_from_file()
 
         # Handle a specification file.
+        self._specification = self._load_specification(specification)
+
+    def _load_specification(self, specification_path: Path):
         success, reason = is_proper_input_file(specification_path)
         if not success:
             raise ValueError(f"Invalid `specification_path`: {reason}")
-        self._load_specification(specification_path)
-
-        self._graph = None
-        self.output_file = dataflow_path
-
-    def _load_specification(self, specification_path: Path) -> None:
-        self._specification = None
         with open(specification_path, mode="rt", encoding="utf-8") as fd:
-            self._specification = json.loads(fd.read())
-
-        if not self._specification:
-            raise ValueError(
-                "Specification cannot be empty. "
-                f"Currently: {self._specification}"
-            )
+            return json.loads(fd.read())
 
     def load_dataflow_graph(
-        self, graph: Tuple[Path | str | DataflowGraph]
+        self,
+        graph: Tuple[Path | str | DataflowGraph],
     ) -> DataflowGraph:
         if isinstance(graph, DataflowGraph):
-            # FIXME: Validate the graph before loading it.
+            self.validate_graph(graph)
             self._graph = graph
             return self._graph
 
         elif isinstance(graph, str):
-            # FIXME: Validate the graph before loading it.
             graph_file = Path(graph)
-            self._load_from_file(graph)
+            _graph = self._load_dataflow_graph_from_file(graph_file)
+            return _graph
 
         elif isinstance(self, Path):
-            # FIXME: Validate the graph before loading it.
             graph_file = graph
-            self._load_from_file(graph_file)
-
-        # FIXME: Validate the graph before loading it.
+            _graph = self._load_dataflow_graph_from_file(graph_file)
+            _graph.validate()
+            return _graph
 
     def create_graph(self) -> DataflowGraph:
         self._graph = DataflowGraph(self._specification)
         return self._graph
+
+    def _load_dataflow_graph_from_file(self, path: Path) -> DataflowGraph:
+        path = path.resolve()
+        with open(path, "rt", encoding="utf-8") as fd:
+            graph_as_text = fd.read()
+            graph = json.loads(graph_as_text)
+            return DataflowGraph(
+                dataflow=graph, specification=self._specification
+            )
