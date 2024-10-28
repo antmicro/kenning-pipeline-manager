@@ -20,7 +20,14 @@ class DataflowBuilder:
         self,
         specification: Union[Path, str],
     ) -> None:
-        """Initialise class attribute, perform basic checks."""
+        """
+        Load a specification from a file, initialise empty list of graphs.
+
+        Parameters
+        ----------
+        specification : Union[Path, str]
+            Path to a JSON specification file.
+        """
         self._specification = self._load_specification(specification)
         self.graphs: List[DataflowGraph] = []
 
@@ -34,6 +41,27 @@ class DataflowBuilder:
     def create_graph(
         self, based_on: Union[Path, str, DataflowGraph, None] = None
     ) -> DataflowGraph:
+        """
+        Create a dataflow graph and return its instance.
+
+        Create an instance of a dataflow graph, add it to the internal
+        list and return it. The dataflow graph is based on the graph
+        provided in `based_on` parameter.
+
+        Parameters
+        ----------
+        based_on : Union[Path, str, DataflowGraph, None], optional
+            Dataflow graph, on which the new graph should be based on.
+            When `Path` or `str`, it should be a path to dataflow graph in
+            a JSON format. When `DataflowGraph`, it should be a valid
+            representation. When `None`, the new dataflow graph will not
+            be based on anything, by default None.
+
+        Returns
+        -------
+        DataflowGraph
+            Instance a of a dataflow graph, preserved in the DataflowBuilder.
+        """
         if based_on is not None:
             if isinstance(based_on, DataflowGraph):
                 self.graphs.append(based_on)
@@ -73,11 +101,11 @@ class DataflowBuilder:
     def validate(self):
         # Sava dataflow to a temp file.
         # Enabling safe mode here would lead to infinite circular recursion.
-        temp_dataflow_file = Path(f"temp_dataflow{get_uuid()}.json")
+        temp_dataflow_file = Path(f"temp_dataflow_{get_uuid()}.json")
         self.save(output_file=temp_dataflow_file, safe_mode=False)
 
         # `self.save()` cannot be used as it saves the dataflow only.
-        temp_specification_file = Path(f"temp_specification{get_uuid()}.json")
+        temp_specification_file = Path(f"temp_specification_{get_uuid()}.json")
         with open(temp_specification_file, "wt", encoding="utf-8") as fd:
             specification = json.dumps(self._specification)
             fd.write(specification)

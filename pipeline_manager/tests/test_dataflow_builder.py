@@ -5,7 +5,10 @@ from typing import Dict, Tuple
 import pytest
 
 from pipeline_manager.dataflow_builder.dataflow_builder import DataflowBuilder
-from pipeline_manager.dataflow_builder.dataflow_graph import DataflowGraph
+from pipeline_manager.dataflow_builder.dataflow_graph import (
+    AttributeType,
+    DataflowGraph,
+)
 from pipeline_manager.dataflow_builder.entities import (
     Property,
     Vector2,
@@ -111,7 +114,9 @@ def test_adding_multiple_nodes(n: int, builder):
 
 
 @pytest.fixture
-def single_connection_graph(builder) -> Tuple[DataflowGraph, Dict]:
+def single_connection_graph(
+    builder
+) -> Tuple[DataflowBuilder, DataflowGraph, Dict]:
     """
     Fixture providing a valid graph with two node a single connection
     between them.
@@ -194,14 +199,15 @@ def test_adding_connection(single_connection_graph):
 
 
 def test_if_adding_duplicate_connection_fails(single_connection_graph):
-    """Test if adding a connection between two existing nodes succeeds."""
+    """
+    Test if adding a duplicate of an existing connection between two existing
+    nodes fails.
+    """
     _, graph, expected = single_connection_graph
     assert graph.to_json(as_str=False) == expected
 
-    # TODO: Replace with user-friendly node selection.
-    nodes = [value for _, value in graph._nodes.items()]
-    from_node = nodes[0]
-    to_node = nodes[1]
+    from_node = graph.get(AttributeType.NODE, name="LoadVideo")
+    to_node = graph.get(AttributeType.NODE, name="LoadVideo")
 
     with pytest.raises(ValueError):
         graph.create_connection(
@@ -211,6 +217,79 @@ def test_if_adding_duplicate_connection_fails(single_connection_graph):
 
 
 def test_passing_validation_with_simple_graph(single_connection_graph):
+    """Test whether DataflowBuilder with a simple graph passes validation."""
     builder, _, _ = single_connection_graph
-    # If validation fails, it will raise an error.
+    # If validation fails, an error will be raised.
     builder.validate()
+
+
+def test_getting_nodes(single_connection_graph):
+    """Test if nodes may be retrieved from a graph with `get` method."""
+    _, graph, _ = single_connection_graph
+    node_name = "LoadVideo"
+
+    found = graph.get(AttributeType.NODE, name=node_name)
+
+    assert (
+        len(found) == 1
+    ), f"Exactly one element should be found but found {len(found)}."
+    assert found[0].name == node_name, (
+        f"Retrieved a wrong node. Expected name `{node_name}` "
+        f"but found `{found[0].name}`."
+    )
+
+
+def test_getting_node_by_id(single_connection_graph):
+    """Test if a node may be retrieved by its id."""
+    _, graph, _ = single_connection_graph
+    nodes = [value for _, value in graph._nodes.items()]
+    node = nodes[0]
+
+    found = graph.get_by_id(AttributeType.NODE, node.id)
+
+    assert found is not None, "A node was not found while it should be found."
+    # Dataclasses equality is determined on attributes equality basis.
+    assert node == found, "Retrieved a different node than expected."
+
+
+def test_getting_connections(single_connection_graph):
+    """Test if connections may be retrieved from a graph with `get` method."""
+    _, graph, _ = single_connection_graph
+
+    # nodes = [value for _, value in graph._nodes.items()]
+    # node = nodes[0]
+    # node.interfaces[]
+
+    # TODO: Implement user-friendly interface getting from node and graph.
+    # interface = InterfaceConnection(
+    # id=
+    # )
+    # found = graph.get(AttributeType.CONNECTION, from_interface=)
+    # found = graph.get(AttributeType.NODE, name=node_name)
+
+    # assert (
+    #     len(found) == 1
+    # ), f"Exactly one element should be found but found {len(found)}."
+    # assert found[0].name == node_name, (
+    #     f"Retrieved a wrong node. Expected name `{node_name}` "
+    #     f"but found `{found[0].name}`."
+    # )
+    raise NotImplementedError()
+
+
+def test_getting_connection_by_id(single_connection_graph):
+    """Test if a connection may be retrieved by its id."""
+    # _, graph, _ = single_connection_graph
+    # nodes = [value for _, value in graph._nodes.items()]
+    # node = nodes[0]
+
+    # found = graph.get_by_id(AttributeType.NODE, node.id)
+
+    # assert found, f"Failed get a node by its id `{node.id}`."
+    # assert (
+    #     found.name == node.name
+    # ), "Retrieved node has a different name than expected."
+    # assert (
+    #     found.position == node.position
+    # ), "Retrieved node has a different position than expected."
+    raise NotImplementedError()

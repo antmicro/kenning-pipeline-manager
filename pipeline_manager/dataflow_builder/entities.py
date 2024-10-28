@@ -144,7 +144,32 @@ class Node(JsonConvertible):
 
     # Attributes starting with a name starting with _ (underscore),
 
-    def __init__(self, specification: Dict[str, Any], **kwargs):
+    def __init__(self, specification: Dict[str, Any], **kwargs: Dict):
+        """
+        Initialise a node based on the provided specification and
+        `kwargs`.
+
+        In `kwargs`, `name` key is required. Based on that key, attributes
+        are filled with values from the provided specification. Default values
+        from the specification may be overridden with parameters
+        passed in `kwargs`.
+
+        Parameters
+        ----------
+        specification : Dict[str, Any]
+            Content of a specification file parsed to a Python dictionary.
+        **kwargs : Dict
+            Kwargs with parameter to override default values from the
+            specification. Key `name` is required.
+
+        Raises
+        ------
+        ValueError
+            Raised if the specification does not define any nodes.
+        ValueError
+            Raised if illegal parameter was passed via `kwargs`.
+            Allowed values include all attributes of `Node` class.
+        """
         is_type_correct = False
 
         if "nodes" not in specification:

@@ -1,7 +1,8 @@
 """Module with DataflowGraph class for representing a dataflow graph."""
 
 import json
-from typing import Any, Dict, Optional, Union
+from enum import Enum
+from typing import Any, Dict, List, Optional, Union
 
 from pipeline_manager.dataflow_builder.entities import (
     Direction,
@@ -17,6 +18,16 @@ from pipeline_manager.dataflow_builder.utils import (
     get_interface_if_present,
     get_uuid,
 )
+
+
+class AttributeType(Enum):
+    """
+    Available types of attributes that may be obtained with
+    the `DataflowGraph.get` method.
+    """
+
+    NODE = "_nodes"
+    CONNECTION = "_connections"
 
 
 class DataflowGraph(JsonConvertible):
@@ -40,10 +51,11 @@ class DataflowGraph(JsonConvertible):
     def create_node(self, **kwargs: Dict[str, Any]) -> Node:
         """
         Create the node initialized with the supplied arguments.
-        `id` is already initialized.
 
-        Default values are taken from the specification. They may
-        be overridden by the values supplied in `kwargs`.
+        The use of this method is highly preferred to manually adding a node.
+        Default values are taken from the specification so remember to pass
+        `name` of the node. The default values may be overridden by the values
+        supplied in `kwargs`. `id` is already initialized.
 
         Parameters
         ----------
@@ -85,7 +97,7 @@ class DataflowGraph(JsonConvertible):
 
         node_id = get_uuid()
 
-        # Take values for interface initialization from the specification.
+        # Values for interface initialization are taken from the specification.
         interfaces = []
         for interface in base_node["interfaces"]:
             _interface = Interface(
@@ -95,7 +107,8 @@ class DataflowGraph(JsonConvertible):
             )
             interfaces.append(_interface)
 
-        # Take values for properties initialization from the specification.
+        # Values for properties initialization are taken
+        # from the specification.
         properties = []
         if "properties" in base_node:
             for prop in base_node["properties"]:
@@ -120,7 +133,7 @@ class DataflowGraph(JsonConvertible):
             "two_column": self._specification["metadata"]["twoColumn"],
         }
 
-        # Override default parameters
+        # Override the default parameters with `kwargs`.
         for key, value in kwargs.items():
             parameters[key] = value
 
@@ -132,6 +145,40 @@ class DataflowGraph(JsonConvertible):
         from_interface: Union[Interface, str],
         to_interface: Union[Interface, str],
     ) -> InterfaceConnection:
+        """
+        Create a connection between two existing interfaces.
+
+        The function performs numerous checks to verify validity
+        of the desired connection, including if the connection already exists,
+        interfaces' types are matching and so on. The connection is added,
+        given it has passed these checks.
+
+        Parameters
+        ----------
+        from_interface : Union[Interface, str]
+            Source interface, where data will flow from.
+        to_interface : Union[Interface, str]
+            Destination interface, where data will flow to.
+
+        Returns
+        -------
+        InterfaceConnection
+            Created connection added to the graph.
+
+        Raises
+        ------
+        ValueError
+            Raised if source interface does not belong to the graph.
+        ValueError
+            Raised if destination interface does not belong to the graph.
+        ValueError
+            Raised if source interface direction is `input`.
+        ValueError
+            Raised if destination interface direction is `output`.
+        ValueError
+            Raised if a mismatch between source and destination interfaces'
+                types occurs.
+        """
         from_interface = get_interface_if_present(from_interface, self._nodes)
         to_interface = get_interface_if_present(to_interface, self._nodes)
 
@@ -194,3 +241,68 @@ class DataflowGraph(JsonConvertible):
         if as_str:
             return json.dumps(output)
         return output
+
+    def get(
+        self, type: AttributeType, **kwargs
+    ) -> Union[List[Node], List[InterfaceConnection]]:
+        """
+        Get items of a given type, which satisfy all the desired criteria.
+
+        Items are understood as either nodes or connections.
+        The function finds objects by eliminating these, which do not
+        match the criteria. Thus, between all the criteria
+        is `AND` logical operator.
+
+        Parameters
+        ----------
+        type : AttributeType
+            Type of the output objects.
+        **kwargs
+            Search criteria. Available:
+            - Keys: the attributes of the object of he chosen type.
+            - Values: values to be matched.
+
+        Returns
+        -------
+        Union[List[Node], List[InterfaceConnection]]
+            List of items satisfying the criteria.
+        """
+        # Choose an appropriate dictionary.
+        items: Dict = getattr(self, type.value)
+        items_satisfying_criteria = list(items.values())
+
+        # Match criteria.
+        for search_key, desired_value in kwargs.items():
+            items_satisfying_criteria = [
+                item
+                for item in items_satisfying_criteria
+                if getattr(item, search_key) == desired_value
+            ]
+
+        return items_satisfying_criteria
+
+    def get_by_id(
+        self, type: AttributeType, id: str
+    ) -> Optional[Union[InterfaceConnection, Node]]:
+        """
+        Fast getter, which finds an item of a supplied type and
+        with the provided id.
+
+        It has complexity of O(1) in juxtaposition to the `get` method, which
+        iterates over all items.
+
+        Parameters
+        ----------
+        type : AttributeType
+            Type of the output objects.
+        id : str
+            ID of the sought object.
+
+        Returns
+        -------
+        Optional[Union[InterfaceConnection, Node]]
+            Either an instance of InterfaceConnection or Node depending
+            on the provided `type`. If does not exist, None is returned.
+        """
+        items: Dict = getattr(self, type.value)
+        return items.get(id, None)
