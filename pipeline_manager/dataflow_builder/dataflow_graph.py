@@ -1,7 +1,6 @@
 """Module with DataflowGraph class for representing a dataflow graph."""
 
 import json
-from pathlib import Path
 from typing import Any, Dict, Optional, Union
 
 from pipeline_manager.dataflow_builder.entities import (
@@ -29,11 +28,14 @@ class DataflowGraph(JsonConvertible):
         dataflow: Optional[Dict[str, Any]] = None,
     ):
         """Initialise a dataflow graph with default, mostly empty, values."""
-        # FIXME: Initialise graph with dataflow.
         self._id = get_uuid()
         self._nodes: Dict[str, Node] = {}
         self._connections: Dict[str, InterfaceConnection] = {}
         self._specification: Dict[str, Any] = specification
+
+        if dataflow:
+            self._nodes = dataflow["nodes"]
+            self._connections = dataflow["connections"]
 
     def create_node(self, **kwargs: Dict[str, Any]) -> Node:
         """
@@ -192,36 +194,3 @@ class DataflowGraph(JsonConvertible):
         if as_str:
             return json.dumps(output)
         return output
-
-    def save(self, output_file: Path, safe_mode: bool = True):
-        """
-        Save graph to a JSON file.
-
-        Parameters
-        ----------
-        output_file : Path
-            Path to an output JSON file. File may not exist.
-        safe_mode : bool
-            In safe mode, a dataflow is validated before being saved.
-        """
-        if safe_mode:
-            self.validate()
-        with open(output_file, "wt", encoding="utf-8") as fd:
-            fd.write(self.to_json(as_str=True))
-
-    def validate(self):
-        raise NotImplementedError()
-
-        # Sava dataflow to a temp file.
-        temp_dataflow_file = Path("temp_dataflow.json")
-        # Enabling safe mode here would lead to infinite circular recursion.
-        self.save(output_file=temp_dataflow_file, safe_mode=False)
-
-        # `self.save()` cannot be used as it saves the dataflow only.
-        # temp_specification_path =
-
-        # result = validate(
-        #     dataflow_paths=temp_dataflow_file,
-        #     specification_path=
-
-        # )

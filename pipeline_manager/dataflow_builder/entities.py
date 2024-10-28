@@ -140,7 +140,7 @@ class Node(JsonConvertible):
     two_column: bool
     instance_name: Optional[str]
     subgraph: Optional[str]
-    enabled_interface_groups: List[Interface] = field(default_factory=list)
+    enabled_interface_groups: List[Interface] = field(default_factory=List)
 
     # Attributes starting with a name starting with _ (underscore),
 
@@ -169,10 +169,6 @@ class Node(JsonConvertible):
 
         for key, value in kwargs.items():
             setattr(self, key, value)
-
-    def from_specification(self, definition: Dict[str, Any]):
-        # self.name =
-        raise NotImplementedError()
 
     def to_json(self, as_str=True) -> Union[str, Dict]:
         output = {}

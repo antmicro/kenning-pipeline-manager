@@ -15,7 +15,6 @@ from pipeline_manager.dataflow_builder.entities import (
 @pytest.fixture
 def builder() -> DataflowBuilder:
     return DataflowBuilder(
-        input_dataflow=None,
         specification="examples/sample-specification.json",
     )
 
@@ -185,18 +184,18 @@ def single_connection_graph(builder) -> Tuple[DataflowGraph, Dict]:
         ],
     }
 
-    return graph, expected
+    return builder, graph, expected
 
 
 def test_adding_connection(single_connection_graph):
     """Test if adding a connection between two existing nodes succeeds."""
-    graph, expected = single_connection_graph
+    _, graph, expected = single_connection_graph
     assert graph.to_json(as_str=False) == expected
 
 
 def test_if_adding_duplicate_connection_fails(single_connection_graph):
     """Test if adding a connection between two existing nodes succeeds."""
-    graph, expected = single_connection_graph
+    _, graph, expected = single_connection_graph
     assert graph.to_json(as_str=False) == expected
 
     # TODO: Replace with user-friendly node selection.
@@ -209,3 +208,9 @@ def test_if_adding_duplicate_connection_fails(single_connection_graph):
             from_interface=from_node.interfaces[0],
             to_interface=to_node.interfaces[0],
         )
+
+
+def test_passing_validation_with_simple_graph(single_connection_graph):
+    builder, _, _ = single_connection_graph
+    # If validation fails, it will raise an error.
+    builder.validate()

@@ -1,79 +1,111 @@
 """Module with DataflowBuilder class, sharing its API publicly."""
 
 import json
+import os
 from pathlib import Path
-from typing import Tuple, Union
+from typing import Dict, List, Union
 
 from pipeline_manager.dataflow_builder.dataflow_graph import DataflowGraph
-from pipeline_manager.dataflow_builder.utils import is_proper_input_file
+from pipeline_manager.dataflow_builder.utils import (
+    get_uuid,
+    is_proper_input_file,
+)
+from pipeline_manager.validator import validate
 
 
 class DataflowBuilder:
-    """Class for building dataflow graph."""
+    """Class for building dataflow graphs."""
 
     def __init__(
         self,
-        input_dataflow: Union[Path, str, DataflowGraph, None],
         specification: Union[Path, str],
-        # override_existing_dataflow: bool = False,
     ) -> None:
         """Initialise class attribute, perform basic checks."""
-        # # Handling a resulting dataflow file.
-        # if isinstance(output_dataflow, str):
-        #     output_dataflow = Path(output_dataflow)
-
-        # output_dataflow = output_dataflow.resolve()
-        # if output_dataflow.exists() and not override_existing_dataflow:
-        #     raise FileExistsError(
-        #         f"Specification file {output_dataflow} already exists. "
-        #         "Set `override_existing_dataflow=True` to override it."
-        #     )
-        # self.output_file = output_dataflow
-
-        # Handling an initial dataflow file.
-        self._graph = None
-        if input_dataflow is not None:
-            self._graph = self._load_dataflow_graph_from_file()
-
-        # Handle a specification file.
         self._specification = self._load_specification(specification)
+        self.graphs: List[DataflowGraph] = []
 
-    def _load_specification(self, specification_path: Path):
+    def _load_specification(self, specification_path: Path) -> Dict:
         success, reason = is_proper_input_file(specification_path)
         if not success:
             raise ValueError(f"Invalid `specification_path`: {reason}")
         with open(specification_path, mode="rt", encoding="utf-8") as fd:
             return json.loads(fd.read())
 
-    def load_dataflow_graph(
-        self,
-        graph: Tuple[Path | str | DataflowGraph],
+    def create_graph(
+        self, based_on: Union[Path, str, DataflowGraph, None] = None
     ) -> DataflowGraph:
-        if isinstance(graph, DataflowGraph):
-            self.validate_graph(graph)
-            self._graph = graph
-            return self._graph
+        if based_on is not None:
+            if isinstance(based_on, DataflowGraph):
+                self.graphs.append(based_on)
+            else:
+                self.graphs.append(self._load_dataflow_graph_from_file())
 
-        elif isinstance(graph, str):
-            graph_file = Path(graph)
-            _graph = self._load_dataflow_graph_from_file(graph_file)
-            return _graph
-
-        elif isinstance(self, Path):
-            graph_file = graph
-            _graph = self._load_dataflow_graph_from_file(graph_file)
-            _graph.validate()
-            return _graph
-
-    def create_graph(self) -> DataflowGraph:
-        self._graph = DataflowGraph(self._specification)
-        return self._graph
+        self.graphs.append(DataflowGraph(self._specification))
+        return self.graphs[-1]
 
     def _load_dataflow_graph_from_file(self, path: Path) -> DataflowGraph:
         path = path.resolve()
         with open(path, "rt", encoding="utf-8") as fd:
             graph_as_text = fd.read()
             graph = json.loads(graph_as_text)
-            return DataflowGraph(
+            dataflow_graph = DataflowGraph(
                 dataflow=graph, specification=self._specification
             )
+
+            return dataflow_graph
+
+    def save(self, output_file: Path, safe_mode: bool = True):
+        """
+        Save graphs to a JSON file.
+
+        Parameters
+        ----------
+        output_file : Path
+            Path to an output JSON file. File may not exist.
+        safe_mode : bool
+            In safe mode, a dataflow is validated before being saved.
+        """
+        if safe_mode:
+            self.validate()
+        with open(output_file, "wt", encoding="utf-8") as fd:
+            fd.write(self.to_json(as_str=True))
+
+    def validate(self):
+        # Sava dataflow to a temp file.
+        # Enabling safe mode here would lead to infinite circular recursion.
+        temp_dataflow_file = Path(f"temp_dataflow{get_uuid()}.json")
+        self.save(output_file=temp_dataflow_file, safe_mode=False)
+
+        # `self.save()` cannot be used as it saves the dataflow only.
+        temp_specification_file = Path(f"temp_specification{get_uuid()}.json")
+        with open(temp_specification_file, "wt", encoding="utf-8") as fd:
+            specification = json.dumps(self._specification)
+            fd.write(specification)
+
+        result = validate(
+            dataflow_paths=[temp_dataflow_file],
+            specification_path=temp_specification_file,
+        )
+
+        os.remove(temp_dataflow_file)
+        os.remove(temp_specification_file)
+
+        message = ""
+        if result == 1:
+            message = "The provided specification is invalid."
+        elif result == 2:
+            message = "The generated dataflow is invalid."
+        elif result == 3:
+            message = "Input was invalid."
+        if message:
+            raise ValueError(message)
+
+    def to_json(self, as_str: bool = True) -> Union[Dict, str]:
+        output = {
+            "version": "20240723.13",
+            "graphs": [graph.to_json(as_str=False) for graph in self.graphs],
+        }
+
+        if as_str:
+            return json.dumps(output)
+        return output
