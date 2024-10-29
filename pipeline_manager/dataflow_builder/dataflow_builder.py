@@ -14,29 +14,93 @@ from pipeline_manager.validator import validate
 
 
 class DataflowBuilder:
-    """Class for building dataflow graphs."""
+    """
+    Class for building dataflow graphs,
+    each instance of the class must be associated with a single specification.
+    """
 
     def __init__(
         self,
-        specification: Union[Path, str],
+        specification: Path,
     ) -> None:
         """
-        Load a specification from a file, initialise empty list of graphs.
+        Load a specification from a file, initialise an empty list of graphs.
 
         Parameters
         ----------
-        specification : Union[Path, str]
+        specification : Path
             Path to a JSON specification file.
         """
-        self._specification = self._load_specification(specification)
+        self.load_specification(specification)
         self.graphs: List[DataflowGraph] = []
 
-    def _load_specification(self, specification_path: Path) -> Dict:
+    def load_dataflow(self, dataflow_path: Path) -> DataflowGraph:
+        """
+        Load a dataflow graph from a file.
+
+        The graph is loaded to the internal storage and returned to
+        facilitate further manipulations. The first graph from a
+        file is loaded.
+
+        Parameters
+        ----------
+        dataflow_path : Path
+            Path a dataflow graph.
+
+        Returns
+        -------
+        DataflowGraph
+            Instance of DataflowGraph loaded from a file.
+
+        Raises
+        ------
+        ValueError
+            Raised if a dataflow graph could not be loaded.
+        """
+        success, reason = is_proper_input_file(
+            dataflow_path, intended_use="dataflow"
+        )
+        if not success:
+            raise ValueError(f"Invalid `dataflow_path`: {reason}")
+        with open(dataflow_path, "rt", encoding="utf-8") as fd:
+            content = json.loads(fd.read())
+            dataflow_graph = DataflowGraph(
+                specification=self._specification,
+                dataflow=content["graphs"][0],
+            )
+
+            self.graphs.append(dataflow_graph)
+            return self.graphs[-1]
+
+    def load_specification(
+        self, specification_path: Path, purge_dataflows: bool = True
+    ):
+        """
+        Replace a current specification file associated
+        with the instance of DataflowBuilder.
+
+        Parameters
+        ----------
+        specification_path : Path
+            Path to a specification file.
+        purge_dataflows : bool, optional
+            Determine if dataflow graphs loaded to memory should be purged.
+            It makes sense as after changing a specification dataflow graphs
+            may no longer be valid. By default True.
+
+        Raises
+        ------
+        ValueError
+            Raised if specification file cannot be loaded or is invalid.
+        """
         success, reason = is_proper_input_file(specification_path)
         if not success:
             raise ValueError(f"Invalid `specification_path`: {reason}")
         with open(specification_path, mode="rt", encoding="utf-8") as fd:
-            return json.loads(fd.read())
+            self._specification = json.loads(fd.read())
+
+            if purge_dataflows:
+                self.graphs = []
 
     def create_graph(
         self, based_on: Union[Path, str, DataflowGraph, None] = None

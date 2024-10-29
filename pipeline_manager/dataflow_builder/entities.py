@@ -104,6 +104,12 @@ class Interface(JsonConvertible):
     id: str = str(uuid.uuid4())
     type: List[str] = field(default_factory=list)
 
+    def __post_init__(self):
+        if isinstance(self.direction, str):
+            self.direction = Direction(self.direction)
+        if isinstance(self.side, str):
+            self.side = Side(self.side)
+
     def to_json(self, as_str: bool) -> Union[str, Dict]:
         if not self.side:
             if self.direction in (Direction.INOUT, Direction.INPUT):
@@ -152,8 +158,8 @@ class Node(JsonConvertible):
     interfaces: List[Interface]
     width: float
     two_column: bool
-    instance_name: Optional[str]
-    subgraph: Optional[str]
+    instance_name: Optional[str] = None
+    subgraph: Optional[str] = None
     enabled_interface_groups: List[Interface] = field(default_factory=List)
 
     # Attributes starting with a name starting with _ (underscore),
@@ -207,6 +213,30 @@ class Node(JsonConvertible):
             )
 
         for key, value in kwargs.items():
+            # List of dictionary to list of Property objects conversion.
+            if key == "properties" and len(value) > 0:
+                if isinstance(value[0], Dict):
+                    properties = []
+                    for property in value:
+                        snake_cased_arguments = {
+                            camel_case_to_snake_case(key): value
+                            for key, value in property.items()
+                        }
+                        properties.append(Property(**snake_cased_arguments))
+                    value = properties
+
+            # List of dictionary to list of Interface objects conversion.
+            if key == "interfaces" and len(value) > 0:
+                if isinstance(value[0], Dict):
+                    interfaces = []
+                    for interface in value:
+                        snake_cased_arguments = {
+                            camel_case_to_snake_case(key): value
+                            for key, value in interface.items()
+                        }
+                        interfaces.append(Interface(**snake_cased_arguments))
+                    value = interfaces
+
             setattr(self, key, value)
 
     def get(
@@ -353,6 +383,31 @@ def snake_case_to_camel_case(name: str) -> str:
     first_character = first_character.lower()
 
     return first_character + title_cased[1:]
+
+
+def camel_case_to_snake_case(name: str) -> str:
+    """
+    Convert an entity name in a camel case (camelCase) to
+    a snake case (snake_case).
+
+    Parameters
+    ----------
+    name : str
+        Camel-cased name.
+
+    Returns
+    -------
+    str
+        Snaked-cased name.
+    """
+    snake_cased = ""
+    for letter in name:
+        if letter.isupper():
+            snake_cased += f"_{letter.lower()}"
+        else:
+            snake_cased += letter
+
+    return snake_cased
 
 
 def match_criteria(items: List, **kwargs) -> List[Any]:

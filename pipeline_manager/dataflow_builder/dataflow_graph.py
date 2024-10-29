@@ -12,6 +12,7 @@ from pipeline_manager.dataflow_builder.entities import (
     Node,
     Property,
     Vector2,
+    camel_case_to_snake_case,
     match_criteria,
 )
 from pipeline_manager.dataflow_builder.utils import (
@@ -40,15 +41,52 @@ class DataflowGraph(JsonConvertible):
         specification: Dict[str, Any],
         dataflow: Optional[Dict[str, Any]] = None,
     ):
-        """Initialise a dataflow graph with default, mostly empty, values."""
+        """
+        Initialise a dataflow graph with values either from with the supplied
+        dataflow graph or empty values.
+
+        Do not use the constructor directly.
+        Use `DataflowBuilder.create_graph`, instead.
+
+        Parameters
+        ----------
+        specification : Dict[str, Any]
+            Content of a specification file.
+        dataflow : Optional[Dict[str, Any]], optional
+            Content of a dataflow builder to load,
+            None means an empty dataflow graph, by default None.
+        """
         self._id = get_uuid()
         self._nodes: Dict[str, Node] = {}
         self._connections: Dict[str, InterfaceConnection] = {}
         self._specification: Dict[str, Any] = specification
 
         if dataflow:
-            self._nodes = dataflow["nodes"]
-            self._connections = dataflow["connections"]
+            for node in dataflow["nodes"]:
+                node_arguments = {
+                    camel_case_to_snake_case(key): value
+                    for key, value in node.items()
+                }
+                node_arguments["position"] = Vector2(
+                    node_arguments["position"]["x"],
+                    node_arguments["position"]["y"],
+                )
+
+                self._nodes[node["id"]] = Node(
+                    specification=self._specification,
+                    **node_arguments,
+                )
+
+            for connection in dataflow["connections"]:
+                self._connections[connection["id"]] = InterfaceConnection(
+                    id=connection["id"],
+                    from_interface=self.get_by_id(
+                        AttributeType.INTERFACE, connection["from"]
+                    ),
+                    to_interface=self.get_by_id(
+                        AttributeType.INTERFACE, connection["to"]
+                    ),
+                )
 
     def create_node(self, **kwargs: Dict[str, Any]) -> Node:
         """

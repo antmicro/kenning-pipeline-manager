@@ -1,5 +1,6 @@
 """Module with tests for dataflow building process."""
 
+from pathlib import Path
 from typing import Dict, Tuple
 
 import pytest
@@ -364,3 +365,17 @@ def test_absolute_node_motion(
     assert (
         node.position == expected_position
     ), "Failed to properly re-position a node."
+
+
+def test_using_sample_graphs():
+    """
+    Test if using a sample specification and a sample dataflow
+    passes validation.
+    """
+    specification_path = Path("examples/sample-specification.json")
+    builder = DataflowBuilder(specification=specification_path)
+
+    dataflow_path = Path("examples/sample-dataflow.json")
+    builder.load_dataflow(dataflow_path=dataflow_path)
+
+    builder.validate()
