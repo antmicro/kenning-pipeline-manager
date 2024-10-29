@@ -14,6 +14,11 @@ class Vector2:
 
     x: float = 0.0
     y: float = 0.0
+    _minimal_value: float = 0
+    _maximal_value: float = 2**16
+
+    def __add__(self, another: "Vector2") -> "Vector2":
+        return Vector2(self.x + another.x, self.y + another.y)
 
     def to_json(self, as_str: bool = True) -> Union[str, Dict]:
         output = {
@@ -225,6 +230,39 @@ class Node(JsonConvertible):
         items: Dict = getattr(self, type.value)
         return match_criteria(items=items, **kwargs)
 
+    def move(self, new_position: Vector2, relative: bool = False):
+        """
+        Change a position of the node.
+
+        Change a position of the node either in a relative manner or
+        an absolute manner. Values are clamped to stay in the range
+        of values.
+
+        Parameters
+        ----------
+        new_position : Vector2
+            If `relative` is False, then this a new position.
+            Otherwise, it is a displacement (movement) vector.
+        relative : bool, optional
+            Whether position should be calculated based on the
+            previous one True or not (False), by default False.
+        """
+        if relative:
+            self.position += new_position
+        else:
+            self.position = new_position
+
+        self.position.x = clamp(
+            self.position.x,
+            self.position._minimal_value,
+            self.position._maximal_value,
+        )
+        self.position.y = clamp(
+            self.position.y,
+            self.position._minimal_value,
+            self.position._maximal_value,
+        )
+
     def to_json(self, as_str=True) -> Union[str, Dict]:
         output = {}
         for field_name, _ in get_type_hints(self).items():
@@ -345,3 +383,28 @@ def match_criteria(items: List, **kwargs) -> List[Any]:
             if getattr(item, search_key) == desired_value
         ]
     return items
+
+
+def clamp(value: float, minimum: float, maximum: float) -> float:
+    """
+    Clamp `value` are in the [minimum, maximum] range.
+
+    Parameters
+    ----------
+    value : float
+        Number to be clamped.
+    minimum : float
+        Lower bound of the range.
+    maximum : float
+        Upper bound of the range.
+
+    Returns
+    -------
+    float
+        Clamped number.
+    """
+    if value < minimum:
+        return minimum
+    elif value > maximum:
+        return maximum
+    return value

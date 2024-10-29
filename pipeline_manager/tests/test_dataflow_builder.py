@@ -305,3 +305,62 @@ def test_getting_connection_from_graph_by_id(single_connection_graph):
     assert (
         retrieved_connection == original_connection
     ), "Retrieved a different connection than expected with id."
+
+
+# LoadVideo starts at (0, 0).
+# SaveVideo starts at (2100, 200).
+@pytest.mark.parametrize(
+    "node_name,shift,expected_position",
+    (
+        ("LoadVideo", Vector2(200, 200), Vector2(200, 200)),
+        ("SaveVideo", Vector2(200, 200), Vector2(2300, 400)),
+        ("LoadVideo", Vector2(-1000, 0), Vector2(0, 0)),
+        ("LoadVideo", Vector2(0, -1000), Vector2(0, 0)),
+        ("SaveVideo", Vector2(-3000, 0), Vector2(0, 200)),
+        ("SaveVideo", Vector2(0, -199), Vector2(2100, 1)),
+    ),
+)
+def test_relative_node_motion(
+    node_name: str,
+    shift: Vector2,
+    expected_position: Vector2,
+    single_connection_graph,
+):
+    """Test if a node is moved relative to its previous position."""
+    _, graph, _ = single_connection_graph
+    [node] = graph.get(AttributeType.NODE, name=node_name)
+
+    node.move(shift, relative=True)
+
+    assert (
+        node.position == expected_position
+    ), "Failed to properly re-position a node."
+
+
+@pytest.mark.parametrize(
+    "node_name,new_position,expected_position",
+    (
+        ("LoadVideo", Vector2(200, 200), Vector2(200, 200)),
+        ("SaveVideo", Vector2(200, 200), Vector2(200, 200)),
+        ("SaveVideo", Vector2(1, 2), Vector2(1, 2)),
+        ("LoadVideo", Vector2(-100, 0), Vector2(Vector2._minimal_value, 0)),
+        ("SaveVideo", Vector2(-100, 0), Vector2(Vector2._minimal_value, 0)),
+        ("SaveVideo", Vector2(2**20, 0), Vector2(Vector2._maximal_value, 0)),
+        ("LoadVideo", Vector2(2**20, 5), Vector2(Vector2._maximal_value, 5)),
+    ),
+)
+def test_absolute_node_motion(
+    node_name: str,
+    new_position: Vector2,
+    expected_position: Vector2,
+    single_connection_graph,
+):
+    """Test if a node is moved independently of its previous position."""
+    _, graph, _ = single_connection_graph
+    [node] = graph.get(AttributeType.NODE, name=node_name)
+
+    node.move(new_position, relative=False)
+
+    assert (
+        node.position == expected_position
+    ), "Failed to properly re-position a node."
