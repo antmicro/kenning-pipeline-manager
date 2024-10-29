@@ -127,6 +127,15 @@ class Interface(JsonConvertible):
         return output
 
 
+class NodeAttributeType(Enum):
+    """
+    Available type of attributes that may be found with the `Node.get` method.
+    """
+
+    INTERFACE = "interfaces"
+    PROPERTY = "properties"
+
+
 @dataclass
 class Node(JsonConvertible):
     """Representation of a node in a dataflow graph."""
@@ -194,6 +203,27 @@ class Node(JsonConvertible):
 
         for key, value in kwargs.items():
             setattr(self, key, value)
+
+    def get(
+        self, type: NodeAttributeType, **kwargs
+    ) -> Union[List[Property], List[Interface]]:
+        """
+        Get either properties or interfaces matching criteria.
+
+        Parameters
+        ----------
+        type : NodeAttributeType
+            Type of an item to retrieve.
+        **kwargs
+            Criteria, which items have to satisfy.
+
+        Returns
+        -------
+        Union[List[Property], List[Interface]]
+            List of either Property or Interface instances.
+        """
+        items: Dict = getattr(self, type.value)
+        return match_criteria(items=items, **kwargs)
 
     def to_json(self, as_str=True) -> Union[str, Dict]:
         output = {}
@@ -285,3 +315,33 @@ def snake_case_to_camel_case(name: str) -> str:
     first_character = first_character.lower()
 
     return first_character + title_cased[1:]
+
+
+def match_criteria(items: List, **kwargs) -> List[Any]:
+    """
+    Get a list of items matching criteria supplied in `kwargs`.
+
+    Find items matching all the criteria (logical `AND` operator).
+    Keys are names of attributes of an item.
+    Values are values of attributes of an item.
+
+    Parameters
+    ----------
+    items : List
+        Items, against which the matching should be performed.
+        Lack of criteria causes returning all items.
+    **kwargs
+
+
+    Returns
+    -------
+    List[Any]
+        Items matching the supplied criteria.
+    """
+    for search_key, desired_value in kwargs.items():
+        items = [
+            item
+            for item in items
+            if getattr(item, search_key) == desired_value
+        ]
+    return items

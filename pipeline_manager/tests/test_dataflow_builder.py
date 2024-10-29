@@ -10,6 +10,8 @@ from pipeline_manager.dataflow_builder.dataflow_graph import (
     DataflowGraph,
 )
 from pipeline_manager.dataflow_builder.entities import (
+    Direction,
+    NodeAttributeType,
     Property,
     Vector2,
 )
@@ -206,8 +208,8 @@ def test_if_adding_duplicate_connection_fails(single_connection_graph):
     _, graph, expected = single_connection_graph
     assert graph.to_json(as_str=False) == expected
 
-    from_node = graph.get(AttributeType.NODE, name="LoadVideo")
-    to_node = graph.get(AttributeType.NODE, name="LoadVideo")
+    [from_node] = graph.get(AttributeType.NODE, name="LoadVideo")
+    [to_node] = graph.get(AttributeType.NODE, name="LoadVideo")
 
     with pytest.raises(ValueError):
         graph.create_connection(
@@ -249,47 +251,57 @@ def test_getting_node_by_id(single_connection_graph):
 
     assert found is not None, "A node was not found while it should be found."
     # Dataclasses equality is determined on attributes equality basis.
-    assert node == found, "Retrieved a different node than expected."
+    assert found == node, "Retrieved a different node than expected."
 
 
-def test_getting_connections(single_connection_graph):
-    """Test if connections may be retrieved from a graph with `get` method."""
+@pytest.mark.parametrize(
+    "search_criteria,results_count",
+    (
+        ({}, 2),
+        ({"direction": Direction.INPUT}, 1),
+        ({"direction": Direction.OUTPUT}, 1),
+        ({"direction": Direction.INOUT}, 0),
+    ),
+)
+def test_getting_interfaces_from_graph(
+    search_criteria: Dict, results_count: int, single_connection_graph
+):
+    """Test if interfaces may be retrieved."""
     _, graph, _ = single_connection_graph
 
-    # nodes = [value for _, value in graph._nodes.items()]
-    # node = nodes[0]
-    # node.interfaces[]
+    all_interfaces = graph.get(type=AttributeType.INTERFACE, **search_criteria)
 
-    # TODO: Implement user-friendly interface getting from node and graph.
-    # interface = InterfaceConnection(
-    # id=
-    # )
-    # found = graph.get(AttributeType.CONNECTION, from_interface=)
-    # found = graph.get(AttributeType.NODE, name=node_name)
-
-    # assert (
-    #     len(found) == 1
-    # ), f"Exactly one element should be found but found {len(found)}."
-    # assert found[0].name == node_name, (
-    #     f"Retrieved a wrong node. Expected name `{node_name}` "
-    #     f"but found `{found[0].name}`."
-    # )
-    raise NotImplementedError()
+    assert (
+        len(all_interfaces) == results_count
+    ), f"Failed to retrieve {results_count} interfaces."
 
 
-def test_getting_connection_by_id(single_connection_graph):
+def test_getting_connections_from_graph(single_connection_graph):
+    """Test if connections may be retrieved from a graph with `get` method."""
+    _, graph, _ = single_connection_graph
+    [node] = graph.get(AttributeType.NODE, name="LoadVideo")
+    [found_interface] = node.get(NodeAttributeType.INTERFACE)
+
+    [retrieved_connection] = graph.get(
+        AttributeType.CONNECTION, from_interface=found_interface
+    )
+
+    [original_connection_id] = graph._connections
+    original_connection = graph._connections[original_connection_id]
+    assert (
+        retrieved_connection == original_connection
+    ), "Retrieved a different connection than expected."
+
+
+def test_getting_connection_from_graph_by_id(single_connection_graph):
     """Test if a connection may be retrieved by its id."""
-    # _, graph, _ = single_connection_graph
-    # nodes = [value for _, value in graph._nodes.items()]
-    # node = nodes[0]
+    _, graph, _ = single_connection_graph
+    [original_connection] = list(graph._connections.values())
 
-    # found = graph.get_by_id(AttributeType.NODE, node.id)
+    retrieved_connection = graph.get_by_id(
+        AttributeType.CONNECTION, id=original_connection.id
+    )
 
-    # assert found, f"Failed get a node by its id `{node.id}`."
-    # assert (
-    #     found.name == node.name
-    # ), "Retrieved node has a different name than expected."
-    # assert (
-    #     found.position == node.position
-    # ), "Retrieved node has a different position than expected."
-    raise NotImplementedError()
+    assert (
+        retrieved_connection == original_connection
+    ), "Retrieved a different connection than expected with id."

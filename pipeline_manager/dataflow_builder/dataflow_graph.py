@@ -12,6 +12,7 @@ from pipeline_manager.dataflow_builder.entities import (
     Node,
     Property,
     Vector2,
+    match_criteria,
 )
 from pipeline_manager.dataflow_builder.utils import (
     ensure_connection_is_absent,
@@ -28,6 +29,7 @@ class AttributeType(Enum):
 
     NODE = "_nodes"
     CONNECTION = "_connections"
+    INTERFACE = "interfaces"
 
 
 class DataflowGraph(JsonConvertible):
@@ -244,11 +246,11 @@ class DataflowGraph(JsonConvertible):
 
     def get(
         self, type: AttributeType, **kwargs
-    ) -> Union[List[Node], List[InterfaceConnection]]:
+    ) -> Union[List[Node], List[InterfaceConnection], List[Interface]]:
         """
         Get items of a given type, which satisfy all the desired criteria.
 
-        Items are understood as either nodes or connections.
+        Items are understood as either nodes or connections or interfaces.
         The function finds objects by eliminating these, which do not
         match the criteria. Thus, between all the criteria
         is `AND` logical operator.
@@ -264,32 +266,36 @@ class DataflowGraph(JsonConvertible):
 
         Returns
         -------
-        Union[List[Node], List[InterfaceConnection]]
+        Union[List[Node], List[InterfaceConnection], List[Interface]]
             List of items satisfying the criteria.
         """
-        # Choose an appropriate dictionary.
+        # Although interfaces belong to the nodes, not to a graph.
+        # The option to find them is kept here so the API is coherent.
+        if type == AttributeType.INTERFACE:
+            return self._get_interfaces(**kwargs)
+
+        # Choose an appropriate dictionary as data source.
         items: Dict = getattr(self, type.value)
         items_satisfying_criteria = list(items.values())
 
-        # Match criteria.
-        for search_key, desired_value in kwargs.items():
-            items_satisfying_criteria = [
-                item
-                for item in items_satisfying_criteria
-                if getattr(item, search_key) == desired_value
-            ]
+        return match_criteria(items=items_satisfying_criteria, **kwargs)
 
-        return items_satisfying_criteria
+    def _get_interfaces(self, **kwargs) -> List[Interface]:
+        interfaces: List[Interface] = []
+        for _, node in self._nodes.items():
+            interfaces.extend(node.interfaces)
+
+        return match_criteria(items=interfaces, **kwargs)
 
     def get_by_id(
         self, type: AttributeType, id: str
-    ) -> Optional[Union[InterfaceConnection, Node]]:
+    ) -> Optional[Union[InterfaceConnection, Node, Interface]]:
         """
         Fast getter, which finds an item of a supplied type and
         with the provided id.
 
-        It has complexity of O(1) in juxtaposition to the `get` method, which
-        iterates over all items.
+        It has complexity of O(1) (except for interfaces) in juxtaposition
+        to the `get` method, which iterates over all items.
 
         Parameters
         ----------
@@ -300,9 +306,13 @@ class DataflowGraph(JsonConvertible):
 
         Returns
         -------
-        Optional[Union[InterfaceConnection, Node]]
-            Either an instance of InterfaceConnection or Node depending
-            on the provided `type`. If does not exist, None is returned.
+        Optional[Union[InterfaceConnection, Node, Interface]]
+            Either an single instance of InterfaceConnection or Node
+            or Interface depending on the provided `type`.
+            If does not exist, None is returned.
         """
+        if type == AttributeType.INTERFACE:
+            interface = self._get_interfaces(id=id)
+            return interface[0] if interface else None
         items: Dict = getattr(self, type.value)
         return items.get(id, None)
