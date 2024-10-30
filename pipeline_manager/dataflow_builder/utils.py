@@ -169,7 +169,7 @@ def filter_connections(
 
     filtered = [
         id
-        for id, connection in connections.keys()
+        for id, connection in connections.items()
         if getattr(connection, attribute_name) == value
     ]
 

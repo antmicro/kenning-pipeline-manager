@@ -213,6 +213,11 @@ class Node(JsonConvertible):
             )
 
         for key, value in kwargs.items():
+            if key not in Node.__annotations__.keys():
+                raise KeyError(
+                    f"There is no attribute `{key}` defined in Node."
+                )
+
             # List of dictionary to list of Property objects conversion.
             if key == "properties" and len(value) > 0:
                 if isinstance(value[0], Dict):

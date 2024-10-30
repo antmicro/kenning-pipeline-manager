@@ -367,15 +367,66 @@ def test_absolute_node_motion(
     ), "Failed to properly re-position a node."
 
 
-def test_using_sample_graphs():
+@pytest.fixture
+def sample_specification_path():
+    """Fixture providing path to a file with a sample specification."""
+    return Path("examples/sample-specification.json")
+
+
+@pytest.fixture
+def sample_dataflow_path():
+    """Fixture providing path to a file with a sample dataflow graph."""
+    return Path("examples/sample-dataflow.json")
+
+
+def test_using_sample_graphs(sample_specification_path, sample_dataflow_path):
     """
     Test if using a sample specification and a sample dataflow
     passes validation.
     """
-    specification_path = Path("examples/sample-specification.json")
-    builder = DataflowBuilder(specification=specification_path)
-
-    dataflow_path = Path("examples/sample-dataflow.json")
-    builder.load_dataflow(dataflow_path=dataflow_path)
+    builder = DataflowBuilder(specification=sample_specification_path)
+    builder.load_dataflow(dataflow_path=sample_dataflow_path)
 
     builder.validate()
+
+
+def test_modifying_sample_graph(
+    sample_specification_path, sample_dataflow_path
+):
+    """
+    Test if adding a node and connecting it
+    to a sample graph yields no errors.
+    """
+    builder = DataflowBuilder(specification=sample_specification_path)
+    graph = builder.load_dataflow(dataflow_path=sample_dataflow_path)
+    builder.validate()
+
+    second_storage = graph.create_node(name="SaveVideo")
+    second_storage.move(Vector2(1500, 1000))
+
+    [morphological_operation] = graph.get(
+        AttributeType.NODE, name="Morphological operation"
+    )
+    [source] = morphological_operation.get(
+        NodeAttributeType.INTERFACE, direction=Direction.OUTPUT
+    )
+    [drain] = second_storage.get(
+        NodeAttributeType.INTERFACE, direction=Direction.INPUT
+    )
+
+    graph.create_connection(from_interface=source, to_interface=drain)
+
+    builder.validate()
+
+
+def test_raising_error_when_using_non_existent_keyword_argument(
+    sample_specification_path, sample_dataflow_path
+):
+    """
+    Test if an KeyError is raised when a non-existent
+    keyword argument is used.
+    """
+    builder = DataflowBuilder(specification=sample_specification_path)
+    graph = builder.load_dataflow(dataflow_path=sample_dataflow_path)
+    with pytest.raises(KeyError):
+        graph.create_node(name="LoadVideo", non_existent_keyword_arg=123)
