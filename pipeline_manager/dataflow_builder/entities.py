@@ -164,6 +164,33 @@ class Node(JsonConvertible):
 
     # Attributes starting with a name starting with _ (underscore),
 
+    def set_property(self, property_name: str, property_value: Any) -> None:
+        """
+        Convenient setter to change value of a property of the node.
+
+        Parameters
+        ----------
+        property_name : str
+            Name of the property.
+        property_value : Any
+            New value of a property.
+
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        KeyError
+            Raised if property with the supplied `property_named`
+            was not found.
+        """
+        for property in self.properties:
+            if property.name == property_name:
+                property.value = property_value
+                return
+        raise KeyError(f"Property with name `{property_name}` was not found.")
+
     def __init__(self, specification: Dict[str, Any], **kwargs: Dict):
         """
         Initialise a node based on the provided specification and
