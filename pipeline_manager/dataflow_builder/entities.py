@@ -234,8 +234,9 @@ class Node(JsonConvertible):
                 break
 
         if not is_type_correct:
+            node_name = kwargs["name"]
             raise ValueError(
-                f"Illegal name of the node `{kwargs["name"]}`, "
+                f"Illegal name of the node `{node_name}`, "
                 "which was not defined in the specification. "
             )
 

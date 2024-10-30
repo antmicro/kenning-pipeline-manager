@@ -130,8 +130,9 @@ class DataflowGraph(JsonConvertible):
                 base_node = _node
 
         if not base_node:
+            node_name = kwargs["name"]
             raise ValueError(
-                f"Provided name of the node `{kwargs["name"]}` "
+                f"Provided name of the node `{node_name}` "
                 "is missing in the specification."
             )
 
