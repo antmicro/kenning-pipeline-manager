@@ -167,3 +167,6 @@ cython_debug/
 
 **/.env*.local
 docs/source/generated
+
+# Playwright test results
+pipeline_manager/frontend/test-results
