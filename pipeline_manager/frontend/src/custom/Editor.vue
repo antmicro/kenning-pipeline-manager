@@ -572,6 +572,11 @@ export default defineComponent({
 
         /* eslint-disable no-lonely-if */
         onMounted(async () => {
+            window.addEventListener('message', (event) => {
+                // TODO: if (event.origin !== "http://localhost:...") return; - should be added in the future for security reasons
+                updateEditorSpecification(event.data);
+            });
+
             NotificationHandler.setShowNotification(false);
             editorManager.updateMetadata({}); // Defaulting metadata values
 
