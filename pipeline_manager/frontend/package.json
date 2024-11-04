@@ -10,7 +10,8 @@
         "lint": "npx --no-install eslint --ext .js,.vue,.ts src/ --fix --color",
         "format": "prettier --write .",
         "clean": "rm -rf node_modules",
-        "postinstall": "patch-package"
+        "postinstall": "patch-package",
+        "test": "npx playwright test"
     },
     "dependencies": {
         "@vue/cli-service": "^5.0.8",
@@ -40,6 +41,7 @@
         "vue-toastification": "^2.0.0-rc.5"
     },
     "devDependencies": {
+        "@playwright/test": "^1.48.2",
         "@types/uuid": "^9.0.2",
         "@typescript-eslint/eslint-plugin": "^5.4.0",
         "@typescript-eslint/parser": "^5.4.0",
