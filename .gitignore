@@ -170,3 +170,4 @@ docs/source/generated
 
 # Playwright test results
 pipeline_manager/frontend/test-results
+pipeline_manager/frontend/playwright-report
