@@ -219,8 +219,7 @@
                                                                 }
                                                             },
                                                             "required": [
-                                                                "name",
-                                                                "direction"
+                                                                "name"
                                                             ]
                                                         }
                                                     ],
