@@ -1,6 +1,7 @@
 {
     "graphs": [
         {
+            "name": "Example of a graph with dynamic number of interfaces",
             "id": "4b507b03-4c77-4d00-8a2a-c225b984377b",
             "nodes": [
                 {
