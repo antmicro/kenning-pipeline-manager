@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
+import { getUrl } from './config';
 
-const BASE_URL = "http://localhost:8080";
-const SAMPLE_DATAFLOW = `${BASE_URL}/?spec=https%3A%2F%2Fraw.githubusercontent.com%2Fantmicro%2Fkenning-pipeline-manager%2Fmain%2Fexamples%2Fsample-specification.json&graph=https%3A%2F%2Fraw.githubusercontent.com%2Fantmicro%2Fkenning-pipeline-manager%2Fmain%2Fexamples%2Fsample-dataflow.json`;
+const SAMPLE_DATAFLOW = `${getUrl()}/?spec=https%3A%2F%2Fraw.githubusercontent.com%2Fantmicro%2Fkenning-pipeline-manager%2Fmain%2Fexamples%2Fsample-specification.json&graph=https%3A%2F%2Fraw.githubusercontent.com%2Fantmicro%2Fkenning-pipeline-manager%2Fmain%2Fexamples%2Fsample-dataflow.json`;
 
 
 test('has title', async ({ page }) => {

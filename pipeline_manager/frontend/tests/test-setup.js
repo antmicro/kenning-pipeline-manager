@@ -1,5 +1,6 @@
 import { exec } from 'child_process';
 import { promisify } from 'util';
+import { config, getUrl } from '../tests/config';
 
 const execPromise = promisify(exec);
 
@@ -15,7 +16,7 @@ export default async () => {
     await new Promise((resolve) => {
         const checkServer = setInterval(async () => {
             try {
-                await execPromise('curl -f http://localhost:8080');
+                await execPromise(`curl -f ${getUrl()}`);
                 clearInterval(checkServer);
                 resolve();
             } catch (error) {
