@@ -570,11 +570,48 @@ export default defineComponent({
             return errors;
         }
 
+        /**
+         * Prepares the Editor based on dataflow configuration.
+         *
+         * The function loads the dataflow
+         * and provides error messages for erroneous content.
+         *
+         * @param dataflow The object holding the parsed dataflow file
+         */
+        async function updateDataflow(dataflow) {
+            const result = await editorManager.loadDataflow(dataflow);
+            const { errors } = result;
+            const { warnings } = result;
+            if (Array.isArray(warnings) && warnings.length) {
+                NotificationHandler.terminalLog(
+                    'warning',
+                    'Issue when loading dataflow',
+                    warnings,
+                );
+            }
+            if (Array.isArray(errors) && errors.length) {
+                const messageTitle = process.env.VUE_APP_GRAPH_DEVELOPMENT_MODE === 'true' ?
+                    'Softload enabled, errors found while loading the dataflow' :
+                    'Dataflow is invalid';
+                NotificationHandler.terminalLog('error', messageTitle, errors);
+            }
+
+            return errors;
+        }
+
         /* eslint-disable no-lonely-if */
         onMounted(async () => {
+            // Load specification and/or dataflow delivered via window.postMessage
             window.addEventListener('message', (event) => {
                 // TODO: if (event.origin !== "http://localhost:...") return; - should be added in the future for security reasons
-                updateEditorSpecification(event.data);
+
+                if (event.data.type === 'specification') {
+                    updateEditorSpecification(event.data.content);
+                } else if (event.data.type === 'dataflow') {
+                    updateDataflow(event.data.content);
+                } else {
+                    NotificationHandler.terminalLog('error', 'Message type is invalid');
+                }
             });
 
             NotificationHandler.setShowNotification(false);
