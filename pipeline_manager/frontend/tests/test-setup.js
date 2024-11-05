@@ -10,7 +10,7 @@ export default async () => {
     console.log('Starting server...');
 
     // Start the server.
-    serverProcess = exec('npm run serve-static');
+    serverProcess = exec('pipeline_manager run');
 
     // Wait for the server to be ready.
     await new Promise((resolve) => {
