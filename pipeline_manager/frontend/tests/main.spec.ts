@@ -1,19 +1,15 @@
 import { test, expect } from '@playwright/test';
-import { getUrl } from './config';
-
-// sample-dataflow.json and sample-specification.json from GitHub of KPM.
-const SAMPLE_DATAFLOW = `${getUrl()}/?spec=https%3A%2F%2Fraw.githubusercontent.com%2Fantmicro%2Fkenning-pipeline-manager%2Fmain%2Fexamples%2Fsample-specification.json&graph=https%3A%2F%2Fraw.githubusercontent.com%2Fantmicro%2Fkenning-pipeline-manager%2Fmain%2Fexamples%2Fsample-dataflow.json`;
-
+import { getUrl } from './config.js';
 
 test('has title', async ({ page }) => {
-  await page.goto(SAMPLE_DATAFLOW);
-  expect(await page.title()).toBe('Pipeline Manager');
+  await page.goto(getUrl());
+  expect(await page.title()).toBe('Test webpage');
 });
 
 
 test('remove node', async ({ page }) => {
   // Load a website and wait until nodes are loaded.
-  await page.goto(SAMPLE_DATAFLOW);
+  await page.goto(getUrl());
   const loadVideoNodeId = 'f50b4f2a-a2e2-4409-a5c9-891a8de44a5b';
   await page.waitForSelector(`#${loadVideoNodeId}`);
 
@@ -35,7 +31,7 @@ test('remove node', async ({ page }) => {
 
 test('show menu by right-clicking on node', async ({ page }) => {
   // Load a website and wait until nodes are loaded.
-  await page.goto(SAMPLE_DATAFLOW);
+  await page.goto(getUrl());
   const loadVideoNodeId = 'f50b4f2a-a2e2-4409-a5c9-891a8de44a5b';
   await page.waitForSelector(`#${loadVideoNodeId}`);
   const node = await page.locator(`#${loadVideoNodeId}`);
@@ -62,7 +58,7 @@ test('show menu by right-clicking on node', async ({ page }) => {
 
 test('show menu by right-clicking on interface', async ({ page }) => {
   // Load a website.
-  await page.goto(SAMPLE_DATAFLOW);
+  await page.goto(getUrl());
   const loadVideoNodeId = 'f50b4f2a-a2e2-4409-a5c9-891a8de44a5b';
   await page.waitForSelector(`#${loadVideoNodeId}`);
   const node = await page.locator(`#${loadVideoNodeId}`);

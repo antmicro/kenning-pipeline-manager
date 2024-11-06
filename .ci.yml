@@ -40,27 +40,41 @@ build-server-app:
     script:
         - ./build server-app
 
-test_singlehtml_build:
+test-singlehtml-build:
     stage: build
     <<: *ace
     <<: *common_only
     script:
         - ./build static-html ./examples/sample-specification.json ./examples/sample-dataflow.json --editor-title "Test webpage" --output-directory ./output-dir --clean-build --single-html output.html --minify-specification
 
-test_validate:
+test-validate:
     stage: build
     <<: *ace
     <<: *common_only
     script:
         - ./validate ./examples/sample-specification.json ./examples/sample-dataflow.json
 
-pytest:
+test-python:
     stage: build
     <<: *ace
     <<: *common_only
     script:
         - pip3 install -e ".[test,backend-communication]"
         - python3 -m pytest
+
+test-frontend:
+    stage: build
+    <<: *ace
+    <<: *common_only
+    script:
+        - ./build static-html ./examples/sample-specification.json ./examples/sample-dataflow.json
+        - cd pipeline_manager/frontend/
+        - npx playwright install --with-deps
+        - npm run test
+    artifacts:
+        paths:
+            - pipeline_manager/frontend/playwright-report
+            - pipeline_manager/frontend/test-results
 
 check-links:
     stage: build
@@ -84,13 +98,10 @@ build-docs-and-static-html:
           make html SPHINXOPTS="-W"
           make latexpdf
         - cp build/latex/*.pdf build/html/
-        - tar cf $CI_DOCS_ARCHIVE -C build/html/ .
-        - mv $CI_DOCS_ARCHIVE ..
     artifacts:
         paths:
             - docs/build/html
             - docs/build/latex/*.pdf
-            - $CI_DOCS_ARCHIVE
 
 docs:
     image: $CI_DOCS_DOCKER_IMAGE
@@ -98,12 +109,18 @@ docs:
     <<: *common_only
     dependencies:
         - build-docs-and-static-html
+        - test-frontend
     variables:
         GIT_STRATEGY: none
     tags:
         - docs
-    before_script: []
-    script: echo 'Deploying docs'
+    script:
+        - cd docs
+        - mv ../pipeline_manager/frontend/playwright-report/index.html ../pipeline_manager/frontend/playwright-report/index.html
+        - cp -r ../pipeline_manager/frontend/test-results build/html/
+        - cp -r ../pipeline_manager/frontend/playwright-report build/html/
+        - tar -cf $CI_DOCS_ARCHIVE -C build/html/ .
+        - mv $CI_DOCS_ARCHIVE ..
     artifacts:
         paths:
             - $CI_DOCS_ARCHIVE
