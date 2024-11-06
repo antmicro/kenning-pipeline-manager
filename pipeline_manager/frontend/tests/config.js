@@ -1,6 +1,5 @@
 // Configuration file with the default configuration for playwright.
 // @ts-check
-
 export const config = {
     protocol: 'http',
     address: '127.0.0.0',
