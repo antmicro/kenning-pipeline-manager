@@ -602,12 +602,12 @@ export default defineComponent({
         /* eslint-disable no-lonely-if */
         onMounted(async () => {
             // Load specification and/or dataflow delivered via window.postMessage
-            window.addEventListener('message', (event) => {
+            window.addEventListener('message', async (event) => {
                 // TODO: introduce mechanism for checking event.origin against allowed origins
                 if (event.data.type === 'specification') {
-                    updateEditorSpecification(event.data.content);
+                    await updateEditorSpecification(event.data.content);
                 } else if (event.data.type === 'dataflow') {
-                    updateDataflow(event.data.content);
+                    await updateDataflow(event.data.content);
                 } else {
                     NotificationHandler.terminalLog('error', 'Message type is invalid');
                 }
@@ -713,7 +713,7 @@ export default defineComponent({
                 );
             }
             const reader = new FileReader();
-            reader.addEventListener('load', (ev) => {
+            reader.addEventListener('load', async (ev) => {
                 const file = ev.target.result;
                 let data;
                 try {
@@ -727,42 +727,12 @@ export default defineComponent({
                 }
 
                 if (data.nodes) { // Load Specification
-                    const specErrors = EditorManager.validateSpecification(data);
-                    if (specErrors.length) {
-                        NotificationHandler.terminalLog('error', 'Specification is invalid', specErrors);
-                        return;
-                    }
-                    editorManager.updateEditorSpecification(data).then(({ errors, warnings }) => {
-                        if (Array.isArray(warnings) && warnings.length) {
-                            NotificationHandler.terminalLog(
-                                'warning',
-                                'Issue when loading specification',
-                                warnings,
-                            );
-                        }
-                        if (Array.isArray(errors) && errors.length) {
-                            NotificationHandler.terminalLog('error', 'Specification is invalid', errors);
-                        }
-                    });
+                    await updateEditorSpecification(data);
                     return;
                 }
 
                 if (data.graphs) { // Load Dataflow
-                    editorManager.loadDataflow(data).then(({ errors, warnings }) => {
-                        if (Array.isArray(warnings) && warnings.length) {
-                            NotificationHandler.terminalLog(
-                                'warning',
-                                'Issue when loading dataflow',
-                                warnings,
-                            );
-                        }
-                        if (Array.isArray(errors) && errors.length) {
-                            const messageTitle = process.env.VUE_APP_GRAPH_DEVELOPMENT_MODE === 'true' ?
-                                'Softload enabled, errors found while loading the dataflow' :
-                                'Dataflow is invalid';
-                            NotificationHandler.terminalLog('error', messageTitle, errors);
-                        }
-                    });
+                    await updateDataflow(data);
                     return;
                 }
 
