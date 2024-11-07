@@ -393,7 +393,7 @@ class CustomNode extends Node {
         });
 
         for (let i = 0; i < value; i += 1) {
-            const ioName = `${interfaceName}-${i}`;
+            const ioName = `${interfaceName}[${i}]`;
             const directionIoName = `${direction}_${ioName}`;
 
             const intf = {
