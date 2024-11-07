@@ -657,7 +657,7 @@ export default defineComponent({
                     if (specText.include === undefined) specText.include = [];
                     specText.include.push(urlParams.get('include'));
                 }
-                let errors = await updateEditorSpecification(specText);
+                const errors = await updateEditorSpecification(specText);
 
                 if (errors.length) {
                     NotificationHandler.restoreShowNotification();
@@ -686,21 +686,7 @@ export default defineComponent({
                     }
                 }
                 if (dataflow) {
-                    let warnings;
-                    ({ errors, warnings } = await editorManager.loadDataflow(dataflow));
-                    if (Array.isArray(warnings) && warnings.length) {
-                        NotificationHandler.terminalLog(
-                            'warning',
-                            'Issue when loading dataflow',
-                            warnings,
-                        );
-                    }
-                    if (Array.isArray(errors) && errors.length) {
-                        const messageTitle = process.env.VUE_APP_GRAPH_DEVELOPMENT_MODE === 'true' ?
-                            'Softload enabled, errors found while loading the dataflow' :
-                            'Dataflow is invalid';
-                        NotificationHandler.terminalLog('error', messageTitle, errors);
-                    }
+                    await updateDataflow(dataflow);
                 }
             }
             NotificationHandler.restoreShowNotification();
