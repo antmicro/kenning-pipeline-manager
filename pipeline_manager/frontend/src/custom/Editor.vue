@@ -603,8 +603,7 @@ export default defineComponent({
         onMounted(async () => {
             // Load specification and/or dataflow delivered via window.postMessage
             window.addEventListener('message', (event) => {
-                // TODO: if (event.origin !== "http://localhost:...") return; - should be added in the future for security reasons
-
+                // TODO: introduce mechanism for checking event.origin against allowed origins
                 if (event.data.type === 'specification') {
                     updateEditorSpecification(event.data.content);
                 } else if (event.data.type === 'dataflow') {
