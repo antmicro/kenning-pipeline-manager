@@ -1,8 +1,5 @@
 image: $CI_IMAGE
 
-.ace: &ace
-    tags: ['ace-x86_64']
-
 .common_only: &common_only
     only:
         - main
@@ -20,14 +17,12 @@ stages:
 
 pre-commit:
     stage: lint
-    <<: *ace
     <<: *common_only
     script:
         - pre-commit run --all-files
 
 commit-lint:
     stage: lint
-    <<: *ace
     only:
         - merge_requests
     script:
@@ -35,28 +30,24 @@ commit-lint:
 
 build-server-app:
     stage: build
-    <<: *ace
     <<: *common_only
     script:
         - ./build server-app
 
 test-singlehtml-build:
     stage: build
-    <<: *ace
     <<: *common_only
     script:
         - ./build static-html ./examples/sample-specification.json ./examples/sample-dataflow.json --editor-title "Test webpage" --output-directory ./output-dir --clean-build --single-html output.html --minify-specification
 
 test-validate:
     stage: build
-    <<: *ace
     <<: *common_only
     script:
         - ./validate ./examples/sample-specification.json ./examples/sample-dataflow.json
 
 test-python:
     stage: build
-    <<: *ace
     <<: *common_only
     script:
         - pip3 install -e ".[test,backend-communication]"
@@ -64,7 +55,6 @@ test-python:
 
 test-frontend:
     stage: build
-    <<: *ace
     <<: *common_only
     script:
         - ./build static-html ./examples/sample-specification.json ./examples/sample-dataflow.json
@@ -78,7 +68,6 @@ test-frontend:
 
 check-links:
     stage: build
-    <<: *ace
     <<: *common_only
     script:
         - pip install -e '.[docs]'
@@ -88,7 +77,6 @@ check-links:
 
 build-docs-and-static-html:
     stage: build
-    <<: *ace
     <<: *common_only
     script:
         - pip install --no-deps -e .
@@ -116,7 +104,6 @@ docs:
         - docs
     script:
         - cd docs
-        - mv ../pipeline_manager/frontend/playwright-report/index.html ../pipeline_manager/frontend/playwright-report/index.html
         - cp -r ../pipeline_manager/frontend/test-results build/html/
         - cp -r ../pipeline_manager/frontend/playwright-report build/html/
         - tar -cf $CI_DOCS_ARCHIVE -C build/html/ .
