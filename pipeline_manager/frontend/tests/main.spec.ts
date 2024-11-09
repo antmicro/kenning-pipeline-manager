@@ -3,7 +3,7 @@ import { getUrl } from './config.js';
 
 test('has title', async ({ page }) => {
   await page.goto(getUrl());
-  expect(await page.title()).toBe('Test webpage');
+  expect(await page.title()).toBe('Pipeline Manager');
 });
 
 

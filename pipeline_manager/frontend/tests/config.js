@@ -8,7 +8,7 @@ const __dirname = dirname(__filename);
 
 // Path and directory to a static HTML-based version of the frontend.
 export const config = {
-    directory: 'output-dir',
+    directory: 'dist',
     file: 'index.html'
 }
 
@@ -17,5 +17,5 @@ export const config = {
  * @returns {string} URL of the main page.
  */
 export function getUrl() {
-    return `file://${join(__dirname, `./../../../${config.directory}/${config.file}`)}`
+    return `file://${join(__dirname, `../${config.directory}/${config.file}`)}`
 }
