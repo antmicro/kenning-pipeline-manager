@@ -290,7 +290,7 @@ Every interface object has following properties:
 * `dynamic` (optional) - determines whether the interface should be dynamic, which means that the number of interfaces created of this definition can be changed in the editor.
   For each dynamic interface definition, a new property is added to the node that allows the user to change the number of interfaces.
   The name of the property is determined by the `name` and `direction` of the dynamic interface.
-  The format is `dynamic-interfaces-{direction}-{name}`, so it is important not to create conflicting properties.
+  The format is `{name} {direction} count`, so it is important not to create conflicting properties.
   The name of the dynamic interfaces is `{name}[{i}]`, where `i` is the index of the interface.
   `dynamic` property can be either `true`, then the maximum number of interfaces is not limited, or an array in a form of `[min, max]` that specifies the range of interfaces.
   All created interfaces share the same `maxConnectionCount` and `type` values.

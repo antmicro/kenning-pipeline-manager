@@ -22,7 +22,7 @@ import {
     parseInterfaces,
     validateInterfaceGroups,
     generateProperties,
-    DYNAMIC_INTERFACE_PREFIX,
+    DYNAMIC_INTERFACE_SUFFIX,
 } from './interfaceParser.js';
 
 import InputInterface from '../interfaces/InputInterface.js';
@@ -374,13 +374,12 @@ class CustomNode extends Node {
         // The interface metadata has to be obtained from the specification of the property
         const { interfaceType, interfaceMaxConnectionsCount } = this.inputs[`property_${prop.name}`];
 
-        // The DYNAMIC_INTERFACE_PREFIX is omitted
-        const direction = prop.name
-            .slice(DYNAMIC_INTERFACE_PREFIX.length)
-            .split('-')[0];
-        // The DYNAMIC_INTERFACE_PREFIX and direction are omitted
+        // Direction is obtained from property name
+        const propName = prop.name.split(' ');
+        const direction = propName[propName.length - 2];
+        // The DYNAMIC_INTERFACE_SUFFIX and direction are omitted
         const interfaceName = prop.name
-            .slice(DYNAMIC_INTERFACE_PREFIX.length + 1 + direction.length);
+            .slice(0, -1 * (DYNAMIC_INTERFACE_SUFFIX.length + 2 + direction.length));
 
         const occupied = { left: [], right: [] };
 
@@ -671,7 +670,7 @@ class CustomNode extends Node {
             Object.entries(parsedState.inputs).forEach(([name, intf]) => {
                 if (!name.startsWith('property_')) return;
 
-                if (name.startsWith(`property_${DYNAMIC_INTERFACE_PREFIX}`)) {
+                if (name.startsWith('property_') && name.endsWith(`${DYNAMIC_INTERFACE_SUFFIX}`)) {
                     this.updateDynamicInterfaces(intf);
                 }
             });

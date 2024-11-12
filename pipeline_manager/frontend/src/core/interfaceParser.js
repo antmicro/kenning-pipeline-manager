@@ -8,9 +8,9 @@ const defaultDirection = 'inout';
 
 /**
  * Dynamic interfaces that are controlled with a dedicated property
- * are prefixed with `DYNAMIC_INTERFACE_PREFIX`.
+ * are suffixed with `DYNAMIC_INTERFACE_SUFFIX`.
 */
-export const DYNAMIC_INTERFACE_PREFIX = 'dynamic-interfaces-';
+export const DYNAMIC_INTERFACE_SUFFIX = 'count';
 
 /**
  * Returns a prepared interface that is passed to baklava constructor
@@ -341,7 +341,7 @@ export function generateProperties(interfaces) {
                 ) {
                     // Property should have limits specified by 'intf.dynamic' value
                     properties.push({
-                        name: `${DYNAMIC_INTERFACE_PREFIX}${intf.direction}-${intf.name}`,
+                        name: `${intf.name} ${intf.direction} ${DYNAMIC_INTERFACE_SUFFIX}`,
                         type: 'integer',
                         min: intf.dynamic[0],
                         max: intf.dynamic[1],
@@ -353,7 +353,7 @@ export function generateProperties(interfaces) {
                 } else if (intf.dynamic === true) {
                     // Property should not have limits
                     properties.push({
-                        name: `${DYNAMIC_INTERFACE_PREFIX}${intf.direction}-${intf.name}`,
+                        name: `${intf.name} ${intf.direction} ${DYNAMIC_INTERFACE_SUFFIX}`,
                         type: 'integer',
                         min: 0,
                         default: 0,
