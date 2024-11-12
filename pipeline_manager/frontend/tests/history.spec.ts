@@ -1,4 +1,4 @@
-import { test, expect, Page } from '@playwright/test';
+import { test, expect, Page, Locator } from '@playwright/test';
 import { getUrl } from './config.js';
 
 async function deleteNode(page: Page, nodeId: String) {
@@ -39,7 +39,12 @@ async function addNode(page: Page, category: string, nodeName: string, x: number
     await categoryBar.click();
 
     // Drag and drop to the [x, y] position.
-    await node.hover();
+    await dragAndDrop(page, node, x, y);
+}
+
+
+async function dragAndDrop(page: Page, locator: Locator, x: number, y: number) {
+    await locator.hover();
     await page.mouse.down();
     await page.mouse.move(x, y);
     await page.mouse.up();
@@ -79,4 +84,40 @@ test('test history by adding node', async ({ page }) => {
 
     await page.keyboard.press('Control+KeyY');
     expect(await countSaveVideoNodes(page)).toBe(2);
+});
+
+test('test history by moving node', async ({ page }) => {
+    // Load a website and wait until nodes are loaded.
+    const loadVideoNodeId = 'f50b4f2a-a2e2-4409-a5c9-891a8de44a5b';
+    await loadWebsite(page, loadVideoNodeId);
+
+    const node = page.locator(`#${loadVideoNodeId}`);
+    const nodeTitleArea = node.locator('.__title');
+    
+    const oldPosition = await node.boundingBox();
+    const newCoordinates = {
+        x: oldPosition.x + 100, // Move 100 pixels to the right.
+        y: oldPosition.y + 50   // Move 50 pixels down.
+    };
+
+    await dragAndDrop(page, nodeTitleArea, newCoordinates.x, newCoordinates.y);
+
+    const newBoundingBox = await node.boundingBox();
+    expect(newBoundingBox).not.toStrictEqual(oldPosition);
+
+    // Perform the undo action.
+    await page.keyboard.press('Control+KeyZ');
+    await page.waitForTimeout(1000); // Wait for the undo action to complete
+
+    // Check that the position is back to the old position.
+    const afterUndoBoundingBox = await node.boundingBox();
+    expect(afterUndoBoundingBox).toStrictEqual(oldPosition);
+
+    // Perform the redo action.
+    await page.keyboard.press('Control+KeyY');
+    await page.waitForTimeout(1000); // Wait for the redo action to complete
+
+    // Check that the position is back to the old position.
+    const afterRedoBoundingBox = await node.boundingBox();
+    expect(afterRedoBoundingBox).not.toStrictEqual(oldPosition);
 });
