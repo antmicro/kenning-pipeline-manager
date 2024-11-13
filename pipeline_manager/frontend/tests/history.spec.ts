@@ -107,11 +107,10 @@ test('test history by moving node', async ({ page }) => {
 
     // Perform the undo action.
     await page.keyboard.press('Control+KeyZ');
-    await page.waitForTimeout(1000); // Wait for the undo action to complete
 
     // Check that the position is back to the old position.
     const afterUndoBoundingBox = await node.boundingBox();
-    expect(afterUndoBoundingBox).toStrictEqual(oldPosition);
+    await expect(afterUndoBoundingBox).toStrictEqual(oldPosition);
 
     // Perform the redo action.
     await page.keyboard.press('Control+KeyY');
@@ -119,7 +118,7 @@ test('test history by moving node', async ({ page }) => {
 
     // Check that the position is back to the old position.
     const afterRedoBoundingBox = await node.boundingBox();
-    expect(afterRedoBoundingBox).not.toStrictEqual(oldPosition);
+    await expect(afterRedoBoundingBox).not.toStrictEqual(oldPosition);
 });
 
 async function removeConnection(page: Page, inputInterface: Locator) {
@@ -139,17 +138,42 @@ test('test history by removing connection', async ({ page }) => {
     const connections = page.locator('.connections-container').locator('g');
 
     // At the beginning, six connections exist.
-    expect(connections).toHaveCount(6);
+    await expect(connections).toHaveCount(6);
 
     // Remove the connection.
     await removeConnection(page, outputPort);
-    expect(connections).toHaveCount(5);
+    await expect(connections).toHaveCount(5);
 
     // Undo the removal.
     await page.keyboard.press('Control+KeyZ');
-    expect(connections).toHaveCount(6);
+    await expect(connections).toHaveCount(6);
 
     // Redo the removal.
     await page.keyboard.press('Control+KeyY');
-    expect(connections.locator('..').locator('g')).toHaveCount(5);
+    await expect(connections).toHaveCount(5);
+});
+
+test('test history by adding connection', async ({ page }) => {
+    const loadVideoNodeId = 'f50b4f2a-a2e2-4409-a5c9-891a8de44a5b';
+    await loadWebsite(page, loadVideoNodeId);
+
+    const outputPort = page.locator(`#${loadVideoNodeId} .__content .__outputs .__port`);
+    const connections = page.locator('.connections-container').locator('g');
+
+    await expect(connections).toHaveCount(6);
+
+    await removeConnection(page, outputPort);
+    await expect(connections).toHaveCount(5);
+
+    const sourceInterface = page.getByText('LoadVideo').nth(1).locator('../..').locator('.__port');
+    const targetInterface = page.getByText('Filter2D').nth(1).locator('../..').locator('.__inputs').getByText('input 1').locator('..').locator('.__port');
+
+    await sourceInterface.dragTo(targetInterface);
+    await expect(connections).toHaveCount(6);
+
+    await page.keyboard.press('Control+KeyZ');
+    await expect(connections).toHaveCount(5);
+
+    await page.keyboard.press('Control+KeyY');
+    await expect(connections).toHaveCount(6);
 });
