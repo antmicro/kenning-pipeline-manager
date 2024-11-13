@@ -8,7 +8,7 @@ async function deleteNode(page: Page, nodeId: String) {
     await loadVideoNode.click({
         button: 'right'
     });
-    
+
     // Delete the node.
     const deleteButton = await page.getByText('Delete');
     await deleteButton.click();
@@ -93,7 +93,7 @@ test('test history by moving node', async ({ page }) => {
 
     const node = page.locator(`#${loadVideoNodeId}`);
     const nodeTitleArea = node.locator('.__title');
-    
+
     const oldPosition = await node.boundingBox();
     const newCoordinates = {
         x: oldPosition.x + 100, // Move 100 pixels to the right.
@@ -120,4 +120,36 @@ test('test history by moving node', async ({ page }) => {
     // Check that the position is back to the old position.
     const afterRedoBoundingBox = await node.boundingBox();
     expect(afterRedoBoundingBox).not.toStrictEqual(oldPosition);
+});
+
+async function removeConnection(page: Page, inputInterface: Locator) {
+    const inputInterfaceLocation = await inputInterface.boundingBox();
+    const shiftToConnectionInPx = 50;
+    await page.mouse.dblclick(
+        inputInterfaceLocation.x + shiftToConnectionInPx,
+        inputInterfaceLocation.y
+    );
+}
+
+test('test history by removing connection', async ({ page }) => {
+    const loadVideoNodeId = 'f50b4f2a-a2e2-4409-a5c9-891a8de44a5b';
+    await loadWebsite(page, loadVideoNodeId);
+
+    const outputPort = page.locator(`#${loadVideoNodeId} .__content .__outputs .__port`);
+    const connections = page.locator('.connections-container').locator('g');
+
+    // At the beginning, six connections exist.
+    expect(connections).toHaveCount(6);
+
+    // Remove the connection.
+    await removeConnection(page, outputPort);
+    expect(connections).toHaveCount(5);
+
+    // Undo the removal.
+    await page.keyboard.press('Control+KeyZ');
+    expect(connections).toHaveCount(6);
+
+    // Redo the removal.
+    await page.keyboard.press('Control+KeyY');
+    expect(connections.locator('..').locator('g')).toHaveCount(5);
 });
