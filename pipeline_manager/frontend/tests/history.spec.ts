@@ -177,3 +177,107 @@ test('test history by adding connection', async ({ page }) => {
     await page.keyboard.press('Control+KeyY');
     await expect(connections).toHaveCount(6);
 });
+
+async function firstInputInterfaceHasToBe(page: Page, value: string) {
+    const firstInputInterface = page.getByText('Filter2D').nth(1).locator('../..').locator('.__inputs div').first();
+    await expect(await firstInputInterface.innerText()).toBe(value);
+}
+
+test('test history by moving interface down', async ({ page }) => {
+    const loadVideoNodeId = 'f50b4f2a-a2e2-4409-a5c9-891a8de44a5b';
+    await loadWebsite(page, loadVideoNodeId);
+
+    await firstInputInterfaceHasToBe(page, 'input 1');
+
+    // Open a context menu of an interface.
+    const filter2dNode = page.getByText('Filter2D').nth(1).locator('../..');
+    let interfaceInput1 = filter2dNode.locator('.__inputs').getByText('input 1').locator('..').locator('.__port');
+    await interfaceInput1.click({button: 'right'});
+
+    // Move the interface down.
+    const moveDownOption = page.locator('.baklava-context-menu').getByText('Move Down');
+    await moveDownOption.click();
+    await firstInputInterfaceHasToBe(page, 'kernel');
+
+    await page.keyboard.press('Control+KeyZ');
+    await firstInputInterfaceHasToBe(page, 'input 1');
+
+    await page.keyboard.press('Control+KeyY');
+    await firstInputInterfaceHasToBe(page, 'kernel');
+});
+
+test('test history by moving interface up', async ({ page }) => {
+    const loadVideoNodeId = 'f50b4f2a-a2e2-4409-a5c9-891a8de44a5b';
+    await loadWebsite(page, loadVideoNodeId);
+
+    await firstInputInterfaceHasToBe(page, 'input 1');
+
+    // Open a context menu of an interface.
+    const filter2dNode = page.getByText('Filter2D').nth(1).locator('../..');
+    let interfaceInput1 = filter2dNode.locator('.__inputs').getByText('kernel').locator('..').locator('.__port');
+    await interfaceInput1.click({button: 'right'});
+
+    // Move the interface down.
+    const moveUpOption = page.locator('.baklava-context-menu').getByText('Move Up');
+    await moveUpOption.click();
+    await firstInputInterfaceHasToBe(page, 'kernel');
+
+    await page.keyboard.press('Control+KeyZ');
+    await firstInputInterfaceHasToBe(page, 'input 1');
+
+    await page.keyboard.press('Control+KeyY');
+    await firstInputInterfaceHasToBe(page, 'kernel');
+});
+
+async function countInterfaces(page: Page, type: 'input' | 'output'): Promise<number> {
+    const filter2dNode = page.getByText('Filter2D').nth(1).locator('../..');
+    return filter2dNode.locator(`.__${type}s .__port`).count();
+}
+
+test('test history by moving interface to left', async ({ page }) => {
+    const loadVideoNodeId = 'f50b4f2a-a2e2-4409-a5c9-891a8de44a5b';
+    await loadWebsite(page, loadVideoNodeId);
+
+    // Test an initial state.
+    expect(await countInterfaces(page, 'input')).toBe(2);
+    expect(await countInterfaces(page, 'output')).toBe(1);
+    
+    // Double click on an interface.
+    const filter2dNode = page.getByText('Filter2D').nth(1).locator('../..');
+    let interfaceInput1 = filter2dNode.locator('.__inputs').getByText('input 1').locator('..').locator('.__port');
+    await interfaceInput1.dblclick();
+    expect(await countInterfaces(page, 'input')).toBe(1);
+    expect(await countInterfaces(page, 'output')).toBe(2);
+
+    await page.keyboard.press('Control+KeyZ');
+    expect(await countInterfaces(page, 'input')).toBe(2);
+    expect(await countInterfaces(page, 'output')).toBe(1);
+
+    await page.keyboard.press('Control+KeyY');
+    expect(await countInterfaces(page, 'input')).toBe(1);
+    expect(await countInterfaces(page, 'output')).toBe(2);
+});
+
+test('test history by moving interface to right', async ({ page }) => {
+    const loadVideoNodeId = 'f50b4f2a-a2e2-4409-a5c9-891a8de44a5b';
+    await loadWebsite(page, loadVideoNodeId);
+
+    // Test an initial state.
+    expect(await countInterfaces(page, 'input')).toBe(2);
+    expect(await countInterfaces(page, 'output')).toBe(1);
+    
+    // Double click on an interface.
+    const filter2dNode = page.getByText('Filter2D').nth(1).locator('../..');
+    let interfaceOutput1 = filter2dNode.locator('.__outputs').getByText('output 1').locator('..').locator('.__port');
+    await interfaceOutput1.dblclick();
+    expect(await countInterfaces(page, 'input')).toBe(1);
+    expect(await countInterfaces(page, 'output')).toBe(2);
+
+    await page.keyboard.press('Control+KeyZ');
+    expect(await countInterfaces(page, 'input')).toBe(2);
+    expect(await countInterfaces(page, 'output')).toBe(1);
+
+    await page.keyboard.press('Control+KeyY');
+    expect(await countInterfaces(page, 'input')).toBe(1);
+    expect(await countInterfaces(page, 'output')).toBe(2);
+});
