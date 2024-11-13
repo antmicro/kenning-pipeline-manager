@@ -25,7 +25,7 @@ test('remove node', async ({ page }) => {
   await deleteButton.click();
 
   // Verify that the node has disappeared.
-  expect(await page.locator(`#${loadVideoNodeId}`).isVisible() === false);
+  await expect(page.locator(`#${loadVideoNodeId}`)).not.toBeVisible();
 });
 
 
@@ -40,8 +40,8 @@ test('show menu by right-clicking on node', async ({ page }) => {
   const nodeTitle = await node.locator('.__title');
   await nodeTitle.click({ button: 'right' });
   let menu = await page.locator('.baklava-context-menu');
-  expect(await page.locator('.baklava-context-menu').isVisible());
-  expect(await menu.filter({ hasText: 'Details' }).count());
+  expect(page.locator('.baklava-context-menu')).toBeVisible;
+  expect(await menu.filter({ hasText: 'Details' }).count()).toBeGreaterThan(0);
 
 
   // Close the context menu.

@@ -241,7 +241,7 @@ test('test history by moving interface to left', async ({ page }) => {
     // Test an initial state.
     expect(await countInterfaces(page, 'input')).toBe(2);
     expect(await countInterfaces(page, 'output')).toBe(1);
-    
+
     // Double click on an interface.
     const filter2dNode = page.getByText('Filter2D').nth(1).locator('../..');
     let interfaceInput1 = filter2dNode.locator('.__inputs').getByText('input 1').locator('..').locator('.__port');
@@ -265,7 +265,7 @@ test('test history by moving interface to right', async ({ page }) => {
     // Test an initial state.
     expect(await countInterfaces(page, 'input')).toBe(2);
     expect(await countInterfaces(page, 'output')).toBe(1);
-    
+
     // Double click on an interface.
     const filter2dNode = page.getByText('Filter2D').nth(1).locator('../..');
     let interfaceOutput1 = filter2dNode.locator('.__outputs').getByText('output 1').locator('..').locator('.__port');
@@ -281,3 +281,29 @@ test('test history by moving interface to right', async ({ page }) => {
     expect(await countInterfaces(page, 'input')).toBe(1);
     expect(await countInterfaces(page, 'output')).toBe(2);
 });
+
+test('test history by removing node with connection', async ({ page }) => {
+    const loadVideoNodeId = 'f50b4f2a-a2e2-4409-a5c9-891a8de44a5b';
+    await loadWebsite(page, loadVideoNodeId);
+
+    // At the beginning, six connections exist.
+    const connections = page.locator('.connections-container').locator('g');
+    await expect(connections).toHaveCount(6);
+
+    // Delete a node.
+    const loadVideoNode = await page.locator(`#${loadVideoNodeId}`);
+    expect(loadVideoNode.isVisible());
+    await loadVideoNode.click({button: 'right'});
+    const deleteButton = await page.getByText('Delete');
+    await deleteButton.click();
+
+    // Verify that the node and its connection have disappeared.
+    await expect(page.locator(`#${loadVideoNodeId}`)).not.toBeVisible();
+    await expect(connections).toHaveCount(5);
+
+    await page.keyboard.press('Control+KeyZ');
+    await expect(connections).toHaveCount(6);
+
+    await page.keyboard.press('Control+KeyY');
+    await expect(connections).toHaveCount(5);
+  });
