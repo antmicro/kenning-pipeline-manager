@@ -1,0 +1,21 @@
+{
+    "version": "20240723.13",
+    "include": [
+        "https://raw.githubusercontent.com/antmicro/kenning-pipeline-manager/main/examples/sample-specification.json",
+        "https://raw.githubusercontent.com/antmicro/kenning-pipeline-manager/main/examples/sample-loopback-specification.json",
+        "https://raw.githubusercontent.com/antmicro/kenning-pipeline-manager/main/examples/sample-multiple-io-specification.json"
+    ],
+    "nodes": [
+        {
+            "name": "UploadVideo",
+            "category": "Filesystem",
+            "properties": [
+                {"name": "Platform", "type": "text", "default": ""},
+                {"name": "API Token", "type": "text", "default": ""}
+            ],
+            "interfaces": [
+                {"name": "frames", "type": ["Image", "BinaryImage"], "direction": "input"}
+            ]
+        }
+    ]
+}

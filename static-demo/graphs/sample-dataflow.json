@@ -1,0 +1,318 @@
+{
+    "graphs": [
+        {
+            "id": "78cc86c4-9ad0-4a8f-88cb-71ee28c48659",
+            "nodes": [
+                {
+                    "id": "f50b4f2a-a2e2-4409-a5c9-891a8de44a5b",
+                    "position": {
+                        "x": 100,
+                        "y": -100
+                    },
+                    "width": 200,
+                    "twoColumn": true,
+                    "interfaces": [
+                        {
+                            "name": "frames",
+                            "id": "c85c70e0-72b3-4e87-a24b-054a861e5fcc",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 0
+                        }
+                    ],
+                    "properties": [
+                        {
+                            "name": "filename",
+                            "id": "86e9df9f-03c7-4c97-b6fc-a1b0e074dd64",
+                            "value": ""
+                        }
+                    ],
+                    "enabledInterfaceGroups": [],
+                    "name": "LoadVideo",
+                    "instanceName": "LoadVideo"
+                },
+                {
+                    "id": "3f16d8b0-8bf4-411c-9b61-286fde9035be",
+                    "position": {
+                        "x": 100,
+                        "y": 200
+                    },
+                    "width": 200,
+                    "twoColumn": true,
+                    "interfaces": [
+                        {
+                            "name": "kernel",
+                            "id": "9e01074e-5383-47d7-bfe4-a19cf85ad498",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 0
+                        }
+                    ],
+                    "properties": [
+                        {
+                            "name": "size",
+                            "id": "9814b717-376e-46db-b0e5-5bd38b9ce3be",
+                            "value": 5
+                        },
+                        {
+                            "name": "sigma",
+                            "id": "3319d658-e5da-41ef-b580-c94fe0db0bdf",
+                            "value": 1
+                        },
+                        {
+                            "name": "tags",
+                            "id": "2a07d4b9-8df7-49b1-b705-40f116536d69",
+                            "value": ["inverse"]
+                        }
+                    ],
+                    "enabledInterfaceGroups": [],
+                    "name": "GaussianKernel",
+                    "instanceName": "GaussianKernel"
+                },
+                {
+                    "id": "75800d41-a534-4dae-9133-2fabb0c98e31",
+                    "position": {
+                        "x": 600,
+                        "y": 0
+                    },
+                    "width": 200,
+                    "twoColumn": true,
+                    "interfaces": [
+                        {
+                            "name": "input 1",
+                            "id": "4ef81d44-1510-4054-ae8a-3ae6ce3b3ebf",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 0
+                        },
+                        {
+                            "name": "kernel",
+                            "id": "e77925e0-6e04-4d81-bc12-753dffa665ac",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 1
+                        },
+                        {
+                            "name": "output 1",
+                            "id": "8607922d-a688-48fa-8db2-a662391f7e47",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 0
+                        }
+                    ],
+                    "properties": [
+                        {
+                            "name": "iterations",
+                            "id": "73130be9-d058-434d-89dd-50c048bee0e4",
+                            "value": 1
+                        },
+                        {
+                            "name": "border type",
+                            "id": "4060362f-fc27-42c5-872d-9a5f91931daa",
+                            "value": "constant"
+                        }
+                    ],
+                    "enabledInterfaceGroups": [],
+                    "name": "Filter2D",
+                    "instanceName": "Filter2D"
+                },
+                {
+                    "id": "5c398d8d-1ee2-41ab-afa5-1a07efac3f8d",
+                    "position": {
+                        "x": 1100,
+                        "y": 0
+                    },
+                    "width": 200,
+                    "twoColumn": true,
+                    "interfaces": [
+                        {
+                            "name": "input 1",
+                            "id": "f86700d4-3995-4ab0-8ab3-917f3543b1ab",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 0
+                        },
+                        {
+                            "name": "output 1",
+                            "id": "7adadecc-4009-4a59-a52a-d480b665e7b7",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 0
+                        }
+                    ],
+                    "properties": [
+                        {
+                            "name": "threshold_value",
+                            "id": "5dc9f2b5-24a6-40ed-a13e-6f753d101a1b",
+                            "value": 1
+                        },
+                        {
+                            "name": "threshold_type",
+                            "id": "67d1cbf1-bd36-46db-984d-6bb874f80a2c",
+                            "value": "Binary"
+                        }
+                    ],
+                    "enabledInterfaceGroups": [],
+                    "name": "Threshold",
+                    "instanceName": "Threshold"
+                },
+                {
+                    "id": "1e9f5db4-0f0a-4664-b2d4-f419df9ad667",
+                    "position": {
+                        "x": 1600,
+                        "y": 0
+                    },
+                    "width": 200,
+                    "twoColumn": true,
+                    "interfaces": [
+                        {
+                            "name": "input 1",
+                            "id": "70acb735-dd00-43a6-bf00-cf43856aaa70",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 0
+                        },
+                        {
+                            "name": "kernel",
+                            "id": "ff47b91a-99ef-4074-9588-8bd89ce25605",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 1
+                        },
+                        {
+                            "name": "output 1",
+                            "id": "ca071f01-616b-4f6c-9cf9-a1fcdfa1c785",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 1
+                        }
+                    ],
+                    "properties": [
+                        {
+                            "name": "Enable operations",
+                            "id": "b75ee6c7-4698-4aaa-9d18-37c3ed020d0b",
+                            "value": true
+                        },
+                        {
+                            "name": "iterations",
+                            "id": "723e1efd-918d-45f5-b312-16eb2cdc4422",
+                            "value": 1
+                        },
+                        {
+                            "name": "border type",
+                            "id": "543b4a03-a90d-4a8d-9168-8f0d30bc1429",
+                            "value": "constant"
+                        },
+                        {
+                            "name": "operation type",
+                            "id": "20657005-0a26-4d77-ac72-46e1b42a8b59",
+                            "value": "dilation"
+                        }
+                    ],
+                    "enabledInterfaceGroups": [],
+                    "name": "Morphological operation",
+                    "instanceName": "Morphological operation"
+                },
+                {
+                    "id": "c8406335-ae89-4b0a-8fe7-9d12ab0a2ff5",
+                    "position": {
+                        "x": 1100,
+                        "y": 300
+                    },
+                    "width": 200,
+                    "twoColumn": true,
+                    "interfaces": [
+                        {
+                            "name": "kernel",
+                            "id": "66f09d0f-b000-4d1a-b34f-d9636764e391",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 0
+                        }
+                    ],
+                    "properties": [
+                        {
+                            "name": "size",
+                            "id": "5b0b6f00-0219-4831-9c07-21cfe917d90a",
+                            "value": 5
+                        },
+                        {
+                            "name": "shape",
+                            "id": "220653d5-25f2-4cc1-9f96-8f3304d13662",
+                            "value": "Cross"
+                        }
+                    ],
+                    "enabledInterfaceGroups": [],
+                    "name": "StructuringElement",
+                    "instanceName": "StructuringElement"
+                },
+                {
+                    "id": "fc7d1706-6240-41e2-a8da-91c8577e09f9",
+                    "position": {
+                        "x": 2100,
+                        "y": 200
+                    },
+                    "width": 200,
+                    "twoColumn": true,
+                    "interfaces": [
+                        {
+                            "name": "frames",
+                            "id": "6efb374c-a115-404e-ade8-0aa05ba93996",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 0
+                        }
+                    ],
+                    "properties": [
+                        {
+                            "name": "filename",
+                            "id": "3039e744-9941-47c5-8902-f260e6c29a35",
+                            "value": ""
+                        }
+                    ],
+                    "enabledInterfaceGroups": [],
+                    "name": "SaveVideo",
+                    "instanceName": "SaveVideo"
+                }
+            ],
+            "connections": [
+                {
+                    "id": "9ee371be-41cc-4cf4-9530-7cf794c9c94e",
+                    "from": "c85c70e0-72b3-4e87-a24b-054a861e5fcc",
+                    "to": "4ef81d44-1510-4054-ae8a-3ae6ce3b3ebf"
+                },
+                {
+                    "id": "4b15be01-7f32-44e3-9e41-79216815ba90",
+                    "from": "9e01074e-5383-47d7-bfe4-a19cf85ad498",
+                    "to": "e77925e0-6e04-4d81-bc12-753dffa665ac"
+                },
+                {
+                    "id": "97de3fb0-3198-4a49-8463-8be2a1bea679",
+                    "from": "8607922d-a688-48fa-8db2-a662391f7e47",
+                    "to": "f86700d4-3995-4ab0-8ab3-917f3543b1ab"
+                },
+                {
+                    "id": "b58e9ff5-271a-4e38-af98-d868aaaf4e4b",
+                    "from": "7adadecc-4009-4a59-a52a-d480b665e7b7",
+                    "to": "70acb735-dd00-43a6-bf00-cf43856aaa70"
+                },
+                {
+                    "id": "e4022d3a-0c2b-4fa1-96b1-a3e28523029d",
+                    "from": "66f09d0f-b000-4d1a-b34f-d9636764e391",
+                    "to": "ff47b91a-99ef-4074-9588-8bd89ce25605"
+                },
+                {
+                    "id": "2d68da52-5071-4086-8549-d871fee2512d",
+                    "from": "ca071f01-616b-4f6c-9cf9-a1fcdfa1c785",
+                    "to": "6efb374c-a115-404e-ade8-0aa05ba93996"
+                }
+            ],
+            "name": "Example of a more complex graph with nodes as interfaces, inheritance and more"
+        }
+    ],
+    "version": "20240723.13",
+    "metadata": {
+        "movementStep": 100,
+        "randomizedOffset": false
+    }
+}
