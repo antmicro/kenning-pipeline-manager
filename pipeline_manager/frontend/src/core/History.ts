@@ -48,6 +48,11 @@ export class Step {
     remove(graph: Ref<Graph>) {
         throw new Error(`Method remove has thrown an error for topic: ${this.topic}`);
     }
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    edit(graph: Ref<Graph>) {
+        throw new Error(`Method edit has thrown an error for topic: ${this.topic}`);
+    }
 }
 
 class NodeStep extends Step {
@@ -70,6 +75,18 @@ class NodeStep extends Step {
         if (node !== undefined) {
             this.nodeTuple = [node, node.save()];
             graph.value.removeNode(node);
+        }
+    }
+
+    edit(graph: Ref<Graph>) {
+        if (this.nodeTuple[0] !== undefined) {
+            // remove the current version of the node
+            graph.value.removeNode(this.nodeTuple[0]);
+            // save the current version and load the previous save
+            const n = graph.value.addNode(this.nodeTuple[0]);
+            const save = this.nodeTuple[1];
+            this.nodeTuple = [this.nodeTuple[0], this.nodeTuple[0].save()];
+            n.load(save);
         }
     }
 }
@@ -183,6 +200,7 @@ export function useHistory(graph: Ref<any>, commandHandler: ICommandHandler): IH
     const unsubscribeFromGraphEvents = (g: any, tok : symbol) => {
         g.events.addNode.unsubscribe(tok);
         g.events.removeNode.unsubscribe(tok);
+        g.events.editNode.unsubscribe(tok);
         g.events.addConnection.unsubscribe(tok);
         g.events.removeConnection.unsubscribe(tok);
         g.events.addAnchor.unsubscribe(tok);
@@ -218,6 +236,16 @@ export function useHistory(graph: Ref<any>, commandHandler: ICommandHandler): IH
                     const historyItem = history.get(newGraph.id);
                     if (!historyItem) return;
                     const step = new NodeStep('rem', node.id.toString(), transactionId.value);
+                    historyItem.push(step);
+                    step.nodeTuple = [node, node.save()];
+                    undoneHistory.set(newGraph.id, []);
+                }
+            });
+            newGraph.events.editNode.subscribe(token, (node : any) => {
+                if (!suppressingHistory.value) {
+                    const historyItem = history.get(newGraph.id);
+                    if (!historyItem) return;
+                    const step = new NodeStep('edit', node.id.toString(), transactionId.value);
                     historyItem.push(step);
                     step.nodeTuple = [node, node.save()];
                     undoneHistory.set(newGraph.id, []);
@@ -286,6 +314,9 @@ export function useHistory(graph: Ref<any>, commandHandler: ICommandHandler): IH
         } else if (step.type === 'rem') {
             step.type = 'add';
             step.add(graph);
+        } else if (step.type === 'edit') {
+            step.type = 'edit';
+            step.edit(graph);
         }
         auxiliaryHistory.push(step);
         if (
