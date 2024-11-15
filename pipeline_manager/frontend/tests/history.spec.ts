@@ -1,5 +1,5 @@
 import { test, expect, Page, Locator } from '@playwright/test';
-import { getUrl } from './config.js';
+import { getUrl, loadVideoNodeId } from './config.js';
 
 async function deleteNode(page: Page, nodeId: string) {
     // Find the node and invoke a context menu with a right click.
@@ -57,7 +57,6 @@ async function dragAndDrop(page: Page, locator: Locator, x: number, y: number) {
 
 test('test history by removing node', async ({ page }) => {
     // Load a website and wait until nodes are loaded.
-    const loadVideoNodeId = 'f50b4f2a-a2e2-4409-a5c9-891a8de44a5b';
     await loadWebsite(page, loadVideoNodeId);
 
     await deleteNode(page, loadVideoNodeId);
@@ -96,7 +95,6 @@ async function countSaveVideoNodes(page: Page): Promise<number> {
 
 test('test history by adding node', async ({ page }) => {
     // Load a website and wait until nodes are loaded.
-    const loadVideoNodeId = 'f50b4f2a-a2e2-4409-a5c9-891a8de44a5b';
     await loadWebsite(page, loadVideoNodeId);
 
     await addNode(page, 'Filesystem', 'SaveVideo', 750, 80);
@@ -118,7 +116,6 @@ test('test history by adding node', async ({ page }) => {
 
 test('test history by moving node', async ({ page }) => {
     // Load a website and wait until nodes are loaded.
-    const loadVideoNodeId = 'f50b4f2a-a2e2-4409-a5c9-891a8de44a5b';
     await loadWebsite(page, loadVideoNodeId);
 
     const node = page.locator(`#${loadVideoNodeId}`);
@@ -168,7 +165,6 @@ async function removeConnection(page: Page, inputInterface: Locator) {
 }
 
 test('test history by removing connection', async ({ page }) => {
-    const loadVideoNodeId = 'f50b4f2a-a2e2-4409-a5c9-891a8de44a5b';
     await loadWebsite(page, loadVideoNodeId);
 
     const outputPort = page.locator(`#${loadVideoNodeId} .__content .__outputs .__port`);
@@ -194,7 +190,6 @@ test('test history by removing connection', async ({ page }) => {
 });
 
 test('test history by adding connection', async ({ page }) => {
-    const loadVideoNodeId = 'f50b4f2a-a2e2-4409-a5c9-891a8de44a5b';
     await loadWebsite(page, loadVideoNodeId);
 
     const outputPort = page.locator(`#${loadVideoNodeId} .__content .__outputs .__port`);
@@ -244,7 +239,6 @@ async function firstInputInterfaceHasToBe(page: Page, value: string, errorMessag
 }
 
 test('test history by moving interface down', async ({ page }) => {
-    const loadVideoNodeId = 'f50b4f2a-a2e2-4409-a5c9-891a8de44a5b';
     await loadWebsite(page, loadVideoNodeId);
 
     await firstInputInterfaceHasToBe(
@@ -283,7 +277,6 @@ test('test history by moving interface down', async ({ page }) => {
 });
 
 test('test history by moving interface up', async ({ page }) => {
-    const loadVideoNodeId = 'f50b4f2a-a2e2-4409-a5c9-891a8de44a5b';
     await loadWebsite(page, loadVideoNodeId);
 
     await firstInputInterfaceHasToBe(
@@ -327,7 +320,6 @@ async function countInterfaces(page: Page, type: 'input' | 'output'): Promise<nu
 }
 
 test('test history by moving interface to right', async ({ page }) => {
-    const loadVideoNodeId = 'f50b4f2a-a2e2-4409-a5c9-891a8de44a5b';
     await loadWebsite(page, loadVideoNodeId);
 
     expect(await countInterfaces(page, 'input'), {
@@ -370,7 +362,6 @@ test('test history by moving interface to right', async ({ page }) => {
 });
 
 test('test history by moving interface to left', async ({ page }) => {
-    const loadVideoNodeId = 'f50b4f2a-a2e2-4409-a5c9-891a8de44a5b';
     await loadWebsite(page, loadVideoNodeId);
 
     expect(await countInterfaces(page, 'input'), {
@@ -413,7 +404,6 @@ test('test history by moving interface to left', async ({ page }) => {
 });
 
 test('test history by removing node with connection', async ({ page }) => {
-    const loadVideoNodeId = 'f50b4f2a-a2e2-4409-a5c9-891a8de44a5b';
     await loadWebsite(page, loadVideoNodeId);
 
     // At the beginning, six connections exist.
