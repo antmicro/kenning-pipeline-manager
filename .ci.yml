@@ -58,7 +58,7 @@ test-frontend:
     <<: *common_only
     script:
         - ./build static-html ./examples/sample-specification.json ./examples/sample-dataflow.json
-        - cd pipeline_manager/frontend/
+        - cd pipeline_manager/frontend
         - npx playwright install --with-deps
         - npm run test
     artifacts:

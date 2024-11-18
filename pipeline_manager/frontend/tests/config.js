@@ -6,9 +6,9 @@ import { dirname, join } from 'path';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// Path and directory to a static HTML-based version of the frontend.
-export const config = {
-    directory: 'dist',
+// Configuration for path and directory of static HTML-based version of the frontend.
+const config = {
+    directory: './dist',
     file: 'index.html',
 };
 
