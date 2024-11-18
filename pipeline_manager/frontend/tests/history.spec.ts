@@ -240,10 +240,7 @@ async function firstInputInterfaceHasToBe(page: Page, value: string, errorMessag
     await expect(await firstInputInterface.innerText(), { message: errorMessage }).toBe(value);
 }
 
-// Undo & redo action triggered by Ctrl+Z and Ctrl+Y respectively,
-// do not undo and redo moving an interface down.
-// Moving down is an option available in the context menu of an interface.
-test.fixme('test history by moving interface down', async ({ page }) => {
+test('test history by moving interface down', async ({ page }) => {
     await loadWebsite(page, loadVideoNodeId);
 
     await firstInputInterfaceHasToBe(
@@ -281,10 +278,7 @@ test.fixme('test history by moving interface down', async ({ page }) => {
     );
 });
 
-// Undo & redo action triggered by Ctrl+Z and Ctrl+Y respectively,
-// do not undo and redo moving an interface up.
-// Moving up is an option available in the context menu of an interface.
-test.fixme('test history by moving interface up', async ({ page }) => {
+test('test history by moving interface up', async ({ page }) => {
     await loadWebsite(page, loadVideoNodeId);
 
     await firstInputInterfaceHasToBe(
@@ -327,10 +321,7 @@ async function countInterfaces(page: Page, type: 'input' | 'output'): Promise<nu
     return filter2dNode.locator(`.__${type}s .__port`).count();
 }
 
-// Undo & redo action triggered by Ctrl+Z and Ctrl+Y respectively,
-// do not undo and redo moving an interface to the right.
-// Moving to the right happens after double clicking on an interface located on the left.
-test.fixme('test history by moving interface to right', async ({ page }) => {
+test('test history by moving interface to right', async ({ page }) => {
     await loadWebsite(page, loadVideoNodeId);
 
     expect(await countInterfaces(page, 'input'), {
@@ -372,10 +363,7 @@ test.fixme('test history by moving interface to right', async ({ page }) => {
     }).toBe(2);
 });
 
-// Undo & redo action triggered by Ctrl+Z and Ctrl+Y respectively,
-// do not undo and redo moving an interface to the left.
-// Moving to the left happens after double clicking on an interface located on the right.
-test.fixme('test history by moving interface to left', async ({ page }) => {
+test('test history by moving interface to left', async ({ page }) => {
     await loadWebsite(page, loadVideoNodeId);
 
     expect(await countInterfaces(page, 'input'), {
