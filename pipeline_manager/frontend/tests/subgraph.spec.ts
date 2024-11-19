@@ -21,3 +21,21 @@ test('test entering subgraph', async ({ page }) => {
     nodes = page.locator('.node-container > div');
     expect(await nodes.count()).toBe(2);
 });
+
+test('test coming back from subgraph', async ({ page }) => {
+    await page.goto(getUrl('subgraph'));
+
+    // There are four nodes initially.
+    const nodes = page.locator('.node-container > div');
+    expect(await nodes.count()).toBe(4);
+
+    const nodeContainingSubgraph = page.getByText('Test subgraph node #1').nth(1).locator('../..');
+    await enterSubgraph(page, nodeContainingSubgraph);
+    // A subgraph contains two nodes.
+    expect(await nodes.count()).toBe(2);
+
+    // Leave a subgraph.
+    const leaveButton = page.getByText('Return from subgraph editor').locator('../..');
+    await leaveButton.click();
+    expect(await nodes.count()).toBe(4);
+});
