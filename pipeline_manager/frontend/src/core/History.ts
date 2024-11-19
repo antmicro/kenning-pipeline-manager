@@ -80,13 +80,28 @@ class NodeStep extends Step {
 
     edit(graph: Ref<Graph>) {
         if (this.nodeTuple[0] !== undefined) {
+            // save node connections
+            const interfaces = [
+                ...Object.values(this.nodeTuple[0].inputs),
+                ...Object.values(this.nodeTuple[0].outputs),
+            ];
+            const connections = graph.value.connections.filter(
+                (c) => interfaces.includes(c.from) || interfaces.includes(c.to),
+            );
+
             // remove the current version of the node
             graph.value.removeNode(this.nodeTuple[0]);
+
             // save the current version and load the previous save
             const n = graph.value.addNode(this.nodeTuple[0]);
             const save = this.nodeTuple[1];
             this.nodeTuple = [this.nodeTuple[0], this.nodeTuple[0].save()];
             n.load(save);
+
+            // restore connections
+            connections.forEach((conn) => {
+                graph.value.addConnection(conn.from, conn.to);
+            });
         }
     }
 }
