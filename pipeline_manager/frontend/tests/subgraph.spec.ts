@@ -75,3 +75,44 @@ test('test preserving changes to subgraph', async ({ page }) => {
     await enterSubgraph(page, nodeContainingSubgraph);
     expect(await nodes.count()).toBe(3);
 });
+
+test('test visibility of exposed subgraph interface', async ({ page }) => {
+    await page.goto(getUrl('subgraph'));
+
+    // Initially, there are 4 interfaces exposed.
+    const initialInterfaceCount = 4;
+    const nodeWithSubgraph = page.getByText('Test subgraph node #1').locator('../..');
+    const outputs = nodeWithSubgraph.locator('.__outputs > div');
+    expect(await outputs.count()).toBe(initialInterfaceCount);
+
+    const nodeContainingSubgraph = page.getByText('Test subgraph node #1').nth(1).locator('../..');
+    await enterSubgraph(page, nodeContainingSubgraph);
+
+    // Add a new node: open the node browser, expand a category, and drag & drop a node.
+    const showNodesButton = page.getByText('Show node browser').locator('../..');
+    await showNodesButton.click();
+
+    const firstCategoryLabel = page.getByText('First Category');
+    await firstCategoryLabel.click();
+
+    const nodeFromBrowser = page.getByText('Test node #').first();
+    await dragAndDrop(page, nodeFromBrowser, { x: 400, y: 200 });
+
+    // Expose a new interface: right click on an interface and choose 'Expose Interface'.
+    const newOutputInterface = page
+        .getByText('Test node #1')
+        .locator('../..')
+        .locator('.__content .__port')
+        .nth(4);
+    await newOutputInterface.click({ button: 'right' });
+
+    const contextMenuOption = page.locator('.baklava-context-menu').getByText('Expose Interface');
+    await contextMenuOption.click();
+
+    // Get back to the main graph.
+    const leaveButton = page.getByText('Return from subgraph editor').locator('../..');
+    await leaveButton.click();
+
+    // Check if the newly exposed interface is present.
+    expect(await outputs.count()).toBe(initialInterfaceCount + 1);
+});
