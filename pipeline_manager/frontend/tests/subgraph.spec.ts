@@ -76,7 +76,7 @@ test('test preserving changes to subgraph', async ({ page }) => {
     expect(await nodes.count()).toBe(3);
 });
 
-test('test visibility of exposed subgraph interface', async ({ page }) => {
+test('test visibility of newly exposed subgraph interface', async ({ page }) => {
     await page.goto(getUrl('subgraph'));
 
     // Initially, there are 4 interfaces exposed.
@@ -85,6 +85,7 @@ test('test visibility of exposed subgraph interface', async ({ page }) => {
     const outputs = nodeWithSubgraph.locator('.__outputs > div');
     expect(await outputs.count()).toBe(initialInterfaceCount);
 
+    // Enter a subgraph.
     const nodeContainingSubgraph = page.getByText('Test subgraph node #1').nth(1).locator('../..');
     await enterSubgraph(page, nodeContainingSubgraph);
 
@@ -115,4 +116,48 @@ test('test visibility of exposed subgraph interface', async ({ page }) => {
 
     // Check if the newly exposed interface is present.
     expect(await outputs.count()).toBe(initialInterfaceCount + 1);
+});
+
+test("test hiding and exposing subgraph's interface", async ({ page }) => {
+    await page.goto(getUrl('subgraph'));
+
+    // Initially, there are 4 interfaces exposed.
+    const initialInterfaceCount = 4;
+    const nodeWithSubgraph = page.getByText('Test subgraph node #1').locator('../..');
+    const exposedInterfaces = nodeWithSubgraph.locator('.__outputs > div');
+    expect(await exposedInterfaces.count()).toBe(initialInterfaceCount);
+
+    // Enter a subgraph.
+    const nodeContainingSubgraph = page.getByText('Test subgraph node #1').nth(1).locator('../..');
+    await enterSubgraph(page, nodeContainingSubgraph);
+
+    // Hide an exposed interface: invoke a interface's context menu and click the option.
+    const exposedInterface = page
+        .getByText('Test node #1')
+        .locator('../..')
+        .locator('.__content .__port')
+        .nth(1);
+    await exposedInterface.click({ button: 'right' });
+
+    const privatizeContextMenuOption = page
+        .locator('.baklava-context-menu')
+        .getByText('Privatize Interface');
+    await privatizeContextMenuOption.click();
+
+    // Get back to the main graph.
+    const leaveButton = page.getByText('Return from subgraph editor').locator('../..');
+    await leaveButton.click();
+    expect(await exposedInterfaces.count()).toBe(initialInterfaceCount - 1);
+
+    // Re-expose the currently hidden interface: invoke an interface's context menu and click the option.
+    await enterSubgraph(page, nodeContainingSubgraph);
+    await exposedInterface.click({ button: 'right' });
+    const exposeContextMenuOption = page
+        .locator('.baklava-context-menu')
+        .getByText('Expose Interface');
+    await exposeContextMenuOption.click();
+
+    // Get back to the main graph.
+    await leaveButton.click();
+    expect(await exposedInterfaces.count()).toBe(initialInterfaceCount);
 });
