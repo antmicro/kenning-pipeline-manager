@@ -447,3 +447,42 @@ test('test history by removing node with connection', async ({ page }) => {
         message: 'Redo of removal of a node should restore remove its connections but it did not.',
     }).toHaveCount(5);
 });
+
+test('test history by editing node with connection', async ({ page }) => {
+    await loadWebsite(page, loadVideoNodeId);
+
+    // At the beginning, six connections exist.
+    const connections = page.locator('.connections-container').locator('g');
+    await expect(connections, {
+        message: 'The initial condition of six connections being present are not met.',
+    }).toHaveCount(6);
+
+    // Open a context menu of an interface.
+    const filter2dNode = page.getByText('Filter2D').nth(1).locator('../..');
+    let interfaceInput1 = filter2dNode
+        .locator('.__inputs')
+        .getByText('kernel')
+        .locator('..')
+        .locator('.__port');
+    await interfaceInput1.click({ button: 'right' });
+
+    // Move the interface up.
+    const moveUpOption = page.locator('.baklava-context-menu').getByText('Move Up');
+    await moveUpOption.click();
+    await firstInputInterfaceHasToBe(page, 'kernel', 'An interface `input 1` was not moved up.');
+
+    // Verify the number of connections.
+    await expect(connections, {
+        message: 'Editing a node should not affect the number of connections but it did.',
+    }).toHaveCount(6);
+
+    await page.keyboard.press('Control+KeyZ');
+    await expect(connections, {
+        message: 'Undo of node edit should restore its connections but it did not.',
+    }).toHaveCount(6);
+
+    await page.keyboard.press('Control+KeyY');
+    await expect(connections, {
+        message: 'Redo of node edit should restore its connections but it did not.',
+    }).toHaveCount(6);
+});
