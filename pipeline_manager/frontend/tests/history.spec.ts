@@ -346,20 +346,24 @@ test('test history by moving interface to right', async ({ page }) => {
         message: 'An interface was not moved to the right after double clicking it.',
     }).toBe(2);
 
+    // Click on another node to enable undo.
+    const node = page.locator(`#${loadVideoNodeId}`);
+    await node.click();
+
     await page.keyboard.press('Control+KeyZ');
     expect(await countInterfaces(page, 'input'), {
-        message: 'Undoing of moving an interface to the left failed.',
+        message: 'Undoing of moving an interface to the right failed.',
     }).toBe(2);
     expect(await countInterfaces(page, 'output'), {
-        message: 'Undoing of moving an interface to the left failed.',
+        message: 'Undoing of moving an interface to the right failed.',
     }).toBe(1);
 
     await page.keyboard.press('Control+KeyY');
     expect(await countInterfaces(page, 'input'), {
-        message: 'Redoing of moving an interface to the left failed.',
+        message: 'Redoing of moving an interface to the right failed.',
     }).toBe(1);
     expect(await countInterfaces(page, 'output'), {
-        message: 'Redoing of moving an interface to the left failed.',
+        message: 'Redoing of moving an interface to the right failed.',
     }).toBe(2);
 });
 
@@ -387,6 +391,10 @@ test('test history by moving interface to left', async ({ page }) => {
     expect(await countInterfaces(page, 'output'), {
         message: 'An interface was not moved to the left after double clicking it.',
     }).toBe(0);
+
+    // Click on another node to enable undo.
+    const node = page.locator(`#${loadVideoNodeId}`);
+    await node.click();
 
     await page.keyboard.press('Control+KeyZ');
     expect(await countInterfaces(page, 'input'), {
