@@ -36,11 +36,9 @@ class DataflowBuilder:
 
     def load_graphs(self, dataflow_path: Path):
         """
-        Load a dataflow graph from a file.
+        Load each dataflow graph from a file.
 
-        The graph is loaded to the internal storage and returned to
-        facilitate further manipulations. The first graph from a
-        file is loaded.
+        All the graphs are loaded to the internal storage.
 
         Parameters
         ----------
@@ -57,8 +55,10 @@ class DataflowBuilder:
         )
         if not success:
             raise ValueError(f"Invalid `dataflow_path`: {reason}")
-        with open(dataflow_path, "rt", encoding="utf-8") as fd:
+        with open(dataflow_path, encoding="utf-8") as fd:
             content = json.loads(fd.read(), ensure_ascii=False)
+            self.validate()
+
             for graph in content["graphs"]:
                 dataflow_graph = DataflowGraph(
                     specification=self._specification,
@@ -158,6 +158,15 @@ class DataflowBuilder:
             fd.write(self.to_json(as_str=True))
 
     def validate(self):
+        """
+        Validate the entire dataflow file including all the included graphs.
+
+        Raises
+        ------
+        ValueError
+            Raised if an external validator failed to validate
+            either a dataflow or specification file.
+        """
         # Sava dataflow to a temp file.
         # Enabling safe mode here would lead to infinite circular recursion.
         temp_dataflow_file = Path(f"temp_dataflow_{get_uuid()}.json")
