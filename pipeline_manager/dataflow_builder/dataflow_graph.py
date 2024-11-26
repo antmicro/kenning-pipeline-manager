@@ -143,7 +143,7 @@ class DataflowGraph(JsonConvertible):
                 "is missing in the specification."
             )
 
-        node_id = get_uuid()
+        node_id = base_node["id"] if "id" in base_node else get_uuid()
 
         # Values for interface initialization are taken from the specification.
         interfaces = []
@@ -192,6 +192,7 @@ class DataflowGraph(JsonConvertible):
         self,
         from_interface: Union[Interface, str],
         to_interface: Union[Interface, str],
+        connection_id: Optional[str] = None,
     ) -> InterfaceConnection:
         """
         Create a connection between two existing interfaces.
@@ -207,6 +208,9 @@ class DataflowGraph(JsonConvertible):
             Source interface, where data will flow from.
         to_interface : Union[Interface, str]
             Destination interface, where data will flow to.
+        connection_id : Optional[str]
+            Identifier of a connection. If not supplied,
+            one will be generated.
 
         Returns
         -------
@@ -216,15 +220,12 @@ class DataflowGraph(JsonConvertible):
         Raises
         ------
         ValueError
-            Raised if source interface does not belong to the graph.
-        ValueError
-            Raised if destination interface does not belong to the graph.
-        ValueError
-            Raised if source interface direction is `input`.
-        ValueError
-            Raised if destination interface direction is `output`.
-        ValueError
-            Raised if a mismatch between source and destination interfaces'
+            Raised if:
+            - a source interface does not belong to the graph.
+            - a destination interface does not belong to the graph.
+            - a source interface direction is `input`.
+            - a destination interface direction is `output`.
+            - a mismatch between source and destination interfaces'
                 types occurs.
         """
         from_interface = get_interface_if_present(from_interface, self._nodes)
@@ -263,7 +264,9 @@ class DataflowGraph(JsonConvertible):
                 f"{to_interface.type}."
             )
 
-        connection_id = get_uuid()
+        if not connection_id:
+            connection_id = get_uuid()
+
         connection = InterfaceConnection(
             id=connection_id,
             from_interface=from_interface,
