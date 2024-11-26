@@ -92,17 +92,20 @@ class DataflowGraph(JsonConvertible):
                 ),
             )
 
-    def create_node(self, **kwargs: Dict[str, Any]) -> Node:
+    def create_node(self, name: str, **kwargs: Dict[str, Any]) -> Node:
         """
         Create the node initialized with the supplied arguments.
 
         The use of this method is highly preferred to manually adding a node.
-        Default values are taken from the specification so remember to pass
-        `name` of the node. The default values may be overridden by the values
-        supplied in `kwargs`. `id` is already initialized.
+        Default values are taken from the specification, based on the
+        provided `name` parameter. The default values may be overridden by
+        the values supplied in `kwargs`. `id` is already initialized.
 
         Parameters
         ----------
+        name: str
+            Name of a node, based on which default values will be derived
+            from the specification.
         **kwargs : Dict[str, Any]
             Keyword arguments to initialise a newly created node.
             Check attributes of `Node` dataclass, to find all available keys.
@@ -119,22 +122,22 @@ class DataflowGraph(JsonConvertible):
             or the provided name of the node does not exists in the
             specification.
         """
-        if "name" not in kwargs:
-            raise ValueError(
-                "Missing parameter `name`, which is required "
-                "to create new node."
-            )
+        # if "name" not in kwargs:
+        #     raise ValueError(
+        #         "Missing parameter `name`, which is required "
+        #         "to create new node."
+        #     )
 
         base_node = None
         for _node in self._specification["nodes"]:
             # Not a node but a category.
             if "name" not in _node:
                 continue
-            if kwargs["name"] == _node["name"]:
+            if name == _node["name"]:
                 base_node = _node
 
         if not base_node:
-            node_name = kwargs["name"]
+            node_name = name
             raise ValueError(
                 f"Provided name of the node `{node_name}` "
                 "is missing in the specification."

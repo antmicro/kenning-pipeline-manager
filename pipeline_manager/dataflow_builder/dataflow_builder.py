@@ -175,8 +175,7 @@ class DataflowBuilder:
         # `self.save()` cannot be used as it saves the dataflow only.
         temp_specification_file = Path(f"temp_specification_{get_uuid()}.json")
         with open(temp_specification_file, "wt", encoding="utf-8") as fd:
-            specification = json.dumps(self._specification, ensure_ascii=False)
-            fd.write(specification)
+            json.dump(self._specification, fd, ensure_ascii=False)
 
         result = validate(
             dataflow_paths=[temp_dataflow_file],
