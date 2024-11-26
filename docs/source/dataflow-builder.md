@@ -26,12 +26,13 @@ graph = builder.create_graph()
 
 To load an existing specification from a file:
 ```python
-graph = builder.load_dataflow(dataflow_path='examples/sample-dataflow.json')
+builder.load_graphs(dataflow_path='examples/sample-dataflow.json')
+graph = builder.graphs[0]
 ```
 
 In both cases, the dataflow graph:
 - has to be compliant with the provided specification.
-- is returned and may be edited with its public methods.
+- is retrieved and may be edited with its public methods.
 
 ### Creating a node
 
@@ -99,5 +100,43 @@ node.move(Vector(1000, 1000)) # relative = False, by default
 
 ```{eval-rst}
 .. autoclass:: pipeline_manager.dataflow_builder.dataflow_builder.DataflowBuilder
+  :members:
+```
+
+## Specification of DataflowGraph
+
+```{eval-rst}
+.. autoclass:: pipeline_manager.dataflow_builder.dataflow_graph.DataflowGraph
+  :members:
+```
+
+## Specification of Node
+
+```{eval-rst}
+.. autoclass:: pipeline_manager.dataflow_builder.entities.Node
+  :members:
+```
+
+## Specification of Interface
+
+```{eval-rst}
+.. autoclass:: pipeline_manager.dataflow_builder.entities.Interface
+  :members:
+```
+
+## Specification of Connection
+
+Notice that name of the class representing connection is `InterfaceConnection`, not `Connection`.
+It aims not to confuse a user what is connected specifically, stating explicitly that interfaces are connected, not nodes.
+
+```{eval-rst}
+.. autoclass:: pipeline_manager.dataflow_builder.entities.InterfaceConnection
+  :members:
+```
+
+## Specification of Property
+
+```{eval-rst}
+.. autoclass:: pipeline_manager.dataflow_builder.entities.Property
   :members:
 ```
