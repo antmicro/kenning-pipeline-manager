@@ -26,7 +26,7 @@ class Vector2:
             "y": self.y,
         }
         if as_str:
-            return json.dumps(output)
+            return json.dumps(output, ensure_ascii=False)
         return output
 
 
@@ -88,7 +88,7 @@ class Property(JsonConvertible):
             "id": self.id,
         }
         if as_str:
-            return json.dumps(output)
+            return json.dumps(output, ensure_ascii=False)
         return output
 
 
@@ -134,7 +134,7 @@ class Interface(JsonConvertible):
             output["type"] = self.type
 
         if as_str:
-            return json.dumps(output)
+            return json.dumps(output, ensure_ascii=False)
         return output
 
 
@@ -360,7 +360,7 @@ class Node(JsonConvertible):
             output[camel_cased_name] = field_value
 
         if as_str:
-            return json.dumps(output)
+            return json.dumps(output, ensure_ascii=False)
         return output
 
 
@@ -388,7 +388,7 @@ class InterfaceConnection(JsonConvertible):
             output["anchors"] = anchors
 
         if as_str:
-            json.dumps(output)
+            json.dumps(output, ensure_ascii=False)
         return output
 
 

@@ -280,7 +280,7 @@ class DataflowGraph(JsonConvertible):
         output = {"id": self._id, "nodes": nodes, "connections": connections}
 
         if as_str:
-            return json.dumps(output)
+            return json.dumps(output, ensure_ascii=False)
         return output
 
     def get(

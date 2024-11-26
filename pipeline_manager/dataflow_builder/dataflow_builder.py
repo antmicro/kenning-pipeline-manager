@@ -56,16 +56,16 @@ class DataflowBuilder:
         if not success:
             raise ValueError(f"Invalid `dataflow_path`: {reason}")
         with open(dataflow_path, encoding="utf-8") as fd:
-            content = json.loads(fd.read(), ensure_ascii=False)
-            self.validate()
+            content = json.loads(fd.read())
 
             for graph in content["graphs"]:
                 dataflow_graph = DataflowGraph(
                     specification=self._specification,
                     dataflow=graph,
                 )
-
                 self.graphs.append(dataflow_graph)
+
+            self.validate()
 
     def load_specification(
         self, specification_path: Path, purge_dataflows: bool = True
@@ -175,7 +175,7 @@ class DataflowBuilder:
         # `self.save()` cannot be used as it saves the dataflow only.
         temp_specification_file = Path(f"temp_specification_{get_uuid()}.json")
         with open(temp_specification_file, "wt", encoding="utf-8") as fd:
-            specification = json.dumps(self._specification)
+            specification = json.dumps(self._specification, ensure_ascii=False)
             fd.write(specification)
 
         result = validate(
@@ -203,5 +203,5 @@ class DataflowBuilder:
         }
 
         if as_str:
-            return json.dumps(output)
+            return json.dumps(output, ensure_ascii=False)
         return output
