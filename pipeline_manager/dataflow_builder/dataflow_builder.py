@@ -56,7 +56,7 @@ class DataflowBuilder:
         if not success:
             raise ValueError(f"Invalid `dataflow_path`: {reason}")
         with open(dataflow_path, encoding="utf-8") as fd:
-            content = json.loads(fd.read())
+            content = json.load(fd)
 
             for graph in content["graphs"]:
                 dataflow_graph = DataflowGraph(
@@ -92,7 +92,7 @@ class DataflowBuilder:
         if not success:
             raise ValueError(f"Invalid `specification_path`: {reason}")
         with open(specification_path, mode="rt", encoding="utf-8") as fd:
-            self._specification = json.loads(fd.read())
+            self._specification = json.load(fd)
 
             if purge_dataflows:
                 self.graphs = []
@@ -132,9 +132,8 @@ class DataflowBuilder:
 
     def _load_dataflow_graph_from_file(self, path: Path) -> DataflowGraph:
         path = path.resolve()
-        with open(path, "rt", encoding="utf-8") as fd:
-            graph_as_text = fd.read()
-            graph = json.loads(graph_as_text)
+        with open(path, encoding="utf-8") as fd:
+            graph = json.load(fd)
             dataflow_graph = DataflowGraph(
                 dataflow=graph, specification=self._specification
             )
