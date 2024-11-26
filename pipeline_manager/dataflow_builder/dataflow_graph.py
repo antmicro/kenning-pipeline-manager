@@ -1,6 +1,5 @@
 """Module with DataflowGraph class for representing a dataflow graph."""
 
-import json
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union
 
@@ -13,6 +12,7 @@ from pipeline_manager.dataflow_builder.entities import (
     Property,
     Vector2,
     camel_case_to_snake_case,
+    convert_output,
     match_criteria,
 )
 from pipeline_manager.dataflow_builder.utils import (
@@ -282,10 +282,7 @@ class DataflowGraph(JsonConvertible):
         ]
 
         output = {"id": self._id, "nodes": nodes, "connections": connections}
-
-        if as_str:
-            return json.dumps(output, ensure_ascii=False)
-        return output
+        return convert_output(output, as_str)
 
     def get(
         self, type: AttributeType, **kwargs

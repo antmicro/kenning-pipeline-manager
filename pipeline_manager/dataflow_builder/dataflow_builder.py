@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Dict, List, Union
 
 from pipeline_manager.dataflow_builder.dataflow_graph import DataflowGraph
+from pipeline_manager.dataflow_builder.entities import convert_output
 from pipeline_manager.dataflow_builder.utils import (
     get_uuid,
     is_proper_input_file,
@@ -201,6 +202,4 @@ class DataflowBuilder:
             "graphs": [graph.to_json(as_str=False) for graph in self.graphs],
         }
 
-        if as_str:
-            return json.dumps(output, ensure_ascii=False)
-        return output
+        return convert_output(output, as_str)

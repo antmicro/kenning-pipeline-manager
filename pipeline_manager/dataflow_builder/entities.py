@@ -25,9 +25,7 @@ class Vector2:
             "x": self.x,
             "y": self.y,
         }
-        if as_str:
-            return json.dumps(output, ensure_ascii=False)
-        return output
+        return convert_output(output, as_str)
 
 
 class Direction(Enum):
@@ -87,9 +85,7 @@ class Property(JsonConvertible):
             "value": self.value,
             "id": self.id,
         }
-        if as_str:
-            return json.dumps(output, ensure_ascii=False)
-        return output
+        return convert_output(output, as_str)
 
 
 @dataclass
@@ -133,9 +129,7 @@ class Interface(JsonConvertible):
         if self.type:
             output["type"] = self.type
 
-        if as_str:
-            return json.dumps(output, ensure_ascii=False)
-        return output
+        return convert_output(output, as_str)
 
 
 class NodeAttributeType(Enum):
@@ -359,9 +353,7 @@ class Node(JsonConvertible):
             camel_cased_name = snake_case_to_camel_case(field_name)
             output[camel_cased_name] = field_value
 
-        if as_str:
-            return json.dumps(output, ensure_ascii=False)
-        return output
+        return convert_output(output, as_str)
 
 
 @dataclass
@@ -496,3 +488,26 @@ def clamp(value: float, minimum: float, maximum: float) -> float:
     elif value > maximum:
         return maximum
     return value
+
+
+def convert_output(
+    output: Dict[str, Any], as_str: bool
+) -> Union[str, Dict[str, Any]]:
+    """
+    Convert a dictionary to either string or do not change.
+
+    Parameters
+    ----------
+    output : Dict[str, Any]
+        Dictionary to be converted.
+    as_str : bool
+        Whether to convert.
+
+    Returns
+    -------
+    Union[str, Dict[str, Any]]
+        The converted output.
+    """
+    if as_str:
+        return json.dumps(output, ensure_ascii=False)
+    return output
