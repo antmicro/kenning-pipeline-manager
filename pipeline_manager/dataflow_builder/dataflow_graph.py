@@ -20,6 +20,7 @@ from pipeline_manager.dataflow_builder.utils import (
     get_interface_if_present,
     get_uuid,
 )
+from pipeline_manager.specification_builder import SpecificationBuilder
 
 
 class AttributeType(Enum):
@@ -38,7 +39,7 @@ class DataflowGraph(JsonConvertible):
 
     def __init__(
         self,
-        specification: Dict[str, Any],
+        builder_with_spec: SpecificationBuilder,
         dataflow: Optional[Dict[str, Any]] = None,
     ):
         """
@@ -50,8 +51,8 @@ class DataflowGraph(JsonConvertible):
 
         Parameters
         ----------
-        specification : Dict[str, Any]
-            Content of a specification file.
+        builder_with_spec : SpecificationBuilder
+            Specification builder instance with specification file loaded.
         dataflow : Optional[Dict[str, Any]], optional
             Content of a dataflow builder to load,
             None means an empty dataflow graph, by default None.
@@ -61,7 +62,7 @@ class DataflowGraph(JsonConvertible):
         )
         self._nodes: Dict[str, Node] = {}
         self._connections: Dict[str, InterfaceConnection] = {}
-        self._specification: Dict[str, Any] = specification
+        self._spec_builder = builder_with_spec
 
         if not dataflow:
             return
@@ -77,7 +78,7 @@ class DataflowGraph(JsonConvertible):
             )
 
             self._nodes[node["id"]] = Node(
-                specification=self._specification,
+                specification_builder=self._spec_builder,
                 **node_arguments,
             )
 
@@ -106,7 +107,7 @@ class DataflowGraph(JsonConvertible):
         name: str
             Name of a node, based on which default values will be derived
             from the specification.
-        **kwargs : Dict[str, Any]
+        kwargs : Dict[str, Any]
             Keyword arguments to initialise a newly created node.
             Check attributes of `Node` dataclass, to find all available keys.
 
@@ -122,14 +123,9 @@ class DataflowGraph(JsonConvertible):
             or the provided name of the node does not exists in the
             specification.
         """
-        # if "name" not in kwargs:
-        #     raise ValueError(
-        #         "Missing parameter `name`, which is required "
-        #         "to create new node."
-        #     )
-
         base_node = None
-        for _node in self._specification["nodes"]:
+
+        for _node in self._spec_builder._get_nodes(sort_spec=False):
             # Not a node but a category.
             if "name" not in _node:
                 continue
@@ -168,7 +164,7 @@ class DataflowGraph(JsonConvertible):
 
         DEFAULT_WIDTH = 200
         parameters = {
-            "specification": self._specification,
+            "specification_builder": self._spec_builder,
             "id": node_id,
             "name": base_node["name"],
             "width": getattr(base_node, "width", DEFAULT_WIDTH),
@@ -178,7 +174,7 @@ class DataflowGraph(JsonConvertible):
             "position": Vector2(0, 0),
             "properties": properties,
             "subgraph": None,
-            "two_column": self._specification["metadata"]["twoColumn"],
+            "two_column": self._spec_builder._metadata["twoColumn"],
         }
 
         # Override the default parameters with `kwargs`.

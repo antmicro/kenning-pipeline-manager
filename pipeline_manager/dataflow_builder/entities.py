@@ -7,6 +7,8 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union, get_type_hints
 
+from pipeline_manager.specification_builder import SpecificationBuilder
+
 
 class Direction(Enum):
     """Available directions of an interface."""
@@ -185,7 +187,9 @@ class Node(JsonConvertible):
                 return
         raise KeyError(f"Property with name `{property_name}` was not found.")
 
-    def __init__(self, specification: Dict[str, Any], **kwargs: Dict):
+    def __init__(
+        self, specification_builder: SpecificationBuilder, **kwargs: Dict
+    ):
         """
         Initialise a node based on the provided specification and
         `kwargs`.
@@ -197,8 +201,8 @@ class Node(JsonConvertible):
 
         Parameters
         ----------
-        specification : Dict[str, Any]
-            Content of a specification file parsed to a Python dictionary.
+        specification_builder : SpecificationBuilder
+            Instance of specification builder with a loaded specification.
         **kwargs : Dict
             Kwargs with parameter to override default values from the
             specification. Key `name` is required.
@@ -213,14 +217,16 @@ class Node(JsonConvertible):
         """
         is_type_correct = False
 
-        if "nodes" not in specification:
+        nodes_in_specification = specification_builder._get_nodes(
+            sort_spec=False
+        )
+        if not nodes_in_specification:
             raise ValueError(
                 "The provided specification has no nodes defined. "
-                "Missing `nodes` key. "
-                f"Specification: {str(specification)}"
+                "Possibly the `nodes` key is missing. "
             )
 
-        for node in specification["nodes"]:
+        for node in nodes_in_specification:
             if "name" not in node:
                 continue
             if node["name"] == kwargs["name"]:

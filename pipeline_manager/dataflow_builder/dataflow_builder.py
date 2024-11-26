@@ -11,6 +11,7 @@ from pipeline_manager.dataflow_builder.utils import (
     get_uuid,
     is_proper_input_file,
 )
+from pipeline_manager.specification_builder import SpecificationBuilder
 from pipeline_manager.validator import validate
 
 
@@ -21,8 +22,7 @@ class DataflowBuilder:
     """
 
     def __init__(
-        self,
-        specification: Path,
+        self, specification: Path, specification_version: str = "20240723.13"
     ) -> None:
         """
         Load a specification from a file, initialise an empty list of graphs.
@@ -31,7 +31,10 @@ class DataflowBuilder:
         ----------
         specification : Path
             Path to a JSON specification file.
+        specification_version: str
+            Version of the specification. By default, "20240723.13".
         """
+        self.specification_version = specification_version
         self.load_specification(specification)
         self.graphs: List[DataflowGraph] = []
 
@@ -61,7 +64,7 @@ class DataflowBuilder:
 
             for graph in content["graphs"]:
                 dataflow_graph = DataflowGraph(
-                    specification=self._specification,
+                    builder_with_spec=self._spec_builder,
                     dataflow=graph,
                 )
                 self.graphs.append(dataflow_graph)
@@ -69,17 +72,17 @@ class DataflowBuilder:
             self.validate()
 
     def load_specification(
-        self, specification_path: Path, purge_dataflows: bool = True
+        self, specification_path: Path, purge_old_graphs: bool = True
     ):
         """
         Replace a current specification file associated
-        with the instance of DataflowBuilder.
+        with the instance of DataflowBuilder with a new one.
 
         Parameters
         ----------
         specification_path : Path
             Path to a specification file.
-        purge_dataflows : bool, optional
+        purge_old_graphs : bool, optional
             Determine if dataflow graphs loaded to memory should be purged.
             It makes sense as after changing a specification dataflow graphs
             may no longer be valid. By default True.
@@ -89,13 +92,18 @@ class DataflowBuilder:
         ValueError
             Raised if specification file cannot be loaded or is invalid.
         """
+        self._spec_builder = SpecificationBuilder(
+            spec_version=self.specification_version
+        )
+
         success, reason = is_proper_input_file(specification_path)
         if not success:
             raise ValueError(f"Invalid `specification_path`: {reason}")
         with open(specification_path, mode="rt", encoding="utf-8") as fd:
-            self._specification = json.load(fd)
+            specification = json.load(fd)
+            self._spec_builder.update_spec_from_other(specification)
 
-            if purge_dataflows:
+            if purge_old_graphs:
                 self.graphs = []
 
     def create_graph(
@@ -128,7 +136,7 @@ class DataflowBuilder:
             else:
                 self.graphs.append(self._load_dataflow_graph_from_file())
 
-        self.graphs.append(DataflowGraph(self._specification))
+        self.graphs.append(DataflowGraph(self._spec_builder))
         return self.graphs[-1]
 
     def _load_dataflow_graph_from_file(self, path: Path) -> DataflowGraph:
@@ -136,7 +144,7 @@ class DataflowBuilder:
         with open(path, encoding="utf-8") as fd:
             graph = json.load(fd)
             dataflow_graph = DataflowGraph(
-                dataflow=graph, specification=self._specification
+                dataflow=graph, builder_with_spec=self._spec_builder
             )
 
             return dataflow_graph
@@ -174,8 +182,12 @@ class DataflowBuilder:
 
         # `self.save()` cannot be used as it saves the dataflow only.
         temp_specification_file = Path(f"temp_specification_{get_uuid()}.json")
+
         with open(temp_specification_file, "wt", encoding="utf-8") as fd:
-            json.dump(self._specification, fd, ensure_ascii=False)
+            specification = self._spec_builder._construct_specification(
+                sort_spec=False
+            )
+            json.dump(specification, fd, ensure_ascii=False)
 
         result = validate(
             dataflow_paths=[temp_dataflow_file],
