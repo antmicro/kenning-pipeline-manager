@@ -385,7 +385,7 @@ def test_using_sample_graphs(sample_specification_path, sample_dataflow_path):
     passes validation.
     """
     builder = DataflowBuilder(specification=sample_specification_path)
-    builder.load_dataflow(dataflow_path=sample_dataflow_path)
+    builder.load_graphs(dataflow_path=sample_dataflow_path)
 
     builder.validate()
 
@@ -398,7 +398,8 @@ def test_modifying_sample_graph(
     to a sample graph yields no errors.
     """
     builder = DataflowBuilder(specification=sample_specification_path)
-    graph = builder.load_dataflow(dataflow_path=sample_dataflow_path)
+    builder.load_graphs(dataflow_path=sample_dataflow_path)
+    graph = builder.graphs[0]
     builder.validate()
 
     second_storage = graph.create_node(name="SaveVideo")
@@ -427,6 +428,7 @@ def test_raising_error_when_using_non_existent_keyword_argument(
     keyword argument is used.
     """
     builder = DataflowBuilder(specification=sample_specification_path)
-    graph = builder.load_dataflow(dataflow_path=sample_dataflow_path)
+    builder.load_graphs(dataflow_path=sample_dataflow_path)
+    graph = builder.graphs[0]
     with pytest.raises(KeyError):
         graph.create_node(name="LoadVideo", non_existent_keyword_arg=123)

@@ -34,7 +34,7 @@ class DataflowBuilder:
         self.load_specification(specification)
         self.graphs: List[DataflowGraph] = []
 
-    def load_dataflow(self, dataflow_path: Path) -> DataflowGraph:
+    def load_graphs(self, dataflow_path: Path):
         """
         Load a dataflow graph from a file.
 
@@ -46,11 +46,6 @@ class DataflowBuilder:
         ----------
         dataflow_path : Path
             Path a dataflow graph.
-
-        Returns
-        -------
-        DataflowGraph
-            Instance of DataflowGraph loaded from a file.
 
         Raises
         ------
@@ -64,13 +59,13 @@ class DataflowBuilder:
             raise ValueError(f"Invalid `dataflow_path`: {reason}")
         with open(dataflow_path, "rt", encoding="utf-8") as fd:
             content = json.loads(fd.read())
-            dataflow_graph = DataflowGraph(
-                specification=self._specification,
-                dataflow=content["graphs"][0],
-            )
+            for graph in content["graphs"]:
+                dataflow_graph = DataflowGraph(
+                    specification=self._specification,
+                    dataflow=graph,
+                )
 
-            self.graphs.append(dataflow_graph)
-            return self.graphs[-1]
+                self.graphs.append(dataflow_graph)
 
     def load_specification(
         self, specification_path: Path, purge_dataflows: bool = True
