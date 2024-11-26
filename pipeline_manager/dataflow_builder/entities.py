@@ -8,26 +8,6 @@ from enum import Enum
 from typing import Any, Dict, List, Optional, Union, get_type_hints
 
 
-@dataclass
-class Vector2:
-    """Class representation a two-dimensional (2D) mathematical vector."""
-
-    x: float = 0.0
-    y: float = 0.0
-    _minimal_value: float = 0
-    _maximal_value: float = 2**16
-
-    def __add__(self, another: "Vector2") -> "Vector2":
-        return Vector2(self.x + another.x, self.y + another.y)
-
-    def to_json(self, as_str: bool = True) -> Union[str, Dict]:
-        output = {
-            "x": self.x,
-            "y": self.y,
-        }
-        return convert_output(output, as_str)
-
-
 class Direction(Enum):
     """Available directions of an interface."""
 
@@ -69,6 +49,26 @@ class JsonConvertible(ABC):
             Otherwise, a Python dictionary is returned.
         """
         pass
+
+
+@dataclass
+class Vector2(JsonConvertible):
+    """Class representation a two-dimensional (2D) mathematical vector."""
+
+    x: float = 0.0
+    y: float = 0.0
+    _minimal_value: float = 0
+    _maximal_value: float = 2**16
+
+    def __add__(self, another: "Vector2") -> "Vector2":
+        return Vector2(self.x + another.x, self.y + another.y)
+
+    def to_json(self, as_str: bool = True) -> Union[str, Dict]:
+        output = {
+            "x": self.x,
+            "y": self.y,
+        }
+        return convert_output(output, as_str)
 
 
 @dataclass
