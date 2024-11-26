@@ -13,7 +13,7 @@ from pipeline_manager.dataflow_builder.entities import (
     [
         ("not_snake_case", "notSnakeCase"),
         ("snake", "snake"),
-        ("ant_micro123", "antMicro123"),
+        ("happy_elephant123", "happyElephant123"),
     ],
 )
 def test_snake_case_to_camel_case_conversion(
@@ -28,7 +28,7 @@ def test_snake_case_to_camel_case_conversion(
     (
         ("whatIsThat", "what_is_that"),
         ("variable", "variable"),
-        ("antMicro456", "ant_micro456"),
+        ("happyElephant456", "happy_elephant456"),
     ),
 )
 def test_camel_case_to_snake_case(input_name: str, expected_output: str):
