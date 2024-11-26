@@ -58,7 +58,7 @@ class DataflowBuilder:
         if not success:
             raise ValueError(f"Invalid `dataflow_path`: {reason}")
         with open(dataflow_path, "rt", encoding="utf-8") as fd:
-            content = json.loads(fd.read())
+            content = json.loads(fd.read(), ensure_ascii=False)
             for graph in content["graphs"]:
                 dataflow_graph = DataflowGraph(
                     specification=self._specification,
