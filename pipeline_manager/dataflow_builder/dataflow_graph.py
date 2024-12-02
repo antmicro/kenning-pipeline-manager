@@ -93,7 +93,7 @@ class DataflowGraph(JsonConvertible):
                 ),
             )
 
-    def create_node(self, name: str, **kwargs: Dict[str, Any]) -> Node:
+    def create_node(self, name: str, **kwargs) -> Node:
         """
         Create the node initialized with the supplied arguments.
 
@@ -107,7 +107,7 @@ class DataflowGraph(JsonConvertible):
         name: str
             Name of a node, based on which default values will be derived
             from the specification.
-        kwargs : Dict[str, Any]
+        **kwargs
             Keyword arguments to initialise a newly created node.
             Check attributes of `Node` dataclass, to find all available keys.
 
