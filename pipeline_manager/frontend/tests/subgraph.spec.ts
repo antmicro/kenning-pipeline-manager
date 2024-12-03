@@ -1,7 +1,10 @@
 import { test, expect, Page, Locator, FileChooser } from '@playwright/test';
 import { getPathToJsonFile, getUrl } from './config.js';
 
-async function enterSubgraph(page: Page, nodeWithSubgraph: Locator) {
+const countOfInitiallyExposedInterface = 4;
+
+async function enterSubgraph(page: Page) {
+    const nodeWithSubgraph = page.getByText('Test subgraph node #1').nth(1).locator('../..');
     await nodeWithSubgraph.locator('.__title').click({ button: 'right' });
     const contextMenuOption = page.locator('.baklava-context-menu').getByText('Edit Subgraph');
     await contextMenuOption.click();
@@ -13,15 +16,9 @@ async function openFileChooser(
 ): Promise<FileChooser> {
     const fileChooserPromise = page.waitForEvent('filechooser');
     await page.mouse.move(25, 25);
-    let text = '';
-    if (purpose === 'specification') {
-        text = 'Load specification';
-    } else if (purpose === 'dataflow') {
-        text = 'Load graph file';
-    }
+    const text = purpose === 'specification' ? 'Load specification' : 'Load graph file';
     await page.getByText(text).click();
-    const fileChooser = await fileChooserPromise;
-    return fileChooser;
+    return await fileChooserPromise;
 }
 
 async function loadSubgraphSpecification(page: Page) {
@@ -34,49 +31,21 @@ async function loadSubgraphDataflow(page: Page) {
     await fileChooser.setFiles(getPathToJsonFile('sample-subgraph-dataflow.json'));
 }
 
-test('test loading subgraph dataflow', async ({ page }) => {
+async function prepareSubgraphPage(page: Page) {
     await page.goto(getUrl());
     await loadSubgraphSpecification(page);
     await loadSubgraphDataflow(page);
-    let nodes = page.locator('.node-container > div');
-    expect(await nodes.count()).toBe(4);
-});
+}
 
-test('test entering subgraph', async ({ page }) => {
-    await page.goto(getUrl());
-    await loadSubgraphSpecification(page);
-    await loadSubgraphDataflow(page);
-
-    // There are four nodes initially.
-    let nodes = page.locator('.node-container > div');
-    expect(await nodes.count()).toBe(4);
-
-    const nodeContainingSubgraph = page.getByText('Test subgraph node #1').nth(1).locator('../..');
-    await enterSubgraph(page, nodeContainingSubgraph);
-
-    // A subgraph contains two nodes.
-    expect(await nodes.count()).toBe(2);
-});
-
-test('test coming back from subgraph', async ({ page }) => {
-    await page.goto(getUrl());
-    await loadSubgraphSpecification(page);
-    await loadSubgraphDataflow(page);
-
-    // Initially, there are four nodes.
+async function verifyNodeCount(page: Page, expectedCount: number) {
     const nodes = page.locator('.node-container > div');
-    expect(await nodes.count()).toBe(4);
+    expect(await nodes.count()).toBe(expectedCount);
+}
 
-    const nodeContainingSubgraph = page.getByText('Test subgraph node #1').nth(1).locator('../..');
-    await enterSubgraph(page, nodeContainingSubgraph);
-    // A subgraph contains two nodes.
-    expect(await nodes.count()).toBe(2);
-
-    // Leave the subgraph.
+async function leaveSubgraph(page: Page) {
     const leaveButton = page.getByText('Return from subgraph editor').locator('../..');
     await leaveButton.click();
-    expect(await nodes.count()).toBe(4);
-});
+}
 
 async function dragAndDrop(page: Page, locator: Locator, to: { x: number; y: number }) {
     await locator.hover();
@@ -85,62 +54,66 @@ async function dragAndDrop(page: Page, locator: Locator, to: { x: number; y: num
     await page.mouse.up();
 }
 
-test('test preserving changes to subgraph', async ({ page }) => {
-    await page.goto(getUrl());
-    await loadSubgraphSpecification(page);
-    await loadSubgraphDataflow(page);
-
-    const nodes = page.locator('.node-container > div');
-    expect(await nodes.count()).toBe(4);
-
-    const nodeContainingSubgraph = page.getByText('Test subgraph node #1').nth(1).locator('../..');
-    await enterSubgraph(page, nodeContainingSubgraph);
-    expect(await nodes.count()).toBe(2);
-
-    // Add a new node: open the node browser, expand a category, and drag & drop a node.
-    const showNodesButton = page.getByText('Show node browser').locator('../..');
-    await showNodesButton.click();
-
-    const firstCategoryLabel = page.getByText('First Category');
-    await firstCategoryLabel.click();
-
-    const nodeFromBrowser = page.getByText('Test node #').first();
-    await dragAndDrop(page, nodeFromBrowser, { x: 400, y: 200 });
-    expect(await nodes.count()).toBe(3);
-
-    // Get back to the main graph.
-    const leaveButton = page.getByText('Return from subgraph editor').locator('../..');
-    await leaveButton.click();
-
-    // Enter the subgraph, it should have the same node count.
-    await enterSubgraph(page, nodeContainingSubgraph);
-    expect(await nodes.count()).toBe(3);
+test('test loading subgraph dataflow', async ({ page }) => {
+    await prepareSubgraphPage(page);
+    await verifyNodeCount(page, 4);
 });
 
-test('test visibility of newly exposed subgraph interface', async ({ page }) => {
-    await page.goto(getUrl());
-    await loadSubgraphSpecification(page);
-    await loadSubgraphDataflow(page);
+test('test entering subgraph', async ({ page }) => {
+    await prepareSubgraphPage(page);
+    await verifyNodeCount(page, 4);
+    await enterSubgraph(page);
+    await verifyNodeCount(page, 2);
+});
 
-    // Initially, there are 4 interfaces exposed.
-    const initialInterfaceCount = 4;
-    const nodeWithSubgraph = page.getByText('Test subgraph node #1').locator('../..');
-    const outputs = nodeWithSubgraph.locator('.__outputs > div');
-    expect(await outputs.count()).toBe(initialInterfaceCount);
+test('test coming back from subgraph', async ({ page }) => {
+    await prepareSubgraphPage(page);
+    await verifyNodeCount(page, 4);
 
-    // Enter a subgraph.
-    const nodeContainingSubgraph = page.getByText('Test subgraph node #1').nth(1).locator('../..');
-    await enterSubgraph(page, nodeContainingSubgraph);
+    await enterSubgraph(page);
+    await verifyNodeCount(page, 2);
 
-    // Add a new node: open the node browser, expand a category, and drag & drop a node.
+    await leaveSubgraph(page);
+    await verifyNodeCount(page, 4);
+});
+
+async function placeNewNode(page, location: { x: number; y: number }) {
     const showNodesButton = page.getByText('Show node browser').locator('../..');
     await showNodesButton.click();
-
     const firstCategoryLabel = page.getByText('First Category');
     await firstCategoryLabel.click();
-
     const nodeFromBrowser = page.getByText('Test node #').first();
-    await dragAndDrop(page, nodeFromBrowser, { x: 400, y: 200 });
+    await dragAndDrop(page, nodeFromBrowser, location);
+}
+
+test('test preserving changes to subgraph', async ({ page }) => {
+    await prepareSubgraphPage(page);
+    await verifyNodeCount(page, 4);
+
+    await enterSubgraph(page);
+    await verifyNodeCount(page, 2);
+    await placeNewNode(page, { x: 400, y: 200 });
+
+    await verifyNodeCount(page, 3);
+
+    await leaveSubgraph(page);
+    await enterSubgraph(page);
+    await verifyNodeCount(page, 3);
+});
+
+async function verifyInterfaceCount(page: Page, expectedNumber: number): Promise<Locator> {
+    const nodeWithSubgraph = page.getByText('Test subgraph node #1').locator('../..');
+    const exposedInterfaces = nodeWithSubgraph.locator('.__outputs > div');
+    expect(await exposedInterfaces.count()).toBe(expectedNumber);
+    return exposedInterfaces;
+}
+
+test('test visibility of newly exposed subgraph interface', async ({ page }) => {
+    await prepareSubgraphPage(page);
+    const exposedInterfaces = await verifyInterfaceCount(page, countOfInitiallyExposedInterface);
+
+    await enterSubgraph(page);
+    await placeNewNode(page, { x: 400, y: 200 });
 
     // Expose a new interface: right click on an interface and choose 'Expose Interface'.
     const newOutputInterface = page
@@ -154,27 +127,17 @@ test('test visibility of newly exposed subgraph interface', async ({ page }) => 
     await contextMenuOption.click();
 
     // Get back to the main graph.
-    const leaveButton = page.getByText('Return from subgraph editor').locator('../..');
-    await leaveButton.click();
+    await leaveSubgraph(page);
 
     // Check if the newly exposed interface is present.
-    expect(await outputs.count()).toBe(initialInterfaceCount + 1);
+    expect(await exposedInterfaces.count()).toBe(countOfInitiallyExposedInterface + 1);
 });
 
 test("test hiding and exposing subgraph's interface", async ({ page }) => {
-    await page.goto(getUrl());
-    await loadSubgraphSpecification(page);
-    await loadSubgraphDataflow(page);
+    await prepareSubgraphPage(page);
+    const exposedInterfaces = await verifyInterfaceCount(page, countOfInitiallyExposedInterface);
 
-    // Initially, there are 4 interfaces exposed.
-    const initialInterfaceCount = 4;
-    const nodeWithSubgraph = page.getByText('Test subgraph node #1').locator('../..');
-    const exposedInterfaces = nodeWithSubgraph.locator('.__outputs > div');
-    expect(await exposedInterfaces.count()).toBe(initialInterfaceCount);
-
-    // Enter a subgraph.
-    const nodeContainingSubgraph = page.getByText('Test subgraph node #1').nth(1).locator('../..');
-    await enterSubgraph(page, nodeContainingSubgraph);
+    await enterSubgraph(page);
 
     // Hide an exposed interface: invoke a interface's context menu and click the option.
     const exposedInterface = page
@@ -190,12 +153,11 @@ test("test hiding and exposing subgraph's interface", async ({ page }) => {
     await privatizeContextMenuOption.click();
 
     // Get back to the main graph.
-    const leaveButton = page.getByText('Return from subgraph editor').locator('../..');
-    await leaveButton.click();
-    expect(await exposedInterfaces.count()).toBe(initialInterfaceCount - 1);
+    await leaveSubgraph(page);
+    expect(await exposedInterfaces.count()).toBe(countOfInitiallyExposedInterface - 1);
 
     // Re-expose the currently hidden interface: invoke an interface's context menu and click the option.
-    await enterSubgraph(page, nodeContainingSubgraph);
+    await enterSubgraph(page);
     await exposedInterface.click({ button: 'right' });
     const exposeContextMenuOption = page
         .locator('.baklava-context-menu')
@@ -203,6 +165,6 @@ test("test hiding and exposing subgraph's interface", async ({ page }) => {
     await exposeContextMenuOption.click();
 
     // Get back to the main graph.
-    await leaveButton.click();
-    expect(await exposedInterfaces.count()).toBe(initialInterfaceCount);
+    await leaveSubgraph(page);
+    expect(await exposedInterfaces.count()).toBe(countOfInitiallyExposedInterface);
 });
