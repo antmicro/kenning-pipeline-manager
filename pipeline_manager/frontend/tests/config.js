@@ -1,7 +1,7 @@
 // Configuration file with the default configuration for playwright tests.
 // @ts-check
 import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
+import path, { dirname, join } from 'path';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -10,6 +10,7 @@ const __dirname = dirname(__filename);
 const config = {
     directory: './dist',
     file: 'index.html',
+    directoryWithJsonFile: path.join(__dirname, '../../../examples'),
 };
 
 /**
@@ -19,5 +20,15 @@ const config = {
 export function getUrl() {
     return `file://${join(__dirname, `../${config.directory}/${config.file}`)}`;
 }
+
+/**
+ * Get the URL to either a dataflow or specification JSON file from `examples` directory.
+ * @param {string} filename
+ * @returns {string} Path to the JSON file.
+ */
+export function getPathToJsonFile(filename) {
+    return path.join(config.directoryWithJsonFile, filename);
+}
+
 
 export const loadVideoNodeId = 'f50b4f2a-a2e2-4409-a5c9-891a8de44a5b';

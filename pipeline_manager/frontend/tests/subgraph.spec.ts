@@ -1,5 +1,5 @@
-import { test, expect, Page, Locator } from '@playwright/test';
-import { getUrl } from './config.js';
+import { test, expect, Page, Locator, FileChooser } from '@playwright/test';
+import { getPathToJsonFile, getUrl } from './config.js';
 
 async function enterSubgraph(page: Page, nodeWithSubgraph: Locator) {
     await nodeWithSubgraph.locator('.__title').click({ button: 'right' });
@@ -7,8 +7,45 @@ async function enterSubgraph(page: Page, nodeWithSubgraph: Locator) {
     await contextMenuOption.click();
 }
 
+async function openFileChooser(
+    page: Page,
+    purpose: 'specification' | 'dataflow',
+): Promise<FileChooser> {
+    const fileChooserPromise = page.waitForEvent('filechooser');
+    await page.mouse.move(25, 25);
+    let text = '';
+    if (purpose === 'specification') {
+        text = 'Load specification';
+    } else if (purpose === 'dataflow') {
+        text = 'Load graph file';
+    }
+    await page.getByText(text).click();
+    const fileChooser = await fileChooserPromise;
+    return fileChooser;
+}
+
+async function loadSubgraphSpecification(page: Page) {
+    const fileChooser = await openFileChooser(page, 'specification');
+    await fileChooser.setFiles(getPathToJsonFile('sample-subgraph-specification.json'));
+}
+
+async function loadSubgraphDataflow(page: Page) {
+    const fileChooser = await openFileChooser(page, 'dataflow');
+    await fileChooser.setFiles(getPathToJsonFile('sample-subgraph-dataflow.json'));
+}
+
+test('test loading subgraph dataflow', async ({ page }) => {
+    await page.goto(getUrl());
+    await loadSubgraphSpecification(page);
+    await loadSubgraphDataflow(page);
+    let nodes = page.locator('.node-container > div');
+    expect(await nodes.count()).toBe(4);
+});
+
 test('test entering subgraph', async ({ page }) => {
-    await page.goto(getUrl('subgraph'));
+    await page.goto(getUrl());
+    await loadSubgraphSpecification(page);
+    await loadSubgraphDataflow(page);
 
     // There are four nodes initially.
     let nodes = page.locator('.node-container > div');
@@ -22,7 +59,9 @@ test('test entering subgraph', async ({ page }) => {
 });
 
 test('test coming back from subgraph', async ({ page }) => {
-    await page.goto(getUrl('subgraph'));
+    await page.goto(getUrl());
+    await loadSubgraphSpecification(page);
+    await loadSubgraphDataflow(page);
 
     // Initially, there are four nodes.
     const nodes = page.locator('.node-container > div');
@@ -47,7 +86,9 @@ async function dragAndDrop(page: Page, locator: Locator, to: { x: number; y: num
 }
 
 test('test preserving changes to subgraph', async ({ page }) => {
-    await page.goto(getUrl('subgraph'));
+    await page.goto(getUrl());
+    await loadSubgraphSpecification(page);
+    await loadSubgraphDataflow(page);
 
     const nodes = page.locator('.node-container > div');
     expect(await nodes.count()).toBe(4);
@@ -77,7 +118,9 @@ test('test preserving changes to subgraph', async ({ page }) => {
 });
 
 test('test visibility of newly exposed subgraph interface', async ({ page }) => {
-    await page.goto(getUrl('subgraph'));
+    await page.goto(getUrl());
+    await loadSubgraphSpecification(page);
+    await loadSubgraphDataflow(page);
 
     // Initially, there are 4 interfaces exposed.
     const initialInterfaceCount = 4;
@@ -119,7 +162,9 @@ test('test visibility of newly exposed subgraph interface', async ({ page }) => 
 });
 
 test("test hiding and exposing subgraph's interface", async ({ page }) => {
-    await page.goto(getUrl('subgraph'));
+    await page.goto(getUrl());
+    await loadSubgraphSpecification(page);
+    await loadSubgraphDataflow(page);
 
     // Initially, there are 4 interfaces exposed.
     const initialInterfaceCount = 4;
