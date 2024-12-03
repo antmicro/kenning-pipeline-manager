@@ -168,3 +168,31 @@ test("test hiding and exposing subgraph's interface", async ({ page }) => {
     await leaveSubgraph(page);
     expect(await exposedInterfaces.count()).toBe(countOfInitiallyExposedInterface);
 });
+
+function generateUuid(): string {
+    let uuid = '';
+    for (let i = 0; i < 3; i++) {
+        uuid += `${new Date(Math.ceil(Math.random() * 1e13)).valueOf().toString(36)}`;
+    }
+    return uuid;
+}
+
+test('test renaming exposed interface', async ({ page }) => {
+    await prepareSubgraphPage(page);
+    await verifyNodeCount(page, 4);
+
+    await enterSubgraph(page);
+    await verifyNodeCount(page, 2);
+
+    // Rename an exposed interface.
+    const newName = generateUuid();
+    await page.locator('.__port').nth(2).hover();
+    await page.getByText('Subgraph Input').click();
+    await page.getByPlaceholder('External name').fill(newName);
+    await page.getByPlaceholder('External name').press('Enter');
+
+    // Verify if the exposed interface's name has been changed.
+    await leaveSubgraph(page);
+    await verifyNodeCount(page, 4);
+    await expect(page.locator('#container')).toContainText(newName);
+});

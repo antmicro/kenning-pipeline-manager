@@ -30,5 +30,4 @@ export function getPathToJsonFile(filename) {
     return path.join(config.directoryWithJsonFile, filename);
 }
 
-
 export const loadVideoNodeId = 'f50b4f2a-a2e2-4409-a5c9-891a8de44a5b';
