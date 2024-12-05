@@ -1,0 +1,212 @@
+{
+    "graphs": [
+        {
+            "name": "Example of a graph with dynamic number of interfaces",
+            "id": "4b507b03-4c77-4d00-8a2a-c225b984377b",
+            "nodes": [
+                {
+                    "id": "121291d0-309f-45e3-ad33-e356d32f9ba4",
+                    "position": {
+                        "x": 389,
+                        "y": 152
+                    },
+                    "width": 400,
+                    "twoColumn": true,
+                    "interfaces": [
+                        {
+                            "name": "regular-intf",
+                            "id": "1da0dcb2-c525-4a5d-8263-219f87ac24e1",
+                            "direction": "inout",
+                            "side": "left",
+                            "sidePosition": 0
+                        },
+                        {
+                            "name": "test-interface-1[0]",
+                            "id": "2a7bf9a8-6d9b-4c67-a7f5-7e090700eefa",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 1
+                        },
+                        {
+                            "name": "test-interface-2[0]",
+                            "id": "9e1b57c6-bb63-4fdf-95e3-f30c11f98ca9",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 0
+                        },
+                        {
+                            "name": "test-interface-2[1]",
+                            "id": "2866be50-a54c-46e5-a8cd-20abfb9ffb05",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 1
+                        },
+                        {
+                            "name": "test-interface-2[2]",
+                            "id": "5df358f3-bc33-4ae0-af0d-21cfc6578e81",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 2
+                        }
+                    ],
+                    "properties": [
+                        {
+                            "name": "regular-property",
+                            "id": "b6355975-d7f3-4e3f-959c-cd836cd75b9f",
+                            "value": ""
+                        },
+                        {
+                            "name": "test-interface-1 input count",
+                            "id": "6c15d8dd-1a1e-421c-b2a5-357dbb791c14",
+                            "value": 1
+                        },
+                        {
+                            "name": "test-interface-2 output count",
+                            "id": "2f2ef448-df36-44ab-90ae-44567d10c42a",
+                            "value": 3
+                        }
+                    ],
+                    "enabledInterfaceGroups": [],
+                    "name": "DynamicInterfaces",
+                    "instanceName": "DynamicInterfaces"
+                },
+                {
+                    "id": "54353727-05f6-431d-bcde-8e8f5861440d",
+                    "position": {
+                        "x": 947,
+                        "y": 275
+                    },
+                    "width": 400,
+                    "twoColumn": true,
+                    "interfaces": [
+                        {
+                            "name": "regular-intf",
+                            "id": "03a8b642-baa3-465c-95aa-e3117ec9351e",
+                            "direction": "inout",
+                            "side": "left",
+                            "sidePosition": 0
+                        },
+                        {
+                            "name": "test-interface-1[0]",
+                            "id": "3e3c82f9-7542-430c-99d7-512d981fac70",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 1
+                        },
+                        {
+                            "name": "test-interface-1[1]",
+                            "id": "87fbef70-6e03-43e6-81b5-88b7b419a034",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 2
+                        },
+                        {
+                            "name": "test-interface-2[0]",
+                            "id": "b9d64d86-091e-4858-a068-567059847848",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 0
+                        },
+                        {
+                            "name": "test-interface-2[1]",
+                            "id": "a7501dc5-1a19-495e-b8a8-c7b251e0df4d",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 1
+                        }
+                    ],
+                    "properties": [
+                        {
+                            "name": "regular-property",
+                            "id": "246165c8-a81e-4732-833f-aa28dfbc0478",
+                            "value": ""
+                        },
+                        {
+                            "name": "test-interface-1 input count",
+                            "id": "3813b0c3-139b-425e-9b8f-a4d9ad67ceed",
+                            "value": 2
+                        },
+                        {
+                            "name": "test-interface-2 output count",
+                            "id": "9f953c1e-6b3d-4d3c-878a-b51aa1a58ae5",
+                            "value": 2
+                        }
+                    ],
+                    "enabledInterfaceGroups": [],
+                    "name": "DynamicInterfaces",
+                    "instanceName": "DynamicInterfaces"
+                },
+                {
+                    "id": "8c843128-f4a2-4a3b-bb52-a655134af8d7",
+                    "position": {
+                        "x": 430,
+                        "y": 735
+                    },
+                    "width": 400,
+                    "twoColumn": true,
+                    "interfaces": [
+                        {
+                            "name": "regular-intf",
+                            "id": "d01ea848-6f4f-4d71-b4f8-10631bec4548",
+                            "direction": "inout",
+                            "side": "left",
+                            "sidePosition": 0
+                        },
+                        {
+                            "name": "test-interface-2[0]",
+                            "id": "c0fc282a-b801-451b-8eaa-18efc2afe2c8",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 0
+                        },
+                        {
+                            "name": "test-interface-2[1]",
+                            "id": "b522972f-4090-4c4a-b54f-077eeb53f8cc",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 1
+                        }
+                    ],
+                    "properties": [
+                        {
+                            "name": "regular-property",
+                            "id": "004ac55c-c558-49c6-b4de-36db219beadb",
+                            "value": ""
+                        },
+                        {
+                            "name": "test-interface-1 input count",
+                            "id": "2559a806-c557-4b05-9b76-154a8f005afa",
+                            "value": 0
+                        },
+                        {
+                            "name": "test-interface-2 output count",
+                            "id": "38961a9d-9fe6-4fe9-ae55-d3fdfd045137",
+                            "value": 2
+                        }
+                    ],
+                    "enabledInterfaceGroups": [],
+                    "name": "DynamicInterfaces",
+                    "instanceName": "DynamicInterfaces"
+                }
+            ],
+            "connections": [
+                {
+                    "id": "9d2d1d4c-b368-453a-8a41-66a967431bea",
+                    "from": "d01ea848-6f4f-4d71-b4f8-10631bec4548",
+                    "to": "2a7bf9a8-6d9b-4c67-a7f5-7e090700eefa"
+                },
+                {
+                    "id": "74110406-92c2-457b-aa1a-eb2549a055ca",
+                    "from": "1da0dcb2-c525-4a5d-8263-219f87ac24e1",
+                    "to": "87fbef70-6e03-43e6-81b5-88b7b419a034"
+                },
+                {
+                    "id": "36307df3-8881-4741-9493-4a303008b2ee",
+                    "from": "5df358f3-bc33-4ae0-af0d-21cfc6578e81",
+                    "to": "03a8b642-baa3-465c-95aa-e3117ec9351e"
+                }
+            ]
+        }
+    ],
+    "version": "20240723.13"
+}

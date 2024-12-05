@@ -1,0 +1,120 @@
+{
+    "graphs": [
+        {
+            "id": "68957efd-6ced-4756-86d4-e4bca26ea536",
+            "name": "Example of interface grouping",
+            "nodes": [
+                {
+                    "name": "TestNode",
+                    "id": "aba4c532-c115-4073-b467-5fc0ae278c63",
+                    "position": {
+                        "x": 700,
+                        "y": 600
+                    },
+                    "width": 200,
+                    "twoColumn": false,
+                    "interfaces": [
+                        {
+                            "name": "1",
+                            "id": "e4f15c86-7403-4c1b-8926-f8e4161db6b7",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 0
+                        },
+                        {
+                            "name": "1[30]",
+                            "id": "d757a07b-4fed-46dc-965d-bf7f22584bdb",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 0
+                        },
+                        {
+                            "name": "1[31]",
+                            "id": "83297130-f840-42fd-abba-827c2e3dbeb8",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 1
+                        }
+                    ],
+                    "properties": [
+                        {
+                            "name": "test",
+                            "id": "ea087941-6d41-4297-9454-4a59f8d76d40",
+                            "value": "testing"
+                        }
+                    ],
+                    "enabledInterfaceGroups": [
+                        {
+                            "name": "1",
+                            "direction": "input"
+                        }
+                    ]
+                },
+                {
+                    "name": "TestNode",
+                    "id": "947bdbd3-c93f-41a9-ba2a-adb7f54f0f7f",
+                    "position": {
+                        "x": 400,
+                        "y": 200
+                    },
+                    "width": 200,
+                    "twoColumn": false,
+                    "interfaces": [
+                        {
+                            "name": "1",
+                            "id": "abcb18da-6144-42bb-9278-b280fc641656",
+                            "direction": "input",
+                            "side": "right",
+                            "sidePosition": 0
+                        },
+                        {
+                            "name": "1[30]",
+                            "id": "8476eab3-5ac5-403a-830a-b86dd6f9d22c",
+                            "direction": "output",
+                            "side": "left",
+                            "sidePosition": 0
+                        },
+                        {
+                            "name": "1[31]",
+                            "id": "701ad4e7-f21a-4c1f-9676-cba9c4423eb3",
+                            "direction": "output",
+                            "side": "left",
+                            "sidePosition": 1
+                        }
+                    ],
+                    "properties": [
+                        {
+                            "name": "test",
+                            "id": "6189117f-e2e8-4a08-bdab-451e748c6891",
+                            "value": "testing"
+                        }
+                    ],
+                    "enabledInterfaceGroups": [
+                        {
+                            "name": "1",
+                            "direction": "input"
+                        }
+                    ]
+                }
+            ],
+            "connections": [
+                {
+                    "id": "edabb5ed-2694-4e51-ac6a-21bc25c7e1dc",
+                    "from": "83297130-f840-42fd-abba-827c2e3dbeb8",
+                    "to": "abcb18da-6144-42bb-9278-b280fc641656"
+                },
+                {
+                    "id": "8e0cb6be-66fb-4b26-9a94-836bdb780c35",
+                    "from": "701ad4e7-f21a-4c1f-9676-cba9c4423eb3",
+                    "to": "e4f15c86-7403-4c1b-8926-f8e4161db6b7"
+                }
+            ],
+            "panning": {
+                "x": 358.06026736046715,
+                "y": 299.88035477954077
+            },
+            "scaling": 0.7191816916217644
+        }
+    ],
+    "version": "20240723.13"
+}
