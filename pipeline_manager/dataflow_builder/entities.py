@@ -187,9 +187,7 @@ class Node(JsonConvertible):
                 return
         raise KeyError(f"Property with name `{property_name}` was not found.")
 
-    def __init__(
-        self, specification_builder: SpecificationBuilder, **kwargs: Dict
-    ):
+    def __init__(self, specification_builder: SpecificationBuilder, **kwargs):
         """
         Initialise a node based on the provided specification and
         `kwargs`.
@@ -203,7 +201,7 @@ class Node(JsonConvertible):
         ----------
         specification_builder : SpecificationBuilder
             Instance of specification builder with a loaded specification.
-        **kwargs : Dict
+        **kwargs
             Kwargs with parameter to override default values from the
             specification. Key `name` is required.
 
@@ -282,7 +280,7 @@ class Node(JsonConvertible):
         ----------
         type : NodeAttributeType
             Type of an item to retrieve.
-        **kwargs
+        **kwargs : Any
             Criteria, which items have to satisfy.
 
         Returns
@@ -455,6 +453,8 @@ def match_criteria(items: List, **kwargs) -> List[Any]:
         Items, against which the matching should be performed.
         Lack of criteria causes returning all items.
     **kwargs
+        Attributes of items to match. Key match names of attributes,
+        values - values of the attributes.
 
 
     Returns

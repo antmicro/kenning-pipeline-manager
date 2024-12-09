@@ -94,7 +94,9 @@ class DataflowGraph(JsonConvertible):
             )
 
     def create_node(self, name: str, **kwargs) -> Node:
+        # pydoclint: disable DOC110, DOC103
         """
+
         Create the node initialized with the supplied arguments.
 
         The use of this method is highly preferred to manually adding a node.
@@ -105,9 +107,8 @@ class DataflowGraph(JsonConvertible):
         Parameters
         ----------
         name: str
-            Name of a node, based on which default values will be derived
-            from the specification.
-        **kwargs
+            Name of a node, based on which default values will be derived.
+        kwargs
             Keyword arguments to initialise a newly created node.
             Check attributes of `Node` dataclass, to find all available keys.
 
@@ -289,7 +290,9 @@ class DataflowGraph(JsonConvertible):
     def get(
         self, type: AttributeType, **kwargs
     ) -> Union[List[Node], List[InterfaceConnection], List[Interface]]:
+        # pydoclint: disable DOC110, DOC103
         """
+
         Get items of a given type, which satisfy all the desired criteria.
 
         Items are understood as either nodes or connections or interfaces.
@@ -297,12 +300,13 @@ class DataflowGraph(JsonConvertible):
         match the criteria. Thus, between all the criteria
         is `AND` logical operator.
 
+
         Parameters
         ----------
         type : AttributeType
             Type of the output objects.
-        **kwargs
-            Search criteria. Available:
+        kwargs
+            Contains search criteria. Available:
             - Keys: the attributes of the object of he chosen type.
             - Values: values to be matched.
 

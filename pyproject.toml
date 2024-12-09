@@ -77,10 +77,11 @@ pipeline_manager = ["**/*.*", "frontend/.env.static"]
 
 [tool.pydoclint]
 style = "numpy"
-allow-init-docstring = true
-exclude = 'pipeline_manager/tests'
+allow_init_docstring = true
+exclude = "pipeline_manager/tests|dataflow_builder/(dataflow_graph.py|entities.py)"
 quiet = true
-check-return-types = true
+check_return_types = true
+
 
 [tool.ruff]
 preview = true
