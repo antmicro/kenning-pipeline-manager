@@ -280,7 +280,7 @@ class Node(JsonConvertible):
         ----------
         type : NodeAttributeType
             Type of an item to retrieve.
-        **kwargs : Any
+        kwargs : Any
             Criteria, which items have to satisfy.
 
         Returns
