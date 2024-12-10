@@ -549,8 +549,9 @@ class SpecificationBuilder(object):
         self,
         name: str,
         interfacename: str,
-        interfacetype: Optional[Union[str, List[str]]],
+        interfacetype: Optional[Union[str, List[str]]] = None,
         direction: str = "inout",
+        dynamic: Union[bool, List[int]] = False,
         side: Optional[str] = None,
         maxcount: Optional[int] = None,
         override: Optional[bool] = None,
@@ -569,6 +570,9 @@ class SpecificationBuilder(object):
             List of matching types for interfaces
         direction: str
             Direction of the connection, by default "inout".
+        dynamic: Union[bool, List[int]]
+            Determine whether a number of interfaces may be
+            dynamically adjusted. By default, False.
         side: Optional[str]
             On which side the interface should be placed by default
         maxcount: Optional[int]
@@ -603,13 +607,20 @@ class SpecificationBuilder(object):
 
         interface = {"name": interfacename, "direction": direction}
 
-        if interfacetype is not None:
-            interface["type"] = interfacetype
-
+        set_if_not_none(interface, "type", interfacetype)
         set_if_not_none(interface, "side", side)
         set_if_not_none(interface, "maxConnectionsCount", maxcount)
         set_if_not_none(interface, "override", override)
         set_if_not_none(interface, "array", array)
+
+        if dynamic:
+            assert isinstance(dynamic, bool) or isinstance(dynamic, List), (
+                "A value of an interface's property `dynamic` has to "
+                "take either True or list of size 2: [min, max]. "
+                f"Provided: {dynamic} of type {type(dynamic)}, "
+                "which is unsupported."
+            )
+            interface["dynamic"] = dynamic
 
         self._nodes[name]["interfaces"].append(interface)
 
@@ -852,6 +863,7 @@ class SpecificationBuilder(object):
                 name=nodename,
                 interfacename=interface["name"],
                 interfacetype=iface,
+                dynamic=get_optional(interface, "dynamic"),
                 direction=get_optional(interface, "direction"),
                 side=get_optional(interface, "side"),
                 maxcount=get_optional(interface, "maxConnectionsCount"),
