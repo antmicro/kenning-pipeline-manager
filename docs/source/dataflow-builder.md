@@ -87,7 +87,7 @@ except KeyError:
     print('Cannot set compression_rate to 1 as the property does not exists.')
 ```
 
-Yet another examples depicts moving a node:
+Yet another example depicts moving a node:
 ```python
 # Move the node by 500 pixels to the right, relative to its previous position.
 node.move(new_position=Vector2(500, 0), relative=True)
@@ -130,7 +130,6 @@ node.move(Vector(1000, 1000)) # relative = False, by default
 ## Specification of Connection
 
 Notice that name of the class representing connection is `InterfaceConnection`, not `Connection`.
-It aims not to confuse a user what is connected specifically, stating explicitly that interfaces are connected, not nodes.
 
 ```{eval-rst}
 .. autoclass:: pipeline_manager.dataflow_builder.entities.InterfaceConnection

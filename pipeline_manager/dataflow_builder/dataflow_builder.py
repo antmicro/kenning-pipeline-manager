@@ -1,7 +1,8 @@
-"""Module with DataflowBuilder class, sharing its API publicly."""
+"""Module for building the dataflow graphs."""
 
 import json
 import os
+import tempfile
 from pathlib import Path
 from typing import Dict, List, Union
 
@@ -177,9 +178,10 @@ class DataflowBuilder:
             either a dataflow or specification file.
         """
         # Save a dataflow graph to a temporary file.
-        temp_dataflow_file = Path(f"temp_dataflow_{get_uuid()}.json")
-        with open(temp_dataflow_file, "wt", encoding="utf-8") as fd:
-            fd.write(self.to_json(as_str=True))
+        with tempfile.TemporaryDirectory() as tmpdir:
+            temp_dataflow_file = Path(tmpdir) / "spec.json"
+            with open(temp_dataflow_file, "wt", encoding="utf-8") as fd:
+                fd.write(self.to_json(as_str=True))
 
         # `self.save()` cannot be used as it saves the dataflow only.
         temp_specification_file = Path(f"temp_specification_{get_uuid()}.json")
