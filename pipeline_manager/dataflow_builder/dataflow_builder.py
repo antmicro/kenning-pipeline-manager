@@ -149,21 +149,18 @@ class DataflowBuilder:
 
             return dataflow_graph
 
-    def save(self, output_file: Path, safe_mode: bool = True):
+    def save(self, json_file: Path):
         """
         Save graphs to a JSON file.
 
         Parameters
         ----------
-        output_file : Path
-            Path to an output JSON file. File may not exist.
-        safe_mode : bool
-            In safe mode, a dataflow is validated before being saved.
+        json_file : Path
+            Path, where an output JSON file will be created.
         """
-        if safe_mode:
-            self.validate()
-        with open(output_file, "wt", encoding="utf-8") as fd:
+        with open(json_file, "wt", encoding="utf-8") as fd:
             fd.write(self.to_json(as_str=True))
+        self.validate()
 
     def validate(self):
         """
@@ -176,9 +173,9 @@ class DataflowBuilder:
             either a dataflow or specification file.
         """
         # Sava dataflow to a temp file.
-        # Enabling safe mode here would lead to infinite circular recursion.
         temp_dataflow_file = Path(f"temp_dataflow_{get_uuid()}.json")
-        self.save(output_file=temp_dataflow_file, safe_mode=False)
+        with open(temp_dataflow_file, "wt", encoding="utf-8") as fd:
+            fd.write(self.to_json(as_str=True))
 
         # `self.save()` cannot be used as it saves the dataflow only.
         temp_specification_file = Path(f"temp_specification_{get_uuid()}.json")
