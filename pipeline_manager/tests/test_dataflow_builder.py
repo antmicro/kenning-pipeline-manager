@@ -22,6 +22,7 @@ from pipeline_manager.dataflow_builder.entities import (
 def builder() -> GraphBuilder:
     return GraphBuilder(
         specification="examples/sample-specification.json",
+        specification_version="20240723.13",
     )
 
 
