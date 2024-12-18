@@ -14,8 +14,6 @@ repos:
   rev: 0.3.4
   hooks:
   - id: pydoclint
-    args:
-    - "--config=pyproject.toml"
 - repo: https://github.com/crate-ci/typos
   rev: v1.16.23
   hooks:
