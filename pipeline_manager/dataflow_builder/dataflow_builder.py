@@ -17,12 +17,14 @@ from pipeline_manager.validator import validate
 
 class DataflowBuilder:
     """
-    Class for building dataflow graphs,
-    each instance of the class must be associated with a single specification.
+    Class for building dataflow graphs.
+
+    Each instance of the DataflowBuilder must be associated with a single
+    specification to ensure proper validation.
     """
 
     def __init__(
-        self, specification: Path, specification_version: str = "20240723.13"
+        self, specification: Path, specification_version: str
     ) -> None:
         """
         Load a specification from a file, initialise an empty list of graphs.
@@ -32,7 +34,7 @@ class DataflowBuilder:
         specification : Path
             Path to a JSON specification file.
         specification_version: str
-            Version of the specification. By default, "20240723.13".
+            Version of the specification.
         """
         self.specification_version = specification_version
         self.load_specification(specification)
@@ -40,14 +42,12 @@ class DataflowBuilder:
 
     def load_graphs(self, dataflow_path: Path):
         """
-        Load each dataflow graph from a file.
-
-        All the graphs are loaded to the internal storage.
+        Load all dataflow graphs from a file.
 
         Parameters
         ----------
         dataflow_path : Path
-            Path a dataflow graph.
+            Path to a dataflow graph.
 
         Raises
         ------
@@ -75,8 +75,12 @@ class DataflowBuilder:
         self, specification_path: Path, purge_old_graphs: bool = True
     ):
         """
-        Replace a current specification file associated
-        with the instance of DataflowBuilder with a new one.
+        Load a specification from a file to use in DataflowBuilder.
+
+        The default behaviour is to remove loaded dataflow graphs when loading
+        a new specification. That is due to the fact that a dataflow graph
+        is closely linked with its specification. Notice that loading a
+        specification overrides the old one.
 
         Parameters
         ----------
@@ -172,7 +176,7 @@ class DataflowBuilder:
             Raised if an external validator failed to validate
             either a dataflow or specification file.
         """
-        # Sava dataflow to a temp file.
+        # Save a dataflow graph to a temporary file.
         temp_dataflow_file = Path(f"temp_dataflow_{get_uuid()}.json")
         with open(temp_dataflow_file, "wt", encoding="utf-8") as fd:
             fd.write(self.to_json(as_str=True))

@@ -10,7 +10,10 @@ In order to create an instance of `DataflowBuilder`:
 ```python
 from pipeline_manager.dataflow_builder.dataflow_builder import DataflowBuilder
 
-builder = DataflowBuilder(specification="examples/sample-specification.json")
+builder = DataflowBuilder(
+    specification="examples/sample-specification.json",
+    specification_version="20240723.13",
+)
 ```
 
 The code creates an instance of `DataflowBuilder` with the `sample-specification.json` loaded.
@@ -80,7 +83,7 @@ On the other hand, if a user wanted to alter a property (from the list of `prope
 try:
     # Use of `set_property` is recommended to set values of properties of a node.
     node.set_property('compression_rate', 1)
-except KeyError as error:
+except KeyError:
     print('Cannot set compression_rate to 1 as the property does not exists.')
 ```
 
