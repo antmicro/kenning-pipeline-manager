@@ -1,22 +1,22 @@
 # Dataflow graph builder
 
-Class `DataflowBuilder` (available in `pipeline_manager.dataflow_builder.dataflow_builder`) provides a convenient Python API for creating and editing a dataflow graph.
+Class `GraphBuilder` (available in `pipeline_manager.dataflow_builder.dataflow_builder`) provides a convenient Python API for creating and editing a dataflow graph.
 
-## Examples of DataflowBuilder usage
+## Examples of GraphBuilder usage
 
-### Creating DataflowBuilder
+### Creating GraphBuilder
 
-In order to create an instance of `DataflowBuilder`:
+In order to create an instance of `GraphBuilder`:
 ```python
-from pipeline_manager.dataflow_builder.dataflow_builder import DataflowBuilder
+from pipeline_manager.dataflow_builder.dataflow_builder import GraphBuilder
 
-builder = DataflowBuilder(
+builder = GraphBuilder(
     specification="examples/sample-specification.json",
     specification_version="20240723.13",
 )
 ```
 
-The code creates an instance of `DataflowBuilder` with the `sample-specification.json` loaded.
+The code creates an instance of `GraphBuilder` with the `sample-specification.json` loaded.
 
 ### Obtaining a dataflow graph
 
@@ -78,7 +78,7 @@ After having a node retrieved from a graph, it is time to modify its attributes.
 node.instance_name = 'Instance name of a node'
 ```
 
-On the other hand, if a user wanted to alter a property (from the list of `properties` of a node), she or he should use an indirect method:
+On the other hand, if user wanted to alter a property (from the list of `properties` of a node), she or he should use an indirect method:
 ```python
 try:
     # Use of `set_property` is recommended to set values of properties of a node.
@@ -99,10 +99,10 @@ However, if a user wants to move to an absolute position, the following code sho
 node.move(Vector(1000, 1000)) # relative = False, by default
 ```
 
-## Specification of DataflowBuilder
+## Specification of GraphBuilder
 
 ```{eval-rst}
-.. autoclass:: pipeline_manager.dataflow_builder.dataflow_builder.DataflowBuilder
+.. autoclass:: pipeline_manager.dataflow_builder.dataflow_builder.GraphBuilder
   :members:
 ```
 

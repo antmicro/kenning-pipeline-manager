@@ -1,4 +1,4 @@
-"""Module with tests of DataflowBuilder utilities."""
+"""Module with tests of GraphBuilder utilities."""
 
 import pytest
 

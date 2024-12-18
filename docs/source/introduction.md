@@ -11,6 +11,6 @@ This documentation contains the following chapters:
 * [Communication with an external application](external-app-communication) - external application integration overview
 * [Sample third-party server](example-server) - describes how to configure server for testing frontend features
 * [Specification Builder](specification-builder) - describes the Python's `SpecificationBuilder` module for constructing the specification.
-* [Dataflow Builder](dataflow-builder) - describes the Python's `DataflowBuilder` module for constructing and manipulating the dataflow graph.
+* [Graph Builder](graph-builder) - describes the Python's `GraphBuilder` class for constructing and manipulating the dataflow graph.
 * [Dataflow and specification format changelog](changelogs) - lists changes and versions in the format of dataflow and specification files
 * [Front end demo](demo) - {{project}}'s front end demonstration.

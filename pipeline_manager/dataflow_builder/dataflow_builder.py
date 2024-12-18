@@ -16,11 +16,11 @@ from pipeline_manager.specification_builder import SpecificationBuilder
 from pipeline_manager.validator import validate
 
 
-class DataflowBuilder:
+class GraphBuilder:
     """
     Class for building dataflow graphs.
 
-    Each instance of the DataflowBuilder must be associated with a single
+    Each instance of the GraphBuilder must be associated with a single
     specification to ensure proper validation.
     """
 
@@ -76,7 +76,7 @@ class DataflowBuilder:
         self, specification_path: Path, purge_old_graphs: bool = True
     ):
         """
-        Load a specification from a file to use in DataflowBuilder.
+        Load a specification from a file to use in GraphBuilder.
 
         The default behaviour is to remove loaded dataflow graphs when loading
         a new specification. That is due to the fact that a dataflow graph
@@ -133,7 +133,7 @@ class DataflowBuilder:
         Returns
         -------
         DataflowGraph
-            Instance a of a dataflow graph, preserved in the DataflowBuilder.
+            Instance a of a dataflow graph, preserved in the GraphBuilder.
         """
         if based_on is not None:
             if isinstance(based_on, DataflowGraph):

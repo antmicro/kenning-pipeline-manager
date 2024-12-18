@@ -5,7 +5,7 @@ from typing import Dict, Tuple
 
 import pytest
 
-from pipeline_manager.dataflow_builder.dataflow_builder import DataflowBuilder
+from pipeline_manager.dataflow_builder.dataflow_builder import GraphBuilder
 from pipeline_manager.dataflow_builder.dataflow_graph import (
     AttributeType,
     DataflowGraph,
@@ -19,8 +19,8 @@ from pipeline_manager.dataflow_builder.entities import (
 
 
 @pytest.fixture
-def builder() -> DataflowBuilder:
-    return DataflowBuilder(
+def builder() -> GraphBuilder:
+    return GraphBuilder(
         specification="examples/sample-specification.json",
     )
 
@@ -119,7 +119,7 @@ def test_adding_multiple_nodes(n: int, builder):
 @pytest.fixture
 def single_connection_graph(
     builder
-) -> Tuple[DataflowBuilder, DataflowGraph, Dict]:
+) -> Tuple[GraphBuilder, DataflowGraph, Dict]:
     """
     Fixture providing a valid graph with two node a single connection
     between them.
@@ -220,7 +220,7 @@ def test_if_adding_duplicate_connection_fails(single_connection_graph):
 
 
 def test_passing_validation_with_simple_graph(single_connection_graph):
-    """Test whether DataflowBuilder with a simple graph passes validation."""
+    """Test whether GraphBuilder with a simple graph passes validation."""
     builder, _, _ = single_connection_graph
     # If validation fails, an error will be raised.
     builder.validate()
@@ -384,7 +384,7 @@ def test_using_sample_graphs(sample_specification_path, sample_dataflow_path):
     Test if using a sample specification and a sample dataflow
     passes validation.
     """
-    builder = DataflowBuilder(specification=sample_specification_path)
+    builder = GraphBuilder(specification=sample_specification_path)
     builder.load_graphs(dataflow_path=sample_dataflow_path)
 
     builder.validate()
@@ -397,7 +397,7 @@ def test_modifying_sample_graph(
     Test if adding a node and connecting it
     to a sample graph yields no errors.
     """
-    builder = DataflowBuilder(specification=sample_specification_path)
+    builder = GraphBuilder(specification=sample_specification_path)
     builder.load_graphs(dataflow_path=sample_dataflow_path)
     graph = builder.graphs[0]
     builder.validate()
@@ -427,7 +427,7 @@ def test_raising_error_when_using_non_existent_keyword_argument(
     Test if an KeyError is raised when a non-existent
     keyword argument is used.
     """
-    builder = DataflowBuilder(specification=sample_specification_path)
+    builder = GraphBuilder(specification=sample_specification_path)
     builder.load_graphs(dataflow_path=sample_dataflow_path)
     graph = builder.graphs[0]
     with pytest.raises(KeyError):

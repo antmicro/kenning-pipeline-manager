@@ -47,7 +47,7 @@ class DataflowGraph(JsonConvertible):
         dataflow graph or empty values.
 
         Do not use the constructor directly.
-        Use `DataflowBuilder.create_graph`, instead.
+        Use `GraphBuilder.create_graph`, instead.
 
         Parameters
         ----------

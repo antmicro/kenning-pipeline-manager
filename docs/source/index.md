@@ -11,7 +11,7 @@ frontend-features
 external-app-communication
 example-server
 specification-builder
-dataflow-builder
+graph-builder
 changelogs
 demo
 ```
