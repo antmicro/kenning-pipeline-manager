@@ -17,12 +17,14 @@ from pipeline_manager.dataflow_builder.entities import (
     Vector2,
 )
 
+DEFAULT_SPECIFICATION_VERSION = "20240723.13"
+
 
 @pytest.fixture
 def builder() -> GraphBuilder:
     return GraphBuilder(
         specification="examples/sample-specification.json",
-        specification_version="20240723.13",
+        specification_version=DEFAULT_SPECIFICATION_VERSION,
     )
 
 
@@ -385,7 +387,10 @@ def test_using_sample_graphs(sample_specification_path, sample_dataflow_path):
     Test if using a sample specification and a sample dataflow
     passes validation.
     """
-    builder = GraphBuilder(specification=sample_specification_path)
+    builder = GraphBuilder(
+        specification=sample_specification_path,
+        specification_version=DEFAULT_SPECIFICATION_VERSION,
+    )
     builder.load_graphs(dataflow_path=sample_dataflow_path)
 
     builder.validate()
@@ -398,7 +403,10 @@ def test_modifying_sample_graph(
     Test if adding a node and connecting it
     to a sample graph yields no errors.
     """
-    builder = GraphBuilder(specification=sample_specification_path)
+    builder = GraphBuilder(
+        specification=sample_specification_path,
+        specification_version=DEFAULT_SPECIFICATION_VERSION,
+    )
     builder.load_graphs(dataflow_path=sample_dataflow_path)
     graph = builder.graphs[0]
     builder.validate()
@@ -428,7 +436,10 @@ def test_raising_error_when_using_non_existent_keyword_argument(
     Test if an KeyError is raised when a non-existent
     keyword argument is used.
     """
-    builder = GraphBuilder(specification=sample_specification_path)
+    builder = GraphBuilder(
+        specification=sample_specification_path,
+        specification_version=DEFAULT_SPECIFICATION_VERSION,
+    )
     builder.load_graphs(dataflow_path=sample_dataflow_path)
     graph = builder.graphs[0]
     with pytest.raises(KeyError):

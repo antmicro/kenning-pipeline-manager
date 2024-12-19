@@ -43,8 +43,8 @@ class DataflowGraph(JsonConvertible):
         dataflow: Optional[Dict[str, Any]] = None,
     ):
         """
-        Initialise a dataflow graph with values either from with the supplied
-        dataflow graph or empty values.
+        Initialise a dataflow graph with values either taken from the supplied
+        dataflow graph or empty ones.
 
         Do not use the constructor directly.
         Use `GraphBuilder.create_graph`, instead.
@@ -94,12 +94,11 @@ class DataflowGraph(JsonConvertible):
             )
 
     def create_node(self, name: str, **kwargs) -> Node:
-        # pydoclint: disable DOC110, DOC103
         """
 
         Create the node initialized with the supplied arguments.
 
-        The use of this method is highly preferred to manually adding a node.
+        Use of this method instead of manually adding a node.
         Default values are taken from the specification, based on the
         provided `name` parameter. The default values may be overridden by
         the values supplied in `kwargs`. `id` is already initialized.
@@ -290,7 +289,6 @@ class DataflowGraph(JsonConvertible):
     def get(
         self, type: AttributeType, **kwargs
     ) -> Union[List[Node], List[InterfaceConnection], List[Interface]]:
-        # pydoclint: disable DOC110, DOC103
         """
 
         Get items of a given type, which satisfy all the desired criteria.

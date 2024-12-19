@@ -1,7 +1,6 @@
 """Module for building the dataflow graphs."""
 
 import json
-import os
 import tempfile
 from pathlib import Path
 from typing import Dict, List, Union
@@ -173,9 +172,10 @@ class GraphBuilder:
 
         Raises
         ------
-        ValueError
+        RuntimeError
             Raised if an external validator failed to validate
-            either a dataflow or specification file.
+            either a dataflow or specification file. An error
+            message is provided by the external validator.
         """
         # Save a dataflow graph to a temporary file.
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -183,36 +183,28 @@ class GraphBuilder:
             with open(temp_dataflow_file, "wt", encoding="utf-8") as fd:
                 fd.write(self.to_json(as_str=True))
 
-        # `self.save()` cannot be used as it saves the dataflow only.
-        temp_specification_file = Path(f"temp_specification_{get_uuid()}.json")
-
-        with open(temp_specification_file, "wt", encoding="utf-8") as fd:
-            specification = self._spec_builder._construct_specification(
-                sort_spec=False
+            # `self.save()` cannot be used as it saves the dataflow only.
+            temp_specification_file = Path(tmpdir) / (
+                f"temp_specification_{get_uuid()}.json"
             )
-            json.dump(specification, fd, ensure_ascii=False)
 
-        result = validate(
-            dataflow_paths=[temp_dataflow_file],
-            specification_path=temp_specification_file,
-        )
+            with open(temp_specification_file, "wt", encoding="utf-8") as fd:
+                specification = self._spec_builder._construct_specification(
+                    sort_spec=False
+                )
+                json.dump(specification, fd, ensure_ascii=False)
 
-        os.remove(temp_dataflow_file)
-        os.remove(temp_specification_file)
+            result = validate(
+                dataflow_paths=[temp_dataflow_file],
+                specification_path=temp_specification_file,
+            )
 
-        message = ""
-        if result == 1:
-            message = "The provided specification is invalid."
-        elif result == 2:
-            message = "The generated dataflow is invalid."
-        elif result == 3:
-            message = "Input was invalid."
-        if message:
-            raise ValueError(message)
+        if result:
+            raise RuntimeError()
 
     def to_json(self, as_str: bool = True) -> Union[Dict, str]:
         output = {
-            "version": "20240723.13",
+            "version": self.specification_version,
             "graphs": [graph.to_json(as_str=False) for graph in self.graphs],
         }
 
