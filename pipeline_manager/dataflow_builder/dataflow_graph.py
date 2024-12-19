@@ -64,7 +64,7 @@ class DataflowGraph(JsonConvertible):
         self._connections: Dict[str, InterfaceConnection] = {}
         self._spec_builder = builder_with_spec
 
-        if not dataflow:
+        if dataflow is None:
             return
 
         for node in dataflow["nodes"]:
@@ -98,7 +98,7 @@ class DataflowGraph(JsonConvertible):
 
         Create the node initialized with the supplied arguments.
 
-        Use of this method instead of manually adding a node.
+        Use this method instead of manually adding a node.
         Default values are taken from the specification, based on the
         provided `name` parameter. The default values may be overridden by
         the values supplied in `kwargs`. `id` is already initialized.
