@@ -24,6 +24,8 @@ A dataflow graph may be either loaded from a dataflow file or created.
 
 To create a new empty dataflow graph:
 ```python
+from pipeline_manager.dataflow_builder.dataflow_graph import DataflowGraph
+
 graph = builder.create_graph()
 ```
 
@@ -41,6 +43,8 @@ In both cases, the dataflow graph:
 
 Having obtained the `DataflowGraph` object (in the previous examples, stored in the `graph` variable), a new node may be added to the graph in the following way:
 ```python
+from pipeline_manager.dataflow_builder.entities import Node
+
 node = graph.create_node(
     name="LoadVideo", # Required.
     position=Vector2(0, 0), # Optional.
@@ -66,7 +70,9 @@ The `DataflowGraph.get` method retrieves not only nodes but other objects presen
 
 To get a node, which satisfies all the matching criteria, use the `get` method once again:
 ```python
-[node] = graph.get(AttributeType.Node, position=Vector2(0, 0), name="LoadVideo")
+from pipeline_manager.dataflow_builder.entities import Vector2
+
+[node] = graph.get(AttributeType.NODE, position=Vector2(0, 0), name="LoadVideo")
 ```
 
 The code above puts in the `node` variable a node with name `LoadVideo` and position with coordinates `[0, 0]`.
@@ -96,7 +102,7 @@ node.move(new_position=Vector2(500, 0), relative=True)
 However, if a user wants to move to an absolute position, the following code should be used:
 ```python
 # Move a node to [1000, 1000].
-node.move(Vector(1000, 1000)) # relative = False, by default
+node.move(Vector2(1000, 1000)) # relative = False, by default
 ```
 
 ## Specification of GraphBuilder
