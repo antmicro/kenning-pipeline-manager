@@ -95,7 +95,6 @@ class DataflowGraph(JsonConvertible):
 
     def create_node(self, name: str, **kwargs) -> Node:
         """
-
         Create the node initialized with the supplied arguments.
 
         Use this method instead of manually adding a node.

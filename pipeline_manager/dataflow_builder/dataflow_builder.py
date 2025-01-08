@@ -1,5 +1,6 @@
 """Module for building the dataflow graphs."""
 
+import copy
 import json
 import tempfile
 from pathlib import Path
@@ -126,7 +127,8 @@ class GraphBuilder:
             Dataflow graph, on which the new graph should be based on.
             When `Path` or `str`, it should be a path to dataflow graph in
             a JSON format. When `DataflowGraph`, it should be a valid
-            representation. When `None`, the new dataflow graph will not
+            representation (as its deep copy will be added).
+            When `None`, the new dataflow graph will not
             be based on anything, by default None.
 
         Returns
@@ -136,7 +138,8 @@ class GraphBuilder:
         """
         if based_on is not None:
             if isinstance(based_on, DataflowGraph):
-                self.graphs.append(based_on)
+                graph_copy = copy.deepcopy(based_on)
+                self.graphs.append(graph_copy)
             else:
                 self.graphs.append(self._load_dataflow_graph_from_file())
 
