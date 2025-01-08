@@ -59,7 +59,7 @@ class Vector2(JsonConvertible):
 
     x: float = 0.0
     y: float = 0.0
-    _minimal_value: float = 0
+    _minimal_value: float = -(2**16)
     _maximal_value: float = 2**16
 
     def __add__(self, another: "Vector2") -> "Vector2":
@@ -157,8 +157,6 @@ class Node(JsonConvertible):
     instance_name: Optional[str] = None
     subgraph: Optional[str] = None
     enabled_interface_groups: List[Interface] = field(default_factory=List)
-
-    # Attributes starting with a name starting with _ (underscore),
 
     def set_property(self, property_name: str, property_value: Any) -> None:
         """
@@ -306,7 +304,7 @@ class Node(JsonConvertible):
             Otherwise, it is a displacement (movement) vector.
         relative : bool, optional
             Whether position should be calculated based on the
-            previous one True or not (False), by default False.
+            previous one (True) or not (False), by default False.
         """
         if relative:
             self.position += new_position
@@ -500,7 +498,8 @@ def convert_output(
     output: Dict[str, Any], as_str: bool
 ) -> Union[str, Dict[str, Any]]:
     """
-    Convert a dictionary to either string or do not change.
+    Convert a dictionary to either `str` or do not change,
+    depending on the `as_str` parameter.
 
     Parameters
     ----------

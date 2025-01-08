@@ -318,9 +318,9 @@ def test_getting_connection_from_graph_by_id(single_connection_graph):
     (
         ("LoadVideo", Vector2(200, 200), Vector2(200, 200)),
         ("SaveVideo", Vector2(200, 200), Vector2(2300, 400)),
-        ("LoadVideo", Vector2(-1000, 0), Vector2(0, 0)),
-        ("LoadVideo", Vector2(0, -1000), Vector2(0, 0)),
-        ("SaveVideo", Vector2(-3000, 0), Vector2(0, 200)),
+        ("LoadVideo", Vector2(-1000, 0), Vector2(-1000, 0)),
+        ("LoadVideo", Vector2(0, -(2**16) - 1), Vector2(0, -(2**16))),
+        ("SaveVideo", Vector2(-9999999, 0), Vector2(-(2**16), 200)),
         ("SaveVideo", Vector2(0, -199), Vector2(2100, 1)),
     ),
 )
@@ -347,8 +347,16 @@ def test_relative_node_motion(
         ("LoadVideo", Vector2(200, 200), Vector2(200, 200)),
         ("SaveVideo", Vector2(200, 200), Vector2(200, 200)),
         ("SaveVideo", Vector2(1, 2), Vector2(1, 2)),
-        ("LoadVideo", Vector2(-100, 0), Vector2(Vector2._minimal_value, 0)),
-        ("SaveVideo", Vector2(-100, 0), Vector2(Vector2._minimal_value, 0)),
+        (
+            "LoadVideo",
+            Vector2(-(2**17), 0),
+            Vector2(Vector2._minimal_value, 0),
+        ),
+        (
+            "SaveVideo",
+            Vector2(-(2**17), 0),
+            Vector2(Vector2._minimal_value, 0),
+        ),
         ("SaveVideo", Vector2(2**20, 0), Vector2(Vector2._maximal_value, 0)),
         ("LoadVideo", Vector2(2**20, 5), Vector2(Vector2._maximal_value, 5)),
     ),
