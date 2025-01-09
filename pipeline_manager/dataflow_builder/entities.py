@@ -382,7 +382,9 @@ class InterfaceConnection(JsonConvertible):
             output["anchors"] = anchors
 
         if as_str:
-            json.dumps(output, ensure_ascii=False)
+            return json.dumps(
+                output, ensure_ascii=False, indent=4, sort_keys=True
+            )
         return output
 
 
@@ -514,5 +516,5 @@ def convert_output(
         The converted output.
     """
     if as_str:
-        return json.dumps(output, ensure_ascii=False)
+        return json.dumps(output, ensure_ascii=False, indent=4, sort_keys=True)
     return output
