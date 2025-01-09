@@ -42,6 +42,7 @@ In both cases, the dataflow graph:
 ### Creating a node
 
 Having obtained the `DataflowGraph` object (in the previous examples, stored in the `graph` variable), a new node may be added to the graph in the following way:
+
 ```python
 from pipeline_manager.dataflow_builder.entities import Node
 
@@ -51,12 +52,17 @@ node = graph.create_node(
 )
 ```
 
-Only keyword parameters are allowed. The available parameters of the `create_node` method are attributes of the `Node` dataclass (which is located under `pipeline_manager.dataflow_builder.entities.Node`).
+Only keyword parameters are allowed.
+The available parameters of the `create_node` method are attributes of the `Node` dataclass (which is located under `pipeline_manager.dataflow_builder.entities.Node`).
 
 ### Getting a node
 
-A dataflow graphs stores nodes. Thus, nodes are retrieved from the dataflow graph in the following way:
+A dataflow graphs stores nodes.
+Thus, nodes are retrieved from the dataflow graph in the following way:
+
 ```python
+from pipeline_manager.dataflow_builder.dataflow_graph import AttributeType
+
 nodes = graph.get(AttributeType.NODE, name="LoadVideo")
 if len(nodes) > 0:
     node = nodes[0]
@@ -64,7 +70,10 @@ if len(nodes) > 0:
 
 Only nodes with `name` equal to `LoadVideo` will be retrieved.
 
-The `DataflowGraph.get` method retrieves not only nodes but other objects present in the `AttributeType` enum: connections, interfaces, and nodes. In this case, nodes are retrieved. Parameters other than `type` are filters, which specify what values should the obtained objects (here: nodes) have. Take a look at the next example to see such usage.
+The `DataflowGraph.get` method retrieves not only nodes but other objects present in the `AttributeType` enum: connections, interfaces, and nodes.
+In this case, nodes are retrieved.
+Parameters other than `type` are filters, which specify what values should the obtained objects (here: nodes) have.
+Take a look at the next example to see such usage.
 
 ### Getting a node matching multiple criteria
 
@@ -79,12 +88,14 @@ The code above puts in the `node` variable a node with name `LoadVideo` and posi
 
 ### Manipulating a node
 
-After having a node retrieved from a graph, it is time to modify its attributes. For example, if a user wanted to assign an instance name to the node, she or he should do it directly:
+After having a node retrieved from a graph, it is time to modify its attributes.
+For example, to change an instance name of the node, run:
 ```python
 node.instance_name = 'Instance name of a node'
 ```
 
-On the other hand, if user wanted to alter a property (from the list of `properties` of a node), she or he should use an indirect method:
+To change the property of the node, `set_property` can be used:
+
 ```python
 try:
     # Use of `set_property` is recommended to set values of properties of a node.
@@ -93,16 +104,14 @@ except KeyError:
     print('Cannot set compression_rate to 1 as the property does not exists.')
 ```
 
-Yet another example depicts moving a node:
-```python
-# Move the node by 500 pixels to the right, relative to its previous position.
-node.move(new_position=Vector2(500, 0), relative=True)
-```
+To move the node from its current position, use `move`:
 
-However, if a user wants to move to an absolute position, the following code should be used:
 ```python
 # Move a node to [1000, 1000].
-node.move(Vector2(1000, 1000)) # relative = False, by default
+node.move(Vector2(1000, 1000))
+
+# Move the node by 500 pixels to the right, relative to its previous position.
+node.move(new_position=Vector2(500, 0), relative=True)
 ```
 
 ## Specification of GraphBuilder
