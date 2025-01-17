@@ -67,7 +67,7 @@ def get_uuid() -> str:
 
 @dataclass
 class Vector2(JsonConvertible):
-    """Class representation a two-dimensional (2D) mathematical vector."""
+    """Class representation of a two-dimensional (2D) mathematical vector."""
 
     x: float = 0.0
     y: float = 0.0
@@ -145,6 +145,9 @@ class Interface(JsonConvertible):
         if self.type:
             output["type"] = self.type
 
+        if self.side_position:
+            output["sidePosition"] = self.side_position
+
         return convert_output(output, as_str)
 
 
@@ -163,11 +166,11 @@ class Node(JsonConvertible):
 
     id: str
     name: str
-    position: Vector2
     properties: List[Property]
     interfaces: List[Interface]
     width: float
-    two_column: bool
+    two_column: Optional[bool] = None
+    position: Optional[Vector2] = None
     instance_name: Optional[str] = None
     subgraph: Optional[str] = None
     enabled_interface_groups: List[Interface] = field(default_factory=List)

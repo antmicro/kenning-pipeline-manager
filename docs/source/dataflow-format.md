@@ -54,7 +54,8 @@ Each node has:
   Every element is of type [Interface](#interface).
 * `width` - the node's width in the editor.
 * `twoColumn` - boolean value.
-  If set to `true`, the interfaces on opposite sides will be arranged parallel to each otherl. Otherwise, each interface will be positioned on a separate line.
+  If set to `true`, the interfaces on opposite sides will be arranged parallel to each other.
+  Otherwise, each interface will be positioned on a separate line.
 * `subgraph` - optional field defining the `id` of the subgraph that this node represents.
   It refers to one of the [Graphs](#graph) entries from `graphs` with a matching `id`.
 * `enabledInterfaceGroups` - optional array describing enabled interface groups.

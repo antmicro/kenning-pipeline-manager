@@ -71,7 +71,6 @@ def test_adding_node_present_in_specification(builder):
                         "id": node.interfaces[0].id,
                         "direction": "output",
                         "side": "right",
-                        "sidePosition": 0,
                     }
                 ],
                 "properties": [
@@ -161,7 +160,6 @@ def single_connection_graph(
                         "id": source.interfaces[0].id,
                         "direction": "output",
                         "side": "right",
-                        "sidePosition": 0,
                     }
                 ],
                 "properties": [],
@@ -178,7 +176,6 @@ def single_connection_graph(
                         "id": drain.interfaces[0].id,
                         "direction": "input",
                         "side": "left",
-                        "sidePosition": 0,
                     }
                 ],
                 "properties": [],
