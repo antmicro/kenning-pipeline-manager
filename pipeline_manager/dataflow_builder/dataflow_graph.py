@@ -13,12 +13,12 @@ from pipeline_manager.dataflow_builder.entities import (
     Vector2,
     camel_case_to_snake_case,
     convert_output,
+    get_uuid,
     match_criteria,
 )
 from pipeline_manager.dataflow_builder.utils import (
     ensure_connection_is_absent,
     get_interface_if_present,
-    get_uuid,
 )
 from pipeline_manager.specification_builder import SpecificationBuilder
 

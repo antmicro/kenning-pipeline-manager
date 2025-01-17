@@ -7,9 +7,8 @@ from pathlib import Path
 from typing import Dict, List, Union
 
 from pipeline_manager.dataflow_builder.dataflow_graph import DataflowGraph
-from pipeline_manager.dataflow_builder.entities import convert_output
+from pipeline_manager.dataflow_builder.entities import convert_output, get_uuid
 from pipeline_manager.dataflow_builder.utils import (
-    get_uuid,
     is_proper_input_file,
 )
 from pipeline_manager.specification_builder import SpecificationBuilder

@@ -2,7 +2,6 @@
 
 import logging
 import os
-import uuid
 from pathlib import Path
 from typing import Any, Dict, List, Tuple, Union
 
@@ -60,18 +59,6 @@ def is_proper_input_file(
             return (False, message)
 
     return (True, "File is a proper input.")
-
-
-def get_uuid() -> str:
-    """
-    Generate universally unique identifier in version 4 as a string.
-
-    Returns
-    -------
-    str
-        Generated UUID.
-    """
-    return str(uuid.uuid4())
 
 
 def ensure_connection_is_absent(

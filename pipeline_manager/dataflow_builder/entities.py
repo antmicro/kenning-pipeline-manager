@@ -53,6 +53,18 @@ class JsonConvertible(ABC):
         pass
 
 
+def get_uuid() -> str:
+    """
+    Generate universally unique identifier in version 4 as a string.
+
+    Returns
+    -------
+    str
+        Generated UUID.
+    """
+    return str(uuid.uuid4())
+
+
 @dataclass
 class Vector2(JsonConvertible):
     """Class representation a two-dimensional (2D) mathematical vector."""
@@ -79,7 +91,7 @@ class Property(JsonConvertible):
 
     name: str
     value: Any
-    id: str = str(uuid.uuid4())
+    id: str = field(default_factory=get_uuid)
 
     def to_json(self, as_str: bool = True) -> Union[Dict, str]:
         output = {
@@ -99,7 +111,7 @@ class Interface(JsonConvertible):
     side: Optional[Side] = None
     side_position: Optional[int] = None
     external_name: Optional[str] = None
-    id: str = str(uuid.uuid4())
+    id: str = field(default_factory=get_uuid)
     type: List[str] = field(default_factory=list)
 
     def __post_init__(self):
@@ -368,7 +380,7 @@ class InterfaceConnection(JsonConvertible):
     from_interface: Interface
     to_interface: Interface
     anchors: Optional[List[Vector2]] = None
-    id: str = str(uuid.uuid4())
+    id: str = field(default_factory=get_uuid)
 
     def to_json(self, as_str: bool = True) -> Dict | str:
         output = {
