@@ -4,7 +4,7 @@ import copy
 import json
 import tempfile
 from pathlib import Path
-from typing import Dict, List, Union
+from typing import Dict, List, Optional, Union
 
 from pipeline_manager.dataflow_builder.dataflow_graph import DataflowGraph
 from pipeline_manager.dataflow_builder.entities import convert_output, get_uuid
@@ -24,7 +24,10 @@ class GraphBuilder:
     """
 
     def __init__(
-        self, specification: Path, specification_version: str
+        self,
+        specification: Path,
+        specification_version: str,
+        workspace_directory: Optional[Path] = None,
     ) -> None:
         """
         Load a specification from a file, initialise an empty list of graphs.
@@ -35,8 +38,11 @@ class GraphBuilder:
             Path to a JSON specification file.
         specification_version: str
             Version of the specification.
+        workspace_directory: Optional[Path]
+            Path to the Pipeline Manager's workspace directory
         """
         self.specification_version = specification_version
+        self.workspace_directory = workspace_directory
         self.load_specification(specification)
         self.graphs: List[DataflowGraph] = []
 
@@ -199,6 +205,7 @@ class GraphBuilder:
             result = validate(
                 dataflow_paths=[temp_dataflow_file],
                 specification_path=temp_specification_file,
+                workspace_directory=self.workspace_directory,
             )
 
         if result:
