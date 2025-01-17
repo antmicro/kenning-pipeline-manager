@@ -132,8 +132,10 @@ class Interface(JsonConvertible):
             "direction": self.direction.name.lower(),
             "side": self.side.name.lower(),
             "id": self.id,
-            "sidePosition": self.side_position or 0,
         }
+
+        if self.side_position:
+            output["sidePosition"] = self.side_position
 
         # Notice conversion from snake_case to camelCase.
         # Optional fields.
