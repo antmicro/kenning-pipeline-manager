@@ -130,6 +130,7 @@ def single_connection_graph(
 
     source = graph.create_node(
         name="LoadVideo",
+        position=Vector2(0, 0),
     )
 
     drain = graph.create_node(

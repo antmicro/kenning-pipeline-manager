@@ -134,19 +134,16 @@ class Interface(JsonConvertible):
             "id": self.id,
         }
 
+        # Notice conversion from snake_case to camelCase.
+        # Optional fields.
         if self.side_position:
             output["sidePosition"] = self.side_position
 
-        # Notice conversion from snake_case to camelCase.
-        # Optional fields.
         if self.external_name:
             output["externalName"] = self.external_name
 
         if self.type:
             output["type"] = self.type
-
-        if self.side_position:
-            output["sidePosition"] = self.side_position
 
         return convert_output(output, as_str)
 
@@ -323,6 +320,8 @@ class Node(JsonConvertible):
             Whether position should be calculated based on the
             previous one (True) or not (False), by default False.
         """
+        if self.position is None:
+            self.position = Vector2()
         if relative:
             self.position += new_position
         else:

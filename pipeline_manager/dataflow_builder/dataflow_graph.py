@@ -170,7 +170,6 @@ class DataflowGraph(JsonConvertible):
             "enabled_interface_groups": [],
             "instance_name": None,
             "interfaces": interfaces,
-            "position": Vector2(0, 0),
             "properties": properties,
             "subgraph": None,
             "two_column": self._spec_builder._metadata["twoColumn"]
