@@ -121,18 +121,14 @@ class Interface(JsonConvertible):
             self.side = Side(self.side)
 
     def to_json(self, as_str: bool) -> Union[str, Dict]:
-        if not self.side:
-            if self.direction in (Direction.INOUT, Direction.INPUT):
-                self.side = Side.LEFT
-            else:
-                self.side = Side.RIGHT
-
         output = {
             "name": self.name,
             "direction": self.direction.name.lower(),
-            "side": self.side.name.lower(),
             "id": self.id,
         }
+
+        if self.side:
+            output["side"] = self.side.name.lower()
 
         # Notice conversion from snake_case to camelCase.
         # Optional fields.

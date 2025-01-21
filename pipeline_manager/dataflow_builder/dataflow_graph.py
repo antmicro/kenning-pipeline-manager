@@ -1,5 +1,6 @@
 """Module with DataflowGraph class for representing a dataflow graph."""
 
+from dataclasses import fields
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union
 
@@ -143,11 +144,16 @@ class DataflowGraph(JsonConvertible):
         # Values for interface initialization are taken from the specification.
         interfaces = []
         if "interfaces" in base_node:
+            sampleinterface = Interface("sample", "inout")
+            interfacefields = [f.name for f in fields(sampleinterface)]
             for interface in base_node["interfaces"]:
                 _interface = Interface(
                     id=get_uuid(),
-                    name=interface["name"],
-                    direction=Direction(interface["direction"]),
+                    **{
+                        camel_case_to_snake_case(key): value
+                        for key, value in interface.items()
+                        if key in interfacefields
+                    },
                 )
                 interfaces.append(_interface)
 
@@ -175,7 +181,7 @@ class DataflowGraph(JsonConvertible):
             "subgraph": None,
             "two_column": self._spec_builder._metadata["twoColumn"]
             if "twoColumn" in self._spec_builder._metadata
-            else None,
+            else True,
         }
 
         # Override the default parameters with `kwargs`.
