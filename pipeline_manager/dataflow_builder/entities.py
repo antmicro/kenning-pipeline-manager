@@ -138,9 +138,6 @@ class Interface(JsonConvertible):
         if self.external_name:
             output["externalName"] = self.external_name
 
-        if self.type:
-            output["type"] = self.type
-
         return convert_output(output, as_str)
 
 
