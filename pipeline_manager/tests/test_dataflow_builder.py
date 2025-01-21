@@ -70,7 +70,6 @@ def test_adding_node_present_in_specification(builder):
                         "name": "frames",
                         "id": node.interfaces[0].id,
                         "direction": "output",
-                        "side": "right",
                     }
                 ],
                 "properties": [
@@ -160,7 +159,6 @@ def single_connection_graph(
                         "name": "frames",
                         "id": source.interfaces[0].id,
                         "direction": "output",
-                        "side": "right",
                     }
                 ],
                 "properties": [],
@@ -176,7 +174,6 @@ def single_connection_graph(
                         "name": "frames",
                         "id": drain.interfaces[0].id,
                         "direction": "input",
-                        "side": "left",
                     }
                 ],
                 "properties": [],
