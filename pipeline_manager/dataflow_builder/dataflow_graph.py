@@ -259,13 +259,24 @@ class DataflowGraph(JsonConvertible):
                 "Direction of the `to` interface cannot be `output`."
                 "Aborted creation a connection."
             )
-
-        if from_interface.type != to_interface.type:
-            raise ValueError(
-                "Mismatch between `from` interface with type = "
-                f"{from_interface.type} and `to` interface with type = "
-                f"{to_interface.type}."
+        if from_interface.type and to_interface.type:
+            fromtype = (
+                from_interface.type
+                if isinstance(from_interface.type, list)
+                else [from_interface.type]
             )
+            totype = (
+                to_interface.type
+                if isinstance(to_interface.type, list)
+                else [to_interface.type]
+            )
+            common_type = set(fromtype).intersection(totype)
+            if len(common_type) == 0:
+                raise ValueError(
+                    "Mismatch between `from` interface with type = "
+                    f"{from_interface.type} and `to` interface with type = "
+                    f"{to_interface.type}."
+                )
 
         if not connection_id:
             connection_id = get_uuid()
