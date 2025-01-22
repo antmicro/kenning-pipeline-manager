@@ -6,6 +6,7 @@
 
 import subprocess
 import tempfile
+import tempfile
 from pathlib import Path
 from typing import Any, Dict, Tuple
 
@@ -202,7 +203,7 @@ def single_connection_graph(
 @pytest.fixture
 def subgraph_specification():
     """
-    Fixture to provide a subgraph specification from a file in `examples`
+    Fixture to provide a subgraph specification from a file in `examples`.
     directory.
     """
     return Path("./examples/sample-subgraph-specification.json")
@@ -552,6 +553,7 @@ def test_loading_graph_with_load_graphs_method(graph_created_with_builders):
         f" but contains {graph_count} graphs."
     )
     graph_builder.validate()
+
 
 
 def test_loading_graph_with_create_graph_method(graph_created_with_builders):
