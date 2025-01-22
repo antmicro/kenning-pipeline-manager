@@ -184,6 +184,7 @@ class DataflowGraph(JsonConvertible):
         if not base_node:
             raise ValueError(
                 f"Provided name of the node `{name}` "
+                f"Provided name of the node `{name}` "
                 "is missing in the specification."
             )
 
