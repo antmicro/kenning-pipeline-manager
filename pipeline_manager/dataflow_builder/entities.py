@@ -379,7 +379,7 @@ class InterfaceConnection(JsonConvertible):
     anchors: Optional[List[Vector2]] = None
     id: str = field(default_factory=get_uuid)
 
-    def to_json(self, as_str: bool = True) -> Dict | str:
+    def to_json(self, as_str: bool = True) -> Union[str, Dict]:
         output = {
             # Renamed to the original names.
             "id": self.id,
