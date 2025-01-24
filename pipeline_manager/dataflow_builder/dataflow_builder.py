@@ -199,6 +199,7 @@ class GraphBuilder:
                 self._load_graph_from_dataflow_source(based_on, identifier)
             )
 
+        self.graphs.append(DataflowGraph(self._spec_builder, self))
         return self.graphs[-1]
 
     def _load_graph_from_dataflow_source(

@@ -175,6 +175,7 @@ class Node(JsonConvertible):
     instance_name: Optional[str] = None
     subgraph: Optional[str] = None
     _subgraph: Any = None  # Optional[DataflowGraph]
+    _subgraph: Any = None  # Optional[DataflowGraph]
     enabled_interface_groups: List[Interface] = field(default_factory=list)
 
     def set_property(self, property_name: str, property_value: Any) -> None:
@@ -303,7 +304,7 @@ class Node(JsonConvertible):
     def init_subgraph_node(
         specification_builder: SpecificationBuilder,
         name: str,
-        subgraph: Any,
+        subgraph: Any,  # dataflow_graph.DataflowGraph,
     ) -> "Node":
         """
         An alternative constructor of Node object.
