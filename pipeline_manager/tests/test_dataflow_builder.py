@@ -6,7 +6,6 @@
 
 import subprocess
 import tempfile
-import tempfile
 from pathlib import Path
 from typing import Dict, Tuple
 
@@ -585,6 +584,11 @@ def test_loading_subgraphs(graph_builder_for_subgraphs):
     Test if loading a subgraph specification and dataflow to an instance
     of GraphBuilder and saving them to a file does not raise an error.
     """
+    builder = GraphBuilder(
+        subgraph_specification,
+        DEFAULT_SPECIFICATION_VERSION,
+    )
+    builder.load_graphs(subgraph_dataflow)
     with tempfile.NamedTemporaryFile() as file:
         graph_builder_for_subgraphs.save(json_file=file.name)
 

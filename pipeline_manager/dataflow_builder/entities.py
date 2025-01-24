@@ -236,9 +236,6 @@ class Node(JsonConvertible):
             - illegal parameter was passed via `kwargs`.
               Allowed values include all attributes of `Node` class.
         """
-        if for_subgraph_node:
-            return
-
         is_type_correct = False
         self._specification_builder = specification_builder
         nodes_in_specification = specification_builder._get_nodes(
@@ -304,7 +301,7 @@ class Node(JsonConvertible):
     def init_subgraph_node(
         specification_builder: SpecificationBuilder,
         name: str,
-        subgraph: Any,  # dataflow_graph.DataflowGraph,
+        subgraph: Any,
     ) -> "Node":
         """
         An alternative constructor of Node object.

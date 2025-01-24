@@ -48,7 +48,6 @@ class DataflowGraph(JsonConvertible):
         self,
         builder_with_spec: SpecificationBuilder,
         builder_with_dataflow: Any,
-        builder_with_dataflow: Any,
         dataflow: Optional[Dict[str, Any]] = None,
     ):
         """
