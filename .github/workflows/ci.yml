@@ -60,7 +60,7 @@ jobs:
             cd docs
             make html
             make linkcheck
-        - uses: actions/upload-artifact@v3
+        - uses: actions/upload-artifact@v4
           with:
             name: gh-page
             path: docs/build/html
