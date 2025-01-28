@@ -1,6 +1,6 @@
 # Pipeline Manager
 
-Copyright (c) 2022-2024 [Antmicro](https://www.antmicro.com)
+Copyright (c) 2022-2025 [Antmicro](https://www.antmicro.com)
 
 Pipeline Manager is a data-based, application-agnostic web application for creating, visualizing and managing dataflows in various applications.
 It does not assume any properties of the application it is working with, thanks to which fast integration with various formats is possible.

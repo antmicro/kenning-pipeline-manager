@@ -1,3 +1,7 @@
+# Copyright (c) 2024-2025 Antmicro <www.antmicro.com>
+#
+# SPDX-License-Identifier: Apache-2.0
+
 """Module with DataflowGraph class for representing a dataflow graph."""
 
 from dataclasses import fields
