@@ -31,12 +31,6 @@ def test_existing_examples(
     checks whether SpecificationBuilder can recreate specifications correctly.
     """
     spec_path, dataflow_path = example
-
-    if spec_path.name == "sample-interface-groups-specification.json":
-        pytest.xfail(
-            "Groups of interfaces are not yet implemented for Specification Builder"  # noqa: E501
-        )
-
     with open(spec_path, "r") as f:
         spec = json.load(f)
 

@@ -14,22 +14,8 @@ from typing import Any, Dict, List, Optional, Union, get_type_hints
 
 from typing_extensions import override
 
+from pipeline_manager.dataflow_builder.data_structures import Direction, Side
 from pipeline_manager.specification_builder import SpecificationBuilder
-
-
-class Direction(Enum):
-    """Available directions of an interface."""
-
-    INPUT = "input"
-    OUTPUT = "output"
-    INOUT = "inout"
-
-
-class Side(Enum):
-    """Sides, on which an interface may be located."""
-
-    LEFT = "left"
-    RIGHT = "right"
 
 
 class JsonConvertible(ABC):

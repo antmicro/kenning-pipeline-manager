@@ -11,6 +11,7 @@ for the Pipeline Manager server.
 
 import json
 import logging
+import re
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 
@@ -21,6 +22,7 @@ from urllib3.exceptions import (
     ReadTimeoutError,
 )
 
+from pipeline_manager.dataflow_builder.data_structures import Direction, Side
 from pipeline_manager.validator import validate
 
 
@@ -152,13 +154,13 @@ class SpecificationBuilder(object):
         """
         Resets all fields for the specification.
         """
-        self._nodes = dict()
-        self._nodelayers = set()
+        self._nodes = {}
+        self._node_layers = set()
         self._categories = set()
         self._includes = set()
-        self._includeGraphs = dict()
-        self._graphs = dict()
-        self._metadata = dict()
+        self._includeGraphs = {}
+        self._graphs = {}
+        self._metadata = {}
         self.warnings = 0
 
         if self.check_urls:
@@ -241,7 +243,7 @@ class SpecificationBuilder(object):
     def add_node_type(
         self,
         name: str,
-        category: str,
+        category: Optional[str] = None,
         layer: Optional[str] = None,
         extends: Optional[Union[str, List[str]]] = None,
         abstract: Optional[bool] = False,
@@ -253,7 +255,7 @@ class SpecificationBuilder(object):
         ----------
         name: str
             Name of the node type.
-        category: str
+        category: Optional[str]
             Category of the node. Required by the specification format.
         layer: Optional[str]
             Name of the layer metatype.
@@ -279,7 +281,7 @@ class SpecificationBuilder(object):
             self.add_node_type_parent(name, extends)
         if layer:
             self._nodes[name]["layer"] = layer
-            self._nodelayers.add(layer)
+            self._node_layers.add(layer)
         if category:
             self.add_node_type_category(name, category)
         if abstract is not None:
@@ -325,7 +327,7 @@ class SpecificationBuilder(object):
             self.add_node_type_parent(categoryname, extends)
         if layer:
             self._nodes[categoryname]["layer"] = layer
-            self._nodelayers.add(layer)
+            self._node_layers.add(layer)
 
     def set_node_type_abstract(self, name, value):
         self._nodes[name]["abstract"] = value
@@ -545,15 +547,221 @@ class SpecificationBuilder(object):
             )
         self._nodes[name]["additionalData"] = additionaldata
 
+    def add_node_interface_group(
+        self,
+        node_type_name: str,
+        interface_group_name: str,
+        direction: Direction = Direction.INOUT,
+        interface_type: Optional[str] = None,
+    ):
+        """
+        Add an empty interface group to a node type.
+
+        Parameters
+        ----------
+        node_type_name : str
+            Name of a node type.
+        interface_group_name : str
+            Name of a newly created interface group.
+        direction : Direction
+            Direction of the interface group, by default Direction.INOUT.
+        interface_type : Optional[str]
+            Type of an interface group, by default None
+        """
+        node = self._get_node_type(node_type_name)
+        node.setdefault("interfaceGroups", [])
+
+        interface_group = {
+            "name": interface_group_name,
+            "direction": direction.value,
+            "interfaces": [],
+        }
+        set_if_not_none(interface_group, "type", interface_type)
+
+        node["interfaceGroups"].append(interface_group)
+
+    def _get_node_type(self, node_type_name: str) -> Dict[str, Any]:
+        """
+        Get a node type from the specification.
+
+        Parameters
+        ----------
+        node_type_name : str
+            Name of the requested node type.
+
+        Returns
+        -------
+        Dict[str, Any]
+            Node type definition.
+
+        Raises
+        ------
+        ValueError
+            Raised if a node type does not exist.
+        """
+        if node_type_name not in self._nodes:
+            raise ValueError(
+                f"Node type `{node_type_name} is not associated with any node."
+            )
+        return self._nodes[node_type_name]
+
+    def add_interface_to_group_interface(
+        self,
+        node_type_name: str,
+        interface_group_name: str,
+        actual_interface_name: str,
+        index_or_indices: Union[int, Tuple[int]],
+        direction: Direction = Direction.INOUT,
+        max_connection_count: Optional[int] = None,
+        side: Optional[Side] = None,
+    ):
+        """
+        Add an interface or a range of interfaces to an existing
+        interface group.
+
+        Parameters
+        ----------
+        node_type_name : str
+            Name of the node type.
+        interface_group_name : str
+            Name of the interface group.
+        actual_interface_name : str
+            Name of the actual interface to be split within groups.
+        index_or_indices : Union[int, Tuple[int]]
+            Either a single index of a new interface or [lower, upper)
+            range of interface to be added to the group interface.
+        direction : Direction, optional
+            Direction of the interface. By default, Direction.INOUT.
+        max_connection_count : Optional[int], optional
+            Maximal number of connection of the interface or the range
+            of interface. By default, None.
+        side : Optional[Side], optional
+            Side, where the interface or the group of interface should
+            be located. By default, None.
+
+        Raises
+        ------
+        TypeError
+            Raised if:
+            - an unsupported type of `index_or_indices` was provided,
+            - a provided range of indices has size different than two.
+        ValueError
+            Raised if:
+            - there is no interface group present in the specification builder,
+            - a group with `interface_group_name` does not exist.
+
+        """
+        if isinstance(index_or_indices, int):
+            name = f"{actual_interface_name}[{index_or_indices}]"
+            array = None
+        elif isinstance(index_or_indices, Tuple) or isinstance(
+            index_or_indices, List
+        ):
+            if len(index_or_indices) != 2:
+                raise TypeError(
+                    "Range has to have exactly two elements: [min, max)."
+                    f"{len(index_or_indices)} were provided."
+                )
+            name = actual_interface_name
+            array = list(index_or_indices)
+        else:
+            raise TypeError(
+                "Unsupported type for interface index: "
+                f"`{type(index_or_indices)}`."
+                "Supported types: int, Tuple[int, int]."
+            )
+        interface = {
+            "name": name,
+            "direction": direction.value,
+        }
+        set_if_not_none(interface, "array", array)
+        set_if_not_none(interface, "maxConnectionCount", max_connection_count)
+        set_if_not_none(interface, "side", side)
+
+        node = self._get_node_type(node_type_name)
+        if "interfaceGroups" not in node:
+            raise ValueError(
+                "Cannot add an interface or a range of interface as no "
+                "interface group exists."
+            )
+        matching_group = [
+            interface_group
+            for interface_group in node["interfaceGroups"]
+            if interface_group["name"] == interface_group_name
+        ]
+        if len(matching_group) != 1:
+            raise ValueError(
+                "Cannot add an interface or a range of interface to the "
+                f"non-existent interface group `{interface_group_name}`."
+            )
+        matching_group[0]["interfaces"].append(interface)
+
+    def enable_interface_group_by_default(
+        self, node_name: str, interface_group: str, direction: Direction
+    ):
+        """
+        Add an interface group to default interface groups of a node type.
+
+        The default interface group contains a list of
+        interface groups enabled by default. Adding an
+        interface group there effectively enables the
+        interface group from the specification.
+
+        Parameters
+        ----------
+        node_name : str
+            Name of the node type.
+        interface_group : str
+            Name of the interface group.
+        direction : Direction
+            Direction of the interface group.
+
+        Raises
+        ------
+        ValueError
+            Raised if:
+            - the node with the provided `node_name` does
+              not have any interface groups,
+            - more than one interface group matches provided
+              `interface_group` and `direction`,
+            - none of interface groups matches provided
+              `interface_group` and `direction`.
+        """
+        node = self._get_node_type(node_name)
+        if "interfaceGroups" not in node:
+            raise ValueError(
+                f"Node type `{node_name}` does not have any interface groups."
+            )
+
+        interface_groups = [
+            interface
+            for interface in node["interfaceGroups"]
+            if interface["name"] == interface_group
+            and interface["direction"] == direction.value
+        ]
+        if len(interface_groups) != 1:
+            raise ValueError(
+                "Expected exactly one interface group to match name = "
+                f"`{interface_group}` and direction = `{direction.value}` but"
+                f" found {len(interface_groups)} matching interface groups."
+            )
+
+        new_group = {"name": interface_group, "direction": direction.value}
+
+        if "defaultInterfaceGroups" in node:
+            node["defaultInterfaceGroups"].append(new_group)
+        else:
+            node["defaultInterfaceGroups"] = [new_group]
+
     def add_node_type_interface(
         self,
         name: str,
         interfacename: str,
-        interfacetype: Optional[Union[str, List[str]]] = None,
+        interface_type: Optional[Union[str, List[str]]] = None,
         direction: str = "inout",
         dynamic: Union[bool, List[int]] = False,
         side: Optional[str] = None,
-        maxcount: Optional[int] = None,
+        max_count: Optional[int] = None,
         override: Optional[bool] = None,
         array: Optional[List[int]] = None,
     ):
@@ -566,7 +774,7 @@ class SpecificationBuilder(object):
             Name of the node type
         interfacename: str
             Name of the interface
-        interfacetype: Optional[Union[str, List[str]]]
+        interface_type: Optional[Union[str, List[str]]]
             List of matching types for interfaces
         direction: str
             Direction of the connection, by default "inout".
@@ -575,7 +783,7 @@ class SpecificationBuilder(object):
             dynamically adjusted. By default, False.
         side: Optional[str]
             On which side the interface should be placed by default
-        maxcount: Optional[int]
+        max_count: Optional[int]
             The maximum connections to the given interface
         override: Optional[bool]
             Determines whether interface should be overridden
@@ -607,9 +815,9 @@ class SpecificationBuilder(object):
 
         interface = {"name": interfacename, "direction": direction}
 
-        set_if_not_none(interface, "type", interfacetype)
+        set_if_not_none(interface, "type", interface_type)
         set_if_not_none(interface, "side", side)
-        set_if_not_none(interface, "maxConnectionsCount", maxcount)
+        set_if_not_none(interface, "maxConnectionsCount", max_count)
         set_if_not_none(interface, "override", override)
         set_if_not_none(interface, "array", array)
 
@@ -862,14 +1070,60 @@ class SpecificationBuilder(object):
             self.add_node_type_interface(
                 name=nodename,
                 interfacename=interface["name"],
-                interfacetype=iface,
+                interface_type=iface,
                 dynamic=get_optional(interface, "dynamic"),
                 direction=get_optional(interface, "direction"),
                 side=get_optional(interface, "side"),
-                maxcount=get_optional(interface, "maxConnectionsCount"),
+                max_count=get_optional(interface, "maxConnectionsCount"),
                 override=get_optional(interface, "override"),
                 array=get_optional(interface, "array"),
             )
+        for interface_group in node.get("interfaceGroups", []):
+            if "name" not in interface_group:
+                raise SpecificationBuilderException(
+                    "Missing property `name` in the specification of"
+                    "an interface group."
+                )
+            direction = get_optional(interface_group, "direction")
+            self.add_node_interface_group(
+                node_type_name=nodename,
+                interface_group_name=interface_group["name"],
+                direction=Direction(direction)
+                if direction is not None
+                else None,
+                interface_type=get_optional(interface_group, "type"),
+            )
+
+            for interface_or_range in interface_group.get("interfaces", []):
+                indices = None
+                index = None
+                if "array" in interface_or_range:
+                    indices = interface_or_range["array"]
+                else:
+                    pattern = r"\[[0-9]+\]$"
+                    match = re.search(
+                        pattern=pattern, string=interface_group["name"]
+                    )
+                    index = int(match.group()[1:-1])
+
+                interface_direction = get_optional(
+                    interface_or_range, "direction"
+                )
+                if interface_direction is not None:
+                    interface_direction = Direction(interface_direction)
+
+                self.add_interface_to_group_interface(
+                    node_type_name=nodename,
+                    actual_interface_name=interface_or_range["name"],
+                    interface_group_name=interface_group["name"],
+                    index_or_indices=index or indices,
+                    direction=interface_direction,
+                    max_connection_count=get_optional(
+                        interface_or_range, "maxConnectionCount"
+                    ),
+                    side=get_optional(interface_or_range, "side"),
+                )
+
         for property in node.get("properties", []):
             self.add_node_type_property(
                 nodename,
@@ -1009,12 +1263,12 @@ class SpecificationBuilder(object):
             Color of the interface connection line
         """
         if "interfaces" not in self._metadata:
-            self._metadata["interfaces"] = dict()
+            self._metadata["interfaces"] = {}
         if interfacename in self._metadata["interfaces"]:
             raise SpecificationBuilderException(
                 f"Styling for interface {interfacename} already exists."
             )
-        props = dict()
+        props = {}
         set_if_not_none(props, "interfaceColor", interfacecolor)
         set_if_not_none(
             props, "interfaceConnectionPattern", interfaceconnpattern
@@ -1241,6 +1495,9 @@ class SpecificationBuilder(object):
                     if "group" in prop:
                         for group in prop["group"]:
                             sort_dict_list(group, "values")
+
+            for interface_group in node.get("interfaceGroups", []):
+                sort_dict_list(interface_group, "interfaces", sort_by="name")
 
         sorted_tuples = sorted(self._nodes.items())
         sorted_nodes = list(zip(*sorted_tuples))
