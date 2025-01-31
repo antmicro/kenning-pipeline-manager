@@ -606,7 +606,7 @@ def test_adding_subgraph_node(subgraph_specification):
 
 
 def test_disallowing_for_changing_graph_id(sample_specification_path):
-    """Test if an ID of a graph is immutable."""
+    """Test if modifying an ID of a graph is immutable."""
     builder = GraphBuilder(
         sample_specification_path,
         DEFAULT_SPECIFICATION_VERSION,
