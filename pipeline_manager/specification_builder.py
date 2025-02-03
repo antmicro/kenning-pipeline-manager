@@ -252,13 +252,13 @@ class SpecificationBuilder(object):
         Parameters
         ----------
         name: str
-            Name of the node type
+            Name of the node type.
         category: Optional[str]
-            Category of the node
+            Category of the node. Required by the specification format.
         layer: Optional[str]
-            Name of the layer metatype
+            Name of the layer metatype.
         extends: Optional[Union[str, List[str]]]
-            Base classes for the node type
+            Base classes for the node type.
         abstract: Optional[bool]
             Tells if the type is abstract or not.
             Abstract types do not need to be complete, they

@@ -4,12 +4,15 @@
 
 """Module with definition of a dataflow graph's node."""
 
+import copy
 import json
 import uuid
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union, get_type_hints
+
+from typing_extensions import override
 
 from pipeline_manager.specification_builder import SpecificationBuilder
 
@@ -81,6 +84,7 @@ class Vector2(JsonConvertible):
     def __add__(self, another: "Vector2") -> "Vector2":
         return Vector2(self.x + another.x, self.y + another.y)
 
+    @override
     def to_json(self, as_str: bool = True) -> Union[str, Dict]:
         output = {
             "x": self.x,
@@ -97,6 +101,7 @@ class Property(JsonConvertible):
     value: Any
     id: str = field(default_factory=get_uuid)
 
+    @override
     def to_json(self, as_str: bool = True) -> Union[Dict, str]:
         output = {
             "name": self.name,
@@ -124,7 +129,8 @@ class Interface(JsonConvertible):
         if isinstance(self.side, str):
             self.side = Side(self.side)
 
-    def to_json(self, as_str: bool) -> Union[str, Dict]:
+    @override
+    def to_json(self, as_str: bool = True) -> Union[str, Dict]:
         output = {
             "name": self.name,
             "direction": self.direction.name.lower(),
@@ -159,15 +165,17 @@ class Node(JsonConvertible):
     """Representation of a node in a dataflow graph."""
 
     id: str
-    name: str
-    properties: List[Property]
-    interfaces: List[Interface]
+    _node_name: str
     width: float
+    _specification_builder: SpecificationBuilder
+    properties: List[Property] = field(default_factory=list)
+    interfaces: List[Interface] = field(default_factory=list)
     two_column: Optional[bool] = None
     position: Optional[Vector2] = None
     instance_name: Optional[str] = None
     subgraph: Optional[str] = None
-    enabled_interface_groups: List[Interface] = field(default_factory=List)
+    _subgraph: Any = None  # Optional[DataflowGraph]
+    enabled_interface_groups: List[Interface] = field(default_factory=list)
 
     def set_property(self, property_name: str, property_value: Any) -> None:
         """
@@ -196,7 +204,12 @@ class Node(JsonConvertible):
                 return
         raise KeyError(f"Property with name `{property_name}` was not found.")
 
-    def __init__(self, specification_builder: SpecificationBuilder, **kwargs):
+    def __init__(
+        self,
+        specification_builder: SpecificationBuilder,
+        for_subgraph_node: bool = False,
+        **kwargs,
+    ):
         """
         Initialise a node based on the provided specification and
         `kwargs`.
@@ -217,13 +230,13 @@ class Node(JsonConvertible):
         Raises
         ------
         ValueError
-            Raised if the specification does not define any nodes.
-        ValueError
-            Raised if illegal parameter was passed via `kwargs`.
-            Allowed values include all attributes of `Node` class.
+            Raised if:
+            - the specification does not define any nodes,
+            - illegal parameter was passed via `kwargs`.
+              Allowed values include all attributes of `Node` class.
         """
         is_type_correct = False
-
+        self._specification_builder = specification_builder
         nodes_in_specification = specification_builder._get_nodes(
             sort_spec=False
         )
@@ -240,12 +253,16 @@ class Node(JsonConvertible):
                 is_type_correct = True
                 break
 
-        if not is_type_correct:
+        if not is_type_correct and not for_subgraph_node:
             node_name = kwargs["name"]
             raise ValueError(
                 f"Illegal name of the node `{node_name}`, "
                 "which was not defined in the specification. "
             )
+
+        if "name" in kwargs:
+            setattr(self, "_node_name", kwargs["name"])
+            del kwargs["name"]
 
         for key, value in kwargs.items():
             if key not in Node.__annotations__.keys():
@@ -278,6 +295,69 @@ class Node(JsonConvertible):
                     value = interfaces
 
             setattr(self, key, value)
+
+    @staticmethod
+    def init_subgraph_node(
+        specification_builder: SpecificationBuilder,
+        name: str,
+        subgraph: Any,
+    ) -> "Node":
+        """
+        An alternative constructor of Node object.
+
+        Not for external use. Use `GraphBuilder.create_subgraph_node(...)`
+        instead.
+
+        Parameters
+        ----------
+        specification_builder : SpecificationBuilder
+            Specification builder with loaded specification.
+        name : str
+            Name of the node.
+        subgraph : DataflowGraph
+            Dataflow graph that this node should contain.
+
+        Returns
+        -------
+        Node
+            Constructed Node object containing a subgraph.
+
+        Raises
+        ------
+        RuntimeError
+            Raised if `graph_id` of a non-existent graph is provided.
+        """
+        node = Node(
+            for_subgraph_node=True,
+            specification_builder=specification_builder,
+            name=name,
+        )
+        node.id = get_uuid()
+        node._node_name = name
+        node._subgraph = subgraph
+        node.subgraph = subgraph._id
+        # Node interfaces are graph interfaces with `external_name`.
+        node.interfaces = [
+            interface
+            for interface in copy.deepcopy(node._subgraph._get_interfaces())
+            if interface.external_name is not None
+        ]
+
+        # `external_name` has to be unique among interfaces.
+        external_names = [
+            interface.external_name
+            for interface in node.interfaces
+            if interface.external_name is not None
+        ]
+        unique_external_names = set(external_names)
+        if len(external_names) != len(unique_external_names):
+            raise RuntimeError(
+                "External names have to be unique, however, the following list"
+                " of `external_name`s contain repetitions: "
+                f"{', '.join(external_names)}."
+            )
+
+        return node
 
     def get(
         self, type: NodeAttributeType, **kwargs
@@ -335,10 +415,17 @@ class Node(JsonConvertible):
             self.position._maximal_value,
         )
 
+    @override
     def to_json(self, as_str=True) -> Union[str, Dict]:
         output = {}
         for field_name, _ in get_type_hints(self).items():
+            if not hasattr(self, field_name):
+                continue
+
             field_value = getattr(self, field_name)
+
+            if field_name == "_node_name":
+                output["name"] = field_value
 
             # Attributes starting with a name starting with _ (underscore),
             # are not added to JSON file.
@@ -369,6 +456,32 @@ class Node(JsonConvertible):
             output[camel_cased_name] = field_value
 
         return convert_output(output, as_str)
+
+    @property
+    def name(self) -> str:
+        """Getter to retrieve name of the node."""
+        return self._node_name
+
+    @name.setter
+    def name(self, new_name: str):
+        """
+        Setter restricting setting a name of the node
+        to those existing in specification.
+        """
+        updated = False
+        nodes = self._specification_builder._get_nodes(sort_spec=False)
+        for node in nodes:
+            name_from_specification = node.get("name")
+            if new_name == name_from_specification:
+                self._node_name = new_name
+                updated = True
+                break
+
+        if not updated:
+            raise ValueError(
+                f"Cannot set a name of the node to `{new_name}` as that name "
+                "does not appear in the specification."
+            )
 
 
 @dataclass

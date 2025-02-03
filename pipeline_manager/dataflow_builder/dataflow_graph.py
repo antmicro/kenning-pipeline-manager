@@ -8,6 +8,8 @@ from dataclasses import fields
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union
 
+from typing_extensions import override
+
 from pipeline_manager.dataflow_builder.entities import (
     Direction,
     Interface,
@@ -45,6 +47,7 @@ class DataflowGraph(JsonConvertible):
     def __init__(
         self,
         builder_with_spec: SpecificationBuilder,
+        builder_with_dataflow: Any,
         dataflow: Optional[Dict[str, Any]] = None,
     ):
         """
@@ -58,6 +61,8 @@ class DataflowGraph(JsonConvertible):
         ----------
         builder_with_spec : SpecificationBuilder
             Specification builder instance with specification file loaded.
+        builder_with_dataflow : Any
+            Dataflow graph builder creating the graph.
         dataflow : Optional[Dict[str, Any]], optional
             Content of a dataflow builder to load,
             None means an empty dataflow graph, by default None.
@@ -68,34 +73,61 @@ class DataflowGraph(JsonConvertible):
         self._nodes: Dict[str, Node] = {}
         self._connections: Dict[str, InterfaceConnection] = {}
         self._spec_builder = builder_with_spec
+        from pipeline_manager.dataflow_builder.dataflow_builder import (
+            GraphBuilder,
+        )
+
+        self._graph_builder: GraphBuilder = builder_with_dataflow
 
         if dataflow is None:
             return
 
-        for node in dataflow["nodes"]:
+        self.name = None
+        if "name" in dataflow:
+            self.name = dataflow["name"]
+
+        for node in dataflow.setdefault("nodes", []):
             node_arguments = {
                 camel_case_to_snake_case(key): value
                 for key, value in node.items()
             }
-            node_arguments["position"] = Vector2(
-                node_arguments["position"]["x"],
-                node_arguments["position"]["y"],
-            )
 
-            self._nodes[node["id"]] = Node(
+            if "position" in node_arguments:
+                node_arguments["position"] = Vector2(
+                    node_arguments["position"]["x"],
+                    node_arguments["position"]["y"],
+                )
+
+            current_node = Node(
                 specification_builder=self._spec_builder,
+                for_subgraph_node="subgraph" in node,
                 **node_arguments,
             )
 
-        for connection in dataflow["connections"]:
+            self._nodes[node["id"]] = current_node
+
+        for connection in dataflow.setdefault("connections", []):
+            source = self.get_by_id(
+                AttributeType.INTERFACE, connection["from"]
+            )
+            if source is None:
+                raise ValueError(
+                    f"Cannot create connection {connection['id']} because "
+                    f"`from_interface` with id = {connection['from']}"
+                    " is missing."
+                )
+            target = self.get_by_id(AttributeType.INTERFACE, connection["to"])
+            if target is None:
+                raise ValueError(
+                    f"Cannot create connection {connection['id']} because "
+                    f"`to_interface` with id = {connection['to']}"
+                    " is missing."
+                )
+
             self._connections[connection["id"]] = InterfaceConnection(
                 id=connection["id"],
-                from_interface=self.get_by_id(
-                    AttributeType.INTERFACE, connection["from"]
-                ),
-                to_interface=self.get_by_id(
-                    AttributeType.INTERFACE, connection["to"]
-                ),
+                from_interface=source,
+                to_interface=target,
             )
 
     def create_node(self, name: str, **kwargs) -> Node:
@@ -127,6 +159,13 @@ class DataflowGraph(JsonConvertible):
             or the provided name of the node does not exists in the
             specification.
         """
+        if "subgraph" in kwargs:
+            raise RuntimeError(
+                "`DataflowGraph.create_node` method cannot be used to create "
+                "a subgraph node. Use `DataflowGraph.create_subgraph_node` "
+                "instead."
+            )
+
         base_node = None
 
         for _node in self._spec_builder._get_nodes(sort_spec=False):
@@ -137,9 +176,8 @@ class DataflowGraph(JsonConvertible):
                 base_node = _node
 
         if not base_node:
-            node_name = name
             raise ValueError(
-                f"Provided name of the node `{node_name}` "
+                f"Provided name of the node `{name}` "
                 "is missing in the specification."
             )
 
@@ -148,15 +186,15 @@ class DataflowGraph(JsonConvertible):
         # Values for interface initialization are taken from the specification.
         interfaces = []
         if "interfaces" in base_node:
-            sampleinterface = Interface("sample", "inout")
-            interfacefields = [f.name for f in fields(sampleinterface)]
+            sample_interface = Interface("sample", "inout")
+            interface_fields = [f.name for f in fields(sample_interface)]
             for interface in base_node["interfaces"]:
                 _interface = Interface(
                     id=get_uuid(),
                     **{
                         camel_case_to_snake_case(key): value
                         for key, value in interface.items()
-                        if key in interfacefields
+                        if key in interface_fields
                     },
                 )
                 interfaces.append(_interface)
@@ -194,6 +232,34 @@ class DataflowGraph(JsonConvertible):
 
         self._nodes[node_id] = Node(**parameters)
         return self._nodes[node_id]
+
+    def create_subgraph_node(self, name: str, subgraph_id: str) -> Node:
+        """
+        Create a node with a subgraph.
+
+        A graph has to exist inside `GraphBuilder` instance
+        before creating a node containing it as a subgraph.
+
+        Parameters
+        ----------
+        name : str
+            Name of the node.
+        subgraph_id : str
+            ID of the subgraph that contained by the node.
+
+        Returns
+        -------
+        Node
+            Newly created node with a subgraph.
+        """
+        subgraph = self._graph_builder.get_graph_by_id(subgraph_id)
+        node = Node.init_subgraph_node(
+            specification_builder=self._spec_builder,
+            name=name,
+            subgraph=subgraph,
+        )
+        self._nodes[node.id] = node
+        return node
 
     def create_connection(
         self,
@@ -264,17 +330,17 @@ class DataflowGraph(JsonConvertible):
                 "Aborted creation a connection."
             )
         if from_interface.type and to_interface.type:
-            fromtype = (
+            from_type = (
                 from_interface.type
                 if isinstance(from_interface.type, list)
                 else [from_interface.type]
             )
-            totype = (
+            to_type = (
                 to_interface.type
                 if isinstance(to_interface.type, list)
                 else [to_interface.type]
             )
-            common_type = set(fromtype).intersection(totype)
+            common_type = set(from_type).intersection(to_type)
             if len(common_type) == 0:
                 raise ValueError(
                     "Mismatch between `from` interface with type = "
@@ -299,6 +365,7 @@ class DataflowGraph(JsonConvertible):
         self._connections[connection_id] = connection
         return self._connections[connection_id]
 
+    @override
     def to_json(self, as_str: bool = True) -> Union[str, Dict]:
         nodes = [node.to_json(as_str=False) for _, node in self._nodes.items()]
         connections = [
@@ -312,7 +379,6 @@ class DataflowGraph(JsonConvertible):
         self, type: AttributeType, **kwargs
     ) -> Union[List[Node], List[InterfaceConnection], List[Interface]]:
         """
-
         Get items of a given type, which satisfy all the desired criteria.
 
         Items are understood as either nodes or connections or interfaces.
@@ -382,3 +448,13 @@ class DataflowGraph(JsonConvertible):
             return interface[0] if interface else None
         items: Dict = getattr(self, type.value)
         return items.get(id, None)
+
+    @property
+    def id(self) -> str:
+        """Getter to obtain the ID of the graph."""
+        return self._id
+
+    @id.setter
+    def id(self, _: str):
+        """Setter disallowing manual modification of the ID of the graph."""
+        raise RuntimeError("An ID of a graph cannot be changed.")
