@@ -241,7 +241,7 @@ class SpecificationBuilder(object):
     def add_node_type(
         self,
         name: str,
-        category: Optional[str] = None,
+        category: str,
         layer: Optional[str] = None,
         extends: Optional[Union[str, List[str]]] = None,
         abstract: Optional[bool] = False,
@@ -253,7 +253,7 @@ class SpecificationBuilder(object):
         ----------
         name: str
             Name of the node type.
-        category: Optional[str]
+        category: str
             Category of the node. Required by the specification format.
         layer: Optional[str]
             Name of the layer metatype.

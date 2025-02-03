@@ -538,6 +538,7 @@ def test_loading_graph_with_load_graphs_method(graph_created_with_builders):
         specification_path,
         dataflow_path,
     ) = graph_created_with_builders
+
     graph_builder = GraphBuilder(
         specification=specification_path,
         specification_version=DEFAULT_SPECIFICATION_VERSION,

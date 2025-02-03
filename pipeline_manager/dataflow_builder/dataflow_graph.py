@@ -98,6 +98,12 @@ class DataflowGraph(JsonConvertible):
                     node_arguments["position"]["y"],
                 )
 
+            if "position" in node_arguments:
+                node_arguments["position"] = Vector2(
+                    node_arguments["position"]["x"],
+                    node_arguments["position"]["y"],
+                )
+
             current_node = Node(
                 specification_builder=self._spec_builder,
                 for_subgraph_node="subgraph" in node,
