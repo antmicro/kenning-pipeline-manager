@@ -272,10 +272,31 @@ class GraphBuilder:
             "does not match any graph."
         )
 
-    def _load_dataflow_graph_from_file(self, path: Path) -> DataflowGraph:
-        path = path.resolve()
+    def _load_graph_from_dataflow_file(
+        self, path: Union[Path, str], index: int
+    ) -> DataflowGraph:
+        path = Path(path).resolve()
         with open(path, encoding="utf-8") as fd:
-            graph: Dict[str, Any] = json.load(fd)
+            dataflow = json.load(fd)
+            if "graphs" not in dataflow:
+                raise ValueError(
+                    f"The provided file `{str(path)}` does not contain "
+                    "any graphs."
+                )
+
+            graphs = dataflow["graphs"]
+            graph_count = len(graphs)
+            if index < 0:
+                raise ValueError(
+                    "`index` cannot have a negative value. "
+                    f"Currently it has: {index}."
+                )
+            if index >= graph_count:
+                raise ValueError(
+                    f"Attempted to load the {index}. graph but the dataflow "
+                    f"file contains only {graph_count}."
+                )
+
             dataflow_graph = DataflowGraph(
                 dataflow=graph,
                 builder_with_spec=self._spec_builder,
