@@ -129,6 +129,7 @@ class GraphBuilder:
         ValueError
             Raised if specification cannot be loaded or its file is invalid.
         """
+        self.specification_file = specification
         self._spec_builder = SpecificationBuilder(
             spec_version=self.specification_version
         )
@@ -273,37 +274,32 @@ class GraphBuilder:
         )
 
     def _load_graph_from_dataflow_file(
-        self, path: Union[Path, str], index: int
+        self, path: Union[Path, str], identifier: Optional[str]
     ) -> DataflowGraph:
         path = Path(path).resolve()
-        with open(path, encoding="utf-8") as fd:
-            dataflow = json.load(fd)
-            if "graphs" not in dataflow:
-                raise ValueError(
-                    f"The provided file `{str(path)}` does not contain "
-                    "any graphs."
-                )
 
-            graphs = dataflow["graphs"]
-            graph_count = len(graphs)
-            if index < 0:
-                raise ValueError(
-                    "`index` cannot have a negative value. "
-                    f"Currently it has: {index}."
-                )
-            if index >= graph_count:
-                raise ValueError(
-                    f"Attempted to load the {index}. graph but the dataflow "
-                    f"file contains only {graph_count}."
-                )
+        another_builder = GraphBuilder(
+            specification_version=self.specification_version,
+            specification=self.specification_file,
+            workspace_directory=self.workspace_directory,
+        )
+        path = another_builder.load_graphs(dataflow_path=path)
 
-            dataflow_graph = DataflowGraph(
-                dataflow=graph,
-                builder_with_spec=self._spec_builder,
-                builder_with_dataflow=self,
-            )
+        if identifier is None:
+            return another_builder.entry_graph
 
-            return dataflow_graph
+        try:
+            return another_builder.get_graph_by_property("id", identifier)
+        except ValueError:
+            try:
+                return another_builder.get_graph_by_property(
+                    "name", identifier
+                )
+            except ValueError:
+                raise ValueError(
+                    f"The provided `identifier` = `{identifier}` "
+                    "matches neither `id` nor `name` of any graph."
+                )
 
     def get_graph_by_id(self, id: str) -> DataflowGraph:
         """
