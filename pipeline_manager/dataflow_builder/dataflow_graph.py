@@ -82,9 +82,11 @@ class DataflowGraph(JsonConvertible):
         if dataflow is None:
             return
 
-        self.name = None
-        if "name" in dataflow:
-            self.name = dataflow["name"]
+        if "name" not in dataflow:
+            raise ValueError(
+                "A mandatory field `name` of `DataflowGraph` is missing."
+            )
+        self.name = dataflow["name"]
 
         for node in dataflow.setdefault("nodes", []):
             node_arguments = {

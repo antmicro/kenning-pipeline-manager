@@ -154,6 +154,7 @@ class GraphBuilder:
 
     def create_graph(
         self,
+        name: str,
         based_on: Union[Path, str, DataflowGraph, Dict, None] = None,
         identifier: Optional[str] = None,
     ) -> DataflowGraph:
@@ -166,6 +167,8 @@ class GraphBuilder:
 
         Parameters
         ----------
+        name : str
+            Human-readable name of the graph.
         based_on : Union[Path, str, DataflowGraph, Dict, None], optional
             Dataflow graph, on which the new graph should be based on.
             When `Path` or `str`, it should be a path to dataflow file in
@@ -188,6 +191,17 @@ class GraphBuilder:
         DataflowGraph
             Instance a of a dataflow graph, preserved in the GraphBuilder.
         """
+        if based_on is not None:
+            if isinstance(based_on, DataflowGraph):
+                graph_copy = copy.deepcopy(based_on)
+                graph_copy.name = name
+                self.graphs.append(graph_copy)
+            else:
+                self.graphs.append(
+                    self._load_dataflow_graph_from_file(
+                        name=name, path=based_on
+                    )
+                )
         if based_on is None:
             self.graphs.append(DataflowGraph(self._spec_builder, self))
             return self.graphs[-1]
@@ -302,6 +316,21 @@ class GraphBuilder:
                     "matches neither `id` nor `name` of any graph."
                 )
 
+    def _load_dataflow_graph_from_file(
+        self, name: str, path: Path
+    ) -> DataflowGraph:
+        path = path.resolve()
+        with open(path, encoding="utf-8") as fd:
+            graph: Dict[str, Any] = json.load(fd)
+            graph["name"] = name
+            dataflow_graph = DataflowGraph(
+                dataflow=graph,
+                builder_with_spec=self._spec_builder,
+                builder_with_dataflow=self,
+            )
+
+            return dataflow_graph
+
     def get_graph_by_id(self, id: str) -> DataflowGraph:
         """
         Get a graph by its ID.
@@ -338,7 +367,7 @@ class GraphBuilder:
         Get a list of subgraphs.
 
         Get a list of graphs, which are contained in some node,
-        what makes them subgraphs.
+        what makes them sub-graphs.
 
         Returns
         -------
@@ -350,7 +379,7 @@ class GraphBuilder:
             for node in graph._nodes.values():
                 if node.subgraph is None:
                     continue
-                subgraphs.append(self.get_graph_by_id(node.subgraph))
+                subgraphs.append(node._subgraph)
 
         return subgraphs
 
@@ -379,9 +408,7 @@ class GraphBuilder:
         """
         subgraphs = self.get_subgraphs()
         subgraphs_by_graph_name = [
-            graph
-            for graph in subgraphs
-            if graph.name is not None and graph.name == name
+            graph for graph in subgraphs if graph.name == name
         ]
 
         subgraphs_by_node_name = [
@@ -391,12 +418,10 @@ class GraphBuilder:
             if node.subgraph is not None and node.name == name
         ]
 
-        matching_subgraphs = list(
-            {
-                *subgraphs_by_graph_name,
-                *subgraphs_by_node_name,
-            }
-        )
+        matching_subgraphs = [
+            *subgraphs_by_graph_name,
+            *subgraphs_by_node_name,
+        ]
         if len(matching_subgraphs) != 1:
             raise ValueError(
                 "The name should be associated with exactly one graph"
