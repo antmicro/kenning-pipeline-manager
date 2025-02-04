@@ -175,7 +175,6 @@ class Node(JsonConvertible):
     instance_name: Optional[str] = None
     subgraph: Optional[str] = None
     _subgraph: Any = None  # Optional[DataflowGraph]
-    _subgraph: Any = None  # Optional[DataflowGraph]
     enabled_interface_groups: List[Interface] = field(default_factory=list)
 
     def set_property(self, property_name: str, property_value: Any) -> None:

@@ -194,13 +194,10 @@ class GraphBuilder:
         if based_on is not None:
             if isinstance(based_on, DataflowGraph):
                 graph_copy = copy.deepcopy(based_on)
-                graph_copy.name = name
                 self.graphs.append(graph_copy)
             else:
                 self.graphs.append(
-                    self._load_dataflow_graph_from_file(
-                        name=name, path=based_on
-                    )
+                    self._load_dataflow_graph_from_file(path=based_on)
                 )
         if based_on is None:
             self.graphs.append(DataflowGraph(self._spec_builder, self))
@@ -288,6 +285,34 @@ class GraphBuilder:
             "does not match any graph."
         )
 
+    def _load_dataflow_graph_from_file(
+        self, identifier: str, path: Path
+    ) -> DataflowGraph:
+        path = Path(path).resolve()
+
+        another_builder = GraphBuilder(
+            specification_version=self.specification_version,
+            specification=self.specification_file,
+            workspace_directory=self.workspace_directory,
+        )
+        path = another_builder.load_graphs(dataflow_path=path)
+
+        if identifier is None:
+            return another_builder.entry_graph
+
+        try:
+            return another_builder.get_graph_by_property("id", identifier)
+        except ValueError:
+            try:
+                return another_builder.get_graph_by_property(
+                    "name", identifier
+                )
+            except ValueError:
+                raise ValueError(
+                    f"The provided `identifier` = `{identifier}` "
+                    "matches neither `id` nor `name` of any graph."
+                )
+
     def _load_graph_from_dataflow_file(
         self, path: Union[Path, str], identifier: Optional[str]
     ) -> DataflowGraph:
@@ -316,13 +341,10 @@ class GraphBuilder:
                     "matches neither `id` nor `name` of any graph."
                 )
 
-    def _load_dataflow_graph_from_file(
-        self, name: str, path: Path
-    ) -> DataflowGraph:
+    def _load_dataflow_graph_from_file(self, path: Path) -> DataflowGraph:
         path = path.resolve()
         with open(path, encoding="utf-8") as fd:
             graph: Dict[str, Any] = json.load(fd)
-            graph["name"] = name
             dataflow_graph = DataflowGraph(
                 dataflow=graph,
                 builder_with_spec=self._spec_builder,
@@ -379,7 +401,7 @@ class GraphBuilder:
             for node in graph._nodes.values():
                 if node.subgraph is None:
                     continue
-                subgraphs.append(node._subgraph)
+                subgraphs.append(self.get_graph_by_id(node.subgraph))
 
         return subgraphs
 
