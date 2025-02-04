@@ -389,7 +389,7 @@ class GraphBuilder:
         Get a list of subgraphs.
 
         Get a list of graphs, which are contained in some node,
-        what makes them sub-graphs.
+        what makes them subgraphs.
 
         Returns
         -------
@@ -430,7 +430,9 @@ class GraphBuilder:
         """
         subgraphs = self.get_subgraphs()
         subgraphs_by_graph_name = [
-            graph for graph in subgraphs if graph.name == name
+            graph
+            for graph in subgraphs
+            if graph.name is not None and graph.name == name
         ]
 
         subgraphs_by_node_name = [
@@ -440,10 +442,12 @@ class GraphBuilder:
             if node.subgraph is not None and node.name == name
         ]
 
-        matching_subgraphs = [
-            *subgraphs_by_graph_name,
-            *subgraphs_by_node_name,
-        ]
+        matching_subgraphs = list(
+            {
+                *subgraphs_by_graph_name,
+                *subgraphs_by_node_name,
+            }
+        )
         if len(matching_subgraphs) != 1:
             raise ValueError(
                 "The name should be associated with exactly one graph"
