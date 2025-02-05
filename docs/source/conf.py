@@ -7,7 +7,6 @@ Configuration for docs building.
 """
 
 import json
-import sys
 from datetime import datetime
 from pathlib import Path
 
@@ -68,42 +67,40 @@ myst_fence_as_directive = default_myst_fence_as_directive
 
 myst_substitutions = {
     "project": project,
-    "examples": "To see the work of the frontend, check HTML documentation or follow [Building and Running](project-readme.md#building-and-running).",  # noqa: E501
     "api_specification": generate_schema_md(),
 }
 
-if "-M html" in " ".join(sys.argv):
-    exampleentries = [
-        "To see the work of the frontend check one of the below examples:\n"
-    ]  # noqa: E501
-    for graph in sorted(Path("../../examples").glob("*-dataflow.json")):
-        graphname = graph.stem.replace("-dataflow", "")
-        spec = graph.parent / f"{graphname}-specification.json"
-        title = graph.stem.replace("-dataflow", "")
-        with open(graph, "r") as f:
-            try:
-                data = json.load(f)
-                graph_data = data["graphs"][0]
-                if "entryGraph" in data:
-                    entrygraph = data["entryGraph"]
-                    for graph_data in data["graphs"]:
-                        if graph_data["id"] == entrygraph:
-                            break
-                title = graph_data["name"]
-            except KeyError:
-                raise Exception(
-                    f"Pair {graph} {spec} does not have base graph name provided"  # noqa: E501
-                )
-        exampleentries.extend(
-            [
-                f"* {title}",
-                "```{pipeline_manager}",
-                f":spec: {spec}",
-                f":graph: {graph}",
-                "```",
-            ]
-        )
-    myst_substitutions["examples"] = "\n".join(exampleentries)
+exampleentries = [
+    "To see the work of the frontend check one of the below examples:\n"
+]  # noqa: E501
+for graph in sorted(Path("../../examples").glob("*-dataflow.json")):
+    graphname = graph.stem.replace("-dataflow", "")
+    spec = graph.parent / f"{graphname}-specification.json"
+    title = graph.stem.replace("-dataflow", "")
+    with open(graph, "r") as f:
+        try:
+            data = json.load(f)
+            graph_data = data["graphs"][0]
+            if "entryGraph" in data:
+                entrygraph = data["entryGraph"]
+                for graph_data in data["graphs"]:
+                    if graph_data["id"] == entrygraph:
+                        break
+            title = graph_data["name"]
+        except KeyError:
+            raise Exception(
+                f"Pair {graph} {spec} does not have base graph name provided"  # noqa: E501
+            )
+    exampleentries.extend(
+        [
+            f"* {title}",
+            "```{pipeline_manager}",
+            f":spec: {spec}",
+            f":graph: {graph}",
+            "```",
+        ]
+    )
+myst_substitutions["examples"] = "\n".join(exampleentries)
 
 today_fmt = "%Y-%m-%d"
 
@@ -120,7 +117,8 @@ html_static_path = ["_static"]
 html_css_files = ("css/styles.css",)
 
 (html_logo, html_theme_options, html_context) = antmicro_html(
-    gh_slug="antmicro/kenning-pipeline-manager"
+    gh_slug="antmicro/kenning-pipeline-manager",
+    pdf_url=f"{basic_filename}.pdf",
 )
 
 html_title = project
