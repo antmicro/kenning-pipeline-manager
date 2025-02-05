@@ -1,3 +1,7 @@
+# Copyright (c) 2022-2025 Antmicro <www.antmicro.com>
+#
+# SPDX-License-Identifier: Apache-2.0
+
 """Module with tests for dataflow building process."""
 
 from pathlib import Path

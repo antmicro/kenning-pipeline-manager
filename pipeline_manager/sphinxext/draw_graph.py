@@ -1,3 +1,11 @@
+# Copyright (c) 2025 Antmicro <www.antmicro.com>
+#
+# SPDX-License-Identifier: Apache-2.0
+
+"""
+Sphinx extension for drawing graphs using Pipeline Manager.
+"""
+
 from __future__ import annotations
 
 from typing import Optional
@@ -12,21 +20,26 @@ from sphinx.util.typing import ExtensionMetadata
 from sphinx.writers.html5 import HTML5Translator
 from sphinx.writers.latex import LaTeXTranslator
 
-KPM_PATH = "_static/kpm/index.html"
+KPM_PATH = "_static/pipeline-manager.html"
 DEFAULT_ALT_TEXT = "An interactive KPM frame, where you can explore the block design for this section, is available here in the HTML version of this documentation."  # noqa: E501
 
 
 class KPMNode(nodes.container):
+    """
+    Docutils node introducing Pipeline Manager graph to docs.
+    """
+
     def __init__(
         self,
         *,
         depth: int,
         preview: Optional[bool] = None,
         spec: Optional[str] = None,
-        dataflow: Optional[str] = None,
+        graph: Optional[str] = None,
         height: Optional[str] = None,
         alt: Optional[str] = None,
     ) -> None:
+        """Constructor for KPMNode."""
         # we're leveraging the builtin download_reference node
         # to automatically move necessary files from sources
         # into the build directory and have a path to them
@@ -35,9 +48,9 @@ class KPMNode(nodes.container):
             spec_node = download_reference(
                 "", "", reftarget=spec, disabled=True
             )
-        if dataflow:
+        if graph:
             graph_node = download_reference(
-                "", "", reftarget=dataflow, disabled=True
+                "", "", reftarget=graph, disabled=True
             )
 
         super().__init__(
@@ -54,7 +67,7 @@ class KPMNode(nodes.container):
 
     def _node_to_target(self, node: download_reference) -> str:
         if "filename" in node:
-            return "relative://../../_downloads/" + node["filename"]
+            return "relative://../_downloads/" + node["filename"]
         elif "refuri" in node:
             return node["refuri"]
 
@@ -62,6 +75,9 @@ class KPMNode(nodes.container):
 
     @staticmethod
     def visit_html(trans: HTML5Translator, node: KPMNode):
+        """
+        Node renderer method for HTML target.
+        """
         params = {}
         if node.spec_node:
             params["spec"] = node._node_to_target(node.spec_node)
@@ -84,6 +100,9 @@ class KPMNode(nodes.container):
 
     @staticmethod
     def visit_latex(trans: LaTeXTranslator, node: KPMNode):
+        """
+        Node renderer method for LaTeX target.
+        """
         node = node.attributes["self_ref"]
         trans.body.append(
             rf"""
@@ -99,25 +118,72 @@ class KPMNode(nodes.container):
 
 
 class KPMDirective(SphinxDirective):
+    """
+    Sphinx directive for pipeline_manager.
+    """
+
     option_spec = {
         "spec": path,
-        "dataflow": path,
+        "graph": path,
         "preview": bool,
         "height": str,
         "alt": str,
     }
 
     def run(self) -> list[nodes.Node]:
+        """
+        Creates nodes for the directive.
+        """
         return [KPMNode(depth=self.env.docname.count("/"), **self.options)]
 
 
+def build_pipeline_manager(app):
+    """
+    Builds Pipeline Manager frontend on builder's initialization.
+    """
+    from sphinx.errors import ExtensionError
+
+    from pipeline_manager.frontend_builder import build_frontend, build_prepare
+
+    workspace_dir = app.builder.outdir.parent / "pm-workspace"
+    static_dir = app.builder.outdir / "_static"
+
+    status = 0
+
+    if not workspace_dir.exists():
+        status, _ = build_prepare(workspace_directory=workspace_dir)
+
+    if status != 0:
+        raise ExtensionError(
+            f"Failed to prepare Pipeline Manager workspace in {workspace_dir} ({status})"  # noqa: E501
+        )
+
+    static_dir.mkdir(parents=True, exist_ok=True)
+
+    status = build_frontend(
+        build_type="static-html",
+        workspace_directory=workspace_dir,
+        single_html=static_dir / "pipeline-manager.html",
+    )
+
+    if status != 0:
+        raise ExtensionError(
+            f"Failed to build frontend for Pipeline Manager in {static_dir} ({status})"  # noqa: E501
+        )
+
+
 def setup(app: Sphinx) -> ExtensionMetadata:
+    """
+    Method setting up a Pipeline Manager extension.
+    """
     app.add_node(
         KPMNode,
         html=(KPMNode.visit_html, KPMNode.depart_node),
         latex=(KPMNode.visit_latex, KPMNode.depart_node),
     )
-    app.add_directive("kpm_iframe", KPMDirective)
+    app.add_directive("pipeline_manager", KPMDirective)
+
+    app.connect("builder-inited", build_pipeline_manager)
 
     return {
         "version": "0.1",
