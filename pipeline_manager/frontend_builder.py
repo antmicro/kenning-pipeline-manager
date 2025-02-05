@@ -83,6 +83,115 @@ def build_singlehtml(
         outputfile.write(soup)
 
 
+def get_project_paths() -> Tuple[str, str, str]:
+    """
+    Returns project-specific paths.
+
+    It can point either to Pipeline Manager module, or
+    to current directory, if it is a Pipeline Manager
+    repository, based on directory layout.
+
+    Returns
+    -------
+    str
+        Path to Pipeline Manager project in the system
+    str
+        Path to frontend for Pipeline Manager
+    str
+        Path to resources for Pipeline Manager
+    """
+    project_path = Path(__file__).parent.parent.absolute()
+    frontend_path = project_path / "pipeline_manager/frontend"
+    resources_path = project_path / "pipeline_manager/resources"
+
+    # change project path to current working directory if project is
+    # installed in other location, but we are in the repo directory
+    if (Path.cwd() / "pipeline_manager/frontend").is_dir() and Path(
+        pipeline_manager.__file__
+    ).samefile(Path.cwd() / "pipeline_manager/__init__.py"):  # noqa E501
+        project_path = Path.cwd().absolute()
+        frontend_path = project_path / "pipeline_manager/frontend"
+        resources_path = project_path / "pipeline_manager/resources"
+
+    return project_path, frontend_path, resources_path
+
+
+def copy_frontend_to_workspace(
+    workspace_directory: Path, dont_update: bool = False
+) -> bool:
+    """
+    Copies frontend and resources files to the workspace directory.
+
+    If workspace_directory does not exist, it is created.
+
+    Method returns boolean telling whether any changes were made in
+    the source files compared to workspace directory (True) or not
+    (False).
+
+    Parameters
+    ----------
+    workspace_directory: Path
+        Path to the workspace directory
+    dont_update: bool
+        Tells not to update files in the workspace directory if they differ
+        from module's frontend files
+
+    Returns
+    -------
+    bool
+        True if any file was copied (new or changed), False if workspace
+        directory is already up to date.
+    """
+    project_path, frontend_path, resources_path = get_project_paths()
+
+    workspace_directory.mkdir(parents=True, exist_ok=True)
+
+    if (len_work := len(list(workspace_directory.glob("*")))) == 0:
+        shutil.copytree(
+            frontend_path,
+            workspace_directory / "frontend",
+            dirs_exist_ok=True,
+        )
+        shutil.copytree(
+            resources_path,
+            workspace_directory / "resources",
+            dirs_exist_ok=True,
+        )
+        return True
+    elif len_work > 0 and not dont_update:
+
+        def _check_subdir(diff: filecmp.dircmp, current_path: Path):
+            changed = False
+            # if those files aren't ignored,
+            # the sync will always trigger since
+            # the time signature of the file changes
+            ignored_files = [
+                ".env.local",
+                ".env.static.local",
+                "node_modules",
+            ]
+            changed_sources = list(
+                filter(lambda x: x not in ignored_files, diff.diff_files)
+            )
+            for i in changed_sources:
+                src = frontend_path / current_path / i
+                dst = workspace_directory / "frontend" / current_path / i
+                shutil.copy(src, dst)
+                changed |= True
+            if diff.subdirs is not {}:
+                for name, subdir in diff.subdirs.items():
+                    if name not in ignored_files:
+                        changed |= _check_subdir(subdir, current_path / name)
+            return changed
+
+        root_diff = filecmp.dircmp(
+            workspace_directory / "frontend", frontend_path
+        )
+        return _check_subdir(root_diff, Path(""))
+    else:
+        return False
+
+
 def build_prepare(
     workspace_directory: Optional[Path] = None,
     skip_install_deps: bool = False,
@@ -112,22 +221,19 @@ def build_prepare(
     Path
         path to the workspace directory
     """
-    project_path = Path(__file__).parent.parent.absolute()
-    frontend_path = project_path / "pipeline_manager/frontend"
-    resources_path = project_path / "pipeline_manager/resources"
+    project_path, frontend_path, _ = get_project_paths()
 
     # change project path to current working directory if project is
     # installed in other location, but we are in the repo directory
-    if (Path.cwd() / "pipeline_manager/frontend").is_dir() and Path(
-        pipeline_manager.__file__
-    ).samefile(Path.cwd() / "pipeline_manager/__init__.py"):  # noqa E501
-        project_path = Path.cwd().absolute()
-        frontend_path = project_path / "pipeline_manager/frontend"
-        resources_path = project_path / "pipeline_manager/resources"
-
-    # check if building is happening in repo, if not ask the user to provide
-    # the necessary directory paths
-    elif not workspace_directory:
+    if not (
+        (
+            (Path.cwd() / "pipeline_manager/frontend").is_dir()
+            and Path(pipeline_manager.__file__).samefile(
+                Path.cwd() / "pipeline_manager/__init__.py"
+            )
+        )
+        or workspace_directory
+    ):  # noqa E501
         logging.error(
             "The build script requires providing workspace path for storing "
             "frontend sources for building purposes"
@@ -136,47 +242,10 @@ def build_prepare(
         return errno.EINVAL, workspace_directory
 
     if workspace_directory:
-        workspace_directory.mkdir(parents=True, exist_ok=True)
-
-        if (len_work := len(list(workspace_directory.glob("*")))) == 0:
-            shutil.copytree(
-                frontend_path,
-                workspace_directory / "frontend",
-                dirs_exist_ok=True,
-            )
-            shutil.copytree(
-                resources_path,
-                workspace_directory / "resources",
-                dirs_exist_ok=True,
-            )
-        elif len_work > 0 and not skip_frontend_copying:
-
-            def _check_subdir(diff: filecmp.dircmp, current_path: Path):
-                # if those files aren't ignored,
-                # the sync will always trigger since
-                # the time signature of the file changes
-                ignored_files = [
-                    ".env.local",
-                    ".env.static.local",
-                    "node_modules",
-                ]
-                changed_sources = list(
-                    filter(lambda x: x not in ignored_files, diff.diff_files)
-                )
-                for i in changed_sources:
-                    src = frontend_path / current_path / i
-                    dst = workspace_directory / "frontend" / current_path / i
-                    shutil.copy(src, dst)
-                if diff.subdirs is not {}:
-                    for name, subdir in diff.subdirs.items():
-                        if name not in ignored_files:
-                            _check_subdir(subdir, current_path / name)
-
-            root_diff = filecmp.dircmp(
-                workspace_directory / "frontend", frontend_path
-            )
-            _check_subdir(root_diff, Path(""))
-
+        copy_frontend_to_workspace(
+            workspace_directory=workspace_directory,
+            dont_update=skip_frontend_copying,
+        )
     else:
         workspace_directory = project_path / "pipeline_manager"
     frontend_path = workspace_directory / "frontend"
