@@ -143,33 +143,32 @@ def build_pipeline_manager(app):
     """
     from sphinx.errors import ExtensionError
 
-    from pipeline_manager.frontend_builder import build_frontend, build_prepare
+    from pipeline_manager.frontend_builder import (
+        build_frontend,
+        copy_frontend_to_workspace,
+    )
 
     workspace_dir = app.builder.outdir.parent / "pm-workspace"
     static_dir = app.builder.outdir / "_static"
 
-    status = 0
-
-    if not workspace_dir.exists():
-        status, _ = build_prepare(workspace_directory=workspace_dir)
-
-    if status != 0:
-        raise ExtensionError(
-            f"Failed to prepare Pipeline Manager workspace in {workspace_dir} ({status})"  # noqa: E501
-        )
-
     static_dir.mkdir(parents=True, exist_ok=True)
 
-    status = build_frontend(
-        build_type="static-html",
-        workspace_directory=workspace_dir,
-        single_html=static_dir / "pipeline-manager.html",
-    )
-
-    if status != 0:
-        raise ExtensionError(
-            f"Failed to build frontend for Pipeline Manager in {static_dir} ({status})"  # noqa: E501
+    frontend_changed = True
+    if workspace_dir.exists():
+        frontend_changed = copy_frontend_to_workspace(
+            workspace_directory=workspace_dir,
         )
+
+    if frontend_changed:
+        status = build_frontend(
+            build_type="static-html",
+            workspace_directory=workspace_dir,
+            single_html=static_dir / "pipeline-manager.html",
+        )
+        if status != 0:
+            raise ExtensionError(
+                f"Failed to build frontend for Pipeline Manager in {static_dir} ({status})"  # noqa: E501
+            )
 
 
 def setup(app: Sphinx) -> ExtensionMetadata:
