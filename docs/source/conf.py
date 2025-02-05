@@ -76,7 +76,7 @@ if "-M html" in " ".join(sys.argv):
     exampleentries = [
         "To see the work of the frontend check one of the below examples:\n"
     ]  # noqa: E501
-    for graph in Path("../../examples").glob("*-dataflow.json"):
+    for graph in sorted(Path("../../examples").glob("*-dataflow.json")):
         graphname = graph.stem.replace("-dataflow", "")
         spec = graph.parent / f"{graphname}-specification.json"
         title = graph.stem.replace("-dataflow", "")
