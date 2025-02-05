@@ -471,7 +471,7 @@ def build_frontend(
             return filename
 
         # Retrieving all urls of icons
-        if "urls" in spec["metadata"]:
+        if "metadata" in spec and "urls" in spec["metadata"]:
             for url in spec["metadata"]["urls"].values():
                 filename = url["icon"]
                 url["icon"] = store_url_asset(filename)
