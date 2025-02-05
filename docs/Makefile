@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2023 Antmicro <www.antmicro.com>
+# Copyright (c) 2022-2025 Antmicro <www.antmicro.com>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -13,13 +13,3 @@ PROJ_DIR      = $(realpath $(DOCS_DIR)/..)
 
 %:
 	env BUILDDIR=$(BUILDDIR) $(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
-
-# Catch-all target: route all unknown targets to Sphinx using the "make mode" option.
-# $(O) is meant as a shortcut for $(SPHINXOPTS).
-html: $(BUILDDIR)/html/static-demo
-	env BUILDDIR=$(BUILDDIR) $(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
-
-$(BUILDDIR)/html/static-demo:
-	echo "Building static page for demo..."
-	cd $(PROJ_DIR); $(DOCS_DIR)/build-examples $(PROJ_DIR)/examples $(BUILDDIR)/html/static-demo
-	echo "Building static page for demo... DONE"

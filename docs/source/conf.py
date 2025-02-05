@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2024 Antmicro <www.antmicro.com>
+# Copyright (c) 2022-2025 Antmicro <www.antmicro.com>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -7,8 +7,7 @@ Configuration for docs building.
 """
 
 import json
-import os
-import urllib.parse
+import sys
 from datetime import datetime
 from pathlib import Path
 
@@ -41,7 +40,6 @@ def figure_wrapper(directive, node, caption):
 
 mermaid.figure_wrapper = figure_wrapper
 
-
 # -- General configuration ----------------------------------------------------
 
 # General information about the project.
@@ -59,7 +57,12 @@ myst_heading_anchors = 6
 
 
 # If you need to add extensions just add to those lists
-extensions = list(set(default_extensions + ["sphinx.ext.napoleon"]))
+extensions = list(
+    set(
+        default_extensions
+        + ["sphinx.ext.napoleon", "pipeline_manager.sphinxext.draw_graph"]
+    )
+)  # noqa: E501
 myst_enable_extensions = default_myst_enable_extensions
 myst_fence_as_directive = default_myst_fence_as_directive
 
@@ -69,41 +72,36 @@ myst_substitutions = {
     "api_specification": generate_schema_md(),
 }
 
-html_build_dir = Path(os.environ["BUILDDIR"]) / "html"
-
-if html_build_dir.is_dir():
+if "-M html" in " ".join(sys.argv):
     exampleentries = [
         "To see the work of the frontend check one of the below examples:\n"
     ]  # noqa: E501
-    static_demo_dir = html_build_dir / "static-demo"
-    for example in (static_demo_dir / "graphs").glob("*-dataflow.json"):
-        relexample = example.relative_to(static_demo_dir)
-        graphname = example.stem.replace("-dataflow", "")
-        spec = example.parent / f"{graphname}-specification.json"
-        relspec = spec.relative_to(static_demo_dir)
-        relgraph = example.relative_to(static_demo_dir)
-        title = relexample.stem.replace("-dataflow", "")
-        with open(example, "r") as f:
+    for graph in Path("../../examples").glob("*-dataflow.json"):
+        graphname = graph.stem.replace("-dataflow", "")
+        spec = graph.parent / f"{graphname}-specification.json"
+        title = graph.stem.replace("-dataflow", "")
+        with open(graph, "r") as f:
             try:
                 data = json.load(f)
-                graph = data["graphs"][0]
+                graph_data = data["graphs"][0]
                 if "entryGraph" in data:
                     entrygraph = data["entryGraph"]
-                    for graph in data["graphs"]:
-                        if graph["id"] == entrygraph:
+                    for graph_data in data["graphs"]:
+                        if graph_data["id"] == entrygraph:
                             break
-                title = graph["name"]
+                title = graph_data["name"]
             except KeyError:
                 raise Exception(
-                    f"Pair {relgraph} {relspec} does not have base graph name provided"  # noqa: E501
+                    f"Pair {graph} {spec} does not have base graph name provided"  # noqa: E501
                 )
-        params = {
-            "spec": f"relative://{relspec}",
-            "graph": f"relative://{relexample}",
-        }
-        encoded_pm_params = urllib.parse.urlencode(params)
-        exampleentries.append(
-            f"* [{title}](demo:static-demo/index.html?{encoded_pm_params}) ([Graph](resource:static-demo/{relexample}), [Spec](resource:static-demo/{relspec}))"  # noqa: E501
+        exampleentries.extend(
+            [
+                f"* {title}",
+                "```{pipeline_manager}",
+                f":spec: {spec}",
+                f":graph: {graph}",
+                "```",
+            ]
         )
     myst_substitutions["examples"] = "\n".join(exampleentries)
 
