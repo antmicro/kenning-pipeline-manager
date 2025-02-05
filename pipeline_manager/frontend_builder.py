@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2024 Antmicro <www.antmicro.com>
+# Copyright (c) 2022-2025 Antmicro <www.antmicro.com>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -358,7 +358,7 @@ def build_frontend(
         return errno.EINVAL
 
     single_html_spec = None
-    if single_html:
+    if single_html and specification:
         # Preprocessing url assets so that they are accessible offline
         with open(specification, "r") as specfile:
             spec = json.load(specfile)
@@ -493,6 +493,7 @@ def build_frontend(
 
     if single_html:
         build_singlehtml(frontend_dist_path, single_html, used_icons)
-        os.remove(single_html_spec)
+        if single_html_spec and single_html_spec.exists():
+            os.remove(single_html_spec)
 
     return 0
