@@ -8,6 +8,8 @@ Sphinx extension for drawing graphs using Pipeline Manager.
 
 from __future__ import annotations
 
+import os
+from pathlib import Path
 from typing import Optional
 from urllib.parse import urlencode
 
@@ -15,10 +17,10 @@ from docutils import nodes
 from docutils.parsers.rst.directives import path
 from sphinx.addnodes import download_reference
 from sphinx.application import Sphinx
+from sphinx.errors import ExtensionError
 from sphinx.util.docutils import SphinxDirective
 from sphinx.util.typing import ExtensionMetadata
 from sphinx.writers.html5 import HTML5Translator
-from sphinx.writers.latex import LaTeXTranslator
 
 KPM_PATH = "_static/pipeline-manager.html"
 DEFAULT_ALT_TEXT = "An interactive KPM frame, where you can explore the block design for this section, is available here in the HTML version of this documentation."  # noqa: E501
@@ -99,20 +101,6 @@ class KPMNode(nodes.container):
         )
 
     @staticmethod
-    def visit_latex(trans: LaTeXTranslator, node: KPMNode):
-        """
-        Node renderer method for LaTeX target.
-        """
-        node = node.attributes["self_ref"]
-        trans.body.append(
-            rf"""
-\begin{{sphinxadmonition}}{{warning}}{{Note:}}
-\sphinxAtStartPar
-{node.alt}
-\end{{sphinxadmonition}}"""
-        )
-
-    @staticmethod
     def depart_node(*_):
         pass
 
@@ -134,15 +122,78 @@ class KPMDirective(SphinxDirective):
         """
         Creates nodes for the directive.
         """
-        return [KPMNode(depth=self.env.docname.count("/"), **self.options)]
+        if self.env.app.builder.name == "html":
+            return [KPMNode(depth=self.env.docname.count("/"), **self.options)]
+
+        try:
+            from html2image import Html2Image
+        except ImportError:
+            raise ExtensionError(
+                "html2image module is missing for converting HTML graphs to images, please install it."  # noqa: E501
+            )
+        from tempfile import NamedTemporaryFile
+
+        from pipeline_manager.frontend_builder import build_frontend
+
+        workspace_dir = self.env.app.builder.outdir.parent / "pm-workspace"
+        pm_graphs_dir = self.env.app.builder.outdir / "_static/pm-graphs"
+
+        pm_graphs_dir.mkdir(parents=True, exist_ok=True)
+
+        curr_file_path = Path(self.env.doc2path(self.env.docname)).resolve()
+        out_html = (workspace_dir / "frontend/dist/index.html").resolve()
+        spec_path = (
+            curr_file_path.parent / self.options["spec"]
+            if "spec" in self.options
+            else None
+        )
+        graph_path = (
+            curr_file_path.parent / self.options["graph"]
+            if "graph" in self.options
+            else None
+        )
+        status = build_frontend(
+            build_type="static-html",
+            specification=spec_path,
+            dataflow=graph_path,
+            workspace_directory=workspace_dir,
+            skip_install_deps=True,
+            skip_frontend_copying=True,
+        )
+        if status != 0:
+            raise ExtensionError(
+                f"Failed to build frontend for Pipeline Manager in ({status})"
+            )
+        hti = Html2Image(
+            size=(1920, 1080),
+            custom_flags=[
+                "--virtual-time-budget=10000",
+                "--hide-scrollbars",
+                "--disable-gpu",
+                "--no-sandbox",
+            ],
+            output_path=pm_graphs_dir,
+        )
+        hti.browser.use_new_headless = True
+        with NamedTemporaryFile(
+            prefix="pipeline-manager-",
+            suffix=".png",
+            delete=False,
+            dir=pm_graphs_dir,
+        ) as f:
+            graph_path = Path(f.name).resolve()
+        hti.screenshot(
+            url=f"file://{out_html}?preview=true",
+            save_as=str(graph_path.relative_to(pm_graphs_dir)),
+        )
+        uri = os.path.relpath(graph_path, curr_file_path.parent)
+        return [nodes.image(uri=uri, alt="Graph")]
 
 
 def build_pipeline_manager(app):
     """
     Builds Pipeline Manager frontend on builder's initialization.
     """
-    from sphinx.errors import ExtensionError
-
     from pipeline_manager.frontend_builder import (
         build_frontend,
         copy_frontend_to_workspace,
@@ -178,7 +229,6 @@ def setup(app: Sphinx) -> ExtensionMetadata:
     app.add_node(
         KPMNode,
         html=(KPMNode.visit_html, KPMNode.depart_node),
-        latex=(KPMNode.visit_latex, KPMNode.depart_node),
     )
     app.add_directive("pipeline_manager", KPMDirective)
 
