@@ -54,11 +54,16 @@ jobs:
           with:
             python-version: 3.11
         - name: Install dependencies
-          run: pip install -e ".[docs]"
+          run: |
+            sudo apt-get update
+            sudo apt-get install -y texlive-full
+            pip install -e ".[docs,to-image]"
         - name: Build docs and static demo
           run: |
             cd docs
             make html
+            make latexpdf
+            cp build/latex/*.pdf build/html/
             make linkcheck
         - uses: actions/upload-artifact@v4
           with:
