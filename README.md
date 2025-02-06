@@ -5,7 +5,7 @@ Copyright (c) 2022-2025 [Antmicro](https://www.antmicro.com)
 Pipeline Manager is a data-based, application-agnostic web application for creating, visualizing and managing dataflows in various applications.
 It does not assume any properties of the application it is working with, thanks to which fast integration with various formats is possible.
 
-[Pipeline Manager documentation](https://antmicro.github.io/kenning-pipeline-manager/) | [Demo application](https://antmicro.github.io/kenning-pipeline-manager/static-demo/index.html?spec=relative%3A%2F%2Fgraphs%2Fsample-specification.json&amp;graph=relative%3A%2F%2Fgraphs%2Fsample-dataflow.json)
+[Pipeline Manager documentation](https://antmicro.github.io/kenning-pipeline-manager/) | [Demo application](https://antmicro.github.io/kenning-pipeline-manager/_static/pipeline-manager.html?spec=https%3A%2F%2Fraw.githubusercontent.com%2Fantmicro%2Fkenning-pipeline-manager%2Frefs%2Fheads%2Fmain%2Fexamples%2Fsample-specification.json&graph=https%3A%2F%2Fraw.githubusercontent.com%2Fantmicro%2Fkenning-pipeline-manager%2Frefs%2Fheads%2Fmain%2Fexamples%2Fsample-dataflow.json)
 
 It provides functionality for:
 
@@ -75,7 +75,7 @@ What is more, the specification and the dataflow can be provided as URL argument
 For example:
 
 ```bash
-firefox "https://antmicro.github.io/kenning-pipeline-manager/static-demo/index.html?spec=https%3A%2F%2Fraw.githubusercontent.com%2Fantmicro%2Fkenning-pipeline-manager%2Fmain%2Fexamples%2Fsample-specification.json&graph=https%3A%2F%2Fraw.githubusercontent.com%2Fantmicro%2Fkenning-pipeline-manager%2Fmain%2Fexamples%2Fsample-dataflow.json"
+firefox "https://antmicro.github.io/kenning-pipeline-manager/_static/pipeline-manager.html?spec=https%3A%2F%2Fraw.githubusercontent.com%2Fantmicro%2Fkenning-pipeline-manager%2Frefs%2Fheads%2Fmain%2Fexamples%2Fsample-specification.json&graph=https%3A%2F%2Fraw.githubusercontent.com%2Fantmicro%2Fkenning-pipeline-manager%2Frefs%2Fheads%2Fmain%2Fexamples%2Fsample-dataflow.json"
 ```
 
 Will fetch and use specification and dataflow from the GitHub repository for this project.
@@ -125,7 +125,7 @@ After successful build, run:
 firefox ./pipeline-manager-demo/index.html
 ```
 
-You should get a graph view similar to the one in the [documentation's demo](https://antmicro.github.io/kenning-pipeline-manager/static-demo/index.html?spec=relative%3A%2F%2Fgraphs%2Fsample-specification.json&amp;graph=relative%3A%2F%2Fgraphs%2Fsample-dataflow.json).
+You should get a graph view similar to the one in the [documentation's demo](https://antmicro.github.io/kenning-pipeline-manager/_static/pipeline-manager.html?spec=https%3A%2F%2Fraw.githubusercontent.com%2Fantmicro%2Fkenning-pipeline-manager%2Frefs%2Fheads%2Fmain%2Fexamples%2Fsample-specification.json&graph=https%3A%2F%2Fraw.githubusercontent.com%2Fantmicro%2Fkenning-pipeline-manager%2Frefs%2Fheads%2Fmain%2Fexamples%2Fsample-dataflow.json).
 
 ### Web application
 
