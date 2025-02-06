@@ -6,8 +6,8 @@
 
 import copy
 import json
-import string
 import re
+import string
 import uuid
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field

@@ -6,8 +6,9 @@
 
 import subprocess
 import tempfile
+from itertools import zip_longest
 from pathlib import Path
-from typing import Any, Dict, Tuple
+from typing import Any, Dict, List, Tuple
 from unittest.mock import Mock
 
 import pytest
@@ -30,6 +31,7 @@ DEFAULT_SPECIFICATION_VERSION = "20250623.14"
 
 @pytest.fixture
 def builder() -> GraphBuilder:
+    """Provide a graph builder from a sample specification."""
     return GraphBuilder(
         specification="examples/sample-specification.json",
         specification_version=DEFAULT_SPECIFICATION_VERSION,
@@ -39,7 +41,7 @@ def builder() -> GraphBuilder:
 def test_creating_empty_graph(builder):
     """Test if an empty graph has a proper format after conversion to JSON."""
     graph = builder.create_graph()
-    assert type(graph) == DataflowGraph
+    assert isinstance(graph, DataflowGraph)
     assert graph.to_json(as_str=False) == {
         "id": f"{graph._id}",
         "nodes": [],
@@ -490,6 +492,24 @@ def test_raising_error_when_using_non_existent_keyword_argument(
 
 
 @pytest.fixture
+def dynamic_interfaces_specification():
+    """
+    Fixture providing the path to a specification utilizing dynamic
+    interface feature.
+    """
+    return Path("examples/sample-dynamic-interfaces-specification.json")
+
+
+@pytest.fixture
+def dynamic_interfaces_dataflow():
+    """
+    Fixture providing the path to a dataflow utilizing dynamic interface
+    feature.
+    """
+    return Path("examples/sample-dynamic-interfaces-dataflow.json")
+
+
+@pytest.fixture
 def graph_created_with_builders():
     spec = SpecificationBuilder(DEFAULT_SPECIFICATION_VERSION)
     node_name = "test1"
@@ -845,3 +865,90 @@ def test_disabled_validation(sample_specification_path):
 
     dataflow_builder.validate.assert_not_called()
     second_dataflow_builder.validate.assert_not_called()
+
+
+def test_increasing_number_of_dynamic_interfaces():
+    """Test if adding additional dynamic interfaces works as expected."""
+    with tempfile.TemporaryDirectory() as temporary_directory:
+        specification_path = Path(temporary_directory) / "spec.json"
+        dataflow_path = Path(temporary_directory) / "dataflow.json"
+        node_name = "Interconnect"
+        interface_name = "manager"
+
+        spec_builder = SpecificationBuilder(DEFAULT_SPECIFICATION_VERSION)
+        spec_builder.add_node_type(node_name, category="Metanodes")
+        spec_builder.add_node_type_interface(
+            node_name,
+            interface_name,
+            dynamic=True,
+            direction=Direction.INPUT.value,
+        )
+        spec_builder.create_and_validate_spec(dump_spec=specification_path)
+
+        graph_builder = GraphBuilder(
+            specification_path, DEFAULT_SPECIFICATION_VERSION
+        )
+        graph = graph_builder.create_graph()
+        node = graph.create_node(node_name)
+        graph_builder.save(dataflow_path)
+
+        node.increment_dynamic_interface_count(interface_name)
+        assert node.get_number_of_dynamic_interfaces(interface_name) == 2
+
+        node.increment_dynamic_interface_count(interface_name)
+        assert node.get_number_of_dynamic_interfaces(interface_name) == 3
+
+
+def test_decreasing_number_of_interfaces():
+    """Test if decreasing number of interfaces work as expected."""
+    raise NotImplementedError()
+
+
+@pytest.mark.parametrize(
+    "pattern,expected_names",
+    [
+        (r"non_existent_node", []),
+        (r"regular-intf", ["regular-intf"]),
+        (r"regular.+", ["regular-intf"]),
+        (
+            r"test-interface-1.+",
+            ["test-interface-1[0]", "test-interface-1[1]"],
+        ),
+        (
+            r".*\[[0-9]+\]$",
+            [
+                "test-interface-1[0]",
+                "test-interface-1[1]",
+                "test-interface-2[0]",
+                "test-interface-2[1]",
+            ],
+        ),
+    ],
+)
+def test_getting_interfaces_by_regex(
+    pattern: str,
+    expected_names: List[str],
+    dynamic_interfaces_specification,
+    dynamic_interfaces_dataflow,
+):
+    """Test if getting interfaces of a node by regex works as expected."""
+    graph_builder = GraphBuilder(
+        specification=dynamic_interfaces_specification,
+        specification_version=DEFAULT_SPECIFICATION_VERSION,
+    )
+    graph_builder.load_graphs(dynamic_interfaces_dataflow)
+    [graph] = graph_builder.graphs
+
+    node_with_dynamic_interfaces = graph.get_by_id(
+        AttributeType.NODE, "54353727-05f6-431d-bcde-8e8f5861440d"
+    )
+    interfaces = node_with_dynamic_interfaces.get_interfaces_by_regex(pattern)
+    interface_names = [interface.name for interface in interfaces]
+
+    for expected_name, actual_name in zip_longest(
+        sorted(expected_names), sorted(interface_names)
+    ):
+        assert expected_name == actual_name, (
+            f"Expected to find interface named `{expected_name}` but found "
+            f"`{actual_name}` instead."
+        )
