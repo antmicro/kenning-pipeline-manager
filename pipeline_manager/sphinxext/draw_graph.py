@@ -122,7 +122,7 @@ class KPMDirective(SphinxDirective):
         """
         Creates nodes for the directive.
         """
-        if self.env.app.builder.name == "html":
+        if self.env.app.builder.name in ["html", "linkcheck"]:
             return [KPMNode(depth=self.env.docname.count("/"), **self.options)]
 
         try:
