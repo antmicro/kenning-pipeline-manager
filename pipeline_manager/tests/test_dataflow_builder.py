@@ -4,7 +4,6 @@
 
 """Module with tests for dataflow building process."""
 
-import tempfile
 import subprocess
 import tempfile
 from pathlib import Path
@@ -579,6 +578,36 @@ def test_loading_graph_with_create_graph_method(graph_created_with_builders):
         f" but contains {graph_count} graphs."
     )
     graph_builder.validate()
+
+
+def test_dynamic_interfaces():
+    """
+    Test if dynamic interfaces work with GraphBuilder and SpecificationBuilder.
+    """
+    with tempfile.TemporaryDirectory() as temporary_directory:
+        specification_path = Path(temporary_directory) / "spec.json"
+        dataflow_path = Path(temporary_directory) / "dataflow.json"
+        node_name = "Interconnect"
+
+        spec_builder = SpecificationBuilder(DEFAULT_SPECIFICATION_VERSION)
+        spec_builder.add_node_type(node_name, category="Metanodes")
+        spec_builder.add_node_type_interface(
+            node_name, "manager", dynamic=True, direction=Direction.INPUT.value
+        )
+        spec_builder.create_and_validate_spec(dump_spec=specification_path)
+
+        graph_builder = GraphBuilder(
+            specification_path, DEFAULT_SPECIFICATION_VERSION
+        )
+        graph = graph_builder.create_graph()
+        _ = graph.create_node(node_name)
+        graph_builder.save(dataflow_path)
+
+        another_builder = GraphBuilder(
+            specification_path, DEFAULT_SPECIFICATION_VERSION
+        )
+        another_builder.load_graphs(dataflow_path)
+        another_builder.validate()
 
 
 def test_loading_subgraphs(graph_builder_for_subgraphs):

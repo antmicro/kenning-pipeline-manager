@@ -219,6 +219,8 @@ class Interface(JsonConvertible):
             "id": self.id,
         }
 
+        # Notice conversion from snake_case to camelCase.
+        # Optional fields.
         if self.side:
             output["side"] = self.side.name.lower()
 
@@ -280,8 +282,11 @@ class Node(JsonConvertible):
         ------
         KeyError
             Raised if property with the supplied `property_named`
-            was not found.
+            was not found.self.properties
         """
+        if not hasattr(self, "properties"):
+            self.properties = []
+
         for property in self.properties:
             if property.name == property_name:
                 property.value = property_value
@@ -373,19 +378,6 @@ class Node(JsonConvertible):
             setattr(self, "_node_name", kwargs["name"])
             del kwargs["name"]
 
-        # Take initial properties from specification.
-        if node_in_specification:
-            [node] = [
-                node
-                for node in nodes_in_specification
-                if node.get("name") is not None
-                and node["name"] == self._node_name
-            ]
-            if node.get("properties") is not None:
-                self.properties = [
-                    Property(**property) for property in node["properties"]
-                ]
-
         for key, value in kwargs.items():
             if key not in Node.__annotations__.keys():
                 raise KeyError(
@@ -417,20 +409,6 @@ class Node(JsonConvertible):
                     value = interfaces
 
             setattr(self, key, value)
-
-        if not hasattr(self, "id"):
-            self.id = get_uuid()
-
-        if not hasattr(self, "interfaces"):
-            self.interfaces = []
-
-        if not hasattr(self, "properties"):
-            self.properties = []
-
-        required_attrs = ("id", "width", "properties", "interfaces")
-        for attr in required_attrs:
-            if not hasattr(self, attr):
-                raise ValueError(f"Missing `{attr}` of a node.")
 
     @staticmethod
     def init_subgraph_node(
@@ -504,21 +482,32 @@ class Node(JsonConvertible):
         return f"{name} {direction.value} count"
 
     def _init_dynamic_interface(self, interface_definition: Dict[str, Any]):
+        if not hasattr(self, "properties"):
+            self.properties = []
+        if not hasattr(self, "interfaces"):
+            self.interfaces = []
+
         if "name" not in interface_definition:
             raise ValueError("A dynamic interface has to have a name.")
         interface_name = interface_definition["name"]
 
-        node_specification = self.specification_builder._nodes[interface_name]
-        if "dynamic" not in node_specification:
+        [interface_specification] = [
+            interface_spec
+            for interface_spec in self.specification_builder._nodes[self.name][
+                "interfaces"
+            ]
+            if interface_spec["name"] == interface_name
+        ]
+        if "dynamic" not in interface_specification:
             raise ValueError(
                 "A missing property `dynamic` in an interface assumed to be "
                 f"dynamic. Node name: `{interface_name}`."
             )
-        dynamic = node_specification["dynamic"]
+        dynamic = interface_specification["dynamic"]
 
-        if "direction" not in node_specification:
+        if "direction" not in interface_specification:
             raise ValueError("A dynamic interface has to have a direction.")
-        direction = Direction(node_specification["direction"])
+        direction = Direction(interface_specification["direction"])
 
         if isinstance(dynamic, bool):
             min_interfaces = 1

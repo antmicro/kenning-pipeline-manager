@@ -144,6 +144,38 @@ class DataflowGraph(JsonConvertible):
                 to_interface=target,
             )
 
+    def _get_interface_specification(
+        self, node_name: str, interface_name: str
+    ) -> Dict[str, Any]:
+        """
+        Get the first interface specification by matching criteria by its name.
+
+        Parameters
+        ----------
+        node_name : str
+            Name of a node.
+        interface_name : str
+            Name of a requested interface.
+
+        Returns
+        -------
+        Dict[str, Any]
+            Specification of an interface.
+        """
+        node_spec = self._spec_builder._nodes[node_name]
+        if "interfaces" not in node_spec:
+            raise ValueError(
+                f"Interface specification named `{interface_name}` does not "
+                "define any interfaces."
+            )
+
+        for interface_spec in node_spec["interfaces"]:
+            if interface_spec["name"] == interface_name:
+                return interface_spec
+        raise ValueError(
+            f"No interface specification matches name `{interface_name}`."
+        )
+
     def create_node(self, name: str, **kwargs) -> Node:
         """
         Create the node initialized with the supplied arguments.
@@ -208,14 +240,22 @@ class DataflowGraph(JsonConvertible):
         if "interfaces" in base_node:
             interface_fields = [f.name for f in fields(Interface)]
             for interface in base_node["interfaces"]:
+                snake_cased_arguments = {
+                    camel_case_to_snake_case(key): value
+                    for key, value in interface.items()
+                    if key in interface_fields
+                }
+
+                interface_specification = self._get_interface_specification(
+                    node_name=name,
+                    interface_name=snake_cased_arguments["name"],
+                )
+                direction = Direction(interface_specification["direction"])
+                snake_cased_arguments["direction"] = direction
+
                 _interface = Interface(
                     id=get_uuid(),
-                    **{
-                        camel_case_to_snake_case(key): value
-                        for key, value in interface.items()
-                        if key in interface_fields
-                        if key in interface_fields
-                    },
+                    **snake_cased_arguments,
                 )
                 interfaces.append(_interface)
 
@@ -347,13 +387,13 @@ class DataflowGraph(JsonConvertible):
 
         if from_interface.direction == Direction.INPUT:
             raise ValueError(
-                "Direction of the `from` interface cannot be `input`."
+                "Direction of the `from` interface cannot be `input`. "
                 "Aborted creating a connection."
             )
 
         if to_interface.direction == Direction.OUTPUT:
             raise ValueError(
-                "Direction of the `to` interface cannot be `output`."
+                "Direction of the `to` interface cannot be `output`. "
                 "Aborted creation a connection."
             )
         if from_interface.type and to_interface.type:
