@@ -922,11 +922,7 @@ def match_criteria(items: List, **kwargs) -> List[Any]:
         items = [
             item
             for item in items
-            if (
-                getattr(item, search_key, None) == desired_value
-                if not isinstance(item, dict)
-                else item.get(search_key) == desired_value
-            )
+            if getattr(item, search_key) == desired_value
         ]
     return items
 
