@@ -892,6 +892,8 @@ def test_increasing_number_of_dynamic_interfaces():
         node = graph.create_node(node_name)
         graph_builder.save(dataflow_path)
 
+        assert node.get_number_of_dynamic_interfaces(interface_name) == 1
+
         node.increment_dynamic_interface_count(interface_name)
         assert node.get_number_of_dynamic_interfaces(interface_name) == 2
 

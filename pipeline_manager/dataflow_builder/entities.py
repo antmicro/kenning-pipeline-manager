@@ -224,8 +224,6 @@ class Interface(JsonConvertible):
         if self.side:
             output["side"] = self.side.name.lower()
 
-        # Notice conversion from snake_case to camelCase.
-        # Optional fields.
         if self.side_position:
             output["sidePosition"] = self.side_position
 
@@ -282,7 +280,7 @@ class Node(JsonConvertible):
         ------
         KeyError
             Raised if property with the supplied `property_named`
-            was not found.self.properties
+            was not found.
         """
         if not hasattr(self, "properties"):
             self.properties = []
@@ -399,13 +397,17 @@ class Node(JsonConvertible):
             # List of dictionary to list of Interface objects conversion.
             if key == "interfaces" and len(value) > 0:
                 if isinstance(value[0], Dict):
-                    interfaces = []
-                    for interface in value:
-                        snake_cased_arguments = {
-                            camel_case_to_snake_case(key): value
-                            for key, value in interface.items()
-                        }
-                        interfaces.append(Interface(**snake_cased_arguments))
+                    interfaces = [
+                        Interface(
+                            **{
+                                camel_case_to_snake_case(k): v
+                                for k, v in interface.items()
+                            }
+                        )
+                        for interface in value
+                    ]
+                elif isinstance(value[0], Interface):
+                    interfaces = [interface for interface in value]
                     value = interfaces
 
             setattr(self, key, value)
@@ -920,7 +922,11 @@ def match_criteria(items: List, **kwargs) -> List[Any]:
         items = [
             item
             for item in items
-            if getattr(item, search_key) == desired_value
+            if (
+                getattr(item, search_key, None) == desired_value
+                if not isinstance(item, dict)
+                else item.get(search_key) == desired_value
+            )
         ]
     return items
 

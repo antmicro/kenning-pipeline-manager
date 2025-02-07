@@ -10,8 +10,8 @@ from typing import Any, Dict, List, Optional, Union
 
 from typing_extensions import override
 
+from pipeline_manager.dataflow_builder.data_structures import Direction
 from pipeline_manager.dataflow_builder.entities import (
-    Direction,
     Interface,
     InterfaceConnection,
     JsonConvertible,
@@ -218,6 +218,7 @@ class DataflowGraph(JsonConvertible):
                     f"Illegal argument `{arg_name}` when creating node."
                 )
 
+        dynamic_interfaces = []
         base_node = None
 
         for _node in self._spec_builder._get_nodes(sort_spec=False):
@@ -240,6 +241,10 @@ class DataflowGraph(JsonConvertible):
         if "interfaces" in base_node:
             interface_fields = [f.name for f in fields(Interface)]
             for interface in base_node["interfaces"]:
+                if isinstance(interface, Interface):
+                    interfaces.append(interface)
+                    continue
+
                 snake_cased_arguments = {
                     camel_case_to_snake_case(key): value
                     for key, value in interface.items()
@@ -250,8 +255,15 @@ class DataflowGraph(JsonConvertible):
                     node_name=name,
                     interface_name=snake_cased_arguments["name"],
                 )
-                direction = Direction(interface_specification["direction"])
-                snake_cased_arguments["direction"] = direction
+
+                if "dynamic" in interface_specification:
+                    dynamic_interfaces.append(snake_cased_arguments)
+                    continue
+
+                if "direction" not in snake_cased_arguments:
+                    snake_cased_arguments[
+                        "direction"
+                    ] = interface_specification["direction"]
 
                 _interface = Interface(
                     id=get_uuid(),
@@ -292,6 +304,12 @@ class DataflowGraph(JsonConvertible):
             parameters[key] = value
 
         self._nodes[node_id] = Node(**parameters)
+
+        for interface_specification in dynamic_interfaces:
+            self._nodes[node_id]._init_dynamic_interface(
+                interface_specification
+            )
+
         return self._nodes[node_id]
 
     def create_subgraph_node(
