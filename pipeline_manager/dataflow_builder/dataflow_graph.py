@@ -306,8 +306,8 @@ class DataflowGraph(JsonConvertible):
         self._nodes[node_id] = Node(**parameters)
 
         for interface_specification in dynamic_interfaces:
-            self._nodes[node_id]._init_dynamic_interface(
-                interface_specification
+            self._nodes[node_id].create_dynamic_interfaces(
+                **interface_specification
             )
 
         return self._nodes[node_id]

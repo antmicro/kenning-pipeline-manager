@@ -954,3 +954,52 @@ def test_getting_interfaces_by_regex(
             f"Expected to find interface named `{expected_name}` but found "
             f"`{actual_name}` instead."
         )
+
+
+def test_setting_number_of_dynamic_interfaces(dynamic_interface_builders):
+    """
+    Test if setting a number of dynamic interfaces for valid values
+    produces correct results.
+    """
+    (
+        _,
+        graph_builder,
+        interface_name,
+        dynamic_node_name,
+    ) = dynamic_interface_builders
+    graph = graph_builder.create_graph()
+    dynamic_node = graph.create_node(dynamic_node_name)
+    assert dynamic_node.get_number_of_dynamic_interfaces(interface_name) == 1
+
+    dynamic_node.set_number_of_dynamic_interfaces(interface_name, 5)
+    assert dynamic_node.get_number_of_dynamic_interfaces(interface_name) == 5
+    graph_builder.validate()
+
+    dynamic_node.set_number_of_dynamic_interfaces(interface_name, 2)
+    assert dynamic_node.get_number_of_dynamic_interfaces(interface_name) == 2
+    graph_builder.validate()
+
+
+def test_setting_number_of_dynamic_interfaces_to_invalid_value_fails(
+    dynamic_interface_builders
+):
+    """
+    Test if setting a number of dynamic interfaces results in raising an error.
+    """
+    (
+        _,
+        graph_builder,
+        interface_name,
+        dynamic_node_name,
+    ) = dynamic_interface_builders
+    graph = graph_builder.create_graph()
+    dynamic_node = graph.create_node(dynamic_node_name)
+
+    with pytest.raises(ValueError):
+        dynamic_node.set_number_of_dynamic_interfaces(interface_name, -1)
+    with pytest.raises(ValueError):
+        dynamic_node.set_number_of_dynamic_interfaces(interface_name, 0)
+    with pytest.raises(ValueError):
+        dynamic_node.set_number_of_dynamic_interfaces(
+            "non-existent interface", 2
+        )
