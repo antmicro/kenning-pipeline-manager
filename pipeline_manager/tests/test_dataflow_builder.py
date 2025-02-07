@@ -59,7 +59,7 @@ def test_adding_node_present_in_specification(builder):
         two_column=False,
     )
 
-    prop = Property(name="filename", value="input.mp4", type="text")
+    prop = Property(name="filename", value="input.mp4")
     node.properties = [prop]
 
     assert graph.to_json(as_str=False) == {
@@ -901,9 +901,32 @@ def test_increasing_number_of_dynamic_interfaces():
         assert node.get_number_of_dynamic_interfaces(interface_name) == 3
 
 
-def test_decreasing_number_of_interfaces():
-    """Test if decreasing number of interfaces work as expected."""
-    raise NotImplementedError()
+def test_decreasing_number_of_interfaces(dynamic_interface_builders):
+    """Test both decreasing and increasing a number of dynamic interfaces."""
+    (
+        _,
+        graph_builder,
+        interface_name,
+        dynamic_node_name,
+    ) = dynamic_interface_builders
+    graph = graph_builder.create_graph()
+    dynamic_node = graph.create_node(dynamic_node_name)
+
+    assert dynamic_node.get_number_of_dynamic_interfaces(interface_name) == 1
+    for i in range(2, 5):
+        dynamic_node._increment_dynamic_interface_count(interface_name)
+        assert (
+            dynamic_node.get_number_of_dynamic_interfaces(interface_name) == i
+        )
+
+    for i in reversed(range(2, 5)):
+        assert (
+            dynamic_node.get_number_of_dynamic_interfaces(interface_name) == i
+        )
+        dynamic_node._decrement_dynamic_interface_count(interface_name)
+
+    assert dynamic_node.get_number_of_dynamic_interfaces(interface_name) == 1
+    graph_builder.validate()
 
 
 @pytest.mark.parametrize(

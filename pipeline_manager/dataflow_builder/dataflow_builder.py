@@ -411,7 +411,12 @@ class GraphBuilder:
         skip_validation: bool
             Whether the validation of the script should be
             skipped or not.
+        skip_validation : bool
+            Whether the validation of graphs should be omitted.
+            It defaults to False.
         """
+        if not skip_validation:
+            self.validate()
         with open(json_file, "wt", encoding="utf-8") as fd:
             fd.write(self.to_json(as_str=True))
 

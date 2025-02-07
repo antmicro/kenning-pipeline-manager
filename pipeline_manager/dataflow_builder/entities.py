@@ -248,8 +248,8 @@ class Node(JsonConvertible):
 
     id: str
     _node_name: str
-    width: float
     _specification_builder: SpecificationBuilder
+    width: float = 500
     properties: List[Property] = field(default_factory=list)
     interfaces: List[Interface] = field(default_factory=list)
     two_column: Optional[bool] = None
@@ -361,7 +361,7 @@ class Node(JsonConvertible):
         for node in nodes_in_specification:
             if "name" not in node:
                 continue
-            if node["name"] == kwargs["name"]:
+            if node["name"] == node_name:
                 node_in_specification = True
                 break
 
@@ -373,7 +373,7 @@ class Node(JsonConvertible):
             )
 
         if "name" in kwargs:
-            setattr(self, "_node_name", kwargs["name"])
+            setattr(self, "_node_name", node_name)
             del kwargs["name"]
 
         for key, value in kwargs.items():
@@ -396,21 +396,44 @@ class Node(JsonConvertible):
 
             # List of dictionary to list of Interface objects conversion.
             if key == "interfaces" and len(value) > 0:
-                if isinstance(value[0], Dict):
-                    interfaces = [
-                        Interface(
-                            **{
-                                camel_case_to_snake_case(k): v
-                                for k, v in interface.items()
-                            }
+                interfaces = []
+                for interface in value:
+                    if isinstance(interface, Dict):
+                        interfaces.append(
+                            Interface(
+                                **{
+                                    camel_case_to_snake_case(k): v
+                                    for k, v in interface.items()
+                                }
+                            )
                         )
-                        for interface in value
-                    ]
-                elif isinstance(value[0], Interface):
-                    interfaces = [interface for interface in value]
-                    value = interfaces
+                    elif isinstance(interface, Interface):
+                        interfaces.append(interface)
+                    else:
+                        raise TypeError(
+                            (
+                                "All interfaces must be either dicts or"
+                                " Interface instances. Received: "
+                                f"{interface} of type {type(interface)}."
+                            )
+                        )
+                value = interfaces
 
             setattr(self, key, value)
+
+        # Ensure properties always exist.
+        properties = []
+        for node_specification in nodes_in_specification:
+            for property_specification in node_specification.setdefault(
+                "properties", []
+            ):
+                property = Property(**property_specification)
+                properties.append(property)
+
+        if hasattr(self, "properties"):
+            self.properties.extend(properties)
+        else:
+            self.properties = properties
 
     @staticmethod
     def init_subgraph_node(
@@ -454,6 +477,7 @@ class Node(JsonConvertible):
         node._node_name = name
         node._subgraph = subgraph
         node.subgraph = subgraph._id
+
         # Node interfaces are graph interfaces with `external_name`.
         node.interfaces = [
             interface
@@ -488,7 +512,7 @@ class Node(JsonConvertible):
         Create a minimal number of dynamic interfaces.
 
         Create a minimal number of dynamic interfaces, based on
-        the specification of an interface.
+        the specification of an interface and the provided attributes.
 
         Parameters
         ----------
@@ -514,9 +538,9 @@ class Node(JsonConvertible):
 
         [interface_specification] = [
             interface_spec
-            for interface_spec in self.specification_builder._nodes[self.name][
-                "interfaces"
-            ]
+            for interface_spec in self._specification_builder._nodes[
+                self.name
+            ]["interfaces"]
             if interface_spec["name"] == interface_name
         ]
         if "dynamic" not in interface_specification:
@@ -554,6 +578,29 @@ class Node(JsonConvertible):
     def set_number_of_dynamic_interfaces(
         self, interface_name: str, new_count: int
     ):
+        """
+        Set a number of dynamic interfaces to `new_count`.
+
+        Parameters
+        ----------
+        interface_name : str
+            Name of the dynamic interface.
+        new_count : int
+            Number of the dynamic interfaces that should exist in the end.
+
+        Raises
+        ------
+        ValueError
+            Raised if:
+            - new interface count is equal to or lower than 0,
+            - interface name is associated with none of the interfaces,
+            - interface names is associated with more than one interface,
+            - interface is not dynamic,
+            - exceeded a maximum interface count from the specification,
+            - gone below a minimum interface count from the specification.
+        """
+        if new_count <= 0:
+            raise ValueError("Number of interface has to be at least 1.")
         interfaces: List[Interface] = self.get(
             NodeAttributeType.INTERFACE,
             name=f"{interface_name}[0]",
@@ -567,7 +614,7 @@ class Node(JsonConvertible):
             )
         [interface] = interfaces
 
-        node_specification = self.specification_builder._nodes[self.name]
+        node_specification = self._specification_builder._nodes[self.name]
 
         [interface_specification] = [
             interface_spec
@@ -613,10 +660,10 @@ class Node(JsonConvertible):
         repetitions = new_count - old_count
         if repetitions > 0:
             for _ in range(repetitions):
-                self.increment_dynamic_interface_count(interface_name)
+                self._increment_dynamic_interface_count(interface_name)
         else:
             for _ in range(-repetitions):
-                self.decrement_dynamic_interface_count(interface_name)
+                self._decrement_dynamic_interface_count(interface_name)
 
     def get_interfaces_by_regex(self, pattern: str) -> List[Interface]:
         """
@@ -639,7 +686,23 @@ class Node(JsonConvertible):
             if re.search(pattern, interface.name)
         ]
 
-    def increment_dynamic_interface_count(self, interface_name: str):
+    def _increment_dynamic_interface_count(self, interface_name: str):
+        """
+        Add a new dynamic interface.
+
+        This method does not perform bounds checking.
+        Use `set_number_of_dynamic_interfaces` instead.
+
+        Parameters
+        ----------
+        interface_name : str
+            Name of the dynamic interfaces.
+
+        Raises
+        ------
+        ValueError
+            Raised if value of dynamic interfaces is invalid (below 1).
+        """
         max_index = self._find_highest_index_of_dynamic_interface(
             interface_name
         )
@@ -681,7 +744,7 @@ class Node(JsonConvertible):
 
         return max_index
 
-    def decrement_dynamic_interface_count(self, interface_name: str):
+    def _decrement_dynamic_interface_count(self, interface_name: str):
         """
         Remove a single dynamic interface.
 
@@ -725,7 +788,7 @@ class Node(JsonConvertible):
 
     def get_number_of_dynamic_interfaces(self, interface_name: str) -> int:
         """
-        Get a number of dynamic interface with a given name.
+        Get a number of dynamic interfaces with a given name.
 
         Parameters
         ----------
@@ -748,7 +811,7 @@ class Node(JsonConvertible):
         )
         interfaces = [
             interface
-            for interface in self.specification_builder._nodes[self.name][
+            for interface in self._specification_builder._nodes[self.name][
                 "interfaces"
             ]
             if interface["name"] == interface_name
@@ -782,7 +845,7 @@ class Node(JsonConvertible):
         Union[List[Property], List[Interface]]
             List of either Property or Interface instances.
         """
-        items: Dict = getattr(self, type.value)
+        items: List = getattr(self, type.value)
         return match_criteria(items=items, **kwargs)
 
     def move(self, new_position: Vector2, relative: bool = False):
