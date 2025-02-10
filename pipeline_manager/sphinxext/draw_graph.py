@@ -199,6 +199,9 @@ def build_pipeline_manager(app):
         copy_frontend_to_workspace,
     )
 
+    assets_dir = None
+    if app.config.pipeline_manager_assets_directory:
+        assets_dir = Path(app.config.pipeline_manager_assets_directory)
     workspace_dir = app.builder.outdir.parent / "pm-workspace"
     static_dir = app.builder.outdir / "_static"
 
@@ -215,6 +218,7 @@ def build_pipeline_manager(app):
             build_type="static-html",
             workspace_directory=workspace_dir,
             single_html=static_dir / "pipeline-manager.html",
+            assets_directory=assets_dir,
         )
         if status != 0:
             raise ExtensionError(
@@ -226,6 +230,9 @@ def setup(app: Sphinx) -> ExtensionMetadata:
     """
     Method setting up a Pipeline Manager extension.
     """
+    app.add_config_value(
+        name="pipeline_manager_assets_directory", default="", rebuild="env"
+    )
     app.add_node(
         KPMNode,
         html=(KPMNode.visit_html, KPMNode.depart_node),
