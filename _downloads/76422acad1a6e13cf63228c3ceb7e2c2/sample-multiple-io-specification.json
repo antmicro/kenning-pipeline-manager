@@ -1,0 +1,64 @@
+{
+    "version": "20240723.13",
+    "nodes": [
+        {
+            "name": "MultipleIO",
+            "layer": "test",
+            "category": "Test",
+            "properties": [],
+            "interfaces": [
+                {"name": "input 0", "type": "0", "direction": "input"},
+                {"name": "output 0", "type": "0", "direction": "output"},
+                {"name": "input 1", "type": "1", "direction": "input"},
+                {"name": "output 1", "type": "1", "direction": "output"},
+                {"name": "input [2,1]", "type": ["2", "1"], "direction": "input"},
+                {"name": "output [2,1]", "type": ["2", "1"], "direction": "output"},
+                {"name": "input [3,1]", "type": ["3", "1"], "direction": "input"},
+                {"name": "output [3,1]", "type": ["3", "1"], "direction": "output"},
+                {"name": "input [4,3,6]", "type": ["4", "3", "6"], "direction": "input"},
+                {"name": "output [4,3,6]", "type": ["4", "3", "6"], "direction": "output"},
+                {"name": "input [5,4,3]", "type": ["5", "4", "3"], "direction": "input"},
+                {"name": "output [5,4,3]", "type": ["5", "4", "3"], "direction": "output"},
+                {"name": "input [6,3]", "type": ["6", "3"], "direction": "input"},
+                {"name": "output [6,3]", "type": ["6", "3"], "direction": "output"},
+                {"name": "input [7]", "type": ["7"], "direction": "input"},
+                {"name": "output [7]", "type": ["7"], "direction": "output"}
+            ]
+        }
+    ],
+    "metadata": {
+        "twoColumn": true,
+        "interfaces": {
+            "0": {},
+            "1": {
+                "interfaceColor": "#9400D3",
+                "interfaceConnectionColor": "#9400D3"
+            },
+            "2": {
+                "interfaceColor": "#4B0082",
+                "interfaceConnectionColor": "#4B0082"
+            },
+            "3": {
+                "interfaceColor": "#0000FF",
+                "interfaceConnectionColor": "#0000FF"
+            },
+            "4": {
+                "interfaceColor": "#00FF00",
+                "interfaceConnectionColor": "#00FF00"
+            },
+            "5": {
+                "interfaceColor": "#FFFF00",
+                "interfaceConnectionColor": "#FFFF00"
+            },
+            "6": {
+                "interfaceColor": "#FF7F00",
+                "interfaceConnectionColor": "#FF7F00"
+            },
+            "7": {
+                "interfaceColor": "#FF0000",
+                "interfaceConnectionColor": "#FF0000"
+            }
+        },
+        "connectionStyle": "orthogonal"
+    }
+}
