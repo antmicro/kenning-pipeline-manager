@@ -140,6 +140,51 @@ specification_builder.add_node_description(
 )
 ```
 
+### Creating interface groups
+
+All interfaces belonging to a group must exist.
+Members of an interface group may be:
+* interface range(s)
+* single interface(s)
+
+For example, to create an interface range `pins` with indices `0-99`:
+
+```python
+specification_builder.add_node_type_interface(
+    name="Digital camera",
+    interface_name="pins",
+    array=[0, 100],
+    direction=Direction.INOUT.value,
+)
+```
+
+:::{note}
+`Direction` enum may be imported with `pipeline_manager.dataflow_builder.data_structures import Direction`.
+:::
+
+Adding an interface group is a two-step process:
+1. Create an empty interface group.
+
+    ```python
+    specification_builder.add_node_interface_group(
+        node_type_name="Digital camera",
+        interface_group_name=f"lower_half",
+        direction=Direction.INOUT,
+    )
+    ```
+
+2. Add interfaces and/or interface ranges to the newly created interface group.
+
+    ```python
+    specification_builder.add_interface_to_group_interface(
+        node_type_name="Digital camera",
+        interface_group_name=f"lower_half",
+        actual_interface_name="pins",
+        direction=Direction.INOUT,
+        index_or_indices=(0, 50),
+    )
+    ```
+
 ### Adding metadata
 
 Metadata specifies additional editor options, like `connectionStyle` or `movementStep`.
