@@ -339,7 +339,7 @@ class ExternalApplicationManager {
                 await jsonRPC.request(method, changedProperties);
             } catch (error) {
                 NotificationHandler.terminalLog(
-                    'warning', 'Error when notifing about change', error.message,
+                    'warning', 'Error when notifying about change', `${error.message} (method: ${method})`,
                 );
             }
         }

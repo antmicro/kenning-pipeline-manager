@@ -92,6 +92,19 @@ export default class PipelineManagerEditor extends Editor {
         };
         currentGraphState.nodes.forEach(recurrentSubgraphSave);
 
+        stackCopy.forEach((subgraphNode) => {
+            console.log('Current subgraphNode:', subgraphNode);
+
+            if (subgraphNode && subgraphNode.subgraph) {
+                const errors = this.switchToSubgraph(subgraphNode);
+                if (Array.isArray(errors) && errors.length) {
+                    throw new Error(errors);
+                }
+            } else {
+                console.warn('subgraphNode or subgraph is undefined:', subgraphNode);
+            }
+        });
+        /* eslint-enable no-unused-vars */
         if (dataflowState.graphs.length) {
             dataflowState.entryGraph = currentGraphId;
         }
@@ -537,6 +550,11 @@ export default class PipelineManagerEditor extends Editor {
         // disable history logging for the switch - don't push nodes being created here
         suppressHistoryLogging(true);
 
+        if (subgraphNode.subgraph === undefined) {
+            throw Error(
+                `Node "${subgraphNode.name}" does contain a subgraph.`,
+            );
+        }
         this._graph = subgraphNode.subgraph;
         this._switchGraph(subgraphNode.subgraph);
         this.graphName = this._graph.name;
@@ -563,6 +581,8 @@ export default class PipelineManagerEditor extends Editor {
 
     switchToSubgraph(subgraphNode) {
         // Obtaining the current graph from the graph node and pushing it to the stack
+        console.log('Switching to a subgraph.', subgraphNode);
+        console.log('Graph', subgraphNode.graph);
         this.subgraphStack.push(subgraphNode.graph);
         this.switchGraph(subgraphNode);
     }
