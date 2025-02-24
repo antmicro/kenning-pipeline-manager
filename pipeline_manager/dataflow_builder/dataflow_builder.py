@@ -191,14 +191,6 @@ class GraphBuilder:
         DataflowGraph
             Instance a of a dataflow graph, preserved in the GraphBuilder.
         """
-        if based_on is not None:
-            if isinstance(based_on, DataflowGraph):
-                graph_copy = copy.deepcopy(based_on)
-                self.graphs.append(graph_copy)
-            else:
-                self.graphs.append(
-                    self._load_dataflow_graph_from_file(path=based_on)
-                )
         if based_on is None:
             self.graphs.append(DataflowGraph(self._spec_builder, self))
             return self.graphs[-1]
@@ -210,7 +202,6 @@ class GraphBuilder:
                 self._load_graph_from_dataflow_source(based_on, identifier)
             )
 
-        self.graphs.append(DataflowGraph(self._spec_builder, self))
         return self.graphs[-1]
 
     def _load_graph_from_dataflow_source(
