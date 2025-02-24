@@ -68,21 +68,24 @@ export default class PipelineManagerEditor extends Editor {
         super.registerGraph(customGraph);
     }
 
+    /**
+     * Saves the state (nodes, connections, layout) of the current graph and its subgraphs.
+     * @return {Object} State of the current graph and its subgraphs.
+     * @throws {Error} Throws if there are issues switching to a subgraph.
+     */
     save() {
-        // Save all changes done to subgraphs before saving
+        // Save all changes done to subgraphs before saving.
         const currentGraphId = this._graph.id;
         const stackCopy = Array.from(toRaw(this.subgraphStack));
-        stackCopy.forEach(this.backFromSubgraph.bind(this));
 
         const currentGraphState = this.graph.save();
-
         currentGraphState.panning = this._graph.panning;
         currentGraphState.scaling = this._graph.scaling;
 
         const dataflowState = { graphs: [] };
 
-        // subgraphs are stored in state.subgraphs, there is no need to store it
-        // in nodes itself
+        // Subgraphs are stored in state.subgraphs; there is no need to store it
+        // in nodes themselves.
         const recurrentSubgraphSave = (node) => {
             if (node.subgraph !== undefined) {
                 dataflowState.graphs.push(node.graphState);
@@ -93,16 +96,7 @@ export default class PipelineManagerEditor extends Editor {
         currentGraphState.nodes.forEach(recurrentSubgraphSave);
 
         stackCopy.forEach((subgraphNode) => {
-            console.log('Current subgraphNode:', subgraphNode);
-
-            if (subgraphNode && subgraphNode.subgraph) {
-                const errors = this.switchToSubgraph(subgraphNode);
-                if (Array.isArray(errors) && errors.length) {
-                    throw new Error(errors);
-                }
-            } else {
-                console.warn('subgraphNode or subgraph is undefined:', subgraphNode);
-            }
+            this.switchToSubgraph(subgraphNode);
         });
         /* eslint-enable no-unused-vars */
         if (dataflowState.graphs.length) {
@@ -126,7 +120,8 @@ export default class PipelineManagerEditor extends Editor {
 
     /**
      * Cleans up the current graph current graph editor.
-     * @param Determines whether the cleaning process should be stored in history
+     * @param {bool} suppressHistory Determines whether the cleaning process should
+     * be stored in history.
      */
     cleanEditor(suppressHistory = true) {
         const graphInstance = this._graph;
@@ -173,8 +168,8 @@ export default class PipelineManagerEditor extends Editor {
      * Loads the dataflow into the editor.
      *
      * @param state dataflow to load
-     * @param preventCentering determines whether to center the graph after loading
-     * @param loadOnly determines whether to load the graph only without adjusting
+     * @param {bool} preventCentering determines whether to center the graph after loading
+     * @param {bool} loadOnly determines whether to load the graph only without adjusting
      * the graph rendering. Can be used when validating graphs without their browser
      * representation.
      * @returns list of errors that occurred during loading
@@ -253,7 +248,7 @@ export default class PipelineManagerEditor extends Editor {
             !usedGraphs.has(graph.id),
         );
         if (rootGraph === undefined) {
-            return ['No root graph found. Make sure you graph does not have any reccurency'];
+            return ['No root graph found. Make sure you graph does not have any recursion.'];
         }
 
         try {
@@ -579,12 +574,18 @@ export default class PipelineManagerEditor extends Editor {
         });
     }
 
+    /**
+    * Switch to a subgraph by obtaining the current graph from the subgraph node
+    * and pushing the subgraph node to the stack.
+    *
+    * @param {Node} subgraphNode A subgraph node containing a subgraph,
+    * to which a layout should be switched.
+    * */
     switchToSubgraph(subgraphNode) {
-        // Obtaining the current graph from the graph node and pushing it to the stack
-        console.log('Switching to a subgraph.', subgraphNode);
-        console.log('Graph', subgraphNode.graph);
-        this.subgraphStack.push(subgraphNode.graph);
-        this.switchGraph(subgraphNode);
+        if (subgraphNode && subgraphNode.subgraph) {
+            this.subgraphStack.push(subgraphNode.graph);
+            this.switchGraph(subgraphNode);
+        }
     }
 
     /**
