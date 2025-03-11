@@ -935,6 +935,9 @@ export default class EditorManager {
                     this.baklavaView.displayedGraph,
                     this.baklavaView.displayedGraph,
                 );
+
+                this.verifyExposedInterfaceNamesMatchExternalNames(dataflow);
+
                 return errors;
             } catch (err) {
                 return {
@@ -949,6 +952,62 @@ export default class EditorManager {
             // Restore previous state or use value from loaded dataflow
             this.updateMetadata({ notifyWhenChanged }, true);
         }
+    }
+
+    /**
+     * Verify whether exposed interfaces' names match their counterparts' external names.
+     *
+     * @param {object} dataflow Dataflow with external names to verify.
+     * @returns {boolean} True if all exposed interfaces' names match external names.
+     */
+    verifyExposedInterfaceNamesMatchExternalNames(dataflow) {
+        // Collect same-id interfaces to groups.
+        const sameIdInterfaces = new Map();
+        dataflow.graphs.forEach((graph) => {
+            graph.nodes.forEach((node) => {
+                node.interfaces.forEach((intf) => {
+                    if (sameIdInterfaces.has(intf.id)) {
+                        sameIdInterfaces.get(intf.id).push(intf);
+                    } else {
+                        sameIdInterfaces.set(intf.id, [intf]);
+                    }
+                });
+            });
+        });
+
+        // Process groups of two or more interfaces to find mismatches.
+        sameIdInterfaces.forEach((interfaces, sharedId) => {
+            // Single-copy interface is not exposed.
+            if (interfaces.length < 2) {
+                return;
+            }
+
+            // Main interface is the original non-exposed interface with `externalName`.
+            const mainInterface = interfaces.find(
+                (intf) => intf.externalName !== undefined,
+            );
+
+            if (mainInterface === undefined) {
+                throw new Error(
+                    `The interface with id = ${sharedId} seems to ` +
+                    `be exposed but lacks "externalName" property.`,
+                );
+            }
+
+            interfaces.forEach((intf) => {
+                // Skip the main_interface itself and matching interface names.
+                if (intf === mainInterface || mainInterface.externalName === intf.name) {
+                    return;
+                }
+                const errorMessage =
+                    `Mismatch between "externalName" of the original interface ` +
+                    `and "name" of the exposed version of the interface, ` +
+                    `for the interface with id = ${sharedId}\n` +
+                    `Expected: ${mainInterface.externalName}.\n` +
+                    `Got: ${intf.name}.`;
+                throw new Error(errorMessage);
+            });
+        });
     }
 
     /**
