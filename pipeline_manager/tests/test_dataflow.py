@@ -216,7 +216,11 @@ def dataflow_specification_two_incompatible_nodes(
             "name": "EncodeVideo",
             "category": "Filesystem",
             "interfaces": [
-                {"name": "encoding", "type": ["Text"], "direction": "inout"}
+                {
+                    "name": "External Encoding",
+                    "type": ["Text"],
+                    "direction": "inout",
+                }
             ],
         }
     )
@@ -238,7 +242,7 @@ def dataflow_specification_incompatible_node_and_graph_node(
                     "interfaces": [
                         {
                             "id": "40adf4d9-bf08-40ee-82f3-c95b4588dc32",
-                            "name": "encoding",
+                            "name": "External Encoding",
                             "externalName": "External Encoding",
                             "direction": "inout",
                         }
@@ -431,7 +435,7 @@ def dataflow_graph_incompatible_interfaces_connected(
                 {
                     "direction": "inout",
                     "id": "8de940b5-6076-485c-844d-93227281b5e3",
-                    "name": "encoding",
+                    "name": "External Encoding",
                 }
             ],
             "properties": [],
@@ -461,7 +465,7 @@ def dataflow_graph_incompatible_interfaces_connected_graph_node(
                     "id": "231d20d8-811b-46e8-ba9a-6342032f6c85",
                     "interfaces": [
                         {
-                            "name": "encoding",
+                            "name": "External Encoding",
                             "externalName": "External Encoding",
                             "id": "6ba91cca-80d5-4598-a6ab-750ddb6cec83",
                             "direction": "inout",
@@ -514,7 +518,7 @@ def dataflow_two_layer_graph_interfaces_connected_graph_node(
                     "id": "231d20d8-811b-46e8-ba9a-6342032f6c85",
                     "interfaces": [
                         {
-                            "name": "encoding",
+                            "name": "External Encoding",
                             "externalName": "External Encoding",
                             "id": "6ba91cca-80d5-4598-a6ab-750ddb6cec83",
                             "direction": "inout",
@@ -529,7 +533,7 @@ def dataflow_two_layer_graph_interfaces_connected_graph_node(
                     "id": "8e81c0ff-0625-4720-8f6e-322a167ab283",
                     "interfaces": [
                         {
-                            "name": "encoding",
+                            "name": "External Encoding",
                             "id": "51cdbbf8-e78c-4e75-99df-5b841c45d4a3",
                             "direction": "inout",
                         }
@@ -606,7 +610,7 @@ def dataflow_three_layer_graph_interfaces_connected_graph_node(
                     "position": {"x": 500, "y": 600},
                     "interfaces": [
                         {
-                            "name": "encoding",
+                            "name": "External Encoding",
                             "id": "9ae8e27c-7556-4599-8e93-0dd632399eff",
                             "direction": "inout",
                         }

@@ -1003,8 +1003,8 @@ export default class EditorManager {
                     `Mismatch between "externalName" of the original interface ` +
                     `and "name" of the exposed version of the interface, ` +
                     `for the interface with id = ${sharedId}\n` +
-                    `Expected: ${mainInterface.externalName}.\n` +
-                    `Got: ${intf.name}.`;
+                    `Expected: ${mainInterface.externalName}\n` +
+                    `Got: ${intf.name}`;
                 throw new Error(errorMessage);
             });
         });
