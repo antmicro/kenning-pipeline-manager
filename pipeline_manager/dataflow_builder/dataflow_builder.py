@@ -31,7 +31,7 @@ class GraphBuilder:
 
     def __init__(
         self,
-        specification: Path,
+        specification: Union[Path, str, Dict],
         specification_version: str,
         workspace_directory: Optional[Path] = None,
     ) -> None:
@@ -40,8 +40,8 @@ class GraphBuilder:
 
         Parameters
         ----------
-        specification : Path
-            Path to a JSON specification file.
+        specification : Union[Path, str, Dict]
+            Path to a JSON specification file or Dict with its representation
         specification_version: str
             Version of the specification.
         workspace_directory: Optional[Path]
@@ -53,57 +53,62 @@ class GraphBuilder:
         self.graphs: List[DataflowGraph] = []
         self.entry_graph = None
 
-    def load_graphs(self, dataflow_path: Path):
+    def load_graphs(self, dataflow_source: Union[Path, str, Dict]):
         """
         Load all dataflow graphs from a file.
 
         Parameters
         ----------
-        dataflow_path : Path
-            Path to a dataflow graph.
+        dataflow_source : Union[Path, str, Dict]
+            Path to a dataflow graph or dataflow graph dictionary
 
         Raises
         ------
         ValueError
             Raised if a dataflow graph could not be loaded.
         """
-        success, reason = is_proper_input_file(
-            dataflow_path, intended_use="dataflow"
-        )
-        if not success:
-            raise ValueError(f"Invalid `dataflow_path`: {reason}")
-        with open(dataflow_path, encoding="utf-8") as fd:
-            content = json.load(fd)
+        if isinstance(dataflow_source, (Path, str)):
+            dataflow_path = dataflow_source
+            success, reason = is_proper_input_file(
+                dataflow_path, intended_use="dataflow"
+            )
+            if not success:
+                raise ValueError(f"Invalid `dataflow_path`: {reason}")
+            with open(dataflow_path, encoding="utf-8") as fd:
+                content = json.load(fd)
+        else:
+            content = dataflow_source
 
-            for graph in content["graphs"]:
-                dataflow_graph = DataflowGraph(
-                    builder_with_spec=self._spec_builder,
-                    builder_with_dataflow=self,
-                    dataflow=graph,
-                )
-                self.graphs.append(dataflow_graph)
-            if len(self.graphs) < 1:
-                raise ValueError(
-                    f"After loading graphs from the dataflow file "
-                    f"`{dataflow_path.expanduser().resolve()}`, "
-                    "GraphBuilder is empty."
-                )
+        for graph in content["graphs"]:
+            dataflow_graph = DataflowGraph(
+                builder_with_spec=self._spec_builder,
+                builder_with_dataflow=self,
+                dataflow=graph,
+            )
+            self.graphs.append(dataflow_graph)
+        if len(self.graphs) < 1:
+            raise ValueError(
+                f"After loading graphs from the dataflow file "
+                f"`{dataflow_path.expanduser().resolve()}`, "
+                "GraphBuilder is empty."
+            )
 
-            if "entryGraph" in content:
-                entry_graph_id = content["entryGraph"]
-                self.entry_graph = self.get_graph_by_property(
-                    "id", entry_graph_id
-                )
-            else:
-                self.entry_graph = self.graphs[0]
+        if "entryGraph" in content:
+            entry_graph_id = content["entryGraph"]
+            self.entry_graph = self.get_graph_by_property("id", entry_graph_id)
+        else:
+            self.entry_graph = self.graphs[0]
 
-            self.validate()
+        self.validate()
 
     def load_specification(
-        self, specification_path: Path, purge_old_graphs: bool = True
+        self,
+        specification: Union[Path, str, Dict],
+        purge_old_graphs: bool = True,
     ):
         """
-        Load a specification from a file to use in GraphBuilder.
+        Load a specification from given file or dictionary
+        to use in GraphBuilder.
 
         The default behaviour is to remove loaded dataflow graphs when loading
         a new specification. That is due to the fact that a dataflow graph
@@ -112,8 +117,8 @@ class GraphBuilder:
 
         Parameters
         ----------
-        specification_path : Path
-            Path to a specification file.
+        specification : Union[Path, str, Dict]
+            Path to specification file or specification dictionary
         purge_old_graphs : bool, optional
             Determine if dataflow graphs loaded to memory should be purged.
             It makes sense as after changing a specification dataflow graphs
@@ -122,27 +127,33 @@ class GraphBuilder:
         Raises
         ------
         ValueError
-            Raised if specification file cannot be loaded or is invalid.
+            Raised if specification cannot be loaded or its file is invalid.
         """
-        self.specification_file = specification_path
         self._spec_builder = SpecificationBuilder(
             spec_version=self.specification_version
         )
 
-        success, reason = is_proper_input_file(specification_path)
-        if not success:
-            raise ValueError(f"Invalid `specification_path`: {reason}")
-        with open(specification_path, mode="rt", encoding="utf-8") as fd:
-            specification = json.load(fd)
-            self._spec_builder.update_spec_from_other(specification)
+        if isinstance(specification, (Path, str)):
+            self.specification_file = specification
+            self.specification = None
 
-            if purge_old_graphs:
-                self.graphs = []
-                self.entry_graph = None
+            success, reason = is_proper_input_file(self.specification_file)
+            if not success:
+                raise ValueError(f"Invalid `specification_path`: {reason}")
+            with open(self.specification_file, encoding="utf-8") as fd:
+                specification = json.load(fd)
+        else:
+            self.specification_file = None
+            self.specification = specification
+        self._spec_builder.update_spec_from_other(specification)
+
+        if purge_old_graphs:
+            self.graphs = []
+            self.entry_graph = None
 
     def create_graph(
         self,
-        based_on: Union[Path, str, DataflowGraph, None] = None,
+        based_on: Union[Path, str, DataflowGraph, Dict, None] = None,
         identifier: Optional[str] = None,
     ) -> DataflowGraph:
         """
@@ -154,12 +165,13 @@ class GraphBuilder:
 
         Parameters
         ----------
-        based_on : Union[Path, str, DataflowGraph, None], optional
+        based_on : Union[Path, str, DataflowGraph, Dict, None], optional
             Dataflow graph, on which the new graph should be based on.
             When `Path` or `str`, it should be a path to dataflow file in
-            a JSON format. When `DataflowGraph`, it should be a valid
-            representation (as its deep copy will be added).
-            When `None`, the new dataflow graph will not
+            a JSON format. When `Dict`, it should be a dictionary
+            representation of the dataflow. When `DataflowGraph`, it
+            should be a valid representation (as its deep copy will be
+            added). When `None`, the new dataflow graph will not
             be based on anything, by default None.
         identifier : Optional[str]
             Either `id` or `name` of a dataflow graph.
@@ -183,22 +195,26 @@ class GraphBuilder:
             self.graphs.append(graph_copy)
         else:
             self.graphs.append(
-                self._load_graph_from_dataflow_file(based_on, identifier)
+                self._load_graph_from_dataflow_source(based_on, identifier)
             )
 
         return self.graphs[-1]
 
-    def _load_graph_from_dataflow_file(
-        self, path: Union[Path, str], identifier: Optional[str]
+    def _load_graph_from_dataflow_source(
+        self, source: Union[Path, str, Dict], identifier: Optional[str]
     ) -> DataflowGraph:
-        path = Path(path).resolve()
+        if isinstance(source, (str, Path)):
+            source = Path(source).resolve()
 
         another_builder = GraphBuilder(
             specification_version=self.specification_version,
-            specification=self.specification_file,
+            specification=self.specification
+            if self.specification is not None
+            else self.specification_file,
             workspace_directory=self.workspace_directory,
         )
-        path = another_builder.load_graphs(dataflow_path=path)
+
+        another_builder.load_graphs(dataflow_source=source)
 
         if identifier is None:
             return another_builder.entry_graph

@@ -38,7 +38,6 @@ def builder() -> GraphBuilder:
 def test_creating_empty_graph(builder):
     """Test if an empty graph has a proper format after conversion to JSON."""
     graph = builder.create_graph()
-
     assert type(graph) == DataflowGraph
     assert graph.to_json(as_str=False) == {
         "id": f"{graph._id}",
@@ -434,7 +433,7 @@ def test_using_sample_graphs(sample_specification_path, sample_dataflow_path):
         specification=sample_specification_path,
         specification_version=DEFAULT_SPECIFICATION_VERSION,
     )
-    builder.load_graphs(dataflow_path=sample_dataflow_path)
+    builder.load_graphs(dataflow_source=sample_dataflow_path)
 
     builder.validate()
 
@@ -450,7 +449,7 @@ def test_modifying_sample_graph(
         specification=sample_specification_path,
         specification_version=DEFAULT_SPECIFICATION_VERSION,
     )
-    builder.load_graphs(dataflow_path=sample_dataflow_path)
+    builder.load_graphs(dataflow_source=sample_dataflow_path)
     graph = builder.graphs[0]
     builder.validate()
 
@@ -483,7 +482,7 @@ def test_raising_error_when_using_non_existent_keyword_argument(
         specification=sample_specification_path,
         specification_version=DEFAULT_SPECIFICATION_VERSION,
     )
-    builder.load_graphs(dataflow_path=sample_dataflow_path)
+    builder.load_graphs(dataflow_source=sample_dataflow_path)
     graph = builder.graphs[0]
     with pytest.raises(KeyError):
         graph.create_node(name="LoadVideo", non_existent_keyword_arg=123)
