@@ -88,7 +88,6 @@ class Property(JsonConvertible):
     name: str
     value: Any
     type: str
-    description: str
     id: str
 
     def __init__(
@@ -103,7 +102,6 @@ class Property(JsonConvertible):
         dtype: Optional[str] = None,
         group: Optional[Dict[str, Any]] = None,
         id: str = get_uuid(),
-        description: Optional[str] = None,
     ):
         # In a specification, property has `default`,
         # but, in a dataflow, it has either `values` or `value`.
@@ -155,9 +153,6 @@ class Property(JsonConvertible):
 
         if group:
             self.group = group
-
-        if description:
-            self.description = description
 
     @staticmethod
     def get_first_not_none(values: List[Optional[Any]]) -> Any:
@@ -471,7 +466,6 @@ class Node(JsonConvertible):
             for_subgraph_node=True,
             specification_builder=specification_builder,
             name=name,
-            **kwargs,
         )
         node.id = get_uuid()
         node._node_name = name
@@ -507,7 +501,7 @@ class Node(JsonConvertible):
     ) -> str:
         return f"{name} {direction.value} count"
 
-    def create_dynamic_interfaces(self, name: str, **kwargs):
+    def _create_dynamic_interfaces(self, name: str, **kwargs):
         """
         Create a minimal number of dynamic interfaces.
 

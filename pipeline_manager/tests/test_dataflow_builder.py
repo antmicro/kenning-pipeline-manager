@@ -894,11 +894,39 @@ def test_increasing_number_of_dynamic_interfaces():
 
         assert node.get_number_of_dynamic_interfaces(interface_name) == 1
 
-        node.increment_dynamic_interface_count(interface_name)
+        node._increment_dynamic_interface_count(interface_name)
         assert node.get_number_of_dynamic_interfaces(interface_name) == 2
 
-        node.increment_dynamic_interface_count(interface_name)
+        node._increment_dynamic_interface_count(interface_name)
         assert node.get_number_of_dynamic_interfaces(interface_name) == 3
+
+
+@pytest.fixture
+def dynamic_interface_builders():
+    """
+    Fixture providing both a specification and graph builder for dynamic
+    interfaces scenario.
+    """
+    with tempfile.TemporaryDirectory() as temporary_directory:
+        specification_path = Path(temporary_directory) / "spec.json"
+        dynamic_node_name = "Interconnect"
+        interface_name = "manager"
+
+        spec_builder = SpecificationBuilder(DEFAULT_SPECIFICATION_VERSION)
+        spec_builder.add_node_type(dynamic_node_name, category="Metanodes")
+        spec_builder.add_node_type_interface(
+            dynamic_node_name,
+            interface_name,
+            dynamic=True,
+            direction=Direction.INPUT.value,
+        )
+        spec_builder.create_and_validate_spec(dump_spec=specification_path)
+
+        graph_builder = GraphBuilder(
+            specification_path, DEFAULT_SPECIFICATION_VERSION
+        )
+
+        yield spec_builder, graph_builder, interface_name, dynamic_node_name
 
 
 def test_decreasing_number_of_interfaces(dynamic_interface_builders):
