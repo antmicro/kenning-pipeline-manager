@@ -1,0 +1,234 @@
+{
+    "version": "20240723.13",
+    "metadata": {
+        "allowLoopbacks": true,
+        "layers": [],
+        "interfaces": {
+            "Connection-1": {
+                "interfaceColor": "#FF00FF"
+            },
+            "Connection-2": {
+                "interfaceColor": "#FF0000"
+
+            }
+        }
+    },
+    "nodes": [
+        {
+            "name": "Test node #1",
+            "category": "First Category",
+            "properties": [],
+            "interfaces": [
+                {
+                    "name": "Input",
+                    "type": "Connection-2",
+                    "direction": "input",
+                    "maxConnectionsCount": 1
+                },
+                {
+                    "name": "Output",
+                    "type": "Connection-2",
+                    "direction": "output",
+                    "maxConnectionsCount": 1
+                },
+                {
+                    "name": "Inout",
+                    "type": "Connection-2",
+                    "direction": "inout",
+                    "side": "right",
+                    "maxConnectionsCount": 1
+                }
+            ]
+        },
+        {
+            "name": "Test node #2",
+            "category": "Second Category",
+            "properties": [
+                {
+                    "name": "Sample option",
+                    "type": "select",
+                    "values": [
+                        "Option 1",
+                        "Option 2",
+                        "Option 3",
+                        "Option 4"
+                    ],
+                    "default": "Option 2"
+                }
+            ],
+            "interfaces": [
+                {
+                    "name": "Input",
+                    "type": "Connection-2",
+                    "direction": "input",
+                    "maxConnectionsCount": 1
+                },
+                {
+                    "name": "Output",
+                    "type": "Connection-2",
+                    "direction": "output",
+                    "maxConnectionsCount": 1
+
+                },
+                {
+                    "name": "Inout",
+                    "type": "Connection-1",
+                    "direction": "inout",
+                    "maxConnectionsCount": 1
+                }
+            ]
+        }
+    ],
+    "graphs": [
+        {
+            "name": "Test subgraph node #1",
+            "category": "First Category",
+            "nodes": [
+                {
+                    "name": "Test node #1",
+                    "interfaces": [
+                        {
+                            "id": "40adf4d9-bf08-40ee-82f3-c95b4588dc32",
+                            "name": "Input",
+                            "externalName": "Subgraph Input 1",
+                            "direction": "input"
+                        },
+                        {
+                            "id": "4ae2f357-f6fc-41a9-80a0-5439ef822921",
+                            "name": "Output",
+                            "direction": "output"
+                        },
+                        {
+                            "id": "4a1cd750-8018-4f7a-91e1-5dcb63c53fa7",
+                            "name": "Inout",
+                            "externalName": "Subgraph Inout 1",
+                            "direction": "inout",
+                            "side": "right"
+                        }
+                    ],
+                    "position": {
+                        "x": 600,
+                        "y": 500
+                    },
+                    "width": 200,
+                    "twoColumn": false,
+                    "properties": [],
+                    "instanceName": "Foo"
+                },
+                {
+                    "name": "Test node #1",
+                    "interfaces": [
+                        {
+                            "id": "2315f500-e0fd-477f-9d86-d7efc27eac7e",
+                            "name": "Input",
+                            "direction": "input"
+                        },
+                        {
+                            "id": "245f1738-45e4-4169-a5c0-efffd2795b30",
+                            "name": "Output",
+                            "externalName": "Subgraph Output 2",
+                            "direction": "output"
+                        },
+                        {
+                            "id": "c0b9bd16-8162-4f70-8089-d80ef4bde61c",
+                            "name": "Inout",
+                            "direction": "inout",
+                            "externalName": "Subgraph Inout 2",
+                            "side": "right"
+                        }
+                    ],
+                    "position": {
+                        "x": 1100,
+                        "y": 270
+                    },
+                    "width": 200,
+                    "twoColumn": false,
+                    "properties": []
+                }
+            ],
+            "connections": [
+                {
+                    "from": "4ae2f357-f6fc-41a9-80a0-5439ef822921",
+                    "to": "2315f500-e0fd-477f-9d86-d7efc27eac7e"
+                }
+            ]
+        },
+        {
+            "name": "Test subgraph node #2",
+            "category": "Second Category",
+            "nodes": [
+                {
+                    "name": "Test node #1",
+                    "position": {
+                        "x": 600,
+                        "y": 200
+                    },
+                    "width": 200,
+                    "twoColumn": false,
+                    "interfaces": [
+                        {
+                            "name": "Input",
+                            "externalName": "Subgraph Input 1",
+                            "id": "6faecb68-2e97-47eb-8809-597e06bb7089",
+                            "direction": "input"
+                        },
+                        {
+                            "name": "Output",
+                            "id": "82e8c0e5-5e03-456f-b5df-7ca058d4c655",
+                            "direction": "output"
+                        },
+                        {
+                            "name": "Inout",
+                            "externalName": "Subgraph Inout 1",
+                            "id": "199e9e94-3c1b-11ee-be56-0242ac120002",
+                            "direction": "inout",
+                            "side": "right"
+                        }
+                    ],
+                    "properties": []
+                },
+                {
+                    "name": "Test node #2",
+                    "position": {
+                        "x": 1200,
+                        "y": 400
+                    },
+                    "width": 200,
+                    "twoColumn": false,
+                    "interfaces": [
+                        {
+                            "name": "Input",
+                            "id": "24275c67-0642-44c1-84a7-fed4dd9fd6da",
+                            "direction": "input"
+                        },
+                        {
+                            "name": "Output",
+                            "externalName": "Subgraph Output 2",
+                            "id": "8934db3b-954a-4cc1-a821-be06d576a109",
+                            "direction": "output"
+                        },
+                        {
+                            "name": "Inout",
+                            "externalName": "Subgraph Inout 2",
+                            "id": "199e9e94-3c1b-11ee-be74-0242ac120002",
+                            "direction": "inout"
+                        }
+                    ],
+                    "properties": [
+                        {
+                            "name": "Sample option",
+                            "id": "daeae613-f964-4e99-865d-44da69c72474",
+                            "value": "Option 4"
+                        }
+                    ]
+                }
+            ],
+            "connections": [
+                {
+                    "from": "82e8c0e5-5e03-456f-b5df-7ca058d4c655",
+                    "to": "24275c67-0642-44c1-84a7-fed4dd9fd6da"
+                }
+            ]
+        }
+    ]
+}

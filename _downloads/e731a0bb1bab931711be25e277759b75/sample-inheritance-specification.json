@@ -1,0 +1,66 @@
+{
+    "version": "20240723.13",
+    "nodes": [
+        {
+            "name": "Type A",
+            "layer": "aaa",
+            "category": "Classes",
+            "properties": [
+                {"name": "prop-a", "type": "text", "default": ""}
+            ],
+            "interfaces": [
+                {"name": "output-a", "type": "Interface", "direction": "output", "side": "left"}
+            ]
+        },
+        {
+            "name": "Type B",
+            "extends": ["Type A"],
+            "properties": [
+                {"name": "prop-b", "type": "text", "default": ""}
+            ],
+            "interfaces": [
+                {"name": "output-b", "type": "Interface", "direction": "output"}
+            ]
+        },
+        {
+            "name": "Type C",
+            "layer": "ccc",
+            "category": "Classes",
+            "properties": [
+                {"name": "prop-c", "type": "text", "default": ""}
+            ],
+            "interfaces": [
+                {"name": "input-c", "type": "Interface", "direction": "input"}
+            ]
+        },
+        {
+            "name": "Type Abstract",
+            "category": "Class",
+            "abstract": true,
+            "properties": [
+                {"name": "prop-ab", "type": "hex", "default": "0xaa23"}
+            ]
+        },
+        {
+            "name": "Type D",
+            "extends": ["Type C", "Type B", "Type Abstract"],
+            "properties": [
+                {"name": "prop-ab", "type": "hex", "default": "0xffff", "max": "0xfffff", "override": true},
+                {"name": "prop-a", "type": "number", "default": 1.4, "override": true},
+                {"name": "prop-c", "type": "integer", "default": 5, "override": true},
+                {"name": "prop-d", "type": "text", "default": ""}
+            ],
+            "interfaces": [
+                {"name": "inout-d", "type": "Interface", "direction": "inout"},
+                {"name": "output-a", "type": "Interface", "direction": "inout", "side": "right", "override": true}
+            ]
+        },
+        {
+            "name": "Type E",
+            "extends": ["Type D"],
+            "properties": [
+                {"name": "prop-a", "type": "bool", "default": false, "override": true}
+            ]
+        }
+    ]
+}

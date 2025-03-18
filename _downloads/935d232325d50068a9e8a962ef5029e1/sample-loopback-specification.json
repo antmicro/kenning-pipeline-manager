@@ -1,0 +1,67 @@
+{
+    "version": "20240723.13",
+    "metadata": {
+        "allowLoopbacks": true,
+        "connectionStyle": "curved"
+    },
+    "nodes": [
+        {
+            "name": "Node",
+            "layer": "Type",
+            "category": "Nodes",
+            "properties": [],
+            "interfaces": [
+                {
+                    "name": "In 1",
+                    "type": "Connector",
+                    "direction": "input"
+                },
+                {
+                    "name": "In 2",
+                    "type": "Connector",
+                    "direction": "input"
+                },
+                {
+                    "name": "In 3",
+                    "type": "Connector",
+                    "direction": "input"
+                },
+                {
+                    "name": "In 4",
+                    "type": "Connector",
+                    "direction": "input"
+                },
+                {
+                    "name": "In 5",
+                    "type": "Connector",
+                    "direction": "input"
+                },
+                {
+                    "name": "Out 1",
+                    "type": "Connector",
+                    "direction": "output"
+                },
+                {
+                    "name": "Out 2",
+                    "type": "Connector",
+                    "direction": "output"
+                },
+                {
+                    "name": "Out 3",
+                    "type": "Connector",
+                    "direction": "output"
+                },
+                {
+                    "name": "Out 4",
+                    "type": "Connector",
+                    "direction": "output"
+                },
+                {
+                    "name": "Out 5",
+                    "type": "Connector",
+                    "direction": "output"
+                }
+            ]
+        }
+    ]
+}
