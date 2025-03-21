@@ -190,6 +190,8 @@ const renameField = ref(null);
 const tempName = ref('');
 
 const nodeURLs = viewModel.value.editor.getNodeURLs(props.node.type);
+const nodeColor = viewModel.value.editor.getNodeColor(props.node.type);
+
 const displayNoResources = !viewModel.value.editor.nodeURLsEmpty();
 
 const displayedInputs = computed(() => Object.values(props.node.inputs).filter((ni) => !ni.hidden));
@@ -572,17 +574,20 @@ const nodeTitleStyle = computed(() => {
     if (!viewModel.value.editor.readonly) {
         return {
             cursor: 'drag',
+            backgroundColor: nodeColor,
         };
     }
 
     if (canOpenContextMenu.value) {
         return {
             cursor: 'pointer',
+            backgroundColor: nodeColor,
         };
     }
 
     return {
         cursor: 'default',
+        backgroundColor: nodeColor,
     };
 });
 
