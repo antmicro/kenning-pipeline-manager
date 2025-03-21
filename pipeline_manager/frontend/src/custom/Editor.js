@@ -151,6 +151,7 @@ export default class PipelineManagerEditor extends Editor {
             category: options?.category ?? 'default',
             title: options?.title ?? nodeInstance.title,
             isCategory: options?.isCategory ?? false,
+            color: options?.color,
         });
         this.events.registerNodeType.emit({ type, options });
     }
@@ -474,6 +475,10 @@ export default class PipelineManagerEditor extends Editor {
 
     getNodeIconPath(nodeName) {
         return this.nodeIcons.get(nodeName) || undefined;
+    }
+
+    getNodeColor(nodeName) {
+        return this.nodeTypes.get(nodeName).color || undefined;
     }
 
     addGraphTemplate(template, category, type, isCategory = false) {

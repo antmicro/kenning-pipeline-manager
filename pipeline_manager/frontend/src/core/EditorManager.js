@@ -518,11 +518,11 @@ export default class EditorManager {
                 errors.push(...myNode);
                 return;
             }
-
             this.baklavaView.editor.registerNodeType(myNode, {
                 title: node.name,
                 category: node.category,
                 isCategory: node.isCategory ?? false,
+                color: node.color,
             });
             if ('icon' in node) {
                 if (typeof node.icon === 'string') {
