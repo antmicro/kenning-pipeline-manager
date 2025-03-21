@@ -14,14 +14,16 @@
             "name": "LoadVideo",
             "extends": ["Filesystem-base"],
             "interfaces": [{"name": "frames", "type": "Image", "direction": "output"}],
-            "description": "### Information \n\n Node used to load a video and parametrize the *filename*.\n\nAdditionally the video can be passed to another node."
+            "description": "### Information \n\n Node used to load a video and parametrize the *filename*.\n\nAdditionally the video can be passed to another node.",
+            "color": "#004972"
         },
         {
             "name": "SaveVideo",
             "extends": ["Filesystem-base"],
             "interfaces": [
                 {"name": "frames", "type": ["Image", "BinaryImage"], "direction": "input"}
-            ]
+            ],
+            "color": "#006095"
         },
         {
             "name": "SaveFrames",
@@ -34,7 +36,8 @@
             "interfaces": [
                 {"name": "color", "type": "Image", "direction": "input"},
                 {"name": "binary", "type": "BinaryImage", "direction": "input"}
-            ]
+            ],
+            "color": "#007dc3"
         },
         {
             "name": "SaveFrame",
@@ -45,7 +48,8 @@
             "interfaces": [
                 {"name": "color", "type": "Image", "direction": "input"},
                 {"name": "binary", "type": "BinaryImage", "direction": "input"}
-            ]
+            ],
+            "color": "#0093e5"
         },
         {
             "name": "GaussianKernel",
@@ -56,7 +60,8 @@
                 {"name": "sigma", "type": "number", "default": 1.0},
                 {"name": "tags", "type": "list", "dtype": "string", "default": []}
             ],
-            "interfaces": [{"name": "kernel", "type": "Image", "direction": "output"}]
+            "interfaces": [{"name": "kernel", "type": "Image", "direction": "output"}],
+            "color": "#6f091a"
         },
         {
             "name": "SobelKernel",
@@ -68,7 +73,8 @@
             "interfaces": [
                 {"name": "Horizontal edge kernel", "type": "Image", "direction": "output"},
                 {"name": "Vertical edge kernel", "type": "Image", "direction": "output"}
-            ]
+            ],
+            "color": "#900b22"
         },
         {
             "name": "StructuringElement",
@@ -83,7 +89,8 @@
                     "default": "Cross"
                 }
             ],
-            "interfaces": [{"name": "kernel", "type": "BinaryImage", "direction": "output"}]
+            "interfaces": [{"name": "kernel", "type": "BinaryImage", "direction": "output"}],
+            "color": "#bd0e2d"
         },
         {
             "category": "Processing/Color images",
@@ -116,7 +123,8 @@
             ],
             "interfaces": [
                 {"name": "kernel", "type": "Image", "direction": "input"}
-            ]
+            ],
+            "color": "#4e096f"
         },
         {
             "name": "Threshold",
@@ -132,7 +140,8 @@
                     "values": ["Binary", "Truncate", "Otsu"],
                     "default": "constant"
                 }
-            ]
+            ],
+            "color": "#073400"
         },
         {
             "name": "CannyEdgeDetection",
@@ -141,7 +150,8 @@
             "properties": [
                 {"name": "sigma", "type": "text", "default": "1.4"},
                 {"name": "kernel size", "type": "integer", "default": 3}
-            ]
+            ],
+            "color": "#9e1fda"
         },
         {
             "name": "Scale",
@@ -149,7 +159,8 @@
             "category": "Processing/Color images",
             "properties": [
                 {"name": "Scaling factor", "type": "text", "default": "1.75"}
-            ]
+            ],
+            "color": "#650b90"
         },
         {
             "name": "Logical AND",
@@ -157,7 +168,8 @@
             "category": "Processing/Binary images",
             "interfaces": [
                 {"name": "input 2", "type": "BinaryImage", "direction": "input"}
-            ]
+            ],
+            "color": "#99bb22"
         },
         {
             "name": "Logical OR",
@@ -165,12 +177,14 @@
             "category": "Processing/Binary images",
             "interfaces": [
                 {"name": "input 2", "type": "BinaryImage", "direction": "input"}
-            ]
+            ],
+            "color": "#127f00"
         },
         {
             "name": "Logical NOT",
             "extends": ["Binary images"],
-            "category": "Processing/Binary images"
+            "category": "Processing/Binary images",
+            "color": "#159500"
         },
         {
             "name": "Logical XOR",
@@ -178,7 +192,8 @@
             "category": "Processing/Binary images",
             "interfaces": [
                 {"name": "input 2", "type": "BinaryImage", "direction": "input"}
-            ]
+            ],
+            "color": "#38a526"
         },
         {
             "name": "Morphological operation",
@@ -205,7 +220,8 @@
             ],
             "interfaces": [
                 {"name": "kernel", "type": "BinaryImage", "direction": "input"}
-            ]
+            ],
+            "color": "#50af40"
         },
         {
             "name": "RemoveColor",
@@ -213,7 +229,8 @@
             "category": "Processing/Color images",
             "properties": [
                 {"name": "color", "type": "hex", "default": "0xFFFF", "min": "0xFF"}
-            ]
+            ],
+            "color": "#850ebd"
         }
     ],
     "metadata": {
