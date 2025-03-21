@@ -154,7 +154,6 @@ class GraphBuilder:
 
     def create_graph(
         self,
-        name: str,
         based_on: Union[Path, str, DataflowGraph, Dict, None] = None,
         identifier: Optional[str] = None,
     ) -> DataflowGraph:
@@ -167,8 +166,6 @@ class GraphBuilder:
 
         Parameters
         ----------
-        name : str
-            Human-readable name of the graph.
         based_on : Union[Path, str, DataflowGraph, Dict, None], optional
             Dataflow graph, on which the new graph should be based on.
             When `Path` or `str`, it should be a path to dataflow file in
