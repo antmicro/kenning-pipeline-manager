@@ -260,7 +260,7 @@ class SpecificationBuilder(object):
         name: str
             Name of the node type.
         category: Optional[str]
-            Category of the node. Required by the specification format.
+            Category of the node.
         layer: Optional[str]
             Name of the layer metatype.
         extends: Optional[Union[str, List[str]]]
