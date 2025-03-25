@@ -33,8 +33,8 @@ def test_adding_interface_group(specification_builder):
     )
     spec.add_node_type_interface(
         name=NODE_NAME,
-        interface_name=INTERFACE_NAME,
-        interface_type=INTERFACE_TYPE,
+        interfacename=INTERFACE_NAME,
+        interfacetype=INTERFACE_TYPE,
         array=[0, 32],
         direction=Direction.OUTPUT.value,
     )
@@ -74,7 +74,7 @@ def test_enabling_interface_group_by_default(specification_builder):
     spec.add_node_type(NODE, CATEGORY)
     spec.add_node_type_interface(
         NODE,
-        interface_name=INTERFACE,
+        interfacename=INTERFACE,
         array=[0, 100],
         direction=Direction.OUTPUT.value,
     )

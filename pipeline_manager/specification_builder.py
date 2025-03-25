@@ -35,6 +35,10 @@ class SpecificationBuilderException(Exception):
     pass
 
 
+class MissingInterfaceAttribute(Exception):
+    """Exception raised if an interface is missing an obligatory attribute."""
+
+
 def get_optional(
     entry: Optional[Dict], key: Optional[Any] = None
 ) -> Optional[Any]:
@@ -553,6 +557,7 @@ class SpecificationBuilder(object):
         interface_group_name: str,
         direction: Direction = Direction.INOUT,
         interface_type: Optional[str] = None,
+        interfaces: Optional[List[Dict]] = None,
     ):
         """
         Add an empty interface group to a node type.
@@ -566,15 +571,49 @@ class SpecificationBuilder(object):
         direction : Direction
             Direction of the interface group, by default Direction.INOUT.
         interface_type : Optional[str]
-            Type of an interface group, by default None
+            Type of an interface group, by default None.
+        interfaces : Optional[List[Dict]]
+            A list of interfaces to be added to the interface group.
+            It is safer to use `add_interface_to_group_interface`
+            method to add interface to an interface group - it performs
+            more detailed data validation. Each interface is
+            a dictionary with at least two keys: `name` and `direction`.
+
+        Raises
+        ------
+        MissingInterfaceAttribute
+            Raised if either `name` or `direction` is missing in `interfaces`.
+        ValueError
+            Raised if direction has an illegal value.
         """
         node = self._get_node_type(node_type_name)
         node.setdefault("interfaceGroups", [])
 
+        if interfaces is not None:
+            for interface in interfaces:
+                if "name" not in interface:
+                    raise MissingInterfaceAttribute(
+                        "Cannot add an interface missing `name` attribute."
+                    )
+
+                if "direction" not in interface:
+                    continue
+
+                try:
+                    direction = Direction(interface["direction"])
+                except ValueError:
+                    legal_directions = [value.value() for value in Direction]
+                    legal_directions = ", ".join(legal_directions)
+                    raise ValueError(
+                        "Interface direction has to one of: "
+                        f"{legal_directions}."
+                        f"However, its value is: {direction}"
+                    )
+
         interface_group = {
             "name": interface_group_name,
             "direction": direction.value,
-            "interfaces": [],
+            "interfaces": interfaces if interfaces is not None else [],
         }
         set_if_not_none(interface_group, "type", interface_type)
 
@@ -757,11 +796,11 @@ class SpecificationBuilder(object):
         self,
         name: str,
         interfacename: str,
-        interface_type: Optional[Union[str, List[str]]] = None,
+        interfacetype: Optional[Union[str, List[str]]] = None,
         direction: str = "inout",
         dynamic: Union[bool, List[int]] = False,
         side: Optional[str] = None,
-        max_count: Optional[int] = None,
+        maxcount: Optional[int] = None,
         override: Optional[bool] = None,
         array: Optional[List[int]] = None,
     ):
@@ -774,7 +813,7 @@ class SpecificationBuilder(object):
             Name of the node type
         interfacename: str
             Name of the interface
-        interface_type: Optional[Union[str, List[str]]]
+        interfacetype: Optional[Union[str, List[str]]]
             List of matching types for interfaces
         direction: str
             Direction of the connection, by default "inout".
@@ -783,7 +822,7 @@ class SpecificationBuilder(object):
             dynamically adjusted. By default, False.
         side: Optional[str]
             On which side the interface should be placed by default
-        max_count: Optional[int]
+        maxcount: Optional[int]
             The maximum connections to the given interface
         override: Optional[bool]
             Determines whether interface should be overridden
@@ -815,9 +854,9 @@ class SpecificationBuilder(object):
 
         interface = {"name": interfacename, "direction": direction}
 
-        set_if_not_none(interface, "type", interface_type)
+        set_if_not_none(interface, "type", interfacetype)
         set_if_not_none(interface, "side", side)
-        set_if_not_none(interface, "maxConnectionsCount", max_count)
+        set_if_not_none(interface, "maxConnectionsCount", maxcount)
         set_if_not_none(interface, "override", override)
         set_if_not_none(interface, "array", array)
 
@@ -1070,11 +1109,11 @@ class SpecificationBuilder(object):
             self.add_node_type_interface(
                 name=nodename,
                 interfacename=interface["name"],
-                interface_type=iface,
+                interfacetype=iface,
                 dynamic=get_optional(interface, "dynamic"),
                 direction=get_optional(interface, "direction"),
                 side=get_optional(interface, "side"),
-                max_count=get_optional(interface, "maxConnectionsCount"),
+                maxcount=get_optional(interface, "maxConnectionsCount"),
                 override=get_optional(interface, "override"),
                 array=get_optional(interface, "array"),
             )
