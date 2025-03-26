@@ -23,8 +23,8 @@ class RPCMethods:
             specification = json.load(fd)
         return {"type": MessageType.OK.value, "content": specification}
 
-    # Method's parameters have to match with received message
-    # or **kwargs can be used to get all received params
+    # Method's parameters have to match with received message.
+    # **kwargs are used to get all received parameters.
     def dataflow_validate(self, dataflow: dict) -> dict:
         return {"type": MessageType.OK.value}
 
