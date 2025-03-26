@@ -306,9 +306,13 @@ export default class PipelineManagerEditor extends Editor {
         // Finding a path to the defined entry and switching to it sequentially
         const path = dfs(this._graph, []);
 
-        path.forEach((node) => {
-            this.switchToSubgraph(node);
-        });
+        try {
+            path.forEach((node) => {
+                this.switchToSubgraph(node);
+            });
+        } catch (err) {
+            errors.push(err.toString());
+        }
 
         if (this.layoutManager.layoutEngine.activeAlgorithm !== 'NoLayout') {
             await nextTick();
