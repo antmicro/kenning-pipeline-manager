@@ -79,10 +79,11 @@ class DataflowGraph(JsonConvertible):
 
         self._graph_builder: GraphBuilder = builder_with_dataflow
 
+        self.name = None
+
         if dataflow is None:
             return
 
-        self.name = None
         if "name" in dataflow:
             self.name = dataflow["name"]
 
@@ -372,7 +373,13 @@ class DataflowGraph(JsonConvertible):
             conn.to_json(as_str=False) for _, conn in self._connections.items()
         ]
 
-        output = {"id": self._id, "nodes": nodes, "connections": connections}
+        output = {
+            "id": self._id,
+            "nodes": nodes,
+            "connections": connections,
+        }
+        if self.name:
+            output["name"] = self.name
         return convert_output(output, as_str)
 
     def get(
