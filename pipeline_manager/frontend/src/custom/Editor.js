@@ -232,6 +232,7 @@ export default class PipelineManagerEditor extends Editor {
                 if (n.subgraph !== undefined) {
                     usedGraphs.add(n.subgraph);
                 }
+                this.setNodeColor(n.name, n.color);
             });
         });
         // Finding a root graph by checking which graph is not referenced by any other
@@ -479,6 +480,12 @@ export default class PipelineManagerEditor extends Editor {
 
     getNodeColor(nodeName) {
         return this.nodeTypes.get(nodeName).color || undefined;
+    }
+
+    setNodeColor(nodeName, color) {
+        if (color !== undefined) {
+            this.nodeTypes.get(nodeName).color = color;
+        }
     }
 
     addGraphTemplate(template, category, type, isCategory = false) {
