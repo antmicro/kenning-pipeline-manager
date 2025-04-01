@@ -60,6 +60,9 @@ Each node has:
   It refers to one of the [Graphs](#graph) entries from `graphs` with a matching `id`.
 * `enabledInterfaceGroups` - optional array describing enabled interface groups.
   Every element is of type [Enabled Interface Groups](#enabled-interface-groups).
+* `color` - optional field defining a hexadecimal color that will be used as the node background in the editor.
+  This overrides the node color set in the specification.
+  If not provided, the color set in the specification will be used instead.
 
 ##### Property
 

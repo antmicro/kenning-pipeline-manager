@@ -214,6 +214,8 @@ This object specifies a single node.
   If set to true, then the `name` of the node is inferred from the last text segment in the `category` parameter.
   If any node has a node category in its `category` path then it has to extend from the nearest ancestor category node.
   Additionally, if a node extends from a category node, then it has to be in its subtree.
+* `color` - a hexadecimal color that will be used as the node background in the editor.
+  If not provided, the default Kenning Pipeline Manager color scheme will be used.
 
 Some or all of the properties above (except for `name`) can be derived from existing node types using the `extends` list - check [Node type inheritance](#node-type-inheritance).
 
@@ -255,7 +257,8 @@ Here is an example of a node:
             "type": "Image",
             "direction": "output"
         }
-    ]
+    ],
+    "color": "#4e096f"
 }
 ```
 
