@@ -28,6 +28,10 @@
                         "description": "Optional field defining an instance name rendered to the user",
                         "type": "string"
                     },
+                    "color": {
+                        "description": "Optional field defining the color of the node rendered to the user",
+                        "type": "string"
+                    },
                     "properties": {
                         "description": "List describing the node parameterized values",
                         "type": "array",
