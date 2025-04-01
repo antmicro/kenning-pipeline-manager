@@ -29,7 +29,8 @@
                     ],
                     "enabledInterfaceGroups": [],
                     "name": "LoadVideo",
-                    "instanceName": "LoadVideo"
+                    "instanceName": "LoadVideo",
+                    "color": "#e9a726"
                 },
                 {
                     "id": "3f16d8b0-8bf4-411c-9b61-286fde9035be",
@@ -67,7 +68,8 @@
                     ],
                     "enabledInterfaceGroups": [],
                     "name": "GaussianKernel",
-                    "instanceName": "GaussianKernel"
+                    "instanceName": "GaussianKernel",
+                    "color": "#e97826"
                 },
                 {
                     "id": "75800d41-a534-4dae-9133-2fabb0c98e31",
@@ -114,7 +116,8 @@
                     ],
                     "enabledInterfaceGroups": [],
                     "name": "Filter2D",
-                    "instanceName": "Filter2D"
+                    "instanceName": "Filter2D",
+                    "color": "#e56000"
                 },
                 {
                     "id": "5c398d8d-1ee2-41ab-afa5-1a07efac3f8d",
@@ -154,7 +157,8 @@
                     ],
                     "enabledInterfaceGroups": [],
                     "name": "Threshold",
-                    "instanceName": "Threshold"
+                    "instanceName": "Threshold",
+                    "color": "#999999"
                 },
                 {
                     "id": "1e9f5db4-0f0a-4664-b2d4-f419df9ad667",
@@ -272,7 +276,8 @@
                     ],
                     "enabledInterfaceGroups": [],
                     "name": "SaveVideo",
-                    "instanceName": "SaveVideo"
+                    "instanceName": "SaveVideo",
+                    "color": "#e59700"
                 }
             ],
             "connections": [
