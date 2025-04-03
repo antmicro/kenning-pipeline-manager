@@ -513,7 +513,19 @@ export default class PipelineManagerEditor extends Editor {
         nextTick().then(() => {
             const graph = this.graph.save();
             this.layoutManager.registerGraph(graph);
-            this.layoutManager.computeLayout(graph).then(this.updateNodesPosition.bind(this));
+            this.layoutManager
+                .computeLayout(graph)
+                .then(this.updateNodesPosition.bind(this))
+                .then(() => {
+                    nextTick().then(() => {
+                        if (
+                            !this._graph.wasCentered
+                        ) {
+                            this.centerZoom();
+                            this._graph.wasCentered = true;
+                        }
+                    });
+                });
         });
     }
 
