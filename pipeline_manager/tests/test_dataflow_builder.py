@@ -678,3 +678,40 @@ def test_finding_subgraph_by_containing_node_name(graph_builder_for_subgraphs):
         f"Retrieved subgraph should have {expected_subgraph_nodes_count} "
         f"but has {subgraph_nodes_count}."
     )
+
+
+@pytest.fixture
+def graph_with_all_attributes(sample_specification_path) -> DataflowGraph:
+    """
+    Fixture providing a dataflow graph with all the
+    possible attributes present.
+    """
+    builder = GraphBuilder(
+        specification=sample_specification_path,
+        specification_version=DEFAULT_SPECIFICATION_VERSION,
+    )
+    graph = builder.create_graph()
+    # TODO: Finish adding attributes after adding them will be made possible.
+    return graph
+
+
+@pytest.mark.parametrize(
+    "attribute_name",
+    (
+        "id",
+        "name",
+        "additionalData",
+        "nodes",
+        "connections",
+        "panning",
+        "scaling",
+    ),
+)
+def test_if_graph_attribute_gets_serialized(
+    attribute_name: str, graph_with_all_attributes
+):
+    """Test if graph attributes get serialized when they should."""
+    graph: DataflowGraph = graph_with_all_attributes
+    assert (
+        attribute_name in graph.to_json()
+    ), f"Attribute {attribute_name!r} has not been serialized."
