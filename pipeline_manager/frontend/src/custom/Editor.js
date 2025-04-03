@@ -98,14 +98,6 @@ export default class PipelineManagerEditor extends Editor {
 
         dataflowState.graphs = [currentGraphState, ...dataflowState.graphs];
 
-        /* eslint-disable no-unused-vars */
-        stackCopy.forEach(([_, subgraphNode]) => {
-            const errors = this.switchToSubgraph(subgraphNode);
-            if (Array.isArray(errors) && errors.length) {
-                throw new Error(errors);
-            }
-        });
-        /* eslint-enable no-unused-vars */
         return dataflowState;
     }
 
