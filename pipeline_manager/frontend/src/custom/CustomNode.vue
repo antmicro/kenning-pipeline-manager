@@ -191,6 +191,7 @@ const tempName = ref('');
 
 const nodeURLs = viewModel.value.editor.getNodeURLs(props.node.type);
 const nodeColor = viewModel.value.editor.getNodeColor(props.node.type);
+const nodeTitleColor = viewModel.value.editor.getNodeTitleColor(props.node.type);
 
 const displayNoResources = !viewModel.value.editor.nodeURLsEmpty();
 
@@ -575,6 +576,7 @@ const nodeTitleStyle = computed(() => {
         return {
             cursor: 'drag',
             backgroundColor: nodeColor,
+            color: nodeTitleColor,
         };
     }
 
@@ -582,12 +584,14 @@ const nodeTitleStyle = computed(() => {
         return {
             cursor: 'pointer',
             backgroundColor: nodeColor,
+            color: nodeTitleColor,
         };
     }
 
     return {
         cursor: 'default',
         backgroundColor: nodeColor,
+        color: nodeTitleColor,
     };
 });
 

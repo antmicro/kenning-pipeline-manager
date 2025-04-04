@@ -488,6 +488,26 @@ export default class PipelineManagerEditor extends Editor {
         }
     }
 
+    getNodeTitleColor(nodeName) {
+        const { color } = this.nodeTypes.get(nodeName);
+
+        if (color === undefined) {
+            return 'white';
+        }
+        // calculate lightness
+        const rgb = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(color);
+        const r = parseInt(rgb[1], 16) / 255;
+        const g = parseInt(rgb[2], 16) / 255;
+        const b = parseInt(rgb[3], 16) / 255;
+        const lightness = (Math.max(r, g, b) + Math.min(r, g, b)) / 2;
+
+        if (lightness > 0.5) {
+            return 'black';
+        }
+
+        return 'white';
+    }
+
     addGraphTemplate(template, category, type, isCategory = false) {
         if (this.events.beforeAddGraphTemplate.emit(template).prevented) {
             return;
