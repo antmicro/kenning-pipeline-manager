@@ -13,7 +13,7 @@ const getBackendApiUrl = () => {
 
     if (
         process.env.VUE_APP_COMMUNICATION_SERVER_HOST !== undefined &&
-        process.env.VUE_APP_COMMUNICATION_SERVER_HOST !== undefined
+        process.env.VUE_APP_COMMUNICATION_SERVER_PORT !== undefined
     ) return `http://${process.env.VUE_APP_COMMUNICATION_SERVER_HOST}:${process.env.VUE_APP_COMMUNICATION_SERVER_PORT}`;
 
     return `${window.location.protocol}//${window.location.host}`;
