@@ -6,6 +6,11 @@
 
 /* eslint-disable import/prefer-default-export */
 const getBackendApiUrl = () => {
+    // Override backend URL if requested
+    const urlParams = new URLSearchParams(window.location.search);
+    const url = urlParams.get('backend');
+    if (url !== null) return url;
+
     if (
         window.location.protocol === 'file:' ||
         (process.env.VUE_APP_STATIC !== undefined && process.env.VUE_APP_STATIC === 'true')
