@@ -159,6 +159,7 @@ class Node(JsonConvertible):
     two_column: Optional[bool] = None
     position: Optional[Vector2] = None
     instance_name: Optional[str] = None
+    color: Optional[str] = None
     subgraph: Optional[str] = None
     _subgraph: Any = None  # Optional[DataflowGraph]
     enabled_interface_groups: List[Interface] = field(default_factory=list)
