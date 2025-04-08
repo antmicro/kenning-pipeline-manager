@@ -22,10 +22,12 @@ from pipeline_manager.dataflow_builder.entities import (
     convert_output,
     get_uuid,
     match_criteria,
+    snake_case_to_camel_case,
 )
 from pipeline_manager.dataflow_builder.utils import (
     ensure_connection_is_absent,
     get_interface_if_present,
+    get_public_attributes,
 )
 from pipeline_manager.specification_builder import SpecificationBuilder
 
@@ -80,6 +82,8 @@ class DataflowGraph(JsonConvertible):
         self._spec_builder = builder_with_spec
 
         self.name = None
+        self._panning = None
+        self._scaling = None
 
         if dataflow is None:
             return
@@ -372,19 +376,27 @@ class DataflowGraph(JsonConvertible):
 
     @override
     def to_json(self, as_str: bool = True) -> Union[str, Dict]:
+        attributes = {}
+        for attr_name in get_public_attributes(self):
+            key = snake_case_to_camel_case(attr_name)
+            attr_value = getattr(self, attr_name)
+
+            # Skip empty values.
+            if attr_value is None:
+                continue
+            # Convert non-trivial objects to str with `to_json`.
+            if hasattr(attr_value, "to_json"):
+                attr_value = attr_value.to_json(as_str=False)
+
+            attributes[key] = attr_value
+
         nodes = [node.to_json(as_str=False) for _, node in self._nodes.items()]
         connections = [
             conn.to_json(as_str=False) for _, conn in self._connections.items()
         ]
-
-        output = {
-            "id": self._id,
-            "nodes": nodes,
-            "connections": connections,
-        }
-        if self.name:
-            output["name"] = self.name
-        return convert_output(output, as_str)
+        # Merge all attributes to a single dictionary.
+        attributes |= {"nodes": nodes, "connections": connections}
+        return convert_output(attributes, as_str)
 
     def get(
         self, type: AttributeType, **kwargs
