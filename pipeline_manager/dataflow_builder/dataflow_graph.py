@@ -67,17 +67,17 @@ class DataflowGraph(JsonConvertible):
             Content of a dataflow builder to load,
             None means an empty dataflow graph, by default None.
         """
+        from pipeline_manager.dataflow_builder.dataflow_builder import (
+            GraphBuilder,
+        )
+
+        self._graph_builder: GraphBuilder = builder_with_dataflow
         self._id = (
             dataflow["id"] if dataflow and "id" in dataflow else get_uuid()
         )
         self._nodes: Dict[str, Node] = {}
         self._connections: Dict[str, InterfaceConnection] = {}
         self._spec_builder = builder_with_spec
-        from pipeline_manager.dataflow_builder.dataflow_builder import (
-            GraphBuilder,
-        )
-
-        self._graph_builder: GraphBuilder = builder_with_dataflow
 
         self.name = None
 
@@ -86,6 +86,10 @@ class DataflowGraph(JsonConvertible):
 
         if "name" in dataflow:
             self.name = dataflow["name"]
+        if "scaling" in dataflow:
+            self.scaling = dataflow["scaling"]
+        if "panning" in dataflow:
+            self.panning = dataflow["panning"]
 
         for node in dataflow.setdefault("nodes", []):
             node_arguments = {
@@ -465,3 +469,45 @@ class DataflowGraph(JsonConvertible):
     def id(self, _: str):
         """Setter disallowing manual modification of the ID of the graph."""
         raise RuntimeError("An ID of a graph cannot be changed.")
+
+    @property
+    def panning(self) -> Vector2:
+        """Getter to obtain the panning of the graph."""
+        return self._panning
+
+    @panning.setter
+    def panning(self, value: Any):
+        """Setter for `panning` attribute of the graph."""
+        if isinstance(value, Dict):
+            if "x" not in value or "y" not in value:
+                raise TypeError(
+                    "Panning has to have the following keys: x, y."
+                    f"`panning` = {str(value)}"
+                )
+            self._panning = Vector2(x=value["x"], y=value["y"])
+            return
+        elif isinstance(value, Vector2):
+            self._panning = value
+            return
+
+        raise TypeError(
+            "`panning` has be either dictionary or Vector2."
+            f"Its type: {type(value)}"
+        )
+
+    @property
+    def scaling(self) -> Vector2:
+        """Getter to obtain the scaling of the graph."""
+        return self._scaling
+
+    @scaling.setter
+    def scaling(self, value: Any):
+        """Setter for `scaling` attribute of the graph."""
+        value = float(value)
+        max_scaling = 999
+        if not (0 < value <= max_scaling):
+            raise ValueError(
+                f"`scaling` has to be in the range (0, {max_scaling}] "
+                f"but is {value}."
+            )
+        self._scaling = value

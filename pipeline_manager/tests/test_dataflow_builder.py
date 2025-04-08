@@ -7,7 +7,7 @@
 import subprocess
 import tempfile
 from pathlib import Path
-from typing import Dict, Tuple
+from typing import Any, Dict, Tuple
 
 import pytest
 
@@ -691,8 +691,35 @@ def graph_with_all_attributes(sample_specification_path) -> DataflowGraph:
         specification_version=DEFAULT_SPECIFICATION_VERSION,
     )
     graph = builder.create_graph()
-    # TODO: Finish adding attributes after adding them will be made possible.
+    # `id`, `nodes`, and `connections` are taken from a specification.
+    graph.name = "Graph Name"
+    graph.additional_data = {"more": "Additional data in JSON format"}
+    graph.panning = Vector2(x=500, y=500)
+    graph.scaling = 1.0
     return graph
+
+
+@pytest.mark.parametrize(
+    "attribute_name, set_to, expected_attribute_value",
+    (
+        ("panning", {"x": 20, "y": 0}, Vector2(x=20, y=0)),
+        ("name", "my name", "my name"),
+        ("scaling", "0.001", 0.001),
+        ("scaling", 25.7, 25.7),
+        ("scaling", 25, 25.0),
+        ("additional_data", {"pipeline": "manager"}, {"pipeline": "manager"}),
+    ),
+)
+def test_setting_graph_attributes(
+    attribute_name: str,
+    set_to: Any,
+    expected_attribute_value: Any,
+    graph_with_all_attributes,
+):
+    """Test setting graph attributes."""
+    graph = graph_with_all_attributes
+    setattr(graph, attribute_name, set_to)
+    assert getattr(graph, attribute_name) == expected_attribute_value
 
 
 @pytest.mark.parametrize(
