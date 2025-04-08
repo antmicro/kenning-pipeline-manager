@@ -81,8 +81,8 @@ class DataflowGraph(JsonConvertible):
         self._connections: Dict[str, InterfaceConnection] = {}
         self._spec_builder = builder_with_spec
 
-        self.additional_data: Optional[Dict] = None
         self.name: Optional[str] = None
+        self.additional_data: Optional[Dict] = None
         self._panning: Optional[Vector2] = None
         self._scaling: Optional[float] = None
 
@@ -91,6 +91,8 @@ class DataflowGraph(JsonConvertible):
 
         if "name" in dataflow:
             self.name = dataflow["name"]
+        if "additionalData" in dataflow:
+            self.additional_data = dataflow["additionalData"]
         if "scaling" in dataflow:
             self.scaling = dataflow["scaling"]
         if "panning" in dataflow:
