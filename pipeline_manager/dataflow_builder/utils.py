@@ -239,3 +239,28 @@ def get_interface_if_present(
                 return _interface
 
     return None
+
+
+def get_public_attributes(class_instance: object) -> List[str]:
+    """
+    Get public member attributes of a class instance.
+
+    Parameters
+    ----------
+    class_instance : object
+        Class instance from which attributes should be retrieved.
+
+    Returns
+    -------
+    List[str]
+        List of public member attributes.
+    """
+    attributes_with_getters = []
+    for attr in dir(class_instance):
+        if isinstance(getattr(class_instance, attr), property):
+            attributes_with_getters.append(attr)
+        elif not attr.startswith("_") and not callable(
+            getattr(class_instance, attr)
+        ):
+            attributes_with_getters.append(attr)
+    return attributes_with_getters
