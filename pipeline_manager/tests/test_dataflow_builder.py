@@ -703,11 +703,17 @@ def graph_with_all_attributes(sample_specification_path) -> DataflowGraph:
     "attribute_name, set_to, expected_attribute_value",
     (
         ("panning", {"x": 20, "y": 0}, Vector2(x=20, y=0)),
+        ("panning", Vector2(50, 30), Vector2(50, 30)),
         ("name", "my name", "my name"),
         ("scaling", "0.001", 0.001),
         ("scaling", 25.7, 25.7),
         ("scaling", 25, 25.0),
         ("additional_data", {"pipeline": "manager"}, {"pipeline": "manager"}),
+        (
+            "additional_data",
+            {"nested": {"level": "one"}},
+            {"nested": {"level": "one"}},
+        ),
     ),
 )
 def test_setting_graph_attributes(
