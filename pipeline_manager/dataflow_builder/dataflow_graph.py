@@ -81,9 +81,10 @@ class DataflowGraph(JsonConvertible):
         self._connections: Dict[str, InterfaceConnection] = {}
         self._spec_builder = builder_with_spec
 
-        self.name = None
-        self._panning = None
-        self._scaling = None
+        self.additional_data: Optional[Dict] = None
+        self.name: Optional[str] = None
+        self._panning: Optional[Vector2] = None
+        self._scaling: Optional[float] = None
 
         if dataflow is None:
             return
@@ -497,18 +498,16 @@ class DataflowGraph(JsonConvertible):
                     f"`panning` = {str(value)}"
                 )
             self._panning = Vector2(x=value["x"], y=value["y"])
-            return
         elif isinstance(value, Vector2):
             self._panning = value
-            return
-
-        raise TypeError(
-            "`panning` has be either dictionary or Vector2."
-            f"Its type: {type(value)}"
-        )
+        else:
+            raise TypeError(
+                "`panning` has be either dictionary or Vector2."
+                f"Its type: {type(value)}"
+            )
 
     @property
-    def scaling(self) -> Vector2:
+    def scaling(self) -> float:
         """Getter to obtain the scaling of the graph."""
         return self._scaling
 
