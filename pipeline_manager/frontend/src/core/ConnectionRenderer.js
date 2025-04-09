@@ -93,6 +93,8 @@ export default class ConnectionRenderer {
 
     randomizedOffset = false;
 
+    shiftDistance = 15;
+
     /**
      * Defines the shift the connection should have compared to the default position based on the
      * index of the `from` interface and `to` interface bound to the connection in the nodes.
@@ -108,24 +110,14 @@ export default class ConnectionRenderer {
      * @returns Value the connection should shift from it's default position
      */
     getShift(ncFrom, ncTo, graph, scaling) {
-        const shiftDistance = 15;
-        const fromNode = graph.findNodeById(ncFrom.nodeId);
-        const toNode = graph.findNodeById(ncTo.nodeId);
-
         const fromPosition = ncFrom.sidePosition;
         const toPosition = ncTo.sidePosition;
 
         const shiftIndex = (fromPosition + toPosition) / 2;
 
         if (this.randomizedOffset) {
-            const fromNodeNeighbours = [
-                ...Object.values(fromNode.inputs),
-                ...Object.values(fromNode.outputs),
-            ].filter((c) => c.side === ncFrom.side && c.port);
-            const toNodeNeighbours = [
-                ...Object.values(toNode.inputs),
-                ...Object.values(toNode.outputs),
-            ].filter((c) => c.side === ncTo.side && c.port);
+            const fromInterfaceNeighbours = this.getInterfaceNeighbors(ncFrom, graph);
+            const toInterfaceNeighbours = this.getInterfaceNeighbors(ncTo, graph);
 
             // the string is a sum of utf16 representation of each character
             let toRandomIndex =
@@ -136,13 +128,61 @@ export default class ConnectionRenderer {
                 0;
 
             const randomIndex = (toRandomIndex ^ fromRandomIndex); // eslint-disable-line no-bitwise
-            fromRandomIndex = randomIndex % fromNodeNeighbours.length;
-            toRandomIndex = randomIndex % toNodeNeighbours.length;
+            fromRandomIndex = randomIndex % fromInterfaceNeighbours.length;
+            toRandomIndex = randomIndex % toInterfaceNeighbours.length;
             const randomShiftIndex = (fromRandomIndex + toRandomIndex) / 2;
             return this.shiftDistance * (randomShiftIndex / 2 + shiftIndex / 2) * scaling;
         }
 
-        return shiftDistance * shiftIndex * scaling;
+        return this.shiftDistance * shiftIndex * scaling;
+    }
+
+    /**
+     * Checks maximum number of interfaces and computes maximum shift.
+     *
+     * @param ncFrom node from reference
+     * @param ncTo to node reference
+     * @param graph the graph definition
+     * @param scaling number from viewModel defining the scaling of canvas
+     * @returns Maximum value of the shift that the connection can obtain
+     */
+    getMaxShift(ncFrom, ncTo, graph, scaling) {
+        const maxFrom = this.getInterfaceNeighbors(ncFrom, graph).length - 1;
+        const maxTo = this.getInterfaceNeighbors(ncTo, graph).length - 1;
+        return this.shiftDistance * ((maxFrom + maxTo) / 2) * scaling;
+    }
+
+    /**
+     * Checks node and returns interfaces on the same side.
+     *
+     * @param interfaceRef node reference
+     * @param graph the graph definition
+     * @returns Array of neighboring intefraces on the same side
+     */
+    // eslint-disable-next-line class-methods-use-this
+    getInterfaceNeighbors(interfaceRef, graph) {
+        const node = graph.findNodeById(interfaceRef.nodeId);
+        return [
+            ...Object.values(node.inputs),
+            ...Object.values(node.outputs),
+        ].filter((c) => c.side === interfaceRef.side && c.port);
+    }
+
+    /**
+     * Checks whether one of the nodes is above or below the other one.
+     *
+     * @param ncFrom from interface reference
+     * @param ncTo to interface reference
+     * @param graph the graph definition
+     * @returns True if one node is higher than the other one
+     */
+    // eslint-disable-next-line class-methods-use-this
+    someAboveOrBelow(ncFrom, ncTo, graph) {
+        const nodeFromTop = nodeTopPoint(ncFrom, graph.scaling, graph.panning);
+        const nodeToTop = nodeTopPoint(ncTo, graph.scaling, graph.panning);
+        const nodeFromBottom = nodeBottomPoint(ncFrom, graph.scaling, graph.panning);
+        const nodeToBottom = nodeBottomPoint(ncTo, graph.scaling, graph.panning);
+        return nodeFromBottom < nodeToTop || nodeFromTop > nodeToBottom;
     }
 
     /* eslint-disable class-methods-use-this */
@@ -477,6 +517,90 @@ export default class ConnectionRenderer {
         return undefined;
     }
 
+    alternativeOrthogonalRender(x1, y1, x2, y2, connection) {
+        const graph = this.viewModel.displayedGraph;
+        const nc = new NormalizedConnection(x1, y1, x2, y2, connection);
+
+        if (connection.anchors !== undefined && connection.anchors.length) {
+            return this.orthogonalAnchorsPath(connection.anchors, nc, graph);
+        }
+
+        const minMargin = 30 * graph.scaling;
+        const middlePoint = (nc.x1 + nc.x2) / 2;
+
+        if (connection.to) {
+            const shift = this.getShift(nc.from, nc.to, graph, graph.scaling);
+            const maxShift = this.getMaxShift(nc.from, nc.to, graph, graph.scaling) || 1;
+
+            const turnDistance = Math.abs(nc.x1 - nc.x2) - 2 * minMargin;
+            const minTurnDistance = minMargin * (2 + maxShift / graph.scaling / 30);
+            const minTurnDistanceViolated = turnDistance < minTurnDistance;
+            const maxTurnDistance = minTurnDistance * 2;
+
+            let interpolatedShift;
+            if (turnDistance < maxTurnDistance) {
+                interpolatedShift = (shift / maxShift) * turnDistance;
+            } else {
+                interpolatedShift = (shift / maxShift) * maxTurnDistance
+                    + (turnDistance - maxTurnDistance) / 2;
+            }
+
+            const differentLevels = this.someAboveOrBelow(nc.from, nc.to, graph);
+
+            if (nc.from.side === 'right' && nc.to.side === 'left') {
+                // S connection
+                const nodeOverlap = nc.x1 > nc.x2;
+                if ((differentLevels && minTurnDistanceViolated) || nodeOverlap) {
+                    const firstTurn = nc.x1 + minMargin + (shift / maxShift) * minTurnDistance;
+                    const lastTurn = nc.x2 - minMargin + (shift / maxShift - 1) * minTurnDistance;
+                    return `M ${nc.x1} ${nc.y1}
+                    H ${firstTurn}
+                    V ${(nc.y1 + nc.y2) / 2}
+                    H ${lastTurn}
+                    V ${nc.y2}
+                    H ${nc.x2}`;
+                }
+
+                // Z connection
+                const mid = nc.x1 + minMargin + interpolatedShift;
+                return `M ${nc.x1} ${nc.y1} H ${mid} V ${nc.y2} H ${nc.x2}`;
+            }
+            if (nc.from.side === 'left' && nc.to.side === 'right') {
+                // S connection
+                const nodeOverlap = nc.x2 > nc.x1;
+                if ((differentLevels && minTurnDistanceViolated) || nodeOverlap) {
+                    const firstTurn = nc.x2 + minMargin + (shift / maxShift) * minTurnDistance;
+                    const lastTurn = nc.x1 - minMargin + (shift / maxShift - 1) * minTurnDistance;
+                    return `M ${nc.x2} ${nc.y2}
+                    H ${firstTurn}
+                    V ${(nc.y1 + nc.y2) / 2}
+                    H ${lastTurn}
+                    V ${nc.y1}
+                    H ${nc.x1}`;
+                }
+
+                // Z connection
+                const mid = nc.x2 + minMargin + interpolatedShift;
+                return `M ${nc.x2} ${nc.y2} H ${mid} V ${nc.y1} H ${nc.x1}`;
+            }
+            if (nc.from.side === 'right' && nc.to.side === 'right') {
+                return `M ${nc.x1} ${nc.y1} H ${
+                    Math.max(nc.x1, nc.x2, middlePoint) + shift + minMargin
+                } V ${nc.y2} H ${nc.x2}`;
+            }
+            if (nc.from.side === 'left' && nc.to.side === 'left') {
+                return `M ${nc.x1} ${nc.y1} H ${
+                    Math.min(nc.x1, nc.x2, middlePoint) - shift - minMargin
+                } V ${nc.y2} H ${nc.x2}`;
+            }
+        }
+        return `M ${nc.x1} ${nc.y1} H ${middlePoint} V ${nc.y2} H ${nc.x2}`;
+    }
+
+    alternativeOrthogonalRenderLoopback(x1, y1, x2, y2, connection) {
+        return this.orthogonalRenderLoopback(x1, y1, x2, y2, connection);
+    }
+
     straightRender(x1, y1, x2, y2, connection) {
         const graph = this.viewModel.displayedGraph;
         return [{ x: x1, y: y1 }]
@@ -531,6 +655,6 @@ export default class ConnectionRenderer {
      * @returns True if style supports anchors.
      */
     supportsAnchors() {
-        return ['orthogonal', 'straight'].includes(this.style);
+        return ['orthogonal', 'alternativeOrthogonal', 'straight'].includes(this.style);
     }
 }
