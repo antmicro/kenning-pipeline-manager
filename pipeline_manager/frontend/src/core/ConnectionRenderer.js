@@ -457,6 +457,21 @@ export default class ConnectionRenderer {
         return undefined;
     }
 
+    straightRender(x1, y1, x2, y2, connection) {
+        const graph = this.viewModel.displayedGraph;
+        return [{ x: x1, y: y1 }]
+            .concat((connection.anchors ?? []).map((a) => {
+                const tx = (a.x + graph.panning.x) * graph.scaling;
+                const ty = (a.y + graph.panning.y) * graph.scaling;
+                return { x: tx, y: ty };
+            }))
+            .concat([{ x: x2, y: y2 }]);
+    }
+
+    straightRenderLoopback(x1, y1, x2, y2, connection) {
+        return this.curvedRenderLoopback(x1, y1, x2, y2, connection);
+    }
+
     constructor(viewModel, style, randomizedOffset = false) {
         this.viewModel = viewModel;
         this.style = style;
@@ -496,6 +511,6 @@ export default class ConnectionRenderer {
      * @returns True if style supports anchors.
      */
     supportsAnchors() {
-        return ['orthogonal'].includes(this.style);
+        return ['orthogonal', 'straight'].includes(this.style);
     }
 }
