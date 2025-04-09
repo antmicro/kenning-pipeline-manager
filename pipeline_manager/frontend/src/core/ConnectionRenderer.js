@@ -244,95 +244,99 @@ export default class ConnectionRenderer {
         A ${leftRx} ${leftRy} 0 0 1 ${leftx} ${lefty}`;
     }
 
+    orthogonalAnchorsPath(anchors, nc, graph) {
+        const calculatedAnchors = anchors.map((anchor) => {
+            const transform = (a) => {
+                const tx = (a.x + graph.panning.x) * graph.scaling;
+                const ty = (a.y + graph.panning.y) * graph.scaling;
+                return { x: tx, y: ty };
+            };
+
+            return transform(anchor);
+        });
+
+        const path = [{ x: nc.x1, y: nc.y1 }];
+        let direction = nc.from.side;
+        if (direction === 'right') {
+            path.push({ x: nc.x1 + 10, y: nc.y1 });
+        } else if (direction === 'left') {
+            path.push({ x: nc.x1 - 10, y: nc.y1 });
+        }
+        direction = 'horizontal';
+        calculatedAnchors.forEach((anchor) => {
+            if (direction === 'vertical') {
+                path.push({
+                    x: path[path.length - 1].x + (anchor.x - path[path.length - 1].x) / 2,
+                    y: path[path.length - 1].y,
+                });
+                path.push({
+                    x: path[path.length - 2].x + (anchor.x - path[path.length - 2].x) / 2,
+                    y: anchor.y,
+                });
+                path.push({
+                    x: anchor.x,
+                    y: anchor.y,
+                });
+                direction = 'horizontal';
+            } else {
+                path.push({
+                    x: path[path.length - 1].x,
+                    y: path[path.length - 1].y + (anchor.y - path[path.length - 1].y) / 2,
+                });
+                path.push({
+                    x: anchor.x,
+                    y: path[path.length - 2].y + (anchor.y - path[path.length - 2].y) / 2,
+                });
+                path.push({
+                    x: anchor.x,
+                    y: anchor.y,
+                });
+                direction = 'vertical';
+            }
+        });
+        if (direction === 'vertical') {
+            path.push({
+                x: path[path.length - 1].x + (nc.x2 - path[path.length - 1].x) / 2,
+                y: path[path.length - 1].y,
+            });
+            path.push({
+                x: path[path.length - 2].x + (nc.x2 - path[path.length - 2].x) / 2,
+                y: nc.y2,
+            });
+            path.push({
+                x: nc.x2,
+                y: nc.y2,
+            });
+        } else {
+            path.push({
+                x: path[path.length - 1].x,
+                y: path[path.length - 1].y + (nc.y2 - path[path.length - 1].y) / 2,
+            });
+            let offset = 0;
+            if (nc.to.side === 'left') offset = 10;
+            else offset = -10;
+            path.push({
+                x: nc.x2 - offset,
+                y: path[path.length - 2].y + (nc.y2 - path[path.length - 2].y) / 2,
+            });
+            path.push({
+                x: nc.x2 - offset,
+                y: nc.y2,
+            });
+            path.push({
+                x: nc.x2,
+                y: nc.y2,
+            });
+        }
+        return path;
+    }
+
     orthogonalRender(x1, y1, x2, y2, connection) {
         const graph = this.viewModel.displayedGraph;
         const nc = new NormalizedConnection(x1, y1, x2, y2, connection);
 
         if (connection.anchors !== undefined && connection.anchors.length) {
-            const anchors = connection.anchors.map((anchor) => {
-                const transform = (a) => {
-                    const tx = (a.x + graph.panning.x) * graph.scaling;
-                    const ty = (a.y + graph.panning.y) * graph.scaling;
-                    return { x: tx, y: ty };
-                };
-
-                return transform(anchor);
-            });
-
-            const path = [{ x: nc.x1, y: nc.y1 }];
-            let direction = nc.from.side;
-            if (direction === 'right') {
-                path.push({ x: nc.x1 + 10, y: nc.y1 });
-            } else if (direction === 'left') {
-                path.push({ x: nc.x1 - 10, y: nc.y1 });
-            }
-            direction = 'horizontal';
-            anchors.forEach((anchor) => {
-                if (direction === 'vertical') {
-                    path.push({
-                        x: path[path.length - 1].x + (anchor.x - path[path.length - 1].x) / 2,
-                        y: path[path.length - 1].y,
-                    });
-                    path.push({
-                        x: path[path.length - 2].x + (anchor.x - path[path.length - 2].x) / 2,
-                        y: anchor.y,
-                    });
-                    path.push({
-                        x: anchor.x,
-                        y: anchor.y,
-                    });
-                    direction = 'horizontal';
-                } else {
-                    path.push({
-                        x: path[path.length - 1].x,
-                        y: path[path.length - 1].y + (anchor.y - path[path.length - 1].y) / 2,
-                    });
-                    path.push({
-                        x: anchor.x,
-                        y: path[path.length - 2].y + (anchor.y - path[path.length - 2].y) / 2,
-                    });
-                    path.push({
-                        x: anchor.x,
-                        y: anchor.y,
-                    });
-                    direction = 'vertical';
-                }
-            });
-            if (direction === 'vertical') {
-                path.push({
-                    x: path[path.length - 1].x + (nc.x2 - path[path.length - 1].x) / 2,
-                    y: path[path.length - 1].y,
-                });
-                path.push({
-                    x: path[path.length - 2].x + (nc.x2 - path[path.length - 2].x) / 2,
-                    y: nc.y2,
-                });
-                path.push({
-                    x: nc.x2,
-                    y: nc.y2,
-                });
-            } else {
-                path.push({
-                    x: path[path.length - 1].x,
-                    y: path[path.length - 1].y + (nc.y2 - path[path.length - 1].y) / 2,
-                });
-                let offset = 0;
-                if (nc.to.side === 'left') offset = 10;
-                else offset = -10;
-                path.push({
-                    x: nc.x2 - offset,
-                    y: path[path.length - 2].y + (nc.y2 - path[path.length - 2].y) / 2,
-                });
-                path.push({
-                    x: nc.x2 - offset,
-                    y: nc.y2,
-                });
-                path.push({
-                    x: nc.x2,
-                    y: nc.y2,
-                });
-            }
-            return path;
+            return this.orthogonalAnchorsPath(connection.anchors, nc, graph);
         }
 
         const minMargin = 30 * graph.scaling;
