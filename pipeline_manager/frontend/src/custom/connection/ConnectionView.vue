@@ -105,7 +105,7 @@ export default defineComponent({
         const onMouseCtrlDown = (ev, index) => {
             if (
                 viewModel.value.editor.readonly ||
-                viewModel.value.connectionRenderer.style !== 'orthogonal'
+                !viewModel.value.connectionRenderer.supportsAnchors()
             ) return;
             ev.preventDefault();
 
@@ -149,7 +149,7 @@ export default defineComponent({
         const hasAnchors = computed(() =>
             props.connection.anchors !== undefined &&
             props.connection.anchors.length &&
-            viewModel.value.connectionRenderer.style === 'orthogonal',
+            viewModel.value.connectionRenderer.supportsAnchors(),
         );
 
         return {
