@@ -17,14 +17,13 @@
  * Used for loopback connections, calculates the y coordinate of a bottom point of a node
  * based on it's DOM element. If the element does not yet exists, returns 0
  *
- * @param connection BaklavaJS-defined connection
+ * @param interfaceRef interface reference
  * @param scaling number from viewModel defining the scaling of canvas
  * @param panning (x, y) point from viewModel defining the translation of canvas
  * @returns Y coordinate of a bottom of a node, adjusted for canvas transformation
  */
-function nodeBottomPoint(connection, scaling, panning) {
-    const { nodeId } = connection.from;
-    const nodeHtml = document.getElementById(nodeId);
+function nodeBottomPoint(interfaceRef, scaling, panning) {
+    const nodeHtml = document.getElementById(interfaceRef.nodeId);
     const nodeBottom = nodeHtml ? nodeHtml.offsetTop + nodeHtml.offsetHeight : 0;
     return (nodeBottom + panning.y) * scaling;
 }
@@ -207,7 +206,7 @@ export default class ConnectionRenderer {
 
         const lefty = nc.from.side === 'left' ? nc.y1 : nc.y2;
         const righty = nc.to.side === 'right' ? nc.y2 : nc.y1;
-        const bottomY = nodeBottomPoint(connection, graph.scaling, graph.panning);
+        const bottomY = nodeBottomPoint(nc.from, graph.scaling, graph.panning);
 
         const y = bottomY + shift;
 
@@ -430,7 +429,7 @@ export default class ConnectionRenderer {
             return path;
         }
 
-        const bottomY = nodeBottomPoint(connection, graph.scaling, graph.panning);
+        const bottomY = nodeBottomPoint(nc.from, graph.scaling, graph.panning);
         const y = bottomY + shift;
 
         if (nc.from.side === 'right' && nc.to.side === 'left') {
