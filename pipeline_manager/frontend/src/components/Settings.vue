@@ -58,6 +58,7 @@ export default {
             const items = [
                 { text: 'Curved', value: 'curved' },
                 { text: 'Orthogonal', value: 'orthogonal' },
+                { text: 'Alternative orthogonal', value: 'alternativeOrthogonal' },
                 { text: 'Straight', value: 'straight' },
             ];
             const option = new SelectInterface(
