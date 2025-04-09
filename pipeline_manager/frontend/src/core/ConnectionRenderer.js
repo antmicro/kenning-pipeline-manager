@@ -14,6 +14,22 @@
 /* eslint-disable max-classes-per-file */
 
 /**
+ * Retrieves top point of a node based on it's DOM element If the element does not yet exists,
+ * returns 0
+ *
+ * @param interfaceRef interface reference
+ * @param scaling number from viewModel defining the scaling of canvas
+ * @param panning (x, y) point from viewModel defining the translation of canvas
+ * @returns Y coordinate of a bottom of a node, adjusted for canvas transformation
+ */
+/* eslint-disable no-unused-vars */
+function nodeTopPoint(interfaceRef, scaling, panning) {
+    const nodeHtml = document.getElementById(interfaceRef.nodeId);
+    const nodeTop = nodeHtml ? nodeHtml.offsetTop : 0;
+    return (nodeTop + panning.y) * scaling;
+}
+
+/**
  * Used for loopback connections, calculates the y coordinate of a bottom point of a node
  * based on it's DOM element. If the element does not yet exists, returns 0
  *
