@@ -489,4 +489,13 @@ export default class ConnectionRenderer {
         // are not loopback
         return !!connection.to && connection.from.nodeId === connection.to.nodeId;
     }
+
+    /**
+     * Checks whether the current style supports anchors.
+     *
+     * @returns True if style supports anchors.
+     */
+    supportsAnchors() {
+        return ['orthogonal'].includes(this.style);
+    }
 }
