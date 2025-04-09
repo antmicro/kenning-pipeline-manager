@@ -128,17 +128,18 @@ export default class ConnectionRenderer {
             ].filter((c) => c.side === ncTo.side && c.port);
 
             // the string is a sum of utf16 representation of each character
-            const toRandomIndex =
+            let toRandomIndex =
                 [...ncTo.id].reduce((accumulator, char) => accumulator + char.charCodeAt(0), 0) ??
                 0;
-            const fromRandomIndex =
+            let fromRandomIndex =
                 [...ncFrom.id].reduce((accumulator, char) => accumulator + char.charCodeAt(0), 0) ??
                 0;
 
-            const randomIndex =
-                (toRandomIndex ^ fromRandomIndex) % // eslint-disable-line no-bitwise
-                (fromNodeNeighbours.length + toNodeNeighbours.length);
-            return shiftDistance * (randomIndex + shiftIndex) * scaling;
+            const randomIndex = (toRandomIndex ^ fromRandomIndex); // eslint-disable-line no-bitwise
+            fromRandomIndex = randomIndex % fromNodeNeighbours.length;
+            toRandomIndex = randomIndex % toNodeNeighbours.length;
+            const randomShiftIndex = (fromRandomIndex + toRandomIndex) / 2;
+            return this.shiftDistance * (randomShiftIndex / 2 + shiftIndex / 2) * scaling;
         }
 
         return shiftDistance * shiftIndex * scaling;
