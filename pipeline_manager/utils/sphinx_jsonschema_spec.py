@@ -64,9 +64,13 @@ def generate_for_endpoints(spec: Dict, reference_prefix: str) -> List[str]:
         if "description" in schema:
             results.append(schema["description"] + "\n\n")
         if "params" in schema:
-            results.extend(PARSER._parse_object(schema["params"], "params"))
+            results.extend(
+                PARSER._parse_object(schema["params"], "params", [])
+            )
         if "returns" in schema and schema["returns"]:
-            results.extend(PARSER._parse_object(schema["returns"], "result"))
+            results.extend(
+                PARSER._parse_object(schema["returns"], "result", [])
+            )
     return results
 
 
@@ -121,7 +125,7 @@ def generate_schema_md() -> str:
     for name, definition in common_types["$defs"].items():
         results.append(f"({quote(f'mmon_types#/$defs/{name}')})=\n\n")
         results.append(f"#### {name}\n\n")
-        results.extend(PARSER._parse_object(definition, None))
+        results.extend(PARSER._parse_object(definition, None, []))
 
     for idx, item in enumerate(results):
         # NOTE: Modify regex if specification changes
