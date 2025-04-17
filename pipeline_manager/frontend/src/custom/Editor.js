@@ -13,7 +13,7 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { Editor, GRAPH_NODE_TYPE_PREFIX } from '@baklavajs/core';
+import { Editor } from '@baklavajs/core';
 
 import { useGraph } from '@baklavajs/renderer-vue';
 
@@ -528,22 +528,20 @@ export default class PipelineManagerEditor extends Editor {
         } return false;
     }
 
-    addGraphTemplate(template, category, type, isCategory = false) {
+    addGraphTemplate(template, graphNode) {
         if (this.events.beforeAddGraphTemplate.emit(template).prevented) {
-            return;
-        }
-        if (this.nodeTypes.has(`${GRAPH_NODE_TYPE_PREFIX}${template.id}`)) {
             return;
         }
         this._graphTemplates.push(template);
         this.graphTemplateEvents.addTarget(template.events);
         this.graphTemplateHooks.addTarget(template.hooks);
 
-        const customGraphNodeType = CreateCustomGraphNodeType(template, type);
+        const customGraphNodeType = CreateCustomGraphNodeType(template, graphNode);
         this.registerNodeType(customGraphNodeType, {
-            category,
-            title: template.name,
-            isCategory,
+            category: graphNode.category,
+            title: graphNode.title,
+            isCategory: graphNode.isCategory,
+            color: graphNode.color,
         });
 
         this.events.addGraphTemplate.emit(template);
