@@ -5,24 +5,40 @@
  *
  */
 
-import {
-    createGraphNodeType,
-    GRAPH_NODE_TYPE_PREFIX,
-    NodeInterface,
-    Graph,
-} from '@baklavajs/core';
+import { NodeInterface, Graph } from '@baklavajs/core';
 import { v4 as uuidv4 } from 'uuid';
 import { parseInterfaces } from '../core/interfaceParser.js';
-import { updateSubgraphInterfaces } from '../core/NodeFactory.js';
+import { updateSubgraphInterfaces, CustomNode } from '../core/NodeFactory.js';
 import { ir } from '../core/interfaceRegistry.ts';
 
-export default function CreateCustomGraphNodeType(template, type) {
-    const nt = createGraphNodeType(template);
+export default function CreateCustomGraphNodeType(template, graphNode) {
+    return class CustomGraphNodeType extends CustomNode {
+        type = graphNode.name;
 
-    return class customGraphNodeType extends nt {
-        type = `${GRAPH_NODE_TYPE_PREFIX}${type}`;
+        title = graphNode.name;
 
-        title = type;
+        template = template;
+
+        inputs = {};
+
+        outputs = {};
+
+        properties = graphNode.properties ?? [];
+
+        constructor() {
+            super(
+                graphNode.name,
+                graphNode.layer,
+                graphNode.inputs ?? [],
+                graphNode.outputs ?? [],
+                false,
+                graphNode.description ?? '',
+                graphNode.extends ?? [],
+                graphNode.extending ?? [],
+                graphNode.siblings ?? [],
+                graphNode.width ?? 300,
+            );
+        }
 
         save() {
             const state = super.save();
@@ -44,11 +60,7 @@ export default function CreateCustomGraphNodeType(template, type) {
             delete state.inputs;
             delete state.outputs;
 
-            state.subgraph = state.graphState.id;
-
             state.name = state.type;
-            state.name = state.name.slice(GRAPH_NODE_TYPE_PREFIX.length);
-
             delete state.type;
 
             state.instanceName = state.title === '' ? undefined : state.title;
@@ -196,7 +208,7 @@ export default function CreateCustomGraphNodeType(template, type) {
                 if (foundIntf === undefined) {
                     const ni = new NodeInterface(nodeIntf.name);
                     Object.assign(ni, nodeIntf);
-                    ir.pushGraphIdToRegistry(ni.id, this.graph.id);
+                    ir.pushGraphIdToRegistry(ni.id, this.subgraph.id);
                     ir.createSharedInterface(ni);
 
                     const container = nodeIntf.direction === 'output' ? 'output' : 'input';
@@ -216,6 +228,7 @@ export default function CreateCustomGraphNodeType(template, type) {
          * @returns graph state ready to be loaded
          */
         prepareSubgraphInstance() {
+            this.updateProperties(this.properties);
             const idMap = new Map();
 
             const createNewId = (oldId) => {
