@@ -153,6 +153,7 @@ export default class PipelineManagerEditor extends Editor {
         if (this.events.beforeRegisterNodeType.emit({ type, options }).prevented) {
             return;
         }
+
         const nodeInstance = new type(); // eslint-disable-line new-cap
         this._nodeTypes.set(nodeInstance.type, {
             type,
@@ -161,6 +162,7 @@ export default class PipelineManagerEditor extends Editor {
             isCategory: options?.isCategory ?? false,
             color: options?.color,
         });
+
         this.events.registerNodeType.emit({ type, options });
     }
 

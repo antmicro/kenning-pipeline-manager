@@ -562,6 +562,14 @@ export default class EditorManager {
         if (graphs !== undefined) {
             // eslint-disable-next-line no-restricted-syntax
             for (const graph of graphs) {
+                // get graph node for the subgraph
+                let graphNode;
+                nodes.forEach((node) => {
+                    if (node.subgraphId === graph.id) {
+                        graphNode = node;
+                    }
+                });
+
                 const myGraph = GraphFactory(
                     graph.nodes,
                     graph.connections,
@@ -577,8 +585,7 @@ export default class EditorManager {
 
                 this.baklavaView.editor.addGraphTemplate(
                     myGraph,
-                    graph.category ?? DEFAULT_GRAPH_NODE_CATEGORY,
-                    graph.name,
+                    graphNode,
                 );
 
                 // Category is not needed when loading a dataflow
