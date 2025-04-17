@@ -140,7 +140,7 @@ from moving or deleting the nodes.
 /* eslint-disable object-curly-newline */
 import { ref, computed, toRef, onUpdated, onMounted, nextTick, markRaw, watch } from 'vue';
 import { useViewModel, useGraph } from '@baklavajs/renderer-vue';
-import { AbstractNode, GRAPH_NODE_TYPE_PREFIX } from '@baklavajs/core';
+import { AbstractNode } from '@baklavajs/core';
 import DOMPurify from 'dompurify';
 
 import useGroupDragMove from './useGroupDragMove';
@@ -193,6 +193,7 @@ const tempName = ref('');
 const nodeURLs = viewModel.value.editor.getNodeURLs(props.node.type);
 const nodeColor = viewModel.value.editor.getNodeColor(props.node.type);
 const nodeTitleColor = viewModel.value.editor.getNodeTitleColor(props.node.type);
+const isGraphNode = viewModel.value.editor.isGraphNode(props.node.type);
 
 const displayNoResources = !viewModel.value.editor.nodeURLsEmpty();
 
@@ -267,7 +268,7 @@ const contextMenuTitleItems = computed(() => {
     if (!viewModel.value.editor.readonly) {
         items.push({ value: 'rename', label: 'Rename', icon: icons.Pencil });
     }
-    if (props.node.type.startsWith(GRAPH_NODE_TYPE_PREFIX)) {
+    if (isGraphNode) {
         items.push({ value: 'editSubgraph', label: 'Edit Subgraph' });
     }
     if (items.length > 1) {
@@ -289,7 +290,7 @@ const contextMenuTitleItems = computed(() => {
     // NOTE: This feature is disabled for now, as it is not fully implemented
     const SUPPORT_NODE_UNWRAPPING = false;
     if (SUPPORT_NODE_UNWRAPPING) {
-        if (props.node.type.startsWith(GRAPH_NODE_TYPE_PREFIX)) {
+        if (isGraphNode) {
             items.push({ value: 'unwrap', label: 'Unwrap Subgraph', icon: icons.Unwrap });
         }
     }
@@ -402,20 +403,6 @@ const styles = computed(() => ({
 const nodeTitle = computed(() => {
     const title = props.node.highlightedTitle ?? props.node.title;
     const type = props.node.highlightedType ?? props.node.type;
-
-    // Graph node case
-    if (props.node.type.startsWith(GRAPH_NODE_TYPE_PREFIX)) {
-        if (title === '' || title === undefined) {
-            // The highlighted title does not have the GRAPH_NODE_TYPE_PREFIX
-            // because otherwise <span> tags could mangle the name
-            if (props.node.highlightedTitle === props.node.title) {
-                return type.slice(GRAPH_NODE_TYPE_PREFIX.length);
-            }
-            return type;
-        }
-
-        return title;
-    }
 
     if (title === '' || props.node.title === props.node.type) {
         return type;
