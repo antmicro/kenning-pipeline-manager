@@ -520,6 +520,12 @@ export default class PipelineManagerEditor extends Editor {
         return 'white';
     }
 
+    isGraphNode(nodeName) {
+        if (this.nodeTypes.get(nodeName).subgraphId !== undefined) {
+            return true;
+        } return false;
+    }
+
     addGraphTemplate(template, category, type, isCategory = false) {
         if (this.events.beforeAddGraphTemplate.emit(template).prevented) {
             return;
