@@ -164,18 +164,13 @@ There is also a possibility to pass JSON objects directly to the frontend, witho
 This can be done by sending [POST requests](https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage) from an external app opening Pipeline Manager, e.g:
 
 ```javascript
-const iframe = document.getElementById({PipelineManagerIframe});
-iframe.contentWindow.postMessage({"type": "specification", "content": data}, {PipelineManagerURL});
+const iframe = document.getElementById(pipelineManagerIframe);
+iframe.contentWindow.postMessage({ specification, dataflow }, pipelineManagerURL);
 ```
 
 This piece of code opens Pipeline Manager in an iframe and provides it with a `data` JSON object containing the requested specification.
 
-The following message types are supported:
-
-* `specification`
-* `dataflow`
-
-The requested JSON object has to be included in the `content` field.
+The window accepts a specification, or a dataflow, or both.
 
 
 ## Testing the front-end features
