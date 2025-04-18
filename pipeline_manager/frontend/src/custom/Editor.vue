@@ -112,7 +112,7 @@ export default defineComponent({
         NodePalette,
         RectangleSelection,
     },
-    emits: ['loadFinish'],
+    emits: ['setLoad'],
     setup(props, { emit }) {
         const {
             el,
@@ -661,7 +661,7 @@ export default defineComponent({
 
                 if (errors.length) {
                     NotificationHandler.restoreShowNotification();
-                    emit('loadFinish');
+                    emit('setLoad', false);
                     return;
                 }
 
@@ -690,7 +690,7 @@ export default defineComponent({
                 }
             }
             NotificationHandler.restoreShowNotification();
-            emit('loadFinish');
+            emit('setLoad', false);
         });
 
         const onDrop = async (event) => {
@@ -726,15 +726,21 @@ export default defineComponent({
                     return;
                 }
 
+                emit('setLoad', true);
+                const resolve = () => emit('setLoad', false);
+
                 if (data.nodes) { // Load Specification
                     await updateEditorSpecification(data);
+                    resolve();
                     return;
                 }
 
                 if (data.graphs) { // Load Dataflow
                     await updateDataflow(data);
+                    resolve();
                     return;
                 }
+                emit('setLoad', false);
 
                 NotificationHandler.showToast(
                     'error',

@@ -10,15 +10,15 @@ The entrypoint of the application.
 
 <template>
     <div>
-        <LoadingScreen v-if="!finishedLoading" />
+        <LoadingScreen v-if="loading" />
         <div id="container">
-            <NavBar />
+            <NavBar @setLoad="handleLoad" />
             <Editor
                 class="inner-editor"
                 :view-model="editorManager.baklavaView"
-                @loadFinish="handleLoadFinish"
+                @setLoad="handleLoad"
             />
-            <TerminalPanel v-show="finishedLoading && !hideHud" />
+            <TerminalPanel v-show="!loading && !hideHud" />
         </div>
     </div>
 </template>
@@ -41,7 +41,7 @@ export default {
     },
     setup() {
         const editorManager = EditorManager.getEditorManagerInstance();
-        const finishedLoading = ref(false);
+        const loading = ref(true);
 
         const cache = {};
         // Importing all assets to a cache so that they can be accessed dynamically during runtime
@@ -58,15 +58,15 @@ export default {
 
         const hideHud = computed(() => editorManager.baklavaView.editor.hideHud);
 
-        const handleLoadFinish = () => {
-            finishedLoading.value = true;
+        const handleLoad = (value) => {
+            loading.value = value;
         };
 
         return {
             editorManager,
             hideHud,
-            handleLoadFinish,
-            finishedLoading,
+            handleLoad,
+            loading,
         };
     },
 };

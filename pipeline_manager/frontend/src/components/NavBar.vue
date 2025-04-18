@@ -71,6 +71,7 @@ export default {
         BlurPanel,
         CustomSidebar,
     },
+    emits: ['setLoad'],
     computed: {
         dataflowGraphName() {
             return this.editorManager.editor.graphName;
@@ -302,26 +303,28 @@ export default {
          * It first validates the specification file. If the validation is successful the
          * specification is loaded. Otherwise a proper log is printed to the user.
          *
-         * @param {string} specText specification to validate and load
+         * @param {string} specText specification to validate and load.
+         * @returns {Promise} result after validation and loading.
          */
-        loadSpecification(specText) {
+        async loadSpecification(specText) {
             const validationErrors = EditorManager.validateSpecification(specText);
             if (Array.isArray(validationErrors) && validationErrors.length) {
                 NotificationHandler.terminalLog('error', 'Specification is invalid', validationErrors);
-                return;
+                return Promise.resolve();
             }
-            this.editorManager.updateEditorSpecification(specText).then(({ errors, warnings }) => {
-                if (Array.isArray(warnings) && warnings.length) {
-                    NotificationHandler.terminalLog(
-                        'warning',
-                        'Issue when loading specification',
-                        warnings,
-                    );
-                }
-                if (Array.isArray(errors) && errors.length) {
-                    NotificationHandler.terminalLog('error', 'Specification is invalid', errors);
-                }
-            });
+            return this.editorManager.updateEditorSpecification(specText)
+                .then(({ errors, warnings }) => {
+                    if (Array.isArray(warnings) && warnings.length) {
+                        NotificationHandler.terminalLog(
+                            'warning',
+                            'Issue when loading specification',
+                            warnings,
+                        );
+                    }
+                    if (Array.isArray(errors) && errors.length) {
+                        NotificationHandler.terminalLog('error', 'Specification is invalid', errors);
+                    }
+                });
         },
 
         createNewGraphCallback() {
@@ -338,10 +341,13 @@ export default {
             const file = document.getElementById('load-spec-button').files[0];
             if (!file) return;
 
+            this.$emit('setLoad', true);
+            const resolve = () => this.$emit('setLoad', false);
+
             const fileReader = new FileReader();
 
             fileReader.onload = () => {
-                this.loadSpecification(fileReader.result);
+                this.loadSpecification(fileReader.result).then(resolve);
             };
 
             fileReader.readAsText(file);
@@ -397,9 +403,12 @@ export default {
 
         /**
          * Loads nodes' specification from JSON structure.
+         *
+         * @param {string} specText specification to validate and load.
+         * @returns {Promise} result after validation and loading.
          */
-        loadDataflow(dataflow) {
-            this.editorManager.loadDataflow(dataflow).then(({ errors, warnings }) => {
+        async loadDataflow(dataflow) {
+            return this.editorManager.loadDataflow(dataflow).then(({ errors, warnings }) => {
                 if (Array.isArray(warnings) && warnings.length) {
                     NotificationHandler.terminalLog(
                         'warning',
@@ -424,6 +433,9 @@ export default {
             const file = document.getElementById('load-dataflow-button').files[0];
             if (!file) return;
 
+            this.$emit('setLoad', true);
+            const resolve = () => this.$emit('setLoad', false);
+
             const fileReader = new FileReader();
 
             fileReader.onload = async () => {
@@ -444,6 +456,7 @@ export default {
                             exception.toString(),
                         );
                     }
+                    resolve();
                     return;
                 }
 
@@ -451,7 +464,7 @@ export default {
                     dataflow,
                 });
 
-                this.loadDataflow(dataflow);
+                this.loadDataflow(dataflow).then(resolve);
             };
 
             fileReader.readAsText(file);
