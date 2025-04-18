@@ -1068,6 +1068,19 @@ class SpecificationBuilder(object):
         )
         self._nodes[name]["properties"].append(prop)
 
+    def add_node_type_color(self, name: str, color: str):
+        """
+        Sets color for the node.
+
+        Parameters
+        ----------
+        name: str
+            Name of the node
+        color: str
+            Color of the node
+        """
+        self._nodes[name]["color"] = color
+
     def update_node_type_from_spec(self, node):
         if node.get("isCategory", False):
             if "category" not in node:
