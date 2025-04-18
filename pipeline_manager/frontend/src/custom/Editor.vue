@@ -604,13 +604,22 @@ export default defineComponent({
             // Load specification and/or dataflow delivered via window.postMessage
             window.addEventListener('message', async (event) => {
                 // TODO: introduce mechanism for checking event.origin against allowed origins
-                if (event.data.type === 'specification') {
-                    await updateEditorSpecification(event.data.content);
-                } else if (event.data.type === 'dataflow') {
-                    await updateDataflow(event.data.content);
-                } else {
+                const { specification, dataflow } = event.data;
+
+                if (specification === undefined && dataflow === undefined) {
                     NotificationHandler.terminalLog('error', 'Message type is invalid');
+                    return;
                 }
+
+                emit('setLoad', true);
+
+                // Let Vue draw the spinner
+                // eslint-disable-next-line no-promise-executor-return
+                await new Promise((resolve) => setTimeout(resolve, 0));
+
+                if (specification !== undefined) { await updateEditorSpecification(specification); }
+                if (dataflow !== undefined) { await updateDataflow(dataflow); }
+                emit('setLoad', false);
             });
 
             NotificationHandler.setShowNotification(false);
