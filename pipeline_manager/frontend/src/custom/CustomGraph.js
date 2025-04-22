@@ -9,7 +9,7 @@
  */
 
 import {
-    GraphTemplate, DummyConnection, Connection, GRAPH_NODE_TYPE_PREFIX,
+    GraphTemplate, DummyConnection, Connection,
 } from '@baklavajs/core';
 import { v4 as uuidv4 } from 'uuid';
 import { BaklavaEvent } from '@baklavajs/events';
@@ -299,12 +299,8 @@ export default function createPipelineManagerGraph(graph) {
         this.name = state.name ?? undefined;
 
         state.nodes.forEach((n) => {
-            const isSubgraphNode = n.subgraph !== undefined;
-            if (isSubgraphNode) {
-                n.name = `${GRAPH_NODE_TYPE_PREFIX}${n.name}`;
-            }
-
             const nodeInformation = this.editor.nodeTypes.get(n.name);
+
             if (!nodeInformation) {
                 errors.push(`Node type ${n.name} is not registered`);
             } else {
