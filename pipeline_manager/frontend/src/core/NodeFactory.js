@@ -325,7 +325,7 @@ function parseNodeState(state) {
     return newState;
 }
 
-class CustomNode extends Node {
+export class CustomNode extends Node {
     inputs = {};
 
     outputs = {};
