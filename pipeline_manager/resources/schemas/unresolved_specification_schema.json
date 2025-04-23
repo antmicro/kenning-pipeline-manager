@@ -380,6 +380,7 @@
                             "description": "Type of the property",
                             "enum": [
                                 "text",
+                                "multiline",
                                 "number",
                                 "integer",
                                 "select",
@@ -510,6 +511,19 @@
                             "properties": {
                                 "type": {
                                     "const": "text"
+                                },
+                                "default": {
+                                    "type": [
+                                        "string",
+                                        "null"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "properties": {
+                                "type": {
+                                    "const": "multiline"
                                 },
                                 "default": {
                                     "type": [
