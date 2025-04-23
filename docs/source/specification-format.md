@@ -494,11 +494,40 @@ The included graphs are available in the node palette and can be used in the edi
 Included graphs cannot consist of more than one graph.
 ```
 
+Included graphs can be specified using the `includeGraphs` keyword.
+
+They have the following properties:
+
 * `name` - name of the included graph, if not passed, the name of the graph is inferred from the graph.
 * `category` - category in which the included graph is placed in the node palette, uses `/` as a delimiter.
   By default, the category is set to `default`.
 * `url` - URL, where the graph file is located.
   The file has to be in a valid [dataflow](project:dataflow-format.md) format.
+
+Graphs included in the node palette can also be described directly in the specification.
+
+To do that, use the `graphs` keyword and describe the graph using the [dataflow](project:dataflow-format.md) format.
+
+Keep in mind that the node used to represent the graph has to be declared in the specification as well.
+
+The node needs to have `subgraphId` that matched the `id` of the graph.
+
+It is possible to attach one graph to multiple nodes.
+
+```json
+{
+    "name": "Test subgraph node #2",
+    "category": "Second Category",
+    "color": "#6f091a",
+    "subgraphId": "129c6246-d874-48cd-a33c-2927961d42e8"
+},
+{
+    "name": "Test subgraph node #3",
+    "category": "Second Category",
+    "color": "#4e096f",
+    "subgraphId": "129c6246-d874-48cd-a33c-2927961d42e8"
+}
+```
 
 ## Example
 
