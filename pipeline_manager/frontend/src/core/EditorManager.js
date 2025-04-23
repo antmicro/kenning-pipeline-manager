@@ -54,6 +54,10 @@ export const DEFAULT_GRAPH_NODE_TYPE = `${GRAPH_NODE_TYPE_PREFIX}${DEFAULT_GRAPH
  * @returns a translated URL
  */
 function parseLocation(loc) {
+    if (loc.startsWith('data:application/json')) {
+        return loc;
+    }
+
     let relativeurl = '{}';
     if (typeof document !== 'undefined') {
         const urlparent = document.location.href.split('/').slice(0, -1).join('/');
