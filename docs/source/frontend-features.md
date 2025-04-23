@@ -140,6 +140,7 @@ When it comes to `spec` and `graph`, by default we can use following URI schemes
 
 * `http://`, `https://`
 * `relative://` - picks a path relative to the Pipeline Manager URL
+* `data:application,` or `data:application;base64,` - JSON embedded as [Data URL](https://developer.mozilla.org/en-US/docs/Web/URI/Reference/Schemes/data)
 
 To add more URI schemes, we need to define `VUE_APP_JSON_URL_SUBSTITUTES` variable holding a dictionary mapping scheme name to appropriate template/prefix.
 
