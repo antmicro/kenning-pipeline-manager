@@ -564,19 +564,23 @@ export default class EditorManager {
 
         if (graphs !== undefined) {
             // eslint-disable-next-line no-restricted-syntax
-            for (const graph of graphs) {
+            for (const node of nodes) {
                 // get graph node for the subgraph
+                if (node.subgraphId === undefined) continue; // eslint-disable-line no-continue
+
                 let graphNode;
-                nodes.forEach((node) => {
+                let subgraph;
+                graphs.forEach((graph) => {
                     if (node.subgraphId === graph.id) {
                         graphNode = node;
+                        subgraph = graph;
                     }
                 });
 
                 const myGraph = GraphFactory(
-                    graph.nodes,
-                    graph.connections,
-                    graph.name,
+                    subgraph.nodes,
+                    subgraph.connections,
+                    subgraph.name,
                     this.baklavaView.editor,
                 );
 
@@ -592,7 +596,7 @@ export default class EditorManager {
                 );
 
                 // Category is not needed when loading a dataflow
-                const graphToValidate = JSON.parse(JSON.stringify(graph));
+                const graphToValidate = JSON.parse(JSON.stringify(subgraph));
                 if (Object.prototype.hasOwnProperty.call(graphToValidate, 'category')) {
                     delete graphToValidate.category;
                 }
@@ -613,11 +617,11 @@ export default class EditorManager {
                 this.baklavaView.editor.unregisterGraphs();
 
                 warnings.push(
-                    ...loadingWarnings.map((warning) => `Graph '${graph.name}' is invalid: ${warning}`),
+                    ...loadingWarnings.map((warning) => `Graph '${subgraph.name}' is invalid: ${warning}`),
                 );
 
                 errors.push(
-                    ...loadingErrors.map((error) => `Graph '${graph.name}' is invalid: ${error}`));
+                    ...loadingErrors.map((error) => `Graph '${subgraph.name}' is invalid: ${error}`));
             }
         }
 
