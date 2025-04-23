@@ -148,7 +148,6 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { computed, defineComponent, watch, ref, nextTick } from 'vue'; // eslint-disable-line object-curly-newline
-import { GRAPH_NODE_TYPE_PREFIX } from '@baklavajs/core';
 import { CheckboxInterface, ButtonInterface } from '@baklavajs/renderer-vue'; // eslint-disable-line object-curly-newline
 import showdown from 'showdown';
 import DOMPurify from 'dompurify';
@@ -381,9 +380,6 @@ export default defineComponent({
 
         const displayedName = computed(() => {
             if (node.value.title === '' || node.value.title === undefined) {
-                if (node.value.type.startsWith(GRAPH_NODE_TYPE_PREFIX)) {
-                    return node.value.type.slice(GRAPH_NODE_TYPE_PREFIX.length);
-                }
                 return node.value.type;
             }
             return node.value.title;

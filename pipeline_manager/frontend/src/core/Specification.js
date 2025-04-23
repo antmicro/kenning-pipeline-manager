@@ -11,8 +11,6 @@
  * This class should be used as a singleton and should be accessed using the
  * getInstance() function.
  */
-import { GRAPH_NODE_TYPE_PREFIX } from '@baklavajs/core';
-
 export default class Specification {
     static instance = undefined;
 
@@ -47,12 +45,6 @@ export default class Specification {
      */
     getNodeSpecification(nodeName) {
         if (this.currentSpecification === undefined) return undefined;
-
-        if (nodeName.startsWith(GRAPH_NODE_TYPE_PREFIX)) {
-            return this.currentSpecification.graphs.find(
-                (n) => n.name === nodeName.slice(GRAPH_NODE_TYPE_PREFIX.length),
-            );
-        }
 
         return this.currentSpecification.nodes.find(
             (n) => n.name === nodeName,

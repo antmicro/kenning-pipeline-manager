@@ -86,7 +86,6 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
 
 <script>
 /* eslint-disable object-curly-newline */
-import { GRAPH_NODE_TYPE_PREFIX } from '@baklavajs/core';
 import { EditorComponent, useGraph } from '@baklavajs/renderer-vue';
 import { defineComponent, ref, computed, watch, onMounted, nextTick } from 'vue';
 import fuzzysort from 'fuzzysort';
@@ -485,11 +484,7 @@ export default defineComponent({
             const threshold = -50;
 
             const matchingNodes = visibleNodes.value.filter((node) => {
-                let { type } = node;
-                const isGraphNode = type.startsWith(GRAPH_NODE_TYPE_PREFIX);
-                if (isGraphNode) {
-                    type = type.slice(GRAPH_NODE_TYPE_PREFIX.length);
-                }
+                const { type } = node;
 
                 const resultTitle = fuzzysort.single(query, node.title);
                 const resultType = fuzzysort.single(query, type);
@@ -499,9 +494,6 @@ export default defineComponent({
                     node.highlightedTitle = fuzzysort.highlight(resultTitle, '<span>', '</span>');
                     node.highlightedType = fuzzysort.highlight(resultType, '<span>', '</span>');
 
-                    // If the node is a graph node, has a title and query does not match the title,
-                    // do not show the node
-                    if (isGraphNode && node.title !== '' && resultTitle === null) return false;
                     return true;
                 }
                 node.highlightedTitle = node.title;

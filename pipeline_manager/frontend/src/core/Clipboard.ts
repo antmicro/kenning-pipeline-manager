@@ -23,7 +23,6 @@ import {
     IConnectionState,
     Connection,
     NodeInterface,
-    GRAPH_NODE_TYPE_PREFIX,
 } from '@baklavajs/core';
 import {
     ICommandHandler, ICommand, useViewModel,
@@ -143,12 +142,7 @@ export function useClipboard(
         commandHandler.executeCommand<ICommand<void>>('START_TRANSACTION');
 
         for (let i = 0; i < parsedNodeBuffer.length; i += 1) {
-            let nodeType;
-            if (parsedNodeBuffer[i]?.subgraph !== undefined) {
-                nodeType = editor.value.nodeTypes.get(`${GRAPH_NODE_TYPE_PREFIX}${parsedNodeBuffer[i].name}`);
-            } else {
-                nodeType = editor.value.nodeTypes.get(parsedNodeBuffer[i].name);
-            }
+            const nodeType = editor.value.nodeTypes.get(parsedNodeBuffer[i].name);
 
             if (!nodeType) {
                 return;

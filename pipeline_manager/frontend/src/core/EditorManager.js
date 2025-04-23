@@ -11,7 +11,6 @@ import jsonMap from 'json-source-map';
 import jsonlint from 'jsonlint';
 
 import { useBaklava, useCommandHandler } from '@baklavajs/renderer-vue';
-import { GRAPH_NODE_TYPE_PREFIX } from '@baklavajs/core';
 import { toRaw, ref } from 'vue';
 import { useHistory } from './History.ts';
 import { useClipboard } from './Clipboard.ts';
@@ -45,7 +44,7 @@ class Metadata {
 // as a fallback category
 export const DEFAULT_GRAPH_NODE_CATEGORY = 'Graphs';
 export const DEFAULT_GRAPH_NODE_NAME = 'New Graph Node';
-export const DEFAULT_GRAPH_NODE_TYPE = `${GRAPH_NODE_TYPE_PREFIX}${DEFAULT_GRAPH_NODE_NAME}`;
+export const DEFAULT_GRAPH_NODE_TYPE = 'New Graph Node';
 
 /**
  * Translates the provided url according to

@@ -9,7 +9,6 @@
  */
 
 import { useViewModel, useGraph } from '@baklavajs/renderer-vue';
-import { GRAPH_NODE_TYPE_PREFIX } from '@baklavajs/core';
 
 /**
  * The function decides whether a name for the option should be displayed.
@@ -105,8 +104,9 @@ export function updateInterfacePosition(
  * into the current graph. Can be used only when removing a graph node
  */
 export function removeNode(node, unwrapGraph = false) {
-    if (node.type.startsWith(GRAPH_NODE_TYPE_PREFIX) && unwrapGraph) {
-        const { viewModel } = useViewModel();
+    const { viewModel } = useViewModel();
+    const isGraphNode = viewModel.value.editor.isGraphNode(node.type);
+    if (isGraphNode && unwrapGraph) {
         viewModel.value.editor.unwrapSubgraph(node);
     } else {
         const { graph } = useGraph();
