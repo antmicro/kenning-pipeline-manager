@@ -2,10 +2,24 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
+import base64
+import json
+import urllib.parse
+
 import pytest
 from pytest_httpserver import HTTPServer
 
 from pipeline_manager.tests.conftest import check_validation, example_pairs
+
+
+def encode_url(obj: dict):
+    encoded = urllib.parse.quote(json.dumps(obj).encode("utf-8"))
+    return f"data:application/json,{encoded}"
+
+
+def encode_base64(obj: dict):
+    encoded = base64.b64encode(json.dumps(obj).encode("utf-8")).decode("ascii")
+    return f"data:application/json;base64,{encoded}"
 
 
 @pytest.fixture
@@ -180,6 +194,16 @@ def specification_nodes_in_include(
 
 
 @pytest.fixture
+def specification_nodes_in_include_base64(specification_no_include):
+    return {"include": [encode_base64(specification_no_include)]}
+
+
+@pytest.fixture
+def specification_nodes_in_include_encoded_url(specification_no_include):
+    return {"include": [encode_url(specification_no_include)]}
+
+
+@pytest.fixture
 def specification_repeating_include(
     specification_no_include, httpserver: HTTPServer
 ):
@@ -275,6 +299,28 @@ def specification_include_one_graph(
     )
     specification_SaveVideo_node["includeGraphs"] = [
         {"url": httpserver.url_for("/dataflow.json")},
+    ]
+    return specification_SaveVideo_node
+
+
+@pytest.fixture
+def specification_include_one_graph_base64(
+    specification_SaveVideo_node,
+    dataflow_one_graph_using_SaveVideo_node,
+):
+    specification_SaveVideo_node["includeGraphs"] = [
+        {"url": encode_base64(dataflow_one_graph_using_SaveVideo_node)},
+    ]
+    return specification_SaveVideo_node
+
+
+@pytest.fixture
+def specification_include_one_graph_encoded_url(
+    specification_SaveVideo_node,
+    dataflow_one_graph_using_SaveVideo_node,
+):
+    specification_SaveVideo_node["includeGraphs"] = [
+        {"url": encode_url(dataflow_one_graph_using_SaveVideo_node)},
     ]
     return specification_SaveVideo_node
 
