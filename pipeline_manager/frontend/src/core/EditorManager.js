@@ -412,6 +412,11 @@ export default class EditorManager {
             return { errors, warnings };
         }
 
+        const defaultGraphNode = {
+            name: DEFAULT_GRAPH_NODE_NAME,
+            category: DEFAULT_GRAPH_NODE_CATEGORY,
+        };
+
         const myGraph = GraphFactory(
             [],
             [],
@@ -425,8 +430,7 @@ export default class EditorManager {
         } else {
             this.baklavaView.editor.addGraphTemplate(
                 myGraph,
-                DEFAULT_GRAPH_NODE_CATEGORY,
-                DEFAULT_GRAPH_NODE_NAME,
+                defaultGraphNode,
             );
         }
         return { errors, warnings };
