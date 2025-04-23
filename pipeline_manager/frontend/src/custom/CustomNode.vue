@@ -162,6 +162,7 @@ import InputInterfaceComponent from '../interfaces/InputInterface.vue';
 import ListInterfaceComponent from '../interfaces/ListInterface.vue';
 import SliderInterfaceComponent from '../interfaces/SliderInterface.vue';
 import HexInterfaceComponent from '../interfaces/HexInterface.vue';
+import TextAreaInterfaceComponent from '../interfaces/TextAreaInterface.vue';
 
 // Baklavajs implementation
 
@@ -544,6 +545,8 @@ displayedProperties.value.forEach((prop) => {
     if (prop.component === undefined) {
         if (prop.componentName === 'InputInterface') {
             prop.setComponent(markRaw(InputInterfaceComponent));
+        } else if (prop.componentName === 'TextAreaInterface') {
+            prop.setComponent(markRaw(TextAreaInterfaceComponent));
         } else if (prop.componentName === 'ListInterface') {
             prop.setComponent(markRaw(ListInterfaceComponent));
         } else if (prop.componentName === 'SliderInterface') {

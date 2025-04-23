@@ -20,6 +20,7 @@ import { GRAPH_NODE_TYPE_PREFIX } from '@baklavajs/core';
 export function getOptionName(optionType) {
     switch (optionType) {
         case 'InputInterface':
+        case 'TextAreaInterface':
         case 'SelectInterface':
         case 'ListInterface':
         case 'TextInterface':

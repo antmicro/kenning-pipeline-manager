@@ -29,6 +29,7 @@ import InputInterface from '../interfaces/InputInterface.js';
 import ListInterface from '../interfaces/ListInterface.js';
 import SliderInterface from '../interfaces/SliderInterface.js';
 import HexInterface from '../interfaces/HexInterface.js';
+import TextAreaInterface from '../interfaces/TextAreaInterface.js';
 import { ir } from './interfaceRegistry.ts';
 
 /**
@@ -97,6 +98,10 @@ function createProperties(properties) {
             case 'text':
                 intf = new InputInterface(propName, propDef).setPort(false);
                 intf.componentName = 'InputInterface';
+                break;
+            case 'multiline':
+                intf = new TextAreaInterface(propName, propDef).setPort(false);
+                intf.componentName = 'TextAreaInterface';
                 break;
             case 'number':
                 intf = new NumberInterface(propName, propDef, p.min, p.max).setPort(false);
@@ -197,6 +202,7 @@ function detectDiscrepancies(parsedState, inputs, outputs) {
             case 'select':
                 return true;
             case 'text':
+            case 'multiline':
             case 'hex':
                 return typeof value === 'string';
             case 'number':
