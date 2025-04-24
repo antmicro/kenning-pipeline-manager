@@ -88,8 +88,6 @@ export default defineComponent({
         };
 
         const stringRepresentation = computed(() => {
-            // eslint-disable-next-line vue/no-side-effects-in-computed-properties
-            intf.value.value = adjustValue(props.intf.value);
             const s = props.intf.value.toFixed(3);
             return s.length > MAX_STRING_LENGTH ? intf.value.value.toExponential(MAX_STRING_LENGTH - 5) : s; // eslint-disable-line max-len
         });
