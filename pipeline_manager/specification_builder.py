@@ -1081,6 +1081,19 @@ class SpecificationBuilder(object):
         """
         self._nodes[name]["color"] = color
 
+    def add_node_type_subgraph_id(self, name: str, subgraph_id: str):
+        """
+        Sets subgraph ID for the node.
+
+        Parameters
+        ----------
+        name: str
+            Name of the node
+        subgraph_id: str
+            Subgraph ID of the node
+        """
+        self._nodes[name]["subgraphId"] = subgraph_id
+
     def update_node_type_from_spec(self, node):
         if node.get("isCategory", False):
             if "category" not in node:
@@ -1112,6 +1125,10 @@ class SpecificationBuilder(object):
             )
         if "description" in node:
             self.add_node_description(nodename, node["description"])
+        if "color" in node:
+            self.add_node_type_color(nodename, node["color"])
+        if "subgraphId" in node:
+            self.add_node_type_subgraph_id(nodename, node["subgraphId"])
         for interface in node.get("interfaces", []):
             iface = None
             if "type" in interface:
