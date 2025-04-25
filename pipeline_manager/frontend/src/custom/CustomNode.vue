@@ -142,7 +142,7 @@ from moving or deleting the nodes.
 
 <script setup>
 /* eslint-disable object-curly-newline */
-import { ref, computed, toRef, onUpdated, onMounted, nextTick, markRaw, watch } from 'vue';
+import { ref, computed, toRef, onUpdated, onMounted, nextTick, watch } from 'vue';
 import { useViewModel, useGraph } from '@baklavajs/renderer-vue';
 import { AbstractNode } from '@baklavajs/core';
 import DOMPurify from 'dompurify';
@@ -161,12 +161,6 @@ import {
 import EditorManager from '../core/EditorManager';
 import NotificationHandler from '../core/notifications.js';
 import getExternalApplicationManager from '../core/communication/ExternalApplicationManager';
-
-import InputInterfaceComponent from '../interfaces/InputInterface.vue';
-import ListInterfaceComponent from '../interfaces/ListInterface.vue';
-import SliderInterfaceComponent from '../interfaces/SliderInterface.vue';
-import HexInterfaceComponent from '../interfaces/HexInterface.vue';
-import TextAreaInterfaceComponent from '../interfaces/TextAreaInterface.vue';
 
 // Baklavajs implementation
 
@@ -533,18 +527,8 @@ const displayedRightRows = computed(() => getRows(displayedRightSockets.value));
 const displayedLeftRows = computed(() => getRows(displayedLeftSockets.value));
 
 displayedProperties.value.forEach((prop) => {
-    if (prop.component === undefined) {
-        if (prop.componentName === 'InputInterface') {
-            prop.setComponent(markRaw(InputInterfaceComponent));
-        } else if (prop.componentName === 'TextAreaInterface') {
-            prop.setComponent(markRaw(TextAreaInterfaceComponent));
-        } else if (prop.componentName === 'ListInterface') {
-            prop.setComponent(markRaw(ListInterfaceComponent));
-        } else if (prop.componentName === 'SliderInterface') {
-            prop.setComponent(markRaw(SliderInterfaceComponent));
-        } else if (prop.componentName === 'HexInterface') {
-            prop.setComponent(markRaw(HexInterfaceComponent));
-        }
+    if (prop.setDefaultComponent !== undefined) {
+        prop.setDefaultComponent();
     }
 });
 

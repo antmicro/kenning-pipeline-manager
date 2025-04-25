@@ -29,15 +29,14 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { computed, ref } from 'vue';
-import {
-    SelectInterface,
-    CheckboxInterface,
-    IntegerInterface,
-    ButtonInterface,
-} from '@baklavajs/renderer-vue'; // eslint-disable-line object-curly-newline
 import { getOptionName } from '../custom/CustomNode.js';
 import getExternalApplicationManager from '../core/communication/ExternalApplicationManager';
 import { LOG_LEVEL } from '../core/notifications';
+
+import SelectInterface from '../interfaces/SelectInterface.js';
+import CheckboxInterface from '../interfaces/CheckboxInterface.js';
+import IntegerInterface from '../interfaces/IntegerInterface.js';
+import ButtonInterface from '../interfaces/ButtonInterface.js';
 
 export default {
     props: {
@@ -64,12 +63,11 @@ export default {
                 'Connection style',
                 props.viewModel.connectionRenderer.style,
                 items,
-            ).setPort(false);
+            );
             option.events.setValue.subscribe(this, (v) => {
                 props.viewModel.connectionRenderer.style = v; // eslint-disable-line vue/no-mutating-props,max-len,no-param-reassign
                 metadataChanged('connectionStyle', v);
             });
-            option.componentName = 'SelectInterface';
             return option;
         });
 
@@ -77,12 +75,11 @@ export default {
             const option = new CheckboxInterface(
                 'Randomized offset',
                 props.viewModel.connectionRenderer.randomizedOffset,
-            ).setPort(false);
+            );
             option.events.setValue.subscribe(this, (v) => {
                 props.viewModel.connectionRenderer.randomizedOffset = v; // eslint-disable-line vue/no-mutating-props,max-len,no-param-reassign
                 metadataChanged('randomizedOffset', v);
             });
-            option.componentName = 'CheckboxInterface';
             return option;
         });
 
@@ -90,12 +87,11 @@ export default {
             const option = new IntegerInterface(
                 'Background grid size',
                 props.viewModel.settings.background.gridSize,
-            ).setPort(false);
+            );
             option.events.setValue.subscribe(this, (v) => {
                 props.viewModel.settings.background.gridSize = v; // eslint-disable-line vue/no-mutating-props,max-len,no-param-reassign
                 metadataChanged('backgroundSize', v);
             });
-            option.componentName = 'IntegerInterface';
             return option;
         });
 
@@ -103,12 +99,11 @@ export default {
             const option = new IntegerInterface(
                 'Node movement step',
                 props.viewModel.movementStep,
-            ).setPort(false);
+            );
             option.events.setValue.subscribe(this, (v) => {
                 props.viewModel.movementStep = v; // eslint-disable-line vue/no-mutating-props,max-len,no-param-reassign
                 metadataChanged('movementStep', v);
             });
-            option.componentName = 'IntegerInterface';
             return option;
         });
 
@@ -121,12 +116,11 @@ export default {
                 'Autolayout algorithm',
                 layoutManager.usedAlgorithm,
                 items,
-            ).setPort(false);
+            );
             option.events.setValue.subscribe(this, (v) => {
                 layoutManager.useAlgorithm(v);
                 metadataChanged('layout', v);
             });
-            option.componentName = 'SelectInterface';
             return option;
         });
 
@@ -134,7 +128,6 @@ export default {
             const button = new ButtonInterface('Apply autolayout', () => {
                 props.viewModel.editor.applyAutolayout();
             });
-            button.componentName = 'ButtonInterface';
             return button;
         });
 
@@ -143,7 +136,6 @@ export default {
                 props.viewModel.editor.centerZoom();
                 externalApplicationManager.notifyAboutChange('viewport_on_center');
             });
-            button.componentName = 'ButtonInterface';
             return button;
         });
 
@@ -151,7 +143,6 @@ export default {
             const button = new ButtonInterface('Clean editor', () => {
                 props.viewModel.editor.deepCleanEditor();
             });
-            button.componentName = 'ButtonInterface';
             return button;
         });
 
@@ -159,7 +150,7 @@ export default {
             const options = ref([]);
 
             props.viewModel.layers.forEach((layer) => {
-                const option = new CheckboxInterface(layer.name, false).setPort(false);
+                const option = new CheckboxInterface(layer.name, false);
                 option.events.setValue.subscribe(this, () => {
                     if (props.viewModel.ignoredLayers.has(layer.name)) {
                         props.viewModel.ignoredLayers.delete(layer.name);
@@ -167,7 +158,6 @@ export default {
                         props.viewModel.ignoredLayers.add(layer.name);
                     }
                 });
-                option.componentName = 'CheckboxInterface';
                 options.value.push(option);
             });
 
@@ -179,11 +169,10 @@ export default {
                 'Verbosity of notifications',
                 props.viewModel.logLevel,
                 Object.keys(LOG_LEVEL).map((s) => s.toUpperCase()),
-            ).setPort(false);
+            );
             select.events.setValue.subscribe(this, (v) => {
                 props.viewModel.logLevel = v; // eslint-disable-line vue/no-mutating-props,max-len,no-param-reassign
             });
-            select.componentName = 'SelectInterface';
             return select;
         });
 

@@ -30,15 +30,12 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent, computed, markRaw } from 'vue';
-import {
-    ButtonInterface,
-    CheckboxInterface,
-} from '@baklavajs/renderer-vue'; // eslint-disable-line object-curly-newline
+import { defineComponent, computed } from 'vue';
 import Cross from '../icons/Cross.vue';
 
 import InputInterface from '../interfaces/InputInterface.js';
-import InputInterfaceComponent from '../interfaces/InputInterface.vue';
+import ButtonInterface from '../interfaces/ButtonInterface.js';
+import CheckboxInterface from '../interfaces/CheckboxInterface.js';
 
 export default defineComponent({
     props: {
@@ -70,7 +67,6 @@ export default defineComponent({
             option.events.setValue.subscribe(this, (v) => {
                 props.saveConfiguration.readonly = v; // eslint-disable-line vue/no-mutating-props,max-len,no-param-reassign
             });
-            option.componentName = 'CheckboxInterface';
             return option;
         });
 
@@ -84,7 +80,6 @@ export default defineComponent({
             option.events.setValue.subscribe(this, (v) => {
                 props.saveConfiguration.hideHud = v; // eslint-disable-line vue/no-mutating-props,max-len,no-param-reassign
             });
-            option.componentName = 'CheckboxInterface';
             return option;
         });
 
@@ -98,7 +93,6 @@ export default defineComponent({
             option.events.setValue.subscribe(this, (v) => {
                 props.saveConfiguration.position = v; // eslint-disable-line vue/no-mutating-props,max-len,no-param-reassign
             });
-            option.componentName = 'CheckboxInterface';
             return option;
         });
 
@@ -106,10 +100,7 @@ export default defineComponent({
             const option = new InputInterface(
                 'File name',
                 'save',
-            ).setPort(false);
-
-            option.componentName = 'InputInterface';
-            option.setComponent(markRaw(InputInterfaceComponent));
+            );
             return option;
         });
 
@@ -124,7 +115,6 @@ export default defineComponent({
                 props.saveConfiguration.saveCallback();
                 close();
             });
-            button.componentName = 'ButtonInterface';
             return button;
         });
 

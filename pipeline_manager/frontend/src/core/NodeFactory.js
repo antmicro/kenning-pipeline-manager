@@ -6,14 +6,6 @@
 
 /* eslint-disable max-classes-per-file */
 
-import {
-    CheckboxInterface,
-    IntegerInterface,
-    NumberInterface,
-    SelectInterface,
-    TextInterface,
-} from '@baklavajs/renderer-vue';
-
 import { GraphTemplate, NodeInterface, Node } from '@baklavajs/core';
 
 import { updateInterfacePosition } from '../custom/CustomNode.js';
@@ -25,11 +17,17 @@ import {
     DYNAMIC_INTERFACE_SUFFIX,
 } from './interfaceParser.js';
 
-import InputInterface from '../interfaces/InputInterface.js';
-import ListInterface from '../interfaces/ListInterface.js';
-import SliderInterface from '../interfaces/SliderInterface.js';
+import CheckboxInterface from '../interfaces/CheckboxInterface.js';
 import HexInterface from '../interfaces/HexInterface.js';
+import InputInterface from '../interfaces/InputInterface.js';
+import IntegerInterface from '../interfaces/IntegerInterface.js';
+import ListInterface from '../interfaces/ListInterface.js';
+import NumberInterface from '../interfaces/NumberInterface.js';
+import SelectInterface from '../interfaces/SelectInterface.js';
+import SliderInterface from '../interfaces/SliderInterface.js';
 import TextAreaInterface from '../interfaces/TextAreaInterface.js';
+import TextInterface from '../interfaces/TextInterface.js';
+
 import { ir } from './interfaceRegistry.ts';
 
 /**
@@ -92,24 +90,19 @@ export function createProperties(properties) {
 
         switch (propType) {
             case 'constant':
-                intf = new TextInterface(propName, propDef).setPort(false);
-                intf.componentName = 'TextInterface';
+                intf = new TextInterface(propName, propDef);
                 break;
             case 'text':
-                intf = new InputInterface(propName, propDef).setPort(false);
-                intf.componentName = 'InputInterface';
+                intf = new InputInterface(propName, propDef, p.readonly);
                 break;
             case 'multiline':
-                intf = new TextAreaInterface(propName, propDef).setPort(false);
-                intf.componentName = 'TextAreaInterface';
+                intf = new TextAreaInterface(propName, propDef, p.readonly);
                 break;
             case 'number':
-                intf = new NumberInterface(propName, propDef, p.min, p.max).setPort(false);
-                intf.componentName = 'NumberInterface';
+                intf = new NumberInterface(propName, propDef, p.min, p.max, p.readonly);
                 break;
             case 'integer':
-                intf = new IntegerInterface(propName, propDef, p.min, p.max).setPort(false);
-                intf.componentName = 'IntegerInterface';
+                intf = new IntegerInterface(propName, propDef, p.min, p.max, p.readonly);
                 break;
             case 'hex':
                 intf = new HexInterface(
@@ -117,33 +110,27 @@ export function createProperties(properties) {
                     propDef.toLowerCase(),
                     p.min ? BigInt(p.min) : NaN,
                     p.max ? BigInt(p.max) : NaN,
-                ).setPort(false);
-                intf.componentName = 'HexInterface';
+                    p.readonly,
+                );
                 break;
             case 'select': {
                 const it = p.values.map((element) => element.toString());
-                intf = new SelectInterface(propName, propDef, it).setPort(false);
-                intf.componentName = 'SelectInterface';
+                intf = new SelectInterface(propName, propDef, it, p.readonly);
             } break;
             case 'bool':
-                intf = new CheckboxInterface(propName, propDef).setPort(false);
-                intf.componentName = 'CheckboxInterface';
+                intf = new CheckboxInterface(propName, propDef, p.readonly);
                 break;
             case 'slider':
                 if (propDef === undefined) {
                     propDef = p.min;
                 }
-                intf = new SliderInterface(propName, propDef, p.min, p.max, p.step).setPort(
-                    false,
-                );
-                intf.componentName = 'SliderInterface';
+                intf = new SliderInterface(propName, propDef, p.min, p.max, p.step, p.readonly);
                 break;
             case 'list':
                 if (propDef === null) {
                     propDef = [];
                 }
-                intf = new ListInterface(propName, propDef, p.dtype).setPort(false);
-                intf.componentName = 'ListInterface';
+                intf = new ListInterface(propName, propDef, p.dtype, p.readonly);
                 break;
             default:
                 /* eslint-disable no-console */
@@ -638,8 +625,7 @@ export class CustomNode extends Node {
                 const baklavaProp = new InputInterface(
                     propA.name,
                     propA.value,
-                ).setPort(false);
-                baklavaProp.componentName = 'InputInterface';
+                );
                 errors.push(
                     `Property '${propA.name}' ` +
                     `created as it was not found in the specification.`,

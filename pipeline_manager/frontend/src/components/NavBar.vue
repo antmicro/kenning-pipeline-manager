@@ -43,7 +43,6 @@ import { saveSpecificationConfiguration, saveGraphConfiguration } from './saveCo
 import icons from '../icons';
 
 import InputInterface from '../interfaces/InputInterface.js';
-import InputInterfaceComponent from '../interfaces/InputInterface.vue';
 import { brokenImage } from '../../../resources/broken_image.js';
 import {
     startTransaction, commitTransaction,
@@ -218,9 +217,7 @@ export default {
         const editorTitleInterface = new InputInterface(
             'Graph name',
             '',
-        ).setPort(false);
-        editorTitleInterface.componentName = 'InputInterface';
-        editorTitleInterface.setComponent(markRaw(InputInterfaceComponent));
+        );
 
         const searchEditorNodesQuery = ref('');
         // Setup custom hook, which is executed when procedure starts or stops running
