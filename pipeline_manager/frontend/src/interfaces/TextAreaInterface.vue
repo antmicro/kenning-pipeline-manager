@@ -76,6 +76,8 @@ export default defineComponent({
         });
 
         const enterEditMode = async () => {
+            if (props.intf.readonly) { return; }
+
             editMode.value = true;
             await nextTick();
 

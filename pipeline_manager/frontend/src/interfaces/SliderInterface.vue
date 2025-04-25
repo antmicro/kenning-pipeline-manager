@@ -15,7 +15,7 @@ SPDX-License-Identifier: Apache-2.0
         @pointerleave="mouseleave"
     >
         <div class="__slider" :style="{ width: percentageFixed + '%' }" />
-        <div v-if="!editMode" class="__content">
+        <div v-if="!editMode || intf.readonly" class="__content">
             <div class="__label">
                 {{ intf.name }}
             </div>
@@ -50,6 +50,7 @@ export default defineComponent({
     setup(props) {
         const intf = toRef(props, 'intf');
         const interfaceComponent = SliderInterfaceComponent.setup(props);
+        interfaceComponent.enterEditMode();
 
         const adjustValue = (value) => {
             let currentValue = value;

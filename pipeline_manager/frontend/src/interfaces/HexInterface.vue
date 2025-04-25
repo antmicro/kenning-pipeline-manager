@@ -17,6 +17,7 @@ SPDX-License-Identifier: Apache-2.0
             @keypress="handleRestrictedKeys"
             @blur="handleBlur"
             tabindex="-1"
+            :disabled="intf.readonly"
         />
     </div>
 </template>
