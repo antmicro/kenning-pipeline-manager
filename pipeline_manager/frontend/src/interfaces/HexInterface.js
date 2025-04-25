@@ -5,11 +5,21 @@
  */
 
 import { NodeInterface } from '@baklavajs/core';
+import DefaultComponentMixin from './DefaultComponentMixin.js';
 
 export default class HexInterface extends NodeInterface {
-    constructor(name, value, min, max) {
+    // eslint-disable-next-line class-methods-use-this
+    lazyComponent = () => import(/* webpackMode: "eager" */ './HexInterface.vue');
+
+    componentName = 'HexInterface';
+
+    constructor(name, value, min, max, readonly = false) {
         super(name, value);
         this.min = min;
         this.max = max;
+        this.readonly = readonly;
+        this.setPort(false);
     }
 }
+
+Object.assign(HexInterface.prototype, DefaultComponentMixin);

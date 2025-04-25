@@ -9,6 +9,7 @@ SPDX-License-Identifier: Apache-2.0
         ref="el"
         class="baklava-slider"
         :class="{ 'baklava-ignore-mouse': !editMode }"
+        :style="{ cursor: intf.readonly ? 'default' : null }"
         @pointerdown="mousedown"
         @pointerup="mouseup"
         @pointermove="mousemove"
