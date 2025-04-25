@@ -231,10 +231,19 @@ def dataflow_specification_two_incompatible_nodes(
 def dataflow_specification_incompatible_node_and_graph_node(
     dataflow_specification_two_incompatible_nodes
 ):
+    dataflow_specification_two_incompatible_nodes["nodes"].append(
+        {
+            "name": "Subgraph node #1",
+            "category": "Subgraph node #1",
+            "subgraphId": "34ef2575-77dd-46de-917c-cfcdbd40d4eb",
+            "interfaces": [],
+        }
+    )
     dataflow_specification_two_incompatible_nodes["graphs"] = []
     dataflow_specification_two_incompatible_nodes["graphs"].append(
         {
             "name": "Subgraph #1",
+            "id": "34ef2575-77dd-46de-917c-cfcdbd40d4eb",
             "category": "Category #1",
             "nodes": [
                 {
@@ -481,7 +490,7 @@ def dataflow_graph_incompatible_interfaces_connected_graph_node(
     )
     dataflow_node_base["graphs"][0]["nodes"].append(
         {
-            "name": "Subgraph #1",
+            "name": "Subgraph node #1",
             "id": "afe19cad-a7fd-465e-a05a-0b46ece51941",
             "interfaces": [
                 {
@@ -554,7 +563,7 @@ def dataflow_two_layer_graph_interfaces_connected_graph_node(
     )
     dataflow_node_base["graphs"][0]["nodes"].append(
         {
-            "name": "Subgraph #1",
+            "name": "Subgraph node #1",
             "id": "afe19cad-a7fd-465e-a05a-0b46ece51941",
             "interfaces": [
                 {
@@ -603,7 +612,7 @@ def dataflow_three_layer_graph_interfaces_connected_graph_node(
                         }
                     ],
                     "subgraph": "78cc86c4-9ad0-4a8f-88cb-71ee28c48659",
-                    "name": "Subgraph #1",
+                    "name": "Subgraph node #1",
                 },
                 {
                     "id": "9dcc9b2b-2933-467b-9d14-f16e355f0323",
