@@ -3,6 +3,7 @@
     <div
         class="baklava-checkbox"
         :class="{ '--checked': intf.value }"
+        :style="{ cursor: intf.readonly ? 'default' : null }"
         :title="intf.name"
         @click="intf.value = intf.readonly ? intf.value : !intf.value"
     >

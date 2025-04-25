@@ -5,11 +5,22 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-    <div class="baklava-num-input">
-        <div class="__button --dec" @click="decrement">
+    <div
+        class="baklava-num-input"
+        :style="{ gridTemplateColumns: intf.readonly ? '0 1fr 0' : null}"
+    >
+        <div v-if="!intf.readonly" class="__button --dec" @click="decrement">
             <i-arrow />
         </div>
-        <div v-if="!editMode || intf.readonly" class="__content" @click="enterEditMode">
+        <div
+            v-if="!editMode || intf.readonly"
+            class="__content"
+            :style="{
+                borderRadius: intf.readonly ? 'var(--baklava-control-border-radius)' : null,
+                cursor: intf.readonly ? 'default' : null,
+            }"
+            @click="enterEditMode"
+        >
             <div class="__label" :title="intf.name">
                 {{ intf.name }}
             </div>
@@ -29,7 +40,7 @@ SPDX-License-Identifier: Apache-2.0
                 @keydown.enter="leaveEditMode"
             >
         </div>
-        <div class="__button --inc" @click="increment">
+        <div v-if="!intf.readonly" class="__button --inc" @click="increment">
             <i-arrow />
         </div>
     </div>
@@ -42,10 +53,7 @@ import { IntegerInterfaceComponent } from '@baklavajs/renderer-vue';
 export default defineComponent({
     extends: IntegerInterfaceComponent,
     setup(props) {
-        const interfaceComponent = IntegerInterfaceComponent.setup(props);
-        const increment = props.intf.readonly ? () => {} : interfaceComponent.increment;
-        const decrement = props.intf.readonly ? () => {} : interfaceComponent.decrement;
-        return { ...interfaceComponent, increment, decrement };
+        return IntegerInterfaceComponent.setup(props);
     },
 });
 </script>
