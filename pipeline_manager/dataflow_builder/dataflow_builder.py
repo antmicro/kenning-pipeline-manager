@@ -446,7 +446,7 @@ class GraphBuilder:
         [subgraph] = matching_subgraphs
         return subgraph
 
-    def save(self, json_file: Path):
+    def save(self, json_file: Path, skip_validation: bool = False):
         """
         Save graphs to a JSON file.
 
@@ -456,10 +456,14 @@ class GraphBuilder:
         ----------
         json_file : Path
             Path, where an output JSON file will be created.
+        skip_validation: bool
+            Tells whether the validation of the script should be
+            skipped or not.
         """
         with open(json_file, "wt", encoding="utf-8") as fd:
             fd.write(self.to_json(as_str=True))
-        self.validate()
+        if not skip_validation:
+            self.validate()
 
     def validate(self):
         """
