@@ -452,6 +452,11 @@
                             "description": "Determines whether this property should be overridden",
                             "type": "boolean",
                             "default": false
+                        },
+                        "readonly": {
+                            "description": "Determines whether this property should be readonly",
+                            "type": "boolean",
+                            "default": false
                         }
                     }
                 },
