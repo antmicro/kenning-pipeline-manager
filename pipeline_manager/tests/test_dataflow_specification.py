@@ -240,9 +240,15 @@ def specification_node_as_category_other_category_with_same_name(
 
 
 @pytest.fixture
-def specification_with_empty_graph_node(
-    specification_blank_node,
-):
+def specification_graph_node(specification_blank_node):
+    specification_blank_node["nodes"].append(
+        {
+            "name": "TestGraphNode",
+            "category": "TestGraphNode",
+            "subgraphId": "78cc86c4-9ad0-4a8f-88cb-71ee28c48659",
+        }
+    )
+
     specification_blank_node["graphs"] = [
         {
             "id": "78cc86c4-9ad0-4a8f-88cb-71ee28c48659",
@@ -258,14 +264,23 @@ def specification_with_empty_graph_node(
             "connections": [],
         }
     ]
+
     return specification_blank_node
 
 
 @pytest.fixture
+def specification_graph_node_one_interface(specification_graph_node):
+    specification_graph_node["nodes"][0]["interfaces"].append(
+        {"name": "TestInterface", "direction": "inout"}
+    )
+    return specification_graph_node
+
+
+@pytest.fixture
 def specification_with_interface_graph_node(
-    specification_one_interface,
+    specification_graph_node_one_interface,
 ):
-    specification_one_interface["graphs"] = [
+    specification_graph_node_one_interface["graphs"] = [
         {
             "id": "78cc86c4-9ad0-4a8f-88cb-71ee28c48659",
             "nodes": [
@@ -286,7 +301,7 @@ def specification_with_interface_graph_node(
             "connections": [],
         }
     ]
-    return specification_one_interface
+    return specification_graph_node_one_interface
 
 
 @pytest.fixture
@@ -340,28 +355,26 @@ def specification_with_missing_interface_in_graph_node(
 
 @pytest.fixture
 def specification_with_invalid_interface_in_graph_node(
-    specification_with_empty_graph_node,
+    specification_graph_node,
 ):
-    specification_with_empty_graph_node["graphs"][0]["nodes"][0][
-        "interfaces"
-    ].append(
+    specification_graph_node["graphs"][0]["nodes"][0]["interfaces"].append(
         {
             "direction": "input",
             "id": "6efb374c-a115-404e-ade8-0aa05ba93996",
             "name": "frames",
         }
     )
-    return specification_with_empty_graph_node
+    return specification_graph_node
 
 
 @pytest.fixture
 def specification_invalid_node_in_graph_node(
-    specification_with_empty_graph_node,
+    specification_graph_node,
 ):
-    specification_with_empty_graph_node["graphs"][0]["nodes"][0][
+    specification_graph_node["graphs"][0]["nodes"][0][
         "name"
     ] = "NonExistingNode"
-    return specification_with_empty_graph_node
+    return specification_graph_node
 
 
 @pytest.mark.parametrize("example", example_pairs())
@@ -387,7 +400,7 @@ def test_all_existing_examples(example):
         "specification_node_as_category_with_inheriting_nested",
         "specification_node_as_category_other_category_with_same_name",
         "specification_with_two_interfaces_connected_graph_node",
-        "specification_with_empty_graph_node",
+        "specification_graph_node",
         "specification_with_interface_graph_node",
     ],
 )
