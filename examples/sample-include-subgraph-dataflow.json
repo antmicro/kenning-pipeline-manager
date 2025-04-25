@@ -184,8 +184,8 @@
                         }
                     ],
                     "subgraph": "1185eb1c-6dad-4c9d-98ff-dc31da9c8624",
-                    "name": "MultipleIOGraphs",
-                    "instanceName": "MultipleIOGraphs"
+                    "name": "MultipleIOGraphNode",
+                    "instanceName": "MultipleIOGraphNode"
                 },
                 {
                     "id": "3154509e-e166-49ca-9982-b837080e81ae",
