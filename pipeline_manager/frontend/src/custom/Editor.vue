@@ -633,24 +633,22 @@ export default defineComponent({
             }
 
             let specText;
-            if (!defaultSpecification) {
-                // Try loading default specification and/or dataflow from URLs provided in an
-                if (urlParams.has('spec')) {
-                    const [status, ret] = await loadJsonFromRemoteLocation(urlParams.get('spec'));
-                    if (status === false) {
-                        NotificationHandler.terminalLog(
-                            'error',
-                            ret,
-                        );
-                        NotificationHandler.terminalLog(
-                            'error',
-                            `Failed to load the specification file from: ${urlParams.get('spec')}`,
-                        );
-                    } else {
-                        specText = ret;
-                    }
+            // Try loading default specification and/or dataflow from URLs provided in an
+            if (urlParams.has('spec')) {
+                const [status, ret] = await loadJsonFromRemoteLocation(urlParams.get('spec'));
+                if (status === false) {
+                    NotificationHandler.terminalLog(
+                        'error',
+                        ret,
+                    );
+                    NotificationHandler.terminalLog(
+                        'error',
+                        `Failed to load the specification file from: ${urlParams.get('spec')}`,
+                    );
+                } else {
+                    specText = ret;
                 }
-            } else {
+            } else if (defaultSpecification) {
                 // Use raw-loader which does not parse the specification so that it is possible
                 // To add a more verbose validation log
                 if (verboseLoad) {
@@ -675,24 +673,22 @@ export default defineComponent({
                 }
 
                 let dataflow;
-                if (defaultDataflow) {
-                    dataflow = require(process.env.VUE_APP_DATAFLOW_PATH); // eslint-disable-line global-require,max-len,import/no-dynamic-require
-                } else {
-                    if (urlParams.has('graph')) {
-                        const [status, ret] = await loadJsonFromRemoteLocation(urlParams.get('graph'));
-                        if (status === false) {
-                            NotificationHandler.terminalLog(
-                                'error',
-                                ret,
-                            );
-                            NotificationHandler.terminalLog(
-                                'error',
-                                `Failed to load the graph file from: ${urlParams.get('graph')}`,
-                            );
-                        } else {
-                            dataflow = ret;
-                        }
+                if (urlParams.has('graph')) {
+                    const [status, ret] = await loadJsonFromRemoteLocation(urlParams.get('graph'));
+                    if (status === false) {
+                        NotificationHandler.terminalLog(
+                            'error',
+                            ret,
+                        );
+                        NotificationHandler.terminalLog(
+                            'error',
+                            `Failed to load the graph file from: ${urlParams.get('graph')}`,
+                        );
+                    } else {
+                        dataflow = ret;
                     }
+                } else if (defaultDataflow) {
+                    dataflow = require(process.env.VUE_APP_DATAFLOW_PATH); // eslint-disable-line global-require,max-len,import/no-dynamic-require
                 }
                 if (dataflow) {
                     await updateDataflow(dataflow);
