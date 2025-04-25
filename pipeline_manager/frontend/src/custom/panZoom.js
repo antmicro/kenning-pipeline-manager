@@ -42,11 +42,12 @@ export default function usePanZoom() {
         const editorHeight = window.innerHeight;
         const editorWidth = window.innerWidth;
 
-        const allowZoomOut = (zoomLimit * graph.value.size().graphWidth > editorWidth / newScale ||
-            zoomLimit * graph.value.size().graphHeight > editorHeight / newScale);
+        const allowZoomOut =
+            zoomLimit * graph.value.size().graphWidth > editorWidth / newScale ||
+            zoomLimit * graph.value.size().graphHeight > editorHeight / newScale;
 
         if (
-            (allowZoomOut) ||
+            allowZoomOut ||
             (newScale > graph.value.scaling && graph.value.size().graphHeight !== -Infinity)
         ) {
             graph.value.scaling = newScale;
@@ -56,6 +57,10 @@ export default function usePanZoom() {
     };
 
     const onMouseWheel = (ev) => {
+        if (ev.target.type === 'textarea' && ev.target.className === 'baklava-input') {
+            return;
+        }
+
         ev.preventDefault();
         let scrollAmount = ev.deltaY;
         if (ev.deltaMode === 1) {
