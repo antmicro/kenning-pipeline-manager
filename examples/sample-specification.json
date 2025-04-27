@@ -231,6 +231,13 @@
                 {"name": "color", "type": "hex", "default": "0xFFFF", "min": "0xFF"}
             ],
             "color": "#850ebd"
+        },
+        {
+            "name": "Comment",
+            "category": "Other",
+            "properties": [
+                {"name": "comment", "type": "multiline", "default": "Write a comment here in Markdown format"}
+            ]
         }
     ],
     "metadata": {

@@ -278,6 +278,26 @@
                     "name": "SaveVideo",
                     "instanceName": "SaveVideo",
                     "color": "#e59700"
+                },
+                {
+                    "id": "6df5df60-3a6b-44a9-943d-54f3a2207ce7",
+                    "position": {
+                        "x": 600,
+                        "y": -400
+                    },
+                    "width": 300,
+                    "twoColumn": true,
+                    "interfaces": [],
+                    "properties": [
+                        {
+                            "name": "comment",
+                            "id": "252cb047-52a5-4182-b2ed-bcbf6e93a247",
+                            "value": "### Example graph\n\nThis graph demonstrates sample computer vision processing pipeline. This comment is in `Markdown` format."
+                        }
+                    ],
+                    "enabledInterfaceGroups": [],
+                    "name": "Comment",
+                    "instanceName": "Note"
                 }
             ],
             "connections": [
