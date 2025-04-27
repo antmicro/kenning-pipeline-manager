@@ -325,6 +325,8 @@ Every project object has three required base properties:
 There are nine possible values for the `type` property.
 * `text` - property is a string.
   A text field is displayed to the user.
+* `multiline` - property is a multi-line string.
+  It allows to format the text in Markdown format.
 * `constant` - property is a string.
   A non-modifiable text field is displayed to the user.
 * `number` - property is a float.
