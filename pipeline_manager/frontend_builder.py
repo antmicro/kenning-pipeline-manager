@@ -151,6 +151,7 @@ def copy_frontend_to_workspace(
             frontend_path,
             workspace_directory / "frontend",
             dirs_exist_ok=True,
+            ignore=shutil.ignore_patterns("node_modules"),
         )
         shutil.copytree(
             resources_path,
