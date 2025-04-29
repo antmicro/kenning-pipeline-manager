@@ -181,7 +181,9 @@ export default class EditorManager {
             }
         }
 
+        let state;
         if (this.specificationLoaded) {
+            state = this.saveDataflow();
             this.clearEditorManagerState();
         }
 
@@ -253,6 +255,10 @@ export default class EditorManager {
             this.specificationLoaded = true;
         } else {
             this.clearEditorManagerState();
+        }
+
+        if (state !== undefined) {
+            this.loadDataflow(state);
         }
 
         return { errors, warnings };
