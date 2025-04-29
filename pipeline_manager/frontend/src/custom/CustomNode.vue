@@ -269,7 +269,7 @@ const contextMenuTitleItems = computed(() => {
         items.push({ value: 'rename', label: 'Rename', icon: icons.Pencil });
     }
     if (isGraphNode) {
-        items.push({ value: 'editSubgraph', label: 'Edit Subgraph' });
+        items.push({ value: 'editSubgraph', label: 'Edit Subgraph', icon: icons.Subgraph });
     }
     if (items.length > 1) {
         items.at(-1).endSection = true;
