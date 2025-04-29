@@ -37,7 +37,7 @@ import { ir } from './interfaceRegistry.ts';
  * @returns object that can be used to create properties or an array of errors
  * if any occurred.
  */
-function parseProperties(properties) {
+export function parseProperties(properties) {
     const parsedProperties = {};
     const usedNames = new Set();
     const errors = [];
@@ -83,7 +83,7 @@ function parseProperties(properties) {
  * @param properties that are validated and parsed
  * @returns created properties
  */
-function createProperties(properties) {
+export function createProperties(properties) {
     const getIntf = (p, hidden = false) => {
         const propName = p.name;
         const propType = p.type;

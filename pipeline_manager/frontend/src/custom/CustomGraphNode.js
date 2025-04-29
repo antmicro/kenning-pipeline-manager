@@ -8,8 +8,28 @@
 import { NodeInterface, Graph } from '@baklavajs/core';
 import { v4 as uuidv4 } from 'uuid';
 import { parseInterfaces } from '../core/interfaceParser.js';
-import { updateSubgraphInterfaces, CustomNode } from '../core/NodeFactory.js';
+import {
+    CustomNode, parseProperties, createProperties, updateSubgraphInterfaces,
+} from '../core/NodeFactory.js';
 import { ir } from '../core/interfaceRegistry.ts';
+
+/**
+  * Function used to update properties of the graph node based on its specification.
+  *
+  * @param {Object} graphNode graph node object
+  *
+  * @returns properties ready to be loaded
+  */
+function prepareProperties(graphNode) {
+    const properties = graphNode.properties ?? [];
+
+    const parsedProperties = parseProperties(properties);
+    // If parsedProperties returns an array, it is an array of errors
+    if (Array.isArray(parsedProperties) && parsedProperties.length) {
+        return parsedProperties.map((error) => `Node ${graphNode.name} invalid. ${error}`);
+    }
+    return createProperties(parsedProperties);
+}
 
 export default function CreateCustomGraphNodeType(template, graphNode) {
     return class CustomGraphNodeType extends CustomNode {
@@ -19,18 +39,12 @@ export default function CreateCustomGraphNodeType(template, graphNode) {
 
         template = template;
 
-        inputs = {};
-
-        outputs = {};
-
-        properties = graphNode.properties ?? [];
-
         constructor() {
             super(
                 graphNode.name,
                 graphNode.layer,
-                graphNode.inputs ?? [],
-                graphNode.outputs ?? [],
+                prepareProperties(graphNode),
+                [],
                 false,
                 graphNode.description ?? '',
                 graphNode.extends ?? [],
@@ -193,8 +207,11 @@ export default function CreateCustomGraphNodeType(template, graphNode) {
                 // If current interface cannot be found in `newInterfaces`, it means that
                 // it was removed.
                 if (newInterfaces.find((intf) => intf.id === nodeIntf.id) === undefined) {
-                    const container = nodeIntf.direction === 'output' ? 'output' : 'input';
-                    this.removeInterface(container, nodeKey);
+                    // Only remove interfaces, not properties
+                    if (nodeIntf.port) {
+                        const container = nodeIntf.direction === 'output' ? 'output' : 'input';
+                        this.removeInterface(container, nodeKey);
+                    }
                 }
             });
 
@@ -228,7 +245,6 @@ export default function CreateCustomGraphNodeType(template, graphNode) {
          * @returns graph state ready to be loaded
          */
         prepareSubgraphInstance() {
-            this.updateProperties(this.properties);
             const idMap = new Map();
 
             const createNewId = (oldId) => {
