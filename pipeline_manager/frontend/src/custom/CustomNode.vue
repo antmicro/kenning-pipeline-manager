@@ -53,6 +53,10 @@ from moving or deleting the nodes.
                 v-click-outside="doneRenaming"
                 @keydown.enter="doneRenaming"
             />
+            <icons.Subgraph
+                class="__subgraph-icon"
+                v-if="isGraphNode"
+            />
             <CustomContextMenu
                 v-if="showContextMenuTitle"
                 v-model="showContextMenuTitle"
