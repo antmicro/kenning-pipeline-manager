@@ -26,6 +26,7 @@ import Unwrap from './Unwrap.vue';
 import Validate from './Validate.vue';
 import Placeholder from './Placeholder.vue';
 import CassetteStop from './CassetteStop.vue';
+import Subgraph from './Subgraph.vue';
 
 export default {
     Arrow,
@@ -50,4 +51,5 @@ export default {
     StopDataflow,
     Unwrap,
     Validate,
+    Subgraph,
 };
