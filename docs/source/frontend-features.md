@@ -173,6 +173,7 @@ This piece of code opens Pipeline Manager in an iframe and provides it with a `d
 
 The window accepts a specification, or a dataflow, or both.
 
+Note that this method still supports URLs.
 
 ## Testing the front-end features
 
