@@ -604,20 +604,45 @@ export default defineComponent({
             // Load specification and/or dataflow delivered via window.postMessage
             window.addEventListener('message', async (event) => {
                 // TODO: introduce mechanism for checking event.origin against allowed origins
-                const { specification, dataflow } = event.data;
+                const message = event.data;
 
-                if (specification === undefined && dataflow === undefined) {
-                    NotificationHandler.terminalLog('error', 'Message type is invalid');
+                // Validate
+                const validationErrors = EditorManager.validateMessage(message);
+                if (Array.isArray(validationErrors) && validationErrors.length) {
+                    NotificationHandler.terminalLog('error', 'Message is invalid', validationErrors);
                     return;
                 }
 
                 emit('setLoad', true);
 
+                // Download URL entries
+                const errors = [];
+                await Promise.all(Object.entries(message).map(async ([key, value]) => {
+                    if (value === undefined || value instanceof Object) {
+                        return;
+                    }
+                    const [status, newValue] = await loadJsonFromRemoteLocation(value);
+                    if (status === false) {
+                        errors.push(newValue);
+                    } else {
+                        message[key] = newValue;
+                    }
+                }));
+
+                if (errors.length) {
+                    NotificationHandler.terminalLog('error', 'Could not load message data:', errors);
+                    emit('setLoad', false);
+                    return;
+                }
+
                 // Let Vue draw the spinner
                 await nextTick();
 
+                // Update editor
+                const { specification, dataflow } = message;
                 if (specification !== undefined) { await updateEditorSpecification(specification); }
                 if (dataflow !== undefined) { await updateDataflow(dataflow); }
+
                 emit('setLoad', false);
             });
 
