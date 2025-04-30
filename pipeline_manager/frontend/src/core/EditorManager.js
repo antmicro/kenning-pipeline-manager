@@ -25,6 +25,7 @@ import specificationSchema from '../../../resources/schemas/specification_schema
 import metadataSchema from '../../../resources/schemas/metadata_schema.json' with {type: 'json'};
 import dataflowSchema from '../../../resources/schemas/dataflow_schema.json' with {type: 'json'};
 import graphSchema from '../../../resources/schemas/graph_schema.json' with {type: 'json'};
+import messageSchema from '../../../resources/schemas/message_schema.json' with {type: 'json'};
 import ConnectionRenderer from './ConnectionRenderer.js';
 import Specification from './Specification.js';
 
@@ -1260,6 +1261,16 @@ export default class EditorManager {
      */
     static validateDataflow(dataflow) {
         return EditorManager.validateJSONWithSchema(dataflow, dataflowSchema);
+    }
+
+    /**
+     * Validates message in JSON format using schema from messageSchema.
+     *
+     * @param message message in JSON format to validate
+     * @return An array of errors. If the array is empty, the validation was successful.
+     */
+    static validateMessage(message) {
+        return EditorManager.validateJSONWithSchema(message, messageSchema);
     }
 
     /**
