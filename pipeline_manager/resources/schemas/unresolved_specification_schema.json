@@ -18,6 +18,16 @@
                 "type": "string"
             }
         },
+        "urloverrides": {
+            "description": "Mapping for string replacement",
+            "type": "object",
+            "items": {
+                "type": "object",
+                "items": {
+                    "type": "string"
+                }
+            }
+        },
         "includeGraphs": {
             "description": "List of paths to dataflow files that should be included as graphs",
             "type": "array",
