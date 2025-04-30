@@ -88,7 +88,7 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
 /* eslint-disable object-curly-newline */
 import { GRAPH_NODE_TYPE_PREFIX } from '@baklavajs/core';
 import { EditorComponent, useGraph } from '@baklavajs/renderer-vue';
-import { defineComponent, ref, computed, watch, onMounted } from 'vue';
+import { defineComponent, ref, computed, watch, onMounted, nextTick } from 'vue';
 import fuzzysort from 'fuzzysort';
 import usePanZoom from './panZoom';
 
@@ -614,8 +614,7 @@ export default defineComponent({
                 emit('setLoad', true);
 
                 // Let Vue draw the spinner
-                // eslint-disable-next-line no-promise-executor-return
-                await new Promise((resolve) => setTimeout(resolve, 0));
+                await nextTick();
 
                 if (specification !== undefined) { await updateEditorSpecification(specification); }
                 if (dataflow !== undefined) { await updateDataflow(dataflow); }
