@@ -322,6 +322,12 @@ export default class EditorManager {
                     specification: newSpecification, errors: newErrors,
                 } = await this.downloadNestedImports(spec, specTrace);
                 errors.push(...newErrors);
+
+                if (specification.urloverrides !== undefined
+                    && newSpecification.metadata?.urls !== undefined) {
+                    EditorManager.applyUrlOverrides(newSpecification, specification.urloverrides);
+                }
+
                 specification = EditorManager.mergeObjects(specification, newSpecification);
             }));
         return { specification, errors };
@@ -1026,6 +1032,19 @@ export default class EditorManager {
             EditorManager.instance = new EditorManager();
         }
         return EditorManager.instance;
+    }
+
+    /**
+     * Static function used to apply string replacement mapping on urls.
+     * @param specification - specification to be modified.
+     * @param overrides - mapping between old and new values.
+     */
+    static applyUrlOverrides(specification, overrides) {
+        Object.entries(overrides).forEach(([oldValue, newValue]) => {
+            Object.values(specification.metadata?.urls ?? {}).forEach((item) => {
+                item.url = item.url.replaceAll(oldValue, newValue);
+            });
+        });
     }
 
     /**
