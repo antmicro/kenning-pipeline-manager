@@ -171,7 +171,7 @@ def get_node_if_present(
 
 def get_interface_if_present(
     interface: Union[Interface, str], nodes: Dict[str, Node]
-) -> Tuple[Interface, None]:
+) -> Union[Interface, None]:
     """
     Get interface given it is present in the nodes of a dataflow graph.
 
@@ -184,12 +184,12 @@ def get_interface_if_present(
 
     Returns
     -------
-    Tuple[Interface, None]
+    Union[Interface, None]
         Instance of `Interface` if it is present in the dataflow graph.
         Otherwise, `None`.
     """
     if isinstance(interface, Interface):
-        interface = interface.id
+        return interface
 
     for _, node in nodes.items():
         for _interface in node.interfaces:
