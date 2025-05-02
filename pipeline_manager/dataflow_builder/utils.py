@@ -7,7 +7,7 @@
 import logging
 import os
 from pathlib import Path
-from typing import Any, Dict, List, Tuple, Union
+from typing import Dict, List, Tuple, Union
 
 from pipeline_manager.dataflow_builder.entities import (
     Interface,
@@ -110,61 +110,19 @@ def ensure_connection_is_absent(
                 "Connection with the identical id already exists."
             )
 
-        common_source = filter_connections(
-            "from_interface", connection.from_interface, connections
-        )
-        common_drain = filter_connections(
-            "to_interface", connection.to_interface, connections
-        )
-        intersection = set(common_source).intersection(common_drain)
-        if intersection:
+        connection_set = {
+            (x.from_interface.id, x.to_interface.id)
+            for x in connections.values()
+        }
+
+        if (
+            connection.from_interface.id,
+            connection.to_interface.id,
+        ) in connection_set:
             raise ValueError(
-                "The connection between these two interfaces already exists: "
-                + intersection
+                f"The connection between {connection.from_interface.id} and "
+                f"{connection.to_interface.id} already exists."
             )
-
-
-def filter_connections(
-    attribute_name: str,
-    value: Any,
-    connections: Dict[str, InterfaceConnection],
-) -> List[str]:
-    """
-    Filter IDs of connection that match the supplied criterion.
-
-    Parameters
-    ----------
-    attribute_name : str
-        Name of the parameter, by which search should be conducted.
-    value : Any
-        Value of the parameter, which should be matched.
-    connections : Dict[str, InterfaceConnection]
-        Dictionary of all ids and connections.
-
-    Returns
-    -------
-    List[str]
-        List of IDs, where the attribute name matches the expected value.
-
-    Raises
-    ------
-    ValueError
-        Raised if the attribute name is not present in the
-        `NodeConnection` class.
-    """
-    if attribute_name not in InterfaceConnection.__annotations__:
-        raise ValueError(
-            f"Unknown attribute name `{value}`. "
-            f"Allowed values: {InterfaceConnection.__annotations__.keys()}"
-        )
-
-    filtered = [
-        id
-        for id, connection in connections.items()
-        if getattr(connection, attribute_name) == value
-    ]
-
-    return filtered
 
 
 def get_node_if_present(
