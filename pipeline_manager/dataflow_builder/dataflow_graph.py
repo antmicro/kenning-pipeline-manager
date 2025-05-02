@@ -434,7 +434,7 @@ class DataflowGraph(JsonConvertible):
 
         # Choose an appropriate dictionary as data source.
         items: Dict = getattr(self, type.value)
-        items_satisfying_criteria = list(items.values())
+        items_satisfying_criteria = frozenset(items.values())
 
         return match_criteria(items=items_satisfying_criteria, **kwargs)
 
@@ -443,7 +443,7 @@ class DataflowGraph(JsonConvertible):
         for _, node in self._nodes.items():
             interfaces.extend(node.interfaces)
 
-        return match_criteria(items=interfaces, **kwargs)
+        return match_criteria(items=frozenset(interfaces), **kwargs)
 
     def get_by_id(
         self, type: AttributeType, id: str

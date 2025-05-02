@@ -111,8 +111,8 @@ def ensure_connection_is_absent(
             )
 
         connection_set = {
-            (x.from_interface.id, x.to_interface.id)
-            for x in connections.values()
+            (_connection.from_interface.id, _connection.to_interface.id)
+            for _connection in connections.values()
         }
 
         if (
