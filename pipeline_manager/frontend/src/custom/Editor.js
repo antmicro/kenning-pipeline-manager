@@ -74,6 +74,9 @@ export default class PipelineManagerEditor extends Editor {
      * @throws {Error} Throws if there are issues switching to a subgraph.
      */
     save() {
+        while (this.isInSubgraph()) {
+            this.backFromSubgraph();
+        }
         // Save all changes done to subgraphs before saving.
         const currentGraphId = this._graph.id;
         const stackCopy = Array.from(toRaw(this.subgraphStack));
@@ -124,6 +127,9 @@ export default class PipelineManagerEditor extends Editor {
      * be stored in history.
      */
     cleanEditor(suppressHistory = true) {
+        while (this.isInSubgraph()) {
+            this.backFromSubgraph();
+        }
         const graphInstance = this._graph;
 
         suppressHistoryLogging(suppressHistory);

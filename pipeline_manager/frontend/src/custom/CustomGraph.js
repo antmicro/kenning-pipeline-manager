@@ -446,17 +446,7 @@ export default function createPipelineManagerGraph(graph) {
             if (this.events.beforeRemoveNode.emit(node).prevented) {
                 return;
             }
-
             const interfaces = [...Object.values(node.inputs), ...Object.values(node.outputs)];
-            interfaces.forEach((intf) => {
-                if (intf.externalName) {
-                    this.editor.privatizeInterface(
-                        this.id,
-                        intf,
-                    );
-                }
-            });
-
             this.connections
                 .filter((c) => interfaces.includes(c.from) || interfaces.includes(c.to))
                 .forEach((c) => this.removeConnection(c));
