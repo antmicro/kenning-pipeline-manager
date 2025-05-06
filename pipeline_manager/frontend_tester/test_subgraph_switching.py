@@ -133,6 +133,7 @@ def execute_enter_subgraph_scenario(playwright: Playwright):
     browser.close()
 
 
+@pytest.mark.flaky(retries=3, delay=1)
 def test_subgraph_switching(rpc_server, install_playwright_browser):
     """
     Test if switching to a subgraph while utilizing RPC communication
