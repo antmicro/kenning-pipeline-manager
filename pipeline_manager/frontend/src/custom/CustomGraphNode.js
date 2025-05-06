@@ -56,30 +56,8 @@ export default function CreateCustomGraphNodeType(template, graphNode) {
 
         save() {
             const state = super.save();
-
-            const newInterfaces = [];
-            const thisInterfaces = Object.values(this.inputs).concat(Object.values(this.outputs));
-            thisInterfaces.forEach((io) => {
-                newInterfaces.push({
-                    name: io.name,
-                    externalName: io.externalName,
-                    id: io.id,
-                    direction: io.direction,
-                    side: io.side,
-                    sidePosition: io.sidePosition,
-                });
-            });
-
-            state.interfaces = newInterfaces;
-            delete state.inputs;
-            delete state.outputs;
-
-            state.name = state.type;
-            delete state.type;
-
-            state.instanceName = state.title === '' ? undefined : state.title;
-            delete state.title;
-
+            state.subgraph = this.subgraph.id;
+            state.graphState = this.subgraph.save();
             return state;
         }
 
