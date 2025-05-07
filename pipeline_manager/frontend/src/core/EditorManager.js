@@ -1219,6 +1219,9 @@ export default class EditorManager {
         // which has a category 'A/b/C/d/e' then it has to extend C (and C has to extend A)
         const nodeNames = new Set();
         nodes.forEach((node) => {
+            if (node.category === undefined) {
+                node.category = '';
+            }
             const categories = node.category.split('/');
 
             for (let i = categories.length - 1; i >= 0; i -= 1) {
@@ -1230,7 +1233,10 @@ export default class EditorManager {
                     node.name !== categoryNodeName &&
                     remainingCategories === definedCategories[categoryNodeName]
                 ) {
-                    if (node.extends === undefined || !node.extends.includes(categoryNodeName)) {
+                    if (
+                        node.extends === undefined ||
+                        !node.extends.includes(categoryNodeName)
+                    ) {
                         errors.push(`Node '${node.name}' does not extend its category node '${categoryNodeName}'.`);
                     }
                     break;
