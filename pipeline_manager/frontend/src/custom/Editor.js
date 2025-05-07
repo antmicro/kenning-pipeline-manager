@@ -208,7 +208,7 @@ export default class PipelineManagerEditor extends Editor {
                     return [`Subgraph ${node.subgraph} has multiple nodes pointing to it - only unique IDs are allowed`];
                 }
                 usedInstances.add(node.subgraph);
-                node.graphState = structuredClone(fittingTemplate[0]);
+                [node.graphState] = fittingTemplate;
 
                 node.graphState.nodes.forEach((n) => {
                     errors.push(...recurrentSubgraphLoad(n));
