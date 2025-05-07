@@ -723,3 +723,37 @@ def test_if_graph_attribute_gets_serialized(
     assert (
         attribute_name in graph.to_json()
     ), f"Attribute {attribute_name!r} has not been serialized."
+
+
+def test_assigning_property_to_graph_node():
+    """Test if assigning a property to a graph node is possible."""
+    node_name = "test node"
+    graph_name = "test subgraph"
+    property_name = "text field"
+
+    spec = SpecificationBuilder(DEFAULT_SPECIFICATION_VERSION)
+    spec.add_node_type(node_name, "category")
+    spec.add_node_type_property(node_name, property_name, "text", "")
+
+    spec.add_subgraph_from_spec(
+        {
+            "name": graph_name,
+            "nodes": [],
+            "connections": [],
+            # "properties": [], # FIXME: Validation error
+        }
+    )
+
+    specification = spec.create_and_validate_spec()
+
+    dataflow_builder = GraphBuilder(
+        specification, DEFAULT_SPECIFICATION_VERSION
+    )
+    outer_graph = dataflow_builder.create_graph()
+    inner_graph = dataflow_builder.create_graph()
+
+    node = outer_graph.create_subgraph_node(graph_name, inner_graph.id)
+    # FIXME: MISSING PROPERTY, missing `properties` attribute
+    node.set_property(property_name=property_name, property_value=20)
+
+    dataflow_builder.validate()
