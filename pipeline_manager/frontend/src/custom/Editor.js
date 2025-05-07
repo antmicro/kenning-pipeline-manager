@@ -99,6 +99,10 @@ export default class PipelineManagerEditor extends Editor {
         };
         currentGraphState.nodes.forEach(recurrentSubgraphSave);
 
+        currentGraphState.nodes.forEach((node) => {
+            node.color = this.getNodeColor(node.name);
+        });
+
         /* eslint-enable no-unused-vars */
         if (dataflowState.graphs.length) {
             dataflowState.entryGraph = currentGraphId;
