@@ -6,6 +6,7 @@
 
 import copy
 import json
+import string
 import uuid
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
@@ -85,7 +86,94 @@ class Property(JsonConvertible):
 
     name: str
     value: Any
-    id: str = field(default_factory=get_uuid)
+    type: str
+    id: str
+
+    def __init__(
+        self,
+        name: str,
+        type: Optional[str] = None,
+        default: Optional[Any] = None,
+        value: Optional[Any] = None,
+        values: Optional[List[Any]] = None,
+        min: Optional[str] = None,
+        max: Optional[str] = None,
+        dtype: Optional[str] = None,
+        group: Optional[Dict[str, Any]] = None,
+        id: str = get_uuid(),
+    ):
+        # In a specification, property has `default`,
+        # but, in a dataflow, it has either `values` or `value`.
+        if value is None and default is None and values is None:
+            raise ValueError(
+                "Missing the value of a property. "
+                "Provide either `value`, `values` or `default`."
+            )
+        self.value = Property.get_first_not_none([value, values, default])
+
+        self.id = id
+        self.name = name
+
+        # Validate a type of `type` property.
+        if type is not None:
+            self.ensure_one_of(
+                "type",
+                type,
+                (
+                    "text",
+                    "multiline",
+                    "constant",
+                    "number",
+                    "integer",
+                    "select",
+                    "bool",
+                    "slider",
+                    "list",
+                    "hex",
+                ),
+            )
+            self.type = type
+
+        if min:
+            Property.ensure_hex(min)
+            self.min = min
+
+        if max:
+            Property.ensure_hex(max)
+            self.max = max
+
+        if dtype:
+            Property.ensure_one_of(
+                "dtype", dtype, ["string", "number", "integer", "boolean"]
+            )
+            self.dtype = dtype
+
+        if group:
+            self.group = group
+
+    @staticmethod
+    def get_first_not_none(values: List[Optional[Any]]) -> Any:
+        for value in values:
+            return value
+
+    @staticmethod
+    def ensure_hex(value: str) -> None:
+        for char in string.hexdigits:
+            if char not in value:
+                raise ValueError(
+                    "Minimum should be either a decimal or hexadecimal number."
+                    f" Found an illegal character `{char}`."
+                )
+
+    @staticmethod
+    def ensure_one_of(
+        property_name: str, value: str, allowed: List[str]
+    ) -> None:
+        if value not in allowed:
+            raise ValueError(
+                f"The {property_name} of property is `{value}`, "
+                f"but should be one of: {', '.join(allowed)}."
+            )
 
     @override
     def to_json(self, as_str: bool = True) -> Union[Dict, str]:
@@ -222,7 +310,7 @@ class Node(JsonConvertible):
             - illegal parameter was passed via `kwargs`.
               Allowed values include all attributes of `Node` class.
         """
-        is_type_correct = False
+        node_in_specification = False
         self._specification_builder = specification_builder
         nodes_in_specification = specification_builder._get_nodes(
             sort_spec=False
@@ -237,10 +325,10 @@ class Node(JsonConvertible):
             if "name" not in node:
                 continue
             if node["name"] == kwargs["name"]:
-                is_type_correct = True
+                node_in_specification = True
                 break
 
-        if not is_type_correct and not for_subgraph_node:
+        if not node_in_specification and not for_subgraph_node:
             node_name = kwargs["name"]
             raise ValueError(
                 f"Illegal name of the node `{node_name}`, "
@@ -250,6 +338,19 @@ class Node(JsonConvertible):
         if "name" in kwargs:
             setattr(self, "_node_name", kwargs["name"])
             del kwargs["name"]
+
+        # Take initial properties from specification.
+        if node_in_specification:
+            [node] = [
+                node
+                for node in nodes_in_specification
+                if node.get("name") is not None
+                and node["name"] == self._node_name
+            ]
+            if node.get("properties") is not None:
+                self.properties = [
+                    Property(**property) for property in node["properties"]
+                ]
 
         for key, value in kwargs.items():
             if key not in Node.__annotations__.keys():
@@ -283,11 +384,26 @@ class Node(JsonConvertible):
 
             setattr(self, key, value)
 
+        if not hasattr(self, "id"):
+            self.id = get_uuid()
+
+        if not hasattr(self, "interfaces"):
+            self.interfaces = []
+
+        if not hasattr(self, "properties"):
+            self.properties = []
+
+        required_attrs = ("id", "width", "properties", "interfaces")
+        for attr in required_attrs:
+            if not hasattr(self, attr):
+                raise ValueError(f"Missing `{attr}` of a node.")
+
     @staticmethod
     def init_subgraph_node(
         specification_builder: SpecificationBuilder,
         name: str,
         subgraph: Any,
+        **kwargs,
     ) -> "Node":
         """
         An alternative constructor of Node object.
@@ -318,6 +434,7 @@ class Node(JsonConvertible):
             for_subgraph_node=True,
             specification_builder=specification_builder,
             name=name,
+            **kwargs,
         )
         node.id = get_uuid()
         node._node_name = name

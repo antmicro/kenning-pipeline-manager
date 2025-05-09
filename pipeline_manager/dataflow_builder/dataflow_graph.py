@@ -46,6 +46,8 @@ class AttributeType(Enum):
 class DataflowGraph(JsonConvertible):
     """Representation of a dataflow graph."""
 
+    _DEFAULT_NODE_WIDTH = 200
+
     def __init__(
         self,
         builder_with_spec: SpecificationBuilder,
@@ -177,6 +179,12 @@ class DataflowGraph(JsonConvertible):
                 "a subgraph node. Use `DataflowGraph.create_subgraph_node` "
                 "instead."
             )
+        allowed_fields = [field.name for field in fields(Node)]
+        for arg_name in kwargs:
+            if arg_name not in allowed_fields:
+                raise KeyError(
+                    f"Illegal argument `{arg_name}` when creating node."
+                )
 
         base_node = None
 
@@ -222,12 +230,13 @@ class DataflowGraph(JsonConvertible):
                 )
                 properties.append(_property)
 
-        DEFAULT_WIDTH = 200
         parameters = {
             "specification_builder": self._spec_builder,
             "id": node_id,
             "name": base_node["name"],
-            "width": getattr(base_node, "width", DEFAULT_WIDTH),
+            "width": getattr(
+                base_node, "width", DataflowGraph._DEFAULT_NODE_WIDTH
+            ),
             "enabled_interface_groups": [],
             "instance_name": None,
             "interfaces": interfaces,
@@ -245,7 +254,9 @@ class DataflowGraph(JsonConvertible):
         self._nodes[node_id] = Node(**parameters)
         return self._nodes[node_id]
 
-    def create_subgraph_node(self, name: str, subgraph_id: str) -> Node:
+    def create_subgraph_node(
+        self, name: str, subgraph_id: str, **kwargs
+    ) -> Node:
         """
         Create a node with a subgraph.
 
@@ -264,11 +275,15 @@ class DataflowGraph(JsonConvertible):
         Node
             Newly created node with a subgraph.
         """
+        if "width" not in kwargs:
+            kwargs["width"] = DataflowGraph._DEFAULT_NODE_WIDTH
+
         subgraph = self._graph_builder.get_graph_by_id(subgraph_id)
         node = Node.init_subgraph_node(
             specification_builder=self._spec_builder,
             name=name,
             subgraph=subgraph,
+            **kwargs,
         )
         self._nodes[node.id] = node
         return node

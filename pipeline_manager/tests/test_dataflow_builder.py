@@ -56,7 +56,7 @@ def test_adding_node_present_in_specification(builder):
         two_column=False,
     )
 
-    prop = Property(name="filename", value="input.mp4")
+    prop = Property(name="filename", value="input.mp4", type="text")
     node.properties = [prop]
 
     assert graph.to_json(as_str=False) == {
@@ -572,7 +572,9 @@ def test_adding_subgraph_node(subgraph_specification):
 
     graph1 = builder.create_graph()
     graph2 = builder.create_graph()
-    graph1.create_subgraph_node(name="New Graph Node", subgraph_id=graph2.id)
+    graph1.create_subgraph_node(
+        name="New Graph Node", subgraph_id=graph2.id, width=350
+    )
 
 
 def test_disallowing_for_changing_graph_id(sample_specification_path):
@@ -740,7 +742,7 @@ def test_assigning_property_to_graph_node():
             "name": graph_name,
             "nodes": [],
             "connections": [],
-            # "properties": [], # FIXME: Validation error
+            # Graphs don't have properties. Only nodes do.
         }
     )
 
@@ -752,8 +754,9 @@ def test_assigning_property_to_graph_node():
     outer_graph = dataflow_builder.create_graph()
     inner_graph = dataflow_builder.create_graph()
 
-    node = outer_graph.create_subgraph_node(graph_name, inner_graph.id)
-    # FIXME: MISSING PROPERTY, missing `properties` attribute
-    node.set_property(property_name=property_name, property_value=20)
+    node = outer_graph.create_subgraph_node(node_name, inner_graph.id)
+    node.set_property(
+        property_name=property_name, property_value="Hello, Pipeline Manager!"
+    )
 
     dataflow_builder.validate()
