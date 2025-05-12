@@ -66,7 +66,18 @@ export default defineComponent({
             simpleLineBreaks: true,
         });
 
-        const renderedMarkdown = computed(() => converter.makeHtml(props.modelValue));
+        const renderedMarkdown = computed(() => {
+            let html = converter.makeHtml(props.modelValue);
+            const aTagRe = /<a href="[a-zA-Z0-9-$_.+!*'()/&?=:%]+">/gm;
+            html.match(aTagRe)?.forEach((match) => {
+                const hrefParts = match.split('"');
+                // Forces the link to open in a new tab instead of closing the pipeline manager
+                const newEnd = ` tabindex="-1" target="_blank"${hrefParts[2]}`;
+                const newHref = [hrefParts[0], hrefParts[1], newEnd].join('"');
+                html = html.replace(match, newHref);
+            });
+            return html;
+        });
 
         const styles = reactive({
             resize: 'none',
