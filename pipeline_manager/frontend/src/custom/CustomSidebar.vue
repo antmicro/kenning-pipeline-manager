@@ -150,7 +150,6 @@ SPDX-License-Identifier: Apache-2.0
 import { computed, defineComponent, watch, ref, nextTick } from 'vue'; // eslint-disable-line object-curly-newline
 import { CheckboxInterface, ButtonInterface } from '@baklavajs/renderer-vue'; // eslint-disable-line object-curly-newline
 import showdown from 'showdown';
-import DOMPurify from 'dompurify';
 import CustomInterface from './CustomInterface.vue';
 import Cross from '../icons/Cross.vue';
 import Tooltip from '../components/Tooltip.vue';
@@ -197,8 +196,9 @@ export default defineComponent({
                 const newHref = [hrefParts[0], hrefParts[1], newEnd].join('"');
                 html = html.replace(match, newHref);
             });
-            return DOMPurify.sanitize(html);
+            return html;
         });
+
         const nodeIcon = computed(() => viewModel.value.editor.getNodeIconPath(node.value?.type));
         const nodeURLs = computed(() => viewModel.value.editor.getNodeURLs(node.value?.type));
 
