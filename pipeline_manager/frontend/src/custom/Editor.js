@@ -17,7 +17,7 @@ import { Editor } from '@baklavajs/core';
 
 import { useGraph } from '@baklavajs/renderer-vue';
 
-import { toRaw, nextTick } from 'vue';
+import { nextTick } from 'vue';
 import createPipelineManagerGraph from './CustomGraph.js';
 import LayoutManager from '../core/LayoutManager.js';
 import { suppressHistoryLogging } from '../core/History.ts';
@@ -74,13 +74,14 @@ export default class PipelineManagerEditor extends Editor {
      * @throws {Error} Throws if there are issues switching to a subgraph.
      */
     save() {
+        const graphNodes = [];
         while (this.isInSubgraph()) {
+            graphNodes.push(this._graph.graphNode);
             this.backFromSubgraph();
         }
+
         // Save all changes done to subgraphs before saving.
         const currentGraphId = this._graph.id;
-        const stackCopy = Array.from(toRaw(this.subgraphStack));
-
         const currentGraphState = this.graph.save();
         currentGraphState.panning = this._graph.panning;
         currentGraphState.scaling = this._graph.scaling;
@@ -98,15 +99,16 @@ export default class PipelineManagerEditor extends Editor {
         };
         currentGraphState.nodes.forEach(recurrentSubgraphSave);
 
-        stackCopy.forEach((subgraphNode) => {
-            this.switchToSubgraph(subgraphNode);
-        });
         /* eslint-enable no-unused-vars */
         if (dataflowState.graphs.length) {
             dataflowState.entryGraph = currentGraphId;
         }
 
         dataflowState.graphs = [currentGraphState, ...dataflowState.graphs];
+
+        graphNodes.reverse().forEach((subgraphNode) => {
+            this.switchToSubgraph(subgraphNode);
+        });
 
         return dataflowState;
     }
