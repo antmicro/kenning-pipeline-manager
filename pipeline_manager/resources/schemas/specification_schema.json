@@ -18,9 +18,7 @@
                                 "description": "Category of a node in a side bar",
                                 "type": "string"
                             }
-                        },
-                        "required": [
-                        ]
+                        }
                     }
                 }
             },
