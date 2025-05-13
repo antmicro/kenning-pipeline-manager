@@ -343,7 +343,7 @@ export default {
             commitTransaction();
         },
 
-        createNewNodeCallback() {
+        createNewNodeTypeCallback() {
             this.menuState.configurationMenu.visible = !this.menuState.configurationMenu.visible;
             this.menuState.configurationMenu.addNode = true;
         },
@@ -780,11 +780,11 @@ export default {
                                 />
 
                                 <DropdownItem
-                                    id="create-new-node-button"
+                                    id="create-new-node-type-button"
                                     v-if="!readonly"
-                                    text="Create new node"
+                                    text="Create new node type"
                                     type="'button'"
-                                    :eventFunction="createNewNodeCallback"
+                                    :eventFunction="createNewNodeTypeCallback"
                                 />
 
                                 <!-- eslint-disable-next-line max-len -->
