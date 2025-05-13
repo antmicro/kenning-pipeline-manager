@@ -4,6 +4,10 @@ Copyright (c) 2022-2024 Antmicro <www.antmicro.com>
 SPDX-License-Identifier: Apache-2.0
 -->
 
+<!--
+Popup menu for choosing save options.
+-->
+
 <!-- eslint-disable vue/no-mutating-props -->
 <template>
     <div class="save-menu">
