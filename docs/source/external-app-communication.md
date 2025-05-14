@@ -20,7 +20,7 @@ By default, {{project}} in `server-app` mode will wait for an external applicati
 If connection is established successfully, {{project}} frontend will check if external application is still connected every 0.5 second.
 Apart from that, both {{project}} frontend and external application can send requests which pass through {{project}} backend.
 
-```{mermaid}
+```{md-mermaid}
 :caption: Communication sequence diagram
 :alt: Communication sequence diagram
 sequenceDiagram
@@ -80,7 +80,7 @@ Following communication structure diagram below, we have:
 * red lines describing [External App API](external-app-api) request from frontend,
 * purple lines describing [Frontend API](frontend-api) request from external application.
 
-```{mermaid}
+```{md-mermaid}
 :caption: Communication structure diagram
 :alt: Communication structure diagram
 C4Deployment
