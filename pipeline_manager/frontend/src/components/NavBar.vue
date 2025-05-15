@@ -779,13 +779,17 @@ export default {
                                     :eventFunction="createNewGraphCallback"
                                 />
 
-                                <DropdownItem
-                                    id="create-new-node-type-button"
-                                    v-if="!readonly"
-                                    text="Create new node type"
-                                    type="'button'"
-                                    :eventFunction="createNewNodeTypeCallback"
-                                />
+                                <template
+                                    v-if="this.editorManager.baklavaView.settings.editableNodeTypes"
+                                >
+                                    <DropdownItem
+                                        id="create-new-node-type-button"
+                                        v-if="!readonly"
+                                        text="Create new node type"
+                                        type="'button'"
+                                        :eventFunction="createNewNodeTypeCallback"
+                                    />
+                                </template>
 
                                 <!-- eslint-disable-next-line max-len -->
                                 <template v-if="this.externalApplicationManager.externalApplicationConnected">
