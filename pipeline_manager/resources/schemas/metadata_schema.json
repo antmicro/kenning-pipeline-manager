@@ -193,6 +193,11 @@
             "description": "Determines whether connections should have randomized, but deterministic offset",
             "default": false
         },
+        "editableNodeTypes": {
+            "type": "boolean",
+            "description": "Determines whether the user can edit existing and add new node types",
+            "default": false
+        },
         "icons": {
             "type": "object",
             "description": "Mapping from icon URL class to URL prefix",
