@@ -141,6 +141,7 @@ export default class EditorManager {
         this.baklavaView.navbarItems = this.defaultMetadata.navbarItems;
         this.baklavaView.cache = {};
         this.baklavaView.logLevel = this.defaultMetadata.logLevel;
+        this.baklavaView.settings.editableNodeTypes = this.defaultMetadata.editableNodeTypes;
 
         this.specificationVersion = unresolvedSpecificationSchema.version;
         this.baklavaView.commandHandler = useCommandHandler();
@@ -789,6 +790,8 @@ export default class EditorManager {
             metadata?.backgroundSize ?? this.defaultMetadata.backgroundSize;
         this.baklavaView.connectionRenderer.randomizedOffset =
             metadata?.randomizedOffset ?? this.defaultMetadata.randomizedOffset;
+        this.baklavaView.settings.editableNodeTypes =
+            metadata?.editableNodeTypes ?? this.defaultMetadata.editableNodeTypes;
 
         this.baklavaView.ignoredLayers = new Set();
         this.baklavaView.layers = metadata?.layers ?? this.defaultMetadata.layers;
@@ -940,6 +943,7 @@ export default class EditorManager {
             [this.baklavaView.movementStep, 'movementStep'],
             [this.baklavaView.settings.background.gridSize, 'backgroundSize'],
             [this.baklavaView.connectionRenderer.randomizedOffset, 'randomizedOffset'],
+            [this.baklavaView.settings.editableNodeTypes, 'editableNodeTypes'],
         ].forEach(([currVal, name]) => {
             const m = this.specification.currentSpecification?.metadata ?? {};
             const dm = this.defaultMetadata;

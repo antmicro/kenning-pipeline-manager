@@ -83,6 +83,19 @@ export default {
             return option;
         });
 
+        const editableNodeTypes = computed(() => {
+            const option = new CheckboxInterface(
+                'Modify node types',
+                props.viewModel.settings.editableNodeTypes,
+            ).setPort(false);
+            option.events.setValue.subscribe(this, (v) => {
+                props.viewModel.settings.editableNodeTypes = v; // eslint-disable-line vue/no-mutating-props,max-len,no-param-reassign
+                metadataChanged('editableNodeTypes', v);
+            });
+            option.componentName = 'CheckboxInterface';
+            return option;
+        });
+
         const backgroundGridSize = computed(() => {
             const option = new IntegerInterface(
                 'Background grid size',
@@ -189,6 +202,7 @@ export default {
                 clearEditor.value,
                 movementStep.value,
                 randomizedOffsetOption.value,
+                editableNodeTypes.value,
             ];
         });
 
