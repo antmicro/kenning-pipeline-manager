@@ -74,30 +74,21 @@ export default function CreateCustomGraphNodeType(template, graphNode) {
             inputs = Object.values(inputs);
             outputs = Object.values(outputs);
 
-            delete state.graphState.interfaces;
-            delete state.subgraph;
+            if (state.graphState !== undefined) {
+                delete state.graphState.interfaces;
+                delete state.subgraph;
 
-            // Loading the subgraph of the graph node first, before creating
-            // interfaces based on the nodes in the subgraph. Thanks to that
-            // the originally exposed interfaces (coming from regular nodes)
-            // are found first.
-            const errors = this.subgraph.load(state.graphState);
-            if (errors.length) {
-                return errors;
+                // Loading the subgraph of the graph node first, before creating
+                // interfaces based on the nodes in the subgraph. Thanks to that
+                // the originally exposed interfaces (coming from regular nodes)
+                // are found first.
+                const errors = this.subgraph.load(state.graphState);
+                if (errors.length) {
+                    return errors;
+                }
             }
 
             this.updateExposedInterfaces(inputs, outputs);
-
-            if (!this.subgraph) {
-                errors.push('Cannot load a graph node without a graph');
-            }
-            if (!this.template) {
-                errors.push('Unable to load graph node without graph template');
-            }
-            if (errors.length) {
-                return errors;
-            }
-
             // Default position should be undefined instead of (0, 0) so that it can be set
             // by autolayout
             this.position = state.position;
