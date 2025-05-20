@@ -453,16 +453,15 @@ export default class EditorManager {
      * @returns An object consisting of errors and warnings arrays. If both arrays are empty
      * the updating process was successful.
      */
-    addNodeToGraphSpecification(nodeSpecification) {
+    addNodeToEditorSpecification(nodeSpecification) {
         let validationErrors = this.validateNode(nodeSpecification);
         if (validationErrors.length) return validationErrors;
 
-        if (this.currentSpecification === undefined) {
+        if (this.specification.currentSpecification === undefined) {
             const newSpecification = {
                 nodes: [nodeSpecification],
             };
-
-            return this.updateGraphSpecification(newSpecification);
+            return this.updateEditorSpecification(newSpecification);
         }
 
         validationErrors = this._registerNodeType(nodeSpecification);
@@ -470,7 +469,7 @@ export default class EditorManager {
             return { errors: validationErrors, warnings: [] };
         }
 
-        this.unresolvedSpecification.nodes.push(nodeSpecification);
+        this.specification.unresolvedSpecification.nodes.push(nodeSpecification);
         return { errors: [], warnings: [] };
     }
 

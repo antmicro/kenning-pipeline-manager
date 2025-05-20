@@ -323,7 +323,7 @@ export class NodeConfiguration {
             return;
         }
 
-        const ret = editorManager.addNodeToGraphSpecification({
+        const ret = editorManager.addNodeToEditorSpecification({
             name: this.nodeData.name,
             layer: this.nodeData.layer,
             category: this.nodeData.category,
@@ -331,7 +331,7 @@ export class NodeConfiguration {
             properties: this.properties,
         });
 
-        if (ret.errors.length) {
+        if (ret.errors !== undefined && ret.errors.length) {
             NotificationHandler.terminalLog('error', 'Error when finalizing node creation', ret.errors);
             return;
         }
