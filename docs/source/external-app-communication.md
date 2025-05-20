@@ -21,17 +21,9 @@ If connection is established successfully, {{project}} frontend will check if ex
 Apart from that, both {{project}} frontend and external application can send requests which pass through {{project}} backend.
 
 ```{md-mermaid}
-:caption: Communication sequence diagram
-:alt: Communication sequence diagram
 sequenceDiagram
-    box Pipeline Manager
-        participant Frontend
-        participant Backend
-    end
-    box Pipeline Manager Backend Communication
-        participant External App
-    end
-    Note over Frontend,Backend: SocketIO
+    Note over Frontend,Backend: Pipeline Manager (SocketIO)
+    Note over External App: Pipeline Manager Backend Communication
     Frontend->>Backend: status_get
     Backend->>Frontend: status
     Frontend->>+Backend: external_app_connect
@@ -81,8 +73,6 @@ Following communication structure diagram below, we have:
 * purple lines describing [Frontend API](frontend-api) request from external application.
 
 ```{md-mermaid}
-:caption: Communication structure diagram
-:alt: Communication structure diagram
 C4Deployment
     Deployment_Node(pm, "Pipeline Manager", "") {
         Deployment_Node(front, "Frontend", "") {
