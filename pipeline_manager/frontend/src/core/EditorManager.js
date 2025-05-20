@@ -1176,10 +1176,11 @@ export default class EditorManager {
      * @param data Specification file to validate. Can be either a parsed JSON object
      * or a textual file
      * @param schema Schema to use
+     * @param reference Reference to part of the schema, e.g. node, interface or property.
      * @param additionalAjvOptions Additional options to pass to the Ajv constructor
      * @returns An array of errors. If the array is empty, the validation was successful.
      */
-    static validateJSONWithSchema(data, schema, additionalAjvOptions = {}) {
+    static validateJSONWithSchema(data, schema, reference = '', additionalAjvOptions = {}) {
         const ajv = new Ajv2019({
             allowUnionTypes: true,
             // Schema used in compile() may be already included in `schemas`.
@@ -1198,7 +1199,8 @@ export default class EditorManager {
         });
         ajv.addKeyword('version');
 
-        const validate = ajv.compile(schema);
+        ajv.addSchema(schema, 'root');
+        const validate = ajv.getSchema(`root${reference}`);
         const isTextFormat = typeof data === 'string' || data instanceof String;
         let dataJSON;
 
@@ -1355,8 +1357,8 @@ export default class EditorManager {
      * @returns An array of errors. If the array is empty, the validation was successful.
      */
     /* eslint-disable class-methods-use-this */
-    validateNode(nodeSpecification, schema = unresolvedSpecificationSchema.$defs.node) {
-        return EditorManager.validateJSONWithSchema(nodeSpecification, schema);
+    validateNode(nodeSpecification, schema = unresolvedSpecificationSchema) {
+        return EditorManager.validateJSONWithSchema(nodeSpecification, schema, '#/$defs/node');
     }
 
     /**
@@ -1367,9 +1369,9 @@ export default class EditorManager {
      */
     validateNodeProperty(
         propertySpecification,
-        schema = unresolvedSpecificationSchema.$defs.property,
+        schema = unresolvedSpecificationSchema,
     ) {
-        return EditorManager.validateJSONWithSchema(propertySpecification, schema);
+        return EditorManager.validateJSONWithSchema(propertySpecification, schema, '#/$defs/property');
     }
 
     /**
@@ -1380,9 +1382,9 @@ export default class EditorManager {
      */
     validateNodeInterface(
         interfaceSpecification,
-        schema = unresolvedSpecificationSchema.$defs.interface,
+        schema = unresolvedSpecificationSchema,
     ) {
-        return EditorManager.validateJSONWithSchema(interfaceSpecification, schema);
+        return EditorManager.validateJSONWithSchema(interfaceSpecification, schema, '#/$defs/interface');
     }
 
     /**
