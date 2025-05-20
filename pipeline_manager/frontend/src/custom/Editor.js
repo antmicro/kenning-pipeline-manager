@@ -536,6 +536,7 @@ export default class PipelineManagerEditor extends Editor {
     }
 
     isGraphNode(nodeName) {
+        if (!this.nodeTypes.has(nodeName)) return false;
         return this.nodeTypes.get(nodeName).isSubgraph;
     }
 
