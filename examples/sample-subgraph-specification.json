@@ -254,6 +254,23 @@
                             "value": "Option 4"
                         }
                     ]
+                },
+                {
+                    "name": "Test subgraph node #1",
+                    "position": {
+                        "x": 100,
+                        "y": 400
+                    },
+                    "width": 200,
+                    "twoColumn": false,
+                    "interfaces": [],
+                    "properties": [
+                        {
+                            "name": "Sample option",
+                            "id": "5e88be6f-16bd-47b4-a66f-ef002bb9d00e",
+                            "value": "Option 2"
+                        }
+                    ]
                 }
             ],
             "connections": [
