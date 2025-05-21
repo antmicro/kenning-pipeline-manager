@@ -227,12 +227,9 @@ export default defineComponent({
         const getIconPath = (name) => viewModel.value.cache[`./${name}`] ?? name;
         const isCategoryNode = (category) => category?.categoryNode !== undefined;
 
-        const notEmptyCategory = (category) => {
-            if (category.nodes.nodeTypes === undefined) {
-                return Object.keys(category.subcategories).length !== 0;
-            }
-            return Object.keys(category.nodes.nodeTypes).length !== 0;
-        };
+        const notEmptyCategory = (category) =>
+            Object.keys(category.nodes.nodeTypes ?? {}).length !== 0
+            || Object.keys(category.subcategories).length !== 0;
 
         const paddingDepth = 30;
         const minPadding = 10;
