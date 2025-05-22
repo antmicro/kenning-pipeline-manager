@@ -1,0 +1,247 @@
+{
+    "graphs": [
+        {
+            "id": "b592e3fe-e98d-4176-b569-ccf47075e3b0",
+            "name": "Example of the graph with include mechanisms",
+            "nodes": [
+                {
+                    "id": "e4f7814d-0768-4936-872a-fb3de9b1b71a",
+                    "position": {
+                        "x": 1092,
+                        "y": 182
+                    },
+                    "width": 200,
+                    "twoColumn": true,
+                    "interfaces": [
+                        {
+                            "name": "frames",
+                            "id": "edeceac6-67fe-4771-8bf5-0e605862be8e",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 0
+                        }
+                    ],
+                    "properties": [
+                        {
+                            "name": "Platform",
+                            "id": "5ec30e10-ea1d-4fbd-a941-49d89fe1288c",
+                            "value": ""
+                        },
+                        {
+                            "name": "API Token",
+                            "id": "fa41d101-6ee1-47a5-aadf-f06eb3212db2",
+                            "value": ""
+                        }
+                    ],
+                    "enabledInterfaceGroups": [],
+                    "name": "UploadVideo",
+                    "instanceName": "UploadVideo"
+                },
+                {
+                    "id": "fb704dfd-cef6-4bf3-a8c4-523547342f15",
+                    "position": {
+                        "x": 1095,
+                        "y": 516
+                    },
+                    "width": 200,
+                    "twoColumn": true,
+                    "interfaces": [
+                        {
+                            "name": "frames",
+                            "id": "b92d5a38-3ad7-47ba-912b-b586ce8a023a",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 0
+                        }
+                    ],
+                    "properties": [
+                        {
+                            "name": "filename",
+                            "id": "c88a4074-8e70-4844-b7cf-59154f1f8735",
+                            "value": ""
+                        }
+                    ],
+                    "enabledInterfaceGroups": [],
+                    "name": "SaveVideo",
+                    "instanceName": "SaveVideo"
+                },
+                {
+                    "id": "749d2d91-decf-4d10-a63b-0056da34b66e",
+                    "position": {
+                        "x": 500,
+                        "y": 338
+                    },
+                    "width": 200,
+                    "twoColumn": true,
+                    "interfaces": [
+                        {
+                            "name": "input 1",
+                            "id": "97a82180-63c7-439e-a15b-9e2d9dc2f748",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 1
+                        },
+                        {
+                            "name": "kernel",
+                            "id": "2ae866dd-5f2e-442a-9a2a-7f1133d27f79",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 0
+                        },
+                        {
+                            "name": "output 1",
+                            "id": "c7c21e73-760b-4a92-a73e-6886a777dde2",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 0
+                        }
+                    ],
+                    "properties": [
+                        {
+                            "name": "iterations",
+                            "id": "0226acb6-ed2d-47f0-823f-c71d5ad7cad2",
+                            "value": 1
+                        },
+                        {
+                            "name": "border type",
+                            "id": "6077594e-ebd3-4252-9901-7ac81dbfce5c",
+                            "value": "constant"
+                        }
+                    ],
+                    "enabledInterfaceGroups": [],
+                    "name": "Filter2D",
+                    "instanceName": "Filter2D"
+                },
+                {
+                    "id": "6133473c-4beb-49db-8758-86313e2eef20",
+                    "position": {
+                        "x": 66,
+                        "y": 22
+                    },
+                    "width": 200,
+                    "twoColumn": true,
+                    "interfaces": [
+                        {
+                            "name": "kernel",
+                            "id": "be95fc9f-2775-49a1-a522-20fc69e48761",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 0
+                        }
+                    ],
+                    "properties": [
+                        {
+                            "name": "size",
+                            "id": "bd1984a5-5d69-4fdc-8136-14f8d177e105",
+                            "value": 5
+                        },
+                        {
+                            "name": "sigma",
+                            "id": "89d83ce6-e456-4070-af24-bbdc8b4cee31",
+                            "value": 1
+                        }
+                    ],
+                    "enabledInterfaceGroups": [],
+                    "name": "GaussianKernel",
+                    "instanceName": "GaussianKernel"
+                },
+                {
+                    "id": "5262f74e-a375-4522-ac60-de94b53a1ff0",
+                    "position": {
+                        "x": -137,
+                        "y": 413
+                    },
+                    "width": 200,
+                    "twoColumn": true,
+                    "interfaces": [
+                        {
+                            "name": "frames",
+                            "id": "a30c151d-2b77-4d6f-8b63-262b5a08af5a",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 0
+                        }
+                    ],
+                    "properties": [
+                        {
+                            "name": "filename",
+                            "id": "72550311-56a5-418a-8a4b-23d95a88637b",
+                            "value": ""
+                        }
+                    ],
+                    "enabledInterfaceGroups": [],
+                    "name": "LoadVideo",
+                    "instanceName": "LoadVideo"
+                },
+                {
+                    "id": "1b2d9698-1b16-4f29-961c-5f6cc2693e1a",
+                    "position": {
+                        "x": 505,
+                        "y": 648
+                    },
+                    "width": 200,
+                    "twoColumn": true,
+                    "interfaces": [
+                        {
+                            "name": "input 1",
+                            "id": "ffe34d72-34d5-4aa9-8c7d-8d664512ae8a",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 0
+                        },
+                        {
+                            "name": "output 1",
+                            "id": "bc28b3ad-e081-468c-b58b-0cef69359990",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 0
+                        }
+                    ],
+                    "properties": [
+                        {
+                            "name": "color",
+                            "id": "090ebefa-23aa-41be-b885-8fd377ffb653",
+                            "value": "0xffff"
+                        }
+                    ],
+                    "enabledInterfaceGroups": [],
+                    "name": "RemoveColor",
+                    "instanceName": "RemoveColor"
+                }
+            ],
+            "connections": [
+                {
+                    "id": "e2fc1eba-898b-4166-a088-00e3538832e8",
+                    "from": "c7c21e73-760b-4a92-a73e-6886a777dde2",
+                    "to": "edeceac6-67fe-4771-8bf5-0e605862be8e"
+                },
+                {
+                    "id": "34061e6a-67db-4100-b26f-e7b891a91321",
+                    "from": "be95fc9f-2775-49a1-a522-20fc69e48761",
+                    "to": "2ae866dd-5f2e-442a-9a2a-7f1133d27f79"
+                },
+                {
+                    "id": "77807f3d-c674-459f-a459-3b60ae2449a1",
+                    "from": "a30c151d-2b77-4d6f-8b63-262b5a08af5a",
+                    "to": "97a82180-63c7-439e-a15b-9e2d9dc2f748"
+                },
+                {
+                    "id": "3c4c411c-05e8-41b4-a651-bfc300276227",
+                    "from": "a30c151d-2b77-4d6f-8b63-262b5a08af5a",
+                    "to": "ffe34d72-34d5-4aa9-8c7d-8d664512ae8a"
+                },
+                {
+                    "id": "0f1dcdda-613b-4693-a6bc-5d9c5339a15d",
+                    "from": "bc28b3ad-e081-468c-b58b-0cef69359990",
+                    "to": "b92d5a38-3ad7-47ba-912b-b586ce8a023a"
+                }
+            ]
+        }
+    ],
+    "version": "20240723.13",
+    "metadata": {
+        "allowLoopbacks": true,
+        "twoColumn": true,
+        "connectionStyle": "orthogonal"
+    }
+}

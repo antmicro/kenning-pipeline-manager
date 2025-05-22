@@ -1,0 +1,46 @@
+{
+    "version": "20240723.13",
+    "nodes": [
+        {
+            "name": "TestNode",
+            "layer": "TestNode",
+            "category": "TestCategory",
+            "properties": [
+                {"name": "test", "type": "text", "default": "testing"}
+            ],
+            "interfaces": [
+                {"name": "1", "type": "test", "direction": "output", "array": [0, 32]}
+            ],
+            "interfaceGroups": [
+                {
+                    "name": "1",
+                    "type": "test",
+                    "direction": "input",
+                    "interfaces": [
+                        {"name": "1", "array": [0, 30], "direction": "output"}
+                    ]
+                },
+                {
+                    "name": "2",
+                    "type": "test",
+                    "direction": "output",
+                    "interfaces": [
+                        {"name": "1", "array": [3, 30], "direction": "output"}
+                    ]
+                },
+                {
+                    "name": "3",
+                    "type": "test",
+                    "direction": "output",
+                    "interfaces": [
+                        {"name": "1", "array": [28, 30], "direction": "output"}
+                    ]
+                }
+            ],
+            "defaultInterfaceGroups": [
+                {"name": "1", "direction": "input"}
+            ]
+        }
+    ]
+}
+
