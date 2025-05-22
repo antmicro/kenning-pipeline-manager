@@ -1514,22 +1514,24 @@ class SpecificationBuilder(object):
         previousmissing = set()
         missing = set()
         while len(newnodes) > 0:
-            node = newnodes.pop(0)
-            if extends := get_optional(node, "extends"):
-                for basenode in extends:
-                    if basenode not in self._nodes:
-                        newnodes.append(node)
-                        missing.add(basenode)
-                        break
+            currnodes = list(newnodes)
+            newnodes = []
+            for node in currnodes:
+                if extends := get_optional(node, "extends"):
+                    for basenode in extends:
+                        if basenode not in self._nodes:
+                            newnodes.append(node)
+                            missing.add(basenode)
+                            break
+                    else:
+                        self.add_node_type_from_spec(node)
                 else:
                     self.add_node_type_from_spec(node)
-            else:
-                self.add_node_type_from_spec(node)
             if missing == previousmissing and len(missing) > 0:
                 raise SpecificationBuilderException(
                     f"Classes from other spec are not found:  {missing}"
                 )
-            previousmissing = missing
+            previousmissing = set(missing)
             missing = set()
         for subgraph in otherspec.get("graphs", []):
             self.add_subgraph_from_spec(subgraph)
