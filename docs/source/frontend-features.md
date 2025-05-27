@@ -30,7 +30,7 @@ Double left-click on an existing connection removes it.
 
 ![Settings tab](img/settings-tab.png)
 
-On the upper right corner of {{project}} window there is a gear icon toggling settings tab. In the tab following options can be found:
+On the upper right corner of {{project}} window there is a gear icon toggling settings tab. In the tab the following options can be found:
 * `Connection style` - Switch the style of the connection between `orthogonal` and `curved`
 * `AutoLayout algorithm` - Choose the algorithm for automatic node placement. Autolayout algorithm is triggered in the following situations:
   * When loading the dataflow autolayout is used to place nodes without the `position` parameter set. Dataflow load can be triggered either via external application or
@@ -41,6 +41,7 @@ On the upper right corner of {{project}} window there is a gear icon toggling se
 * `Center` - Pressing this buttons moves the viewport to the center of graph and sets the zoom level so that whole dataflow is visible
 * `Hide layers` - [Metadata](project:specification-format.md#layer) allows to specify layers for a certain set of interface types and connections. Toggling this checkbox allows to hide
 connections belonging to said layer
+* `Modify node types` - Toggling this checkbox allows adding new node types to the specification
 
 ## Notifications
 
@@ -88,6 +89,20 @@ Depending the application's mode (`static-html` or `server-app`), the following 
   ```{note}
   It appears only in the `server-app` build mode, since the third-party app performs conversion from the [Dataflow format](dataflow-format) received from the editor to its native format.
   ```
+
+## Creating new node types
+
+After toggling the `Modify nodes types` checkbox in settings, the option `Create new node type` becomes available in the editor menu.
+
+Selecting it displays the `Node configuration menu`.
+
+![Node configuration menu](img/node-configuration-menu.png)
+
+After the node is created, it will be visible in the node palette.
+
+The node type can be configured further from the editor, e.g. by adding properties and interfaces.
+
+To add the new node type to the current specification, choose the `Finalize` option in the node menu.
 
 ## Working with the server
 
