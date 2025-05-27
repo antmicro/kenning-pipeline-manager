@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
-import { getUrl } from './config.js';
+import { getUrl, enableNavigationBar, addNode, dragAndDrop } from './config.js';
 
-test('enable editing', async ({ page }) => {
+async function enableEditingNodes(page: Page) {
     await page.goto(getUrl());
 
     // Assert that node types cannot be added
@@ -22,4 +22,27 @@ test('enable editing', async ({ page }) => {
     await logo.hover();
     addNodeButton = await logo.locator('#create-new-node-type-button');
     expect(addNodeButton).toBeVisible();
+}
+
+async function createNewNodeType(page: Page) {
+    // Open node configuration menu
+    const logo = await page.locator('.logo');
+    await logo.hover();
+    const addNodeButton = await logo.locator('#create-new-node-type-button');
+    await addNodeButton.click();
+
+    // Create node
+    const nodeMenu = await page.locator('#container').locator('.create-menu');
+    const createButton = await nodeMenu.getByText('Create');
+    await createButton.click();
+}
+
+test('enable editing', async ({ page }) => {
+    await enableEditingNodes(page);
+});
+
+test('create new node type', async ({ page }) => {
+    await enableEditingNodes(page);
+    await createNewNodeType(page);
+    await addNode(page, 'Default category', 'Custom Node', 750, 80);
 });
