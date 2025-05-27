@@ -19,7 +19,6 @@ from sphinx.addnodes import download_reference
 from sphinx.application import Sphinx
 from sphinx.errors import ExtensionError
 from sphinx.util.docutils import SphinxDirective
-from sphinx.util.typing import ExtensionMetadata
 from sphinx.writers.html5 import HTML5Translator
 
 KPM_PATH = "_static/pipeline-manager.html"
@@ -135,8 +134,10 @@ class KPMDirective(SphinxDirective):
 
         from pipeline_manager.frontend_builder import build_frontend
 
-        workspace_dir = self.env.app.builder.outdir.parent / "pm-workspace"
-        pm_graphs_dir = self.env.app.builder.outdir / "_static/pm-graphs"
+        workspace_dir = (
+            Path(self.env.app.builder.outdir).parent / "pm-workspace"
+        )
+        pm_graphs_dir = Path(self.env.app.builder.outdir) / "_static/pm-graphs"
 
         pm_graphs_dir.mkdir(parents=True, exist_ok=True)
 
@@ -202,8 +203,8 @@ def build_pipeline_manager(app):
     assets_dir = None
     if app.config.pipeline_manager_assets_directory:
         assets_dir = Path(app.config.pipeline_manager_assets_directory)
-    workspace_dir = app.builder.outdir.parent / "pm-workspace"
-    static_dir = app.builder.outdir / "_static"
+    workspace_dir = Path(app.builder.outdir).parent / "pm-workspace"
+    static_dir = Path(app.builder.outdir) / "_static"
 
     static_dir.mkdir(parents=True, exist_ok=True)
 
@@ -226,7 +227,7 @@ def build_pipeline_manager(app):
             )
 
 
-def setup(app: Sphinx) -> ExtensionMetadata:
+def setup(app: Sphinx):
     """
     Method setting up a Pipeline Manager extension.
     """
