@@ -95,10 +95,18 @@ export default defineComponent({
         });
 
         const create = computed(() => {
-            const button: any = new ButtonInterface('Create', () => {
-                customNodeConfiguration.createNode(newNode);
-                close();
-            });
+            let button: any;
+            if (menuState.configurationMenu.addNode === true) {
+                button = new ButtonInterface('Create', () => {
+                    customNodeConfiguration.createNode(newNode);
+                    close();
+                });
+            } else {
+                button = new ButtonInterface('Configure', () => {
+                    customNodeConfiguration.modifyConfiguration(newNode);
+                    close();
+                });
+            }
             button.componentName = 'ButtonInterface';
             return button;
         });

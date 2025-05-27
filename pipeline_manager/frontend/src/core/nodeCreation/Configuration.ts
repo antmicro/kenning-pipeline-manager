@@ -73,31 +73,34 @@ export class NodeConfiguration {
      * to the new configuration and creates a new node if `configurationMenu.addNode`
      * is set to true. If the configuration is incorrect, it logs an error.
      * @param newNodeData - the configuration of the new node
-     * @returns void
+     * @returns string[] - an array of errors that occurred during node creation
     */
-    public createNode(newNodeData: NodeDataConfiguration): void {
+    public createNode(newNodeData: NodeDataConfiguration): string[] {
         const { viewModel } = useViewModel();
         const { editor } = viewModel.value;
         const { displayedGraph } = viewModel.value;
+        const editorManager = EditorManager.getEditorManagerInstance();
 
-        const errors = this.modifyConfiguration(newNodeData);
+        // Checking if there is there already exists newNodeData.name type and is different
+        // than the current node that is being created
+        if (
+            editorManager.baklavaView.editor.nodeTypes.has(newNodeData.name) && (
+                this.currentNodeType === undefined ||
+                this.currentNodeType !== newNodeData.name
+            )
+        ) {
+            return [`Node of type ${newNodeData.name} already exists. Pick other type`];
+        }
+
+        const errors = this.registerNewNodeConfiguration(newNodeData);
         if (errors.length) {
             NotificationHandler.terminalLog('error', 'Error when creating a node', errors);
-            return;
+            return errors;
         }
-
-        if (menuState.configurationMenu.addNode) {
-            const nodeInformation = editor.nodeTypes.get(newNodeData.name);
-            /*
-                eslint-disable-next-line
-                new-cap,
-                @typescript-eslint/no-non-null-assertion,
-                @typescript-eslint/no-explicit-any
-            */
-            const node: any = new nodeInformation!.type();
-            node.id = uuidv4();
-            displayedGraph.addNode(node);
-        }
+        this.nodeData = { ...newNodeData };
+        configurationState.nodeData = { ...newNodeData };
+        this.customNodeInProgress = true;
+        return [];
     }
 
     private registerNewNodeConfiguration(newNodeData?: NodeDataConfiguration) {
@@ -144,17 +147,6 @@ export class NodeConfiguration {
         const { displayedGraph } = viewModel.value;
         const editorManager = EditorManager.getEditorManagerInstance();
 
-        // Checking if there is there already exists newNodeData.name type and is different
-        // than the current node that is being created
-        if (
-            editorManager.baklavaView.editor.nodeTypes.has(newNodeData.name) && (
-                this.currentNodeType === undefined ||
-                this.currentNodeType !== newNodeData.name
-            )
-        ) {
-            return [`Node of type ${newNodeData.name} already exists. Pick other type`];
-        }
-
         // If there was a node registered, unregister it
         const errors = this.registerNewNodeConfiguration(newNodeData);
         if (errors.length) return errors;
@@ -164,26 +156,16 @@ export class NodeConfiguration {
             (n) => n.type === this.currentNodeType,
         );
 
-        // Changing existing nodes types
+        // Changing existing nodes' types
+        /* eslint-disable no-param-reassign */
         nodes.forEach((node) => {
-            const nodeState = node.save();
-            // // Node should be the same as the old one, except for the new name
-            nodeState.name = newNodeData.name;
-            // // Previous displayed name is obsolete
-            delete nodeState.instanceName;
-            removeNode(node);
-
-            const nodeInformation = editor.nodeTypes.get(newNodeData.name);
-            /*
-                eslint-disable-next-line
-                new-cap,
-                @typescript-eslint/no-non-null-assertion,
-                @typescript-eslint/no-explicit-any
-            */
-            const newNodeInstance: any = new nodeInformation!.type();
-            displayedGraph.addNode(newNodeInstance);
-            newNodeInstance.load(nodeState);
+            node.title = newNodeData.name;
+            node.type = newNodeData.name;
+            node.layer = newNodeData.layer;
+            node.category = newNodeData.category;
+            delete node.instanceName;
         });
+        /* eslint-enable no-param-reassign */
 
         this.nodeData = { ...newNodeData };
         configurationState.nodeData = { ...newNodeData };
