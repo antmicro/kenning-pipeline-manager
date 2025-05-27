@@ -1,5 +1,5 @@
 import { test, expect, Page, Locator } from '@playwright/test';
-import { getUrl, loadVideoNodeId } from './config.js';
+import { getUrl, loadVideoNodeId, enableNavigationBar, addNode, dragAndDrop } from './config.js';
 
 async function deleteNode(page: Page, nodeId: string) {
     // Find the node and invoke a context menu with a right click.
@@ -25,34 +25,6 @@ async function loadWebsite(page: Page, requiredNodeId: string) {
 
 async function expectNode(exists: boolean, page: Page, nodeId: string, errorMessage: string) {
     expect(page.locator(`#${nodeId}`), { message: errorMessage }).toBeVisible({ visible: exists });
-}
-
-async function enableNavigationBar(page: Page) {
-    await page.mouse.move(500, 0);
-    await page
-        .locator('.hoverbox')
-        .filter({ hasText: /^Show node browser$/ })
-        .first()
-        .click();
-}
-
-async function addNode(page: Page, category: string, nodeName: string, x: number, y: number) {
-    const categoryBar = page.getByText(category);
-    const node = page.getByText(nodeName).first();
-
-    // Open a proper category.
-    await enableNavigationBar(page);
-    await categoryBar.click();
-
-    // Drag and drop to the [x, y] position.
-    await dragAndDrop(page, node, x, y);
-}
-
-async function dragAndDrop(page: Page, locator: Locator, x: number, y: number) {
-    await locator.hover();
-    await page.mouse.down();
-    await page.mouse.move(x, y);
-    await page.mouse.up();
 }
 
 test('test history by removing node', async ({ page }) => {
