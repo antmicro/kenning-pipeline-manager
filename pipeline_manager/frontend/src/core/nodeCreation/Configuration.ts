@@ -103,7 +103,13 @@ export class NodeConfiguration {
         return [];
     }
 
-    private registerNewNodeConfiguration(newNodeData?: NodeDataConfiguration) {
+    /**
+     * Registers the configuration of the custom node type.
+     * If a node type was already registered, it unregisters it first.
+     * @param newNodeData? - the configuration of the new node
+     * @returns string[] - an array of errors that occurred during the registration
+    */
+    private registerNewNodeConfiguration(newNodeData?: NodeDataConfiguration): string[] {
         if (newNodeData === undefined) {
             newNodeData = this.nodeData; // eslint-disable-line no-param-reassign
         }
