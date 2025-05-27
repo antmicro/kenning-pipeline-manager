@@ -260,6 +260,23 @@ export default function getNodeTree(nameFilterRef: Ref<string>) {
 
     const nodes: Array<Nodes> = [];
     categoryNames.forEach((c) => {
+        // Add nodes with an empty category to the top level.
+        if (c === '') {
+            nodeTypeEntries
+                .filter(([, ni]) => ni.category === '')
+                .forEach(([nodeName, node]) => {
+                    topLevelCategories.nodeTypes[nodeName] = {
+                        ...node, // @ts-ignore
+                        isCategory: node.isCategory,
+                        mask: true,
+                        hitSubstring: node.title, // @ts-ignore
+                        iconPath: editor.getNodeIconPath(nodeName), // @ts-ignore
+                        URLs: editor.getNodeURLs(nodeName),
+                    };
+                });
+            return;
+        }
+
         let nodeTypesInCategory = nodeTypeEntries.filter(([, ni]) => ni.category === c);
         const nodesURLs = Object.fromEntries(
             nodeTypesInCategory.map((n) => {
