@@ -10,7 +10,6 @@ import uuid
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from enum import Enum
-from functools import cache
 from typing import Any, Dict, List, Optional, Union, get_type_hints
 
 from typing_extensions import override
@@ -136,9 +135,6 @@ class Interface(JsonConvertible):
             output["externalName"] = self.external_name
 
         return convert_output(output, as_str)
-
-    def __hash__(self) -> int:
-        return hash((self.id,))
 
 
 class NodeAttributeType(Enum):
@@ -368,7 +364,7 @@ class Node(JsonConvertible):
         Union[List[Property], List[Interface]]
             List of either Property or Interface instances.
         """
-        items: Dict = frozenset(getattr(self, type.value))
+        items: Dict = getattr(self, type.value)
         return match_criteria(items=items, **kwargs)
 
     def move(self, new_position: Vector2, relative: bool = False):
@@ -474,9 +470,6 @@ class Node(JsonConvertible):
                 "does not appear in the specification."
             )
 
-    def __hash__(self) -> int:
-        return hash((self.id,))
-
 
 @dataclass
 class InterfaceConnection(JsonConvertible):
@@ -506,9 +499,6 @@ class InterfaceConnection(JsonConvertible):
                 output, ensure_ascii=False, indent=4, sort_keys=True
             )
         return output
-
-    def __hash__(self) -> int:
-        return hash((self.id, self.from_interface, self.to_interface))
 
 
 # Defining this in utils causes circular dependency.
@@ -562,10 +552,9 @@ def camel_case_to_snake_case(name: str) -> str:
     return snake_cased
 
 
-@cache
-def match_criteria(items: frozenset, **kwargs) -> List[Any]:
+def match_criteria(items: List, **kwargs) -> List[Any]:
     """
-    Get a set of items matching criteria supplied in `kwargs`.
+    Get a list of items matching criteria supplied in `kwargs`.
 
     Find items matching all the criteria (logical `AND` operator).
     Keys are names of attributes of an item.
@@ -573,28 +562,26 @@ def match_criteria(items: frozenset, **kwargs) -> List[Any]:
 
     Parameters
     ----------
-    items : frozenset
+    items : List
         Items, against which the matching should be performed.
         Lack of criteria causes returning all items.
     **kwargs
         Attributes of items to match. Key match names of attributes,
         values - values of the attributes.
 
+
     Returns
     -------
     List[Any]
         Items matching the supplied criteria.
     """
-    if not kwargs:
-        return list(items)
-
-    return [
-        item
-        for item in items
-        if all(
-            getattr(item, key, None) == value for key, value in kwargs.items()
-        )
-    ]
+    for search_key, desired_value in kwargs.items():
+        items = [
+            item
+            for item in items
+            if getattr(item, search_key) == desired_value
+        ]
+    return items
 
 
 def clamp(value: float, minimum: float, maximum: float) -> float:
