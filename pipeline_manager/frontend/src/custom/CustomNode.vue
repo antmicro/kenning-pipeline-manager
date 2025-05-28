@@ -288,7 +288,7 @@ const contextMenuTitleY = ref(0);
 const contextMenuTitleItems = computed(() => {
     const items = [];
     items.push({ value: 'sidebar', label: 'Details', icon: icons.Sidebar });
-    if (props.node.type === configurationState.nodeData?.name) {
+    if (editorManager.baklavaView.settings.editableNodeTypes) {
         items.push(
             { value: 'register', label: 'Register' },
         );
