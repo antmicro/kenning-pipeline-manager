@@ -37,6 +37,7 @@ export class NodeConfiguration {
         name: 'Custom Node',
         category: 'Default category',
         layer: '',
+        description: '',
     };
 
     private properties: PropertyConfiguration[] = [];
@@ -62,6 +63,7 @@ export class NodeConfiguration {
         this.nodeData.name = 'Custom Node';
         this.nodeData.category = 'Default category';
         this.nodeData.layer = '';
+        this.nodeData.description = '';
         this.properties = [];
         this.interfaces = [];
         this.customNodeInProgress = false;
@@ -131,6 +133,7 @@ export class NodeConfiguration {
             name: newNodeData.name,
             layer: newNodeData.layer,
             category: newNodeData.category,
+            description: newNodeData.description,
             properties: this.properties,
             interfaces: this.interfaces,
         });
@@ -169,6 +172,7 @@ export class NodeConfiguration {
             node.type = newNodeData.name;
             node.layer = newNodeData.layer;
             node.category = newNodeData.category;
+            node.description = newNodeData.description;
             delete node.instanceName;
         });
         /* eslint-enable no-param-reassign */

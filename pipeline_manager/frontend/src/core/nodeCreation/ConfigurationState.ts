@@ -10,6 +10,7 @@ export type NodeDataConfiguration = {
     name: string,
     category: string,
     layer?: string,
+    description?: string,
 }
 
 export type PropertyConfiguration = {

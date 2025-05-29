@@ -52,6 +52,7 @@ export default defineComponent({
             name: 'Custom Node',
             category: 'Default category',
             layer: '',
+            description: '',
         };
 
         const close = () => {
@@ -94,6 +95,18 @@ export default defineComponent({
             return option as NodeConfigurationInterface;
         });
 
+        const nodeDescription = computed(() => {
+            const option: any = new InputInterface(
+                'Node description',
+                'Description',
+            ).setPort(false);
+
+            option.componentName = 'InputInterface';
+            option.configurationVModel = 'description';
+            option.setComponent(markRaw(InputInterfaceComponent));
+            return option as NodeConfigurationInterface;
+        });
+
         const create = computed(() => {
             let button: any;
             if (menuState.configurationMenu.addNode === true) {
@@ -112,7 +125,7 @@ export default defineComponent({
         });
 
         const configurationOptions = computed(() =>
-            [nodeName.value, nodeCategory.value, nodeLayer.value],
+            [nodeName.value, nodeCategory.value, nodeLayer.value, nodeDescription.value],
         );
 
         return {
