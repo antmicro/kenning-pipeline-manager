@@ -39,7 +39,9 @@ import { customNodeConfiguration } from '../../../core/nodeCreation/Configuratio
 import { menuState, NodeDataConfiguration } from '../../../core/nodeCreation/ConfigurationState.ts';
 
 import InputInterface from '../../../interfaces/InputInterface.js';
+import TextAreaInterface from '../../../interfaces/TextAreaInterface.js';
 import InputInterfaceComponent from '../../../interfaces/InputInterface.vue';
+import TextAreaInterfaceComponent from '../../../interfaces/TextAreaInterface.vue';
 
 interface NodeConfigurationInterface extends InputInterface {
     componentName: string,
@@ -96,14 +98,14 @@ export default defineComponent({
         });
 
         const nodeDescription = computed(() => {
-            const option: any = new InputInterface(
+            const option: any = new TextAreaInterface(
                 'Node description',
                 'Description',
             ).setPort(false);
 
-            option.componentName = 'InputInterface';
+            option.componentName = 'TextAreaInterface';
             option.configurationVModel = 'description';
-            option.setComponent(markRaw(InputInterfaceComponent));
+            option.setComponent(markRaw(TextAreaInterfaceComponent));
             return option as NodeConfigurationInterface;
         });
 
