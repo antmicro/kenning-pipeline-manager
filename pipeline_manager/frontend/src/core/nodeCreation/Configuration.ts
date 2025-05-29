@@ -304,14 +304,14 @@ export class NodeConfiguration {
      * Finalizes the creation of the custom node. After the node is added to the specification
      * and the configuration is reset.
     */
-    public finalize() {
+    public register() {
         suppressHistoryLogging(true);
         const editorManager = EditorManager.getEditorManagerInstance();
 
         // eslint-disable-next-line no-underscore-dangle
         const errors = editorManager._unregisterNodeType(this.currentNodeType);
         if (errors.length) {
-            NotificationHandler.terminalLog('error', 'Error when finalizing node creation', errors);
+            NotificationHandler.terminalLog('error', 'Error when registering the node', errors);
             return;
         }
 
@@ -324,7 +324,7 @@ export class NodeConfiguration {
         });
 
         if (ret.errors !== undefined && ret.errors.length) {
-            NotificationHandler.terminalLog('error', 'Error when finalizing node creation', ret.errors);
+            NotificationHandler.terminalLog('error', 'Error when registering the node', ret.errors);
             return;
         }
 

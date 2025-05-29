@@ -268,7 +268,7 @@ const contextMenuTitleItems = computed(() => {
     items.push({ value: 'sidebar', label: 'Details', icon: icons.Sidebar });
     if (props.node.type === configurationState.nodeData?.name) {
         items.push(
-            { value: 'finalize', label: 'Finalize' },
+            { value: 'register', label: 'Register' },
         );
         items.push(
             { value: 'configure', label: 'Configure' },
@@ -372,8 +372,8 @@ const onContextMenuTitleClick = async (action) => {
             removeNode(props.node, true);
             commitTransaction();
             break;
-        case 'finalize':
-            customNodeConfiguration.finalize();
+        case 'register':
+            customNodeConfiguration.register();
             break;
         case 'configure':
             menuState.configurationMenu.visible = true;
