@@ -519,6 +519,10 @@ export default class PipelineManagerEditor extends Editor {
                 && this.getNodeStyle(nodeType.style)?.pill?.text);
     }
 
+    getNodeCategory(nodeName) {
+        return this.nodeTypes.get(nodeName).category || undefined;
+    }
+
     getNodeColor(node) {
         const nodeType = this.nodeTypes.get(node.type);
         return this.nodeColors.get(node.id)

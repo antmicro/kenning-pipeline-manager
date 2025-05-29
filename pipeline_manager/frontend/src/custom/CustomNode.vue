@@ -213,6 +213,7 @@ const tempName = ref('');
 const nodeURLs = viewModel.value.editor.getNodeURLs(props.node.type);
 const nodeColor = viewModel.value.editor.getNodeColor(props.node);
 const nodeTitleColor = viewModel.value.editor.getTextColor(nodeColor);
+const nodeCategory = viewModel.value.editor.getNodeCategory(props.node.type);
 const isGraphNode = viewModel.value.editor.isGraphNode(props.node.type);
 const pillText = viewModel.value.editor.getPillText(props.node.type);
 const pillColor = viewModel.value.editor.getPillColor(props.node.type);
@@ -352,6 +353,11 @@ const openSidebar = () => {
 
 /* eslint-disable default-case */
 const onContextMenuTitleClick = async (action) => {
+    const nodeData = {
+        name: props.node.type,
+        category: nodeCategory,
+        layer: props.node.layer,
+    };
     switch (action) {
         case 'delete':
             startTransaction();
@@ -409,6 +415,7 @@ const onContextMenuTitleClick = async (action) => {
         case 'configure':
             menuState.configurationMenu.visible = true;
             menuState.configurationMenu.addNode = false;
+            configurationState.nodeData = nodeData;
             break;
         case 'property':
             menuState.propertyMenu = true;
