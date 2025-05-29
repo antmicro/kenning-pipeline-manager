@@ -308,6 +308,11 @@ export class NodeConfiguration {
         suppressHistoryLogging(true);
         const editorManager = EditorManager.getEditorManagerInstance();
 
+        if (this.nodeData.name === undefined || this.currentNodeType === undefined) {
+            NotificationHandler.terminalLog('warning', 'Cannot register the node', 'The node is already registered');
+            return;
+        }
+
         // eslint-disable-next-line no-underscore-dangle
         const errors = editorManager._unregisterNodeType(this.currentNodeType);
         if (errors.length) {
