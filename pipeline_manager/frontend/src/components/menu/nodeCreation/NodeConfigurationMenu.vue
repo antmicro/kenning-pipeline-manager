@@ -36,7 +36,7 @@ import {
 
 import { getOptionName } from '../../../custom/CustomNode.js';
 import { customNodeConfiguration } from '../../../core/nodeCreation/Configuration.ts';
-import { menuState, NodeDataConfiguration } from '../../../core/nodeCreation/ConfigurationState.ts';
+import { menuState, NodeDataConfiguration, configurationState } from '../../../core/nodeCreation/ConfigurationState.ts';
 
 import InputInterface from '../../../interfaces/InputInterface.js';
 import TextAreaInterface from '../../../interfaces/TextAreaInterface.js';
@@ -50,12 +50,16 @@ interface NodeConfigurationInterface extends InputInterface {
 
 export default defineComponent({
     setup() {
-        const newNode: NodeDataConfiguration = {
-            name: 'Custom Node',
-            category: 'Default category',
-            layer: '',
-            description: '',
-        };
+        let newNode: NodeDataConfiguration;
+        if (configurationState.nodeData === undefined) {
+            newNode = {
+                name: 'Custom Node',
+                category: 'Default category',
+                layer: '',
+            };
+        } else {
+            newNode = configurationState.nodeData;
+        }
 
         const close = () => {
             menuState.configurationMenu.visible = false;
