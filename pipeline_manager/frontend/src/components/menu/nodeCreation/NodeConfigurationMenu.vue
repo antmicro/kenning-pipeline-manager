@@ -40,8 +40,8 @@ import { menuState, NodeDataConfiguration } from '../../../core/nodeCreation/Con
 
 import InputInterface from '../../../interfaces/InputInterface.js';
 import TextAreaInterface from '../../../interfaces/TextAreaInterface.js';
-import InputInterfaceComponent from '../../../interfaces/InputInterface.vue';
 import TextAreaInterfaceComponent from '../../../interfaces/TextAreaInterface.vue';
+import newInputInterface from './utils.ts';
 
 interface NodeConfigurationInterface extends InputInterface {
     componentName: string,
@@ -61,29 +61,8 @@ export default defineComponent({
             menuState.configurationMenu.visible = false;
         };
 
-        const nodeName = computed(() => {
-            const option: any = new InputInterface(
-                'Node name',
-                'Custom node',
-            ).setPort(false);
-
-            option.componentName = 'InputInterface';
-            option.configurationVModel = 'name';
-            option.setComponent(markRaw(InputInterfaceComponent));
-            return option as NodeConfigurationInterface;
-        });
-
-        const nodeCategory = computed(() => {
-            const option: any = new InputInterface(
-                'Node category',
-                'Default',
-            ).setPort(false);
-
-            option.componentName = 'InputInterface';
-            option.configurationVModel = 'category';
-            option.setComponent(markRaw(InputInterfaceComponent));
-            return option as NodeConfigurationInterface;
-        });
+        const nodeName = newInputInterface<NodeConfigurationInterface>('Node name', 'Custom Node', 'name');
+        const nodeCategory = newInputInterface<NodeConfigurationInterface>('Node category', 'Default', 'category');
 
         const nodeDescription = computed(() => {
             const option: any = new TextAreaInterface(

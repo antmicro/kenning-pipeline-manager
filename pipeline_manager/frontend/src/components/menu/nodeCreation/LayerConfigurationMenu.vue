@@ -30,7 +30,7 @@ Popup menu for configuring node layer.
 
 <script lang="ts">
 import {
-    defineComponent, computed, markRaw,
+    defineComponent, computed,
 } from 'vue';
 import { ButtonInterface } from '@baklavajs/renderer-vue'; // eslint-disable-line object-curly-newline
 
@@ -39,7 +39,7 @@ import { customNodeConfiguration } from '../../../core/nodeCreation/Configuratio
 import { menuState, NodeDataConfiguration } from '../../../core/nodeCreation/ConfigurationState.ts';
 
 import InputInterface from '../../../interfaces/InputInterface.js';
-import InputInterfaceComponent from '../../../interfaces/InputInterface.vue';
+import newInputInterface from './utils.ts';
 
 interface NodeConfigurationInterface extends InputInterface {
     componentName: string,
@@ -54,17 +54,7 @@ export default defineComponent({
             menuState.layerMenu = false;
         };
 
-        const nodeLayer = computed(() => {
-            const option: any = new InputInterface(
-                'Node layer',
-                'Default layer',
-            ).setPort(false);
-
-            option.componentName = 'InputInterface';
-            option.configurationVModel = 'layer';
-            option.setComponent(markRaw(InputInterfaceComponent));
-            return option as NodeConfigurationInterface;
-        });
+        const nodeLayer = newInputInterface<NodeConfigurationInterface>('Node layer', 'Default layer', 'layer');
 
         const setLayer = computed(() => {
             const button: any = new ButtonInterface('Set layer', () => {

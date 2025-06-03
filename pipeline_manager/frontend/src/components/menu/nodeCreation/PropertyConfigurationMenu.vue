@@ -50,6 +50,7 @@ import { menuState } from '../../../core/nodeCreation/ConfigurationState.ts';
 
 import InputInterface from '../../../interfaces/InputInterface.js';
 import InputInterfaceComponent from '../../../interfaces/InputInterface.vue';
+import newInputInterface from './utils.ts';
 
 interface CurrentProperty {
     name: string,
@@ -80,17 +81,7 @@ export default defineComponent({
             menuState.propertyMenu = false;
         };
 
-        const propertyName = computed(() => {
-            const option: any = new InputInterface(
-                'Property name',
-                newProperty.name,
-            ).setPort(false);
-
-            option.componentName = 'InputInterface';
-            option.configurationVModel = 'name';
-            option.setComponent(markRaw(InputInterfaceComponent));
-            return option as PropertyInterface;
-        });
+        const propertyName = newInputInterface<PropertyInterface>('Property name', newProperty.name, 'name');
 
         // NOTE: Select and List types are not supported for now
         const propertyType = computed(() => {

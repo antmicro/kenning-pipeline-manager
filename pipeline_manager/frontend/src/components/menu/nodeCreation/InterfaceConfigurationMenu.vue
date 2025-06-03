@@ -35,7 +35,7 @@ Popup menu for configuring node interfaces.
 
 <script lang="ts">
 import {
-    defineComponent, computed, markRaw, ref, Ref,
+    defineComponent, computed, ref, Ref,
 } from 'vue';
 import {
     ButtonInterface,
@@ -47,7 +47,7 @@ import { customNodeConfiguration } from '../../../core/nodeCreation/Configuratio
 import { menuState } from '../../../core/nodeCreation/ConfigurationState.ts';
 
 import InputInterface from '../../../interfaces/InputInterface.js';
-import InputInterfaceComponent from '../../../interfaces/InputInterface.vue';
+import newInputInterface from './utils.ts';
 
 interface CurrentInterface {
     name: string,
@@ -72,29 +72,8 @@ export default defineComponent({
             menuState.interfaceMenu = false;
         };
 
-        const interfaceName = computed(() => {
-            const option: any = new InputInterface(
-                'Interface name',
-                newInterface.name,
-            ).setPort(false);
-
-            option.componentName = 'InputInterface';
-            option.configurationVModel = 'name';
-            option.setComponent(markRaw(InputInterfaceComponent));
-            return option as InterfaceInterface;
-        });
-
-        const interfaceType = computed(() => {
-            const option: any = new InputInterface(
-                'Interface type',
-                newInterface.type,
-            ).setPort(false);
-
-            option.componentName = 'InputInterface';
-            option.configurationVModel = 'type';
-            option.setComponent(markRaw(InputInterfaceComponent));
-            return option as InterfaceInterface;
-        });
+        const interfaceName = newInputInterface<InterfaceInterface>('Interface name', newInterface.name, 'name');
+        const interfaceType = newInputInterface<InterfaceInterface>('Interface type', newInterface.type, 'type');
 
         const interfaceDirection = computed(() => {
             const option: any = new SelectInterface(
