@@ -65,7 +65,7 @@ export default defineComponent({
         const newInterface: CurrentInterface = {
             name: 'New interface',
             type: '',
-            direction: ref('input'),
+            direction: ref('inout'),
         };
 
         const close = () => {
