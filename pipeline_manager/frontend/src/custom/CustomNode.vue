@@ -277,7 +277,13 @@ const contextMenuTitleItems = computed(() => {
             { value: 'property', label: 'Add property' },
         );
         items.push(
-            { value: 'interface', label: 'Add interface', endSection: true },
+            { value: 'interface', label: 'Add interface' },
+        );
+        items.push(
+            { value: 'delete-property', label: 'Delete property' },
+        );
+        items.push(
+            { value: 'delete-interface', label: 'Delete interface', endSection: true },
         );
     }
     if (!viewModel.value.editor.readonly) {
@@ -384,6 +390,12 @@ const onContextMenuTitleClick = async (action) => {
             break;
         case 'interface':
             menuState.interfaceMenu = true;
+            break;
+        case 'delete-property':
+            menuState.propertyListMenu = true;
+            break;
+        case 'delete-interface':
+            menuState.interfaceListMenu = true;
             break;
     }
 };

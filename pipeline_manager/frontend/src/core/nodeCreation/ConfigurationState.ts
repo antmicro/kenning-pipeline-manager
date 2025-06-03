@@ -39,6 +39,8 @@ export const menuState = reactive({
     },
     propertyMenu: false,
     interfaceMenu: false,
+    propertyListMenu: false,
+    interfaceListMenu: false,
 });
 
 /**

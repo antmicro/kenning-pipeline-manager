@@ -37,7 +37,7 @@ import Notifications from './Notifications.vue';
 import Settings from './Settings.vue';
 import {
     ParentMenu, SaveMenu, NodeConfigurationMenu, PropertyConfigurationMenu,
-    InterfaceConfigurationMenu,
+    InterfaceConfigurationMenu, InterfaceListMenu, PropertyListMenu,
 } from './menu';
 import { menuState } from '../core/nodeCreation/ConfigurationState.ts';
 import BlurPanel from './BlurPanel.vue';
@@ -77,6 +77,8 @@ export default {
         InterfaceConfigurationMenu,
         BlurPanel,
         CustomSidebar,
+        PropertyListMenu,
+        InterfaceListMenu,
     },
     emits: ['setLoad'],
     computed: {
@@ -747,6 +749,28 @@ export default {
                 :title="'Add interface'"
             >
                 <InterfaceConfigurationMenu/>
+            </ParentMenu>
+        </BlurPanel>
+    </Transition>
+    <Transition name="fade" @click.self="menuState.propertyListMenu = false">
+        <BlurPanel v-show="menuState.propertyListMenu">
+            <ParentMenu
+                v-if="menuState.propertyListMenu"
+                v-model="menuState.propertyListMenu"
+                :title="'Remove properties'"
+            >
+                <PropertyListMenu/>
+            </ParentMenu>
+        </BlurPanel>
+    </Transition>
+    <Transition name="fade" @click.self="menuState.interfaceListMenu = false">
+        <BlurPanel v-show="menuState.interfaceListMenu">
+            <ParentMenu
+                v-if="menuState.interfaceListMenu"
+                v-model="menuState.interfaceListMenu"
+                :title="'Remove interfaces'"
+            >
+                <InterfaceListMenu/>
             </ParentMenu>
         </BlurPanel>
     </Transition>
