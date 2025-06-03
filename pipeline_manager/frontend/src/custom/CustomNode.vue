@@ -280,6 +280,9 @@ const contextMenuTitleItems = computed(() => {
             { value: 'interface', label: 'Add interface' },
         );
         items.push(
+            { value: 'layer', label: 'Set layer' },
+        );
+        items.push(
             { value: 'delete-property', label: 'Delete property' },
         );
         items.push(
@@ -390,6 +393,9 @@ const onContextMenuTitleClick = async (action) => {
             break;
         case 'interface':
             menuState.interfaceMenu = true;
+            break;
+        case 'layer':
+            menuState.layerMenu = true;
             break;
         case 'delete-property':
             menuState.propertyListMenu = true;

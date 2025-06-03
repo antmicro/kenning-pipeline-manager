@@ -41,6 +41,7 @@ export const menuState = reactive({
     interfaceMenu: false,
     propertyListMenu: false,
     interfaceListMenu: false,
+    layerMenu: false,
 });
 
 /**

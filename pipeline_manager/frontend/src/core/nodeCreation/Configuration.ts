@@ -33,7 +33,7 @@ type CreatedInterfaces = {
  * and the current configuration can be accessed in the customNodeConfiguration reactive object.
 */
 export class NodeConfiguration {
-    private nodeData: NodeDataConfiguration = {
+    public nodeData: NodeDataConfiguration = {
         name: 'Custom Node',
         category: 'Default category',
         layer: '',
