@@ -97,7 +97,7 @@ export default defineComponent({
             const option: any = new SelectInterface(
                 'Property type',
                 newProperty.type.value,
-                ['text', 'number', 'integer', 'bool', 'slider', 'constant', 'hex'],
+                ['text', 'number', 'integer', 'bool', 'slider', 'constant', 'hex', 'multiline'],
             ).setPort(false);
 
             option.events.setValue.subscribe(this, (v: string) => {
