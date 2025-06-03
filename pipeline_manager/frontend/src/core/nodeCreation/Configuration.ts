@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { reactive } from 'vue';
+import { reactive, ref } from 'vue';
 import { v4 as uuidv4 } from 'uuid';
 
 import { useViewModel } from '@baklavajs/renderer-vue';
@@ -40,9 +40,9 @@ export class NodeConfiguration {
         description: '',
     };
 
-    private properties: PropertyConfiguration[] = [];
+    public properties: PropertyConfiguration[] = [];
 
-    private interfaces: InterfaceConfiguration[] = [];
+    public interfaces: InterfaceConfiguration[] = [];
 
     private customNodeInProgress = false;
 
@@ -239,6 +239,49 @@ export class NodeConfiguration {
     }
 
     /**
+     * Removes properties from the custom node.
+     * @param properties - the properties to be removed
+     * @returns void
+    */
+    public removeProperties(properties: PropertyConfiguration[]): void {
+        const { viewModel } = useViewModel();
+        const { displayedGraph } = viewModel.value;
+
+        const editorManager = EditorManager.getEditorManagerInstance();
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const nodes: any[] = displayedGraph.nodes.filter((n) => n.type === this.currentNodeType);
+        if (nodes === undefined) {
+            NotificationHandler.terminalLog(
+                'error',
+                'Node not found',
+                `Node of type ${this.currentNodeType} not found`,
+            );
+            return;
+        }
+
+        this.properties = this.properties.filter((item) => !properties.includes(item));
+        this.registerNewNodeConfiguration();
+
+        const parsedProperties = parseProperties(properties);
+        const createdProperties = (createProperties(parsedProperties) as CreatedInterfaces);
+
+        nodes.forEach((node) => {
+            const state = node.save();
+
+            Object.keys(createdProperties).forEach((k) => {
+                const input = createdProperties[k]();
+                node.removeInput(k, input);
+                // Because `this` is not reactive in node functions, we need
+                // to notice the reactive `node` reference inputs were updated
+                node.inputs = node.inputs; // eslint-disable-line no-self-assign, no-param-reassign
+            });
+
+            node.load(state);
+        });
+    }
+
+    /**
      * Adds interface to the custom node. If the interface is invalid, it logs an error.
      * @param intf - the interface to be added
      * @returns void
@@ -271,7 +314,6 @@ export class NodeConfiguration {
         if (Array.isArray(parsedInterfaces) && parsedInterfaces.length) {
             this.interfaces.pop();
             NotificationHandler.terminalLog('error', 'Invalid interfaces', parsedInterfaces);
-            return;
         }
         this.registerNewNodeConfiguration();
 
@@ -291,6 +333,57 @@ export class NodeConfiguration {
             Object.keys(outputs).forEach((k) => {
                 const output = outputs[k]();
                 node.addOutput(k, output);
+                // Because `this` is not reactive in node functions, we need
+                // to notice the reactive `node` reference outputs were updated
+                node.outputs = node.outputs; // eslint-disable-line no-self-assign, no-param-reassign, max-len
+            });
+
+            node.load(state);
+        });
+    }
+
+    /**
+     * Removes interfaces from the custom node.
+     * @param interfaces - the interfaces to be removed
+     * @returns void
+    */
+    public removeInterfaces(interfaces: InterfaceConfiguration[]): void {
+        const { viewModel } = useViewModel();
+        const { displayedGraph } = viewModel.value;
+
+        const editorManager = EditorManager.getEditorManagerInstance();
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const nodes: any[] = displayedGraph.nodes.filter((n) => n.type === this.currentNodeType);
+        if (nodes === undefined) {
+            NotificationHandler.terminalLog(
+                'error',
+                'Node not found',
+                `Node of type ${this.currentNodeType} not found`,
+            );
+            return;
+        }
+
+        this.interfaces = this.interfaces.filter((item) => !interfaces.includes(item));
+        this.registerNewNodeConfiguration();
+
+        const parsedInterfaces = parseInterfaces(interfaces, [], []);
+        const [inputs, outputs] =
+            createBaklavaInterfaces(parsedInterfaces) as [CreatedInterfaces, CreatedInterfaces];
+
+        nodes.forEach((node) => {
+            const state = node.save();
+
+            Object.keys(inputs).forEach((k) => {
+                const input = inputs[k]();
+                node.removeInput(k, input);
+                // Because `this` is not reactive in node functions, we need
+                // to notice the reactive `node` reference inputs were updated
+                node.inputs = node.inputs; // eslint-disable-line no-self-assign, no-param-reassign
+            });
+            Object.keys(outputs).forEach((k) => {
+                const output = outputs[k]();
+                node.removeOutput(k, output);
                 // Because `this` is not reactive in node functions, we need
                 // to notice the reactive `node` reference outputs were updated
                 node.outputs = node.outputs; // eslint-disable-line no-self-assign, no-param-reassign, max-len
