@@ -85,18 +85,6 @@ export default defineComponent({
             return option as NodeConfigurationInterface;
         });
 
-        const nodeLayer = computed(() => {
-            const option: any = new InputInterface(
-                'Node layer',
-                'Default layer',
-            ).setPort(false);
-
-            option.componentName = 'InputInterface';
-            option.configurationVModel = 'layer';
-            option.setComponent(markRaw(InputInterfaceComponent));
-            return option as NodeConfigurationInterface;
-        });
-
         const nodeDescription = computed(() => {
             const option: any = new TextAreaInterface(
                 'Node description',
@@ -127,7 +115,7 @@ export default defineComponent({
         });
 
         const configurationOptions = computed(() =>
-            [nodeName.value, nodeCategory.value, nodeLayer.value, nodeDescription.value],
+            [nodeName.value, nodeCategory.value, nodeDescription.value],
         );
 
         return {
