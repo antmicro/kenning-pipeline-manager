@@ -1,0 +1,159 @@
+{
+    "version": "20240723.13",
+    "graphs": [
+        {
+            "id": "98a51a3d-654b-4cd6-8c36-1cfdb90abb58",
+            "name": "Example of graphs with connection loopbacks",
+            "nodes": [
+                {
+                    "name": "Node",
+                    "id": "35dca9a9-dab0-40d4-a2fc-640cd71ff25d",
+                    "position": {
+                        "x": 797,
+                        "y": 123
+                    },
+                    "width": 200,
+                    "twoColumn": false,
+                    "interfaces": [
+                        {
+                            "name": "In 1",
+                            "id": "f192dd6d-9d08-4c36-989f-aa0565e34644",
+                            "direction": "input"
+                        },
+                        {
+                            "name": "In 2",
+                            "id": "c4335fee-28fc-4d2e-abb8-2c79bdc6d749",
+                            "direction": "input"
+                        },
+                        {
+                            "name": "In 3",
+                            "id": "317c11a4-0e52-4db0-bb08-7c51161e48e7",
+                            "direction": "input"
+                        },
+                        {
+                            "name": "In 4",
+                            "id": "2180e57b-7aab-4a61-99ab-d504725eae62",
+                            "direction": "input"
+                        },
+                        {
+                            "name": "In 5",
+                            "id": "8bc21352-ca25-4e48-b55e-5b040b2a8d9e",
+                            "direction": "input"
+                        },
+                        {
+                            "name": "Out 1",
+                            "id": "979dc8d6-8e3b-4b92-84a6-6a1da8da4f97",
+                            "direction": "output"
+                        },
+                        {
+                            "name": "Out 2",
+                            "id": "346a6baa-e834-4cdd-be6a-b7ce1de3d492",
+                            "direction": "output"
+                        },
+                        {
+                            "name": "Out 3",
+                            "id": "b169664a-0e86-476c-bec2-16b01c977844",
+                            "direction": "output"
+                        },
+                        {
+                            "name": "Out 4",
+                            "id": "36a86df0-cbf0-4550-bbb4-81a78b68eb19",
+                            "direction": "output"
+                        },
+                        {
+                            "name": "Out 5",
+                            "id": "d311dc55-8df6-41cc-a59b-828dfa03e49a",
+                            "direction": "output"
+                        }
+                    ],
+                    "properties": []
+                },
+                {
+                    "name": "Node",
+                    "id": "2be5774e-6bc3-4d09-9f19-96828100db84",
+                    "position": {
+                        "x": 1452,
+                        "y": 225
+                    },
+                    "width": 200,
+                    "twoColumn": false,
+                    "interfaces": [
+                        {
+                            "name": "In 1",
+                            "id": "612a13f6-78a8-4365-902d-4893e21a2c40",
+                            "direction": "input"
+                        },
+                        {
+                            "name": "In 2",
+                            "id": "8fd7f22a-97f9-4944-90c3-f7d83e4d765d",
+                            "direction": "input"
+                        },
+                        {
+                            "name": "In 3",
+                            "id": "4e026484-8823-4f82-9387-c9f70a5d3245",
+                            "direction": "input"
+                        },
+                        {
+                            "name": "In 4",
+                            "id": "e49dcdce-80d9-461a-b8c5-2f4b0a88ea3d",
+                            "direction": "input"
+                        },
+                        {
+                            "name": "In 5",
+                            "id": "c2bf8f56-4ad1-4e24-bda7-2cf93e628439",
+                            "direction": "input"
+                        },
+                        {
+                            "name": "Out 1",
+                            "id": "7d6f6f86-1b8e-42fc-b647-05eb60736ab6",
+                            "direction": "output"
+                        },
+                        {
+                            "name": "Out 2",
+                            "id": "56e081cc-5c6a-40e8-b563-049ebdc37037",
+                            "direction": "output"
+                        },
+                        {
+                            "name": "Out 3",
+                            "id": "53d4a49a-54c3-4036-98ef-87048c8d10e6",
+                            "direction": "output"
+                        },
+                        {
+                            "name": "Out 4",
+                            "id": "d1c24b41-980a-4df6-b1c7-226acaf5b49c",
+                            "direction": "output"
+                        },
+                        {
+                            "name": "Out 5",
+                            "id": "1e69fa55-5b8f-4010-b590-0c1d7cb43d09",
+                            "direction": "output"
+                        }
+                    ],
+                    "properties": []
+                }
+            ],
+            "connections": [
+                {
+                    "id": "5bab8337-8227-4b0c-8ed2-427242d66fb3",
+                    "from": "346a6baa-e834-4cdd-be6a-b7ce1de3d492",
+                    "to": "c4335fee-28fc-4d2e-abb8-2c79bdc6d749"
+                },
+                {
+                    "id": "bafcb379-0899-42ae-bfb6-6c30c5e524c2",
+                    "from": "b169664a-0e86-476c-bec2-16b01c977844",
+                    "to": "317c11a4-0e52-4db0-bb08-7c51161e48e7"
+                },
+                {
+                    "id": "a1124d8c-bace-41c8-9a5a-6ca31825c390",
+                    "from": "36a86df0-cbf0-4550-bbb4-81a78b68eb19",
+                    "to": "2180e57b-7aab-4a61-99ab-d504725eae62"
+                },
+                {
+                    "id": "cadb440c-a346-4a7a-9248-a2d2de188e63",
+                    "from": "979dc8d6-8e3b-4b92-84a6-6a1da8da4f97",
+                    "to": "4e026484-8823-4f82-9387-c9f70a5d3245"
+                }
+            ]
+        }
+    ]
+}
