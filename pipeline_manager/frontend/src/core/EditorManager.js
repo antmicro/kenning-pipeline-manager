@@ -329,8 +329,7 @@ export default class EditorManager {
                 } = await this.downloadNestedImports(spec, specTrace);
                 errors.push(...newErrors);
 
-                if (specification.urloverrides !== undefined
-                    && newSpecification.metadata?.urls !== undefined) {
+                if (specification.urloverrides !== undefined) {
                     EditorManager.applyUrlOverrides(newSpecification, specification.urloverrides);
                 }
 
@@ -1128,6 +1127,12 @@ export default class EditorManager {
      */
     static applyUrlOverrides(specification, overrides) {
         Object.entries(overrides).forEach(([oldValue, newValue]) => {
+            // Icons
+            Object.entries(specification.metadata?.icons ?? {}).forEach(([key, value]) => {
+                specification.metadata.icons[key] = value.replaceAll(oldValue, newValue);
+            });
+
+            // urls
             Object.values(specification.metadata?.urls ?? {}).forEach((item) => {
                 item.url = item.url.replaceAll(oldValue, newValue);
             });
