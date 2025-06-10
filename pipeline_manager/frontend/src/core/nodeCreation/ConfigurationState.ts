@@ -27,6 +27,13 @@ export type InterfaceConfiguration = {
     direction: string,
 }
 
+export type ConfigurationState = {
+    editedType?: string,
+    nodeData: NodeDataConfiguration,
+    properties: PropertyConfiguration[],
+    interfaces: InterfaceConfiguration[],
+}
+
 /**
  * Configuration state for the configuration menu.
  * This state is reactive and can be accessed and modified from any component.
@@ -47,8 +54,14 @@ export const menuState = reactive({
 /**
  * Configuration state for the node data.
  * It is used to store the node data that is being configured.
- * Namely, its type, category and layer.
  */
-export const configurationState: {
-    nodeData?: NodeDataConfiguration,
-} = { nodeData: undefined };
+export const configurationState: ConfigurationState = reactive({
+    nodeData: {
+        name: 'Custom Node',
+        category: 'Default category',
+        layer: '',
+        description: '',
+    },
+    properties: [],
+    interfaces: [],
+});
