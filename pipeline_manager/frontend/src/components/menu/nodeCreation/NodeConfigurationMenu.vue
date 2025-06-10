@@ -50,16 +50,7 @@ interface NodeConfigurationInterface extends InputInterface {
 
 export default defineComponent({
     setup() {
-        let newNode: NodeDataConfiguration;
-        if (configurationState.nodeData === undefined) {
-            newNode = {
-                name: 'Custom Node',
-                category: 'Default category',
-                layer: '',
-            };
-        } else {
-            newNode = configurationState.nodeData;
-        }
+        const newNode: NodeDataConfiguration = configurationState.nodeData;
 
         const close = () => {
             menuState.configurationMenu.visible = false;
