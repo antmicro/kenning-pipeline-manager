@@ -90,7 +90,9 @@ export function createNode(): string[] {
             currentType !== newNodeData.name
         )
     ) {
-        return [`Node of type ${newNodeData.name} already exists. Pick other type`];
+        const errors = [`Node of type ${newNodeData.name} already exists. Please pick another type`];
+        NotificationHandler.terminalLog('error', 'Error when creating a node', errors);
+        return errors;
     }
 
     const errors = registerNewNodeConfiguration();
