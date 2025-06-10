@@ -50,6 +50,18 @@ interface NodeConfigurationInterface extends InputInterface {
 
 export default defineComponent({
     setup() {
+        if (menuState.configurationMenu.addNode) {
+            // Reset node configuration
+            configurationState.nodeData = {
+                name: 'Custom Node',
+                category: 'Default category',
+                layer: '',
+                description: '',
+            };
+            configurationState.properties = [];
+            configurationState.interfaces = [];
+            configurationState.editedType = undefined;
+        }
         const newNode: NodeDataConfiguration = configurationState.nodeData;
 
         const close = () => {
@@ -59,6 +71,9 @@ export default defineComponent({
         const nodeName = newInputInterface<NodeConfigurationInterface>('Node name', 'Custom Node', 'name');
         const nodeCategory = newInputInterface<NodeConfigurationInterface>('Node category', 'Default', 'category');
 
+        if (!configurationState.nodeData.description) {
+            configurationState.nodeData.description = '';
+        }
         const nodeDescription = computed(() => {
             const option: any = new TextAreaInterface(
                 'Node description',
