@@ -193,7 +193,7 @@
             "description": "Determines whether connections should have randomized, but deterministic offset",
             "default": false
         },
-        "editableNodeTypes": {
+        "editableTypes": {
             "type": "boolean",
             "description": "Determines whether the user can edit existing and add new node types",
             "default": false

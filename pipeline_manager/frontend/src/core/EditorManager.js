@@ -789,7 +789,7 @@ export default class EditorManager {
         this.baklavaView.connectionRenderer.randomizedOffset =
             metadata?.randomizedOffset ?? this.defaultMetadata.randomizedOffset;
         this.baklavaView.settings.editableNodeTypes =
-            metadata?.editableNodeTypes ?? this.defaultMetadata.editableNodeTypes;
+            metadata?.editableTypes ?? this.defaultMetadata.editableNodeTypes;
 
         this.baklavaView.ignoredLayers = new Set();
         this.baklavaView.layers = metadata?.layers ?? this.defaultMetadata.layers;
