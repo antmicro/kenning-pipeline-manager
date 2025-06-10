@@ -366,7 +366,7 @@ export function removeInterfaces(interfaces: InterfaceConfiguration[]): void {
   * Finalizes the creation of the custom node. After the node is added to the specification
   * and the configuration is reset.
 */
-export function register() {
+export function registerType() {
     suppressHistoryLogging(true);
     const editorManager = EditorManager.getEditorManagerInstance();
 

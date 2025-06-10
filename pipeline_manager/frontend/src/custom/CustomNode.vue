@@ -181,7 +181,7 @@ import EditorManager from '../core/EditorManager';
 import NotificationHandler from '../core/notifications.js';
 import getExternalApplicationManager from '../core/communication/ExternalApplicationManager';
 
-import { customNodeConfiguration } from '../core/nodeCreation/Configuration.ts';
+import { registerType } from '../core/nodeCreation/Configuration.ts';
 import { configurationState, menuState } from '../core/nodeCreation/ConfigurationState.ts';
 
 // Baklavajs implementation
@@ -224,6 +224,9 @@ const displayNoResources = !viewModel.value.editor.nodeURLsEmpty();
 const displayedInputs = computed(() => Object.values(props.node.inputs).filter((ni) => !ni.hidden));
 const displayedOutputs = computed(() =>
     Object.values(props.node.outputs).filter((ni) => !ni.hidden),
+);
+const displayedProperties = computed(() =>
+    Object.values(displayedInputs.value).filter((intf) => !intf.port),
 );
 
 const editorManager = EditorManager.getEditorManagerInstance();
@@ -353,11 +356,42 @@ const openSidebar = () => {
 
 /* eslint-disable default-case */
 const onContextMenuTitleClick = async (action) => {
-    const nodeData = {
-        name: props.node.type,
-        category: nodeCategory,
-        layer: props.node.layer,
-    };
+    if (action !== 'delete' && action !== 'disconnect') {
+        const nodeData = {
+            name: props.node.type,
+            category: nodeCategory,
+            layer: props.node.layer,
+        };
+
+        configurationState.editedType = nodeData.name;
+        configurationState.nodeData = nodeData;
+
+        let nodeInterfaces = [...displayedInputs.value, ...displayedOutputs.value];
+        nodeInterfaces = nodeInterfaces.filter((intf) => intf.direction !== undefined);
+        const configuredInterfaces = nodeInterfaces?.map((intf) => ({
+            name: intf?.name,
+            type: intf?.type,
+            direction: intf?.direction,
+        }));
+
+        /* eslint-disable no-underscore-dangle */
+        const properties = displayedProperties.value;
+        const configuredProperties = properties?.map((prop) => ({
+            name: prop?.name,
+            type: prop?.type,
+            default: prop?._value,
+            min: prop?.min,
+            max: prop?.max,
+            values: prop?.items,
+            step: prop?.step,
+            readonly: prop?.readonly,
+            dtype: prop?.dtype,
+        }));
+
+        configurationState.properties = configuredProperties;
+        configurationState.interfaces = configuredInterfaces;
+    }
+
     switch (action) {
         case 'delete':
             startTransaction();
@@ -410,34 +444,26 @@ const onContextMenuTitleClick = async (action) => {
             commitTransaction();
             break;
         case 'register':
-            configurationState.editedType = nodeData.name;
-            customNodeConfiguration.register();
+            registerType();
             break;
         case 'configure':
             menuState.configurationMenu.visible = true;
             menuState.configurationMenu.addNode = false;
-            configurationState.nodeData = nodeData;
-            configurationState.editedType = nodeData.name;
             break;
         case 'property':
             menuState.propertyMenu = true;
-            configurationState.editedType = nodeData.name;
             break;
         case 'interface':
             menuState.interfaceMenu = true;
-            configurationState.editedType = nodeData.name;
             break;
         case 'layer':
             menuState.layerMenu = true;
-            configurationState.editedType = nodeData.name;
             break;
         case 'delete-property':
             menuState.propertyListMenu = true;
-            configurationState.editedType = nodeData.name;
             break;
         case 'delete-interface':
             menuState.interfaceListMenu = true;
-            configurationState.editedType = nodeData.name;
             break;
     }
 };
@@ -566,10 +592,6 @@ const onMouseDown = () => {
 
     openDoubleClick();
 };
-
-const displayedProperties = computed(() =>
-    Object.values(displayedInputs.value).filter((intf) => !intf.port),
-);
 
 const displayedLeftSockets = computed(() =>
     Object.values([...displayedInputs.value, ...displayedOutputs.value])
