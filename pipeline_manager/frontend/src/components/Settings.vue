@@ -198,7 +198,7 @@ export default {
             if (props.viewModel.editor.readonly) {
                 return [];
             }
-            return [
+            const options = [
                 logLevel.value,
                 connectionStyleOption.value,
                 LayoutOption.value,
@@ -207,9 +207,12 @@ export default {
                 clearEditor.value,
                 movementStep.value,
                 randomizedOffsetOption.value,
-                editableNodeTypes.value,
                 hideAnchors.value,
             ];
+            if (props.viewModel.settings.toggleableEditableTypes) {
+                options.push(editableNodeTypes.value);
+            }
+            return options;
         });
 
         return { getOptionName, settingOptions: readonlyOptions, disableLayersOptions };

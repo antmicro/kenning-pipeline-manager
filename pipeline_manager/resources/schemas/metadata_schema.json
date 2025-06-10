@@ -198,6 +198,11 @@
             "description": "Determines whether the user can edit existing and add new node types",
             "default": false
         },
+        "toggleableEditableTypes": {
+            "type": "boolean",
+            "description": "Determines whether node editibility can be toggled from the UI.",
+            "default": true
+        },
         "hideAnchors": {
             "type": "boolean",
             "description": "Hides anchors in all connections. The anchors are still visible on hover",

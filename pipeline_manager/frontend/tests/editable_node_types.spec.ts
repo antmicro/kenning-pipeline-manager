@@ -6,37 +6,43 @@ import fs from 'fs/promises';
 
 const temporaryDir = os.tmpdir() + '/';
 
-async function enableEditingNodes(page: Page) {
-    // Assert that node types cannot be added
-    const nodePalette = await page.locator('.baklava-node-palette');
-    const addNodeButton = await nodePalette.getByText('New Node Type').first();
-    await enableNavigationBar(page);
-    expect(addNodeButton).toBeHidden();
 
-    // Enable modifying node types
-    const settings = await page.locator('.settings-panel');
+async function enableEditingNodes(page: Page) {
+    // Open a setting panel.
+    const logo = page.locator('.logo');
+    await logo.hover();
+
+    // Enable modifying node types.
+    const settings = page.locator('.settings-panel');
+    await settings.hover();
     expect(settings).toBeVisible();
 
-    const checkbox = await settings
-        .locator('.baklava-checkbox')
-        .nth(1)
-        .locator('.__checkmark-container');
-    expect(checkbox).toBeVisible();
-    await checkbox.click();
+    // Only click the checkbox if it is not already checked.
+    const checkbox = page.getByTitle('Modify node types');
+    const isChecked = await checkbox.evaluate((el) =>
+        el.classList.contains('--checked')
+    );
+    if (!isChecked) {
+        await checkbox.click();
+    }
+    await expect(checkbox).toBeVisible();
 
-    // Assert that node types can be added
+    // Assert that node types can be added.
+    await page.locator('div').filter({ hasText: /^Show node browser$/ }).first().click();
+    const nodePalette = page.locator('.baklava-node-palette');
+    const addNodeButton = nodePalette.getByText('New Node Type').first();
     expect(addNodeButton).toBeVisible();
 }
 
 async function createNewNodeType(page: Page) {
     // Open node configuration menu
-    const nodePalette = await page.locator('.baklava-node-palette');
-    const addNodeButton = await nodePalette.getByText('New Node Type').first();
+    const nodePalette = page.locator('.baklava-node-palette');
+    const addNodeButton = nodePalette.getByText('New Node Type').first();
     await dragAndDrop(page, addNodeButton, 750, 80);
 
     // Create node
-    const nodeMenu = await page.locator('#container').locator('.create-menu');
-    const createButton = await nodeMenu.getByText('Create');
+    const nodeMenu = page.locator('#container').locator('.create-menu');
+    const createButton = nodeMenu.getByText('Create');
     await createButton.click();
 }
 

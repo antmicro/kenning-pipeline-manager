@@ -2,6 +2,7 @@
 // @ts-check
 import { fileURLToPath } from 'url';
 import path, { dirname, join } from 'path';
+import { expect } from 'playwright/test';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -78,7 +79,10 @@ export async function addNode(page, category, nodeName, x, y) {
 
     // Open a proper category.
     await enableNavigationBar(page);
+    await categoryBar.scrollIntoViewIfNeeded();
+    await expect(categoryBar).toBeVisible();
     await categoryBar.click();
+
 
     // Drag and drop to the [x, y] position.
     await dragAndDrop(page, node, x, y);

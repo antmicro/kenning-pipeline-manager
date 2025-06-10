@@ -12,7 +12,12 @@ async function deleteNode(page: Page, nodeId: string) {
     });
 
     // Delete the node.
-    const deleteButton = await page.getByText('Delete');
+    const deleteButton = page.getByText('Delete', { exact: true });
+    await deleteButton.scrollIntoViewIfNeeded();
+
+    // Zoom in to ensure the context menu is visible.
+    await page.mouse.wheel(0, -1500);
+
     await deleteButton.click();
 }
 
@@ -411,10 +416,13 @@ test('test history by removing node with connection', async ({ page }) => {
     }).toHaveCount(6);
 
     // Delete a node.
-    const loadVideoNode = await page.locator(`#${loadVideoNodeId}`);
+    const loadVideoNode = page.locator(`#${loadVideoNodeId}`);
     expect(loadVideoNode.isVisible());
     await loadVideoNode.click({ button: 'right' });
-    const deleteButton = await page.getByText('Delete');
+    const deleteButton = page.getByText('Delete', { exact: true })
+    await deleteButton.scrollIntoViewIfNeeded();
+    // Zoom in to ensure the context menu is visible.
+    await page.mouse.wheel(0, -1500);
     await deleteButton.click();
 
     // Verify that the node and its connection have disappeared.

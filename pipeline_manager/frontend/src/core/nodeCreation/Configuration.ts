@@ -133,6 +133,7 @@ export function modifyConfiguration(): string[] {
         node.type = newNodeData.name;
         node.layer = newNodeData.layer;
         node.category = newNodeData.category;
+        node.color = newNodeData.color;
         node.description = newNodeData.description;
     });
     /* eslint-enable no-param-reassign */
