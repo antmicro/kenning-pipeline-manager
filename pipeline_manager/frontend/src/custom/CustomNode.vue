@@ -410,27 +410,34 @@ const onContextMenuTitleClick = async (action) => {
             commitTransaction();
             break;
         case 'register':
+            configurationState.editedType = nodeData.name;
             customNodeConfiguration.register();
             break;
         case 'configure':
             menuState.configurationMenu.visible = true;
             menuState.configurationMenu.addNode = false;
             configurationState.nodeData = nodeData;
+            configurationState.editedType = nodeData.name;
             break;
         case 'property':
             menuState.propertyMenu = true;
+            configurationState.editedType = nodeData.name;
             break;
         case 'interface':
             menuState.interfaceMenu = true;
+            configurationState.editedType = nodeData.name;
             break;
         case 'layer':
             menuState.layerMenu = true;
+            configurationState.editedType = nodeData.name;
             break;
         case 'delete-property':
             menuState.propertyListMenu = true;
+            configurationState.editedType = nodeData.name;
             break;
         case 'delete-interface':
             menuState.interfaceListMenu = true;
+            configurationState.editedType = nodeData.name;
             break;
     }
 };
