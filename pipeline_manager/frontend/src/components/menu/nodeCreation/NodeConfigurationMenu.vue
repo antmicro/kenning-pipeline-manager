@@ -35,7 +35,7 @@ import {
 } from '@baklavajs/renderer-vue'; // eslint-disable-line object-curly-newline
 
 import { getOptionName } from '../../../custom/CustomNode.js';
-import { customNodeConfiguration } from '../../../core/nodeCreation/Configuration.ts';
+import { createNode, modifyConfiguration } from '../../../core/nodeCreation/Configuration.ts';
 import { menuState, NodeDataConfiguration, configurationState } from '../../../core/nodeCreation/ConfigurationState.ts';
 
 import InputInterface from '../../../interfaces/InputInterface.js';
@@ -75,12 +75,12 @@ export default defineComponent({
             let button: any;
             if (menuState.configurationMenu.addNode === true) {
                 button = new ButtonInterface('Create', () => {
-                    customNodeConfiguration.createNode(newNode);
+                    createNode();
                     close();
                 });
             } else {
                 button = new ButtonInterface('Configure', () => {
-                    customNodeConfiguration.modifyConfiguration(newNode);
+                    modifyConfiguration();
                     close();
                 });
             }

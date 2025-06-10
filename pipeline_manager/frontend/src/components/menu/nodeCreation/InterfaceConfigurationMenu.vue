@@ -29,7 +29,7 @@ Popup menu for configuring node interfaces.
                 class="__name-option"
             />
         </div>
-        <component :is="addInterface.component" :intf="addInterface" />
+        <component :is="addInterfaceMenu.component" :intf="addInterfaceMenu" />
     </div>
 </template>
 
@@ -43,7 +43,7 @@ import {
 } from '@baklavajs/renderer-vue'; // eslint-disable-line object-curly-newline
 
 import { getOptionName } from '../../../custom/CustomNode.js';
-import { customNodeConfiguration } from '../../../core/nodeCreation/Configuration.ts';
+import { addInterface } from '../../../core/nodeCreation/Configuration.ts';
 import { menuState } from '../../../core/nodeCreation/ConfigurationState.ts';
 
 import InputInterface from '../../../interfaces/InputInterface.js';
@@ -90,14 +90,14 @@ export default defineComponent({
             return option as InterfaceInterface;
         });
 
-        const addInterface = computed(() => {
+        const addInterfaceMenu = computed(() => {
             const button: any = new ButtonInterface('Add interface', () => {
                 if (newInterface.type === '') {
                     const intf = {
                         name: newInterface.name,
                         direction: newInterface.direction.value,
                     };
-                    customNodeConfiguration.addInterface(intf);
+                    addInterface(intf);
                 } else {
                     const typesList = newInterface.type.split(',');
 
@@ -106,7 +106,7 @@ export default defineComponent({
                         type: typesList.length === 1 ? newInterface.type : typesList,
                         direction: newInterface.direction.value,
                     };
-                    customNodeConfiguration.addInterface(intf);
+                    addInterface(intf);
                 }
                 close();
             });
@@ -120,8 +120,7 @@ export default defineComponent({
 
         return {
             configurationOptions,
-            addInterface,
-            customNodeConfiguration,
+            addInterfaceMenu,
             getOptionName,
             newInterface,
         };

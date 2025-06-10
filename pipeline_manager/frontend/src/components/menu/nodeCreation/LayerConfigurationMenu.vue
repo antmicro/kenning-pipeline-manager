@@ -35,8 +35,8 @@ import {
 import { ButtonInterface } from '@baklavajs/renderer-vue'; // eslint-disable-line object-curly-newline
 
 import { getOptionName } from '../../../custom/CustomNode.js';
-import { customNodeConfiguration } from '../../../core/nodeCreation/Configuration.ts';
-import { menuState, NodeDataConfiguration } from '../../../core/nodeCreation/ConfigurationState.ts';
+import { modifyConfiguration } from '../../../core/nodeCreation/Configuration.ts';
+import { menuState, NodeDataConfiguration, configurationState } from '../../../core/nodeCreation/ConfigurationState.ts';
 
 import InputInterface from '../../../interfaces/InputInterface.js';
 import newInputInterface from './utils.ts';
@@ -48,7 +48,7 @@ interface NodeConfigurationInterface extends InputInterface {
 
 export default defineComponent({
     setup() {
-        const newNodeData = customNodeConfiguration.nodeData;
+        const newNodeData = configurationState.nodeData;
 
         const close = () => {
             menuState.layerMenu = false;
@@ -58,7 +58,7 @@ export default defineComponent({
 
         const setLayer = computed(() => {
             const button: any = new ButtonInterface('Set layer', () => {
-                customNodeConfiguration.modifyConfiguration(newNodeData);
+                modifyConfiguration();
                 close();
             });
             button.componentName = 'ButtonInterface';

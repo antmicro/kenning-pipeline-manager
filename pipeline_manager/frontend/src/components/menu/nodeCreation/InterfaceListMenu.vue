@@ -32,8 +32,8 @@ import {
 } from 'vue';
 import { ButtonInterface } from '@baklavajs/renderer-vue'; // eslint-disable-line object-curly-newline
 
-import { customNodeConfiguration } from '../../../core/nodeCreation/Configuration.ts';
-import { menuState } from '../../../core/nodeCreation/ConfigurationState.ts';
+import { removeInterfaces } from '../../../core/nodeCreation/Configuration.ts';
+import { menuState, configurationState } from '../../../core/nodeCreation/ConfigurationState.ts';
 
 export default defineComponent({
     setup() {
@@ -41,12 +41,12 @@ export default defineComponent({
             menuState.interfaceListMenu = false;
         };
 
-        const items = customNodeConfiguration.interfaces;
+        const items = configurationState.interfaces;
         const selectedItems = ref([]);
 
         const removeInterface = computed(() => {
             const button: any = new ButtonInterface('Remove interfaces', () => {
-                customNodeConfiguration.removeInterfaces(selectedItems.value);
+                removeInterfaces(selectedItems.value);
                 close();
             });
             button.componentName = 'ButtonInterface';

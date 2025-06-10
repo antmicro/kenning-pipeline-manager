@@ -32,8 +32,8 @@ import {
 } from 'vue';
 import { ButtonInterface } from '@baklavajs/renderer-vue';
 
-import { customNodeConfiguration } from '../../../core/nodeCreation/Configuration.ts';
-import { menuState } from '../../../core/nodeCreation/ConfigurationState.ts';
+import { removeProperties } from '../../../core/nodeCreation/Configuration.ts';
+import { menuState, configurationState } from '../../../core/nodeCreation/ConfigurationState.ts';
 
 export default defineComponent({
     setup() {
@@ -41,12 +41,12 @@ export default defineComponent({
             menuState.propertyListMenu = false;
         };
 
-        const items = customNodeConfiguration.properties;
+        const items = configurationState.properties;
         const selectedItems = ref([]);
 
         const removeProperty = computed(() => {
             const button: any = new ButtonInterface('Remove properties', () => {
-                customNodeConfiguration.removeProperties(selectedItems.value);
+                removeProperties(selectedItems.value);
                 close();
             });
             button.componentName = 'ButtonInterface';

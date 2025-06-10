@@ -29,7 +29,7 @@ Popup menu for configuring node properties.
                 class="__name-option"
             />
         </div>
-        <component :is="addProperty.component" :intf="addProperty" />
+        <component :is="addPropertyMenu.component" :intf="addPropertyMenu" />
     </div>
 </template>
 
@@ -45,7 +45,7 @@ import {
 } from '@baklavajs/renderer-vue'; // eslint-disable-line object-curly-newline
 
 import { getOptionName } from '../../../custom/CustomNode.js';
-import { customNodeConfiguration } from '../../../core/nodeCreation/Configuration.ts';
+import { addProperty } from '../../../core/nodeCreation/Configuration.ts';
 import { menuState } from '../../../core/nodeCreation/ConfigurationState.ts';
 
 import InputInterface from '../../../interfaces/InputInterface.js';
@@ -152,7 +152,7 @@ export default defineComponent({
             return option as PropertyInterface;
         });
 
-        const addProperty = computed(() => {
+        const addPropertyMenu = computed(() => {
             const button: any = new ButtonInterface('Add property', () => {
                 const prop = {
                     name: newProperty.name,
@@ -162,7 +162,7 @@ export default defineComponent({
                     max: enabledMinMax.value ? newProperty.max.value : undefined,
                 };
 
-                customNodeConfiguration.addProperty(prop);
+                addProperty(prop);
                 close();
             });
             button.componentName = 'ButtonInterface';
@@ -223,8 +223,7 @@ export default defineComponent({
 
         return {
             configurationOptions,
-            addProperty,
-            customNodeConfiguration,
+            addPropertyMenu,
             getOptionName,
             newProperty,
         };
