@@ -142,6 +142,7 @@ SPDX-License-Identifier: Apache-2.0
                     {{ output }}
                 </p>
             </div>
+            <NodeSpecificationEditor :node="node" :scrollHandle="sidebarRef" />
         </div>
     </div>
 </template>
@@ -157,12 +158,14 @@ import EditorManager from '../core/EditorManager';
 
 import { validateInterfaceGroupsNames } from '../core/interfaceParser';
 import { getOptionName } from './CustomNode.js';
+import NodeSpecificationEditor from '../components/NodeSpecificationEditor.vue';
 
 export default defineComponent({
     components: {
         Cross,
         CustomInterface,
         CheckboxInterface,
+        NodeSpecificationEditor,
         Tooltip,
     },
     emits: ['sidebar-open'],

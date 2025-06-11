@@ -177,5 +177,32 @@
             }
         }
 
+        & > .__spec-editor-section {
+            & > .__spec-editor {
+                padding: 0.625em 1.25em 0 1.25em;
+
+                & > .__validate-button {
+                    width: 100%;
+                    margin: 0.5em 0;
+                }
+
+                & > .__validate-button:disabled {
+                    pointer-events: none;
+                    cursor: not-allowed;
+                    opacity: 0.65;
+                    filter: alpha(opacity=65);
+                    -webkit-box-shadow: none;
+                    box-shadow: none;
+                }
+
+                & > .__editor  {
+                    font-family: monospace;
+                    box-sizing: border-box;
+                    tab-size: 2;
+                    resize: none;
+                    overflow: hidden;
+                }
+            }
+        }
     }
 }
