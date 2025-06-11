@@ -21,9 +21,8 @@
         "urloverrides": {
             "description": "Mapping for string replacement",
             "type": "object",
-            "items": {
-                "type": "object",
-                "items": {
+            "patternProperties": {
+                ".*": {
                     "type": "string"
                 }
             }
