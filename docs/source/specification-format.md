@@ -68,6 +68,9 @@ This object specifies additional editor options and contains the following optio
   The entries are of type [Navbar item](#navbar-item).
 * `logLevel` - string specifying minimum level of verbosity notification has to have to be displayed.
   It can be one of `INFO`, `WARNING`, `ERROR`.
+* `editableTypes` - Boolean specifying whether nodes can be edited.
+  It may be changed later in the UI (given that `allowEditableTypes` is enabled in the specification).
+  The default value is `false`.
 
 An example:
 
