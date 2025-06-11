@@ -183,8 +183,10 @@ export default class EditorManager {
         }
 
         let state;
+        let stateNodeId;
         if (this.specificationLoaded) {
             state = this.saveDataflow();
+            stateNodeId = this.baklavaView.displayedGraph.sidebar.nodeId;
             this.clearEditorManagerState();
         }
 
@@ -259,7 +261,11 @@ export default class EditorManager {
         }
 
         if (state !== undefined) {
-            this.loadDataflow(state);
+            const ret = await this.loadDataflow(state);
+            if (!ret.errors.length && stateNodeId) {
+                this.baklavaView.displayedGraph.sidebar.nodeId = stateNodeId;
+                this.baklavaView.displayedGraph.sidebar.visible = true;
+            }
         }
 
         return { errors, warnings };
