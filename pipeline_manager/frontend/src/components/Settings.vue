@@ -90,7 +90,7 @@ export default {
             ).setPort(false);
             option.events.setValue.subscribe(this, (v) => {
                 props.viewModel.settings.editableNodeTypes = v; // eslint-disable-line vue/no-mutating-props,max-len,no-param-reassign
-                metadataChanged('editableNodeTypes', v);
+                metadataChanged('editableTypes', v);
             });
             option.componentName = 'CheckboxInterface';
             return option;

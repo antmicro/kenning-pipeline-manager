@@ -941,7 +941,7 @@ export default class EditorManager {
             [this.baklavaView.movementStep, 'movementStep'],
             [this.baklavaView.settings.background.gridSize, 'backgroundSize'],
             [this.baklavaView.connectionRenderer.randomizedOffset, 'randomizedOffset'],
-            [this.baklavaView.settings.editableNodeTypes, 'editableNodeTypes'],
+            [this.baklavaView.settings.editableNodeTypes, 'editableTypes'],
         ].forEach(([currVal, name]) => {
             const m = this.specification.currentSpecification?.metadata ?? {};
             const dm = this.defaultMetadata;
