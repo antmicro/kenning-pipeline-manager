@@ -1,9 +1,7 @@
-import { test, expect } from '@playwright/test';
-import { getUrl, enableNavigationBar, addNode, dragAndDrop } from './config.js';
+import { test, expect, Page, Locator } from '@playwright/test';
+import { getUrl, getPathToJsonFile, addNode, openFileChooser } from './config.js';
 
 async function enableEditingNodes(page: Page) {
-    await page.goto(getUrl());
-
     // Assert that node types cannot be added
     const logo = await page.locator('.logo');
     await logo.hover();
@@ -14,7 +12,10 @@ async function enableEditingNodes(page: Page) {
     const settings = await page.locator('.settings-panel');
     expect(settings).toBeVisible();
 
-    const checkbox = await settings.locator('.baklava-checkbox').nth(1).locator('.__checkmark-container');
+    const checkbox = await settings
+        .locator('.baklava-checkbox')
+        .nth(1)
+        .locator('.__checkmark-container');
     expect(checkbox).toBeVisible();
     await checkbox.click();
 
@@ -37,12 +38,40 @@ async function createNewNodeType(page: Page) {
     await createButton.click();
 }
 
+async function loadIncludeSpecification(page: Page) {
+    const fileChooser = await openFileChooser(page, 'specification');
+    await fileChooser.setFiles(getPathToJsonFile('sample-include-specification.json'));
+}
+
+async function addInterface(page: Page, nodeName: string) {
+    const node = page.getByText(nodeName).last();
+    await node.click({ button: 'right', force: true });
+    await page.getByText('Add interface').click();
+    await page.getByRole('button', { name: 'Add interface' }).click();
+
+    const inputs = await page.locator('[data-node-type="Custom Node"]').locator(".__inputs > div").count();
+    expect(inputs).toBe(1);
+}
+
 test('enable editing', async ({ page }) => {
+    await page.goto(getUrl());
     await enableEditingNodes(page);
 });
 
 test('create new node type', async ({ page }) => {
+    await page.goto(getUrl());
     await enableEditingNodes(page);
     await createNewNodeType(page);
     await addNode(page, 'Default category', 'Custom Node', 750, 80);
+});
+
+test('test adding interface with specification containing "include" keyword', async ({ page }) => {
+    await page.goto(getUrl());
+    await loadIncludeSpecification(page);
+    await enableEditingNodes(page);
+
+    const nodeName = 'Custom Node';
+    await createNewNodeType(page);
+    await addNode(page, 'Default category', nodeName, 750, 80);
+    await addInterface(page, nodeName);
 });

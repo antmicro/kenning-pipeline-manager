@@ -1,5 +1,5 @@
-import { test, expect, Page, Locator, FileChooser } from '@playwright/test';
-import { getPathToJsonFile, getUrl } from './config.js';
+import { test, expect, Page, Locator } from '@playwright/test';
+import { getPathToJsonFile, getUrl, openFileChooser } from './config.js';
 
 const countOfInitiallyExposedInterface = 4;
 
@@ -8,17 +8,6 @@ async function enterSubgraph(page: Page) {
     await nodeWithSubgraph.locator('.__title').click({ button: 'right' });
     const contextMenuOption = page.locator('.baklava-context-menu').getByText('Edit Subgraph');
     await contextMenuOption.click();
-}
-
-async function openFileChooser(
-    page: Page,
-    purpose: 'specification' | 'dataflow',
-): Promise<FileChooser> {
-    const fileChooserPromise = page.waitForEvent('filechooser');
-    await page.mouse.move(25, 25);
-    const text = purpose === 'specification' ? 'Load specification' : 'Load graph file';
-    await page.getByText(text).click();
-    return await fileChooserPromise;
 }
 
 async function loadSubgraphSpecification(page: Page) {
