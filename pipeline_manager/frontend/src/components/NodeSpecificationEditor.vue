@@ -4,28 +4,14 @@ Copyright (c) 2022-2025 Antmicro <www.antmicro.com>
 SPDX-License-Identifier: Apache-2.0
 -->
 <template>
-    <div
-        ref="root"
-        class="__spec-editor-section"
-        v-if="visible"
-    >
+    <div ref="root" class="__spec-editor-section" v-if="visible">
         <div class="__title">Specification</div>
         <div class="__spec-editor">
-            <button
-                class="baklava-button __validate-button"
-                :disabled="validationAvailable()"
-                @click="validate"
-            >
+            <button class="baklava-button __validate-button" :disabled="validationAvailable()" @click="validate">
                 Validate
             </button>
-            <textarea
-                ref="el"
-                v-model="currentSpecification"
-                class="baklava-input __editor"
-                spellcheck="false"
-                @input="handleInput"
-                @keydown.tab="handleTab"
-            />
+            <textarea ref="el" v-model="currentSpecification" class="baklava-input __editor" spellcheck="false"
+                @input="handleInput" @keydown.tab="handleTab" />
         </div>
     </div>
 </template>
@@ -55,9 +41,14 @@ export default defineComponent({
         const editorManager = EditorManager.getEditorManagerInstance();
         const node = toRef(props, 'node');
 
-        const maybeStringify = (maybeSpecification) => (maybeSpecification !== undefined
-            ? YAML.stringify(maybeSpecification)
-            : '');
+        const maybeStringify = (maybeSpecification) => {
+            if (typeof maybeSpecification === 'string') {
+                return maybeSpecification;
+            }
+            return maybeSpecification !== undefined
+                ? YAML.stringify(maybeSpecification)
+                : '';
+        };
 
         const nodeMatchesSpec = (specNode) => {
             const isCategory = specNode.isCategory ?? false;
@@ -79,10 +70,42 @@ export default defineComponent({
             return specification;
         });
 
-        const specification = computed(() => specificationWithIncludes
-            .value
-            ?.nodes
-            ?.find(nodeMatchesSpec));
+        /**
+         * Returns the modified specification for a node, if it exists.
+         * @returns {Object|undefined} The modified specification or undefined.
+         */
+        const getModifiedSpecification = () => {
+            const { id } = node.value;
+            if (!Object.prototype.hasOwnProperty.call(
+                editorManager.modifiedNodeSpecificationRegistry,
+                id,
+            )) {
+                return undefined;
+            }
+            return editorManager.modifiedNodeSpecificationRegistry[id];
+        };
+
+        /**
+         * Updates the modified specification for a given node in the editor manager's registry.
+         *
+         * @param {string} modifiedSpecification - The modified specification YAML string.
+         * @returns {void}
+         */
+        const updateModifiedSpecification = (modifiedSpecification) => {
+            // Store only the raw string for the node.
+            editorManager.modifiedNodeSpecificationRegistry[node.value.id] = modifiedSpecification;
+        };
+
+        const specification = computed(() => {
+            const modifiedCopy = getModifiedSpecification();
+            if (modifiedCopy !== undefined) {
+                return modifiedCopy;
+            }
+            return specificationWithIncludes
+                .value
+                ?.nodes
+                ?.find(nodeMatchesSpec);
+        });
 
         // We modify this value in the editor, so it's not exactly computed
         const currentSpecification = ref(maybeStringify(specification.value));
@@ -112,6 +135,8 @@ export default defineComponent({
             if (scrollHandle !== undefined && scrollHandle.scrollTop < prevParentScrollHeight) {
                 scrollHandle.scrollTop = prevParentScrollHeight;
             }
+
+            updateModifiedSpecification(currentSpecification.value);
         };
 
         const delayedEditorUpdate = () => nextTick().then(handleInput);
@@ -197,8 +222,6 @@ export default defineComponent({
 
         const handleTab = async (event) => {
             event.preventDefault();
-            // This function is deprecated, but there are currently no alternative to preserve the
-            // undo buffer unless we want to switch to a custom editor
             document.execCommand('insertText', false, '\t');
         };
 

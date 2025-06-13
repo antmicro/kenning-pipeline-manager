@@ -158,6 +158,8 @@ export default class EditorManager {
             ref(this.baklavaView.editor),
             this.baklavaView.commandHandler,
         );
+
+        this.modifiedNodeSpecificationRegistry = {};
     }
 
     /**
