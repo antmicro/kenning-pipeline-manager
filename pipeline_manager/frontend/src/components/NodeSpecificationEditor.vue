@@ -4,14 +4,28 @@ Copyright (c) 2022-2025 Antmicro <www.antmicro.com>
 SPDX-License-Identifier: Apache-2.0
 -->
 <template>
-    <div ref="root" class="__spec-editor-section" v-if="visible">
+    <div
+        ref="root"
+        class="__spec-editor-section"
+        v-if="visible"
+    >
         <div class="__title">Specification</div>
         <div class="__spec-editor">
-            <button class="baklava-button __validate-button" :disabled="validationAvailable()" @click="validate">
+            <button
+                class="baklava-button __validate-button"
+                :disabled="validationAvailable()"
+                @click="validate"
+            >
                 Validate
             </button>
-            <textarea ref="el" v-model="currentSpecification" class="baklava-input __editor" spellcheck="false"
-                @input="handleInput" @keydown.tab="handleTab" />
+            <textarea
+                ref="el"
+                v-model="currentSpecification"
+                class="baklava-input __editor"
+                spellcheck="false"
+                @input="handleInput"
+                @keydown.tab="handleTab"
+            />
         </div>
     </div>
 </template>
