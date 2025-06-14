@@ -68,9 +68,19 @@ export default defineComponent({
             return nodeType === specNodeType;
         };
 
-        const specification = computed(() => editorManager
-            .specification
-            .unresolvedSpecification
+        const specificationWithIncludes = computed(() => {
+            const specification = JSON.parse(JSON.stringify(
+                editorManager.specification.unresolvedSpecification));
+
+            EditorManager.mergeObjects(
+                specification,
+                editorManager.specification.includedSpecification,
+            );
+            return specification;
+        });
+
+        const specification = computed(() => specificationWithIncludes
+            .value
             ?.nodes
             ?.find(nodeMatchesSpec));
 
