@@ -229,8 +229,10 @@ export default class EditorManager {
             const {
                 specification: includedSpecification,
                 errors: includeErrors,
+                warnings: includeWarnings,
             } = await this.downloadNestedImports(toInclude);
             errors.push(...includeErrors);
+            warnings.push(...includeWarnings);
             if (errors.length) {
                 return { errors, warnings };
             }
@@ -253,9 +255,10 @@ export default class EditorManager {
 
             // Merge included specification
             const {
-                errors: mergeErrors,
+                errors: mergeErrors, warnings: mergeWarnings,
             } = EditorManager.mergeObjects(dataflowSpecification, includedSpecification);
             errors.push(...mergeErrors);
+            warnings.push(...mergeWarnings);
             if (errors.length) {
                 return { errors, warnings };
             }
@@ -312,6 +315,7 @@ export default class EditorManager {
      * @returns Merged specification and errors.
      */
     async downloadNestedImports(specification, trace = new Set()) {
+        const warnings = [];
         const errors = [];
 
         // Download specifications and verify for circular imports
@@ -351,16 +355,17 @@ export default class EditorManager {
         }));
 
         if (errors.length) {
-            return { specification, errors };
+            return { specification, errors, warnings };
         }
 
         // Download nested imports
         await Promise.all(specificationAndTrace.map(
             async ({ specification: spec, trace: specTrace, style }) => {
                 const {
-                    specification: newSpecification, errors: newErrors,
+                    specification: newSpecification, errors: newErrors, warnings: newWarnings,
                 } = await this.downloadNestedImports(spec, specTrace);
                 errors.push(...newErrors);
+                warnings.push(...newWarnings);
 
                 if (style !== undefined) EditorManager.includeWithStyle(newSpecification, style);
                 if (specification.urloverrides !== undefined) {
@@ -368,11 +373,12 @@ export default class EditorManager {
                 }
 
                 const {
-                    errors: mergeErrors,
+                    errors: mergeErrors, warnings: mergeWarnings,
                 } = EditorManager.mergeObjects(specification, newSpecification);
                 errors.push(...mergeErrors);
+                warnings.push(...mergeWarnings);
             }));
-        return { specification, errors };
+        return { specification, errors, warnings };
     }
 
     /**
@@ -1283,12 +1289,13 @@ export default class EditorManager {
      * @returns Primary object with merged properties from the secondary object
      */
     static mergeObjects(primaryObject, secondaryObject) {
+        const warnings = [];
         const errors = [];
 
         // Check if any of the object is undefined
         secondaryObject = secondaryObject ?? {};
         if (primaryObject === undefined || Object.keys(primaryObject).length === 0) {
-            return { errors };
+            return { errors, warnings };
         }
 
         // Merge object
@@ -1301,26 +1308,49 @@ export default class EditorManager {
 
                 // Merge nodes by names
                 try {
+                    // Rename
+                    const renameMapping = Object.fromEntries(primaryObject[key]
+                        .filter((node) => node.includeName)
+                        .map((node) => [node.includeName, EditorManager.getNodeName(node)]));
+
+                    const usedKeys = new Set();
+                    const conditionalRename = (node) => {
+                        const name = EditorManager.getNodeName(node);
+                        const mapped = renameMapping[name];
+                        if (mapped !== undefined) { usedKeys.add(name); }
+                        return mapped ?? name;
+                    };
+
                     const objsToMerge = [
-                        value.map((node) => [EditorManager.getNodeName(node), node]),
+                        value.map((node) => [conditionalRename(node), node]),
                         primaryObject[key].map((node) => [EditorManager.getNodeName(node), node]),
                     ].map(Object.fromEntries);
 
+                    // Merge
                     primaryObject[key] = Object.values(Object.assign({}, ...objsToMerge));
+
+                    // Check usage of `includeName` directive
+                    const unusedKeys = Object.keys(renameMapping)
+                        .filter((name) => !usedKeys.has(name));
+
+                    if (unusedKeys.length) {
+                        warnings.push(`Unused include names: ${unusedKeys}`);
+                    }
                 } catch (error) {
                     errors.push(error);
                 }
             } else if (typeof value === 'object' && typeof primaryObject[key] === 'object') {
                 // For example, metadata is an object and it has to be merged instead of overwritten
                 const {
-                    errors: mergeErrors,
+                    errors: mergeErrors, warnings: mergeWarnings,
                 } = EditorManager.mergeObjects(primaryObject[key], value);
                 errors.push(...mergeErrors);
+                warnings.push(...mergeWarnings);
             } else {
                 primaryObject[key] = value;
             }
         });
-        return { errors };
+        return { errors, warnings };
     }
 
     /**

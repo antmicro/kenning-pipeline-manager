@@ -391,7 +391,7 @@ def specification_include_graphs_no_nodes(
         ("specification_include_graphs_doesnt_exist", 1),
         ("specification_include_graph_empty", 1),
         ("specification_recursive_include", 1),
-        ("specification_repeating_node_declarations", 1),
+        ("specification_repeating_node_declarations", 0),
         ("specification_nodes_in_include", 0),
         ("specification_repeating_include", 1),
         ("specification_include_one_graph", 0),

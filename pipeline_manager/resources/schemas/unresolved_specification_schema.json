@@ -127,6 +127,10 @@
                             "description": "Name displayed in a node",
                             "type": "string"
                         },
+                        "includeName": {
+                            "type": "string",
+                            "description": "Name of the included node to override"
+                        },
                         "abstract": {
                             "description": "Tells if the given node type is abstract or not",
                             "type": "boolean",
