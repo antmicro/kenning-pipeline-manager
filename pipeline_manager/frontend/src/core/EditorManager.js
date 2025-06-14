@@ -11,7 +11,7 @@ import jsonMap from 'json-source-map';
 import jsonlint from 'jsonlint';
 
 import { useBaklava, useCommandHandler } from '@baklavajs/renderer-vue';
-import { toRaw, ref } from 'vue';
+import { toRaw, ref, reactive } from 'vue';
 import { useHistory } from './History.ts';
 import { useClipboard } from './Clipboard.ts';
 
@@ -215,9 +215,8 @@ export default class EditorManager {
             warnings.push(...EditorManager.unmarkNewNodes(dataflowSpecification));
         }
 
-        this.specification.unresolvedSpecification = JSON.parse(JSON.stringify(
-            dataflowSpecification,
-        ));
+        this.specification.unresolvedSpecification = reactive(
+            JSON.parse(JSON.stringify(dataflowSpecification)));
         this.specification.currentSpecification = dataflowSpecification;
         if (!lazyLoad) {
             // Preprocess includes
@@ -301,7 +300,7 @@ export default class EditorManager {
         this.specificationLoaded = false;
         this.specification.currentSpecification = {};
         this.specification.includedSpecification = {};
-        this.specification.unresolvedSpecification = {};
+        this.specification.unresolvedSpecification = reactive({});
     }
 
     /**
@@ -506,6 +505,7 @@ export default class EditorManager {
             return { errors: validationErrors, warnings: [] };
         }
 
+        this.specification.unresolvedSpecification.nodes ??= [];
         this.specification.unresolvedSpecification.nodes.push(nodeSpecification);
         return { errors: [], warnings: [] };
     }
