@@ -16,6 +16,8 @@ export default class Specification {
 
     currentSpecification = undefined;
 
+    includedSpecification = undefined;
+
     unresolvedSpecification = undefined;
 
     constructor() {

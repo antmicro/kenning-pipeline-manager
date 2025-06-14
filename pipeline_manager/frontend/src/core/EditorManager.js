@@ -222,39 +222,47 @@ export default class EditorManager {
         if (!lazyLoad) {
             // Preprocess includes
             this.globalVisitedSpecs = new Set();
+            const toInclude = Object.fromEntries(Object.entries({
+                include: dataflowSpecification.include,
+                urloverrides: dataflowSpecification.urloverrides,
+            }).filter(([_, value]) => value !== undefined));
+
             const {
-                specification: unresolvedSpecification, errors: includeErrors,
-            } = await this.downloadNestedImports(dataflowSpecification);
+                specification: includedSpecification,
+                errors: includeErrors,
+            } = await this.downloadNestedImports(toInclude);
             errors.push(...includeErrors);
             if (errors.length) {
                 return { errors, warnings };
             }
 
             if (unmarkNewNodes) {
-                warnings.push(...EditorManager.unmarkNewNodes(unresolvedSpecification));
+                warnings.push(...EditorManager.unmarkNewNodes(includedSpecification));
             }
 
             // Include graphs
-            if (unresolvedSpecification.includeGraphs !== undefined) {
-                const {
-                    graphs, errors: includeGraphsErrors,
-                } = await EditorManager.includeGraphs(unresolvedSpecification.includeGraphs);
+            const {
+                graphs, errors: includeGraphsErrors,
+            } = await EditorManager.includeGraphs(dataflowSpecification.includeGraphs ?? []);
+            errors.push(...includeGraphsErrors);
+            if (errors.length) {
+                return { errors, warnings };
+            }
 
-                errors.push(...includeGraphsErrors);
-                if (errors.length) {
-                    return { errors, warnings };
-                }
+            includedSpecification.graphs = (includedSpecification.graphs ?? []).concat(graphs);
+            this.specification.includedSpecification = includedSpecification;
 
-                unresolvedSpecification.graphs = [
-                    ...(unresolvedSpecification.graphs ?? []),
-                    ...graphs,
-                ];
-            } else {
-                unresolvedSpecification.graphs ??= [];
+            // Merge included specification
+            const {
+                errors: mergeErrors,
+            } = EditorManager.mergeObjects(dataflowSpecification, includedSpecification);
+            errors.push(...mergeErrors);
+            if (errors.length) {
+                return { errors, warnings };
             }
 
             // Update metadata
-            const { metadata } = unresolvedSpecification;
+            const { metadata } = dataflowSpecification;
             errors.push(...this.updateMetadata(metadata, false, true));
             if (errors.length) {
                 return { errors, warnings };
@@ -263,7 +271,7 @@ export default class EditorManager {
             // Update graph specification
             const {
                 errors: newErrors, warnings: newWarnings,
-            } = await this.updateGraphSpecification(unresolvedSpecification);
+            } = await this.updateGraphSpecification(dataflowSpecification);
             errors.push(...newErrors);
             warnings.push(...newWarnings);
         }
@@ -292,6 +300,7 @@ export default class EditorManager {
         this.nodeStyles?.clear();
         this.specificationLoaded = false;
         this.specification.currentSpecification = {};
+        this.specification.includedSpecification = {};
         this.specification.unresolvedSpecification = {};
     }
 
