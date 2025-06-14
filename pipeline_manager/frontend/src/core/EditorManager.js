@@ -359,7 +359,10 @@ export default class EditorManager {
                     EditorManager.applyUrlOverrides(newSpecification, specification.urloverrides);
                 }
 
-                specification = EditorManager.mergeObjects(specification, newSpecification);
+                const {
+                    errors: mergeErrors,
+                } = EditorManager.mergeObjects(specification, newSpecification);
+                errors.push(...mergeErrors);
             }));
         return { specification, errors };
     }
@@ -598,7 +601,7 @@ export default class EditorManager {
         let resolvedNodes = [];
 
         try {
-            const preprocessedNodes = this.preprocessNodes(nodes);
+            const preprocessedNodes = EditorManager.preprocessNodes(nodes);
             resolvedNodes = this.resolveInheritance(preprocessedNodes);
         } catch (e) {
             return { errors: [e.message], warnings };
@@ -743,18 +746,11 @@ export default class EditorManager {
      * Preprocess nodes to be later passed to `resolveInheritance` function.
      *
      * @param nodes coming from specification.
-     * @throws Error if a category node has a name different than the last part of its category.
+     * @returns preprocessed nodes.
      */
-    preprocessNodes(nodes) { // eslint-disable-line class-methods-use-this
-        nodes.forEach((node) => {
-            if (node.isCategory) {
-                const name = node.category.split('/').at(-1);
-                if (node.name !== undefined && node.name !== name) {
-                    throw new Error(`Node '${node.name}' is a category node and has a name defined different than ${name}`);
-                }
-                node.name = name;
-            }
-        });
+    static preprocessNodes(nodes) {
+        nodes.filter((node) => node.isCategory)
+            .forEach((node) => { node.name = EditorManager.getNodeName(node); });
         return nodes;
     }
 
@@ -783,11 +779,10 @@ export default class EditorManager {
         if (overriding) {
             // this.specification.currentSpecification?.metadata should not
             // be over overridden, that is why it needs to be copied before merging
-            metadata = EditorManager.mergeObjects(
-                JSON.parse(JSON.stringify(
-                    this.specification.currentSpecification?.metadata ?? {},
-                )), metadata,
-            );
+            const tempMetadata = metadata;
+            metadata = JSON.parse(JSON.stringify(
+                this.specification.currentSpecification?.metadata ?? {}));
+            EditorManager.mergeObjects(metadata, tempMetadata);
         }
 
         this.baklavaView.interfaceTypes.readInterfaceTypes(metadata);
@@ -1279,24 +1274,44 @@ export default class EditorManager {
      * @returns Primary object with merged properties from the secondary object
      */
     static mergeObjects(primaryObject, secondaryObject) {
+        const errors = [];
+
         // Check if any of the object is undefined
         secondaryObject = secondaryObject ?? {};
         if (primaryObject === undefined || Object.keys(primaryObject).length === 0) {
-            return secondaryObject;
+            return { errors };
         }
 
         // Merge object
         Object.entries(secondaryObject).forEach(([key, value]) => {
             if (Array.isArray(value) && Array.isArray(primaryObject[key])) {
-                primaryObject[key].push(...value);
+                if (key !== 'nodes') {
+                    primaryObject[key].push(...value);
+                    return;
+                }
+
+                // Merge nodes by names
+                try {
+                    const objsToMerge = [
+                        value.map((node) => [EditorManager.getNodeName(node), node]),
+                        primaryObject[key].map((node) => [EditorManager.getNodeName(node), node]),
+                    ].map(Object.fromEntries);
+
+                    primaryObject[key] = Object.values(Object.assign({}, ...objsToMerge));
+                } catch (error) {
+                    errors.push(error);
+                }
             } else if (typeof value === 'object' && typeof primaryObject[key] === 'object') {
                 // For example, metadata is an object and it has to be merged instead of overwritten
-                primaryObject[key] = EditorManager.mergeObjects(primaryObject[key], value);
+                const {
+                    errors: mergeErrors,
+                } = EditorManager.mergeObjects(primaryObject[key], value);
+                errors.push(...mergeErrors);
             } else {
                 primaryObject[key] = value;
             }
         });
-        return primaryObject;
+        return { errors };
     }
 
     /**
