@@ -133,7 +133,36 @@ export default defineComponent({
                 const unresolvedSpecification =
                     JSON.parse(JSON.stringify(editorManager.specification.unresolvedSpecification));
 
-                unresolvedSpecification.nodes = unresolvedSpecification.nodes
+                // Handle name overrides
+                const oldName = node.value.type;
+                const newName = EditorManager.getNodeName(parsedSpecification);
+                if (oldName !== newName) {
+                    const newNameInSpec = specificationWithIncludes
+                        .value
+                        ?.nodes
+                        ?.map(EditorManager.getNodeName)
+                        .includes(newName);
+
+                    if (newNameInSpec) {
+                        throw new Error(`Node ${newName} already exists.`);
+                    }
+
+                    // Override included node
+                    if (!parsedSpecification.includeName) {
+                        const oldNameInOverridden = editorManager
+                            .specification
+                            .includedSpecification
+                            .nodes
+                            ?.map(EditorManager.getNodeName)
+                            .includes(oldName);
+
+                        if (oldNameInOverridden) {
+                            parsedSpecification.includeName = oldName;
+                        }
+                    }
+                }
+
+                unresolvedSpecification.nodes = (unresolvedSpecification.nodes ?? [])
                     .filter((specNode) => !nodeMatchesSpec(specNode))
                     .concat([parsedSpecification]);
 
@@ -143,6 +172,9 @@ export default defineComponent({
                 // Update specification
                 const ret = await editorManager
                     .updateEditorSpecification(unresolvedSpecification, false, false);
+                if (ret.warnings !== undefined && ret.warnings.length) {
+                    NotificationHandler.terminalLog('warning', 'Warnings during node validation', ret.warnings);
+                }
                 if (ret.errors !== undefined && ret.errors.length) { throw new Error(ret.errors); }
 
                 NotificationHandler.showToast('info', 'Node validated');
