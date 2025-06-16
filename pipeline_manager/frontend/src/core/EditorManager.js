@@ -579,6 +579,7 @@ export default class EditorManager {
             color: node.color,
             style: node.style,
             pill: node.pill,
+            isSubgraph: node.isSubgraph,
         });
         if ('icon' in node) {
             const icon = typeof node.icon === 'string' ? node.icon : this.getMetadataIcon(node.icon);
