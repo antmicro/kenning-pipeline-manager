@@ -491,13 +491,15 @@ export default class EditorManager {
      * Validates the node specification passed in `nodeSpecification` and if
      * it is correct adds it to the unresolved specification.
      * If there is no current specification loaded then a new one is created.
+     * If node to update is provided, the specification is assigned to that node.
      * The node specification should be in the format of the node schema.
      *
      * @param {object} nodeSpecification Node specification to add
+     * @param {object} nodeToUpdate Node type to update
      * @returns An object consisting of errors and warnings arrays. If both arrays are empty
      * the updating process was successful.
      */
-    addNodeToEditorSpecification(nodeSpecification) {
+    addNodeToEditorSpecification(nodeSpecification, nodeToUpdate = undefined) {
         let validationErrors = this.validateNode(nodeSpecification);
         if (validationErrors.length) return validationErrors;
 
@@ -508,13 +510,31 @@ export default class EditorManager {
             return this.updateEditorSpecification(newSpecification, false, false);
         }
 
+        this.specification.unresolvedSpecification.nodes ??= [];
+
         validationErrors = this._registerNodeType(nodeSpecification);
         if (validationErrors.length) {
             return { errors: validationErrors, warnings: [] };
         }
 
-        this.specification.unresolvedSpecification.nodes ??= [];
-        this.specification.unresolvedSpecification.nodes.push(nodeSpecification);
+        if (nodeToUpdate !== undefined) {
+            const currentSpecification = this.specification.unresolvedSpecification.nodes.find(
+                (node) => node.name === nodeToUpdate,
+            );
+
+            currentSpecification.name = nodeSpecification.name;
+            currentSpecification.category = nodeSpecification.category;
+            currentSpecification.layer = nodeSpecification.layer;
+            currentSpecification.description = nodeSpecification.description;
+            currentSpecification.properties = nodeSpecification.properties;
+
+            if (!currentSpecification.isSubgraph) {
+                currentSpecification.interfaces = nodeSpecification.interfaces;
+            }
+        } else {
+            this.specification.unresolvedSpecification.nodes.push(nodeSpecification);
+        }
+
         return { errors: [], warnings: [] };
     }
 
