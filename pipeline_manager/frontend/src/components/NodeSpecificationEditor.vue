@@ -35,6 +35,7 @@ import YAML from 'yaml';
 import {
     computed, defineComponent, nextTick, ref, toRef, watch,
 } from 'vue';
+import { useViewModel } from '@baklavajs/renderer-vue';
 import EditorManager from '../core/EditorManager';
 import NotificationHandler from '../core/notifications';
 import { menuState, configurationState } from '../core/nodeCreation/ConfigurationState.ts';
@@ -53,6 +54,8 @@ export default defineComponent({
     setup(props) {
         // State
 
+        const { viewModel } = useViewModel();
+        const { displayedGraph } = viewModel.value;
         const editorManager = EditorManager.getEditorManagerInstance();
         const node = toRef(props, 'node');
 
@@ -84,7 +87,7 @@ export default defineComponent({
                 );
                 specificationWithIncludes.value = specification;
             },
-            { immediate: true, deep: false },
+            { immediate: true, deep: true },
         );
 
         const specification = computed(() => specificationWithIncludes
@@ -152,57 +155,42 @@ export default defineComponent({
             try {
                 const parsedSpecification = YAML.parse(currentSpecification.value.replaceAll('\t', '  '));
 
-                // Validate a single node
-                let validationErrors = editorManager.validateNode(parsedSpecification);
-                if (validationErrors.length) { throw new Error(validationErrors); }
+                // Unregister the type in the editor
+                // eslint-disable-next-line no-underscore-dangle
+                const errors = editorManager._unregisterNodeType(node.value.type);
+                if (errors.length) {
+                    NotificationHandler.terminalLog('error', 'Error when registering the node', errors);
+                    return;
+                }
 
-                // Validate the node in overridden specification
-                const unresolvedSpecification =
-                    JSON.parse(JSON.stringify(editorManager.specification.unresolvedSpecification));
+                // Update all nodes of the type to match the new specification
+                const nodes = displayedGraph.nodes.filter(
+                    (n) => n.type === node.value.type,
+                );
 
-                // Handle name overrides
-                const oldName = node.value.type;
-                const newName = EditorManager.getNodeName(parsedSpecification);
-                if (oldName !== newName) {
-                    const newNameInSpec = specificationWithIncludes
-                        .value
-                        ?.nodes
-                        ?.map(EditorManager.getNodeName)
-                        .includes(newName);
+                // Update each field if it is defined
+                /* eslint-disable no-param-reassign */
+                nodes.forEach((n) => {
+                    const oldType = n.type;
+                    n.type = parsedSpecification.name;
+                    n.title = parsedSpecification.name;
+                    delete n.instanceName;
 
-                    if (newNameInSpec) {
-                        throw new Error(`Node ${newName} already exists.`);
-                    }
-
-                    // Override included node
-                    if (!parsedSpecification.includeName) {
-                        const oldNameInOverridden = editorManager
-                            .specification
-                            .includedSpecification
-                            .nodes
-                            ?.map(EditorManager.getNodeName)
-                            .includes(oldName);
-
-                        if (oldNameInOverridden) {
-                            parsedSpecification.includeName = oldName;
+                    Object.entries(parsedSpecification).forEach(([key, value]) => {
+                        if (value !== undefined && key !== 'name') {
+                            node[key] = value;
                         }
+                    });
+
+                    // Add type to editor and specification
+                    const ret = editorManager.addNodeToEditorSpecification(
+                        parsedSpecification,
+                        oldType,
+                    );
+                    if (ret.errors !== undefined && ret.errors.length) {
+                        throw new Error(ret.errors);
                     }
-                }
-
-                unresolvedSpecification.nodes = (unresolvedSpecification.nodes ?? [])
-                    .filter((specNode) => !nodeMatchesSpec(specNode))
-                    .concat([parsedSpecification]);
-
-                validationErrors = EditorManager.validateSpecification(unresolvedSpecification);
-                if (validationErrors.length) { throw new Error(validationErrors); }
-
-                // Update specification
-                const ret = await editorManager
-                    .updateEditorSpecification(unresolvedSpecification, false, false);
-                if (ret.warnings !== undefined && ret.warnings.length) {
-                    NotificationHandler.terminalLog('warning', 'Warnings during node validation', ret.warnings);
-                }
-                if (ret.errors !== undefined && ret.errors.length) { throw new Error(ret.errors); }
+                });
 
                 NotificationHandler.showToast('info', 'Node validated');
             } catch (error) {
