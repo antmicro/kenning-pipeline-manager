@@ -181,7 +181,6 @@ import EditorManager from '../core/EditorManager';
 import NotificationHandler from '../core/notifications.js';
 import getExternalApplicationManager from '../core/communication/ExternalApplicationManager';
 
-import { registerType } from '../core/nodeCreation/Configuration.ts';
 import { configurationState, menuState } from '../core/nodeCreation/ConfigurationState.ts';
 
 // Baklavajs implementation
@@ -293,9 +292,6 @@ const contextMenuTitleItems = computed(() => {
     const items = [];
     items.push({ value: 'sidebar', label: 'Details', icon: icons.Sidebar });
     if (editorManager.baklavaView.settings.editableNodeTypes) {
-        items.push(
-            { value: 'register', label: 'Register' },
-        );
         items.push(
             { value: 'configure', label: 'Configure' },
         );
@@ -442,9 +438,6 @@ const onContextMenuTitleClick = async (action) => {
             startTransaction();
             removeNode(props.node, true);
             commitTransaction();
-            break;
-        case 'register':
-            registerType();
             break;
         case 'configure':
             menuState.configurationMenu.visible = true;
