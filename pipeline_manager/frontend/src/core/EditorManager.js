@@ -531,6 +531,30 @@ export default class EditorManager {
             if (!currentSpecification.isSubgraph) {
                 currentSpecification.interfaces = nodeSpecification.interfaces;
             }
+
+            // attach subgraph to the updated subgraph node
+            if (currentSpecification.subgraphId !== undefined) {
+                let graphNode;
+                let subgraph;
+                this.specification.unresolvedSpecification.graphs.forEach((graph) => {
+                    if (currentSpecification.subgraphId === graph.id) {
+                        graphNode = currentSpecification;
+                        subgraph = graph;
+                    }
+                });
+
+                const myGraph = GraphFactory(
+                    subgraph.nodes,
+                    subgraph.connections,
+                    subgraph.name,
+                    this.baklavaView.editor,
+                );
+
+                this.baklavaView.editor.addGraphTemplate(
+                    myGraph,
+                    graphNode,
+                );
+            }
         } else {
             this.specification.unresolvedSpecification.nodes.push(nodeSpecification);
         }
