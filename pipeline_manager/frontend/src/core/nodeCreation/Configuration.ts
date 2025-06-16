@@ -67,6 +67,42 @@ function registerNewNodeConfiguration(): string[] {
 }
 
 /**
+  * Updates editor specification for the edited node type.
+*/
+function commitTypeToSpecification() {
+    suppressHistoryLogging(true);
+    const editorManager = EditorManager.getEditorManagerInstance();
+
+    const newNodeData = configurationState.nodeData;
+    const currentType = configurationState.editedType;
+
+    if (currentType !== undefined) {
+        // eslint-disable-next-line no-underscore-dangle
+        const errors = editorManager._unregisterNodeType(currentType);
+        if (errors.length) {
+            NotificationHandler.terminalLog('error', 'Error when registering the node', errors);
+            return;
+        }
+    }
+
+    const ret = editorManager.addNodeToEditorSpecification({
+        name: newNodeData.name,
+        layer: newNodeData.layer,
+        category: newNodeData.category,
+        interfaces: configurationState.interfaces,
+        properties: configurationState.properties,
+        style: NEW_NODE_STYLE,
+    }, currentType);
+
+    if (ret.errors !== undefined && ret.errors.length) {
+        NotificationHandler.terminalLog('error', 'Error when registering the node', ret.errors);
+        return;
+    }
+
+    suppressHistoryLogging(false);
+}
+
+/**
   * Creates a new node based on the current configuration.
   * It first validates the configuration and if it is correct, it adjusts the existing nodes
   * to the new configuration and creates a new node if `configurationMenu.addNode`
@@ -100,7 +136,9 @@ export function createNode(): string[] {
         NotificationHandler.terminalLog('error', 'Error when creating a node', errors);
         return errors;
     }
+    commitTypeToSpecification();
     return [];
+
 }
 
 /**
@@ -142,6 +180,7 @@ export function modifyConfiguration(): string[] {
     });
     /* eslint-enable no-param-reassign */
 
+    commitTypeToSpecification();
     suppressHistoryLogging(false);
     return [];
 }
@@ -198,6 +237,8 @@ export function addProperty(property: PropertyConfiguration): void {
 
         node.load(state);
     });
+
+    commitTypeToSpecification();
 }
 
 /**
@@ -244,6 +285,8 @@ export function removeProperties(properties: PropertyConfiguration[]): void {
 
         node.load(state);
     });
+
+    commitTypeToSpecification();
 }
 
 /**
@@ -306,6 +349,8 @@ export function addInterface(intf: InterfaceConfiguration): void {
 
         node.load(state);
     });
+
+    commitTypeToSpecification();
 }
 
 /**
@@ -360,44 +405,6 @@ export function removeInterfaces(interfaces: InterfaceConfiguration[]): void {
 
         node.load(state);
     });
-}
 
-/**
-  * Finalizes the creation of the custom node. After the node is added to the specification
-  * and the configuration is reset.
-*/
-export function registerType() {
-    suppressHistoryLogging(true);
-    const editorManager = EditorManager.getEditorManagerInstance();
-
-    const newNodeData = configurationState.nodeData;
-    const currentType = configurationState.editedType;
-
-    if (newNodeData.name === undefined || currentType === undefined) {
-        NotificationHandler.terminalLog('warning', 'Cannot register the node', 'The node is already registered');
-        return;
-    }
-
-    // eslint-disable-next-line no-underscore-dangle
-    const errors = editorManager._unregisterNodeType(currentType);
-    if (errors.length) {
-        NotificationHandler.terminalLog('error', 'Error when registering the node', errors);
-        return;
-    }
-
-    const ret = editorManager.addNodeToEditorSpecification({
-        name: newNodeData.name,
-        layer: newNodeData.layer,
-        category: newNodeData.category,
-        interfaces: configurationState.interfaces,
-        properties: configurationState.properties,
-        style: NEW_NODE_STYLE,
-    });
-
-    if (ret.errors !== undefined && ret.errors.length) {
-        NotificationHandler.terminalLog('error', 'Error when registering the node', ret.errors);
-        return;
-    }
-
-    suppressHistoryLogging(false);
+    commitTypeToSpecification();
 }
