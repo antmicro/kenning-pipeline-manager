@@ -44,16 +44,28 @@ export default function usePanZoom() {
 
         const allowZoomOut =
             zoomLimit * graph.value.size().graphWidth > editorWidth / newScale ||
-            zoomLimit * graph.value.size().graphHeight > editorHeight / newScale;
+            zoomLimit * graph.value.size().graphHeight > editorHeight / newScale ||
+            (
+                newScale > graph.value.scaling &&
+                graph.value.size().graphHeight !== -Infinity
+            );
 
-        if (
-            allowZoomOut ||
-            (newScale > graph.value.scaling && graph.value.size().graphHeight !== -Infinity)
-        ) {
+        if (allowZoomOut) {
             graph.value.scaling = newScale;
             graph.value.panning.x += diff[0];
             graph.value.panning.y += diff[1];
         }
+    };
+
+    const calculateScale = (scrollDelta) => {
+        const smallerGraph = graph.value.size().graphWidth < 500 ||
+        graph.value.size().graphHeight < 500;
+
+        // For smaller graphs, allow the larger scale than for larger graphs.
+        const upperLimitOfScale = smallerGraph ? 2.5 : 1.5;
+
+        const newScale = graph.value.scaling * (1 - scrollDelta / 3000);
+        return Math.min(newScale, upperLimitOfScale);
     };
 
     const onMouseWheel = (ev) => {
@@ -66,8 +78,10 @@ export default function usePanZoom() {
         if (ev.deltaMode === 1) {
             scrollAmount *= 32; // Firefox fix, multiplier is trial & error
         }
-        // Limit the zooming to 1.5x of the original size
-        const newScale = Math.min(graph.value.scaling * (1 - scrollAmount / 3000), 1.5);
+
+        // Limit the zooming.
+        const newScale = calculateScale(scrollAmount);
+
         applyZoom(ev.clientX, ev.clientY, newScale);
     };
 
