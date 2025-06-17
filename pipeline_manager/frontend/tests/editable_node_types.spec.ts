@@ -61,12 +61,6 @@ async function addInterface(page: Page, nodeName: string) {
     expect(inputs).toBe(1);
 }
 
-async function registerNodeType(page: Page, nodeName: string) {
-    const node = page.getByText(nodeName).last();
-    await node.click({ button: 'right', force: true });
-    await page.getByText('Register').click();
-}
-
 async function saveSpecificationAs(page: Page, filenameWithoutExtension: string): Promise<string> {
     const logo = page.locator('.logo');
     await logo.hover();
@@ -134,7 +128,6 @@ test('register custom node in specification with "include" keyword', async ({ pa
     const nodeName = 'Custom Node';
     await createNewNodeType(page);
     await addNode(page, 'Default category', nodeName, 750, 80);
-    await registerNodeType(page, nodeName);
     const specificationPath = await saveSpecificationAs(page, 'new_specification');
     await verifyNodePresence(page, specificationPath, nodeName);
 });
