@@ -16,10 +16,13 @@ export default function usePanZoom() {
     let prevDiff = -1;
     let midpoint = { x: 0, y: 0 };
 
+    const isGraphSmall = () => graph.value.size().graphWidth <= 500 ||
+            graph.value.size().graphHeight <= 500;
+
     // The limit for zooming that does not allow for zooming if
     // `zoomLimit` number of graphs would fit into the editor
     // vertically or horizontally.
-    const zoomLimit = 2;
+    let zoomLimit = 2;
 
     const panningRef = computed(() => graph.value.panning);
     const dragMove = useDragMove(panningRef);
@@ -27,6 +30,10 @@ export default function usePanZoom() {
     const applyZoom = (centerX, centerY, newScale) => {
         if (newScale <= 0) {
             return;
+        }
+
+        if (isGraphSmall()) {
+            zoomLimit = 3;
         }
 
         const currentPoint = [
@@ -58,11 +65,8 @@ export default function usePanZoom() {
     };
 
     const calculateScale = (scrollDelta) => {
-        const smallerGraph = graph.value.size().graphWidth < 500 ||
-        graph.value.size().graphHeight < 500;
-
         // For smaller graphs, allow the larger scale than for larger graphs.
-        const upperLimitOfScale = smallerGraph ? 2.5 : 1.5;
+        const upperLimitOfScale = isGraphSmall() ? 2 : 1.5;
 
         const newScale = graph.value.scaling * (1 - scrollDelta / 3000);
         return Math.min(newScale, upperLimitOfScale);
