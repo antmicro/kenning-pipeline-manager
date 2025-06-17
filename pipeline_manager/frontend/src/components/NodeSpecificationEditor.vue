@@ -26,6 +26,14 @@ SPDX-License-Identifier: Apache-2.0
                 @input="handleInput"
                 @keydown.tab="handleTab"
             />
+            <button
+                class="baklava-button __validate-button"
+                :disabled="validationAvailable()"
+                @click="validate"
+            >
+                Commit
+            </button>
+
             <p class="__validation_errors"></p>
         </div>
     </div>
@@ -122,7 +130,7 @@ export default defineComponent({
             specification.value && editorManager.baklavaView.settings.editableNodeTypes);
 
         // Validation
-        const validate = async (silent) => {
+        const validate = async (silent = false, shouldCommitChanges = true) => {
             try {
                 const parsedSpecification = YAML.parse(currentSpecification.value.replaceAll('\t', '  '));
 
@@ -241,7 +249,6 @@ export default defineComponent({
                             editorManager.specification.unresolvedSpecification,
                         );
                 if (validationErrors.length) {
-                    if (silent) return validationErrors;
                     throw new Error(validationErrors);
                 }
 
@@ -299,40 +306,20 @@ export default defineComponent({
             editorManager.modifiedNodeSpecificationRegistry[node.value.id] =
                 maybeStringify(currentSpecification.value);
 
-            const liveValidate = async () => {
-                let output = [];
-                let data;
-                const validationErrorsElement = root.value?.querySelector('.__validation_errors');
-                if (!validationErrorsElement) {
-                    return;
-                }
+        const showValidationStatus = async () => {
+            let output = await validate(true, false) || [];
+            if (!Array.isArray(output)) {
+                output = [];
+            }
 
-                try {
-                    output = await validate(true);
-                } catch (err) {
-                    output = Array.isArray(err) ? err : [err.message || String(err)];
-                }
-
-                try {
-                    data = YAML.parse(currentSpecification.value.replaceAll('\t', '  '));
-                    const jsonData = JSON.stringify(data);
-                    const schemaOutput = EditorManager.validateJSONWithSchema(jsonData, unresolvedSpecificationSchema, '#/$defs/node');
-                    // Combine the parsing results, but drop duplicates.
-                    if (Array.isArray(schemaOutput) && schemaOutput.length > 0) {
-                        output = output.concat(schemaOutput.filter((item) =>
-                            !output.includes(item)));
-                    }
-                } catch (err) {
-                    output = [`The specification parsing error: ${err.message}`];
-                }
-
-                if (output.length > 0) {
-                    validationErrorsElement.innerHTML = `Problems:<br>${
-                        output.map((err) =>
-                            `<span style="color: var(--baklava-control-color-error);">${err}</span>`,
-                        ).join('<br><br>')}`;
-                } else {
-                    validationErrorsElement.innerHTML =
+            const validationErrorsElement = root.value?.querySelector('.__validation_errors');
+            if (output.length > 0) {
+                validationErrorsElement.innerHTML = `Problems:<br>${
+                    output.map((err) =>
+                        `<span style="color: var(--baklava-control-color-error);">${(err && err.message) ? err.message : String(err)}</span>`,
+                    ).join('<br><br>')}`;
+            } else {
+                validationErrorsElement.innerHTML =
                     '<span style="color: var(--baklava-control-color-primary);">The specification is valid.</span>';
                 }
             };
@@ -342,7 +329,7 @@ export default defineComponent({
                 el.value.removeEventListener('keyup', el.value.liveValidateListener);
                 el.value.liveValidateListener = () => {
                     clearTimeout(typingTimer);
-                    typingTimer = setTimeout(liveValidate, validateAfterIdleFor);
+                    typingTimer = setTimeout(showValidationStatus, validateAfterIdleFor);
                 };
                 el.value.addEventListener('keyup', el.value.liveValidateListener);
             }
