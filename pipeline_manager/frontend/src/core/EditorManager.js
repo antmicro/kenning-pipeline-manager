@@ -1637,6 +1637,10 @@ export default class EditorManager {
 
         ajv.addSchema(schema, 'root');
         const validate = ajv.getSchema(`root${reference}`);
+        if (validate === undefined) {
+            return [`Invalid value of "reference" parameter: ${reference}`];
+        }
+
         const isTextFormat = typeof data === 'string' || data instanceof String;
         let dataJSON;
 
