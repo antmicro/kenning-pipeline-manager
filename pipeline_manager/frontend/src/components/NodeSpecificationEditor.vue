@@ -26,6 +26,7 @@ SPDX-License-Identifier: Apache-2.0
                 @input="handleInput"
                 @keydown.tab="handleTab"
             />
+            <p class="__validation_errors"></p>
         </div>
     </div>
 </template>
@@ -40,6 +41,7 @@ import EditorManager, { EDITED_NODE_STYLE } from '../core/EditorManager';
 import NotificationHandler from '../core/notifications';
 import { menuState, configurationState } from '../core/nodeCreation/ConfigurationState.ts';
 import { alterInterfaces, alterProperties } from '../core/nodeCreation/Configuration.ts';
+import unresolvedSpecificationSchema from '../../../resources/schemas/unresolved_specification_schema.json' with {type: 'json'};
 
 export default defineComponent({
     props: {
@@ -59,6 +61,9 @@ export default defineComponent({
         const { displayedGraph } = viewModel.value;
         const editorManager = EditorManager.getEditorManagerInstance();
         const node = toRef(props, 'node');
+        let typingTimer;
+        const validateAfterIdleFor = 500;
+        const specificationWithIncludes = ref(null);
 
         const maybeStringify = (maybeSpecification) => (maybeSpecification !== undefined
             ? YAML.stringify(maybeSpecification)
@@ -112,54 +117,21 @@ export default defineComponent({
         const root = ref(null);
         const el = ref(null);
         const height = ref('auto');
-        const handleInput = () => {
-            if (!visible.value) { return; }
-            const { scrollHandle } = props;
-            let prevParentScrollHeight;
-            if (props.scrollHandle) {
-                prevParentScrollHeight = scrollHandle.scrollTop;
-            }
-
-            el.value.style.height = 'auto';
-            el.value.style.height = `${el.value.scrollHeight}px`;
-
-            if (scrollHandle !== undefined && scrollHandle.scrollTop < prevParentScrollHeight) {
-                scrollHandle.scrollTop = prevParentScrollHeight;
-            }
-
-            editorManager.modifiedNodeSpecificationRegistry[node.value.id] =
-                currentSpecification.value;
-        };
-
-        const delayedEditorUpdate = () => nextTick().then(handleInput);
-        watch(currentSpecification, delayedEditorUpdate);
-        watch(visible, delayedEditorUpdate);
-        delayedEditorUpdate();
-
-        const handleUIUpdate = () => {
-            if (menuState.configurationMenu.addNode) return;
-            node.value.type = configurationState.nodeData.name;
-            const newSpecification = editorManager.specification.unresolvedSpecification
-                ?.nodes
-                ?.find(nodeMatchesSpec);
-            specification.value = newSpecification;
-            currentSpecification.value = maybeStringify(newSpecification);
-            editorManager.modifiedNodeSpecificationRegistry[node.value.id] =
-                currentSpecification.value;
-        };
-
-        const delayedUIUpdate = () => nextTick().then(handleUIUpdate);
-        watch(menuState, delayedUIUpdate);
+        const currentSpecification = ref(maybeStringify(specification.value));
+        const visible = computed(() =>
+            specification.value && editorManager.baklavaView.settings.editableNodeTypes);
 
         // Validation
-
-        const validate = async () => {
+        const validate = async (silent) => {
             try {
                 const parsedSpecification = YAML.parse(currentSpecification.value.replaceAll('\t', '  '));
 
                 // Update style of edited node type
                 parsedSpecification.style
                     = EditorManager.mergeStyles(EDITED_NODE_STYLE, parsedSpecification.style);
+                currentSpecification.value = YAML.stringify(parsedSpecification);
+                editorManager.modifiedNodeSpecificationRegistry[node.value.id] =
+                    currentSpecification.value;
 
                 // Update all nodes of the type to match the new specification
                 const oldType = node.value.type;
@@ -184,6 +156,11 @@ export default defineComponent({
                     });
                 });
 
+                editorManager.specification.unresolvedSpecification.nodes =
+                    (editorManager.specification.unresolvedSpecification.nodes ?? [])
+                        .filter((specNode) => !nodeMatchesSpec(specNode))
+                        .concat([parsedSpecification]);
+
                 // Remove deleted interfaces and properties
                 // An interface was deleted if it's present in old resolved specification
                 // but not in the editor and is also not inherited.
@@ -202,32 +179,6 @@ export default defineComponent({
                     oldSpecification = editorManager.specification.unresolvedSpecification
                         .nodes?.find((n) => EditorManager.getNodeName(n) === oldType);
                 }
-
-                let oldProperties = oldSpecification.properties ?? [];
-                let oldInterfaces = oldSpecification.interfaces ?? [];
-
-                let inheritedProperties = [];
-                let inheritedInterfaces = [];
-
-                parsedSpecification?.extends?.forEach((parentType) => {
-                    const parentSpec = editorManager.specification.currentSpecification
-                        .nodes?.find((n) => EditorManager.getNodeName(n) === parentType);
-                    inheritedProperties = [
-                        ...inheritedProperties,
-                        ...(parentSpec?.properties ?? []),
-                    ];
-                    inheritedInterfaces = [
-                        ...inheritedInterfaces,
-                        ...(parentSpec?.interfaces ?? []),
-                    ];
-                });
-
-                oldProperties = oldProperties.filter(
-                    (prop) => !inheritedProperties.some((p) => p.name === prop.name),
-                );
-                oldInterfaces = oldInterfaces.filter(
-                    (intf) => !inheritedInterfaces.some((i) => i.name === intf.name),
-                );
 
                 const parsedProperties = parsedSpecification.properties ?? [];
                 const parsedInterfaces = parsedSpecification.interfaces ?? [];
@@ -284,16 +235,159 @@ export default defineComponent({
                     throw new Error(ret.errors);
                 }
 
-                currentSpecification.value = YAML.stringify(parsedSpecification);
-                editorManager.modifiedNodeSpecificationRegistry[node.value.id] =
-                    currentSpecification.value;
+                const validationErrors =
+                    EditorManager
+                        .validateSpecification(
+                            editorManager.specification.unresolvedSpecification,
+                        );
+                if (validationErrors.length) {
+                    if (silent) return validationErrors;
+                    throw new Error(validationErrors);
+                }
 
-                NotificationHandler.showToast('info', 'Node validated');
+                // Update specification
+                ret =
+                    await editorManager.updateEditorSpecification(
+                        editorManager.specification.unresolvedSpecification,
+                    );
+                if (ret.warnings !== undefined && ret.warnings.length) {
+                    if (!silent) {
+                        NotificationHandler.terminalLog('warning', 'Warnings during node validation', ret.warnings);
+                    }
+                }
+                if (ret.errors !== undefined && ret.errors.length) {
+                    if (silent) {
+                        return ret.errors;
+                    }
+                    throw new Error(ret.errors);
+                }
+
+                // Add type to editor and specification
+                ret = editorManager.addNodeToEditorSpecification(
+                    parsedSpecification,
+                    oldType,
+                );
+                if (ret.errors !== undefined && ret.errors.length) {
+                    throw new Error(ret.errors);
+                }
+
+                if (!silent) {
+                    NotificationHandler.showToast('info', 'Node validated');
+                }
+                return [];
             } catch (error) {
                 const messages = Array.isArray(error) ? error : [error];
                 NotificationHandler.terminalLog('error', 'Validation failed', messages);
             }
         };
+
+        const handleInput = () => {
+            if (!visible.value) { return; }
+            const { scrollHandle } = props;
+            let prevParentScrollHeight;
+            if (props.scrollHandle) {
+                prevParentScrollHeight = scrollHandle.scrollTop;
+            }
+
+            el.value.style.height = 'auto';
+            el.value.style.height = `${el.value.scrollHeight}px`;
+
+            if (scrollHandle !== undefined && scrollHandle.scrollTop < prevParentScrollHeight) {
+                scrollHandle.scrollTop = prevParentScrollHeight;
+            }
+
+            editorManager.modifiedNodeSpecificationRegistry[node.value.id] =
+                maybeStringify(currentSpecification.value);
+
+            const liveValidate = async () => {
+                let output = [];
+                let data;
+                const validationErrorsElement = root.value?.querySelector('.__validation_errors');
+                if (!validationErrorsElement) {
+                    return;
+                }
+
+                try {
+                    output = await validate(true);
+                } catch (err) {
+                    output = Array.isArray(err) ? err : [err.message || String(err)];
+                }
+
+                try {
+                    data = YAML.parse(currentSpecification.value.replaceAll('\t', '  '));
+                    const jsonData = JSON.stringify(data);
+                    const schemaOutput = EditorManager.validateJSONWithSchema(jsonData, unresolvedSpecificationSchema, '#/$defs/node');
+                    // Combine the parsing results, but drop duplicates.
+                    if (Array.isArray(schemaOutput) && schemaOutput.length > 0) {
+                        output = output.concat(schemaOutput.filter((item) =>
+                            !output.includes(item)));
+                    }
+                } catch (err) {
+                    output = [`The specification parsing error: ${err.message}`];
+                }
+
+                if (output.length > 0) {
+                    validationErrorsElement.innerHTML = `Problems:<br>${
+                        output.map((err) =>
+                            `<span style="color: var(--baklava-control-color-error);">${err}</span>`,
+                        ).join('<br><br>')}`;
+                } else {
+                    validationErrorsElement.innerHTML =
+                    '<span style="color: var(--baklava-control-color-primary);">The specification is valid.</span>';
+                }
+            };
+
+            // Validate only if a user stopped typing for a while.
+            if (el.value) {
+                el.value.removeEventListener('keyup', el.value.liveValidateListener);
+                el.value.liveValidateListener = () => {
+                    clearTimeout(typingTimer);
+                    typingTimer = setTimeout(liveValidate, validateAfterIdleFor);
+                };
+                el.value.addEventListener('keyup', el.value.liveValidateListener);
+            }
+        };
+
+        const delayedEditorUpdate = () => nextTick().then(handleInput);
+        watch(currentSpecification, delayedEditorUpdate);
+        watch(visible, delayedEditorUpdate);
+        delayedEditorUpdate();
+
+        watch(
+            () => {
+                const unresolved = editorManager.specification.unresolvedSpecification;
+                const included = editorManager.specification.includedSpecification;
+                specification.value = JSON.parse(JSON.stringify(unresolved));
+
+                EditorManager.mergeObjects(
+                    specification,
+                    included,
+                );
+                specificationWithIncludes.value = specification;
+            },
+            { immediate: true, deep: true },
+        );
+
+        // We modify this value in the editor, so it's not exactly computed
+        watch(specification, async () => {
+            currentSpecification.value =
+                editorManager.modifiedNodeSpecificationRegistry[node.value.id]
+                ?? maybeStringify(specification.value);
+        });
+
+        const handleUIUpdate = () => {
+            node.value.type = configurationState.nodeData.name;
+            const newSpecification = editorManager.specification.unresolvedSpecification
+                ?.nodes
+                ?.find(nodeMatchesSpec);
+            specification.value = newSpecification;
+            currentSpecification.value = maybeStringify(newSpecification);
+            editorManager.modifiedNodeSpecificationRegistry[node.value.id] =
+                currentSpecification.value;
+        };
+
+        const delayedUIUpdate = () => nextTick().then(handleUIUpdate);
+        watch(menuState, delayedUIUpdate);
 
         const validationAvailable = () => {
             try {
