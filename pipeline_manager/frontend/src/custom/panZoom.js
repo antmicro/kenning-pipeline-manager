@@ -16,9 +16,9 @@ export default function usePanZoom() {
     let prevDiff = -1;
     let midpoint = { x: 0, y: 0 };
 
-    // Limit for zooming that does not allow for zomming if
+    // The limit for zooming that does not allow for zooming if
     // `zoomLimit` number of graphs would fit into the editor
-    // vertically or horizontally
+    // vertically or horizontally.
     const zoomLimit = 2;
 
     const panningRef = computed(() => graph.value.panning);
