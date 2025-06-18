@@ -13,10 +13,10 @@ SPDX-License-Identifier: Apache-2.0
         <div class="__spec-editor">
             <button
                 class="baklava-button __validate-button"
-                :disabled="validationAvailable()"
+                :disabled="canApplyChanges()"
                 @click="validate"
             >
-                Validate
+                Apply
             </button>
             <textarea
                 ref="el"
@@ -34,10 +34,16 @@ SPDX-License-Identifier: Apache-2.0
                 Commit
             </button>
 
-            <p class="__validation_errors"></p>
+            <p class="__validation_errors" v-html="getCorrectSpecificationMessage()"></p>
         </div>
     </div>
 </template>
+
+<style scoped>
+    __validation_errors {
+        max-width: 100%;
+    }
+</style>
 
 <script>
 import YAML from 'yaml';
@@ -231,10 +237,10 @@ export default defineComponent({
                 const errors = editorManager._unregisterNodeType(oldType);
                 if (errors.length) {
                     NotificationHandler.terminalLog('error', 'Error when registering the node', errors);
-                    return;
+                    return errors;
                 }
                 // Add type to editor and specification
-                const ret = editorManager.addNodeToEditorSpecification(
+                let ret = editorManager.addNodeToEditorSpecification(
                     parsedSpecification,
                     oldType,
                     node.value.twoColumn,
@@ -284,7 +290,10 @@ export default defineComponent({
                 return [];
             } catch (error) {
                 const messages = Array.isArray(error) ? error : [error];
-                NotificationHandler.terminalLog('error', 'Validation failed', messages);
+                if (!silent) {
+                    NotificationHandler.terminalLog('error', 'Validation failed', messages);
+                }
+                return messages.map((e) => ((e && e.message) ? e.message : String(e)));
             }
         };
 
@@ -400,9 +409,10 @@ export default defineComponent({
             currentSpecification,
             specification,
             validate,
-            validationAvailable,
+            canApplyChanges,
             visible,
             handleTab,
+            getCorrectSpecificationMessage,
         };
     },
 });
