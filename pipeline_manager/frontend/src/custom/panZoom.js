@@ -22,7 +22,7 @@ export default function usePanZoom() {
     // The limit for zooming that does not allow for zooming if
     // `zoomLimit` number of graphs would fit into the editor
     // vertically or horizontally.
-    let zoomLimit = 2;
+    let zoomLimit = 4;
 
     const panningRef = computed(() => graph.value.panning);
     const dragMove = useDragMove(panningRef);
@@ -33,7 +33,7 @@ export default function usePanZoom() {
         }
 
         if (isGraphSmall()) {
-            zoomLimit = 3;
+            zoomLimit = 8;
         }
 
         const currentPoint = [
