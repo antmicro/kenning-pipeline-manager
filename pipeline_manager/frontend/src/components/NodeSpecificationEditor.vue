@@ -26,14 +26,6 @@ SPDX-License-Identifier: Apache-2.0
                 @input="handleInput"
                 @keydown.tab="handleTab"
             />
-            <button
-                class="baklava-button __validate-button"
-                :disabled="validationAvailable()"
-                @click="validate"
-            >
-                Commit
-            </button>
-
             <p class="__validation_errors" v-html="getCorrectSpecificationMessage()"></p>
         </div>
     </div>
@@ -315,6 +307,170 @@ export default defineComponent({
             editorManager.modifiedNodeSpecificationRegistry[node.value.id] =
                 maybeStringify(currentSpecification.value);
 
+        const delayedEditorUpdate = () => nextTick().then(handleInput);
+        watch(currentSpecification, delayedEditorUpdate);
+        watch(visible, delayedEditorUpdate);
+        delayedEditorUpdate();
+
+        const commitChanges = async (unresolvedSpecification, silent) => {
+            const output = await editorManager.updateEditorSpecification(unresolvedSpecification);
+            if (output.errors !== undefined && output.errors.length) {
+                throw new Error(output.errors);
+            }
+
+            if (!silent) {
+                NotificationHandler.showToast('info', 'Node validated');
+            }
+        };
+
+        // Validation
+        const validateNodeProperties = (parsedSpecification) => {
+            // Check for duplicate property names.
+            if (parsedSpecification?.properties) {
+                const propNames = parsedSpecification.properties.map((prop) => prop.name);
+                const duplicates = propNames.filter((name, idx) => propNames.indexOf(name) !== idx);
+                if (duplicates.length > 0) {
+                    throw new Error(`Conflicting property names: ${[...new Set(duplicates)].join(', ')}`);
+                }
+            }
+
+            if (parsedSpecification?.interfaces) {
+                parsedSpecification.interfaces.forEach((intf) => {
+                    const validationErrors = editorManager.validateNodeInterface(intf);
+                    if (validationErrors.length) {
+                        throw new Error(validationErrors);
+                    }
+                });
+            }
+        };
+
+        const validateNodeInterfaces = (parsedSpecification) => {
+            if (parsedSpecification?.interfaces) {
+                // Check for duplicate interface names.
+                const names = parsedSpecification.interfaces.map((intf) => intf.name);
+                const duplicates = names.filter((name, idx) => names.indexOf(name) !== idx);
+                if (duplicates.length > 0) {
+                    throw new Error(`Conflicting interface names: ${[...new Set(duplicates)].join(', ')}`);
+                }
+
+                // Validate against the JSON schema.
+                parsedSpecification.interfaces.forEach((intf) => {
+                    const validationErrors = editorManager.validateNodeInterface(intf);
+                    if (validationErrors.length) {
+                        throw new Error(validationErrors);
+                    }
+                });
+            }
+        };
+
+        const validateNode = (parsedSpecification) => {
+            const validationErrors = editorManager.validateNode(parsedSpecification);
+            if (validationErrors.length) {
+                throw new Error(validationErrors);
+            }
+        };
+
+        const validate = async (silent = false, shouldCommitChanges = true) => {
+            try {
+                const parsedSpecification = YAML.parse(currentSpecification.value.replaceAll('\t', '  '));
+                let validationErrors = [];
+
+                validateNode(parsedSpecification);
+                validateNodeProperties(parsedSpecification);
+                validateNodeInterfaces(parsedSpecification);
+
+                // Validate the node in overridden specification
+                const unresolvedSpecification =
+                    JSON.parse(JSON.stringify(editorManager.specification.unresolvedSpecification));
+
+                // Handle name overrides
+                const oldName = node.value.type;
+                const newName = EditorManager.getNodeName(parsedSpecification);
+                if (oldName !== newName) {
+                    const newNameInSpec = specificationWithIncludes
+                        .value
+                        ?.nodes
+                        ?.map(EditorManager.getNodeName)
+                        .includes(newName);
+
+                    if (newNameInSpec) {
+                        throw new Error(`Node ${newName} already exists.`);
+                    }
+
+                    // Override included node
+                    if (!parsedSpecification.includeName) {
+                        const oldNameInOverridden = editorManager
+                            .specification
+                            .includedSpecification
+                            .nodes
+                            ?.map(EditorManager.getNodeName)
+                            .includes(oldName);
+
+                        if (oldNameInOverridden) {
+                            parsedSpecification.includeName = oldName;
+                        }
+                    }
+                }
+
+                unresolvedSpecification.nodes = (unresolvedSpecification.nodes ?? [])
+                    .filter((specNode) => !nodeMatchesSpec(specNode))
+                    .concat([parsedSpecification]);
+
+                validationErrors = EditorManager.validateSpecification(unresolvedSpecification);
+                if (validationErrors.length) {
+                    throw new Error(validationErrors);
+                }
+
+                // Update specification
+                if (shouldCommitChanges) {
+                    await commitChanges(unresolvedSpecification, silent);
+                }
+                return [];
+            } catch (error) {
+                const messages = Array.isArray(error) ? error : [error];
+                if (!silent) {
+                    NotificationHandler.terminalLog('error', 'Validation failed', messages);
+                }
+                return messages.map((e) => ((e && e.message) ? e.message : String(e)));
+            }
+        };
+
+        const canApplyChanges = () => {
+            try {
+                return JSON.stringify(specification.value) ===
+                    JSON.stringify(YAML.parse(currentSpecification.value.replaceAll('\t', '  '))) &&
+                    validate(true, false);
+            } catch {
+                return false;
+            }
+        };
+
+        const formatError = (error) => {
+            let errorMessage = (error && error.message) ? error.message : String(error);
+            errorMessage = errorMessage.replace(/unresolved_specification\//g, '');
+            try {
+                // If the error message contains a stringified array, extract and format it.
+                const match = errorMessage.match(/\[.*\]/);
+                if (match) {
+                    const arr = JSON.parse(match[0]);
+                    if (Array.isArray(arr)) {
+                        errorMessage = errorMessage.replace(match[0], arr.join(', '));
+                    }
+                }
+            } catch (e) {
+                // Not a JSON array, leave as it is.
+            }
+            return `<span style="color: var(--baklava-control-color-error);">${errorMessage}</span>`;
+        };
+
+        /**
+         * Update the UI to display validation results.
+         *
+         * This function invokes the `validate` function internally.
+         *
+         * @async
+         * @returns {Promise<void>} Resolves when the validation status has been displayed.
+         */
         const showValidationStatus = async () => {
             let output = await validate(true, false) || [];
             if (!Array.isArray(output)) {
@@ -325,28 +481,42 @@ export default defineComponent({
             if (output.length > 0) {
                 validationErrorsElement.innerHTML = `Problems:<br>${
                     output.map((err) =>
-                        `<span style="color: var(--baklava-control-color-error);">${(err && err.message) ? err.message : String(err)}</span>`,
+                        `<span style="color: var(--baklava-control-color-error);">${formatError(err)}</span>`,
                     ).join('<br><br>')}`;
             } else {
                 validationErrorsElement.innerHTML =
                     '<span style="color: var(--baklava-control-color-primary);">The specification is valid.</span>';
                 }
             };
+            el.value.addEventListener('keyup', el.value.liveValidateListener);
+        };
 
-            // Validate only if a user stopped typing for a while.
-            if (el.value) {
-                el.value.removeEventListener('keyup', el.value.liveValidateListener);
-                el.value.liveValidateListener = () => {
-                    clearTimeout(typingTimer);
-                    typingTimer = setTimeout(showValidationStatus, validateAfterIdleFor);
-                };
-                el.value.addEventListener('keyup', el.value.liveValidateListener);
+        const handleInput = () => {
+            if (!visible.value) { return; }
+            const { scrollHandle } = props;
+            let prevParentScrollHeight;
+            if (props.scrollHandle) {
+                prevParentScrollHeight = scrollHandle.scrollTop;
             }
+
+            el.value.style.height = 'auto';
+            el.value.style.height = `${el.value.scrollHeight}px`;
+
+            if (scrollHandle !== undefined && scrollHandle.scrollTop < prevParentScrollHeight) {
+                scrollHandle.scrollTop = prevParentScrollHeight;
+            }
+
+            editorManager.modifiedNodeSpecificationRegistry[node.value.id] =
+                currentSpecification.value;
+            validateIfTypingCompleted();
         };
 
         const delayedEditorUpdate = () => nextTick().then(handleInput);
         watch(currentSpecification, delayedEditorUpdate);
         watch(visible, delayedEditorUpdate);
+        watch([specification, visible], () => {
+            showValidationStatus();
+        });
         delayedEditorUpdate();
 
         watch(
