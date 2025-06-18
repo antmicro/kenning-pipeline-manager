@@ -18,6 +18,7 @@ import Expand from './Expand.vue';
 import Indicator from './Indicator.vue';
 import Logo from './Logo.vue';
 import Magnifier from './Magnifier.vue';
+import NewNode from './NewNode.vue';
 import Pencil from './Pencil.vue';
 import Run from './Run.vue';
 import Sidebar from './Sidebar.vue';
@@ -44,12 +45,13 @@ export default {
     Indicator,
     Logo,
     Magnifier,
+    NewNode,
     Pencil,
     Placeholder,
     Run,
     Sidebar,
     StopDataflow,
+    Subgraph,
     Unwrap,
     Validate,
-    Subgraph,
 };

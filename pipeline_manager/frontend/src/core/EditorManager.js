@@ -46,6 +46,9 @@ export const DEFAULT_GRAPH_NODE_CATEGORY = 'Graphs';
 export const DEFAULT_GRAPH_NODE_NAME = 'New Graph Node';
 export const DEFAULT_GRAPH_NODE_TYPE = 'New Graph Node';
 
+// Styles
+export const NEW_NODE_STYLE = '__new';
+
 /**
  * Translates the provided url according to
  * the optional substitution spec provided at compile time.
@@ -166,12 +169,15 @@ export default class EditorManager {
      *
      * @param dataflowSpecification Specification to load, can be either an object or a string
      * @param lazyLoad Decides whether to actually load the specification or just store
+     * @param unmarkNewNodes Decides whether to remove styling of new nodes.
      * it and check its versioning. Can be used when loading parts of specification manually.
      * @returns An object consisting of errors and warnings arrays. If any array is empty
      * the updating process was successful.
      */
     /* eslint-disable no-underscore-dangle,no-param-reassign */
-    async updateEditorSpecification(dataflowSpecification, lazyLoad = false) {
+    async updateEditorSpecification(
+        dataflowSpecification, lazyLoad = false, unmarkNewNodes = true,
+    ) {
         if (!dataflowSpecification) return ['No specification passed'];
 
         if (typeof dataflowSpecification === 'string' || dataflowSpecification instanceof String) {
@@ -205,6 +211,10 @@ export default class EditorManager {
             }
         }
 
+        if (unmarkNewNodes) {
+            warnings.push(...EditorManager.unmarkNewNodes(dataflowSpecification));
+        }
+
         this.specification.unresolvedSpecification = JSON.parse(JSON.stringify(
             dataflowSpecification,
         ));
@@ -218,6 +228,10 @@ export default class EditorManager {
             errors.push(...includeErrors);
             if (errors.length) {
                 return { errors, warnings };
+            }
+
+            if (unmarkNewNodes) {
+                warnings.push(...EditorManager.unmarkNewNodes(unresolvedSpecification));
             }
 
             // Include graphs
@@ -467,7 +481,7 @@ export default class EditorManager {
             const newSpecification = {
                 nodes: [nodeSpecification],
             };
-            return this.updateEditorSpecification(newSpecification);
+            return this.updateEditorSpecification(newSpecification, false, false);
         }
 
         validationErrors = this._registerNodeType(nodeSpecification);
@@ -790,7 +804,7 @@ export default class EditorManager {
         this.baklavaView.editor.readonly = metadata?.readonly ?? this.defaultMetadata.readonly;
         this.baklavaView.editor.hideHud = metadata?.hideHud ?? this.defaultMetadata.hideHud;
 
-        this.baklavaView.editor.nodeStyles.clear();
+        this.baklavaView.editor.nodeStyles.set(NEW_NODE_STYLE, { icon: 'NewNode' });
         Object.entries(metadata?.styles ?? {}).forEach(([key, value]) => {
             this.baklavaView.editor.nodeStyles.set(key, value);
         });
@@ -922,7 +936,31 @@ export default class EditorManager {
      * @returns Serialized specification.
      */
     saveSpecification() {
-        return JSON.parse(JSON.stringify(this.specification.unresolvedSpecification));
+        const specification =
+            JSON.parse(JSON.stringify(this.specification.unresolvedSpecification));
+
+        EditorManager.unmarkNewNodes(specification);
+        return specification;
+    }
+
+    /**
+     * Removes NEW_NODE_STYLE node styles.
+     *
+     * @param specification specification to modify.
+     * @returns warnings about removed styles.
+     */
+    static unmarkNewNodes(specification) {
+        const warnings = [];
+
+        specification
+            .nodes
+            ?.filter(({ style }) => style === NEW_NODE_STYLE)
+            .forEach((node) => {
+                warnings.push(`Loaded node '${EditorManager.getNodeName(node)}' has '${NEW_NODE_STYLE}' style, removing it.`);
+                delete node.style;
+            });
+
+        return warnings;
     }
 
     /**
@@ -1188,6 +1226,27 @@ export default class EditorManager {
             }
         });
         return primaryObject;
+    }
+
+    /**
+     * Extracts name of the node.
+     *
+     * @param {Object} node to check.
+     * @returns {string} name of the node.
+     * @throws {Error} Throws if there are any naming inconsistencies.
+     */
+    static getNodeName(node) {
+        if (!node.isCategory) {
+            if (node.name === undefined) {
+                throw new Error(`Non-category node has to define field 'name'`);
+            }
+            return node.name;
+        }
+        const name = node.category.split('/').at(-1);
+        if (node.name !== undefined && node.name !== name) {
+            throw new Error(`Node '${node.name}' is a category node and has a name defined different than ${name}`);
+        }
+        return name;
     }
 
     /**

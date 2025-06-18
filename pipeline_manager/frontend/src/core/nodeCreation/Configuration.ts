@@ -9,7 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { useViewModel } from '@baklavajs/renderer-vue';
 import { NodeInterface } from '@baklavajs/core';
-import EditorManager from '../EditorManager.js';
+import EditorManager, { NEW_NODE_STYLE } from '../EditorManager.js';
 import { parseInterfaces } from '../interfaceParser.js';
 import { removeNode } from '../../custom/CustomNode.js';
 import {
@@ -136,6 +136,7 @@ export class NodeConfiguration {
             description: newNodeData.description,
             properties: this.properties,
             interfaces: this.interfaces,
+            style: NEW_NODE_STYLE,
         });
         if (errors.length) return errors;
         return [];
@@ -419,6 +420,7 @@ export class NodeConfiguration {
             category: this.nodeData.category,
             interfaces: this.interfaces,
             properties: this.properties,
+            style: NEW_NODE_STYLE,
         });
 
         if (ret.errors !== undefined && ret.errors.length) {

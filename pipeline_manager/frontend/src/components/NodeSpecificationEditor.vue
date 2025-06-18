@@ -131,7 +131,8 @@ export default defineComponent({
                 if (validationErrors.length) { throw new Error(validationErrors); }
 
                 // Update specification
-                const ret = await editorManager.updateEditorSpecification(unresolvedSpecification);
+                const ret = await editorManager
+                    .updateEditorSpecification(unresolvedSpecification, false, false);
                 if (ret.errors !== undefined && ret.errors.length) { throw new Error(ret.errors); }
 
                 NotificationHandler.showToast('info', 'Node validated');
