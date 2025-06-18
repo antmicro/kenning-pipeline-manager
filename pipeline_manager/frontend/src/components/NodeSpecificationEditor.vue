@@ -55,14 +55,9 @@ export default defineComponent({
         const editorManager = EditorManager.getEditorManagerInstance();
         const node = toRef(props, 'node');
 
-        const maybeStringify = (maybeSpecification) => {
-            if (typeof maybeSpecification === 'string') {
-                return maybeSpecification;
-            }
-            return maybeSpecification !== undefined
-                ? YAML.stringify(maybeSpecification)
-                : '';
-        };
+        const maybeStringify = (maybeSpecification) => (maybeSpecification !== undefined
+            ? YAML.stringify(maybeSpecification)
+            : '');
 
         const nodeMatchesSpec = (specNode) => {
             const isCategory = specNode.isCategory ?? false;
@@ -84,47 +79,17 @@ export default defineComponent({
             return specification;
         });
 
-        /**
-         * Returns the modified specification for a node, if it exists.
-         * @returns {Object|undefined} The modified specification or undefined.
-         */
-        const getModifiedSpecification = () => {
-            const { id } = node.value;
-            if (!Object.prototype.hasOwnProperty.call(
-                editorManager.modifiedNodeSpecificationRegistry,
-                id,
-            )) {
-                return undefined;
-            }
-            return editorManager.modifiedNodeSpecificationRegistry[id];
-        };
-
-        /**
-         * Updates the modified specification for a given node in the editor manager's registry.
-         *
-         * @param {string} modifiedSpecification - The modified specification YAML string.
-         * @returns {void}
-         */
-        const updateModifiedSpecification = (modifiedSpecification) => {
-            // Store only the raw string for the node.
-            editorManager.modifiedNodeSpecificationRegistry[node.value.id] = modifiedSpecification;
-        };
-
-        const specification = computed(() => {
-            const modifiedCopy = getModifiedSpecification();
-            if (modifiedCopy !== undefined) {
-                return modifiedCopy;
-            }
-            return specificationWithIncludes
-                .value
-                ?.nodes
-                ?.find(nodeMatchesSpec);
-        });
+        const specification = computed(() => specificationWithIncludes
+            .value
+            ?.nodes
+            ?.find(nodeMatchesSpec));
 
         // We modify this value in the editor, so it's not exactly computed
         const currentSpecification = ref(maybeStringify(specification.value));
         watch(specification, async () => {
-            currentSpecification.value = maybeStringify(specification.value);
+            currentSpecification.value =
+                editorManager.modifiedNodeSpecificationRegistry[node.value.id]
+                ?? maybeStringify(specification.value);
         });
 
         const visible = computed(() =>
@@ -150,7 +115,8 @@ export default defineComponent({
                 scrollHandle.scrollTop = prevParentScrollHeight;
             }
 
-            updateModifiedSpecification(currentSpecification.value);
+            editorManager.modifiedNodeSpecificationRegistry[node.value.id] =
+                currentSpecification.value;
         };
 
         const delayedEditorUpdate = () => nextTick().then(handleInput);
