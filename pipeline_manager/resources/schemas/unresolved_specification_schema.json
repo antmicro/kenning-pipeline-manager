@@ -353,6 +353,34 @@
                                 "array",
                                 "null"
                             ]
+                        },
+                        "color": {
+                            "description": "Color of the node in the hexadecimal format.",
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "width": {
+                            "description": "Width, in pixels, of the node in the visual editor.",
+                            "type": [
+                                "number",
+                                "null"
+                            ]
+                        },
+                        "subgraphId": {
+                            "description": "ID of the subgraph the node represents.",
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "pill": {
+                            "description": "",
+                            "type": [
+                                "object",
+                                "null"
+                            ]
                         }
                     },
                     "additionalProperties": false
