@@ -275,6 +275,7 @@ export default class EditorManager {
         this.baklavaView.editor.unregisterGraphs();
         this.baklavaView.editor.deepCleanEditor();
         this.baklavaView.editor.unregisterNodes();
+        this.nodeStyles?.clear();
         this.specificationLoaded = false;
         this.specification.currentSpecification = {};
         this.specification.unresolvedSpecification = {};
@@ -517,16 +518,11 @@ export default class EditorManager {
             category: node.category,
             isCategory: node.isCategory ?? false,
             color: node.color,
+            style: node.style,
         });
         if ('icon' in node) {
-            if (typeof node.icon === 'string') {
-                this.baklavaView.editor.nodeIcons.set(node.name, node.icon);
-            } else {
-                const baseName = Object.keys(node.icon)[0];
-                const suffix = Object.values(node.icon)[0];
-                const baseUrl = this.baklavaView.editor.baseIconUrls.get(baseName);
-                this.baklavaView.editor.nodeIcons.set(node.name, `${baseUrl}/${suffix}`);
-            }
+            const icon = typeof node.icon === 'string' ? node.icon : this.getMetadataIcon(node.icon);
+            this.baklavaView.editor.nodeIcons.set(node.name, icon);
         }
         if ('urls' in node) {
             Object.entries(node.urls).forEach(([urlName, url]) => {
@@ -537,6 +533,17 @@ export default class EditorManager {
             });
         }
         return [];
+    }
+
+    /**
+     * Takes the first key-value pair of icon mapping and looks up the base value in the metadata.
+     * @rapam {object} icon icon mapping.
+     * @returns Full URL with substituted base.
+     */
+    getMetadataIcon(icon) {
+        const [[baseName, suffix]] = Object.entries(icon);
+        const baseUrl = this.baklavaView.editor.baseIconUrls.get(baseName);
+        return `${baseUrl}/${suffix}`;
     }
 
     /**
@@ -782,6 +789,11 @@ export default class EditorManager {
 
         this.baklavaView.editor.readonly = metadata?.readonly ?? this.defaultMetadata.readonly;
         this.baklavaView.editor.hideHud = metadata?.hideHud ?? this.defaultMetadata.hideHud;
+
+        this.baklavaView.editor.nodeStyles.clear();
+        Object.entries(metadata?.styles ?? {}).forEach(([key, value]) => {
+            this.baklavaView.editor.nodeStyles.set(key, value);
+        });
 
         this.editor.allowLoopbacks =
             metadata?.allowLoopbacks ?? this.defaultMetadata.allowLoopbacks;

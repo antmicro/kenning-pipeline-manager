@@ -61,6 +61,8 @@ export default class PipelineManagerEditor extends Editor {
 
     nodeURLs = new Map();
 
+    nodeStyles = new Map();
+
     layoutManager = new LayoutManager();
 
     subgraphStack = [];
@@ -176,6 +178,7 @@ export default class PipelineManagerEditor extends Editor {
             isCategory: options?.isCategory ?? false,
             color: options?.color,
             isSubgraph: options?.isSubgraph ?? false,
+            style: options?.style,
         });
 
         this.events.registerNodeType.emit({ type, options });
@@ -509,13 +512,23 @@ export default class PipelineManagerEditor extends Editor {
     }
 
     getNodeColor(node) {
-        return this.nodeColors.get(node.id) ?? this.nodeTypes.get(node.type)?.color;
+        const nodeType = this.nodeTypes.get(node.type);
+        return this.nodeColors.get(node.id)
+            ?? nodeType?.color
+            ?? ((nodeType?.style !== undefined || undefined)
+                && this.nodeStyles.get(nodeType.style)?.color);
     }
 
     setNodeColor(nodeId, color) {
         if (color !== undefined) {
             this.nodeColors.set(nodeId, color);
         }
+    }
+
+    getStyleIcon(nodeName) {
+        const nodeType = this.nodeTypes.get(nodeName);
+        if (nodeType?.style !== undefined) return this.nodeStyles.get(nodeType.style)?.icon;
+        return undefined;
     }
 
     getNodeTitleColor(node) {
@@ -557,6 +570,7 @@ export default class PipelineManagerEditor extends Editor {
             title: graphNode.title,
             isCategory: graphNode.isCategory,
             color: graphNode.color,
+            style: graphNode.style,
             isSubgraph: true,
         });
 

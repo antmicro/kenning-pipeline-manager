@@ -53,6 +53,19 @@ from moving or deleting the nodes.
                 v-click-outside="doneRenaming"
                 @keydown.enter="doneRenaming"
             />
+            <template v-if="styleIconName !== undefined">
+                <component
+                    v-if="styleIcon !== undefined"
+                    class="__title-icon"
+                    :is="styleIcon"
+                    :imgURI="styleIconName"
+                />
+                <img
+                    v-else
+                    class="__title-icon"
+                    :src="styleIconName"
+                />
+             </template>
             <icons.Subgraph
                 class="__subgraph-icon"
                 v-if="isGraphNode"
@@ -586,6 +599,20 @@ watch(displayedProperties, () => {
 
 const path = viewModel.value.editor.getNodeIconPath(props.node.type);
 const iconPath = viewModel.value.cache[`./${path}`] ?? path;
+
+// Metadata ("icon" is not a string) > Predefined > Cached > Arbitrary URI
+let styleIcon;
+let styleIconName = viewModel.value.editor.getStyleIcon(props.node.type);
+
+if (typeof styleIconName === 'object' && styleIconName !== null) {
+    styleIconName = editorManager.getMetadataIcon(styleIconName);
+}
+if (icons[styleIconName] !== undefined) {
+    styleIcon = icons[styleIconName];
+} else if (viewModel.value.cache[`./${styleIconName}`] !== undefined) {
+    styleIcon = icons.Placeholder;
+    styleIconName = viewModel.value.cache[`./${styleIconName}`];
+}
 
 // Interface modification
 
