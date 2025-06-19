@@ -53,6 +53,8 @@ export default class PipelineManagerEditor extends Editor {
 
     nodeIcons = new Map();
 
+    nodeColors = new Map();
+
     baseURLs = new Map();
 
     baseIconUrls = new Map();
@@ -100,7 +102,7 @@ export default class PipelineManagerEditor extends Editor {
         currentGraphState.nodes.forEach(recurrentSubgraphSave);
 
         currentGraphState.nodes.forEach((node) => {
-            node.color = this.getNodeColor(node.name);
+            node.color = this.getNodeColor(node);
         });
 
         /* eslint-enable no-unused-vars */
@@ -250,12 +252,13 @@ export default class PipelineManagerEditor extends Editor {
 
         const usedGraphs = new Set();
 
+        this.nodeColors.clear();
         state.graphs.forEach((graph) => {
             graph.nodes.forEach((n) => {
                 if (n.subgraph !== undefined) {
                     usedGraphs.add(n.subgraph);
                 }
-                this.setNodeColor(n.name, n.color);
+                this.setNodeColor(n.id, n.color);
             });
         });
         // Finding a root graph by checking which graph is not referenced by any other
@@ -505,18 +508,18 @@ export default class PipelineManagerEditor extends Editor {
         return this.nodeIcons.get(nodeName) || undefined;
     }
 
-    getNodeColor(nodeName) {
-        return this.nodeTypes.get(nodeName).color || undefined;
+    getNodeColor(node) {
+        return this.nodeColors.get(node.id) ?? this.nodeTypes.get(node.type)?.color;
     }
 
-    setNodeColor(nodeName, color) {
+    setNodeColor(nodeId, color) {
         if (color !== undefined) {
-            this.nodeTypes.get(nodeName).color = color;
+            this.nodeColors.set(nodeId, color);
         }
     }
 
-    getNodeTitleColor(nodeName) {
-        const { color } = this.nodeTypes.get(nodeName);
+    getNodeTitleColor(node) {
+        const color = this.getNodeColor(node);
 
         if (color === undefined) {
             return 'white';

@@ -192,8 +192,8 @@ const renameField = ref(null);
 const tempName = ref('');
 
 const nodeURLs = viewModel.value.editor.getNodeURLs(props.node.type);
-const nodeColor = viewModel.value.editor.getNodeColor(props.node.type);
-const nodeTitleColor = viewModel.value.editor.getNodeTitleColor(props.node.type);
+const nodeColor = viewModel.value.editor.getNodeColor(props.node);
+const nodeTitleColor = viewModel.value.editor.getNodeTitleColor(props.node);
 const isGraphNode = viewModel.value.editor.isGraphNode(props.node.type);
 
 const displayNoResources = !viewModel.value.editor.nodeURLsEmpty();
