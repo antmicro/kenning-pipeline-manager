@@ -142,6 +142,81 @@ export function modifyConfiguration(): string[] {
 }
 
 /**
+  * Adds or removes node properties.
+  * @param nodes - list of nodes
+  * @param properties - list of properties
+  * @param remove - whether properties should be removed
+  * @returns void
+*/
+export function alterProperties(
+    nodes: any[],
+    properties: PropertyConfiguration[],
+    remove = false,
+): void {
+    const parsedProperties = parseProperties(properties);
+    const createdProperties = (createProperties(parsedProperties) as CreatedInterfaces);
+    nodes.forEach((node) => {
+        const state = node.save();
+
+        Object.keys(createdProperties).forEach((k) => {
+            const input = createdProperties[k]();
+            if (remove) {
+                node.removeInput(k, input);
+            } else {
+                node.addInput(k, input);
+            }
+            // Because `this` is not reactive in node functions, we need
+            // to notice the reactive `node` reference inputs were updated
+            node.inputs = node.inputs; // eslint-disable-line no-self-assign, no-param-reassign
+        });
+
+        node.load(state);
+    });
+}
+
+/**
+  * Adds or removes node interfaces.
+  * @param nodes - list of nodes
+  * @param interfaces - list of interfaces
+  * @param remove - whether interfaces should be removed
+  * @returns void
+*/
+export function alterInterfaces(
+    nodes: any[],
+    interfaces: InterfaceConfiguration[],
+    remove = false,
+): void {
+    const parsedInterfaces = parseInterfaces(interfaces, [], []);
+    const [inputs, outputs] =
+        createBaklavaInterfaces(parsedInterfaces) as [CreatedInterfaces, CreatedInterfaces];
+
+    nodes.forEach((node) => {
+        const state = node.save();
+
+        Object.keys(inputs).forEach((k) => {
+            const input = inputs[k]();
+            if (remove) {
+                node.removeInput(k, input);
+            } else {
+                node.addInput(k, input);
+            }
+            node.inputs = node.inputs; // eslint-disable-line no-self-assign, no-param-reassign
+        });
+        Object.keys(outputs).forEach((k) => {
+            const output = outputs[k]();
+            if (remove) {
+                node.removeOutput(k, output);
+            } else {
+                node.addOutput(k, output);
+            }
+            node.outputs = node.outputs; // eslint-disable-line no-self-assign, no-param-reassign, max-len
+        });
+
+        node.load(state);
+    });
+}
+
+/**
   * Adds property to the custom node. If the property is invalid, it logs an error.
   * @param property - the property to be added
   * @returns void
@@ -171,27 +246,7 @@ export function addProperty(property: PropertyConfiguration): void {
     }
 
     configurationState.properties.push(property);
-    const parsedProperties = parseProperties(configurationState.properties);
-    if (Array.isArray(parsedProperties) && parsedProperties.length) {
-        configurationState.properties.pop();
-        NotificationHandler.terminalLog('error', 'Invalid properties', parsedProperties);
-        return;
-    }
-
-    const createdProperties = (createProperties(parsedProperties) as CreatedInterfaces);
-    nodes.forEach((node) => {
-        const state = node.save();
-
-        Object.keys(createdProperties).forEach((k) => {
-            const input = createdProperties[k]();
-            node.addInput(k, input);
-            // Because `this` is not reactive in node functions, we need
-            // to notice the reactive `node` reference inputs were updated
-            node.inputs = node.inputs; // eslint-disable-line no-self-assign, no-param-reassign
-        });
-
-        node.load(state);
-    });
+    alterProperties(nodes, configurationState.properties);
 
     commitTypeToSpecification();
 }
@@ -222,23 +277,7 @@ export function removeProperties(properties: PropertyConfiguration[]): void {
     configurationState.properties = configurationState.properties.filter(
         (item) => !properties.includes(item),
     );
-
-    const parsedProperties = parseProperties(properties);
-    const createdProperties = (createProperties(parsedProperties) as CreatedInterfaces);
-
-    nodes.forEach((node) => {
-        const state = node.save();
-
-        Object.keys(createdProperties).forEach((k) => {
-            const input = createdProperties[k]();
-            node.removeInput(k, input);
-            // Because `this` is not reactive in node functions, we need
-            // to notice the reactive `node` reference inputs were updated
-            node.inputs = node.inputs; // eslint-disable-line no-self-assign, no-param-reassign
-        });
-
-        node.load(state);
-    });
+    alterProperties(nodes, properties, true);
 
     commitTypeToSpecification();
 }
@@ -273,35 +312,7 @@ export function addInterface(intf: InterfaceConfiguration): void {
     }
 
     configurationState.interfaces.push(intf);
-    const parsedInterfaces = parseInterfaces(configurationState.interfaces, [], []);
-    if (Array.isArray(parsedInterfaces) && parsedInterfaces.length) {
-        configurationState.interfaces.pop();
-        NotificationHandler.terminalLog('error', 'Invalid interfaces', parsedInterfaces);
-    }
-
-    const [inputs, outputs] =
-        createBaklavaInterfaces(parsedInterfaces) as [CreatedInterfaces, CreatedInterfaces];
-
-    nodes.forEach((node) => {
-        const state = node.save();
-
-        Object.keys(inputs).forEach((k) => {
-            const input = inputs[k]();
-            node.addInput(k, input);
-            // Because `this` is not reactive in node functions, we need
-            // to notice the reactive `node` reference inputs were updated
-            node.inputs = node.inputs; // eslint-disable-line no-self-assign, no-param-reassign
-        });
-        Object.keys(outputs).forEach((k) => {
-            const output = outputs[k]();
-            node.addOutput(k, output);
-            // Because `this` is not reactive in node functions, we need
-            // to notice the reactive `node` reference outputs were updated
-            node.outputs = node.outputs; // eslint-disable-line no-self-assign, no-param-reassign, max-len
-        });
-
-        node.load(state);
-    });
+    alterInterfaces(nodes, configurationState.interfaces);
 
     commitTypeToSpecification();
 }
@@ -332,31 +343,7 @@ export function removeInterfaces(interfaces: InterfaceConfiguration[]): void {
     configurationState.interfaces = configurationState.interfaces.filter(
         (item) => !interfaces.includes(item),
     );
-
-    const parsedInterfaces = parseInterfaces(interfaces, [], []);
-    const [inputs, outputs] =
-        createBaklavaInterfaces(parsedInterfaces) as [CreatedInterfaces, CreatedInterfaces];
-
-    nodes.forEach((node) => {
-        const state = node.save();
-
-        Object.keys(inputs).forEach((k) => {
-            const input = inputs[k]();
-            node.removeInput(k, input);
-            // Because `this` is not reactive in node functions, we need
-            // to notice the reactive `node` reference inputs were updated
-            node.inputs = node.inputs; // eslint-disable-line no-self-assign, no-param-reassign
-        });
-        Object.keys(outputs).forEach((k) => {
-            const output = outputs[k]();
-            node.removeOutput(k, output);
-            // Because `this` is not reactive in node functions, we need
-            // to notice the reactive `node` reference outputs were updated
-            node.outputs = node.outputs; // eslint-disable-line no-self-assign, no-param-reassign, max-len
-        });
-
-        node.load(state);
-    });
+    alterInterfaces(nodes, interfaces, true);
 
     commitTypeToSpecification();
 }
