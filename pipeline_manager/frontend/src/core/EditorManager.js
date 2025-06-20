@@ -502,6 +502,22 @@ export default class EditorManager {
      * the updating process was successful.
      */
     addNodeToEditorSpecification(nodeSpecification, nodeToUpdate = undefined) {
+        // Remove undefined fields
+        Object.entries(nodeSpecification.properties).forEach(([_, value]) => {
+            Object.keys(value).forEach((key) => {
+                if (value[key] === undefined) {
+                    delete value[key];
+                }
+            });
+        });
+        Object.entries(nodeSpecification.interfaces).forEach(([_, value]) => {
+            Object.keys(value).forEach((key) => {
+                if (value[key] === undefined) {
+                    delete value[key];
+                }
+            });
+        });
+
         let validationErrors = this.validateNode(nodeSpecification);
         if (validationErrors.length) return validationErrors;
 
@@ -524,11 +540,11 @@ export default class EditorManager {
                 (node) => node.name === nodeToUpdate,
             );
 
-            currentSpecification.name = nodeSpecification.name;
-            currentSpecification.category = nodeSpecification.category;
-            currentSpecification.layer = nodeSpecification.layer;
-            currentSpecification.description = nodeSpecification.description;
-            currentSpecification.properties = nodeSpecification.properties;
+            Object.entries(nodeSpecification).forEach(([key, value]) => {
+                if (value !== undefined && value !== 'interfaces') {
+                    currentSpecification[key] = value;
+                }
+            });
 
             if (currentSpecification.subgraphId === undefined) {
                 currentSpecification.interfaces = nodeSpecification.interfaces;
