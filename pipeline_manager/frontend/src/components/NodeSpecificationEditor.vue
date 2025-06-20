@@ -37,6 +37,7 @@ import {
 } from 'vue';
 import EditorManager from '../core/EditorManager';
 import NotificationHandler from '../core/notifications';
+import { menuState, configurationState } from '../core/nodeCreation/ConfigurationState.ts';
 
 export default defineComponent({
     props: {
@@ -123,6 +124,20 @@ export default defineComponent({
         watch(currentSpecification, delayedEditorUpdate);
         watch(visible, delayedEditorUpdate);
         delayedEditorUpdate();
+
+        const handleUIUpdate = () => {
+            node.value.type = configurationState.nodeData.name;
+            const newSpecification = editorManager.specification.unresolvedSpecification
+                ?.nodes
+                ?.find(nodeMatchesSpec);
+            specification.value = newSpecification;
+            currentSpecification.value = maybeStringify(newSpecification);
+            editorManager.modifiedNodeSpecificationRegistry[node.value.id] =
+                currentSpecification.value;
+        };
+
+        const delayedUIUpdate = () => nextTick().then(handleUIUpdate);
+        watch(menuState, delayedUIUpdate);
 
         // Validation
 
