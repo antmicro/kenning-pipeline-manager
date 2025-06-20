@@ -64,6 +64,8 @@ This object specifies additional editor options and contains the following optio
   Default value is `NoLayout`
 * `icons` - contains definition of icon classes.
   Icon classes are key-value pairs, where key is the name of the icon class, and value is the URL prefix that is used to compute the actual path.
+* `styles` - a dictionary that defines node styles.
+  The key in the dictionary is the name of the style, and the value is of type [Node style](#node-style).
 * `navbarItems` - list of buttons that are displayed in the navbar in `server-app` mode, that allow for calling custom procedures.
   The entries are of type [Navbar item](#navbar-item).
 * `logLevel` - string specifying minimum level of verbosity notification has to have to be displayed.
@@ -136,6 +138,16 @@ It consists of the following properties:
   The possible variants are `solid`, `dashed` and `dotted`.
 * `interfaceConnectionColor` - describes the color of connection lines, should be a hexadecimal number representing RGB values.
 
+#### Node style
+Node style defines how nodes of a given style should look like. Currently, the following options are supported:
+
+* `color` - color of the node unless a node sets its own `color`,
+* `icon` - secondary icon of the node, which is displayed separately from [Node](#node) `icon`.
+
+Values both fields are defined the same way as in [Node](#node) specification, however, `icon` can obtain [Navbar item](#navbar-item) `iconName` values as well.
+
+There exists a special style `__new`, which is managed automatically and does not persist specification saves and loads.
+
 (metadata-navbar-item)=
 #### Navbar item
 
@@ -198,6 +210,9 @@ This object specifies a single node.
   ./build --assets-directory examples/sample-assets static-html static-html examples/sample-specification.json
   ```
   ``````
+* `style` - node style name described in `styles` in [Metadata](#metadata). The value of `style` can be:
+  * `string` - single style,
+  * `array` - multiple styles, each subsequent style overrides the previous one.
 * `interfaces` - array representing inputs, outputs and bidirectional ports for nodes.
   The entries are of type [Interface](#interface).
 * `properties` - array with elements of type [Property](#property),
