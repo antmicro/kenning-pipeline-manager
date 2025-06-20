@@ -89,6 +89,10 @@
                 "type": "number"
             }
         },
+        "style": {
+            "description": "A style or an array of non-repeating styles defined by 'styles' in metadata",
+            "type": "string"
+        },
         "node": {
             "type": "object",
             "allOf": [
@@ -126,6 +130,9 @@
                                 "object",
                                 "string"
                             ]
+                        },
+                        "style": {
+                            "$ref": "#/$defs/style"
                         },
                         "defaultInterfaceGroups": {
                             "description": "List of names of chosen interface groups that are enabled by default",

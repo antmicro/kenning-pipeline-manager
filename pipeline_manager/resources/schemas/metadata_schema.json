@@ -209,6 +209,28 @@
             },
             "default": {}
         },
+        "styles": {
+            "type": "object",
+            "description": "Defines node styles",
+            "patternProperties": {
+                "^.*$": {
+                    "type": "object",
+                    "properties": {
+                        "color": {
+                            "description": "Node color in hexadecimal representation",
+                            "type": "string"
+                        },
+                        "icon": {
+                            "description": "Icon of a node. Can be a string with predefined icon name, relative path, URL, or tuple {'icon_type': 'url_suffix'}",
+                            "type": [
+                                "object",
+                                "string"
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "notifyWhenChanged": {
             "type": "boolean",
             "description": "Determines whether external application should be informed about changes in dataflow. Works only when Pipeline Manager is run in server-app mode",
