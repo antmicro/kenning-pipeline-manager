@@ -91,7 +91,10 @@
         },
         "style": {
             "description": "A style or an array of non-repeating styles defined by 'styles' in metadata",
-            "type": "string"
+            "type": [
+                "string",
+                "array"
+            ]
         },
         "node": {
             "type": "object",

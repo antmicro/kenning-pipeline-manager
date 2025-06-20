@@ -651,6 +651,7 @@ export default class EditorManager {
         });
 
         resolvedNodes.forEach((node) => {
+            errors.push(...this.validateNodeStyle(node));
             errors.push(...this._registerNodeType(node, metadata?.twoColumn ?? false));
         });
 
@@ -931,6 +932,30 @@ export default class EditorManager {
     }
 
     /**
+     * Validate styles of a node.
+     *
+     * @param node node to verify.
+     * @returns errors if the node has non-existing or repeated styles.
+     */
+    validateNodeStyle(node) {
+        const errors = [];
+
+        if (node.style === undefined) return errors;
+
+        const style = Array.isArray(node.style) ? node.style : [node.style];
+        const styleSet = new Set(style);
+        if (styleSet.size !== style.length) {
+            errors.push(`Repeated styles in "${EditorManager.getNodeName(node)}" node`);
+        }
+
+        errors.push(...Array.from(styleSet)
+            .filter((styleName) => !this.baklavaView.editor.nodeStyles.has(styleName))
+            .map((styleName) => `Non-existing style "${styleName}" in '${EditorManager.getNodeName(node)}' node`));
+
+        return errors;
+    }
+
+    /**
      * Serializes and returns current specification in Pipeline Manager format.
      *
      * @returns Serialized specification.
@@ -952,13 +977,19 @@ export default class EditorManager {
     static unmarkNewNodes(specification) {
         const warnings = [];
 
-        specification
-            .nodes
-            ?.filter(({ style }) => style === NEW_NODE_STYLE)
-            .forEach((node) => {
-                warnings.push(`Loaded node '${EditorManager.getNodeName(node)}' has '${NEW_NODE_STYLE}' style, removing it.`);
+        const warn = (node) => {
+            warnings.push(`Loaded node '${EditorManager.getNodeName(node)}' has '${NEW_NODE_STYLE}' style, removing it.`);
+        };
+
+        specification.nodes?.forEach((node) => {
+            if (node.style === NEW_NODE_STYLE) {
+                warn(node);
                 delete node.style;
-            });
+            } else if (Array.isArray(node.style) && node.style.includes(NEW_NODE_STYLE)) {
+                warn(node);
+                node.style.splice(node.style.indexOf(NEW_NODE_STYLE), 1);
+            }
+        });
 
         return warnings;
     }

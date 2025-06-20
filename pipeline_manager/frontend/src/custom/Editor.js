@@ -516,7 +516,7 @@ export default class PipelineManagerEditor extends Editor {
         return this.nodeColors.get(node.id)
             ?? nodeType?.color
             ?? ((nodeType?.style !== undefined || undefined)
-                && this.nodeStyles.get(nodeType.style)?.color);
+                && this.getNodeStyle(nodeType.style)?.color);
     }
 
     setNodeColor(nodeId, color) {
@@ -527,8 +527,18 @@ export default class PipelineManagerEditor extends Editor {
 
     getStyleIcon(nodeName) {
         const nodeType = this.nodeTypes.get(nodeName);
-        if (nodeType?.style !== undefined) return this.nodeStyles.get(nodeType.style)?.icon;
+        if (nodeType?.style !== undefined) return this.getNodeStyle(nodeType.style)?.icon;
         return undefined;
+    }
+
+    getNodeStyle(style) {
+        if (!Array.isArray(style)) {
+            style = [style];
+        }
+
+        return Object.assign({}, ...style
+            .map((styleName) => this.nodeStyles.get(styleName))
+            .filter((value) => value !== undefined));
     }
 
     getNodeTitleColor(node) {
