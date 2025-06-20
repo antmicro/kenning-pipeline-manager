@@ -39,6 +39,7 @@ import { useViewModel } from '@baklavajs/renderer-vue';
 import EditorManager from '../core/EditorManager';
 import NotificationHandler from '../core/notifications';
 import { menuState, configurationState } from '../core/nodeCreation/ConfigurationState.ts';
+import { alterInterfaces, alterProperties } from '../core/nodeCreation/Configuration.ts';
 
 export default defineComponent({
     props: {
@@ -155,42 +156,47 @@ export default defineComponent({
             try {
                 const parsedSpecification = YAML.parse(currentSpecification.value.replaceAll('\t', '  '));
 
-                // Unregister the type in the editor
-                // eslint-disable-next-line no-underscore-dangle
-                const errors = editorManager._unregisterNodeType(node.value.type);
-                if (errors.length) {
-                    NotificationHandler.terminalLog('error', 'Error when registering the node', errors);
-                    return;
-                }
-
                 // Update all nodes of the type to match the new specification
+                const oldType = node.value.type;
                 const nodes = displayedGraph.nodes.filter(
-                    (n) => n.type === node.value.type,
+                    (n) => n.type === oldType,
                 );
 
                 // Update each field if it is defined
                 /* eslint-disable no-param-reassign */
                 nodes.forEach((n) => {
-                    const oldType = n.type;
                     n.type = parsedSpecification.name;
                     n.title = parsedSpecification.name;
                     delete n.instanceName;
 
                     Object.entries(parsedSpecification).forEach(([key, value]) => {
                         if (value !== undefined && key !== 'name') {
-                            node[key] = value;
+                            n[key] = value;
                         }
                     });
-
-                    // Add type to editor and specification
-                    const ret = editorManager.addNodeToEditorSpecification(
-                        parsedSpecification,
-                        oldType,
-                    );
-                    if (ret.errors !== undefined && ret.errors.length) {
-                        throw new Error(ret.errors);
-                    }
                 });
+
+                if (parsedSpecification.properties !== undefined) {
+                    alterProperties(nodes, parsedSpecification.properties);
+                }
+                if (parsedSpecification.interfaces !== undefined) {
+                    alterInterfaces(nodes, parsedSpecification.interfaces);
+                }
+
+                // eslint-disable-next-line no-underscore-dangle
+                const errors = editorManager._unregisterNodeType(oldType);
+                if (errors.length) {
+                    NotificationHandler.terminalLog('error', 'Error when registering the node', errors);
+                    return;
+                }
+                // Add type to editor and specification
+                const ret = editorManager.addNodeToEditorSpecification(
+                    parsedSpecification,
+                    oldType,
+                );
+                if (ret.errors !== undefined && ret.errors.length) {
+                    throw new Error(ret.errors);
+                }
 
                 NotificationHandler.showToast('info', 'Node validated');
             } catch (error) {
