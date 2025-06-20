@@ -16,11 +16,8 @@ Popup menu for configuring node properties.
                 {{ getOptionName(option.componentName) ? `${option.name}:` : '' }}
             </div>
         </div>
-        <div v-for="(item, index) in items" :key="index">
-            <label>
-                <input type="checkbox" v-model="selectedItems" :value="item" />
-                {{ item.name }}
-            </label>
+        <div v-for="option in propertyOptions" :key="option.id">
+            <component :is="option.component" :intf="option" tabindex="-1"></component>
         </div>
         <component :is="removeProperty.component" :intf="removeProperty" />
     </div>
@@ -31,9 +28,10 @@ import {
     defineComponent, computed, ref,
 } from 'vue';
 import { ButtonInterface } from '@baklavajs/renderer-vue';
+import CheckboxInterface from '../../../interfaces/CheckboxInterface.js';
 
 import { removeProperties } from '../../../core/nodeCreation/Configuration.ts';
-import { menuState, configurationState } from '../../../core/nodeCreation/ConfigurationState.ts';
+import { menuState, configurationState, PropertyConfiguration } from '../../../core/nodeCreation/ConfigurationState.ts';
 
 export default defineComponent({
     setup() {
@@ -42,7 +40,28 @@ export default defineComponent({
         };
 
         const items = configurationState.properties;
-        const selectedItems = ref([]);
+        const selectedItems = ref<PropertyConfiguration[]>([]);
+
+        function toggleItem(item: PropertyConfiguration) {
+            const i = selectedItems.value.indexOf(item);
+            if (i >= 0) {
+                selectedItems.value.splice(i, 1);
+            } else {
+                selectedItems.value.push(item);
+            }
+        }
+
+        const propertyOptions = computed(() => {
+            const options: any = ref([]);
+
+            items.forEach((item) => {
+                const option = new CheckboxInterface(item.name, false);
+                option.events.setValue.subscribe(this, () => toggleItem(item));
+                options.value.push(option);
+            });
+
+            return options.value;
+        });
 
         const removeProperty = computed(() => {
             const button: any = new ButtonInterface('Remove properties', () => {
@@ -57,6 +76,7 @@ export default defineComponent({
             items,
             selectedItems,
             removeProperty,
+            propertyOptions,
         };
     },
 });
