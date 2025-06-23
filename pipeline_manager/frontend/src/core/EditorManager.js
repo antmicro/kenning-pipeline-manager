@@ -541,7 +541,7 @@ export default class EditorManager {
             );
 
             Object.entries(nodeSpecification).forEach(([key, value]) => {
-                if (value !== undefined && value !== 'interfaces') {
+                if (value !== undefined && key !== 'interfaces') {
                     currentSpecification[key] = value;
                 }
             });
