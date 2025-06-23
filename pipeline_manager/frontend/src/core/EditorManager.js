@@ -311,6 +311,10 @@ export default class EditorManager {
         const currentImports = new Set();
         const include = specification.include ?? [];
         await Promise.all(include.map(async (specificationUrl) => {
+            let style;
+            if (typeof specificationUrl === 'object' && specificationUrl !== null) {
+                ({ url: specificationUrl, style } = specificationUrl);
+            }
             if (currentImports.has(specificationUrl)) {
                 errors.push(`Specification is included multiple times, skipping ${specificationUrl}`);
                 return;
@@ -331,6 +335,7 @@ export default class EditorManager {
                         {
                             specification: val,
                             trace: new Set([...trace, specificationUrl]), // Detect circular imports
+                            style,
                         },
                     );
                 }
@@ -343,13 +348,13 @@ export default class EditorManager {
 
         // Download nested imports
         await Promise.all(specificationAndTrace.map(
-            async ({ specification: spec, trace: specTrace },
-            ) => {
+            async ({ specification: spec, trace: specTrace, style }) => {
                 const {
                     specification: newSpecification, errors: newErrors,
                 } = await this.downloadNestedImports(spec, specTrace);
                 errors.push(...newErrors);
 
+                if (style !== undefined) EditorManager.includeWithStyle(newSpecification, style);
                 if (specification.urloverrides !== undefined) {
                     EditorManager.applyUrlOverrides(newSpecification, specification.urloverrides);
                 }
@@ -862,7 +867,9 @@ export default class EditorManager {
 
             if (isObject(child) && isObject(base)) {
                 Object.keys(child).forEach((key) => {
-                    if (isObject(child[key])) {
+                    if (key === 'style') {
+                        output[key] = EditorManager.mergeStyles(base[key], child[key]);
+                    } else if (isObject(child[key])) {
                         if (!(key in output)) {
                             output[key] = child[key];
                         } else {
@@ -1224,6 +1231,38 @@ export default class EditorManager {
                 item.url = item.url.replaceAll(oldValue, newValue);
             });
         });
+    }
+
+    /**
+     * Adds style to all nodes in the specification.
+     *
+     * @param {object} specification specification to modify.
+     * @param {string|Array<string>} style style to be applied
+     */
+    static includeWithStyle(specification, style) {
+        specification.nodes?.forEach((node) => {
+            const mergeStyles = EditorManager.mergeStyles(node.style, style);
+            if (mergeStyles !== undefined) node.style = mergeStyles;
+        });
+    }
+
+    /**
+     * Merges two styles.
+     *
+     * @param {string|Array<string>|undefined} style1 first style.
+     * @param {string|Array<string>|undefined} style2 second style.
+     * @returns {Array<string>|undefined} merged style.
+     */
+    static mergeStyles(style1, style2) {
+        if ((style1 && style2) === undefined) return style1 ?? style2;
+
+        [style1, style2] = [style1, style2]
+            .map((style) => (Array.isArray(style) ? style : [style]))
+            .map((style) => new Set(style));
+
+        style1 = style1.difference(style2);
+
+        return Array.from(style1.union(style2));
     }
 
     /**

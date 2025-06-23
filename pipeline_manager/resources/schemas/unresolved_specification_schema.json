@@ -15,7 +15,28 @@
             "description": "List of paths to other specifications that should be included",
             "type": "array",
             "items": {
-                "type": "string"
+                "anyOf": [
+                    {
+                        "description": "Path to the specification",
+                        "type": "string"
+                    },
+                    {
+                        "type": "object",
+                        "properties": {
+                            "url": {
+                                "description": "Path to the specification",
+                                "type": "string"
+                            },
+                            "style": {
+                                "$ref": "#/$defs/style"
+                            }
+                        },
+                        "required": [
+                            "url"
+                        ],
+                        "additionalProperties": false
+                    }
+                ]
             }
         },
         "urloverrides": {
