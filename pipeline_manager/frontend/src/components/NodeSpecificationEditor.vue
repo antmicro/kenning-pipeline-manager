@@ -176,6 +176,40 @@ export default defineComponent({
                     });
                 });
 
+                // Remove deleted interfaces and properties
+                let oldSpecification = editorManager.specification.currentSpecification
+                    .nodes?.find((n) => n.name === oldType);
+
+                if (oldSpecification === undefined) {
+                    oldSpecification = editorManager.specification.currentSpecification
+                        .nodes?.find(nodeMatchesSpec);
+                }
+                if (oldSpecification === undefined) {
+                    oldSpecification = editorManager.specification.unresolvedSpecification
+                        .nodes?.find(nodeMatchesSpec);
+                }
+                if (oldSpecification === undefined) {
+                    oldSpecification = editorManager.specification.unresolvedSpecification
+                        .nodes?.find(nodeMatchesSpec);
+                }
+
+                const parsedProperties = parsedSpecification.properties ?? [];
+                const parsedInterfaces = parsedSpecification.interfaces ?? [];
+
+                const removedProperties = (oldSpecification.properties ?? []).filter(
+                    (prop) => !parsedProperties.some((p) => p.name === prop.name),
+                );
+                const removedInterfaces = (oldSpecification.interfaces ?? []).filter(
+                    (intf) => !parsedInterfaces.some((i) => i.name === intf.name),
+                );
+
+                if (removedProperties !== undefined) {
+                    alterProperties(nodes, removedProperties, true);
+                }
+                if (removedInterfaces !== undefined) {
+                    alterInterfaces(nodes, removedInterfaces, true);
+                }
+
                 if (parsedSpecification.properties !== undefined) {
                     alterProperties(nodes, parsedSpecification.properties);
                 }
