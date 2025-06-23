@@ -503,14 +503,14 @@ export default class EditorManager {
      */
     addNodeToEditorSpecification(nodeSpecification, nodeToUpdate = undefined) {
         // Remove undefined fields
-        Object.entries(nodeSpecification.properties).forEach(([_, value]) => {
+        Object.entries(nodeSpecification.properties ?? {}).forEach(([_, value]) => {
             Object.keys(value).forEach((key) => {
                 if (value[key] === undefined) {
                     delete value[key];
                 }
             });
         });
-        Object.entries(nodeSpecification.interfaces).forEach(([_, value]) => {
+        Object.entries(nodeSpecification.interfaces ?? {}).forEach(([_, value]) => {
             Object.keys(value).forEach((key) => {
                 if (value[key] === undefined) {
                     delete value[key];
@@ -535,43 +535,47 @@ export default class EditorManager {
             return { errors: validationErrors, warnings: [] };
         }
 
+        // Modify existing node specification
         if (nodeToUpdate !== undefined) {
             const currentSpecification = this.specification.unresolvedSpecification.nodes.find(
                 (node) => node.name === nodeToUpdate,
             );
-
-            Object.entries(nodeSpecification).forEach(([key, value]) => {
-                if (value !== undefined && key !== 'interfaces') {
-                    currentSpecification[key] = value;
-                }
-            });
-
-            if (currentSpecification.subgraphId === undefined) {
-                currentSpecification.interfaces = nodeSpecification.interfaces;
-            }
-
-            // attach subgraph to the updated subgraph node
-            if (currentSpecification.subgraphId !== undefined) {
-                let graphNode;
-                let subgraph;
-                this.specification.unresolvedSpecification.graphs.forEach((graph) => {
-                    if (currentSpecification.subgraphId === graph.id) {
-                        graphNode = currentSpecification;
-                        subgraph = graph;
+            if (currentSpecification === undefined) {
+                // The node is included - push new spec to unresolvedSpecification to override
+                nodeSpecification.includeName = nodeToUpdate;
+                this.specification.unresolvedSpecification.nodes.push(nodeSpecification);
+            } else {
+                Object.entries(nodeSpecification).forEach(([key, value]) => {
+                    if (value !== undefined && key !== 'interfaces') {
+                        currentSpecification[key] = value;
                     }
                 });
 
-                const myGraph = GraphFactory(
-                    subgraph.nodes,
-                    subgraph.connections,
-                    subgraph.name,
-                    this.baklavaView.editor,
-                );
+                if (currentSpecification.subgraphId === undefined) {
+                    currentSpecification.interfaces = nodeSpecification.interfaces;
+                } else {
+                    // Attach subgraph to the updated subgraph node
+                    let graphNode;
+                    let subgraph;
+                    this.specification.unresolvedSpecification.graphs.forEach((graph) => {
+                        if (currentSpecification.subgraphId === graph.id) {
+                            graphNode = currentSpecification;
+                            subgraph = graph;
+                        }
+                    });
 
-                this.baklavaView.editor.addGraphTemplate(
-                    myGraph,
-                    graphNode,
-                );
+                    const myGraph = GraphFactory(
+                        subgraph.nodes,
+                        subgraph.connections,
+                        subgraph.name,
+                        this.baklavaView.editor,
+                    );
+
+                    this.baklavaView.editor.addGraphTemplate(
+                        myGraph,
+                        graphNode,
+                    );
+                }
             }
         } else {
             this.specification.unresolvedSpecification.nodes.push(nodeSpecification);
