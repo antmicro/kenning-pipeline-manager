@@ -25,6 +25,8 @@ from urllib3.exceptions import (
 from pipeline_manager.dataflow_builder.data_structures import Direction, Side
 from pipeline_manager.validator import validate
 
+Style = Union[str, List[str]]
+
 
 class SpecificationBuilderException(Exception):
     """
@@ -161,7 +163,7 @@ class SpecificationBuilder(object):
         self._nodes = {}
         self._node_layers = set()
         self._categories = set()
-        self._includes = set()
+        self._includes: Dict[str, Optional[Style]] = {}
         self._includeGraphs = {}
         self._graphs = {}
         self._metadata = {}
@@ -401,11 +403,6 @@ class SpecificationBuilder(object):
             Name of the node type
         iconpath: Union[dict, str]
             Icon path
-
-        Raises
-        ------
-        SpecificationBuilderException
-            Raised when given icon is not available in metadata or is invalid.
         """
         if self.assets_dir and not isinstance(iconpath, dict):
             icon_path_loc = self.assets_dir / iconpath
@@ -413,29 +410,7 @@ class SpecificationBuilder(object):
                 self._nodes[name]["icon"] = iconpath
             return
 
-        full_url = None
-
-        if isinstance(iconpath, dict):
-            if len(iconpath) != 1:
-                raise SpecificationBuilderException(
-                    f"Icon with prefix {json.dumps(iconpath)} for node type {name} can only have one element"  # noqa: E501
-                )
-            group, suffix = list(iconpath.items())[0]
-            if (
-                not self._metadata
-                or "icons" not in self._metadata
-                or group not in self._metadata["icons"]
-            ):
-                raise SpecificationBuilderException(
-                    f"Icons class {group} is not available in metadata"
-                )
-            full_url = self._metadata["icons"][group] + suffix
-        elif isinstance(iconpath, str):
-            full_url = iconpath
-        else:
-            raise SpecificationBuilderException(
-                f"Icon with prefix {iconpath} for node type {name} has invalid format"  # noqa: E501
-            )
+        full_url = self._get_icon_url(iconpath, f"node type {name}")
 
         if self.check_urls:
             try:
@@ -1081,6 +1056,37 @@ class SpecificationBuilder(object):
         """
         self._nodes[name]["color"] = color
 
+    def add_node_type_style(self, name: str, style: Style):
+        """
+        Sets style for the node.
+
+        Parameters
+        ----------
+        name: str
+            Name of the node
+        style: Style
+            Style of the node
+
+        Raises
+        ------
+        SpecificationBuilderException
+            Raised when the given style is not present egistered in metadata
+        """
+        styles = (self._metadata or {}).get("styles", {})
+        if style is not None:
+            for i_style in self._style_to_list(style):
+                if i_style not in styles:
+                    raise SpecificationBuilderException(
+                        f"Style {i_style} not found"
+                    )
+
+        node_ref = self._nodes[name]
+        if "style" not in self._nodes[name]:
+            node_ref["style"] = style
+        else:
+            node_ref["style"] = self._style_to_list(node_ref["style"])
+            node_ref["style"] += self._style_to_list(style)
+
     def add_node_type_subgraph_id(self, name: str, subgraph_id: str):
         """
         Sets subgraph ID for the node.
@@ -1271,7 +1277,7 @@ class SpecificationBuilder(object):
             )
         self._graphs[subgraph["name"]] = subgraph
 
-    def add_include(self, include: str):
+    def add_include(self, include: str, style: Optional[Style] = None):
         """
         Adds include defined by url to the specification.
 
@@ -1279,17 +1285,31 @@ class SpecificationBuilder(object):
         ----------
         include: str
             URL to the specification to include
+        style: Optional[Style]
+            Style of included nodes
 
         Raises
         ------
         SpecificationBuilderException
             Raised when include already exists.
         """
+        styles = (self._metadata or {}).get("styles", {})
+        if style is not None:
+            for i_style in self._style_to_list(style):
+                if i_style not in styles:
+                    raise SpecificationBuilderException(
+                        f"Style {i_style} not found"
+                    )
+
         if include in self._includes:
             raise SpecificationBuilderException(
                 f"Include {include} already exists."
             )
-        self._includes.add(include)
+
+        if style:
+            self._includes[include] = style
+        else:
+            self._includes[include] = None
 
     def add_include_subgraph(self, dataflow: Dict[Tuple[str, str], str]):
         """
@@ -1311,6 +1331,45 @@ class SpecificationBuilder(object):
                 f"Include subgraph {dataflow_key} already exists."
             )
         self._includeGraphs[dataflow_key] = dataflow
+
+    def metadata_add_node_style(
+        self,
+        stylename: str,
+        styleicon: Optional[Union[str, Dict]] = None,
+        stylecolor: Optional[str] = None,
+    ):
+        """
+        Adds node styling to metadata.
+
+        Parameters
+        ----------
+        stylename : str
+            Name of the style
+        styleicon : Optional[Union[str, Dict]]
+            Icon of the style
+        stylecolor : Optional[str]
+            Color of the style
+
+        Raises
+        ------
+        SpecificationBuilderException
+            Raised when the style already exists
+        """
+        if "styles" not in self._metadata:
+            self._metadata["styles"] = {}
+        if stylename in self._metadata["styles"]:
+            raise SpecificationBuilderException(
+                f"Style {stylename} already exists."
+            )
+
+        style = {}
+        set_if_not_none(style, "color", stylecolor)
+        set_if_not_none(
+            style,
+            "icon",
+            styleicon and self._get_icon_url(styleicon, f"style {stylename}"),
+        )
+        self._metadata["styles"][stylename] = style
 
     def metadata_add_interface_styling(
         self,
@@ -1536,7 +1595,10 @@ class SpecificationBuilder(object):
         for subgraph in otherspec.get("graphs", []):
             self.add_subgraph_from_spec(subgraph)
         for include in otherspec.get("include", []):
-            self.add_include(include)
+            if isinstance(include, str):
+                self.add_include(include)
+            else:
+                self.add_include(include["url"], include.get("style"))
         for includeGraphs in otherspec.get("includeGraphs", []):
             self.add_include_subgraph(includeGraphs)
 
@@ -1618,6 +1680,29 @@ class SpecificationBuilder(object):
             return self._sorted_metadata()
         return self._metadata
 
+    def _get_icon_url(self, icon: Union[Dict, str, Any], label: str) -> str:
+        if isinstance(icon, str):
+            return icon
+        if isinstance(icon, dict):
+            if len(icon) != 1:
+                raise SpecificationBuilderException(
+                    f"Icon with prefix {json.dumps(icon)} for {label} can only have one element"  # noqa: E501
+                )
+            group, suffix = list(icon.items())[0]
+            if (
+                not self._metadata
+                or "icons" not in self._metadata
+                or group not in self._metadata["icons"]
+            ):
+                raise SpecificationBuilderException(
+                    f"Icons class {group} is not available in metadata"
+                )
+            return self._metadata["icons"][group] + suffix
+        else:
+            raise SpecificationBuilderException(
+                f"Icon with prefix {icon} for {label} has invalid format"
+            )
+
     def _get_nodes(self, sort_spec: bool) -> List[Dict]:
         if sort_spec:
             return self._sorted_nodes()
@@ -1637,6 +1722,9 @@ class SpecificationBuilder(object):
         if sort_spec:
             return sorted(self._includeGraphs.values())
         return list(self._includeGraphs.values())
+
+    def _style_to_list(self, style: Style):
+        return style if isinstance(style, list) else [style]
 
     def _construct_specification(self, sort_spec: bool) -> Dict:
         """
@@ -1659,7 +1747,12 @@ class SpecificationBuilder(object):
         if self._graphs:
             spec["graphs"] = self._get_graphs(sort_spec)
         if self._includes:
-            spec["include"] = self._get_includes(sort_spec)
+            spec["include"] = [
+                {"url": include, "style": style}
+                if (style := self._includes.get(include))
+                else include
+                for include in self._get_includes(sort_spec)
+            ]
         if self._includeGraphs:
             spec["includeGraphs"] = self._get_include_graphs(sort_spec)
         return spec
