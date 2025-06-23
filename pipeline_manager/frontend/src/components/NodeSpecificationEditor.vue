@@ -69,16 +69,23 @@ export default defineComponent({
             return nodeType === specNodeType;
         };
 
-        const specificationWithIncludes = computed(() => {
-            const specification = JSON.parse(JSON.stringify(
-                editorManager.specification.unresolvedSpecification));
+        const specificationWithIncludes = ref(null);
 
-            EditorManager.mergeObjects(
-                specification,
-                editorManager.specification.includedSpecification,
-            );
-            return specification;
-        });
+        watch(
+            [() => editorManager.specification.unresolvedSpecification.nodes, node],
+            () => {
+                const unresolved = editorManager.specification.unresolvedSpecification;
+                const included = editorManager.specification.includedSpecification;
+                const specification = JSON.parse(JSON.stringify(unresolved));
+
+                EditorManager.mergeObjects(
+                    specification,
+                    included,
+                );
+                specificationWithIncludes.value = specification;
+            },
+            { immediate: true, deep: false },
+        );
 
         const specification = computed(() => specificationWithIncludes
             .value
