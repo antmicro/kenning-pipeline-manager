@@ -24,7 +24,7 @@ from pipeline_manager.dataflow_builder.entities import (
 )
 from pipeline_manager.specification_builder import SpecificationBuilder
 
-DEFAULT_SPECIFICATION_VERSION = "20240723.13"
+DEFAULT_SPECIFICATION_VERSION = "20250623.14"
 
 
 @pytest.fixture

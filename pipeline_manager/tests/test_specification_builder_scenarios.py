@@ -15,7 +15,7 @@ from pipeline_manager.specification_builder import (
 @pytest.fixture
 def specification_builder() -> SpecificationBuilder:
     """Pytest fixture providing an instance of specification builder."""
-    VERSION = "20240723.13"
+    VERSION = "20250623.14"
     return SpecificationBuilder(VERSION)
 
 

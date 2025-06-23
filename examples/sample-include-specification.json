@@ -1,5 +1,5 @@
 {
-    "version": "20240723.13",
+    "version": "20250623.14",
     "include": [
         {
             "url": "https://raw.githubusercontent.com/antmicro/kenning-pipeline-manager/main/examples/sample-specification.json",

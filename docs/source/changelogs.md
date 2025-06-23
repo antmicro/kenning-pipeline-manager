@@ -3,6 +3,36 @@
 Formats of dataflows and specification is often updated with new features, that makes former formats incompatible with the new ones.
 This section lists all versions, related features and breaking changes.
 
+## 20250623.14
+
+Commit SHA - `8938cb326abc59ee8a7d506f9285954a8c6a027c`
+
+* Nodes:
+    * `direction` is now optional, the default value is `inout`
+    * Added `color` for both node specification and node dataflow instance allowing to customize the background color of the node title
+    * Nodes no longer have to have `category` field - node types are created at the root level by default
+    * Added `dynamic` field allowing to modify number of interfaces with dedicated node properties during runtime
+* Properties:
+    * Added `multiline` node property, which renders Markdown inside of node
+    * Added `readonly` property field allowing to forbid value modification from UI
+* Subgraphs:
+    * Introduced new simplified implementation
+    * Subgraphs do not have to be defined for graph nodes
+    * Graph nodes can have properties
+* Metadata:
+    * Added `urloverrides` allowing to modify metadata URLs of included specifications
+    * Added `editableTypes` field to metadata allowing to:
+        * Add new node types from UI
+        * Modify node types from UI with:
+            * forms and buttons
+            * YAML-based editor
+* Added node styling:
+    * `styles` in metadata defines `icon` and `color` for each named style:
+        * `icon` is secondary, displayed on the right side of the node title
+        * `color` is the same as in node specification, however, it has lower priority
+    * `style` in the node type specification allows to use and combine styles defined in metadata
+    * `include` supports new value - a pair `{"url": "...", "style": "..."}`
+
 ## 20240723.13
 
 ```{warning}

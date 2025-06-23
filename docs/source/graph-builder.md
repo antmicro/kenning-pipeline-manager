@@ -12,7 +12,7 @@ from pipeline_manager.dataflow_builder.dataflow_builder import GraphBuilder
 
 builder = GraphBuilder(
     specification="examples/sample-specification.json",
-    specification_version="20240723.13",
+    specification_version="20250623.14",
 )
 ```
 

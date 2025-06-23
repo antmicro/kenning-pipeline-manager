@@ -1,5 +1,5 @@
 {
-    "version": "20240723.13",
+    "version": "20250623.14",
     "$id": "unresolved_specification_schema.json",
     "description": "Schema used to validate specification that hasn't resolved inheritance",
     "type": "object",
