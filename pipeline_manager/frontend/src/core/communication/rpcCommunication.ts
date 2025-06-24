@@ -113,14 +113,18 @@ let jsonRPCServer: CustomJSONRPCServerAndClient;
  */
 function createServer() {
     // Initialize SocketIO
-    if (!backendApiUrl) return;
-    socket = io(backendApiUrl, {
-        extraHeaders: commonHeaders,
-    });
+    if (backendApiUrl) {
+        socket = io(backendApiUrl, {
+            extraHeaders: commonHeaders,
+        });
+    }
     // Create JSON-RPC server
     jsonRPCServer = new JSONRPCServerAndClient(
         new JSONRPCServer(),
         new JSONRPCClient(async (request: JSONRPCRequest) => {
+            if (!backendApiUrl) {
+                throw new Error('Missing backend.');
+            }
             const method = (customMethodRegex.test(request.method)) ?
                 customMethodReplace : request.method;
             // request validation
@@ -180,13 +184,13 @@ function createServer() {
     });
 
     // Define SocketIO events
-    socket.on('connect', () => NotificationHandler.terminalLog('info', 'Initialized connection with communication server', null));
-    socket.on('disconnect', () => {
+    socket?.on('connect', () => NotificationHandler.terminalLog('info', 'Initialized connection with communication server', null));
+    socket?.on('disconnect', () => {
         NotificationHandler.terminalLog('warning', 'Connection with communication server disrupted', null);
         jsonRPCServer.rejectAllPendingRequests('WebSocket disconnected');
     });
 
-    socket.on('api', async (data: JSONRPCRequest) => {
+    socket?.on('api', async (data: JSONRPCRequest) => {
         const response = await jsonRPCServer.server.receive(data);
         if (response) {
             try {
@@ -199,7 +203,7 @@ function createServer() {
             }
         }
     });
-    socket.on('api-response', (response: JSONRPCResponse) => {
+    socket?.on('api-response', (response: JSONRPCResponse) => {
         // response validation
         if (response.result && response.id && requestSchema.get(response.id)?.returns) {
             const validResponse = ajv.validate(
