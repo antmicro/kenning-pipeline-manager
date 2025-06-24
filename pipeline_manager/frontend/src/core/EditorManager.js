@@ -194,7 +194,7 @@ export default class EditorManager {
 
         let state;
         let stateNodeId;
-        if (this.specificationLoaded) {
+        if (this.isSpecificationLoaded()) {
             state = this.saveDataflow();
             stateNodeId = this.baklavaView.displayedGraph.sidebar.nodeId;
             this.clearEditorManagerState();
@@ -283,7 +283,7 @@ export default class EditorManager {
         }
 
         if (errors.length === 0) {
-            this.specificationLoaded = true;
+            this.setSpecificationLoaded(true);
         } else {
             this.clearEditorManagerState();
         }
@@ -304,10 +304,23 @@ export default class EditorManager {
         this.baklavaView.editor.deepCleanEditor();
         this.baklavaView.editor.unregisterNodes();
         this.nodeStyles?.clear();
-        this.specificationLoaded = false;
+        this.setSpecificationLoaded(false);
         this.specification.currentSpecification = {};
         this.specification.includedSpecification = {};
         this.specification.unresolvedSpecification = reactive({});
+    }
+
+    isSpecificationLoaded() {
+        if (typeof this.specificationLoaded === 'boolean') return this.specificationLoaded;
+        return this.specificationLoaded.value;
+    }
+
+    setSpecificationLoaded(value) {
+        if (typeof this.specificationLoaded === 'boolean') {
+            this.specificationLoaded = value;
+        } else {
+            this.specificationLoaded.value = value;
+        }
     }
 
     /**
