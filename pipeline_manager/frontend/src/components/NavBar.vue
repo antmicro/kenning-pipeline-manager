@@ -81,7 +81,6 @@ export default {
         InterfaceListMenu,
         LayerConfigurationMenu,
     },
-    emits: ['setLoad'],
     computed: {
         dataflowGraphName() {
             return this.editorManager.editor.graphName;
@@ -359,8 +358,8 @@ export default {
             const file = document.getElementById('load-spec-button').files[0];
             if (!file) return;
 
-            this.$emit('setLoad', true);
-            const resolve = () => this.$emit('setLoad', false);
+            this.editorManager.baklavaView.editor.events.setLoad.emit(true);
+            const resolve = () => this.editorManager.baklavaView.editor.events.setLoad.emit(false);
 
             const fileReader = new FileReader();
 
@@ -451,8 +450,8 @@ export default {
             const file = document.getElementById('load-dataflow-button').files[0];
             if (!file) return;
 
-            this.$emit('setLoad', true);
-            const resolve = () => this.$emit('setLoad', false);
+            this.editorManager.baklavaView.editor.events.setLoad.emit(true);
+            const resolve = () => this.editorManager.baklavaView.editor.events.setLoad.emit(false);
 
             const fileReader = new FileReader();
 

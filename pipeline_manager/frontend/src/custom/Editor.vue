@@ -89,6 +89,7 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
 import { EditorComponent, useGraph } from '@baklavajs/renderer-vue';
 import { defineComponent, ref, computed, watch, onMounted } from 'vue';
 import fuzzysort from 'fuzzysort';
+import { BaklavaEvent } from '@baklavajs/events';
 import { isJSONRPCRequest, JSONRPC } from 'json-rpc-2.0';
 import usePanZoom from './panZoom';
 
@@ -661,7 +662,7 @@ export default defineComponent({
 
                 if (errors.length) {
                     NotificationHandler.restoreShowNotification();
-                    emit('setLoad', false);
+                    props.viewModel.editor.events.setLoad.emit(false);
                     return;
                 }
 
@@ -688,7 +689,7 @@ export default defineComponent({
                 }
             }
             NotificationHandler.restoreShowNotification();
-            emit('setLoad', false);
+            props.viewModel.editor.events.setLoad.emit(false);
         });
 
         const onDrop = async (event) => {
@@ -724,8 +725,8 @@ export default defineComponent({
                     return;
                 }
 
-                emit('setLoad', true);
-                const resolve = () => emit('setLoad', false);
+                props.viewModel.editor.events.setLoad.emit(true);
+                const resolve = () => props.viewModel.editor.events.setLoad.emit(false);
 
                 if (data.nodes || data.include) { // Load Specification
                     await updateEditorSpecification(data);
@@ -738,7 +739,7 @@ export default defineComponent({
                     resolve();
                     return;
                 }
-                emit('setLoad', false);
+                resolve();
 
                 NotificationHandler.showToast(
                     'error',
@@ -752,6 +753,11 @@ export default defineComponent({
             );
             reader.readAsText(files[0]);
         };
+
+        props.viewModel.editor.events.setLoad = new BaklavaEvent();
+        props.viewModel.editor.events.setLoad.subscribe('editor', (value) => {
+            emit('setLoad', value);
+        });
 
         return {
             el,

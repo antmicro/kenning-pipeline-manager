@@ -12,7 +12,7 @@ The entrypoint of the application.
     <div>
         <LoadingScreen v-if="loading" />
         <div id="container">
-            <NavBar @setLoad="handleLoad" />
+            <NavBar />
             <Editor
                 class="inner-editor"
                 :view-model="editorManager.baklavaView"
