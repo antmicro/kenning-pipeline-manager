@@ -92,6 +92,24 @@ def dataflow_ver_20240723_13(dataflow: dict) -> dict:
     return dataflow
 
 
+def dataflow_ver_20250623_14(dataflow: dict) -> dict:
+    """
+    Converts dataflows to version 20250623.14.
+
+    Parameters
+    ----------
+    dataflow : dict
+        Dataflow to be converted
+
+    Returns
+    -------
+    dict
+        Converted dataflow to the next version
+    """
+    dataflow["version"] = "20250623.14"
+    return dataflow
+
+
 def main(argv):  # noqa: D103
     parser = argparse.ArgumentParser(argv[0])
     parser.add_argument(
@@ -128,6 +146,7 @@ def main(argv):  # noqa: D103
     dataflow_patches = {
         "pre-20230615.1": dataflow_ver_20230615_1,
         "20230830.11": dataflow_ver_20240723_13,
+        "20240723.13": dataflow_ver_20250623_14,
     }
 
     try:
