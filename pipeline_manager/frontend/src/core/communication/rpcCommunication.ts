@@ -41,9 +41,12 @@ const ajv = new Ajv2019({
     allowUnionTypes: true,
     strict: true,
 });
-const frontendEndpoints: { [key: string]: SpecType } = specificationSchema.frontend_endpoints;
-const backendEndpoints: { [key: string]: SpecType } = specificationSchema.backend_endpoints;
-const externalEndpoints: { [key: string]: SpecType } = specificationSchema.external_endpoints;
+
+type Endpoints = { [key: string]: SpecType };
+
+export const frontendEndpoints: Endpoints = specificationSchema.frontend_endpoints;
+export const backendEndpoints: Endpoints = specificationSchema.backend_endpoints;
+export const externalEndpoints: Endpoints = specificationSchema.external_endpoints;
 
 // This should become part of the testing suite at some point
 let invalidDefinition;
