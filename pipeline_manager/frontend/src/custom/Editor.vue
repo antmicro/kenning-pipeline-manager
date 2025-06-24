@@ -87,8 +87,9 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
 <script>
 /* eslint-disable object-curly-newline */
 import { EditorComponent, useGraph } from '@baklavajs/renderer-vue';
-import { defineComponent, ref, computed, watch, onMounted, nextTick } from 'vue';
+import { defineComponent, ref, computed, watch, onMounted } from 'vue';
 import fuzzysort from 'fuzzysort';
+import { isJSONRPCRequest, JSONRPC } from 'json-rpc-2.0';
 import usePanZoom from './panZoom';
 
 import CustomNode from './CustomNode.vue';
@@ -101,6 +102,7 @@ import EditorManager, { loadJsonFromRemoteLocation } from '../core/EditorManager
 import RectangleSelection from './RectangleSelection.vue';
 import nodeInsideSelection from './rectangleSelection.js';
 import getExternalApplicationManager from '../core/communication/ExternalApplicationManager';
+import jsonRPC, { frontendEndpoints } from '../core/communication/rpcCommunication';
 
 export default defineComponent({
     extends: EditorComponent,
@@ -596,46 +598,21 @@ export default defineComponent({
             // Load specification and/or dataflow delivered via window.postMessage
             window.addEventListener('message', async (event) => {
                 // TODO: introduce mechanism for checking event.origin against allowed origins
-                const message = event.data;
+                const request = {
+                    jsonrpc: JSONRPC,
+                    id: crypto.randomUUID(),
+                    ...(event.data ?? {}),
+                };
 
-                // Validate
-                const validationErrors = EditorManager.validateMessage(message);
-                if (Array.isArray(validationErrors) && validationErrors.length) {
-                    NotificationHandler.terminalLog('error', 'Message is invalid', validationErrors);
+                if (!isJSONRPCRequest(request)) {
                     return;
                 }
 
-                emit('setLoad', true);
+                const response = event.data.method in frontendEndpoints
+                    ? (await jsonRPC.server.receive(request))
+                    : (await jsonRPC.requestAdvanced(request));
 
-                // Download URL entries
-                const errors = [];
-                await Promise.all(Object.entries(message).map(async ([key, value]) => {
-                    if (value === undefined || value instanceof Object) {
-                        return;
-                    }
-                    const [status, newValue] = await loadJsonFromRemoteLocation(value);
-                    if (status === false) {
-                        errors.push(newValue);
-                    } else {
-                        message[key] = newValue;
-                    }
-                }));
-
-                if (errors.length) {
-                    NotificationHandler.terminalLog('error', 'Could not load message data:', errors);
-                    emit('setLoad', false);
-                    return;
-                }
-
-                // Let Vue draw the spinner
-                await nextTick();
-
-                // Update editor
-                const { specification, dataflow } = message;
-                if (specification !== undefined) { await updateEditorSpecification(specification); }
-                if (dataflow !== undefined) { await updateDataflow(dataflow); }
-
-                emit('setLoad', false);
+                if (response) event.source.postMessage(JSON.parse(JSON.stringify(response)));
             });
 
             NotificationHandler.setShowNotification(false);
