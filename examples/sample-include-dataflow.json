@@ -207,6 +207,26 @@
                     "enabledInterfaceGroups": [],
                     "name": "RemoveColor",
                     "instanceName": "RemoveColor"
+                },
+                {
+                    "id": "dd90ac83-9dec-480f-8fdc-94b93d551a5a",
+                    "position": {
+                        "x": 734,
+                        "y": -57
+                    },
+                    "width": 300,
+                    "twoColumn": true,
+                    "interfaces": [],
+                    "properties": [
+                        {
+                            "name": "comment",
+                            "id": "f197d7d4-38f0-4b35-9e6e-6af430702bae",
+                            "value": "### Include specifications\n\nThis graph demonstrates the ability to use other specifications as well as add styles to both root and imported nodes."
+                        }
+                    ],
+                    "enabledInterfaceGroups": [],
+                    "name": "Comment",
+                    "instanceName": "Comment"
                 }
             ],
             "connections": [

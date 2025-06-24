@@ -15,6 +15,7 @@ import Cube from './Cube.vue';
 import Disconnect from './Disconnect.vue';
 import ExclamationMark from './ExclamationMark.vue';
 import Expand from './Expand.vue';
+import Import from './Import.vue';
 import Indicator from './Indicator.vue';
 import Logo from './Logo.vue';
 import Magnifier from './Magnifier.vue';
@@ -42,6 +43,7 @@ export default {
     Disconnect,
     ExclamationMark,
     Expand,
+    Import,
     Indicator,
     Logo,
     Magnifier,

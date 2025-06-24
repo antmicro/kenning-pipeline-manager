@@ -1,7 +1,13 @@
 {
     "version": "20240723.13",
     "include": [
-        "https://raw.githubusercontent.com/antmicro/kenning-pipeline-manager/main/examples/sample-specification.json",
+        {
+            "url": "https://raw.githubusercontent.com/antmicro/kenning-pipeline-manager/main/examples/sample-specification.json",
+            "style": [
+                "import",
+                "miscellaneous"
+            ]
+        },
         "https://raw.githubusercontent.com/antmicro/kenning-pipeline-manager/main/examples/sample-loopback-specification.json",
         "https://raw.githubusercontent.com/antmicro/kenning-pipeline-manager/main/examples/sample-multiple-io-specification.json"
     ],
@@ -15,7 +21,18 @@
             ],
             "interfaces": [
                 {"name": "frames", "type": ["Image", "BinaryImage"], "direction": "input"}
-            ]
+            ],
+            "style": "miscellaneous"
         }
-    ]
+    ],
+    "metadata": {
+        "styles": {
+            "import": {
+                "icon": "Import"
+            },
+            "miscellaneous": {
+                "color": "#000000"
+            }
+        }
+    }
 }
