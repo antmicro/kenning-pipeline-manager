@@ -249,8 +249,9 @@ export async function connections_change(params: ModifyConnectionsParamsType) {
 /**
  * Loads received dataflow.
  */
-export function graph_change(params: { dataflow: any }) {
-    editorManager.loadDataflow(params.dataflow);
+export async function graph_change(params: { dataflow: any }) {
+    const externalApplicationManager = getExternalApplicationManager();
+    return externalApplicationManager.updateDataflow(params.dataflow);
 }
 
 type GetPropertiesParamsType = {
@@ -400,7 +401,7 @@ export function notification_send(params: Notification) {
     NotificationHandler.terminalLog(params.type, params.title, params.details);
 }
 
-export function specification_change(params: {specification: any}) {
+export async function specification_change(params: {specification: any}) {
     const externalApplicationManager = getExternalApplicationManager();
-    externalApplicationManager.updateSpecification(params.specification);
+    return externalApplicationManager.updateSpecification(params.specification);
 }

@@ -143,19 +143,19 @@ class ExternalApplicationManager {
             'Warnings when validating specification',
             'Specification is invalid',
         )) return;
-        const graph = this.editorManager.saveDataflow();
-        if (handleSpecificationResult(
+        handleSpecificationResult(
             await this.editorManager.updateEditorSpecification(specification),
             'Warnings when loading specification',
             'Errors when loading specification',
-        )) return;
-        const errors = await this.editorManager.loadDataflow(graph, true);
-        if (errors.errors.length) {
-            NotificationHandler.terminalLog(
-                'error',
-                `Dataflow doesn't match the updated specification`,
-                errors.errors,
-            );
+        );
+    }
+
+    async updateDataflow(dataflow) {
+        const { errors, warnings } = await this.editorManager.loadDataflow(dataflow);
+        if (Array.isArray(errors) && errors.length) {
+            NotificationHandler.terminalLog('error', 'Dataflow is invalid', errors);
+        } else if (Array.isArray(warnings) && warnings.length) {
+            NotificationHandler.terminalLog('warning', 'Dataflow loaded with warning', warnings);
         }
     }
 
