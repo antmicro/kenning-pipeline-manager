@@ -87,6 +87,7 @@ class Property(JsonConvertible):
     name: str
     value: Any
     type: str
+    description: str
     id: str
 
     def __init__(
@@ -101,6 +102,7 @@ class Property(JsonConvertible):
         dtype: Optional[str] = None,
         group: Optional[Dict[str, Any]] = None,
         id: str = get_uuid(),
+        description: Optional[str] = None,
     ):
         # In a specification, property has `default`,
         # but, in a dataflow, it has either `values` or `value`.
@@ -135,11 +137,13 @@ class Property(JsonConvertible):
             self.type = type
 
         if min:
-            Property.ensure_hex(min)
+            if isinstance(min, str):
+                Property.ensure_hex(min)
             self.min = min
 
         if max:
-            Property.ensure_hex(max)
+            if isinstance(max, str):
+                Property.ensure_hex(max)
             self.max = max
 
         if dtype:
@@ -150,6 +154,9 @@ class Property(JsonConvertible):
 
         if group:
             self.group = group
+
+        if description:
+            self.description = description
 
     @staticmethod
     def get_first_not_none(values: List[Optional[Any]]) -> Any:
@@ -249,6 +256,7 @@ class Node(JsonConvertible):
     instance_name: Optional[str] = None
     color: Optional[str] = None
     subgraph: Optional[str] = None
+    description: Optional[str] = None
     _subgraph: Any = None  # Optional[DataflowGraph]
     enabled_interface_groups: List[Interface] = field(default_factory=list)
 
