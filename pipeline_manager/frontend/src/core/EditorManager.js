@@ -475,6 +475,8 @@ export default class EditorManager {
             this.baklavaView.editor,
         );
 
+        defaultGraphNode.subgraphId = myGraph.id;
+
         // If `myGraph` is any array then it is an array of errors
         if (Array.isArray(myGraph) && myGraph.length) {
             errors.push(...myGraph);
