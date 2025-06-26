@@ -177,7 +177,7 @@ export default class PipelineManagerEditor extends Editor {
             title: options?.title ?? nodeInstance.title,
             isCategory: options?.isCategory ?? false,
             color: options?.color,
-            isSubgraph: options?.isSubgraph ?? false,
+            subgraphId: options?.subgraphId,
             style: options?.style,
             pill: options?.pill,
         });
@@ -581,7 +581,7 @@ export default class PipelineManagerEditor extends Editor {
 
     isGraphNode(nodeName) {
         if (!this.nodeTypes.has(nodeName)) return false;
-        return this.nodeTypes.get(nodeName).isSubgraph;
+        return this.nodeTypes.get(nodeName).subgraphId !== undefined;
     }
 
     addGraphTemplate(template, graphNode) {
@@ -599,8 +599,8 @@ export default class PipelineManagerEditor extends Editor {
             isCategory: graphNode.isCategory,
             color: graphNode.color,
             style: graphNode.style,
-            isSubgraph: true,
             pill: graphNode.pill,
+            subgraphId: graphNode.subgraphId,
         });
 
         this.events.addGraphTemplate.emit(template);

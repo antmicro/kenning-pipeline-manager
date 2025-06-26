@@ -528,7 +528,7 @@ export default class EditorManager {
             currentSpecification.description = nodeSpecification.description;
             currentSpecification.properties = nodeSpecification.properties;
 
-            if (!currentSpecification.isSubgraph) {
+            if (currentSpecification.subgraphId === undefined) {
                 currentSpecification.interfaces = nodeSpecification.interfaces;
             }
 
@@ -603,7 +603,7 @@ export default class EditorManager {
             color: node.color,
             style: node.style,
             pill: node.pill,
-            isSubgraph: node.isSubgraph,
+            subgraphId: node.subgraphId,
         });
         if ('icon' in node) {
             const icon = typeof node.icon === 'string' ? node.icon : this.getMetadataIcon(node.icon);
