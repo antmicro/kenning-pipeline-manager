@@ -57,8 +57,6 @@ export default defineComponent({
                 category: 'Default category',
                 layer: '',
                 description: '',
-                color: '',
-                isSubgraph: false,
             };
             configurationState.properties = [];
             configurationState.interfaces = [];

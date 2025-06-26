@@ -361,8 +361,6 @@ const onContextMenuTitleClick = async (action) => {
             name: props.node.type,
             category: nodeCategory,
             layer: props.node.layer,
-            color: nodeColor,
-            isSubgraph: isGraphNode,
         };
 
         configurationState.editedType = nodeData.name;

@@ -54,7 +54,6 @@ function commitTypeToSpecification() {
         name: newNodeData.name,
         layer: newNodeData.layer,
         category: newNodeData.category,
-        isSubgraph: newNodeData.isSubgraph,
         description: newNodeData.description,
         interfaces: configurationState.interfaces,
         properties: configurationState.properties,
@@ -132,8 +131,6 @@ export function modifyConfiguration(): string[] {
         node.type = newNodeData.name;
         node.layer = newNodeData.layer;
         node.category = newNodeData.category;
-        node.color = newNodeData.color;
-        node.isSubgraph = newNodeData.isSubgraph;
         node.description = newNodeData.description;
         delete node.instanceName;
     });
