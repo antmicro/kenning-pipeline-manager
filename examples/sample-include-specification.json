@@ -28,10 +28,12 @@
     "metadata": {
         "styles": {
             "import": {
-                "icon": "Import"
+                "icon": "Import",
+                "pill": {"text": "Import", "color": "#ffffff"}
             },
             "miscellaneous": {
-                "color": "#000000"
+                "color": "#000000",
+                "pill": {"text": "misc", "color": "#2271b3"}
             }
         }
     }
