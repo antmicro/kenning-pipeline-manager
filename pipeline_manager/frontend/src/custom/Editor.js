@@ -513,7 +513,10 @@ export default class PipelineManagerEditor extends Editor {
     }
 
     getPillText(nodeName) {
-        return this.nodeTypes.get(nodeName).pill?.text || undefined;
+        const nodeType = this.nodeTypes.get(nodeName);
+        return nodeType.pill?.text
+            ?? ((nodeType?.style !== undefined || undefined)
+                && this.getNodeStyle(nodeType.style)?.pill?.text);
     }
 
     getNodeColor(node) {
@@ -547,7 +550,10 @@ export default class PipelineManagerEditor extends Editor {
     }
 
     getPillColor(nodeName) {
-        return this.nodeTypes.get(nodeName).pill?.color || undefined;
+        const nodeType = this.nodeTypes.get(nodeName);
+        return nodeType.pill?.color
+            ?? ((nodeType?.style !== undefined || undefined)
+                && this.getNodeStyle(nodeType.style)?.pill?.color);
     }
 
     /* eslint-disable class-methods-use-this */
