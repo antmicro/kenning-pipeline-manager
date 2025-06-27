@@ -61,7 +61,8 @@
                 {"name": "tags", "type": "list", "dtype": "string", "default": []}
             ],
             "interfaces": [{"name": "kernel", "type": "Image", "direction": "output"}],
-            "color": "#6f091a"
+            "color": "#6f091a",
+            "pill": {"text": "kernel", "color": "#999999"}
         },
         {
             "name": "SobelKernel",
@@ -74,7 +75,8 @@
                 {"name": "Horizontal edge kernel", "type": "Image", "direction": "output"},
                 {"name": "Vertical edge kernel", "type": "Image", "direction": "output"}
             ],
-            "color": "#900b22"
+            "color": "#900b22",
+            "pill": {"text": "kernel", "color": "#999999"}
         },
         {
             "name": "StructuringElement",
@@ -90,7 +92,8 @@
                 }
             ],
             "interfaces": [{"name": "kernel", "type": "BinaryImage", "direction": "output"}],
-            "color": "#bd0e2d"
+            "color": "#bd0e2d",
+            "pill": {"text": "kernel", "color": "#999999"}
         },
         {
             "category": "Processing/Color images",
