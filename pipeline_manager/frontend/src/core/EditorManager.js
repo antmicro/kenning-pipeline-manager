@@ -538,6 +538,7 @@ export default class EditorManager {
             isCategory: node.isCategory ?? false,
             color: node.color,
             style: node.style,
+            pill: node.pill,
         });
         if ('icon' in node) {
             const icon = typeof node.icon === 'string' ? node.icon : this.getMetadataIcon(node.icon);

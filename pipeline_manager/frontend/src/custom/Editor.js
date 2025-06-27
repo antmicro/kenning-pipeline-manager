@@ -179,6 +179,7 @@ export default class PipelineManagerEditor extends Editor {
             color: options?.color,
             isSubgraph: options?.isSubgraph ?? false,
             style: options?.style,
+            pill: options?.pill,
         });
 
         this.events.registerNodeType.emit({ type, options });
@@ -511,6 +512,10 @@ export default class PipelineManagerEditor extends Editor {
         return this.nodeIcons.get(nodeName) || undefined;
     }
 
+    getPillText(nodeName) {
+        return this.nodeTypes.get(nodeName).pill?.text || undefined;
+    }
+
     getNodeColor(node) {
         const nodeType = this.nodeTypes.get(node.type);
         return this.nodeColors.get(node.id)
@@ -541,10 +546,13 @@ export default class PipelineManagerEditor extends Editor {
             .filter((value) => value !== undefined));
     }
 
-    getNodeTitleColor(node) {
-        const color = this.getNodeColor(node);
+    getPillColor(nodeName) {
+        return this.nodeTypes.get(nodeName).pill?.color || undefined;
+    }
 
-        if (color === undefined) {
+    /* eslint-disable class-methods-use-this */
+    getTextColor(color) {
+        if (color === undefined || color === '') {
             return 'white';
         }
         // calculate lightness
@@ -582,6 +590,7 @@ export default class PipelineManagerEditor extends Editor {
             color: graphNode.color,
             style: graphNode.style,
             isSubgraph: true,
+            pill: graphNode.pill,
         });
 
         this.events.addGraphTemplate.emit(template);
