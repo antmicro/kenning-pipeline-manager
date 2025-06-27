@@ -70,6 +70,12 @@ from moving or deleting the nodes.
                 class="__subgraph-icon"
                 v-if="isGraphNode"
             />
+            <div
+                v-if="pillText !== undefined"
+                class="pill"
+                :style="nodePillStyle"
+                v-html="DOMPurify.sanitize(pillText)"
+            />
             <CustomContextMenu
                 v-if="showContextMenuTitle"
                 v-model="showContextMenuTitle"
@@ -206,8 +212,11 @@ const tempName = ref('');
 
 const nodeURLs = viewModel.value.editor.getNodeURLs(props.node.type);
 const nodeColor = viewModel.value.editor.getNodeColor(props.node);
-const nodeTitleColor = viewModel.value.editor.getNodeTitleColor(props.node);
+const nodeTitleColor = viewModel.value.editor.getTextColor(nodeColor);
 const isGraphNode = viewModel.value.editor.isGraphNode(props.node.type);
+const pillText = viewModel.value.editor.getPillText(props.node.type);
+const pillColor = viewModel.value.editor.getPillColor(props.node.type);
+const pillTextColor = viewModel.value.editor.getTextColor(pillColor);
 
 const displayNoResources = !viewModel.value.editor.nodeURLsEmpty();
 
@@ -652,6 +661,12 @@ const nodeTitleStyle = computed(() => {
     };
 });
 
+const nodePillStyle = computed(() => ({
+    cursor: 'default',
+    backgroundColor: pillColor,
+    color: pillTextColor,
+}));
+
 const isPickedInterface = (intf) => intf === chosenInterface;
 
 const assignNewPosition = () => {
@@ -849,6 +864,19 @@ const switchSides = (intf) => {
         background-color: $gold;
         z-index: 100;
     }
+}
+.pill {
+    border-radius: 25px;
+    transform: translate(-20%, -50%);
+    font-size: 0.75em;
+    padding: 5px;
+    width: auto;
+    height: auto;
+    z-index: 1;
+    pointer-events: none;
+    position: absolute;
+    top: 0;
+    right: 0;
 }
 
 </style>
