@@ -12,7 +12,7 @@ import { backendApiUrl, PMMessageType, JSONRPCCustomErrorCode } from '../utils';
 import jsonRPC from './rpcCommunication';
 import runInfo from './runInformation';
 import NotificationHandler from '../notifications';
-import EditorManager from '../EditorManager';
+import EditorManager, { loadJsonFromRemoteLocation } from '../EditorManager';
 
 // Default external application capabilities
 const defaultAppCapabilities = {};
@@ -151,6 +151,16 @@ class ExternalApplicationManager {
     }
 
     async updateDataflow(dataflow) {
+        if (typeof dataflow === 'string' || dataflow instanceof String) {
+            const [success, dataflowOrError] = await loadJsonFromRemoteLocation(dataflow);
+            if (!success) {
+                NotificationHandler.terminalLog('error', 'Dataflow is invalid', dataflowOrError);
+                return;
+            }
+
+            // eslint-disable-next-line no-param-reassign
+            dataflow = dataflowOrError;
+        }
         const { errors, warnings } = await this.editorManager.loadDataflow(dataflow);
         if (Array.isArray(errors) && errors.length) {
             NotificationHandler.terminalLog('error', 'Dataflow is invalid', errors);

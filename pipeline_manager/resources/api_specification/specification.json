@@ -128,7 +128,13 @@
         "graph_change": {
             "description": "Procedure to add and delete nodes",
             "params": {
-                "$ref": "common_types#/$defs/dataflow_object"
+                "type": "object",
+                "properties": {
+                    "dataflow": {
+                        "$ref": "common_types#/$defs/dataflow_or_url"
+                    }                },
+                "required": ["dataflow"],
+                "additionalProperties": false
             },
             "returns": {
                 "$ref": "common_types#/$defs/null_or_empty"

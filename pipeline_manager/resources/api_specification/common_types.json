@@ -29,6 +29,13 @@
             },
             "required": ["graph_id", "node_id"]
         },
+        "dataflow_or_url": {
+            "description": "JSON or link to the remote JSON with graph definition",
+            "type": [
+                "object",
+                "string"
+            ]
+        },
         "dataflow_object": {
             "description": "Definition containing `dataflow` object",
             "type": "object",
