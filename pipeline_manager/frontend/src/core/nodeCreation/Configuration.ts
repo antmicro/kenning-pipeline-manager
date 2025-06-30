@@ -20,7 +20,7 @@ import { parseInterfaces } from '../interfaceParser.js';
 import { removeNode } from '../../custom/CustomNode.js';
 import {
     configurationState, NodeDataConfiguration, PropertyConfiguration, InterfaceConfiguration,
-    menuState,
+    menuState, configurationState, PropertyConfiguration, InterfaceConfiguration,
 } from './ConfigurationState.ts';
 
 import { createProperties, parseProperties, createBaklavaInterfaces } from '../NodeFactory.js';
@@ -55,6 +55,7 @@ function commitTypeToSpecification(twoColumn = false) {
         name: newNodeData.name,
         layer: newNodeData.layer,
         category: newNodeData.category,
+        color: newNodeData.color,
         description: newNodeData.description,
         interfaces: configurationState.interfaces,
         properties: configurationState.properties,
@@ -136,6 +137,7 @@ export function modifyConfiguration(): string[] {
         node.type = newNodeData.name;
         node.layer = newNodeData.layer;
         node.category = newNodeData.category;
+        node.color = newNodeData.color;
         node.description = newNodeData.description;
     });
     /* eslint-enable no-param-reassign */

@@ -521,6 +521,48 @@ export default class PipelineManagerEditor extends Editor {
                 && this.getNodeStyle(nodeType.style)?.pill?.text);
     }
 
+    getStyleIcon(nodeName) {
+        const nodeType = this.nodeTypes.get(nodeName);
+        if (nodeType?.style !== undefined) return this.getNodeStyle(nodeType.style)?.icon;
+        return undefined;
+    }
+
+    getNodeStyle(style) {
+        if (!Array.isArray(style)) {
+            style = [style];
+        }
+
+        return Object.assign({}, ...style
+            .map((styleName) => this.nodeStyles.get(styleName))
+            .filter((value) => value !== undefined));
+    }
+
+    getPillColor(nodeName) {
+        const nodeType = this.nodeTypes.get(nodeName);
+        return nodeType.pill?.color
+            ?? ((nodeType?.style !== undefined || undefined)
+                && this.getNodeStyle(nodeType.style)?.pill?.color);
+    }
+
+    /* eslint-disable class-methods-use-this */
+    getTextColor(color) {
+        if (color === undefined || color === '') {
+            return 'white';
+        }
+        // calculate lightness
+        const rgb = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(color);
+        const r = parseInt(rgb[1], 16) / 255;
+        const g = parseInt(rgb[2], 16) / 255;
+        const b = parseInt(rgb[3], 16) / 255;
+        const lightness = (Math.max(r, g, b) + Math.min(r, g, b)) / 2;
+
+        if (lightness > 0.5) {
+            return 'black';
+        }
+
+        return 'white';
+    }
+
     getNodeCategory(nodeName) {
         return this.nodeTypes.get(nodeName).category || undefined;
     }

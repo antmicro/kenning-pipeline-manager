@@ -366,6 +366,7 @@ const onContextMenuTitleClick = async (action) => {
             name: props.node.type,
             category: nodeCategory,
             layer: props.node.layer,
+            color: nodeColor,
         };
 
         configurationState.editedType = nodeData.name;
@@ -397,6 +398,13 @@ const onContextMenuTitleClick = async (action) => {
         configurationState.interfaces = configuredInterfaces;
     }
 
+=======
+    const nodeData = {
+        name: props.node.type,
+        category: nodeCategory,
+        layer: props.node.layer,
+    };
+>>>>>>> 4a36a8ae ([#78095] frontend: src: custom: CustomNode.vue: Save node data before editing)
     switch (action) {
         case 'delete':
             startTransaction();
@@ -416,10 +424,10 @@ const onContextMenuTitleClick = async (action) => {
         case 'disconnect': {
             startTransaction();
             let interfaces = [...displayedInputs.value, ...displayedOutputs.value];
-            graph.value.selectedNodes.forEach((n) => {
+            graph.value.selectedNodes.forEach((node) => {
                 interfaces = interfaces.concat(
-                    Object.entries(n.inputs).filter(([name, ni]) => !ni.hidden && !name.startsWith('property_')).map(([, ni]) => ni),
-                    Object.values(n.outputs).filter((ni) => !ni.hidden),
+                    Object.entries(node.inputs).filter(([name, ni]) => !ni.hidden && !name.startsWith('property_')).map(([, ni]) => ni),
+                    Object.values(node.outputs).filter((ni) => !ni.hidden),
                 );
             });
             const nodeConnections = graph.value.connections.filter(
@@ -449,6 +457,7 @@ const onContextMenuTitleClick = async (action) => {
         case 'configure':
             menuState.configurationMenu.visible = true;
             menuState.configurationMenu.addNode = false;
+            configurationState.nodeData = nodeData;
             break;
         case 'property':
             menuState.propertyMenu = true;

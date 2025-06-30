@@ -26,6 +26,7 @@ SPDX-License-Identifier: Apache-2.0
                 @input="handleInput"
                 @keydown.tab="handleTab"
             />
+
             <p class="__validation_errors" v-html="getCorrectSpecificationMessage()"></p>
         </div>
     </div>
@@ -67,8 +68,12 @@ export default defineComponent({
         const { displayedGraph } = viewModel.value;
         const editorManager = EditorManager.getEditorManagerInstance();
         const node = toRef(props, 'node');
+        const root = ref(null);
+        const el = ref(null);
+
         let typingTimer;
         const validateAfterIdleFor = 500;
+        const getCorrectSpecificationMessage = () => '<span style="color: var(--baklava-control-color-primary);">The specification is valid.</span>';
         const specificationWithIncludes = ref(null);
 
         const maybeStringify = (maybeSpecification) => (maybeSpecification !== undefined
@@ -125,7 +130,81 @@ export default defineComponent({
         const height = ref('auto');
         const currentSpecification = ref(maybeStringify(specification.value));
         const visible = computed(() =>
-            specification.value && editorManager.baklavaView.settings.editableNodeTypes);
+            specification.value && editorManager.baklavaView.settings.editableNodeTypes,
+        );
+
+        /**
+         * Validates the interfaces of a parsed node specification.
+         *
+         * This function performs two main checks:
+         * - Ensures that there are no duplicate interface names.
+         * - Validates each interface object against a JSON schema.
+         *
+         * @param {Object} parsedSpecification - The parsed node specification object to validate.
+         * @throws {Error} Thrown if the validation failed.
+         */
+        const validateNodeInterfaces = (parsedSpecification) => {
+            if (!parsedSpecification?.interfaces) {
+                return;
+            }
+            // Check for duplicate interface names.
+            const names = parsedSpecification.interfaces.map((intf) => intf.name);
+            const duplicates = names.filter((name, idx) => names.indexOf(name) !== idx);
+            if (duplicates.length > 0) {
+                throw new Error(`Conflicting interface names: ${[...new Set(duplicates)].join(', ')}`);
+            }
+
+            // Validate against the JSON schema.
+            parsedSpecification.interfaces.forEach((intf) => {
+                const validationErrors = editorManager.validateNodeInterface(intf);
+                if (validationErrors.length) {
+                    throw new Error(validationErrors);
+                }
+            });
+        };
+
+        /**
+         * Validate a node specification.
+         *
+         * @param {Object} parsedSpecification - The node specification object to validate.
+         * @throws {Error} Throws an error containing validation errors if any are found.
+         */
+        const validateNode = (parsedSpecification) => {
+            const validationErrors = editorManager.validateNode(parsedSpecification);
+            if (validationErrors.length) {
+                throw new Error(validationErrors);
+            }
+        };
+
+        /**
+         * Validate the properties of a node.
+         *
+         * This function performs two main checks:
+         * - Ensures that there are no duplicated properties names.
+         * - Validates each interface object against a JSON schema.
+         *
+         * @param {Object} parsedSpecification - The parsed node specification object to validate.
+         * @throws {Error} Raised if a validation failed.
+         */
+        const validateNodeProperties = (parsedSpecification) => {
+            // Check for duplicate property names.
+            if (parsedSpecification?.properties) {
+                const propNames = parsedSpecification.properties.map((prop) => prop.name);
+                const duplicates = propNames.filter((name, idx) => propNames.indexOf(name) !== idx);
+                if (duplicates.length > 0) {
+                    throw new Error(`Conflicting property names: ${[...new Set(duplicates)].join(', ')}`);
+                }
+            }
+
+            if (parsedSpecification?.interfaces) {
+                parsedSpecification.interfaces.forEach((intf) => {
+                    const validationErrors = editorManager.validateNodeInterface(intf);
+                    if (validationErrors.length) {
+                        throw new Error(validationErrors);
+                    }
+                });
+            }
+        };
 
         // Validation
         const validate = async (silent = false, shouldCommitChanges = true) => {
@@ -241,6 +320,10 @@ export default defineComponent({
                     throw new Error(ret.errors);
                 }
 
+                validateNodeInterfaces(parsedSpecification);
+                validateNodeProperties(parsedSpecification);
+                validateNode(parsedSpecification);
+
                 const validationErrors =
                     EditorManager
                         .validateSpecification(
@@ -305,14 +388,15 @@ export default defineComponent({
             }
 
             editorManager.modifiedNodeSpecificationRegistry[node.value.id] =
-                maybeStringify(currentSpecification.value);
+                currentSpecification.value;
+        };
 
         const delayedEditorUpdate = () => nextTick().then(handleInput);
         watch(currentSpecification, delayedEditorUpdate);
         watch(visible, delayedEditorUpdate);
         delayedEditorUpdate();
 
-        const commitChanges = async (unresolvedSpecification, silent) => {
+        const applyChanges = async (unresolvedSpecification, silent) => {
             const output = await editorManager.updateEditorSpecification(unresolvedSpecification);
             if (output.errors !== undefined && output.errors.length) {
                 throw new Error(output.errors);
@@ -323,7 +407,16 @@ export default defineComponent({
             }
         };
 
-        // Validation
+        /**
+         * Validate the properties of a node.
+         *
+         * This function performs two main checks:
+         * - Ensures that there are no duplicated properties names.
+         * - Validates each interface object against a JSON schema.
+         *
+         * @param {Object} parsedSpecification - The parsed node specification object to validate.
+         * @throws {Error} Raised if a validation failed.
+         */
         const validateNodeProperties = (parsedSpecification) => {
             // Check for duplicate property names.
             if (parsedSpecification?.properties) {
@@ -344,29 +437,92 @@ export default defineComponent({
             }
         };
 
+        /**
+         * Validates the interfaces of a parsed node specification.
+         *
+         * This function performs two main checks:
+         * - Ensures that there are no duplicate interface names.
+         * - Validates each interface object against a JSON schema.
+         *
+         * @param {Object} parsedSpecification - The parsed node specification object to validate.
+         * @throws {Error} Thrown if the validation failed.
+         */
         const validateNodeInterfaces = (parsedSpecification) => {
-            if (parsedSpecification?.interfaces) {
-                // Check for duplicate interface names.
-                const names = parsedSpecification.interfaces.map((intf) => intf.name);
-                const duplicates = names.filter((name, idx) => names.indexOf(name) !== idx);
-                if (duplicates.length > 0) {
-                    throw new Error(`Conflicting interface names: ${[...new Set(duplicates)].join(', ')}`);
-                }
-
-                // Validate against the JSON schema.
-                parsedSpecification.interfaces.forEach((intf) => {
-                    const validationErrors = editorManager.validateNodeInterface(intf);
-                    if (validationErrors.length) {
-                        throw new Error(validationErrors);
-                    }
-                });
+            if (!parsedSpecification?.interfaces) {
+                return;
             }
+            // Check for duplicate interface names.
+            const names = parsedSpecification.interfaces.map((intf) => intf.name);
+            const duplicates = names.filter((name, idx) => names.indexOf(name) !== idx);
+            if (duplicates.length > 0) {
+                throw new Error(`Conflicting interface names: ${[...new Set(duplicates)].join(', ')}`);
+            }
+
+            // Validate against the JSON schema.
+            parsedSpecification.interfaces.forEach((intf) => {
+                const validationErrors = editorManager.validateNodeInterface(intf);
+                if (validationErrors.length) {
+                    throw new Error(validationErrors);
+                }
+            });
         };
 
+        /**
+         * Validate a node specification.
+         *
+         * @param {Object} parsedSpecification - The node specification object to validate.
+         * @throws {Error} Throws an error containing validation errors if any are found.
+         */
         const validateNode = (parsedSpecification) => {
             const validationErrors = editorManager.validateNode(parsedSpecification);
             if (validationErrors.length) {
                 throw new Error(validationErrors);
+            }
+        };
+
+        /**
+         * Handle the change of a node's name within the specification editor.
+         *
+         * This function checks if the new name already exists among the nodes in the current
+         * specification, including included nodes. It throws an error if a node with the new
+         * name already exists. If the node is not from an included specification and the old
+         * name exists in the overridden (included) nodes, it sets `includeName` on the parsed
+         * specification to the old name to indicate that it is overriding an included node.
+         *
+         * @param {string} oldName - The current name of the node before the change.
+         * @param {string} newName - The new name to assign to the node.
+         * @param {Object} parsedSpecification -
+         *     The parsed specification object for the node being edited.
+         * @throws {Error} If a node with the new name already exists in the specification.
+         */
+        const handleNameChange = (oldName, newName, parsedSpecification) => {
+            if (oldName === newName) {
+                return;
+            }
+
+            const newNameInSpec = specificationWithIncludes
+                .value
+                ?.nodes
+                ?.map(EditorManager.getNodeName)
+                .includes(newName);
+
+            if (newNameInSpec) {
+                throw new Error(`Node ${newName} already exists.`);
+            }
+
+            // Override included node
+            if (!parsedSpecification.includeName) {
+                const oldNameInOverridden = editorManager
+                    .specification
+                    .includedSpecification
+                    .nodes
+                    ?.map(EditorManager.getNodeName)
+                    .includes(oldName);
+
+                /* eslint-disable no-param-reassign */
+                if (oldNameInOverridden) {
+                    parsedSpecification.includeName = oldName;
+                }
             }
         };
 
@@ -386,31 +542,7 @@ export default defineComponent({
                 // Handle name overrides
                 const oldName = node.value.type;
                 const newName = EditorManager.getNodeName(parsedSpecification);
-                if (oldName !== newName) {
-                    const newNameInSpec = specificationWithIncludes
-                        .value
-                        ?.nodes
-                        ?.map(EditorManager.getNodeName)
-                        .includes(newName);
-
-                    if (newNameInSpec) {
-                        throw new Error(`Node ${newName} already exists.`);
-                    }
-
-                    // Override included node
-                    if (!parsedSpecification.includeName) {
-                        const oldNameInOverridden = editorManager
-                            .specification
-                            .includedSpecification
-                            .nodes
-                            ?.map(EditorManager.getNodeName)
-                            .includes(oldName);
-
-                        if (oldNameInOverridden) {
-                            parsedSpecification.includeName = oldName;
-                        }
-                    }
-                }
+                handleNameChange(oldName, newName, parsedSpecification);
 
                 unresolvedSpecification.nodes = (unresolvedSpecification.nodes ?? [])
                     .filter((specNode) => !nodeMatchesSpec(specNode))
@@ -423,7 +555,7 @@ export default defineComponent({
 
                 // Update specification
                 if (shouldCommitChanges) {
-                    await commitChanges(unresolvedSpecification, silent);
+                    await applyChanges(unresolvedSpecification, silent);
                 }
                 return [];
             } catch (error) {
@@ -435,16 +567,41 @@ export default defineComponent({
             }
         };
 
+        /**
+         * Determine whether the changes to the node specification can be applied.
+         *
+         * @returns {boolean} Whether the changes to the specification may be applied.
+         * @throws Will return false if parsing the YAML fails.
+         */
         const canApplyChanges = () => {
             try {
-                return JSON.stringify(specification.value) ===
+                if (!canApplyChanges.previousSpecification) {
+                    canApplyChanges.previousSpecification = currentSpecification.value;
+                }
+
+                const hasChanged =
+                    canApplyChanges.previousSpecification !== currentSpecification.value;
+
+                if (hasChanged) {
+                    canApplyChanges.previousSpecification = currentSpecification.value;
+                } else if (canApplyChanges.cachedResult !== undefined) {
+                    return canApplyChanges.cachedResult;
+                }
+                canApplyChanges.cachedResult = JSON.stringify(specification.value) ===
                     JSON.stringify(YAML.parse(currentSpecification.value.replaceAll('\t', '  '))) &&
                     validate(true, false);
+                return canApplyChanges.cachedResult;
             } catch {
                 return false;
             }
         };
 
+        /**
+         * Format an error message into an HTML element.
+         *
+         * @param {string|Error} error - The error object or message to format.
+         * @returns {string} The formatted error message as an HTML string.
+         */
         const formatError = (error) => {
             let errorMessage = (error && error.message) ? error.message : String(error);
             errorMessage = errorMessage.replace(/unresolved_specification\//g, '');
@@ -484,13 +641,51 @@ export default defineComponent({
                         `<span style="color: var(--baklava-control-color-error);">${formatError(err)}</span>`,
                     ).join('<br><br>')}`;
             } else {
-                validationErrorsElement.innerHTML =
-                    '<span style="color: var(--baklava-control-color-primary);">The specification is valid.</span>';
-                }
+                validationErrorsElement.innerHTML = getCorrectSpecificationMessage();
+            }
+        };
+
+        /**
+         * Set up a debounced event listener to validate specification.
+         *
+         * Removes any existing 'keyup' event listener for live validation,
+         * then attaches a new listener that waits for the user to stop typing
+         * for a specified duration (`validateAfterIdleFor`) before triggering
+         * the validation status display (`showValidationStatus`).
+         *
+         * @returns {void}
+         */
+        const validateIfTypingCompleted = () => {
+            if (!el.value) {
+                return;
+            }
+            el.value.removeEventListener('keyup', el.value.liveValidateListener);
+            el.value.liveValidateListener = () => {
+                clearTimeout(typingTimer);
+                typingTimer = setTimeout(showValidationStatus, validateAfterIdleFor);
             };
             el.value.addEventListener('keyup', el.value.liveValidateListener);
         };
 
+        watch(
+            [() => editorManager.specification.unresolvedSpecification.nodes, node],
+            () => {
+                const unresolved = editorManager.specification.unresolvedSpecification;
+                const included = editorManager.specification.includedSpecification;
+                const baseSpecification = JSON.parse(JSON.stringify(unresolved));
+
+                EditorManager.mergeObjects(
+                    baseSpecification,
+                    included,
+                );
+                specificationWithIncludes.value = baseSpecification;
+            },
+            { immediate: true, deep: true },
+        );
+
+        // Editor height
+
+        const height = ref('auto');
         const handleInput = () => {
             if (!visible.value) { return; }
             const { scrollHandle } = props;
@@ -520,6 +715,7 @@ export default defineComponent({
         delayedEditorUpdate();
 
         watch(
+            [() => editorManager.specification.unresolvedSpecification.nodes, node],
             () => {
                 const unresolved = editorManager.specification.unresolvedSpecification;
                 const included = editorManager.specification.includedSpecification;

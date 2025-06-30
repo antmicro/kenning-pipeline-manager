@@ -381,6 +381,13 @@
                                 "object",
                                 "null"
                             ]
+                        },
+                        "pill": {
+                            "description": "",
+                            "type": [
+                                "object",
+                                "null"
+                            ]
                         }
                     },
                     "additionalProperties": false
