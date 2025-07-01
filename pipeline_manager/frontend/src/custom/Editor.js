@@ -67,6 +67,8 @@ export default class PipelineManagerEditor extends Editor {
 
     subgraphStack = [];
 
+    parentNodes = new Map();
+
     registerGraph(graph) {
         const customGraph = createPipelineManagerGraph(graph);
         super.registerGraph(customGraph);

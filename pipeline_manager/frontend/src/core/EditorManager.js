@@ -712,12 +712,25 @@ export default class EditorManager {
 
         let resolvedNodes = [];
 
+        // Store abstract nodes before removing them
+        nodes.forEach((node) => {
+            if (node.abstract) {
+                this.baklavaView.editor.parentNodes.set(node.name, node);
+            }
+        });
+
         try {
             const preprocessedNodes = EditorManager.preprocessNodes(nodes);
             resolvedNodes = this.resolveInheritance(preprocessedNodes);
         } catch (e) {
             return { errors: [e.message], warnings };
         }
+
+        resolvedNodes.forEach((node) => {
+            if (node.isCategory) {
+                this.baklavaView.editor.parentNodes.set(node.name, node);
+            }
+        });
 
         const errors = [];
         errors.push(...this.validateResolvedSpecification(
