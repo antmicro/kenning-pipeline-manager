@@ -142,9 +142,10 @@ It consists of the following properties:
 Node style defines how nodes of a given style should look like. Currently, the following options are supported:
 
 * `color` - color of the node unless a node sets its own `color`,
-* `icon` - secondary icon of the node, which is displayed separately from [Node](#node) `icon`.
+* `icon` - secondary icon of the node, which is displayed separately from [Node](#node) `icon`,
+* `pill` - pill of the node unless a node sets its own `pill`.
 
-Values both fields are defined the same way as in [Node](#node) specification, however, `icon` can obtain [Navbar item](#navbar-item) `iconName` values as well.
+Field values are defined the same way as in [Node](#node) specification, however, `icon` can obtain [Navbar item](#navbar-item) `iconName` values as well.
 
 There exists a special style `__new`, which is managed automatically and does not persist specification saves and loads.
 
@@ -234,6 +235,9 @@ This object specifies a single node.
   Additionally, if a node extends from a category node, then it has to be in its subtree.
 * `color` - a hexadecimal color that will be used as the node background in the editor.
   If not provided, the default Kenning Pipeline Manager color scheme will be used.
+* `pill` - a dictionary that defines an additional node tag displayed in the top right corner of the node. It has the following entries:
+  * `text` - content of the pill,
+  * `color` (optional) - background color. The default color is white.
 
 Some or all of the properties above (except for `name`) can be derived from existing node types using the `extends` list - check [Node type inheritance](#node-type-inheritance).
 
