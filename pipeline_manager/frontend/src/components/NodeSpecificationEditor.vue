@@ -185,8 +185,10 @@ export default defineComponent({
                 });
 
                 // Remove deleted interfaces and properties
+                // An interface was deleted if it's present in old resolved specification
+                // but not in the editor and is also not inherited.
                 let oldSpecification = editorManager.specification.currentSpecification
-                    .nodes?.find((n) => n.name === oldType);
+                    .nodes?.find((n) => EditorManager.getNodeName(n) === oldType);
 
                 if (oldSpecification === undefined) {
                     oldSpecification = editorManager.specification.currentSpecification
@@ -198,16 +200,42 @@ export default defineComponent({
                 }
                 if (oldSpecification === undefined) {
                     oldSpecification = editorManager.specification.unresolvedSpecification
-                        .nodes?.find((n) => n.name === oldType);
+                        .nodes?.find((n) => EditorManager.getNodeName(n) === oldType);
                 }
+
+                let oldProperties = oldSpecification.properties ?? [];
+                let oldInterfaces = oldSpecification.interfaces ?? [];
+
+                let inheritedProperties = [];
+                let inheritedInterfaces = [];
+
+                parsedSpecification?.extends?.forEach((parentType) => {
+                    const parentSpec = editorManager.specification.currentSpecification
+                        .nodes?.find((n) => EditorManager.getNodeName(n) === parentType);
+                    inheritedProperties = [
+                        ...inheritedProperties,
+                        ...(parentSpec?.properties ?? []),
+                    ];
+                    inheritedInterfaces = [
+                        ...inheritedInterfaces,
+                        ...(parentSpec?.interfaces ?? []),
+                    ];
+                });
+
+                oldProperties = oldProperties.filter(
+                    (prop) => !inheritedProperties.some((p) => p.name === prop.name),
+                );
+                oldInterfaces = oldInterfaces.filter(
+                    (intf) => !inheritedInterfaces.some((i) => i.name === intf.name),
+                );
 
                 const parsedProperties = parsedSpecification.properties ?? [];
                 const parsedInterfaces = parsedSpecification.interfaces ?? [];
 
-                const removedProperties = (oldSpecification.properties ?? []).filter(
+                const removedProperties = oldProperties.filter(
                     (prop) => !parsedProperties.some((p) => p.name === prop.name),
                 );
-                const removedInterfaces = (oldSpecification.interfaces ?? []).filter(
+                const removedInterfaces = oldInterfaces.filter(
                     (intf) => !parsedInterfaces.some((i) => i.name === intf.name),
                 );
 
