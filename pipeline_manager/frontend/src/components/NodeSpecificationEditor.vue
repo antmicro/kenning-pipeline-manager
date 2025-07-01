@@ -74,7 +74,6 @@ export default defineComponent({
         let typingTimer;
         const validateAfterIdleFor = 500;
         const getCorrectSpecificationMessage = () => '<span style="color: var(--baklava-control-color-primary);">The specification is valid.</span>';
-        const specificationWithIncludes = ref(null);
 
         const maybeStringify = (maybeSpecification) => (maybeSpecification !== undefined
             ? YAML.stringify(maybeSpecification)
@@ -206,17 +205,41 @@ export default defineComponent({
             }
         };
 
-        // Validation
-        const validate = async (silent = false, shouldCommitChanges = true) => {
+        const validate = () => {
+            const errors = [];
             try {
-                const parsedSpecification = YAML.parse(currentSpecification.value.replaceAll('\t', '  '));
+                const parsedCurrentSpecification = YAML.parse(currentSpecification.value.replaceAll('\t', '  '));
+                const differingSpecifications =
+                    JSON.stringify(specification.value) !==
+                    JSON.stringify(parsedCurrentSpecification);
 
-                // Update style of edited node type
-                parsedSpecification.style
-                    = EditorManager.mergeStyles(EDITED_NODE_STYLE, parsedSpecification.style);
-                currentSpecification.value = YAML.stringify(parsedSpecification);
-                editorManager.modifiedNodeSpecificationRegistry[node.value.id] =
-                    currentSpecification.value;
+                if (!differingSpecifications) {
+                    return []; // No changes, so no errors to show
+                }
+
+                const parsedSpecForValidation = YAML.parse(currentSpecification.value.replaceAll('\t', '  '));
+                try {
+                    validateNode(parsedSpecForValidation);
+                } catch (e) { errors.push(e); }
+                try {
+                    validateNodeProperties(parsedSpecForValidation);
+                } catch (e) { errors.push(e); }
+                try {
+                    validateNodeInterfaces(parsedSpecForValidation);
+                } catch (e) { errors.push(e); }
+            } catch (error) {
+                errors.push(error);
+            }
+            return errors;
+        };
+
+        const updateSpecification = async () => {
+            try {
+                const parsingErrors = validate();
+                if (parsingErrors.length > 0) {
+                    throw new Error(parsingErrors);
+                }
+                const parsedSpecification = YAML.parse(currentSpecification.value.replaceAll('\t', '  '));
 
                 // Update all nodes of the type to match the new specification
                 const oldType = node.value.type;
@@ -308,7 +331,7 @@ export default defineComponent({
                 const errors = editorManager._unregisterNodeType(oldType);
                 if (errors.length) {
                     NotificationHandler.terminalLog('error', 'Error when registering the node', errors);
-                    return errors;
+                    return Array.isArray(errors) ? errors : [errors];
                 }
                 // Add type to editor and specification
                 let ret = editorManager.addNodeToEditorSpecification(
@@ -368,202 +391,7 @@ export default defineComponent({
                 if (!silent) {
                     NotificationHandler.terminalLog('error', 'Validation failed', messages);
                 }
-                return messages.map((e) => ((e && e.message) ? e.message : String(e)));
-            }
-        };
-
-        const handleInput = () => {
-            if (!visible.value) { return; }
-            const { scrollHandle } = props;
-            let prevParentScrollHeight;
-            if (props.scrollHandle) {
-                prevParentScrollHeight = scrollHandle.scrollTop;
-            }
-
-            el.value.style.height = 'auto';
-            el.value.style.height = `${el.value.scrollHeight}px`;
-
-            if (scrollHandle !== undefined && scrollHandle.scrollTop < prevParentScrollHeight) {
-                scrollHandle.scrollTop = prevParentScrollHeight;
-            }
-
-            editorManager.modifiedNodeSpecificationRegistry[node.value.id] =
-                currentSpecification.value;
-        };
-
-        const delayedEditorUpdate = () => nextTick().then(handleInput);
-        watch(currentSpecification, delayedEditorUpdate);
-        watch(visible, delayedEditorUpdate);
-        delayedEditorUpdate();
-
-        const applyChanges = async (unresolvedSpecification, silent) => {
-            const output = await editorManager.updateEditorSpecification(unresolvedSpecification);
-            if (output.errors !== undefined && output.errors.length) {
-                throw new Error(output.errors);
-            }
-
-            if (!silent) {
-                NotificationHandler.showToast('info', 'Node validated');
-            }
-        };
-
-        /**
-         * Validate the properties of a node.
-         *
-         * This function performs two main checks:
-         * - Ensures that there are no duplicated properties names.
-         * - Validates each interface object against a JSON schema.
-         *
-         * @param {Object} parsedSpecification - The parsed node specification object to validate.
-         * @throws {Error} Raised if a validation failed.
-         */
-        const validateNodeProperties = (parsedSpecification) => {
-            // Check for duplicate property names.
-            if (parsedSpecification?.properties) {
-                const propNames = parsedSpecification.properties.map((prop) => prop.name);
-                const duplicates = propNames.filter((name, idx) => propNames.indexOf(name) !== idx);
-                if (duplicates.length > 0) {
-                    throw new Error(`Conflicting property names: ${[...new Set(duplicates)].join(', ')}`);
-                }
-            }
-
-            if (parsedSpecification?.interfaces) {
-                parsedSpecification.interfaces.forEach((intf) => {
-                    const validationErrors = editorManager.validateNodeInterface(intf);
-                    if (validationErrors.length) {
-                        throw new Error(validationErrors);
-                    }
-                });
-            }
-        };
-
-        /**
-         * Validates the interfaces of a parsed node specification.
-         *
-         * This function performs two main checks:
-         * - Ensures that there are no duplicate interface names.
-         * - Validates each interface object against a JSON schema.
-         *
-         * @param {Object} parsedSpecification - The parsed node specification object to validate.
-         * @throws {Error} Thrown if the validation failed.
-         */
-        const validateNodeInterfaces = (parsedSpecification) => {
-            if (!parsedSpecification?.interfaces) {
-                return;
-            }
-            // Check for duplicate interface names.
-            const names = parsedSpecification.interfaces.map((intf) => intf.name);
-            const duplicates = names.filter((name, idx) => names.indexOf(name) !== idx);
-            if (duplicates.length > 0) {
-                throw new Error(`Conflicting interface names: ${[...new Set(duplicates)].join(', ')}`);
-            }
-
-            // Validate against the JSON schema.
-            parsedSpecification.interfaces.forEach((intf) => {
-                const validationErrors = editorManager.validateNodeInterface(intf);
-                if (validationErrors.length) {
-                    throw new Error(validationErrors);
-                }
-            });
-        };
-
-        /**
-         * Validate a node specification.
-         *
-         * @param {Object} parsedSpecification - The node specification object to validate.
-         * @throws {Error} Throws an error containing validation errors if any are found.
-         */
-        const validateNode = (parsedSpecification) => {
-            const validationErrors = editorManager.validateNode(parsedSpecification);
-            if (validationErrors.length) {
-                throw new Error(validationErrors);
-            }
-        };
-
-        /**
-         * Handle the change of a node's name within the specification editor.
-         *
-         * This function checks if the new name already exists among the nodes in the current
-         * specification, including included nodes. It throws an error if a node with the new
-         * name already exists. If the node is not from an included specification and the old
-         * name exists in the overridden (included) nodes, it sets `includeName` on the parsed
-         * specification to the old name to indicate that it is overriding an included node.
-         *
-         * @param {string} oldName - The current name of the node before the change.
-         * @param {string} newName - The new name to assign to the node.
-         * @param {Object} parsedSpecification -
-         *     The parsed specification object for the node being edited.
-         * @throws {Error} If a node with the new name already exists in the specification.
-         */
-        const handleNameChange = (oldName, newName, parsedSpecification) => {
-            if (oldName === newName) {
-                return;
-            }
-
-            const newNameInSpec = specificationWithIncludes
-                .value
-                ?.nodes
-                ?.map(EditorManager.getNodeName)
-                .includes(newName);
-
-            if (newNameInSpec) {
-                throw new Error(`Node ${newName} already exists.`);
-            }
-
-            // Override included node
-            if (!parsedSpecification.includeName) {
-                const oldNameInOverridden = editorManager
-                    .specification
-                    .includedSpecification
-                    .nodes
-                    ?.map(EditorManager.getNodeName)
-                    .includes(oldName);
-
-                /* eslint-disable no-param-reassign */
-                if (oldNameInOverridden) {
-                    parsedSpecification.includeName = oldName;
-                }
-            }
-        };
-
-        const validate = async (silent = false, shouldCommitChanges = true) => {
-            try {
-                const parsedSpecification = YAML.parse(currentSpecification.value.replaceAll('\t', '  '));
-                let validationErrors = [];
-
-                validateNode(parsedSpecification);
-                validateNodeProperties(parsedSpecification);
-                validateNodeInterfaces(parsedSpecification);
-
-                // Validate the node in overridden specification
-                const unresolvedSpecification =
-                    JSON.parse(JSON.stringify(editorManager.specification.unresolvedSpecification));
-
-                // Handle name overrides
-                const oldName = node.value.type;
-                const newName = EditorManager.getNodeName(parsedSpecification);
-                handleNameChange(oldName, newName, parsedSpecification);
-
-                unresolvedSpecification.nodes = (unresolvedSpecification.nodes ?? [])
-                    .filter((specNode) => !nodeMatchesSpec(specNode))
-                    .concat([parsedSpecification]);
-
-                validationErrors = EditorManager.validateSpecification(unresolvedSpecification);
-                if (validationErrors.length) {
-                    throw new Error(validationErrors);
-                }
-
-                // Update specification
-                if (shouldCommitChanges) {
-                    await applyChanges(unresolvedSpecification, silent);
-                }
-                return [];
-            } catch (error) {
-                const messages = Array.isArray(error) ? error : [error];
-                if (!silent) {
-                    NotificationHandler.terminalLog('error', 'Validation failed', messages);
-                }
-                return messages.map((e) => ((e && e.message) ? e.message : String(e)));
+                return messages;
             }
         };
 
@@ -608,24 +436,33 @@ export default defineComponent({
          *   and there are no validation errors. Otherwise, `false`.
          * @throws {Error} If parsing the YAML fails.
          */
-        const canApplyChanges = () => {
+        const canApplyChanges = computed(() => {
             try {
-                const hasChanged =
-                    canApplyChanges.previousSpecification !== currentSpecification.value;
+                const parsedCurrentSpecification = YAML.parse(
+                    currentSpecification.value.replaceAll('\t', '  '),
+                );
+                const differingSpecifications =
+                    JSON.stringify(
+                        specification.value,
+                    ) !==
+                    JSON.stringify(
+                        parsedCurrentSpecification,
+                    );
 
-                if (!hasChanged) {
-                    if (canApplyChanges.cachedResult === undefined) {
-                        canApplyChanges.cachedResult = evaluateIfChangesMayBeApplied();
-                    }
-                    return canApplyChanges.cachedResult;
+                if (!differingSpecifications) {
+                    return false;
                 }
 
-                canApplyChanges.cachedResult = evaluateIfChangesMayBeApplied();
-                return canApplyChanges.cachedResult;
-            } catch {
+                const parsedSpecForValidation = YAML.parse(currentSpecification.value.replaceAll('\t', '  '));
+                validateNode(parsedSpecForValidation);
+                validateNodeProperties(parsedSpecForValidation);
+                validateNodeInterfaces(parsedSpecForValidation);
+
+                return true;
+            } catch (error) {
                 return false;
             }
-        };
+        });
 
         /**
          * Format an error message into an HTML element.
@@ -806,6 +643,7 @@ export default defineComponent({
             currentSpecification,
             specification,
             validate,
+            updateSpecification,
             canApplyChanges,
             visible,
             handleTab,
