@@ -48,6 +48,7 @@ export const DEFAULT_GRAPH_NODE_TYPE = 'New Graph Node';
 
 // Styles
 export const NEW_NODE_STYLE = '__new';
+export const EDITED_NODE_STYLE = '__edited';
 
 /**
  * Translates the provided url according to
@@ -891,6 +892,7 @@ export default class EditorManager {
         this.baklavaView.editor.hideHud = metadata?.hideHud ?? this.defaultMetadata.hideHud;
 
         this.baklavaView.editor.nodeStyles.set(NEW_NODE_STYLE, { icon: 'NewNode' });
+        this.baklavaView.editor.nodeStyles.set(EDITED_NODE_STYLE, { icon: 'EditedNode' });
         Object.entries(metadata?.styles ?? {}).forEach(([key, value]) => {
             this.baklavaView.editor.nodeStyles.set(key, value);
         });
@@ -1334,6 +1336,7 @@ export default class EditorManager {
      * @returns {Array<string>|undefined} merged style.
      */
     static mergeStyles(style1, style2) {
+        if (style1 === style2) return style1;
         if ((style1 && style2) === undefined) return style1 ?? style2;
 
         [style1, style2] = [style1, style2]

@@ -36,7 +36,7 @@ import {
     computed, defineComponent, nextTick, ref, toRef, watch,
 } from 'vue';
 import { useViewModel } from '@baklavajs/renderer-vue';
-import EditorManager from '../core/EditorManager';
+import EditorManager, { EDITED_NODE_STYLE } from '../core/EditorManager';
 import NotificationHandler from '../core/notifications';
 import { menuState, configurationState } from '../core/nodeCreation/ConfigurationState.ts';
 import { alterInterfaces, alterProperties } from '../core/nodeCreation/Configuration.ts';
@@ -155,6 +155,13 @@ export default defineComponent({
         const validate = async () => {
             try {
                 const parsedSpecification = YAML.parse(currentSpecification.value.replaceAll('\t', '  '));
+
+                // Update style of edited node type
+                parsedSpecification.style
+                    = EditorManager.mergeStyles(EDITED_NODE_STYLE, parsedSpecification.style);
+                currentSpecification.value = YAML.stringify(parsedSpecification);
+                editorManager.modifiedNodeSpecificationRegistry[node.value.id] =
+                    currentSpecification.value;
 
                 // Update all nodes of the type to match the new specification
                 const oldType = node.value.type;
