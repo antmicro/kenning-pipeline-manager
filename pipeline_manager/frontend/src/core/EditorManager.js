@@ -547,36 +547,43 @@ export default class EditorManager {
 
         this.specification.unresolvedSpecification.nodes ??= [];
 
-        validationErrors = this._registerNodeType(nodeSpecification, twoColumn);
-        if (validationErrors.length) {
-            return { errors: validationErrors, warnings: [] };
-        }
-
         // Modify existing node specification
         if (nodeToUpdate !== undefined) {
-            const currentSpecification = this.specification.unresolvedSpecification.nodes.find(
-                (node) => node.name === nodeToUpdate,
+            const unresolvedNodeSpecification = this.specification.unresolvedSpecification
+                .nodes.find(
+                    (node) => EditorManager.getNodeName(node) === nodeToUpdate,
+                );
+            const resolvedNodeSpecification = this.specification.currentSpecification.nodes.find(
+                (node) => EditorManager.getNodeName(node) === nodeToUpdate,
             );
-            if (currentSpecification === undefined) {
+
+            if (unresolvedNodeSpecification === undefined) {
                 // The node is included - push new spec to unresolvedSpecification to override
                 nodeSpecification.includeName = nodeToUpdate;
                 this.specification.unresolvedSpecification.nodes.push(nodeSpecification);
             } else {
                 Object.entries(nodeSpecification).forEach(([key, value]) => {
                     if (value !== undefined && key !== 'interfaces') {
-                        currentSpecification[key] = value;
+                        unresolvedNodeSpecification[key] = value;
+                        resolvedNodeSpecification[key] = value;
                     }
                 });
 
-                if (currentSpecification.subgraphId === undefined) {
-                    currentSpecification.interfaces = nodeSpecification.interfaces;
+                validationErrors = this._registerNodeType(resolvedNodeSpecification, twoColumn);
+                if (validationErrors.length) {
+                    return { errors: validationErrors, warnings: [] };
+                }
+
+                if (unresolvedNodeSpecification.subgraphId === undefined) {
+                    unresolvedNodeSpecification.interfaces = nodeSpecification.interfaces;
+                    resolvedNodeSpecification.interfaces = nodeSpecification.interfaces;
                 } else {
                     // Attach subgraph to the updated subgraph node
                     let graphNode;
                     let subgraph;
                     this.specification.unresolvedSpecification.graphs.forEach((graph) => {
-                        if (currentSpecification.subgraphId === graph.id) {
-                            graphNode = currentSpecification;
+                        if (unresolvedNodeSpecification.subgraphId === graph.id) {
+                            graphNode = unresolvedNodeSpecification;
                             subgraph = graph;
                         }
                     });
@@ -595,6 +602,10 @@ export default class EditorManager {
                 }
             }
         } else {
+            validationErrors = this._registerNodeType(nodeSpecification);
+            if (validationErrors.length) {
+                return { errors: validationErrors, warnings: [] };
+            }
             this.specification.unresolvedSpecification.nodes.push(nodeSpecification);
         }
 
