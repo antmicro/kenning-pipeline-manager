@@ -411,3 +411,14 @@ export async function specification_change(params: {specification: any, loadingS
         async () => externalApplicationManager.updateSpecification(params.specification),
     );
 }
+
+export async function specification_graph_change(
+    params: {specification: any, dataflow: any, loadingScreen: boolean},
+) {
+    const externalApplicationManager = getExternalApplicationManager();
+    await externalApplicationManager.conditionalLoadingScreen(params.loadingScreen, async () => {
+        if (!await externalApplicationManager.updateSpecification(params.specification)) {
+            await externalApplicationManager.updateDataflow(params.dataflow);
+        }
+    });
+}

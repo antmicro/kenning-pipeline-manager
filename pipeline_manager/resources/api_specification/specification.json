@@ -265,6 +265,31 @@
             "returns": {
                 "$ref": "common_types#/$defs/null_or_empty"
             }
+        },
+        "specification_graph_change": {
+            "description": "Procedure to update specification and dataflow",
+            "params": {
+                "type": "object",
+                "properties": {
+                    "specification": {
+                        "$ref": "common_types#/$defs/specification"
+                    },
+                    "dataflow": {
+                        "$ref": "common_types#/$defs/dataflow_or_url"
+                    },
+                    "loadingScreen": {
+                        "$ref": "common_types#/$defs/loadingScreen"
+                    }
+                },
+                "required": [
+                    "specification",
+                    "dataflow"
+                ],
+                "additionalProperties": false
+            },
+            "returns": {
+                "$ref": "common_types#/$defs/null_or_empty"
+            }
         }
     },
     "backend_endpoints": {
