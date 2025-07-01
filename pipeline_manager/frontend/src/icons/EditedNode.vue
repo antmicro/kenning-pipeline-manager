@@ -13,6 +13,6 @@ SPDX-License-Identifier: Apache-2.0
 
 <style lang="scss" scoped>
 .__title-icon circle {
-    fill: $green;
+    fill: $gray-200;
 }
 </style>

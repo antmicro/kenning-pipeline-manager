@@ -13,6 +13,7 @@ import Collapse from './Collapse.vue';
 import Cross from './Cross.vue';
 import Cube from './Cube.vue';
 import Disconnect from './Disconnect.vue';
+import EditedNode from './EditedNode.vue';
 import ExclamationMark from './ExclamationMark.vue';
 import Expand from './Expand.vue';
 import Import from './Import.vue';
@@ -41,6 +42,7 @@ export default {
     Cross,
     Cube,
     Disconnect,
+    EditedNode,
     ExclamationMark,
     Expand,
     Import,
