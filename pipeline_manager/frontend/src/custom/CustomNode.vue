@@ -53,17 +53,17 @@ from moving or deleting the nodes.
                 v-click-outside="doneRenaming"
                 @keydown.enter="doneRenaming"
             />
-            <template v-if="styleIconName !== undefined">
+            <template v-if="nodeStyle.name !== undefined">
                 <component
-                    v-if="styleIcon !== undefined"
+                    v-if="nodeStyle.icon !== undefined"
                     class="__title-icon"
-                    :is="styleIcon"
-                    :imgURI="styleIconName"
+                    :is="nodeStyle.icon"
+                    :imgURI="nodeStyle.name"
                 />
                 <img
                     v-else
                     class="__title-icon"
-                    :src="styleIconName"
+                    :src="nodeStyle.name"
                 />
              </template>
             <icons.Subgraph
@@ -203,20 +203,23 @@ const contextMenuStyle = computed(() => ({
     transform: `scale(${1 / graph.value.scaling})`,
 }));
 
+// Template refs
 const nodeRef = ref(null);
 const titleRef = ref(null);
 const renaming = ref(false);
 const renameField = ref(null);
 const tempName = ref('');
 
+// Reactive values
+const node = toRef(props, 'node');
 const nodeURLs = viewModel.value.editor.getNodeURLs(props.node.type);
-const nodeColor = viewModel.value.editor.getNodeColor(props.node);
-const nodeTitleColor = viewModel.value.editor.getTextColor(nodeColor);
+const nodeColor = computed(() => viewModel.value.editor.getNodeColor(node.value));
+const nodeTitleColor = computed(() => viewModel.value.editor.getTextColor(nodeColor.value));
 const nodeCategory = viewModel.value.editor.getNodeCategory(props.node.type);
 const isGraphNode = viewModel.value.editor.isGraphNode(props.node.type);
-const pillText = viewModel.value.editor.getPillText(props.node.type);
-const pillColor = viewModel.value.editor.getPillColor(props.node.type);
-const pillTextColor = viewModel.value.editor.getTextColor(pillColor);
+const pillText = computed(() => viewModel.value.editor.getPillText(node.value.type));
+const pillColor = computed(() => viewModel.value.editor.getPillColor(node.value.type));
+const pillTextColor = computed(() => viewModel.value.editor.getTextColor(pillColor.value));
 
 const displayNoResources = !viewModel.value.editor.nodeURLsEmpty();
 
@@ -399,9 +402,7 @@ const onContextMenuTitleClick = async (action) => {
             if (!graph.value.selectedNodes.includes(props.node)) {
                 graph.value.selectedNodes.push(props.node);
             }
-            graph.value.selectedNodes.forEach((node) => {
-                removeNode(node);
-            });
+            graph.value.selectedNodes.forEach(removeNode);
             commitTransaction();
             break;
         case 'rename':
@@ -413,10 +414,10 @@ const onContextMenuTitleClick = async (action) => {
         case 'disconnect': {
             startTransaction();
             let interfaces = [...displayedInputs.value, ...displayedOutputs.value];
-            graph.value.selectedNodes.forEach((node) => {
+            graph.value.selectedNodes.forEach((n) => {
                 interfaces = interfaces.concat(
-                    Object.entries(node.inputs).filter(([name, ni]) => !ni.hidden && !name.startsWith('property_')).map(([, ni]) => ni),
-                    Object.values(node.outputs).filter((ni) => !ni.hidden),
+                    Object.entries(n.inputs).filter(([name, ni]) => !ni.hidden && !name.startsWith('property_')).map(([, ni]) => ni),
+                    Object.values(n.outputs).filter((ni) => !ni.hidden),
                 );
             });
             const nodeConnections = graph.value.connections.filter(
@@ -643,18 +644,22 @@ const path = viewModel.value.editor.getNodeIconPath(props.node.type);
 const iconPath = viewModel.value.cache[`./${path}`] ?? path;
 
 // Metadata ("icon" is not a string) > Predefined > Cached > Arbitrary URI
-let styleIcon;
-let styleIconName = viewModel.value.editor.getStyleIcon(props.node.type);
+const nodeStyle = computed(() => {
+    let icon;
+    let name = viewModel.value.editor.getStyleIcon(node.value.type);
 
-if (typeof styleIconName === 'object' && styleIconName !== null) {
-    styleIconName = editorManager.getMetadataIcon(styleIconName);
-}
-if (icons[styleIconName] !== undefined) {
-    styleIcon = icons[styleIconName];
-} else if (viewModel.value.cache[`./${styleIconName}`] !== undefined) {
-    styleIcon = icons.Placeholder;
-    styleIconName = viewModel.value.cache[`./${styleIconName}`];
-}
+    if (typeof name === 'object' && name !== null) {
+        name = editorManager.getMetadataIcon(name);
+    }
+    if (icons[name] !== undefined) {
+        icon = icons[name];
+    } else if (viewModel.value.cache[`./${name}`] !== undefined) {
+        icon = icons.Placeholder;
+        name = viewModel.value.cache[`./${name}`];
+    }
+
+    return { icon, name };
+});
 
 // Interface modification
 
@@ -674,30 +679,30 @@ const nodeTitleStyle = computed(() => {
     if (!viewModel.value.editor.readonly) {
         return {
             cursor: 'drag',
-            backgroundColor: nodeColor,
-            color: nodeTitleColor,
+            backgroundColor: nodeColor.value,
+            color: nodeTitleColor.value,
         };
     }
 
     if (canOpenContextMenu.value) {
         return {
             cursor: 'pointer',
-            backgroundColor: nodeColor,
-            color: nodeTitleColor,
+            backgroundColor: nodeColor.value,
+            color: nodeTitleColor.value,
         };
     }
 
     return {
         cursor: 'default',
-        backgroundColor: nodeColor,
-        color: nodeTitleColor,
+        backgroundColor: nodeColor.value,
+        color: nodeTitleColor.value,
     };
 });
 
 const nodePillStyle = computed(() => ({
     cursor: 'default',
-    backgroundColor: pillColor,
-    color: pillTextColor,
+    backgroundColor: pillColor.value,
+    color: pillTextColor.value,
 }));
 
 const isPickedInterface = (intf) => intf === chosenInterface;

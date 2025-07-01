@@ -179,7 +179,7 @@ export default class PipelineManagerEditor extends Editor {
             color: options?.color,
             subgraphId: options?.subgraphId,
             style: options?.style,
-            pill: options?.pill,
+            pill: options?.pill && { color: '#ffffff', ...options.pill },
         });
 
         this.events.registerNodeType.emit({ type, options });
