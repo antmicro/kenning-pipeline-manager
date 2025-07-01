@@ -13,8 +13,8 @@ SPDX-License-Identifier: Apache-2.0
         <div class="__spec-editor">
             <button
                 class="baklava-button __validate-button"
-                :disabled="!canApplyChanges()"
-                @click="validate"
+                :disabled="!canApplyChanges"
+                @click="updateSpecification"
             >
                 Apply
             </button>
@@ -26,8 +26,21 @@ SPDX-License-Identifier: Apache-2.0
                 @input="handleInput"
                 @keydown.tab="handleTab"
             />
-
-            <p class="__validation_errors" v-html="getCorrectSpecificationMessage()"></p>
+            <p class="__validation_errors">
+                <template v-if=" cachedValidationResult.length > 0">
+                    Problems:<br>
+                    <span v-for="(err, idx) in cachedValidationResult" :key="idx">
+                        <span style="color: var(--baklava-control-color-error);">
+                            {{ formatError(err) }}
+                        </span>
+                    </span>
+                </template>
+            <template v-else>
+                <span style="color: var(--baklava-control-color-primary);">
+                    The specification is valid.
+                </span>
+            </template>
+            </p>
         </div>
     </div>
 </template>
@@ -44,11 +57,10 @@ import {
     computed, defineComponent, nextTick, ref, toRef, watch,
 } from 'vue';
 import { useViewModel } from '@baklavajs/renderer-vue';
-import EditorManager, { EDITED_NODE_STYLE } from '../core/EditorManager';
+import EditorManager from '../core/EditorManager';
 import NotificationHandler from '../core/notifications';
 import { menuState, configurationState } from '../core/nodeCreation/ConfigurationState.ts';
 import { alterInterfaces, alterProperties } from '../core/nodeCreation/Configuration.ts';
-import unresolvedSpecificationSchema from '../../../resources/schemas/unresolved_specification_schema.json' with {type: 'json'};
 
 export default defineComponent({
     props: {
@@ -89,23 +101,6 @@ export default defineComponent({
         };
 
         const specificationWithIncludes = ref(null);
-
-        watch(
-            [() => editorManager.specification.unresolvedSpecification.nodes, node],
-            () => {
-                const unresolved = editorManager.specification.unresolvedSpecification;
-                const included = editorManager.specification.includedSpecification;
-                const specification = JSON.parse(JSON.stringify(unresolved));
-
-                EditorManager.mergeObjects(
-                    specification,
-                    included,
-                );
-                specificationWithIncludes.value = specification;
-            },
-            { immediate: true, deep: true },
-        );
-
         const specification = computed(() => specificationWithIncludes
             .value
             ?.nodes
@@ -122,15 +117,7 @@ export default defineComponent({
         const visible = computed(() =>
             specification.value && editorManager.baklavaView.settings.editableNodeTypes);
 
-        // Editor height
-
-        const root = ref(null);
-        const el = ref(null);
-        const height = ref('auto');
-        const currentSpecification = ref(maybeStringify(specification.value));
-        const visible = computed(() =>
-            specification.value && editorManager.baklavaView.settings.editableNodeTypes,
-        );
+        // Validation
 
         /**
          * Validates the interfaces of a parsed node specification.
@@ -388,10 +375,7 @@ export default defineComponent({
                 return [];
             } catch (error) {
                 const messages = Array.isArray(error) ? error : [error];
-                if (!silent) {
-                    NotificationHandler.terminalLog('error', 'Validation failed', messages);
-                }
-                return messages;
+                NotificationHandler.terminalLog('error', 'Validation failed', messages);
             }
         };
 
@@ -468,7 +452,7 @@ export default defineComponent({
          * Format an error message into an HTML element.
          *
          * @param {string|Error} error - The error object or message to format.
-         * @returns {string} The formatted error message as an HTML string.
+         * @returns {string} The formatted error message.
          */
         const formatError = (error) => {
             let errorMessage = (error && error.message) ? error.message : String(error);
@@ -485,41 +469,22 @@ export default defineComponent({
             } catch (e) {
                 // Not a JSON array, leave as it is.
             }
-            return `<span style="color: var(--baklava-control-color-error);">${errorMessage}</span>`;
+            return errorMessage;
+        };
+
+        // Reference to cache validation results.
+        const cachedValidationResult = ref([]);
+        const updateCachedValidationResult = () => {
+            cachedValidationResult.value = validate();
         };
 
         /**
-         * Update the UI to display validation results.
-         *
-         * This function invokes the `validate` function internally.
-         *
-         * @async
-         * @returns {Promise<void>} Resolves when the validation status has been displayed.
-         */
-        const showValidationStatus = async () => {
-            let output = await validate(true, false) || [];
-            if (!Array.isArray(output)) {
-                output = [];
-            }
-
-            const validationErrorsElement = root.value?.querySelector('.__validation_errors');
-            if (output.length > 0) {
-                validationErrorsElement.innerHTML = `Problems:<br>${
-                    output.map((err) =>
-                        `<span style="color: var(--baklava-control-color-error);">${formatError(err)}</span>`,
-                    ).join('<br><br>')}`;
-            } else {
-                validationErrorsElement.innerHTML = getCorrectSpecificationMessage();
-            }
-        };
-
-        /**
-         * Set up a debounced event listener to validate specification.
+         * Set up a debounced event listener to validate a specification.
          *
          * Removes any existing 'keyup' event listener for live validation,
          * then attaches a new listener that waits for the user to stop typing
          * for a specified duration (`validateAfterIdleFor`) before triggering
-         * the validation status display (`showValidationStatus`).
+         * the validation status display (`updateCachedValidationResult`).
          *
          * @returns {void}
          */
@@ -530,7 +495,7 @@ export default defineComponent({
             el.value.removeEventListener('keyup', el.value.liveValidateListener);
             el.value.liveValidateListener = () => {
                 clearTimeout(typingTimer);
-                typingTimer = setTimeout(showValidationStatus, validateAfterIdleFor);
+                typingTimer = setTimeout(updateCachedValidationResult, validateAfterIdleFor);
             };
             el.value.addEventListener('keyup', el.value.liveValidateListener);
         };
@@ -619,15 +584,6 @@ export default defineComponent({
         const delayedUIUpdate = () => nextTick().then(handleUIUpdate);
         watch(menuState, delayedUIUpdate);
 
-        const validationAvailable = () => {
-            try {
-                return JSON.stringify(specification.value) ===
-                    JSON.stringify(YAML.parse(currentSpecification.value.replaceAll('\t', '  ')));
-            } catch {
-                return false;
-            }
-        };
-
         // Editing
 
         const handleTab = async (event) => {
@@ -647,7 +603,8 @@ export default defineComponent({
             canApplyChanges,
             visible,
             handleTab,
-            getCorrectSpecificationMessage,
+            formatError,
+            cachedValidationResult,
         };
     },
 });
