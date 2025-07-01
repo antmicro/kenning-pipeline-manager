@@ -226,6 +226,9 @@
                                 "object",
                                 "string"
                             ]
+                        },
+                        "pill": {
+                            "$ref": "#/$defs/pill"
                         }
                     }
                 }
@@ -244,6 +247,24 @@
                 "ERROR"
             ],
             "default": "WARNING"
+        }
+    },
+    "$defs": {
+        "pill": {
+            "description": "Pill displayed in the top right corner of a node",
+            "type": "object",
+            "properties": {
+                "color": {
+                    "type": "string",
+                    "description": "Color of the pill"
+                },
+                "text": {
+                    "type": "string",
+                    "description": "Text of the pill"
+                }
+            },
+            "required": ["text"],
+            "additionalProperties": false
         }
     },
     "additionalProperties": false

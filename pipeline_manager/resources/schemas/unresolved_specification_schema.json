@@ -162,6 +162,9 @@
                         "style": {
                             "$ref": "#/$defs/style"
                         },
+                        "pill": {
+                            "$ref": "metadata_schema.json#/$defs/pill"
+                        },
                         "defaultInterfaceGroups": {
                             "description": "List of names of chosen interface groups that are enabled by default",
                             "type": "array",
