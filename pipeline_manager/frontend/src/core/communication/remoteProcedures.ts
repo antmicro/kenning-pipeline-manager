@@ -249,9 +249,12 @@ export async function connections_change(params: ModifyConnectionsParamsType) {
 /**
  * Loads received dataflow.
  */
-export async function graph_change(params: { dataflow: any }) {
+export async function graph_change(params: { dataflow: any, loadingScreen: boolean }) {
     const externalApplicationManager = getExternalApplicationManager();
-    return externalApplicationManager.updateDataflow(params.dataflow);
+    await externalApplicationManager.conditionalLoadingScreen(
+        params.loadingScreen,
+        async () => externalApplicationManager.updateDataflow(params.dataflow),
+    );
 }
 
 type GetPropertiesParamsType = {
@@ -401,7 +404,10 @@ export function notification_send(params: Notification) {
     NotificationHandler.terminalLog(params.type, params.title, params.details);
 }
 
-export async function specification_change(params: {specification: any}) {
+export async function specification_change(params: {specification: any, loadingScreen: boolean}) {
     const externalApplicationManager = getExternalApplicationManager();
-    return externalApplicationManager.updateSpecification(params.specification);
+    await externalApplicationManager.conditionalLoadingScreen(
+        params.loadingScreen,
+        async () => externalApplicationManager.updateSpecification(params.specification),
+    );
 }

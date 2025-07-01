@@ -29,6 +29,11 @@
             },
             "required": ["graph_id", "node_id"]
         },
+        "loadingScreen": {
+            "description": "Show loading screen",
+            "type": "boolean",
+            "default": false
+        },
         "dataflow_or_url": {
             "description": "JSON or link to the remote JSON with graph definition",
             "type": [
@@ -47,16 +52,9 @@
             },
             "additionalProperties": false
         },
-        "specification_object": {
-            "description": "Definition containing `specification` object",
-            "type": "object",
-            "properties": {
-                "specification": {
-                    "description": "JSON with specification definition in PM format",
-                    "type": "object"
-                }
-            },
-            "additionalProperties": false
+        "specification": {
+            "description": "JSON with specification definition in PM format",
+            "type": "object"
         },
         "properties_diff": {
             "description": "Schema that represents differences in properties of the node",

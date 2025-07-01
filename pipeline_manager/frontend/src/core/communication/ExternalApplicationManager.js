@@ -6,6 +6,7 @@
 
 import { JSONRPCErrorCode } from 'json-rpc-2.0';
 import { charset } from 'mime-types';
+import { nextTick } from 'vue';
 import { backendApiUrl, PMMessageType, JSONRPCCustomErrorCode } from '../utils';
 
 // eslint-disable-next-line import/no-cycle
@@ -137,13 +138,28 @@ class ExternalApplicationManager {
         }
     }
 
+    async conditionalLoadingScreen(load, callback) {
+        const { setLoad } = this.editorManager.baklavaView.editor.events;
+
+        if (load) {
+            setLoad.emit(true);
+            await nextTick();
+        }
+        const result = await callback();
+        if (load) {
+            setLoad.emit(false);
+            await nextTick();
+        }
+        return result;
+    }
+
     async updateSpecification(specification) {
         if (handleSpecificationResult(
             EditorManager.validateSpecification(specification),
             'Warnings when validating specification',
             'Specification is invalid',
-        )) return;
-        handleSpecificationResult(
+        )) return true;
+        return handleSpecificationResult(
             await this.editorManager.updateEditorSpecification(specification),
             'Warnings when loading specification',
             'Errors when loading specification',

@@ -132,7 +132,11 @@
                 "properties": {
                     "dataflow": {
                         "$ref": "common_types#/$defs/dataflow_or_url"
-                    }                },
+                    },
+                    "loadingScreen": {
+                        "$ref": "common_types#/$defs/loadingScreen"
+                    }
+                },
                 "required": ["dataflow"],
                 "additionalProperties": false
             },
@@ -247,7 +251,16 @@
         "specification_change": {
             "description": "Procedure to update specification",
             "params": {
-                "$ref": "common_types#/$defs/specification_object"
+                "type": "object",
+                "properties": {
+                    "specification": {
+                        "$ref": "common_types#/$defs/specification"
+                    },
+                    "loadingScreen": {
+                        "$ref": "common_types#/$defs/loadingScreen"
+                    }
+                },
+                "required": ["specification"]
             },
             "returns": {
                 "$ref": "common_types#/$defs/null_or_empty"
