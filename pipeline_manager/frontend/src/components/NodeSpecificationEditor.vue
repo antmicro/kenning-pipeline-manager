@@ -13,7 +13,7 @@ SPDX-License-Identifier: Apache-2.0
         <div class="__spec-editor">
             <button
                 class="baklava-button __validate-button"
-                :disabled="canApplyChanges()"
+                :disabled="!canApplyChanges()"
                 @click="validate"
             >
                 Apply
@@ -568,28 +568,59 @@ export default defineComponent({
         };
 
         /**
-         * Determine whether the changes to the node specification can be applied.
+         * Checks if the changes to the node specification can be applied.
          *
-         * @returns {boolean} Whether the changes to the specification may be applied.
-         * @throws Will return false if parsing the YAML fails.
+         * This function compares the current specification (as YAML)
+         * with the original specification, and ensures there are no validation
+         * errors present in the UI. It uses a cached result to avoid
+         * unnecessary recomputation if the specification has not changed.
+         *
+         * @returns {boolean} Returns `true` if the specification has changed
+         *   and there are no validation errors; otherwise, `false`.
+         * @throws {Error} Returns `false` if parsing the YAML fails.
+         */
+        const evaluateIfChangesMayBeApplied = () => {
+            const parsedCurrentSpecification = YAML.parse(currentSpecification.value.replaceAll('\t', '  '));
+            const differingSpecifications =
+                JSON.stringify(specification.value) !== JSON.stringify(parsedCurrentSpecification);
+
+            const validationResult = validate(true, false);
+            if (validationResult && validationResult.length > 0) {
+                return false;
+            }
+
+            const validationErrorsElement = root.value?.querySelector('.__validation_errors');
+            const noValidationErrors =
+                validationErrorsElement?.innerHTML === getCorrectSpecificationMessage();
+
+            return differingSpecifications && noValidationErrors;
+        };
+
+        /**
+         * Determines whether the node specification changes can be applied.
+         *
+         * Compares the current YAML specification with the original,
+         * and checks for the absence of validation errors in the UI.
+         * Utilizes caching to prevent redundant computations if
+         * the specification remains unchanged.
+         *
+         * @returns {boolean} `true` if the specification has been modified
+         *   and there are no validation errors. Otherwise, `false`.
+         * @throws {Error} If parsing the YAML fails.
          */
         const canApplyChanges = () => {
             try {
-                if (!canApplyChanges.previousSpecification) {
-                    canApplyChanges.previousSpecification = currentSpecification.value;
-                }
-
                 const hasChanged =
                     canApplyChanges.previousSpecification !== currentSpecification.value;
 
-                if (hasChanged) {
-                    canApplyChanges.previousSpecification = currentSpecification.value;
-                } else if (canApplyChanges.cachedResult !== undefined) {
+                if (!hasChanged) {
+                    if (canApplyChanges.cachedResult === undefined) {
+                        canApplyChanges.cachedResult = evaluateIfChangesMayBeApplied();
+                    }
                     return canApplyChanges.cachedResult;
                 }
-                canApplyChanges.cachedResult = JSON.stringify(specification.value) ===
-                    JSON.stringify(YAML.parse(currentSpecification.value.replaceAll('\t', '  '))) &&
-                    validate(true, false);
+
+                canApplyChanges.cachedResult = evaluateIfChangesMayBeApplied();
                 return canApplyChanges.cachedResult;
             } catch {
                 return false;
