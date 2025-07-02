@@ -750,7 +750,7 @@ export default defineComponent({
                 emit('setLoad', true);
                 const resolve = () => emit('setLoad', false);
 
-                if (data.nodes) { // Load Specification
+                if (data.nodes || data.include) { // Load Specification
                     await updateEditorSpecification(data);
                     resolve();
                     return;
