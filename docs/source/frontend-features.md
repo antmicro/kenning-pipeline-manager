@@ -173,22 +173,20 @@ And be later be referred to as `examples://sample-specification.json` in URL.
 The URI schemes can be passed to `pipeline_manager build` via `--json_url_specification` argument.
 ```
 
-## Passing JSON objects directly
+## Making API requests
 
-There is also a possibility to pass JSON objects directly to the frontend, without having to save them to a file and add to URL.
+There is also a possibility to call Pipeline Manager [API](#api-specification) via frontend.
 
 This can be done by sending [POST requests](https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage) from an external app opening Pipeline Manager, e.g:
 
 ```javascript
 const iframe = document.getElementById(pipelineManagerIframe);
-iframe.contentWindow.postMessage({ specification, dataflow }, pipelineManagerURL);
+iframe.contentWindow.postMessage({ method: 'specification_change', params: { specification } });
 ```
 
-This piece of code opens Pipeline Manager in an iframe and provides it with a `data` JSON object containing the requested specification.
+This piece of code opens Pipeline Manager in an iframe and provides it with a JSON object containing the request body corresponding to a `specification_change` [frontend endpoint](#frontend-api).
 
-The window accepts a specification, or a dataflow, or both.
-
-Note that this method still supports URLs.
+Note that this method also supports [backend endpoints](#backend-api) and [external app endpoints](#external-app-api).
 
 ## Testing the front-end features
 
