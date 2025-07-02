@@ -96,6 +96,12 @@
                     "default": "Option 2"
                 }
             ],
+            "interfaces": [
+                {
+                    "name": "Regular node input",
+                    "direction": "input"
+                }
+            ],
             "color": "#004972",
             "twoColumn": true,
             "subgraphId": "569edd54-0f42-4c24-a809-1509febbe23a"
