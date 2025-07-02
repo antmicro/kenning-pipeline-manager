@@ -8,6 +8,7 @@
 import { NodeInterface, Graph } from '@baklavajs/core';
 import { v4 as uuidv4 } from 'uuid';
 import { parseInterfaces } from '../core/interfaceParser.js';
+import { updateInterfacePosition } from './CustomNode.js';
 import {
     CustomNode,
     parseProperties,
@@ -66,6 +67,8 @@ export default function CreateCustomGraphNodeType(template, graphNode) {
         title = graphNode.name;
 
         template = template;
+
+        nodeInterfaces = { ...newNodeInputs, ...newNodeOutputs };
 
         constructor() {
             super(
@@ -134,8 +137,9 @@ export default function CreateCustomGraphNodeType(template, graphNode) {
          * will use the current inputs of the graph node.
          * @param {Array} outputs outputs of the graph node. If not provided, the function
          * will use the current outputs of the graph node.
+         * @param {boolean} privatize whether to check for privatized (removed) interfaces
          */
-        updateExposedInterfaces(inputs = undefined, outputs = undefined) {
+        updateExposedInterfaces(inputs = undefined, outputs = undefined, privatize = false) {
             // Update interfaces based on subgraph interfaces and their external names
             const evaluatedIntf = updateSubgraphInterfaces(
                 this.subgraph.nodes,
@@ -150,7 +154,7 @@ export default function CreateCustomGraphNodeType(template, graphNode) {
             }
 
             // After resolving exposed interfaces, the graph node is updated accordingly.
-            this.updateInterfaces(evaluatedIntf.inputs, evaluatedIntf.outputs);
+            this.updateInterfaces(evaluatedIntf.inputs, evaluatedIntf.outputs, privatize);
         }
 
         /**
@@ -196,27 +200,41 @@ export default function CreateCustomGraphNodeType(template, graphNode) {
         }
 
         /**
-         * Function used to update interfaces of the graph node. It makes use of InterfaceRegistry
-         * object to create interfaces that share part of the state of the exposed interfaces.
+         * Function used to check which interfaces had been privatized from within
+         * the subgraph and need to be removed as a result.
          *
-         * @param {Array} newInputs inputs to be added to the graph node
-         * @param {Array} newOutputs outputs to be added to the graph node
+         * @param {Array} newInterfaces interfaces to be added to the graph node
+         * @param {Array} currentInterfaces interfaces already in the graph node
          */
-        updateInterfaces(newInputs, newOutputs) {
-            const newInterfaces = [...newInputs, ...newOutputs];
-            const currentInterfaces = { ...this.inputs, ...this.outputs };
-
+        privatizeInterfaces(newInterfaces, currentInterfaces) {
             Object.entries(currentInterfaces).forEach(([nodeKey, nodeIntf]) => {
                 // If current interface cannot be found in `newInterfaces`, it means that
                 // it was removed.
                 if (newInterfaces.find((intf) => intf.id === nodeIntf.id) === undefined) {
-                    // Only remove interfaces, not properties
-                    if (nodeIntf.port) {
+                    // Only remove subgraph interfaces, not properties or node interfaces
+                    if (!Object.keys(this.nodeInterfaces).some((key) => key === nodeKey)) {
                         const container = nodeIntf.direction === 'output' ? 'output' : 'input';
                         this.removeInterface(container, nodeKey);
                     }
                 }
             });
+        }
+
+        /**
+         * Function used to update interfaces of the graph node. It makes use of InterfaceRegistry
+         * object to create interfaces that share part of the state of the exposed interfaces.
+         *
+         * @param {Array} newInputs inputs to be added to the graph node
+         * @param {Array} newOutputs outputs to be added to the graph node
+         * @param {boolean} privatize whether to check for privatized (removed) interfaces
+         */
+        updateInterfaces(newInputs, newOutputs, privatize = false) {
+            const newInterfaces = [...newInputs, ...newOutputs];
+            const currentInterfaces = { ...this.inputs, ...this.outputs };
+
+            if (privatize) {
+                this.privatizeInterfaces(newInterfaces, currentInterfaces);
+            }
 
             newInterfaces.forEach((nodeIntf) => {
                 // If new interface cannot be found in the current interfaces, it means that
@@ -236,6 +254,10 @@ export default function CreateCustomGraphNodeType(template, graphNode) {
                 } else {
                     Object.assign(foundIntf, nodeIntf);
                 }
+            });
+
+            Object.values(currentInterfaces).forEach((nodeIntf) => {
+                updateInterfacePosition(this, nodeIntf, nodeIntf.side);
             });
         }
 

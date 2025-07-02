@@ -437,13 +437,13 @@ export default class PipelineManagerEditor extends Editor {
         const graphIdIdx = graphIds.findIndex((id) => id === graphNode.graph.id);
         graphIds.splice(graphIdIdx, graphIds.length - graphIdIdx);
 
-        graphNode.updateExposedInterfaces();
+        graphNode.updateExposedInterfaces(undefined, undefined, true);
 
         // Update all graphs that used this exposed interface
         for (let i = graphIdIdx + 1; i < graphIds.length; i += 1) {
             graph = [...this.graphs].find((g) => g.id === graphIds[graphIdIdx]);
             graphNode = graph.graphNode; // eslint-disable-line prefer-destructuring
-            graphNode.updateExposedInterfaces();
+            graphNode.updateExposedInterfaces(undefined, undefined, true);
         }
 
         // If sharedInterface is the same as the interface that is privatized, it means
