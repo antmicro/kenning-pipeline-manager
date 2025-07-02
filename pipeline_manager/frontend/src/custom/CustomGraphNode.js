@@ -9,7 +9,11 @@ import { NodeInterface, Graph } from '@baklavajs/core';
 import { v4 as uuidv4 } from 'uuid';
 import { parseInterfaces } from '../core/interfaceParser.js';
 import {
-    CustomNode, parseProperties, createProperties, updateSubgraphInterfaces,
+    CustomNode,
+    parseProperties,
+    createProperties,
+    createBaklavaInterfaces,
+    updateSubgraphInterfaces,
 } from '../core/NodeFactory.js';
 import { ir } from '../core/interfaceRegistry.ts';
 
@@ -24,14 +28,38 @@ function prepareProperties(graphNode) {
     const properties = graphNode.properties ?? [];
 
     const parsedProperties = parseProperties(properties);
-    // If parsedProperties returns an array, it is an array of errors
     if (Array.isArray(parsedProperties) && parsedProperties.length) {
         return parsedProperties.map((error) => `Node ${graphNode.name} invalid. ${error}`);
     }
     return createProperties(parsedProperties);
 }
 
+/**
+  * Function used to update interfaces of the graph node based on its specification.
+  * This includes only interfaces of the node, not external interfaces of the subgraph.
+  *
+  * @param {Object} graphNode graph node object
+  *
+  * @returns interfaces ready to be loaded
+  */
+function prepareInterfaces(graphNode) {
+    const interfaces = graphNode.interfaces ?? [];
+
+    const parsedInterfaces = parseInterfaces(interfaces, [], []);
+    if (Array.isArray(parsedInterfaces) && parsedInterfaces.length) {
+        return parsedInterfaces.map((error) => `Node ${graphNode.name} invalid. ${error}`);
+    }
+    return createBaklavaInterfaces(parsedInterfaces);
+}
+
 export default function CreateCustomGraphNodeType(template, graphNode) {
+    const [nodeInputs, newNodeOutputs] = prepareInterfaces(graphNode);
+    const properties = prepareProperties(graphNode);
+    const newNodeInputs = {
+        ...nodeInputs,
+        ...properties,
+    };
+
     return class CustomGraphNodeType extends CustomNode {
         type = graphNode.name;
 
@@ -43,8 +71,8 @@ export default function CreateCustomGraphNodeType(template, graphNode) {
             super(
                 graphNode.name,
                 graphNode.layer,
-                prepareProperties(graphNode),
-                [],
+                newNodeInputs,
+                newNodeOutputs,
                 graphNode.twoColumn ?? false,
                 graphNode.description ?? '',
                 graphNode.extends ?? [],
