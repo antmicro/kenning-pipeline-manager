@@ -1648,10 +1648,12 @@ export default class EditorManager {
 
         if (graphs !== undefined) {
             graphs.forEach((graph) => {
-                if (nodeNames.has(graph.name)) {
-                    errors.push(`Graph node name '${graph.name}' is defined multiple times`);
+                if (graph.name !== undefined) {
+                    if (nodeNames.has(graph.name)) {
+                        errors.push(`Graph node name '${graph.name}' is defined multiple times`);
+                    }
+                    nodeNames.add(graph.name);
                 }
-                nodeNames.add(graph.name);
             });
         }
         return errors;
