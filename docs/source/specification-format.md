@@ -16,6 +16,7 @@ The specification consists of:
 * `graphs` - array of dataflow-like objects defining graph nodes, of type [Graph](project:dataflow-format.md#graph).
 * `include` - array of string objects pointing to a remote url to the specifications to include.
 * `includeGraphs` - array of objects of type [Included Graph](#included-graphs), that specifies graph instances to be included in the specification from a remote url.
+* `entryGraph` - ID of the graph that should be loaded with the specification. A graph can be chosen from `include` or `includeGraphs`.
 * `version` - string determining version of the specification.
   Should be set to the newest version described in [Changelogs](#changelogs).
   {{project}} uses that value to check the compatibility of the specification with the current implementation, giving warnings about inconsistency in versions.
