@@ -147,7 +147,9 @@ Node style defines how nodes of a given style should look like. Currently, the f
 
 Field values are defined the same way as in [Node](#node) specification, however, `icon` can obtain [Navbar item](#navbar-item) `iconName` values as well.
 
-There exists a special style `__new`, which is managed automatically and does not persist specification saves and loads.
+There exist special styles:
+* `__new` - managed automatically and does not persist specification saves and loads,
+* `__edited` - added to the node type which was modified.
 
 (metadata-navbar-item)=
 #### Navbar item
