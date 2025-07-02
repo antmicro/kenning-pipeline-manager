@@ -1764,6 +1764,7 @@ class SpecificationBuilder(object):
         fail_on_warnings: bool = True,
         sort_spec: bool = False,
         dump_spec: Optional[Path] = None,
+        skip_validation: bool = False,
     ) -> Dict:
         """
         Creates a specification and validates it using schema.
@@ -1783,6 +1784,8 @@ class SpecificationBuilder(object):
         dump_spec: Optional[Path]
             Tells where the specification should be dumped to file
             before validation and resolving for debugging purposes.
+        skip_validation : bool
+            Whether validation of the specification should be omitted.
 
         Returns
         -------
@@ -1820,16 +1823,27 @@ class SpecificationBuilder(object):
                         sort_keys=True,
                         ensure_ascii=False,
                     )
-            res = validate(
-                specification_path=specpath,
-                workspace_directory=workspacedir,
-                resolved_specification_path=resolved_specification,
-            )
 
-            if res != 0:
-                raise SpecificationBuilderException(
-                    "Builder validation failed."
+            if skip_validation:
+                logging.warning(
+                    (
+                        "Validation was omitted. "
+                        "An invalid specification may be generated. "
+                        "Consider turning on the validation in %s."
+                    ),
+                    self.create_and_validate_spec.__qualname__,
                 )
+            else:
+                res = validate(
+                    specification_path=specpath,
+                    workspace_directory=workspacedir,
+                    resolved_specification_path=resolved_specification,
+                )
+
+                if res != 0:
+                    raise SpecificationBuilderException(
+                        "Builder validation failed."
+                    )
 
             if fail_on_warnings:
                 if self.warnings > 0:

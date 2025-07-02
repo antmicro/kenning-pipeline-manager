@@ -2,6 +2,7 @@
 
 
 from contextlib import nullcontext
+from unittest.mock import patch
 
 import pytest
 
@@ -229,3 +230,22 @@ def test_include_with_style(
         spec.add_include(httpserver.url_for(include_specification), style)
 
     spec.create_and_validate_spec(fail_on_warnings=True)
+
+
+def test_omitting_validation(specification_builder):
+    """
+    Verify if omitting validation actually refrains from calling the validator.
+    """
+    node_name = "New node type"
+    specification_builder.add_node_type(node_name)
+    specification_builder.add_node_description(
+        node_name, "This is a brand-new node."
+    )
+
+    specification_builder.create_and_validate_spec()
+
+    with patch(
+        "pipeline_manager.specification_builder.validate"
+    ) as mock_validate:
+        specification_builder.create_and_validate_spec(skip_validation=True)
+        mock_validate.assert_not_called()
