@@ -9,6 +9,7 @@ import { stringify } from 'ajv';
 import Ajv2019 from 'ajv/dist/2019.js';
 import jsonMap from 'json-source-map';
 import jsonlint from 'jsonlint';
+import { v4 as uuidv4 } from 'uuid';
 
 import { useBaklava, useCommandHandler } from '@baklavajs/renderer-vue';
 import { toRaw, ref, reactive } from 'vue';
@@ -287,7 +288,7 @@ export default class EditorManager {
             this.clearEditorManagerState();
         }
 
-        if (state !== undefined) {
+        if (state !== undefined && dataflowSpecification.entryGraph === undefined) {
             const ret = await this.loadDataflow(state);
             if (!ret.errors.length && stateNodeId) {
                 this.baklavaView.displayedGraph.sidebar.nodeId = stateNodeId;
@@ -823,6 +824,25 @@ export default class EditorManager {
         const { errors: defaultErrors, warnings: defaultWarnings } = this.registerDefaultNodes();
         errors.push(...defaultErrors);
         uniqueWarnings.push(...defaultWarnings);
+
+        // Load entry graph
+        const entryGraphId = dataflowSpecification.entryGraph;
+        if (!errors.length && entryGraphId !== undefined) {
+            const entryGraph = graphs?.find((graph) => graph.id === entryGraphId);
+            if (entryGraph !== undefined) {
+                // Ignore returned errors and warnings because graphs are already validated
+                delete entryGraph.category;
+                // Add IDs to nodes preliminarily because otherwise the connections might broken
+                entryGraph.nodes?.forEach((n) => { n.id ??= uuidv4(); });
+
+                await this.loadDataflow({
+                    graphs: [entryGraph],
+                    version: dataflowSpecification.version,
+                });
+            } else {
+                uniqueWarnings.push(`'entryGraph' points to undefined graph: '${entryGraphId}'`);
+            }
+        }
 
         return { errors, warnings: uniqueWarnings };
     }
@@ -1373,6 +1393,15 @@ export default class EditorManager {
         // Merge object
         Object.entries(secondaryObject).forEach(([key, value]) => {
             if (Array.isArray(value) && Array.isArray(primaryObject[key])) {
+                if (key === 'graphs') {
+                    // Merge graphs by ID
+                    const objsToMerge = [value, primaryObject[key]]
+                        .map((graphs) => graphs.map((graph) => [graph.id, graph]))
+                        .map(Object.fromEntries);
+                    primaryObject[key] = Object.values(Object.assign({}, ...objsToMerge));
+                    return;
+                }
+
                 if (key !== 'nodes') {
                     primaryObject[key].push(...value);
                     return;

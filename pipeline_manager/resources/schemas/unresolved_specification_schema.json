@@ -99,6 +99,10 @@
                 ],
                 "unevaluatedProperties": false
             }
+        },
+        "entryGraph": {
+            "description": "ID of the graph from 'graphs' property that specifies default dataflow of the specification",
+            "type": "string"
         }
     },
     "$defs": {
