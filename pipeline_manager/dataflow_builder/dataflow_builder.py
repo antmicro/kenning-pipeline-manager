@@ -6,6 +6,7 @@
 
 import copy
 import json
+import logging
 import tempfile
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
@@ -53,7 +54,11 @@ class GraphBuilder:
         self.graphs: List[DataflowGraph] = []
         self.entry_graph = None
 
-    def load_graphs(self, dataflow_source: Union[Path, str, Dict]):
+    def load_graphs(
+        self,
+        dataflow_source: Union[Path, str, Dict],
+        skip_validation: bool = False,
+    ):
         """
         Load all dataflow graphs from a file.
 
@@ -61,6 +66,8 @@ class GraphBuilder:
         ----------
         dataflow_source : Union[Path, str, Dict]
             Path to a dataflow graph or dataflow graph dictionary
+        skip_validation: bool
+            Whether validation of a dataflow graph should be omitted.
 
         Raises
         ------
@@ -99,7 +106,17 @@ class GraphBuilder:
         else:
             self.entry_graph = self.graphs[0]
 
-        self.validate()
+        if skip_validation:
+            logging.warning(
+                (
+                    "Validation was omitted. "
+                    "It may cause an invalid graph to be loaded. ",
+                    "Consider turning on the validation in %s.",
+                ),
+                self.load_graphs.__qualname__,
+            )
+        else:
+            self.validate()
 
     def load_specification(
         self,
@@ -457,13 +474,23 @@ class GraphBuilder:
         json_file : Path
             Path, where an output JSON file will be created.
         skip_validation: bool
-            Tells whether the validation of the script should be
+            Whether the validation of the script should be
             skipped or not.
         """
         with open(json_file, "wt", encoding="utf-8") as fd:
             fd.write(self.to_json(as_str=True))
+
         if not skip_validation:
             self.validate()
+        else:
+            logging.warning(
+                (
+                    "Validation was omitted. "
+                    "It may cause an invalid graph to be saved. "
+                    "Consider turning on the validation in %s."
+                ),
+                self.save.__qualname__,
+            )
 
     def validate(self):
         """

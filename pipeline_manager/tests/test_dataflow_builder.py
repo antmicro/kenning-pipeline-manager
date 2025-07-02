@@ -8,6 +8,7 @@ import subprocess
 import tempfile
 from pathlib import Path
 from typing import Any, Dict, Tuple
+from unittest.mock import Mock
 
 import pytest
 
@@ -760,3 +761,32 @@ def test_assigning_property_to_graph_node():
     )
 
     dataflow_builder.validate()
+
+
+def test_disabled_validation(sample_specification_path):
+    """Test if a disabled validation does not invoke the validator."""
+    dataflow_builder = GraphBuilder(
+        specification=sample_specification_path,
+        specification_version=DEFAULT_SPECIFICATION_VERSION,
+    )
+    second_dataflow_builder = GraphBuilder(
+        specification=sample_specification_path,
+        specification_version=DEFAULT_SPECIFICATION_VERSION,
+    )
+
+    dataflow_builder.validate = Mock()
+    second_dataflow_builder.validate = Mock()
+
+    graph = dataflow_builder.create_graph()
+    names = ("LoadVideo", "SaveVideo")
+    nodes = [graph.create_node(name) for name in names]
+    graph.create_connection(nodes[0].interfaces[0], nodes[1].interfaces[0])
+
+    with tempfile.NamedTemporaryFile() as fd_with_name:
+        file_path = Path(fd_with_name.name)
+        dataflow_builder.save(file_path, skip_validation=True)
+
+        second_dataflow_builder.load_graphs(file_path, skip_validation=True)
+
+    dataflow_builder.validate.assert_not_called()
+    second_dataflow_builder.validate.assert_not_called()
