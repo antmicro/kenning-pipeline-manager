@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Antmicro <www.antmicro.com>
+ * Copyright (c) 2022-2025 Antmicro <www.antmicro.com>
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -36,13 +36,17 @@ export const saveSpecificationConfiguration: SaveConfiguration = {
         const specification = editorManager.saveSpecification();
         if (this.graph) {
             specification.graphs ??= [];
-            const graph = editorManager.saveDataflow().graphs[0];
+            const dataflow = editorManager.saveDataflow();
+
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const prevIndex = specification.graphs.map((g: any) => g.id).indexOf(graph.id);
-            const [index, remove] = prevIndex !== undefined
-                ? [prevIndex, 1]
-                : [specification.graphs.length, 0];
-            specification.graphs.splice(index, remove, graph);
+            dataflow.graphs.forEach((graph: any) => {
+                const prevIndex = specification.graphs.map((g: any) => g.id).indexOf(graph.id);
+                const [index, remove] = prevIndex !== -1
+                    ? [prevIndex, 1]
+                    : [specification.graphs.length, 0];
+                specification.graphs.splice(index, remove, graph);
+            });
+            specification.entryGraph = dataflow.entryGraph ?? dataflow.graphs[0].id;
         }
 
         const blob = new Blob(
