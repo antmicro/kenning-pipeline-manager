@@ -53,44 +53,20 @@ export default defineComponent({
             }
         };
 
-        const readonly = computed(() => {
-            if (props.saveConfiguration.readonly === undefined) return undefined;
+        const createOption = (text, label) => computed(() => {
+            if (props.saveConfiguration[label] === undefined) return undefined;
 
-            const option = new CheckboxInterface(
-                'Make graph read only',
-                props.saveConfiguration.readonly,
-            ).setPort(false);
+            const option = new CheckboxInterface(text, props.saveConfiguration[label]);
             option.events.setValue.subscribe(this, (v) => {
-                props.saveConfiguration.readonly = v; // eslint-disable-line vue/no-mutating-props,max-len,no-param-reassign
+                props.saveConfiguration[label] = v; // eslint-disable-line vue/no-mutating-props,max-len,no-param-reassign
             });
             return option;
         });
 
-        const hideHud = computed(() => {
-            if (props.saveConfiguration.hideHud === undefined) return undefined;
-
-            const option = new CheckboxInterface(
-                'Disable HUD',
-                props.saveConfiguration.hideHud,
-            ).setPort(false);
-            option.events.setValue.subscribe(this, (v) => {
-                props.saveConfiguration.hideHud = v; // eslint-disable-line vue/no-mutating-props,max-len,no-param-reassign
-            });
-            return option;
-        });
-
-        const position = computed(() => {
-            if (props.saveConfiguration.position === undefined) return undefined;
-
-            const option = new CheckboxInterface(
-                'Preserve current view location',
-                props.saveConfiguration.position,
-            ).setPort(false);
-            option.events.setValue.subscribe(this, (v) => {
-                props.saveConfiguration.position = v; // eslint-disable-line vue/no-mutating-props,max-len,no-param-reassign
-            });
-            return option;
-        });
+        const readonly = createOption('Make graph read only', 'readonly');
+        const hideHud = createOption('Disable HUD', 'hideHud');
+        const position = createOption('Preserve current view location', 'position');
+        const graph = createOption('Save graph', 'graph');
 
         const dataflowname = computed(() => {
             const option = new InputInterface(
@@ -112,7 +88,7 @@ export default defineComponent({
 
         const additionalOptions = computed(() => {
             const displayableOptions = [];
-            [readonly, hideHud, position].forEach((option) => {
+            [readonly, hideHud, position, graph].forEach((option) => {
                 if (option.value !== undefined) displayableOptions.push(option.value);
             });
             return displayableOptions;

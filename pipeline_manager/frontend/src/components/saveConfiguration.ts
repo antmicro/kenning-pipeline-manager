@@ -11,6 +11,7 @@ interface SaveConfiguration {
     readonly?: boolean;
     hideHud?: boolean;
     position?: boolean;
+    graph?: boolean;
     saveName: string;
 
     saveCallback: () => void;
@@ -27,13 +28,27 @@ const saveBlob = (blob: Blob, filename: string) => {
 };
 
 export const saveSpecificationConfiguration: SaveConfiguration = {
+    graph: false,
     saveName: 'specification',
 
     saveCallback() {
+        const editorManager = EditorManager.getEditorManagerInstance();
+        const specification = editorManager.saveSpecification();
+        if (this.graph) {
+            specification.graphs ??= [];
+            const graph = editorManager.saveDataflow().graphs[0];
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const prevIndex = specification.graphs.map((g: any) => g.id).indexOf(graph.id);
+            const [index, remove] = prevIndex !== undefined
+                ? [prevIndex, 1]
+                : [specification.graphs.length, 0];
+            specification.graphs.splice(index, remove, graph);
+        }
+
         const blob = new Blob(
             [
                 JSON.stringify(
-                    EditorManager.getEditorManagerInstance().saveSpecification(),
+                    specification,
                     null,
                     4,
                 ),
