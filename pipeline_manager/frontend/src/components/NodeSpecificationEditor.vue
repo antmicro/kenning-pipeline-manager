@@ -26,6 +26,13 @@ SPDX-License-Identifier: Apache-2.0
                 @input="handleInput"
                 @keydown.tab="handleTab"
             />
+            <button
+                class="baklava-button __validate-button"
+                :disabled="!editorStateChanged"
+                @click="discard"
+            >
+                Discard
+            </button>
             <p class="__validation_errors">
                 <template v-if=" cachedValidationResult.length > 0">
                     Problems:<br>
@@ -55,7 +62,7 @@ import {
 import { useViewModel } from '@baklavajs/renderer-vue';
 import EditorManager, { EDITED_NODE_STYLE } from '../core/EditorManager';
 import NotificationHandler from '../core/notifications';
-import { menuState, configurationState } from '../core/nodeCreation/ConfigurationState.ts';
+import { menuState, configurationState, editorEventBus } from '../core/nodeCreation/ConfigurationState.ts';
 import {
     alterInterfaces, alterProperties, updateExtendedProperties, updateExtendedInterfaces, findNodes,
 } from '../core/nodeCreation/Configuration.ts';
@@ -586,6 +593,19 @@ export default defineComponent({
         };
 
         /**
+         * Checks whether the node specification has been changed.
+         *
+         * @returns {boolean} `true` if the specification has been modified
+         */
+        const editorStateChanged = computed(() => {
+            const parsedCurrentSpecification = YAML.parse(
+                currentSpecification.value.replaceAll('\t', '  '),
+            );
+            return JSON.stringify(specification.value) !==
+                JSON.stringify(parsedCurrentSpecification);
+        });
+
+        /**
          * Determines whether the node specification changes can be applied.
          *
          * Compares the current YAML specification with the original,
@@ -598,22 +618,10 @@ export default defineComponent({
          * @throws {Error} If parsing the YAML fails.
          */
         const canApplyChanges = computed(() => {
+            if (!editorStateChanged.value) {
+                return false;
+            }
             try {
-                const parsedCurrentSpecification = YAML.parse(
-                    currentSpecification.value.replaceAll('\t', '  '),
-                );
-                const differingSpecifications =
-                    JSON.stringify(
-                        specification.value,
-                    ) !==
-                    JSON.stringify(
-                        parsedCurrentSpecification,
-                    );
-
-                if (!differingSpecifications) {
-                    return false;
-                }
-
                 const parsedSpecForValidation = YAML.parse(currentSpecification.value.replaceAll('\t', '  '));
                 validateNode(parsedSpecForValidation);
                 validateNodeProperties(parsedSpecForValidation);
@@ -735,6 +743,19 @@ export default defineComponent({
             });
         });
 
+        onBeforeUnmount(() => {
+            document.removeEventListener('click', updateCachedValidationResult);
+        });
+
+        editorEventBus.addEventListener('check-validation', (event) => {
+            const { resolve } = event.detail;
+            resolve(editorStateChanged.value);
+        });
+
+        const discard = async () => {
+            currentSpecification.value = maybeStringify(specification.value);
+        };
+
         // Editing
 
         const handleTab = async (event) => {
@@ -751,6 +772,8 @@ export default defineComponent({
             validate,
             updateSpecification,
             canApplyChanges,
+            discard,
+            editorStateChanged,
             visible,
             handleTab,
             formatError,

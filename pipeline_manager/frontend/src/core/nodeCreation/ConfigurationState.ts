@@ -87,3 +87,9 @@ export const configurationState: ConfigurationState = reactive({
     interfaces: [],
     success: false,
 });
+
+/*
+ * Event bus for the YAML node editor.
+ * It is used to check whether the editor state has changed.
+ */
+export const editorEventBus = new EventTarget();
