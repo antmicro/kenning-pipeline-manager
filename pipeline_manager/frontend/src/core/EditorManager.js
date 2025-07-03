@@ -830,14 +830,31 @@ export default class EditorManager {
         if (!errors.length && entryGraphId !== undefined) {
             const entryGraph = graphs?.find((graph) => graph.id === entryGraphId);
             if (entryGraph !== undefined) {
-                // Ignore returned errors and warnings because graphs are already validated
-                delete entryGraph.category;
-                // Add IDs to nodes preliminarily because otherwise the connections might broken
-                entryGraph.nodes?.forEach((n) => { n.id ??= uuidv4(); });
+                graphs.forEach((graph) => {
+                    // Ignore returned errors and warnings because graphs are already validated
+                    delete graph.category;
+                    // Add IDs to nodes preliminarily because otherwise the connections might broken
+                    graph.nodes?.forEach((n) => { n.id ??= uuidv4(); });
+                });
+
+                // Load only entry graph and used subgraphs
+                const graphMapping = Object.fromEntries(graphs.map((graph) => [graph.id, graph]));
+                const usedGraphs = [];
+                const dfs = (subgraph) => {
+                    if (usedGraphs.includes(subgraph.id)) return;
+                    usedGraphs.push(subgraph.id);
+                    subgraph.nodes
+                        ?.map((node) => node.subgraph)
+                        .filter((id) => id !== undefined)
+                        .map((id) => graphMapping[id])
+                        .forEach(dfs);
+                };
+                dfs(entryGraph);
 
                 await this.loadDataflow({
-                    graphs: [entryGraph],
+                    graphs: usedGraphs.map((id) => graphMapping[id]),
                     version: dataflowSpecification.version,
+                    entryGraph: entryGraphId,
                 });
             } else {
                 uniqueWarnings.push(`'entryGraph' points to undefined graph: '${entryGraphId}'`);
