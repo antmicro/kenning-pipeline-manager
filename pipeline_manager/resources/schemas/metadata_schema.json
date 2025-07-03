@@ -249,6 +249,11 @@
                 }
             }
         },
+        "welcome": {
+            "type": "boolean",
+            "description": "Determines whether a welcome text should appear on empty editor",
+            "default": true
+        },
         "notifyWhenChanged": {
             "type": "boolean",
             "description": "Determines whether external application should be informed about changes in dataflow. Works only when Pipeline Manager is run in server-app mode",

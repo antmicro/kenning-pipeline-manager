@@ -913,7 +913,8 @@ export default defineComponent({
         };
 
         const showWelcome =
-            computed(() => !editorManager.baklavaView.editor.readonly &&
+            computed(() => editorManager.baklavaView.welcome &&
+                !editorManager.baklavaView.editor.readonly &&
                 !loading.value &&
                 !nodes.value.length &&
                 !editorManager.editor.isInSubgraph());

@@ -1264,6 +1264,7 @@ export default class EditorManager {
             metadata?.layout ?? this.defaultMetadata.layout,
         );
         this.baklavaView.logLevel = metadata?.logLevel ?? this.defaultMetadata.logLevel;
+        this.baklavaView.welcome = metadata?.welcome ?? this.defaultMetadata.welcome;
         if (newMetadata) this.updatedMetadata = newMetadata;
 
         return [];
