@@ -11,7 +11,7 @@ Base for creating popup menus.
 <!-- eslint-disable vue/no-mutating-props -->
 <template>
     <div class="popup-menu">
-        <div class="__header">
+        <div class="__header" v-show="title">
             <div class="__header-title">
                 {{ title }}
             </div>
@@ -32,7 +32,6 @@ export default defineComponent({
             default: false,
         },
         title: {
-            required: true,
             type: String,
         },
     },

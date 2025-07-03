@@ -13,6 +13,7 @@ import NodeConfigurationMenu from './nodeCreation/NodeConfigurationMenu.vue';
 import PropertyConfigurationMenu from './nodeCreation/PropertyConfigurationMenu.vue';
 import LayerConfigurationMenu from './nodeCreation/LayerConfigurationMenu.vue';
 import ListMenu from './nodeCreation/ListMenu.vue';
+import WelcomeMenu from './WelcomeMenu.vue';
 
 export {
     InterfaceConfigurationMenu,
@@ -23,4 +24,5 @@ export {
     LayerConfigurationMenu,
     ExportMenu,
     ListMenu,
+    WelcomeMenu,
 };

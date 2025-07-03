@@ -17,6 +17,7 @@ The entrypoint of the application.
                 class="inner-editor"
                 :view-model="editorManager.baklavaView"
                 @setLoad="handleLoad"
+                :loading="loading"
             />
             <TerminalPanel v-show="(!loading && !hideHud) || terminalStore.show" />
         </div>
@@ -42,7 +43,7 @@ export default {
     },
     setup() {
         const editorManager = EditorManager.getEditorManagerInstance();
-        const loading = ref(true);
+        const loading = ref(false);
 
         const cache = {};
         // Importing all assets to a cache so that they can be accessed dynamically during runtime

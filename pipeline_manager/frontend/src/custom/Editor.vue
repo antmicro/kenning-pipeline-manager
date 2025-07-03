@@ -91,13 +91,19 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
         <Zoom @zoom-in="zoomIn" @zoom-out="zoomOut" @center="center" :floating="!hideHud" />
 
         <Return v-if="preview && isInSubgraph" @click="returnFromSubgraph" />
+
+        <Panel v-show="showWelcome" :blur="false">
+            <ParentMenu>
+                <WelcomeMenu :loadFiles="loadFiles" />
+            </ParentMenu>
+        </Panel>
     </div>
 </template>
 
 <script>
 /* eslint-disable object-curly-newline */
 import { EditorComponent, useGraph } from '@baklavajs/renderer-vue';
-import { defineComponent, ref, computed, watch, onMounted } from 'vue';
+import { defineComponent, ref, computed, watch, onMounted, toRef, nextTick } from 'vue';
 import fuzzysort from 'fuzzysort';
 import { BaklavaEvent } from '@baklavajs/events';
 import { isJSONRPCRequest, isJSONRPCResponse, JSONRPC } from 'json-rpc-2.0';
@@ -116,15 +122,26 @@ import getExternalApplicationManager from '../core/communication/ExternalApplica
 import jsonRPC, { frontendEndpoints } from '../core/communication/rpcCommunication';
 import Zoom from '../components/Zoom.vue';
 import Return from '../components/Return.vue';
+import Panel from '../components/Panel.vue';
+import { ParentMenu, WelcomeMenu } from '../components/menu';
 
 export default defineComponent({
     extends: EditorComponent,
+    props: {
+        loading: {
+            required: true,
+            type: Boolean,
+        },
+    },
     components: {
         CustomNode,
+        Panel,
+        ParentMenu,
         PipelineManagerConnection,
         TemporaryConnection,
         NodePalette,
         RectangleSelection,
+        WelcomeMenu,
         Zoom,
         Return,
     },
@@ -163,6 +180,8 @@ export default defineComponent({
 
         let pressStartTime = 0;
         const longPressMilisThreshold = 100;
+
+        const loading = toRef(props, 'loading');
 
         const editorStyle = computed(() => ({
             '--scale': scale.value,
@@ -716,6 +735,8 @@ export default defineComponent({
             let specText;
             // Try loading default specification and/or dataflow from URLs provided in an
             if (urlParams.has('spec')) {
+                props.viewModel.editor.events.setLoad.emit(true);
+                await nextTick();
                 const [status, ret] = await loadJsonFromRemoteLocation(urlParams.get('spec'));
                 if (status === false) {
                     NotificationHandler.terminalLog(
@@ -780,10 +801,13 @@ export default defineComponent({
         });
 
         const loadFiles = async (files) => {
+            props.viewModel.editor.events.setLoad.emit(true);
+            const resolve = () => props.viewModel.editor.events.setLoad.emit(false);
             const notify = NotificationHandler.showToast;
 
             if (files.length > 2) {
                 notify('error', `Up to two files supported, inserted: ${files.length}`);
+                resolve();
                 return;
             }
 
@@ -793,6 +817,7 @@ export default defineComponent({
                 objects = await Promise.all(Array.from(files).map(parse));
             } catch (error) {
                 notify('error', 'Dropped file is not in JSON format');
+                resolve();
                 return;
             }
 
@@ -804,6 +829,7 @@ export default defineComponent({
             if (isInvalid.every(Boolean)) {
                 if (objects.length === 1) notify('error', 'Provided file is not of Pipeline Manager format');
                 else notify('error', 'Neither of provided files is of Pipeline Manager format');
+                resolve();
                 return;
             }
 
@@ -836,8 +862,6 @@ export default defineComponent({
                 else [dataflow, specification] = objects;
             }
 
-            props.viewModel.editor.events.setLoad.emit(true);
-
             let isValidSpec = true;
             if (specification) {
                 if (externalApplicationManager.isConnected()) {
@@ -856,7 +880,7 @@ export default defineComponent({
                 await updateDataflow(dataflow);
             }
 
-            props.viewModel.editor.events.setLoad.emit(false);
+            resolve();
         };
 
         const onDrop = async (event) => {
@@ -872,7 +896,7 @@ export default defineComponent({
             } else {
                 files.push(...event.dataTransfer.files);
             }
-            loadFiles(files);
+            await loadFiles(files);
         };
 
         props.viewModel.editor.events.setLoad = new BaklavaEvent();
@@ -887,6 +911,12 @@ export default defineComponent({
         const returnFromSubgraph = () => {
             editorManager.returnFromSubgraph();
         };
+
+        const showWelcome =
+            computed(() => !editorManager.baklavaView.editor.readonly &&
+                !loading.value &&
+                !nodes.value.length &&
+                !editorManager.editor.isInSubgraph());
 
         return {
             el,
@@ -923,6 +953,8 @@ export default defineComponent({
             returnFromSubgraph,
             isInSubgraph,
             preview,
+            showWelcome,
+            loadFiles,
         };
     },
 });
