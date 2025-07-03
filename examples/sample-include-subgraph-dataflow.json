@@ -2,7 +2,7 @@
     "graphs": [
         {
             "name": "Example of the graph with top-level interfaces exposed",
-            "id": "79040424-1464-40a0-ba97-cc0ba6a1944f",
+            "id": "0f3b7564-3294-42bf-ab1d-d5d3d80f015d",
             "nodes": [
                 {
                     "id": "17ed7efe-dde3-4d99-9c9e-2d00b81352a6",
@@ -890,6 +890,6 @@
             ]
         }
     ],
-    "entryGraph": "79040424-1464-40a0-ba97-cc0ba6a1944f",
+    "entryGraph": "0f3b7564-3294-42bf-ab1d-d5d3d80f015d",
     "version": "20250623.14"
 }
