@@ -81,6 +81,8 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
         <div class="selection-container">
             <RectangleSelection ref="rectangleSelection"/>
         </div>
+
+        <Zoom @zoom-in="zoomIn" @zoom-out="zoomOut" :floating="!hideHud" />
     </div>
 </template>
 
@@ -105,6 +107,7 @@ import RectangleSelection from './RectangleSelection.vue';
 import nodeInsideSelection from './rectangleSelection.js';
 import getExternalApplicationManager from '../core/communication/ExternalApplicationManager';
 import jsonRPC, { frontendEndpoints } from '../core/communication/rpcCommunication';
+import Zoom from '../components/Zoom.vue';
 
 export default defineComponent({
     extends: EditorComponent,
@@ -114,6 +117,7 @@ export default defineComponent({
         TemporaryConnection,
         NodePalette,
         RectangleSelection,
+        Zoom,
     },
     emits: ['setLoad'],
     setup(props, { emit }) {
@@ -788,6 +792,8 @@ export default defineComponent({
             visibleNodes,
             highlightInterfaces,
             editorStyle,
+            zoomIn: panZoom.onZoomIn,
+            zoomOut: panZoom.onZoomOut,
         };
     },
 });

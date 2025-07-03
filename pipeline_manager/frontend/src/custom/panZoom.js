@@ -149,11 +149,23 @@ export default function usePanZoom() {
         prevDiff = -1;
     };
 
+    const onZoomIn = () => {
+        // Limit the zooming to 1.5x of the original size
+        const newScale = Math.min(graph.value.scaling * 1.2, 1.5);
+        applyZoom(window.innerWidth / 2, window.innerHeight / 2, newScale);
+    };
+
+    const onZoomOut = () => {
+        applyZoom(window.innerWidth / 2, window.innerHeight / 2, graph.value.scaling * 0.8);
+    };
+
     return {
         ...dragMove,
         onPointerDown,
         onPointerMove,
         onPointerUp,
         onMouseWheel,
+        onZoomIn,
+        onZoomOut,
     };
 }
