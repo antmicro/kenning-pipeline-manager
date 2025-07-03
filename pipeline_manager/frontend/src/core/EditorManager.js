@@ -665,7 +665,7 @@ export default class EditorManager {
     getMetadataIcon(icon) {
         const [[baseName, suffix]] = Object.entries(icon);
         const baseUrl = this.baklavaView.editor.baseIconUrls.get(baseName);
-        return `${baseUrl}/${suffix}`;
+        return `${baseUrl}${baseUrl.endsWith('/') ? '' : '/'}${suffix}`;
     }
 
     /**
