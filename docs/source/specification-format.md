@@ -67,6 +67,7 @@ This object specifies additional editor options and contains the following optio
   Icon classes are key-value pairs, where key is the name of the icon class, and value is the URL prefix that is used to compute the actual path.
 * `styles` - a dictionary that defines node styles.
   The key in the dictionary is the name of the style, and the value is of type [Node style](#node-style).
+* `welcome` - boolean value determining whether a welcome text should appear on empty editor. This feature is enabled by default.
 * `navbarItems` - list of buttons that are displayed in the navbar in `server-app` mode, that allow for calling custom procedures.
   The entries are of type [Navbar item](#navbar-item).
 * `logLevel` - string specifying minimum level of verbosity notification has to have to be displayed.
