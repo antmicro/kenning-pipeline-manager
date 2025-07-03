@@ -10,11 +10,30 @@ SPDX-License-Identifier: Apache-2.0
     </div>
 </template>
 
+<script>
+import { computed, defineComponent } from 'vue';
+
+export default defineComponent({
+    props: {
+        blur: {
+            type: Boolean,
+            default: true,
+        },
+    },
+    setup(props) {
+        const backgroundColor = computed(() => (props.blur ? '#{$gray-600}80' : null));
+        const backdropFilter = computed(() => (props.blur ? 'blur(10px)' : null));
+        const position = computed(() => (props.blur ? 'absolute' : null));
+        return { backgroundColor, backdropFilter, position };
+    },
+});
+</script>
+
 <style lang="scss">
 .blur-panel {
-    background-color: #{$gray-600}80;
-    backdrop-filter: blur(10px);
-    position: absolute;
+    background-color: v-bind('backgroundColor');
+    backdrop-filter: v-bind('backdropFilter');
+    position: v-bind('position');
     padding: $spacing-l;
     color: white;
     left: 0%;

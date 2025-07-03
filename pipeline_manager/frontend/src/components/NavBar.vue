@@ -41,7 +41,7 @@ import {
 } from './menu';
 import { menuState, configurationState } from '../core/nodeCreation/ConfigurationState.ts';
 import { removeInterfaces, removeProperties } from '../core/nodeCreation/Configuration.ts';
-import BlurPanel from './BlurPanel.vue';
+import Panel from './Panel.vue';
 import CustomSidebar from '../custom/CustomSidebar.vue';
 import { saveSpecificationConfiguration, saveGraphConfiguration, exportGraph } from './saveConfiguration.ts';
 
@@ -77,7 +77,7 @@ export default {
         NodeConfigurationMenu,
         PropertyConfigurationMenu,
         InterfaceConfigurationMenu,
-        BlurPanel,
+        Panel,
         CustomSidebar,
         LayerConfigurationMenu,
         ListMenu,
@@ -704,7 +704,7 @@ export default {
 <!-- eslint-disable vue/no-multiple-template-root -->
 <template>
     <Transition name="fade" @mousedown.self="saveMenuShow = false">
-        <BlurPanel v-show="saveMenuShow">
+        <Panel v-show="saveMenuShow">
             <ParentMenu
                 v-show="saveMenuShow"
                 v-model="saveMenuShow"
@@ -715,7 +715,7 @@ export default {
                     v-model="saveMenuShow"
                 />
             </ParentMenu>
-        </BlurPanel>
+        </Panel>
     </Transition>
     <Transition name="fade" @mousedown.self="exportMenuShow = false">
         <BlurPanel v-show="exportMenuShow">
@@ -732,7 +732,7 @@ export default {
         </BlurPanel>
     </Transition>
     <Transition name="fade" @mousedown.self="menuState.configurationMenu.visible = false">
-        <BlurPanel v-show="menuState.configurationMenu.visible">
+        <Panel v-show="menuState.configurationMenu.visible">
             <ParentMenu
                 v-if="menuState.configurationMenu.visible"
                 v-model="menuState.configurationMenu.visible"
@@ -740,10 +740,10 @@ export default {
             >
                 <NodeConfigurationMenu/>
             </ParentMenu>
-        </BlurPanel>
+        </Panel>
     </Transition>
     <Transition name="fade" @mousedown.self="menuState.propertyMenu = false">
-        <BlurPanel v-show="menuState.propertyMenu">
+        <Panel v-show="menuState.propertyMenu">
             <ParentMenu
                 v-if="menuState.propertyMenu"
                 v-model="menuState.propertyMenu"
@@ -751,10 +751,10 @@ export default {
             >
                 <PropertyConfigurationMenu/>
             </ParentMenu>
-        </BlurPanel>
+        </Panel>
     </Transition>
     <Transition name="fade" @mousedown.self="menuState.interfaceMenu = false">
-        <BlurPanel v-show="menuState.interfaceMenu">
+        <Panel v-show="menuState.interfaceMenu">
             <ParentMenu
                 v-if="menuState.interfaceMenu"
                 v-model="menuState.interfaceMenu"
@@ -762,10 +762,10 @@ export default {
             >
                 <InterfaceConfigurationMenu/>
             </ParentMenu>
-        </BlurPanel>
+        </Panel>
     </Transition>
     <Transition name="fade" @mousedown.self="menuState.propertyListMenu = false">
-        <BlurPanel v-show="menuState.propertyListMenu">
+        <Panel v-show="menuState.propertyListMenu">
             <ParentMenu
                 v-if="menuState.propertyListMenu"
                 v-model="menuState.propertyListMenu"
@@ -778,10 +778,10 @@ export default {
                     :confirmText="'Remove properties'"
                 />
             </ParentMenu>
-        </BlurPanel>
+        </Panel>
     </Transition>
     <Transition name="fade" @mousedown.self="menuState.interfaceListMenu = false">
-        <BlurPanel v-show="menuState.interfaceListMenu">
+        <Panel v-show="menuState.interfaceListMenu">
             <ParentMenu
                 v-if="menuState.interfaceListMenu"
                 v-model="menuState.interfaceListMenu"
@@ -794,10 +794,10 @@ export default {
                     :confirmText="'Remove interfaces'"
                 />
             </ParentMenu>
-        </BlurPanel>
+        </Panel>
     </Transition>
     <Transition name="fade" @mousedown.self="menuState.layerMenu = false">
-        <BlurPanel v-show="menuState.layerMenu">
+        <Panel v-show="menuState.layerMenu">
             <ParentMenu
                 v-if="menuState.layerMenu"
                 v-model="menuState.layerMenu"
@@ -805,7 +805,7 @@ export default {
             >
                 <LayerConfigurationMenu/>
             </ParentMenu>
-        </BlurPanel>
+        </Panel>
     </Transition>
 
     <div class="wrapper"
