@@ -298,22 +298,18 @@ const contextMenuTitleItems = computed(() => {
         items.push(
             { value: 'property', label: 'Add property' },
         );
-        if (!isGraphNode) {
-            items.push(
-                { value: 'interface', label: 'Add interface' },
-            );
-        }
+        items.push(
+            { value: 'interface', label: 'Add interface' },
+        );
         items.push(
             { value: 'layer', label: 'Set layer' },
         );
         items.push(
             { value: 'delete-property', label: 'Delete property' },
         );
-        if (!isGraphNode) {
-            items.push(
-                { value: 'delete-interface', label: 'Delete interface', endSection: true },
-            );
-        }
+        items.push(
+            { value: 'delete-interface', label: 'Delete interface', endSection: true },
+        );
     }
     if (!viewModel.value.editor.readonly) {
         items.push({ value: 'rename', label: 'Rename', icon: icons.Pencil });

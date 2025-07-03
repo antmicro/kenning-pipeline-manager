@@ -709,10 +709,7 @@ export default class EditorManager {
                     );
                 }
 
-                if (unresolvedNodeSpecification.subgraphId === undefined) {
-                    unresolvedNodeSpecification.interfaces = nodeSpecification.interfaces;
-                    resolvedNodeSpecification.interfaces = nodeSpecification.interfaces;
-                } else {
+                if (resolvedNodeSpecification.subgraphId !== undefined) {
                     // Attach subgraph to the updated subgraph node
                     let graphNode;
                     let subgraph;
