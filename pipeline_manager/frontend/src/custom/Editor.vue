@@ -779,6 +779,86 @@ export default defineComponent({
             props.viewModel.editor.events.setLoad.emit(false);
         });
 
+        const loadFiles = async (files) => {
+            const notify = NotificationHandler.showToast;
+
+            if (files.length > 2) {
+                notify('error', `Up to two files supported, inserted: ${files.length}`);
+                return;
+            }
+
+            let objects;
+            try {
+                const parse = async (file) => JSON.parse(await file.text());
+                objects = await Promise.all(Array.from(files).map(parse));
+            } catch (error) {
+                notify('error', 'Dropped file is not in JSON format');
+                return;
+            }
+
+            const isSpecificationFunc = (o) => Boolean(o.nodes || o.include || o.includeGraphs);
+            const isDataflowFunc = (o) => Boolean(o.graphs && !isSpecificationFunc(o));
+            const isInvalid = objects.map((o) => !isSpecificationFunc(o) && !isDataflowFunc(o));
+
+            // [invalid, invalid]
+            if (isInvalid.every(Boolean)) {
+                if (objects.length === 1) notify('error', 'Provided file is not of Pipeline Manager format');
+                else notify('error', 'Neither of provided files is of Pipeline Manager format');
+                return;
+            }
+
+            // Remove invalid
+            objects = objects.filter((_, i) => !isInvalid[i]);
+            if (isInvalid.some(Boolean)) {
+                notify('warning', 'One of the objects is not of Pipeline Manager format');
+            }
+
+            const isSpecification = objects.map(isSpecificationFunc);
+            const isDataflow = objects.map(isDataflowFunc);
+            let specification;
+            let dataflow;
+
+            if (isSpecification.every(Boolean)) {
+                // [spec], [spec, spec]
+                if (objects.length > 1) {
+                    notify('warning', 'Two specifications provided, using the first one.');
+                }
+                [specification] = objects;
+            } else if (isDataflow.every(Boolean)) {
+                // [dataflow], [dataflow, dataflow]
+                if (objects.length > 1) {
+                    notify('warning', 'Two dataflows provided, using the first one.');
+                }
+                [dataflow] = objects;
+            } else if (isSpecification.some(Boolean) && isDataflow.some(Boolean)) {
+                // [spec, dataflow], [dataflow, spec]
+                if (isSpecification[0]) [specification, dataflow] = objects;
+                else [dataflow, specification] = objects;
+            }
+
+            props.viewModel.editor.events.setLoad.emit(true);
+
+            let isValidSpec = true;
+            if (specification) {
+                if (externalApplicationManager.isConnected()) {
+                    NotificationHandler.showToast(
+                        'warning',
+                        'Specification is managed by an external application.',
+                    );
+                    isValidSpec = false;
+                } else {
+                    const errors = await updateEditorSpecification(specification);
+                    isValidSpec = !errors.length;
+                }
+            }
+
+            if (isValidSpec && dataflow) {
+                await updateDataflow(dataflow);
+            }
+
+            props.viewModel.editor.events.setLoad.emit(false);
+        };
+
         const onDrop = async (event) => {
             event.preventDefault();
             event.dataTransfer.dropEffect = 'copy';
@@ -792,60 +872,7 @@ export default defineComponent({
             } else {
                 files.push(...event.dataTransfer.files);
             }
-            if (files.length > 1) {
-                NotificationHandler.showToast(
-                    'warning',
-                    'More than one file dropped, processing only the first one',
-                );
-            }
-            const reader = new FileReader();
-            reader.addEventListener('load', async (ev) => {
-                const file = ev.target.result;
-                let data;
-                try {
-                    data = JSON.parse(file);
-                } catch (SyntaxError) {
-                    NotificationHandler.showToast(
-                        'error',
-                        'Dropped file is not in JSON format',
-                    );
-                    return;
-                }
-
-                props.viewModel.editor.events.setLoad.emit(true);
-                const resolve = () => props.viewModel.editor.events.setLoad.emit(false);
-
-                if (data.nodes || data.include) { // Load Specification
-                    if (externalApplicationManager.backendAvailable) {
-                        NotificationHandler.showToast(
-                            'warning',
-                            'Specification is managed by an external application.',
-                        );
-                    } else {
-                        await updateEditorSpecification(data);
-                    }
-                    resolve();
-                    return;
-                }
-
-                if (data.graphs) { // Load Dataflow
-                    await updateDataflow(data);
-                    resolve();
-                    return;
-                }
-                resolve();
-
-                NotificationHandler.showToast(
-                    'error',
-                    'File is neither specification nor dataflow',
-                );
-            });
-            reader.onerror = (er) => NotificationHandler.terminalLog(
-                'error',
-                'File cannot be loaded',
-                er.message,
-            );
-            reader.readAsText(files[0]);
+            loadFiles(files);
         };
 
         props.viewModel.editor.events.setLoad = new BaklavaEvent();
