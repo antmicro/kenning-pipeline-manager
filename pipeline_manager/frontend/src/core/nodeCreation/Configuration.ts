@@ -10,17 +10,12 @@
  * and the current configuration can be accessed in the configurationState reactive object.
 */
 
-import { reactive, ref } from 'vue';
-import { v4 as uuidv4 } from 'uuid';
-
 import { useViewModel } from '@baklavajs/renderer-vue';
 import { NodeInterface } from '@baklavajs/core';
 import EditorManager, { NEW_NODE_STYLE } from '../EditorManager.js';
 import { parseInterfaces } from '../interfaceParser.js';
-import { removeNode } from '../../custom/CustomNode.js';
 import {
-    configurationState, NodeDataConfiguration, PropertyConfiguration, InterfaceConfiguration,
-    menuState, configurationState, PropertyConfiguration, InterfaceConfiguration,
+    configurationState, PropertyConfiguration, InterfaceConfiguration,
 } from './ConfigurationState.ts';
 
 import { createProperties, parseProperties, createBaklavaInterfaces } from '../NodeFactory.js';
@@ -137,7 +132,6 @@ export function modifyConfiguration(): string[] {
         node.type = newNodeData.name;
         node.layer = newNodeData.layer;
         node.category = newNodeData.category;
-        node.color = newNodeData.color;
         node.description = newNodeData.description;
     });
     /* eslint-enable no-param-reassign */

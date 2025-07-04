@@ -85,7 +85,6 @@ export default defineComponent({
 
         let typingTimer;
         const validateAfterIdleFor = 500;
-        const getCorrectSpecificationMessage = () => '<span style="color: var(--baklava-control-color-primary);">The specification is valid.</span>';
 
         const maybeStringify = (maybeSpecification) => (maybeSpecification !== undefined
             ? YAML.stringify(maybeSpecification)
@@ -377,35 +376,6 @@ export default defineComponent({
                 const messages = Array.isArray(error) ? error : [error];
                 NotificationHandler.terminalLog('error', 'Validation failed', messages);
             }
-        };
-
-        /**
-         * Checks if the changes to the node specification can be applied.
-         *
-         * This function compares the current specification (as YAML)
-         * with the original specification, and ensures there are no validation
-         * errors present in the UI. It uses a cached result to avoid
-         * unnecessary recomputation if the specification has not changed.
-         *
-         * @returns {boolean} Returns `true` if the specification has changed
-         *   and there are no validation errors; otherwise, `false`.
-         * @throws {Error} Returns `false` if parsing the YAML fails.
-         */
-        const evaluateIfChangesMayBeApplied = () => {
-            const parsedCurrentSpecification = YAML.parse(currentSpecification.value.replaceAll('\t', '  '));
-            const differingSpecifications =
-                JSON.stringify(specification.value) !== JSON.stringify(parsedCurrentSpecification);
-
-            const validationResult = validate(true, false);
-            if (validationResult && validationResult.length > 0) {
-                return false;
-            }
-
-            const validationErrorsElement = root.value?.querySelector('.__validation_errors');
-            const noValidationErrors =
-                validationErrorsElement?.innerHTML === getCorrectSpecificationMessage();
-
-            return differingSpecifications && noValidationErrors;
         };
 
         /**

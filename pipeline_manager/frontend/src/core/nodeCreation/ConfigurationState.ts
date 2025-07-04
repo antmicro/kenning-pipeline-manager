@@ -11,6 +11,7 @@ export type NodeDataConfiguration = {
     category: string,
     layer?: string,
     description?: string,
+    color?: string
 }
 
 export type PropertyConfiguration = {
@@ -61,6 +62,8 @@ export const configurationState: ConfigurationState = reactive({
         category: 'Default category',
         layer: '',
         description: '',
+        color: '',
+
     },
     properties: [],
     interfaces: [],
