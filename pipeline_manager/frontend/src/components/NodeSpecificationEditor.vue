@@ -438,7 +438,7 @@ export default defineComponent({
          */
         const formatError = (error) => {
             let errorMessage = (error && error.message) ? error.message : String(error);
-            errorMessage = errorMessage.replace(/unresolved_specification\//g, '');
+            errorMessage = errorMessage.replace(/^unresolved_specification\//, '');
             try {
                 // If the error message contains a stringified array, extract and format it.
                 const match = errorMessage.match(/\[.*\]/);
