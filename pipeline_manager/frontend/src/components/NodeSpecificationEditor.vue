@@ -172,9 +172,12 @@ export default defineComponent({
                 // Update each field if it is defined
                 /* eslint-disable no-param-reassign */
                 nodes.forEach((n) => {
+                    if (n.type === n.title) {
+                        n.title = parsedSpecification.name;
+                    } else {
+                        n.highlightedType = parsedSpecification.name;
+                    }
                     n.type = parsedSpecification.name;
-                    n.title = parsedSpecification.name;
-                    delete n.instanceName;
 
                     Object.entries(parsedSpecification).forEach(([key, value]) => {
                         if (value !== undefined && key !== 'name') {
