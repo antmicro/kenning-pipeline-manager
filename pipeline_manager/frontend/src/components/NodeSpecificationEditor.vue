@@ -35,21 +35,15 @@ SPDX-License-Identifier: Apache-2.0
                         </span>
                     </span>
                 </template>
-            <template v-else>
-                <span style="color: var(--baklava-control-color-primary);">
-                    The specification is valid.
-                </span>
-            </template>
+                <template v-else>
+                    <span style="color: var(--baklava-control-color-primary);">
+                        The specification is valid.
+                    </span>
+                </template>
             </p>
         </div>
     </div>
 </template>
-
-<style scoped>
-    __validation_errors {
-        max-width: 100%;
-    }
-</style>
 
 <script>
 import YAML from 'yaml';
@@ -579,3 +573,9 @@ export default defineComponent({
     },
 });
 </script>
+
+<style scoped>
+    __validation_errors {
+        max-width: 100%;
+    }
+</style>
