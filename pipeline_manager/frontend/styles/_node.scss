@@ -91,19 +91,21 @@
     }
 
     &.--two-column > .__content {
-        & > .__inputs {
-            grid-row: 2;
-            grid-column: 1;
-        }
+        display: block;
 
-        & > .__outputs {
-            grid-row: 2;
-            grid-column: 2;
-        }
+        & > .__interfaces {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
 
-        & > .__properties {
-            grid-row: 1;
-            grid-column: 1 / span 2;
+            & > .__inputs {
+                grid-row: 1;
+                grid-column: 1;
+            }
+
+            & > .__outputs {
+                grid-row: 1;
+                grid-column: 2;
+            }
         }
     }
 

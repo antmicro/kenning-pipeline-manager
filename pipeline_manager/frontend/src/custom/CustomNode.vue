@@ -106,44 +106,46 @@ from moving or deleting the nodes.
                 </div>
             </div>
 
-            <!-- Outputs -->
-            <div class="__outputs" ref="rightSocketsRefs">
-                <template v-for="output in displayedRightRows">
-                    <CustomInterface
-                        :key="output.id"
-                        v-if="output"
-                        @pointerdown.left.shift="pickInterface(output, $event)"
-                        @pointerdown.right.exact="openContextMenuInterface(output, $event)"
-                        v-long-press-to-right:500
-                        :node="node"
-                        :intf="output"
-                        :highlighted="props.interfaces.includes(output)"
-                        :picked="isPickedInterface(output)"
-                        :switchSides="switchSides"
-                    />
-                    <!-- eslint-disable-next-line vue/require-v-for-key -->
-                    <div v-else class="baklava-node-interface --output">&nbsp;</div>
-                </template>
-            </div>
+            <div class="__interfaces">
+                <!-- Outputs -->
+                <div class="__outputs" ref="rightSocketsRefs">
+                    <template v-for="output in displayedRightRows">
+                        <CustomInterface
+                            :key="output.id"
+                            v-if="output"
+                            @pointerdown.left.shift="pickInterface(output, $event)"
+                            @pointerdown.right.exact="openContextMenuInterface(output, $event)"
+                            v-long-press-to-right:500
+                            :node="node"
+                            :intf="output"
+                            :highlighted="props.interfaces.includes(output)"
+                            :picked="isPickedInterface(output)"
+                            :switchSides="switchSides"
+                        />
+                        <!-- eslint-disable-next-line vue/require-v-for-key -->
+                        <div v-else class="baklava-node-interface --output">&nbsp;</div>
+                    </template>
+                </div>
 
-            <!-- Inputs -->
-            <div class="__inputs" ref="leftSocketsRefs">
-                <template v-for="input in displayedLeftRows">
-                    <CustomInterface
-                        :key="input.id"
-                        v-if="input"
-                        @pointerdown.left.shift="pickInterface(input, $event)"
-                        @pointerdown.right="openContextMenuInterface(input, $event)"
-                        v-long-press-to-right:500
-                        :node="node"
-                        :intf="input"
-                        :highlighted="props.interfaces.includes(input)"
-                        :picked="isPickedInterface(input)"
-                        :switchSides="switchSides"
-                    />
-                    <!-- eslint-disable-next-line vue/require-v-for-key -->
-                    <div v-else class="baklava-node-interface --input">&nbsp;</div>
-                </template>
+                <!-- Inputs -->
+                <div class="__inputs" ref="leftSocketsRefs">
+                    <template v-for="input in displayedLeftRows">
+                        <CustomInterface
+                            :key="input.id"
+                            v-if="input"
+                            @pointerdown.left.shift="pickInterface(input, $event)"
+                            @pointerdown.right="openContextMenuInterface(input, $event)"
+                            v-long-press-to-right:500
+                            :node="node"
+                            :intf="input"
+                            :highlighted="props.interfaces.includes(input)"
+                            :picked="isPickedInterface(input)"
+                            :switchSides="switchSides"
+                        />
+                        <!-- eslint-disable-next-line vue/require-v-for-key -->
+                        <div v-else class="baklava-node-interface --input">&nbsp;</div>
+                    </template>
+                </div>
             </div>
 
             <CustomContextMenu
