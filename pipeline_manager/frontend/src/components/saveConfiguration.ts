@@ -14,6 +14,7 @@ interface SaveConfiguration {
     hideHud?: boolean;
     position?: boolean;
     graph?: boolean;
+    minify?: boolean;
     graphName?: string | null;
     saveName: string;
 
@@ -32,14 +33,16 @@ const saveBlob = (blob: Blob, filename: string) => {
 
 export const saveSpecificationConfiguration: SaveConfiguration = {
     graph: false,
+    minify: false,
     saveName: 'specification',
 
     saveCallback() {
         const editorManager = EditorManager.getEditorManagerInstance();
         const specification = editorManager.saveSpecification();
+        let dataflow: any;
         if (this.graph) {
+            dataflow ??= editorManager.saveDataflow();
             specification.graphs ??= [];
-            const dataflow = editorManager.saveDataflow();
 
             // Match graph IDs with subgraphId in node specification
             dataflow.graphs.forEach((graph: any) => {
@@ -74,12 +77,40 @@ export const saveSpecificationConfiguration: SaveConfiguration = {
             });
         }
 
+        if (this.minify) {
+            dataflow ??= editorManager.saveDataflow();
+
+            const nameToNodeMapping = Object.fromEntries(
+                specification.nodes.map((node: any) => [EditorManager.getNodeName(node), node]));
+            const nameToNode = (name: string) => nameToNodeMapping[name];
+
+            const usedNames = dataflow.graphs
+                ?.map((graph: any) => graph.nodes.map(EditorManager.getNodeName))
+                .flat();
+
+            if (usedNames.length) {
+                const resolvedNames: string[] = [];
+                const resolve = (node: any) => {
+                    if (node === undefined) return;
+                    const name = EditorManager.getNodeName(node);
+                    if (resolvedNames.includes(name)) return;
+                    resolvedNames.push(name);
+                    node.extends?.map(nameToNode).forEach(resolve);
+                };
+                usedNames.map(nameToNode).forEach(resolve);
+                specification.nodes = resolvedNames
+                    .map(nameToNode)
+                    .filter((node: any) => node !== undefined);
+                if (!specification.nodes.length) delete specification.nodes;
+            }
+        }
+
         const blob = new Blob(
             [
                 JSON.stringify(
                     specification,
                     null,
-                    4,
+                    this.minify ? 0 : 4,
                 ),
             ],
             { type: 'application/json' },
@@ -89,6 +120,8 @@ export const saveSpecificationConfiguration: SaveConfiguration = {
     },
 
     reset() {
+        this.graph = false;
+        this.minify = false;
         this.saveName = 'specification';
     },
 };
