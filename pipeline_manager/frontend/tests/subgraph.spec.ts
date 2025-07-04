@@ -92,7 +92,7 @@ test('test preserving changes to subgraph', async ({ page }) => {
 
 async function verifyInterfaceCount(page: Page, expectedNumber: number): Promise<Locator> {
     const nodeWithSubgraph = page.getByText('Test subgraph node #1').locator('../..');
-    const exposedInterfaces = nodeWithSubgraph.locator('.__outputs > div');
+    const exposedInterfaces = nodeWithSubgraph.locator('.__interfaces .__outputs > div');
     expect(await exposedInterfaces.count()).toBe(expectedNumber);
     return exposedInterfaces;
 }

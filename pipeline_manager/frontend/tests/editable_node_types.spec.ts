@@ -56,7 +56,7 @@ async function addInterface(page: Page, nodeName: string) {
 
     const inputs = await page
         .locator('[data-node-type="Custom Node"]')
-        .locator('.__inputs > div')
+        .locator('.__interfaces .__inputs > div')
         .count();
     expect(inputs).toBe(1);
 }

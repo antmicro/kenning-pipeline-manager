@@ -141,7 +141,7 @@ async function removeConnection(page: Page, inputInterface: Locator) {
 test('test history by removing connection', async ({ page }) => {
     await loadWebsite(page, loadVideoNodeId);
 
-    const outputPort = page.locator(`#${loadVideoNodeId} .__content .__outputs .__port`);
+    const outputPort = page.locator(`#${loadVideoNodeId} .__content .__interfaces .__outputs .__port`);
     const connections = page.locator('.connections-container').locator('g');
 
     await expect(connections, {
@@ -166,7 +166,7 @@ test('test history by removing connection', async ({ page }) => {
 test('test history by adding connection', async ({ page }) => {
     await loadWebsite(page, loadVideoNodeId);
 
-    const outputPort = page.locator(`#${loadVideoNodeId} .__content .__outputs .__port`);
+    const outputPort = page.locator(`#${loadVideoNodeId} .__content .__interfaces .__outputs .__port`);
     const connections = page.locator('.connections-container').locator('g');
 
     await expect(connections, {
@@ -181,7 +181,7 @@ test('test history by adding connection', async ({ page }) => {
         .getByText('Filter2D')
         .nth(1)
         .locator('../..')
-        .locator('.__inputs')
+        .locator('.__interfaces .__inputs')
         .getByText('input 1')
         .locator('..')
         .locator('.__port');
@@ -207,7 +207,7 @@ async function firstInputInterfaceHasToBe(page: Page, value: string, errorMessag
         .getByText('Filter2D')
         .nth(1)
         .locator('../..')
-        .locator('.__inputs div')
+        .locator('.__interfaces .__inputs div')
         .first();
     await expect(await firstInputInterface.innerText(), { message: errorMessage }).toBe(value);
 }
@@ -224,7 +224,7 @@ test('test history by moving interface down', async ({ page }) => {
     // Open a context menu of an interface.
     const filter2dNode = page.getByText('Filter2D').nth(1).locator('../..');
     let interfaceInput1 = filter2dNode
-        .locator('.__inputs')
+        .locator('.__interfaces .__inputs')
         .getByText('input 1')
         .locator('..')
         .locator('.__port');
@@ -262,7 +262,7 @@ test('test history by moving interface up', async ({ page }) => {
     // Open a context menu of an interface.
     const filter2dNode = page.getByText('Filter2D').nth(1).locator('../..');
     let interfaceInput1 = filter2dNode
-        .locator('.__inputs')
+        .locator('.__interfaces .__inputs')
         .getByText('kernel')
         .locator('..')
         .locator('.__port');
@@ -306,7 +306,7 @@ test('test history by moving interface to right', async ({ page }) => {
     // Double click on an interface.
     const filter2dNode = page.getByText('Filter2D').nth(1).locator('../..');
     let interfaceInput1 = filter2dNode
-        .locator('.__inputs')
+        .locator('.__interfaces .__inputs')
         .getByText('input 1')
         .locator('..')
         .locator('.__port');
@@ -352,7 +352,7 @@ test('test history by moving interface to left', async ({ page }) => {
     // Double click on an interface.
     const filter2dNode = page.getByText('Filter2D').nth(1).locator('../..');
     let interfaceOutput1 = filter2dNode
-        .locator('.__outputs')
+        .locator('.__interfaces .__outputs')
         .getByText('output 1')
         .locator('..')
         .locator('.__port');
@@ -432,7 +432,7 @@ test('test history by editing node with connection', async ({ page }) => {
     // Open a context menu of an interface.
     const filter2dNode = page.getByText('Filter2D').nth(1).locator('../..');
     let interfaceInput1 = filter2dNode
-        .locator('.__inputs')
+        .locator('.__interfaces .__inputs')
         .getByText('kernel')
         .locator('..')
         .locator('.__port');
