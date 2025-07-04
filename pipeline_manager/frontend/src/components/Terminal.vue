@@ -56,14 +56,18 @@ export default defineComponent({
             return logs.value.length;
         });
 
+        const terminalBuffer = [];
+
         const printLog = (log) => {
             if (term === undefined) return;
-            term.io.print(props.terminalInstance === MAIN_TERMINAL ? log.replace(/\n/g, '\r\n') : log);
+            const text = props.terminalInstance === MAIN_TERMINAL ? log.replace(/\n/g, '\r\n') : log;
+            term.io.print(text);
+            terminalBuffer.push(text);
         };
 
         let renderIndex = 0;
 
-        const clearLog = () => {
+        const clearTerminal = () => {
             renderIndex = 0;
             if (term === undefined) return;
 
@@ -71,6 +75,11 @@ export default defineComponent({
             term.scrollHome();
             // This line console logs' "Couldn't fetch row index:"
             term.wipeContents();
+        };
+
+        const clearLog = () => {
+            clearTerminal();
+            terminalBuffer.length = 0;
         };
 
         const externalApplicationManager = getExternalApplicationManager();
@@ -107,6 +116,11 @@ export default defineComponent({
                 this.io.onTerminalResize = () => {
                     // Focus the terminal when it is resized
                     this.focus();
+                    // Reload content
+                    clearTerminal();
+                    terminalBuffer.forEach((line) => {
+                        term.io.print(line);
+                    });
                 };
                 this.installKeyboard();
             };
