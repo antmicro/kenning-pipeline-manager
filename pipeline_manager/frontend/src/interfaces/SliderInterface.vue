@@ -51,7 +51,6 @@ export default defineComponent({
     setup(props) {
         const intf = toRef(props, 'intf');
         const interfaceComponent = SliderInterfaceComponent.setup(props);
-        interfaceComponent.enterEditMode();
 
         const adjustValue = (value) => {
             let currentValue = value;
