@@ -557,8 +557,7 @@ export default defineComponent({
                 currentSpecification.value;
         };
 
-        const delayedUIUpdate = () => nextTick().then(handleUIUpdate);
-        watch(menuState, delayedUIUpdate);
+        watch(menuState, () => nextTick().then(handleUIUpdate));
 
         // Editing
 
