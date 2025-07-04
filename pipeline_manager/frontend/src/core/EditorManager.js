@@ -506,6 +506,69 @@ export default class EditorManager {
     }
 
     /**
+     * Propagates changes to nodes extending a category node.
+     * Called when the category node type is edited.
+     *
+     * @param {object} nodeSpecification Node specification to add
+     * @param {object} nodeToUpdate Node type to update
+     */
+    updateExtendingNodes(nodeSpecification, nodeToUpdate) {
+        const unresolvedChildNodes = this.specification.unresolvedSpecification.nodes
+            .filter((node) => node.extends?.includes(nodeToUpdate));
+        const resolvedChildNodes = this.specification.currentSpecification.nodes
+            .filter((node) => node.extends?.includes(nodeToUpdate));
+
+        const childNodes = [...unresolvedChildNodes, ...resolvedChildNodes];
+        childNodes.forEach((node) => {
+            node.category = nodeSpecification.category;
+            node.extends.forEach((parent, i) => {
+                if (parent === nodeToUpdate) {
+                    node.extends[i] = EditorManager.getNodeName(nodeSpecification);
+                }
+            });
+        });
+
+        // Update properties and interfaces in resolved specification
+        const unresolvedMap = new Map(
+            unresolvedChildNodes.map((node) => [node.name, node]),
+        );
+        const resolvedMap = new Map(
+            resolvedChildNodes.map((node) => [node.name, node]),
+        );
+        resolvedMap.forEach((resolvedNode, nodeName) => {
+            this._unregisterNodeType(nodeName);
+
+            resolvedNode.category = nodeSpecification.category;
+            const unresolvedNode = unresolvedMap.get(nodeName);
+            const resolvedInterfaces = resolvedNode.interfaces ?? [];
+            const unresolvedInterfaces = unresolvedNode.interfaces ?? [];
+            const resolvedProperties = resolvedNode.properties ?? [];
+            const unresolvedProperties = unresolvedNode.properties ?? [];
+
+            resolvedNode.interfaces = resolvedInterfaces.filter(
+                (intf) => unresolvedInterfaces.includes(intf),
+            );
+            resolvedNode.properties = resolvedProperties.filter(
+                (prop) => unresolvedProperties.includes(prop),
+            );
+            if (nodeSpecification.interfaces) {
+                resolvedNode.interfaces = [
+                    ...resolvedNode.interfaces,
+                    ...nodeSpecification.interfaces,
+                ];
+            }
+            if (nodeSpecification.properties) {
+                resolvedNode.properties = [
+                    ...resolvedNode.properties,
+                    ...nodeSpecification.properties,
+                ];
+            }
+
+            this._registerNodeType(resolvedNode);
+        });
+    }
+
+    /**
      * Validates the node specification passed in `nodeSpecification` and if
      * it is correct adds it to the unresolved specification.
      * If there is no current specification loaded then a new one is created.
@@ -563,15 +626,20 @@ export default class EditorManager {
                 this.specification.unresolvedSpecification.nodes.push(nodeSpecification);
             } else {
                 Object.entries(nodeSpecification).forEach(([key, value]) => {
-                    if (value !== undefined && key !== 'interfaces') {
+                    if (value !== undefined) {
                         unresolvedNodeSpecification[key] = value;
                         resolvedNodeSpecification[key] = value;
                     }
                 });
+                resolvedNodeSpecification.name = EditorManager.getNodeName(nodeSpecification);
 
                 validationErrors = this._registerNodeType(resolvedNodeSpecification, twoColumn);
                 if (validationErrors.length) {
                     return { errors: validationErrors, warnings: [] };
+                }
+
+                if (nodeSpecification.isCategory) {
+                    this.updateExtendingNodes(nodeSpecification, nodeToUpdate);
                 }
 
                 if (unresolvedNodeSpecification.subgraphId === undefined) {
