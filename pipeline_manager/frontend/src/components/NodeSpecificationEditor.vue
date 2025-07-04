@@ -193,15 +193,14 @@ export default defineComponent({
                     return []; // No changes, so no errors to show
                 }
 
-                const parsedSpecForValidation = YAML.parse(currentSpecification.value.replaceAll('\t', '  '));
                 try {
-                    validateNode(parsedSpecForValidation);
+                    validateNode(parsedCurrentSpecification);
                 } catch (e) { errors.push(e); }
                 try {
-                    validateNodeProperties(parsedSpecForValidation);
+                    validateNodeProperties(parsedCurrentSpecification);
                 } catch (e) { errors.push(e); }
                 try {
-                    validateNodeInterfaces(parsedSpecForValidation);
+                    validateNodeInterfaces(parsedCurrentSpecification);
                 } catch (e) { errors.push(e); }
             } catch (error) {
                 errors.push(error);
