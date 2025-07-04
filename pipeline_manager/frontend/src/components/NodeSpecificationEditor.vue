@@ -48,7 +48,7 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import YAML from 'yaml';
 import {
-    computed, defineComponent, nextTick, ref, toRef, watch,
+    computed, defineComponent, nextTick, ref, toRef, watch, onMounted, onBeforeUnmount,
 } from 'vue';
 import { useViewModel } from '@baklavajs/renderer-vue';
 import EditorManager from '../core/EditorManager';
@@ -69,7 +69,6 @@ export default defineComponent({
     },
     setup(props) {
         // State
-
         const { viewModel } = useViewModel();
         const { displayedGraph } = viewModel.value;
         const editorManager = EditorManager.getEditorManagerInstance();
@@ -103,12 +102,9 @@ export default defineComponent({
         const currentSpecification = ref(maybeStringify(specification.value));
         watch(specification, async () => {
             currentSpecification.value =
-                editorManager.modifiedNodeSpecificationRegistry[node.value.id]
-                ?? maybeStringify(specification.value);
+            editorManager.modifiedNodeSpecificationRegistry[node.value.id]
+            ?? maybeStringify(specification.value);
         });
-
-        const visible = computed(() =>
-            specification.value && editorManager.baklavaView.settings.editableNodeTypes);
 
         // Validation
 
@@ -212,6 +208,29 @@ export default defineComponent({
             }
             return errors;
         };
+
+        // Reference to cache validation results.
+        const cachedValidationResult = ref([]);
+        const updateCachedValidationResult = () => {
+            cachedValidationResult.value = validate();
+        };
+
+        // Use clicks to detect node changes.
+        if (typeof window !== 'undefined') {
+            onMounted(() => {
+                document.addEventListener('click', updateCachedValidationResult);
+            });
+            onBeforeUnmount(() => {
+                document.removeEventListener('click', updateCachedValidationResult);
+            });
+        }
+
+        const visible = computed(
+            () =>
+                specification.value && editorManager.baklavaView.settings.editableNodeTypes,
+        );
+
+        updateCachedValidationResult();
 
         const updateSpecification = async () => {
             try {
@@ -434,12 +453,6 @@ export default defineComponent({
                 // Not a JSON array, leave as it is.
             }
             return errorMessage;
-        };
-
-        // Reference to cache validation results.
-        const cachedValidationResult = ref([]);
-        const updateCachedValidationResult = () => {
-            cachedValidationResult.value = validate();
         };
 
         /**
