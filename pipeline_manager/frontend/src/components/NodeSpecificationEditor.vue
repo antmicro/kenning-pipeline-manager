@@ -109,6 +109,31 @@ export default defineComponent({
         // Validation
 
         /**
+         * Find duplicate values in an array of objects based on a specified property.
+         *
+         * @param {Array} array - The array of objects to search for duplicates.
+         * @param {string} propertyName - The property name to check for duplicate values.
+         * @returns {Array} An array containing the values of the specified property
+         *     that appear more than once.
+         */
+        const findDuplicates = (array, propertyName) => {
+            const nameCounter = new Map();
+            array.forEach((element) => {
+                let count = 1;
+                if (nameCounter.has(element[propertyName])) {
+                    count = nameCounter.get(element[propertyName]) + 1;
+                }
+                nameCounter.set(element[propertyName], count);
+            });
+
+            return Array.from(
+                nameCounter.entries(),
+            )
+                .filter(([_, count]) => count > 1)
+                .map(([name]) => name);
+        };
+
+        /**
          * Validates the interfaces of a parsed node specification.
          *
          * This function performs two main checks:
@@ -122,11 +147,10 @@ export default defineComponent({
             if (!parsedSpecification?.interfaces) {
                 return;
             }
-            // Check for duplicate interface names.
-            const names = parsedSpecification.interfaces.map((intf) => intf.name);
-            const duplicates = names.filter((name, idx) => names.indexOf(name) !== idx);
+
+            const duplicates = findDuplicates(parsedSpecification.interfaces, 'name');
             if (duplicates.length > 0) {
-                throw new Error(`Conflicting interface names: ${[...new Set(duplicates)].join(', ')}`);
+                throw new Error(`Conflicting interface names: ${duplicates.join(', ')}`);
             }
 
             // Validate against the JSON schema.
@@ -156,29 +180,28 @@ export default defineComponent({
          *
          * This function performs two main checks:
          * - Ensures that there are no duplicated properties names.
-         * - Validates each interface object against a JSON schema.
+         * - Validates each property object against a JSON schema.
          *
          * @param {Object} parsedSpecification - The parsed node specification object to validate.
          * @throws {Error} Raised if a validation failed.
          */
         const validateNodeProperties = (parsedSpecification) => {
-            // Check for duplicate property names.
-            if (parsedSpecification?.properties) {
-                const propNames = parsedSpecification.properties.map((prop) => prop.name);
-                const duplicates = propNames.filter((name, idx) => propNames.indexOf(name) !== idx);
-                if (duplicates.length > 0) {
-                    throw new Error(`Conflicting property names: ${[...new Set(duplicates)].join(', ')}`);
-                }
+            if (!parsedSpecification?.properties) {
+                return;
             }
 
-            if (parsedSpecification?.interfaces) {
-                parsedSpecification.interfaces.forEach((intf) => {
-                    const validationErrors = editorManager.validateNodeInterface(intf);
-                    if (validationErrors.length) {
-                        throw new Error(validationErrors);
-                    }
-                });
+            const duplicates = findDuplicates(parsedSpecification.properties, 'name');
+            if (duplicates.length > 0) {
+                throw new Error(`Conflicting property names: ${duplicates.join(', ')}`);
             }
+
+            // Validate against a JSON schema of a property.
+            parsedSpecification.properties.forEach((prop) => {
+                const validationErrors = editorManager.validateNodeProperty(prop);
+                if (validationErrors.length) {
+                    throw new Error(validationErrors);
+                }
+            });
         };
 
         const validate = () => {
@@ -558,6 +581,13 @@ export default defineComponent({
         };
 
         watch(menuState, () => nextTick().then(handleUIUpdate));
+
+        onMounted(() => {
+            document.addEventListener('click', updateCachedValidationResult);
+            nextTick(() => {
+                handleInput();
+            });
+        });
 
         // Editing
 
