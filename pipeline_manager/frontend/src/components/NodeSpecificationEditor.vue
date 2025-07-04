@@ -237,16 +237,6 @@ export default defineComponent({
             cachedValidationResult.value = validate();
         };
 
-        // Use clicks to detect node changes.
-        if (typeof window !== 'undefined') {
-            onMounted(() => {
-                document.addEventListener('click', updateCachedValidationResult);
-            });
-            onBeforeUnmount(() => {
-                document.removeEventListener('click', updateCachedValidationResult);
-            });
-        }
-
         const visible = computed(
             () =>
                 specification.value && editorManager.baklavaView.settings.editableNodeTypes,
@@ -517,7 +507,6 @@ export default defineComponent({
 
         // Editor height
 
-        const height = ref('auto');
         const handleInput = () => {
             if (!visible.value) { return; }
             const { scrollHandle } = props;
@@ -526,6 +515,10 @@ export default defineComponent({
                 prevParentScrollHeight = scrollHandle.scrollTop;
             }
 
+            // Setting the height to 'auto' first allows the element
+            // to shrink if the content has decreased.
+            // Then, setting it to the scrollHeight of the element (in pixels)
+            // resizes the element to fit its content exactly.
             el.value.style.height = 'auto';
             el.value.style.height = `${el.value.scrollHeight}px`;
 
@@ -539,6 +532,7 @@ export default defineComponent({
         };
 
         const delayedEditorUpdate = () => nextTick().then(handleInput);
+
         watch(currentSpecification, delayedEditorUpdate);
         watch(visible, delayedEditorUpdate);
         watch([specification, visible], () => {
@@ -586,7 +580,15 @@ export default defineComponent({
             document.addEventListener('click', updateCachedValidationResult);
             nextTick(() => {
                 handleInput();
+                // Resize the YAML editor after DOM is loaded.
+                setTimeout(() => {
+                    handleInput();
+                }, 10);
             });
+        });
+
+        onBeforeUnmount(() => {
+            document.removeEventListener('click', updateCachedValidationResult);
         });
 
         // Editing
@@ -600,7 +602,6 @@ export default defineComponent({
             el,
             root,
             handleInput,
-            height,
             currentSpecification,
             specification,
             validate,
