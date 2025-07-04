@@ -127,12 +127,15 @@ export function modifyConfiguration(): string[] {
     // Changing existing nodes' types
     /* eslint-disable no-param-reassign */
     nodes.forEach((node) => {
-        node.title = newNodeData.name;
+        if (node.type === node.title) {
+            node.title = newNodeData.name;
+        } else {
+            node.highlightedType = newNodeData.name;
+        }
         node.type = newNodeData.name;
         node.layer = newNodeData.layer;
         node.category = newNodeData.category;
         node.description = newNodeData.description;
-        delete node.instanceName;
     });
     /* eslint-enable no-param-reassign */
 
