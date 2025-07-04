@@ -197,7 +197,7 @@ export default defineComponent({
                 }
                 if (oldSpecification === undefined) {
                     oldSpecification = editorManager.specification.unresolvedSpecification
-                        .nodes?.find(nodeMatchesSpec);
+                        .nodes?.find((n) => n.name === oldType);
                 }
 
                 const parsedProperties = parsedSpecification.properties ?? [];
