@@ -89,6 +89,7 @@ export default defineComponent({
         const hideHud = createCheckboxOption('Disable HUD', 'hideHud');
         const position = createCheckboxOption('Preserve current view location', 'position');
         const graph = createCheckboxOption('Save graph', 'graph');
+        const minify = createCheckboxOption('Minify', 'minify');
         const graphName = createInputOption('Graph name', 'graphName');
         const dataflowname = createInputOption('File name', 'saveName');
 
@@ -97,8 +98,8 @@ export default defineComponent({
             close();
         })), undefined];
 
-        const options =
-            computed(() => [readonly, hideHud, position, graph, graphName, dataflowname, save]
+        const options = computed(() =>
+            [readonly, hideHud, position, graph, minify, graphName, dataflowname, save]
                 .filter(([option, _]) => option.value !== undefined)
                 .map(([option, label]) => [option.value, label]));
 
