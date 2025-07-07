@@ -131,6 +131,10 @@
                             "description": "Name displayed in a node",
                             "type": "string"
                         },
+                        "subgraphId": {
+                            "description": "Graph ID that the subgraph node corresponds to",
+                            "type": "string"
+                        },
                         "includeName": {
                             "type": "string",
                             "description": "Name of the included node to override"
@@ -162,6 +166,14 @@
                                 "object",
                                 "string"
                             ]
+                        },
+                        "color": {
+                            "description": "Optional field defining the color of the node rendered to the user",
+                            "type": "string"
+                        },
+                        "width": {
+                            "description": "Width of the node",
+                            "type": "number"
                         },
                         "style": {
                             "$ref": "#/$defs/style"
@@ -338,7 +350,8 @@
                                 "null"
                             ]
                         }
-                    }
+                    },
+                    "additionalProperties": false
                 },
                 {
                     "anyOf": [
