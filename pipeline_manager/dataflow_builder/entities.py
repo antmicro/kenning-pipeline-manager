@@ -161,8 +161,11 @@ class Property(JsonConvertible):
 
     @staticmethod
     def ensure_hex(value: str) -> None:
-        for char in string.hexdigits:
-            if char not in value:
+        if value.startswith("0x"):
+            value = value[2:]
+        for char in value:
+            if char not in string.hexdigits:
+                breakpoint()
                 raise ValueError(
                     "Minimum should be either a decimal or hexadecimal number."
                     f" Found an illegal character `{char}`."
