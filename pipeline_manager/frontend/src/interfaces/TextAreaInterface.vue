@@ -86,16 +86,6 @@ export default defineComponent({
             height: 'auto',
         });
 
-        const enterEditMode = async () => {
-            if (props.intf.readonly) { return; }
-
-            editMode.value = true;
-            await nextTick();
-
-            // Restore scroll
-            el.value.scrollTop = previousScroll.value;
-        };
-
         const leaveEditMode = () => {
             if (props.modelValue.trim()) {
                 editMode.value = false;
@@ -132,6 +122,21 @@ export default defineComponent({
                 styles.overflow = 'hidden';
             }
         };
+
+        const enterEditMode = async () => {
+            if (props.intf.readonly) { return; }
+
+            editMode.value = true;
+            await nextTick();
+
+            // Restore scroll
+            el.value.scrollTop = previousScroll.value;
+
+            handleInput();
+        };
+
+        // Don't render if the initial value is empty
+        nextTick().then(() => { if (!props.modelValue.trim()) enterEditMode(); });
 
         useResizeObserver(el, (_) => {
             styles.height = el.value.style.height;
