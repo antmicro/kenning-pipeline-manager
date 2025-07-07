@@ -513,10 +513,11 @@ export default class EditorManager {
      *
      * @param {object} nodeSpecification Node specification to add
      * @param {object} nodeToUpdate Node type to update
+     * @param {object} twoColumn Whether the updated node has a two-column layout
      * @returns An object consisting of errors and warnings arrays. If both arrays are empty
      * the updating process was successful.
      */
-    addNodeToEditorSpecification(nodeSpecification, nodeToUpdate = undefined) {
+    addNodeToEditorSpecification(nodeSpecification, nodeToUpdate = undefined, twoColumn = false) {
         // Remove undefined fields
         Object.entries(nodeSpecification.properties ?? {}).forEach(([_, value]) => {
             Object.keys(value).forEach((key) => {
@@ -545,7 +546,7 @@ export default class EditorManager {
 
         this.specification.unresolvedSpecification.nodes ??= [];
 
-        validationErrors = this._registerNodeType(nodeSpecification);
+        validationErrors = this._registerNodeType(nodeSpecification, twoColumn);
         if (validationErrors.length) {
             return { errors: validationErrors, warnings: [] };
         }
