@@ -157,6 +157,8 @@ export function alterProperties(
     properties: PropertyConfiguration[],
     remove = false,
 ): void {
+    if (properties === undefined) return;
+
     const parsedProperties = parseProperties(properties);
     const createdProperties = (createProperties(parsedProperties) as CreatedInterfaces);
     nodes.forEach((node) => {
@@ -190,6 +192,8 @@ export function alterInterfaces(
     interfaces: InterfaceConfiguration[],
     remove = false,
 ): void {
+    if (interfaces === undefined) return;
+
     const parsedInterfaces = parseInterfaces(interfaces, [], []);
     const [inputs, outputs] =
         createBaklavaInterfaces(parsedInterfaces) as [CreatedInterfaces, CreatedInterfaces];

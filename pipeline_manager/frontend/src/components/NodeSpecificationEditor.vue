@@ -239,19 +239,10 @@ export default defineComponent({
                     (intf) => !parsedInterfaces.some((i) => i.name === intf.name),
                 );
 
-                if (removedProperties !== undefined) {
-                    alterProperties(nodes, removedProperties, true);
-                }
-                if (removedInterfaces !== undefined) {
-                    alterInterfaces(nodes, removedInterfaces, true);
-                }
-
-                if (parsedSpecification.properties !== undefined) {
-                    alterProperties(nodes, parsedSpecification.properties);
-                }
-                if (parsedSpecification.interfaces !== undefined) {
-                    alterInterfaces(nodes, parsedSpecification.interfaces);
-                }
+                alterProperties(nodes, removedProperties, true);
+                alterInterfaces(nodes, removedInterfaces, true);
+                alterProperties(nodes, parsedSpecification.properties);
+                alterInterfaces(nodes, parsedSpecification.interfaces);
 
                 // eslint-disable-next-line no-underscore-dangle
                 const errors = editorManager._unregisterNodeType(oldType);
