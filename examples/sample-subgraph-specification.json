@@ -79,7 +79,7 @@
             ]
         },
         {
-            "name": "Test subgraph node #1",
+            "name": "Test subgraph #1",
             "category": "First Category",
             "properties": [
                 {
@@ -98,13 +98,13 @@
             "subgraphId": "569edd54-0f42-4c24-a809-1509febbe23a"
         },
         {
-            "name": "Test subgraph node #2",
+            "name": "Test subgraph #2",
             "category": "Second Category",
             "color": "#6f091a",
             "subgraphId": "129c6246-d874-48cd-a33c-2927961d42e8"
         },
         {
-            "name": "Test subgraph node #3",
+            "name": "Test subgraph #3",
             "category": "Second Category",
             "color": "#4e096f",
             "subgraphId": "129c6246-d874-48cd-a33c-2927961d42e8"
@@ -256,7 +256,7 @@
                     ]
                 },
                 {
-                    "name": "Test subgraph node #1",
+                    "name": "Test subgraph #1",
                     "position": {
                         "x": 100,
                         "y": 400

@@ -312,8 +312,8 @@
                         }
                     ],
                     "subgraph": "ceded982-088e-4f63-8cef-75b2e6435cb1",
-                    "name": "Test subgraph node #1",
-                    "instanceName": "Test subgraph node #1"
+                    "name": "Test subgraph #1",
+                    "instanceName": "Test subgraph #1"
                 },
                 {
                     "id": "174b1b6d-99db-46d3-bb38-9b36b9930870",
@@ -354,8 +354,8 @@
                         }
                     ],
                     "subgraph": "40a30253-a806-4c36-906b-cbfd670d66ed",
-                    "name": "Test subgraph node #2",
-                    "instanceName": "Test subgraph node #2"
+                    "name": "Test subgraph #2",
+                    "instanceName": "Test subgraph #2"
                 }
             ],
             "connections": [
