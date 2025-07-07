@@ -516,7 +516,7 @@ export default class PipelineManagerEditor extends Editor {
 
     getPillText(nodeName) {
         const nodeType = this.nodeTypes.get(nodeName);
-        return nodeType.pill?.text
+        return nodeType?.pill?.text
             ?? ((nodeType?.style !== undefined || undefined)
                 && this.getNodeStyle(nodeType.style)?.pill?.text);
     }
@@ -557,7 +557,7 @@ export default class PipelineManagerEditor extends Editor {
 
     getPillColor(nodeName) {
         const nodeType = this.nodeTypes.get(nodeName);
-        return nodeType.pill?.color
+        return nodeType?.pill?.color
             ?? ((nodeType?.style !== undefined || undefined)
                 && this.getNodeStyle(nodeType.style)?.pill?.color);
     }
