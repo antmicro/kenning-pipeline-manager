@@ -59,6 +59,11 @@ def create_backend(argv):  # noqa: D103
         type=Path,
     )
     parser.add_argument(
+        "--relative-pm-url",
+        help="Path in URL where Pipeline Manager should be served",
+        type=Path,
+    )
+    parser.add_argument(
         "--skip-frontend",
         action="store_true",
         help="Creates server without frontend",
@@ -98,7 +103,7 @@ def create_backend(argv):  # noqa: D103
     sio = create_socketio()
     app = None
     if not args.skip_frontend:
-        app = create_app(args.frontend_directory)
+        app = create_app(args.frontend_directory, args.relative_pm_url)
 
     return sio, app, args
 

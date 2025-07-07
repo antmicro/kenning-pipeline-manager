@@ -13,6 +13,7 @@ import asyncio
 import logging
 from multiprocessing import Process
 from pathlib import Path
+from typing import Optional
 
 from pipeline_manager.backend.state_manager import global_state_manager
 
@@ -24,6 +25,7 @@ def server_process_handler(
     tcp_host: str,
     tcp_port: int,
     lazy_server_init: bool = False,
+    relative_pm_url: Optional[Path] = None,
 ):
     """
     Function ran as a process target, responsible for initializing the tcp
@@ -44,12 +46,14 @@ def server_process_handler(
     lazy_server_init: bool
         Tells whether the server should connect first (False) or render
         the frontend without waiting for third-party app (True)
+    relative_pm_url : Optional[Path]
+        Path in URL where Pipeline Manager should be served
     """
     from pipeline_manager.backend.fastapi import create_app
     from pipeline_manager.backend.run_backend import run_uvicorn
     from pipeline_manager.backend.socketio import create_socketio
 
-    app = create_app(frontend_path)
+    app = create_app(frontend_path, relative_pm_url)
     sio = create_socketio()
 
     app.static_folder = Path(frontend_path).resolve()
@@ -74,6 +78,7 @@ async def start_server_in_parallel(
     backend_port: int = 5000,
     verbosity: str = "INFO",
     lazy_server_init: bool = False,
+    relative_pm_url: Optional[Path] = None,
 ) -> int:
     """
     Wrapper function that starts a Pipeline Manager process in the background
@@ -101,6 +106,8 @@ async def start_server_in_parallel(
         Tells whether the connection with the third-party
         application should be established after connecting with
         the frontend (True) or immediately upon start (False)
+    relative_pm_url : Optional[Path]
+        Path in URL where Pipeline Manager should be served
 
     Returns
     -------
@@ -121,6 +128,7 @@ async def start_server_in_parallel(
                 tcp_server_host,
                 tcp_server_port,
                 lazy_server_init,
+                relative_pm_url,
             ),
         )
     )

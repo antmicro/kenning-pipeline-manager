@@ -7,6 +7,7 @@ Provides function for creating FastAPI application.
 """
 
 import os
+import shutil
 from pathlib import Path
 from typing import Optional
 
@@ -19,7 +20,9 @@ from pipeline_manager import frontend
 dist_path = Path(os.path.dirname(frontend.__file__)) / "dist"
 
 
-def create_app(frontend_dir: Optional[Path] = None) -> FastAPI:
+def create_app(
+    frontend_dir: Optional[Path] = None, relative_pm_url: Optional[Path] = None
+) -> FastAPI:
     """
     Hosts frontend application.
 
@@ -27,6 +30,8 @@ def create_app(frontend_dir: Optional[Path] = None) -> FastAPI:
     ----------
     frontend_dir : Optional[Path]
         Path where the built frontend is stored.
+    relative_pm_url : Optional[Path]
+        Path in URL where Pipeline Manager should be served
 
     Returns
     -------
@@ -37,6 +42,15 @@ def create_app(frontend_dir: Optional[Path] = None) -> FastAPI:
 
     if not frontend_dir:
         frontend_dir = dist_path
+    elif relative_pm_url:
+        if relative_pm_url.is_relative_to("/"):
+            relative_pm_url = relative_pm_url.relative_to("/")
+
+        shutil.copytree(
+            dist_path,
+            frontend_dir / relative_pm_url,
+            dirs_exist_ok=True,
+        )
     app.mount(
         "/", StaticFiles(directory=frontend_dir, html=True), name="static"
     )
