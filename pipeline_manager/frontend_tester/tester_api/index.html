@@ -1,0 +1,111 @@
+<html>
+<head>
+    <style>
+
+    * {
+      font-family: 'Montserrat', sans-serif
+    }
+
+    body {
+      background-color: #1d1d1d;
+    }
+
+    #pm {
+      border: 0;
+      width: 100%;
+      height: 75%;
+    }
+
+    #controls {
+      display: grid;
+      grid-template-columns: 0.3fr 1fr 1fr;
+      grid-gap: 0.5em;
+      height: 20%;
+      padding: 0.5em
+    }
+
+    #input {
+      width: 100%;
+      height: 100%;
+    }
+
+    #buttons {
+      display: grid;
+      grid-gap: 0.5em;
+    }
+
+    #buttons button {
+      font-size: inherit;
+      background-color: #343434;
+      color: white;
+      transition: background-color 0.1s linear;
+      border: none;
+      border-radius: 10px;
+      padding: 0.45em 0.35em;
+      cursor: pointer;
+    }
+
+    #buttons button:hover {
+      background-color: #4a4a4a
+    }
+
+    #input {
+      font-family: monospace;
+      padding: 0.5em;
+      border: none;
+      resize: none;
+      color: white;
+      background-color: #343434;
+      overflow: scroll;
+    }
+
+    #output {
+      font-family: monospace;
+      padding: 0.5em;
+      margin: 0px;
+      border: none;
+      color: white;
+      background-color: #343434;
+      overflow: scroll;
+    }
+    </style>
+</head>
+<body>
+    <script>
+        window.addEventListener('message', (event) => {
+          document.getElementById("output").innerHTML = JSON.stringify(event.data, null, 4)
+        });
+
+        let PM;
+        window.onload = () => { PM = document.getElementById("pm"); }
+
+        const specification_get = () => PM.contentWindow.postMessage({method: "specification_get"});
+        const graph_get = () => PM.contentWindow.postMessage({method: "graph_get"});
+        const specification_change = () => PM.contentWindow.postMessage({
+          method: "specification_change",
+          params: { specification: JSON.parse(document.getElementById("input").value) }}
+        );
+        const graph_change = () => PM.contentWindow.postMessage({
+          method: "graph_change",
+          params: { dataflow: JSON.parse(document.getElementById("input").value) }}
+        );
+        const status_get = () => PM.contentWindow.postMessage({method: "status_get"});
+    </script>
+    <div class="wrapper">
+        <iframe id="pm" src="/pipeline-manager"></iframe>
+        <div>
+            <div id="controls">
+                <div id="buttons">
+                    <button onclick="specification_get()">Get specification</button>
+                    <button onclick="graph_get()">Get graph</button>
+                    <button onclick="specification_change()">Set specification</button>
+                    <button onclick="graph_change()">Set graph</button>
+                    <button onclick="status_get()">Get status</button>
+                </div>
+                  <textarea id="input" placeholder="Write here specification or dataflow" spellcheck="false"></textarea>
+                  <pre id="output">Make a request.</pre>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -16,3 +16,23 @@ By default application will be available at:
 * [http://localhost:5000/](http://localhost:5000/) -- original Pipeline Manager
 * [http://localhost:5001/](http://localhost:5001/) -- mirrored Pipeline Manager
 
+
+# Use Pipeline Manager API from frontend
+
+Build pipeline_manager:
+
+```bash
+./build server-app
+```
+
+Run backend with a sample frontend wrapper in the background:
+
+```bash
+./run --frontend-directory pipeline_manager/frontend_tester/tester_api --relative-pm-url pipeline-manager &
+```
+
+Start any external application, e.g.:
+
+```bash
+python -m pipeline_manager.frontend_tester.tester_client
+```
