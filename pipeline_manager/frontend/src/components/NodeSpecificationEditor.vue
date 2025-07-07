@@ -239,10 +239,14 @@ export default defineComponent({
                     (intf) => !parsedInterfaces.some((i) => i.name === intf.name),
                 );
 
-                alterProperties(nodes, removedProperties, true);
-                alterInterfaces(nodes, removedInterfaces, true);
-                alterProperties(nodes, parsedSpecification.properties);
-                alterInterfaces(nodes, parsedSpecification.interfaces);
+                const childNodes = displayedGraph.nodes.filter(
+                    (n) => n.extends?.includes(oldType),
+                ) ?? [];
+
+                alterProperties([...nodes, ...childNodes], removedProperties, true);
+                alterInterfaces([...nodes, ...childNodes], removedInterfaces, true);
+                alterProperties([...nodes, ...childNodes], parsedSpecification.properties);
+                alterInterfaces([...nodes, ...childNodes], parsedSpecification.interfaces);
 
                 // eslint-disable-next-line no-underscore-dangle
                 const errors = editorManager._unregisterNodeType(oldType);
