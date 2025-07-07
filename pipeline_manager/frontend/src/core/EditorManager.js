@@ -633,6 +633,13 @@ export default class EditorManager {
                 });
                 resolvedNodeSpecification.name = EditorManager.getNodeName(nodeSpecification);
 
+                const extendingNodes = this.specification.unresolvedSpecification.nodes
+                    .filter((node) => node.extends?.includes(nodeToUpdate))
+                    .map((node) => EditorManager.getNodeName(node));
+                if (extendingNodes !== undefined) {
+                    resolvedNodeSpecification.extending = extendingNodes;
+                }
+
                 validationErrors = this._registerNodeType(resolvedNodeSpecification, twoColumn);
                 if (validationErrors.length) {
                     return { errors: validationErrors, warnings: [] };
