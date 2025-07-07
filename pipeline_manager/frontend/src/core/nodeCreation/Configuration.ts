@@ -33,8 +33,9 @@ type CreatedInterfaces = {
 
 /**
   * Updates editor specification for the edited node type.
+     * @param {object} twoColumn Whether the updated node has a two-column layout
 */
-function commitTypeToSpecification() {
+function commitTypeToSpecification(twoColumn = false) {
     suppressHistoryLogging(true);
     const editorManager = EditorManager.getEditorManagerInstance();
 
@@ -58,7 +59,7 @@ function commitTypeToSpecification() {
         interfaces: configurationState.interfaces,
         properties: configurationState.properties,
         style: NEW_NODE_STYLE,
-    }, currentType);
+    }, currentType, twoColumn);
 
     if (ret.errors !== undefined && ret.errors.length) {
         NotificationHandler.terminalLog('error', 'Error when registering the node', ret.errors);
@@ -139,7 +140,7 @@ export function modifyConfiguration(): string[] {
     });
     /* eslint-enable no-param-reassign */
 
-    commitTypeToSpecification();
+    commitTypeToSpecification(nodes[0].twoColumn);
     suppressHistoryLogging(false);
     return [];
 }
@@ -251,7 +252,7 @@ export function addProperty(property: PropertyConfiguration): void {
     configurationState.properties.push(property);
     alterProperties(nodes, configurationState.properties);
 
-    commitTypeToSpecification();
+    commitTypeToSpecification(nodes[0].twoColumn);
 }
 
 /**
@@ -282,7 +283,7 @@ export function removeProperties(properties: PropertyConfiguration[]): void {
     );
     alterProperties(nodes, properties, true);
 
-    commitTypeToSpecification();
+    commitTypeToSpecification(nodes[0].twoColumn);
 }
 
 /**
@@ -317,7 +318,7 @@ export function addInterface(intf: InterfaceConfiguration): void {
     configurationState.interfaces.push(intf);
     alterInterfaces(nodes, configurationState.interfaces);
 
-    commitTypeToSpecification();
+    commitTypeToSpecification(nodes[0].twoColumn);
 }
 
 /**
@@ -348,5 +349,5 @@ export function removeInterfaces(interfaces: InterfaceConfiguration[]): void {
     );
     alterInterfaces(nodes, interfaces, true);
 
-    commitTypeToSpecification();
+    commitTypeToSpecification(nodes[0].twoColumn);
 }
