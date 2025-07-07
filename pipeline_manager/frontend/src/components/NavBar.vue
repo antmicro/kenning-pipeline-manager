@@ -228,6 +228,7 @@ export default {
             'Graph name',
             '',
         );
+        editorTitleInterface.setDefaultComponent();
 
         const searchEditorNodesQuery = ref('');
         // Setup custom hook, which is executed when procedure starts or stops running
