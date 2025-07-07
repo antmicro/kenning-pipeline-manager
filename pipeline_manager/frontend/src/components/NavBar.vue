@@ -706,7 +706,7 @@ export default {
 
 <!-- eslint-disable vue/no-multiple-template-root -->
 <template>
-    <Transition name="fade" @click.self="saveMenuShow = false">
+    <Transition name="fade" @mousedown.self="saveMenuShow = false">
         <BlurPanel v-show="saveMenuShow">
             <ParentMenu
                 v-show="saveMenuShow"
@@ -720,7 +720,7 @@ export default {
             </ParentMenu>
         </BlurPanel>
     </Transition>
-    <Transition name="fade" @click.self="menuState.configurationMenu.visible = false">
+    <Transition name="fade" @mousedown.self="menuState.configurationMenu.visible = false">
         <BlurPanel v-show="menuState.configurationMenu.visible">
             <ParentMenu
                 v-if="menuState.configurationMenu.visible"
@@ -731,7 +731,7 @@ export default {
             </ParentMenu>
         </BlurPanel>
     </Transition>
-    <Transition name="fade" @click.self="menuState.propertyMenu = false">
+    <Transition name="fade" @mousedown.self="menuState.propertyMenu = false">
         <BlurPanel v-show="menuState.propertyMenu">
             <ParentMenu
                 v-if="menuState.propertyMenu"
@@ -742,7 +742,7 @@ export default {
             </ParentMenu>
         </BlurPanel>
     </Transition>
-    <Transition name="fade" @click.self="menuState.interfaceMenu = false">
+    <Transition name="fade" @mousedown.self="menuState.interfaceMenu = false">
         <BlurPanel v-show="menuState.interfaceMenu">
             <ParentMenu
                 v-if="menuState.interfaceMenu"
@@ -753,7 +753,7 @@ export default {
             </ParentMenu>
         </BlurPanel>
     </Transition>
-    <Transition name="fade" @click.self="menuState.propertyListMenu = false">
+    <Transition name="fade" @mousedown.self="menuState.propertyListMenu = false">
         <BlurPanel v-show="menuState.propertyListMenu">
             <ParentMenu
                 v-if="menuState.propertyListMenu"
@@ -764,7 +764,7 @@ export default {
             </ParentMenu>
         </BlurPanel>
     </Transition>
-    <Transition name="fade" @click.self="menuState.interfaceListMenu = false">
+    <Transition name="fade" @mousedown.self="menuState.interfaceListMenu = false">
         <BlurPanel v-show="menuState.interfaceListMenu">
             <ParentMenu
                 v-if="menuState.interfaceListMenu"
@@ -775,7 +775,7 @@ export default {
             </ParentMenu>
         </BlurPanel>
     </Transition>
-    <Transition name="fade" @click.self="menuState.layerMenu = false">
+    <Transition name="fade" @mousedown.self="menuState.layerMenu = false">
         <BlurPanel v-show="menuState.layerMenu">
             <ParentMenu
                 v-if="menuState.layerMenu"
