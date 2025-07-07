@@ -1610,7 +1610,7 @@ export default class EditorManager {
         if (validationErrors.length) return validationErrors;
 
         // Validating category nodes
-        const { nodes, graphs } = specification;
+        const { nodes } = specification;
         const categoryNodes = nodes.filter((node) => node.isCategory);
         const definedCategories = {};
 
@@ -1677,16 +1677,6 @@ export default class EditorManager {
             nodeNames.add(node.name);
         });
 
-        if (graphs !== undefined) {
-            graphs.forEach((graph) => {
-                if (graph.name !== undefined) {
-                    if (nodeNames.has(graph.name)) {
-                        errors.push(`Graph node name '${graph.name}' is defined multiple times`);
-                    }
-                    nodeNames.add(graph.name);
-                }
-            });
-        }
         return errors;
     }
 
