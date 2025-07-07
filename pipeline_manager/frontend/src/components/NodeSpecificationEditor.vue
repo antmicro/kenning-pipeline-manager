@@ -171,11 +171,11 @@ export default defineComponent({
                 /* eslint-disable no-param-reassign */
                 nodes.forEach((n) => {
                     if (n.type === n.title) {
-                        n.title = parsedSpecification.name;
+                        n.title = EditorManager.getNodeName(parsedSpecification);
                     } else {
-                        n.highlightedType = parsedSpecification.name;
+                        n.highlightedType = EditorManager.getNodeName(parsedSpecification);
                     }
-                    n.type = parsedSpecification.name;
+                    n.type = EditorManager.getNodeName(parsedSpecification);
 
                     Object.entries(parsedSpecification).forEach(([key, value]) => {
                         if (value !== undefined && key !== 'name') {
