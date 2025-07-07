@@ -255,7 +255,8 @@ export default class EditorManager {
             }
 
             includedSpecification.graphs = (includedSpecification.graphs ?? []).concat(graphs);
-            this.specification.includedSpecification = includedSpecification;
+            this.specification.includedSpecification =
+                JSON.parse(JSON.stringify(includedSpecification));
 
             // Merge included specification
             const {

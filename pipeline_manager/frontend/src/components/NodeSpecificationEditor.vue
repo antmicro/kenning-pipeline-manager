@@ -160,9 +160,6 @@ export default defineComponent({
                 // Update style of edited node type
                 parsedSpecification.style
                     = EditorManager.mergeStyles(EDITED_NODE_STYLE, parsedSpecification.style);
-                currentSpecification.value = YAML.stringify(parsedSpecification);
-                editorManager.modifiedNodeSpecificationRegistry[node.value.id] =
-                    currentSpecification.value;
 
                 // Update all nodes of the type to match the new specification
                 const oldType = node.value.type;
@@ -243,6 +240,10 @@ export default defineComponent({
                 if (ret.errors !== undefined && ret.errors.length) {
                     throw new Error(ret.errors);
                 }
+
+                currentSpecification.value = YAML.stringify(parsedSpecification);
+                editorManager.modifiedNodeSpecificationRegistry[node.value.id] =
+                    currentSpecification.value;
 
                 NotificationHandler.showToast('info', 'Node validated');
             } catch (error) {
