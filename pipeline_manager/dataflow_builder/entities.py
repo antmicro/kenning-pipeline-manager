@@ -165,7 +165,6 @@ class Property(JsonConvertible):
             value = value[2:]
         for char in value:
             if char not in string.hexdigits:
-                breakpoint()
                 raise ValueError(
                     "Minimum should be either a decimal or hexadecimal number."
                     f" Found an illegal character `{char}`."
@@ -382,15 +381,26 @@ class Node(JsonConvertible):
 
             # List of dictionary to list of Property objects conversion.
             if key == "properties" and len(value) > 0:
-                if isinstance(value[0], Dict):
-                    properties = []
-                    for property in value:
+                properties = []
+                for property_item in value:
+                    if isinstance(property_item, Dict):
                         snake_cased_arguments = {
-                            camel_case_to_snake_case(key): value
-                            for key, value in property.items()
+                            camel_case_to_snake_case(k): v
+                            for k, v in property_item.items()
                         }
                         properties.append(Property(**snake_cased_arguments))
-                    value = properties
+                    elif isinstance(property_item, Property):
+                        properties.append(property_item)
+                    else:
+                        raise TypeError(
+                            (
+                                "All properties must be either dicts or"
+                                " Property instances. Received: "
+                                f"{property_item} of type "
+                                f"{type(property_item)}."
+                            )
+                        )
+                value = properties
 
             # List of dictionary to list of Interface objects conversion.
             if key == "interfaces" and len(value) > 0:
@@ -420,18 +430,19 @@ class Node(JsonConvertible):
             setattr(self, key, value)
 
         # Ensure properties always exist.
-        properties = []
-        for node_specification in nodes_in_specification:
-            for property_specification in node_specification.setdefault(
-                "properties", []
-            ):
-                property = Property(**property_specification)
-                properties.append(property)
+        if not hasattr(self, "properties"):
+            properties = []
+            for node_specification in nodes_in_specification:
+                for property_specification in node_specification.setdefault(
+                    "properties", []
+                ):
+                    property = Property(**property_specification)
+                    properties.append(property)
 
-        if hasattr(self, "properties"):
-            self.properties.extend(properties)
-        else:
-            self.properties = properties
+            if hasattr(self, "properties"):
+                self.properties.extend(properties)
+            else:
+                self.properties = properties
 
     @staticmethod
     def init_subgraph_node(
