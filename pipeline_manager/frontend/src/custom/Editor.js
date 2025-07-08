@@ -516,9 +516,9 @@ export default class PipelineManagerEditor extends Editor {
 
     getPillText(nodeName) {
         const nodeType = this.nodeTypes.get(nodeName);
-        return nodeType?.pill?.text
-            ?? ((nodeType?.style !== undefined || undefined)
-                && this.getNodeStyle(nodeType.style)?.pill?.text);
+        if (nodeType?.pill !== undefined) return nodeType.pill?.text;
+        if (nodeType?.style !== undefined) return this.getNodeStyle(nodeType.style)?.pill?.text;
+        return undefined;
     }
 
     getNodeCategory(nodeName) {
@@ -526,11 +526,13 @@ export default class PipelineManagerEditor extends Editor {
     }
 
     getNodeColor(node) {
+        const nodeColor = this.nodeColors.get(node.id);
+        if (nodeColor !== undefined) return nodeColor;
+
         const nodeType = this.nodeTypes.get(node.type);
-        return this.nodeColors.get(node.id)
-            ?? nodeType?.color
-            ?? ((nodeType?.style !== undefined || undefined)
-                && this.getNodeStyle(nodeType.style)?.color);
+        if (nodeType?.color !== undefined) return nodeType.color;
+        if (nodeType?.style !== undefined) return this.getNodeStyle(nodeType.style)?.color;
+        return undefined;
     }
 
     setNodeColor(nodeId, color) {
@@ -557,14 +559,14 @@ export default class PipelineManagerEditor extends Editor {
 
     getPillColor(nodeName) {
         const nodeType = this.nodeTypes.get(nodeName);
-        return nodeType?.pill?.color
-            ?? ((nodeType?.style !== undefined || undefined)
-                && this.getNodeStyle(nodeType.style)?.pill?.color);
+        if (nodeType?.pill !== undefined) return nodeType.pill?.color;
+        if (nodeType?.style !== undefined) return this.getNodeStyle(nodeType.style).pill?.color;
+        return undefined;
     }
 
     /* eslint-disable class-methods-use-this */
     getTextColor(color) {
-        if (color === undefined || color === '') {
+        if (!color) {
             return 'white';
         }
         // calculate lightness

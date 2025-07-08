@@ -53,7 +53,7 @@ from moving or deleting the nodes.
                 v-click-outside="doneRenaming"
                 @keydown.enter="doneRenaming"
             />
-            <template v-if="nodeStyle.name !== undefined">
+            <template v-if="nodeStyle.name !== undefined && nodeStyle.name !== null">
                 <component
                     v-if="nodeStyle.icon !== undefined"
                     class="__title-icon"
