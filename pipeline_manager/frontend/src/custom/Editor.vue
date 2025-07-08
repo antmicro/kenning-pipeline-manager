@@ -73,7 +73,7 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
             <TemporaryConnection
                 name="temporaryConnection"
                 :temporary-connection="temporaryConnection"
-                v-if="temporaryConnection"
+                v-if="temporaryConnection && temporaryConnectionRender"
                 :connection="temporaryConnection"
             />
         </svg>
@@ -774,6 +774,7 @@ export default defineComponent({
             rectangleSelection,
             greyedOutNodes,
             temporaryConnection: temporaryConnection.temporaryConnection,
+            temporaryConnectionRender: temporaryConnection.render,
             mouseWheel: panZoom.onMouseWheel,
             dragging: panZoom.dragging,
             changeHoveredConnections,

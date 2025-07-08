@@ -28,15 +28,17 @@ export function useTemporaryConnection() {
 
     const temporaryConnection = ref(null);
     const hoveringOver = ref(null);
+    const hoveredOut = ref(false);
     let hoveringOverElement = null;
 
     const onMouseMove = (ev) => {
         if (temporaryConnection.value) {
+            const element = document.elementFromPoint(ev.clientX, ev.clientY);
             // Touch does not support hover, check if event pointing on interface
             if (ev.pointerType === 'touch') {
-                const element = document.elementFromPoint(ev.clientX, ev.clientY);
                 // Hover out, trigger pointerout
                 if (hoveringOverElement && hoveringOverElement !== element) {
+                    hoveredOut.value = true;
                     hoveringOverElement.dispatchEvent(new PointerEvent('pointerout'));
                     hoveringOverElement = null;
                 }
@@ -50,6 +52,8 @@ export function useTemporaryConnection() {
                 temporaryConnection.value.my =
                     ev.clientY / graph.value.scaling - graph.value.panning.y;
             } else {
+                // eslint-disable-next-line no-bitwise
+                hoveredOut.value |= hoveringOverElement && hoveringOverElement !== element;
                 temporaryConnection.value.mx =
                     ev.offsetX / graph.value.scaling - graph.value.panning.x;
                 temporaryConnection.value.my =
@@ -69,11 +73,12 @@ export function useTemporaryConnection() {
 
             temporaryConnection.value.mx = undefined;
             temporaryConnection.value.my = undefined;
+            hoveredOut.value = false;
         }
     };
 
     const onMouseUp = () => {
-        if (temporaryConnection.value && hoveringOver.value) {
+        if (temporaryConnection.value && hoveringOver.value && hoveredOut.value) {
             graph.value.addConnection(temporaryConnection.value.from, temporaryConnection.value.to);
         }
         temporaryConnection.value = null;
@@ -81,7 +86,7 @@ export function useTemporaryConnection() {
 
     const hoveredOver = (ni) => {
         hoveringOver.value = ni ?? null;
-        if (ni && temporaryConnection.value) {
+        if (ni && temporaryConnection.value && hoveredOut.value) {
             temporaryConnection.value.to = ni;
             const checkConnectionResult = graph.value.checkConnection(
                 temporaryConnection.value.from,
@@ -112,6 +117,7 @@ export function useTemporaryConnection() {
 
     return {
         temporaryConnection,
+        render: hoveredOut,
         onMouseMove,
         onMouseDown,
         onMouseUp,
