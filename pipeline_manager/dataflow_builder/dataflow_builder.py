@@ -342,7 +342,9 @@ class GraphBuilder:
 
         return subgraphs
 
-    def get_subgraph_by_name(self, name: str) -> DataflowGraph:
+    def get_subgraph_by_name(
+        self, name: str
+    ) -> DataflowGraph | List[DataflowGraph]:
         """
         Get a subgraph by the name.
 
@@ -357,8 +359,9 @@ class GraphBuilder:
 
         Returns
         -------
-        DataflowGraph
-            An instance of DataflowGraph matching by `name`.
+        DataflowGraph | List[DataflowGraph]
+            An single instance if one graph is matched, a list of instances if
+            multiple graphs are matched.
 
         Raises
         ------
@@ -385,15 +388,15 @@ class GraphBuilder:
                 *subgraphs_by_node_name,
             }
         )
-        if len(matching_subgraphs) != 1:
+        if len(matching_subgraphs) == 0:
             raise ValueError(
-                "The name should be associated with exactly one graph"
-                " but the provided `name` matches "
-                f"{len(matching_subgraphs)} graphs."
+                f"The name '{len(matching_subgraphs)}' should be at least with"
+                " one graph"
             )
-
-        [subgraph] = matching_subgraphs
-        return subgraph
+        elif len(matching_subgraphs) == 1:
+            [subgraph] = matching_subgraphs
+            return subgraph
+        return matching_subgraphs
 
     def save(self, json_file: Path, skip_validation: bool = False):
         """
