@@ -624,7 +624,7 @@ def test_subgraph_node_creation_misuse_raises(sample_specification_path):
 def test_finding_subgraph_by_subgraph_name(graph_builder_for_subgraphs):
     """Test if subgraph may be retrieved by its name."""
     subgraph = graph_builder_for_subgraphs.get_subgraph_by_name(
-        "Test subgraph node #1"
+        "Test subgraph #1"
     )
 
     assert isinstance(

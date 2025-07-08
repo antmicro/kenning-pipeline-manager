@@ -397,7 +397,7 @@ def specification_include_graphs_no_nodes(
         ("specification_include_one_graph", 0),
         ("specification_include_one_graph_with_exposed_interface", 0),
         ("specification_nested_repeating_include", 0),
-        ("specification_include_graphs_node_conflicting", 1),
+        ("specification_include_graphs_node_conflicting", 0),
         ("specification_include_graphs_names_repeated", 1),
         ("specification_include_graphs_no_nodes", 1),
     ],

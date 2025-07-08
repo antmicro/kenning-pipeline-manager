@@ -2,7 +2,7 @@
     "version": "20250623.14",
     "graphs": [
         {
-            "name": "Test subgraph node #1",
+            "name": "Test subgraph #1",
             "category": "Test Category",
             "nodes": [
                 {

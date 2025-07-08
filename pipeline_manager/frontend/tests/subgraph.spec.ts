@@ -4,7 +4,7 @@ import { getPathToJsonFile, getUrl, openFileChooser } from './config.js';
 const countOfInitiallyExposedInterface = 4;
 
 async function enterSubgraph(page: Page) {
-    const nodeWithSubgraph = page.getByText('Test subgraph node #1').nth(1).locator('../..');
+    const nodeWithSubgraph = page.getByText('Test subgraph #1').nth(1).locator('../..');
     await nodeWithSubgraph.locator('.__title').click({ button: 'right' });
     const contextMenuOption = page.locator('.baklava-context-menu').getByText('Edit Subgraph');
     await contextMenuOption.click();
@@ -91,7 +91,7 @@ test('test preserving changes to subgraph', async ({ page }) => {
 });
 
 async function verifyInterfaceCount(page: Page, expectedNumber: number): Promise<Locator> {
-    const nodeWithSubgraph = page.getByText('Test subgraph node #1').locator('../..');
+    const nodeWithSubgraph = page.getByText('Test subgraph #1').locator('../..');
     const exposedInterfaces = nodeWithSubgraph.locator('.__interfaces .__outputs > div');
     expect(await exposedInterfaces.count()).toBe(expectedNumber);
     return exposedInterfaces;
