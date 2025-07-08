@@ -64,6 +64,8 @@ import getNodeTree from './nodeTree';
 import PaletteEntry from './PaletteEntry.vue';
 import Tooltip from '../../components/Tooltip.vue';
 import Magnifier from '../../icons/Magnifier.vue';
+import { DEFAULT_CUSTOM_NODE_TYPE } from '../../core/EditorManager';
+import { menuState } from '../../core/nodeCreation/ConfigurationState';
 
 export default defineComponent({
     components: {
@@ -107,12 +109,18 @@ export default defineComponent({
 
             if (!elements.includes(paletteRef.value)) {
                 const instance = new draggedNode.value.nodeInformation.type(); // eslint-disable-line new-cap,max-len
-                viewModel.value.displayedGraph.addNode(instance);
 
-                const rect = editorEl.value.getBoundingClientRect();
-                const [x, y] = transform(mouseX.value - rect.left, mouseY.value - rect.top);
-                instance.position.x = x;
-                instance.position.y = y;
+                if (draggedNode.value.type === DEFAULT_CUSTOM_NODE_TYPE) {
+                    menuState.configurationMenu.visible = !menuState.configurationMenu.visible;
+                    menuState.configurationMenu.addNode = true;
+                } else {
+                    viewModel.value.displayedGraph.addNode(instance);
+
+                    const rect = editorEl.value.getBoundingClientRect();
+                    const [x, y] = transform(mouseX.value - rect.left, mouseY.value - rect.top);
+                    instance.position.x = x;
+                    instance.position.y = y;
+                }
 
                 draggedNode.value = null;
                 document.removeEventListener('pointerup', dragEndPlaceNode);
