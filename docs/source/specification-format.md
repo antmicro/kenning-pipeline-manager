@@ -238,6 +238,9 @@ This object specifies a single node.
   Additionally, if a node extends from a category node, then it has to be in its subtree.
 * `color` - a hexadecimal color that will be used as the node background in the editor.
   If not provided, the default Kenning Pipeline Manager color scheme will be used.
+* `twoColumn` - boolean value.
+  If set to `true`, the interfaces on opposite sides will be arranged parallel to each other.
+  Otherwise, each interface will be positioned on a separate line.
 * `pill` - a dictionary that defines an additional node tag displayed in the top right corner of the node. It has the following entries:
   * `text` - content of the pill,
   * `color` (optional) - background color. The default color is white.

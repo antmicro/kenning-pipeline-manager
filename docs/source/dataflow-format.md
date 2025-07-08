@@ -56,6 +56,8 @@ Each node has:
 * `twoColumn` - boolean value.
   If set to `true`, the interfaces on opposite sides will be arranged parallel to each other.
   Otherwise, each interface will be positioned on a separate line.
+  This overrides the value set in the specification.
+  If not provided, the value set in the specification will be used instead.
 * `subgraph` - optional field defining the `id` of the subgraph that this node represents.
   It refers to one of the [Graphs](#graph) entries from `graphs` with a matching `id`.
 * `enabledInterfaceGroups` - optional array describing enabled interface groups.
