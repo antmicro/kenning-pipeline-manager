@@ -7,7 +7,7 @@ import { useViewModel } from '@baklavajs/renderer-vue';
 import { INodeTypeInformation } from '@baklavajs/core';
 import { watch, Ref, WatchStopHandle } from 'vue';
 import fuzzysort from 'fuzzysort';
-import { DEFAULT_GRAPH_NODE_TYPE } from '../../core/EditorManager';
+import EditorManager, { DEFAULT_GRAPH_NODE_TYPE, DEFAULT_CUSTOM_NODE_TYPE } from '../../core/EditorManager';
 
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 interface NodeURL {
@@ -243,12 +243,14 @@ let unWatch: WatchStopHandle;
 
 const TOP_LEVEL_CATEGORY = 'TopLevel';
 export const TOP_LEVEL_NODES_NAMES = [
+    DEFAULT_CUSTOM_NODE_TYPE,
     DEFAULT_GRAPH_NODE_TYPE,
 ];
 
 export default function getNodeTree(nameFilterRef: Ref<string>) {
     const { viewModel } = useViewModel();
     const { editor } = viewModel.value;
+    const editorManager = EditorManager.getEditorManagerInstance();
 
     const nodeTypeEntries = Array.from(editor.nodeTypes.entries());
     const categoryNames = new Set(nodeTypeEntries.map(([, ni]) => ni.category));
@@ -294,13 +296,19 @@ export default function getNodeTree(nameFilterRef: Ref<string>) {
             }),
         );
 
-        const topLevelNodes = nodeTypesInCategory.filter(
+        let topLevelNodes = nodeTypesInCategory.filter(
             ([name, _]) => TOP_LEVEL_NODES_NAMES.includes(name), // eslint-disable-line @typescript-eslint/no-unused-vars,max-len
         );
 
         nodeTypesInCategory = nodeTypesInCategory.filter(
             ([name, _]) => !TOP_LEVEL_NODES_NAMES.includes(name), // eslint-disable-line @typescript-eslint/no-unused-vars,max-len
         );
+
+        if (!editorManager.baklavaView.settings.editableNodeTypes) {
+            topLevelNodes = topLevelNodes.filter(
+                ([name, _]) => name !== DEFAULT_CUSTOM_NODE_TYPE,
+            );
+        }
 
         if (nodeTypesInCategory.length > 0) {
             const nodeTypes: Array<[string, NodeType]> = nodeTypesInCategory.map(
