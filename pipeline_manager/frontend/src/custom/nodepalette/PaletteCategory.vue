@@ -281,8 +281,17 @@ export default defineComponent({
             mask.value.splice(index, 1, !mask.value[index]);
         };
 
+        const isTopLevelNode = (name) => TOP_LEVEL_NODES_NAMES.includes(name);
+
         const sortedEntries = (obj, sortSubcategories = false) =>
             Object.entries(obj).sort(([a, aNode], [b, bNode]) => {
+                if (!isTopLevelNode(a) && isTopLevelNode(b)) {
+                    return 1;
+                }
+                if (isTopLevelNode(a) && !isTopLevelNode(b)) {
+                    return -1;
+                }
+
                 if (sortSubcategories) {
                     if (notEmptyCategory(aNode) && !notEmptyCategory(bNode)) {
                         return 1;
@@ -305,8 +314,6 @@ export default defineComponent({
 
         const editorManager = EditorManager.getEditorManagerInstance();
         const specificationLoaded = computed(() => editorManager.specificationLoaded.value);
-
-        const isTopLevelNode = (name) => TOP_LEVEL_NODES_NAMES.includes(name);
 
         const nodeEntryClasses = (name) => ({
             __entry: true,
