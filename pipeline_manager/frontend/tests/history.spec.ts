@@ -186,7 +186,23 @@ test('test history by adding connection', async ({ page }) => {
         .locator('..')
         .locator('.__port');
 
-    await sourceInterface.dragTo(targetInterface);
+    const [sourcePosition, targetPosition]: [number, number][] = await Promise.all(
+        [sourceInterface, targetInterface]
+            .map(async (locator) => {
+                const {
+                    x, width, y, height,
+                } = await locator.boundingBox() as {
+                    x: number, y: number, width: number, height: number,
+                };
+
+                return [x + width / 2, y + height / 2];
+            }));
+
+    await page.mouse.move(...sourcePosition);
+    await page.mouse.down();
+    await page.mouse.move(...targetPosition, { steps: 2 });
+    await page.mouse.up();
+
     await expect(connections, {
         message: 'Adding a connection (in place of a missing connection) failed.',
     }).toHaveCount(6);
