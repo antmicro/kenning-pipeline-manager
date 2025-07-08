@@ -16,7 +16,11 @@ from typing import Any, Dict, List, Optional, Union, get_type_hints
 
 from typing_extensions import override
 
-from pipeline_manager.dataflow_builder.data_structures import Direction, Side
+from pipeline_manager.dataflow_builder.data_structures import (
+    Direction,
+    Infinity,
+    Side,
+)
 from pipeline_manager.specification_builder import SpecificationBuilder
 
 
@@ -641,17 +645,16 @@ class Node(JsonConvertible):
             )
 
         if isinstance(dynamic, bool):
-            dynamic_interface_count_limit = 999**999
             min_interfaces = 1
-            max_interfaces = dynamic_interface_count_limit
+            max_interfaces = Infinity
         else:
             dynamic = tuple(dynamic)
             min_interfaces, max_interfaces = dynamic
 
-        if new_count > max_interfaces:
+        if max_interfaces is not Infinity and new_count > max_interfaces:
             raise ValueError(
-                f"Cannot set the number of dynamic interfaces to {new_count}"
-                f"as this value exceeds max = {max_interfaces}."
+                f"Cannot set the number of dynamic interfaces to "
+                f"{new_count} as this value exceeds max = {max_interfaces}"
             )
         if new_count < min_interfaces:
             raise ValueError(

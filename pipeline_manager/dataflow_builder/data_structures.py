@@ -19,3 +19,6 @@ class Side(Enum):
 
     LEFT = "left"
     RIGHT = "right"
+
+
+Infinity = None
