@@ -171,10 +171,6 @@
                             "description": "Optional field defining the color of the node rendered to the user",
                             "type": "string"
                         },
-                        "width": {
-                            "description": "Width of the node",
-                            "type": "number"
-                        },
                         "twoColumn": {
                             "description": "Determines whether sockets should be rendered in the top part of the node and properties below them",
                             "type": "boolean"
@@ -362,16 +358,8 @@
                         },
                         "width": {
                             "description": "Width, in pixels, of the node in the visual editor. The minimum value is 300.",
-                            "anyOf": [
-                                {
-                                    "type": "number",
-                                    "minimum": 300
-                                },
-                                {
-                                    "type": "null"
-                                }
-                            ]
-                        },
+                            "type": ["number", "null"]
+			},
                         "subgraphId": {
                             "description": "ID of the subgraph the node represents.",
                             "type": [
