@@ -79,7 +79,6 @@
         let PM;
         window.onload = () => { PM = document.getElementById("pm"); }
 
-        const specification_get = () => PM.contentWindow.postMessage({method: "specification_get"});
         const graph_get = () => PM.contentWindow.postMessage({method: "graph_get"});
         const specification_change = () => PM.contentWindow.postMessage({
           method: "specification_change",
@@ -89,18 +88,17 @@
           method: "graph_change",
           params: { dataflow: JSON.parse(document.getElementById("input").value) }}
         );
-        const status_get = () => PM.contentWindow.postMessage({method: "status_get"});
+        const any_request = () => PM.contentWindow.postMessage(JSON.parse(document.getElementById("input").value));
     </script>
     <div class="wrapper">
         <iframe id="pm" src="/pipeline-manager"></iframe>
         <div>
             <div id="controls">
                 <div id="buttons">
-                    <button onclick="specification_get()">Get specification</button>
                     <button onclick="graph_get()">Get graph</button>
                     <button onclick="specification_change()">Set specification</button>
                     <button onclick="graph_change()">Set graph</button>
-                    <button onclick="status_get()">Get status</button>
+                    <button onclick="any_request()">Handle provided request</button>
                 </div>
                   <textarea id="input" placeholder="Write here specification or dataflow" spellcheck="false"></textarea>
                   <pre id="output">Make a request.</pre>
