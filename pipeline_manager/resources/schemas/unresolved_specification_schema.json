@@ -175,6 +175,10 @@
                             "description": "Width of the node",
                             "type": "number"
                         },
+                        "twoColumn": {
+                            "description": "Determines whether sockets should be rendered in the top part of the node and properties below them",
+                            "type": "boolean"
+                        },
                         "style": {
                             "$ref": "#/$defs/style"
                         },
