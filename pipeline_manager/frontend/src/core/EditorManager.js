@@ -541,7 +541,7 @@ export default class EditorManager {
             );
             nodes.forEach((n) => {
                 Object.entries(resolvedNode).forEach(([key, value]) => {
-                    if (value !== undefined) {
+                    if (value !== undefined && key !== 'interfaces' && key !== 'properties') {
                         n[key] = value;
                     }
                 });

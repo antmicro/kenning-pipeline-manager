@@ -234,10 +234,16 @@ export default defineComponent({
 
                 const removedProperties = oldProperties.filter(
                     (prop) => !parsedProperties.some((p) => p.name === prop.name),
-                );
+                ) ?? [];
                 const removedInterfaces = oldInterfaces.filter(
                     (intf) => !parsedInterfaces.some((i) => i.name === intf.name),
-                );
+                ) ?? [];
+                const addedProperties = parsedProperties.filter(
+                    (prop) => !oldProperties.some((p) => p.name === prop.name),
+                ) ?? [];
+                const addedInterfaces = parsedInterfaces.filter(
+                    (intf) => !oldInterfaces.some((i) => i.name === intf.name),
+                ) ?? [];
 
                 const childNodes = displayedGraph.nodes.filter(
                     (n) => n.extends?.includes(oldType),
@@ -247,6 +253,20 @@ export default defineComponent({
                 alterInterfaces([...nodes, ...childNodes], removedInterfaces, true);
                 alterProperties([...nodes, ...childNodes], parsedSpecification.properties);
                 alterInterfaces([...nodes, ...childNodes], parsedSpecification.interfaces);
+
+                const resolvedChildNodes = editorManager.specification.currentSpecification.nodes
+                    .filter((n) => n.extends?.includes(oldType)) ?? [];
+
+                resolvedChildNodes.forEach((n) => {
+                    n.interfaces = n.interfaces?.filter(
+                        (intf) => !removedInterfaces.some((i) => i.name === intf.name),
+                    ) ?? [];
+                    n.properties = n.properties?.filter(
+                        (prop) => !removedProperties.some((p) => p.name === prop.name),
+                    ) ?? [];
+                    n.interfaces = [...n.interfaces, ...addedInterfaces];
+                    n.properties = [...n.properties, ...addedProperties];
+                });
 
                 // eslint-disable-next-line no-underscore-dangle
                 const errors = editorManager._unregisterNodeType(oldType);
