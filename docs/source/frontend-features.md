@@ -175,18 +175,28 @@ The URI schemes can be passed to `pipeline_manager build` via `--json_url_specif
 
 ## Making API requests
 
-There is also a possibility to call Pipeline Manager [API](#api-specification) via frontend.
+There is a possibility to call Pipeline Manager [API](#api-specification) from the frontend level, e.g. when Pipeline Manager is embedded in another website using `iframe`.
 
 This can be done by sending [POST requests](https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage) from an external app opening Pipeline Manager, e.g:
 
 ```javascript
 const iframe = document.getElementById(pipelineManagerIframe);
+
+window.addEventListener('message', (event) => {
+    // handling responses from Pipeline Manager
+    const response = JSON.stringify(event.data, null, 4);
+    console.log(response);
+});
+
+// sending specification_change request to Pipeline Manager's iframe
 iframe.contentWindow.postMessage({ method: 'specification_change', params: { specification } });
 ```
 
 This piece of code opens Pipeline Manager in an iframe and provides it with a JSON object containing the request body corresponding to a `specification_change` [frontend endpoint](#frontend-api).
+Note that this method also supports [backend endpoints](#backend-api) and [external app endpoints](#external-app-api) if external application is attached to Pipeline Manager.
 
-Note that this method also supports [backend endpoints](#backend-api) and [external app endpoints](#external-app-api).
+The example of such use case can be found in [pipeline_manager/frontend_tester/tester_api/index.html](https://github.com/antmicro/kenning-pipeline-manager/tree/main/pipeline_manager/frontend_tester/tester_api/index.html).
+Read [pipeline_manager/frontend_tester/README.md](https://github.com/antmicro/kenning-pipeline-manager/blob/main/pipeline_manager/frontend_tester/README.md) for more details.
 
 ## Testing the front-end features
 
