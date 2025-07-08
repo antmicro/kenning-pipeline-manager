@@ -168,8 +168,7 @@
                             ]
                         },
                         "color": {
-                            "description": "Optional field defining the color of the node rendered to the user",
-                            "type": "string"
+                            "$ref": "metadata_schema.json#/$defs/color"
                         },
                         "twoColumn": {
                             "description": "Determines whether sockets should be rendered in the top part of the node and properties below them",

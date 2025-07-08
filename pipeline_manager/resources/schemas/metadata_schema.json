@@ -217,14 +217,14 @@
                     "type": "object",
                     "properties": {
                         "color": {
-                            "description": "Node color in hexadecimal representation",
-                            "type": "string"
+                            "$ref": "#/$defs/color"
                         },
                         "icon": {
                             "description": "Icon of a node. Can be a string with predefined icon name, relative path, URL, or tuple {'icon_type': 'url_suffix'}",
                             "type": [
                                 "object",
-                                "string"
+                                "string",
+                                "null"
                             ]
                         },
                         "pill": {
@@ -252,7 +252,10 @@
     "$defs": {
         "pill": {
             "description": "Pill displayed in the top right corner of a node",
-            "type": "object",
+            "type": [
+                "object",
+                "null"
+            ],
             "properties": {
                 "color": {
                     "type": "string",
@@ -265,6 +268,13 @@
             },
             "required": ["text"],
             "additionalProperties": false
+        },
+        "color": {
+            "description": "Node color in hexadecimal representation",
+            "type": [
+                "string",
+                "null"
+            ]
         }
     },
     "additionalProperties": false
