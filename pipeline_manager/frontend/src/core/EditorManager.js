@@ -41,6 +41,10 @@ class Metadata {
     }
 }
 
+export const DEFAULT_CUSTOM_NODE_CATEGORY = 'Default';
+export const DEFAULT_CUSTOM_NODE_NAME = 'New Node Type';
+export const DEFAULT_CUSTOM_NODE_TYPE = 'New Node Type';
+
 // If a graph node entry does not have a category assigned, this values is used
 // as a fallback category
 export const DEFAULT_GRAPH_NODE_CATEGORY = 'Graphs';
@@ -461,7 +465,7 @@ export default class EditorManager {
 
     /**
      * Registers default nodes, that are always present in the editor.
-     * The default nodes are the graph node and the dynamic interfaces node.
+     * The default nodes are the graph node and the new custom node.
      * If the nodes are already present in the editor, an error is returned.
      *
      * @returns {object} Object consisting of errors and warnings arrays.
@@ -478,6 +482,19 @@ export default class EditorManager {
             );
             return { errors, warnings };
         }
+        if (this.editor.nodeTypes.has(DEFAULT_CUSTOM_NODE_TYPE)) {
+            errors.push(
+                `Node name '${DEFAULT_CUSTOM_NODE_NAME}' is reserved by the editor, ` +
+                'but it was included in the specification. ' +
+                'Please change the name of the graph node to avoid conflicts.',
+            );
+            return { errors, warnings };
+        }
+        const customNodeType = {
+            name: DEFAULT_CUSTOM_NODE_NAME,
+            category: DEFAULT_CUSTOM_NODE_CATEGORY,
+        };
+        this._registerNodeType(customNodeType);
 
         const defaultGraphNode = {
             name: DEFAULT_GRAPH_NODE_NAME,
