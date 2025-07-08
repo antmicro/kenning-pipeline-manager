@@ -346,11 +346,6 @@ export default {
             commitTransaction();
         },
 
-        createNewNodeTypeCallback() {
-            this.menuState.configurationMenu.visible = !this.menuState.configurationMenu.visible;
-            this.menuState.configurationMenu.addNode = true;
-        },
-
         /**
          * Event handler that loads a specification passed by the user
          * and tries to load it into a new environment it.
@@ -814,19 +809,6 @@ export default {
                                     type="'button'"
                                     :eventFunction="createNewGraphCallback"
                                 />
-
-                                <template
-                                    v-if="this.editorManager.baklavaView.settings.editableNodeTypes"
-                                >
-                                    <DropdownItem
-                                        id="create-new-node-type-button"
-                                        v-if="!readonly"
-                                        text="Create new node type"
-                                        type="'button'"
-                                        :eventFunction="createNewNodeTypeCallback"
-                                    />
-                                </template>
-
                                 <!-- eslint-disable-next-line max-len -->
                                 <template v-if="this.externalApplicationManager.externalApplicationConnected">
                                     <hr />
