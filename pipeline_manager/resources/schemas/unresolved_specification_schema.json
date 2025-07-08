@@ -357,35 +357,25 @@
                         "color": {
                             "description": "Color of the node in the hexadecimal format.",
                             "type": [
-                                "string",
-                                "null"
+                                "string"
                             ]
                         },
                         "width": {
-                            "description": "Width, in pixels, of the node in the visual editor.",
-                            "type": [
-                                "number",
-                                "null"
+                            "description": "Width, in pixels, of the node in the visual editor. The minimum value is 300.",
+                            "anyOf": [
+                                {
+                                    "type": "number",
+                                    "minimum": 300
+                                },
+                                {
+                                    "type": "null"
+                                }
                             ]
                         },
                         "subgraphId": {
                             "description": "ID of the subgraph the node represents.",
                             "type": [
                                 "string",
-                                "null"
-                            ]
-                        },
-                        "pill": {
-                            "description": "",
-                            "type": [
-                                "object",
-                                "null"
-                            ]
-                        },
-                        "pill": {
-                            "description": "",
-                            "type": [
-                                "object",
                                 "null"
                             ]
                         }
