@@ -156,13 +156,13 @@ class ExternalApplicationManager {
     async updateSpecification(specification) {
         if (handleSpecificationResult(
             EditorManager.validateSpecification(specification),
-            'Warnings when validating specification',
             'Specification is invalid',
+            'Warnings when validating specification',
         )) return true;
         return handleSpecificationResult(
             await this.editorManager.updateEditorSpecification(specification),
-            'Warnings when loading specification',
             'Errors when loading specification',
+            'Warnings when loading specification',
         );
     }
 
@@ -365,7 +365,7 @@ class ExternalApplicationManager {
                 await jsonRPC.request(method, changedProperties);
             } catch (error) {
                 NotificationHandler.terminalLog(
-                    'warning', 'Error when notifying about change', `${error.message} (method: ${method})`,
+                    'warning', 'Notifying about change failed', `${error.message} (method: ${method})`,
                 );
             }
         }
@@ -386,7 +386,7 @@ class ExternalApplicationManager {
         try {
             await jsonRPC.request('terminal_read', { name: terminalName, message });
         } catch (error) {
-            NotificationHandler.terminalLog('warning', 'Error when sending terminal input', error.message);
+            NotificationHandler.terminalLog('warning', 'Sending terminal input failed', error.message);
         }
     }
 
@@ -470,7 +470,7 @@ class ExternalApplicationManager {
             } catch (error) {
                 if (error.code !== JSONRPCErrorCode.MethodNotFound &&
                     error.code !== JSONRPCCustomErrorCode.EXTERNAL_APPLICATION_NOT_CONNECTED) {
-                    NotificationHandler.terminalLog('warning', error.message, error.data);
+                    NotificationHandler.terminalLog('error', error.message, error.data);
                 }
             }
         }
