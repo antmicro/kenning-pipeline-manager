@@ -23,6 +23,7 @@ from pipeline_manager.dataflow_builder.entities import (
     get_uuid,
     match_criteria,
     snake_case_to_camel_case,
+    to_snake_case_keys,
 )
 from pipeline_manager.dataflow_builder.utils import (
     ensure_connection_is_absent,
@@ -245,11 +246,9 @@ class DataflowGraph(JsonConvertible):
                     interfaces.append(interface)
                     continue
 
-                snake_cased_arguments = {
-                    camel_case_to_snake_case(key): value
-                    for key, value in interface.items()
-                    if key in interface_fields
-                }
+                snake_cased_arguments = to_snake_case_keys(
+                    interface, interface_fields
+                )
 
                 interface_specification = self._get_interface_specification(
                     node_name=name,

@@ -384,10 +384,9 @@ class Node(JsonConvertible):
                 properties = []
                 for property_item in value:
                     if isinstance(property_item, Dict):
-                        snake_cased_arguments = {
-                            camel_case_to_snake_case(k): v
-                            for k, v in property_item.items()
-                        }
+                        snake_cased_arguments = to_snake_case_keys(
+                            property_item
+                        )
                         properties.append(Property(**snake_cased_arguments))
                     elif isinstance(property_item, Property):
                         properties.append(property_item)
@@ -1039,6 +1038,40 @@ def camel_case_to_snake_case(name: str) -> str:
             snake_cased += letter
 
     return snake_cased
+
+
+def to_snake_case_keys(
+    camel_cased_arguments: Dict[str, Any],
+    allowed_keys: Optional[List[str]] = None,
+) -> Dict[str, Any]:
+    """
+    Convert keys of a dictionary from camel case to snake case.
+
+    Parameters
+    ----------
+    camel_cased_arguments : Dict[str, Any]
+        Dictionary with keys (argument names) in camel case.
+    allowed_keys : Optional[List[str]], optional
+        Keys, in snake case, that are allowed.
+        `None` means all keys are allowed, by default `None`.
+
+    Returns
+    -------
+    Dict[str, Any]
+        Dictionary with keys mapped to snake case.
+        Only `allowed_keys` are included.
+    """
+    if allowed_keys:
+        return {
+            camel_case_to_snake_case(key): value
+            for key, value in camel_cased_arguments.items()
+            if camel_case_to_snake_case(key) in allowed_keys
+        }
+
+    return {
+        camel_case_to_snake_case(key): value
+        for key, value in camel_cased_arguments.items()
+    }
 
 
 def match_criteria(items: List, **kwargs) -> List[Any]:
