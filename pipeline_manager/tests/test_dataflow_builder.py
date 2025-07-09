@@ -4,6 +4,7 @@
 
 """Module with tests for dataflow building process."""
 
+import tempfile
 import subprocess
 import tempfile
 from pathlib import Path
@@ -546,6 +547,31 @@ def test_loading_graph_with_load_graphs_method(graph_created_with_builders):
     )
 
     graph_builder.load_graphs(dataflow_path)
+
+    graph_count = len(graph_builder.graphs)
+    assert graph_count == 1, (
+        "After loading graph from a file, graph_builder should contain 1 graph"
+        f" but contains {graph_count} graphs."
+    )
+    graph_builder.validate()
+
+
+def test_loading_graph_with_create_graph_method(graph_created_with_builders):
+    """
+    Test if loading a dataflow graph with `GraphBuilder.create_graph` succeeds.
+    """
+    (
+        working_directory,
+        specification_path,
+        dataflow_path,
+    ) = graph_created_with_builders
+    graph_builder = GraphBuilder(
+        specification=specification_path,
+        specification_version=DEFAULT_SPECIFICATION_VERSION,
+        workspace_directory=working_directory,
+    )
+
+    graph_builder.create_graph(based_on=dataflow_path)
 
     graph_count = len(graph_builder.graphs)
     assert graph_count == 1, (

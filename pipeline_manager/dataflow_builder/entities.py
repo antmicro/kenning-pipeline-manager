@@ -7,6 +7,7 @@
 import copy
 import json
 import string
+import re
 import uuid
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
@@ -287,6 +288,30 @@ class Node(JsonConvertible):
                 return
         raise KeyError(f"Property with name `{property_name}` was not found.")
 
+    def get_property(self, property_name: str) -> Any:
+        """
+        Convenient getter to get value of a property of a node.
+
+        Parameters
+        ----------
+        property_name : str
+            Name of the property.
+
+        Returns
+        -------
+        Any
+            Value of the property.
+
+        Raises
+        ------
+        KeyError
+            Raised if the supplied name is not associated with any property.
+        """
+        for property in self.properties:
+            if property.name == property_name:
+                return property.value
+        raise KeyError(f"Property with name `{property_name}` was not found.")
+
     def __init__(
         self,
         specification_builder: SpecificationBuilder,
@@ -328,6 +353,7 @@ class Node(JsonConvertible):
                 "The provided specification has no nodes defined. "
                 "Possibly the `nodes` key is missing. "
             )
+        node_name = kwargs["name"]
 
         for node in nodes_in_specification:
             if "name" not in node:
@@ -470,6 +496,207 @@ class Node(JsonConvertible):
             )
 
         return node
+
+    @staticmethod
+    def _get_dynamic_interface_property_name(
+        name: str, direction: Direction
+    ) -> str:
+        return f"{name} {direction.value} count"
+
+    def _init_dynamic_interface(self, interface_definition: Dict[str, Any]):
+        if "name" not in interface_definition:
+            raise ValueError("A dynamic interface has to have a name.")
+        interface_name = interface_definition["name"]
+
+        node_specification = self.specification_builder._nodes[interface_name]
+        if "dynamic" not in node_specification:
+            raise ValueError(
+                "A missing property `dynamic` in an interface assumed to be "
+                f"dynamic. Node name: `{interface_name}`."
+            )
+        dynamic = node_specification["dynamic"]
+
+        if "direction" not in node_specification:
+            raise ValueError("A dynamic interface has to have a direction.")
+        direction = Direction(node_specification["direction"])
+
+        if isinstance(dynamic, bool):
+            min_interfaces = 1
+        else:
+            dynamic = tuple(dynamic)
+            min_interfaces, _ = dynamic
+
+        # Create property controlling a number of interfaces.
+        property = Property(
+            name=Node._get_dynamic_interface_property_name(
+                interface_name, direction
+            ),
+            value=min_interfaces,
+        )
+        self.properties.append(property)
+
+        # Create actual interfaces.
+        for i in range(min_interfaces):
+            interface_definition["name"] = f"{interface_name}[{i}]"
+            interface = Interface(**interface_definition)
+            self.interfaces.append(interface)
+
+    def set_number_of_dynamic_interfaces(
+        self, interface_name: str, new_count: int
+    ):
+        interfaces: List[Interface] = self.get(
+            NodeAttributeType.INTERFACE,
+            name=f"{interface_name}[0]",
+        )
+        interface_count = len(interfaces)
+        if interface_count != 1:
+            raise ValueError(
+                "Provided name has to uniquely identify the dynamic interface."
+                f"However, name = `{interface_name}` identifies "
+                f"{interface_count} interfaces."
+            )
+        [interface] = interfaces
+
+        node_specification = self.specification_builder._nodes[interface_name]
+        if "dynamic" not in node_specification:
+            raise ValueError(
+                "A missing property `dynamic` in an interface assumed to be "
+                f"dynamic. Node name: `{interface_name}`."
+            )
+        dynamic = node_specification["dynamic"]
+        if dynamic is None:
+            raise TypeError(
+                "Cannot set number of interface for a non-dynamic interface "
+                f"with name = `{interface_name}`."
+            )
+
+        if isinstance(dynamic, bool):
+            dynamic_interface_count_limit = 999**999
+            min_interfaces = 1
+            max_interfaces = dynamic_interface_count_limit
+        else:
+            dynamic = tuple(dynamic)
+            min_interfaces, max_interfaces = dynamic
+
+        if new_count > max_interfaces:
+            raise ValueError(
+                f"Cannot set the number of dynamic interfaces to {new_count}"
+                f"as this value exceeds max = {max_interfaces}."
+            )
+        if new_count < min_interfaces:
+            raise ValueError(
+                f"Cannot set the number of dynamic interfaces to {new_count}"
+                f"as this value exceeds min = {min_interfaces}."
+            )
+
+        # Update the actual number of interfaces.
+        property_name = Node._get_dynamic_interface_property_name(
+            interface_name, interface.direction
+        )
+        old_count = int(self.get_property(property_name))
+        repetitions = new_count - old_count
+        if repetitions > 0:
+            for _ in range(repetitions):
+                self.increment_dynamic_interface_count(interface_name)
+        else:
+            for _ in range(-repetitions):
+                self.decrement_dynamic_interface_count(interface_name)
+
+    def get_interfaces_by_regex(self, pattern: str) -> List[Interface]:
+        """
+        Find interfaces with names matching `pattern`.
+
+        Parameters
+        ----------
+        pattern : str
+            Regular expression used to match the names of the interfaces.
+
+        Returns
+        -------
+        List[Interface]
+            List of interfaces matching `pattern` with their names.
+        """
+        pattern = re.compile(pattern)
+        return [
+            interface
+            for interface in self.interfaces
+            if re.search(pattern, interface.name)
+        ]
+
+    def increment_dynamic_interface_count(self, interface_name: str):
+        # Find the max index of dynamic interface's interfaces.
+        dynamic_interfaces = self.get_interfaces_by_regex(
+            rf"{interface_name}\[\[0-9]+\]$"
+        )
+        if len(dynamic_interfaces) < 1:
+            raise ValueError(
+                "Cannot find any interface matching an interface name "
+                f"`{interface_name}`."
+            )
+        max_index = 0
+        some_dynamic_interface = None
+        for dynamic_interface in dynamic_interfaces:
+            some_dynamic_interface = dynamic_interface
+            index_pattern = r"\[[0-9]+\]"
+            match = re.search(index_pattern, dynamic_interface.name).group(0)
+            index = int(match[1:-1])
+            if max_index < index:
+                max_index = index
+
+        interface_definition = some_dynamic_interface.json()
+        interface_definition["name"] = f"{interface_name}[{max_index + 1}]"
+        dynamic_interface = Interface(**interface_definition)
+        self.interfaces.append(dynamic_interface)
+        # Update property counting that dynamic interfaces.
+        property_name = self._get_dynamic_interface_property_name(
+            interface_name, some_dynamic_interface.direction
+        )
+        self.set_property(property_name, max_index)
+
+    def decrement_dynamic_interface_count(self, interface_name: str):
+        dynamic_interfaces = self.get_interfaces_by_regex(
+            rf"{interface_name}\[\[0-9]+\]$"
+        )
+        if len(dynamic_interfaces) < 1:
+            raise ValueError(
+                "Cannot find any interface matching an interface name "
+                f"`{interface_name}`."
+            )
+        max_index = 0
+        some_dynamic_interface = None
+        for dynamic_interface in dynamic_interfaces:
+            some_dynamic_interface = dynamic_interface
+            index_pattern = r"\[[0-9]+\]"
+            match = re.search(index_pattern, dynamic_interface.name).group(0)
+            index = int(match[1:-1])
+            if max_index < index:
+                max_index = index
+
+        # Remove the last interface.
+        to_be_removed: Interface = self.get(
+            NodeAttributeType.INTERFACE, name=f"{interface_name}[{max_index}]"
+        )
+        self.interfaces = [
+            interface
+            for interface in self.interfaces
+            if interface.id != to_be_removed.id
+        ]
+
+        property_name = self._get_dynamic_interface_property_name(
+            interface_name, some_dynamic_interface.direction
+        )
+        self.set_property(property_name, max_index)
+
+    def get_number_of_dynamic_interfaces(self, interface_name: str) -> int:
+        dynamic_interfaces = self.get_interfaces_by_regex(
+            rf"{interface_name}\[[0-9]+\]"
+        )
+        if len(dynamic_interfaces) < 1:
+            return 0
+        property_name = Node._get_dynamic_interface_property_name(
+            interface_name, dynamic_interfaces[0].direction
+        )
+        return int(self.get(NodeAttributeType.PROPERTY, name=property_name))
 
     def get(
         self, type: NodeAttributeType, **kwargs

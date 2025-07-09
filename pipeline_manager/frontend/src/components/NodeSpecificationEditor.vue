@@ -51,7 +51,7 @@ import {
     computed, defineComponent, nextTick, ref, toRef, watch, onMounted, onBeforeUnmount,
 } from 'vue';
 import { useViewModel } from '@baklavajs/renderer-vue';
-import EditorManager from '../core/EditorManager';
+import EditorManager, { EDITED_NODE_STYLE } from '../core/EditorManager';
 import NotificationHandler from '../core/notifications';
 import { menuState, configurationState } from '../core/nodeCreation/ConfigurationState.ts';
 import { alterInterfaces, alterProperties } from '../core/nodeCreation/Configuration.ts';
@@ -69,6 +69,7 @@ export default defineComponent({
     },
     setup(props) {
         // State
+
         const { viewModel } = useViewModel();
         const { displayedGraph } = viewModel.value;
         const editorManager = EditorManager.getEditorManagerInstance();
@@ -93,6 +94,22 @@ export default defineComponent({
         };
 
         const specificationWithIncludes = ref(null);
+        watch(
+            [() => editorManager.specification.unresolvedSpecification.nodes, node],
+            () => {
+                const unresolved = editorManager.specification.unresolvedSpecification;
+                const included = editorManager.specification.includedSpecification;
+                const specification = JSON.parse(JSON.stringify(unresolved));
+
+                EditorManager.mergeObjects(
+                    specification,
+                    included,
+                );
+                specificationWithIncludes.value = specification;
+            },
+            { immediate: true, deep: true },
+        );
+
         const specification = computed(() => specificationWithIncludes
             .value
             ?.nodes
@@ -252,6 +269,10 @@ export default defineComponent({
                 }
                 const parsedSpecification = YAML.parse(currentSpecification.value.replaceAll('\t', '  '));
 
+                // Update style of edited node type
+                parsedSpecification.style
+                    = EditorManager.mergeStyles(EDITED_NODE_STYLE, parsedSpecification.style);
+
                 // Update all nodes of the type to match the new specification
                 const oldType = node.value.type;
                 const nodes = displayedGraph.nodes.filter(
@@ -275,11 +296,6 @@ export default defineComponent({
                     });
                 });
 
-                editorManager.specification.unresolvedSpecification.nodes =
-                    (editorManager.specification.unresolvedSpecification.nodes ?? [])
-                        .filter((specNode) => !nodeMatchesSpec(specNode))
-                        .concat([parsedSpecification]);
-
                 // Remove deleted interfaces and properties
                 // An interface was deleted if it's present in old resolved specification
                 // but not in the editor and is also not inherited.
@@ -298,6 +314,32 @@ export default defineComponent({
                     oldSpecification = editorManager.specification.unresolvedSpecification
                         .nodes?.find((n) => EditorManager.getNodeName(n) === oldType);
                 }
+
+                let oldProperties = oldSpecification.properties ?? [];
+                let oldInterfaces = oldSpecification.interfaces ?? [];
+
+                let inheritedProperties = [];
+                let inheritedInterfaces = [];
+
+                parsedSpecification?.extends?.forEach((parentType) => {
+                    const parentSpec = editorManager.specification.currentSpecification
+                        .nodes?.find((n) => EditorManager.getNodeName(n) === parentType);
+                    inheritedProperties = [
+                        ...inheritedProperties,
+                        ...(parentSpec?.properties ?? []),
+                    ];
+                    inheritedInterfaces = [
+                        ...inheritedInterfaces,
+                        ...(parentSpec?.interfaces ?? []),
+                    ];
+                });
+
+                oldProperties = oldProperties.filter(
+                    (prop) => !inheritedProperties.some((p) => p.name === prop.name),
+                );
+                oldInterfaces = oldInterfaces.filter(
+                    (intf) => !inheritedInterfaces.some((i) => i.name === intf.name),
+                );
 
                 const parsedProperties = parsedSpecification.properties ?? [];
                 const parsedInterfaces = parsedSpecification.interfaces ?? [];
@@ -342,10 +384,10 @@ export default defineComponent({
                 const errors = editorManager._unregisterNodeType(oldType);
                 if (errors.length) {
                     NotificationHandler.terminalLog('error', 'Error when registering the node', errors);
-                    return Array.isArray(errors) ? errors : [errors];
+                    return;
                 }
                 // Add type to editor and specification
-                let ret = editorManager.addNodeToEditorSpecification(
+                const ret = editorManager.addNodeToEditorSpecification(
                     parsedSpecification,
                     oldType,
                     node.value.twoColumn,
@@ -367,36 +409,11 @@ export default defineComponent({
                     throw new Error(validationErrors);
                 }
 
-                // Update specification
-                ret =
-                    await editorManager.updateEditorSpecification(
-                        editorManager.specification.unresolvedSpecification,
-                    );
-                if (ret.warnings !== undefined && ret.warnings.length) {
-                    if (!silent) {
-                        NotificationHandler.terminalLog('warning', 'Warnings during node validation', ret.warnings);
-                    }
-                }
-                if (ret.errors !== undefined && ret.errors.length) {
-                    if (silent) {
-                        return ret.errors;
-                    }
-                    throw new Error(ret.errors);
-                }
+                currentSpecification.value = YAML.stringify(parsedSpecification);
+                editorManager.modifiedNodeSpecificationRegistry[node.value.id] =
+                    currentSpecification.value;
 
-                // Add type to editor and specification
-                ret = editorManager.addNodeToEditorSpecification(
-                    parsedSpecification,
-                    oldType,
-                );
-                if (ret.errors !== undefined && ret.errors.length) {
-                    throw new Error(ret.errors);
-                }
-
-                if (!silent) {
-                    NotificationHandler.showToast('info', 'Node validated');
-                }
-                return [];
+                NotificationHandler.showToast('info', 'Node validated');
             } catch (error) {
                 const messages = Array.isArray(error) ? error : [error];
                 NotificationHandler.terminalLog('error', 'Validation failed', messages);
@@ -489,22 +506,6 @@ export default defineComponent({
             el.value.addEventListener('keyup', el.value.liveValidateListener);
         };
 
-        watch(
-            [() => editorManager.specification.unresolvedSpecification.nodes, node],
-            () => {
-                const unresolved = editorManager.specification.unresolvedSpecification;
-                const included = editorManager.specification.includedSpecification;
-                const baseSpecification = JSON.parse(JSON.stringify(unresolved));
-
-                EditorManager.mergeObjects(
-                    baseSpecification,
-                    included,
-                );
-                specificationWithIncludes.value = baseSpecification;
-            },
-            { immediate: true, deep: true },
-        );
-
         // Editor height
 
         const handleInput = () => {
@@ -535,26 +536,7 @@ export default defineComponent({
 
         watch(currentSpecification, delayedEditorUpdate);
         watch(visible, delayedEditorUpdate);
-        watch([specification, visible], () => {
-            showValidationStatus();
-        });
         delayedEditorUpdate();
-
-        watch(
-            [() => editorManager.specification.unresolvedSpecification.nodes, node],
-            () => {
-                const unresolved = editorManager.specification.unresolvedSpecification;
-                const included = editorManager.specification.includedSpecification;
-                specification.value = JSON.parse(JSON.stringify(unresolved));
-
-                EditorManager.mergeObjects(
-                    specification,
-                    included,
-                );
-                specificationWithIncludes.value = specification;
-            },
-            { immediate: true, deep: true },
-        );
 
         // We modify this value in the editor, so it's not exactly computed
         watch(specification, async () => {

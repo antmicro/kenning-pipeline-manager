@@ -206,14 +206,14 @@ class DataflowGraph(JsonConvertible):
         # Values for interface initialization are taken from the specification.
         interfaces = []
         if "interfaces" in base_node:
-            sample_interface = Interface("sample", "inout")
-            interface_fields = [f.name for f in fields(sample_interface)]
+            interface_fields = [f.name for f in fields(Interface)]
             for interface in base_node["interfaces"]:
                 _interface = Interface(
                     id=get_uuid(),
                     **{
                         camel_case_to_snake_case(key): value
                         for key, value in interface.items()
+                        if key in interface_fields
                         if key in interface_fields
                     },
                 )
