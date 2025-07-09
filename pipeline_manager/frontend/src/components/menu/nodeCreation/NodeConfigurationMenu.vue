@@ -119,26 +119,3 @@ export default defineComponent({
     },
 });
 </script>
-
-<style lang="scss">
-    .create-menu {
-        display: flex;
-        flex-direction: column;
-        gap: 1em;
-
-        height: max-content;
-
-        & > div {
-            & > .__name-option > .baklava-input {
-                // Padding is included into width
-                box-sizing: border-box;
-            }
-
-            & > .option-label {
-                padding-bottom: $spacing-s;
-                color: $white;
-                font-size: $fs-medium;
-            }
-        }
-    }
-</style>
