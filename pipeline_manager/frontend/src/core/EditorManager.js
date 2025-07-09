@@ -637,6 +637,17 @@ export default class EditorManager {
                 if (nodeSpecification.isCategory) {
                     this.updateExtendingNodes(nodeSpecification, nodeToUpdate);
                 }
+            } else if (resolvedNodeSpecification === undefined) {
+                // The node is newly created - it is not in registered specification yet
+                Object.entries(nodeSpecification).forEach(([key, value]) => {
+                    if (value !== undefined) {
+                        unresolvedNodeSpecification[key] = value;
+                    }
+                });
+                validationErrors = this._registerNodeType(unresolvedNodeSpecification);
+                if (validationErrors.length) {
+                    return { errors: validationErrors, warnings: [] };
+                }
             } else {
                 Object.entries(nodeSpecification).forEach(([key, value]) => {
                     if (value !== undefined) {
