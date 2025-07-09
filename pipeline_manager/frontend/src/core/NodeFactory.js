@@ -219,7 +219,7 @@ function detectDiscrepancies(parsedState, inputs, outputs) {
         ) {
             if (direction === 'property') {
                 errors.push(`Property named '${name}' not found in specification!`);
-            } else {
+            } else if (!/\[\d+\]$/.test(name)) {
                 errors.push(`Interface named '${name}' of direction '${direction}' not found in specification!`);
             }
         } else if (direction === 'property') {
@@ -430,11 +430,50 @@ export class CustomNode extends Node {
             interfaces.push(intf);
         }
 
+        // Remove extra interfaces if value of the property gets decreased.
+        const container = direction === 'output' ? this.outputs : this.inputs;
+        Object.keys(container).forEach((key) => {
+            if (!key.startsWith(`${direction}_${interfaceName}[`)) {
+                return;
+            }
+
+            const match = key.match(/\[(\d+)\]$/);
+            if (!match) {
+                return;
+            }
+
+            const idx = parseInt(match[1], 10);
+            if (idx < value) {
+                return;
+            }
+
+            if (direction === 'output') {
+                this.removeOutput(key);
+            } else {
+                this.removeInput(key);
+            }
+        });
+
         const out = parseInterfaces(interfaces, [], []);
         if (Array.isArray(out) && out.length) {
             throw new Error(`Internal error, node ${this.type} invalid. Reason: ${out.join(' ')}`);
         }
         const { inputs: newInputs, outputs: newOutputs } = out;
+
+        // Add new interfaces if they do not exist.
+        Object.entries(direction === 'output' ? newOutputs : newInputs).forEach(([key, intf]) => {
+            if ((key in container)) {
+                return;
+            }
+
+            const baklavaIntf = new NodeInterface(key);
+            Object.assign(baklavaIntf, intf);
+            if (direction === 'output') {
+                this.addOutput(key, baklavaIntf);
+            } else {
+                this.addInput(key, baklavaIntf);
+            }
+        });
 
         // Finding a reactive reference of `this` and using it to bind
         // the function to the node instance, so that the changes are
@@ -704,14 +743,26 @@ export class CustomNode extends Node {
         // Assigning sides and sides Positions to interfaces
         Object.entries(stateios).forEach(([ioName, ioState]) => {
             if (ioState.direction === 'input' || ioState.direction === 'inout') {
+                if (!(ioName in this.inputs)) {
+                    const baklavaIntf = new NodeInterface(ioName);
+                    Object.assign(baklavaIntf, ioState);
+                    this.addInput(ioName, baklavaIntf);
+                }
                 this.inputs[ioName].side = ioState.side;
                 this.inputs[ioName].sidePosition = ioState.sidePosition;
                 this.inputs[ioName].externalName = ioState.externalName;
+                this.inputs[ioName].direction = ioState.direction;
                 occupied[ioState.side].push(ioState.sidePosition);
             } else if (ioState.direction === 'output') {
+                if (!(ioName in this.outputs)) {
+                    const baklavaIntf = new NodeInterface(ioName);
+                    Object.assign(baklavaIntf, ioState);
+                    this.addOutput(ioName, baklavaIntf);
+                }
                 this.outputs[ioName].side = ioState.side;
                 this.outputs[ioName].sidePosition = ioState.sidePosition;
                 this.outputs[ioName].externalName = ioState.externalName;
+                this.outputs[ioName].direction = ioState.direction;
                 occupied[ioState.side].push(ioState.sidePosition);
             }
         });
