@@ -55,7 +55,7 @@ async function addInterface(page: Page, nodeName: string) {
         .locator('[data-node-type="Custom Node"]')
         .locator('.__interfaces .__inputs > div')
         .count();
-    expect(inputs).toBe(1);
+    expect(inputs).toBe(2);
 }
 
 async function saveSpecificationAs(page: Page, filenameWithoutExtension: string): Promise<string> {
