@@ -1,5 +1,5 @@
 import { test, expect, Page, Locator } from '@playwright/test';
-import { getUrl, getPathToJsonFile, addNode, openFileChooser } from './config.js';
+import { getUrl, getPathToJsonFile, addNode, openFileChooser, dragAndDrop, enableNavigationBar } from './config.js';
 
 import os from 'os';
 import fs from 'fs/promises';
@@ -8,9 +8,9 @@ const temporaryDir = os.tmpdir() + '/';
 
 async function enableEditingNodes(page: Page) {
     // Assert that node types cannot be added
-    const logo = await page.locator('.logo');
-    await logo.hover();
-    let addNodeButton = await logo.locator('#create-new-node-type-button');
+    const nodePalette = await page.locator('.baklava-node-palette');
+    const addNodeButton = await nodePalette.getByText('New Node Type').first();
+    await enableNavigationBar(page);
     expect(addNodeButton).toBeHidden();
 
     // Enable modifying node types
@@ -25,17 +25,14 @@ async function enableEditingNodes(page: Page) {
     await checkbox.click();
 
     // Assert that node types can be added
-    await logo.hover();
-    addNodeButton = await logo.locator('#create-new-node-type-button');
     expect(addNodeButton).toBeVisible();
 }
 
 async function createNewNodeType(page: Page) {
     // Open node configuration menu
-    const logo = await page.locator('.logo');
-    await logo.hover();
-    const addNodeButton = await logo.locator('#create-new-node-type-button');
-    await addNodeButton.click();
+    const nodePalette = await page.locator('.baklava-node-palette');
+    const addNodeButton = await nodePalette.getByText('New Node Type').first();
+    await dragAndDrop(page, addNodeButton, 750, 80);
 
     // Create node
     const nodeMenu = await page.locator('#container').locator('.create-menu');
