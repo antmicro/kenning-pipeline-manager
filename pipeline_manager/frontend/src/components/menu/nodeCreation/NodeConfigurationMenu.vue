@@ -61,6 +61,7 @@ export default defineComponent({
             configurationState.properties = [];
             configurationState.interfaces = [];
             configurationState.editedType = undefined;
+            configurationState.success = false;
         }
         const newNode: NodeDataConfiguration = configurationState.nodeData;
 
@@ -90,12 +91,14 @@ export default defineComponent({
             let button: any;
             if (menuState.configurationMenu.addNode === true) {
                 button = new ButtonInterface('Create', () => {
-                    createNode();
+                    const errors = createNode();
+                    configurationState.success = errors.length === 0;
                     close();
                 });
             } else {
                 button = new ButtonInterface('Configure', () => {
-                    modifyConfiguration();
+                    const errors = modifyConfiguration();
+                    configurationState.success = errors.length === 0;
                     close();
                 });
             }

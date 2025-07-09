@@ -33,6 +33,7 @@ export type ConfigurationState = {
     nodeData: NodeDataConfiguration,
     properties: PropertyConfiguration[],
     interfaces: InterfaceConfiguration[],
+    success?: boolean,
 }
 
 /**
@@ -67,4 +68,5 @@ export const configurationState: ConfigurationState = reactive({
     },
     properties: [],
     interfaces: [],
+    success: false,
 });

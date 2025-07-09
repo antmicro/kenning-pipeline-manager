@@ -120,7 +120,9 @@ export default defineComponent({
                 const newType = configurationState.nodeData.name;
                 const nodeInformation = editor.nodeTypes.get(newType);
                 const instance = new nodeInformation.type(); // eslint-disable-line new-cap
-                placeNode(instance);
+                if (configurationState.success) {
+                    placeNode(instance);
+                }
             }
         });
 
