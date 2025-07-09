@@ -56,7 +56,7 @@ Inherits from baklavajs/packages/renderer-vue/src/nodepalette/NodePalette.vue
 </template>
 
 <script>
-import { computed, defineComponent, provide, inject, ref, onMounted } from 'vue'; // eslint-disable-line object-curly-newline
+import { computed, defineComponent, provide, inject, ref, onMounted, watch } from 'vue'; // eslint-disable-line object-curly-newline
 import { useViewModel, useTransform } from '@baklavajs/renderer-vue';
 import { usePointer } from '@vueuse/core';
 import PaletteCategory from './PaletteCategory.vue';
@@ -65,7 +65,7 @@ import PaletteEntry from './PaletteEntry.vue';
 import Tooltip from '../../components/Tooltip.vue';
 import Magnifier from '../../icons/Magnifier.vue';
 import { DEFAULT_CUSTOM_NODE_TYPE } from '../../core/EditorManager';
-import { menuState } from '../../core/nodeCreation/ConfigurationState';
+import { menuState, configurationState } from '../../core/nodeCreation/ConfigurationState';
 
 export default defineComponent({
     components: {
@@ -76,6 +76,7 @@ export default defineComponent({
     },
     setup() {
         const { viewModel } = useViewModel();
+        const { editor } = viewModel.value;
 
         const { x: mouseX, y: mouseY } = usePointer();
         const { transform } = useTransform();
@@ -85,6 +86,9 @@ export default defineComponent({
 
         const draggedNode = ref(null);
         const tooltip = ref(null);
+
+        const x = ref(null);
+        const y = ref(null);
 
         tooltip.value = {
             top: 0,
@@ -104,22 +108,35 @@ export default defineComponent({
             };
         });
 
+        function placeNode(instance) {
+            viewModel.value.displayedGraph.addNode(instance);
+            instance.position.x = x.value; // eslint-disable-line no-param-reassign
+            instance.position.y = y.value; // eslint-disable-line no-param-reassign
+        }
+
+        // Add new node when configuration menu is closed
+        watch(() => menuState.configurationMenu.visible, async (newValue, oldValue) => {
+            if (oldValue === true && newValue === false) {
+                const newType = configurationState.nodeData.name;
+                const nodeInformation = editor.nodeTypes.get(newType);
+                const instance = new nodeInformation.type(); // eslint-disable-line new-cap
+                placeNode(instance);
+            }
+        });
+
         const dragEndPlaceNode = (ev) => {
             const elements = document.elementsFromPoint(ev.clientX, ev.clientY);
 
             if (!elements.includes(paletteRef.value)) {
-                const instance = new draggedNode.value.nodeInformation.type(); // eslint-disable-line new-cap,max-len
+                const rect = editorEl.value.getBoundingClientRect();
+                [x.value, y.value] = transform(mouseX.value - rect.left, mouseY.value - rect.top);
 
                 if (draggedNode.value.type === DEFAULT_CUSTOM_NODE_TYPE) {
                     menuState.configurationMenu.visible = !menuState.configurationMenu.visible;
                     menuState.configurationMenu.addNode = true;
                 } else {
-                    viewModel.value.displayedGraph.addNode(instance);
-
-                    const rect = editorEl.value.getBoundingClientRect();
-                    const [x, y] = transform(mouseX.value - rect.left, mouseY.value - rect.top);
-                    instance.position.x = x;
-                    instance.position.y = y;
+                    const instance = new draggedNode.value.nodeInformation.type(); // eslint-disable-line new-cap,max-len
+                    placeNode(instance);
                 }
 
                 draggedNode.value = null;
