@@ -74,7 +74,7 @@ export async function enableNavigationBar(page) {
  */
 export async function addNode(page, category, nodeName, x, y) {
     const categoryBar = page.getByText(category);
-    const node = page.getByText(nodeName).first();
+    const node = page.getByText(nodeName, { exact: true }).first();
 
     // Open a proper category.
     await enableNavigationBar(page);
