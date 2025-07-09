@@ -92,17 +92,15 @@ Depending the application's mode (`static-html` or `server-app`), the following 
 
 ## Creating new node types
 
-After toggling the `Modify nodes types` checkbox in settings, the option `Create new node type` becomes available in the editor menu.
+After toggling the `Modify nodes types` checkbox in settings, the special `New Node Type` becomes available in the node palette.
 
-Selecting it displays the `Node configuration menu`.
+Drag and drop it to the editor to display the `Node configuration menu`.
 
 ![Node configuration menu](img/node-configuration-menu.png)
 
-After the node is created, it will be visible in the node palette.
+After the node is created, it will be added to the editor and available in the node palette.
 
 The node type can be configured further from the editor, e.g. by adding properties and interfaces.
-
-To add the new node type to the current specification, choose the `Finalize` option in the node menu.
 
 ## Working with the server
 
@@ -116,7 +114,7 @@ The color of the icon indicates the status of the connection with the server:
 * `Red` - No connection with the server.
 * `Green` - Connection with the server is established.
 
-Extrnal application may deliver additional features by providing additional buttons in the editor menu.
+External application may deliver additional features by providing additional buttons in the editor menu.
 More details can be found in the [Specification format](project:specification-format.md#navbar-item) section.
 
 ## URL parameters for the frontend
