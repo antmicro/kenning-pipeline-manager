@@ -188,7 +188,7 @@ import DOMPurify from 'dompurify';
 import Arrow from '../../icons/Arrow.vue';
 import VerticalEllipsis from '../../icons/VerticalEllipsis.vue';
 import LinkMenu from '../LinkMenu.vue';
-import EditorManager from '../../core/EditorManager';
+import EditorManager, { DEFAULT_CUSTOM_NODE_TYPE } from '../../core/EditorManager';
 import Cross from '../../icons/Cross.vue';
 import { TOP_LEVEL_NODES_NAMES } from './nodeTree';
 
@@ -285,6 +285,12 @@ export default defineComponent({
 
         const sortedEntries = (obj, sortSubcategories = false) =>
             Object.entries(obj).sort(([a, aNode], [b, bNode]) => {
+                if (a === DEFAULT_CUSTOM_NODE_TYPE) {
+                    return -1;
+                }
+                if (b === DEFAULT_CUSTOM_NODE_TYPE) {
+                    return 1;
+                }
                 if (!isTopLevelNode(a) && isTopLevelNode(b)) {
                     return 1;
                 }
