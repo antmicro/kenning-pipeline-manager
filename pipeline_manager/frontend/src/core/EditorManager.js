@@ -1388,6 +1388,17 @@ export default class EditorManager {
     }
 
     /**
+     * Returns the top-level graph.
+     *
+     * @returns {object} baklava format graph.
+     */
+    getRootGraph() {
+        return this.editor.subgraphStack.length
+            ? this.editor.subgraphStack[0]
+            : this.editor.graph;
+    }
+
+    /**
      * Serializes and returns current dataflow in Pipeline Manager format.
      *
      * @param {Boolean} readonly whether the dataflow should be saved in readonly mode
@@ -1406,7 +1417,10 @@ export default class EditorManager {
             : save.graphs[0];
 
         if (entryGraph && graphName !== null && graphName !== undefined) {
+            const rootGraph = this.getRootGraph();
             entryGraph.name = graphName;
+            rootGraph.name = graphName;
+            if (rootGraph === this.editor.graph) this.baklavaView.editor.graphName = graphName;
         }
 
         if (!position) {
