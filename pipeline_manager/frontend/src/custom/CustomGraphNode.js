@@ -45,7 +45,7 @@ export default function CreateCustomGraphNodeType(template, graphNode) {
                 graphNode.layer,
                 prepareProperties(graphNode),
                 [],
-                false,
+                graphNode.twoColumn ?? false,
                 graphNode.description ?? '',
                 graphNode.extends ?? [],
                 graphNode.extending ?? [],
