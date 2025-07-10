@@ -26,6 +26,10 @@ Left-clicking on a node allows you to select and drag the node within the editor
 To create a connection, left-click a node's connector and connect it to a connector (of a matching type, see [Specification format](specification-format)) on another node.
 Double left-click on an existing connection removes it.
 
+Clicking on a connection while pressing the `ctrl` key creates an anchor, which breaks up the connection into two parts, allowing to manually configure the layout.
+Right-clicking on an anchor removes it.
+Note that anchors can only be created when `Connection style` is set to `orthogonal` and the editor is not in read-only mode.
+
 ## Settings
 
 ![Settings tab](img/settings-tab.png)
@@ -41,7 +45,8 @@ On the upper right corner of {{project}} window there is a gear icon toggling se
 * `Center` - Pressing this buttons moves the viewport to the center of graph and sets the zoom level so that whole dataflow is visible
 * `Hide layers` - [Metadata](project:specification-format.md#layer) allows to specify layers for a certain set of interface types and connections. Toggling this checkbox allows to hide
 connections belonging to said layer
-* `Modify node types` - Toggling this checkbox allows adding new node types to the specification
+* `Modify node types` - Toggling this checkbox allows editing existing nodes and adding new node types to the specification
+* `Hide anchors` - Hides anchors in all connections. The anchors are still visible (and can be edited) when hovering over the connection
 
 ## Notifications
 
