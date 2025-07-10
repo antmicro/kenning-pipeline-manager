@@ -97,18 +97,21 @@
                 }
             ],
             "color": "#004972",
+            "twoColumn": true,
             "subgraphId": "569edd54-0f42-4c24-a809-1509febbe23a"
         },
         {
             "name": "Test subgraph #2",
             "category": "Second Category",
             "color": "#6f091a",
+            "twoColumn": true,
             "subgraphId": "129c6246-d874-48cd-a33c-2927961d42e8"
         },
         {
             "name": "Test subgraph #3",
             "category": "Second Category",
             "color": "#4e096f",
+            "twoColumn": true,
             "subgraphId": "129c6246-d874-48cd-a33c-2927961d42e8"
         }
     ],
