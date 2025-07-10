@@ -546,6 +546,7 @@ export default defineComponent({
         });
 
         const handleUIUpdate = () => {
+            if (menuState.configurationMenu.addNode) return;
             node.value.type = configurationState.nodeData.name;
             const newSpecification = editorManager.specification.unresolvedSpecification
                 ?.nodes
