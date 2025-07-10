@@ -22,16 +22,20 @@ Inherits from baklavajs/renderer-vue/src/connection/ConnectionView.vue
                 @pointerdown.left.exact="onMouseDown"
                 @pointerdown="(ev) => { if(ev.pointerType === 'touch') onMouseDown(ev) }"
                 @pointerdown.left.ctrl.exact="(ev) => onMouseCtrlDown(ev, index)"
+                @mouseover="hover = true"
+                @mouseleave="hover = false"
             >
             <path :d="d" class="connection-wrapper baklava-connection"></path>
             <path :d="d" class="baklava-connection" :class="cssClasses" :style="style"></path>
             </g>
-            <Anchor
-                v-for="(anchor, index) in connection.anchors"
-                :key="anchor.id"
-                :position="anchor"
-                :rightclickCallback="() => removeAnchor(index)"
-            />
+            <template v-if="hover || !editorManager.baklavaView.settings.hideAnchors">
+                <Anchor
+                    v-for="(anchor, index) in connection.anchors"
+                    :key="anchor.id"
+                    :position="anchor"
+                    :rightclickCallback="() => removeAnchor(index)"
+                />
+            </template>
         </template>
     </g>
     <g
@@ -46,10 +50,11 @@ Inherits from baklavajs/renderer-vue/src/connection/ConnectionView.vue
 </template>
 
 <script>
-import { defineComponent, computed } from 'vue';
+import { defineComponent, computed, ref } from 'vue';
 import { Components, useGraph, useViewModel } from '@baklavajs/renderer-vue';
 import doubleClick from '../../core/doubleClick';
 import Anchor from '../../components/Anchor.vue';
+import EditorManager from '../../core/EditorManager';
 
 /* eslint-disable vue/no-mutating-props,no-param-reassign */
 export default defineComponent({
@@ -61,6 +66,9 @@ export default defineComponent({
         const { graph } = useGraph();
         const { viewModel } = useViewModel();
         const { interfaceTypes } = viewModel.value;
+        const editorManager = EditorManager.getEditorManagerInstance();
+
+        const hover = ref(false);
 
         const connectionStyle = interfaceTypes.getConnectionStyle(
             props.connection.from,
@@ -69,7 +77,7 @@ export default defineComponent({
 
         const cssClasses = computed(() => ({
             ...classes.value,
-            '--hover': props.isHighlighted,
+            '--hover': props.isHighlighted || hover.value,
             '--dashed': connectionStyle.interfaceConnectionPattern === 'dashed',
             '--dotted': connectionStyle.interfaceConnectionPattern === 'dotted',
         }));
@@ -149,6 +157,8 @@ export default defineComponent({
             style,
             hasAnchors,
             removeAnchor,
+            editorManager,
+            hover,
         };
     },
 });
