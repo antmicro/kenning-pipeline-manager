@@ -22,8 +22,6 @@ Inherits from baklavajs/renderer-vue/src/connection/ConnectionView.vue
                 @pointerdown.left.exact="onMouseDown"
                 @pointerdown="(ev) => { if(ev.pointerType === 'touch') onMouseDown(ev) }"
                 @pointerdown.left.ctrl.exact="(ev) => onMouseCtrlDown(ev, index)"
-                @mouseover="hover = true"
-                @mouseleave="hover = false"
             >
             <path :d="d" class="connection-wrapper baklava-connection"></path>
             <path :d="d" class="baklava-connection" :class="cssClasses" :style="style"></path>
@@ -50,7 +48,9 @@ Inherits from baklavajs/renderer-vue/src/connection/ConnectionView.vue
 </template>
 
 <script>
-import { defineComponent, computed, ref } from 'vue';
+import {
+    defineComponent, computed, toRef,
+} from 'vue';
 import { Components, useGraph, useViewModel } from '@baklavajs/renderer-vue';
 import doubleClick from '../../core/doubleClick';
 import Anchor from '../../components/Anchor.vue';
@@ -59,7 +59,11 @@ import EditorManager from '../../core/EditorManager';
 /* eslint-disable vue/no-mutating-props,no-param-reassign */
 export default defineComponent({
     extends: Components.Connection,
-    props: { isHighlighted: { default: false }, connection: { required: true } },
+    props: {
+        isHighlighted: { default: false },
+        connection: { required: true },
+        hover: { default: false },
+    },
     components: { Anchor },
     setup(props) {
         const { classes } = Components.Connection.setup(props);
@@ -67,8 +71,7 @@ export default defineComponent({
         const { viewModel } = useViewModel();
         const { interfaceTypes } = viewModel.value;
         const editorManager = EditorManager.getEditorManagerInstance();
-
-        const hover = ref(false);
+        const hover = toRef(props, 'hover');
 
         const connectionStyle = interfaceTypes.getConnectionStyle(
             props.connection.from,
@@ -158,7 +161,6 @@ export default defineComponent({
             hasAnchors,
             removeAnchor,
             editorManager,
-            hover,
         };
     },
 });

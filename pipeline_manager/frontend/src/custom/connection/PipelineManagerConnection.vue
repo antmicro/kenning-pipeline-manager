@@ -19,6 +19,9 @@ Inherits from baklavajs/renderer-vue/src/connection/ConnectionView.vue
         :state="state"
         :connection="connection"
         :isHighlighted="isHighlighted"
+        :hover="hover"
+        @mouseover="hover = true"
+        @mouseleave="hover = false"
     ></ConnectionView>
 </template>
 
@@ -51,6 +54,8 @@ export default defineComponent({
                 ? TemporaryConnectionState.FORBIDDEN
                 : TemporaryConnectionState.NONE,
         );
+
+        const hover = ref(false);
 
         /**
          * Check whether the connection path contains the x, y point
@@ -154,6 +159,7 @@ export default defineComponent({
             state,
             containsPoint,
             conn,
+            hover,
         };
     },
 });
