@@ -12,6 +12,7 @@ interface SaveConfiguration {
     hideHud?: boolean;
     position?: boolean;
     graph?: boolean;
+    graphName?: string | null;
     saveName: string;
 
     saveCallback: () => void;
@@ -40,6 +41,7 @@ export const saveSpecificationConfiguration: SaveConfiguration = {
 
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             dataflow.graphs.forEach((graph: any) => {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const prevIndex = specification.graphs.map((g: any) => g.id).indexOf(graph.id);
                 const [index, remove] = prevIndex !== -1
                     ? [prevIndex, 1]
@@ -72,6 +74,7 @@ export const saveGraphConfiguration: SaveConfiguration = {
     readonly: false,
     hideHud: false,
     position: false,
+    graphName: null,
     saveName: 'save',
 
     saveCallback() {
@@ -79,6 +82,7 @@ export const saveGraphConfiguration: SaveConfiguration = {
             this.readonly,
             this.hideHud,
             this.position,
+            this.graphName,
         ), null, 4)], {
             type: 'application/json',
         });
@@ -106,9 +110,18 @@ export const saveGraphConfiguration: SaveConfiguration = {
     },
 
     reset() {
+        const dataflow = EditorManager.getEditorManagerInstance().saveDataflow();
+        const graphName: string | null | undefined = (dataflow.entryGraph
+            ? (dataflow.graphs
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                .find((dataflowGraph: any) => dataflowGraph.id === dataflow.entryGraph)
+                ?.name)
+            : dataflow.graphs[0]?.name) ?? null;
+
         this.readonly = false;
         this.hideHud = false;
         this.position = false;
+        this.graphName = graphName;
         this.saveName = 'save';
     },
 };
