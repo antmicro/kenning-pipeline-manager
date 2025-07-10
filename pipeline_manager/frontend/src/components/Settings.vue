@@ -96,6 +96,19 @@ export default {
             return option;
         });
 
+        const hideAnchors = computed(() => {
+            const option = new CheckboxInterface(
+                'Hide anchors',
+                props.viewModel.settings.hideAnchors,
+            ).setPort(false);
+            option.events.setValue.subscribe(this, (v) => {
+                props.viewModel.settings.hideAnchors = v; // eslint-disable-line vue/no-mutating-props,max-len,no-param-reassign
+                metadataChanged('hideAnchors', v);
+            });
+            option.componentName = 'CheckboxInterface';
+            return option;
+        });
+
         const backgroundGridSize = computed(() => {
             const option = new IntegerInterface(
                 'Background grid size',
@@ -203,6 +216,7 @@ export default {
                 movementStep.value,
                 randomizedOffsetOption.value,
                 editableNodeTypes.value,
+                hideAnchors.value,
             ];
         });
 
