@@ -10,30 +10,31 @@ Popup menu for choosing save options.
 
 <!-- eslint-disable vue/no-mutating-props -->
 <template>
-    <div class="save-menu">
-        <component
-            v-for="option in additionalOptions"
-            :key="option.id"
-            :is="option.component"
-            :intf="option"
-        />
-        File name:
-        <component
-            :is="dataflowname.component"
-            :intf="dataflowname" class="__name-option"
-            v-model="saveConfiguration.saveName"
-        />
-        <component :is="save.component" :intf="save" />
+    <div class="create-menu">
+        <div v-for="[option, label] in options" :key="option.id" class="option">
+            <div class="option-label" v-if="getOptionName(option.componentName)">
+                {{ option.name }}
+            </div>
+            <component
+                :is="option.component"
+                :intf="option"
+                v-model="saveConfiguration[label]"
+                :class="{ '__name-option': getOptionName(option.componentName)}"
+            />
+        </div>
     </div>
 </template>
 
 <script>
-import { defineComponent, computed, markRaw } from 'vue';
+import {
+    defineComponent, computed, markRaw, ref, watch, toRef,
+} from 'vue';
 
 import InputInterface from '../../interfaces/InputInterface.js';
 import InputInterfaceComponent from '../../interfaces/InputInterface.vue';
 import ButtonInterface from '../../interfaces/ButtonInterface.js';
 import CheckboxInterface from '../../interfaces/CheckboxInterface.js';
+import { getOptionName } from '../../custom/CustomNode.js';
 
 export default defineComponent({
     props: {
@@ -53,69 +54,55 @@ export default defineComponent({
             }
         };
 
-        const createOption = (text, label) => computed(() => {
+        const createCheckboxOption = (text, label) => [computed(() => {
             if (props.saveConfiguration[label] === undefined) return undefined;
 
             const option = new CheckboxInterface(text, props.saveConfiguration[label]);
             option.events.setValue.subscribe(this, (v) => {
                 props.saveConfiguration[label] = v; // eslint-disable-line vue/no-mutating-props,max-len,no-param-reassign
             });
+            option.setDefaultComponent();
             return option;
-        });
+        }), label];
 
-        const readonly = createOption('Make graph read only', 'readonly');
-        const hideHud = createOption('Disable HUD', 'hideHud');
-        const position = createOption('Preserve current view location', 'position');
-        const graph = createOption('Save graph', 'graph');
+        const saveConfiguration = toRef(props, 'saveConfiguration');
+        const createInputOption = (text, label) => {
+            const createComponent = () => {
+                const component = new InputInterface(text);
+                component.componentName = 'InputInterface';
+                component.setComponent(markRaw(InputInterfaceComponent));
+                return component;
+            };
 
-        const dataflowname = computed(() => {
-            const option = new InputInterface(
-                'File name',
-                'save',
-            );
-            option.componentName = 'InputInterface';
-            option.setComponent(markRaw(InputInterfaceComponent));
-            return option;
-        });
+            const exists = computed(() => saveConfiguration.value[label] !== undefined);
+            const option = ref(exists.value ? createComponent() : undefined);
 
-        const save = computed(() => {
-            const button = new ButtonInterface('Save', () => {
-                props.saveConfiguration.saveCallback();
-                close();
+            watch(exists, (existsNow, existedBefore) => {
+                if (existedBefore === existsNow) return;
+                option.value = existsNow ? createComponent() : undefined;
             });
-            return button;
-        });
 
-        const additionalOptions = computed(() => {
-            const displayableOptions = [];
-            [readonly, hideHud, position, graph].forEach((option) => {
-                if (option.value !== undefined) displayableOptions.push(option.value);
-            });
-            return displayableOptions;
-        });
-
-        return {
-            additionalOptions,
-            dataflowname,
-            save,
+            return [option, label];
         };
+
+        const readonly = createCheckboxOption('Make graph read only', 'readonly');
+        const hideHud = createCheckboxOption('Disable HUD', 'hideHud');
+        const position = createCheckboxOption('Preserve current view location', 'position');
+        const graph = createCheckboxOption('Save graph', 'graph');
+        const graphName = createInputOption('Graph name', 'graphName');
+        const dataflowname = createInputOption('File name', 'saveName');
+
+        const save = [computed(() => new ButtonInterface('Save', () => {
+            props.saveConfiguration.saveCallback();
+            close();
+        })), undefined];
+
+        const options =
+            computed(() => [readonly, hideHud, position, graph, graphName, dataflowname, save]
+                .filter(([option, _]) => option.value !== undefined)
+                .map(([option, label]) => [option.value, label]));
+
+        return { options, getOptionName };
     },
 });
 </script>
-
-<style lang="scss">
-    .save-menu {
-        display: flex;
-        flex-direction: column;
-        gap: 1em;
-
-        height: max-content;
-
-        .__name-option {
-            & > .baklava-input {
-                // Padding is included into width
-                box-sizing: border-box;
-            }
-        }
-    }
-</style>
