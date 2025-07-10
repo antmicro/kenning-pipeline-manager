@@ -420,6 +420,12 @@ export default {
             this.togglePanel(panel, true);
         },
 
+        setEditTitle() {
+            if (this.readonly) return;
+            this.editTitle = true;
+            this.$nextTick(() => this.$refs.editorTitleInput._.refs.el.focus());
+        },
+
         /**
          * Loads nodes' specification from JSON structure.
          *
@@ -857,6 +863,11 @@ export default {
 
                             <template v-if="this.editorManager.specificationLoaded">
                                 <DropdownItem
+                                    type="'button'"
+                                    text="Set graph name"
+                                    :eventFunction="setEditTitle"
+                                />
+                                <DropdownItem
                                     v-if="!hideHud"
                                     id="load-dataflow-button"
                                     text="Load graph file"
@@ -974,16 +985,18 @@ export default {
                 </div>
                 <component
                     v-if="editTitle && !panels.nodesearch.isOpen"
+                    ref="editorTitleInput"
                     :is="editorTitleInterface.component"
                     :intf="editorTitleInterface"
                     :class="['editorTitleInput', mobileClasses]"
                     v-model="graphName"
                     v-click-outside="() => { editTitle = false }"
+                    @keyup.enter="() => { editTitle = false }"
                 />
                 <span
                     v-if="!editTitle && !panels.nodesearch.isOpen"
                     :class="['editorTitle', mobileClasses]"
-                    @dblclick="editTitle = !readonly">
+                    @dblclick="setEditTitle">
                         {{ editorTitle }}
                 </span>
                 <div :style="rightContainerStyles" ref="rightButtons">
