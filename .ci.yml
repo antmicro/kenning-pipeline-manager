@@ -1,3 +1,5 @@
+include: kenning-ci-scripts@main:kenning_pipeline_manager.yml
+
 image: $CI_IMAGE
 
 .common_only: &common_only
