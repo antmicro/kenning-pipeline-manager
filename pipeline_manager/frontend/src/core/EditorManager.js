@@ -1263,16 +1263,24 @@ export default class EditorManager {
     /**
      * Serializes and returns current dataflow in Pipeline Manager format.
      *
-     * @param readonly whether the dataflow should be saved in readonly mode
-     * @param hideHud whether the dataflow should be saved in hideHud mode
-     * @param position whether the dataflow should store panning and scaling values
-     * @param graphname graph name which is rendered to the user
+     * @param {Boolean} readonly whether the dataflow should be saved in readonly mode
+     * @param {Boolean} hideHud whether the dataflow should be saved in hideHud mode
+     * @param {Boolean} position whether the dataflow should store panning and scaling values
+     * @param {string|null|undefined} graphName graph name which is rendered to the user
      *
      * @returns Serialized dataflow.
      */
-    saveDataflow(readonly, hideHud, position) {
+    saveDataflow(readonly, hideHud, position, graphName) {
         const save = this.baklavaView.editor.save();
         save.version = this.specificationVersion;
+
+        const entryGraph = save.entryGraph
+            ? save.graphs.find((dataflowGraph) => dataflowGraph.id === save.entryGraph)
+            : save.graphs[0];
+
+        if (entryGraph && graphName !== null && graphName !== undefined) {
+            entryGraph.name = graphName;
+        }
 
         if (!position) {
             save.graphs.forEach((graph) => {
