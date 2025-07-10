@@ -198,6 +198,11 @@
             "description": "Determines whether the user can edit existing and add new node types",
             "default": false
         },
+        "hideAnchors": {
+            "type": "boolean",
+            "description": "Hides anchors in all connections. The anchors are still visible on hover",
+            "default": false
+        },
         "icons": {
             "type": "object",
             "description": "Mapping from icon URL class to URL prefix",
