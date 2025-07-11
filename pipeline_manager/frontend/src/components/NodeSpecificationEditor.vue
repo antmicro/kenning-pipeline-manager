@@ -270,8 +270,10 @@ export default defineComponent({
                 const parsedSpecification = YAML.parse(currentSpecification.value.replaceAll('\t', '  '));
 
                 // Update style of edited node type
-                parsedSpecification.style
-                    = EditorManager.mergeStyles(parsedSpecification.style, EDITED_NODE_STYLE);
+                const { style } = parsedSpecification;
+                if (!Array.isArray(style) || !style.includes(EDITED_NODE_STYLE)) {
+                    parsedSpecification.style = EditorManager.mergeStyles(style, EDITED_NODE_STYLE);
+                }
 
                 // Update all nodes of the type to match the new specification
                 const oldType = node.value.type;
