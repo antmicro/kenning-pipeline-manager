@@ -54,10 +54,10 @@ export default defineComponent({
             }
         };
 
-        const createIntegerOption = (text, min, max, label) => [computed(() => {
+        const createIntegerOption = (text, label) => [computed(() => {
             if (props.exportGraph[label] === undefined) return undefined;
 
-            const option = new IntegerInterface(text, props.exportGraph[label], min, max);
+            const option = new IntegerInterface(text, props.exportGraph[label]);
             option.events.setValue.subscribe(this, (v) => {
                 props.exportGraph[label] = v; // eslint-disable-line vue/no-mutating-props,max-len,no-param-reassign
             });
@@ -65,8 +65,8 @@ export default defineComponent({
             return option;
         }), label];
 
-        const width = createIntegerOption('Width', 0, 5000, 'width');
-        const height = createIntegerOption('Height', 0, 3000, 'height');
+        const width = createIntegerOption('Width', 'width');
+        const height = createIntegerOption('Height', 'height');
 
         const fileName = [computed(() => {
             const component = new InputInterface('File name');
