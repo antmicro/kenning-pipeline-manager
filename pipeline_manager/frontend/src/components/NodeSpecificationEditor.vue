@@ -271,7 +271,7 @@ export default defineComponent({
 
                 // Update style of edited node type
                 parsedSpecification.style
-                    = EditorManager.mergeStyles(EDITED_NODE_STYLE, parsedSpecification.style);
+                    = EditorManager.mergeStyles(parsedSpecification.style, EDITED_NODE_STYLE);
 
                 // Update all nodes of the type to match the new specification
                 const oldType = node.value.type;
