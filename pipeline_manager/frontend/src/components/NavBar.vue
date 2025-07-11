@@ -11,7 +11,7 @@ Displays user interface and main details about the Pipeline Manager status.
 
 <script>
 import { markRaw, ref, provide } from 'vue';
-import { toPng, toSvg } from 'html-to-image';
+import { toSvg } from 'html-to-image';
 import jsonlint from 'jsonlint';
 import { useViewModel } from '@baklavajs/renderer-vue';
 import { api as fullscreen } from 'vue-fullscreen';
@@ -36,13 +36,13 @@ import getExternalApplicationManager from '../core/communication/ExternalApplica
 import Notifications from './Notifications.vue';
 import Settings from './Settings.vue';
 import {
-    ParentMenu, SaveMenu, NodeConfigurationMenu, PropertyConfigurationMenu,
+    ParentMenu, SaveMenu, ExportMenu, NodeConfigurationMenu, PropertyConfigurationMenu,
     InterfaceConfigurationMenu, InterfaceListMenu, PropertyListMenu, LayerConfigurationMenu,
 } from './menu';
 import { menuState } from '../core/nodeCreation/ConfigurationState.ts';
 import BlurPanel from './BlurPanel.vue';
 import CustomSidebar from '../custom/CustomSidebar.vue';
-import { saveSpecificationConfiguration, saveGraphConfiguration } from './saveConfiguration.ts';
+import { saveSpecificationConfiguration, saveGraphConfiguration, exportGraph } from './saveConfiguration.ts';
 
 import icons from '../icons';
 
@@ -72,6 +72,7 @@ export default {
         Cube,
         ParentMenu,
         SaveMenu,
+        ExportMenu,
         NodeConfigurationMenu,
         PropertyConfigurationMenu,
         InterfaceConfigurationMenu,
@@ -256,7 +257,9 @@ export default {
             saveConfiguration: saveGraphConfiguration,
             saveGraphConfiguration,
             saveSpecificationConfiguration,
+            exportGraph,
             saveMenuShow: false,
+            exportMenuShow: false,
             editTitle: false,
             notificationStore,
             showSearch: false,
@@ -544,31 +547,6 @@ export default {
             fileReader.readAsText(file);
         },
 
-        exportToPng() {
-            // Get editor with data flow
-            const nodeEditor = document.querySelector('.inner-editor');
-            // Exclude nodes hidden in export (e.g. node palette and zoom controls)
-            const filter = (node) => !node.classList?.contains('export-hidden');
-
-            toPng(nodeEditor, { filter, imagePlaceholder: brokenImage })
-                .then((dataUrl) => {
-                    const downloadLink = document.createElement('a');
-                    downloadLink.download = 'dataflow.png';
-                    downloadLink.href = dataUrl;
-                    downloadLink.dataset.downloadurl = [
-                        dataUrl,
-                        downloadLink.download,
-                        downloadLink.href,
-                    ].join(':');
-                    document.body.appendChild(downloadLink);
-                    downloadLink.click();
-                    document.body.removeChild(downloadLink);
-                })
-                .catch((error) => {
-                    NotificationHandler.showToast('error', `Export to PNG failed: ${error}`);
-                });
-        },
-
         exportToSvg() {
             // Get editor with data flow
             const nodeEditor = document.querySelector('.inner-editor');
@@ -711,6 +689,20 @@ export default {
                 <SaveMenu
                     :saveConfiguration="saveConfiguration"
                     v-model="saveMenuShow"
+                />
+            </ParentMenu>
+        </BlurPanel>
+    </Transition>
+    <Transition name="fade" @mousedown.self="exportMenuShow = false">
+        <BlurPanel v-show="exportMenuShow">
+            <ParentMenu
+                v-show="exportMenuShow"
+                v-model="exportMenuShow"
+                :title="'Export graph'"
+            >
+                <ExportMenu
+                    :exportGraph = "exportGraph"
+                    v-model="exportMenuShow"
                 />
             </ParentMenu>
         </BlurPanel>
@@ -877,7 +869,10 @@ export default {
                             <DropdownItem
                                 type="'button'"
                                 text="Export graph to PNG"
-                                :eventFunction="exportToPng"
+                                :eventFunction="() => {
+                                    exportMenuShow = !exportMenuShow
+                                    exportGraph = exportGraph
+                                }"
                             />
                             <DropdownItem
                                 type="'button'"
