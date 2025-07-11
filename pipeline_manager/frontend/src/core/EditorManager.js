@@ -558,14 +558,14 @@ export default class EditorManager {
                 (n) => n.type === nodeName,
             );
             nodes.forEach((n) => {
-                Object.entries(resolvedNode).forEach(([key, value]) => {
+                Object.entries(structuredClone(resolvedNode)).forEach(([key, value]) => {
                     if (value !== undefined && key !== 'interfaces' && key !== 'properties') {
-                        n[key] = value;
+                        n[key] = structuredClone(value);
                     }
                 });
             });
 
-            this._registerNodeType(resolvedNode);
+            this._registerNodeType(structuredClone(resolvedNode));
         });
     }
 
@@ -628,7 +628,7 @@ export default class EditorManager {
 
                 Object.entries(nodeSpecification).forEach(([key, value]) => {
                     if (value !== undefined) {
-                        resolvedNodeSpecification[key] = value;
+                        resolvedNodeSpecification[key] = structuredClone(value);
                     }
                 });
                 validationErrors = this._registerNodeType(resolvedNodeSpecification);
@@ -642,7 +642,7 @@ export default class EditorManager {
                 // The node is newly created - it is not in registered specification yet
                 Object.entries(nodeSpecification).forEach(([key, value]) => {
                     if (value !== undefined) {
-                        unresolvedNodeSpecification[key] = value;
+                        unresolvedNodeSpecification[key] = structuredClone(value);
                     }
                 });
                 validationErrors = this._registerNodeType(unresolvedNodeSpecification);
@@ -650,10 +650,10 @@ export default class EditorManager {
                     return { errors: validationErrors, warnings: [] };
                 }
             } else {
-                Object.entries(nodeSpecification).forEach(([key, value]) => {
+                Object.entries(structuredClone(nodeSpecification)).forEach(([key, value]) => {
                     if (value !== undefined) {
-                        unresolvedNodeSpecification[key] = value;
-                        resolvedNodeSpecification[key] = value;
+                        unresolvedNodeSpecification[key] = structuredClone(value);
+                        resolvedNodeSpecification[key] = structuredClone(value);
                     }
                 });
                 resolvedNodeSpecification.name = EditorManager.getNodeName(nodeSpecification);
@@ -671,7 +671,7 @@ export default class EditorManager {
                 }
 
                 if (nodeSpecification.isCategory) {
-                    this.updateExtendingNodes(nodeSpecification, nodeToUpdate);
+                    this.updateExtendingNodes(structuredClone(nodeSpecification), nodeToUpdate);
                 }
 
                 if (unresolvedNodeSpecification.subgraphId === undefined) {

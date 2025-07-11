@@ -343,8 +343,9 @@ export default defineComponent({
                     (intf) => !inheritedInterfaces.some((i) => i.name === intf.name),
                 );
 
-                const parsedProperties = parsedSpecification.properties ?? [];
-                const parsedInterfaces = parsedSpecification.interfaces ?? [];
+                // Deep copy properties from specification before altering nodes
+                const parsedProperties = structuredClone(parsedSpecification.properties ?? []);
+                const parsedInterfaces = structuredClone(parsedSpecification.interfaces ?? []);
 
                 const removedProperties = oldProperties.filter(
                     (prop) => !parsedProperties.some((p) => p.name === prop.name),
@@ -365,8 +366,8 @@ export default defineComponent({
 
                 alterProperties([...nodes, ...childNodes], removedProperties, true);
                 alterInterfaces([...nodes, ...childNodes], removedInterfaces, true);
-                alterProperties([...nodes, ...childNodes], parsedSpecification.properties);
-                alterInterfaces([...nodes, ...childNodes], parsedSpecification.interfaces);
+                alterProperties([...nodes, ...childNodes], parsedProperties);
+                alterInterfaces([...nodes, ...childNodes], parsedInterfaces);
 
                 const resolvedChildNodes = editorManager.specification.currentSpecification.nodes
                     .filter((n) => n.extends?.includes(oldType)) ?? [];
