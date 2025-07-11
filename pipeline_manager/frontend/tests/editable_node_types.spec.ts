@@ -64,7 +64,7 @@ async function saveSpecificationAs(page: Page, filenameWithoutExtension: string)
     const saveAsMenuOption = page.getByRole('button', { name: 'Save specification as...' });
     await saveAsMenuOption.click();
 
-    await page.getByPlaceholder('File name').fill(filenameWithoutExtension);
+    await page.getByPlaceholder('File name').first().fill(filenameWithoutExtension);
     const saveAsButton = page.getByRole('button', { name: 'Save' });
 
     const downloadPromise = page.waitForEvent('download');
