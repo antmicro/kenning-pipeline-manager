@@ -4,8 +4,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { toPng, toSvg } from 'html-to-image';
 import EditorManager from '../core/EditorManager';
 import NotificationHandler from '../core/notifications';
+import { brokenImage } from '../../../resources/broken_image.js';
 
 interface SaveConfiguration {
     readonly?: boolean;
@@ -128,6 +130,48 @@ export const saveGraphConfiguration: SaveConfiguration = {
         this.hideHud = false;
         this.position = false;
         this.graphName = graphName;
+        this.saveName = 'save';
+    },
+};
+
+export const exportGraph = {
+    width: 1920,
+    height: 1080,
+    saveName: 'dataflow',
+
+    exportCallback() {
+        // Get editor with data flow
+        const nodeEditor: HTMLElement = document.querySelector('.inner-editor')!;
+        // Exclude node palette
+        const filter = (node: any) => !node.classList?.contains('baklava-node-palette');
+
+        toPng(nodeEditor, {
+            filter,
+            imagePlaceholder: brokenImage,
+            canvasWidth: this.width,
+            canvasHeight: this.height,
+        })
+            .then((dataUrl) => {
+                const downloadLink = document.createElement('a');
+                downloadLink.download = this.saveName;
+                downloadLink.href = dataUrl;
+                downloadLink.dataset.downloadurl = [
+                    dataUrl,
+                    downloadLink.download,
+                    downloadLink.href,
+                ].join(':');
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                document.body.removeChild(downloadLink);
+            })
+            .catch((error) => {
+                NotificationHandler.showToast('error', `Export to PNG failed: ${error}`);
+            });
+    },
+
+    reset() {
+        this.width = 1920;
+        this.height = 1080;
         this.saveName = 'save';
     },
 };
