@@ -118,6 +118,13 @@ function getConnection(graph_id: string, from: string, to: string): any {
 }
 
 /**
+ * @returns currently used specification
+ */
+export function frontend_specification_get() {
+    return { specification: editorManager.saveSpecification() };
+}
+
+/**
  * @returns currently used dataflow
  */
 export function graph_get() {
