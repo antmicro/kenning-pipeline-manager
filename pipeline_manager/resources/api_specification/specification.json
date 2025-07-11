@@ -1,5 +1,14 @@
 {
     "frontend_endpoints": {
+        "frontend_specification_get": {
+            "description": "Returns specification used by frontend",
+            "params": {
+                "$ref": "common_types#/$defs/null_or_empty"
+            },
+            "returns": {
+                "$ref": "common_types#/$defs/specification_object"
+            }
+        },
         "graph_get": {
             "description": "Returns dataflow used by frontend",
             "params": {

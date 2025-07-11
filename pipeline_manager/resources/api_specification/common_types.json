@@ -65,6 +65,16 @@
             "description": "JSON with specification definition in PM format",
             "type": "object"
         },
+        "specification_object": {
+            "description": "Definition containing `specification` object",
+            "type": "object",
+            "properties": {
+                "specification": {
+                    "$ref": "common_types#/$defs/specification"
+                }
+            },
+            "additionalProperties": false
+        },
         "properties_diff": {
             "description": "Schema that represents differences in properties of the node",
             "allOf": [{ "$ref": "common_types#/$defs/node_object" }],
