@@ -13,7 +13,7 @@ SPDX-License-Identifier: Apache-2.0
         shape-rendering="crispEdges"
         xmlns="http://www.w3.org/2000/svg"
     >
-        <path d="M16 9.5V10.5H4V9.5H16Z" :class="hoverStatus" />
+        <path d="M4,10 H16 z" :class="hoverStatus" />
     </svg>
 </template>
 
@@ -39,11 +39,15 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+path {
+    stroke-width: 2px;
+}
+
 .normal {
-    fill: #ffffff;
+    stroke: #ffffff;
 }
 
 .hovered {
-    fill: $green;
+    stroke: $green;
 }
 </style>
