@@ -221,6 +221,17 @@ export default defineComponent({
             });
         };
 
+        /**
+         * Validate the style of a node.
+         *
+         * @param {Object} parsedSpecification - The parsed node specification object to validate.
+         * @throws {Error} Raised if a validation failed.
+         */
+        const validateNodeStyle = (parsedSpecification) => {
+            const validationErrors = editorManager.validateNodeStyle(parsedSpecification);
+            if (validationErrors.length) throw new Error(validationErrors);
+        };
+
         const validate = () => {
             const errors = [];
             try {
@@ -241,6 +252,9 @@ export default defineComponent({
                 } catch (e) { errors.push(e); }
                 try {
                     validateNodeInterfaces(parsedCurrentSpecification);
+                } catch (e) { errors.push(e); }
+                try {
+                    validateNodeStyle(parsedCurrentSpecification);
                 } catch (e) { errors.push(e); }
             } catch (error) {
                 errors.push(error);
@@ -399,6 +413,7 @@ export default defineComponent({
                     throw new Error(ret.errors);
                 }
 
+                validateNodeStyle(parsedSpecification);
                 validateNodeInterfaces(parsedSpecification);
                 validateNodeProperties(parsedSpecification);
                 validateNode(parsedSpecification);
