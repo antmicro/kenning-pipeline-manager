@@ -361,7 +361,7 @@ def build_frontend(
     if dataflow:
         dataflow = Path(dataflow).absolute()
 
-    if editor_title:
+    if editor_title is not None:
         config_lines.append(f"VUE_APP_EDITOR_TITLE={editor_title}\n")
 
     urls = None
