@@ -181,7 +181,7 @@ export default class PipelineManagerEditor extends Editor {
             color: options?.color,
             subgraphId: options?.subgraphId,
             style: options?.style,
-            pill: options?.pill && { color: '#ffffff', ...options.pill },
+            pill: options?.pill,
         });
 
         this.events.registerNodeType.emit({ type, options });
@@ -559,8 +559,10 @@ export default class PipelineManagerEditor extends Editor {
 
     getPillColor(nodeName) {
         const nodeType = this.nodeTypes.get(nodeName);
-        if (nodeType?.pill !== undefined) return nodeType.pill?.color;
-        if (nodeType?.style !== undefined) return this.getNodeStyle(nodeType.style).pill?.color;
+        const pill = nodeType?.pill !== undefined
+            ? nodeType.pill
+            : this.getNodeStyle(nodeType.style).pill;
+        if (pill !== undefined) return pill.color ?? '#ffffff';
         return undefined;
     }
 
