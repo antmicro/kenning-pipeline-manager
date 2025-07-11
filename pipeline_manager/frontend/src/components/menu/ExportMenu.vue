@@ -1,0 +1,91 @@
+<!--
+Copyright (c) 2025 Antmicro <www.antmicro.com>
+
+SPDX-License-Identifier: Apache-2.0
+-->
+
+<!--
+Popup menu for choosing export options.
+-->
+
+<!-- eslint-disable vue/no-mutating-props -->
+<template>
+    <div class="create-menu">
+        <div v-for="[option, label] in options" :key="option.id" class="option">
+            <div class="option-label" v-if="getOptionName(option.componentName)">
+                {{ option.name }}
+            </div>
+            <component
+                :is="option.component"
+                :intf="option"
+                v-model="exportGraph[label]"
+                :class="{ '__name-option': getOptionName(option.componentName)}"
+            />
+        </div>
+    </div>
+</template>
+
+<script>
+import {
+    defineComponent, computed, markRaw,
+} from 'vue';
+
+import IntegerInterface from '../../interfaces/IntegerInterface.js';
+import ButtonInterface from '../../interfaces/ButtonInterface.js';
+import InputInterface from '../../interfaces/InputInterface.js';
+import InputInterfaceComponent from '../../interfaces/InputInterface.vue';
+import { getOptionName } from '../../custom/CustomNode.js';
+
+export default defineComponent({
+    props: {
+        modelValue: {
+            type: Boolean,
+            default: false,
+        },
+        exportGraph: {
+            required: true,
+            type: Object,
+        },
+    },
+    setup(props, { emit }) {
+        const close = () => {
+            if (props.modelValue) {
+                emit('update:modelValue', false);
+            }
+        };
+
+        const createIntegerOption = (text, min, max, label) => [computed(() => {
+            if (props.exportGraph[label] === undefined) return undefined;
+
+            const option = new IntegerInterface(text, props.exportGraph[label], min, max);
+            option.events.setValue.subscribe(this, (v) => {
+                props.exportGraph[label] = v; // eslint-disable-line vue/no-mutating-props,max-len,no-param-reassign
+            });
+            option.setDefaultComponent();
+            return option;
+        }), label];
+
+        const width = createIntegerOption('Width', 0, 5000, 'width');
+        const height = createIntegerOption('Height', 0, 3000, 'height');
+
+        const fileName = [computed(() => {
+            const component = new InputInterface('File name');
+            component.componentName = 'InputInterface';
+            component.setComponent(markRaw(InputInterfaceComponent));
+            return component;
+        }), 'saveName'];
+
+        const save = [computed(() => new ButtonInterface('Export', () => {
+            props.exportGraph.exportCallback();
+            close();
+        })), undefined];
+
+        const options =
+            computed(() => [width, height, fileName, save]
+                .filter(([option, _]) => option.value !== undefined)
+                .map(([option, label]) => [option.value, label]));
+
+        return { options, getOptionName };
+    },
+});
+</script>
