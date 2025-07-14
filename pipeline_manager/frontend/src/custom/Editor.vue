@@ -92,7 +92,7 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
 
         <Return v-if="preview && isInSubgraph" @click="returnFromSubgraph" />
 
-        <Panel v-show="showWelcome" :blur="false">
+        <Panel v-show="showWelcome" :blur="false" class="welcome-container-panel">
             <ParentMenu>
                 <WelcomeMenu :loadFiles="loadFiles" />
             </ParentMenu>
