@@ -29,6 +29,15 @@
             },
             "required": ["graph_id", "node_id"]
         },
+        "urloverrides": {
+            "description": "Mapping for URL replacement",
+            "type": "object",
+            "patternProperties": {
+                "^.*$": {
+                    "type": "string"
+                }
+            }
+        },
         "loadingScreen": {
             "description": "Show loading screen",
             "type": "boolean",

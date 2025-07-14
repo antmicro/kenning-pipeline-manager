@@ -256,6 +256,9 @@
                     "specification": {
                         "$ref": "common_types#/$defs/specification"
                     },
+                    "urloverrides": {
+                        "$ref": "common_types#/$defs/urloverrides"
+                    },
                     "loadingScreen": {
                         "$ref": "common_types#/$defs/loadingScreen"
                     }
@@ -276,6 +279,9 @@
                     },
                     "dataflow": {
                         "$ref": "common_types#/$defs/dataflow_or_url"
+                    },
+                    "urloverrides": {
+                        "$ref": "common_types#/$defs/urloverrides"
                     },
                     "loadingScreen": {
                         "$ref": "common_types#/$defs/loadingScreen"
