@@ -51,6 +51,7 @@ from moving or deleting the nodes.
                 placeholder="Node Name"
                 ref="renameField"
                 v-click-outside="doneRenaming"
+                @keydown="(ev) => ev.stopPropagation()"
                 @keydown.enter="doneRenaming"
             />
             <template v-if="nodeStyle.name !== undefined && nodeStyle.name !== null">
