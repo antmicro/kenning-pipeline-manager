@@ -652,12 +652,18 @@ export default class EditorManager {
                     return { errors: validationErrors, warnings: [] };
                 }
             } else {
-                Object.entries(structuredClone(nodeSpecification)).forEach(([key, value]) => {
-                    if (value !== undefined) {
-                        unresolvedNodeSpecification[key] = structuredClone(value);
-                        resolvedNodeSpecification[key] = structuredClone(value);
-                    }
-                });
+                [unresolvedNodeSpecification, resolvedNodeSpecification]
+                    .forEach((specification) => {
+                        Object.keys(specification)
+                            .filter((key) => !(key in nodeSpecification))
+                            .forEach((key) => { delete specification[key]; });
+
+                        Object.entries(structuredClone(nodeSpecification))
+                            .filter(([_, value]) => value !== undefined)
+                            .map(([key, value]) => [key, structuredClone(value)])
+                            .forEach(([key, value]) => { specification[key] = value; });
+                    });
+
                 resolvedNodeSpecification.name = EditorManager.getNodeName(nodeSpecification);
 
                 const extendingNodes = this.specification.unresolvedSpecification.nodes
