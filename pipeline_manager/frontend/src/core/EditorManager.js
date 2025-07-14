@@ -310,7 +310,7 @@ export default class EditorManager {
         this.baklavaView.editor.unregisterGraphs();
         this.baklavaView.editor.deepCleanEditor();
         this.baklavaView.editor.unregisterNodes();
-        this.nodeStyles?.clear();
+        this.baklavaView.editor.nodeStyles.clear();
         this.setSpecificationLoaded(false);
         this.specification.currentSpecification = {};
         this.specification.includedSpecification = {};
