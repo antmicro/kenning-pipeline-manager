@@ -404,20 +404,27 @@ export function notification_send(params: Notification) {
     NotificationHandler.terminalLog(params.type, params.title, params.details);
 }
 
-export async function specification_change(params: {specification: any, loadingScreen: boolean}) {
+export async function specification_change(
+    params: { specification: any, urloverrides: any, loadingScreen: boolean },
+) {
     const externalApplicationManager = getExternalApplicationManager();
     await externalApplicationManager.conditionalLoadingScreen(
         params.loadingScreen,
-        async () => externalApplicationManager.updateSpecification(params.specification),
+        async () => externalApplicationManager.updateSpecification(
+            params.specification, params.urloverrides,
+        ),
     );
 }
 
 export async function specification_graph_change(
-    params: {specification: any, dataflow: any, loadingScreen: boolean},
+    params: {specification: any, dataflow: any, urloverrides: any, loadingScreen: boolean},
 ) {
     const externalApplicationManager = getExternalApplicationManager();
     await externalApplicationManager.conditionalLoadingScreen(params.loadingScreen, async () => {
-        if (!await externalApplicationManager.updateSpecification(params.specification)) {
+        const error = await externalApplicationManager.updateSpecification(
+            params.specification, params.urloverrides,
+        );
+        if (!error) {
             await externalApplicationManager.updateDataflow(params.dataflow);
         }
     });

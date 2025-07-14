@@ -179,13 +179,14 @@ export default class EditorManager {
      * @param dataflowSpecification Specification to load, can be either an object or a string
      * @param lazyLoad Decides whether to actually load the specification or just store
      * @param unmarkNewNodes Decides whether to remove styling of new nodes.
+     * @param urloverrides Override mapping for included URLs.
      * it and check its versioning. Can be used when loading parts of specification manually.
      * @returns An object consisting of errors and warnings arrays. If any array is empty
      * the updating process was successful.
      */
     /* eslint-disable no-underscore-dangle,no-param-reassign */
     async updateEditorSpecification(
-        dataflowSpecification, lazyLoad = false, unmarkNewNodes = true,
+        dataflowSpecification, lazyLoad = false, unmarkNewNodes = true, urloverrides = null,
     ) {
         if (!dataflowSpecification) return ['No specification passed'];
 
@@ -239,7 +240,7 @@ export default class EditorManager {
                 specification: includedSpecification,
                 errors: includeErrors,
                 warnings: includeWarnings,
-            } = await this.downloadNestedImports(toInclude);
+            } = await this.downloadNestedImports(toInclude, undefined, urloverrides);
             errors.push(...includeErrors);
             warnings.push(...includeWarnings);
             if (errors.length) {
@@ -337,7 +338,7 @@ export default class EditorManager {
      * @param trace Set of visited specifications to detect circular imports.
      * @returns Merged specification and errors.
      */
-    async downloadNestedImports(specification, trace = new Set()) {
+    async downloadNestedImports(specification, trace = new Set(), urloverrides = null) {
         const warnings = [];
         const errors = [];
 
@@ -386,14 +387,16 @@ export default class EditorManager {
             async ({ specification: spec, trace: specTrace, style }) => {
                 const {
                     specification: newSpecification, errors: newErrors, warnings: newWarnings,
-                } = await this.downloadNestedImports(spec, specTrace);
+                } = await this.downloadNestedImports(spec, specTrace, urloverrides);
                 errors.push(...newErrors);
                 warnings.push(...newWarnings);
 
                 if (style !== undefined) EditorManager.includeWithStyle(newSpecification, style);
-                if (specification.urloverrides !== undefined) {
-                    EditorManager.applyUrlOverrides(newSpecification, specification.urloverrides);
-                }
+
+                EditorManager.applyUrlOverrides(
+                    newSpecification,
+                    { ...(specification.urloverrides ?? {}), ...(urloverrides ?? {}) },
+                );
 
                 const {
                     errors: mergeErrors, warnings: mergeWarnings,

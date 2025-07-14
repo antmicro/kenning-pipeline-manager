@@ -153,14 +153,16 @@ class ExternalApplicationManager {
         return result;
     }
 
-    async updateSpecification(specification) {
+    async updateSpecification(specification, urloverrides) {
         if (handleSpecificationResult(
             EditorManager.validateSpecification(specification),
             'Specification is invalid',
             'Warnings when validating specification',
         )) return true;
         return handleSpecificationResult(
-            await this.editorManager.updateEditorSpecification(specification),
+            await this.editorManager.updateEditorSpecification(
+                specification, false, true, urloverrides,
+            ),
             'Errors when loading specification',
             'Warnings when loading specification',
         );
