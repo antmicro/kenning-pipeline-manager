@@ -407,7 +407,6 @@ export default defineComponent({
                 const ret = editorManager.addNodeToEditorSpecification(
                     parsedSpecification,
                     oldType,
-                    node.value.twoColumn,
                 );
                 if (ret.errors !== undefined && ret.errors.length) {
                     throw new Error(ret.errors);

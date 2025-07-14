@@ -581,11 +581,10 @@ export default class EditorManager {
      *
      * @param {object} nodeSpecification Node specification to add
      * @param {object} nodeToUpdate Node type to update
-     * @param {object} twoColumn Whether the updated node has a two-column layout
      * @returns An object consisting of errors and warnings arrays. If both arrays are empty
      * the updating process was successful.
      */
-    addNodeToEditorSpecification(nodeSpecification, nodeToUpdate = undefined, twoColumn = false) {
+    addNodeToEditorSpecification(nodeSpecification, nodeToUpdate = undefined) {
         // Remove undefined fields
         Object.entries(nodeSpecification.properties ?? {}).forEach(([_, value]) => {
             Object.keys(value).forEach((key) => {
@@ -668,7 +667,7 @@ export default class EditorManager {
                     resolvedNodeSpecification.extending = extendingNodes;
                 }
 
-                validationErrors = this._registerNodeType(resolvedNodeSpecification, twoColumn);
+                validationErrors = this._registerNodeType(resolvedNodeSpecification);
                 if (validationErrors.length) {
                     return { errors: validationErrors, warnings: [] };
                 }
@@ -721,10 +720,9 @@ export default class EditorManager {
      * If the nodeType is valid then it is registered in the editor and an empty array is returned.
      *
      * @param {object} node Node to register
-     * @param {boolean} twoColumn Whether the node should be displayed in two columns
      * @returns An array of errors that occurred during the node registration.
      */
-    _registerNodeType(node, twoColumn) {
+    _registerNodeType(node) {
         if (this.baklavaView.editor.nodeTypes.has(node.name)) {
             return [`Node of type ${node.name} is already registered`];
         }
@@ -736,7 +734,7 @@ export default class EditorManager {
             node.properties ?? [],
             node.interfaceGroups ?? [],
             node.defaultInterfaceGroups ?? [],
-            twoColumn ?? node.twoColumn ?? false,
+            node.twoColumn ?? this.baklavaView.twoColumn ?? false,
             node.description ?? '',
             node.extends ?? [],
             node.extending ?? [],
@@ -889,9 +887,7 @@ export default class EditorManager {
 
         resolvedNodes.forEach((node) => {
             errors.push(...this.validateNodeStyle(node));
-            errors.push(...this._registerNodeType(
-                node, node.twoColumn ?? metadata?.twoColumn ?? false,
-            ));
+            errors.push(...this._registerNodeType(node));
         });
 
         if (errors.length) {
