@@ -137,6 +137,8 @@ export const saveGraphConfiguration: SaveConfiguration = {
 export const exportGraph = {
     width: 1920,
     height: 1080,
+    maxWidth: 16384,
+    maxHeight: 16384,
     saveName: 'dataflow',
 
     exportCallback() {
@@ -144,6 +146,23 @@ export const exportGraph = {
         const nodeEditor: HTMLElement = document.querySelector('.inner-editor')!;
         // Exclude node palette
         const filter = (node: any) => !node.classList?.contains('baklava-node-palette');
+
+        if (this.width < 0) {
+            NotificationHandler.showToast('error', `Negative width. The image could not be saved.`);
+            return;
+        }
+        if (this.height < 0) {
+            NotificationHandler.showToast('error', `Negative height. The image could not be saved.`);
+            return;
+        }
+        if (this.width > this.maxWidth) {
+            NotificationHandler.showToast('warning', `Invalid width. The maximum value ${this.maxWidth} was used instead.`);
+            this.width = this.maxWidth;
+        }
+        if (this.height > this.maxHeight) {
+            NotificationHandler.showToast('warning', `Invalid height. The maximum value ${this.maxHeight} was used instead.`);
+            this.height = this.maxHeight;
+        }
 
         toPng(nodeEditor, {
             filter,
