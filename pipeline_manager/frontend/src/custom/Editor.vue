@@ -1,5 +1,5 @@
 <!--
-Copyright (c) 2022-2024 Antmicro <www.antmicro.com>
+Copyright (c) 2022-2025 Antmicro <www.antmicro.com>
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -82,7 +82,9 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
             <RectangleSelection ref="rectangleSelection"/>
         </div>
 
-        <Zoom @zoom-in="zoomIn" @zoom-out="zoomOut" :floating="!hideHud" />
+        <Zoom @zoom-in="zoomIn" @zoom-out="zoomOut" @center="center" :floating="!hideHud" />
+
+        <Return v-if="hideHud && isInSubgraph" @click="returnFromSubgraph" />
     </div>
 </template>
 
@@ -108,6 +110,7 @@ import nodeInsideSelection from './rectangleSelection.js';
 import getExternalApplicationManager from '../core/communication/ExternalApplicationManager';
 import jsonRPC, { frontendEndpoints } from '../core/communication/rpcCommunication';
 import Zoom from '../components/Zoom.vue';
+import Return from '../components/Return.vue';
 
 export default defineComponent({
     extends: EditorComponent,
@@ -118,6 +121,7 @@ export default defineComponent({
         NodePalette,
         RectangleSelection,
         Zoom,
+        Return,
     },
     emits: ['setLoad'],
     setup(props, { emit }) {
@@ -159,6 +163,8 @@ export default defineComponent({
             '--scale': scale.value,
             cursor: panZoom.dragging.value ? 'move' : 'default',
         }));
+
+        const isInSubgraph = computed(() => editorManager.editor.isInSubgraph());
 
         const unselectAllNodes = () => {
             /* eslint-disable vue/no-mutating-props,no-param-reassign */
@@ -764,6 +770,14 @@ export default defineComponent({
             emit('setLoad', value);
         });
 
+        const center = () => {
+            editorManager.centerZoom();
+        };
+
+        const returnFromSubgraph = () => {
+            editorManager.returnFromSubgraph();
+        };
+
         return {
             el,
             counter,
@@ -794,6 +808,9 @@ export default defineComponent({
             editorStyle,
             zoomIn: panZoom.onZoomIn,
             zoomOut: panZoom.onZoomOut,
+            center,
+            returnFromSubgraph,
+            isInSubgraph,
         };
     },
 });

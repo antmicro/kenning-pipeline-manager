@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <!--
 This component is used to control the zoom level of the graph.
-It emits 'zoomIn' and 'zoomOut' events when the respective buttons are clicked.
+It emits 'center', 'zoomIn' and 'zoomOut' events when the respective buttons are clicked.
 The component can be displayed in in a normal mode or in a floating mode (higher).
 -->
 
@@ -14,21 +14,32 @@ The component can be displayed in in a normal mode or in a floating mode (higher
     <div class="zoom-container" :class="floatingStatus">
         <div
             role="button"
-            class="zoom-control"
-            @pointerover="() => updateHoverInfo('plus')"
-            @pointerleave="() => resetHoverInfo('plus')"
-            @click="$emit('zoomIn')"
+            class="zoom-center"
+            @pointerover="() => updateHoverInfo('center')"
+            @pointerleave="() => resetHoverInfo('center')"
+            @click="$emit('center')"
         >
-            <Plus :hover="isHovered('plus')" />
+            <Crosshair :hover="isHovered('center')" />
         </div>
-        <div
-            role="button"
-            class="zoom-control"
-            @pointerover="() => updateHoverInfo('minus')"
-            @pointerleave="() => resetHoverInfo('minus')"
-            @click="$emit('zoomOut')"
-        >
-            <Minus :hover="isHovered('minus')" />
+        <div class="zoom-control-wrapper">
+            <div
+                role="button"
+                class="zoom-control"
+                @pointerover="() => updateHoverInfo('plus')"
+                @pointerleave="() => resetHoverInfo('plus')"
+                @click="$emit('zoomIn')"
+            >
+                <Plus :hover="isHovered('plus')" />
+            </div>
+            <div
+                role="button"
+                class="zoom-control"
+                @pointerover="() => updateHoverInfo('minus')"
+                @pointerleave="() => resetHoverInfo('minus')"
+                @click="$emit('zoomOut')"
+            >
+                <Minus :hover="isHovered('minus')" />
+            </div>
         </div>
     </div>
 </template>
@@ -37,11 +48,13 @@ The component can be displayed in in a normal mode or in a floating mode (higher
 import { computed } from 'vue';
 import Minus from '../icons/Minus.vue';
 import Plus from '../icons/Plus.vue';
+import Crosshair from '../icons/Crosshair.vue';
 
 export default {
     components: {
         Minus,
         Plus,
+        Crosshair,
     },
 
     props: {
@@ -60,7 +73,7 @@ export default {
         return { floatingStatus };
     },
 
-    emits: ['zoomIn', 'zoomOut'],
+    emits: ['zoomIn', 'zoomOut', 'center'],
 
     data() {
         return {
@@ -96,22 +109,40 @@ export default {
     display: flex;
     flex-direction: column;
     position: fixed;
-    background-color: $gray-600;
-    border: 1px solid $gray-500;
-    border-radius: 3px;
     z-index: 100;
+    align-items: center;
+    gap: 22px;
 
-    .zoom-control {
+    .zoom-center {
         width: 44px;
         height: 44px;
         display: flex;
         justify-content: center;
         align-items: center;
         cursor: pointer;
+        background-color: $gray-600;
+        border: 1px solid $gray-500;
+        border-radius: 100%;
     }
+    .zoom-control-wrapper {
+        display: flex;
+        flex-direction: column;
+        background-color: $gray-600;
+        border: 1px solid $gray-500;
+        border-radius: 3px;
 
-    .zoom-control:first-of-type {
-        border-bottom: 1px solid $gray-500;
+        .zoom-control {
+            width: 44px;
+            height: 44px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .zoom-control:first-of-type {
+            border-bottom: 1px solid $gray-500;
+        }
     }
 }
 .zoom-container.floating {

@@ -1921,6 +1921,13 @@ export default class EditorManager {
     }
 
     /**
+     * Centers the editor view and resets zoom level
+     */
+    centerZoom() {
+        this.baklavaView.editor.centerZoom();
+    }
+
+    /**
      * Updates name of currently displayed graph
      */
     updateSubgraphName(name) {

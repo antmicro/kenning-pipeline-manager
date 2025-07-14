@@ -157,14 +157,6 @@ export default {
             return button;
         });
 
-        const center = computed(() => {
-            const button = new ButtonInterface('Center', () => {
-                props.viewModel.editor.centerZoom();
-                externalApplicationManager.notifyAboutChange('viewport_on_center');
-            });
-            return button;
-        });
-
         const clearEditor = computed(() => {
             const button = new ButtonInterface('Clean editor', () => {
                 props.viewModel.editor.deepCleanEditor();
@@ -220,11 +212,7 @@ export default {
             ];
         });
 
-        const settingOptions = computed(() => ([
-            center.value,
-        ].concat(readonlyOptions.value)));
-
-        return { getOptionName, settingOptions, disableLayersOptions };
+        return { getOptionName, settingOptions: readonlyOptions, disableLayersOptions };
     },
 };
 </script>
