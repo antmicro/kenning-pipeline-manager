@@ -148,6 +148,26 @@
                         "description": "Optional field defining the id of the subgraph that this node represents",
                         "type": "string"
                     },
+                    "relatedGraphs": {
+                        "description": "Map containing name and ID of a related graph",
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "type": "string"
+                                },
+                                "id": {
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "name",
+                                "id"
+                            ],
+                            "additionalProperties": false
+                        }
+                    },
                     "position": {
                         "description": "Position of a node in an editor",
                         "allOf": [

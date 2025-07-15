@@ -122,6 +122,26 @@
                             "description": "Graph ID that the subgraph node corresponds to",
                             "type": "string"
                         },
+                        "relatedGraphs": {
+                            "description": "Map containing name and ID of a related graph",
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "id": {
+                                        "type": "string"
+                                    }
+                                },
+                                "required": [
+                                    "name",
+                                    "id"
+                                ],
+                                "additionalProperties": false
+                            }
+                        },
                         "includeName": {
                             "type": "string",
                             "description": "Name of the included node to override"
