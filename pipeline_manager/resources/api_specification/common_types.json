@@ -65,6 +65,13 @@
             "description": "JSON with specification definition in PM format",
             "type": "object"
         },
+        "specification_or_url": {
+            "description": "JSON or link to the remote JSON with specification",
+            "type": [
+                "object",
+                "string"
+            ]
+        },
         "specification_object": {
             "description": "Definition containing `specification` object",
             "type": "object",

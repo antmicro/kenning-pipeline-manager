@@ -154,6 +154,16 @@ class ExternalApplicationManager {
     }
 
     async updateSpecification(specification, urloverrides) {
+        if (typeof specification === 'string' || specification instanceof String) {
+            const [success, specificationOrError] = await loadJsonFromRemoteLocation(specification);
+            if (!success) {
+                NotificationHandler.terminalLog('error', 'Specification is invalid', specificationOrError);
+                return true;
+            }
+
+            // eslint-disable-next-line no-param-reassign
+            specification = specificationOrError;
+        }
         if (handleSpecificationResult(
             EditorManager.validateSpecification(specification),
             'Specification is invalid',

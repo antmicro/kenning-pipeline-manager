@@ -263,7 +263,7 @@
                 "type": "object",
                 "properties": {
                     "specification": {
-                        "$ref": "common_types#/$defs/specification"
+                        "$ref": "common_types#/$defs/specification_or_url"
                     },
                     "urloverrides": {
                         "$ref": "common_types#/$defs/urloverrides"
@@ -284,7 +284,7 @@
                 "type": "object",
                 "properties": {
                     "specification": {
-                        "$ref": "common_types#/$defs/specification"
+                        "$ref": "common_types#/$defs/specification_or_url"
                     },
                     "dataflow": {
                         "$ref": "common_types#/$defs/dataflow_or_url"
