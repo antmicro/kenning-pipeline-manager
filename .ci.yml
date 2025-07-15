@@ -65,6 +65,7 @@ test-frontend:
         paths:
             - pipeline_manager/frontend/playwright-report
             - pipeline_manager/frontend/test-results
+        when: always
 
 check-links:
     stage: build
