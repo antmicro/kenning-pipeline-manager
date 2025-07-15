@@ -1,5 +1,5 @@
 <!--
-Copyright (c) 2022-2024 Antmicro <www.antmicro.com>
+Copyright (c) 2022-2025 Antmicro <www.antmicro.com>
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -69,7 +69,7 @@ from moving or deleting the nodes.
              </template>
             <icons.Subgraph
                 class="__subgraph-icon"
-                v-if="isGraphNode"
+                v-if="isGraphNode || nodeHasRelatedGraphs"
             />
             <div
                 v-if="pillText !== undefined"
@@ -220,6 +220,7 @@ const nodeColor = computed(() => viewModel.value.editor.getNodeColor(node.value)
 const nodeTitleColor = computed(() => viewModel.value.editor.getTextColor(nodeColor.value));
 const nodeCategory = viewModel.value.editor.getNodeCategory(props.node.type);
 const isGraphNode = viewModel.value.editor.isGraphNode(props.node.type);
+const nodeHasRelatedGraphs = viewModel.value.editor.nodeHasRelatedGraphs(props.node.type);
 const pillText = computed(() => viewModel.value.editor.getPillText(node.value.type));
 const pillColor = computed(() => viewModel.value.editor.getPillColor(node.value.type));
 const pillTextColor = computed(() => viewModel.value.editor.getTextColor(pillColor.value));
@@ -327,6 +328,12 @@ const contextMenuTitleItems = computed(() => {
     if (isGraphNode) {
         items.push({ value: 'editSubgraph', label: 'Edit Subgraph', icon: icons.Subgraph });
     }
+    if (nodeHasRelatedGraphs) {
+        const nodeType = viewModel.value.editor.nodeTypes.get(props.node.type);
+        nodeType?.relatedGraphs.forEach(({ name, id }) => {
+            items.push({ value: `gotoRelatedGraph ${id}`, label: `Go to ${name} graph`, icon: icons.Subgraph });
+        });
+    }
     if (items.length > 1) {
         items.at(-1).endSection = true;
     }
@@ -404,6 +411,10 @@ const onContextMenuTitleClick = async (action) => {
         category: nodeCategory,
         layer: props.node.layer,
     };
+
+    if (action.includes('gotoRelatedGraph')) {
+        viewModel.value.editor.switchToRelatedGraph(action.replace(/^gotoRelatedGraph /, ''));
+    }
     switch (action) {
         case 'delete':
             startTransaction();

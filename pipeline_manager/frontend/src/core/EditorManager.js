@@ -13,6 +13,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { useBaklava, useCommandHandler, useViewModel } from '@baklavajs/renderer-vue';
 import { toRaw, ref, reactive } from 'vue';
+import { Graph } from '@baklavajs/core';
 import { useHistory } from './History.ts';
 import { useClipboard } from './Clipboard.ts';
 
@@ -760,6 +761,7 @@ export default class EditorManager {
             style: node.style,
             pill: node.pill,
             subgraphId: node.subgraphId,
+            relatedGraphs: node.relatedGraphs,
         });
         if ('icon' in node) {
             const icon = typeof node.icon === 'string' ? node.icon : this.getMetadataIcon(node.icon);
@@ -903,6 +905,38 @@ export default class EditorManager {
         if (graphs !== undefined) {
             // eslint-disable-next-line no-restricted-syntax
             for (const node of nodes) {
+                if (node.relatedGraphs !== undefined) {
+                    node.relatedGraphs.forEach(({ id }) => {
+                        const graphState = graphs.find((item) => item.id === id);
+                        // If graph is not already defined - make it and append it to graphs
+                        if (graphState !== undefined) {
+                            // Nested such that the lower argument doesn't throw an error,
+                            // just skips the processing
+                            if (!Array.from(this.baklavaView.editor.graphs).find(
+                                (el) => id === el.id)
+                            ) {
+                                const newGraph = new Graph(this.baklavaView.editor);
+                                newGraph.load(graphState);
+                                // Node interfaces had no `nodeId` field set,
+                                // those loops copy them over.
+                                // New nodes always have this field initialized with a value,
+                                // but it doesn't happen in certain load conditions
+                                newGraph._nodes.forEach((n) => {
+                                    Object.keys(n.inputs).forEach((iface) => {
+                                        n.inputs[iface].nodeId = n.id;
+                                    });
+                                    Object.keys(n.outputs).forEach((iface) => {
+                                        n.outputs[iface].nodeId = n.id;
+                                    });
+                                });
+                                this.baklavaView.editor.graphs.add(newGraph);
+                            }
+                        } else {
+                            errors.push([`The related graph with ID ${id} was not found`]);
+                        }
+                    });
+                }
+
                 // get graph node for the subgraph
                 if (node.subgraphId === undefined) continue; // eslint-disable-line no-continue
 

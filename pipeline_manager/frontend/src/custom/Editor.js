@@ -13,7 +13,7 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { Editor } from '@baklavajs/core';
+import { Editor, Graph } from '@baklavajs/core';
 
 import { useGraph } from '@baklavajs/renderer-vue';
 
@@ -69,6 +69,11 @@ export default class PipelineManagerEditor extends Editor {
 
     parentNodes = new Map();
 
+    subgraphStackGraphTypeEnum = {
+        SUBGRAPH: 'subgraph',
+        RELATEDGRAPH: 'relatedGraph',
+    };
+
     registerGraph(graph) {
         const customGraph = createPipelineManagerGraph(graph);
         super.registerGraph(customGraph);
@@ -80,9 +85,19 @@ export default class PipelineManagerEditor extends Editor {
      * @throws {Error} Throws if there are issues switching to a subgraph.
      */
     save() {
-        const graphNodes = [];
+        const subgraphStackFrames = [];
         while (this.isInSubgraph()) {
-            graphNodes.push(this._graph.graphNode);
+            if (this._graph.graphNode === undefined) {
+                subgraphStackFrames.push({
+                    type: this.subgraphStackGraphTypeEnum.RELATEDGRAPH,
+                    frame: this._graph.id,
+                });
+            } else {
+                subgraphStackFrames.push({
+                    type: this.subgraphStackGraphTypeEnum.SUBGRAPH,
+                    frame: this._graph.graphNode,
+                });
+            }
             this.backFromSubgraph();
         }
 
@@ -104,6 +119,14 @@ export default class PipelineManagerEditor extends Editor {
             delete node.graphState;
         };
         currentGraphState.nodes.forEach(recurrentSubgraphSave);
+        this.nodeTypes.forEach((node, _) => {
+            node.relatedGraphs?.forEach(({ id }) => {
+                const graphObject = Array.from(this.graphs).find((el) => id === el.id);
+                if (graphObject && !dataflowState.graphs.find((el) => el.id === graphObject.id)) {
+                    dataflowState.graphs.push(graphObject.save());
+                }
+            });
+        });
 
         currentGraphState.nodes.forEach((node) => {
             node.color = this.getNodeColor(node);
@@ -116,8 +139,17 @@ export default class PipelineManagerEditor extends Editor {
 
         dataflowState.graphs = [currentGraphState, ...dataflowState.graphs];
 
-        graphNodes.reverse().forEach((subgraphNode) => {
-            this.switchToSubgraph(subgraphNode);
+        subgraphStackFrames.reverse().forEach(({ frame, type }) => {
+            switch (type) {
+                case this.subgraphStackGraphTypeEnum.RELATEDGRAPH:
+                    this.switchToRelatedGraph(frame);
+                    break;
+                case this.subgraphStackGraphTypeEnum.SUBGRAPH:
+                    this.switchToSubgraph(frame);
+                    break;
+                default:
+                    break;
+            }
         });
 
         return dataflowState;
@@ -180,6 +212,7 @@ export default class PipelineManagerEditor extends Editor {
             isCategory: options?.isCategory ?? false,
             color: options?.color,
             subgraphId: options?.subgraphId,
+            relatedGraphs: options?.relatedGraphs,
             style: options?.style,
             pill: options?.pill,
         });
@@ -263,6 +296,30 @@ export default class PipelineManagerEditor extends Editor {
             graph.nodes.forEach((n) => {
                 if (n.subgraph !== undefined) {
                     usedGraphs.add(n.subgraph);
+                }
+                if (n.relatedGraphs !== undefined) {
+                    n.relatedGraphs.forEach(({ id }) => {
+                        const graphState = state.graphs.find((el) => el.id === id);
+                        if (graphState === undefined) {
+                            errors.push([`The related graph of id ${id} is not defined`]);
+                        }
+                        usedGraphs.add();
+                        const graphObject = new Graph(this);
+                        graphObject.load(graphState);
+                        // Node interfaces had no `nodeId` field set,
+                        // those loops copy them over.
+                        // New nodes always have this field initialized with a value,
+                        // but it doesn't happen in certain load conditions
+                        graphObject._nodes.forEach((node) => {
+                            Object.keys(node.inputs).forEach((iface) => {
+                                node.inputs[iface].nodeId = node.id;
+                            });
+                            Object.keys(node.outputs).forEach((iface) => {
+                                node.outputs[iface].nodeId = node.id;
+                            });
+                        });
+                        this.graphs.add(graphObject);
+                    });
                 }
                 this.setNodeColor(n.id, n.color);
             });
@@ -590,6 +647,11 @@ export default class PipelineManagerEditor extends Editor {
         return this.nodeTypes.get(nodeName).subgraphId !== undefined;
     }
 
+    nodeHasRelatedGraphs(nodeName) {
+        if (!this.nodeTypes.has(nodeName)) return false;
+        return this.nodeTypes.get(nodeName).relatedGraphs !== undefined;
+    }
+
     addGraphTemplate(template, graphNode) {
         if (this.events.beforeAddGraphTemplate.emit(template).prevented) {
             return;
@@ -607,6 +669,7 @@ export default class PipelineManagerEditor extends Editor {
             style: graphNode.style,
             pill: graphNode.pill,
             subgraphId: graphNode.subgraphId,
+            relatedGraphs: graphNode?.relatedGraphs,
         });
 
         this.events.addGraphTemplate.emit(template);
@@ -661,6 +724,47 @@ export default class PipelineManagerEditor extends Editor {
             this.subgraphStack.push(subgraphNode.graph);
             this.switchGraph(subgraphNode);
         }
+    }
+
+    /**
+    * Switch to a related by matching the ID to a loaded graph instancce
+    * and pushing the current graph to the stack.
+    *
+    * @param {relatedGraphID} An ID of the graph, to which a layout should be switched.
+    * */
+    switchToRelatedGraph(relatedGraphID) {
+        if (this._switchGraph === undefined) {
+            const { switchGraph } = useGraph();
+            this._switchGraph = switchGraph;
+        }
+        // disable history logging for the switch - don't push nodes being created here
+        suppressHistoryLogging(true);
+        const relatedGraph = Array.from(this.graphs).find((item) => item.id === relatedGraphID);
+        if (relatedGraph) {
+            this.subgraphStack.push(this._graph);
+            this._graph = relatedGraph;
+            this._switchGraph(this._graph);
+            this.graphName = this._graph.name;
+
+            nextTick().then(() => {
+                const graph = this.graph.save();
+                this.layoutManager.registerGraph(graph);
+                this.layoutManager
+                    .computeLayout(graph)
+                    .then(this.updateNodesPosition.bind(this))
+                    .then(() => {
+                        nextTick().then(() => {
+                            if (
+                                !this._graph.wasCentered
+                            ) {
+                                this.centerZoom();
+                                this._graph.wasCentered = true;
+                            }
+                        });
+                    });
+            });
+        }
+        suppressHistoryLogging(false);
     }
 
     /**
