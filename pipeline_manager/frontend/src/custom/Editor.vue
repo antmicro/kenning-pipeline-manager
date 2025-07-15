@@ -84,7 +84,7 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
 
         <Zoom @zoom-in="zoomIn" @zoom-out="zoomOut" @center="center" :floating="!hideHud" />
 
-        <Return v-if="hideHud && isInSubgraph" @click="returnFromSubgraph" />
+        <Return v-if="preview && isInSubgraph" @click="returnFromSubgraph" />
     </div>
 </template>
 
@@ -165,6 +165,8 @@ export default defineComponent({
         }));
 
         const isInSubgraph = computed(() => props.viewModel.editor.isInSubgraph());
+
+        const preview = computed(() => props.viewModel.editor.preview);
 
         const unselectAllNodes = () => {
             /* eslint-disable vue/no-mutating-props,no-param-reassign */
@@ -811,6 +813,7 @@ export default defineComponent({
             center,
             returnFromSubgraph,
             isInSubgraph,
+            preview,
         };
     },
 });
