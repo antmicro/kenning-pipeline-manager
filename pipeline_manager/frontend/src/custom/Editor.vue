@@ -164,7 +164,7 @@ export default defineComponent({
             cursor: panZoom.dragging.value ? 'move' : 'default',
         }));
 
-        const isInSubgraph = computed(() => editorManager.editor.isInSubgraph());
+        const isInSubgraph = computed(() => props.viewModel.editor.isInSubgraph());
 
         const unselectAllNodes = () => {
             /* eslint-disable vue/no-mutating-props,no-param-reassign */
