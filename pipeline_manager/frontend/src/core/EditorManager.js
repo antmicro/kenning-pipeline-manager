@@ -460,7 +460,6 @@ export default class EditorManager {
                 continue; // eslint-disable-line no-continue
             }
 
-            targetGraph.category = dataflowMetadata.category;
             graphs.push(targetGraph);
         }
 
@@ -933,12 +932,6 @@ export default class EditorManager {
                     graphNode,
                 );
 
-                // Category is not needed when loading a dataflow
-                const graphToValidate = JSON.parse(JSON.stringify(subgraph));
-                if (Object.prototype.hasOwnProperty.call(graphToValidate, 'category')) {
-                    delete graphToValidate.category;
-                }
-
                 // Validating the graph after it is registered to see if there are any errors
                 // by loading a single graph dataflow
 
@@ -946,7 +939,7 @@ export default class EditorManager {
                     errors: loadingErrors,
                     warnings: loadingWarnings,
                 } = await this.loadDataflow({ // eslint-disable-line no-await-in-loop
-                    graphs: [graphToValidate],
+                    graphs: [subgraph],
                     version: dataflowSpecification.version,
                 }, true, true);
 
@@ -977,8 +970,6 @@ export default class EditorManager {
             const entryGraph = graphs?.find((graph) => graph.id === entryGraphId);
             if (entryGraph !== undefined) {
                 graphs.forEach((graph) => {
-                    // Ignore returned errors and warnings because graphs are already validated
-                    delete graph.category;
                     // Add IDs to nodes preliminarily because otherwise the connections might broken
                     graph.nodes?.forEach((n) => { n.id ??= uuidv4(); });
                 });
