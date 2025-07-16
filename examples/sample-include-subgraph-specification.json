@@ -10,7 +10,6 @@
     "includeGraphs": [
         {
             "name": "MultipleIOGraphs",
-            "category": "Test/Graphs",
             "url": "https://raw.githubusercontent.com/antmicro/kenning-pipeline-manager/main/examples/sample-multiple-io-dataflow.json"
         }
     ],

@@ -119,7 +119,6 @@
         {
             "name": "Test subgraph #1",
             "id": "569edd54-0f42-4c24-a809-1509febbe23a",
-            "category": "First Category",
             "nodes": [
                 {
                     "name": "Test node #1",
@@ -193,7 +192,6 @@
         {
             "name": "Test subgraph #2",
             "id": "129c6246-d874-48cd-a33c-2927961d42e8",
-            "category": "Second Category",
             "nodes": [
                 {
                     "name": "Test node #1",

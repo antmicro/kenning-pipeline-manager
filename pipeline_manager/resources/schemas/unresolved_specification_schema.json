@@ -55,13 +55,6 @@
                 "description": "Definition of the graphs included from the dataflow file",
                 "type": "object",
                 "properties": {
-                    "category": {
-                        "description": "Category of the graph in the node palette. If no category is provided 'default' is used",
-                        "type": [
-                            "string",
-                            "null"
-                        ]
-                    },
                     "name": {
                         "description": "Name of the subgraph",
                         "type": [
@@ -91,13 +84,7 @@
             "description": "Definition of the available graphs",
             "type": "array",
             "items": {
-                "type": "object",
-                "allOf": [
-                    {
-                        "$ref": "#/$defs/graph_with_categories"
-                    }
-                ],
-                "unevaluatedProperties": false
+                "$ref": "graph_schema.json"
             }
         },
         "entryGraph": {
@@ -659,24 +646,6 @@
                 "default"
             ],
             "unevaluatedProperties": true
-        },
-        "graph_with_categories": {
-            "type": "object",
-            "allOf": [
-                {
-                    "$ref": "graph_schema.json"
-                },
-                {
-                    "type": "object",
-                    "properties": {
-                        "category": {
-                            "description": "Category of a node in a side bar",
-                            "type": "string"
-                        }
-                    }
-                }
-            ],
-            "unevaluatedProperties": false
         }
     },
     "additionalProperties": false
