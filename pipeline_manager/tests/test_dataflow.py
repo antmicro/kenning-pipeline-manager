@@ -244,7 +244,6 @@ def dataflow_specification_incompatible_node_and_graph_node(
         {
             "name": "Subgraph #1",
             "id": "34ef2575-77dd-46de-917c-cfcdbd40d4eb",
-            "category": "Category #1",
             "nodes": [
                 {
                     "name": "EncodeVideo",

@@ -256,7 +256,6 @@ def specification_include_graphs_node_conflicting(
     specification_SaveVideo_node["includeGraphs"] = [
         {
             "url": httpserver.url_for("/dataflow.json"),
-            "category": "includeGraphs",
             "name": "SaveVideo",
         }
     ]
@@ -276,12 +275,10 @@ def specification_include_graphs_names_repeated(
     specification_SaveVideo_node["includeGraphs"] = [
         {
             "url": httpserver.url_for("/dataflow.json"),
-            "category": "includeGraphs",
             "name": "LoadVideo",
         },
         {
             "url": httpserver.url_for("/dataflow.json"),
-            "category": "includeGraphs",
             "name": "LoadVideo",
         },
     ]
@@ -373,7 +370,6 @@ def specification_include_graphs_no_nodes(
     specification_SaveVideo_node["includeGraphs"] = [
         {
             "url": httpserver.url_for("/dataflow.json"),
-            "category": "includeGraphs",
             "name": "LoadVideo",
         },
     ]
@@ -432,7 +428,6 @@ def test_all_existing_examples_by_include(example, httpserver: HTTPServer):
     spec["includeGraphs"] = [
         {
             "url": httpserver.url_for("/dataflow.json"),
-            "category": "includeGraphs",
             "name": "Dataflow",
         },
     ]
