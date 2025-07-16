@@ -128,6 +128,8 @@ export default class EditorManager {
 
     updatedMetadata = {};
 
+    relatedGraphsStore = [];
+
     constructor() {
         // Baklava's view registers subgraph input and output nodes
         // This call un-registers them as obsolete
@@ -301,6 +303,8 @@ export default class EditorManager {
             if (!ret.errors.length && stateNodeId) {
                 this.baklavaView.displayedGraph.sidebar.nodeId = stateNodeId;
                 this.baklavaView.displayedGraph.sidebar.visible = true;
+            } else {
+                this.relatedGraphsStore.forEach((g) => this.baklavaView.editor.registerGraph(g));
             }
         }
 
@@ -901,7 +905,6 @@ export default class EditorManager {
         if (errors.length) {
             return { errors, warnings };
         }
-
         if (graphs !== undefined) {
             // eslint-disable-next-line no-restricted-syntax
             for (const node of nodes) {
@@ -929,7 +932,7 @@ export default class EditorManager {
                                         n.outputs[iface].nodeId = n.id;
                                     });
                                 });
-                                this.baklavaView.editor.graphs.add(newGraph);
+                                this.relatedGraphsStore.push(newGraph);
                             }
                         } else {
                             errors.push([`The related graph with ID ${id} was not found`]);
@@ -979,6 +982,9 @@ export default class EditorManager {
                 }, true, true);
 
                 // Cleaning the editor after loading the dataflow
+                const newGraphInstance = new Graph(this.baklavaView.editor);
+
+                this.baklavaView.editor.displayedGraph = newGraphInstance;
                 this.baklavaView.editor.deepCleanEditor();
                 this.baklavaView.editor.unregisterGraphs();
 
@@ -989,6 +995,7 @@ export default class EditorManager {
                 errors.push(
                     ...loadingErrors.map((error) => `Graph '${subgraph.name}' is invalid: ${error}`));
             }
+            this.relatedGraphsStore.forEach((g) => this.baklavaView.editor.registerGraph(g));
         }
 
         // Removing duplicate warnings

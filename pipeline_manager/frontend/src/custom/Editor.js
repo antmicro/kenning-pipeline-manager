@@ -303,9 +303,9 @@ export default class PipelineManagerEditor extends Editor {
                         if (graphState === undefined) {
                             errors.push([`The related graph of id ${id} is not defined`]);
                         }
-                        usedGraphs.add();
                         const graphObject = new Graph(this);
                         graphObject.load(graphState);
+                        usedGraphs.add(graphObject.id);
                         // Node interfaces had no `nodeId` field set,
                         // those loops copy them over.
                         // New nodes always have this field initialized with a value,
