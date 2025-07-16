@@ -1100,6 +1100,16 @@ class SpecificationBuilder(object):
         """
         self._nodes[name]["subgraphId"] = subgraph_id
 
+    def add_node_type_related_graph(self, name: str, related_graph_name: str):
+        if "relatedGraphs" not in self._nodes[name]:
+            self._nodes[name]["relatedGraphs"] = []
+        self._nodes[name]["relatedGraphs"].append(
+            {
+                "name": related_graph_name,
+                "id": self._graphs[related_graph_name]["id"],
+            }
+        )
+
     def update_node_type_from_spec(self, node):
         if node.get("isCategory", False):
             if "category" not in node:
