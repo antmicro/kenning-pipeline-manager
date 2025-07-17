@@ -49,6 +49,12 @@ export const saveSpecificationConfiguration: SaveConfiguration = {
                 specification.graphs.splice(index, remove, graph);
             });
             specification.entryGraph = dataflow.entryGraph ?? dataflow.graphs[0].id;
+
+            Object.entries(dataflow.metadata).forEach(([key, value]) => {
+                if (value !== undefined) {
+                    specification.metadata[key] = value;
+                }
+            });
         }
 
         const blob = new Blob(
