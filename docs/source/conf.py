@@ -93,7 +93,7 @@ for graph in sorted(Path("../../examples").glob("*-dataflow.json")):
             )
     exampleentries.extend(
         [
-            f"* {title}",
+            f"## {title}",
             "```{pipeline_manager}",
             f":spec: {spec}",
             f":graph: {graph}",
