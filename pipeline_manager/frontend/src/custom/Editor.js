@@ -228,9 +228,12 @@ export default class PipelineManagerEditor extends Editor {
      * @param {bool} loadOnly determines whether to load the graph only without adjusting
      * the graph rendering. Can be used when validating graphs without their browser
      * representation.
+     * @param templateName {string|null} name of the template, if the graph is a template
      * @returns list of errors that occurred during loading
      */
-    async load(state, preventCentering = false, loadOnly = false) {
+    async load(
+        state, preventCentering = false, loadOnly = false, templateName = null,
+    ) {
         // All subgraphs should be unregistered to avoid conflicts later when trying to
         // load into subgraph (in that case there may be two subgraphs with the same ID, one
         // of them from the previous session).
@@ -280,7 +283,7 @@ export default class PipelineManagerEditor extends Editor {
                     if (fittingTemplate.length !== 1) {
                         errors.push([`Expected exactly one template with ID ${n.name}, got ${fittingTemplate.length}`]);
                     }
-                    if (usedSubgraphs.has(n.subgraph)) {
+                    if (usedSubgraphs.has(n.subgraph) && templateName === null) {
                         errors.push([`Subgraph ${n.subgraph} has multiple nodes pointing to it - only unique IDs are allowed`]);
                     }
                     usedSubgraphs.add(n.subgraph);
@@ -318,9 +321,8 @@ export default class PipelineManagerEditor extends Editor {
         });
 
         try {
-            if (errors.length) {
-                return errors;
-            }
+            if (errors.length) return errors;
+
             state.graphs?.forEach((graph) => {
                 if (
                     !usedSubgraphs.has(graph.id) &&
@@ -334,8 +336,23 @@ export default class PipelineManagerEditor extends Editor {
                     this.registerGraph(graphObject);
                 }
             });
-            state = this.hooks.load.execute(state);
-            errors.push(...this._graph.load(entryGraph));
+
+            if (!errors.length) {
+                let graphToLoad;
+                if (!templateName) {
+                    state = this.hooks.load.execute(state);
+                    graphToLoad = entryGraph;
+                } else {
+                    // eslint-disable-next-line new-cap
+                    const graphNode = new (this._nodeTypes.get(templateName)).type();
+                    const {
+                        state: preparedSubgraphState, errors: prepareSubgraphErrors,
+                    } = graphNode.prepareSubgraphInstance();
+                    errors.push(...prepareSubgraphErrors);
+                    graphToLoad = preparedSubgraphState;
+                }
+                if (!errors.length) errors.push(...this._graph.load(graphToLoad));
+            }
         } catch (err) {
             // If anything goes wrong during dataflow loading, the editor is cleaned and an
             // appropriate error is returned.

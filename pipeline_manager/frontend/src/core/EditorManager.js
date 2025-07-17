@@ -9,7 +9,6 @@ import { stringify } from 'ajv';
 import Ajv2019 from 'ajv/dist/2019.js';
 import jsonMap from 'json-source-map';
 import jsonlint from 'jsonlint';
-import { v4 as uuidv4 } from 'uuid';
 
 import { useBaklava, useCommandHandler, useViewModel } from '@baklavajs/renderer-vue';
 import { toRaw, ref, reactive } from 'vue';
@@ -809,6 +808,41 @@ export default class EditorManager {
     }
 
     /**
+     * Filters graphs that are recursively included by the graph with a given ID.
+     *
+     * @param {string} entryGraphId root graph.
+     * @param {Object[]} graphs graphs to be filtered.
+     * @param {Boolean} Whether to include the entry graph.
+     * @returns {Object[]} Filtered graphs
+     */
+    static getSubgraphs(entryGraphId, graphs, includeEntry = true) {
+        const entryGraph = graphs?.find((graph) => graph.id === entryGraphId);
+        const graphMapping = Object.fromEntries(graphs.map((graph) => [graph.id, graph]));
+        const usedGraphs = [];
+        const dfs = (subgraph) => {
+            if (usedGraphs.includes(subgraph.id)) return;
+            usedGraphs.push(subgraph.id);
+
+            const subgraphs = subgraph.nodes
+                ?.map((node) => node.subgraph) ?? [];
+            const relatedGraphs = subgraph.nodes
+                ?.map((node) => node.relatedGraphs?.map(({ id }) => id) ?? [])
+                .flat() ?? [];
+
+            subgraphs
+                .concat(relatedGraphs)
+                .filter((id) => id !== undefined)
+                .map((id) => graphMapping[id])
+                .forEach(dfs);
+        };
+        dfs(entryGraph);
+
+        return usedGraphs
+            .filter((id) => id !== entryGraphId || includeEntry)
+            .map((id) => graphMapping[id]);
+    }
+
+    /**
      * Reads and validates part of specification related to nodes and subgraphs
      * @param dataflowSpecification Specification to load
      * @param includedGraphs Graphs included in the specification
@@ -970,15 +1004,18 @@ export default class EditorManager {
                 );
 
                 // Validating the graph after it is registered to see if there are any errors
-                // by loading a single graph dataflow
+                // by loading a graph (with nested subgraphs, if applicable)
 
+                const graphs_ = EditorManager
+                    .getSubgraphs(subgraph.id, graphs)
+                    .map((graph) => structuredClone(graph));
                 const {
                     errors: loadingErrors,
                     warnings: loadingWarnings,
                 } = await this.loadDataflow({ // eslint-disable-line no-await-in-loop
-                    graphs: [subgraph],
+                    graphs: graphs_,
                     version: dataflowSpecification.version,
-                }, true, true);
+                }, true, true, graphNode.name);
 
                 // Cleaning the editor after loading the dataflow
                 const newGraphInstance = new Graph(this.baklavaView.editor);
@@ -1008,38 +1045,11 @@ export default class EditorManager {
         // Load entry graph
         const entryGraphId = dataflowSpecification.entryGraph;
         if (!errors.length && entryGraphId !== undefined) {
-            const entryGraph = graphs?.find((graph) => graph.id === entryGraphId);
-            if (entryGraph !== undefined) {
-                graphs.forEach((graph) => {
-                    // Add IDs to nodes preliminarily because otherwise the connections might broken
-                    graph.nodes?.forEach((n) => { n.id ??= uuidv4(); });
-                });
-
-                // Load only entry graph and used subgraphs
-                const graphMapping = Object.fromEntries(graphs.map((graph) => [graph.id, graph]));
-                const usedGraphs = [];
-                const dfs = (subgraph) => {
-                    if (usedGraphs.includes(subgraph.id)) return;
-                    usedGraphs.push(subgraph.id);
-                    subgraph.nodes
-                        ?.map((node) => node.subgraph)
-                        .filter((id) => id !== undefined)
-                        .map((id) => graphMapping[id])
-                        .forEach(dfs);
-                    subgraph.nodes
-                        ?.map((node) => node.relatedGraphs)
-                        .forEach((rgid) => {
-                            rgid
-                                ?.map(({ id }) => graphMapping[id])
-                                .forEach(dfs);
-                        });
-                };
-                dfs(entryGraph);
-
+            if (graphs?.some((graph) => graph.id === entryGraphId)) {
                 const {
                     errors: entryErrors,
                 } = await this.loadDataflow({
-                    graphs: usedGraphs.map((id) => graphMapping[id]),
+                    graphs: EditorManager.getSubgraphs(entryGraphId, graphs),
                     version: dataflowSpecification.version,
                     entryGraph: entryGraphId,
                 });
@@ -1389,12 +1399,15 @@ export default class EditorManager {
      * @param dataflow Dataflow to load. Can be either an object or a string
      * @param preventCentering Boolean Blocks view in the same spot.
      * @param loadOnly determines whether to load the graph only without adjusting
+     * @param templateName {string|null} name of the template, if the graph is a template
      * the graph rendering. Can be used when validating graphs without their browser
      * representation.
      * @returns An array of errors that occurred during the dataflow loading.
      * If the array is empty, the loading was successful.
      */
-    async loadDataflow(dataflow, preventCentering = false, loadOnly = false) {
+    async loadDataflow(
+        dataflow, preventCentering = false, loadOnly = false, templateName = null,
+    ) {
         let { notifyWhenChanged } = this;
         // Turn off notification during dataflow loading
         this.updateMetadata({ notifyWhenChanged: false }, true, true);
@@ -1446,6 +1459,7 @@ export default class EditorManager {
                         dataflow,
                         preventCentering,
                         loadOnly,
+                        templateName,
                     ),
                     warnings,
                 };
