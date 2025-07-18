@@ -21,12 +21,7 @@
       grid-template-columns: 0.3fr 1fr 1fr;
       grid-gap: 0.5em;
       height: 20%;
-      padding: 0.5em
-    }
-
-    #input {
-      width: 100%;
-      height: 100%;
+      padding: 0.5em;
     }
 
     #buttons {
@@ -49,46 +44,63 @@
       background-color: #4a4a4a
     }
 
-    #input {
+    .io-container textarea {
+      width: 100%;
+      height: 100%;
+
       font-family: monospace;
       padding: 0.5em;
       border: none;
       resize: none;
       color: white;
       background-color: #343434;
-      overflow: scroll;
+      overflow: auto;
+      white-space: pre;
     }
 
-    #output {
-      font-family: monospace;
-      padding: 0.5em;
-      margin: 0px;
-      border: none;
-      color: white;
-      background-color: #343434;
-      overflow: scroll;
+    .io-container {
+        display: flex;
+        flex-direction: column;
     }
+
+    .io-container div {
+      margin: 0.2em;
+      color: white;
+    }
+
     </style>
 </head>
 <body>
     <script>
-        window.addEventListener('message', (event) => {
-          document.getElementById("output").innerHTML = JSON.stringify(event.data, null, 4)
-        });
+        const logJson = (containerId, content) => {
+          document.getElementById(containerId).innerHTML = JSON.stringify(content, null, 4);
+        };
+
+        // Pipeline Manager communication
 
         let PM;
-        window.onload = () => { PM = document.getElementById("pm"); }
+        window.onload = () => {
+          PM = document.getElementById('pm');
 
-        const graph_get = () => PM.contentWindow.postMessage({method: "graph_get"});
-        const specification_change = () => PM.contentWindow.postMessage({
-          method: "specification_change",
-          params: { specification: JSON.parse(document.getElementById("input").value) }}
-        );
-        const graph_change = () => PM.contentWindow.postMessage({
-          method: "graph_change",
-          params: { dataflow: JSON.parse(document.getElementById("input").value) }}
-        );
-        const any_request = () => PM.contentWindow.postMessage(JSON.parse(document.getElementById("input").value));
+          const output = document.getElementById("frontend-endpoint-responses");
+          output.addEventListener('focus', (ev) => ev.target.blur();
+          output.addEventListener('drop', (ev) => ev.preventDefault();
+        };
+        const sendPM = (data) => PM.contentWindow.postMessage(data);
+
+        window.addEventListener('message', (event) => {
+          const data = event.data;
+          logJson('frontend-endpoint-responses', data);
+        });
+
+        // Frontend requests
+
+        const getInput = () => JSON.parse(document.getElementById('input').value);
+
+        const graph_get = () => sendPM({ method: 'graph_get' });
+        const specification_change = () => sendPM({ method: 'specification_change', params: { specification: getInput() } });
+        const graph_change = () => sendPM({ method: 'graph_change', params: { dataflow: getInput() } });
+        const any_request = () => sendPM(getInput());
     </script>
     <div class="wrapper">
         <iframe id="pm" src="/pipeline-manager"></iframe>
@@ -100,8 +112,14 @@
                     <button onclick="graph_change()">Set graph</button>
                     <button onclick="any_request()">Handle provided request</button>
                 </div>
-                  <textarea id="input" placeholder="Write here specification or dataflow" spellcheck="false"></textarea>
-                  <pre id="output">Make a request.</pre>
+                <div class="io-container">
+                    <div>Specification/Dataflow/Custom request</div>
+                    <textarea id="input" placeholder="Write here specification or dataflow" spellcheck="false"></textarea>
+                </div>
+                <div class="io-container">
+                    <div>Responses</div>
+                    <textarea id="frontend-endpoint-responses" readonly">Make a request.</textarea>
+                </div>
             </div>
         </div>
     </div>
