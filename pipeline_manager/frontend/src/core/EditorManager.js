@@ -905,40 +905,39 @@ export default class EditorManager {
         if (errors.length) {
             return { errors, warnings };
         }
+        this.relatedGraphsStore = [];
         if (graphs !== undefined) {
             // eslint-disable-next-line no-restricted-syntax
             for (const node of nodes) {
-                if (node.relatedGraphs !== undefined) {
-                    node.relatedGraphs.forEach(({ id }) => {
-                        const graphState = graphs.find((item) => item.id === id);
-                        // If graph is not already defined - make it and append it to graphs
-                        if (graphState !== undefined) {
-                            // Nested such that the lower argument doesn't throw an error,
-                            // just skips the processing
-                            if (!Array.from(this.baklavaView.editor.graphs).find(
-                                (el) => id === el.id)
-                            ) {
-                                const newGraph = new Graph(this.baklavaView.editor);
-                                newGraph.load(graphState);
-                                // Node interfaces had no `nodeId` field set,
-                                // those loops copy them over.
-                                // New nodes always have this field initialized with a value,
-                                // but it doesn't happen in certain load conditions
-                                newGraph._nodes.forEach((n) => {
-                                    Object.keys(n.inputs).forEach((iface) => {
-                                        n.inputs[iface].nodeId = n.id;
-                                    });
-                                    Object.keys(n.outputs).forEach((iface) => {
-                                        n.outputs[iface].nodeId = n.id;
-                                    });
+                node.relatedGraphs?.forEach(({ id }) => {
+                    const graphState = graphs.find((item) => item.id === id);
+                    // If graph is not already defined - make it and append it to graphs
+                    if (graphState !== undefined) {
+                        // Nested such that the lower argument doesn't throw an error,
+                        // just skips the processing
+                        if (!Array.from(this.baklavaView.editor.graphs).find(
+                            (el) => id === el.id)
+                        ) {
+                            const newGraph = new Graph(this.baklavaView.editor);
+                            newGraph.load(graphState);
+                            // Node interfaces had no `nodeId` field set,
+                            // those loops copy them over.
+                            // New nodes always have this field initialized with a value,
+                            // but it doesn't happen in certain load conditions
+                            newGraph._nodes.forEach((n) => {
+                                Object.keys(n.inputs).forEach((iface) => {
+                                    n.inputs[iface].nodeId = n.id;
                                 });
-                                this.relatedGraphsStore.push(newGraph);
-                            }
-                        } else {
-                            errors.push([`The related graph with ID ${id} was not found`]);
+                                Object.keys(n.outputs).forEach((iface) => {
+                                    n.outputs[iface].nodeId = n.id;
+                                });
+                            });
+                            this.relatedGraphsStore.push(newGraph);
                         }
-                    });
-                }
+                    } else {
+                        errors.push([`The related graph with ID ${id} was not found`]);
+                    }
+                });
 
                 // get graph node for the subgraph
                 if (node.subgraphId === undefined) continue; // eslint-disable-line no-continue
@@ -1027,14 +1026,33 @@ export default class EditorManager {
                         .filter((id) => id !== undefined)
                         .map((id) => graphMapping[id])
                         .forEach(dfs);
+                    subgraph.nodes
+                        ?.map((node) => node.relatedGraphs)
+                        .forEach((rgid) => {
+                            rgid
+                                ?.map(({ id }) => graphMapping[id])
+                                .forEach(dfs);
+                        });
                 };
                 dfs(entryGraph);
 
-                await this.loadDataflow({
+                const {
+                    errors: entryErrors,
+                } = await this.loadDataflow({
                     graphs: usedGraphs.map((id) => graphMapping[id]),
                     version: dataflowSpecification.version,
                     entryGraph: entryGraphId,
                 });
+                if (entryErrors && entryErrors.length !== 0) {
+                    entryErrors.forEach((e) => errors.push(e));
+                    const newGraphInstance = new Graph(this.baklavaView.editor);
+                    this.baklavaView.editor.displayedGraph = newGraphInstance;
+                    this.baklavaView.editor.deepCleanEditor();
+                    this.baklavaView.editor.unregisterGraphs();
+                    this.relatedGraphsStore.forEach((g) => {
+                        this.baklavaView.editor.registerGraph(g);
+                    });
+                }
             } else {
                 uniqueWarnings.push(`'entryGraph' points to undefined graph: '${entryGraphId}'`);
             }

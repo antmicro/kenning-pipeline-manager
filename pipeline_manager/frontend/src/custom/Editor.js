@@ -237,31 +237,6 @@ export default class PipelineManagerEditor extends Editor {
         this.unregisterGraphs();
         ir.clearRegistry();
 
-        // There can be only one subgraph node matching to a particular subgraphs
-        const usedInstances = new Set();
-
-        const recurrentSubgraphLoad = (node) => {
-            const errors = [];
-            if (node.subgraph !== undefined) {
-                const fittingTemplate = state.graphs.filter(
-                    (template) => template.id === node.subgraph,
-                );
-                if (fittingTemplate.length !== 1) {
-                    return [`Expected exactly one template with ID ${node.name}, got ${fittingTemplate.length}`];
-                }
-                if (usedInstances.has(node.subgraph)) {
-                    return [`Subgraph ${node.subgraph} has multiple nodes pointing to it - only unique IDs are allowed`];
-                }
-                usedInstances.add(node.subgraph);
-                [node.graphState] = fittingTemplate;
-
-                node.graphState.nodes.forEach((n) => {
-                    errors.push(...recurrentSubgraphLoad(n));
-                });
-            }
-            return errors;
-        };
-
         // Load the node state as it is, wait until vue renders new nodes so that
         // node dimensions can be retrieved from DOM elements and then update the
         // location based on autolayout results. The editor is set to readonly
@@ -269,7 +244,7 @@ export default class PipelineManagerEditor extends Editor {
         // and layout computation
         const readonlySetting = this.readonly;
         this.readonly = true;
-        let errors = [];
+        const errors = [];
 
         if (!state.graphs.length) {
             return ['No graphs found'];
@@ -289,60 +264,78 @@ export default class PipelineManagerEditor extends Editor {
         }
         const { panning, scaling } = entryGraph;
 
-        const usedGraphs = new Set();
+        // Due to having a sequential load on all nodes,
+        // those have to be separate in case a subgraph
+        // is also a related graph
+        const usedSubgraphs = new Set();
+        const usedRelatedGraphs = new Set();
 
         this.nodeColors.clear();
         state.graphs.forEach((graph) => {
             graph.nodes.forEach((n) => {
                 if (n.subgraph !== undefined) {
-                    usedGraphs.add(n.subgraph);
+                    const fittingTemplate = state.graphs.filter(
+                        (template) => template.id === n.subgraph,
+                    );
+                    if (fittingTemplate.length !== 1) {
+                        errors.push([`Expected exactly one template with ID ${n.name}, got ${fittingTemplate.length}`]);
+                    }
+                    if (usedSubgraphs.has(n.subgraph)) {
+                        errors.push([`Subgraph ${n.subgraph} has multiple nodes pointing to it - only unique IDs are allowed`]);
+                    }
+                    usedSubgraphs.add(n.subgraph);
+                    [n.graphState] = fittingTemplate;
                 }
                 if (n.relatedGraphs !== undefined) {
                     n.relatedGraphs.forEach(({ id }) => {
                         const graphState = state.graphs.find((el) => el.id === id);
                         if (graphState === undefined) {
                             errors.push([`The related graph of id ${id} is not defined`]);
+                        } else if (Array.from(this.graphs).find((el) => id === el.id)) {
+                            // Do nothing - the linter hates this being a return from arrow func
+                        } else {
+                            const graphObject = new Graph(this);
+                            graphObject.load(graphState);
+                            usedRelatedGraphs.add(id);
+                            // Node interfaces had no `nodeId` field set,
+                            // those loops copy them over.
+                            // New nodes always have this field initialized with a value,
+                            // but it doesn't happen in certain load conditions
+                            graphObject._nodes.forEach((node) => {
+                                Object.keys(node.inputs).forEach((iface) => {
+                                    node.inputs[iface].nodeId = node.id;
+                                });
+                                Object.keys(node.outputs).forEach((iface) => {
+                                    node.outputs[iface].nodeId = node.id;
+                                });
+                            });
+                            this.registerGraph(graphObject);
                         }
-                        const graphObject = new Graph(this);
-                        graphObject.load(graphState);
-                        usedGraphs.add(graphObject.id);
-                        // Node interfaces had no `nodeId` field set,
-                        // those loops copy them over.
-                        // New nodes always have this field initialized with a value,
-                        // but it doesn't happen in certain load conditions
-                        graphObject._nodes.forEach((node) => {
-                            Object.keys(node.inputs).forEach((iface) => {
-                                node.inputs[iface].nodeId = node.id;
-                            });
-                            Object.keys(node.outputs).forEach((iface) => {
-                                node.outputs[iface].nodeId = node.id;
-                            });
-                        });
-                        this.graphs.add(graphObject);
                     });
                 }
                 this.setNodeColor(n.id, n.color);
             });
         });
-        // Finding a root graph by checking which graph is not referenced by any other
-        const rootGraph = state.graphs.find((graph) =>
-            !usedGraphs.has(graph.id),
-        );
-        if (rootGraph === undefined) {
-            return ['No root graph found. Make sure you graph does not have any recursion.'];
-        }
 
         try {
-            rootGraph.nodes.forEach((n) => {
-                errors.push(...recurrentSubgraphLoad(n));
-            });
-
             if (errors.length) {
                 return errors;
             }
-
+            state.graphs?.forEach((graph) => {
+                if (
+                    !usedSubgraphs.has(graph.id) &&
+                        !usedRelatedGraphs.has(graph.id) &&
+                        entryGraph.id !== graph.id) {
+                    // Currently this is inaccessible from the editor
+                    // in the future, such graphs may require interface nodeID mapping
+                    // like in relatedGraphs
+                    const graphObject = new Graph(this);
+                    errors.push(...graphObject.load(graph));
+                    this.registerGraph(graphObject);
+                }
+            });
             state = this.hooks.load.execute(state);
-            errors = this._graph.load(rootGraph);
+            errors.push(...this._graph.load(entryGraph));
         } catch (err) {
             // If anything goes wrong during dataflow loading, the editor is cleaned and an
             // appropriate error is returned.
