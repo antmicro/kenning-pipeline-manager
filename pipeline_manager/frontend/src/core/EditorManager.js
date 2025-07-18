@@ -219,6 +219,8 @@ export default class EditorManager {
 
         const warnings = [];
         const errors = [];
+        const info = [];
+
         const { version } = dataflowSpecification; // eslint-disable-line object-curly-newline,max-len
         if (!this.specification.currentSpecification) {
             if (version === undefined) {
@@ -226,8 +228,8 @@ export default class EditorManager {
                     `Loaded specification has no version assigned. Please update the specification to version ${this.specificationVersion}.`,
                 );
             } else if (version !== this.specificationVersion) {
-                warnings.push(
-                    `The specification format version (${version}) differs from the current specification format version (${this.specificationVersion}). It may result in an unexpected behaviour.`,
+                info.push(
+                    `The specification format version (${version}) differs from the current specification format version (${this.specificationVersion}). It may result in unexpected behaviour.`,
                 );
             }
         }
@@ -255,7 +257,7 @@ export default class EditorManager {
             errors.push(...includeErrors);
             warnings.push(...includeWarnings);
             if (errors.length) {
-                return { errors, warnings };
+                return { errors, warnings, info };
             }
 
             if (unmarkNewNodes) {
@@ -268,7 +270,7 @@ export default class EditorManager {
             } = await EditorManager.includeGraphs(dataflowSpecification.includeGraphs ?? []);
             errors.push(...includeGraphsErrors);
             if (errors.length) {
-                return { errors, warnings };
+                return { errors, warnings, info };
             }
 
             includedSpecification.graphs = (includedSpecification.graphs ?? []).concat(graphs);
@@ -282,14 +284,14 @@ export default class EditorManager {
             errors.push(...mergeErrors);
             warnings.push(...mergeWarnings);
             if (errors.length) {
-                return { errors, warnings };
+                return { errors, warnings, info };
             }
 
             // Update metadata
             const { metadata } = dataflowSpecification;
             errors.push(...this.updateMetadata(metadata, false, true));
             if (errors.length) {
-                return { errors, warnings };
+                return { errors, warnings, info };
             }
 
             // Update graph specification
@@ -323,7 +325,7 @@ export default class EditorManager {
             });
         }
 
-        return { errors, warnings };
+        return { errors, warnings, info };
     }
 
     clearEditorManagerState() {
@@ -1453,13 +1455,15 @@ export default class EditorManager {
 
                 const specificationVersion = dataflow.version;
                 const warnings = [];
+                const info = [];
+
                 if (specificationVersion === undefined) {
                     warnings.push(
-                        `Current format specification version is ${this.specificationVersion}. It may result in an unexpected behaviour`,
+                        `Loaded dataflow has no version assigned. Please update the dataflow to version ${this.specificationVersion}.`,
                     );
                 } else if (specificationVersion !== this.specificationVersion) {
-                    warnings.push(
-                        `Dataflow format specification version (${specificationVersion}) differs from the current format specification version (${this.specificationVersion}). It may result in unexpected behaviour.`,
+                    info.push(
+                        `Dataflow version (${specificationVersion}) differs from the current version (${this.specificationVersion}). It may result in unexpected behaviour.`,
                     );
                 }
 
@@ -1491,6 +1495,7 @@ export default class EditorManager {
                         templateName,
                     ),
                     warnings,
+                    info,
                 };
                 this.baklavaView.history.graphSwitch(
                     this.baklavaView.displayedGraph,
@@ -1507,6 +1512,7 @@ export default class EditorManager {
                         err.toString(),
                     ],
                     warnings: [],
+                    info: [],
                 };
             }
         } finally {
