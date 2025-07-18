@@ -402,6 +402,7 @@ def test_all_existing_examples(example):
         "specification_with_two_interfaces_connected_graph_node",
         "specification_graph_node",
         "specification_with_interface_graph_node",
+        "specification_empty",
     ],
 )
 def test_valid_specification(
@@ -422,7 +423,6 @@ def test_valid_specification(
         "specification_same_node",
         "specification_same_node_name_different_category",
         "specification_same_category",
-        "specification_empty",
         "specification_no_nodes",
         "dataflow_without_nodes",
         "specification_with_invalid_connection_graph_node",
