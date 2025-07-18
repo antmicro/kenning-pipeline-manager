@@ -250,7 +250,7 @@ export default function createPipelineManagerGraph(graph) {
         return newNodeInstance;
     };
 
-    graph.addNode = function addNode(node) {
+    graph.addNode = function addNode(node, graphLoadingState, nodeId) {
         if (this.events.beforeAddNode.emit(node).prevented) {
             return;
         }
@@ -269,7 +269,7 @@ export default function createPipelineManagerGraph(graph) {
         // However, our current reference is the non-reactive version.
         // Therefore, we need to get the reactive version from the array.
         node = this.nodes.find((n) => n.id === node.id);
-        node.onPlaced();
+        node.onPlaced(graphLoadingState, nodeId);
         this.events.addNode.emit(node);
         return node; // eslint-disable-line consistent-return
     };
@@ -306,7 +306,7 @@ export default function createPipelineManagerGraph(graph) {
             } else {
                 const node = new nodeInformation.type(); // eslint-disable-line new-cap
                 const nodeId = node.id;
-                this.addNode(node);
+                this.addNode(node, state.graphLoadingState, n.id);
                 const nodeErrors = node.load(n);
                 if (Array.isArray(nodeErrors) && nodeErrors.length) {
                     errors.push(...nodeErrors);
