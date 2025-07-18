@@ -36,7 +36,7 @@ function handleExternalAppResponse(response) {
  * Creates notifications based on specification.
  * Returns `true` if error appeared.
  */
-function handleSpecificationResult({ errors, warnings }, errorTitle, warningTitle) {
+function handleSpecificationResult({ errors, warnings, info }, errorTitle, warningTitle, infTitle) {
     if (Array.isArray(warnings) && warnings.length) {
         NotificationHandler.terminalLog('warning', warningTitle, warnings);
     }
@@ -44,7 +44,23 @@ function handleSpecificationResult({ errors, warnings }, errorTitle, warningTitl
         NotificationHandler.terminalLog('error', errorTitle, errors);
         return true;
     }
+    if (Array.isArray(info) && info.length) {
+        NotificationHandler.terminalLog('info', infTitle, info);
+    }
     return false;
+}
+
+/**
+ * Creates notification about mismatched specification versions
+ */
+function showVersionError(currentVersion, usedVersion) {
+    if (currentVersion === usedVersion) return;
+    NotificationHandler.terminalLog(
+        'error',
+        'Mismatched specification version',
+        `Specification version (${usedVersion}) differs from the current version (${currentVersion}). It may result in unexpected behaviour.` +
+        'Please refer to https://antmicro.github.io/kenning-pipeline-manager/changelogs.html to see if that is the case.',
+    );
 }
 
 const startTimeoutStatusInterval = 1500;
@@ -173,18 +189,35 @@ class ExternalApplicationManager {
             // eslint-disable-next-line no-param-reassign
             specification = specificationOrError;
         }
+
         if (handleSpecificationResult(
             EditorManager.validateSpecification(specification),
             'Specification is invalid',
             'Warnings when validating specification',
-        )) return true;
-        return handleSpecificationResult(
+            'Validated specification',
+        )) {
+            showVersionError(
+                this.editorManager.specificationVersion,
+                JSON.parse(specification).version,
+            );
+            return true;
+        }
+
+        const error = handleSpecificationResult(
             await this.editorManager.updateEditorSpecification(
                 specification, false, true, urloverrides,
             ),
             'Errors when loading specification',
             'Warnings when loading specification',
+            'Loaded specification',
         );
+        if (error) {
+            showVersionError(
+                this.editorManager.specificationVersion,
+                JSON.parse(specification).version,
+            );
+        }
+        return error;
     }
 
     async updateDataflow(dataflow) {
@@ -198,11 +231,20 @@ class ExternalApplicationManager {
             // eslint-disable-next-line no-param-reassign
             dataflow = dataflowOrError;
         }
-        const { errors, warnings } = await this.editorManager.loadDataflow(dataflow);
+        const { errors, warnings, info } = await this.editorManager.loadDataflow(dataflow);
         if (Array.isArray(errors) && errors.length) {
             NotificationHandler.terminalLog('error', 'Dataflow is invalid', errors);
+            if (Array.isArray(info) && info.length) {
+                NotificationHandler.terminalLog(
+                    'error',
+                    'Mismatched specification version',
+                    `${info} Please refer to https://antmicro.github.io/kenning-pipeline-manager/changelogs.html to see if that is the case.`,
+                );
+            }
         } else if (Array.isArray(warnings) && warnings.length) {
             NotificationHandler.terminalLog('warning', 'Dataflow loaded with warning', warnings);
+        } else if (Array.isArray(info) && info.length) {
+            NotificationHandler.terminalLog('info', 'Dataflow loaded', info);
         }
     }
 
