@@ -114,8 +114,6 @@ export default defineComponent({
                     }
                 };
                 this.io.onTerminalResize = () => {
-                    // Focus the terminal when it is resized
-                    this.focus();
                     // Reload content
                     clearTerminal();
                     terminalBuffer.forEach((line) => {
