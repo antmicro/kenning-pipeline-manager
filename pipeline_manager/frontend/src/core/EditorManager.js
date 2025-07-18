@@ -815,6 +815,7 @@ export default class EditorManager {
         if (!dataflowSpecification) return { errors: ['No specification passed'], warnings };
 
         const { nodes, graphs, metadata } = dataflowSpecification;
+        if (nodes === undefined && graphs === undefined) return { errors: [], warnings };
 
         let resolvedNodes = [];
 
