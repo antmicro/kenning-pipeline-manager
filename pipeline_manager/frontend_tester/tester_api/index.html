@@ -18,7 +18,7 @@
 
     #controls {
       display: grid;
-      grid-template-columns: 0.3fr 1fr 1fr;
+      grid-template-columns: 0.3fr 1fr 1fr 1fr;
       grid-gap: 0.5em;
       height: 20%;
       padding: 0.5em;
@@ -64,7 +64,6 @@
     }
 
     .io-container div {
-      margin: 0.2em;
       color: white;
     }
 
@@ -72,6 +71,21 @@
 </head>
 <body>
     <script>
+        let defaultSpecification;
+        let defaultDataflow;
+        let apiSpecification;
+
+        const load = async (path) => fetch(path).then((response) => response.json())
+
+        load('api-specification.json').then((data) => { apiSpecification = data; });
+        load('sample-specification.json')
+          .then((data) => {
+            data.metadata.notifyWhenChanged = true;
+            defaultSpecification = data;
+          });
+        load('sample-dataflow.json').then((data) => { defaultDataflow = data; });
+
+
         const logJson = (containerId, content) => {
           document.getElementById(containerId).innerHTML = JSON.stringify(content, null, 4);
         };
@@ -81,16 +95,26 @@
         let PM;
         window.onload = () => {
           PM = document.getElementById('pm');
+          new Promise(() => { setTimeout(() => sendPM({ method: 'register_external_frontend' }), 2000); });
 
-          const output = document.getElementById("frontend-endpoint-responses");
-          output.addEventListener('focus', (ev) => ev.target.blur();
-          output.addEventListener('drop', (ev) => ev.preventDefault();
+          ['frontend-endpoint-responses', 'external-endpoint-requests']
+            .map((id) => document.getElementById(id))
+            .forEach((e) => {
+                e.addEventListener('focus', (ev) => ev.target.blur());
+                e.addEventListener('drop', (ev) => ev.preventDefault());
+            });
         };
         const sendPM = (data) => PM.contentWindow.postMessage(data);
+        const createJSONRPCResponse = (id, response) => ({ jsonrpc: "2.0", id, result: response });
 
         window.addEventListener('message', (event) => {
           const data = event.data;
-          logJson('frontend-endpoint-responses', data);
+          if (data.method !== undefined && !(data.method in apiSpecification.frontend_endpoints)) {
+            const response = handleExternalRequest(data);
+            if (response !== undefined) sendPM(createJSONRPCResponse(data.id, response));
+          } else {
+            logJson('frontend-endpoint-responses', data);
+          }
         });
 
         // Frontend requests
@@ -101,6 +125,41 @@
         const specification_change = () => sendPM({ method: 'specification_change', params: { specification: getInput() } });
         const graph_change = () => sendPM({ method: 'graph_change', params: { dataflow: getInput() } });
         const any_request = () => sendPM(getInput());
+
+        // External requests
+
+        const handleExternalRequest = (request) => {
+          const { method } = request;
+          logJson('external-endpoint-requests', request)
+
+          let response;
+          switch (method) {
+            case 'specification_get':
+              response = { type: 0, content: defaultSpecification };
+              break;
+            case 'app_capabilities':
+              response = {};
+              break
+            case 'frontend_on_connect':
+              sendPM({ method: "graph_change", params: { dataflow: "http://localhost:3000/examples/sample-dataflow.json" } })
+              response = null;
+              break
+            case 'dataflow_run':
+              break
+            case 'dataflow_import':
+              const { params: { external_application_dataflow } } = request;
+              response = { type: 0, content: JSON.parse(external_application_dataflow) }
+              break
+            case 'dataflow_export':
+              const { params: { dataflow } } = request;
+              response = { type: 0, content: dataflow, filename: 'pipeline.json' }
+              break;
+            default:
+              response = null;
+          }
+
+          return response;
+        };
     </script>
     <div class="wrapper">
         <iframe id="pm" src="/pipeline-manager"></iframe>
@@ -120,8 +179,13 @@
                     <div>Responses</div>
                     <textarea id="frontend-endpoint-responses" readonly">Make a request.</textarea>
                 </div>
+                <div class="io-container">
+                    <div>Requests</div>
+                    <textarea id="external-endpoint-requests" readonly"></textarea>
+                </div>
             </div>
         </div>
     </div>
 </body>
 </html>
+
