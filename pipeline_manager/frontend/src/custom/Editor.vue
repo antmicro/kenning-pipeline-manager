@@ -590,12 +590,22 @@ export default defineComponent({
         async function updateEditorSpecification(specification) {
             let errors = EditorManager.validateSpecification(specification);
             let warnings;
+            let info;
+
             if (errors.length) {
                 NotificationHandler.terminalLog('error', 'Specification is invalid', errors);
+                if (editorManager.specificationVersion !== specification.version) {
+                    NotificationHandler.terminalLog(
+                        'error',
+                        'Mismatched specification version',
+                        `Specification version (${specification.version}) differs from the current version (${editorManager.specificationVersion}). It may result in unexpected behaviour.` +
+                        ' Please refer to https://antmicro.github.io/kenning-pipeline-manager/changelogs.html to see if that is the case.',
+                    );
+                }
                 return errors;
             }
 
-            ({ errors, warnings } = await editorManager.updateEditorSpecification(specification)); // eslint-disable-line prefer-const,max-len
+            ({ errors, warnings, info } = await editorManager.updateEditorSpecification(specification)); // eslint-disable-line prefer-const,max-len
             if (Array.isArray(warnings) && warnings.length) {
                 NotificationHandler.terminalLog(
                     'warning',
@@ -605,6 +615,15 @@ export default defineComponent({
             }
             if (Array.isArray(errors) && errors.length) {
                 NotificationHandler.terminalLog('error', 'Specification is invalid', errors);
+                if (Array.isArray(info) && info.length) {
+                    NotificationHandler.terminalLog(
+                        'error',
+                        'Mismatched specification version',
+                        `${info} Please refer to https://antmicro.github.io/kenning-pipeline-manager/changelogs.html to see if that is the case.`,
+                    );
+                }
+            } else if (Array.isArray(info) && info.length) {
+                NotificationHandler.terminalLog('info', 'Specification loaded', info);
             }
 
             return errors;
@@ -619,9 +638,8 @@ export default defineComponent({
          * @param dataflow The object holding the parsed dataflow file
          */
         async function updateDataflow(dataflow) {
-            const result = await editorManager.loadDataflow(dataflow);
-            const { errors } = result;
-            const { warnings } = result;
+            const { errors, warnings, info } = await editorManager.loadDataflow(dataflow);
+
             if (Array.isArray(warnings) && warnings.length) {
                 NotificationHandler.terminalLog(
                     'warning',
@@ -634,6 +652,15 @@ export default defineComponent({
                     'Softload enabled, errors found while loading the dataflow' :
                     'Dataflow is invalid';
                 NotificationHandler.terminalLog('error', messageTitle, errors);
+                if (Array.isArray(info) && info.length) {
+                    NotificationHandler.terminalLog(
+                        'error',
+                        'Mismatched dataflow version',
+                        `${info} Please refer to https://antmicro.github.io/kenning-pipeline-manager/changelogs.html to see if that is the case.`,
+                    );
+                }
+            } else if (Array.isArray(info) && info.length) {
+                NotificationHandler.terminalLog('info', 'Dataflow loaded', info);
             }
 
             return errors;
