@@ -28,9 +28,8 @@ type CreatedInterfaces = {
 
 /**
   * Updates editor specification for the edited node type.
-     * @param {object} twoColumn Whether the updated node has a two-column layout
 */
-function commitTypeToSpecification(twoColumn = false) {
+function commitTypeToSpecification() {
     suppressHistoryLogging(true);
     const editorManager = EditorManager.getEditorManagerInstance();
 
@@ -138,7 +137,7 @@ export function modifyConfiguration(): string[] {
     });
     /* eslint-enable no-param-reassign */
 
-    commitTypeToSpecification(nodes[0].twoColumn);
+    commitTypeToSpecification();
     suppressHistoryLogging(false);
     return [];
 }
@@ -254,7 +253,7 @@ export function addProperty(property: PropertyConfiguration): void {
     configurationState.properties.push(property);
     alterProperties(nodes, configurationState.properties);
 
-    commitTypeToSpecification(nodes[0].twoColumn);
+    commitTypeToSpecification();
 }
 
 /**
@@ -285,7 +284,7 @@ export function removeProperties(properties: PropertyConfiguration[]): void {
     );
     alterProperties(nodes, properties, true);
 
-    commitTypeToSpecification(nodes[0].twoColumn);
+    commitTypeToSpecification();
 }
 
 /**
@@ -320,7 +319,7 @@ export function addInterface(intf: InterfaceConfiguration): void {
     configurationState.interfaces.push(intf);
     alterInterfaces(nodes, configurationState.interfaces);
 
-    commitTypeToSpecification(nodes[0].twoColumn);
+    commitTypeToSpecification();
 }
 
 /**
@@ -351,5 +350,5 @@ export function removeInterfaces(interfaces: InterfaceConfiguration[]): void {
     );
     alterInterfaces(nodes, interfaces, true);
 
-    commitTypeToSpecification(nodes[0].twoColumn);
+    commitTypeToSpecification();
 }
