@@ -41,7 +41,7 @@ export function parseProperties(properties) {
     const errors = [];
 
     properties.forEach((prop) => {
-        if (prop.group !== undefined) {
+        if (prop.group !== undefined && Array.isArray(prop.group)) {
             const parsedGroup = parseProperties(prop.group);
             if (Array.isArray(parsedGroup) && parsedGroup.length) {
                 errors.push(...parsedGroup);
