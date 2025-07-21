@@ -11,7 +11,7 @@ The component can be displayed in in a normal mode or in a floating mode (higher
 -->
 
 <template>
-    <div class="zoom-container" :class="floatingStatus">
+    <div class="zoom-container export-hidden" :class="floatingStatus">
         <div
             role="button"
             class="zoom-center"

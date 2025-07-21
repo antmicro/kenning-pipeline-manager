@@ -547,8 +547,8 @@ export default {
         exportToPng() {
             // Get editor with data flow
             const nodeEditor = document.querySelector('.inner-editor');
-            // Exclude node palette
-            const filter = (node) => !node.classList?.contains('baklava-node-palette');
+            // Exclude nodes hidden in export (e.g. node palette and zoom controls)
+            const filter = (node) => !node.classList?.contains('export-hidden');
 
             toPng(nodeEditor, { filter, imagePlaceholder: brokenImage })
                 .then((dataUrl) => {
@@ -572,8 +572,8 @@ export default {
         exportToSvg() {
             // Get editor with data flow
             const nodeEditor = document.querySelector('.inner-editor');
-            // Exclude node palette
-            const filter = (node) => !node.classList?.contains('baklava-node-palette');
+            // Exclude nodes hidden in export (e.g. node palette and zoom controls)
+            const filter = (node) => !node.classList?.contains('export-hidden');
             toSvg(nodeEditor, { filter, imagePlaceholder: brokenImage })
                 .then((dataUrl) => {
                     const downloadLink = document.createElement('a');

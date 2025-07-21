@@ -14,7 +14,7 @@ Inherits from baklavajs/packages/renderer-vue/src/nodepalette/NodePalette.vue
     <!-- eslint-disable vue/no-multiple-template-root -->
     <div
         ref="paletteRef"
-        class="baklava-node-palette"
+        class="baklava-node-palette export-hidden"
         :class="{'hidden-navbar': $isMobile}"
     >
         <div class="search-bar">

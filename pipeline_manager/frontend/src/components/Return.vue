@@ -12,7 +12,7 @@ It emits 'click' event when the button is clicked.
 <template>
     <div
         role="button"
-        class="return-control"
+        class="return-control export-hidden"
         @pointerover="isHovered = true"
         @pointerleave="isHovered = false"
         @click="$emit('click')"
