@@ -55,7 +55,7 @@ function commitTypeToSpecification(twoColumn = false) {
         interfaces: configurationState.interfaces,
         properties: configurationState.properties,
         style: NEW_NODE_STYLE,
-    }, currentType, twoColumn);
+    }, currentType, false);
 
     if (ret.errors !== undefined && ret.errors.length) {
         NotificationHandler.terminalLog('error', 'Error when registering the node', ret.errors);

@@ -600,10 +600,11 @@ export default class EditorManager {
      *
      * @param {object} nodeSpecification Node specification to add
      * @param {object} nodeToUpdate Node type to update
+     * @param {boolean} removeUnused Whether keys missing from nodeSpecification should be removed
      * @returns An object consisting of errors and warnings arrays. If both arrays are empty
      * the updating process was successful.
      */
-    addNodeToEditorSpecification(nodeSpecification, nodeToUpdate = undefined) {
+    addNodeToEditorSpecification(nodeSpecification, nodeToUpdate = undefined, removeUnused = true) {
         // Remove undefined fields
         Object.entries(nodeSpecification.properties ?? {}).forEach(([_, value]) => {
             Object.keys(value).forEach((key) => {
@@ -673,11 +674,13 @@ export default class EditorManager {
             } else {
                 [unresolvedNodeSpecification, resolvedNodeSpecification]
                     .forEach((specification) => {
-                        Object.keys(specification)
-                            .filter((key) => !(key in nodeSpecification))
-                            .forEach((key) => { delete specification[key]; });
+                        if (removeUnused) {
+                            Object.keys(specification)
+                                .filter((key) => !(key in nodeSpecification))
+                                .forEach((key) => { delete specification[key]; });
+                        }
 
-                        Object.entries(structuredClone(nodeSpecification))
+                        Object.entries(JSON.parse(JSON.stringify(nodeSpecification)))
                             .filter(([_, value]) => value !== undefined)
                             .map(([key, value]) => [key, structuredClone(value)])
                             .forEach(([key, value]) => { specification[key] = value; });
