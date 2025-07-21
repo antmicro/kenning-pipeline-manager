@@ -12,7 +12,7 @@
 
 import { useViewModel } from '@baklavajs/renderer-vue';
 import { NodeInterface } from '@baklavajs/core';
-import EditorManager, { NEW_NODE_STYLE } from '../EditorManager.js';
+import EditorManager, { NEW_NODE_STYLE, EDITED_NODE_STYLE } from '../EditorManager.js';
 import { parseInterfaces } from '../interfaceParser.js';
 import {
     configurationState, PropertyConfiguration, InterfaceConfiguration,
@@ -36,6 +36,7 @@ function commitTypeToSpecification(twoColumn = false) {
 
     const newNodeData = configurationState.nodeData;
     const currentType = configurationState.editedType;
+    let style = NEW_NODE_STYLE;
 
     if (currentType !== undefined) {
         // eslint-disable-next-line no-underscore-dangle
@@ -44,6 +45,7 @@ function commitTypeToSpecification(twoColumn = false) {
             NotificationHandler.terminalLog('error', 'Error when registering the node', errors);
             return;
         }
+        style = EDITED_NODE_STYLE;
     }
 
     const ret = editorManager.addNodeToEditorSpecification({
@@ -54,7 +56,7 @@ function commitTypeToSpecification(twoColumn = false) {
         description: newNodeData.description,
         interfaces: configurationState.interfaces,
         properties: configurationState.properties,
-        style: NEW_NODE_STYLE,
+        style,
     }, currentType, false);
 
     if (ret.errors !== undefined && ret.errors.length) {
