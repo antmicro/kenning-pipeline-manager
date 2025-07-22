@@ -210,6 +210,10 @@ export async function nodes_change(params: ModifyNodesParamsType) {
         } else {
             const node = new info.type(); // eslint-disable-line new-cap
             node.id = n.id;
+            if (n.color) {
+                const editor = viewModel.value.editor as any;
+                editor.setNodeColor(n.id, n.color);
+            }
             graph.addNode(node);
             const errors = node.load(n);
             if (Array.isArray(errors) && errors.length) throw new Error(errors.join('\n'));
