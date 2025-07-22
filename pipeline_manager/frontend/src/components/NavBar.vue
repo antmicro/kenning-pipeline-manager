@@ -1122,6 +1122,7 @@ export default {
         <Notifications v-click-outside="(ev) => clickOutside(ev, panels.notifications)" />
         <Settings
             v-click-outside="(ev) => clickOutside(ev, panels.settings)"
+            tabindex="-1"
             :viewModel="editorManager.baklavaView"
         />
         <CustomSidebar
