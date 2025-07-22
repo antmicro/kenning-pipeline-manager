@@ -118,21 +118,6 @@ export default {
         backendStatusOpen() {
             return this.panels.backendStatus.isOpen;
         },
-        notificationsTooltipClasses() {
-            return {
-                last: !this.hideHud,
-            };
-        },
-        backendStatusTooltipClasses() {
-            return {
-                last: this.hideHud && this.externalApplicationManager.backendAvailable,
-            };
-        },
-        settingsTooltipClasses() {
-            return {
-                last: this.hideHud && !this.externalApplicationManager.backendAvailable,
-            };
-        },
         navbarItems() {
             const { navbarItems } = this.editorManager.baklavaView;
             navbarItems.forEach((item) => {
@@ -1018,7 +1003,7 @@ export default {
                             :hover="isHovered('search')"
                             class="small_svg"
                         />
-                        <div :class="['tooltip', mobileClasses, settingsTooltipClasses]">
+                        <div :class="['tooltip', mobileClasses]">
                             <span v-if="!panels.nodesearch.isOpen">Show node search bar</span>
                             <span v-else>Hide node search bar</span>
                         </div>
@@ -1048,7 +1033,7 @@ export default {
                             v-if="!panels.fullscreen.isOpen"
                         />
                         <Collapse :hover="isHovered('Fullscreen')" class="small_svg" v-else />
-                        <div :class="['tooltip', mobileClasses, settingsTooltipClasses]">
+                        <div :class="['tooltip', mobileClasses]">
                             <span v-if="!panels.fullscreen.isOpen">Enable fullscreen</span>
                             <span v-else>Disable fullscreen</span>
                         </div>
@@ -1063,7 +1048,7 @@ export default {
                         v-click-outside="() => panels.settings.isOpen = false"
                     >
                         <Cogwheel :hover="isHovered('settings')" class="small_svg" />
-                        <div :class="['tooltip', mobileClasses, settingsTooltipClasses]">
+                        <div :class="['tooltip', mobileClasses]">
                             <span v-if="!panels.settings.isOpen">Show settings</span>
                             <span v-else>Hide settings</span>
                         </div>
@@ -1089,7 +1074,7 @@ export default {
                             :active="backendStatusOpen"
                             :hover="isHovered('backendStatus')"
                         />
-                        <div :class="['tooltip', mobileClasses, backendStatusTooltipClasses]">
+                        <div :class="['tooltip', mobileClasses]">
                             <span>Backend status</span>
                         </div>
                         <div
@@ -1127,12 +1112,12 @@ export default {
                         />
                         <div
                             v-if="notificationsOpen"
-                            :class="['tooltip', mobileClasses, notificationsTooltipClasses]"
+                            :class="['tooltip', mobileClasses]"
                         >
                             <span>Hide notifications</span>
                         </div>
                         <div
-                            v-else :class="['tooltip', mobileClasses, notificationsTooltipClasses]"
+                            v-else :class="['tooltip', mobileClasses]"
                         >
                             <span>Show notifications</span>
                         </div>
@@ -1348,13 +1333,6 @@ export default {
                 transform: translate(-50%, 25%);
                 pointer-events: none;
                 white-space: nowrap;
-
-                &.last {
-                    transform: translate(-75%, 25%);
-                }
-                &.first {
-                    transform: translate(-25%, 25%);
-                }
             }
 
             &.logo:hover > .dropdown-wrapper {
@@ -1422,6 +1400,10 @@ export default {
                     box-sizing: border-box;
                 }
             }
+        }
+
+        &:last-child > div:last-child .tooltip {
+            transform: translate(-75%, 25%);
         }
     }
 }
