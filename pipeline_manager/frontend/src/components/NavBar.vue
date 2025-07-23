@@ -37,9 +37,10 @@ import Notifications from './Notifications.vue';
 import Settings from './Settings.vue';
 import {
     ParentMenu, SaveMenu, ExportMenu, NodeConfigurationMenu, PropertyConfigurationMenu,
-    InterfaceConfigurationMenu, InterfaceListMenu, PropertyListMenu, LayerConfigurationMenu,
+    InterfaceConfigurationMenu, LayerConfigurationMenu, ListMenu,
 } from './menu';
-import { menuState } from '../core/nodeCreation/ConfigurationState.ts';
+import { menuState, configurationState } from '../core/nodeCreation/ConfigurationState.ts';
+import { removeInterfaces, removeProperties } from '../core/nodeCreation/Configuration.ts';
 import BlurPanel from './BlurPanel.vue';
 import CustomSidebar from '../custom/CustomSidebar.vue';
 import { saveSpecificationConfiguration, saveGraphConfiguration, exportGraph } from './saveConfiguration.ts';
@@ -78,9 +79,8 @@ export default {
         InterfaceConfigurationMenu,
         BlurPanel,
         CustomSidebar,
-        PropertyListMenu,
-        InterfaceListMenu,
         LayerConfigurationMenu,
+        ListMenu,
     },
     computed: {
         dataflowGraphName() {
@@ -233,6 +233,9 @@ export default {
                 it will be not displayed in the ParentMenu.
             */
             menuState,
+            configurationState,
+            removeInterfaces,
+            removeProperties,
             /* create instance of external manager to control
             connection, dataflow and specification
             */
@@ -768,7 +771,12 @@ export default {
                 v-model="menuState.propertyListMenu"
                 :title="'Remove properties'"
             >
-                <PropertyListMenu/>
+                <ListMenu
+                    :componentName="'propertyListMenu'"
+                    :items=configurationState.properties
+                    :confirmAction="removeProperties"
+                    :confirmText="'Remove properties'"
+                />
             </ParentMenu>
         </BlurPanel>
     </Transition>
@@ -779,7 +787,12 @@ export default {
                 v-model="menuState.interfaceListMenu"
                 :title="'Remove interfaces'"
             >
-                <InterfaceListMenu/>
+                <ListMenu
+                    :componentName="'interfaceListMenu'"
+                    :items=configurationState.interfaces
+                    :confirmAction="removeInterfaces"
+                    :confirmText="'Remove interfaces'"
+                />
             </ParentMenu>
         </BlurPanel>
     </Transition>
