@@ -29,10 +29,12 @@ SPDX-License-Identifier: Apache-2.0
             <p class="__validation_errors">
                 <template v-if=" cachedValidationResult.length > 0">
                     Problems:<br>
-                    <span v-for="(err, idx) in cachedValidationResult" :key="idx">
-                        <span style="color: var(--baklava-control-color-error);">
-                            {{ formatError(err) }}
-                        </span>
+                    <span
+                        v-for="(err, idx) in cachedValidationResult"
+                        :key="idx"
+                        style="color: var(--baklava-control-color-error);"
+                    >
+                        {{ formatError(err) }}
                     </span>
                 </template>
                 <template v-else>
