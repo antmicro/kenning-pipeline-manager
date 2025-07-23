@@ -305,6 +305,15 @@
             "returns": {
                 "$ref": "common_types#/$defs/null_or_empty"
             }
+        },
+        "nodes_highlight": {
+            "description": "Procedure to highlight specified nodes in the editor",
+            "params": {
+                "$ref": "common_types#/$defs/highlight_diff"
+            },
+            "returns": {
+                "$ref": "common_types#/$defs/null_or_empty"
+            }
         }
     },
     "backend_endpoints": {
@@ -594,6 +603,15 @@
                     }
                 },
                 "required": ["name", "message"]
+            },
+            "returns": {
+                "$ref": "common_types#/$defs/null_or_empty"
+            }
+        },
+        "nodes_on_highlight": {
+            "description": "Request send when node was selected or unselected",
+            "params": {
+                "$ref": "common_types#/$defs/highlight_diff"
             },
             "returns": {
                 "$ref": "common_types#/$defs/null_or_empty"
