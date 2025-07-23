@@ -132,14 +132,10 @@ export default {
             return navbarItems;
         },
         leftButtonsQuantity() {
-            return 2 + (
-                (this.externalApplicationManager.backendAvailable) ? this.navbarItems.length : 0
-            ) + (
-                (this.editorManager.editor.isInSubgraph()) ? 1 : 0
-            );
+            return this.$refs.leftButtons.children.length;
         },
         rightButtonsQuantity() {
-            return 3 + ((this.externalApplicationManager.backendAvailable) ? 1 : 0);
+            return this.$refs.rightButtons.children.length;
         },
         isNavBarCompressed() {
             return (
@@ -797,6 +793,7 @@ export default {
             <div class="container">
                 <div :style="leftContainerStyles">
                     <div
+                        ref="leftButtons"
                         :class="['logo', mobileClasses]"
                         @pointerover="() => updateHoverInfo('logo')"
                         @pointerleave="() => resetHoverInfo('logo')"
@@ -986,7 +983,7 @@ export default {
                     @dblclick="editTitle = !readonly">
                         {{ editorTitle }}
                 </span>
-                <div :style="rightContainerStyles">
+                <div :style="rightContainerStyles" ref="rightButtons">
                     <div
                         ref="searchbar"
                         :class="['hoverbox', mobileClasses]"
