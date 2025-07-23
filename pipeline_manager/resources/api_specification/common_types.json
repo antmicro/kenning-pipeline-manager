@@ -231,6 +231,39 @@
             },
             "required": ["graph_id", "connections"]
         },
+        "highlight_diff": {
+            "description": "Schema that represents the difference in node selection in the editor",
+            "type": "object",
+            "properties": {
+                "graph_id": {
+                    "description": "Id of the graph",
+                    "type": "string"
+                },
+                "nodes": {
+                    "description": "",
+                    "type": "object",
+                    "properties": {
+                        "selected": {
+                            "description": "List with selected nodes",
+                            "type": "array",
+                            "items": {
+                                "description": "ID of selected node",
+                                "type": "string"
+                            }
+                        },
+                        "unselected": {
+                            "description": "List with unselected nodes",
+                            "type": "array",
+                            "items": {
+                                "description": "ID of unselected node",
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "required": ["graph_id", "nodes"]
+        },
         "metadata": {
             "description": "Type with PM metadata",
             "type": "object",
