@@ -440,3 +440,31 @@ export async function specification_graph_change(
         }
     });
 }
+
+type ModifyNodesHighlightType = {
+    graph_id: string,
+    nodes: {
+        selected: string[],
+        unselected: string[],
+    }
+}
+
+/**
+ * Highlights nodes provided in params
+ */
+export async function nodes_highlight(
+    params: ModifyNodesHighlightType,
+) {
+    const graph = getGraph(params.graph_id);
+
+    graph.selectedNodes = graph.selectedNodes.filter((node: any) =>
+        !params.nodes.unselected.includes(node.id),
+    );
+
+    params.nodes.selected.forEach((node_id: string) => {
+        const node = getNode(params.graph_id, node_id);
+        if (!graph.selectedNodes.includes(node)) {
+            graph.selectedNodes.push(node);
+        }
+    });
+}
