@@ -153,9 +153,7 @@ export default defineComponent({
         /**
          * Validates the interfaces of a parsed node specification.
          *
-         * This function performs two main checks:
-         * - Ensures that there are no duplicate interface names.
-         * - Validates each interface object against a JSON schema.
+         * This function ensures that there are no duplicate interface names.
          *
          * @param {Object} parsedSpecification - The parsed node specification object to validate.
          * @throws {Error} Thrown if the validation failed.
@@ -169,14 +167,6 @@ export default defineComponent({
             if (duplicates.length > 0) {
                 throw new Error(`Conflicting interface names: ${duplicates.join(', ')}`);
             }
-
-            // Validate against the JSON schema.
-            parsedSpecification.interfaces.forEach((intf) => {
-                const validationErrors = editorManager.validateNodeInterface(intf);
-                if (validationErrors.length) {
-                    throw new Error(validationErrors);
-                }
-            });
         };
 
         /**
@@ -195,9 +185,7 @@ export default defineComponent({
         /**
          * Validate the properties of a node.
          *
-         * This function performs two main checks:
-         * - Ensures that there are no duplicated properties names.
-         * - Validates each property object against a JSON schema.
+         * This function ensures that there are no duplicated properties names.
          *
          * @param {Object} parsedSpecification - The parsed node specification object to validate.
          * @throws {Error} Raised if a validation failed.
@@ -211,14 +199,6 @@ export default defineComponent({
             if (duplicates.length > 0) {
                 throw new Error(`Conflicting property names: ${duplicates.join(', ')}`);
             }
-
-            // Validate against a JSON schema of a property.
-            parsedSpecification.properties.forEach((prop) => {
-                const validationErrors = editorManager.validateNodeProperty(prop);
-                if (validationErrors.length) {
-                    throw new Error(validationErrors);
-                }
-            });
         };
 
         /**
