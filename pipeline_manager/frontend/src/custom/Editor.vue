@@ -434,6 +434,12 @@ export default defineComponent({
             ),
         );
 
+        const highlightedNodes = computed(() =>
+            visibleNodes.value.filter(
+                (n) => props.viewModel.displayedGraph.selectedNodes.includes(n),
+            ),
+        );
+
         const externalApplicationManager = getExternalApplicationManager();
         if (externalApplicationManager.backendAvailable) {
             watch(visibleNodes, async (value, old) => {
@@ -493,6 +499,32 @@ export default defineComponent({
                     },
                 };
                 await externalApplicationManager.notifyAboutChange('connections_on_change', data);
+            });
+
+            watch(highlightedNodes, async (value, old) => {
+                if (!editorManager.notifyWhenChanged) return;
+                const newIds = Object.values(value).map((n) => n.id);
+                const oldIds = Object.values(old).map((n) => n.id);
+                const nodesSelected = [];
+                Object.values(value).forEach((node) => {
+                    if (!(oldIds.includes(node.id))) {
+                        nodesSelected.push(node.id);
+                    }
+                });
+                const nodesUnselected = [];
+                Object.values(old).forEach((node) => {
+                    if (!(newIds.includes(node.id))) {
+                        nodesUnselected.push(node.id);
+                    }
+                });
+                const data = {
+                    graph_id: graph.value.id,
+                    nodes: {
+                        selected: nodesSelected,
+                        unselected: nodesUnselected,
+                    },
+                };
+                await externalApplicationManager.notifyAboutChange('nodes_on_highlight', data);
             });
         }
 
