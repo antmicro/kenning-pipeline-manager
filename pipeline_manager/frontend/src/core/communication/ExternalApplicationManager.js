@@ -62,6 +62,15 @@ class ExternalApplicationManager {
 
     appCapabilities = {};
 
+    constructor() {
+        /**
+         * Assigning the ExternalApplicationManager instance to the EditorManager properties.
+         * This assignment bypasses the cycle problem if the ExternalApplicationManager was normally
+         * imported in the EditorManager.
+         */
+        this.editorManager.externalApplicationManager = this;
+    }
+
     /**
      * Function that fetches state of the connection and updates.
      * `this.externalApplicationConnected` property.

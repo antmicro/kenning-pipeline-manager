@@ -5,6 +5,7 @@
  */
 
 /* eslint-disable max-classes-per-file */
+
 import { stringify } from 'ajv';
 import Ajv2019 from 'ajv/dist/2019.js';
 import jsonMap from 'json-source-map';
@@ -128,6 +129,14 @@ export default class EditorManager {
     updatedMetadata = {};
 
     relatedGraphsStore = [];
+
+    /**
+     * 'externalApplicationManager' property is set when ExternalApplicationManager
+     * is initialized, in its constructor, to avoid the cycle problem if it were
+     * imported normally.
+     */
+
+    externalApplicationManager;
 
     constructor() {
         // Baklava's view registers subgraph input and output nodes
@@ -305,6 +314,13 @@ export default class EditorManager {
             } else {
                 this.relatedGraphsStore.forEach((g) => this.baklavaView.editor.registerGraph(g));
             }
+        }
+
+        if (this.externalApplicationManager) {
+            const spec = this.specification.currentSpecification;
+            await this.externalApplicationManager.notifyAboutChange('specification_on_change', {
+                specification: spec,
+            });
         }
 
         return { errors, warnings };
@@ -718,6 +734,13 @@ export default class EditorManager {
                 return { errors: validationErrors, warnings: [] };
             }
             this.specification.unresolvedSpecification.nodes.push(nodeSpecification);
+        }
+
+        if (this.externalApplicationManager) {
+            const spec = this.specification.unresolvedSpecification;
+            this.externalApplicationManager.notifyAboutChange('specification_on_change', {
+                specification: spec,
+            }).then();
         }
 
         return { errors: [], warnings: [] };

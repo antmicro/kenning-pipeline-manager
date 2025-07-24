@@ -231,6 +231,10 @@ class RPCMethodsOriginal(RPCMethodsBase):
     async def graph_on_change(self, **kwargs) -> Dict:
         return await self._redirect_changed("graph_change", **kwargs)
 
+    async def specification_on_change(self, **kwargs) -> Dict:
+        kwargs["specification"]["metadata"]["notifyWhenChanged"] = False
+        return await self._redirect_changed("specification_change", **kwargs)
+
     async def metadata_on_change(self, **kwargs) -> Dict:
         return await self._redirect_changed("metadata_change", **kwargs)
 

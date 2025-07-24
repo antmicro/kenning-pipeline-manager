@@ -551,6 +551,15 @@
                 "$ref": "common_types#/$defs/null_or_empty"
             }
         },
+        "specification_on_change": {
+            "description": "Request send when whole specification changed, e.g. when node type is modified",
+            "params": {
+                "$ref": "common_types#/$defs/specification_object"
+            },
+            "returns": {
+                "$ref": "common_types#/$defs/null_or_empty"
+            }
+        },
         "metadata_on_change": {
             "description": "Request send when metadata was changed",
             "params": {
