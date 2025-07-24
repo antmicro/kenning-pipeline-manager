@@ -242,7 +242,7 @@ Object.entries(props.node.inputs).forEach(([name, input]) => {
     if (name.startsWith('property_')) {
         let firstWatch = true;
         watch(input, async (value) => {
-            if (!externalApplicationManager.backendAvailable) {
+            if (!externalApplicationManager.isConnected()) {
                 firstWatch = true;
                 return;
             }
@@ -266,7 +266,7 @@ Object.entries(props.node.inputs).forEach(([name, input]) => {
 
 // Send message about changed position
 const notifyPositionChanged = (position) => {
-    if (!externalApplicationManager.backendAvailable) return;
+    if (!externalApplicationManager.isConnected()) return;
     externalApplicationManager.notifyAboutChange('position_on_change', {
         graph_id: props.node.graphInstance.id,
         node_id: props.node.id,

@@ -115,8 +115,8 @@ export default {
         paletteOpen() {
             return this.panels.palette.isOpen;
         },
-        backendStatusOpen() {
-            return this.panels.backendStatus.isOpen;
+        externalAppStatus() {
+            return this.panels.externalAppStatus.isOpen;
         },
         navbarItems() {
             const { navbarItems } = this.editorManager.baklavaView;
@@ -234,6 +234,10 @@ export default {
             connection, dataflow and specification
             */
             externalApplicationManager: getExternalApplicationManager(),
+            externalApp: {
+                available: false,
+                connected: false,
+            },
             activeNavbarItemsNames: [],
             saveConfiguration: saveGraphConfiguration,
             saveGraphConfiguration,
@@ -271,9 +275,9 @@ export default {
                     showTransform: '0px, 0px',
                     hideTransform: '-450px, 0px',
                 },
-                backendStatus: {
+                externalAppStatus: {
                     isOpen: false,
-                    class: '.backend-status',
+                    class: '.external-app-status',
                     iconRef: 'backend',
                     showTransform: '-89%, 0px',
                     hideTransform: '-89%, -180px',
@@ -496,7 +500,7 @@ export default {
         },
 
         async requestDataflowAction(actionItem) {
-            if (!this.externalApplicationManager.backendAvailable) return;
+            if (!this.externalApp.available) return;
             if (
                 this.isInProgress(actionItem.procedureName) &&
                 this.isStoppable(actionItem.procedureName)
@@ -515,7 +519,7 @@ export default {
         },
 
         async requestDataflowExport(prompt = true) {
-            if (!this.externalApplicationManager.backendAvailable) return;
+            if (!this.externalApp.available) return;
             const result = await this.externalApplicationManager.requestDataflowExport();
 
             if (result !== false) {
@@ -544,7 +548,7 @@ export default {
         },
 
         importDataflow() {
-            if (!this.externalApplicationManager.backendAvailable) return;
+            if (!this.externalApp.available) return;
             const file = document.getElementById('request-dataflow-button').files[0];
             if (!file) return;
 
@@ -677,10 +681,10 @@ export default {
             this.panels.fullscreen.isOpen = !fullscreen.isFullscreen;
         });
 
-        // Create connection on page load
-        if (this.externalApplicationManager.backendAvailable) {
-            this.externalApplicationManager.startStatusInterval();
-        }
+        this.externalApplicationManager.registerConnectionHook(() => {
+            this.externalApp.available = this.externalApplicationManager.isExternalAppAvailable();
+            this.externalApp.connected = this.externalApplicationManager.isConnected();
+        });
     },
 };
 </script>
@@ -810,8 +814,7 @@ export default {
                                     type="'button'"
                                     :eventFunction="createNewGraphCallback"
                                 />
-                                <!-- eslint-disable-next-line max-len -->
-                                <template v-if="this.externalApplicationManager.externalApplicationConnected">
+                                <template v-if="externalApp.connected">
                                     <hr />
                                     <DropdownItem
                                         text="Load file"
@@ -833,7 +836,7 @@ export default {
                             </template>
 
                             <template
-                                v-if="!this.externalApplicationManager.backendAvailable && !hideHud"
+                                v-if="!externalApp.available && !hideHud"
                             >
                                 <DropdownItem
                                     text="Load specification"
@@ -907,7 +910,7 @@ export default {
                         </div>
                     </div>
 
-                    <template v-if="this.externalApplicationManager.backendAvailable">
+                    <template v-if="externalApp.available">
                         <div
                             v-for="actionItem in navbarItems"
                             :key="actionItem.name"
@@ -1053,35 +1056,35 @@ export default {
                     <div
                         ref="backend"
                         :class="['hoverbox', mobileClasses]"
-                        v-if="this.externalApplicationManager.backendAvailable"
-                        @click="() => togglePanel(panels.backendStatus)"
-                        @pointerover="() => updateHoverInfo('backendStatus')"
-                        @pointerleave="() => resetHoverInfo('backendStatus')"
+                        v-if="externalApp.available"
+                        @click="() => togglePanel(panels.externalAppStatus)"
+                        @pointerover="() => updateHoverInfo('externalAppStatus')"
+                        @pointerleave="() => resetHoverInfo('externalAppStatus')"
                     >
                         <Backend
-                            v-if="this.externalApplicationManager.externalApplicationConnected"
+                            v-if="externalApp.connected"
                             color="connected"
                             class="small_svg"
-                            :active="backendStatusOpen"
-                            :hover="isHovered('backendStatus')"
+                            :active="externalAppStatus"
+                            :hover="isHovered('externalAppStatus')"
                         />
                         <Backend
                             v-else color="disconnected"
                             class="small_svg"
-                            :active="backendStatusOpen"
-                            :hover="isHovered('backendStatus')"
+                            :active="externalAppStatus"
+                            :hover="isHovered('externalAppStatus')"
                         />
                         <div :class="['tooltip', mobileClasses]">
-                            <span>Backend status</span>
+                            <span>External App status</span>
                         </div>
                         <div
-                            v-click-outside="(ev) => clickOutside(ev, panels.backendStatus)"
-                            class="backend-status"
+                            v-click-outside="(ev) => clickOutside(ev, panels.externalAppStatus)"
+                            class="external-app-status"
                         >
                             <div>
                                 <span>Client status:</span>
                                 <!-- eslint-disable-next-line max-len -->
-                                <span v-if="this.externalApplicationManager.externalApplicationConnected"
+                                <span v-if="externalApp.connected"
                                     class="connected"
                                     >Connected</span
                                 >
@@ -1292,11 +1295,11 @@ export default {
                 }
             }
 
-            & > .backend-status {
+            & > .external-app-status {
                 @extend .dropdown-wrapper;
                 width: 220px;
                 display: flex;
-                /* Hide backend panel and position it
+                /* Hide external app panel and position it
                   to right border of backend icon
                 */
                 transform: translate(-89%, -180px);

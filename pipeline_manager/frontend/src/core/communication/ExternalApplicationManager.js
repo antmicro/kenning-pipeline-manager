@@ -15,6 +15,7 @@ import runInfo from './runInformation';
 import NotificationHandler from '../notifications';
 import EditorManager, { loadJsonFromRemoteLocation } from '../EditorManager';
 import ExternalBackendApp from './externalApp/backend.ts';
+import ConnectionManager from './connectionManager.ts';
 
 // Default external application capabilities
 const defaultAppCapabilities = {};
@@ -64,20 +65,14 @@ function showVersionError(currentVersion, usedVersion) {
     );
 }
 
-const startTimeoutStatusInterval = 1500;
-
 class ExternalApplicationManager {
-    externalApplicationConnected = false;
-
     editorManager = EditorManager.getEditorManagerInstance();
-
-    idStatusInterval = null;
-
-    timeoutStatusInterval = startTimeoutStatusInterval;
 
     appCapabilities = {};
 
     externalApp = null;
+
+    connectionHook = null;
 
     constructor() {
         /**
@@ -86,10 +81,22 @@ class ExternalApplicationManager {
          * imported in the EditorManager.
          */
         this.editorManager.externalApplicationManager = this;
+
+        // eslint-disable-next-line no-param-reassign
+        const resetProgress = () => runInfo.forEach((itemInfo) => { itemInfo.inProgress = false; });
+        this.connectionManager = new ConnectionManager(
+            (externalApp) => this.initializeConnection(externalApp),
+            resetProgress,
+        );
+        this.connectionManager.poll();
     }
 
-    get backendAvailable() {
+    isExternalAppAvailable() {
         return this.externalApp !== null;
+    }
+
+    isConnected() {
+        return Array.from(this.connectionManager.connected.values()).some(Boolean);
     }
 
     /**
@@ -102,53 +109,6 @@ class ExternalApplicationManager {
     async request(method, params) {
         const { externalApp } = this;
         return jsonRPC.request(method, params, { externalApp });
-    }
-
-    /**
-     * Function that fetches state of the connection and updates.
-     * `this.externalApplicationConnected` property.
-     */
-    async updateConnectionStatus() {
-        try {
-            const response = await this.request('status_get');
-
-            // If the application was connected and the connection was lost, a warning is displayed.
-            if (!response.status.connected && this.externalApplicationConnected) {
-                NotificationHandler.terminalLog('warning', 'External application was disconnected');
-            }
-
-            // If external-app disconnects while running, the progress bar needs to be reset.
-            if (this.externalApplicationConnected !== response.status.connected) {
-                const progressBar = document.querySelector('.progress-bar');
-                progressBar.style.width = '0%';
-                runInfo.forEach((_v, k) => { runInfo.get(k).inProgress = false; });
-            }
-
-            this.externalApplicationConnected = response.status.connected;
-        } catch (error) {
-            this.externalApplicationConnected = false;
-        }
-    }
-
-    /**
-     * Event handler that asks the backend to open a TCP socket that can be connected to.
-     * If the external application did not connect the user is alerted with a feedback message.
-     * This function updates `this.externalApplicationConnected` property
-     *
-     * @returns {null | [string, string]} Null if the connection was successful, otherwise a tuple
-     * containing the toast type and the message.
-     */
-    async openTCP() {
-        try {
-            await this.request('external_app_connect');
-            this.externalApplicationConnected = true;
-            return null;
-        } catch (error) {
-            this.externalApplicationConnected = false;
-            const errorCode = error.code ?? JSONRPCCustomErrorCode.EXCEPTION_RAISED;
-            const messageType = (errorCode !== JSONRPCCustomErrorCode.NEWER_SESSION_AVAILABLE) ? 'warning' : 'info';
-            return [messageType, error.message];
-        }
     }
 
     /**
@@ -437,17 +397,13 @@ class ExternalApplicationManager {
      * @param changedProperties Params of the send request, should contain changed values.
      */
     async notifyAboutChange(method, changedProperties) {
-        if (
-            this.backendAvailable && this.externalApplicationConnected &&
-            this.editorManager.notifyWhenChanged
-        ) {
-            try {
-                await this.request(method, changedProperties);
-            } catch (error) {
-                NotificationHandler.terminalLog(
-                    'warning', 'Notifying about change failed', `${error.message} (method: ${method})`,
-                );
-            }
+        if (!this.isConnected() || !this.editorManager.notifyWhenChanged) return;
+        try {
+            await this.request(method, changedProperties);
+        } catch (error) {
+            NotificationHandler.terminalLog(
+                'warning', 'Notifying about change failed', `${error.message} (method: ${method})`,
+            );
         }
     }
 
@@ -458,44 +414,11 @@ class ExternalApplicationManager {
      * @param message Input provided for the terminal
      */
     async requestTerminalRead(terminalName, message) {
-        if (!(
-            this.backendAvailable && this.externalApplicationConnected
-        )) {
-            return;
-        }
+        if (!this.isConnected()) return;
         try {
             await this.request('terminal_read', { name: terminalName, message });
         } catch (error) {
             NotificationHandler.terminalLog('warning', 'Sending terminal input failed', error.message);
-        }
-    }
-
-    /**
-     * Function that is used by setInterval() to periodically check the status
-     * of the TCP connection. If the connection is not alive, then `initializeConnection`
-     * is invoked.
-     */
-    async checkConnectionStatus() {
-        while (this.interval) {
-            /* eslint-disable-next-line no-await-in-loop */
-            await this.updateConnectionStatus();
-            if (!this.externalApplicationConnected) {
-                runInfo.forEach((_v, k) => { runInfo.get(k).inProgress = false; });
-                /* eslint-disable-next-line no-await-in-loop */
-                await this.initializeConnection(false);
-            }
-            /* eslint-disable-next-line no-await-in-loop,no-promise-executor-return */
-            await new Promise((r) => setTimeout(r, this.timeoutStatusInterval));
-        }
-    }
-
-    /**
-     * Starts status checking.
-     */
-    startStatusInterval() {
-        if (this.idStatusInterval === null) {
-            this.interval = true;
-            this.idStatusInterval = this.checkConnectionStatus();
         }
     }
 
@@ -508,52 +431,34 @@ class ExternalApplicationManager {
      * If it is not then it opens a TCP port, wait for the application to connect and then
      * requests specification.
      *
-     * @param checkConnection True if should check connection status beforehand. Used to reduce
-     * the number of requests if the status of the connection is known.
+     * @param {import('./externalApp/base.ts').ExternalApp} externalApp
      */
-    async initializeConnection(checkConnection = true) {
-        if (checkConnection) {
-            await this.updateConnectionStatus();
-        }
+    async initializeConnection(_externalApp) {
+        NotificationHandler.terminalLog(
+            'info',
+            `External application connected successfully`,
+            undefined,
+        );
 
-        if (!this.externalApplicationConnected) {
-            do {
-                NotificationHandler.terminalLog(
-                    'info',
-                    `Trying to establish connection with external application`,
-                );
+        await Promise.all([
+            this.requestSpecification(),
+            this.requestAppCapabilities(),
+        ]);
 
-                /* eslint-disable-next-line no-await-in-loop */
-                const message = await this.openTCP();
-
-                if (message !== null) {
-                    /* eslint-disable-next-line no-await-in-loop,no-promise-executor-return */
-                    await new Promise((r) => setTimeout(r, this.timeoutStatusInterval));
-                } else {
-                    NotificationHandler.terminalLog(
-                        'info',
-                        `External application connected successfully`,
-                    );
-                }
-            } while (!this.externalApplicationConnected);
-            this.timeoutStatusInterval = startTimeoutStatusInterval;
-        }
-        if (this.externalApplicationConnected) {
-            await Promise.all([
-                this.requestSpecification(),
-                this.requestAppCapabilities(),
-            ]);
-        }
-        if (this.externalApplicationConnected) {
-            try {
-                await this.request('frontend_on_connect');
-            } catch (error) {
-                if (error.code !== JSONRPCErrorCode.MethodNotFound &&
-                    error.code !== JSONRPCCustomErrorCode.EXTERNAL_APPLICATION_NOT_CONNECTED) {
-                    NotificationHandler.terminalLog('error', error.message, error.data);
-                }
+        try {
+            await this.request('frontend_on_connect');
+        } catch (error) {
+            if (error.code !== JSONRPCErrorCode.MethodNotFound &&
+                error.code !== JSONRPCCustomErrorCode.EXTERNAL_APPLICATION_NOT_CONNECTED) {
+                NotificationHandler.terminalLog('error', error.message, error.data);
             }
         }
+
+        if (this.connectionHook !== null) this.connectionHook();
+    }
+
+    registerConnectionHook(connectionHook) {
+        this.connectionHook = connectionHook;
     }
 
     /**
@@ -563,6 +468,9 @@ class ExternalApplicationManager {
      */
     registerBackendApplication(url) {
         this.externalApp = new ExternalBackendApp(url, jsonRPC);
+        this.connectionManager.add(this.externalApp);
+
+        if (this.connectionHook !== null) this.connectionHook();
     }
 }
 

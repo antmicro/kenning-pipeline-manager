@@ -442,7 +442,7 @@ export default defineComponent({
         const externalApplicationManager = getExternalApplicationManager();
 
         watch(visibleNodes, async (value, old) => {
-            if (!externalApplicationManager.backendAvailable) return;
+            if (!externalApplicationManager.isConnected()) return;
             if (!editorManager.notifyWhenChanged) return;
             const newIds = Object.values(value).map((n) => n.id);
             const oldIds = Object.values(old).map((n) => n.id);
@@ -469,7 +469,7 @@ export default defineComponent({
         });
 
         watch(visibleConnections, async (value, old) => {
-            if (!externalApplicationManager.backendAvailable) return;
+            if (!externalApplicationManager.isConnected()) return;
             if (!editorManager.notifyWhenChanged) return;
             const newIds = Object.values(value).map((n) => n.id);
             const oldIds = Object.values(old).map((n) => n.id);
@@ -503,7 +503,7 @@ export default defineComponent({
         });
 
         watch(highlightedNodes, async (value, old) => {
-            if (!externalApplicationManager.backendAvailable) return;
+            if (!externalApplicationManager.isConnected()) return;
             if (!editorManager.notifyWhenChanged) return;
             const newIds = Object.values(value).map((n) => n.id);
             const oldIds = Object.values(old).map((n) => n.id);
