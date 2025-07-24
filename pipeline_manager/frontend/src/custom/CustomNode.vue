@@ -422,7 +422,8 @@ const onContextMenuTitleClick = async (action) => {
             if (!graph.value.selectedNodes.includes(props.node)) {
                 graph.value.selectedNodes.push(props.node);
             }
-            graph.value.selectedNodes.forEach(removeNode);
+            graph.value.selectedNodes.forEach((n) => removeNode(n));
+            graph.value.selectedNodes = [];
             commitTransaction();
             break;
         case 'rename':
