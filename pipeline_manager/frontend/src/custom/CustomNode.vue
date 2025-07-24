@@ -239,9 +239,13 @@ const editorManager = EditorManager.getEditorManagerInstance();
 const externalApplicationManager = getExternalApplicationManager();
 // Watch properties
 Object.entries(props.node.inputs).forEach(([name, input]) => {
-    if (externalApplicationManager.backendAvailable && name.startsWith('property_')) {
+    if (name.startsWith('property_')) {
         let firstWatch = true;
         watch(input, async (value) => {
+            if (!externalApplicationManager.backendAvailable) {
+                firstWatch = true;
+                return;
+            }
             if (firstWatch || !editorManager.notifyWhenChanged) {
                 firstWatch = false;
                 return;
@@ -262,6 +266,7 @@ Object.entries(props.node.inputs).forEach(([name, input]) => {
 
 // Send message about changed position
 const notifyPositionChanged = (position) => {
+    if (!externalApplicationManager.backendAvailable) return;
     externalApplicationManager.notifyAboutChange('position_on_change', {
         graph_id: props.node.graphInstance.id,
         node_id: props.node.id,
@@ -272,19 +277,7 @@ const notifyPositionChanged = (position) => {
     });
 };
 // Create watcher for position
-const startPositionWatcher = (position) => watch(position, (value) => {
-    if (!editorManager.notifyWhenChanged) return;
-    notifyPositionChanged(value);
-});
-if (externalApplicationManager.backendAvailable) {
-    let stopPositionWatcher = startPositionWatcher(props.node.position);
-    // Restart watcher when position is replaced
-    watch(() => props.node.position, (value) => {
-        stopPositionWatcher();
-        notifyPositionChanged(value);
-        stopPositionWatcher = startPositionWatcher(value);
-    });
-}
+watch(props.node.position, notifyPositionChanged);
 
 const focusOnRename = () => {
     renameField.value.focus();
