@@ -742,7 +742,14 @@ export default defineComponent({
                 const resolve = () => props.viewModel.editor.events.setLoad.emit(false);
 
                 if (data.nodes || data.include) { // Load Specification
-                    await updateEditorSpecification(data);
+                    if (externalApplicationManager.backendAvailable) {
+                        NotificationHandler.showToast(
+                            'warning',
+                            'Specification is managed by an external application.',
+                        );
+                    } else {
+                        await updateEditorSpecification(data);
+                    }
                     resolve();
                     return;
                 }
