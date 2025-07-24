@@ -14,6 +14,7 @@ import jsonRPC from './rpcCommunication';
 import runInfo from './runInformation';
 import NotificationHandler from '../notifications';
 import EditorManager, { loadJsonFromRemoteLocation } from '../EditorManager';
+import ExternalBackendApp from './externalApp/backend.ts';
 
 // Default external application capabilities
 const defaultAppCapabilities = {};
@@ -68,8 +69,6 @@ const startTimeoutStatusInterval = 1500;
 class ExternalApplicationManager {
     externalApplicationConnected = false;
 
-    backendAvailable = backendApiUrl !== null;
-
     editorManager = EditorManager.getEditorManagerInstance();
 
     idStatusInterval = null;
@@ -77,6 +76,8 @@ class ExternalApplicationManager {
     timeoutStatusInterval = startTimeoutStatusInterval;
 
     appCapabilities = {};
+
+    externalApp = null;
 
     constructor() {
         /**
@@ -87,13 +88,29 @@ class ExternalApplicationManager {
         this.editorManager.externalApplicationManager = this;
     }
 
+    get backendAvailable() {
+        return this.externalApp !== null;
+    }
+
+    /**
+     * Wrap the RPC request with the current application.
+     *
+     * @param {string} method - API endpoint.
+     * @param {any} params - Parameters for the given API endpoint.
+     * @returns RPC response.
+     */
+    async request(method, params) {
+        const { externalApp } = this;
+        return jsonRPC.request(method, params, { externalApp });
+    }
+
     /**
      * Function that fetches state of the connection and updates.
      * `this.externalApplicationConnected` property.
      */
     async updateConnectionStatus() {
         try {
-            const response = await jsonRPC.request('status_get');
+            const response = await this.request('status_get');
 
             // If the application was connected and the connection was lost, a warning is displayed.
             if (!response.status.connected && this.externalApplicationConnected) {
@@ -123,7 +140,7 @@ class ExternalApplicationManager {
      */
     async openTCP() {
         try {
-            await jsonRPC.request('external_app_connect');
+            await this.request('external_app_connect');
             this.externalApplicationConnected = true;
             return null;
         } catch (error) {
@@ -142,7 +159,7 @@ class ExternalApplicationManager {
     async requestSpecification() {
         let message = 'Unknown error';
         try {
-            const data = await jsonRPC.request('specification_get');
+            const data = await this.request('specification_get');
 
             if (data.type === PMMessageType.OK) {
                 const specification = data.content;
@@ -254,7 +271,7 @@ class ExternalApplicationManager {
     */
     async requestAppCapabilities() {
         try {
-            const appCapabilities = await jsonRPC.request('app_capabilities_get');
+            const appCapabilities = await this.request('app_capabilities_get');
             this.appCapabilities = { ...defaultAppCapabilities, ...appCapabilities };
         } catch (error) {
             this.appCapabilities = { ...defaultAppCapabilities };
@@ -271,7 +288,7 @@ class ExternalApplicationManager {
 
         let data;
         try {
-            data = await jsonRPC.request('dataflow_export', { dataflow });
+            data = await this.request('dataflow_export', { dataflow });
         } catch (error) {
             // The connection was closed.
             data = error.message;
@@ -318,9 +335,9 @@ class ExternalApplicationManager {
         let data;
         try {
             if (validatedProcedureName.startsWith('dataflow_')) {
-                data = await jsonRPC.request(procedureName, { dataflow });
+                data = await this.request(procedureName, { dataflow });
             } else {
-                data = await jsonRPC.request(validatedProcedureName);
+                data = await this.request(validatedProcedureName);
             }
         } catch (error) {
             // The connection was closed
@@ -348,7 +365,7 @@ class ExternalApplicationManager {
         }
 
         try {
-            const response = await jsonRPC.request('dataflow_stop', { method: procedureName });
+            const response = await this.request('dataflow_stop', { method: procedureName });
             handleExternalAppResponse(response);
         } catch (error) {
             NotificationHandler.terminalLog('error', error.message);
@@ -390,7 +407,7 @@ class ExternalApplicationManager {
         }
 
         try {
-            const data = await jsonRPC.request('dataflow_import', { external_application_dataflow: dataflow, mime: file.type, base64: !encoding });
+            const data = await this.request('dataflow_import', { external_application_dataflow: dataflow, mime: file.type, base64: !encoding });
             if (data.type === PMMessageType.OK) {
                 const { errors, warnings } = await this.editorManager.loadDataflow(data.content);
                 if (Array.isArray(errors) && errors.length) {
@@ -425,7 +442,7 @@ class ExternalApplicationManager {
             this.editorManager.notifyWhenChanged
         ) {
             try {
-                await jsonRPC.request(method, changedProperties);
+                await this.request(method, changedProperties);
             } catch (error) {
                 NotificationHandler.terminalLog(
                     'warning', 'Notifying about change failed', `${error.message} (method: ${method})`,
@@ -447,7 +464,7 @@ class ExternalApplicationManager {
             return;
         }
         try {
-            await jsonRPC.request('terminal_read', { name: terminalName, message });
+            await this.request('terminal_read', { name: terminalName, message });
         } catch (error) {
             NotificationHandler.terminalLog('warning', 'Sending terminal input failed', error.message);
         }
@@ -529,7 +546,7 @@ class ExternalApplicationManager {
         }
         if (this.externalApplicationConnected) {
             try {
-                await jsonRPC.request('frontend_on_connect');
+                await this.request('frontend_on_connect');
             } catch (error) {
                 if (error.code !== JSONRPCErrorCode.MethodNotFound &&
                     error.code !== JSONRPCCustomErrorCode.EXTERNAL_APPLICATION_NOT_CONNECTED) {
@@ -538,11 +555,23 @@ class ExternalApplicationManager {
             }
         }
     }
+
+    /**
+     * Registers external backend application.
+     *
+     * @param {string} url - Backend URL.
+     */
+    registerBackendApplication(url) {
+        this.externalApp = new ExternalBackendApp(url, jsonRPC);
+    }
 }
 
 let externalApplicationManager;
 
 export default function getExternalApplicationManager() {
-    if (!externalApplicationManager) externalApplicationManager = new ExternalApplicationManager();
+    if (!externalApplicationManager) {
+        externalApplicationManager = new ExternalApplicationManager();
+        if (backendApiUrl) externalApplicationManager.registerBackendApplication(backendApiUrl);
+    }
     return externalApplicationManager;
 }

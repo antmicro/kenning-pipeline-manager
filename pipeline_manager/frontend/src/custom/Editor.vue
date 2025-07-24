@@ -95,7 +95,6 @@ import { defineComponent, ref, computed, watch, onMounted } from 'vue';
 import fuzzysort from 'fuzzysort';
 import { BaklavaEvent } from '@baklavajs/events';
 import { isJSONRPCRequest, JSONRPC } from 'json-rpc-2.0';
-import { v4 as uuidv4 } from 'uuid';
 import usePanZoom from './panZoom';
 
 import CustomNode from './CustomNode.vue';
@@ -675,7 +674,7 @@ export default defineComponent({
                 // TODO: introduce mechanism for checking event.origin against allowed origins
                 const request = {
                     jsonrpc: JSONRPC,
-                    id: uuidv4(),
+                    id: jsonRPC.client.createID(),
                     ...(event.data ?? {}),
                 };
 
@@ -685,7 +684,9 @@ export default defineComponent({
 
                 const response = event.data.method in frontendEndpoints
                     ? (await jsonRPC.server.receive(request))
-                    : (await jsonRPC.requestAdvanced(request));
+                    : (await jsonRPC.requestAdvanced(request, {
+                        externalApp: externalApplicationManager.externalApp,
+                    }));
 
                 if (response) event.source.postMessage(JSON.parse(JSON.stringify(response)));
             });

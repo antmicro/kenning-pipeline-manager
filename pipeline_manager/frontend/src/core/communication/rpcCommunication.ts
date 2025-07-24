@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// eslint-disable-next-line max-classes-per-file
 import {
     JSONRPCServerAndClient,
     JSONRPCServer,
@@ -15,34 +16,29 @@ import {
     createJSONRPCErrorResponse,
 } from 'json-rpc-2.0';
 import Ajv2019 from 'ajv/dist/2019.js';
-import { io, Socket } from 'socket.io-client';
 import NotificationHandler from '../notifications';
-import { backendApiUrl } from '../utils';
+import { PMMessageType } from '../utils';
 import commonTypesSchema from '../../../../resources/api_specification/common_types.json' with { type: 'json' };
 import specificationSchema from '../../../../resources/api_specification/specification.json' with { type: 'json' };
 
 // eslint-disable-next-line import/no-cycle
 import * as remoteProcedures from './remoteProcedures';
+import { ClientParams, Endpoints, SpecType } from './utils';
 
-const customMethodRegex = /^custom_.*$/;
-const customMethodReplace = 'dataflow_run';
-class CustomJSONRPCServerAndClient extends JSONRPCServerAndClient {
+class CustomJSONRPCServerAndClient extends JSONRPCServerAndClient<void, ClientParams> {
     customMethodRegex: RegExp | null = null;
 
     customMethodReplace: string | null = null;
 }
 
-type SpecType = {
-    params: object,
-    returns: object | null, // null when method is a notification
-};
+const customMethodRegex = /^custom_.*$/;
+const customMethodReplace = 'dataflow_run';
+
 const ajv = new Ajv2019({
     schemas: [commonTypesSchema],
     allowUnionTypes: true,
     strict: true,
 });
-
-type Endpoints = { [key: string]: SpecType };
 
 export const frontendEndpoints: Endpoints = specificationSchema.frontend_endpoints;
 export const backendEndpoints: Endpoints = specificationSchema.backend_endpoints;
@@ -102,30 +98,43 @@ const validateServerRequestResponse = async (
 let jsonRPCID = 1;
 // eslint-disable-next-line no-plusplus
 const createID = () => jsonRPCID++;
-const commonHeaders = {
-    'Access-Control-Allow-Origin': 'http://localhost',
-    'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
-};
 const requestSchema = new Map<number | string, SpecType>();
 
-const MAX_MESSAGE_LENGTH = 256 * 1024;
-let socket: Socket;
 let jsonRPCServer: CustomJSONRPCServerAndClient;
+
+const validateClientResponse = (response: JSONRPCResponse) => {
+    if (response.result && response.id && requestSchema.get(response.id)?.returns) {
+        const validResponse = ajv.validate(
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            requestSchema.get(response.id)!.returns!,
+            response.result,
+        );
+        if (!validResponse) {
+            return createJSONRPCErrorResponse(
+                response.id, PMMessageType.ERROR, 'Response does not match specification',
+            );
+        }
+    }
+    return response;
+};
+
+class CustomJSONRPCClient<C> extends JSONRPCClient<C> {
+    receive(responses: JSONRPCResponse | JSONRPCResponse[]): void {
+        // eslint-disable-next-line no-param-reassign
+        responses = Array.isArray(responses) ? responses : [responses];
+        super.receive(responses.map(validateClientResponse));
+    }
+}
+
 /**
  * Function that creates JSON-RPC client-server and defines how messages are send and received.
  */
 function createServer() {
-    // Initialize SocketIO
-    if (backendApiUrl) {
-        socket = io(backendApiUrl, {
-            extraHeaders: commonHeaders,
-        });
-    }
     // Create JSON-RPC server
-    jsonRPCServer = new JSONRPCServerAndClient(
+    jsonRPCServer = new CustomJSONRPCServerAndClient(
         new JSONRPCServer(),
-        new JSONRPCClient(async (request: JSONRPCRequest) => {
-            if (!backendApiUrl) {
+        new CustomJSONRPCClient(async (request: JSONRPCRequest, { externalApp }) => {
+            if (!externalApp) {
                 throw new Error('Missing backend.');
             }
             const method = (customMethodRegex.test(request.method)) ?
@@ -133,11 +142,6 @@ function createServer() {
             // request validation
             if (!(method in externalEndpoints) && !(method in backendEndpoints)) {
                 throw new Error('Requested method not known');
-            }
-            if (socket.disconnected) {
-                return Promise.reject(
-                    new Error('WebSocket is disconnected. Make sure the communication server is available.'),
-                );
             }
 
             const endpoints = (method in externalEndpoints) ?
@@ -151,30 +155,14 @@ function createServer() {
 
             // sending request
             const endpoint = (endpoints === backendEndpoints) ? 'backend-api' : 'external-api';
-            const stringify = JSON.stringify(request);
             try {
-                // Emit request in chunks
-                if (stringify.length > MAX_MESSAGE_LENGTH) {
-                    const messageID = request.id ?? crypto.randomUUID();
-                    for (let i = 0; i < stringify.length; i += MAX_MESSAGE_LENGTH) {
-                        socket.emit(endpoint, {
-                            id: messageID,
-                            chunk: stringify.substring(
-                                i, Math.min(i + MAX_MESSAGE_LENGTH, stringify.length),
-                            ),
-                            end: i + MAX_MESSAGE_LENGTH >= stringify.length,
-                        });
-                    }
-                // Emit whole request
-                } else {
-                    socket.emit(endpoint, request);
-                }
+                externalApp.request(request, endpoint);
             } catch (exception) {
                 return Promise.reject(exception);
             }
             return Promise.resolve();
         }, createID),
-    ) as CustomJSONRPCServerAndClient;
+    );
     // Add middlewares
     jsonRPCServer.server.applyMiddleware(
         validateServerRequestResponse as JSONRPCServerMiddleware<void>);
@@ -186,45 +174,6 @@ function createServer() {
         }
     });
 
-    // Define SocketIO events
-    socket?.on('connect', () => NotificationHandler.terminalLog('info', 'Initialized connection with communication server', null));
-    socket?.on('disconnect', () => {
-        NotificationHandler.terminalLog('warning', 'Connection with communication server disrupted', null);
-        jsonRPCServer.rejectAllPendingRequests('WebSocket disconnected');
-    });
-
-    socket?.on('api', async (data: JSONRPCRequest) => {
-        const response = await jsonRPCServer.server.receive(data);
-        if (response) {
-            try {
-                const ack = await socket.emitWithAck('external-api', response);
-                if (ack !== undefined && !ack) {
-                    NotificationHandler.terminalLog('error', 'Response to external app was not send', null);
-                }
-            } catch (error) {
-                NotificationHandler.terminalLog('error', `Response to ${data.method} request cannot be send`, error);
-            }
-        }
-    });
-    socket?.on('api-response', (response: JSONRPCResponse) => {
-        // response validation
-        if (response.result && response.id && requestSchema.get(response.id)?.returns) {
-            const validResponse = ajv.validate(
-                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                requestSchema.get(response.id)!.returns!,
-                response.result,
-            );
-            if (!validResponse) {
-                jsonRPCServer.client.receive(
-                    createJSONRPCErrorResponse(
-                        response.id, 1, 'Response does not match specification',
-                    ),
-                );
-                return;
-            }
-        }
-        jsonRPCServer.client.receive(response);
-    });
     jsonRPCServer.customMethodRegex = customMethodRegex;
     jsonRPCServer.customMethodReplace = customMethodReplace;
 }
