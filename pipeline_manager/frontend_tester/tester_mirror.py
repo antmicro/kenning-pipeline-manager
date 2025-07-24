@@ -241,6 +241,9 @@ class RPCMethodsOriginal(RPCMethodsBase):
     async def viewport_on_center(self) -> Dict:
         return await self._redirect_changed("viewport_center")
 
+    async def nodes_on_highlight(self, **kwargs) -> Dict:
+        return await self._redirect_changed("nodes_highlight", **kwargs)
+
 
 def main(argv):  # noqa: D103
     parser = argparse.ArgumentParser(argv[0])
