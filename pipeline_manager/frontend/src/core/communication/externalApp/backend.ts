@@ -1,7 +1,8 @@
 import {
-    JSONRPCRequest, JSONRPCResponse, JSONRPCServerAndClient,
+    JSONRPCError, JSONRPCRequest, JSONRPCResponse, JSONRPCServerAndClient,
 } from 'json-rpc-2.0';
 import { io, Socket } from 'socket.io-client';
+import { JSONRPCCustomErrorCode } from '../../utils';
 import ExternalApp, { EndpointType } from './base';
 import { ClientParams } from '../utils';
 import NotificationHandler from '../../notifications';
@@ -42,6 +43,28 @@ export default class ExternalBackendApp implements ExternalApp {
             }
         });
         this.socket.on('api-response', (response: JSONRPCResponse) => { this.jsonRPC.client.receive(response); });
+    }
+
+    public async isConnected() {
+        try {
+            const { status: { connected } } = await this.jsonRPC.request('status_get', undefined, { externalApp: this });
+            return connected;
+        } catch {
+            return false;
+        }
+    }
+
+    public async onConnect() {
+        try {
+            await this.jsonRPC.request('external_app_connect', undefined, { externalApp: this });
+            return true;
+        } catch (unknownError) {
+            const error = unknownError as JSONRPCError;
+            const errorCode = error.code ?? JSONRPCCustomErrorCode.EXCEPTION_RAISED;
+            const messageType = (errorCode !== JSONRPCCustomErrorCode.NEWER_SESSION_AVAILABLE) ? 'warning' : 'info';
+            NotificationHandler.terminalLog(messageType, error.message, undefined);
+            return false;
+        }
     }
 
     public request(data: JSONRPCRequest, endpoint: EndpointType) {
