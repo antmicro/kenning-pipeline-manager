@@ -156,7 +156,7 @@ function createServer() {
             // sending request
             const endpoint = (endpoints === backendEndpoints) ? 'backend-api' : 'external-api';
             try {
-                externalApp.request(request, endpoint);
+                externalApp.request(JSON.parse(JSON.stringify(request)), endpoint);
             } catch (exception) {
                 return Promise.reject(exception);
             }

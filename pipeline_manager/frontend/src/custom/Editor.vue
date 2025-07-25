@@ -94,7 +94,7 @@ import { EditorComponent, useGraph } from '@baklavajs/renderer-vue';
 import { defineComponent, ref, computed, watch, onMounted } from 'vue';
 import fuzzysort from 'fuzzysort';
 import { BaklavaEvent } from '@baklavajs/events';
-import { isJSONRPCRequest, JSONRPC } from 'json-rpc-2.0';
+import { isJSONRPCRequest, isJSONRPCResponse, JSONRPC } from 'json-rpc-2.0';
 import usePanZoom from './panZoom';
 
 import CustomNode from './CustomNode.vue';
@@ -672,19 +672,24 @@ export default defineComponent({
             // Load specification and/or dataflow delivered via window.postMessage
             window.addEventListener('message', async (event) => {
                 // TODO: introduce mechanism for checking event.origin against allowed origins
-                const request = {
-                    jsonrpc: JSONRPC,
-                    id: jsonRPC.client.createID(),
-                    ...(event.data ?? {}),
-                };
+                let data = event.data ?? {};
 
-                if (!isJSONRPCRequest(request)) {
+                if (isJSONRPCResponse(data)) {
+                    if (event.source === window) return;
+                    jsonRPC.client.receive(data);
                     return;
                 }
 
-                const response = event.data.method in frontendEndpoints
-                    ? (await jsonRPC.server.receive(request))
-                    : (await jsonRPC.requestAdvanced(request, {
+                data = { jsonrpc: JSONRPC, id: jsonRPC.client.createID(), ...data };
+                if (!isJSONRPCRequest(data)) return;
+
+                let response = data.method === 'register_external_frontend'
+                    ? externalApplicationManager.registerFrontendApplication(event.source, data)
+                    : null;
+
+                response ??= event.data.method in frontendEndpoints
+                    ? (await jsonRPC.server.receive(data))
+                    : (await jsonRPC.requestAdvanced(data, {
                         externalApp: externalApplicationManager.externalApp,
                     }));
 

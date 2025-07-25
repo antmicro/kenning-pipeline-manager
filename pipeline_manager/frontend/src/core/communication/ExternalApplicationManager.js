@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { JSONRPCErrorCode } from 'json-rpc-2.0';
+import { createJSONRPCErrorResponse, createJSONRPCSuccessResponse, JSONRPCErrorCode } from 'json-rpc-2.0';
 import { charset } from 'mime-types';
 import { nextTick } from 'vue';
 import { backendApiUrl, PMMessageType, JSONRPCCustomErrorCode } from '../utils';
@@ -16,6 +16,7 @@ import NotificationHandler from '../notifications';
 import EditorManager, { loadJsonFromRemoteLocation } from '../EditorManager';
 import ExternalBackendApp from './externalApp/backend.ts';
 import ConnectionManager from './connectionManager.ts';
+import ExternalFrontendApp from './externalApp/frontend.ts';
 
 // Default external application capabilities
 const defaultAppCapabilities = {};
@@ -462,15 +463,52 @@ class ExternalApplicationManager {
     }
 
     /**
+     * Registers external application and calls connection hook, if exists.
+     *
+     * @param {import('./externalApp/base.ts').ExternalApp} externalApp - External application.
+     */
+    registerApplication(externalApp) {
+        this.externalApp = externalApp;
+        this.connectionManager.add(externalApp);
+
+        if (this.connectionHook !== null) this.connectionHook();
+    }
+
+    /**
      * Registers external backend application.
      *
      * @param {string} url - Backend URL.
      */
     registerBackendApplication(url) {
-        this.externalApp = new ExternalBackendApp(url, jsonRPC);
-        this.connectionManager.add(this.externalApp);
+        this.registerApplication(new ExternalBackendApp(url, jsonRPC));
+    }
 
-        if (this.connectionHook !== null) this.connectionHook();
+    /**
+     * Registers external frontend.
+     *
+     * @param {Window} sourceWindow - Wrapping window.
+     * @param {import('json-rpc-2.0').JSONRPCRequest} request - Wrapping window.
+     * @returns {import('json-rpc-2.0').JSONRPCResponse} Response with success or error message.
+     */
+    registerFrontendApplication(sourceWindow, request) {
+        const logAndRespond = (msgType, msg) => {
+            const [logType, response] = {
+                [PMMessageType.ERROR]: ['error', createJSONRPCErrorResponse(request.id, msgType, msg)],
+                [PMMessageType.WARNING]: ['warning', createJSONRPCSuccessResponse(request.id, msg)],
+                [PMMessageType.OK]: ['info', createJSONRPCSuccessResponse(request.id, msg)],
+            }[msgType];
+            NotificationHandler.terminalLog(logType, msg);
+            return response;
+        };
+
+        if (sourceWindow === window) return logAndRespond(PMMessageType.ERROR, 'External frontend cannot be a Pipeline Manager itself');
+        if (this.externalApp !== null) {
+            this.connectionManager.remove(this.externalApp);
+            logAndRespond(PMMessageType.WARNING, 'Replacing current external application.');
+        }
+
+        this.registerApplication(new ExternalFrontendApp(sourceWindow));
+        return logAndRespond(PMMessageType.OK, 'Registered external frontend successfully');
     }
 }
 
