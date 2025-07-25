@@ -314,6 +314,15 @@
             "returns": {
                 "$ref": "common_types#/$defs/null_or_empty"
             }
+        },
+        "register_external_frontend": {
+            "description": "Register external frontend in the Pipeline Manager frontend, available only through 'postMessage' interface",
+            "params": {
+                "$ref": "common_types#/$defs/null_or_empty"
+            },
+            "returns": {
+                "$ref": "common_types#/$defs/null_or_empty"
+            }
         }
     },
     "backend_endpoints": {

@@ -468,3 +468,7 @@ export async function nodes_highlight(
         }
     });
 }
+
+export function register_external_frontend() {
+    throw new Error('Frontend registering available only through "postMessage" interface.');
+}
