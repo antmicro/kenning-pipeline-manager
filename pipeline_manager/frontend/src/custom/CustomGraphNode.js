@@ -257,7 +257,7 @@ export default function CreateCustomGraphNodeType(template, graphNode) {
             });
 
             Object.values(currentInterfaces).forEach((nodeIntf) => {
-                updateInterfacePosition(this, nodeIntf, nodeIntf.side);
+                updateInterfacePosition(this, nodeIntf, nodeIntf.side, undefined, false, false);
             });
         }
 

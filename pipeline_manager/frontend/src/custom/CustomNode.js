@@ -53,9 +53,12 @@ export function updateInterfacePosition(
     newSide,
     newSidePosition = undefined,
     swap = false,
+    editNode = true,
 ) {
-    const { graph } = useGraph();
-    graph.value.editNode(node);
+    if (editNode) {
+        const { graph } = useGraph();
+        graph.value.editNode(node);
+    }
 
     const oldSidePosition = intf.sidePosition;
 
