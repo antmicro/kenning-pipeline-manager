@@ -18,8 +18,21 @@ from typing_extensions import override
 
 from pipeline_manager.dataflow_builder.data_structures import (
     Direction,
+    DuplicateExternalNamesError,
     Infinity,
+    InterfaceCountError,
+    InvalidInterfaceTypeError,
+    InvalidPropertyTypeError,
+    InvalidPropertyValueError,
+    MissingInterfaceAttributeError,
+    MissingNodeAttributeError,
+    MissingPropertyError,
+    MultipleInterfacesSelectedError,
+    NoInterfaceMatchedError,
+    NotDynamicInterfaceError,
+    OutOfSpecificationNodeError,
     Side,
+    SpecificationWithoutNodesError,
 )
 from pipeline_manager.specification_builder import SpecificationBuilder
 
@@ -110,7 +123,7 @@ class Property(JsonConvertible):
         # In a specification, property has `default`,
         # but, in a dataflow, it has either `values` or `value`.
         if value is None and default is None and values is None:
-            raise ValueError(
+            raise InvalidPropertyValueError(
                 "Missing the value of a property. "
                 "Provide either `value`, `values` or `default`."
             )
@@ -169,7 +182,7 @@ class Property(JsonConvertible):
             value = value[2:]
         for char in value:
             if char not in string.hexdigits:
-                raise ValueError(
+                raise InvalidPropertyValueError(
                     "Minimum should be either a decimal or hexadecimal number."
                     f" Found an illegal character `{char}`."
                 )
@@ -179,7 +192,7 @@ class Property(JsonConvertible):
         property_name: str, value: str, allowed: List[str]
     ) -> None:
         if value not in allowed:
-            raise ValueError(
+            raise InvalidPropertyValueError(
                 f"The {property_name} of property is `{value}`, "
                 f"but should be one of: {', '.join(allowed)}."
             )
@@ -279,7 +292,7 @@ class Node(JsonConvertible):
 
         Raises
         ------
-        KeyError
+        MissingPropertyError
             Raised if property with the supplied `property_named`
             was not found.
         """
@@ -290,7 +303,9 @@ class Node(JsonConvertible):
             if property.name == property_name:
                 property.value = property_value
                 return
-        raise KeyError(f"Property with name `{property_name}` was not found.")
+        raise MissingPropertyError(
+            f"Property with name `{property_name}` was not found."
+        )
 
     def get_property(self, property_name: str) -> Any:
         """
@@ -308,13 +323,15 @@ class Node(JsonConvertible):
 
         Raises
         ------
-        KeyError
+        MissingPropertyError
             Raised if the supplied name is not associated with any property.
         """
         for property in self.properties:
             if property.name == property_name:
                 return property.value
-        raise KeyError(f"Property with name `{property_name}` was not found.")
+        raise MissingPropertyError(
+            f"Property with name `{property_name}` was not found."
+        )
 
     def __init__(
         self,
@@ -341,11 +358,22 @@ class Node(JsonConvertible):
 
         Raises
         ------
-        ValueError
-            Raised if:
-            - the specification does not define any nodes,
-            - illegal parameter was passed via `kwargs`.
-              Allowed values include all attributes of `Node` class.
+        SpecificationWithoutNodesError
+            Raised if the specification does not define any nodes.
+        OutOfSpecificationNodeError
+            Raised if a name of the node
+            is absent from the specification.
+        MissingNodeAttributeError
+            Raised if an illegal parameter was passed via `kwargs`.
+            Allowed values include all attributes of `Node` class.
+        InvalidPropertyTypeError
+            Raised if either the specification or kwargs contain
+            an invalid type as a property definition. Allowed types:
+            `Property`, `dict`.
+        InvalidInterfaceTypeError
+            Raised if either the specification or kwargs contain
+            an invalid type as a interface definition. Allowed types:
+            `Interface`, `dict`.
         """
         node_in_specification = False
         self._specification_builder = specification_builder
@@ -353,7 +381,7 @@ class Node(JsonConvertible):
             sort_spec=False
         )
         if not nodes_in_specification:
-            raise ValueError(
+            raise SpecificationWithoutNodesError(
                 "The provided specification has no nodes defined. "
                 "Possibly the `nodes` key is missing. "
             )
@@ -368,7 +396,7 @@ class Node(JsonConvertible):
 
         if not node_in_specification and not for_subgraph_node:
             node_name = kwargs["name"]
-            raise ValueError(
+            raise OutOfSpecificationNodeError(
                 f"Illegal name of the node `{node_name}`, "
                 "which was not defined in the specification. "
             )
@@ -379,7 +407,7 @@ class Node(JsonConvertible):
 
         for key, value in kwargs.items():
             if key not in Node.__annotations__.keys():
-                raise KeyError(
+                raise MissingNodeAttributeError(
                     f"There is no attribute `{key}` defined in Node."
                 )
 
@@ -395,7 +423,7 @@ class Node(JsonConvertible):
                     elif isinstance(property_item, Property):
                         properties.append(property_item)
                     else:
-                        raise TypeError(
+                        raise InvalidPropertyTypeError(
                             (
                                 "All properties must be either dicts or"
                                 " Property instances. Received: "
@@ -421,7 +449,7 @@ class Node(JsonConvertible):
                     elif isinstance(interface, Interface):
                         interfaces.append(interface)
                     else:
-                        raise TypeError(
+                        raise InvalidInterfaceTypeError(
                             (
                                 "All interfaces must be either dicts or"
                                 " Interface instances. Received: "
@@ -504,7 +532,7 @@ class Node(JsonConvertible):
         ]
         unique_external_names = set(external_names)
         if len(external_names) != len(unique_external_names):
-            raise RuntimeError(
+            raise DuplicateExternalNamesError(
                 "External names have to be unique, however, the following list"
                 " of `external_name`s contain repetitions: "
                 f"{', '.join(external_names)}."
@@ -534,10 +562,11 @@ class Node(JsonConvertible):
 
         Raises
         ------
-        ValueError
-            Raised if kwargs contains a definition of a non-dynamic interface
-            (`dynamic` property is missing) or direction of an interface
-            cannot be found in its specification.
+        MissingInterfaceAttributeError
+            Raised if kwargs contain a definition of a non-dynamic
+            interface (`dynamic` property is missing) or
+            the direction of an interface cannot be found
+            in its specification.
         """
         interface_definition = kwargs
         if not hasattr(self, "properties"):
@@ -555,14 +584,16 @@ class Node(JsonConvertible):
             if interface_spec["name"] == interface_name
         ]
         if "dynamic" not in interface_specification:
-            raise ValueError(
+            raise MissingInterfaceAttributeError(
                 "A missing property `dynamic` in an interface assumed to be "
                 f"dynamic. Node name: `{interface_name}`."
             )
         dynamic = interface_specification["dynamic"]
 
         if "direction" not in interface_specification:
-            raise ValueError("A dynamic interface has to have a direction.")
+            raise MissingInterfaceAttributeError(
+                "A dynamic interface has to have a direction."
+            )
         direction = Direction(interface_specification["direction"])
 
         if isinstance(dynamic, bool):
@@ -605,20 +636,32 @@ class Node(JsonConvertible):
             Raised if:
             - new interface count is equal to or lower than 0,
             - interface name is associated with none of the interfaces,
-            - interface names is associated with more than one interface,
-            - interface is not dynamic,
-            - exceeded a maximum interface count from the specification,
-            - gone below a minimum interface count from the specification.
+
+        MultipleInterfacesSelectedError
+            Raised if the interface name is associated with
+            more than one interface.
+        MissingInterfaceAttributeError
+            Raised if the interface is not dynamic
+            due to missing `dynamic` attribute.
+        NotDynamicInterfaceError
+            Raised if the interface is not dynamic
+            due to explicit definition in the specification.
+        InterfaceCountError
+            Raised if either maximum interface count from
+            the specification was exceeded or it has gone below
+            a minimum interface count from the specification.
         """
         if new_count <= 0:
-            raise ValueError("Number of interface has to be at least 1.")
+            raise InterfaceCountError(
+                "Number of interface has to be at least 1."
+            )
         interfaces: List[Interface] = self.get(
             NodeAttributeType.INTERFACE,
             name=f"{interface_name}[0]",
         )
         interface_count = len(interfaces)
         if interface_count != 1:
-            raise ValueError(
+            raise MultipleInterfacesSelectedError(
                 "Provided name has to uniquely identify the dynamic interface."
                 f"However, name = `{interface_name}` identifies "
                 f"{interface_count} interfaces."
@@ -633,13 +676,13 @@ class Node(JsonConvertible):
             if interface_spec["name"] == interface_name
         ]
         if "dynamic" not in interface_specification:
-            raise ValueError(
+            raise MissingInterfaceAttributeError(
                 "A missing property `dynamic` in an interface assumed to be "
                 f"dynamic. Node name: `{interface_name}`."
             )
         dynamic = interface_specification["dynamic"]
         if dynamic is None:
-            raise TypeError(
+            raise NotDynamicInterfaceError(
                 "Cannot set number of interface for a non-dynamic interface "
                 f"with name = `{interface_name}`."
             )
@@ -652,14 +695,14 @@ class Node(JsonConvertible):
             min_interfaces, max_interfaces = dynamic
 
         if max_interfaces is not Infinity and new_count > max_interfaces:
-            raise ValueError(
+            raise InterfaceCountError(
                 f"Cannot set the number of dynamic interfaces to "
                 f"{new_count} as this value exceeds max = {max_interfaces}"
             )
         if new_count < min_interfaces:
-            raise ValueError(
+            raise InterfaceCountError(
                 f"Cannot set the number of dynamic interfaces to {new_count}"
-                f"as this value exceeds min = {min_interfaces}."
+                f"as this value is smaller than min = {min_interfaces}."
             )
 
         # Update the actual number of interfaces.
@@ -710,14 +753,14 @@ class Node(JsonConvertible):
 
         Raises
         ------
-        ValueError
+        InterfaceCountError
             Raised if value of dynamic interfaces is invalid (below 1).
         """
         max_index = self._find_highest_index_of_dynamic_interface(
             interface_name
         )
         if max_index == -1:
-            raise ValueError(
+            raise InterfaceCountError(
                 "Number of dynamic interface should never go below 1."
                 f"However, currently for interface named `{interface_name}`, "
                 "it is equal to 0."
@@ -770,14 +813,14 @@ class Node(JsonConvertible):
 
         Raises
         ------
-        ValueError
+        NoInterfaceMatchedError
             Raised if `interface_name` does not match any dynamic interface.
         """
         max_index = self._find_highest_index_of_dynamic_interface(
             interface_name
         )
         if max_index == -1:
-            raise ValueError(
+            raise NoInterfaceMatchedError(
                 f"Interface name `{interface_name}` does not match "
                 "any dynamic interface."
             )
@@ -812,9 +855,11 @@ class Node(JsonConvertible):
 
         Raises
         ------
-        ValueError
+        NoInterfaceMatchedError
             Raised if multiple properties representing the same number of
             dynamic interfaces exist.
+        NotDynamicInterfaceError
+            Raised if the provided interface is non-dynamic.
         """
         max_index = self._find_highest_index_of_dynamic_interface(
             interface_name
@@ -827,12 +872,12 @@ class Node(JsonConvertible):
             if interface["name"] == interface_name
         ]
         if len(interfaces) < 1:
-            raise ValueError(
+            raise NoInterfaceMatchedError(
                 f"No interface with name `{interface_name}` was found."
             )
 
         if "dynamic" not in interfaces[0]:
-            raise TypeError(
+            raise NotDynamicInterfaceError(
                 f"Interface with name `{interface_name} is not dynamic.`"
             )
         return max_index + 1
@@ -956,7 +1001,7 @@ class Node(JsonConvertible):
                 break
 
         if not updated:
-            raise ValueError(
+            raise OutOfSpecificationNodeError(
                 f"Cannot set a name of the node to `{new_name}` as that name "
                 "does not appear in the specification."
             )
