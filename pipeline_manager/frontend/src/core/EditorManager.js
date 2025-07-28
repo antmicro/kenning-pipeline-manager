@@ -1908,6 +1908,27 @@ export default class EditorManager {
             });
         }
 
+        // Remove 'hidden' if it aligns with specification
+        const nodeToProps = EditorManager.getEditorManagerInstance()
+            .specification
+            .currentSpecification
+            ?.nodes
+            .map((node) => {
+                const properties = (node.properties ?? [])
+                    // Unwrap groups
+                    .flatMap((prop) => (prop.group ? [prop, ...prop.group] : [prop]))
+                    .reduce((acc, prop) => ({ ...acc, [prop.name]: prop }), {});
+                return [EditorManager.getNodeName(node), properties];
+            })
+            .reduce((acc, [name, properties]) => ({ ...acc, [name]: properties }), {});
+
+        save.graphs
+            .flatMap((graph) => graph.nodes ?? [])
+            .flatMap((node) => node.properties
+                .map((prop) => [prop, nodeToProps[EditorManager.getNodeName(node)][prop.name]]))
+            .filter(([savedProp, specProp]) => savedProp.hidden === Boolean(specProp.hidden))
+            .forEach(([savedProp, _]) => { delete savedProp.hidden; });
+
         if (save.metadata === undefined) {
             save.metadata = {};
         }
