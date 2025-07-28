@@ -252,7 +252,7 @@ export default defineComponent({
 
         const toggleGroup = (intf) => {
             intf.group.forEach((name) => {
-                node.value.inputs[name].hidden = intf.value;
+                node.value.inputs[name].hidden = !intf.value;
             });
         };
 
@@ -290,11 +290,8 @@ export default defineComponent({
             );
         };
 
-        const displayedInputs = computed(() =>
-            Object.values(node.value.inputs).filter((ni) => !ni.hidden),
-        );
         const displayedProperties = computed(() =>
-            Object.values(displayedInputs.value).filter((intf) => !intf.port),
+            Object.values(node.value.inputs).filter((intf) => !intf.port),
         );
 
         const interfaceGroups = computed(() =>
