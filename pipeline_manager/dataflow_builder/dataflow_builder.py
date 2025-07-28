@@ -32,7 +32,7 @@ class GraphBuilder:
 
     def __init__(
         self,
-        specification: Union[Path, str, Dict],
+        specification: Union[Path, str, Dict, SpecificationBuilder],
         specification_version: str,
         workspace_directory: Optional[Path] = None,
     ) -> None:
@@ -41,8 +41,9 @@ class GraphBuilder:
 
         Parameters
         ----------
-        specification : Union[Path, str, Dict]
-            Path to a JSON specification file or Dict with its representation
+        specification : Union[Path, str, Dict, SpecificationBuilder]
+            Path to a JSON specification file or Dict with its representation.
+            Alternatively, a SpecificationBuilder can be passed directly
         specification_version: str
             Version of the specification.
         workspace_directory: Optional[Path]
@@ -120,7 +121,7 @@ class GraphBuilder:
 
     def load_specification(
         self,
-        specification: Union[Path, str, Dict],
+        specification: Union[Path, str, Dict, SpecificationBuilder],
         purge_old_graphs: bool = True,
     ):
         """
@@ -134,8 +135,8 @@ class GraphBuilder:
 
         Parameters
         ----------
-        specification : Union[Path, str, Dict]
-            Path to specification file or specification dictionary
+        specification : Union[Path, str, Dict, SpecificationBuilder]
+            Path to specification file, dictionary or the builder directly
         purge_old_graphs : bool, optional
             Determine if dataflow graphs loaded to memory should be purged.
             It makes sense as after changing a specification dataflow graphs
@@ -146,24 +147,27 @@ class GraphBuilder:
         ValueError
             Raised if specification cannot be loaded or its file is invalid.
         """
-        self.specification_file = specification
-        self._spec_builder = SpecificationBuilder(
-            spec_version=self.specification_version
-        )
-
-        if isinstance(specification, (Path, str)):
-            self.specification_file = specification
-            self.specification = None
-
-            success, reason = is_proper_input_file(self.specification_file)
-            if not success:
-                raise ValueError(f"Invalid `specification_path`: {reason}")
-            with open(self.specification_file, encoding="utf-8") as fd:
-                specification = json.load(fd)
+        if isinstance(specification, SpecificationBuilder):
+            self._spec_builder = specification
         else:
-            self.specification_file = None
-            self.specification = specification
-        self._spec_builder.update_spec_from_other(specification)
+            self.specification_file = specification
+            self._spec_builder = SpecificationBuilder(
+                spec_version=self.specification_version
+            )
+
+            if isinstance(specification, (Path, str)):
+                self.specification_file = specification
+                self.specification = None
+
+                success, reason = is_proper_input_file(self.specification_file)
+                if not success:
+                    raise ValueError(f"Invalid `specification_path`: {reason}")
+                with open(self.specification_file, encoding="utf-8") as fd:
+                    specification = json.load(fd)
+            else:
+                self.specification_file = None
+                self.specification = specification
+            self._spec_builder.update_spec_from_other(specification)
 
         if purge_old_graphs:
             self.graphs = []
@@ -224,11 +228,14 @@ class GraphBuilder:
         if isinstance(source, (str, Path)):
             source = Path(source).resolve()
 
+        if self.specification is None:
+            specification = self.specification_file
+        else:
+            specification = self.specification
+
         another_builder = GraphBuilder(
             specification_version=self.specification_version,
-            specification=self.specification
-            if self.specification is not None
-            else self.specification_file,
+            specification=specification,
             workspace_directory=self.workspace_directory,
         )
 
