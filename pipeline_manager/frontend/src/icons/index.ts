@@ -17,6 +17,7 @@ import Disconnect from './Disconnect.vue';
 import EditedNode from './EditedNode.vue';
 import ExclamationMark from './ExclamationMark.vue';
 import Expand from './Expand.vue';
+import Hide from './Hide.vue';
 import Import from './Import.vue';
 import Indicator from './Indicator.vue';
 import Logo from './Logo.vue';
@@ -48,6 +49,7 @@ export default {
     EditedNode,
     ExclamationMark,
     Expand,
+    Hide,
     Import,
     Indicator,
     Logo,
