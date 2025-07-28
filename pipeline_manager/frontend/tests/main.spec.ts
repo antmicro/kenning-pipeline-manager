@@ -21,8 +21,6 @@ test('remove node', async ({ page }) => {
     // Delete the node.
     const deleteButton = page.getByText('Delete', { exact: true });
     await deleteButton.scrollIntoViewIfNeeded();
-    // Zoom in to ensure the context menu is visible.
-    await page.mouse.wheel(0, -1500);
     await deleteButton.click();
 
     // Verify that the node has disappeared.
