@@ -245,6 +245,7 @@
     ],
     "metadata": {
         "editableTypes": true,
+        "toggleableEditableTypes": false,
         "twoColumn": true,
         "interfaces": {
             "BinaryImage": {
