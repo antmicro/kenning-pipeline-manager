@@ -120,7 +120,7 @@ from moving or deleting the nodes.
                             v-long-press-to-right:500
                             :node="node"
                             :intf="output"
-                            :highlighted="props.interfaces.includes(output)"
+                            :highlighted="props.interfaces?.includes(output)"
                             :picked="isPickedInterface(output)"
                             :switchSides="switchSides"
                         />
@@ -140,7 +140,7 @@ from moving or deleting the nodes.
                             v-long-press-to-right:500
                             :node="node"
                             :intf="input"
-                            :highlighted="props.interfaces.includes(input)"
+                            :highlighted="props.interfaces?.includes(input)"
                             :picked="isPickedInterface(input)"
                             :switchSides="switchSides"
                         />
@@ -193,6 +193,7 @@ const props = defineProps({
     node: AbstractNode,
     selected: Boolean,
     greyedOut: Boolean,
+    hidden: Boolean,
     interfaces: Array,
 });
 
@@ -556,6 +557,7 @@ const classes = computed(() => ({
     '--dragging': groupDragMove.dragging.value,
     '--two-column': !!props.node.twoColumn,
     '--greyed-out': props.greyedOut,
+    '--hidden': props.hidden,
     __readonly: viewModel.value.editor.readonly,
 }));
 

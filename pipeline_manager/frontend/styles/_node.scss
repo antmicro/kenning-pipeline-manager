@@ -112,4 +112,8 @@
     &.--greyed-out {
         filter: brightness(60%) blur(0.5px);
     }
+
+    &.--hidden {
+        visibility: hidden;
+    }
 }

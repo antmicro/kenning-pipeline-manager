@@ -54,6 +54,12 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
                 :interfaces="highlightInterfaces"
                 @select="(ev) => selectNode(node, ev)"
             />
+            <CustomNode
+                v-for="node in ignoredNodes"
+                :key="node.id + counter.toString()"
+                :node="node"
+                :hidden="true"
+            />
         </div>
 
         <svg
@@ -881,6 +887,7 @@ export default defineComponent({
             scale,
             visibleConnections,
             visibleNodes,
+            ignoredNodes,
             highlightInterfaces,
             editorStyle,
             zoomIn: panZoom.onZoomIn,
