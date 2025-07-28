@@ -21,6 +21,9 @@ const getBackendApiUrl = () => {
         process.env.VUE_APP_COMMUNICATION_SERVER_PORT !== undefined
     ) return `http://${process.env.VUE_APP_COMMUNICATION_SERVER_HOST}:${process.env.VUE_APP_COMMUNICATION_SERVER_PORT}`;
 
+    // npm run serve
+    if (process.env.NODE_ENV === 'development') return null;
+
     return `${window.location.protocol}//${window.location.host}`;
 };
 
