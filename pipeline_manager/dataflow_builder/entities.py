@@ -111,6 +111,7 @@ class Property(JsonConvertible):
     type: str
     id: str
     dynamic_counter: Optional[bool] = None
+    hidden: Optional[bool] = None
 
     def __init__(
         self,
@@ -125,6 +126,7 @@ class Property(JsonConvertible):
         group: Optional[Dict[str, Any]] = None,
         dynamic_counter: Optional[bool] = None,
         id: str = get_uuid(),
+        hidden: Optional[bool] = None,
     ):
         # In a specification, property has `default`,
         # but, in a dataflow, it has either `values` or `value`.
@@ -179,6 +181,8 @@ class Property(JsonConvertible):
 
         if dynamic_counter:
             self.dynamic_counter = dynamic_counter
+        if hidden is not None:
+            self.hidden = hidden
 
     @staticmethod
     def get_first_not_none(values: List[Optional[Any]]) -> Any:

@@ -914,6 +914,7 @@ class SpecificationBuilder(object):
         dtype: Optional[str] = None,
         override: Optional[bool] = None,
         stringify: bool = False,
+        hidden: Optional[bool] = None,
     ) -> Union[Dict, str]:
         """
         Creates and returns a property.
@@ -940,6 +941,8 @@ class SpecificationBuilder(object):
             Determines whether property should be overridden
         stringify : bool
             Determines whether property should be returned as a string
+        hidden: Optional[bool]
+            Determines whether property should be rendered in node
 
         Returns
         -------
@@ -954,6 +957,7 @@ class SpecificationBuilder(object):
         set_if_not_none(prop, "values", values)
         set_if_not_none(prop, "dtype", dtype)
         set_if_not_none(prop, "override", override)
+        set_if_not_none(prop, "hidden", hidden)
 
         if stringify:
             prop = json.dumps(prop)
@@ -1046,6 +1050,7 @@ class SpecificationBuilder(object):
         values: Optional[List[Any]] = None,
         dtype: Optional[str] = None,
         override: Optional[bool] = None,
+        hidden: Optional[bool] = None,
     ):
         """
         Adds property to the node.
@@ -1072,6 +1077,8 @@ class SpecificationBuilder(object):
             Type of elements in property type is list
         override: Optional[bool]
             Determines whether property should be overridden
+        hidden: Optional[bool]
+            Determines whether property should be rendered in node
 
         Raises
         ------
@@ -1101,6 +1108,7 @@ class SpecificationBuilder(object):
             values,
             dtype,
             override,
+            hidden,
         )
         self._nodes[name]["properties"].append(prop)
 
