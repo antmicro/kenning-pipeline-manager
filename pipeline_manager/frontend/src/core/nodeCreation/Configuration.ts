@@ -153,10 +153,14 @@ export function alterProperties(
     nodes: any[],
     properties: PropertyConfiguration[],
     remove = false,
-): void {
-    if (properties === undefined) return;
+): any[] {
+    if (properties === undefined) return [];
 
     const parsedProperties = parseProperties(properties);
+    // If parsedProperties returns an array, it is an array of errors
+    if (Array.isArray(parsedProperties) && parsedProperties.length) {
+        return parsedProperties;
+    }
     const createdProperties = (createProperties(parsedProperties) as CreatedInterfaces);
     nodes.forEach((node) => {
         const state = node.save();
@@ -175,6 +179,7 @@ export function alterProperties(
 
         node.load(state);
     });
+    return [];
 }
 
 /**
@@ -188,10 +193,14 @@ export function alterInterfaces(
     nodes: any[],
     interfaces: InterfaceConfiguration[],
     remove = false,
-): void {
-    if (interfaces === undefined) return;
+): any[] {
+    if (interfaces === undefined) return [];
 
     const parsedInterfaces = parseInterfaces(interfaces, [], []);
+    // If parsedInterfaces returns an array, it is an array of errors
+    if (Array.isArray(parsedInterfaces) && parsedInterfaces.length) {
+        return parsedInterfaces;
+    }
     const [inputs, outputs] =
         createBaklavaInterfaces(parsedInterfaces) as [CreatedInterfaces, CreatedInterfaces];
 
@@ -219,6 +228,7 @@ export function alterInterfaces(
 
         node.load(state);
     });
+    return [];
 }
 
 /**
@@ -232,7 +242,7 @@ export function addProperty(property: PropertyConfiguration): void {
 
     const currentType = configurationState.editedType;
     const editorManager = EditorManager.getEditorManagerInstance();
-    const error = editorManager.validateNodeProperty(property);
+    let error = editorManager.validateNodeProperty(property);
 
     if (error.length) {
         NotificationHandler.terminalLog('error', 'Invalid property', error);
@@ -251,7 +261,12 @@ export function addProperty(property: PropertyConfiguration): void {
     }
 
     configurationState.properties.push(property);
-    alterProperties(nodes, configurationState.properties);
+    error = alterProperties(nodes, configurationState.properties);
+
+    if (error.length) {
+        NotificationHandler.terminalLog('error', 'Invalid property', error);
+        return;
+    }
 
     commitTypeToSpecification();
 }
@@ -298,7 +313,7 @@ export function addInterface(intf: InterfaceConfiguration): void {
 
     const currentType = configurationState.editedType;
     const editorManager = EditorManager.getEditorManagerInstance();
-    const error = editorManager.validateNodeInterface(intf);
+    let error = editorManager.validateNodeInterface(intf);
 
     if (error.length) {
         NotificationHandler.terminalLog('error', 'Invalid interface', error);
@@ -317,7 +332,12 @@ export function addInterface(intf: InterfaceConfiguration): void {
     }
 
     configurationState.interfaces.push(intf);
-    alterInterfaces(nodes, configurationState.interfaces);
+    error = alterInterfaces(nodes, configurationState.interfaces);
+
+    if (error.length) {
+        NotificationHandler.terminalLog('error', 'Invalid interface', error);
+        return;
+    }
 
     commitTypeToSpecification();
 }
