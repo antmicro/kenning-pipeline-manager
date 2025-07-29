@@ -174,3 +174,9 @@ class ExternalValidatorError(Exception):
 
 class ConnectionExistsError(Exception):
     """Raised if a connection two interfaces already exists."""
+
+
+class MissingNodeError(Exception):
+    """
+    Raised if a node is absent from the dataflow.
+    """

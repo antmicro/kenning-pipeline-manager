@@ -11,6 +11,7 @@ from typing import Dict, List, Tuple, Union
 
 from pipeline_manager.dataflow_builder.data_structures import (
     ConnectionExistsError,
+    MissingNodeError,
 )
 from pipeline_manager.dataflow_builder.entities import (
     Interface,
@@ -146,23 +147,21 @@ def get_node_if_present(
 
     Raises
     ------
-    KeyError
-        Raised if the node is absent in the graph. For `str`.
-    KeyError
-        Raised if the node is absent in the graph. For `Node` instance.
+    InvalidNodeIdError
+        Raised if the node is absent from the graph.
     """
     if isinstance(node, str):
         if node not in nodes:
-            raise KeyError(
-                f"{node_name.title()} node with id={node} is "
+            raise MissingNodeError(
+                f"{node_name.title()} node with id = {node} is "
                 "absent in the dataflow graph."
             )
         node = nodes[node]
 
     if node.id not in nodes:
-        raise KeyError(
-            f"{node_name.title()} node with id={node} is absent "
-            "in the dataflow graph."
+        raise MissingNodeError(
+            f"{node_name.title()} node with id= {node} is absent "
+            "from the dataflow graph."
         )
 
     return node
