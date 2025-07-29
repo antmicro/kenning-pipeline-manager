@@ -140,7 +140,7 @@ It consists of the following properties:
 * `interfaceConnectionColor` - describes the color of connection lines, should be a hexadecimal number representing RGB values.
 
 #### Node style
-Node style defines how nodes of a given style should look like. Currently, the following options are supported:
+Node style defines how nodes of a given style should look like. Currently, the following elements are supported:
 
 * `color` - color of the node unless a node sets its own `color`,
 * `icon` - secondary icon of the node, which is displayed separately from [Node](#node) `icon`,
@@ -151,6 +151,88 @@ Field values are defined the same way as in [Node](#node) specification, however
 There exist special styles:
 * `__new` - managed automatically and does not persist specification saves and loads,
 * `__edited` - added to the node type which was modified.
+
+##### Specificity
+
+[Node type](#node) can define multiple styles and styling of type-specific elements (e.g. `icon`).
+Moreover, [an instance](project:dataflow-format.md#node) can do this as well, although it is currently limited to the `color` option.
+
+The following order of specificity is used when evaluating the actual style of a given element (the first - the most important):
+
+1. Node instance styling
+2. Node type styling
+3. Styles defined by the node type
+
+##### Cascading
+
+Appearance of a given element is determined by the the most specific rule that defines the element.
+
+```{note}
+Value `null` is a regular style value (i.e. undergoes the same merging procedure). It discards any lower-precedence styling of an element.
+```
+
+##### Example
+
+For example, given:
+* styles:
+
+```json
+{
+    "style1": {
+        "options": {
+            "color": "#0000FF",,
+            "icon": "Cogwheel",
+            "pill": {
+                "text": "options"
+            }
+        },
+        "miscellaneous": {
+            "color": null,
+            "pill": {
+                "text": "misc"
+            }
+        }
+    }
+}
+```
+
+* a node type:
+
+```json
+{
+    "name": "Node",
+    "style": ["options", "miscellaneous"],
+    "pill": null
+}
+```
+
+* a node instance:
+
+```json
+{
+    "id": "401aff7b-fbb7-44cb-8f77-c78c80deefff",
+    "position": {
+        "x": 0,
+        "y": 0
+    },
+    "width": 300,
+    "twoColumn": false,
+    "interfaces": [],
+    "properties": [],
+    "enabledInterfaceGroups": [],
+    "name": "Node",
+    "instanceName": "Node",
+    "color": "#000000"
+},
+```
+
+would resolve in the following way:
+
+Element | Style `options` | Style `miscellaneous` | Node type | Node instance | Resolved value |
+| - | - | - | - | - | - |
+| `color` | `##0000FF` | `null` | `undefined` | `#000000` | `#000000` |
+| `icon` | `Cogwheel` | `undefined` | `undefined` | -- | `Cogwheel` |
+| `pill` | `{"text": "options"}` | `{"text": "misc"}` | `null` | -- | `null`
 
 (metadata-navbar-item)=
 #### Navbar item
