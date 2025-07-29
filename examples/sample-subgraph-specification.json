@@ -278,7 +278,8 @@
                             "id": "9a83f612-ca4c-4042-a44a-26834f0b5a98",
                             "direction": "input",
                             "side": "left",
-                            "sidePosition": 0
+                            "sidePosition": 0,
+                            "externalName": "Nested subgraph input"
                         },
                         {
                             "name": "Subgraph Inout 1",
@@ -348,7 +349,8 @@
                             "id": "bc901bcf-513a-4845-8db9-b1c4c9b7592e",
                             "direction": "output",
                             "side": "right",
-                            "sidePosition": 2
+                            "sidePosition": 2,
+                            "externalName": "Nested subgraph output"
                         }
                     ],
                     "properties": [
