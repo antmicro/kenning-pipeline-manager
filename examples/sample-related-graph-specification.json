@@ -159,7 +159,108 @@
                     "to": "2315f500-e0fd-477f-9d86-d7efc27eac7e"
                 }
             ]
+        },
+        {
+            "name": "Entry Graph",
+            "id": "7a0f4b8d-438b-4699-8631-a3fffeba520e",
+            "nodes": [
+                {
+                    "name": "Test node #1",
+                    "interfaces": [
+                        {
+                            "id": "c461252d-1849-4536-97d0-713b900e8e8f",
+                            "name": "Input",
+                            "direction": "input"
+                        },
+                        {
+                            "id": "c3d0d369-f808-40e0-85e5-97698984eb03",
+                            "name": "Output",
+                            "direction": "output"
+                        },
+                        {
+                            "id": "11397ace-ef67-425e-a036-b2ef0b393512",
+                            "name": "Inout",
+                            "direction": "inout",
+                            "side": "right"
+                        }
+                    ],
+                    "position": {
+                        "x": 100,
+                        "y": 400
+                    },
+                    "width": 200,
+                    "twoColumn": false,
+                    "properties": []
+                },
+                {
+                    "name": "Test node #2",
+                    "interfaces": [
+                        {
+                            "id": "dbd72a26-25dd-4fef-ac82-536bff66b9a3",
+                            "name": "Input",
+                            "direction": "input"
+                        },
+                        {
+                            "id": "e8245788-9b38-4604-8d18-d7625fe158fb",
+                            "name": "Output",
+                            "direction": "output"
+                        },
+                        {
+                            "id": "b7c0e131-82eb-487f-85a3-9c1f483438fb",
+                            "name": "Inout",
+                            "direction": "inout",
+                            "side": "right"
+                        }
+                    ],
+                    "position": {
+                        "x": 500,
+                        "y": 400
+                    },
+                    "width": 200,
+                    "twoColumn": false,
+                    "properties": []
+                },
+                {
+                    "name": "Test node #1",
+                    "interfaces": [
+                        {
+                            "id": "c8c51300-5e4b-4c0b-9caa-3cf00f07ba56",
+                            "name": "Input",
+                            "direction": "input"
+                        },
+                        {
+                            "id": "67ffab2b-43c4-4e2b-aebf-b5876d76221e",
+                            "name": "Output",
+                            "direction": "output"
+                        },
+                        {
+                            "id": "37a9aca0-8c6b-42c9-aa44-bcee1641db51",
+                            "name": "Inout",
+                            "direction": "inout",
+                            "side": "right"
+                        }
+                    ],
+                    "position": {
+                        "x": 900,
+                        "y": 400
+                    },
+                    "width": 200,
+                    "twoColumn": false,
+                    "properties": []
+                }
+            ],
+            "connections": [
+                {
+                    "from": "c3d0d369-f808-40e0-85e5-97698984eb03",
+                    "to": "dbd72a26-25dd-4fef-ac82-536bff66b9a3"
+                },
+                {
+                    "from": "e8245788-9b38-4604-8d18-d7625fe158fb",
+                    "to": "c8c51300-5e4b-4c0b-9caa-3cf00f07ba56"
+                }
+            ]
         }
-    ]
+    ],
+    "entryGraph": "7a0f4b8d-438b-4699-8631-a3fffeba520e"
 }
 
