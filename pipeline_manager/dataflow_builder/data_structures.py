@@ -24,7 +24,10 @@ class Side(Enum):
 
 
 class InterfaceCountError(Exception):
-    """Raised if there is either too many or too few dynamic interfaces."""
+    """
+    Raised if there is either too many or too few dynamic interfaces
+    (than the specification requires).
+    """
 
 
 class MissingInterfaceAttributeError(Exception):
@@ -140,3 +143,34 @@ class MismatchingInterfaceTypesError(Exception):
     """
     Raised if interfaces of mismatching types are connected.
     """
+
+
+class InvalidDataflowError(Exception):
+    """
+    Raised if loading the dataflow generates an error.
+    """
+
+
+class NoGraphsError(Exception):
+    """Raised if no graph was found in the dataflow."""
+
+
+class NotSpecificationError(Exception):
+    """
+    Raised if a path does not lead to a file with the specification.
+    """
+
+
+class NoGraphSelectedError(Exception):
+    """
+    Raised if no graph was selected but either one
+    or more were expected to be selected.
+    """
+
+
+class ExternalValidatorError(Exception):
+    """Raised if an external JavaScript validator reports an error."""
+
+
+class ConnectionExistsError(Exception):
+    """Raised if a connection two interfaces already exists."""

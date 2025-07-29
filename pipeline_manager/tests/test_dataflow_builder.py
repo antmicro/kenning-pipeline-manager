@@ -13,6 +13,15 @@ from unittest.mock import Mock
 
 import pytest
 
+from pipeline_manager.dataflow_builder.data_structures import (
+    ConnectionExistsError,
+    ExtraNodeAttributeError,
+    GraphRenamingError,
+    InterfaceCountError,
+    InvalidMethodUsedError,
+    MultipleInterfacesSelectedError,
+    OutOfSpecificationNodeError,
+)
 from pipeline_manager.dataflow_builder.dataflow_builder import GraphBuilder
 from pipeline_manager.dataflow_builder.dataflow_graph import (
     AttributeType,
@@ -102,7 +111,7 @@ def test_adding_node_absent_in_specification(builder):
     """
     graph = builder.create_graph()
 
-    with pytest.raises(ValueError):
+    with pytest.raises(OutOfSpecificationNodeError):
         graph.create_node(name="Name Not in Specification")
 
 
@@ -234,9 +243,9 @@ def test_if_adding_duplicate_connection_fails(single_connection_graph):
     assert graph.to_json(as_str=False) == expected
 
     [from_node] = graph.get(AttributeType.NODE, name="LoadVideo")
-    [to_node] = graph.get(AttributeType.NODE, name="LoadVideo")
+    [to_node] = graph.get(AttributeType.NODE, name="SaveVideo")
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ConnectionExistsError):
         graph.create_connection(
             from_interface=from_node.interfaces[0],
             to_interface=to_node.interfaces[0],
@@ -487,7 +496,7 @@ def test_raising_error_when_using_non_existent_keyword_argument(
     )
     builder.load_graphs(dataflow_source=sample_dataflow_path)
     graph = builder.graphs[0]
-    with pytest.raises(KeyError):
+    with pytest.raises(ExtraNodeAttributeError):
         graph.create_node(name="LoadVideo", non_existent_keyword_arg=123)
 
 
@@ -661,7 +670,7 @@ def test_disallowing_for_changing_graph_id(sample_specification_path):
     )
 
     graph = builder.create_graph()
-    with pytest.raises(RuntimeError):
+    with pytest.raises(GraphRenamingError):
         graph.id = "new_id"
 
 
@@ -677,7 +686,7 @@ def test_prevent_node_name_change(sample_specification_path):
     graph = graph_builder.create_graph()
     node = graph.create_node(name="SaveVideo")
 
-    with pytest.raises(ValueError):
+    with pytest.raises(OutOfSpecificationNodeError):
         node.name = "Non-existent Node Name"
 
 
@@ -692,7 +701,7 @@ def test_subgraph_node_creation_misuse_raises(sample_specification_path):
         DEFAULT_SPECIFICATION_VERSION,
     )
     graph = graph_builder.create_graph()
-    with pytest.raises(RuntimeError):
+    with pytest.raises(InvalidMethodUsedError):
         _ = graph.create_node(name="SaveVideo", subgraph=graph.id)
 
 
@@ -1046,11 +1055,11 @@ def test_setting_number_of_dynamic_interfaces_to_invalid_value_fails(
     graph = graph_builder.create_graph()
     dynamic_node = graph.create_node(dynamic_node_name)
 
-    with pytest.raises(ValueError):
+    with pytest.raises(InterfaceCountError):
         dynamic_node.set_number_of_dynamic_interfaces(interface_name, -1)
-    with pytest.raises(ValueError):
+    with pytest.raises(InterfaceCountError):
         dynamic_node.set_number_of_dynamic_interfaces(interface_name, 0)
-    with pytest.raises(ValueError):
+    with pytest.raises(MultipleInterfacesSelectedError):
         dynamic_node.set_number_of_dynamic_interfaces(
             "non-existent interface", 2
         )

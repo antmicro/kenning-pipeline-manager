@@ -9,6 +9,9 @@ import os
 from pathlib import Path
 from typing import Dict, List, Tuple, Union
 
+from pipeline_manager.dataflow_builder.data_structures import (
+    ConnectionExistsError,
+)
 from pipeline_manager.dataflow_builder.entities import (
     Interface,
     InterfaceConnection,
@@ -80,23 +83,20 @@ def ensure_connection_is_absent(
     connections : Dict[str, InterfaceConnection]
         A dictionary of ids and connections between nodes in a dataflow graph.
 
-    Raises
-    ------
-    KeyError
-        Raised if a connection between nodes exists. For `str`.
-    KeyError
-        Raised if a connection between nodes exists.
-            For `Connection` instance.
-
     Returns
     -------
     None
         Returned to get out of the function.
+
+    Raises
+    ------
+    ConnectionExistsError
+        Raised if a connection between nodes already exists.
     """
     if isinstance(connection, str):
         if connection in connections:
-            raise KeyError(
-                f"Connection with id={connection} is present in a dataflow "
+            raise ConnectionExistsError(
+                f"Connection with id = {connection} is present in a dataflow "
                 "graph. Connection with the identical id already exists."
             )
         # No more checks are possible solely on an id.
@@ -104,10 +104,9 @@ def ensure_connection_is_absent(
 
     if isinstance(connection, InterfaceConnection):
         if connection.id in connections:
-            raise KeyError(
-                f"Connection with id={connection.id} is present "
-                "in a dataflow graph."
-                "Connection with the identical id already exists."
+            raise ConnectionExistsError(
+                f"Connection with id = {connection} is present in a dataflow "
+                "graph. Connection with the identical id already exists."
             )
 
         connection_set = {
@@ -119,7 +118,7 @@ def ensure_connection_is_absent(
             connection.from_interface.id,
             connection.to_interface.id,
         ) in connection_set:
-            raise ValueError(
+            raise ConnectionExistsError(
                 f"The connection between {connection.from_interface.id} and "
                 f"{connection.to_interface.id} already exists."
             )

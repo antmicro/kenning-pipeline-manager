@@ -13,6 +13,14 @@ from typing import Any, Dict, List, Optional, Union
 
 from typing_extensions import override
 
+from pipeline_manager.dataflow_builder.data_structures import (
+    ExternalValidatorError,
+    InvalidDataflowError,
+    MissingPropertyError,
+    NoGraphSelectedError,
+    NoGraphsError,
+    NotSpecificationError,
+)
 from pipeline_manager.dataflow_builder.dataflow_graph import DataflowGraph
 from pipeline_manager.dataflow_builder.entities import convert_output, get_uuid
 from pipeline_manager.dataflow_builder.utils import (
@@ -72,8 +80,10 @@ class GraphBuilder:
 
         Raises
         ------
-        ValueError
+        InvalidDataflowError
             Raised if a dataflow graph could not be loaded.
+        NoGraphsError
+            Raised if there are no graph in the dataflow file.
         """
         if isinstance(dataflow_source, (Path, str)):
             dataflow_path = dataflow_source
@@ -81,7 +91,9 @@ class GraphBuilder:
                 dataflow_path, intended_use="dataflow"
             )
             if not success:
-                raise ValueError(f"Invalid `dataflow_path`: {reason}")
+                raise InvalidDataflowError(
+                    f"Invalid `dataflow_path`: {reason}"
+                )
             with open(dataflow_path, encoding="utf-8") as fd:
                 content = json.load(fd)
         else:
@@ -95,7 +107,7 @@ class GraphBuilder:
             )
             self.graphs.append(dataflow_graph)
         if len(self.graphs) < 1:
-            raise ValueError(
+            raise NoGraphsError(
                 f"After loading graphs from the dataflow file "
                 f"`{dataflow_path.expanduser().resolve()}`, "
                 f"{GraphBuilder.__qualname__} is empty."
@@ -144,7 +156,7 @@ class GraphBuilder:
 
         Raises
         ------
-        ValueError
+        NotSpecificationError
             Raised if specification cannot be loaded or its file is invalid.
         """
         if isinstance(specification, SpecificationBuilder):
@@ -161,7 +173,9 @@ class GraphBuilder:
 
                 success, reason = is_proper_input_file(self.specification_file)
                 if not success:
-                    raise ValueError(f"Invalid `specification_path`: {reason}")
+                    raise NotSpecificationError(
+                        f"Invalid `specification_path`: {reason}"
+                    )
                 with open(self.specification_file, encoding="utf-8") as fd:
                     specification = json.load(fd)
             else:
@@ -246,13 +260,13 @@ class GraphBuilder:
 
         try:
             return another_builder.get_graph_by_property("id", identifier)
-        except ValueError:
+        except (NoGraphSelectedError, MissingPropertyError):
             try:
                 return another_builder.get_graph_by_property(
                     "name", identifier
                 )
-            except ValueError:
-                raise ValueError(
+            except (NoGraphSelectedError, MissingPropertyError):
+                raise NoGraphSelectedError(
                     f"The provided `identifier` = `{identifier}` "
                     "matches neither `id` nor `name` of any graph."
                 )
@@ -277,13 +291,15 @@ class GraphBuilder:
 
         Raises
         ------
-        ValueError
+        MissingPropertyError
+            Raised if any graph lacks the property.
+        NoGraphSelectedError
             Raised if the provided property name and
             values does not match any graph.
         """
         for graph in self.graphs:
             if not hasattr(graph, property_name):
-                raise TypeError(
+                raise MissingPropertyError(
                     "DataflowGraph does not have "
                     f"the property named `{property_name}`."
                 )
@@ -291,7 +307,7 @@ class GraphBuilder:
                 continue
             return graph
 
-        raise ValueError(
+        raise NoGraphSelectedError(
             f"Pair `{property_name}` = `{property_value}` should "
             "be associated with at least one graph. However, the pair "
             "does not match any graph."
@@ -313,13 +329,13 @@ class GraphBuilder:
 
         Raises
         ------
-        ValueError
+        NoGraphSelectedError
             Raised if the provided ID does not match any graph
             or matches more than one graph.
         """
         matching_graphs = [graph for graph in self.graphs if graph._id == id]
         if len(matching_graphs) != 1:
-            raise ValueError(
+            raise NoGraphSelectedError(
                 "The ID of a graph should be associated with exactly one graph"
                 " but the provided `id` matches "
                 f"{len(matching_graphs)} graphs."
@@ -372,7 +388,7 @@ class GraphBuilder:
 
         Raises
         ------
-        ValueError
+        NoGraphSelectedError
             Raised if name matches to more than one or none of graphs.
         """
         subgraphs = self.get_subgraphs()
@@ -396,7 +412,7 @@ class GraphBuilder:
             }
         )
         if len(matching_subgraphs) == 0:
-            raise ValueError(
+            raise NoGraphSelectedError(
                 f"The name '{len(matching_subgraphs)}' should be at least with"
                 " one graph"
             )
@@ -442,7 +458,7 @@ class GraphBuilder:
 
         Raises
         ------
-        RuntimeError
+        ExternalValidatorError
             Raised if an external validator failed to validate
             either a dataflow or specification file. An error
             message is provided by the external validator.
@@ -471,7 +487,7 @@ class GraphBuilder:
             )
 
         if result:
-            raise RuntimeError(
+            raise ExternalValidatorError(
                 "An external validator failed. An error message has been "
                 "provided by the validator."
             )
