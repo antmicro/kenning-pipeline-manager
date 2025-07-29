@@ -2232,6 +2232,34 @@ export default class EditorManager {
     }
 
     /**
+     * Finds a graph that contains a node linking to the current graph.
+     *
+     * @return A graph object that contains a node linking to the current graph
+     * or undefined if the graph is not linked to anything.
+     */
+    getParentGraph() {
+        let parentGraph;
+        Array.from(this.baklavaView.editor.graphs)
+            .filter((graph) => graph.id !== this.baklavaView.displayedGraph.id)
+            .forEach((graph) => {
+                graph.nodes.forEach((node) => {
+                    if (node.subgraph?.id === this.baklavaView.displayedGraph.id) {
+                        parentGraph = graph;
+                    }
+                });
+            });
+        return parentGraph;
+    }
+
+    /**
+     * Switches the editor state to a given graph object.
+     * @param graph A graph object that the layout should be switched to.
+     */
+    switchToGraph(graph) {
+        this.baklavaView.editor.switchToGraph(graph);
+    }
+
+    /**
      * Centers the editor view and resets zoom level
      */
     centerZoom() {
