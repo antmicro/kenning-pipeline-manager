@@ -674,14 +674,14 @@ export default class EditorManager {
                     return { errors: validationErrors, warnings: [] };
                 }
             } else {
+                if (removeUnused) {
+                    Object.keys(unresolvedNodeSpecification)
+                        .filter((key) => !(key in nodeSpecification))
+                        .forEach((key) => { delete unresolvedNodeSpecification[key]; });
+                }
+
                 [unresolvedNodeSpecification, resolvedNodeSpecification]
                     .forEach((specification) => {
-                        if (removeUnused) {
-                            Object.keys(specification)
-                                .filter((key) => !(key in nodeSpecification))
-                                .forEach((key) => { delete specification[key]; });
-                        }
-
                         Object.entries(JSON.parse(JSON.stringify(nodeSpecification)))
                             .filter(([_, value]) => value !== undefined)
                             .map(([key, value]) => [key, structuredClone(toRaw(value))])
