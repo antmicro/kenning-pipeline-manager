@@ -57,6 +57,13 @@ class MissingNodeAttributeError(Exception):
     """Raised if a given node lacks an expected attribute."""
 
 
+class ExtraNodeAttributeError(Exception):
+    """
+    Raised if an additional out-of-specification attribute
+    was provided while creating a node.
+    """
+
+
 class InvalidPropertyTypeError(Exception):
     """
     Raised if an argument representing a property has an unrecognized type
@@ -86,4 +93,50 @@ class NoInterfaceMatchedError(Exception):
     """
     Raised if no interface was matched
     but at least or more than one had to be matched.
+    """
+
+
+class InvalidPanningError(Exception):
+    """
+    Raised if a panning is either of invalid type
+    or has invalid internal structure (missing attributes).
+    """
+
+
+class ScalingOutOfBoundsError(Exception):
+    """Raised if the value of scaling is outside the (0, max] range."""
+
+
+class GraphRenamingError(Exception):
+    """Raised if there was an attempt to rename a graph."""
+
+
+class MissingInterfaceError(Exception):
+    """Raised if an interface is missing but should be present."""
+
+
+class NodeLacksInterfacesError(Exception):
+    """Raised if the node lacks `interfaces` key."""
+
+
+class OutOfSpecificationInterfaceError(Exception):
+    """Raised if there is no such interface in a given node definition."""
+
+
+class InvalidMethodUsedError(Exception):
+    """
+    Raised if too general method was used when more specific one is available.
+    """
+
+
+class InvalidDirectionError(Exception):
+    """
+    Raised if an interface receiving data has `output` direction
+    or one sending data has input direction.
+    """
+
+
+class MismatchingInterfaceTypesError(Exception):
+    """
+    Raised if interfaces of mismatching types are connected.
     """

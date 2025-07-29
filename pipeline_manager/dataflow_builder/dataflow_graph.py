@@ -10,7 +10,20 @@ from typing import Any, Dict, List, Optional, Union
 
 from typing_extensions import override
 
-from pipeline_manager.dataflow_builder.data_structures import Direction
+from pipeline_manager.dataflow_builder.data_structures import (
+    Direction,
+    ExtraNodeAttributeError,
+    GraphRenamingError,
+    InvalidDirectionError,
+    InvalidMethodUsedError,
+    InvalidPanningError,
+    MismatchingInterfaceTypesError,
+    MissingInterfaceError,
+    NodeLacksInterfacesError,
+    OutOfSpecificationInterfaceError,
+    OutOfSpecificationNodeError,
+    ScalingOutOfBoundsError,
+)
 from pipeline_manager.dataflow_builder.entities import (
     Interface,
     InterfaceConnection,
@@ -71,6 +84,11 @@ class DataflowGraph(JsonConvertible):
         dataflow : Optional[Dict[str, Any]], optional
             Content of a dataflow builder to load,
             None means an empty dataflow graph, by default None.
+
+        Raises
+        ------
+        MissingInterfaceError
+            Raised if either source or target interface is missing.
         """
         from pipeline_manager.dataflow_builder.dataflow_builder import (
             GraphBuilder,
@@ -126,14 +144,14 @@ class DataflowGraph(JsonConvertible):
                 AttributeType.INTERFACE, connection["from"]
             )
             if source is None:
-                raise ValueError(
+                raise MissingInterfaceError(
                     f"Cannot create connection {connection['id']} because "
                     f"`from_interface` with id = {connection['from']}"
                     " is missing."
                 )
             target = self.get_by_id(AttributeType.INTERFACE, connection["to"])
             if target is None:
-                raise ValueError(
+                raise MissingInterfaceError(
                     f"Cannot create connection {connection['id']} because "
                     f"`to_interface` with id = {connection['to']}"
                     " is missing."
@@ -162,10 +180,20 @@ class DataflowGraph(JsonConvertible):
         -------
         Dict[str, Any]
             Specification of an interface.
+
+        Raises
+        ------
+        NodeLacksInterfacesError
+            Raised if the node definition
+            does not have `interfaces` attribute.
+        OutOfSpecificationInterface
+            Raised if there is no interface with
+            the given name in the node definition.
+
         """
         node_spec = self._spec_builder._nodes[node_name]
         if "interfaces" not in node_spec:
-            raise ValueError(
+            raise NodeLacksInterfacesError(
                 f"Interface specification named `{interface_name}` does not "
                 "define any interfaces."
             )
@@ -173,7 +201,7 @@ class DataflowGraph(JsonConvertible):
         for interface_spec in node_spec["interfaces"]:
             if interface_spec["name"] == interface_name:
                 return interface_spec
-        raise ValueError(
+        raise OutOfSpecificationInterfaceError(
             f"No interface specification matches name `{interface_name}`."
         )
 
@@ -201,13 +229,17 @@ class DataflowGraph(JsonConvertible):
 
         Raises
         ------
-        ValueError
-            Raised if `name` key is missing in the `kwargs` directory
-            or the provided name of the node does not exists in the
+        InvalidMethodUsedError
+            Raised if `subgraph` attribute was present in `kwargs`.
+        ExtraNodeAttributeError
+            Raised if out-of-specification key is present
+            in the `kwargs` directory.
+        OutOfSpecificationNodeError
+            Raised if the provided name of the node does not exists in the
             specification.
         """
         if "subgraph" in kwargs:
-            raise RuntimeError(
+            raise InvalidMethodUsedError(
                 "`DataflowGraph.create_node` method cannot be used to create "
                 "a subgraph node. Use `DataflowGraph.create_subgraph_node` "
                 "instead."
@@ -215,7 +247,7 @@ class DataflowGraph(JsonConvertible):
         allowed_fields = [field.name for field in fields(Node)]
         for arg_name in kwargs:
             if arg_name not in allowed_fields:
-                raise KeyError(
+                raise ExtraNodeAttributeError(
                     f"Illegal argument `{arg_name}` when creating node."
                 )
 
@@ -230,7 +262,7 @@ class DataflowGraph(JsonConvertible):
                 base_node = _node
 
         if not base_node:
-            raise ValueError(
+            raise OutOfSpecificationNodeError(
                 f"Provided name of the node `{name}` "
                 "is missing in the specification."
             )
@@ -376,40 +408,42 @@ class DataflowGraph(JsonConvertible):
 
         Raises
         ------
-        ValueError
-            Raised if:
-            - a source interface does not belong to the graph.
-            - a destination interface does not belong to the graph.
-            - a source interface direction is `input`.
-            - a destination interface direction is `output`.
-            - a mismatch between source and destination interfaces'
-                types occurs.
+        MissingInterfaceError
+            Raised if either a source or destination interface
+            does not belong to the graph.
+        InvalidDirectionError
+            Raised if either a source interface direction
+            has `input` direction or a destination interface
+            direction is `output`.
+        MismatchingInterfaceTypesError
+            Raised if a mismatch between source and destination
+            interfaces' types occurs.
         """
         from_interface = get_interface_if_present(from_interface, self._nodes)
         to_interface = get_interface_if_present(to_interface, self._nodes)
 
         if from_interface is None:
-            raise ValueError(
+            raise MissingInterfaceError(
                 "Source interface is "
                 "not present in the dataflow graph."
                 f"{from_interface}"
             )
 
         if to_interface is None:
-            raise ValueError(
+            raise MissingInterfaceError(
                 "Destination (drain) interface is "
                 "not present in the dataflow graph."
                 f"{to_interface}. Aborted creation a connection."
             )
 
         if from_interface.direction == Direction.INPUT:
-            raise ValueError(
+            raise InvalidDirectionError(
                 "Direction of the `from` interface cannot be `input`. "
                 "Aborted creating a connection."
             )
 
         if to_interface.direction == Direction.OUTPUT:
-            raise ValueError(
+            raise InvalidDirectionError(
                 "Direction of the `to` interface cannot be `output`. "
                 "Aborted creation a connection."
             )
@@ -426,10 +460,10 @@ class DataflowGraph(JsonConvertible):
             )
             common_type = set(from_type).intersection(to_type)
             if len(common_type) == 0:
-                raise ValueError(
+                raise MismatchingInterfaceTypesError(
                     "Mismatch between `from` interface with type = "
                     f"{from_interface.type} and `to` interface with type = "
-                    f"{to_interface.type}."
+                    f"{to_interface.type}. The types have to match."
                 )
 
         if not connection_id:
@@ -555,7 +589,7 @@ class DataflowGraph(JsonConvertible):
     @id.setter
     def id(self, _: str):
         """Setter disallowing manual modification of the ID of the graph."""
-        raise RuntimeError("An ID of a graph cannot be changed.")
+        raise GraphRenamingError("An ID of a graph cannot be changed.")
 
     @property
     def panning(self) -> Vector2:
@@ -567,7 +601,7 @@ class DataflowGraph(JsonConvertible):
         """Setter for `panning` attribute of the graph."""
         if isinstance(value, Dict):
             if "x" not in value or "y" not in value:
-                raise TypeError(
+                raise InvalidPanningError(
                     "Panning has to have the following keys: x, y."
                     f"`panning` = {str(value)}"
                 )
@@ -575,7 +609,7 @@ class DataflowGraph(JsonConvertible):
         elif isinstance(value, Vector2):
             self._panning = value
         else:
-            raise TypeError(
+            raise InvalidPanningError(
                 "`panning` has be either dictionary or Vector2."
                 f"Its type: {type(value)}"
             )
@@ -591,7 +625,7 @@ class DataflowGraph(JsonConvertible):
         value = float(value)
         max_scaling = 999
         if not (0 < value <= max_scaling):
-            raise ValueError(
+            raise ScalingOutOfBoundsError(
                 f"`scaling` has to be in the range (0, {max_scaling}] "
                 f"but is {value}."
             )
