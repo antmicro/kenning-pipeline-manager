@@ -594,6 +594,26 @@ export default class EditorManager {
     }
 
     /**
+     * Updates the list of extending nodes in all parent nodes.
+     * Called when the name of the node type is changed.
+     *
+     * @param {object} nodeSpecification Updated node data
+     * @param {object} nodeToUpdate Node type to update
+     */
+    updateParentNode(nodeSpecification, nodeToUpdate) {
+        nodeSpecification?.extends?.forEach((parentType) => {
+            const parentSpec = this.baklavaView.editor.parentNodes.get(parentType);
+            if (parentSpec.extending?.includes(nodeToUpdate)) {
+                parentSpec.extending.splice(
+                    parentSpec.extending.indexOf(nodeToUpdate),
+                    1,
+                    nodeSpecification.name,
+                );
+            }
+        });
+    }
+
+    /**
      * Validates the node specification passed in `nodeSpecification` and if
      * it is correct adds it to the unresolved specification.
      * If there is no current specification loaded then a new one is created.
@@ -662,6 +682,9 @@ export default class EditorManager {
                 if (nodeSpecification.isCategory) {
                     this.updateExtendingNodes(nodeSpecification, nodeToUpdate);
                 }
+                if (nodeSpecification.name !== nodeToUpdate) {
+                    this.updateParentNode(resolvedNodeSpecification, nodeToUpdate);
+                }
             } else if (resolvedNodeSpecification === undefined) {
                 // The node is newly created - it is not in registered specification yet
                 Object.entries(nodeSpecification).forEach(([key, value]) => {
@@ -707,6 +730,10 @@ export default class EditorManager {
                         structuredClone(toRaw(nodeSpecification)),
                         nodeToUpdate,
                     );
+                }
+
+                if (nodeSpecification.name !== nodeToUpdate) {
+                    this.updateParentNode(resolvedNodeSpecification, nodeToUpdate);
                 }
 
                 if (resolvedNodeSpecification.subgraphId !== undefined) {
