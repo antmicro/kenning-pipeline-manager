@@ -320,8 +320,7 @@ export default defineComponent({
                 let inheritedInterfaces = [];
 
                 parsedSpecification?.extends?.forEach((parentType) => {
-                    const parentSpec = editorManager.specification.currentSpecification
-                        .nodes?.find((n) => EditorManager.getNodeName(n) === parentType);
+                    const parentSpec = editorManager.baklavaView.editor.parentNodes.get(parentType);
                     inheritedProperties = [
                         ...inheritedProperties,
                         ...(parentSpec?.properties ?? []),
