@@ -374,9 +374,21 @@ export default defineComponent({
             return buttons.value;
         };
 
+        const nodeSiblings = computed(() => {
+            const siblings = new Set();
+            (node.value.extends ?? []).forEach((eName) => {
+                const extended = editorManager.baklavaView.editor.parentNodes.get(eName);
+                if (extended !== undefined) {
+                    extended.extending?.forEach((e) => siblings.add(e));
+                }
+            });
+            siblings.delete(node.value.type);
+            return Array.from(siblings);
+        });
+
         const replacementParents = computed(() => replacementButtons(node.value.extends));
         const replacementChildren = computed(() => replacementButtons(node.value.extending));
-        const replacementSiblings = computed(() => replacementButtons(node.value.siblings));
+        const replacementSiblings = computed(() => replacementButtons(nodeSiblings.value));
 
         const displayedName = computed(() => {
             if (node.value.title === '' || node.value.title === undefined) {
