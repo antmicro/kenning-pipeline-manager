@@ -711,7 +711,8 @@ export default class EditorManager {
                             .forEach(([key, value]) => { specification[key] = value; });
                     });
 
-                resolvedNodeSpecification.name = EditorManager.getNodeName(nodeSpecification);
+                const nodeName = EditorManager.getNodeName(nodeSpecification);
+                resolvedNodeSpecification.name = nodeName;
 
                 const extendingNodes = this.specification.unresolvedSpecification.nodes
                     .filter((node) => node.extends?.includes(nodeToUpdate))
@@ -725,9 +726,9 @@ export default class EditorManager {
                     return { errors: validationErrors, warnings: [] };
                 }
 
-                if (nodeSpecification.isCategory) {
+                if (this.baklavaView.editor.nodeTypes.get(nodeName).isCategory) {
                     this.updateExtendingNodes(
-                        structuredClone(toRaw(nodeSpecification)),
+                        JSON.parse(JSON.stringify(nodeSpecification)),
                         nodeToUpdate,
                     );
                 }

@@ -269,6 +269,16 @@ export function addProperty(property: PropertyConfiguration): void {
         return;
     }
 
+    const resolvedChildNodes = editorManager.specification.currentSpecification.nodes
+        .filter((n: any) => n.extends?.includes(currentType)) ?? [];
+
+    resolvedChildNodes.forEach((n: any) => {
+        // eslint-disable-next-line no-param-reassign
+        n.properties = [...(n.properties ?? []), ...[property]];
+        const childNodes: any[] = displayedGraph.nodes.filter((child) => child.type === n.name);
+        alterProperties(childNodes, [property]);
+    });
+
     commitTypeToSpecification();
 }
 
@@ -299,6 +309,18 @@ export function removeProperties(properties: PropertyConfiguration[]): void {
         (item) => !properties.includes(item),
     );
     alterProperties(nodes, properties, true);
+
+    const resolvedChildNodes = editorManager.specification.currentSpecification.nodes
+        .filter((n: any) => n.extends?.includes(currentType)) ?? [];
+
+    resolvedChildNodes.forEach((n: any) => {
+        // eslint-disable-next-line no-param-reassign
+        n.properties = n.properties?.filter(
+            (prop: PropertyConfiguration) => !properties.some((p) => p.name === prop.name),
+        ) ?? [];
+        const childNodes: any[] = displayedGraph.nodes.filter((child) => child.type === n.name);
+        alterProperties(childNodes, properties, true);
+    });
 
     commitTypeToSpecification();
 }
@@ -340,6 +362,16 @@ export function addInterface(intf: InterfaceConfiguration): void {
         return;
     }
 
+    const resolvedChildNodes = editorManager.specification.currentSpecification.nodes
+        .filter((n: any) => n.extends?.includes(currentType)) ?? [];
+
+    resolvedChildNodes.forEach((n: any) => {
+        // eslint-disable-next-line no-param-reassign
+        n.interfaces = [...(n.interfaces ?? []), ...[intf]];
+        const childNodes: any[] = displayedGraph.nodes.filter((child) => child.type === n.name);
+        alterInterfaces(childNodes, [intf]);
+    });
+
     commitTypeToSpecification();
 }
 
@@ -351,7 +383,6 @@ export function addInterface(intf: InterfaceConfiguration): void {
 export function removeInterfaces(interfaces: InterfaceConfiguration[]): void {
     const { viewModel } = useViewModel();
     const { displayedGraph } = viewModel.value;
-
     const currentType = configurationState.editedType;
     const editorManager = EditorManager.getEditorManagerInstance();
 
@@ -370,6 +401,18 @@ export function removeInterfaces(interfaces: InterfaceConfiguration[]): void {
         (item) => !interfaces.includes(item),
     );
     alterInterfaces(nodes, interfaces, true);
+
+    const resolvedChildNodes = editorManager.specification.currentSpecification.nodes
+        .filter((n: any) => n.extends?.includes(currentType)) ?? [];
+
+    resolvedChildNodes.forEach((n: any) => {
+        // eslint-disable-next-line no-param-reassign
+        n.interfaces = n.interfaces?.filter(
+            (intf: InterfaceConfiguration) => !interfaces.some((i) => i.name === intf.name),
+        ) ?? [];
+        const childNodes: any[] = displayedGraph.nodes.filter((child) => child.type === n.name);
+        alterInterfaces(childNodes, interfaces, true);
+    });
 
     commitTypeToSpecification();
 }
