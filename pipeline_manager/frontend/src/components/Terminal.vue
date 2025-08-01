@@ -60,7 +60,7 @@ export default defineComponent({
 
         const printLog = (log) => {
             if (term === undefined) return;
-            const text = props.terminalInstance === MAIN_TERMINAL ? log.replace(/\n/g, '\r\n') : log;
+            const text = terminalStore.readOnly[props.terminalInstance] ? log.replace(/\n/g, '\r\n') : log;
             term.io.print(text);
             terminalBuffer.push(text);
         };
