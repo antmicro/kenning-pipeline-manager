@@ -31,7 +31,10 @@ Resizable terminal panel that handles the user interactions
             </div>
 
             <div class="button-wrapper">
-                <button v-if="isTerminalPanelOpened" @click="clearTerminalOutput(activeTerminal)">
+                <button
+                    v-if="isTerminalPanelOpened && showClearButton"
+                    @click="clearTerminalOutput(activeTerminal)"
+                >
                     <Bin/>
                     <span>Clear terminal</span>
                 </button>
@@ -67,6 +70,7 @@ import {
     nextTick,
 } from 'vue';
 
+import { TerminalView } from '../core/communication/utils';
 import Terminal from './Terminal.vue';
 import Arrow from '../icons/Arrow.vue';
 import Indicator from '../icons/Indicator.vue';
@@ -87,6 +91,7 @@ export default defineComponent({
 
         const activeTerminal = ref<string | undefined>(undefined);
         const isTerminalPanelOpened = ref<boolean>(false);
+        const showClearButton = ref(true);
         const terminalPanelHeight = ref(0);
 
         const arrowHovered = ref(false);
@@ -112,17 +117,18 @@ export default defineComponent({
             'pointer-events': (isTerminalPanelOpened.value ? 'all' : 'none'),
         }) as StyleValue);
 
-        onMounted(() => {
-            const setTerminalHeight = (height: number) => {
-                terminalPanelHeight.value = height;
-            };
-            resizer.value!.addEventListener('mousedown', mouseDownHandler(setTerminalHeight));
-        });
-
-        const displayedTerminals: Ref<{
+        const terminals: Ref<{
             name: string,
             hasNewMessage: boolean,
         }[]> = ref([]);
+
+        const terminalMatch
+            = (name: string) => (terminal: { name: string }) => terminal.name === name;
+
+        const displayedNames = ref<string[]>([]);
+        const displayedTerminals = computed(
+            () => displayedNames.value.map((name) => terminals.value.find(terminalMatch(name))!),
+        );
 
         // Computing tuples of names and lengths of terminals
         const terminalNamesLengths = computed(() => {
@@ -147,21 +153,35 @@ export default defineComponent({
             newVal.forEach((tuple) => {
                 if (!(oldNames?.includes(tuple.name))) {
                     // Adding new terminals to the displayed ones
-                    displayedTerminals.value.push({
+                    terminals.value.push({
                         name: tuple.name,
                         hasNewMessage: tuple.length !== 0,
                     });
+                    displayedNames.value.push(tuple.name);
                 } else {
                     // Checking whether length changed in an existing terminal
                     const oldTuple = oldVal!.find((t) => t.name === tuple.name);
-                    if (oldTuple!.length !== tuple.length && tuple.name !== activeTerminal.value) {
-                        const terminal = displayedTerminals.value.find(
+                    if (oldTuple?.length !== tuple.length && tuple.name !== activeTerminal.value) {
+                        const terminal = terminals.value.find(
                             (t) => t.name === tuple.name,
                         );
                         terminal!.hasNewMessage = true;
                     }
                 }
             });
+
+            oldVal
+                ?.filter((terminal) => !newVal.some(terminalMatch(terminal.name)))
+                .forEach((terminal) => {
+                    const terminalIndex = terminals.value.findIndex(terminalMatch(terminal.name));
+                    terminals.value.splice(terminalIndex, 1);
+
+                    const nameIndex = displayedNames.value.indexOf(terminal.name, 1);
+                    displayedNames.value.splice(nameIndex, 1);
+
+                    // eslint-disable-next-line no-use-before-define
+                    if (activeTerminal.value === terminal.name) toggleTerminalPanel(terminal.name);
+                });
         }, {
             immediate: true,
         });
@@ -172,13 +192,13 @@ export default defineComponent({
         };
 
         const setReadMessages = (terminalName: string) => {
-            displayedTerminals.value.forEach((terminal) => {
+            terminals.value.forEach((terminal) => {
                 // eslint-disable-next-line no-param-reassign
                 if (terminal.name === terminalName) terminal.hasNewMessage = false;
             });
         };
 
-        const toggleTerminalPanel = (terminal: string | undefined) => {
+        const toggleTerminalPanel = (terminal?: string, checkReadonly = true) => {
             if (terminal === undefined && !isTerminalPanelOpened.value) {
                 activeTerminal.value = MAIN_TERMINAL;
                 isTerminalPanelOpened.value = true;
@@ -196,22 +216,49 @@ export default defineComponent({
             }
             // Focus on terminal if it is not readonly
             if (activeTerminal.value !== undefined &&
-            !terminalStore.isReadOnly(activeTerminal.value)) {
+            (!checkReadonly || !terminalStore.isReadOnly(activeTerminal.value))) {
                 nextTick().then(() => document.getElementById('hterm-terminal')?.focus());
             }
         };
 
+        const manager = {
+            hide() {
+                if (isTerminalPanelOpened.value) toggleTerminalPanel(activeTerminal.value);
+            },
+            show(name?: string) {
+                const terminal = name ?? MAIN_TERMINAL;
+
+                terminalStore.show = true;
+                const isViewChanged = !isTerminalPanelOpened.value;
+                const isDifferentTerminal = activeTerminal.value
+                    && terminal !== activeTerminal.value;
+
+                if (isViewChanged || isDifferentTerminal) {
+                    toggleTerminalPanel(terminal ?? activeTerminal.value, false);
+                }
+            },
+            view(params: TerminalView) {
+                if (params.names) displayedNames.value = params.names;
+                if (params.clearButton !== undefined) showClearButton.value = params.clearButton;
+            },
+        };
+
+        onMounted(() => {
+            const setTerminalHeight = (height: number) => {
+                terminalPanelHeight.value = height;
+            };
+            terminalStore.manager = manager;
+            resizer.value!.addEventListener('mousedown', mouseDownHandler(setTerminalHeight));
+        });
+
         const clearTerminalOutput = (terminal?: string) => {
-            if (terminal !== undefined) {
-                terminalStore.remove(terminal);
-            } else {
-                terminalStore.remove();
-            }
+            terminalStore.clear(terminal);
         };
 
         return {
             toggleTerminalPanel,
             clearTerminalOutput,
+            showClearButton,
             displayedTerminals,
             activeTerminal,
             isTerminalPanelOpened,

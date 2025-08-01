@@ -137,4 +137,9 @@ export const terminalStore = reactive({
     },
 
     show: false,
+
+    /**
+    * @type {import('./communication/utils').TerminalManager|null}
+    */
+    manager: null,
 });

@@ -128,7 +128,7 @@ export default defineComponent({
             watch(
                 [() => props.terminalInstance, logsLength],
                 async ([newIns, newLen], [oldIns, oldLen]) => {
-                    if (newIns === undefined) {
+                    if (newIns === undefined || !terminalStore.exists(newIns)) {
                         return;
                     }
 
