@@ -135,4 +135,6 @@ export const terminalStore = reactive({
         this.readOnly[name] = readOnly;
         return true;
     },
+
+    show: false,
 });

@@ -18,7 +18,7 @@ The entrypoint of the application.
                 :view-model="editorManager.baklavaView"
                 @setLoad="handleLoad"
             />
-            <TerminalPanel v-show="!loading && !hideHud" />
+            <TerminalPanel v-show="(!loading && !hideHud) || terminalStore.show" />
         </div>
     </div>
 </template>
@@ -31,6 +31,7 @@ import TerminalPanel from './TerminalPanel.vue';
 import LoadingScreen from './LoadingScreen.vue';
 import Editor from '../custom/Editor.vue';
 import '@baklavajs/themes/dist/classic.css';
+import { terminalStore } from '../core/stores.js';
 
 export default {
     components: {
@@ -67,6 +68,7 @@ export default {
             hideHud,
             handleLoad,
             loading,
+            terminalStore,
         };
     },
 };
