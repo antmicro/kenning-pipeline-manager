@@ -102,11 +102,14 @@ async function verifyNodePresence(page: Page, specificationPath: string, nodeNam
 
 test('enable editing', async ({ page }) => {
     await page.goto(getUrl());
+    await loadIncludeSpecification(page);
     await enableEditingNodes(page);
 });
 
 test('create new node type', async ({ page }) => {
     await page.goto(getUrl());
+    await loadIncludeSpecification(page);
+
     await enableEditingNodes(page);
     await createNewNodeType(page);
     await addNode(page, 'Default category', 'Custom Node', 750, 80);
