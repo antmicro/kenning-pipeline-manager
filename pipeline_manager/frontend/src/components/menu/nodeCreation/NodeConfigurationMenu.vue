@@ -35,7 +35,7 @@ import {
 } from '@baklavajs/renderer-vue'; // eslint-disable-line object-curly-newline
 
 import { getOptionName } from '../../../custom/CustomNode.js';
-import { createNode, modifyConfiguration } from '../../../core/nodeCreation/Configuration.ts';
+import { createNode, duplicateNode, modifyConfiguration } from '../../../core/nodeCreation/Configuration.ts';
 import { menuState, NodeDataConfiguration, configurationState } from '../../../core/nodeCreation/ConfigurationState.ts';
 
 import InputInterface from '../../../interfaces/InputInterface.js';
@@ -95,6 +95,12 @@ export default defineComponent({
                     configurationState.success = errors.length === 0;
                     close();
                 });
+            } else if (menuState.configurationMenu.duplicateNode === true) {
+                button = new ButtonInterface('Duplicate', () => {
+                    const errors = duplicateNode();
+                    configurationState.success = errors.length === 0;
+                    close();
+                });
             } else {
                 button = new ButtonInterface('Configure', () => {
                     const errors = modifyConfiguration();
@@ -105,7 +111,6 @@ export default defineComponent({
             button.componentName = 'ButtonInterface';
             return button;
         });
-
         const configurationOptions = computed(() =>
             [nodeName.value, nodeCategory.value, nodeDescription.value],
         );
@@ -118,4 +123,5 @@ export default defineComponent({
         };
     },
 });
+
 </script>

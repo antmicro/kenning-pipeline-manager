@@ -15,7 +15,7 @@ import { NodeInterface } from '@baklavajs/core';
 import EditorManager, { NEW_NODE_STYLE, EDITED_NODE_STYLE } from '../EditorManager.js';
 import { parseInterfaces } from '../interfaceParser.js';
 import {
-    configurationState, PropertyConfiguration, InterfaceConfiguration,
+    menuState, configurationState, PropertyConfiguration, InterfaceConfiguration,
 } from './ConfigurationState.ts';
 
 import {
@@ -29,6 +29,72 @@ type CreatedInterfaces = {
 }
 
 /**
+  * Function that find unresolved specification of node with nodeType type and
+  * then parsse it for node type cloning.
+  * @param nodeType- name of a node type to clone
+*/
+export function prepareNodeForDuplication(nodeType:string) : void {
+    const editorManager = EditorManager.getEditorManagerInstance();
+
+    const getNodeSpec = (nodeName:string) =>
+        editorManager.specification.unresolvedSpecification.nodes.filter((node:any) => {
+            let namesToCheck;
+            if (node.isCategory === true) namesToCheck = node.category.split('/');
+            else namesToCheck = [node.name];
+            return namesToCheck.includes(nodeName);
+        })[0];
+
+    const nodeSpec = getNodeSpec(nodeType);
+
+    if (nodeSpec.isCategory) {
+        NotificationHandler.terminalLog('error', 'Node copy error', 'Cannot copy category node!');
+        return;
+    }
+
+    const nodeData = {
+        name: nodeType,
+        category: nodeSpec.category,
+        layer: nodeSpec.layer,
+        color: nodeSpec.color,
+    };
+
+    configurationState.editedType = nodeType;
+    configurationState.nodeData = nodeData;
+    configurationState.subgraphId = nodeSpec?.subgraphId;
+
+    configurationState.pill = nodeSpec.pill;
+    configurationState.extends = nodeSpec.extends;
+
+    const nodeInterfaces = nodeSpec.interfaces;
+
+    const configuredInterfaces = nodeInterfaces?.map((intf:InterfaceConfiguration) => ({
+        name: intf?.name,
+        type: intf?.type,
+        direction: intf?.direction,
+        array: intf?.array,
+    }));
+
+    const nodeProperties = nodeSpec.properties;
+
+    /* eslint-disable no-underscore-dangle */
+    const configuredProperties = nodeProperties?.map((prop:PropertyConfiguration) => ({
+        name: prop?.name,
+        type: prop?.type,
+        default: prop?.default,
+        min: prop?.min,
+        max: prop?.max,
+        values: prop?.values,
+        step: prop?.step,
+        readonly: prop?.readonly,
+        dtype: prop?.dtype,
+        group: prop?.group,
+    }));
+
+    configurationState.properties = configuredProperties;
+    configurationState.interfaces = configuredInterfaces;
+}
+
+/**
   * Updates editor specification for the edited node type.
 */
 function commitTypeToSpecification() {
@@ -39,7 +105,7 @@ function commitTypeToSpecification() {
     const currentType = configurationState.editedType;
     let style = NEW_NODE_STYLE;
 
-    if (currentType !== undefined) {
+    if (currentType !== undefined && !menuState.configurationMenu.duplicateNode) {
         // eslint-disable-next-line no-underscore-dangle
         const errors = editorManager._unregisterNodeType(currentType);
         if (errors.length) {
@@ -119,7 +185,28 @@ export function createNode(): string[] {
     }
 
     commitTypeToSpecification();
+
+    if (menuState.configurationMenu.duplicateNode) {
+        [
+            ...editorManager.specification.unresolvedSpecification.nodes ?? [],
+            ...editorManager.specification.currentSpecification.nodes ?? [],
+        ].forEach((node) => {
+            editorManager.refreshSubgraph(node);
+        });
+    }
+
     return [];
+}
+
+/**
+  * Duplicates a node based on the current configuration.
+  * It delegates work to the createNode function
+  * @returns any - a createNode function returns
+*/
+export function duplicateNode(): string[] {
+    const ret = createNode();
+    menuState.configurationMenu.duplicateNode = false;
+    return ret;
 }
 
 /**

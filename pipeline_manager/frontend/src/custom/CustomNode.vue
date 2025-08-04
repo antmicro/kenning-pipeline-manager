@@ -335,7 +335,8 @@ const contextMenuTitleItems = computed(() => {
             { value: 'interface', label: 'Add interface' },
             { value: 'layer', label: 'Set layer' },
             { value: 'delete-property', label: 'Delete property' },
-            { value: 'delete-interface', label: 'Delete interface', endSection: true },
+            { value: 'delete-interface', label: 'Delete interface' },
+            { value: 'duplicate', label: 'Duplicate node type', endSection: true },
         );
         if (!isGraphNode && !editorManager.editor.preview) {
             items.push(
@@ -485,6 +486,11 @@ const onContextMenuTitleClick = async (action) => {
     if (action.includes('gotoRelatedGraph')) {
         viewModel.value.editor.switchToRelatedGraph(action.replace(/^gotoRelatedGraph /, ''));
     }
+
+    if (action === 'duplicate') {
+        prepareNodeForDuplication(props.node.title);
+    }
+
     switch (action) {
         case 'delete':
             startTransaction();
@@ -535,9 +541,17 @@ const onContextMenuTitleClick = async (action) => {
             removeNode(props.node, true);
             commitTransaction();
             break;
+        case 'duplicate':
+            menuState.configurationMenu.visible = true;
+            menuState.configurationMenu.addNode = false;
+            menuState.configurationMenu.duplicateNode = true;
+            nodeData.name += ' (copy)';
+            configurationState.nodeData = nodeData;
+            break;
         case 'configure':
             menuState.configurationMenu.visible = true;
             menuState.configurationMenu.addNode = false;
+            menuState.configurationMenu.duplicateNode = false;
             configurationState.nodeData = nodeData;
             break;
         case 'property':
