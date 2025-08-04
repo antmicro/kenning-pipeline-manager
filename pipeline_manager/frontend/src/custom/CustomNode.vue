@@ -21,7 +21,7 @@ from moving or deleting the nodes.
         :class="classes"
         :style="styles"
         :data-node-type="node.type"
-        @pointerdown.left.self="(ev) => select(ev)"
+        @pointerdown.left.exact="(ev) => select(ev)"
         oncontextmenu="return false;"
     >
         <div class="interface-cursor">
