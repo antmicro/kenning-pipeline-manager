@@ -17,10 +17,11 @@ import { useViewModel } from '@baklavajs/renderer-vue';
 import runInfo from './runInformation';
 import EditorManager from '../EditorManager';
 import NotificationHandler from '../notifications';
-import { terminalStore } from '../stores';
+import { MAIN_TERMINAL, terminalStore } from '../stores';
 
 // eslint-disable-next-line import/no-cycle
 import getExternalApplicationManager from './ExternalApplicationManager';
+import { checkTerminalExistence, TerminalView } from './utils';
 
 /* eslint-disable import/prefer-default-export */
 /* eslint-disable camelcase */
@@ -390,6 +391,11 @@ export function terminal_add(params: TerminalAdd) {
     }
 }
 
+export function terminal_remove(params: { name: string }) {
+    checkTerminalExistence(params.name, true);
+    terminalStore.remove(params.name);
+}
+
 type TerminalWrite = {
     name: string,
     message: string
@@ -403,6 +409,31 @@ export function terminal_write(params: TerminalWrite) {
         terminalStore.createTerminalInstance(params.name);
     }
     terminalStore.add(params.message, params.name);
+}
+
+export function terminal_clear(params: { name: string | undefined }) {
+    const name = params?.name ?? MAIN_TERMINAL;
+    checkTerminalExistence(name, true);
+    terminalStore.clear(name);
+}
+
+export function terminal_hide() {
+    terminalStore.manager?.hide();
+}
+
+export function terminal_show(params: { name: string | undefined }) {
+    const name = params?.name ?? MAIN_TERMINAL;
+    if (name !== undefined) checkTerminalExistence(name, true);
+    terminalStore.manager?.show(name);
+}
+
+export function terminal_view(params: TerminalView) {
+    params.names?.forEach(((name) => checkTerminalExistence(name, true)));
+    terminalStore.manager?.view(params);
+}
+
+export function terminal_get_instances() {
+    return terminalStore.getInstances();
 }
 
 type Notification = {

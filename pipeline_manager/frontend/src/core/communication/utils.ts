@@ -1,3 +1,4 @@
+import { terminalStore } from '../stores';
 import ExternalApp from './externalApp/base';
 
 export type SpecType = {
@@ -18,4 +19,11 @@ export type TerminalManager = {
     hide(): void;
     show(name: string | undefined): void;
     view(params: TerminalView): void;
+}
+
+export function checkTerminalExistence(name: string, exists = true) {
+    if (terminalStore.exists(name) !== exists) {
+        const message = `Terminal instance of name '${name} ${exists ? 'does not exist' : 'already exists'}`;
+        throw new Error(message);
+    }
 }

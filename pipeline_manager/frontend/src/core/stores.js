@@ -113,11 +113,25 @@ export const terminalStore = reactive({
         this.add(parsedMessage, instance);
     },
 
-    remove(instance = MAIN_TERMINAL) {
+    clear(instance = MAIN_TERMINAL) {
         if (instance === MAIN_TERMINAL) {
             remove(`logs`);
         }
         this.logs[instance] = [];
+    },
+
+    remove(instance = MAIN_TERMINAL) {
+        this.clear(instance);
+        delete this.logs[instance];
+        delete this.readOnly[instance];
+    },
+
+    exists(name = MAIN_TERMINAL) {
+        return name in this.logs;
+    },
+
+    getInstances() {
+        return Object.keys(this.logs);
     },
 
     /**

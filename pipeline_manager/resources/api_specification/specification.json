@@ -211,6 +211,23 @@
                 "$ref": "common_types#/$defs/null_or_empty"
             }
         },
+        "terminal_remove": {
+            "description": "Create new terminal instance",
+            "params": {
+                "description": "Parameters for request",
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "description": "Name of the terminal to remove",
+                        "type": "string"
+                    }
+                },
+                "required": ["name"]
+            },
+            "returns": {
+                "$ref": "common_types#/$defs/null_or_empty"
+            }
+        },
         "terminal_write": {
             "description": "Writes a message line to a terminal instance. Allows to send both text and hterm's control sequences. For more details on available control sequences check [hterm Control Sequences](https://chromium.googlesource.com/apps/libapps/+/master/hterm/doc/ControlSequences.md).\n\n```{warning}\nSince data is sent in JSON format, the hexadecimal values need to be escaped with `\\u`, not `\\x`, e.g. `\\u001b[38:2:238:178:17mexample`.\n```",
             "params": {
@@ -225,11 +242,89 @@
                         "description": "Message to be written to the terminal",
                         "type": "string"
                     }
+
                 },
                 "required": ["name", "message"]
             },
             "returns": {
                 "$ref": "common_types#/$defs/null_or_empty"
+            }
+        },
+        "terminal_clear": {
+            "description": "Clears a terminal with a given name",
+            "params": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "description": "Name of the terminal to clear. If the name is not provided, the main terminal is cleared.",
+                        "type": "string"
+                    }
+                }
+            },
+            "returns": {
+                "$ref": "common_types#/$defs/null_or_empty"
+            }
+        },
+        "terminal_hide": {
+            "description": "Hides a terminal panel",
+            "params": {
+                "$ref": "common_types#/$defs/null_or_empty"
+            },
+            "returns": {
+                "$ref": "common_types#/$defs/null_or_empty"
+            }
+        },
+        "terminal_show": {
+            "params": {
+                "type": "object",
+                "description": "Parameters for request",
+                "properties": {
+                    "name": {
+                        "description": "Name of the terminal to show. If the name is not provided, the main terminal is chosen.",
+                        "type": "string"
+                    }
+                }
+            },
+            "returns": {
+                "$ref": "common_types#/$defs/null_or_empty"
+            }
+        },
+        "terminal_view": {
+            "description": "Configures the layout of the terminal panel",
+            "params": {
+                "description": "Parameters for request",
+                "type": "object",
+                "properties": {
+                    "names": {
+                        "description": "Names of the terminal to show. If the parameter is empty, then the terminal view is unmodified",
+                        "type": "array",
+                        "items": {
+                            "description": "Name of the terminal",
+                            "type": "string"
+                        }
+                    },
+                    "clearButton": {
+                        "description": "Specifies whether to 'Clear terminal' button should be displayed. If not specified, the state of the clear button is not modified.",
+                        "type": "boolean"
+                    }
+                }
+            },
+            "returns": {
+                "$ref": "common_types#/$defs/null_or_empty"
+            }
+        },
+        "terminal_get_instances": {
+            "description": "Configures the layout of the terminal panel",
+            "params": {
+                "$ref": "common_types#/$defs/null_or_empty"
+            },
+            "returns": {
+                "description": "Existing terminals",
+                "type": "array",
+                "items": {
+                    "description": "Name of the terminal",
+                    "type": "string"
+                }
             }
         },
         "notification_send": {
