@@ -669,27 +669,7 @@ export default class EditorManager {
                 (node) => EditorManager.getNodeName(node) === nodeToUpdate,
             );
 
-            if (unresolvedNodeSpecification === undefined) {
-                // The node is included - push new spec to unresolvedSpecification to override
-                nodeSpecification.includeName = nodeToUpdate;
-                this.specification.unresolvedSpecification.nodes.push(nodeSpecification);
-
-                Object.entries(nodeSpecification).forEach(([key, value]) => {
-                    if (value !== undefined) {
-                        resolvedNodeSpecification[key] = structuredClone(toRaw(value));
-                    }
-                });
-                validationErrors = this._registerNodeType(resolvedNodeSpecification);
-                if (validationErrors.length) {
-                    return { errors: validationErrors, warnings: [] };
-                }
-                if (nodeSpecification.isCategory) {
-                    this.updateExtendingNodes(nodeSpecification, nodeToUpdate);
-                }
-                if (nodeSpecification.name !== nodeToUpdate) {
-                    this.updateParentNode(resolvedNodeSpecification, nodeToUpdate);
-                }
-            } else if (resolvedNodeSpecification === undefined) {
+            if (resolvedNodeSpecification === undefined) {
                 // The node is newly created - it is not in registered specification yet
                 Object.entries(nodeSpecification).forEach(([key, value]) => {
                     if (value !== undefined) {
@@ -701,24 +681,32 @@ export default class EditorManager {
                     return { errors: validationErrors, warnings: [] };
                 }
             } else {
-                if (removeUnused) {
-                    Object.keys(unresolvedNodeSpecification)
-                        .filter((key) => !(key in nodeSpecification))
-                        .forEach((key) => { delete unresolvedNodeSpecification[key]; });
-                }
-
-                [unresolvedNodeSpecification, resolvedNodeSpecification]
-                    .forEach((specification) => {
-                        Object.entries(JSON.parse(JSON.stringify(nodeSpecification)))
-                            .filter(([_, value]) => value !== undefined)
-                            .map(([key, value]) => [key, structuredClone(toRaw(value))])
-                            .forEach(([key, value]) => { specification[key] = value; });
+                if (unresolvedNodeSpecification === undefined) {
+                    // The node is included - push new spec to unresolvedSpecification to override
+                    nodeSpecification.includeName = nodeToUpdate;
+                    this.specification.unresolvedSpecification.nodes.push(nodeSpecification);
+                } else {
+                    if (removeUnused) {
+                        Object.keys(unresolvedNodeSpecification)
+                            .filter((key) => !(key in nodeSpecification))
+                            .forEach((key) => { delete unresolvedNodeSpecification[key]; });
+                    }
+                    Object.entries(nodeSpecification).forEach(([key, value]) => {
+                        if (value !== undefined) {
+                            unresolvedNodeSpecification[key] = JSON.parse(JSON.stringify(value));
+                        }
                     });
+                }
+                Object.entries(nodeSpecification).forEach(([key, value]) => {
+                    if (value !== undefined) {
+                        resolvedNodeSpecification[key] = JSON.parse(JSON.stringify(value));
+                    }
+                });
 
                 const nodeName = EditorManager.getNodeName(nodeSpecification);
                 resolvedNodeSpecification.name = nodeName;
 
-                const extendingNodes = this.specification.unresolvedSpecification.nodes
+                const extendingNodes = this.specification.currentSpecification.nodes
                     .filter((node) => node.extends?.includes(nodeToUpdate))
                     .map((node) => EditorManager.getNodeName(node));
                 if (extendingNodes !== undefined) {
@@ -745,9 +733,9 @@ export default class EditorManager {
                     // Attach subgraph to the updated subgraph node
                     let graphNode;
                     let subgraph;
-                    this.specification.unresolvedSpecification.graphs.forEach((graph) => {
-                        if (unresolvedNodeSpecification.subgraphId === graph.id) {
-                            graphNode = unresolvedNodeSpecification;
+                    this.specification.currentSpecification.graphs.forEach((graph) => {
+                        if (resolvedNodeSpecification.subgraphId === graph.id) {
+                            graphNode = resolvedNodeSpecification;
                             subgraph = graph;
                         }
                     });
