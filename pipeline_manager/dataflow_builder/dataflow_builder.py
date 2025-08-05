@@ -367,7 +367,7 @@ class GraphBuilder:
 
     def get_subgraph_by_name(
         self, name: str
-    ) -> DataflowGraph | List[DataflowGraph]:
+    ) -> Union[DataflowGraph, list[DataflowGraph]]:
         """
         Get a subgraph by the name.
 
@@ -382,7 +382,7 @@ class GraphBuilder:
 
         Returns
         -------
-        DataflowGraph | List[DataflowGraph]
+        Union[DataflowGraph, list[DataflowGraph]]
             An single instance if one graph is matched, a list of instances if
             multiple graphs are matched.
 
