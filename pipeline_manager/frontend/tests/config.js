@@ -74,7 +74,7 @@ export async function enableNavigationBar(page) {
  * @returns {Promise<void>} Promise that resolves when the drag-and-drop operation is complete.
  */
 export async function addNode(page, category, nodeName, x, y) {
-    const categoryBar = page.getByText(category);
+    const categoryBar = page.getByText(category, { exact: true });
     const node = page.getByText(nodeName, { exact: true }).first();
 
     // Open a proper category.
