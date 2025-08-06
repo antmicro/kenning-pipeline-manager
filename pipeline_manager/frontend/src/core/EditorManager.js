@@ -611,6 +611,10 @@ export default class EditorManager {
                 );
             }
         });
+        if (this.baklavaView.editor.parentNodes.has(nodeToUpdate)) {
+            this.baklavaView.editor.parentNodes.delete(nodeToUpdate);
+        }
+        this.baklavaView.editor.parentNodes.set(nodeSpecification.name, nodeSpecification);
     }
 
     /**
