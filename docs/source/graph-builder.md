@@ -114,6 +114,53 @@ node.move(Vector2(1000, 1000))
 node.move(new_position=Vector2(500, 0), relative=True)
 ```
 
+## Exception Hierarchy
+
+The dataflow builder module has custom exceptions ordered in a hierarchy of inheritance.
+The highest in the hierarchy is `DataflowBuilderError`.
+
+The complete hierarchy of custom exceptions:
+
+```
+DataflowBuilderError
+├── InterfaceError
+│   ├── InterfaceCountError
+│   ├── MissingInterfaceAttributeError
+│   ├── MultipleInterfacesSelectedError
+│   ├── NotDynamicInterfaceError
+│   ├── NoInterfaceMatchedError
+│   ├── InvalidInterfaceTypeError
+│   ├── MissingInterfaceError
+│   └── OutOfSpecificationInterfaceError
+├── PropertyError
+│   ├── InvalidPropertyValueError
+│   ├── MissingPropertyError
+│   └── InvalidPropertyTypeError
+├── NodeError
+│   ├── MissingNodeAttributeError
+│   ├── ExtraNodeAttributeError
+│   ├── OutOfSpecificationNodeError
+│   ├── NodeLacksInterfacesError
+│   └── MissingNodeError
+├── GraphError
+│   ├── DuplicateExternalNamesError
+│   ├── InvalidPanningError
+│   ├── ScalingOutOfBoundsError
+│   ├── InvalidDataflowError
+│   ├── NoGraphsError
+│   └── GraphRenamingError
+├── ConnectionError
+│   ├── InvalidDirectionError
+│   ├── ConnectionExistsError
+│   └── MismatchingInterfaceTypesError
+└── GraphBuilderError
+    ├── NotSpecificationError
+    ├── NoGraphSelectedError
+    ├── ExternalValidatorError
+    ├── SpecificationWithoutNodesError
+    └──
+```
+
 ## Specification of GraphBuilder
 
 ```{eval-rst}
