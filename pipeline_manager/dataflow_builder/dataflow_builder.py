@@ -265,11 +265,11 @@ class GraphBuilder:
                 return another_builder.get_graph_by_property(
                     "name", identifier
                 )
-            except (NoGraphSelectedError, MissingPropertyError):
+            except (NoGraphSelectedError, MissingPropertyError) as e:
                 raise NoGraphSelectedError(
                     f"The provided `identifier` = `{identifier}` "
                     "matches neither `id` nor `name` of any graph."
-                )
+                ) from e
 
     def get_graph_by_property(
         self, property_name: str, property_value: Any
