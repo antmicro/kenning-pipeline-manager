@@ -220,7 +220,8 @@ const nodeColor = computed(() => viewModel.value.editor.getNodeColor(node.value)
 const nodeTitleColor = computed(() => viewModel.value.editor.getTextColor(nodeColor.value));
 const nodeCategory = viewModel.value.editor.getNodeCategory(props.node.type);
 const isGraphNode = viewModel.value.editor.isGraphNode(props.node.type);
-const nodeHasRelatedGraphs = viewModel.value.editor.nodeHasRelatedGraphs(props.node.type);
+const nodeHasRelatedGraphs
+    = computed(() => viewModel.value.editor.nodeHasRelatedGraphs(node.value));
 const pillText = computed(() => viewModel.value.editor.getPillText(node.value.type));
 const pillColor = computed(() => viewModel.value.editor.getPillColor(node.value.type));
 const pillTextColor = computed(() => viewModel.value.editor.getTextColor(pillColor.value));
@@ -317,9 +318,18 @@ const contextMenuTitleItems = computed(() => {
     if (isGraphNode) {
         items.push({ value: 'editSubgraph', label: 'Edit Subgraph', icon: icons.Subgraph });
     }
-    if (nodeHasRelatedGraphs) {
+    if (nodeHasRelatedGraphs.value) {
+        const nodeInstance = node.value;
         const nodeType = viewModel.value.editor.nodeTypes.get(props.node.type);
-        nodeType?.relatedGraphs.forEach(({ name, id }) => {
+        const toEntries = (graphs) => graphs?.map(({ id, name }) => [id, name]) ?? [];
+
+        // Merge related graphs from node type and instance
+        const relatedGraphs = Object.entries({
+            ...Object.fromEntries(toEntries(nodeType.relatedGraphs)),
+            ...Object.fromEntries(toEntries(nodeInstance.relatedGraphs)),
+        });
+
+        relatedGraphs.forEach(([id, name]) => {
             items.push({ value: `gotoRelatedGraph ${id}`, label: `Go to ${name} graph`, icon: icons.Subgraph });
         });
     }

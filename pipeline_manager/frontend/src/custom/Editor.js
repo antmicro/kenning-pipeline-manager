@@ -625,9 +625,8 @@ export default class PipelineManagerEditor extends Editor {
         return this.nodeTypes.get(nodeName).subgraphId !== undefined;
     }
 
-    nodeHasRelatedGraphs(nodeName) {
-        if (!this.nodeTypes.has(nodeName)) return false;
-        return this.nodeTypes.get(nodeName).relatedGraphs !== undefined;
+    nodeHasRelatedGraphs(node) {
+        return (node.relatedGraphs ?? this.nodeTypes.get(node.type)?.relatedGraphs) !== undefined;
     }
 
     addGraphTemplate(template, graphNode) {

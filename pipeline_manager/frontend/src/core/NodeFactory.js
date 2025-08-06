@@ -366,6 +366,7 @@ export class CustomNode extends Node {
         nodeExtending = [],
         nodeSiblings = [],
         width = 300,
+        relatedGraphs = undefined,
     ) {
         super();
 
@@ -378,6 +379,7 @@ export class CustomNode extends Node {
         this.twoColumn = twoColumn;
         this.type = name;
         this.width = width;
+        this.relatedGraphs = relatedGraphs;
 
         Object.keys(inputs).forEach((k) => {
             const intf = inputs[k]();
@@ -594,6 +596,7 @@ export class CustomNode extends Node {
         savedState.interfaces = newInterfaces;
         savedState.properties = newProperties;
         savedState.enabledInterfaceGroups = enabledInterfaceGroups;
+        savedState.relatedGraphs = this.relatedGraphs;
 
         savedState.name = savedState.type;
         delete savedState.type;
@@ -851,6 +854,8 @@ export class CustomNode extends Node {
         if (state.position === undefined) {
             this.position = undefined;
         }
+
+        this.relatedGraphs = state.relatedGraphs;
         return errors;
     }
 

@@ -419,13 +419,7 @@ export default function createPipelineManagerGraph(graph) {
         const state = {
             id: this.id,
             name: this.name,
-            nodes: this.nodes.map((n) => {
-                const nodeState = n.save();
-                if (this.editor.nodeHasRelatedGraphs(n.type)) {
-                    nodeState.relatedGraphs = this.editor.nodeTypes.get(n.type).relatedGraphs;
-                }
-                return nodeState;
-            }),
+            nodes: this.nodes.map((n) => n.save()),
             connections: this.connections.map((c) => ({
                 id: c.id,
                 from: c.from.id,
