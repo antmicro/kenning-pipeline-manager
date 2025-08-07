@@ -88,7 +88,6 @@
         {
             "name": "Related Graph",
             "id": "569edd54-0f42-4c24-a809-1509febbe23a",
-            "category": "First Category",
             "nodes": [
                 {
                     "name": "Test node #1",
