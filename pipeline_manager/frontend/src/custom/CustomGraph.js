@@ -305,16 +305,16 @@ export default function createPipelineManagerGraph(graph) {
                 errors.push(`Node type ${n.name} is not registered`);
             } else {
                 const node = new nodeInformation.type(); // eslint-disable-line new-cap
-                const nodeId = node.id;
+
+                // The node state may not have an id, so we it has to be assigned manually
+                // if needed
+                n.id ??= uuidv4();
+
                 this.addNode(node, state.graphLoadingState, n.id);
                 const nodeErrors = node.load(n);
                 if (Array.isArray(nodeErrors) && nodeErrors.length) {
                     errors.push(...nodeErrors);
                 }
-
-                // The node state may not have an id, so we it has to be assigned manually
-                // if needed
-                node.id ??= nodeId;
             }
         });
 

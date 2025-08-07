@@ -1073,19 +1073,6 @@ export default class EditorManager {
 
                 const newGraph = new Graph(this.baklavaView.editor);
                 newGraph.load(graph);
-                // Node interfaces had no `nodeId` field set,
-                // those loops copy them over.
-                // New nodes always have this field initialized with a value,
-                // but it doesn't happen in certain load conditions
-                newGraph._nodes.forEach((n) => {
-                    Object.keys(n.inputs).forEach((iface) => {
-                        n.inputs[iface].nodeId = n.id;
-                    });
-                    Object.keys(n.outputs).forEach((iface) => {
-                        n.outputs[iface].nodeId = n.id;
-                    });
-                });
-
                 this.relatedGraphsStore.push(newGraph);
             }
             this.relatedGraphsStore.forEach((g) => this.baklavaView.editor.registerGraph(g));

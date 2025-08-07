@@ -267,11 +267,7 @@ export default class PipelineManagerEditor extends Editor {
         }
         const { panning, scaling } = entryGraph;
 
-        // Due to having a sequential load on all nodes,
-        // those have to be separate in case a subgraph
-        // is also a related graph
         const usedSubgraphs = new Set();
-        const usedRelatedGraphs = new Set();
 
         this.nodeColors.clear();
         state.graphs.forEach((graph) => {
@@ -289,33 +285,9 @@ export default class PipelineManagerEditor extends Editor {
                     usedSubgraphs.add(n.subgraph);
                     [n.graphState] = fittingTemplate;
                 }
-                if (n.relatedGraphs !== undefined) {
-                    n.relatedGraphs.forEach(({ id }) => {
-                        const graphState = state.graphs.find((el) => el.id === id);
-                        if (graphState === undefined) {
-                            errors.push([`The related graph of id ${id} is not defined`]);
-                        } else if (Array.from(this.graphs).find((el) => id === el.id)) {
-                            // Do nothing - the linter hates this being a return from arrow func
-                        } else {
-                            const graphObject = new Graph(this);
-                            graphObject.load(graphState);
-                            usedRelatedGraphs.add(id);
-                            // Node interfaces had no `nodeId` field set,
-                            // those loops copy them over.
-                            // New nodes always have this field initialized with a value,
-                            // but it doesn't happen in certain load conditions
-                            graphObject._nodes.forEach((node) => {
-                                Object.keys(node.inputs).forEach((iface) => {
-                                    node.inputs[iface].nodeId = node.id;
-                                });
-                                Object.keys(node.outputs).forEach((iface) => {
-                                    node.outputs[iface].nodeId = node.id;
-                                });
-                            });
-                            this.registerGraph(graphObject);
-                        }
-                    });
-                }
+                n.relatedGraphs
+                    ?.filter(({ id }) => state.graphs.find((el) => el.id === id) === undefined)
+                    .forEach(({ id }) => errors.push([`The related graph of id ${id} is not defined`]));
                 this.setNodeColor(n.id, n.color);
             });
         });
@@ -324,13 +296,7 @@ export default class PipelineManagerEditor extends Editor {
             if (errors.length) return errors;
 
             state.graphs?.forEach((graph) => {
-                if (
-                    !usedSubgraphs.has(graph.id) &&
-                        !usedRelatedGraphs.has(graph.id) &&
-                        entryGraph.id !== graph.id) {
-                    // Currently this is inaccessible from the editor
-                    // in the future, such graphs may require interface nodeID mapping
-                    // like in relatedGraphs
+                if (!usedSubgraphs.has(graph.id) && entryGraph.id !== graph.id) {
                     const graphObject = new Graph(this);
                     errors.push(...graphObject.load(graph));
                     this.registerGraph(graphObject);
