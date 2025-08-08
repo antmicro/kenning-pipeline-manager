@@ -91,9 +91,9 @@
         // Pipeline Manager communication
 
         let PM;
-        window.onload = () => {
+        window.addEventListener('load', () => {
           PM = document.getElementById('pm');
-          new Promise(() => { setTimeout(() => sendPM({ method: 'register_external_frontend' }), 2000); });
+          sendPM({ method: 'register_external_frontend' });
 
           ['frontend-endpoint-responses', 'external-endpoint-requests']
             .map((id) => document.getElementById(id))
@@ -101,7 +101,7 @@
                 e.addEventListener('focus', (ev) => ev.target.blur());
                 e.addEventListener('drop', (ev) => ev.preventDefault());
             });
-        };
+        });
         const sendPM = (data) => PM.contentWindow.postMessage(data);
         const createJSONRPCResponse = (id, response) => ({ jsonrpc: "2.0", id, result: response });
 
@@ -109,7 +109,7 @@
           const data = event.data;
           if (data.method !== undefined) {
             const response = handleExternalRequest(data);
-            if (response !== undefined) sendPM(createJSONRPCResponse(data.id, response));
+            sendPM(createJSONRPCResponse(data.id, response));
           } else {
             logJson('frontend-endpoint-responses', data);
           }
@@ -139,7 +139,7 @@
               response = {};
               break
             case 'frontend_on_connect':
-              sendPM({ method: "graph_change", params: { dataflow: "http://localhost:3000/examples/sample-dataflow.json" } })
+              sendPM({ method: "graph_change", params: { dataflow: defaultDataflow } })
               response = null;
               break
             case 'dataflow_run':
