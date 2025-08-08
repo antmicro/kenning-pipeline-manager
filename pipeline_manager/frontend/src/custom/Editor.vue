@@ -672,7 +672,8 @@ export default defineComponent({
             // Load specification and/or dataflow delivered via window.postMessage
             window.addEventListener('message', async (event) => {
                 // TODO: introduce mechanism for checking event.origin against allowed origins
-                let data = event.data ?? {};
+                const data = event.data ?? {};
+                data.jsonrpc ??= JSONRPC;
 
                 if (isJSONRPCResponse(data)) {
                     if (event.source === window) return;
@@ -680,7 +681,7 @@ export default defineComponent({
                     return;
                 }
 
-                data = { jsonrpc: JSONRPC, id: jsonRPC.client.createID(), ...data };
+                data.id ??= jsonRPC.client.createID();
                 if (!isJSONRPCRequest(data)) return;
 
                 let response = data.method === 'register_external_frontend'
