@@ -182,7 +182,7 @@ The URI schemes can be passed to `pipeline_manager build` via `--json_url_specif
 These features are available for websites that embed {{project}} using `iframe`. [POST requests](https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage) are used as a communication channel.
 
 The usage example can be found in [pipeline_manager/frontend_tester/tester_api/index.html](https://github.com/antmicro/kenning-pipeline-manager/tree/main/pipeline_manager/frontend_tester/tester_api/index.html)
-(see [pipeline_manager/frontend_tester/README.md](https://github.com/antmicro/kenning-pipeline-manager/blob/main/pipeline_manager/frontend_tester/README.md) for build instructions).
+(see [README](https://github.com/antmicro/kenning-pipeline-manager/blob/main/pipeline_manager/frontend_tester/README.md) for build instructions). You can check a deployed instance [here](resource:tester_api/index.html).
 
 ### Making API requests
 

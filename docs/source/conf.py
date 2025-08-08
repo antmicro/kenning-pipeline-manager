@@ -114,6 +114,8 @@ html_show_sphinx = False
 
 html_static_path = ["_static"]
 
+html_extra_path = ["generated"]
+
 html_css_files = ("css/styles.css",)
 
 (html_logo, html_theme_options, html_context) = antmicro_html(
@@ -141,3 +143,5 @@ myst_url_schemes = {
 mermaid_cmd = "./mmdc"
 mermaid_params = ["--cssFile", "source/_static/css/styles.css"]
 mermaid_d3_zoom = True
+
+linkcheck_ignore = ["^tester_api.*"]
