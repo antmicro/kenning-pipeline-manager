@@ -1258,6 +1258,9 @@ export default class EditorManager {
                     version: dataflowSpecification.version,
                     entryGraph: entryGraphId,
                 });
+                this.relatedGraphsStore.forEach((g) => {
+                    this.baklavaView.editor.registerGraph(g);
+                });
                 if (entryErrors && entryErrors.length !== 0) {
                     entryErrors.forEach((e) => errors.push(e));
                     const newGraphInstance = new Graph(this.baklavaView.editor);
