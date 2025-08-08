@@ -1,9 +1,10 @@
 # Communication with an external application
 
-The communication with an external application is based on a [JSON-RPC](https://www.jsonrpc.org/specification), BSD sockets and SocketIO.
-{{project}} implements a TCP server that is listening on a specified port and waiting for the client to connect.
-{{project}} frontend sends JSON-RPC requests to this server through SocketIO, which redirects messages to connected client for specific actions described in this chapter.
-External application can also request actions from {{project}} in similar manner.
+The communication with an external application is based on a [JSON-RPC](https://www.jsonrpc.org/specification).
+
+{{project}} supports 2 ways of defining external application:
+* [External Backend Application](#external-backend-application)
+* [External Frontend Application](#external-frontend-application)
 
 ## Communication protocol
 
@@ -14,10 +15,18 @@ The application layer protocol specifies two blocks:
 
 The `size` and `content` are stored in big-endian.
 
-### Communication structure
+### External Backend Application
 
-By default, {{project}} in `server-app` mode will wait for an external application to connect and then request the specification.
-If connection is established successfully, {{project}} frontend will check if external application is still connected every 0.5 second.
+This is a core concept of `server-app` {{project}} mode.
+
+{{project}} implements a TCP server that is listening on a specified port and waiting for the client to connect.
+{{project}} frontend sends JSON-RPC requests to this server through SocketIO, which redirects messages to connected client for specific actions described in this chapter.
+External application can also request actions from {{project}} in similar manner.
+
+#### Frontend / Backend / External application
+
+By default, {{project}} will wait for an external application to connect and then request the specification.
+If the connection is established successfully, {{project}} frontend will check if external application is still connected every 0.5 second.
 Apart from that, both {{project}} frontend and external application can send requests which pass through {{project}} backend.
 
 ```{md-mermaid}
@@ -38,12 +47,12 @@ sequenceDiagram
         Frontend->>Backend: status_get
         Backend->>Frontend: status
     end
-    par Frontend request
+    par External App API
         Frontend->>+Backend: request
         Backend->>+External App: redirected request
         External App->>-Backend: response
         Backend->>-Frontend: redirected response
-    and External App request
+    and Frontend API
         External App->>+Backend: request
         Backend->>+Frontend: redirected request
         Frontend->>-Backend: response
@@ -66,6 +75,29 @@ Backend implements the following events:
 On the other hand, communication between backend and external application is done through BSD socket.
 To manage this, both sides run socket listener as separate coroutine task, which waits for messages and responds or redirects them.
 
+(external-frontend-backend-external-app)=
+#### External Frontend / {{project}}
+
+If the {{project}} is wrapped with another frontend (see [Frontend Features](project:frontend-features.md#making-api-requests) for details),
+the communication can be established with [POST requests](https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage).
+
+```{md-mermaid}
+sequenceDiagram
+    Note over External Frontend,Frontend: postMessage
+    par Frontend API
+        External Frontend->>Frontend: request
+        Frontend->>External Frontend: response
+    and Backend/External API
+        External Frontend->>+Frontend: request
+        Note over Frontend,Backend & External App: Pipeline Manager (SocketIO)
+        Frontend->>+Backend & External App: redirected request
+        Backend & External App->>-Frontend: response
+        Frontend->>-External Frontend: redirected response
+    end
+```
+
+#### Request structure
+
 Following communication structure diagram below, we have:
 
 * blue lines describing [Backend API](backend-api) request from frontend,
@@ -74,8 +106,12 @@ Following communication structure diagram below, we have:
 
 ```{md-mermaid}
 C4Deployment
+    Deployment_Node(cf, "External Frontend", "") {
+        Container(external-post-message, "postMessage")
+    }
     Deployment_Node(pm, "Pipeline Manager", "") {
         Deployment_Node(front, "Frontend", "") {
+            Container(front-post-message, "postMessage")
             Deployment_Node(socketio, "SocketIO", "") {
                 Container(front-socket, "SocketIO")
                 Deployment_Node(front-event, "Events", "") {
@@ -102,6 +138,12 @@ C4Deployment
             }
         }
     }
+    %% frontend to frontend
+    BiRel(external-post-message, front-post-message, "JSON-RPC requests and frontend responses")
+    Rel(front-post-message, front-socket, "Redirected requests")
+    Rel(front-response-api, external-post-message, "Redirected responses")
+    UpdateRelStyle(external-post-message, front-post-message, $offsetX="-55", $offsetY="-30")
+    UpdateRelStyle(front-post-message, front-socket, front-post-message, $offsetX="-55", $offsetY="-30")
     %% frontend to backend request
     Rel(front-socket, flask-backend-api, "JSON-RPC request")
     Rel(flask-backend-api, front-response-api, "JSON-RPC response")
@@ -122,11 +164,35 @@ C4Deployment
     Rel(front-api, flask-external-api, "JSON-RPC response")
     Rel(pmbc-listener, pmbc-socket, "Received response")
     UpdateRelStyle(pmbc-socket, back-socket, $textColor="var(--md-code-hl-function-color)", $lineColor="var(--md-code-hl-function-color)", $offsetX="-10", $offsetY="15")
-    UpdateRelStyle(back-socket, front-api, $textColor="var(--md-code-hl-function-color)", $lineColor="var(--md-code-hl-function-color)", $offsetX="45", $offsetY="-35")
-    UpdateRelStyle(front-api, flask-external-api, $textColor="var(--md-code-hl-function-color)", $lineColor="var(--md-code-hl-function-color)")
+    UpdateRelStyle(back-socket, front-api, $textColor="var(--md-code-hl-function-color)", $lineColor="var(--md-code-hl-function-color)", $offsetX="45")
+    UpdateRelStyle(front-api, flask-external-api, $textColor="var(--md-code-hl-function-color)", $lineColor="var(--md-code-hl-function-color)", $offsetX="-65", $offsetY="-30")
     UpdateRelStyle(pmbc-listener, pmbc-socket, $textColor="var(--md-code-hl-function-color)", $lineColor="var(--md-code-hl-function-color)", $offsetX="5", $offsetY="-30")
 
-    UpdateLayoutConfig($c4ShapeInRow="1", $c4BoundaryInRow="2")
+    UpdateLayoutConfig($c4ShapeInRow="1", $c4BoundaryInRow="3")
+```
+
+### External Frontend Application
+
+If the {{project}} is used as an `iframe`, a website that wraps it can implement an [External Application](external-app-api).
+
+Similartly to [External Frontend Communication](external-frontend-backend-external-app), data transfer relies on [POST requests](https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage):
+both requests and responses use [MessageEvent](https://developer.mozilla.org/en-US/docs/Web/API/Window/message_event) (see [Frontend Features](project:frontend-features.md#serving-external-application) for details).
+
+This application type can be enabled dynamically via dedicated `register_external_frontend` [Frontend API](frontend-api) request. This is possible for both `static-html` and `server-app` modes.
+Currently, in the latter case, external backend application will be overridden with the frontend one.
+
+#### Request structure
+
+```{md-mermaid}
+sequenceDiagram
+    Note over External Frontend,Pipeline Manager Frontend: postMessage
+    par Frontend API
+        External Frontend->>Pipeline Manager Frontend: request
+        Pipeline Manager Frontend->>External Frontend: response
+    and External API
+        Pipeline Manager Frontend->>External Frontend: request
+        External Frontend->>Pipeline Manager Frontend: response
+    end
 ```
 
 (message-type)=

@@ -149,10 +149,11 @@ encodeURIComponent("https://github.com/antmicro/kenning-pipeline-manager/blob/ma
 
 Available parameters are as follows:
 
-* `spec` - URL to the specification, by default it can be a HTTP/HTTPS URL.
-* `graph` - URL to the graph, by default it can be a HTTP/HTTPS URL.
-* `preview` - starts Pipeline Manager in read only mode, without HUD
-* `include` - allows to provide includes for the specification.
+* `spec` - URL to the specification, by default it can be a HTTP/HTTPS URL,
+* `graph` - URL to the graph, by default it can be a HTTP/HTTPS URL,
+* `preview` - starts {{project}} in read only mode, without HUD,
+* `include` - allows to provide includes for the specification,
+* `backend` - connects {{project}} to the specified backend regardless of the application mode.
 
 When it comes to `spec` and `graph`, by default we can use following URI schemes:
 
@@ -176,14 +177,23 @@ And be later be referred to as `examples://sample-specification.json` in URL.
 The URI schemes can be passed to `pipeline_manager build` via `--json_url_specification` argument.
 ```
 
-## Making API requests
+## External frontend
 
-There is a possibility to call Pipeline Manager [API](#api-specification) from the frontend level, e.g. when Pipeline Manager is embedded in another website using `iframe`.
+These features are available for websites that embed {{project}} using `iframe`. [POST requests](https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage) are used as a communication channel.
 
-This can be done by sending [POST requests](https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage) from an external app opening Pipeline Manager, e.g:
+The usage example can be found in [pipeline_manager/frontend_tester/tester_api/index.html](https://github.com/antmicro/kenning-pipeline-manager/tree/main/pipeline_manager/frontend_tester/tester_api/index.html)
+(see [pipeline_manager/frontend_tester/README.md](https://github.com/antmicro/kenning-pipeline-manager/blob/main/pipeline_manager/frontend_tester/README.md) for build instructions).
+
+### Making API requests
+
+There is a possibility to call Pipeline Manager [API](#api-specification) from the frontend level.
 
 ```javascript
-const iframe = document.getElementById(pipelineManagerIframe);
+let iframe;
+
+window.addEventListener('load', () => {
+    iframe = document.getElementById(pipelineManagerIframe);
+});
 
 window.addEventListener('message', (event) => {
     // handling responses from Pipeline Manager
@@ -198,8 +208,34 @@ iframe.contentWindow.postMessage({ method: 'specification_change', params: { spe
 This piece of code opens Pipeline Manager in an iframe and provides it with a JSON object containing the request body corresponding to a `specification_change` [frontend endpoint](#frontend-api).
 Note that this method also supports [backend endpoints](#backend-api) and [external app endpoints](#external-app-api) if external application is attached to Pipeline Manager.
 
-The example of such use case can be found in [pipeline_manager/frontend_tester/tester_api/index.html](https://github.com/antmicro/kenning-pipeline-manager/tree/main/pipeline_manager/frontend_tester/tester_api/index.html).
-Read [pipeline_manager/frontend_tester/README.md](https://github.com/antmicro/kenning-pipeline-manager/blob/main/pipeline_manager/frontend_tester/README.md) for more details.
+Check [External Frontend Communication](external-frontend-backend-external-app) for more details.
+
+### Serving External Application
+
+A wrapping website may implement [External Application](#external-app-api), e.g.:
+
+```javascript
+let iframe;
+
+window.addEventListener('load', () => {
+    iframe = document.getElementById(pipelineManagerIframe);
+    iframe = iframe.contentWindow.postMessage({ method: 'register_external_frontend' });
+});
+
+window.addEventListener('message', (event) => {
+    const { data } = event;
+    if (data.method !== undefined) {
+        const result = handleExternalAppRequest(data);
+        iframe.contentWindow.postMessage({ id: data.id, result });
+    } else {
+        handleResponse(data);
+    }
+});
+```
+
+Here, the code registers the website as an external application, and then sets up the listener for processing corresponding requests and responses.
+
+Check [External Frontend Application](project:external-app-communication.md#external-frontend-application) for more details.
 
 ## Testing the front-end features
 
