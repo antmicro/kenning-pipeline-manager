@@ -73,11 +73,9 @@
     <script>
         let defaultSpecification;
         let defaultDataflow;
-        let apiSpecification;
 
         const load = async (path) => fetch(path).then((response) => response.json())
 
-        load('api-specification.json').then((data) => { apiSpecification = data; });
         load('sample-specification.json')
           .then((data) => {
             data.metadata.notifyWhenChanged = true;
@@ -109,7 +107,7 @@
 
         window.addEventListener('message', (event) => {
           const data = event.data;
-          if (data.method !== undefined && !(data.method in apiSpecification.frontend_endpoints)) {
+          if (data.method !== undefined) {
             const response = handleExternalRequest(data);
             if (response !== undefined) sendPM(createJSONRPCResponse(data.id, response));
           } else {
