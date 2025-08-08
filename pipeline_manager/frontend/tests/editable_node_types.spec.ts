@@ -7,26 +7,7 @@ import fs from 'fs/promises';
 const temporaryDir = os.tmpdir() + '/';
 
 
-async function enableEditingNodes(page: Page) {
-    // Open a setting panel.
-    const logo = page.locator('.logo');
-    await logo.hover();
-
-    // Enable modifying node types.
-    const settings = page.locator('.settings-panel');
-    await settings.hover();
-    expect(settings).toBeVisible();
-
-    // Only click the checkbox if it is not already checked.
-    const checkbox = page.getByTitle('Modify node types');
-    const isChecked = await checkbox.evaluate((el) =>
-        el.classList.contains('--checked')
-    );
-    if (!isChecked) {
-        await checkbox.click();
-    }
-    await expect(checkbox).toBeVisible();
-
+async function openNodePalette(page: Page) {
     // Assert that node types can be added.
     await page.locator('div').filter({ hasText: /^Show node browser$/ }).first().click();
     const nodePalette = page.locator('.baklava-node-palette');
@@ -135,14 +116,14 @@ async function verifyNodePresence(page: Page, specificationPath: string, nodeNam
 test('enable editing', async ({ page }) => {
     await page.goto(getUrl());
     await loadIncludeSpecification(page);
-    await enableEditingNodes(page);
+    await openNodePalette(page);
 });
 
 test('create new node type', async ({ page }) => {
     await page.goto(getUrl());
     await loadIncludeSpecification(page);
 
-    await enableEditingNodes(page);
+    await openNodePalette(page);
     await createNewNodeType(page);
     await addNode(page, 'Default category', 'Custom Node', 750, 80);
 });
@@ -150,7 +131,7 @@ test('create new node type', async ({ page }) => {
 test('add interface to custom node in specification with "include" keyword', async ({ page }) => {
     await page.goto(getUrl());
     await loadIncludeSpecification(page);
-    await enableEditingNodes(page);
+    await openNodePalette(page);
 
     const nodeName = 'Custom Node';
     await createNewNodeType(page);
@@ -161,7 +142,7 @@ test('add interface to custom node in specification with "include" keyword', asy
 test('register custom node in specification with "include" keyword', async ({ page }) => {
     await page.goto(getUrl());
     await loadIncludeSpecification(page);
-    await enableEditingNodes(page);
+    await openNodePalette(page);
 
     const nodeName = 'Custom Node';
     await createNewNodeType(page);
@@ -175,7 +156,7 @@ test('rename extending node', async ({ page }) => {
     await loadIncludeSpecification(page);
 
     await addNode(page, 'Filesystem', 'LoadVideo', 750, 80);
-    await enableEditingNodes(page);
+    await openNodePalette(page);
     await renameNodeType(page, 'LoadVideo', 'New node name');
 
     // assert that both nodes are renamed
@@ -186,7 +167,7 @@ test('rename extending node', async ({ page }) => {
     const nodePalette = page.locator('.baklava-node-palette');
     const category = nodePalette.getByText('Filesystem');
 
-    await enableNavigationBar(page);
+    await openNodePalette(page);
     await category.scrollIntoViewIfNeeded();
     await expect(category).toBeVisible();
     await category.click();
