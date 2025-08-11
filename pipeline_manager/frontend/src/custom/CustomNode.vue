@@ -305,6 +305,11 @@ const contextMenuTitleItems = computed(() => {
         items.push(
             { value: 'layer', label: 'Set layer' },
         );
+        if (!isGraphNode) {
+            items.push(
+                { value: 'addSubgraph', label: 'Add subgraph' },
+            );
+        }
         items.push(
             { value: 'delete-property', label: 'Delete property' },
         );
@@ -478,6 +483,20 @@ const onContextMenuTitleClick = async (action) => {
         case 'layer':
             menuState.layerMenu = true;
             break;
+        case 'addSubgraph': {
+            let errors = editorManager.addSubgraphToNode(props.node);
+            if (Array.isArray(errors) && errors.length) {
+                NotificationHandler.terminalLog('error', 'Creating subgraph failed', errors);
+            }
+            const newGraphNode = viewModel.value.displayedGraph.nodes.filter(
+                (n) => n.type === props.node.type,
+            )[0];
+            errors = viewModel.value.editor.switchToSubgraph(newGraphNode);
+            if (Array.isArray(errors) && errors.length) {
+                NotificationHandler.terminalLog('error', 'Switching to subgraph failed', errors);
+            }
+            break;
+        }
         case 'delete-property':
             menuState.propertyListMenu = true;
             break;
