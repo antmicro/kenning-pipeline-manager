@@ -776,6 +776,53 @@ export default class EditorManager {
     }
 
     /**
+     * Assigns a new subgraph to the node.
+     *
+     * @param {object} node Node that the subgraph will be attached to
+     * @returns An array of errors that occurred.
+     */
+    addSubgraphToNode(node) {
+        this._unregisterNodeType(node.type);
+
+        // Create new graph
+        const newGraph = GraphFactory([], [], node.type, this.baklavaView.editor);
+        if (Array.isArray(newGraph) && newGraph.length) {
+            return newGraph;
+        }
+
+        // Update node specification
+        const unresolvedNodeSpecification = this.specification.unresolvedSpecification.nodes.find(
+            (n) => EditorManager.getNodeName(n) === node.type,
+        );
+        const resolvedNodeSpecification = this.specification.currentSpecification.nodes.find(
+            (n) => EditorManager.getNodeName(n) === node.type,
+        );
+        if (resolvedNodeSpecification === undefined) {
+            unresolvedNodeSpecification.subgraphId = newGraph.id;
+            this.baklavaView.editor.addGraphTemplate(newGraph, unresolvedNodeSpecification);
+        } else {
+            resolvedNodeSpecification.subgraphId = newGraph.id;
+            if (unresolvedNodeSpecification === undefined) {
+                this.specification.unresolvedSpecification.nodes.push(resolvedNodeSpecification);
+            } else {
+                unresolvedNodeSpecification.subgraphId = newGraph.id;
+            }
+            this.baklavaView.editor.addGraphTemplate(newGraph, resolvedNodeSpecification);
+        }
+
+        // Update editor nodes
+        const { viewModel } = useViewModel();
+        const { displayedGraph } = viewModel.value;
+        const nodes = displayedGraph.nodes.filter(
+            (n) => n.type === node.type,
+        );
+        nodes.forEach((n) => {
+            displayedGraph.replaceNode(n, node.type);
+        });
+        return [];
+    }
+
+    /**
      * Creates a new nodeType and registers it in the editor.
      * If the nodeType is not valid then an array of errors is returned.
      * If the nodeType is valid then it is registered in the editor and an empty array is returned.
