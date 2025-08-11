@@ -223,6 +223,7 @@ export default defineComponent({
 
         const manager = {
             hide() {
+                terminalStore.show = false;
                 if (isTerminalPanelOpened.value) toggleTerminalPanel(activeTerminal.value);
             },
             show(name?: string) {
