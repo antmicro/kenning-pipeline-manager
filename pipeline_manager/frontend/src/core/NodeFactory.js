@@ -228,18 +228,23 @@ function detectDiscrepancies(parsedState, inputs, outputs) {
             const propertyType = inputs[ioName].type;
             if (!checkType(propertyType, parsedValue)) {
                 errors.push(`Property '${name}' type mismatch. ${propertyType} expected, ${typeof parsedValue} found.`);
-            } else if (propertyType === 'select' && !inputs[ioName].items.includes(parsedValue)) {
-                errors.push(`Property '${name}' value mismatch. ${parsedValue} not found in ${inputs[ioName].items}`);
+            } else if (propertyType === 'select') {
+                const { items } = inputs[ioName];
+                if (Array.isArray(items)) {
+                    if (!items.map(String).includes(String(parsedValue))) {
+                        errors.push(
+                            `Property '${name}' value mismatch. ${parsedValue} (type: ${typeof parsedValue}) not found in ${JSON.stringify(items)}`,
+                        );
+                    }
+                } else if (String(parsedValue) !== String(items)) {
+                    errors.push(
+                        `Property '${name}' value mismatch. Expected '${items}' (type: ${typeof items}), found '${parsedValue}' (type: ${typeof parsedValue}).`,
+                    );
+                }
             } else if (propertyType === 'list') {
                 const { dtype } = inputs[ioName];
 
                 const mismatchedElements = parsedValue.filter((val) => {
-                    // object elements are converted to string in Kenning
-                    // and should be accepted here.
-                    if (dtype === 'string') {
-                        return typeof val !== 'string' && typeof val !== 'object'; // eslint-disable-line valid-typeof, max-len
-                    }
-
                     // Accept both 'integer' and 'number' for dtype 'integer'.
                     if (dtype === 'integer') {
                         return typeof val !== 'number' || !Number.isInteger(val);
