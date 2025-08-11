@@ -74,6 +74,8 @@ export default class PipelineManagerEditor extends Editor {
         RELATEDGRAPH: 'relatedGraph',
     };
 
+    editorManager = null;
+
     registerGraph(graph) {
         const customGraph = createPipelineManagerGraph(graph);
         super.registerGraph(customGraph);

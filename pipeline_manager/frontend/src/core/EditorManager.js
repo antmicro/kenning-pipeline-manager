@@ -140,6 +140,8 @@ export default class EditorManager {
     externalApplicationManager;
 
     constructor() {
+        this.editor.editorManager = this;
+
         // Baklava's view registers subgraph input and output nodes
         // This call un-registers them as obsolete
         this.editor.unregisterNodes();
