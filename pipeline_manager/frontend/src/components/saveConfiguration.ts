@@ -41,6 +41,21 @@ export const saveSpecificationConfiguration: SaveConfiguration = {
             specification.graphs ??= [];
             const dataflow = editorManager.saveDataflow();
 
+            // Match graph IDs with subgraphId in node specification
+            dataflow.graphs.forEach((graph: any) => {
+                dataflow.graphs.forEach((g: any) => {
+                    const node = g.nodes.find((n: any) => n.subgraph === graph.id);
+                    if (node !== undefined) {
+                        const nodeSpecification = specification.nodes.find(
+                            (n: any) => n.name === node.name,
+                        );
+                        // eslint-disable-next-line no-param-reassign
+                        graph.id = nodeSpecification.subgraphId;
+                        node.subgraph = nodeSpecification.subgraphId;
+                    }
+                });
+            });
+
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             dataflow.graphs.forEach((graph: any) => {
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
