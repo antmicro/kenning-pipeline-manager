@@ -1096,7 +1096,10 @@ export default class EditorManager {
                     continue; // eslint-disable-line no-continue
                 }
 
-                this.baklavaView.editor.addGraphTemplate(myGraph, node);
+                this.baklavaView.editor.addGraphTemplate(
+                    myGraph,
+                    resolvedNodes.find((n) => n.name === node.name),
+                );
 
                 const loadArgs = [true, true, node.name];
 
