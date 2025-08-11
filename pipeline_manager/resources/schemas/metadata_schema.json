@@ -208,6 +208,11 @@
             "description": "Hides anchors in all connections. The anchors are still visible on hover",
             "default": false
         },
+        "showIds": {
+            "type": "boolean",
+            "description": "Displays node ID in the node details view",
+            "default": false
+        },
         "icons": {
             "type": "object",
             "description": "Mapping from icon URL class to URL prefix",
