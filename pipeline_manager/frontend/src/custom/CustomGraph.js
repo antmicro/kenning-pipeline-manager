@@ -179,6 +179,8 @@ export default function createPipelineManagerGraph(graph) {
                         newNodeInstance.inputs[name],
                         intf.side,
                         intf.sidePosition,
+                        false,
+                        false,
                     );
                 }
                 if (Object.prototype.hasOwnProperty.call(newNodeInstance.outputs, name)) {
@@ -187,6 +189,8 @@ export default function createPipelineManagerGraph(graph) {
                         newNodeInstance.outputs[name],
                         intf.side,
                         intf.sidePosition,
+                        false,
+                        false,
                     );
                 }
                 // If the new node has the same property of the same type as it could be overridden
