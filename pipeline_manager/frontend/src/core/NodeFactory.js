@@ -232,17 +232,24 @@ function detectDiscrepancies(parsedState, inputs, outputs) {
                 errors.push(`Property '${name}' value mismatch. ${parsedValue} not found in ${inputs[ioName].items}`);
             } else if (propertyType === 'list') {
                 const { dtype } = inputs[ioName];
-                // Accept both 'integer' and 'number' for dtype 'integer'.
+
                 const mismatchedElements = parsedValue.filter((val) => {
+                    // object elements are converted to string in Kenning
+                    // and should be accepted here.
+                    if (dtype === 'string') {
+                        return typeof val !== 'string' && typeof val !== 'object'; // eslint-disable-line valid-typeof, max-len
+                    }
+
+                    // Accept both 'integer' and 'number' for dtype 'integer'.
                     if (dtype === 'integer') {
                         return typeof val !== 'number' || !Number.isInteger(val);
                     }
-                    return typeof val !== dtype;// eslint-disable-line valid-typeof,max-len
+                    return typeof val !== dtype;// eslint-disable-line valid-typeof
                 });
                 if (mismatchedElements.length > 0) {
                     errors.push(
                         `Property '${name}' value mismatch. ` +
-                        `Items: '${mismatchedElements.join(' ')}' are not of 'd${dtype}' dtype.` +
+                        `Items: '${mismatchedElements.join(' ')}' are not of '${dtype}' dtype.` +
                         `Items are of type: ${mismatchedElements.map((val) => typeof val).join(', ')}`,
                     );
                 }
