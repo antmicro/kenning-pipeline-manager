@@ -4,8 +4,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ButtonInterface as BaklavaButtonInterface } from 'baklavajs';
+import { ButtonInterface as BaklavaButtonInterface } from '@baklavajs/renderer-vue';
 
 export default class ButtonInterface extends BaklavaButtonInterface {
     componentName = 'ButtonInterface';
+
+    constructor(name, callback, value) {
+        super(name, callback);
+        this.value = value;
+    }
 }
