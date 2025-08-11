@@ -55,6 +55,12 @@ SPDX-License-Identifier: Apache-2.0
                     />
                 </a>
             </div>
+            <div v-if="editorManager.baklavaView.settings.showIds" class="__id">
+                <div class="__title">Node ID</div>
+                <div class="__value">
+                    {{ node.id }}
+                </div>
+            </div>
             <div v-show="prettyCategory" class="__category">
                 <div class="__title">Category</div>
                 <div class="__category-name">
