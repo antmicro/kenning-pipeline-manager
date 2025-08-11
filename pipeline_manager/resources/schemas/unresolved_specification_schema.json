@@ -462,7 +462,9 @@
                                 "slider",
                                 "list",
                                 "constant",
-                                "hex"
+                                "hex",
+                                "button-url",
+                                "button-api"
                             ]
                         },
                         "description": {
@@ -656,6 +658,26 @@
                             "required": [
                                 "dtype"
                             ]
+                        },
+                        {
+                            "properties": {
+                                "type": {
+                                    "const": "button-url"
+                                },
+                                "default": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        {
+                            "properties": {
+                                "type": {
+                                    "const": "button-api"
+                                },
+                                "default": {
+                                    "type": ["object", "null"]
+                                }
+                            }
                         }
                     ]
                 }

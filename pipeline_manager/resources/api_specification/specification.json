@@ -720,6 +720,27 @@
             "returns": {
                 "$ref": "common_types#/$defs/null_or_empty"
             }
+        },
+        "button_click": {
+            "description": "Request send when button node property was pressed",
+            "params": {
+                "description": "Parameters for request",
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "description": "ID of the property",
+                        "type": "string"
+                    },
+                    "value": {
+                        "description": "Value of the property",
+                        "type": ["object", "null"]
+                    }
+                },
+                "required": ["id", "value"]
+            },
+            "returns": {
+                "$ref": "common_types#/$defs/null_or_empty"
+            }
         }
     }
 }

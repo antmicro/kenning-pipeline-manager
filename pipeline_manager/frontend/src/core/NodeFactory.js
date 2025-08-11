@@ -27,6 +27,7 @@ import SelectInterface from '../interfaces/SelectInterface.js';
 import SliderInterface from '../interfaces/SliderInterface.js';
 import TextAreaInterface from '../interfaces/TextAreaInterface.js';
 import TextInterface from '../interfaces/TextInterface.js';
+import ButtonInterface from '../interfaces/ButtonInterface.js';
 
 import { ir } from './interfaceRegistry.ts';
 
@@ -133,6 +134,15 @@ export function createProperties(properties) {
                 }
                 intf = new ListInterface(propName, propDef, p.dtype, p.readonly);
                 break;
+            case 'button-url':
+                intf = new ButtonInterface(propName, () => window.open(intf.value, '_blank'), propDef);
+                break;
+            case 'button-api':
+                intf = new ButtonInterface(
+                    propName,
+                    () => intf.events.updated.emit(['button_click', { id: intf.id, value: intf.value }]),
+                    propDef);
+                break;
             default:
                 /* eslint-disable no-console */
                 console.error(propType, ' input type is not recognized.');
@@ -191,6 +201,7 @@ function detectDiscrepancies(parsedState, inputs, outputs) {
                 return true;
             case 'text':
             case 'multiline':
+            case 'button-url':
             case 'hex':
                 return typeof value === 'string';
             case 'number':
@@ -201,6 +212,8 @@ function detectDiscrepancies(parsedState, inputs, outputs) {
                 return typeof value === 'boolean';
             case 'list':
                 return Array.isArray(value);
+            case 'button-api':
+                return typeof value === 'object';
             default:
                 return false;
         }
@@ -834,11 +847,25 @@ export class CustomNode extends Node {
         return errors;
     }
 
+    onPlaced() {
+        super.onPlaced();
+        const externalRequest = ([method, params]) => this.graphInstance
+            ?.editor
+            ?.editorManager
+            ?.externalApplicationManager
+            ?.request(method, params);
+        Object.entries(this.inputs)
+            .filter(([name, _]) => name.startsWith('property_'))
+            .filter(([_, intf]) => intf.componentName === 'ButtonInterface')
+            .forEach(([_, intf]) => intf.events.updated.subscribe(this, externalRequest));
+    }
+
     onDestroy() {
         [...Object.values(this.inputs), ...Object.values(this.outputs)].forEach((io) => {
             Object.values(io.events).forEach((event) => {
                 // We need to unsubscribe from all events to avoid memory leaks
                 // On token mismatch, the event will not be unsubscribed
+                event.unsubscribe(this);
                 event.unsubscribe(io);
             });
         });
