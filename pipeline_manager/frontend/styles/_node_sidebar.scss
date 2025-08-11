@@ -114,6 +114,14 @@
             }
         }
 
+        & > .__id {
+            & > .__value {
+                white-space: nowrap;
+                padding: 0.625em 1.25em;
+                font-size: small;
+            }
+        }
+
         & > .__replace {
             & > .__replace_entry {
                 display: flex;
