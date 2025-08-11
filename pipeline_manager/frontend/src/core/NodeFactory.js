@@ -387,11 +387,25 @@ export class CustomNode extends Node {
         const interfaces = [];
         const { value } = prop;
 
+        // Ensure prop.name is defined and is a string.
+        if (typeof prop.name !== 'string') {
+            throw new Error('Property \'name\' is undefined or not a string in updateDynamicInterfaces.');
+        }
+
         // The interface metadata has to be obtained from the specification of the property
-        const { interfaceType, interfaceMaxConnectionsCount } = this.inputs[`property_${prop.name}`];
+        const propertyInput = this.inputs[`property_${prop.name}`];
+        const interfaceType = propertyInput?.interfaceType;
+        const interfaceMaxConnectionsCount = propertyInput?.interfaceMaxConnectionsCount;
 
         // Direction is obtained from property name
         const propName = prop.name.split(' ');
+        // Ensure propName has enough elements
+        if (propName.length < 2) {
+            throw new Error(
+                'Property name is too short to extract direction in updateDynamicInterfaces.' +
+                `Property name: ${prop.name}`,
+            );
+        }
         const direction = propName[propName.length - 2];
         // The DYNAMIC_INTERFACE_SUFFIX and direction are omitted
         const interfaceName = prop.name
@@ -399,10 +413,10 @@ export class CustomNode extends Node {
 
         const occupied = { left: [], right: [] };
 
-        const stateios = { ...this.inputs, ...this.outputs };
+        const stateIOs = { ...this.inputs, ...this.outputs };
 
         // Assigning sides and sides Positions to interfaces
-        Object.entries(stateios).forEach(([ioName, ioState]) => {
+        Object.entries(stateIOs).forEach(([ioName, ioState]) => {
             if (ioName.startsWith('property_')) return;
             occupied[ioState.side].push(ioState.sidePosition);
         });
