@@ -109,6 +109,19 @@ export default {
             return option;
         });
 
+        const showIds = computed(() => {
+            const option = new CheckboxInterface(
+                'Show IDs',
+                props.viewModel.settings.showIds,
+            ).setPort(false);
+            option.events.setValue.subscribe(this, (v) => {
+                props.viewModel.settings.showIds = v; // eslint-disable-line vue/no-mutating-props,max-len,no-param-reassign
+                metadataChanged('showIds', v);
+            });
+            option.componentName = 'CheckboxInterface';
+            return option;
+        });
+
         const backgroundGridSize = computed(() => {
             const option = new IntegerInterface(
                 'Background grid size',
@@ -208,6 +221,7 @@ export default {
                 movementStep.value,
                 randomizedOffsetOption.value,
                 hideAnchors.value,
+                showIds.value,
             ];
             if (props.viewModel.settings.toggleableEditableTypes) {
                 options.push(editableNodeTypes.value);
