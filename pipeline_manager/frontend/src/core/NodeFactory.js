@@ -232,9 +232,19 @@ function detectDiscrepancies(parsedState, inputs, outputs) {
                 errors.push(`Property '${name}' value mismatch. ${parsedValue} not found in ${inputs[ioName].items}`);
             } else if (propertyType === 'list') {
                 const { dtype } = inputs[ioName];
-                const mismatchedElements = parsedValue.filter((val) => typeof val !== dtype); // eslint-disable-line valid-typeof,max-len
+                // Accept both 'integer' and 'number' for dtype 'integer'.
+                const mismatchedElements = parsedValue.filter((val) => {
+                    if (dtype === 'integer') {
+                        return typeof val !== 'number' || !Number.isInteger(val);
+                    }
+                    return typeof val !== dtype;// eslint-disable-line valid-typeof,max-len
+                });
                 if (mismatchedElements.length > 0) {
-                    errors.push(`Property '${name}' value mismatch. Items: '${mismatchedElements.join(' ')}' are not of '${dtype}' dtype.`);
+                    errors.push(
+                        `Property '${name}' value mismatch. ` +
+                        `Items: '${mismatchedElements.join(' ')}' are not of 'd${dtype}' dtype.` +
+                        `Items are of type: ${mismatchedElements.map((val) => typeof val).join(', ')}`,
+                    );
                 }
             }
         }
