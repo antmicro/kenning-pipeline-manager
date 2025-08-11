@@ -164,6 +164,7 @@ export default class EditorManager {
         this.baklavaView.logLevel = this.defaultMetadata.logLevel;
         this.baklavaView.settings.editableNodeTypes = this.defaultMetadata.editableNodeTypes;
         this.baklavaView.settings.hideAnchors = this.defaultMetadata.hideAnchors;
+        this.baklavaView.settings.showIds = this.defaultMetadata.showIds;
 
         this.specificationVersion = unresolvedSpecificationSchema.version;
         this.baklavaView.commandHandler = useCommandHandler();
@@ -1200,6 +1201,8 @@ export default class EditorManager {
             metadata?.editableTypes ?? this.defaultMetadata.editableNodeTypes;
         this.baklavaView.settings.hideAnchors =
             metadata?.hideAnchors ?? this.defaultMetadata.hideAnchors;
+        this.baklavaView.settings.showIds =
+            metadata?.showIds ?? this.defaultMetadata.showIds;
 
         this.baklavaView.ignoredLayers = new Set();
         this.baklavaView.layers = metadata?.layers ?? this.defaultMetadata.layers;
@@ -1432,6 +1435,7 @@ export default class EditorManager {
             [this.baklavaView.settings.editableNodeTypes, 'editableTypes'],
             [this.baklavaView.settings.toggleableEditableTypes, 'toggleableEditableTypes'],
             [this.baklavaView.settings.hideAnchors, 'hideAnchors'],
+            [this.baklavaView.settings.showIds, 'showIds'],
         ].forEach(([currVal, name]) => {
             const m = this.specification.currentSpecification?.metadata ?? {};
             const dm = this.defaultMetadata;
