@@ -1,5 +1,5 @@
 import { test, expect, Page, Locator } from '@playwright/test';
-import { getUrl, getPathToJsonFile, addNode, openFileChooser, dragAndDrop} from './config.js';
+import { getUrl, getPathToJsonFile, addNode, openFileChooser, dragAndDrop, enableNavigationBar, openNodePalette } from './config.js';
 import { loadSpecification, loadDataflow, enableEditingNodes } from './config.js';
 
 import os from 'os';
@@ -8,14 +8,6 @@ import YAML from 'yaml';
 
 const temporaryDir = os.tmpdir() + '/';
 
-
-async function openNodePalette(page: Page) {
-    // Assert that node types can be added.
-    await page.locator('div').filter({ hasText: /^Show node browser$/ }).first().click();
-    const nodePalette = page.locator('.baklava-node-palette');
-    const addNodeButton = nodePalette.getByText('New Node Type').first();
-    expect(addNodeButton).toBeVisible();
-}
 
 async function createNewNodeType(page: Page) {
     // Open node configuration menu

@@ -92,6 +92,19 @@ export async function loadDataflow(page, dataflowFile) {
 }
 
 /**
+ * Opens node palette
+ *
+ * @async
+ * @param {import('@playwright/test').Page} page - The Playwright Page object to interact with.
+ */
+export async function openNodePalette(page) {
+    await page.locator('div').filter({ hasText: /^Show node browser$/ }).first().click();
+    const nodePalette = page.locator('.baklava-node-palette');
+    const addNodeButton = nodePalette.getByText('New Node Type').first();
+    expect(addNodeButton).toBeVisible();
+}
+
+/**
  * Add a node to the canvas by dragging it from the navigation bar.
  * @param {import('@playwright/test').Page} page - The Playwright page object.
  * @param {string} category - The category name in the navigation bar.
@@ -102,8 +115,8 @@ export async function loadDataflow(page, dataflowFile) {
  * @returns {Promise<void>} Promise that resolves when the drag-and-drop operation is complete.
  */
 export async function addNode(page, category, nodeName, x, y, openCategory = true) {
-    const categoryBar = page.getByText(category, { exact: true });
-    const node = page.getByText(nodeName, { exact: true }).first();
+    const categoryBar = page.locator('.__title-label').getByText(category, { exact: true });
+    const node = page.locator('.__title-label').getByText(nodeName, { exact: true }).first();
 
     // Open a proper category.
     await enableNavigationBar(page);
