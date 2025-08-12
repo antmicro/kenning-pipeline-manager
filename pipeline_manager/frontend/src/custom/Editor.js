@@ -704,44 +704,60 @@ export default class PipelineManagerEditor extends Editor {
     }
 
     /**
-    * Switch to a related by matching the ID to a loaded graph instancce
-    * and pushing the current graph to the stack.
+    * Switch to a given graph object.
     *
-    * @param {relatedGraphID} An ID of the graph, to which a layout should be switched.
+    * @param {object} targetGraph A graph object to which the layout should be switched
+    * @param {bool} subgraphStack Determines whether the graph should be added to subgraph stack
     * */
-    switchToRelatedGraph(relatedGraphID) {
+    switchToGraph(targetGraph, subgraphStack = false) {
+        if (!targetGraph) return;
+
         if (this._switchGraph === undefined) {
             const { switchGraph } = useGraph();
             this._switchGraph = switchGraph;
         }
         // disable history logging for the switch - don't push nodes being created here
         suppressHistoryLogging(true);
-        const relatedGraph = Array.from(this.graphs).find((item) => item.id === relatedGraphID);
-        if (relatedGraph) {
-            this.subgraphStack.push(this._graph);
-            this._graph = relatedGraph;
-            this._switchGraph(this._graph);
-            this.graphName = this._graph.name;
 
-            nextTick().then(() => {
-                const graph = this.graph.save();
-                this.layoutManager.registerGraph(graph);
-                this.layoutManager
-                    .computeLayout(graph)
-                    .then(this.updateNodesPosition.bind(this))
-                    .then(() => {
-                        nextTick().then(() => {
-                            if (
-                                !this._graph.wasCentered
-                            ) {
-                                this.centerZoom();
-                                this._graph.wasCentered = true;
-                            }
-                        });
-                    });
-            });
+        if (subgraphStack) {
+            this.subgraphStack.push(this._graph);
+        } else if (this.subgraphStack.length > 0) {
+            this.subgraphStack.pop();
         }
+        this._graph = targetGraph;
+        this._switchGraph(this._graph);
+        this.graphName = this._graph.name;
+
+        nextTick().then(() => {
+            const graph = this.graph.save();
+            this.layoutManager.registerGraph(graph);
+            this.layoutManager
+                .computeLayout(graph)
+                .then(this.updateNodesPosition.bind(this))
+                .then(() => {
+                    nextTick().then(() => {
+                        if (
+                            !this._graph.wasCentered
+                        ) {
+                            this.centerZoom();
+                            this._graph.wasCentered = true;
+                        }
+                    });
+                });
+        });
+
         suppressHistoryLogging(false);
+    }
+
+    /**
+    * Switch to a related by matching the ID to a loaded graph instancce
+    * and pushing the current graph to the stack.
+    *
+    * @param {relatedGraphID} An ID of the graph, to which a layout should be switched.
+    * */
+    switchToRelatedGraph(relatedGraphID) {
+        const relatedGraph = Array.from(this.graphs).find((item) => item.id === relatedGraphID);
+        this.switchToGraph(relatedGraph, true);
     }
 
     /**
