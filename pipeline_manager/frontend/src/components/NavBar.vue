@@ -178,6 +178,9 @@ export default {
         activeNavbarItems() {
             return this.activeNavbarItemsNames;
         },
+        parentGraph() {
+            return this.editorManager.getParentGraph();
+        },
     },
     watch: {
         dataflowGraphName(newValue) {
@@ -729,6 +732,10 @@ export default {
             this.editorManager.returnFromSubgraph();
             this.resetHoverInfo('subgraphReturn');
         },
+        goToParentGraph(graph) {
+            this.editorManager.switchToGraph(graph);
+            this.resetHoverInfo('parentGraph');
+        },
     },
     async mounted() {
         this.isMounted = true;
@@ -1054,6 +1061,24 @@ export default {
                         />
                         <div :class="['tooltip', mobileClasses]">
                             <span>Return from subgraph editor</span>
+                        </div>
+                    </div>
+                    <div
+                        v-if="parentGraph && !this.editorManager.editor.isInSubgraph()"
+                        :class="['hoverbox', mobileClasses]"
+                        role="button"
+                        @click="goToParentGraph(parentGraph)"
+                        @pointerover="() => updateHoverInfo('parentGraph')"
+                        @pointerleave="() => resetHoverInfo('parentGraph')"
+                    >
+                        <Arrow
+                            rotate="up"
+                            :hover="isHovered('parentGraph')"
+                            color="white"
+                            class="small_svg"
+                        />
+                        <div :class="['tooltip', mobileClasses]">
+                            <span>Go to parent graph</span>
                         </div>
                     </div>
                 </div>
