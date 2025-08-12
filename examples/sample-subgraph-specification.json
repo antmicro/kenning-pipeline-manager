@@ -438,6 +438,40 @@
                     "to": "a6c82841-159a-4a55-8680-b421c8ba19f5"
                 }
             ]
+        },
+        {
+            "name": "Main graph",
+            "id": "887f8b3d-b145-47ec-8fec-eb3e8e7c7735",
+            "nodes": [
+                {
+                    "name": "Test subgraph #2",
+                    "id": "352f9db6-7d85-45ef-81d4-c4ae46e60f89",
+                    "interfaces": [],
+                    "position": {
+                        "x": 600,
+                        "y": 500
+                    },
+                    "width": 200,
+                    "twoColumn": false,
+                    "properties": [],
+                    "subgraph": "129c6246-d874-48cd-a33c-2927961d42e8"
+                },
+                {
+                    "name": "Test subgraph #3",
+                    "id": "859161af-b2fe-48ce-ba80-4f046368cbbc",
+                    "interfaces": [],
+                    "position": {
+                        "x": 1100,
+                        "y": 270
+                    },
+                    "width": 200,
+                    "twoColumn": false,
+                    "properties": [],
+                    "subgraph": "129c6246-d874-48cd-a33c-2927961d42e8"
+                }
+            ],
+            "connections": []
         }
-    ]
+    ],
+    "entryGraph": "569edd54-0f42-4c24-a809-1509febbe23a"
 }
