@@ -40,7 +40,7 @@ from datetime import datetime
 from pathlib import Path
 from queue import Queue
 from threading import Thread
-from typing import Dict, List, Union
+from typing import Callable, Dict, List, Optional, Union
 
 import pexpect
 from pipeline_manager_backend_communication.communication_backend import (
@@ -472,6 +472,35 @@ class RPCMethods:
             self.custom_api_test.__name__,
         )
 
+    async def button_click(self, id: str, value: Optional[Dict]):
+        message = ""
+        response = await self.client.request("graph_get")
+        nodes = (
+            response.get("result", {})
+            .get("dataflow", {})
+            .get("graphs", [{}])[0]
+            .get("nodes", [])
+        )
+
+        # Find node by button ID and retrieve message from another property
+        for node in nodes:
+            properties = node.get("properties", [])
+
+            def get_prop_by_key(key: Callable):
+                return next(filter(key, properties), None)
+
+            if get_prop_by_key(lambda p: p["id"] == id) is None:
+                continue
+
+            if property := get_prop_by_key(lambda p: p["name"] == "Message"):
+                message = property["value"]
+                break
+
+        await self.client.notify(
+            "terminal_write",
+            {"name": "Terminal", "message": f"Button {id} clicked: {message}"},
+        )
+
     async def _run_validate_response(
         self,
         title: Union[str, List[str]],
@@ -668,7 +697,8 @@ class RPCMethods:
             Raised when error is returned in the response
         """
         response = await self.client.request(
-            "graph_change", {"dataflow": self.default_dataflow},
+            "graph_change",
+            {"dataflow": self.default_dataflow},
         )
         if "error" in response:
             raise Exception(response["error"]["message"])

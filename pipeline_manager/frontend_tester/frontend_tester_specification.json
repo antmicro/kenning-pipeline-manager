@@ -207,6 +207,22 @@
             "interfaces": []
         },
         {
+            "name": "ButtonClick",
+            "category": "API",
+            "properties": [
+                {
+                    "name": "Message",
+                    "type": "text",
+                    "default": "Everything went fine!"
+                },
+                {
+                    "name": "Click",
+                    "type": "button-api",
+                    "default": null
+                }
+            ]
+        },
+        {
             "name": "Disconnect",
             "category": "Effects",
             "properties": [
