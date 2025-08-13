@@ -181,9 +181,14 @@ class RPCMethods:
     WRITABLE_TERMINAL = "WritableTerminal"
 
     def __init__(
-        self, specification: Dict, client: CommunicationBackend, out_path: str
+        self,
+        specification: Dict,
+        dataflow: Dict,
+        client: CommunicationBackend,
+        out_path: str,
     ):
         self.specification = specification
+        self.default_dataflow = dataflow
         self.client = client
         self.out_path = out_path
         self.last_dataflow = None
@@ -646,6 +651,29 @@ class RPCMethods:
             else "pipeline.json",
         }
 
+    async def frontend_on_connect(self) -> Dict:
+        """
+        RPC method that responses to frontend_on_connect request.
+
+        Initialize default dataflow.
+
+        Returns
+        -------
+        Dict
+            Method's response
+
+        Raises
+        ------
+        Exception
+            Raised when error is returned in the response
+        """
+        response = await self.client.request(
+            "graph_change", {"dataflow": self.default_dataflow},
+        )
+        if "error" in response:
+            raise Exception(response["error"]["message"])
+        return {}
+
 
 def main(argv):  # noqa: D103
     parser = argparse.ArgumentParser(argv[0])
@@ -678,7 +706,19 @@ def main(argv):  # noqa: D103
         "--specification-path",
         type=Path,
         help="Path to specification JSON file",
-        default=None,
+        default=(
+            Path(frontend_tester.__file__).parent
+            / "frontend_tester_specification.json"
+        ),
+    )
+    parser.add_argument(
+        "--default-dataflow-path",
+        type=Path,
+        help="Path to dataflow JSON file",
+        default=(
+            Path(frontend_tester.__file__).parent
+            / "frontend_tester_dataflow.json"
+        ),
     )
     args, _ = parser.parse_known_args(argv[1:])
     logging.basicConfig(level=string_to_verbosity(args.verbosity))
@@ -687,13 +727,12 @@ def main(argv):  # noqa: D103
 
 
 async def _main(args: argparse.Namespace):
-    if args.specification_path is None:
-        spec_path = Path(frontend_tester.__file__).parent
-        spec_path = spec_path / "frontend_tester_specification.json"
-    else:
-        spec_path = args.specification_path
-    with open(spec_path) as f:
+    spec_path = args.specification_path
+    dataflow_path = args.default_dataflow_path
+    with spec_path.open() as f:
         specification = json.load(f)
+    with dataflow_path.open() as f:
+        dataflow = json.load(f)
 
     client = CommunicationBackend(
         args.host,
@@ -702,6 +741,7 @@ async def _main(args: argparse.Namespace):
     )
     methods = RPCMethods(
         specification,
+        dataflow,
         client,
         args.output_path,
     )
