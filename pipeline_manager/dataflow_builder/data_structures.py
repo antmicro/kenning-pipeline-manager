@@ -9,7 +9,7 @@ from enum import Enum
 Infinity = None
 
 
-class Direction(Enum):
+class Direction(str, Enum):
     """Available directions of an interface."""
 
     INPUT = "input"
@@ -17,7 +17,7 @@ class Direction(Enum):
     INOUT = "inout"
 
 
-class Side(Enum):
+class Side(str, Enum):
     """Sides, on which an interface may be located."""
 
     LEFT = "left"
