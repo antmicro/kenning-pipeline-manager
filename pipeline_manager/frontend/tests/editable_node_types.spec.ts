@@ -29,7 +29,15 @@ async function createNewNodeType(page: Page) {
 
 async function loadIncludeSpecification(page: Page) {
     const fileChooser = await openFileChooser(page, 'specification');
-    await fileChooser.setFiles(getPathToJsonFile('sample-include-specification.json'));
+    const specificationName = 'sample-include-specification.json';
+    const specification = await fs.readFile(getPathToJsonFile(specificationName), { encoding: 'utf-8' });
+    const newSpecification = specification.replaceAll(
+        'https://raw.githubusercontent.com/antmicro/kenning-pipeline-manager/main/examples/',
+        `http://localhost:7001/`,
+    );
+    const newSpecificationPath = temporaryDir + specificationName;
+    await fs.writeFile(newSpecificationPath, newSpecification);
+    await fileChooser.setFiles(newSpecificationPath);
 }
 
 async function assertInputCount(page: Page, nodeName: string, count: integer) {
