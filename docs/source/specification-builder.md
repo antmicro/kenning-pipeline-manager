@@ -101,8 +101,7 @@ specification_builder.add_node_type_interface(
 To create a property in Pipeline Manager, we need to pass three required arguments:
 
 - `name` - the name of the property
-- `type` - the type of the property, which has nine possible values:
-  - `text`, `constant`, `number`, `integer`, `select`, `bool`, `slider`, `list`, `hex`,
+- `type` - the type of the property, see [specification format](./specification-format.md#property) for possible values
 - `default` - specifies a default value, its type depends on the `type` of the property
 
 

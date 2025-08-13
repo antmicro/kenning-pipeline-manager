@@ -435,7 +435,7 @@ Every project object has three required base properties:
 * `default` - specifies a default selected value
   Its type depends on the `type` chosen.
 
-There are nine possible values for the `type` property.
+There are 12 possible values for the `type` property.
 * `text` - property is a string.
   A text field is displayed to the user.
 * `multiline` - property is a multi-line string.
@@ -454,6 +454,8 @@ There are nine possible values for the `type` property.
   It requires `min` and `max` properties.
 * `list` - property is a list of arguments of the same type, which can be specified using `dtype`.
 * `hex` - property is a string representing base-16 number which has to match the following regex: `/0x[a-fA-F0-9]`.
+* `button-url` - property is a button which opens a new tab with a given URL.
+* `button-api` - property is a button which triggers `button_click` [External App API](external-app-api) request, providing property `id` and `value`.
 
 
 Additional properties:
