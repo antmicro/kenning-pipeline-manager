@@ -122,6 +122,11 @@
                     "type": "select",
                     "values": ["constant", "replicate", "wrap", "reflect"],
                     "default": "constant"
+                },
+                {
+                    "name": "Wiki",
+                    "type": "button-url",
+                    "default": "https://en.wikipedia.org/wiki/Two-dimensional_filter"
                 }
             ],
             "interfaces": [

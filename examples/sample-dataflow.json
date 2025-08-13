@@ -112,6 +112,11 @@
                             "name": "border type",
                             "id": "4060362f-fc27-42c5-872d-9a5f91931daa",
                             "value": "constant"
+                        },
+                        {
+                            "name": "Wiki",
+                            "id": "04720dda-7280-48f2-b7f8-b81b7433cc0c",
+                            "value": "https://en.wikipedia.org/wiki/Two-dimensional_filter"
                         }
                     ],
                     "enabledInterfaceGroups": [],
