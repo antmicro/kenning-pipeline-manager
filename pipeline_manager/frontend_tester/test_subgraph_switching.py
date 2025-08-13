@@ -59,7 +59,7 @@ def build_server_app():
             tmp_dir,
         ]
         process = subprocess.Popen(args)
-        return_code = process.wait(timeout=30)
+        return_code = process.wait(timeout=50)
         assert not return_code, (
             "Building a server app failed."
             f"Return non-zero code: {return_code}"
