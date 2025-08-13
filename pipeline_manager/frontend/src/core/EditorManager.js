@@ -2219,15 +2219,6 @@ export default class EditorManager {
     }
 
     /**
-     * Checks whether currently edited pipeline is one of the subgraphs
-     *
-     * @returns True if editor is editing subgraph instance, false otherwise
-     */
-    isInsideSubgraph() {
-        return this.baklavaView.displayedGraph !== this.baklavaView.editor.graph;
-    }
-
-    /**
      * Switches the editor state to main graph
      */
     returnFromSubgraph() {
