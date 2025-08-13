@@ -291,9 +291,6 @@ export default class PipelineManagerEditor extends Editor {
                     if (fittingTemplate.length !== 1) {
                         errors.push([`Expected exactly one template with ID ${n.name}, got ${fittingTemplate.length}`]);
                     }
-                    if (usedSubgraphs.has(n.subgraph) && templateName === null) {
-                        errors.push([`Subgraph ${n.subgraph} has multiple nodes pointing to it - only unique IDs are allowed`]);
-                    }
                     usedSubgraphs.add(n.subgraph);
                     [n.graphState] = fittingTemplate;
                 }

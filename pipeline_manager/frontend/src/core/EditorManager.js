@@ -1254,7 +1254,7 @@ export default class EditorManager {
                 const {
                     errors: entryErrors,
                 } = await this.loadDataflow({
-                    graphs: EditorManager.getSubgraphs(entryGraphId, graphs),
+                    graphs,
                     version: dataflowSpecification.version,
                     entryGraph: entryGraphId,
                 });
