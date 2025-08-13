@@ -857,7 +857,8 @@ class SpecificationBuilder(object):
         values: Optional[List[Any]] = None,
         dtype: Optional[str] = None,
         override: Optional[bool] = None,
-    ) -> dict:
+        stringify: bool = False,
+    ) -> Union[Dict, str]:
         """
         Creates and returns a property.
 
@@ -881,10 +882,12 @@ class SpecificationBuilder(object):
             Type of elements in property type is list
         override: Optional[bool]
             Determines whether property should be overridden
+        stringify : bool
+            Determines whether property should be returned as a string
 
         Returns
         -------
-        dict
+        Union[Dict, str]
             Creates a single property for the node type
         """
         prop = {"name": propname, "type": proptype, "default": default}
@@ -896,6 +899,8 @@ class SpecificationBuilder(object):
         set_if_not_none(prop, "dtype", dtype)
         set_if_not_none(prop, "override", override)
 
+        if stringify:
+            prop = json.dumps(prop)
         return prop
 
     def add_node_type_property_group(
@@ -1685,10 +1690,17 @@ class SpecificationBuilder(object):
         sorted_tuples = sorted(self._graphs.items())
         return list(zip(*sorted_tuples))[1]
 
-    def _get_metadata(self, sort_spec: bool) -> Dict:
+    def _get_metadata(
+        self, sort_spec: bool, stringify: bool = False
+    ) -> Union[Dict, str]:
+        res = self._metadata
         if sort_spec:
-            return self._sorted_metadata()
-        return self._metadata
+            res = self._sorted_metadata()
+
+        if stringify:
+            res = json.dumps(res)
+
+        return res
 
     def _get_icon_url(self, icon: Union[Dict, str, Any], label: str) -> str:
         if isinstance(icon, str):
@@ -1696,7 +1708,8 @@ class SpecificationBuilder(object):
         if isinstance(icon, dict):
             if len(icon) != 1:
                 raise SpecificationBuilderException(
-                    f"Icon with prefix {json.dumps(icon)} for {label} can only have one element"  # noqa: E501
+                    f"Icon with prefix {json.dumps(icon)} for {label}"
+                    + "can only have one element"  # noqa: E501
                 )
             group, suffix = list(icon.items())[0]
             if (
@@ -1713,30 +1726,60 @@ class SpecificationBuilder(object):
                 f"Icon with prefix {icon} for {label} has invalid format"
             )
 
-    def _get_nodes(self, sort_spec: bool) -> List[Dict]:
+    def _get_nodes(
+        self, sort_spec: bool, stringify: bool = False
+    ) -> List[Dict]:
+        res = list(self._nodes.values())
         if sort_spec:
-            return self._sorted_nodes()
-        return list(self._nodes.values())
+            res = self._sorted_nodes()
 
-    def _get_graphs(self, sort_spec: bool) -> List[Dict]:
-        if sort_spec:
-            return self._sorted_graphs()
-        return list(self._graphs.values())
+        if stringify:
+            res = json.dumps(res)
 
-    def _get_includes(self, sort_spec: bool) -> List[str]:
-        if sort_spec:
-            return sorted(self._includes)
-        return list(self._includes)
+        return res
 
-    def _get_include_graphs(self, sort_spec: bool) -> List[Dict]:
+    def _get_graphs(
+        self, sort_spec: bool, stringify: bool = False
+    ) -> Union[List[Dict], str]:
+        res = list(self._graphs.values())
         if sort_spec:
-            return sorted(self._includeGraphs.values())
-        return list(self._includeGraphs.values())
+            res = self._sorted_graphs()
+
+        if stringify:
+            res = json.dumps(res)
+
+        return res
+
+    def _get_includes(
+        self, sort_spec: bool, stringify: bool = False
+    ) -> Union[List[str], str]:
+        res = list(self._includes)
+        if sort_spec:
+            res = sorted(res)
+
+        if stringify:
+            res = json.dumps(res)
+
+        return res
+
+    def _get_include_graphs(
+        self, sort_spec: bool, stringify: bool = False
+    ) -> Union[List[Dict], str]:
+        res = list(self._includeGraphs.values())
+        if sort_spec:
+            res = sorted(res)
+
+        if stringify:
+            res = json.dumps(res)
+
+        return res
 
     def _style_to_list(self, style: Style):
         return style if isinstance(style, list) else [style]
 
-    def _construct_specification(self, sort_spec: bool) -> Dict:
+    def _construct_specification(
+        self, sort_spec: bool, stringify: bool = False
+    ) -> Union[Dict, str]:
         """
         Builds specification from the builder data.
 
@@ -1744,10 +1787,12 @@ class SpecificationBuilder(object):
         ----------
         sort_spec: bool
             True if the entries in the specification should be sorted.
+        stringify: bool
+            True if the specification should be returned as a string.
 
         Returns
         -------
-        Dict
+        Union[Dict, str]
             Full specification from SpecificationBuilder
         """
         spec = {"version": self.version}
@@ -1765,6 +1810,11 @@ class SpecificationBuilder(object):
             ]
         if self._includeGraphs:
             spec["includeGraphs"] = self._get_include_graphs(sort_spec)
+        if stringify:
+            spec = json.dumps(
+                spec,
+                sort_keys=sort_spec,
+            )
         return spec
 
     def create_and_validate_spec(
