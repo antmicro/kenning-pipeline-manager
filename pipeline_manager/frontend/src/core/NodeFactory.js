@@ -742,8 +742,15 @@ export class CustomNode extends Node {
             }
         }
 
+        let isWebpack = true;
+        try {
+            isWebpack = window.isWebpack;
+        } catch {
+            isWebpack = false;
+        }
+
         let errors = [];
-        if (process.env.VUE_APP_GRAPH_DEVELOPMENT_MODE === 'true') {
+        if (!isWebpack && process.env.VUE_APP_GRAPH_DEVELOPMENT_MODE === 'true') {
             errors = this.updateInterfaces(parsedState.inputs, parsedState.outputs);
             errors = [...errors, ...this.updateProperties(parsedState.inputs)];
             errors = errors.map((error) => `Node ${this.type} of id: ${this.id} invalid. ${error}`);

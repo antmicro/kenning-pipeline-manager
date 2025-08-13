@@ -9,7 +9,7 @@
 import { stringify } from 'ajv';
 import Ajv2019 from 'ajv/dist/2019.js';
 import jsonMap from 'json-source-map';
-import jsonlint from 'jsonlint';
+import jsonlint from 'jsonlint-webpack';
 
 import { useBaklava, useCommandHandler, useViewModel } from '@baklavajs/renderer-vue';
 import { toRaw, ref, reactive } from 'vue';
@@ -1521,20 +1521,36 @@ export default class EditorManager {
                         Symbol('HistoryToken'),
                     );
                 }
-                const errors = {
-                    errors: await this.baklavaView.editor.load(
-                        dataflow,
-                        preventCentering,
-                        loadOnly,
-                        templateName,
-                    ),
-                    warnings,
-                    info,
-                };
-                this.baklavaView.history.graphSwitch(
-                    this.baklavaView.displayedGraph,
-                    this.baklavaView.displayedGraph,
-                );
+
+                let isWebpack = true;
+                try {
+                    isWebpack = window.isWebpack;
+                } catch {
+                    isWebpack = false;
+                }
+
+                const errors = {};
+                if (!isWebpack) {
+                    Object.assign(errors, {
+                        errors: await this.baklavaView.editor.load(
+                            dataflow,
+                            preventCentering,
+                            loadOnly,
+                            templateName,
+                        ),
+                        warnings,
+                        info,
+                    });
+                    this.baklavaView.history.graphSwitch(
+                        this.baklavaView.displayedGraph,
+                        this.baklavaView.displayedGraph,
+                    );
+                } else {
+                    Object.assign(errors, {
+                        errors: [],
+                        warnings: [],
+                    });
+                }
 
                 this.verifyExposedInterfaceNamesMatchExternalNames(dataflow);
 

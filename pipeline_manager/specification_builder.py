@@ -12,6 +12,7 @@ for the Pipeline Manager server.
 import json
 import logging
 import re
+import sys
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 
@@ -22,8 +23,12 @@ from urllib3.exceptions import (
     ReadTimeoutError,
 )
 
-from pipeline_manager.dataflow_builder.data_structures import Direction, Side
-from pipeline_manager.validator import validate
+if not sys.platform == "emscripten":
+    from pipeline_manager.dataflow_builder.data_structures import (
+        Direction,
+        Side,
+    )
+    from pipeline_manager.validator import validate
 
 Style = Union[str, List[str]]
 
