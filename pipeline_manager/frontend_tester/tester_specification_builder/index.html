@@ -1,0 +1,97 @@
+<!--
+Copyright (c) 2025 Antmicro <www.antmicro.com>
+
+SPDX-License-Identifier: Apache-2.0
+-->
+
+<html>
+<head>
+    <script src="https://cdn.jsdelivr.net/npm/marked/lib/marked.umd.js"></script>
+    <!-- Adjust the SpecificationBuilder path -->
+    <script src="/pipeline_manager/frontend/specification_builder/specification_builder.js"></script>
+</head>
+<body>
+
+  <div id="content"></div>
+
+  <script>
+    async function main() {
+      default_specification = "";
+      default_dataflow = "";
+      let content = "";
+
+      const load = async (path) => fetch(path).then((response) => response.json())
+      const display_md = (content) => document.getElementById('content').innerHTML = marked.parse(content);
+
+      await load('sample-dataflow.json').then((data) => { default_dataflow = data; });
+      await load('sample-specification.json').then((data) => { default_specification = data; });
+
+
+      // Initial information
+      let header = "# Initial information\n"
+      header += `Sample **dataflow** and **specification** are loaded under **\`default_dataflow\`** and \
+      **\`default_specification\`** variables respectively.\n\nSpecification version: ${default_specification.version}\n`
+      content += header
+
+      // Specbuilder init
+      specification_builder = await new SpecLibrary.SpecificationBuilder(default_specification.version)
+
+      // Overview
+      let overview = "# Overview\n"
+      overview += "The browser loaded the `SpecLibrary` module which contains e.g. `SpecificatioBuilder` class:\n"
+
+      for (const [k, v] of Object.entries(SpecLibrary))
+        overview += `- \`${k}\`\n`
+
+      overview += "\nRight now, `SpecificationBuilder` is initialized. If you wish to use it, \
+      it is available under **\`specification_builder\`** variable in the browser console (Crt + Shift + K). \
+      If you wish to initialize it by yourself you can do it by:\n"
+      overview += "```\nspec_builder = await new SpecLibrary.SpecificationBuilder(defaultSpecification.version)\n```\n"
+
+      content += overview
+
+      // Usage examples
+      let usage_examples = "# Usage examples\n"
+      usage_examples += "If you want to play with the generated methods then look at its header, listed below, \
+      and adjust your arguments if needed. **Last line** gives an idea of what output to expect. \
+      More in **Generated methods**.\n\n"
+
+      usage_examples += "Example:\n"
+      usage_examples += "```\nspecification_builder.update_spec_from_other(default_specification)\n\
+generated_spec = await specification_builder.create_and_validate_spec()\n\
+await SpecLibrary.validate_dataflow(default_dataflow, generated_spec)\n```\n\n"
+
+      usage_examples += "Example:\n"
+      usage_examples += "```\nspecification_builder.add_node_type('Test')\n\
+specification_builder.add_node_type_color('Test', '#FF0000')\n\
+constructed_spec = specification_builder._construct_specification(false)\n\
+JSON.stringify(constructed_spec, null, 4)\n```\n"
+
+      content += usage_examples
+
+      // Generated methods info
+      let generated_methods_listing = "# Generated methods info\n"
+      generated_methods_listing += "Section shows crucial parts of generated method, which can be compared with its \
+      equivalents from Python implementation.\n\n"
+
+      generated_methods_listing += "**Header** - self-explanatory\n\n"
+      generated_methods_listing += "**Last line** - last line in generated method determining `return` statement:\n"
+      generated_methods_listing += "- if there is a `return` in it expect the returned value being\n"
+      generated_methods_listing += "  - object type, if `JSON.parse` is used\n"
+      generated_methods_listing += "  - primitive type otherwise\n"
+      generated_methods_listing += "- otherwise method returns nothing\n\n"
+
+      for (const [k, v] of Object.entries(specification_builder.generatedMethods))
+        generated_methods_listing += `## ${k}\n**Header:**\n\`\`\`\n${v.header}\n\`\`\`\n**Last line:**\n\`\`\`\n${v.last_line}\n\`\`\`\n`
+
+      content += generated_methods_listing
+
+      display_md(content);
+
+    }
+    main();
+
+  </script>
+</body>
+</html>
+
