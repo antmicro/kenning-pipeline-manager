@@ -9,7 +9,7 @@
                     "id": "ae784e0e-1d1a-4f5d-99e1-955b42cbd47e",
                     "position": {
                         "x": 395,
-                        "y": 279
+                        "y": 345
                     },
                     "width": 200,
                     "twoColumn": true,
@@ -66,7 +66,8 @@
                         {
                             "name": "property-2",
                             "id": "290f2265-9e21-4e80-ba64-8489091386a6",
-                            "value": ""
+                            "value": "",
+                            "hidden": true
                         }
                     ]
                 },
@@ -193,7 +194,8 @@
                         {
                             "name": "property-1",
                             "id": "2937bc73-f55f-4254-89d8-c634ab05bf9e",
-                            "value": ""
+                            "value": "",
+                            "hidden": true
                         },
                         {
                             "name": "property-2",
