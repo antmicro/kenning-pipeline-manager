@@ -1,8 +1,9 @@
 # Communication with an external application
 
-The communication with an external application is based on a [JSON-RPC](https://www.jsonrpc.org/specification).
+The communication with an external application is based on [JSON-RPC](https://www.jsonrpc.org/specification) messages.
 
-{{project}} supports 2 ways of defining external application:
+{{project}} supports two ways of defining external application:
+
 * [External Backend Application](#external-backend-application)
 * [External Frontend Application](#external-frontend-application)
 
