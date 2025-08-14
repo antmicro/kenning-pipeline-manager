@@ -86,6 +86,9 @@ export default {
         dataflowGraphName() {
             return this.editorManager.editor.graphName;
         },
+        graphId() {
+            return this.editorManager.baklavaView.displayedGraph.id;
+        },
         editorTitle() {
             if (this.graphName === undefined) {
                 return this.appName;
@@ -998,6 +1001,12 @@ export default {
                     :class="['editorTitle', mobileClasses]"
                     @dblclick="setEditTitle">
                         {{ editorTitle }}
+                </span>
+                <span
+                    v-if="this.editorManager.baklavaView.settings.showIds &&
+                          !panels.nodesearch.isOpen"
+                    :class="['editorTitle', mobileClasses]">
+                        Graph ID: {{ graphId }}
                 </span>
                 <div :style="rightContainerStyles" ref="rightButtons">
                     <div
