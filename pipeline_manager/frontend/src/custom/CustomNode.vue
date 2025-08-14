@@ -87,6 +87,7 @@ from moving or deleting the nodes.
                 :style="contextMenuStyle"
                 @pointerdown.left.stop
                 @click="onContextMenuTitleClick"
+                @sizeUpdate="onContextMenuSizeUpdate"
             />
         </div>
 
@@ -201,11 +202,6 @@ const { viewModel } = useViewModel();
 const { graph } = useGraph();
 const movementStep = computed(() => viewModel.value.movementStep);
 
-const contextMenuStyle = computed(() => ({
-    'transform-origin': '0 0',
-    transform: `scale(${1 / graph.value.scaling})`,
-}));
-
 // Template refs
 const nodeRef = ref(null);
 const titleRef = ref(null);
@@ -289,6 +285,15 @@ const focusOnRename = () => {
 const showContextMenuTitle = ref(false);
 const contextMenuTitleX = ref(0);
 const contextMenuTitleY = ref(0);
+const contextMenuVisibility = ref('hidden');
+const contextMenuPosition = ref(0);
+
+const contextMenuStyle = computed(() => ({
+    'transform-origin': '0 0',
+    transform: `scale(${1 / graph.value.scaling})`,
+    visible: contextMenuVisibility.value,
+}));
+
 const contextMenuTitleItems = computed(() => {
     const items = [];
     items.push({ value: 'sidebar', label: 'Details', icon: icons.Sidebar });
@@ -506,6 +511,16 @@ const onContextMenuTitleClick = async (action) => {
     }
 };
 
+const onContextMenuSizeUpdate = (size) => {
+    // Adjust context menu position to fit into the viewport
+    const offset = contextMenuPosition.value + size.height + 200 - window.innerHeight;
+    if (offset > 0) {
+        contextMenuTitleY.value -= offset;
+    }
+    // Make it visible
+    contextMenuVisibility.value = 'visible';
+};
+
 const canOpenContextMenu = computed(() =>
     (contextMenuTitleItems.value.length === 0 && displayNoResources)
         || contextMenuTitleItems.value.length > 0,
@@ -519,10 +534,14 @@ const openContextMenuTitle = (ev) => {
         showContextMenuTitle.value === false &&
         showContextMenuInterface.value === false
     ) {
+        // Render the menu but keep it hidden
+        showContextMenuTitle.value = true;
+
+        // Set initial menu position
         const target = ev.currentTarget;
         contextMenuTitleX.value = ev.offsetX;
         contextMenuTitleY.value = ev.offsetY + target.offsetTop + 20;
-        showContextMenuTitle.value = true;
+        contextMenuPosition.value = ev.clientY;
     }
 };
 

@@ -67,7 +67,9 @@ from creating and deleting connections or altering nodes' values if the editor i
 </template>
 
 <script>
-import { defineComponent, ref } from 'vue';
+import {
+    defineComponent, ref, onMounted, nextTick,
+} from 'vue';
 import { Components, useViewModel } from '@baklavajs/renderer-vue';
 
 export default defineComponent({
@@ -78,7 +80,7 @@ export default defineComponent({
             default: [],
         },
     },
-    emits: ['update:modelValue', 'click'],
+    emits: ['update:modelValue', 'click', 'sizeUpdate'],
     setup(props, context) {
         const {
             el,
@@ -92,6 +94,12 @@ export default defineComponent({
         const getIconPath = (name) => viewModel.value.cache[`./${name}`] ?? name;
 
         const justOpened = ref(true);
+
+        onMounted(async () => {
+            await nextTick();
+            const size = el.value.getBoundingClientRect();
+            context.emit('sizeUpdate', size);
+        });
 
         const closeContextMenu = (ev) => {
             if (props.modelValue === true) {
