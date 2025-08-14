@@ -82,13 +82,14 @@ JSON.stringify(constructed_spec, null, 4)\n```\n"
       generated_methods_listing += "- otherwise method returns nothing\n\n"
 
       for (const [k, v] of Object.entries(specification_builder.generatedMethods))
-        generated_methods_listing += `## ${k}\n**Header:**\n\`\`\`\n${v.header}\n\`\`\`\n**Last line:**\n\`\`\`\n${v.last_line}\n\`\`\`\n`
+        generated_methods_listing += `## ${k}\n**Header:**\n\`\`\`\n${v.header}\n\`\`\`\n**Last line:**\n\`\`\`\n${v.lastLine}\n\`\`\`\n`
 
       content += generated_methods_listing
 
       display_md(content);
 
     }
+
     main();
 
   </script>

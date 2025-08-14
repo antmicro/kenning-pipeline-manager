@@ -84,7 +84,7 @@ methods_specs = [
         "name": method_spec[0],
         "args": method_spec[1].args,
         "defaults": method_spec[1].defaults,
-        "returns": method_spec[2],
+        "doesReturn": method_spec[2],
     }
     for method_spec in methods_names_specs_returns
 ]

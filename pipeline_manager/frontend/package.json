@@ -7,7 +7,7 @@
         "serve-static": "vue-cli-service --mode static serve",
         "build-server-app": "vue-cli-service build",
         "build-static-html": "vue-cli-service --mode static build",
-        "lint": "npx --no-install eslint --ext .js,.vue,.ts src/ specification_builder/ --fix --color --ignore-pattern specification_builder_source.js",
+        "lint": "npx --no-install eslint --ext .js,.vue,.ts src/ specification_builder/ --fix --color --ignore-pattern specification_builder/specification_builder_source.js --ignore-pattern specification_builder/utils/specification_builder_init_utils.js",
         "format": "prettier --write .",
         "clean": "rm -rf node_modules",
         "postinstall": "patch-package",

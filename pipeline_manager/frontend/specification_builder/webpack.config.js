@@ -43,8 +43,8 @@ export default (_, argv) =>
                     include: [
                         path.resolve('../dataflow_builder/data_structures.py'),
                         path.resolve('../specification_builder.py'),
-                        path.resolve('./specification_builder/retrieve_python_methods_info.py'),
-                        path.resolve('./specification_builder/argument_preparation_utils.py'),
+                        path.resolve('./specification_builder/utils/retrieve_python_methods_info.py'),
+                        path.resolve('./specification_builder/utils/argument_preparation_utils.py'),
                     ],
                 },
                 {
