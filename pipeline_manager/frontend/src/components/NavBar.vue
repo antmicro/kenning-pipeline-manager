@@ -30,6 +30,7 @@ import CassetteStop from '../icons/CassetteStop.vue';
 import DropdownItem from './DropdownItem.vue';
 import Cogwheel from '../icons/Cogwheel.vue';
 import Magnifier from '../icons/Magnifier.vue';
+import Sidebar from '../icons/Sidebar.vue';
 import EditorManager from '../core/EditorManager';
 import NotificationHandler from '../core/notifications';
 import { notificationStore } from '../core/stores';
@@ -46,6 +47,7 @@ import { menuState, configurationState } from '../core/nodeCreation/Configuratio
 import { removeInterfaces, removeProperties } from '../core/nodeCreation/Configuration.ts';
 import Panel from './Panel.vue';
 import CustomSidebar from '../custom/CustomSidebar.vue';
+import GraphDetails from './GraphDetails.vue';
 import { saveSpecificationConfiguration, saveGraphConfiguration, exportGraph } from './saveConfiguration.ts';
 
 import icons from '../icons';
@@ -72,6 +74,7 @@ export default {
         Notifications,
         Magnifier,
         Cogwheel,
+        Sidebar,
         Settings,
         Cube,
         ParentMenu,
@@ -84,6 +87,7 @@ export default {
         CustomSidebar,
         LayerConfigurationMenu,
         ListMenu,
+        GraphDetails,
     },
     computed: {
         dataflowGraphName() {
@@ -309,6 +313,13 @@ export default {
                 },
                 fullscreen: {
                     isOpen: fullscreen.isFullscreen,
+                },
+                graphDetails: {
+                    isOpen: false,
+                    class: '.details-panel',
+                    iconRef: 'graphDetails',
+                    showTransform: '-495px, 0px',
+                    hideTransform: '0px, 0px',
                 },
             },
         };
@@ -733,6 +744,7 @@ export default {
         returnFromSubgraph() {
             this.editorManager.returnFromSubgraph();
             this.resetHoverInfo('subgraphReturn');
+            this.togglePanel(this.panels.graphDetails, true);
         },
         goToParentGraph(graph) {
             this.editorManager.switchToGraph(graph);
@@ -1159,6 +1171,20 @@ export default {
                         </div>
                     </div>
                     <div
+                        ref="graphDetails"
+                        :class="['hoverbox', mobileClasses]"
+                        role="button"
+                        @click="togglePanel(panels.graphDetails)"
+                        @pointerover="() => updateHoverInfo('graphDetails')"
+                        @pointerleave="() => resetHoverInfo('graphDetails')"
+                    >
+                        <Sidebar :hover="isHovered('graphDetails')" class="small_svg"/>
+                        <div :class="['tooltip', mobileClasses]">
+                            <span v-if="!panels.graphDetails.isOpen">Show graph details</span>
+                            <span v-else>Hide graph details</span>
+                        </div>
+                    </div>
+                    <div
                         ref="settings"
                         :class="['hoverbox', mobileClasses]"
                         role="button"
@@ -1254,6 +1280,11 @@ export default {
         />
         <CustomSidebar
             @sidebar-open="openNavbar"
+        />
+        <GraphDetails
+            v-click-outside="(ev) => clickOutside(ev, panels.graphDetails)"
+            tabindex="-1"
+            :viewModel="editorManager.baklavaView"
         />
     </div>
 </template>
