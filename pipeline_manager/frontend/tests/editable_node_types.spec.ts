@@ -210,7 +210,7 @@ test('rename category node', async ({ page }) => {
     // check category in custom sidebar
     const node = page.getByText('Logical AND').locator('..').last();
     await node.click({ button: 'right'});
-    await page.getByText('Details').click();
+    await page.getByText('Details', { exact: true }).click();
 
     const parents = page.getByText('Generalize');
     const siblings = page.getByText('Choose other type');

@@ -11,11 +11,11 @@ async function enableEditingNodes(page: Page) {
     // Enable modifying node types.
     const settings = page.locator('.settings-panel');
     expect(settings).toBeVisible();
-    await settings.hover();
+    await settings.hover({ force: true });
 
     const checkbox = page.getByText('Modify node types');
     expect(checkbox).toBeVisible();
-    await checkbox.click();
+    await checkbox.click({ force: true });
 }
 
 async function openFileChooser(

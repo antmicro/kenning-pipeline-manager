@@ -4,7 +4,7 @@ import { getPathToJsonFile, getUrl, openFileChooser } from './config.js';
 const countOfInitiallyExposedInterface = 3;
 
 async function enterSubgraph(page: Page) {
-    const nodeWithSubgraph = page.getByText('Test subgraph #1').nth(1).locator('../..');
+    const nodeWithSubgraph = page.getByText('Test subgraph #1').last().locator('../..');
     await nodeWithSubgraph.locator('.__title').click({ button: 'right' });
     const contextMenuOption = page.locator('.baklava-context-menu').getByText('Edit Subgraph');
     await contextMenuOption.click();
