@@ -25,6 +25,14 @@ SPDX-License-Identifier: Apache-2.0
                     />
                 </div>
             </div>
+            <div class="__properties" v-if="viewModel.settings.editableNodeTypes && inSubgraph">
+                <button
+                    class="baklava-button __validate-button"
+                    @click="addProperties"
+                >
+                    Add properties
+                </button>
+            </div>
         </div>
     </div>
 </template>
@@ -33,6 +41,7 @@ SPDX-License-Identifier: Apache-2.0
 import { ref, watch } from 'vue';
 import { getOptionName } from '../custom/CustomNode.js';
 import CustomInterface from '../custom/CustomInterface.vue';
+import { configurationState, menuState } from '../core/nodeCreation/ConfigurationState.ts';
 
 export default {
     components: {
@@ -47,14 +56,17 @@ export default {
         const node = ref(null);
         const graphNodeName = ref('');
         const displayedProperties = ref([]);
+        const inSubgraph = ref(false);
 
         watch(props.viewModel.editor.graph, () => {
             node.value = props.viewModel.editor.graph.graphNode;
             if (node.value) {
+                inSubgraph.value = true;
                 graphNodeName.value = node.value.title !== '' ? node.value.title : node.value.type;
                 displayedProperties.value = Object.values(node.value.inputs)
                     .filter((intf) => !intf.port);
             } else {
+                inSubgraph.value = false;
                 graphNodeName.value = props.viewModel.editor.graph.name;
                 displayedProperties.value = props.viewModel.editor.graph.nodes
                     .map((n) => Object.values(n.inputs)).flat()
@@ -72,6 +84,25 @@ export default {
             node.value.updateDynamicInterfaces(intf);
         };
 
+        const addProperties = () => {
+            configurationState.editedType = node.value.type;
+
+            const configuredProperties = displayedProperties.value?.map((prop) => ({
+                name: prop?.name,
+                type: prop?.type,
+                default: prop?.value,
+                min: prop?.min,
+                max: prop?.max,
+                values: prop?.items,
+                step: prop?.step,
+                readonly: prop?.readonly,
+                dtype: prop?.dtype,
+            }));
+            configurationState.properties = configuredProperties;
+
+            menuState.propertyMenu = true;
+        };
+
         return {
             node,
             graphNodeName,
@@ -79,6 +110,8 @@ export default {
             getOptionName,
             toggleGroup,
             updateDynamicInterfaces,
+            addProperties,
+            inSubgraph,
         };
     },
 };
@@ -141,6 +174,10 @@ export default {
 
             & > .__property:last-child {
                 padding-bottom: 1.25em;
+            }
+
+            & > button {
+                margin: 1.25em 1.25em;
             }
         }
     }
