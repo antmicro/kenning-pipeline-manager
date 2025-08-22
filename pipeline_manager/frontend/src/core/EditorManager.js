@@ -582,10 +582,9 @@ export default class EditorManager {
             this._unregisterNodeType(nodeName);
 
             const { viewModel } = useViewModel();
-            const { displayedGraph } = viewModel.value;
-            const nodes = displayedGraph.nodes.filter(
-                (n) => n.type === nodeName,
-            );
+            const { editor } = viewModel.value;
+            const allNodes = Array.from(editor.graphs).map((graph) => graph.nodes).flat();
+            const nodes = allNodes.filter((n) => n.type === nodeName);
             nodes.forEach((n) => {
                 Object.entries(structuredClone(toRaw(resolvedNode))).forEach(([key, value]) => {
                     if (value !== undefined && key !== 'interfaces' && key !== 'properties') {

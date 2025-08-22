@@ -52,11 +52,10 @@ import YAML from 'yaml';
 import {
     computed, defineComponent, nextTick, ref, toRef, watch, onMounted, onBeforeUnmount,
 } from 'vue';
-import { useViewModel } from '@baklavajs/renderer-vue';
 import EditorManager, { EDITED_NODE_STYLE } from '../core/EditorManager';
 import NotificationHandler from '../core/notifications';
 import { menuState, configurationState } from '../core/nodeCreation/ConfigurationState.ts';
-import { alterInterfaces, alterProperties } from '../core/nodeCreation/Configuration.ts';
+import { alterInterfaces, alterProperties, findNodes } from '../core/nodeCreation/Configuration.ts';
 
 export default defineComponent({
     props: {
@@ -72,8 +71,6 @@ export default defineComponent({
     setup(props) {
         // State
 
-        const { viewModel } = useViewModel();
-        const { displayedGraph } = viewModel.value;
         const editorManager = EditorManager.getEditorManagerInstance();
         const node = toRef(props, 'node');
         const root = ref(null);
@@ -273,9 +270,7 @@ export default defineComponent({
 
                 // Update all nodes of the type to match the new specification
                 const oldType = node.value.type;
-                const nodes = displayedGraph.nodes.filter(
-                    (n) => n.type === oldType,
-                );
+                const nodes = findNodes(oldType);
 
                 // Update each field if it is defined
                 /* eslint-disable no-param-reassign */
@@ -355,9 +350,7 @@ export default defineComponent({
                     (intf) => !oldInterfaces.some((i) => i.name === intf.name),
                 ) ?? [];
 
-                const childNodes = displayedGraph.nodes.filter(
-                    (n) => n.extends?.includes(oldType),
-                ) ?? [];
+                const childNodes = findNodes(oldType, true) ?? [];
 
                 alterProperties([...nodes, ...childNodes], removedProperties, true);
                 alterInterfaces([...nodes, ...childNodes], removedInterfaces, true);

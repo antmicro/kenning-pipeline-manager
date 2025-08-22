@@ -67,6 +67,22 @@ function commitTypeToSpecification() {
 }
 
 /**
+  * Finds all nodes of a given type in all editor graphs.
+  * @param nodeType - type of the node to find
+  * @param extending - find extending nodes
+  * @returns any[] - an array of nodes
+*/
+export function findNodes(nodeType: string, extending = false): any[] {
+    const { viewModel } = useViewModel();
+    const { editor } = viewModel.value;
+
+    const allNodes = Array.from(editor.graphs).map((graph: any) => graph.nodes).flat();
+
+    if (extending) return allNodes.filter((n: any) => n.extends?.includes(nodeType));
+    return allNodes.filter((n: any) => n.type === nodeType);
+}
+
+/**
   * Creates a new node based on the current configuration.
   * It first validates the configuration and if it is correct, it adjusts the existing nodes
   * to the new configuration and creates a new node if `configurationMenu.addNode`
@@ -74,9 +90,6 @@ function commitTypeToSpecification() {
   * @returns string[] - an array of errors that occurred during node creation
 */
 export function createNode(): string[] {
-    const { viewModel } = useViewModel();
-    const { editor } = viewModel.value;
-    const { displayedGraph } = viewModel.value;
     const editorManager = EditorManager.getEditorManagerInstance();
 
     const newNodeData = configurationState.nodeData;
@@ -103,26 +116,15 @@ export function createNode(): string[] {
   * Modifies the configuration of the custom node.
   * It first validates the configuration and if it is correct, it adjusts the existing nodes
   * to the new configuration. If the configuration is incorrect, it logs an error.
-  * @param newNodeData - the configuration of the new node
   * @returns string[] - an array of errors that occurred during the modification
 */
 export function modifyConfiguration(): string[] {
     suppressHistoryLogging(true);
 
-    const { viewModel } = useViewModel();
-    const { editor } = viewModel.value;
-    const { displayedGraph } = viewModel.value;
-    const editorManager = EditorManager.getEditorManagerInstance();
-
     const newNodeData = configurationState.nodeData;
     const currentType = configurationState.editedType;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const nodes: any[] = displayedGraph.nodes.filter(
-        (n) => n.type === currentType,
-    );
-
-    // Changing existing nodes' types
+    const nodes = findNodes(currentType!);
     /* eslint-disable no-param-reassign */
     nodes.forEach((node) => {
         if (node.type === node.title) {
@@ -238,9 +240,6 @@ export function alterInterfaces(
   * @returns void
 */
 export function addProperty(property: PropertyConfiguration): void {
-    const { viewModel } = useViewModel();
-    const { displayedGraph } = viewModel.value;
-
     const currentType = configurationState.editedType;
     const editorManager = EditorManager.getEditorManagerInstance();
     let error = editorManager.validateNodeProperty(property);
@@ -250,8 +249,8 @@ export function addProperty(property: PropertyConfiguration): void {
         return;
     }
 
+    const nodes = findNodes(currentType!);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const nodes: any[] = displayedGraph.nodes.filter((n) => n.type === currentType);
     if (nodes === undefined) {
         NotificationHandler.terminalLog(
             'error',
@@ -275,7 +274,7 @@ export function addProperty(property: PropertyConfiguration): void {
     resolvedChildNodes.forEach((n: any) => {
         // eslint-disable-next-line no-param-reassign
         n.properties = [...(n.properties ?? []), ...[property]];
-        const childNodes: any[] = displayedGraph.nodes.filter((child) => child.type === n.name);
+        const childNodes = findNodes(n.name!);
         alterProperties(childNodes, [property]);
     });
 
@@ -288,14 +287,10 @@ export function addProperty(property: PropertyConfiguration): void {
   * @returns void
 */
 export function removeProperties(properties: PropertyConfiguration[]): void {
-    const { viewModel } = useViewModel();
-    const { displayedGraph } = viewModel.value;
-
     const currentType = configurationState.editedType;
     const editorManager = EditorManager.getEditorManagerInstance();
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const nodes: any[] = displayedGraph.nodes.filter((n) => n.type === currentType);
+    const nodes = findNodes(currentType!);
     if (nodes === undefined) {
         NotificationHandler.terminalLog(
             'error',
@@ -318,7 +313,7 @@ export function removeProperties(properties: PropertyConfiguration[]): void {
         n.properties = n.properties?.filter(
             (prop: PropertyConfiguration) => !properties.some((p) => p.name === prop.name),
         ) ?? [];
-        const childNodes: any[] = displayedGraph.nodes.filter((child) => child.type === n.name);
+        const childNodes = findNodes(n.name!);
         alterProperties(childNodes, properties, true);
     });
 
@@ -331,9 +326,6 @@ export function removeProperties(properties: PropertyConfiguration[]): void {
   * @returns void
 */
 export function addInterface(intf: InterfaceConfiguration): void {
-    const { viewModel } = useViewModel();
-    const { displayedGraph } = viewModel.value;
-
     const currentType = configurationState.editedType;
     const editorManager = EditorManager.getEditorManagerInstance();
     let error = editorManager.validateNodeInterface(intf);
@@ -343,8 +335,7 @@ export function addInterface(intf: InterfaceConfiguration): void {
         return;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const nodes: any[] = displayedGraph.nodes.filter((n) => n.type === currentType);
+    const nodes = findNodes(currentType!);
     if (nodes === undefined) {
         NotificationHandler.terminalLog(
             'error',
@@ -368,7 +359,7 @@ export function addInterface(intf: InterfaceConfiguration): void {
     resolvedChildNodes.forEach((n: any) => {
         // eslint-disable-next-line no-param-reassign
         n.interfaces = [...(n.interfaces ?? []), ...[intf]];
-        const childNodes: any[] = displayedGraph.nodes.filter((child) => child.type === n.name);
+        const childNodes = findNodes(n.name!);
         alterInterfaces(childNodes, [intf]);
     });
 
@@ -381,13 +372,10 @@ export function addInterface(intf: InterfaceConfiguration): void {
   * @returns void
 */
 export function removeInterfaces(interfaces: InterfaceConfiguration[]): void {
-    const { viewModel } = useViewModel();
-    const { displayedGraph } = viewModel.value;
     const currentType = configurationState.editedType;
     const editorManager = EditorManager.getEditorManagerInstance();
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const nodes: any[] = displayedGraph.nodes.filter((n) => n.type === currentType);
+    const nodes = findNodes(currentType!);
     if (nodes === undefined) {
         NotificationHandler.terminalLog(
             'error',
@@ -410,7 +398,7 @@ export function removeInterfaces(interfaces: InterfaceConfiguration[]): void {
         n.interfaces = n.interfaces?.filter(
             (intf: InterfaceConfiguration) => !interfaces.some((i) => i.name === intf.name),
         ) ?? [];
-        const childNodes: any[] = displayedGraph.nodes.filter((child) => child.type === n.name);
+        const childNodes = findNodes(n.name!);
         alterInterfaces(childNodes, interfaces, true);
     });
 
