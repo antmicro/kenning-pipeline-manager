@@ -39,47 +39,45 @@ export const saveSpecificationConfiguration: SaveConfiguration = {
     saveCallback() {
         const editorManager = EditorManager.getEditorManagerInstance();
         const specification = editorManager.saveSpecification();
-        let dataflow: any;
-        if (this.graph) {
-            dataflow ??= editorManager.saveDataflow();
-            specification.graphs ??= [];
+        const dataflow = editorManager.saveDataflow();
+        specification.graphs ??= [];
 
-            // Match graph IDs with subgraphId in node specification
-            dataflow.graphs.forEach((graph: any) => {
-                dataflow.graphs.forEach((g: any) => {
-                    const node = g.nodes.find((n: any) => n.subgraph === graph.id);
-                    if (node !== undefined) {
-                        const nodeSpecification = specification.nodes.find(
-                            (n: any) => n.name === node.name,
-                        );
-                        // eslint-disable-next-line no-param-reassign
-                        graph.id = nodeSpecification.subgraphId;
-                        node.subgraph = nodeSpecification.subgraphId;
-                    }
-                });
-            });
-
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            dataflow.graphs.forEach((graph: any) => {
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                const prevIndex = specification.graphs.map((g: any) => g.id).indexOf(graph.id);
-                const [index, remove] = prevIndex !== -1
-                    ? [prevIndex, 1]
-                    : [specification.graphs.length, 0];
-                specification.graphs.splice(index, remove, graph);
-            });
-            specification.entryGraph = dataflow.entryGraph ?? dataflow.graphs[0].id;
-
-            Object.entries(dataflow.metadata).forEach(([key, value]) => {
-                if (value !== undefined) {
-                    specification.metadata[key] = value;
+        // Match graph IDs with subgraphId in node specification
+        dataflow.graphs.forEach((graph: any) => {
+            dataflow.graphs.forEach((g: any) => {
+                const node = g.nodes.find((n: any) => n.subgraph === graph.id);
+                if (node !== undefined) {
+                    const nodeSpecification = specification.nodes.find(
+                        (n: any) => n.name === node.name,
+                    );
+                    // eslint-disable-next-line no-param-reassign
+                    graph.id = nodeSpecification.subgraphId;
+                    node.subgraph = nodeSpecification.subgraphId;
                 }
             });
+        });
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        dataflow.graphs.forEach((graph: any) => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const prevIndex = specification.graphs.map((g: any) => g.id).indexOf(graph.id);
+            const [index, remove] = prevIndex !== -1
+                ? [prevIndex, 1]
+                : [specification.graphs.length, 0];
+            specification.graphs.splice(index, remove, graph);
+        });
+
+        Object.entries(dataflow.metadata).forEach(([key, value]) => {
+            if (value !== undefined) {
+                specification.metadata[key] = value;
+            }
+        });
+
+        if (this.graph) {
+            specification.entryGraph = dataflow.entryGraph ?? dataflow.graphs[0].id;
         }
 
         if (this.minify) {
-            dataflow ??= editorManager.saveDataflow();
-
             const nameToNodeMapping = Object.fromEntries(
                 specification.nodes.map((node: any) => [EditorManager.getNodeName(node), node]));
             const nameToNode = (name: string) => nameToNodeMapping[name];
