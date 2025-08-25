@@ -33,6 +33,7 @@ import NotificationHandler from '../core/notifications';
 import { notificationStore } from '../core/stores';
 import runInfo from '../core/communication/runInformation';
 import getExternalApplicationManager from '../core/communication/ExternalApplicationManager';
+import { GraphFactory } from '../core/NodeFactory.js';
 import Notifications from './Notifications.vue';
 import Settings from './Settings.vue';
 import {
@@ -595,6 +596,51 @@ export default {
                 });
         },
 
+        createGraphNodeTypeFromCurrentGraph() {
+            // The empirically tested limit is 28, but three characters were left for " #2".
+            const nodeTypeNameLengthLimit = 25;
+            const currentGraph = this.editorManager.baklavaView.displayedGraph;
+            let graphName = currentGraph.name.trim().slice(0, nodeTypeNameLengthLimit);
+
+            // Generate an unique name by appending " #i".
+            let index = 1;
+            while (this.editorManager.editor.nodeTypes.has(graphName)) {
+                // Strip the suffix " #i".
+                graphName = graphName.replace(/\s+#\d+$/, '').trim();
+                graphName = `${graphName} #${index}`;
+                index += 1;
+            }
+
+            const graphNode = {
+                name: graphName,
+                category: 'From Graphs',
+            };
+
+            // Serialize state of the current graph to avoid circular references.
+            const currentGraphState = currentGraph.save();
+
+            const graphInstance = GraphFactory(
+                currentGraphState.nodes,
+                currentGraphState.connections,
+                graphName,
+                this.editorManager.baklavaView.editor,
+            );
+
+            graphNode.subgraphId = currentGraph.id;
+
+            // If `graphInstance` is any array, it is an array of errors.
+            if (Array.isArray(graphInstance) && graphInstance.length) {
+                graphInstance.forEach((error) => {
+                    NotificationHandler.showToast('error', error);
+                });
+            } else {
+                this.editorManager.baklavaView.editor.addGraphTemplate(
+                    graphInstance,
+                    graphNode,
+                );
+            }
+        },
+
         onClickNodeSearch() {
             this.togglePanel(this.panels.nodesearch);
             if (this.panels.nodesearch.isOpen) {
@@ -917,6 +963,11 @@ export default {
                                 type="'button'"
                                 text="Export graph to HTML-based SVG"
                                 :eventFunction="exportToSvg"
+                            />
+                            <DropdownItem
+                                type="'button'"
+                                text="Create node type from graph"
+                                :eventFunction="createGraphNodeTypeFromCurrentGraph"
                             />
                         </div>
                     </div>
