@@ -77,6 +77,9 @@ This object specifies additional editor options and contains the following optio
   The default value is `false`.
 * `toggleableEditableTypes` - Boolean value determining whether node editibility can be toggled from the frontend.
   The default value is `true`.
+* `newGraphNode` - Boolean value telling whether anonymous graphs should be available for the given specification or not.
+  It appears in the UI as `New Graph Node` button.
+  The default is `true`.
 
 An example:
 
