@@ -126,6 +126,7 @@ export function useClipboard(
         if (isEmpty.value || viewModel.value.editor.readonly) {
             return;
         }
+        startTransaction();
         const movementStep = (<any>viewModel.value).movementStep ?? 1;
 
         // Map old IDs to new IDs
@@ -256,7 +257,7 @@ export function useClipboard(
             }
         }
 
-        commandHandler.executeCommand<ICommand<void>>('COMMIT_TRANSACTION');
+        commitTransaction();
 
         /* eslint-disable-next-line consistent-return */
         return {
