@@ -116,7 +116,7 @@ export default defineComponent({
 
         // Add new node when configuration menu is closed
         watch(() => menuState.configurationMenu.visible, async (newValue, oldValue) => {
-            if (oldValue === true && newValue === false) {
+            if (oldValue === true && newValue === false && menuState.configurationMenu.placeNode) {
                 const newType = configurationState.nodeData.name;
                 const nodeInformation = editor.nodeTypes.get(newType);
                 const instance = new nodeInformation.type(); // eslint-disable-line new-cap
@@ -136,6 +136,7 @@ export default defineComponent({
                 if (draggedNode.value.type === DEFAULT_CUSTOM_NODE_TYPE) {
                     menuState.configurationMenu.visible = !menuState.configurationMenu.visible;
                     menuState.configurationMenu.addNode = true;
+                    menuState.configurationMenu.placeNode = true;
                 } else {
                     const instance = new draggedNode.value.nodeInformation.type(); // eslint-disable-line new-cap,max-len
                     placeNode(instance);

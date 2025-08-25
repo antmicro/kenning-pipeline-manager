@@ -45,6 +45,7 @@ export const menuState = reactive({
     configurationMenu: {
         visible: false,
         addNode: false,
+        placeNode: false,
     },
     propertyMenu: false,
     interfaceMenu: false,
