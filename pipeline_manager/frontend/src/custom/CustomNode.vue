@@ -297,34 +297,22 @@ const contextMenuStyle = computed(() => ({
 
 const contextMenuTitleItems = computed(() => {
     const items = [];
-    items.push({ value: 'sidebar', label: 'Details', icon: icons.Sidebar });
+    items.push({ value: 'sidebar', label: 'Details', icon: icons.Sidebar, endSection: true });
     if (editorManager.baklavaView.settings.editableNodeTypes) {
         items.push(
             { value: 'configure', label: 'Configure' },
-        );
-        items.push(
             { value: 'property', label: 'Add property' },
-        );
-        items.push(
             { value: 'interface', label: 'Add interface' },
-        );
-        items.push(
             { value: 'layer', label: 'Set layer' },
+            { value: 'delete-property', label: 'Delete property' },
+            { value: 'delete-interface', label: 'Delete interface', endSection: true },
         );
         if (!isGraphNode) {
             items.push(
-                { value: 'addSubgraph', label: 'Add subgraph' },
+                { value: 'addSubgraph', label: 'Add subgraph', icon: icons.Subgraph },
+                { value: 'addAndEditSubgraph', label: 'Add and edit subgraph', icon: icons.Subgraph },
             );
         }
-        items.push(
-            { value: 'delete-property', label: 'Delete property' },
-        );
-        items.push(
-            { value: 'delete-interface', label: 'Delete interface', endSection: true },
-        );
-    }
-    if (!viewModel.value.editor.readonly) {
-        items.push({ value: 'rename', label: 'Rename', icon: icons.Pencil });
     }
     if (isGraphNode) {
         items.push({ value: 'editSubgraph', label: 'Edit Subgraph', icon: icons.Subgraph });
@@ -355,6 +343,7 @@ const contextMenuTitleItems = computed(() => {
             items.at(-1).endSection = true;
         }
         items.push(
+            { value: 'rename', label: 'Rename', icon: icons.Pencil },
             { value: 'disconnect', label: 'Disconnect', icon: icons.Disconnect },
             { value: 'delete', label: 'Delete', icon: icons.Bin },
         );
@@ -490,6 +479,13 @@ const onContextMenuTitleClick = async (action) => {
             menuState.layerMenu = true;
             break;
         case 'addSubgraph': {
+            const errors = editorManager.addSubgraphToNode(props.node);
+            if (Array.isArray(errors) && errors.length) {
+                NotificationHandler.terminalLog('error', 'Creating subgraph failed', errors);
+            }
+            break;
+        }
+        case 'addAndEditSubgraph': {
             let errors = editorManager.addSubgraphToNode(props.node);
             if (Array.isArray(errors) && errors.length) {
                 NotificationHandler.terminalLog('error', 'Creating subgraph failed', errors);
