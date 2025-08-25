@@ -10,7 +10,9 @@ Displays user interface and main details about the Pipeline Manager status.
 -->
 
 <script>
-import { markRaw, ref, provide } from 'vue';
+import {
+    markRaw, ref, provide, watch,
+} from 'vue';
 import { toSvg } from 'html-to-image';
 import jsonlint from 'jsonlint';
 import { useViewModel } from '@baklavajs/renderer-vue';
@@ -597,48 +599,42 @@ export default {
         },
 
         createGraphNodeTypeFromCurrentGraph() {
-            // The empirically tested limit is 28, but three characters were left for " #2".
-            const nodeTypeNameLengthLimit = 25;
-            const currentGraph = this.editorManager.baklavaView.displayedGraph;
-            let graphName = currentGraph.name.trim().slice(0, nodeTypeNameLengthLimit);
+            menuState.configurationMenu.visible = !menuState.configurationMenu.visible;
+            menuState.configurationMenu.addNode = true;
+            menuState.configurationMenu.placeNode = false;
 
-            // Generate an unique name by appending " #i".
-            let index = 1;
-            while (this.editorManager.editor.nodeTypes.has(graphName)) {
-                // Strip the suffix " #i".
-                graphName = graphName.replace(/\s+#\d+$/, '').trim();
-                graphName = `${graphName} #${index}`;
-                index += 1;
-            }
+            watch(() => menuState.configurationMenu.visible, async (newValue, oldValue) => {
+                if (oldValue === true && newValue === false) {
+                    const nodeName = configurationState.nodeData.name;
+                    let graphNode = this.editorManager.baklavaView.editor.nodeTypes.get(nodeName);
+                    let instance = new graphNode.type(); // eslint-disable-line new-cap
 
-            const graphNode = {
-                name: graphName,
-                category: 'From Graphs',
-            };
+                    if (configurationState.success) {
+                        // Save current graph
+                        const currentGraph = this.editorManager.baklavaView.displayedGraph;
+                        const currentGraphState = currentGraph.save();
 
-            // Serialize state of the current graph to avoid circular references.
-            const currentGraphState = currentGraph.save();
+                        const errors = this.editorManager.addSubgraphToNode(
+                            instance,
+                            currentGraphState.nodes,
+                            currentGraphState.connections,
+                        );
+                        if (Array.isArray(errors) && errors.length) {
+                            NotificationHandler.terminalLog('error', 'Creating subgraph failed', errors);
+                        }
 
-            const graphInstance = GraphFactory(
-                currentGraphState.nodes,
-                currentGraphState.connections,
-                graphName,
-                this.editorManager.baklavaView.editor,
-            );
+                        // Switch to new graph and add new node there
+                        const newGraph = GraphFactory([], [], 'Pipeline Manager', this.editorManager.baklavaView.editor);
+                        this.editorManager.baklavaView.editor.switchToGraph(newGraph);
 
-            graphNode.subgraphId = currentGraph.id;
-
-            // If `graphInstance` is any array, it is an array of errors.
-            if (Array.isArray(graphInstance) && graphInstance.length) {
-                graphInstance.forEach((error) => {
-                    NotificationHandler.showToast('error', error);
-                });
-            } else {
-                this.editorManager.baklavaView.editor.addGraphTemplate(
-                    graphInstance,
-                    graphNode,
-                );
-            }
+                        graphNode = this.editorManager.baklavaView.editor.nodeTypes.get(nodeName);
+                        instance = new graphNode.type(); // eslint-disable-line new-cap
+                        this.editorManager.baklavaView.displayedGraph.addNode(instance);
+                        instance.position.x = window.innerWidth / 2;
+                        instance.position.y = window.innerHeight / 2;
+                    }
+                }
+            });
         },
 
         onClickNodeSearch() {
@@ -965,6 +961,7 @@ export default {
                                 :eventFunction="exportToSvg"
                             />
                             <DropdownItem
+                                v-if="this.editorManager.baklavaView.settings.editableNodeTypes"
                                 type="'button'"
                                 text="Create node type from graph"
                                 :eventFunction="createGraphNodeTypeFromCurrentGraph"
