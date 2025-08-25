@@ -624,7 +624,9 @@ export default {
                         }
 
                         // Switch to new graph and add new node there
-                        const newGraph = GraphFactory([], [], 'Pipeline Manager', this.editorManager.baklavaView.editor);
+                        const newGraph = GraphFactory(
+                            [], [], this.appName, this.editorManager.baklavaView.editor,
+                        );
                         this.editorManager.baklavaView.editor.switchToGraph(newGraph);
 
                         graphNode = this.editorManager.baklavaView.editor.nodeTypes.get(nodeName);
