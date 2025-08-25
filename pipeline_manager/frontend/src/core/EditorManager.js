@@ -780,13 +780,15 @@ export default class EditorManager {
      * Assigns a new subgraph to the node.
      *
      * @param {object} node Node that the subgraph will be attached to
+     * @param {Array} nodes Nodes in the subgraph
+     * @param {Array} connections Connections in the subgraph
      * @returns An array of errors that occurred.
      */
-    addSubgraphToNode(node) {
+    addSubgraphToNode(node, nodes = [], connections = []) {
         this._unregisterNodeType(node.type);
 
         // Create new graph
-        const newGraph = GraphFactory([], [], node.type, this.baklavaView.editor);
+        const newGraph = GraphFactory(nodes, connections, node.type, this.baklavaView.editor);
         if (Array.isArray(newGraph) && newGraph.length) {
             return newGraph;
         }
@@ -814,10 +816,10 @@ export default class EditorManager {
         // Update editor nodes
         const { viewModel } = useViewModel();
         const { displayedGraph } = viewModel.value;
-        const nodes = displayedGraph.nodes.filter(
+        const nodesToReplace = displayedGraph.nodes.filter(
             (n) => n.type === node.type,
         );
-        nodes.forEach((n) => {
+        nodesToReplace.forEach((n) => {
             displayedGraph.replaceNode(n, node.type);
         });
         return [];
