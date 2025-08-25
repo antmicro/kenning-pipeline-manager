@@ -181,7 +181,7 @@ import {
     startTransaction, commitTransaction,
 } from '../core/History.ts';
 
-import EditorManager from '../core/EditorManager';
+import EditorManager, { DEFAULT_GRAPH_NODE_TYPE } from '../core/EditorManager';
 import NotificationHandler from '../core/notifications.js';
 import getExternalApplicationManager from '../core/communication/ExternalApplicationManager';
 
@@ -298,7 +298,8 @@ const contextMenuStyle = computed(() => ({
 const contextMenuTitleItems = computed(() => {
     const items = [];
     items.push({ value: 'sidebar', label: 'Details', icon: icons.Sidebar, endSection: true });
-    if (editorManager.baklavaView.settings.editableNodeTypes) {
+    if (editorManager.baklavaView.settings.editableNodeTypes &&
+        node.value.type !== DEFAULT_GRAPH_NODE_TYPE) {
         items.push(
             { value: 'configure', label: 'Configure' },
             { value: 'property', label: 'Add property' },
