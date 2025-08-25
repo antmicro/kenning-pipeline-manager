@@ -276,6 +276,7 @@ def build_frontend(
     favicon_path: Optional[Path] = None,
     communication_server_host: Optional[str] = None,
     communication_server_port: Optional[int] = None,
+    welcome_message: Optional[str] = None,
 ) -> int:
     """
     Builds the frontend for the Pipeline Manager.
@@ -332,6 +333,8 @@ def build_frontend(
         Port of the communication server. Should be used if the
         frontend application is server on different HTTP server than
         the communication server.
+    welcome_message: Optional[str]
+        Welcome message to be displayed in the beginning of apps' work.
 
     Returns
     -------
@@ -413,6 +416,9 @@ def build_frontend(
         config_lines.append(
             f'VUE_APP_JSON_URL_SUBSTITUTES="{json.dumps(urls)}"\n'
         )
+
+    if welcome_message is not None:
+        config_lines.append(f'VUE_APP_WELCOME_MESSAGE="{welcome_message}"\n')
 
     if assets_directory:
         shutil.copytree(

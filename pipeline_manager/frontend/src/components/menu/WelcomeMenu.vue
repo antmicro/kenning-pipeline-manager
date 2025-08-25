@@ -1,14 +1,10 @@
 <template>
     <div class="welcome-container">
         <p class="subtitle">
-            Data-based web application for creating, visualizing and managing pipelines for various
-            applications.
+            <span v-if="welcomeMessage">
+            {{ welcomeMessage }}
             <br /><br />
-            <span v-if="specificationLoaded">
-                You can start creating a new diagram using nodes from the left sidebar, or load a
-                diagram/specification file.
             </span>
-            <span v-else> Upload your specification file, optionally with diagram data. </span>
         </p>
 
         <div
@@ -29,12 +25,20 @@
                 />
             </svg>
 
-            <h3>Drag & drop your files</h3>
+            <h3>
+                {{
+                    specificationLoaded
+                        ? 'Drag & drop graph file or nodes'
+                        : 'Drag & drop specification of nodes'
+                }}
+            </h3>
             <p class="drop-text">
                 {{
                     specificationLoaded
-                        ? 'Load a diagram or a new specification file (.json)'
-                        : 'Specification file required, diagram data optional (.json)'
+                        // eslint-disable-next-line max-len
+                        ? 'Either upload an existing graph in JSON format or start a new graph by drag and dropping nodes specified in the left sidebar'
+                        // eslint-disable-next-line max-len
+                        : 'Load a specification file in JSON format to provide available node types. Optionally upload both specification and graph'
                 }}
             </p>
 
@@ -111,11 +115,6 @@ const LINKS = [
         icon: 'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z',
         polyline: '14,2 14,8 20,8',
     },
-    {
-        text: 'GitHub',
-        url: 'https://github.com/antmicro/kenning-pipeline-manager',
-        icon: 'M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22',
-    },
 ];
 
 export default defineComponent({
@@ -128,6 +127,10 @@ export default defineComponent({
             () => EditorManager.getEditorManagerInstance().specificationLoaded.value,
         );
 
+        const welcomeMessage = computed(
+            () => process.env.VUE_APP_WELCOME_MESSAGE,
+        );
+
         const handleDrop = ({ dataTransfer: { files } }) => {
             isDragging.value = false;
             if (files.length) {
@@ -138,6 +141,7 @@ export default defineComponent({
         return {
             isDragging,
             specificationLoaded,
+            welcomeMessage,
             links: LINKS,
             handleDrop,
         };

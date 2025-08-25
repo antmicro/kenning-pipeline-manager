@@ -72,6 +72,11 @@ def script_build():  # noqa: D103
         help="Path to the SVG file with favicon for the web page",
         type=Path,
     )
+    base_parser.add_argument(
+        "--welcome-message",
+        help="Message to be displayed on top of welcome view.",
+        type=str,
+    )
     subparsers = parser.add_subparsers(
         title="build_type",
         help="Build type of the frontend application",
