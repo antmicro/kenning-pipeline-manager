@@ -22,7 +22,8 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
                 :key="nt"
             >
                 <div
-                    @pointerdown="onDragStart(nt, node, node.iconPath)"
+                    @pointerdown.left="onDragStart(nt, node, node.iconPath)"
+                    @pointerdown.right="openContextMenu(nt)"
                     :class="nodeEntryClasses(nt)"
                 >
                     <template v-if="!isTopLevelNode(nt)">
@@ -34,7 +35,11 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
                         />
                     </template>
                     <Cross v-else color="white" :rotate="45" class="__title-icon"></Cross>
-                    <div class="__title-label" v-html="DOMPurify.sanitize(node.hitSubstring)"></div>
+                    <div
+                        class="__title-label"
+                        v-html="DOMPurify.sanitize(node.hitSubstring)"
+                        :ref="el => labelRefs[nt] = el"
+                    />
                 </div>
                 <div
                     class="__vertical_ellipsis"
@@ -59,6 +64,16 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
         </div>
     </div>
 
+    <CustomContextMenu
+        v-if="showContextMenu"
+        v-model="showContextMenu"
+        :x="contextMenuX"
+        :y="contextMenuY"
+        :items="contextMenuItems"
+        :style="contextMenuStyle"
+        @click="onContextMenuClick"
+    />
+
     <div
         v-for="([name, category], i) in sortedEntries(nodeTree.subcategories, true)"
         v-show="category.mask"
@@ -78,11 +93,12 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
                         v-show="category.mask"
                         :key="category.title"
                         @click="onMouseDown(i)"
-                        @pointerdown="onDragStart(
+                        @pointerdown.left="onDragStart(
                             category.title,
                             category.categoryNode,
                             category.iconPath
                         )"
+                        @pointerdown.right="openContextMenu(name)"
                     >
                         <img
                             class="__title-icon"
@@ -92,7 +108,8 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
                         />
                         <div
                             class="__title-label"
-                            v-html="DOMPurify.sanitize(category.hitSubstring)">
+                            v-html="DOMPurify.sanitize(category.hitSubstring)"
+                            :ref="el => labelRefs[name] = el">
                         </div>
                         <div
                             class="__vertical_ellipsis"
@@ -182,19 +199,21 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
 </template>
 
 <script>
-import { defineComponent, computed, ref, watch, inject } from 'vue'; // eslint-disable-line object-curly-newline
+import { defineComponent, computed, ref, watch, inject, reactive } from 'vue'; // eslint-disable-line object-curly-newline
 import { useViewModel } from '@baklavajs/renderer-vue';
 import DOMPurify from 'dompurify';
 import Arrow from '../../icons/Arrow.vue';
 import VerticalEllipsis from '../../icons/VerticalEllipsis.vue';
 import LinkMenu from '../LinkMenu.vue';
+import CustomContextMenu from '../ContextMenu.vue';
 import EditorManager, { DEFAULT_CUSTOM_NODE_TYPE } from '../../core/EditorManager';
 import Cross from '../../icons/Cross.vue';
+import Bin from '../../icons/Bin.vue';
 import { TOP_LEVEL_NODES_NAMES } from './nodeTree';
 
 export default defineComponent({
     components: {
-        Arrow, LinkMenu, VerticalEllipsis, Cross,
+        Arrow, LinkMenu, VerticalEllipsis, Cross, CustomContextMenu,
     },
     props: {
         nodeTree: {
@@ -327,6 +346,41 @@ export default defineComponent({
             '__top-level-node-entry': isTopLevelNode(name),
         });
 
+        const labelRefs = reactive({});
+        const showContextMenu = ref(false);
+        const contextMenuX = ref(0);
+        const contextMenuY = ref(0);
+        const selectedNode = ref('');
+
+        const openContextMenu = (nodeType) => {
+            if (
+                showContextMenu.value === false &&
+                !isTopLevelNode(nodeType) &&
+                editorManager.baklavaView.settings.editableNodeTypes
+            ) {
+                selectedNode.value = nodeType;
+                showContextMenu.value = true;
+
+                const container = labelRefs[nodeType];
+                const range = document.createRange();
+                range.selectNodeContents(container);
+                const rect = range.getBoundingClientRect();
+
+                contextMenuX.value = rect.right + 20;
+                contextMenuY.value = rect.top - 5.15 * rect.height;
+            }
+        };
+
+        const contextMenuItems = computed(() => {
+            const items = [];
+            items.push({ value: 'delete', label: 'Delete', icon: Bin });
+            return items;
+        });
+
+        const onContextMenuClick = () => {
+            editorManager.removeNodeType(selectedNode.value);
+        };
+
         return {
             padding,
             mask,
@@ -342,6 +396,13 @@ export default defineComponent({
             specificationLoaded,
             nodeEntryClasses,
             isTopLevelNode,
+            openContextMenu,
+            showContextMenu,
+            contextMenuX,
+            contextMenuY,
+            contextMenuItems,
+            onContextMenuClick,
+            labelRefs,
         };
     },
 });
