@@ -252,6 +252,7 @@
         "editableTypes": true,
         "toggleableEditableTypes": false,
         "twoColumn": true,
+        "newGraphNode": false,
         "interfaces": {
             "BinaryImage": {
                 "interfaceColor": "#FF00FF",
