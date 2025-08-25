@@ -1068,7 +1068,7 @@ export default {
                 <span
                     v-if="this.editorManager.baklavaView.settings.showIds &&
                           !panels.nodesearch.isOpen"
-                    :class="['editorTitle', mobileClasses]">
+                    :class="['editorTitle', 'graphId', mobileClasses]">
                         Graph ID: {{ graphId }}
                 </span>
                 <div :style="rightContainerStyles" ref="rightButtons">
@@ -1272,6 +1272,12 @@ export default {
         &.compressed-mobile {
             display: none;
         }
+    }
+
+    .graphId {
+        -webkit-user-select: text;
+        -ms-user-select: text;
+        user-select: text;
     }
 
     .editorTitleInput {
