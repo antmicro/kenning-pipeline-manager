@@ -310,6 +310,11 @@ export default function getNodeTree(nameFilterRef: Ref<string>) {
                 ([name, _]) => name !== DEFAULT_CUSTOM_NODE_TYPE,
             );
         }
+        if (!editorManager.baklavaView.settings.newGraphNode) {
+            topLevelNodes = topLevelNodes.filter(
+                ([name, _]) => name !== DEFAULT_GRAPH_NODE_TYPE,
+            );
+        }
 
         if (nodeTypesInCategory.length > 0) {
             const nodeTypes: Array<[string, NodeType]> = nodeTypesInCategory.map(
