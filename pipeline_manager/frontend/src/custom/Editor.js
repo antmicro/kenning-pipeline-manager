@@ -76,6 +76,8 @@ export default class PipelineManagerEditor extends Editor {
 
     editorManager = null;
 
+    newRootGraph = undefined;
+
     registerGraph(graph) {
         const customGraph = createPipelineManagerGraph(graph);
         super.registerGraph(customGraph);
@@ -104,10 +106,15 @@ export default class PipelineManagerEditor extends Editor {
         }
 
         // Save all changes done to subgraphs before saving.
-        const currentGraphId = this._graph.id;
-        const currentGraphState = this.graph.save();
+        let currentGraphId = this._graph.id;
+        let currentGraphState = this.graph.save();
         currentGraphState.panning = this._graph.panning;
         currentGraphState.scaling = this._graph.scaling;
+
+        if (this.newRootGraph !== undefined) {
+            currentGraphId = this.newRootGraph.id;
+            currentGraphState = this.newRootGraph.save();
+        }
 
         const dataflowState = { graphs: [] };
 
@@ -779,6 +786,16 @@ export default class PipelineManagerEditor extends Editor {
         this.graphName = this._graph.name;
 
         suppressHistoryLogging(false);
+    }
+
+    /**
+    * Changes top level graph to one of the other graphs in the editor.
+    *
+    * @param {string} graphId ID of the new top level graph.
+    * */
+    changeTopLevelGraph(graphId) {
+        const rootGraph = Array.from(this.graphs).find((graph) => graph.id === graphId);
+        this.newRootGraph = rootGraph;
     }
 
     findInterface(intfId) {

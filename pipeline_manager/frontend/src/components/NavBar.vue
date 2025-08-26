@@ -634,6 +634,10 @@ export default {
                         this.editorManager.baklavaView.displayedGraph.addNode(instance);
                         instance.position.x = window.innerWidth / 2;
                         instance.position.y = window.innerHeight / 2;
+
+                        this.editorManager.baklavaView.editor.changeTopLevelGraph(
+                            this.editorManager.baklavaView.displayedGraph.id,
+                        );
                     }
                 }
             });
