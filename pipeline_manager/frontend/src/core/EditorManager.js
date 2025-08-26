@@ -599,26 +599,37 @@ export default class EditorManager {
 
     /**
      * Updates the list of extending nodes in all parent nodes.
-     * Called when the name of the node type is changed.
+     * Called when the name of the node type is changed
+     * or the node type has been deleted.
      *
      * @param {object} nodeSpecification Updated node data
      * @param {object} nodeToUpdate Node type to update
+     * @param {object} remove Whether the node has been deleted
      */
-    updateParentNode(nodeSpecification, nodeToUpdate) {
+    updateParentNode(nodeSpecification, nodeToUpdate, remove = false) {
         nodeSpecification?.extends?.forEach((parentType) => {
             const parentSpec = this.baklavaView.editor.parentNodes.get(parentType);
             if (parentSpec.extending?.includes(nodeToUpdate)) {
-                parentSpec.extending.splice(
-                    parentSpec.extending.indexOf(nodeToUpdate),
-                    1,
-                    nodeSpecification.name,
-                );
+                if (remove) {
+                    parentSpec.extending.splice(
+                        parentSpec.extending.indexOf(nodeToUpdate),
+                        1,
+                    );
+                } else {
+                    parentSpec.extending.splice(
+                        parentSpec.extending.indexOf(nodeToUpdate),
+                        1,
+                        nodeSpecification.name,
+                    );
+                }
             }
         });
         if (this.baklavaView.editor.parentNodes.has(nodeToUpdate)) {
             this.baklavaView.editor.parentNodes.delete(nodeToUpdate);
         }
-        this.baklavaView.editor.parentNodes.set(nodeSpecification.name, nodeSpecification);
+        if (!remove) {
+            this.baklavaView.editor.parentNodes.set(nodeSpecification.name, nodeSpecification);
+        }
     }
 
     /**
@@ -800,6 +811,65 @@ export default class EditorManager {
         }
 
         return { errors: [], warnings: [] };
+    }
+
+    /**
+     * Removes node type from editor specification.
+     *
+     * @param {object} nodeType Node type to remove
+     */
+    removeNodeType(nodeType) {
+        this._unregisterNodeType(nodeType);
+
+        // Remove from editor graphs
+        this.baklavaView.editor.graphs.forEach((graph) => {
+            graph.nodes
+                .filter((node) => node.type === nodeType)
+                .forEach((node) => graph.removeNode(node));
+        });
+
+        // Remove from specification nodes
+        const resolvedNodeSpecification = this.specification.currentSpecification.nodes.find(
+            (node) => EditorManager.getNodeName(node) === nodeType,
+        );
+        this.specification.unresolvedSpecification.nodes = this.specification
+            .unresolvedSpecification.nodes.filter(
+                (node) => EditorManager.getNodeName(node) !== nodeType,
+            );
+        this.specification.currentSpecification.nodes = this.specification.currentSpecification
+            .nodes.filter((node) => EditorManager.getNodeName(node) !== nodeType);
+
+        // Remove from specification graphs
+        this.specification.unresolvedSpecification.graphs?.forEach((graph) => {
+            graph.nodes = graph.nodes.filter((node) => node.name !== nodeType);
+        });
+        this.specification.currentSpecification.graphs?.forEach((graph) => {
+            graph.nodes = graph.nodes.filter((node) => node.name !== nodeType);
+        });
+
+        // Update child nodes
+        this.specification.unresolvedSpecification.nodes
+            .filter((node) => node.extends !== undefined)
+            .forEach((node) => {
+                node.extends = node.extends.filter((n) => n !== nodeType);
+            });
+        this.specification.currentSpecification.nodes
+            .filter((node) => node.extends !== undefined)
+            .forEach((node) => {
+                node.extends = node.extends.filter((n) => n !== nodeType);
+            });
+
+        // Update parent nodes
+        if (resolvedNodeSpecification !== undefined) {
+            this.updateParentNode(resolvedNodeSpecification, nodeType, true);
+        }
+
+        if (this.externalApplicationManager) {
+            const spec = this.specification.unresolvedSpecification;
+            this.externalApplicationManager.notifyAboutChange('specification_on_change', {
+                specification: spec,
+            }).then();
+        }
     }
 
     /**
