@@ -487,8 +487,18 @@ export default function createPipelineManagerGraph(graph) {
     };
 
     graph.isIncorrectExternalName = function isIncorrectExternalName(name, exposedNames) {
-        const sameNames = exposedNames.filter((n) => n === name).length;
-        return name.length === 0 || sameNames !== 0;
+        const sameExposedNames = exposedNames.filter((n) => n === name).length;
+
+        // Extract interface names from graph node
+        const interfaces = [
+            ...Object.keys(this.graphNode.inputs),
+            ...Object.keys(this.graphNode.outputs),
+        ].map((intf) => intf.split('_'))
+            .filter((intf) => intf[0] !== 'property')
+            .map((intf) => intf[1]);
+
+        const sameInterfaceNames = interfaces.filter((n) => n === name).length;
+        return name.length === 0 || sameExposedNames !== 0 || sameInterfaceNames !== 0;
     };
 
     graph.resolveNewExposedName = function resolveNewExposedName(name) {
