@@ -990,50 +990,47 @@ export default {
                             <span v-else>Show node browser</span>
                         </div>
                     </div>
-
-                    <template v-if="externalApp.available">
-                        <div
-                            v-for="actionItem in navbarItems"
-                            :key="actionItem.name"
-                            :id="`navbar-button-${actionItem.procedureName}`"
-                            :class="[
-                                (
-                                    (activeNavbarItems.includes(actionItem.procedureName)
-                                    || isInProgress(actionItem.procedureName))
-                                    ? 'hoverbox' : 'box'
-                                ),
-                                mobileClasses, {
-                                'button-in-progress': isInProgress(actionItem.procedureName),
-                            }]"
-                            role="button"
-                            @click="(async () => requestDataflowAction(actionItem))"
-                            @pointerover="() => updateHoverInfo(actionItem.procedureName, true)"
-                            @pointerleave="() => resetHoverInfo(actionItem.procedureName)"
-                        >
-                            <!-- imgURI is used for Placeholder Icon to retrieve the image -->
-                            <CassetteStop
-                                v-if="
-                                    isStoppable(actionItem.procedureName)
-                                    && isInProgress(actionItem.procedureName)
-                                "
-                                class="small_svg"
-                                :hover="isHovered(actionItem.procedureName)"
-                            />
-                            <component
-                                v-else
-                                class="small_svg"
-                                :is="actionItem.icon"
-                                :hover="isHovered(actionItem.procedureName)"
-                                :imgURI="actionItem.iconName"
-                            />
-                            <div class="progress-bar" />
-                            <div :class="['tooltip', mobileClasses]">
-                                <span>
-                                    {{ getNavbarActionTooltip(actionItem) }}
-                                </span>
-                            </div>
+                    <div
+                        v-for="actionItem in navbarItems"
+                        :key="actionItem.name"
+                        :id="`navbar-button-${actionItem.procedureName}`"
+                        :class="[
+                            (
+                                (activeNavbarItems.includes(actionItem.procedureName)
+                                || isInProgress(actionItem.procedureName))
+                                ? 'hoverbox' : 'box'
+                            ),
+                            mobileClasses, {
+                            'button-in-progress': isInProgress(actionItem.procedureName),
+                        }]"
+                        role="button"
+                        @click="(async () => requestDataflowAction(actionItem))"
+                        @pointerover="() => updateHoverInfo(actionItem.procedureName, true)"
+                        @pointerleave="() => resetHoverInfo(actionItem.procedureName)"
+                    >
+                        <!-- imgURI is used for Placeholder Icon to retrieve the image -->
+                        <CassetteStop
+                            v-if="
+                                isStoppable(actionItem.procedureName)
+                                && isInProgress(actionItem.procedureName)
+                            "
+                            class="small_svg"
+                            :hover="isHovered(actionItem.procedureName)"
+                        />
+                        <component
+                            v-else
+                            class="small_svg"
+                            :is="actionItem.icon"
+                            :hover="isHovered(actionItem.procedureName)"
+                            :imgURI="actionItem.iconName"
+                        />
+                        <div class="progress-bar" />
+                        <div :class="['tooltip', mobileClasses]">
+                            <span>
+                                {{ getNavbarActionTooltip(actionItem) }}
+                            </span>
                         </div>
-                    </template>
+                    </div>
                     <div
                         v-if="this.editorManager.editor.isInSubgraph()"
                         :class="['hoverbox', mobileClasses]"
