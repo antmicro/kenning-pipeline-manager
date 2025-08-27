@@ -103,7 +103,7 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
 <script>
 /* eslint-disable object-curly-newline */
 import { EditorComponent, useGraph } from '@baklavajs/renderer-vue';
-import { defineComponent, ref, computed, watch, onMounted, toRef, nextTick } from 'vue';
+import { defineComponent, ref, computed, watch, onMounted, nextTick } from 'vue';
 import fuzzysort from 'fuzzysort';
 import { BaklavaEvent } from '@baklavajs/events';
 import { isJSONRPCRequest, isJSONRPCResponse, JSONRPC } from 'json-rpc-2.0';
@@ -180,8 +180,6 @@ export default defineComponent({
 
         let pressStartTime = 0;
         const longPressMilisThreshold = 100;
-
-        const loading = toRef(props, 'loading');
 
         const editorStyle = computed(() => ({
             '--scale': scale.value,
@@ -915,7 +913,6 @@ export default defineComponent({
         const showWelcome =
             computed(() => editorManager.baklavaView.welcome &&
                 !editorManager.baklavaView.editor.readonly &&
-                !loading.value &&
                 !nodes.value.length &&
                 !editorManager.editor.isInSubgraph());
 
