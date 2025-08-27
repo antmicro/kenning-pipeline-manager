@@ -65,6 +65,11 @@
                             "description": "`procedureName` of `navbarItem`"
                         },
                         "default": []
+                    },
+                    "requireResponse": {
+                        "description": "Flag determining whether response from external application should be awaited when running the procedure",
+                        "type": "boolean",
+                        "default": true
                     }
                 },
                 "required": [
