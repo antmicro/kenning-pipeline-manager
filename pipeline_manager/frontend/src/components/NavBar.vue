@@ -527,6 +527,7 @@ export default {
             if (activeAction && !this.isInProgress(actionItem.procedureName)) {
                 await this.externalApplicationManager.requestDataflowAction(
                     actionItem.procedureName,
+                    actionItem.requireResponse,
                 );
             } else if (activeAction) {
                 NotificationHandler.terminalLog('warning', `${actionItem.name} cannot be stopped`);

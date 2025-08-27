@@ -276,8 +276,9 @@ class ExternalApplicationManager {
      * The user is alerted with a feedback message.
      *
      * @param procedureName Name of the requested procedure.
+     * @param requireResponse Whether response from external application should be awaited.
      */
-    async requestDataflowAction(procedureName) {
+    async requestDataflowAction(procedureName, requireResponse) {
         const dataflow = this.editorManager.saveDataflow();
         const runProcedureInfo = runInfo.get(procedureName);
         if (!dataflow) return;
@@ -291,25 +292,31 @@ class ExternalApplicationManager {
             }
             NotificationHandler.showToast('info', 'Running dataflow');
         }
-        runProcedureInfo.inProgress = true;
+        if (requireResponse) {
+            runProcedureInfo.inProgress = true;
 
-        let data;
-        try {
-            if (validatedProcedureName.startsWith('dataflow_')) {
-                data = await this.request(procedureName, { dataflow });
-            } else {
-                data = await this.request(validatedProcedureName);
+            let data;
+            try {
+                if (validatedProcedureName.startsWith('dataflow_')) {
+                    data = await this.request(procedureName, { dataflow });
+                } else {
+                    data = await this.request(validatedProcedureName);
+                }
+            } catch (error) {
+                // The connection was closed
+                data = error.message;
+                NotificationHandler.terminalLog('error', 'Cannot create a request', data);
+                runProcedureInfo.inProgress = false;
+                return;
             }
-        } catch (error) {
-            // The connection was closed
-            data = error.message;
-            NotificationHandler.terminalLog('error', 'Cannot create a request', data);
-            runProcedureInfo.inProgress = false;
-            return;
-        }
 
-        handleExternalAppResponse(data);
-        runProcedureInfo.inProgress = false;
+            handleExternalAppResponse(data);
+            runProcedureInfo.inProgress = false;
+        } else if (validatedProcedureName.startsWith('dataflow_')) {
+            this.request(procedureName, { dataflow });
+        } else {
+            this.request(validatedProcedureName);
+        }
     }
 
     /**
