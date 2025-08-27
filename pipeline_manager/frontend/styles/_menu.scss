@@ -10,6 +10,8 @@
     gap: 1em;
 
     height: max-content;
+    max-height: 85vh;
+    box-sizing: border-box;
 
     & > div {
         & > .__name-option > .baklava-input {
