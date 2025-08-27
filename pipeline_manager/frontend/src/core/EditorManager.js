@@ -1119,8 +1119,10 @@ export default class EditorManager {
                     continue; // eslint-disable-line no-continue
                 }
 
+                const loadArgs = [true, true];
+
                 // eslint-disable-next-line no-await-in-loop
-                await validateGraph(graph);
+                await validateGraph(graph, loadArgs);
 
                 if (this.relatedGraphsStore.find((el) => graphId === el.id)) {
                     continue; // eslint-disable-line no-continue
