@@ -11,10 +11,14 @@ Popup menu with a list of checkboxes.
 <!-- eslint-disable vue/no-mutating-props -->
 <template>
     <div class="create-menu">
-        <div v-for="option in listedOptions" :key="option.id">
-            <component :is="option.component" :intf="option" tabindex="-1"></component>
+        <div class="list">
+            <div v-for="option in listedOptions" :key="option.id">
+                <component :is="option.component" :intf="option" tabindex="-1"></component>
+            </div>
         </div>
-        <component :is="confirmButton.component" :intf="confirmButton" />
+        <div class="confirm">
+            <component :is="confirmButton.component" :intf="confirmButton" />
+        </div>
     </div>
 </template>
 
@@ -90,3 +94,11 @@ export default defineComponent({
     },
 });
 </script>
+
+<style lang="scss">
+    .list {
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow-y: auto;
+    }
+</style>
