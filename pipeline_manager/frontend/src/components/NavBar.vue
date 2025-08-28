@@ -907,7 +907,7 @@ export default {
                             </template>
 
                             <template
-                                v-if="!externalApp.available && !hideHud"
+                                v-if="!hideHud"
                             >
                                 <DropdownItem
                                     text="Load specification"
