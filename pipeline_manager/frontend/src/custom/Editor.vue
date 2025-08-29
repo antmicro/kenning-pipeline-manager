@@ -388,14 +388,25 @@ export default defineComponent({
         };
 
         const changeHoveredConnections = (ev) => {
-            // Get all connection DOM elements that have mouse hovered over them
             const elements = document.elementsFromPoint(ev.clientX, ev.clientY);
+            const elementsWithZIndex = elements.map((element) => {
+                const z = window.getComputedStyle(element).zIndex;
+                return {
+                    z_index: Number.isNaN(parseInt(z, 10)) ? 0 : parseInt(z, 10),
+                    element,
+                };
+            });
+
+            const highestZIndexElement =
+                elementsWithZIndex.reduce(
+                    (max, curr) => (curr.z_index > max.z_index ? curr : max), elementsWithZIndex[0],
+                );
 
             const hoveredHtml = connRefs.value.filter((conn) =>
-                conn.containsPoint(elements),
+                conn.containsPoint([highestZIndexElement.element]),
             );
 
-            // Convert DOM elements to BaklavaJS connections
+            // Convert DOM elements to BaklavaJS connections.
             const hovered = connections.value.filter(
                 (conn) => hoveredHtml.filter((htmlEl) => htmlEl.connection === conn).length > 0,
             );
@@ -403,9 +414,10 @@ export default defineComponent({
             const highlighted = connections.value.filter(
                 (conn) => hovered.filter((hov) => hov.from === conn.from).length > 0,
             );
+            const mostSuitableHighlight = highlighted.at(0);
 
             connections.value.forEach((conn) => {
-                if (highlighted.includes(conn)) {
+                if (conn === mostSuitableHighlight) {
                     addHighlight(conn);
                 } else {
                     removeHighlight(conn);
