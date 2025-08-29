@@ -23,7 +23,7 @@ export default class ConnectionManager {
 
         const updating = new Set<ExternalApp>();
         while (this.isRunning) {
-            this.connected.keys()
+            Array.from(this.connected.keys())
                 .filter((externalApp) => !updating.has(externalApp))
                 .forEach((externalApp) => {
                     updating.add(externalApp);
