@@ -75,6 +75,8 @@ class ExternalApplicationManager {
 
     connectionHook = null;
 
+    backend = false;
+
     constructor() {
         /**
          * Assigning the ExternalApplicationManager instance to the EditorManager properties.
@@ -442,11 +444,13 @@ class ExternalApplicationManager {
      * @param {import('./externalApp/base.ts').ExternalApp} externalApp
      */
     async initializeConnection(_externalApp) {
-        NotificationHandler.terminalLog(
-            'info',
-            `External application connected successfully`,
-            undefined,
-        );
+        if (this.backend) {
+            NotificationHandler.terminalLog(
+                'info',
+                `External application connected successfully`,
+                undefined,
+            );
+        }
 
         await Promise.all([
             this.requestSpecification(),
@@ -488,6 +492,7 @@ class ExternalApplicationManager {
      */
     registerBackendApplication(url) {
         this.registerApplication(new ExternalBackendApp(url, jsonRPC));
+        this.backend = true;
     }
 
     /**
@@ -504,7 +509,9 @@ class ExternalApplicationManager {
                 [PMMessageType.WARNING]: ['warning', createJSONRPCSuccessResponse(request.id, msg)],
                 [PMMessageType.OK]: ['info', createJSONRPCSuccessResponse(request.id, msg)],
             }[msgType];
-            NotificationHandler.terminalLog(logType, msg);
+            if (msgType !== PMMessageType.OK) {
+                NotificationHandler.terminalLog(logType, msg);
+            }
             return response;
         };
 
@@ -515,6 +522,7 @@ class ExternalApplicationManager {
         }
 
         this.registerApplication(new ExternalFrontendApp(sourceWindow));
+        this.backend = false;
         return logAndRespond(PMMessageType.OK, 'Registered external frontend successfully');
     }
 }
