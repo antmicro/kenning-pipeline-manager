@@ -246,6 +246,7 @@ export default {
             externalApp: {
                 available: false,
                 connected: false,
+                backend: false,
             },
             activeNavbarItemsNames: [],
             saveConfiguration: saveGraphConfiguration,
@@ -745,6 +746,7 @@ export default {
         this.externalApplicationManager.registerConnectionHook(() => {
             this.externalApp.available = this.externalApplicationManager.isExternalAppAvailable();
             this.externalApp.connected = this.externalApplicationManager.isConnected();
+            this.externalApp.backend = this.externalApplicationManager.backend === true;
         });
     },
 };
@@ -885,7 +887,7 @@ export default {
                                     type="'button'"
                                     :eventFunction="createNewGraphCallback"
                                 />
-                                <template v-if="externalApp.connected">
+                                <template v-if="externalApp.backend && externalApp.connected">
                                     <hr />
                                     <DropdownItem
                                         text="Load file"
@@ -907,7 +909,7 @@ export default {
                             </template>
 
                             <template
-                                v-if="!hideHud"
+                                v-if="!externalApp.backend && !hideHud"
                             >
                                 <DropdownItem
                                     text="Load specification"
@@ -991,47 +993,49 @@ export default {
                             <span v-else>Show node browser</span>
                         </div>
                     </div>
-                    <div
-                        v-for="actionItem in navbarItems"
-                        :key="actionItem.name"
-                        :id="`navbar-button-${actionItem.procedureName}`"
-                        :class="[
-                            (
-                                (activeNavbarItems.includes(actionItem.procedureName)
-                                || isInProgress(actionItem.procedureName))
-                                ? 'hoverbox' : 'box'
-                            ),
-                            mobileClasses, {
-                            'button-in-progress': isInProgress(actionItem.procedureName),
-                        }]"
-                        role="button"
-                        @click="(async () => requestDataflowAction(actionItem))"
-                        @pointerover="() => updateHoverInfo(actionItem.procedureName, true)"
-                        @pointerleave="() => resetHoverInfo(actionItem.procedureName)"
-                    >
-                        <!-- imgURI is used for Placeholder Icon to retrieve the image -->
-                        <CassetteStop
-                            v-if="
-                                isStoppable(actionItem.procedureName)
-                                && isInProgress(actionItem.procedureName)
-                            "
-                            class="small_svg"
-                            :hover="isHovered(actionItem.procedureName)"
-                        />
-                        <component
-                            v-else
-                            class="small_svg"
-                            :is="actionItem.icon"
-                            :hover="isHovered(actionItem.procedureName)"
-                            :imgURI="actionItem.iconName"
-                        />
-                        <div class="progress-bar" />
-                        <div :class="['tooltip', mobileClasses]">
-                            <span>
-                                {{ getNavbarActionTooltip(actionItem) }}
-                            </span>
+                    <template v-if="this.externalApp.available">
+                        <div
+                            v-for="actionItem in navbarItems"
+                            :key="actionItem.name"
+                            :id="`navbar-button-${actionItem.procedureName}`"
+                            :class="[
+                                (
+                                    (activeNavbarItems.includes(actionItem.procedureName)
+                                    || isInProgress(actionItem.procedureName))
+                                    ? 'hoverbox' : 'box'
+                                ),
+                                mobileClasses, {
+                                'button-in-progress': isInProgress(actionItem.procedureName),
+                            }]"
+                            role="button"
+                            @click="(async () => requestDataflowAction(actionItem))"
+                            @pointerover="() => updateHoverInfo(actionItem.procedureName, true)"
+                            @pointerleave="() => resetHoverInfo(actionItem.procedureName)"
+                        >
+                            <!-- imgURI is used for Placeholder Icon to retrieve the image -->
+                            <CassetteStop
+                                v-if="
+                                    isStoppable(actionItem.procedureName)
+                                    && isInProgress(actionItem.procedureName)
+                                "
+                                class="small_svg"
+                                :hover="isHovered(actionItem.procedureName)"
+                            />
+                            <component
+                                v-else
+                                class="small_svg"
+                                :is="actionItem.icon"
+                                :hover="isHovered(actionItem.procedureName)"
+                                :imgURI="actionItem.iconName"
+                            />
+                            <div class="progress-bar" />
+                            <div :class="['tooltip', mobileClasses]">
+                                <span>
+                                    {{ getNavbarActionTooltip(actionItem) }}
+                                </span>
+                            </div>
                         </div>
-                    </div>
+                    </template>
                     <div
                         v-if="this.editorManager.editor.isInSubgraph()"
                         :class="['hoverbox', mobileClasses]"
@@ -1143,7 +1147,7 @@ export default {
                     <div
                         ref="backend"
                         :class="['hoverbox', mobileClasses]"
-                        v-if="externalApp.available"
+                        v-if="externalApp.available && externalApp.backend"
                         @click="() => togglePanel(panels.externalAppStatus)"
                         @pointerover="() => updateHoverInfo('externalAppStatus')"
                         @pointerleave="() => resetHoverInfo('externalAppStatus')"
