@@ -464,7 +464,8 @@
                                 "constant",
                                 "hex",
                                 "button-url",
-                                "button-api"
+                                "button-api",
+                                "button-graph"
                             ]
                         },
                         "description": {
@@ -663,6 +664,16 @@
                             "properties": {
                                 "type": {
                                     "const": "button-url"
+                                },
+                                "default": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        {
+                            "properties": {
+                                "type": {
+                                    "const": "button-graph"
                                 },
                                 "default": {
                                     "type": "string"

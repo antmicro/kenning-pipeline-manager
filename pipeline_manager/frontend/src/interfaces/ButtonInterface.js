@@ -9,8 +9,9 @@ import { ButtonInterface as BaklavaButtonInterface } from '@baklavajs/renderer-v
 export default class ButtonInterface extends BaklavaButtonInterface {
     componentName = 'ButtonInterface';
 
-    constructor(name, callback, value) {
+    constructor(name, callback, value, type) {
         super(name, callback);
         this.value = value;
+        this.type = type;
     }
 }

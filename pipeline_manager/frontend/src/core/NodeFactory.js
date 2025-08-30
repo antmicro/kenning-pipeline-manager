@@ -135,13 +135,21 @@ export function createProperties(properties) {
                 intf = new ListInterface(propName, propDef, p.dtype, p.readonly);
                 break;
             case 'button-url':
-                intf = new ButtonInterface(propName, () => window.open(intf.value, '_blank'), propDef);
+                intf = new ButtonInterface(propName, () => window.open(intf.value, '_blank'), propDef, 'button-url');
                 break;
             case 'button-api':
                 intf = new ButtonInterface(
                     propName,
                     () => intf.events.updated.emit(['button_click', { id: intf.id, value: intf.value }]),
-                    propDef);
+                    propDef,
+                    'button-api');
+                break;
+            case 'button-graph':
+                intf = new ButtonInterface(
+                    propName,
+                    () => intf.events.updated.emit(intf.value),
+                    propDef,
+                    'button-graph');
                 break;
             default:
                 /* eslint-disable no-console */
@@ -866,10 +874,13 @@ export class CustomNode extends Node {
             ?.editorManager
             ?.externalApplicationManager
             ?.request(method, params);
+        const goToGraph = (graphid) => this.graphInstance
+            ?.editor.switchToRelatedGraph(graphid);
         Object.entries(this.inputs)
             .filter(([name, _]) => name.startsWith('property_'))
             .filter(([_, intf]) => intf.componentName === 'ButtonInterface')
-            .forEach(([_, intf]) => intf.events.updated.subscribe(this, externalRequest));
+            .forEach(([_, intf]) => (intf.type === 'button-graph' ? intf.events.updated.subscribe(this, goToGraph) : intf.events.updated.subscribe(this, externalRequest)),
+            );
     }
 
     onDestroy() {
