@@ -611,7 +611,7 @@
             }
         },
         "frontend_on_connect": {
-            "description": "Request send when Pipeline Manager frontend connects to backend",
+            "description": "Request sent when Pipeline Manager frontend connects to backend and `notifyWhenChanged` option is enabled in the metadata section of specification.",
             "params": {
                 "$ref": "common_types#/$defs/null_or_empty"
             },
@@ -620,7 +620,7 @@
             }
         },
         "properties_on_change": {
-            "description": "Request send when properties of any node changes",
+            "description": "Request sent when properties of any node change and `notifyWhenChanged` option is enabled in the metadata section of specification.",
             "params": {
                 "$ref": "common_types#/$defs/properties_diff"
             },
@@ -629,7 +629,7 @@
             }
         },
         "position_on_change": {
-            "description": "Request send when position of any node changes",
+            "description": "Request sent when position of any node changes and `notifyWhenChanged` option is enabled in the metadata section of specification.",
             "params": {
                 "$ref": "common_types#/$defs/position_diff"
             },
@@ -638,7 +638,7 @@
             }
         },
         "nodes_on_change": {
-            "description": "Request send when node was added or deleted",
+            "description": "Request sent when node was added or deleted and `notifyWhenChanged` option is enabled in the metadata section of specification.",
             "params": {
                 "$ref": "common_types#/$defs/nodes_diff"
             },
@@ -647,7 +647,7 @@
             }
         },
         "connections_on_change": {
-            "description": "Request send when connection was added or deleted",
+            "description": "Request sent when connection was added or deleted and `notifyWhenChanged` option is enabled in the metadata section of specification.",
             "params": {
                 "$ref": "common_types#/$defs/connections_diff"
             },
@@ -656,7 +656,7 @@
             }
         },
         "graph_on_change": {
-            "description": "Request send when whole dataflow changed, e.g. when dataflow is loaded",
+            "description": "Request sent when whole dataflow changed, e.g. when dataflow is loaded, and `notifyWhenChanged` option is enabled in the metadata section of specification.",
             "params": {
                 "$ref": "common_types#/$defs/dataflow_object"
             },
@@ -665,7 +665,7 @@
             }
         },
         "specification_on_change": {
-            "description": "Request send when whole specification changed, e.g. when node type is modified",
+            "description": "Request sent when whole specification changed, e.g. when node type is modified, and `notifyWhenChanged` option is enabled in the metadata section of specification.",
             "params": {
                 "$ref": "common_types#/$defs/specification_object"
             },
@@ -674,7 +674,7 @@
             }
         },
         "metadata_on_change": {
-            "description": "Request send when metadata was changed",
+            "description": "Request sent when metadata was changed, and `notifyWhenChanged` option is enabled in the metadata section of specification.",
             "params": {
                 "$ref": "common_types#/$defs/metadata"
             },
@@ -683,7 +683,7 @@
             }
         },
         "viewport_on_center": {
-            "description": "Request send when editor was centered",
+            "description": "Request sent when editor was centered and `notifyWhenChanged` option is enabled in the metadata section of specification.",
             "params": {
                 "$ref": "common_types#/$defs/null_or_empty"
             },
@@ -713,7 +713,7 @@
             }
         },
         "nodes_on_highlight": {
-            "description": "Request send when node was selected or unselected",
+            "description": "Request sent when node was either selected or unselected and `notifyWhenChanged` option is enabled in the metadata section of specification.",
             "params": {
                 "$ref": "common_types#/$defs/highlight_diff"
             },
