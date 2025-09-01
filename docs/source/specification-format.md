@@ -80,6 +80,8 @@ This object specifies additional editor options and contains the following optio
 * `newGraphNode` - Boolean value telling whether anonymous graphs should be available for the given specification or not.
   It appears in the UI as `New Graph Node` button.
   The default is `true`.
+* `notifyWhenChanged` - Boolean value determining whether frontend should send requests with information about changed values.
+  Information about updated values include the items from the [list of available events](project:external-app-communication.md#external-app-api) ending with `_on_change`.
 
 An example:
 
