@@ -78,10 +78,9 @@ This object specifies additional editor options and contains the following optio
 * `toggleableEditableTypes` - Boolean value determining whether node editibility can be toggled from the frontend.
   The default value is `true`.
 * `newGraphNode` - Boolean value telling whether anonymous graphs should be available for the given specification or not.
-  It appears in the UI as `New Graph Node` button.
-  The default is `true`.
-* `notifyWhenChanged` - Boolean value determining whether frontend should send requests with information about changed values.
-  Information about updated values include the items from the [list of available events](project:external-app-communication.md#external-app-api) ending with `_on_change`.
+* `notifyWhenChanged` - Boolean value specifying whether the frontend should send requests with information about changed values.
+  This option is only effective when Pipeline Manager is run in server-app mode.
+  Notifications include events from the [list of available events](project:external-app-communication.md#external-app-api) ending with `_on_change`.
 
 An example:
 
