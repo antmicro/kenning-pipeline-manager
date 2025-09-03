@@ -44,7 +44,14 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
             <NodePalette />
         </slot>
 
-        <div class="node-container" :style="nodeContainerStyle" @wheel="mouseWheel">
+        <div
+            class="node-container"
+            :style="nodeContainerStyle"
+            @wheel="mouseWheel"
+            @mouseenter="changeHoveredConnections"
+            @mousemove="changeHoveredConnections"
+            @mouseleave="clearHighlight"
+        >
             <CustomNode
                 v-for="node in visibleNodes"
                 :key="node.id + counter.toString()"
@@ -387,9 +394,8 @@ export default defineComponent({
             }
         };
 
-        const changeHoveredConnections = (ev) => {
-            const elements = document.elementsFromPoint(ev.clientX, ev.clientY);
-            const elementsWithZIndex = elements.map((element) => {
+        const findConnectionsToHighlight = (elementsUnderCursor) => {
+            const elementsWithZIndex = elementsUnderCursor.map((element) => {
                 const z = window.getComputedStyle(element).zIndex;
                 return {
                     z_index: Number.isNaN(parseInt(z, 10)) ? 0 : parseInt(z, 10),
@@ -405,19 +411,58 @@ export default defineComponent({
             const hoveredHtml = connRefs.value.filter((conn) =>
                 conn.containsPoint([highestZIndexElement.element]),
             );
-
             // Convert DOM elements to BaklavaJS connections.
-            const hovered = connections.value.filter(
+            const hoveredConnections = connections.value.filter(
                 (conn) => hoveredHtml.filter((htmlEl) => htmlEl.connection === conn).length > 0,
             );
 
-            const highlighted = connections.value.filter(
-                (conn) => hovered.filter((hov) => hov.from === conn.from).length > 0,
-            );
-            const mostSuitableHighlight = highlighted.at(0);
+            // Check for hovered interfaces.
+            const hoveredInterface = elementsUnderCursor.find((element) => {
+                // Check if the element is a port or inside an interface.
+                if (element.classList?.contains('__port')) {
+                    return true;
+                }
+                if (element.classList?.contains('baklava-node-interface')) {
+                    return true;
+                }
+                // Check if element is inside an interface.
+                return element.closest?.('.baklava-node-interface') !== null;
+            });
 
+            let connectionsToHighlight = [];
+
+            if (hoveredConnections.length > 0) {
+                const highlighted = connections.value.filter(
+                    (conn) => hoveredConnections.filter((hov) => hov.from === conn.from).length > 0,
+                );
+                const mostSuitableHighlight = highlighted.at(0);
+                if (mostSuitableHighlight) {
+                    connectionsToHighlight = [mostSuitableHighlight];
+                }
+            } else if (hoveredInterface) {
+                // Find the interface ID and highlight all connections.
+                let interfaceElement = hoveredInterface;
+
+                interfaceElement = hoveredInterface.closest('.baklava-node-interface');
+                if (interfaceElement?.id) {
+                    // Find all connections that involve this interface.
+                    connectionsToHighlight = connections.value.filter((conn) =>
+                        conn.from?.id === interfaceElement.id
+                        || conn.to?.id === interfaceElement.id,
+                    );
+                }
+            }
+
+            return connectionsToHighlight;
+        };
+
+        const changeHoveredConnections = (ev) => {
+            const elements = document.elementsFromPoint(ev.clientX, ev.clientY);
+            const connectionsToHighlight = findConnectionsToHighlight(elements);
+
+            // Toggle highlighting of connections.
             connections.value.forEach((conn) => {
-                if (conn === mostSuitableHighlight) {
+                if (connectionsToHighlight.includes(conn)) {
                     addHighlight(conn);
                 } else {
                     removeHighlight(conn);
