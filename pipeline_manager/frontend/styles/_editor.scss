@@ -212,7 +212,7 @@
     background-color: $gray-600;
     border-radius: unset;
     border: 1px solid $gray-500;
-    cursor: pointer;
+    cursor: auto;
 
     &.hidden-navbar {
         translate: 0 $navbar-height;
@@ -229,8 +229,9 @@
         color: inherit;
         font-size: 0.875em;
 
-        &:hover {
+        &:not(.--disabled):hover {
             color: var(--baklava-control-color-primary);
+            cursor: pointer;
         }
 
         & > .icon {

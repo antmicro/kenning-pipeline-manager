@@ -33,13 +33,22 @@ from creating and deleting connections or altering nodes' values if the editor i
                     v-if="item.url === undefined"
                     :key="`i-${index}`"
                     class="item"
-                    :class="{ submenu: !!item.submenu, '--disabled': !!item.disabled }"
-                    @click.stop="onClick(item)"
+                    :class="{
+                        submenu: !!item.submenu,
+                        '--disabled': !!item.disabled,
+                        hoverbox: !!item.tooltipMsg
+                    }"
+                    @click.stop="(!!item.disabled) ? null : onClick(item)"
+                    @pointerover="onPointerOver(item)"
+                    @pointerleave="onPointerLeave(item)"
                 >
                     <div class="icon">
                         <component v-if="item.icon !== undefined" :is="item.icon"></component>
                     </div>
                     <div class="text">{{ item.label }}</div>
+                    <div :class="'tooltip'">
+                        <span> {{ item.tooltipMsg }}</span>
+                    </div>
                 </div>
                 <a
                     v-else
@@ -80,7 +89,7 @@ export default defineComponent({
             default: [],
         },
     },
-    emits: ['update:modelValue', 'click', 'sizeUpdate'],
+    emits: ['update:modelValue', 'click', 'sizeUpdate', 'onpointerover', 'onpointerleave'],
     setup(props, context) {
         const {
             el,
@@ -128,6 +137,18 @@ export default defineComponent({
             context.emit('update:modelValue', false);
         };
 
+        const onPointerOver = (item) => {
+            if (item.onPointerEmit) {
+                context.emit('pointerover', item);
+            }
+        };
+
+        const onPointerLeave = (item) => {
+            if (item.onPointerEmit) {
+                context.emit('pointerleave', item);
+            }
+        };
+
         return {
             el,
             styles,
@@ -135,7 +156,50 @@ export default defineComponent({
             itemsWithHoverProperty,
             onClick,
             getIconPath,
+            onPointerOver,
+            onPointerLeave,
         };
     },
 });
 </script>
+
+<style lang="scss" scoped>
+
+.dropdown-wrapper {
+    user-select: none;
+    position: absolute;
+    flex-direction: column;
+    top: 100%;
+    left: 0;
+    display: none;
+    background-color: #181818;
+    border: 2px solid #737373;
+
+    & > div:hover {
+        background-color: #2A2A2A;
+    }
+}
+
+.tooltip {
+    @extend .dropdown-wrapper;
+    border-radius: 15px;
+    background-color: $gray-600;
+    border: 1px solid $gray-200;
+    padding: $spacing-s;
+    top: 0;
+    left: 100%;
+    transform: translate(10px);
+    pointer-events: none;
+    white-space: nowrap;
+    color: #fff;
+    display: none;
+}
+
+.hoverbox:hover {
+    & > .tooltip {
+        display: flex;
+        z-index: 11;
+    }
+}
+
+</style>

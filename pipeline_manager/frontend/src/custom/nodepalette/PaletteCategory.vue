@@ -72,6 +72,8 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
         :items="contextMenuItems"
         :style="contextMenuStyle"
         @click="onContextMenuClick"
+        @pointerover="onPointerOver"
+        @pointerleave="onPointerLeave"
     />
 
     <div
@@ -371,9 +373,36 @@ export default defineComponent({
             }
         };
 
+        const contextMenuHoverInfo = reactive({
+            isHovered: false,
+            hoveredItemValue: undefined,
+        });
+
+        const onPointerOver = (value) => {
+            contextMenuHoverInfo.hoveredItemValue = value;
+            contextMenuHoverInfo.isHovered = true;
+        };
+
+        const onPointerLeave = (value) => {
+            if (contextMenuHoverInfo.hoveredItemValue === value) {
+                contextMenuHoverInfo.hoveredItemValue = undefined;
+                contextMenuHoverInfo.isHovered = false;
+            }
+        };
+
         const contextMenuItems = computed(() => {
+            const itemToDisable = () => !editorManager.editor.additionalNodeTypes.has(selectedNode.value); // eslint-disable-line max-len
+
             const items = [];
-            items.push({ value: 'delete', label: 'Delete', icon: Bin });
+            items.push(
+                {
+                    value: 'delete',
+                    label: 'Delete',
+                    icon: Bin,
+                    disabled: itemToDisable(),
+                    onPointerEmit: itemToDisable(),
+                    tooltipMsg: itemToDisable() && 'Node type can\'t be deleted',
+                });
             return items;
         });
 
@@ -402,6 +431,8 @@ export default defineComponent({
             contextMenuY,
             contextMenuItems,
             onContextMenuClick,
+            onPointerOver,
+            onPointerLeave,
             labelRefs,
         };
     },
