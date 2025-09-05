@@ -69,6 +69,9 @@ export default class PipelineManagerEditor extends Editor {
 
     parentNodes = new Map();
 
+    // node types created in visual-editor
+    additionalNodeTypes = new Set();
+
     subgraphStackGraphTypeEnum = {
         SUBGRAPH: 'subgraph',
         RELATEDGRAPH: 'relatedGraph',

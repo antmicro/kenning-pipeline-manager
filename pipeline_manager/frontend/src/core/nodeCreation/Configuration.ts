@@ -111,6 +111,7 @@ export function createNode(): string[] {
     }
 
     commitTypeToSpecification();
+    editorManager.editor.additionalNodeTypes.add(newNodeData.name);
     return [];
 }
 

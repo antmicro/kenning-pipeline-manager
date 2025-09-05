@@ -810,6 +810,9 @@ export default class EditorManager {
             }).then();
         }
 
+        // Keep track of additional node types
+        this.editor.additionalNodeTypes.add(nodeSpecification.name);
+
         return { errors: [], warnings: [] };
     }
 
@@ -870,6 +873,9 @@ export default class EditorManager {
                 specification: spec,
             }).then();
         }
+
+        // Keep track of additional node types
+        this.editor.additionalNodeTypes.delete(nodeType);
     }
 
     /**
