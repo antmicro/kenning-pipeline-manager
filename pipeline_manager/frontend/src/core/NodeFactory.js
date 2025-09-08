@@ -602,6 +602,7 @@ export class CustomNode extends Node {
             } else {
                 newProperties.push({
                     name: ioName.slice('property'.length + 1),
+                    externalName: ioState.externalName,
                     id: ioState.id,
                     value: ioState.value === undefined ? null : ioState.value,
                 });
@@ -840,6 +841,13 @@ export class CustomNode extends Node {
                 this.outputs[ioName].externalName = ioState.externalName;
                 this.outputs[ioName].direction = ioState.direction;
                 occupied[ioState.side].push(ioState.sidePosition);
+            } else {
+                if (!(ioName in this.inputs)) {
+                    const baklavaIntf = new InputInterface(ioName);
+                    Object.assign(baklavaIntf, ioState);
+                    this.addInput(ioName, baklavaIntf);
+                }
+                this.inputs[ioName].externalName = ioState.externalName;
             }
         });
 
