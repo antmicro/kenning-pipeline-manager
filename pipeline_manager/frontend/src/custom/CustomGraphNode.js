@@ -11,10 +11,12 @@ import { parseInterfaces } from '../core/interfaceParser.js';
 import { updateInterfacePosition } from './CustomNode.js';
 import {
     CustomNode,
+    newProperty,
     parseProperties,
     createProperties,
     createBaklavaInterfaces,
     updateSubgraphInterfaces,
+    updateSubgraphProperties,
 } from '../core/NodeFactory.js';
 import { ir } from '../core/interfaceRegistry.ts';
 
@@ -133,7 +135,7 @@ export default function CreateCustomGraphNodeType(template, graphNode) {
         }
 
         /**
-         * Function used to update exposed interfaces of the graph node based on the
+         * Function used to update exposed interfaces and properties of the graph node based on the
          * nodes inside the graph, their interfaces and their external names.
          *
          * @param {Array} inputs inputs of the graph node. If not provided, the function
@@ -155,9 +157,14 @@ export default function CreateCustomGraphNodeType(template, graphNode) {
                     `Reason: ${evaluatedIntf.join('. ')}`,
                 );
             }
+            const evaluatedProp = updateSubgraphProperties(
+                this.subgraph.nodes,
+                inputs ?? Object.values(this.inputs),
+            );
 
             // After resolving exposed interfaces, the graph node is updated accordingly.
             this.updateInterfaces(evaluatedIntf.inputs, evaluatedIntf.outputs, privatize);
+            this.updateProperties(evaluatedProp);
         }
 
         /**
@@ -261,6 +268,34 @@ export default function CreateCustomGraphNodeType(template, graphNode) {
 
             Object.values(currentInterfaces).forEach((nodeIntf) => {
                 updateInterfacePosition(this, nodeIntf, nodeIntf.side, undefined, false, false);
+            });
+        }
+
+        /**
+         * Function used to update interfaces of the graph node. It makes use of InterfaceRegistry
+         * object to create interfaces that share part of the state of the exposed interfaces.
+         *
+         * @param {Array} newInputs inputs to be added to the graph node
+         * @param {Array} newOutputs outputs to be added to the graph node
+         * @param {boolean} privatize whether to check for privatized (removed) interfaces
+         */
+        updateProperties(newProperties, privatize = false) {
+            if (privatize) {
+                this.privatizeInterfaces(newProperties, this.inputs);
+            }
+
+            newProperties.forEach((property) => {
+                const foundProperty = Object.values(this.inputs).find(
+                    (prop) => prop.id === property.id,
+                );
+
+                if (foundProperty === undefined) {
+                    const np = newProperty(property);
+                    Object.assign(np, property);
+                    this.addInput(`property_${property.name}`, np);
+                } else {
+                    Object.assign(foundProperty, property);
+                }
             });
         }
 
