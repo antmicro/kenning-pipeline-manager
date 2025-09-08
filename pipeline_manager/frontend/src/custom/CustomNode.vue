@@ -97,7 +97,11 @@ from moving or deleting the nodes.
             >
             <!-- Properties -->
             <div class="__properties">
-                <div v-for="input in displayedProperties" :key="input.id">
+                <div
+                    v-for="input in displayedProperties"
+                    :key="input.id"
+                    @pointerdown.right.exact="openContextMenuProperty(input, $event)"
+                >
                     {{ getOptionName(input.componentName) ? `${input.name}:` : '' }}
                     <CustomInterface
                         :node="node"
@@ -159,6 +163,16 @@ from moving or deleting the nodes.
                 :style="contextMenuStyle"
                 @click="onContextMenuInterfaceClick"
             />
+            <CustomContextMenu
+                v-if="showContextMenuProperty"
+                v-model="showContextMenuProperty"
+                :x="contextMenuPropertyX"
+                :y="contextMenuPropertyY"
+                :items="contextMenuPropertyItems"
+                :style="contextMenuStyle"
+                @click="onContextMenuPropertyClick"
+            />
+
         </div>
     </div>
 </template>
@@ -526,12 +540,14 @@ const canOpenContextMenu = computed(() =>
 );
 
 const showContextMenuInterface = ref(false);
+const showContextMenuProperty = ref(false);
 
 const openContextMenuTitle = (ev) => {
     if (
         canOpenContextMenu.value &&
         showContextMenuTitle.value === false &&
-        showContextMenuInterface.value === false
+        showContextMenuInterface.value === false &&
+        showContextMenuProperty.value === false
     ) {
         // Render the menu but keep it hidden
         showContextMenuTitle.value = true;
@@ -724,6 +740,7 @@ const nodeStyle = computed(() => {
 
 let newSocketIndex;
 let chosenInterface;
+let chosenProperty;
 
 const leftSocketsRefs = ref(null);
 const rightSocketsRefs = ref(null);
@@ -842,8 +859,8 @@ const createContextMenuInterfaceItems = () => {
 
     if (chosenInterface !== undefined) {
         const intfMode = (chosenInterface.externalName === undefined ?
-            { value: 'SetExternalName', label: 'Expose Interface' } :
-            { value: 'UnsetExternalName', label: 'Privatize Interface' }
+            { value: 'SetExternalName', label: 'Expose Interface', icon: icons.Subgraph } :
+            { value: 'UnsetExternalName', label: 'Privatize Interface', icon: icons.Subgraph }
         );
         items.push(intfMode);
     }
@@ -946,6 +963,66 @@ const switchSides = (intf) => {
         updateInterfacePosition(props.node, intf, 'left');
     }
 };
+
+// Property context menu
+
+const contextMenuPropertyX = ref(0);
+const contextMenuPropertyY = ref(0);
+
+const createContextMenuPropertyItems = () => {
+    const items = [];
+
+    if (chosenProperty !== undefined) {
+        const propertyMode = (chosenProperty.externalName === undefined ?
+            { value: 'SetExternalName', label: 'Expose Property', icon: icons.Subgraph } :
+            { value: 'UnsetExternalName', label: 'Privatize Property', icon: icons.Subgraph }
+        );
+        items.push(propertyMode);
+    }
+
+    return items;
+};
+
+const contextMenuPropertyItems = ref(createContextMenuPropertyItems());
+
+/* eslint-disable default-case */
+const onContextMenuPropertyClick = (action) => {
+    switch (action) {
+        case 'SetExternalName':
+            viewModel.value.editor.exposeInterface(
+                graph.value.id,
+                chosenProperty,
+            );
+            break;
+        case 'UnsetExternalName':
+            viewModel.value.editor.privatizeInterface(
+                graph.value.id,
+                chosenProperty,
+            );
+            break;
+    }
+};
+
+const openContextMenuProperty = (property, ev) => {
+    if (!viewModel.value.editor.readonly && showContextMenuProperty.value === false) {
+        chosenProperty = property;
+        contextMenuPropertyItems.value = createContextMenuPropertyItems();
+
+        if (contextMenuPropertyItems.value.length > 0) {
+            const target = ev.currentTarget;
+            contextMenuPropertyX.value = ev.offsetX;
+            contextMenuPropertyY.value = ev.offsetY + target.offsetTop + 20;
+            showContextMenuProperty.value = true;
+        }
+    }
+};
+
+watch(showContextMenuProperty, () => {
+    if (showContextMenuProperty.value === false) {
+        chosenProperty = undefined;
+    }
+});
+
 </script>
 
 <style lang="scss" scoped>
