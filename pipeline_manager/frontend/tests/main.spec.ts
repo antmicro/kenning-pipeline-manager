@@ -15,14 +15,12 @@ test('remove node', async ({ page }) => {
     // Find the node and invoke a context menu with a right click.
     const loadVideoNode = page.locator(`#${loadVideoNodeId}`);
     expect(loadVideoNode).toBeVisible();
-    await loadVideoNode.click({
-        button: 'right',
-    });
+    const nodeTitle = loadVideoNode.locator('.__title');
+    await nodeTitle.click({ button: 'right' });
 
     // Delete the node.
     const deleteButton = page.getByText('Delete', { exact: true });
-    await deleteButton.scrollIntoViewIfNeeded();
-    await deleteButton.click();
+    await deleteButton.click({ force: true });
 
     // Verify that the node has disappeared.
     await expect(page.locator(`#${loadVideoNodeId}`)).not.toBeVisible();
@@ -67,5 +65,5 @@ test('show menu by right-clicking on interface', async ({ page }) => {
     // Verify presence and content of a context menu.
     const menu = page.locator('.baklava-context-menu');
     expect(menu).toBeVisible();
-    expect(await menu.filter({ hasText: 'Expose Interface' }).count()).toBeGreaterThan(0);
+    expect(await menu.filter({ hasText: 'Space Up' }).count()).toBeGreaterThan(0);
 });

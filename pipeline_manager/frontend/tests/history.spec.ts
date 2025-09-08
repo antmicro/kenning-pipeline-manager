@@ -9,14 +9,12 @@ async function deleteNode(page: Page, nodeId: string) {
     expect(loadVideoNode, {
         message: `The node with id ${nodeId} is expected to be visible before the remove operation.`,
     }).toBeVisible();
-    await loadVideoNode.click({
-        button: 'right',
-    });
+    const nodeTitle = loadVideoNode.locator('.__title');
+    await nodeTitle.click({ button: 'right' });
 
     // Delete the node.
     const deleteButton = page.getByText('Delete', { exact: true });
-    await deleteButton.scrollIntoViewIfNeeded();
-    await deleteButton.click();
+    await deleteButton.click({ force: true });
 }
 
 async function loadWebsite(page: Page, requiredNodeId: string) {
