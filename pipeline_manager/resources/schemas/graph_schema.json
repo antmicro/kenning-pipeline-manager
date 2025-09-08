@@ -56,6 +56,10 @@
                                         "array",
                                         "null"
                                     ]
+                                },
+                                "externalName": {
+                                    "description": "Name of the external property displayed in the node",
+                                    "type": ["string", "null"]
                                 }
                             },
                             "required": [
