@@ -998,6 +998,48 @@ export function CustomNodeFactory(
 }
 
 /**
+ * Function checks for duplicate interface names in the subgraph.
+ *
+ * An error message is returned for each duplicate name.
+ *
+ * @param interfaces External interfaces in the subgraph
+ *
+ * @returns List of new interfaces and errors
+ */
+function checkInterfaceNames(interfaces) {
+    const countedIntfNames = Object.create(null);
+    const externalInterfaces = [];
+    interfaces?.forEach(
+        ([, intf]) => {
+            countedIntfNames[intf.externalName] = (countedIntfNames[intf.externalName] ?? 0) + 1;
+            if (countedIntfNames[intf.externalName] === 1) {
+                externalInterfaces.push(intf);
+            } else {
+                externalInterfaces.push(`Interface '${intf.externalName}' is repeated ${countedIntfNames[intf.externalName]} times.`);
+            }
+        },
+    );
+    return externalInterfaces;
+}
+
+function updateInterfaceRegistry(intf, graphId) {
+    // It may happen that the registered interface has the same id, but is a reference,
+    // for example when dealing with history or clipboard.
+    if (
+        ir.isRegistered(intf.id) &&
+        ir.getRegisteredInterface(intf.id).sharedInterface !== intf &&
+        ir.getRegisteredInterface(intf.id).sharedInterface.id === intf.id &&
+        ir.getRegisteredInterface(intf.id).sharedInterfaceGraphId === graphId
+    ) {
+        ir.deleteRegisteredInterface(intf.id);
+    }
+
+    if (!ir.isRegistered(intf.id)) {
+        ir.registerInterface(intf, graphId);
+    }
+}
+
+/**
  * Function looks for graph node interfaces based on the nodes inside of it.
  *
  * It finds all interfaces that have `externalName` property set and registers
@@ -1025,18 +1067,7 @@ export function updateSubgraphInterfaces(nodes, inputs = [], outputs = []) {
         );
 
     // Filter out repeated external names
-    const countedIntfNames = Object.create(null);
-    const externalInterfaces = [];
-    exposedIntf.forEach(
-        ([, intf]) => {
-            countedIntfNames[intf.externalName] = (countedIntfNames[intf.externalName] ?? 0) + 1;
-            if (countedIntfNames[intf.externalName] === 1) {
-                externalInterfaces.push(intf);
-            } else {
-                externalInterfaces.push(`Interface '${intf.externalName}' is repeated ${countedIntfNames[intf.externalName]} times.`);
-            }
-        },
-    );
+    const externalInterfaces = checkInterfaceNames(exposedIntf);
     const errorMessages = externalInterfaces.filter((n) => typeof n === 'string');
     if (errorMessages.length) {
         return errorMessages;
@@ -1044,22 +1075,9 @@ export function updateSubgraphInterfaces(nodes, inputs = [], outputs = []) {
 
     // Create new inputs and outputs
     const newInterfaces = [];
+    const graphId = nodes[0].graph.id;
     externalInterfaces.forEach((intf) => {
-        const graphId = nodes[0].graph.id;
-        // It may happen that the registered interface has the same id, but is a reference,
-        // for example when dealing with history or clipboard.
-        if (
-            ir.isRegistered(intf.id) &&
-            ir.getRegisteredInterface(intf.id).sharedInterface !== intf &&
-            ir.getRegisteredInterface(intf.id).sharedInterface.id === intf.id &&
-            ir.getRegisteredInterface(intf.id).sharedInterfaceGraphId === graphId
-        ) {
-            ir.deleteRegisteredInterface(intf.id);
-        }
-
-        if (!ir.isRegistered(intf.id)) {
-            ir.registerInterface(intf, graphId);
-        }
+        updateInterfaceRegistry(intf, graphId);
 
         const container = intf.direction === 'output' ? outputs : inputs;
         const idx = container.findIndex((x) => x.id === intf.id);
@@ -1089,6 +1107,53 @@ export function updateSubgraphInterfaces(nodes, inputs = [], outputs = []) {
         inputs: Object.values(newInterfacesPositionsOrErrors.inputs),
         outputs: Object.values(newInterfacesPositionsOrErrors.outputs),
     };
+}
+
+/**
+ * Function looks for graph node properties based on the nodes inside of it.
+ *
+ * If there are any errors, they are returned as an array of strings.
+ * If the operation was successful, the new properties are returned.
+ *
+ * @param nodes Nodes of the subgraph
+ *
+ * @returns List of errors or new properties
+ */
+export function updateSubgraphProperties(nodes) {
+    const exposedProperties = nodes.map((node) => Object.entries(node.inputs)).flat()
+        .filter(([key]) => key.startsWith('property_'))
+        .filter(([, prop]) => prop.externalName);
+
+    // Filter out repeated external names
+    const externalProperties = checkInterfaceNames(exposedProperties);
+    const errorMessages = externalProperties?.filter((n) => typeof n === 'string');
+    if (errorMessages.length) {
+        return errorMessages;
+    }
+
+    const newProperties = [];
+    const graphId = nodes[0].graph.id;
+    externalProperties.forEach((property) => {
+        updateInterfaceRegistry(property, graphId);
+
+        newProperties.push({
+            name: property.externalName,
+            id: property.id,
+            externalName: undefined,
+            type: property.type,
+            value: property.value,
+            description: property.description,
+            default: property.default,
+            min: property.min,
+            max: property.max,
+            step: property.step,
+            values: property.items,
+            dtype: property.dtype,
+            override: property.override,
+            readonly: property.readonly,
+        });
+    });
+    return newProperties;
 }
 
 /**
