@@ -260,7 +260,8 @@
                         {
                             "name": "Sample option",
                             "id": "93314129-7565-41fe-819c-14810334ca9a",
-                            "value": "Option 4"
+                            "value": "Option 4",
+                            "externalName": "Subgraph property"
                         }
                     ]
                 },
