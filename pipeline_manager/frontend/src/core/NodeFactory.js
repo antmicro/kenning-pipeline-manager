@@ -79,112 +79,120 @@ export function parseProperties(properties) {
 }
 
 /**
+ * Creates a property based on its specification.
+ *
+ * @param p property specification with name and type
+ * @param hidden whether the property should be hidden
+ *
+ * @returns property object of a given type
+ * */
+export function newProperty(p, hidden = false) {
+    const propName = p.name;
+    const propType = p.type;
+    let propDef = p.default;
+    let intf;
+
+    switch (propType) {
+        case 'constant':
+            intf = new TextInterface(propName, propDef);
+            break;
+        case 'text':
+            intf = new InputInterface(propName, propDef, p.readonly);
+            break;
+        case 'multiline':
+            intf = new TextAreaInterface(propName, propDef, p.readonly);
+            break;
+        case 'number':
+            intf = new NumberInterface(propName, propDef, p.min, p.max, p.readonly);
+            break;
+        case 'integer':
+            intf = new IntegerInterface(propName, propDef, p.min, p.max, p.readonly);
+            break;
+        case 'hex':
+            intf = new HexInterface(
+                propName,
+                propDef.toLowerCase(),
+                p.min ? BigInt(p.min) : NaN,
+                p.max ? BigInt(p.max) : NaN,
+                p.readonly,
+            );
+            break;
+        case 'select': {
+            const it = p.values.map((element) => element.toString());
+            intf = new SelectInterface(propName, propDef, it, p.readonly);
+        } break;
+        case 'bool':
+            intf = new CheckboxInterface(propName, propDef, p.readonly);
+            break;
+        case 'slider':
+            if (propDef === undefined) {
+                propDef = p.min;
+            }
+            intf = new SliderInterface(propName, propDef, p.min, p.max, p.step, p.readonly);
+            break;
+        case 'list':
+            if (propDef === null) {
+                propDef = [];
+            }
+            intf = new ListInterface(propName, propDef, p.dtype, p.readonly);
+            break;
+        case 'button-url':
+            intf = new ButtonInterface(propName, () => window.open(intf.value, '_blank'), propDef, 'button-url');
+            break;
+        case 'button-api':
+            intf = new ButtonInterface(
+                propName,
+                () => intf.events.updated.emit(['button_click', { id: intf.id, value: intf.value }]),
+                propDef,
+                'button-api');
+            break;
+        case 'button-graph':
+            intf = new ButtonInterface(
+                propName,
+                () => intf.events.updated.emit(intf.value),
+                propDef,
+                'button-graph');
+            break;
+        default:
+            /* eslint-disable no-console */
+            console.error(propType, ' input type is not recognized.');
+    }
+    if (intf !== undefined) {
+        intf.hidden = hidden;
+        intf.type = propType;
+
+        if (p.interfaceMaxConnectionsCount !== undefined) {
+            intf.interfaceMaxConnectionsCount = p.interfaceMaxConnectionsCount;
+        }
+
+        if (p.interfaceType !== undefined) {
+            intf.interfaceType = p.interfaceType;
+        }
+    }
+
+    return intf;
+}
+
+/**
  * @param properties that are validated and parsed. The format
  * should be the same as the one returned by parseProperties.
  * @returns created properties
  */
 export function createProperties(properties) {
-    const getIntf = (p, hidden = false) => {
-        const propName = p.name;
-        const propType = p.type;
-        let propDef = p.default;
-        let intf;
-
-        switch (propType) {
-            case 'constant':
-                intf = new TextInterface(propName, propDef);
-                break;
-            case 'text':
-                intf = new InputInterface(propName, propDef, p.readonly);
-                break;
-            case 'multiline':
-                intf = new TextAreaInterface(propName, propDef, p.readonly);
-                break;
-            case 'number':
-                intf = new NumberInterface(propName, propDef, p.min, p.max, p.readonly);
-                break;
-            case 'integer':
-                intf = new IntegerInterface(propName, propDef, p.min, p.max, p.readonly);
-                break;
-            case 'hex':
-                intf = new HexInterface(
-                    propName,
-                    propDef.toLowerCase(),
-                    p.min ? BigInt(p.min) : NaN,
-                    p.max ? BigInt(p.max) : NaN,
-                    p.readonly,
-                );
-                break;
-            case 'select': {
-                const it = p.values.map((element) => element.toString());
-                intf = new SelectInterface(propName, propDef, it, p.readonly);
-            } break;
-            case 'bool':
-                intf = new CheckboxInterface(propName, propDef, p.readonly);
-                break;
-            case 'slider':
-                if (propDef === undefined) {
-                    propDef = p.min;
-                }
-                intf = new SliderInterface(propName, propDef, p.min, p.max, p.step, p.readonly);
-                break;
-            case 'list':
-                if (propDef === null) {
-                    propDef = [];
-                }
-                intf = new ListInterface(propName, propDef, p.dtype, p.readonly);
-                break;
-            case 'button-url':
-                intf = new ButtonInterface(propName, () => window.open(intf.value, '_blank'), propDef, 'button-url');
-                break;
-            case 'button-api':
-                intf = new ButtonInterface(
-                    propName,
-                    () => intf.events.updated.emit(['button_click', { id: intf.id, value: intf.value }]),
-                    propDef,
-                    'button-api');
-                break;
-            case 'button-graph':
-                intf = new ButtonInterface(
-                    propName,
-                    () => intf.events.updated.emit(intf.value),
-                    propDef,
-                    'button-graph');
-                break;
-            default:
-                /* eslint-disable no-console */
-                console.error(propType, ' input type is not recognized.');
-        }
-        if (intf !== undefined) {
-            intf.hidden = hidden;
-            intf.type = propType;
-
-            if (p.interfaceMaxConnectionsCount !== undefined) {
-                intf.interfaceMaxConnectionsCount = p.interfaceMaxConnectionsCount;
-            }
-
-            if (p.interfaceType !== undefined) {
-                intf.interfaceType = p.interfaceType;
-            }
-        }
-
-        return intf;
-    };
-
     const tempProperties = {};
 
     Object.entries(properties).forEach(([pname, p]) => {
         if (p.group !== undefined) {
             tempProperties[pname] = (() => {
-                const groupedProperty = getIntf(p);
+                const groupedProperty = newProperty(p);
                 groupedProperty.group = Object.keys(p.group);
                 return groupedProperty;
             });
             Object.entries(p.group).forEach(([pgroupname, pgroup]) => {
-                tempProperties[pgroupname] = () => getIntf(pgroup);
+                tempProperties[pgroupname] = () => newProperty(pgroup);
             });
         } else {
-            tempProperties[pname] = () => getIntf(p);
+            tempProperties[pname] = () => newProperty(p);
         }
     });
     return tempProperties;
