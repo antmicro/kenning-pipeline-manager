@@ -66,19 +66,52 @@ from creating and deleting connections or altering nodes' values if the editor i
             />
         </div>
 
-        <!-- @keydown.stop is added so that events are not bubbled up to the editor -->
-        <component
-            :is="intf.component"
-            v-if="showComponent"
-            v-model="intf.value"
-            :node="node"
-            :intf="intf"
-            @keydown.stop
-            :tabindex="tabindexValue"
-        />
-        <span v-else>
-            {{ intf.name }}
-        </span>
+        <div
+            @mouseenter="startPropertyHover"
+            @mouseleave="endPropertyHover"
+        >
+            <!-- @keydown.stop is added so that events are not bubbled up to the editor -->
+            <component
+                :is="intf.component"
+                v-if="showComponent"
+                v-model="intf.value"
+                :node="node"
+                :intf="intf"
+                @keydown.stop
+                :tabindex="tabindexValue"
+            />
+            <span v-else>
+                {{ intf.name }}
+            </span>
+            <div
+                v-if="isExposed && (propertyHovered || editExternalName) && !intf.port"
+                class="__property_name"
+            >
+                <input
+                    v-if="editExternalName"
+                    v-model="inputExternalName"
+                    ref="externalNameInput"
+                    type="text"
+                    spellcheck="false"
+                    autocomplete="off"
+                    class="__property_input"
+                    :class="{ '__error': externalNameInputIncorrect }"
+                    placeholder="External name"
+                    @focusout="externalNameFocusOutCallback"
+                    @keydown.enter.exact.stop="(e) => { e.target.blur(); }"
+                    @input="externalNameInputCallback"
+                    @pointerdown.left.stop="(e) => e.stopPropagation()"
+                    @keydown.ctrl.stop="(e) => e.stopPropagation()"
+                />
+                <span
+                    v-else
+                    @pointerdown.left.stop="enableExternalNameEdit"
+                    @keydown.stop
+                >
+                    {{ intf.externalName }}
+                </span>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -156,6 +189,15 @@ export default defineComponent({
             if (!viewModel.value.editor.readonly) {
                 endHover();
             }
+        };
+
+        const propertyHovered = ref(false);
+        const startPropertyHover = () => {
+            propertyHovered.value = true;
+        };
+
+        const endPropertyHover = () => {
+            propertyHovered.value = false;
         };
 
         /* eslint-disable vue/no-mutating-props,no-param-reassign */
@@ -246,6 +288,8 @@ export default defineComponent({
         const externalNameFocusOutCallback = () => {
             editExternalName.value = false;
             externalNameInputIncorrect.value = false;
+            if (inputExternalName.value === props.intf.externalName) return;
+
             const newExternalName = graph.value.resolveNewExposedName(inputExternalName.value);
             inputExternalName.value = newExternalName;
 
@@ -278,6 +322,9 @@ export default defineComponent({
             isExposed,
             startHover,
             startHoverWrapper,
+            propertyHovered,
+            startPropertyHover,
+            endPropertyHover,
         };
     },
 });
