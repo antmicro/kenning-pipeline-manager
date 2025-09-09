@@ -104,3 +104,17 @@ export async function dragAndDrop(page, locator, x, y) {
     await page.mouse.move(x, y);
     await page.mouse.up();
 }
+
+/**
+ * Closes the terminal so it doesn't cover page content.
+ *
+ * @async
+ * @param {import('playwright').Page} page - Playwright Page to perform actions on.
+ * @returns {Promise<void>} Promise that resolves when the terminal has been closed.
+ */
+export async function closeTerminal(page) {
+    if (await page.isVisible('#hterm-terminal')) {
+        await page.locator('.terminal-wrapper').locator('.container').getByRole('button').last().click();
+    }
+    await expect(page.locator('#hterm-terminal')).not.toBeVisible();
+}

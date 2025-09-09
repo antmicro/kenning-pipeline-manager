@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { getUrl, loadVideoNodeId } from './config.js';
+import { getUrl, loadVideoNodeId, closeTerminal } from './config.js';
 
 test('has title', async ({ page }) => {
     await page.goto(getUrl());
@@ -10,6 +10,7 @@ test('remove node', async ({ page }) => {
     // Load a website and wait until nodes are loaded.
     await page.goto(getUrl());
     await page.waitForSelector(`#${loadVideoNodeId}`);
+    await closeTerminal(page);
 
     // Find the node and invoke a context menu with a right click.
     const loadVideoNode = page.locator(`#${loadVideoNodeId}`);

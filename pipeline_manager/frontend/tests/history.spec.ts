@@ -1,7 +1,9 @@
 import { test, expect, Page, Locator } from '@playwright/test';
-import { getUrl, loadVideoNodeId, enableNavigationBar, addNode, dragAndDrop } from './config.js';
+import { getUrl, loadVideoNodeId, enableNavigationBar, addNode, dragAndDrop, closeTerminal } from './config.js';
 
 async function deleteNode(page: Page, nodeId: string) {
+    await closeTerminal(page);
+
     // Find the node and invoke a context menu with a right click.
     const loadVideoNode = page.locator(`#${nodeId}`);
     expect(loadVideoNode, {
@@ -411,13 +413,7 @@ test('test history by removing node with connection', async ({ page }) => {
         message: 'The initial condition of six connections being present are not met.',
     }).toHaveCount(6);
 
-    // Delete a node.
-    const loadVideoNode = page.locator(`#${loadVideoNodeId}`);
-    expect(loadVideoNode.isVisible());
-    await loadVideoNode.click({ button: 'right' });
-    const deleteButton = page.getByText('Delete', { exact: true })
-    await deleteButton.scrollIntoViewIfNeeded();
-    await deleteButton.click();
+    await deleteNode(page, loadVideoNodeId);
 
     // Verify that the node and its connection have disappeared.
     await expect(page.locator(`#${loadVideoNodeId}`), {
