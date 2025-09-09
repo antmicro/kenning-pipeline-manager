@@ -184,7 +184,7 @@ test('test history by adding connection', async ({ page }) => {
         .locator('../..')
         .locator('.__interfaces .__inputs')
         .getByText('input 1')
-        .locator('..')
+        .locator('../..')
         .locator('.__port');
 
     const [sourcePosition, targetPosition]: [number, number][] = await Promise.all(
@@ -243,7 +243,7 @@ test('test history by moving interface down', async ({ page }) => {
     let interfaceInput1 = filter2dNode
         .locator('.__interfaces .__inputs')
         .getByText('input 1')
-        .locator('..')
+        .locator('../..')
         .locator('.__port');
     await interfaceInput1.click({ button: 'right' });
 
@@ -281,7 +281,7 @@ test('test history by moving interface up', async ({ page }) => {
     let interfaceInput1 = filter2dNode
         .locator('.__interfaces .__inputs')
         .getByText('kernel')
-        .locator('..')
+        .locator('../..')
         .locator('.__port');
     await interfaceInput1.click({ button: 'right' });
 
@@ -325,7 +325,7 @@ test('test history by moving interface to right', async ({ page }) => {
     let interfaceInput1 = filter2dNode
         .locator('.__interfaces .__inputs')
         .getByText('input 1')
-        .locator('..')
+        .locator('../..')
         .locator('.__port');
     await interfaceInput1.dblclick();
     expect(await countInterfaces(page, 'input'), {
@@ -371,7 +371,7 @@ test('test history by moving interface to left', async ({ page }) => {
     let interfaceOutput1 = filter2dNode
         .locator('.__interfaces .__outputs')
         .getByText('output 1')
-        .locator('..')
+        .locator('../..')
         .locator('.__port');
     await interfaceOutput1.dblclick();
     expect(await countInterfaces(page, 'input'), {
@@ -446,7 +446,7 @@ test('test history by editing node with connection', async ({ page }) => {
     let interfaceInput1 = filter2dNode
         .locator('.__interfaces .__inputs')
         .getByText('kernel')
-        .locator('..')
+        .locator('../..')
         .locator('.__port');
     await interfaceInput1.click({ button: 'right' });
 
