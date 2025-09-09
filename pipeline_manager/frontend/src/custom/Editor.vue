@@ -919,7 +919,7 @@ export default defineComponent({
 
             let isValidSpec = true;
             if (specification) {
-                if (externalApplicationManager.isConnected()) {
+                if (externalApplicationManager.usesBackend()) {
                     NotificationHandler.showToast(
                         'warning',
                         'Specification is managed by an external application.',

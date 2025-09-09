@@ -102,6 +102,10 @@ class ExternalApplicationManager {
         return Array.from(this.connectionManager.connected.values()).some(Boolean);
     }
 
+    usesBackend() {
+        return this.backend;
+    }
+
     /**
      * Wrap the RPC request with the current application.
      *
