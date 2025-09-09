@@ -851,6 +851,39 @@ class SpecificationBuilder(object):
 
         self._nodes[name]["interfaces"].append(interface)
 
+    def remove_node_type_interface(
+        self,
+        name: str,
+        interfacename: str,
+    ) -> None:
+        """
+        Removes interface from a selected node type.
+
+        Parameters
+        ----------
+        name: str
+            Name of the node type
+        interfacename: str
+            Name of the interface
+
+        Raises
+        ------
+        SpecificationBuilderException
+            Raised when node type or interface does not exist.
+        """
+        if name not in self._nodes:
+            raise SpecificationBuilderException(
+                f"Node type of name {name} does not exist."
+            )
+        for i, iface in self._nodes[name]["interfaces"]:
+            if iface["name"] == interfacename:
+                del self.nodes[name][i]
+                return None
+        raise SpecificationBuilderException(
+            f"Interface of name {interfacename} does not exist "
+            f"in node type {name}."
+        )
+
     def create_property(
         self,
         propname: str,
