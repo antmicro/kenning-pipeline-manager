@@ -55,18 +55,12 @@ export const saveSpecificationConfiguration: SaveConfiguration = {
                         graph.id = nodeSpecification.subgraphId;
                         node.subgraph = nodeSpecification.subgraphId;
                     }
+
+                    specification.graphs = specification.graphs
+                        .filter((oldGraph: any) => oldGraph.id !== graph.id);
+                    specification.graphs.push(graph);
                 }
             });
-        });
-
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        dataflow.graphs.forEach((graph: any) => {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const prevIndex = specification.graphs.map((g: any) => g.id).indexOf(graph.id);
-            const [index, remove] = prevIndex !== -1
-                ? [prevIndex, 1]
-                : [specification.graphs.length, 0];
-            specification.graphs.splice(index, remove, graph);
         });
 
         Object.entries(dataflow.metadata).forEach(([key, value]) => {
@@ -77,6 +71,16 @@ export const saveSpecificationConfiguration: SaveConfiguration = {
 
         if (this.graph) {
             specification.entryGraph = dataflow.entryGraph ?? dataflow.graphs[0].id;
+
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            dataflow.graphs.forEach((graph: any) => {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const prevIndex = specification.graphs.map((g: any) => g.id).indexOf(graph.id);
+                const [index, remove] = prevIndex !== -1
+                    ? [prevIndex, 1]
+                    : [specification.graphs.length, 0];
+                specification.graphs.splice(index, remove, graph);
+            });
         }
 
         if (this.minify && specification.nodes) {
