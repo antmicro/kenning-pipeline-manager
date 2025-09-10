@@ -18,7 +18,9 @@ import {
     configurationState, PropertyConfiguration, InterfaceConfiguration,
 } from './ConfigurationState.ts';
 
-import { createProperties, parseProperties, createBaklavaInterfaces } from '../NodeFactory.js';
+import {
+    createProperties, parseProperties, createBaklavaInterfaces, GraphFactory,
+} from '../NodeFactory.js';
 import NotificationHandler from '../notifications.js';
 import { suppressHistoryLogging } from '../History.ts';
 
@@ -385,6 +387,7 @@ export function removeInterfaces(interfaces: InterfaceConfiguration[]): void {
         return;
     }
 
+    // Remove interfaces from graphs in the editor
     configurationState.interfaces = configurationState.interfaces.filter(
         (item) => !interfaces.includes(item),
     );
@@ -400,6 +403,49 @@ export function removeInterfaces(interfaces: InterfaceConfiguration[]): void {
         ) ?? [];
         const childNodes = findNodes(n.name!);
         alterInterfaces(childNodes, interfaces, true);
+    });
+
+    // Remove interfaces from uninitialized graphs
+    function removeFromSubgraph(graph: any, nodesToUpdate: any[], names: string[]): string[] {
+        const externalNames: string[] = [];
+        nodesToUpdate.forEach((node: any) => {
+            const interfacesToRemove = node.interfaces
+                .filter((intf: any) => names.includes(intf.name));
+            const ids = interfacesToRemove.map((intf: any) => intf.id);
+
+            // eslint-disable-next-line no-param-reassign
+            graph.connections = graph.connections
+                .filter((conn: any) => !ids.includes(conn.from) && !ids.includes(conn.to));
+            // eslint-disable-next-line no-param-reassign
+            node.interfaces = node.interfaces.filter((intf: any) => !ids.includes(intf.id));
+
+            externalNames.push(...interfacesToRemove
+                .map((intf: any) => intf.externalName)
+                .filter((name: string | undefined) => name),
+            );
+        });
+        return externalNames;
+    }
+
+    const names = interfaces.map((intf: InterfaceConfiguration) => intf.name);
+    [
+        ...editorManager.specification.unresolvedSpecification.graphs ?? [],
+        ...editorManager.specification.currentSpecification.graphs ?? [],
+    ].forEach((graph: any) => {
+        const nodesToUpdate = graph.nodes.filter((n: any) => n.name === currentType);
+        let externalNames = removeFromSubgraph(graph, nodesToUpdate, names);
+
+        while (externalNames.length > 0) {
+            const newExternalNames = removeFromSubgraph(graph, graph.nodes, externalNames);
+            externalNames = newExternalNames;
+        }
+    });
+
+    [
+        ...editorManager.specification.unresolvedSpecification.nodes ?? [],
+        ...editorManager.specification.currentSpecification.nodes ?? [],
+    ].forEach((node: any) => {
+        editorManager.refreshSubgraph(node);
     });
 
     commitTypeToSpecification();
