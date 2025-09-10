@@ -622,6 +622,36 @@ export default class EditorManager {
     }
 
     /**
+     * Attaches subgraph to the updated subgraph node.
+     *
+     * @param {object} node Updated graph node
+     */
+    refreshSubgraph(node) {
+        let graphNode;
+        let subgraph;
+        this.specification.currentSpecification.graphs?.forEach((graph) => {
+            if (node.subgraphId === graph.id) {
+                graphNode = node;
+                subgraph = graph;
+            }
+        });
+
+        if (subgraph) {
+            const myGraph = GraphFactory(
+                subgraph.nodes,
+                subgraph.connections,
+                subgraph.name,
+                this.baklavaView.editor,
+            );
+
+            this.baklavaView.editor.addGraphTemplate(
+                myGraph,
+                graphNode,
+            );
+        }
+    }
+
+    /**
      * Validates the node specification passed in `nodeSpecification` and if
      * it is correct adds it to the unresolved specification.
      * If there is no current specification loaded then a new one is created.
@@ -731,30 +761,27 @@ export default class EditorManager {
 
                 if (nodeSpecification.name !== nodeToUpdate) {
                     this.updateParentNode(resolvedNodeSpecification, nodeToUpdate);
+
+                    [
+                        ...this.specification.unresolvedSpecification.graphs ?? [],
+                        ...this.specification.currentSpecification.graphs ?? [],
+                    ].forEach((graph) => {
+                        const nodesToUpdate = graph.nodes.filter((n) => n.name === nodeToUpdate);
+                        nodesToUpdate.forEach((node) => {
+                            node.name = nodeSpecification.name;
+                        });
+                    });
+
+                    [
+                        ...this.specification.unresolvedSpecification.nodes ?? [],
+                        ...this.specification.currentSpecification.nodes ?? [],
+                    ].forEach((node) => {
+                        this.refreshSubgraph(node);
+                    });
                 }
 
                 if (resolvedNodeSpecification.subgraphId !== undefined) {
-                    // Attach subgraph to the updated subgraph node
-                    let graphNode;
-                    let subgraph;
-                    this.specification.currentSpecification.graphs.forEach((graph) => {
-                        if (resolvedNodeSpecification.subgraphId === graph.id) {
-                            graphNode = resolvedNodeSpecification;
-                            subgraph = graph;
-                        }
-                    });
-
-                    const myGraph = GraphFactory(
-                        subgraph.nodes,
-                        subgraph.connections,
-                        subgraph.name,
-                        this.baklavaView.editor,
-                    );
-
-                    this.baklavaView.editor.addGraphTemplate(
-                        myGraph,
-                        graphNode,
-                    );
+                    this.refreshSubgraph(resolvedNodeSpecification);
                 }
             }
         } else {
