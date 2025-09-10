@@ -605,7 +605,8 @@ export default {
             menuState.configurationMenu.addNode = true;
             menuState.configurationMenu.placeNode = false;
 
-            watch(() => menuState.configurationMenu.visible, async (newValue, oldValue) => {
+            const unwatch = watch(() =>
+                menuState.configurationMenu.visible, async (newValue, oldValue) => {
                 if (oldValue === true && newValue === false) {
                     const nodeName = configurationState.nodeData.name;
                     let graphNode = this.editorManager.baklavaView.editor.nodeTypes.get(nodeName);
@@ -642,6 +643,7 @@ export default {
                         );
                     }
                 }
+                unwatch();
             });
         },
 
