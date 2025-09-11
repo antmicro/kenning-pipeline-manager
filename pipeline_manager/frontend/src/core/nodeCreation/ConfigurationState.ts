@@ -26,6 +26,7 @@ export type InterfaceConfiguration = {
     name: string,
     type?: string | string[],
     direction: string,
+    maxConnectionsCount?: number,
 }
 
 export type ConfigurationState = {

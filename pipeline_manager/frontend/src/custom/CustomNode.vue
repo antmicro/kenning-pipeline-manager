@@ -386,6 +386,7 @@ const onContextMenuTitleClick = async (action) => {
             name: intf?.name,
             type: intf?.type,
             direction: intf?.direction,
+            maxConnectionsCount: intf?.maxConnectionsCount,
         }));
 
         /* eslint-disable no-underscore-dangle */
