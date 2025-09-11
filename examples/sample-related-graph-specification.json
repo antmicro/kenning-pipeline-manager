@@ -17,7 +17,13 @@
         {
             "name": "Test node #1",
             "category": "First Category",
-            "properties": [],
+            "properties": [
+                {
+                    "name": "Related graph",
+                    "type": "button-graph",
+                    "default": "569edd54-0f42-4c24-a809-1509febbe23a"
+                }
+            ],
             "relatedGraphs": [
                 {"name": "Related example", "id": "569edd54-0f42-4c24-a809-1509febbe23a"}
             ],
