@@ -47,12 +47,14 @@ import { addInterface } from '../../../core/nodeCreation/Configuration.ts';
 import { menuState } from '../../../core/nodeCreation/ConfigurationState.ts';
 
 import InputInterface from '../../../interfaces/InputInterface.js';
+import IntegerInterface from '../../../interfaces/IntegerInterface.js';
 import newInputInterface from './utils.ts';
 
 interface CurrentInterface {
     name: string,
     type: string,
     direction: Ref<string>,
+    maxConnectionsCount: Ref<number>,
 }
 
 interface InterfaceInterface extends InputInterface {
@@ -66,6 +68,7 @@ export default defineComponent({
             name: 'New interface',
             type: '',
             direction: ref('inout'),
+            maxConnectionsCount: ref(0),
         };
 
         const close = () => {
@@ -90,12 +93,29 @@ export default defineComponent({
             return option as InterfaceInterface;
         });
 
+        const interfaceConnectionCount = computed(() => {
+            const option: any = new IntegerInterface(
+                'Max connection count',
+                newInterface.maxConnectionsCount.value,
+                -1,
+                100,
+            ).setPort(false);
+
+            option.events.setValue.subscribe(this, (v: number) => {
+                newInterface.maxConnectionsCount.value = v;
+            });
+
+            option.componentName = 'IntegerInterface';
+            return option as InterfaceInterface;
+        });
+
         const addInterfaceMenu = computed(() => {
             const button: any = new ButtonInterface('Add interface', () => {
                 if (newInterface.type === '') {
                     const intf = {
                         name: newInterface.name,
                         direction: newInterface.direction.value,
+                        maxConnectionsCount: newInterface.maxConnectionsCount.value,
                     };
                     addInterface(intf);
                 } else {
@@ -105,6 +125,7 @@ export default defineComponent({
                         name: newInterface.name,
                         type: typesList.length === 1 ? newInterface.type : typesList,
                         direction: newInterface.direction.value,
+                        maxConnectionsCount: newInterface.maxConnectionsCount.value,
                     };
                     addInterface(intf);
                 }
@@ -115,7 +136,12 @@ export default defineComponent({
         });
 
         const configurationOptions = computed(
-            () => [interfaceName.value, interfaceType.value, interfaceDirection.value],
+            () => [
+                interfaceName.value,
+                interfaceType.value,
+                interfaceDirection.value,
+                interfaceConnectionCount.value,
+            ],
         );
 
         return {
