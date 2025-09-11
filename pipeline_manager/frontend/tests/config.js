@@ -64,6 +64,33 @@ export async function enableNavigationBar(page) {
         .click();
 }
 
+
+/**
+ * Loads specification file by using the file chooser.
+ *
+ * @async
+ * @param {string} specificationFile - the name of specification file to load
+ * @param {import('@playwright/test').Page} page - The Playwright Page object to interact with.
+ * @returns {Promise<void>} Resolves when the specification has been loaded
+ */
+export async function loadSpecification(page, specificationFile) {
+    const fileChooser = await openFileChooser(page, 'specification');
+    await fileChooser.setFiles(getPathToJsonFile(specificationFile));
+}
+
+/**
+ * Loads dataflow file by using the file chooser.
+ *
+ * @async
+ * @param {string} dataflowFile - the name of dataflow file to load
+ * @param {import('@playwright/test').Page} page - The Playwright Page object to interact with.
+ * @returns {Promise<void>} Resolves when the dataflow has been loaded
+ */
+export async function loadDataflow(page, dataflowFile) {
+    const fileChooser = await openFileChooser(page, 'dataflow');
+    await fileChooser.setFiles(getPathToJsonFile(dataflowFile));
+}
+
 /**
  * Add a node to the canvas by dragging it from the navigation bar.
  * @param {import('@playwright/test').Page} page - The Playwright page object.

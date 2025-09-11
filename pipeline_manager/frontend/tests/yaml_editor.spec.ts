@@ -1,5 +1,5 @@
 import { test, expect, Page, FileChooser } from '@playwright/test';
-import { getPathToJsonFile, getUrl, enableEditingNodes } from './config.js';
+import { getPathToJsonFile, getUrl, enableEditingNodes, loadSpecification, loadDataflow } from './config.js';
 
 async function openFileChooser(
     page: Page,
@@ -10,16 +10,6 @@ async function openFileChooser(
     const text = purpose === 'specification' ? 'Load specification' : 'Load graph file';
     await page.getByText(text).click();
     return await fileChooserPromise;
-}
-
-async function loadSpecification(page: Page, specificationFile: string) {
-    const fileChooser = await openFileChooser(page, 'specification');
-    await fileChooser.setFiles(getPathToJsonFile(specificationFile));
-}
-
-async function loadDataflow(page: Page, dataflowFile: string) {
-    const fileChooser = await openFileChooser(page, 'dataflow');
-    await fileChooser.setFiles(getPathToJsonFile(dataflowFile));
 }
 
 async function checkIfYAMLPersists(page: Page) {
