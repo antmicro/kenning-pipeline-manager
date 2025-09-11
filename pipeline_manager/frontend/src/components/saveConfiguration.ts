@@ -45,17 +45,24 @@ export const saveSpecificationConfiguration: SaveConfiguration = {
         // Match graph IDs with subgraphId in node specification
         dataflow.graphs.forEach((graph: any) => {
             dataflow.graphs.forEach((g: any) => {
-                const node = g.nodes.find((n: any) => n.subgraph === graph.id);
-                if (node !== undefined) {
+                const subgraphNode = g.nodes.find((n: any) => n.subgraph === graph.id);
+                if (subgraphNode !== undefined) {
                     const nodeSpecification = specification.nodes?.find(
-                        (n: any) => n.name === node.name,
+                        (n: any) => n.name === subgraphNode.name,
                     );
                     if (nodeSpecification) {
                         // eslint-disable-next-line no-param-reassign
                         graph.id = nodeSpecification.subgraphId;
-                        node.subgraph = nodeSpecification.subgraphId;
+                        subgraphNode.subgraph = nodeSpecification.subgraphId;
                     }
-
+                }
+                const relatedGraphNode = g.nodes.find(
+                    (n: any) => n.relatedGraphs?.includes((entry: any) => entry.id === graph.id),
+                );
+                const graphButton = g.nodes.find(
+                    (n: any) => n.properties?.includes((prop: any) => prop.type === 'button-graph' && prop.default === graph.id),
+                );
+                if (subgraphNode || relatedGraphNode || graphButton) {
                     specification.graphs = specification.graphs
                         .filter((oldGraph: any) => oldGraph.id !== graph.id);
                     specification.graphs.push(graph);
