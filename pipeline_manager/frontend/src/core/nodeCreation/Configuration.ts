@@ -323,6 +323,45 @@ export function removeProperties(properties: PropertyConfiguration[]): void {
         alterProperties(childNodes, properties, true);
     });
 
+    function removeFromSubgraph(graph: any, nodesToUpdate: any[], names: string[]): string[] {
+        const externalNames: string[] = [];
+        nodesToUpdate.forEach((node: any) => {
+            const propertiesToRemove = node.properties
+                .filter((prop: any) => names.includes(prop.name));
+
+            // eslint-disable-next-line no-param-reassign
+            node.properties = node.properties
+                .filter((prop: any) => !propertiesToRemove.includes(prop));
+
+            externalNames.push(...propertiesToRemove
+                .map((prop: any) => prop.externalName)
+                .filter((name: string | undefined) => name),
+            );
+        });
+        return externalNames;
+    }
+
+    const names = properties.map((prop: PropertyConfiguration) => prop.name);
+    [
+        ...editorManager.specification.unresolvedSpecification.graphs ?? [],
+        ...editorManager.specification.currentSpecification.graphs ?? [],
+    ].forEach((graph: any) => {
+        const nodesToUpdate = graph.nodes.filter((n: any) => n.name === currentType);
+        let externalNames = removeFromSubgraph(graph, nodesToUpdate, names);
+
+        while (externalNames.length > 0) {
+            const newExternalNames = removeFromSubgraph(graph, graph.nodes, externalNames);
+            externalNames = newExternalNames;
+        }
+    });
+
+    [
+        ...editorManager.specification.unresolvedSpecification.nodes ?? [],
+        ...editorManager.specification.currentSpecification.nodes ?? [],
+    ].forEach((node: any) => {
+        editorManager.refreshSubgraph(node);
+    });
+
     commitTypeToSpecification();
 }
 
