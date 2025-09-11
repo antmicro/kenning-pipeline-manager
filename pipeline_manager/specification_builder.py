@@ -1291,11 +1291,14 @@ class SpecificationBuilder(object):
         """
         Adds subgraph defined in JSON-like format.
         """
-        if subgraph["name"] in self._graphs:
-            raise SpecificationBuilderException(
-                f'Subgraph {subgraph["name"]} already exists.'  # noqa: E501
-            )
-        self._graphs[subgraph["name"]] = subgraph
+        if "name" in subgraph:
+            if subgraph["name"] in self._graphs:
+                raise SpecificationBuilderException(
+                    f'Subgraph {subgraph["name"]} already exists.'  # noqa: E501
+                )
+            self._graphs[subgraph["name"]] = subgraph
+        else:
+            self._graphs[subgraph["id"]] = subgraph
 
     def add_include(self, include: str, style: Optional[Style] = None):
         """
