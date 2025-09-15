@@ -47,12 +47,14 @@ export const saveSpecificationConfiguration: SaveConfiguration = {
             dataflow.graphs.forEach((g: any) => {
                 const node = g.nodes.find((n: any) => n.subgraph === graph.id);
                 if (node !== undefined) {
-                    const nodeSpecification = specification.nodes.find(
+                    const nodeSpecification = specification.nodes?.find(
                         (n: any) => n.name === node.name,
                     );
-                    // eslint-disable-next-line no-param-reassign
-                    graph.id = nodeSpecification.subgraphId;
-                    node.subgraph = nodeSpecification.subgraphId;
+                    if (nodeSpecification) {
+                        // eslint-disable-next-line no-param-reassign
+                        graph.id = nodeSpecification.subgraphId;
+                        node.subgraph = nodeSpecification.subgraphId;
+                    }
                 }
             });
         });
@@ -77,7 +79,7 @@ export const saveSpecificationConfiguration: SaveConfiguration = {
             specification.entryGraph = dataflow.entryGraph ?? dataflow.graphs[0].id;
         }
 
-        if (this.minify) {
+        if (this.minify && specification.nodes) {
             const nameToNodeMapping = Object.fromEntries(
                 specification.nodes.map((node: any) => [EditorManager.getNodeName(node), node]));
             const nameToNode = (name: string) => nameToNodeMapping[name];
