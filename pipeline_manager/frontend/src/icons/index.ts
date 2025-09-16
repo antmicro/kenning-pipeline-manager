@@ -31,6 +31,7 @@ import Validate from './Validate.vue';
 import Placeholder from './Placeholder.vue';
 import CassetteStop from './CassetteStop.vue';
 import Subgraph from './Subgraph.vue';
+import Save from './Save.vue';
 
 export default {
     Arrow,
@@ -60,4 +61,5 @@ export default {
     Subgraph,
     Unwrap,
     Validate,
+    Save,
 };
