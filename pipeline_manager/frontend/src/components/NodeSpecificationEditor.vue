@@ -94,19 +94,16 @@ export default defineComponent({
 
         const specificationWithIncludes = ref(null);
         watch(
-            [() => editorManager.specification.unresolvedSpecification.nodes, node],
+            editorManager.specification.unresolvedSpecification,
             () => {
                 const unresolved = editorManager.specification.unresolvedSpecification;
                 const included = editorManager.specification.includedSpecification;
                 const specification = JSON.parse(JSON.stringify(unresolved));
 
-                EditorManager.mergeObjects(
-                    specification,
-                    included,
-                );
+                EditorManager.mergeObjects(specification, included);
                 specificationWithIncludes.value = specification;
             },
-            { immediate: true, deep: true },
+            { immediate: true },
         );
 
         const specification = computed(() => specificationWithIncludes
@@ -116,11 +113,6 @@ export default defineComponent({
 
         // We modify this value in the editor, so it's not exactly computed
         const currentSpecification = ref(maybeStringify(specification.value));
-        watch(specification, async () => {
-            currentSpecification.value =
-            editorManager.modifiedNodeSpecificationRegistry[node.value.id]
-            ?? maybeStringify(specification.value);
-        });
 
         // Validation
 
