@@ -296,6 +296,53 @@
             "required": [
                 "type"
             ]
+        },
+        "navbar_items": {
+            "type": "array",
+            "description": "List of buttons displayed in the application navbar",
+            "items": {
+                "type": "object",
+                "description": "Description of a single button.",
+                "properties": {
+                    "name": {
+                        "description": "Name displayed in the tooltip",
+                        "type": "string"
+                    },
+                    "stopName": {
+                        "description": "Name displayed in the tooltip when the corresponding procedure is running and is stoppable. If not specified simply Stop is added as a prefix to the name",
+                        "type": "string"
+                    },
+                    "iconName": {
+                        "description": "Name of the icon displayed in the navbar. Name should correspond to a file in the asset directory or to an icon in `frontend/src/icons`",
+                        "type": "string"
+                    },
+                    "procedureName": {
+                        "description": "Name of the procedure used when button is pressed. The currently displayed graph is used as an argument",
+                        "type": "string"
+                    },
+                    "allowToRunInParallelWith": {
+                        "description": "List of procedures which can be run when this `navbarItem` is still running",
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "description": "`procedureName` of `navbarItem`"
+                        },
+                        "default": []
+                    },
+                    "requireResponse": {
+                        "description": "Flag determining whether response from external application should be awaited when running the procedure",
+                        "type": "boolean",
+                        "default": true
+                    }
+                },
+                "required": [
+                    "name",
+                    "iconName",
+                    "procedureName"
+                ],
+                "additionalProperties": false
+            },
+            "default": []
         }
     }
 }

@@ -496,19 +496,7 @@
                 "$ref": "common_types#/$defs/null_or_empty"
             },
             "returns": {
-                "description": "External application capabilities",
-                "type": "object",
-                "properties": {
-                    "stoppable_methods": {
-                        "description": "List with methods that can be stopped with [dataflow_stop](#external-dataflow-stop) request",
-                        "type": "array",
-                        "items": {
-                            "description": "Name of the stoppable method",
-                            "type": "string"
-                        }
-                    }
-                },
-                "additionalProperties": false
+                "$ref": "common_types#/$defs/navbar_items"
             }
         },
         "dataflow_import": {
