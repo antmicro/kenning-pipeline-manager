@@ -11,7 +11,7 @@ Displays user interface and main details about the Pipeline Manager status.
 
 <script>
 import {
-    markRaw, ref, provide, watch,
+    markRaw, ref, provide, watch, computed,
 } from 'vue';
 import { toSvg } from 'html-to-image';
 import jsonlint from 'jsonlint';
@@ -124,19 +124,6 @@ export default {
         externalAppStatus() {
             return this.panels.externalAppStatus.isOpen;
         },
-        navbarItems() {
-            const { navbarItems } = this.editorManager.baklavaView;
-            navbarItems.forEach((item) => {
-                // If there is no such icon then assets are checked and used as a fallback
-                if (icons[item.iconName] === undefined) {
-                    item.icon = markRaw(icons.Placeholder);
-                    item.iconName = this.editorManager.baklavaView.cache[`./${item.iconName}`];
-                } else {
-                    item.icon = markRaw(icons[item.iconName]);
-                }
-            });
-            return navbarItems;
-        },
         leftButtonsQuantity() {
             return this.$refs.leftButtons.children.length;
         },
@@ -206,7 +193,15 @@ export default {
             viewModel.value.editor.searchQuery = newValue.toLowerCase();
         },
         navbarItems(newValue) {
-            // Setup initial navbarItems
+            newValue.forEach((item) => {
+                // If there is no such icon then assets are checked and used as a fallback
+                if (icons[item.iconName] === undefined) {
+                    item.icon = markRaw(icons.Placeholder);
+                    item.iconName = this.editorManager.baklavaView.cache[`./${item.iconName}`];
+                } else {
+                    item.icon = markRaw(icons[item.iconName]);
+                }
+            });
             this.activeNavbarItemsNames = newValue.map((item) => item.procedureName);
         },
     },
@@ -214,6 +209,12 @@ export default {
         const editorManager = EditorManager.getEditorManagerInstance();
         const graphName = editorManager.baklavaView.editor.graphName ?? '';
         const appName = process.env.VUE_APP_EDITOR_TITLE ?? 'Pipeline Manager';
+
+        const externalApplicationManager = getExternalApplicationManager();
+        const navbarItems = computed(() => [
+            ...editorManager.baklavaView.navbarItems,
+            ...externalApplicationManager.appCapabilities.value,
+        ]);
 
         const editorTitleInterface = new InputInterface(
             'Graph name',
@@ -245,12 +246,13 @@ export default {
             /* create instance of external manager to control
             connection, dataflow and specification
             */
-            externalApplicationManager: getExternalApplicationManager(),
+            externalApplicationManager,
             externalApp: {
                 available: false,
                 connected: false,
                 backend: false,
             },
+            navbarItems,
             activeNavbarItemsNames: [],
             saveConfiguration: saveGraphConfiguration,
             saveGraphConfiguration,

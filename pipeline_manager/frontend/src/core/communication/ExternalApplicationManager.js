@@ -6,7 +6,7 @@
 
 import { createJSONRPCErrorResponse, createJSONRPCSuccessResponse, JSONRPCErrorCode } from 'json-rpc-2.0';
 import { charset } from 'mime-types';
-import { nextTick } from 'vue';
+import { nextTick, ref } from 'vue';
 import { backendApiUrl, PMMessageType, JSONRPCCustomErrorCode } from '../utils';
 
 // eslint-disable-next-line import/no-cycle
@@ -19,7 +19,7 @@ import ConnectionManager from './connectionManager.ts';
 import ExternalFrontendApp from './externalApp/frontend.ts';
 
 // Default external application capabilities
-const defaultAppCapabilities = {};
+const defaultAppCapabilities = [];
 
 /**
  * Creates notifications based on response received from external application.
@@ -69,7 +69,7 @@ function showVersionError(currentVersion, usedVersion) {
 class ExternalApplicationManager {
     editorManager = EditorManager.getEditorManagerInstance();
 
-    appCapabilities = {};
+    appCapabilities = ref([]);
 
     externalApp = null;
 
@@ -239,9 +239,9 @@ class ExternalApplicationManager {
     async requestAppCapabilities() {
         try {
             const appCapabilities = await this.request('app_capabilities_get');
-            this.appCapabilities = { ...defaultAppCapabilities, ...appCapabilities };
+            this.appCapabilities.value = appCapabilities;
         } catch (error) {
-            this.appCapabilities = { ...defaultAppCapabilities };
+            this.appCapabilities.value = defaultAppCapabilities;
             NotificationHandler.terminalLog('warning', 'Application capabilities cannot be retrieved, using defaults', error.message);
         }
     }
