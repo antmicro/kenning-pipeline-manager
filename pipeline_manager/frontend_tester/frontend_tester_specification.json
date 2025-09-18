@@ -281,46 +281,6 @@
             "Effect": {
                 "interfaceColor": "#FF0000"
             }
-        },
-        "navbarItems": [
-            {
-                "name": "Run",
-                "iconName": "Run",
-                "procedureName": "dataflow_run",
-                "allowToRunInParallelWith": [
-                    "dataflow_validate",
-                    "custom_create_writable_terminal"
-                ]
-            },
-            {
-                "name": "Run API test",
-                "iconName": "Run",
-                "procedureName": "custom_api_test",
-                "allowToRunInParallelWith": [
-                    "dataflow_validate",
-                    "custom_create_writable_terminal"
-                ]
-            },
-            {
-                "name": "Perform terminal stress test",
-                "stopName": "Stop terminal stress test",
-                "iconName": "Run",
-                "procedureName": "custom_terminal_stress_test",
-                "allowToRunInParallelWith": [
-                    "dataflow_validate",
-                    "custom_create_writable_terminal"
-                ]
-            },
-            {
-                "name": "Validate",
-                "iconName": "Validate",
-                "procedureName": "dataflow_validate"
-            },
-            {
-                "name": "Create writable terminal",
-                "iconName": "Backend",
-                "procedureName": "custom_create_writable_terminal"
-            }
-        ]
+        }
     }
 }

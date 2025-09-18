@@ -269,21 +269,55 @@ class RPCMethods:
             return
         self.input_queue.put(message)
 
-    def app_capabilities_get(self) -> Dict:
+    def app_capabilities_get(self) -> List:
         """
         RPC method that responses to App Capabalities request.
 
         Returns
         -------
-        Dict
-            Application capabalities
+        List
+            Application capabilities
         """
-        return {
-            "stoppable_methods": [
-                "dataflow_run",
-                "custom_terminal_stress_test",
-            ],
-        }
+        return [
+            {
+                "name": "Run",
+                "iconName": "Run",
+                "procedureName": "dataflow_run",
+                "allowToRunInParallelWith": [
+                    "dataflow_validate",
+                    "custom_create_writable_terminal",
+                ],
+            },
+            {
+                "name": "Run API test",
+                "iconName": "Run",
+                "procedureName": "custom_api_test",
+                "allowToRunInParallelWith": [
+                    "dataflow_validate",
+                    "custom_create_writable_terminal",
+                ],
+            },
+            {
+                "name": "Perform terminal stress test",
+                "stopName": "Stop terminal stress test",
+                "iconName": "Run",
+                "procedureName": "custom_terminal_stress_test",
+                "allowToRunInParallelWith": [
+                    "dataflow_validate",
+                    "custom_create_writable_terminal",
+                ],
+            },
+            {
+                "name": "Validate",
+                "iconName": "Validate",
+                "procedureName": "dataflow_validate",
+            },
+            {
+                "name": "Create writable terminal",
+                "iconName": "Backend",
+                "procedureName": "custom_create_writable_terminal",
+            },
+        ]
 
     def dataflow_import(
         self,
