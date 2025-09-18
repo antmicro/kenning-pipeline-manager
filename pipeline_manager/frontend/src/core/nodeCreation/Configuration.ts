@@ -102,10 +102,12 @@ function commitTypeToSpecification() {
     const editorManager = EditorManager.getEditorManagerInstance();
 
     const newNodeData = configurationState.nodeData;
-    const currentType = configurationState.editedType;
+    const currentType = (!menuState.configurationMenu.duplicateNode) ?
+        configurationState.editedType : undefined;
+
     let style = NEW_NODE_STYLE;
 
-    if (currentType !== undefined && !menuState.configurationMenu.duplicateNode) {
+    if (currentType !== undefined) {
         // eslint-disable-next-line no-underscore-dangle
         const errors = editorManager._unregisterNodeType(currentType);
         if (errors.length) {
@@ -129,8 +131,9 @@ function commitTypeToSpecification() {
         category: newNodeData.isCategoryInherited ? undefined : newNodeData.category,
         color: newNodeData.color,
         description: newNodeData.description,
-        interfaces: processedInterfaces,
-        properties: processedProperties,
+        interfaces: configurationState.interfaces,
+        properties: configurationState.properties,
+        pill: configurationState.pill,
         style,
     }, currentType, false);
 

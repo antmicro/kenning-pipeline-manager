@@ -87,6 +87,7 @@ from moving or deleting the nodes.
                 :style="contextMenuStyle"
                 @pointerdown.left.stop
                 @click="onContextMenuTitleClick"
+
                 @sizeUpdate="onContextMenuSizeUpdate"
             />
         </div>
@@ -545,8 +546,7 @@ const onContextMenuTitleClick = async (action) => {
             menuState.configurationMenu.visible = true;
             menuState.configurationMenu.addNode = false;
             menuState.configurationMenu.duplicateNode = true;
-            nodeData.name += ' (copy)';
-            configurationState.nodeData = nodeData;
+            configurationState.nodeData.name += ' (copy)';
             break;
         case 'configure':
             menuState.configurationMenu.visible = true;

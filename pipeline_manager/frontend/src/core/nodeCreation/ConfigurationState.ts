@@ -39,6 +39,7 @@ export type ConfigurationState = {
     properties: PropertyConfiguration[],
     interfaces: InterfaceConfiguration[],
     success?: boolean,
+    pill?: object,
 }
 
 /**

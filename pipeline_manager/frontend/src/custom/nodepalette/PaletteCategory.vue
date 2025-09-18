@@ -23,7 +23,7 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
             >
                 <div
                     @pointerdown.left="onDragStart(nt, node, node.iconPath)"
-                    @pointerdown.right="openContextMenu(nt)"
+                    @pointerdown.right="openContextMenu(node)"
                     :class="nodeEntryClasses(nt)"
                 >
                     <template v-if="!isTopLevelNode(nt)">
@@ -100,7 +100,7 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
                             category.categoryNode,
                             category.iconPath
                         )"
-                        @pointerdown.right="openContextMenu(name)"
+                        @pointerdown.right="openContextMenu(category)"
                     >
                         <img
                             class="__title-icon"
@@ -212,6 +212,7 @@ import EditorManager, { DEFAULT_CUSTOM_NODE_TYPE } from '../../core/EditorManage
 import Cross from '../../icons/Cross.vue';
 import Bin from '../../icons/Bin.vue';
 import { TOP_LEVEL_NODES_NAMES } from './nodeTree';
+import { configurationState, menuState } from '../../core/nodeCreation/ConfigurationState.ts';
 
 export default defineComponent({
     components: {
@@ -236,6 +237,7 @@ export default defineComponent({
             required: false,
         },
         nodeSearch: {
+
             type: String,
             required: true,
         },
@@ -355,16 +357,16 @@ export default defineComponent({
         const contextMenuY = ref(0);
         const selectedNode = ref('');
 
-        const openContextMenu = (nodeType) => {
+        const openContextMenu = (nodeInfo) => {
             if (
                 showContextMenu.value === false &&
-                !isTopLevelNode(nodeType) &&
+                !isTopLevelNode(nodeInfo.title) &&
                 editorManager.baklavaView.settings.editableNodeTypes
             ) {
-                selectedNode.value = nodeType;
+                selectedNodeInfo.value = nodeInfo;
                 showContextMenu.value = true;
 
-                const container = labelRefs[nodeType];
+                const container = labelRefs[nodeInfo.title];
                 const range = document.createRange();
                 range.selectNodeContents(container);
                 const rect = range.getBoundingClientRect();
@@ -392,7 +394,7 @@ export default defineComponent({
         };
 
         const contextMenuItems = computed(() => {
-            const itemToDisable = () => !editorManager.editor.additionalNodeTypes.has(selectedNode.value); // eslint-disable-line max-len
+            const itemToDisable = () => !editorManager.editor.additionalNodeTypes.has(selectedNodeInfo.value.title); // eslint-disable-line max-len
 
             const items = [];
             items.push(
@@ -403,12 +405,86 @@ export default defineComponent({
                     disabled: itemToDisable(),
                     onPointerEmit: itemToDisable(),
                     tooltipMsg: itemToDisable() && 'Node type can\'t be deleted',
-                });
+                },
+                {
+                    value: 'duplicate',
+                    label: 'Duplicate node type',
+                    endSection: true,
+                },
+            );
             return items;
         });
 
-        const onContextMenuClick = () => {
-            editorManager.removeNodeType(selectedNode.value);
+        const onContextMenuClick = async (action) => {
+            if (action === 'duplicate') {
+                /* eslint-disable new-cap */
+                const nodeInstance = new selectedNodeInfo.value.type();
+                /* eslint-enable new-cap */
+                const nodeCategory = viewModel.value.editor.getNodeCategory(nodeInstance.type);
+                const nodeColor = viewModel.value.editor.getNodeColor(nodeInstance);
+
+                const displayedInputs = Object.values(
+                    nodeInstance.inputs,
+                ).filter((ni) => !ni.hidden);
+
+                const displayedOutputs = Object.values(
+                    nodeInstance.outputs,
+                ).filter((ni) => !ni.hidden);
+
+                const displayedProperties = Object.values(
+                    displayedInputs,
+                ).filter((intf) => !intf.port);
+
+                const nodeData = {
+                    name: nodeInstance.type,
+                    category: nodeCategory,
+                    layer: nodeInstance.layer,
+                    color: nodeColor,
+                };
+
+                configurationState.editedType = nodeData.name;
+                configurationState.nodeData = nodeData;
+
+                configurationState.pill = selectedNodeInfo.value.pill;
+
+                let nodeInterfaces = [...displayedInputs, ...displayedOutputs];
+                nodeInterfaces = nodeInterfaces.filter((intf) => intf.direction !== undefined);
+                const configuredInterfaces = nodeInterfaces?.map((intf) => ({
+                    name: intf?.name,
+                    type: intf?.type,
+                    direction: intf?.direction,
+                }));
+
+                /* eslint-disable no-underscore-dangle */
+                const configuredProperties = displayedProperties?.map((prop) => ({
+                    name: prop?.name,
+                    type: prop?.type,
+                    default: prop?._value,
+                    min: prop?.min,
+                    max: prop?.max,
+                    values: prop?.items,
+                    step: prop?.step,
+                    readonly: prop?.readonly,
+                    dtype: prop?.dtype,
+                }));
+
+                configurationState.properties = configuredProperties;
+                configurationState.interfaces = configuredInterfaces;
+            }
+
+            switch (action) {
+                case 'duplicate':
+                    menuState.configurationMenu.visible = true;
+                    menuState.configurationMenu.addNode = false;
+                    menuState.configurationMenu.duplicateNode = true;
+                    configurationState.nodeData.name += ' (copy)';
+                    break;
+                case 'delete':
+                    editorManager.removeNodeType(selectedNodeInfo.value.title);
+                    break;
+                default:
+                    break;
+            }
         };
 
         return {
