@@ -1227,6 +1227,85 @@ export default class EditorManager {
     }
 
     /**
+     * Resolve inheritance in passed node, by adding interfaces and properties from
+     * its parents.
+     *
+     * @param node Node with unresolved inheritance.
+     * @returns node with resolved inheritance
+     */
+    extendNodeSpecification(node) {
+        const extendedNode = node;
+
+        if (!node.extends) {
+            return extendedNode;
+        }
+
+        const { nodeData } = node;
+
+        const updateParentCategory = (n) => {
+            if (n.extends.length === 0) {
+                return;
+            }
+
+            const parentType = n.extends[0];
+
+            const parentSpec = this.baklavaView.editor.parentNodes.get(parentType);
+            extendedNode.nodeData.category = parentSpec.category;
+        };
+
+        const updateParentLayers = (n) => {
+            if (n.extends.length === 0) {
+                return;
+            }
+
+            const parentType = n.extends[0];
+
+            const parentSpec = this.baklavaView.editor.parentNodes.get(parentType);
+            extendedNode.nodeData.layer = parentSpec.layer;
+        };
+
+        if (!nodeData.layer) {
+            updateParentLayers(node);
+        }
+
+        if (!nodeData.category) {
+            updateParentCategory(node);
+        }
+
+        let inheritedProperties = [];
+        let inheritedInterfaces = [];
+
+        const updateParentParams = (n) => {
+            n.extends?.forEach(
+                (parentType) => {
+                    const parentSpec = this.baklavaView.editor.parentNodes.get(parentType);
+                    inheritedProperties = [
+                        ...inheritedProperties,
+                        ...(parentSpec?.properties ?? []),
+                    ];
+                    inheritedInterfaces = [
+                        ...inheritedInterfaces,
+                        ...(parentSpec?.interfaces ?? []),
+                    ];
+                    updateParentParams(parentSpec);
+                },
+            );
+        };
+
+        updateParentParams(node);
+
+        const oldProperties = node.properties ? node.properties.filter(
+            (prop) => !inheritedProperties.some((p) => p.name === prop.name)) : [];
+        const oldInterfaces = node.interfaces ? node.interfaces.filter(
+            (interf) => !inheritedInterfaces.some((i) => i.name === interf.name)) : [];
+
+        extendedNode.interfaces = [...oldInterfaces, ...inheritedInterfaces];
+        extendedNode.properties = [...oldProperties, ...inheritedProperties];
+
+        return extendedNode;
+    }
+
+    /**
      * Reads and validates part of specification related to nodes and subgraphs
      * @param {object?} dataflowSpecification Specification to load
      * @param {Map<string, string[]>} idToNested Mapping between graph ID to its nested graphs.

@@ -134,6 +134,7 @@ function commitTypeToSpecification() {
         interfaces: configurationState.interfaces,
         properties: configurationState.properties,
         pill: configurationState.pill,
+        extends: configurationState.extends,
         style,
     }, currentType, false);
 

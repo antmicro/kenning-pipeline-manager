@@ -23,7 +23,7 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
             >
                 <div
                     @pointerdown.left="onDragStart(nt, node, node.iconPath)"
-                    @pointerdown.right="openContextMenu(node)"
+                    @pointerdown.right="openContextMenu(nt)"
                     :class="nodeEntryClasses(nt)"
                 >
                     <template v-if="!isTopLevelNode(nt)">
@@ -100,7 +100,7 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
                             category.categoryNode,
                             category.iconPath
                         )"
-                        @pointerdown.right="openContextMenu(category)"
+                        @pointerdown.right="openContextMenu(name)"
                     >
                         <img
                             class="__title-icon"
@@ -357,16 +357,16 @@ export default defineComponent({
         const contextMenuY = ref(0);
         const selectedNode = ref('');
 
-        const openContextMenu = (nodeInfo) => {
+        const openContextMenu = (nodeName) => {
             if (
                 showContextMenu.value === false &&
-                !isTopLevelNode(nodeInfo.title) &&
+                !isTopLevelNode(nodeName) &&
                 editorManager.baklavaView.settings.editableNodeTypes
             ) {
-                selectedNodeInfo.value = nodeInfo;
+                selectedNode.value = nodeName;
                 showContextMenu.value = true;
 
-                const container = labelRefs[nodeInfo.title];
+                const container = labelRefs[nodeName];
                 const range = document.createRange();
                 range.selectNodeContents(container);
                 const rect = range.getBoundingClientRect();
@@ -394,7 +394,7 @@ export default defineComponent({
         };
 
         const contextMenuItems = computed(() => {
-            const itemToDisable = () => !editorManager.editor.additionalNodeTypes.has(selectedNodeInfo.value.title); // eslint-disable-line max-len
+            const itemToDisable = () => !editorManager.editor.additionalNodeTypes.has(selectedNode.value.title); // eslint-disable-line max-len
 
             const items = [];
             items.push(
@@ -417,37 +417,34 @@ export default defineComponent({
 
         const onContextMenuClick = async (action) => {
             if (action === 'duplicate') {
-                /* eslint-disable new-cap */
-                const nodeInstance = new selectedNodeInfo.value.type();
-                /* eslint-enable new-cap */
-                const nodeCategory = viewModel.value.editor.getNodeCategory(nodeInstance.type);
-                const nodeColor = viewModel.value.editor.getNodeColor(nodeInstance);
 
-                const displayedInputs = Object.values(
-                    nodeInstance.inputs,
-                ).filter((ni) => !ni.hidden);
-
-                const displayedOutputs = Object.values(
-                    nodeInstance.outputs,
-                ).filter((ni) => !ni.hidden);
-
-                const displayedProperties = Object.values(
-                    displayedInputs,
-                ).filter((intf) => !intf.port);
-
-                const nodeData = {
-                    name: nodeInstance.type,
-                    category: nodeCategory,
-                    layer: nodeInstance.layer,
-                    color: nodeColor,
+                const getNodeSpec = (nodeName) => {
+                    return editorManager.specification.unresolvedSpecification.nodes.filter((node) => {
+                        let namesToCheck;
+                        if (node.isCategory === true)
+                            namesToCheck = node.category.split("/");
+                        else
+                            namesToCheck = [node.name];
+                        return namesToCheck.includes(nodeName);
+                    })[0];
                 };
 
-                configurationState.editedType = nodeData.name;
+                const nodeSpec = getNodeSpec(selectedNode.value)
+
+                const nodeData = {
+                    name: selectedNode.value,
+                    category: nodeSpec.category,
+                    layer: nodeSpec.layer,
+                    color: nodeSpec.color,
+                };
+
+                configurationState.editedType = selectedNode.value;
                 configurationState.nodeData = nodeData;
 
-                configurationState.pill = selectedNodeInfo.value.pill;
+                configurationState.pill = nodeSpec.pill;
+                configurationState.extends = nodeSpec.extends;
 
-                let nodeInterfaces = [...displayedInputs, ...displayedOutputs];
+                let nodeInterfaces = nodeSpec.interfaces;
                 nodeInterfaces = nodeInterfaces.filter((intf) => intf.direction !== undefined);
                 const configuredInterfaces = nodeInterfaces?.map((intf) => ({
                     name: intf?.name,
@@ -455,8 +452,9 @@ export default defineComponent({
                     direction: intf?.direction,
                 }));
 
+                let nodeProperties = nodeSpec.properties;
                 /* eslint-disable no-underscore-dangle */
-                const configuredProperties = displayedProperties?.map((prop) => ({
+                const configuredProperties = nodeProperties?.map((prop) => ({
                     name: prop?.name,
                     type: prop?.type,
                     default: prop?._value,
@@ -480,7 +478,7 @@ export default defineComponent({
                     configurationState.nodeData.name += ' (copy)';
                     break;
                 case 'delete':
-                    editorManager.removeNodeType(selectedNodeInfo.value.title);
+                    editorManager.removeNodeType(selectedNode.value.title);
                     break;
                 default:
                     break;

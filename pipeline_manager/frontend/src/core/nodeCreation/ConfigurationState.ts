@@ -40,6 +40,7 @@ export type ConfigurationState = {
     interfaces: InterfaceConfiguration[],
     success?: boolean,
     pill?: object,
+    extends?: any,
 }
 
 /**
