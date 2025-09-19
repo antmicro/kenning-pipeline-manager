@@ -37,7 +37,7 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
                     <Cross v-else color="white" :rotate="45" class="__title-icon"></Cross>
                     <div
                         class="__title-label"
-                        v-html="DOMPurify.sanitize(node.hitSubstring)"
+                        v-html="DOMPurify.sanitize(prettyTitle(node.hitSubstring))"
                         :ref="el => labelRefs[nt] = el"
                     />
                 </div>
@@ -110,7 +110,7 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
                         />
                         <div
                             class="__title-label"
-                            v-html="DOMPurify.sanitize(category.hitSubstring)"
+                            v-html="DOMPurify.sanitize(prettyTitle(category.hitSubstring))"
                             :ref="el => labelRefs[name] = el">
                         </div>
                         <div
@@ -137,7 +137,7 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
                 <div
                     v-else
                     class="__title"
-                    v-html="DOMPurify.sanitize(category.hitSubstring)"
+                    v-html="DOMPurify.sanitize(prettyTitle(category.hitSubstring))"
                 ></div>
             </div>
             <div v-show="mask[i]">
@@ -195,7 +195,7 @@ It groups the nodes of the same subcategory in the block that can be collapsed.
                     </div>
                 </div>
             </template>
-            <div v-else class="__title">{{ category.hitSubstring }}</div>
+            <div v-else class="__title">{{ prettyTitle(category.hitSubstring) }}</div>
         </template>
     </div>
 </template>
@@ -330,6 +330,7 @@ export default defineComponent({
 
                 return a.toLowerCase().localeCompare(b.toLowerCase());
             });
+        const prettyTitle = (title) => title.replace('\\/', '/');
 
         const showMenu = inject('menu');
         const showMenuClick = (menu) => {
@@ -416,6 +417,7 @@ export default defineComponent({
             onMouseDown,
             getRotation,
             sortedEntries,
+            prettyTitle,
             getIconPath,
             isCategoryNode,
             notEmptyCategory,

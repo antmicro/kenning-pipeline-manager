@@ -198,7 +198,12 @@ export default defineComponent({
         });
 
         const category = computed(() => graph.value.editor.nodeTypes.get(node.value.type).category);
-        const prettyCategory = computed(() => `${category.value.split('/').join(' / ')}`);
+        const prettyCategory = computed(() => `${
+            category.value
+                .split(/(?<!\\)\//)
+                .map((x) => x.replace('\\/', '/'))
+                .join(' / ')
+        }`);
 
         const subgraphId = computed(() => graph.value.editor.nodeTypes.get(
             node.value.type,
