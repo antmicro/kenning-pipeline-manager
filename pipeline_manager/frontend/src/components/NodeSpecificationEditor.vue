@@ -50,7 +50,7 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import YAML from 'yaml';
 import {
-    computed, defineComponent, nextTick, ref, toRef, watch, onMounted, onBeforeUnmount,
+    computed, defineComponent, nextTick, ref, toRef, watch, onMounted,
 } from 'vue';
 import EditorManager, { EDITED_NODE_STYLE } from '../core/EditorManager';
 import NotificationHandler from '../core/notifications';
@@ -243,8 +243,6 @@ export default defineComponent({
             () =>
                 specification.value && editorManager.baklavaView.settings.editableNodeTypes,
         );
-
-        updateCachedValidationResult();
 
         const updateSpecification = async () => {
             try {
@@ -544,7 +542,6 @@ export default defineComponent({
         watch(menuState, () => nextTick().then(handleUIUpdate));
 
         onMounted(() => {
-            document.addEventListener('click', updateCachedValidationResult);
             nextTick(() => {
                 handleInput();
                 // Resize the YAML editor after DOM is loaded.
@@ -552,10 +549,6 @@ export default defineComponent({
                     handleInput();
                 }, 10);
             });
-        });
-
-        onBeforeUnmount(() => {
-            document.removeEventListener('click', updateCachedValidationResult);
         });
 
         // Editing
