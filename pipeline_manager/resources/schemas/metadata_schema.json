@@ -99,7 +99,9 @@
         "connectionStyle": {
             "enum": [
                 "curved",
-                "orthogonal"
+                "orthogonal",
+                "alternativeOrthogonal",
+                "straight"
             ],
             "description": "Defines connection style",
             "default": "curved"
