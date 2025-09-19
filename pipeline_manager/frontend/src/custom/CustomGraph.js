@@ -487,6 +487,8 @@ export default function createPipelineManagerGraph(graph) {
     };
 
     graph.isIncorrectExternalName = function isIncorrectExternalName(name, exposedNames) {
+        if (this.graphNode === undefined) return false;
+
         const sameExposedNames = exposedNames.filter((n) => n === name).length;
 
         // Extract interface names from graph node
