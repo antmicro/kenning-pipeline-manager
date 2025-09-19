@@ -298,11 +298,10 @@ export default class ConnectionRenderer {
 
         const path = [{ x: nc.x1, y: nc.y1 }];
         let direction = nc.from.side;
-        if (direction === 'right') {
-            path.push({ x: nc.x1 + 10, y: nc.y1 });
-        } else if (direction === 'left') {
-            path.push({ x: nc.x1 - 10, y: nc.y1 });
-        }
+        let offset = 0;
+        if (direction === 'left') offset = -20;
+        else offset = 20;
+        path.push({ x: nc.x1 + offset * graph.scaling, y: nc.y1 });
         direction = 'horizontal';
         calculatedAnchors.forEach((anchor) => {
             if (direction === 'vertical') {
@@ -353,7 +352,6 @@ export default class ConnectionRenderer {
                 x: path[path.length - 1].x,
                 y: path[path.length - 1].y + (nc.y2 - path[path.length - 1].y) / 2,
             });
-            let offset = 0;
             if (nc.to.side === 'left') offset = 10;
             else offset = -10;
             path.push({
