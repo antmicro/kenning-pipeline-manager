@@ -115,6 +115,12 @@ def script_build():  # noqa: D103
         "It provides a list of found errors.",
         action="store_true",
     )
+    static_app_args.add_argument(
+        "--save-img-path",
+        help="Allows to save the graph to PNG. Provide path to where the image"
+        " is supposed to be saved",
+        type=Path,
+    )
 
     server_app_args = subparsers.add_parser(
         "server-app",

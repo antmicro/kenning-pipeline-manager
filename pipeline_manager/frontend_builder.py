@@ -277,6 +277,7 @@ def build_frontend(
     communication_server_host: Optional[str] = None,
     communication_server_port: Optional[int] = None,
     welcome_message: Optional[str] = None,
+    save_img_path: Optional[Path] = None,
 ) -> int:
     """
     Builds the frontend for the Pipeline Manager.
@@ -335,6 +336,8 @@ def build_frontend(
         the communication server.
     welcome_message: Optional[str]
         Welcome message to be displayed in the beginning of apps' work.
+    save_img_path: Optional[Path]
+        Path, where the graph should be save as an image.
 
     Returns
     -------
@@ -571,5 +574,21 @@ def build_frontend(
         build_singlehtml(frontend_dist_path, single_html, used_icons)
         if single_html_spec and single_html_spec.exists():
             os.remove(single_html_spec)
+    if save_img_path:
+        from pipeline_manager.html_to_img import html_to_png
+
+        out_html = (frontend_dist_path / "index.html").resolve()
+        try:
+            save_img_path.parent.mkdir(parents=True, exist_ok=True)
+            html_to_png(out_html, save_img_path)
+        except ImportError:
+            logging.error(
+                "html2image module is missing for converting HTML graphs to "
+                "images, please install it."
+            )
+            return errno.ENOENT
+        except Exception as e:
+            logging.error(f"Error occurred during image export: {e}")
+            return errno.EINVAL
 
     return 0
