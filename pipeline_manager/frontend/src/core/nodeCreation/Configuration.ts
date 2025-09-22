@@ -160,6 +160,7 @@ export function alterProperties(
     remove = false,
 ): any[] {
     if (properties === undefined) return [];
+    let errors: any[] = [];
 
     const parsedProperties = parseProperties(properties);
     // If parsedProperties returns an array, it is an array of errors
@@ -182,9 +183,10 @@ export function alterProperties(
             node.inputs = node.inputs; // eslint-disable-line no-self-assign, no-param-reassign
         });
 
-        node.load(state);
+        const loadErrors = node.load(state);
+        errors = [...errors, ...loadErrors];
     });
-    return [];
+    return errors;
 }
 
 /**
@@ -200,6 +202,7 @@ export function alterInterfaces(
     remove = false,
 ): any[] {
     if (interfaces === undefined) return [];
+    let errors: any[] = [];
 
     const parsedInterfaces = parseInterfaces(interfaces, [], []);
     // If parsedInterfaces returns an array, it is an array of errors
@@ -231,9 +234,10 @@ export function alterInterfaces(
             node.outputs = node.outputs; // eslint-disable-line no-self-assign, no-param-reassign, max-len
         });
 
-        node.load(state);
+        const loadErrors = node.load(state);
+        errors = [...errors, ...loadErrors];
     });
-    return [];
+    return errors;
 }
 
 /**
