@@ -210,6 +210,7 @@ function detectDiscrepancies(parsedState, inputs, outputs) {
             case 'text':
             case 'multiline':
             case 'button-url':
+            case 'button-graph':
             case 'hex':
                 return typeof value === 'string';
             case 'number':
