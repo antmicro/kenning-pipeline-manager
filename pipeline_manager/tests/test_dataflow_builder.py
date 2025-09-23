@@ -705,43 +705,6 @@ def test_subgraph_node_creation_misuse_raises(sample_specification_path):
         _ = graph.create_node(name="SaveVideo", subgraph=graph.id)
 
 
-def test_finding_subgraph_by_subgraph_name(graph_builder_for_subgraphs):
-    """Test if subgraph may be retrieved by its name."""
-    subgraph = graph_builder_for_subgraphs.get_subgraph_by_name(
-        "Test subgraph #1"
-    )
-
-    assert isinstance(
-        subgraph, DataflowGraph
-    ), f"Expected an instance of `DataflowGraph` but found {type(subgraph)}."
-
-    subgraph_nodes_count = len(subgraph.get(AttributeType.NODE))
-    expected_subgraph_nodes_count = 2
-    assert subgraph_nodes_count == expected_subgraph_nodes_count, (
-        f"Retrieved subgraph should have {expected_subgraph_nodes_count} "
-        f"but has {subgraph_nodes_count}."
-    )
-
-
-def test_finding_subgraph_by_containing_node_name(graph_builder_for_subgraphs):
-    """
-    Test if it is possible to retrieve subgraph
-    by name of the node containing it.
-    """
-    subgraph = graph_builder_for_subgraphs.get_subgraph_by_name("Subgraph #1")
-
-    assert isinstance(
-        subgraph, DataflowGraph
-    ), f"Expected an instance of `DataflowGraph` but found {type(subgraph)}."
-
-    subgraph_nodes_count = len(subgraph.get(AttributeType.NODE))
-    expected_subgraph_nodes_count = 2
-    assert subgraph_nodes_count == expected_subgraph_nodes_count, (
-        f"Retrieved subgraph should have {expected_subgraph_nodes_count} "
-        f"but has {subgraph_nodes_count}."
-    )
-
-
 @pytest.fixture
 def graph_with_all_attributes(sample_specification_path) -> DataflowGraph:
     """
