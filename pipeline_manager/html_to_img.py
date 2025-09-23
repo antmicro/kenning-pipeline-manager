@@ -10,7 +10,41 @@ Script for converting input HTML file to interactive SVG file.
 
 import argparse
 import base64
+import logging
 from pathlib import Path
+
+
+def html_to_png(input_html: Path, output_png: Path):
+    """
+    Creates a png file from input HTML file.
+
+    Parameters
+    ----------
+    input_html : Path
+        Path to the input HTML file
+    output_png: Path
+        Path to the output png file
+    """
+    from html2image import Html2Image
+
+    out_dir = output_png.parent
+
+    hti = Html2Image(
+        size=(1920, 1080),
+        custom_flags=[
+            "--virtual-time-budget=10000",
+            "--hide-scrollbars",
+            "--disable-gpu",
+            "--no-sandbox",
+        ],
+        output_path=out_dir,
+    )
+
+    hti.browser.use_new_headless = True
+    hti.screenshot(
+        url=f"file://{input_html}?preview=true",
+        save_as=str(output_png.name),
+    )
 
 
 def html_to_svg(input_html: Path, output_svg: Path):
@@ -64,10 +98,26 @@ if __name__ == "__main__":
         "input_html",
         help="Input html",
     )
-    parser.add_argument("output_svg", help="Output svg file")
+    parser.add_argument(
+        "output_img",
+        help="Output image, format deduced automatically or via --format "
+        "argument",
+        type=Path,
+    )
+    parser.add_argument("--format", help="Format of the image saved", type=str)
 
     args = parser.parse_args()
 
     args = {k: v for k, v in vars(args).items() if v is not None}
+    format = None
+    if "format" in args:
+        format = args["format"]
+    else:
+        format = args["output_img"].suffix[1:]
 
-    html_to_svg(**args)
+    if format == "svg":
+        html_to_svg(args["input_html"], args["output_img"])
+    elif format == "png":
+        html_to_png(args["input_html"], args["output_img"])
+    else:
+        logging.error(f"Html to {format} conversion is not supported")
