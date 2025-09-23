@@ -448,6 +448,18 @@ export default class PipelineManagerEditor extends Editor {
     }
 
     /**
+     * Iterates over all nodes of the currently displayed graph
+     * to find all exposed properties in the graph.
+     *
+     * @returns {Array} list of exposed properties in displayed graph
+     */
+    getExposedProperties() {
+        return this._graph.nodes
+            .map((n) => Object.values(n.inputs)).flat()
+            .filter((intf) => !intf.port && intf.externalName);
+    }
+
+    /**
      * Calculates the width, height of the editor and the width of the sidebar.
      * It is assumed that the view is rendered in the browser,
      * otherwise an error will be thrown.

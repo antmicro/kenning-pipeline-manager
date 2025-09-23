@@ -1171,6 +1171,8 @@ export default {
                         </div>
                     </div>
                     <div
+                        v-if="this.editorManager.editor.getExposedProperties().length > 0
+                              || this.editorManager.editor.isInSubgraph()"
                         ref="graphDetails"
                         :class="['hoverbox', mobileClasses]"
                         role="button"

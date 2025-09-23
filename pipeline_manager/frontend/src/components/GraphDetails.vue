@@ -68,9 +68,7 @@ export default {
             } else {
                 inSubgraph.value = false;
                 graphNodeName.value = props.viewModel.editor.graph.name;
-                displayedProperties.value = props.viewModel.editor.graph.nodes
-                    .map((n) => Object.values(n.inputs)).flat()
-                    .filter((intf) => !intf.port && intf.externalName);
+                displayedProperties.value = props.viewModel.editor.getExposedProperties();
             }
         });
 
