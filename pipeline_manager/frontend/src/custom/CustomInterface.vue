@@ -79,6 +79,8 @@ from creating and deleting connections or altering nodes' values if the editor i
                 :intf="intf"
                 @keydown.stop
                 :tabindex="tabindexValue"
+                @click="setValue"
+                @input="setValue"
             />
             <span v-else>
                 {{ intf.name }}
@@ -125,6 +127,7 @@ import {
 import Arrow from '../icons/Arrow.vue';
 import doubleClick from '../core/doubleClick';
 import { DYNAMIC_INTERFACE_SUFFIX } from '../core/interfaceParser';
+import { ir } from '../core/interfaceRegistry.ts';
 
 export default defineComponent({
     extends: Components.NodeInterface,
@@ -300,6 +303,21 @@ export default defineComponent({
             );
         };
 
+        const setValue = () => {
+            if (!props.intf.value) return;
+            if (!(isExposed.value || ir.isRegistered(props.intf.id))) return;
+
+            const { editor } = viewModel.value;
+            const allNodes = Array.from(editor.graphs).map((g) => g.nodes).flat();
+            const allProperties = allNodes.map((n) => Object.entries(n.inputs)).flat()
+                .filter(([key, _]) => key.startsWith('property_'));
+            const exposedProperties = allProperties.map(([_, value]) => value)
+                .filter((prop) => prop.id === props.intf.id);
+
+            // eslint-disable-next-line no-return-assign
+            exposedProperties.forEach((prop) => prop.value = props.intf.value);
+        };
+
         return {
             arrowRotation,
             displayArrow,
@@ -325,6 +343,7 @@ export default defineComponent({
             propertyHovered,
             startPropertyHover,
             endPropertyHover,
+            setValue,
         };
     },
 });
