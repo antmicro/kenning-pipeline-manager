@@ -124,15 +124,10 @@ class KPMDirective(SphinxDirective):
         if self.env.app.builder.name in ["html", "linkcheck"]:
             return [KPMNode(depth=self.env.docname.count("/"), **self.options)]
 
-        try:
-            from html2image import Html2Image
-        except ImportError:
-            raise ExtensionError(
-                "html2image module is missing for converting HTML graphs to images, please install it."  # noqa: E501
-            )
         from tempfile import NamedTemporaryFile
 
         from pipeline_manager.frontend_builder import build_frontend
+        from pipeline_manager.html_to_img import html_to_png
 
         workspace_dir = (
             Path(self.env.app.builder.outdir).parent / "pm-workspace"
@@ -165,17 +160,7 @@ class KPMDirective(SphinxDirective):
             raise ExtensionError(
                 f"Failed to build frontend for Pipeline Manager in ({status})"
             )
-        hti = Html2Image(
-            size=(1920, 1080),
-            custom_flags=[
-                "--virtual-time-budget=10000",
-                "--hide-scrollbars",
-                "--disable-gpu",
-                "--no-sandbox",
-            ],
-            output_path=pm_graphs_dir,
-        )
-        hti.browser.use_new_headless = True
+
         with NamedTemporaryFile(
             prefix="pipeline-manager-",
             suffix=".png",
@@ -183,10 +168,13 @@ class KPMDirective(SphinxDirective):
             dir=pm_graphs_dir,
         ) as f:
             graph_path = Path(f.name).resolve()
-        hti.screenshot(
-            url=f"file://{out_html}?preview=true",
-            save_as=str(graph_path.relative_to(pm_graphs_dir)),
-        )
+        try:
+            html_to_png(out_html, graph_path)
+        except ImportError:
+            raise ExtensionError(
+                "html2image module is missing for converting HTML graphs to "
+                "images, please install it."
+            )
         uri = os.path.relpath(graph_path, curr_file_path.parent)
         return [nodes.image(uri=uri, alt="Graph")]
 
