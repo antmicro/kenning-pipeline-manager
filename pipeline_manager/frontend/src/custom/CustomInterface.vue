@@ -86,7 +86,7 @@ from creating and deleting connections or altering nodes' values if the editor i
                 {{ intf.name }}
             </span>
             <div
-                v-if="isExposed && (propertyHovered || editExternalName) && !intf.port"
+                v-if="isExposed && (propertyHovered || editExternalName) && !intf.port && !sidebar"
                 class="__property_name"
             >
                 <input
@@ -137,6 +137,7 @@ export default defineComponent({
         switchSides: {},
         toggleGroup: { default: () => {}, required: false },
         updateDynamicInterfaces: { default: () => {}, required: false },
+        sidebar: { default: false, required: false },
         tabindexValue: { default: -1, required: false },
     },
     components: {

@@ -21,6 +21,7 @@ SPDX-License-Identifier: Apache-2.0
                         :intf="input"
                         :toggleGroup="toggleGroup"
                         :updateDynamicInterfaces="updateDynamicInterfaces"
+                        sidebar=true
                         tabindex="-1"
                     />
                 </div>
