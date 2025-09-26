@@ -533,6 +533,11 @@ class ExternalApplicationManager {
 
 let externalApplicationManager;
 
+/**
+ * Function managing External Application Manager singleton.
+ *
+ * @returns {ExternalApplicationManager} Instance of External Application Manager.
+ */
 export default function getExternalApplicationManager() {
     if (!externalApplicationManager) {
         externalApplicationManager = new ExternalApplicationManager();

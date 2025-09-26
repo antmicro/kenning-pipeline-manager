@@ -1795,7 +1795,7 @@ export default class EditorManager {
      * Static function used to get the instance of the EditorManager in a singleton manner.
      * If there is no existing instance of the EditorManager then a new one is created.
      *
-     * @returns Instance of EditorManager.
+     * @returns {EditorManager} Instance of EditorManager.
      */
     static getEditorManagerInstance() {
         if (!EditorManager.instance) {
