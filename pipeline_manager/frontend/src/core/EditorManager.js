@@ -121,6 +121,12 @@ export default class EditorManager {
 
     editor = new PipelineManagerEditor();
 
+    /**
+     * @type {import('baklavajs').IBaklavaViewModel & {
+     *    editor: PipelineManagerEditor,
+     *    settings: any
+     * }}
+     */
     baklavaView = useBaklava(this.editor);
 
     specificationLoaded = ref(false);
@@ -204,7 +210,7 @@ export default class EditorManager {
     async updateEditorSpecification(
         dataflowSpecification, lazyLoad = false, unmarkNewNodes = true, urloverrides = null,
     ) {
-        if (!dataflowSpecification) return ['No specification passed'];
+        if (!dataflowSpecification) return { errors: ['No specification passed'] };
 
         if (typeof dataflowSpecification === 'string' || dataflowSpecification instanceof String) {
             try {
@@ -670,7 +676,7 @@ export default class EditorManager {
      * The node specification should be in the format of the node schema.
      *
      * @param {object} nodeSpecification Node specification to add
-     * @param {object} nodeToUpdate Node type to update
+     * @param {string|undefined} nodeToUpdate Node type to update
      * @param {boolean} removeUnused Whether keys missing from nodeSpecification should be removed
      * @returns An object consisting of errors and warnings arrays. If both arrays are empty
      * the updating process was successful.
@@ -693,13 +699,10 @@ export default class EditorManager {
         });
 
         let validationErrors = this.validateNode(nodeSpecification);
-        if (validationErrors.length) return validationErrors;
+        if (validationErrors.length) return { errors: validationErrors };
 
         if (this.specification.currentSpecification === undefined) {
-            const newSpecification = {
-                nodes: [nodeSpecification],
-            };
-            return this.updateEditorSpecification(newSpecification, false, false);
+            return { errors: ['Current specification cannot be empty'] };
         }
 
         this.specification.unresolvedSpecification.nodes ??= [];
@@ -1000,7 +1003,7 @@ export default class EditorManager {
      * Unregisters a node type
      * If there is no such node type then an array of errors is returned.
      *
-     * @param {object} nodeType Node to unregister
+     * @param {string} nodeType Node to unregister
      * @returns An array of errors that occurred during the node unregistration.
      */
     _unregisterNodeType(nodeType) {
@@ -1555,14 +1558,16 @@ export default class EditorManager {
     /**
      * Serializes and returns current dataflow in Pipeline Manager format.
      *
-     * @param {Boolean} readonly whether the dataflow should be saved in readonly mode
-     * @param {Boolean} hideHud whether the dataflow should be saved in hideHud mode
-     * @param {Boolean} position whether the dataflow should store panning and scaling values
-     * @param {string|null|undefined} graphName graph name which is rendered to the user
+     * @param {Object} obj Parameters.
+     * @param {Boolean} obj.readonly whether the dataflow should be saved in readonly mode
+     * @param {Boolean} obj.hideHud whether the dataflow should be saved in hideHud mode
+     * @param {Boolean} obj.position whether the dataflow should store panning and scaling values
+     * @param {string|null|undefined} obj.graphName graph name which is rendered to the user
      *
      * @returns Serialized dataflow.
      */
-    saveDataflow(readonly, hideHud, position, graphName) {
+    /* eslint-disable-next-line object-curly-newline */
+    saveDataflow({ readonly, hideHud, position, graphName } = {}) {
         const save = this.baklavaView.editor.save();
         save.version = this.specificationVersion;
 

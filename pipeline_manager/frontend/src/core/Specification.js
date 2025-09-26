@@ -14,10 +14,22 @@
 export default class Specification {
     static instance = undefined;
 
+    /**
+     * Current resolved specification.
+     * @type {any}
+     */
     currentSpecification = undefined;
 
+    /**
+     * Specification build from `include` and `includeGraph` directives.
+     * @type {any}
+     */
     includedSpecification = undefined;
 
+    /**
+     * Current unresolved specification.
+     * @type {any}
+     */
     unresolvedSpecification = undefined;
 
     constructor() {
@@ -30,7 +42,7 @@ export default class Specification {
      * Static function used to get the instance of the Specification in a singleton manner.
      * If there is no existing instance of the Specification then a new one is created.
      *
-     * @returns Instance of Specification.
+     * @returns {Specification} Instance of Specification.
      */
     static getInstance() {
         if (!Specification.instance) {

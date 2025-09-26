@@ -145,12 +145,13 @@ export const saveGraphConfiguration: SaveConfiguration = {
     saveName: 'save',
 
     saveCallback() {
-        const blob = new Blob([JSON.stringify(EditorManager.getEditorManagerInstance().saveDataflow(
-            this.readonly,
-            this.hideHud,
-            this.position,
-            this.graphName,
-        ), null, 4)], {
+        const editorManager = EditorManager.getEditorManagerInstance();
+        const blob = new Blob([JSON.stringify(editorManager.saveDataflow({
+            readonly: !!this.readonly,
+            hideHud: !!this.hideHud,
+            position: !!this.position,
+            graphName: this.graphName,
+        }), null, 4)], {
             type: 'application/json',
         });
         saveBlob(blob, this.saveName);
