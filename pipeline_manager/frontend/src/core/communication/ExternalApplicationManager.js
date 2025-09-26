@@ -56,7 +56,11 @@ function handleSpecificationResult({ errors, warnings, info }, errorTitle, warni
 /**
  * Creates notification about mismatched specification versions
  */
-function showVersionError(currentVersion, usedVersion) {
+function showVersionError(currentVersion, specification) {
+    let usedVersion;
+    try {
+        usedVersion = JSON.parse(specification).version;
+    } catch { return; }
     if (currentVersion === usedVersion) return;
     NotificationHandler.terminalLog(
         'error',
@@ -196,7 +200,7 @@ class ExternalApplicationManager {
         )) {
             showVersionError(
                 this.editorManager.specificationVersion,
-                JSON.parse(specification).version,
+                specification,
             );
             return Promise.resolve();
         }
@@ -260,7 +264,7 @@ class ExternalApplicationManager {
         if (error) {
             showVersionError(
                 this.editorManager.specificationVersion,
-                JSON.parse(specification).version,
+                specification,
             );
         }
         return error;

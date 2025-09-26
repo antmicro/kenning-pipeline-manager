@@ -337,7 +337,11 @@ export default {
             const validationErrors = EditorManager.validateSpecification(specText);
             if (Array.isArray(validationErrors) && validationErrors.length) {
                 NotificationHandler.terminalLog('error', 'Specification is invalid', validationErrors);
-                const { version } = JSON.parse(specText);
+                let version;
+                try {
+                    version = JSON.parse(specText).version;
+                } catch { return Promise.resolve(); }
+
                 if (this.editorManager.specificationVersion !== version) {
                     NotificationHandler.terminalLog(
                         'error',
