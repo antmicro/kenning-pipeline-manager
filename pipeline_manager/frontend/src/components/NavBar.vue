@@ -57,6 +57,7 @@ import { brokenImage } from '../../../resources/broken_image.js';
 import {
     startTransaction, commitTransaction,
 } from '../core/History.ts';
+import { loadingScreen } from '../core/utils';
 
 /* eslint-disable no-param-reassign */
 export default {
@@ -386,20 +387,14 @@ export default {
          * Event handler that loads a specification passed by the user
          * and tries to load it into a new environment it.
          */
-        loadSpecificationCallback() {
+        async loadSpecificationCallback() {
             const file = document.getElementById('load-spec-button').files[0];
             if (!file) return;
 
-            this.editorManager.baklavaView.editor.events.setLoad.emit(true);
-            const resolve = () => this.editorManager.baklavaView.editor.events.setLoad.emit(false);
-
-            const fileReader = new FileReader();
-
-            fileReader.onload = () => {
-                this.loadSpecification(fileReader.result).then(resolve);
-            };
-
-            fileReader.readAsText(file);
+            await loadingScreen(async () => {
+                const content = await file.text();
+                return this.loadSpecification(content);
+            }, this.editorManager.baklavaView.editor.events.setLoad);
             document.getElementById('load-spec-button').value = '';
         },
 
@@ -493,19 +488,14 @@ export default {
          * It the loading is successful it is loaded as the current dataflow.
          * Otherwise the user is alerted with a feedback message.
          */
-        loadDataflowCallback() {
+        async loadDataflowCallback() {
             const file = document.getElementById('load-dataflow-button').files[0];
             if (!file) return;
 
-            this.editorManager.baklavaView.editor.events.setLoad.emit(true);
-            const resolve = () => this.editorManager.baklavaView.editor.events.setLoad.emit(false);
-
-            const fileReader = new FileReader();
-
-            fileReader.onload = async () => {
+            await loadingScreen(async () => {
                 let dataflow = null;
                 try {
-                    dataflow = jsonlint.parse(fileReader.result);
+                    dataflow = jsonlint.parse(await file.text());
                 } catch (exception) {
                     if (exception instanceof SyntaxError) {
                         NotificationHandler.terminalLog(
@@ -520,7 +510,6 @@ export default {
                             exception.toString(),
                         );
                     }
-                    resolve();
                     return;
                 }
 
@@ -528,10 +517,9 @@ export default {
                     dataflow,
                 });
 
-                this.loadDataflow(dataflow).then(resolve);
-            };
+                await this.loadDataflow(dataflow);
+            }, this.editorManager.baklavaView.editor.events.setLoad);
 
-            fileReader.readAsText(file);
             document.getElementById('load-dataflow-button').value = '';
         },
 

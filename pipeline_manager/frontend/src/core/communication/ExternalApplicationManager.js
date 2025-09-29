@@ -6,8 +6,10 @@
 
 import { createJSONRPCErrorResponse, createJSONRPCSuccessResponse, JSONRPCErrorCode } from 'json-rpc-2.0';
 import { charset } from 'mime-types';
-import { nextTick, ref } from 'vue';
-import { backendApiUrl, PMMessageType, JSONRPCCustomErrorCode } from '../utils';
+import { ref } from 'vue';
+import {
+    backendApiUrl, PMMessageType, JSONRPCCustomErrorCode, loadingScreen,
+} from '../utils';
 
 // eslint-disable-next-line import/no-cycle
 import jsonRPC from './rpcCommunication';
@@ -167,17 +169,7 @@ class ExternalApplicationManager {
 
     async conditionalLoadingScreen(load, callback) {
         const { setLoad } = this.editorManager.baklavaView.editor.events;
-
-        if (load) {
-            setLoad.emit(true);
-            await nextTick();
-        }
-        const result = await callback();
-        if (load) {
-            setLoad.emit(false);
-            await nextTick();
-        }
-        return result;
+        return loadingScreen(callback, setLoad, { show: load });
     }
 
     async validateSpecification(specification) {

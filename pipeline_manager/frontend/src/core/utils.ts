@@ -4,6 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { nextTick } from 'vue';
+import NotificationHandler from './notifications';
+
 /* eslint-disable import/prefer-default-export */
 const getBackendApiUrl = () => {
     // Override backend URL if requested
@@ -46,4 +49,26 @@ export const JSONRPCCustomErrorCode = {
     EXCEPTION_RAISED: -1,
     EXTERNAL_APPLICATION_NOT_CONNECTED: -2,
     NEWER_SESSION_AVAILABLE: -3,
+};
+
+export const loadingScreen = async (
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    callback: () => any,
+    loadEvent: {emit: (load: boolean) => void },
+    { show, log } = { show: true, log: true },
+) => {
+    if (show) {
+        loadEvent.emit(true);
+        await nextTick();
+    }
+    try {
+        await callback();
+    } catch (error) {
+        if (log) {
+            NotificationHandler.terminalLog('error', 'Unexpected error', (error as Error).message);
+        }
+    } finally {
+        loadEvent.emit(false);
+        await nextTick();
+    }
 };

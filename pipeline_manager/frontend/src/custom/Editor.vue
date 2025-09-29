@@ -110,7 +110,7 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
 <script>
 /* eslint-disable object-curly-newline */
 import { EditorComponent, useGraph } from '@baklavajs/renderer-vue';
-import { defineComponent, ref, computed, watch, onMounted, nextTick } from 'vue';
+import { defineComponent, ref, computed, watch, onMounted } from 'vue';
 import fuzzysort from 'fuzzysort';
 import { BaklavaEvent } from '@baklavajs/events';
 import { isJSONRPCRequest, isJSONRPCResponse, JSONRPC } from 'json-rpc-2.0';
@@ -131,6 +131,7 @@ import Zoom from '../components/Zoom.vue';
 import Return from '../components/Return.vue';
 import Panel from '../components/Panel.vue';
 import { ParentMenu, WelcomeMenu } from '../components/menu';
+import { loadingScreen } from '../core/utils';
 
 export default defineComponent({
     extends: EditorComponent,
@@ -201,6 +202,12 @@ export default defineComponent({
             /* eslint-disable vue/no-mutating-props,no-param-reassign */
             props.viewModel.displayedGraph.selectedNodes = [];
         };
+
+        const setLoad = new BaklavaEvent();
+        setLoad.subscribe('editor', (value) => {
+            emit('setLoad', value);
+        });
+        props.viewModel.editor.events.setLoad = setLoad;
 
         const appendSelectMultipleNodes = () => {
             graph.value.nodes.forEach((node) => {
@@ -780,6 +787,11 @@ export default defineComponent({
             NotificationHandler.setShowNotification(false);
             editorManager.updateMetadata({}); // Defaulting metadata values
 
+            // eslint-disable-next-line no-use-before-define
+            await loadingScreen(loadInit, setLoad);
+        });
+
+        const loadInit = async () => {
             const escapedsearch = window.location.search.replace(/&amp;/g, '&');
             const urlParams = new URLSearchParams(escapedsearch);
             if (urlParams.has('preview')) {
@@ -790,8 +802,6 @@ export default defineComponent({
             let specText;
             // Try loading default specification and/or dataflow from URLs provided in an
             if (urlParams.has('spec')) {
-                props.viewModel.editor.events.setLoad.emit(true);
-                await nextTick();
                 const [status, ret] = await loadJsonFromRemoteLocation(urlParams.get('spec'));
                 if (status === false) {
                     NotificationHandler.terminalLog(
@@ -825,7 +835,6 @@ export default defineComponent({
 
                 if (errors.length) {
                     NotificationHandler.restoreShowNotification();
-                    props.viewModel.editor.events.setLoad.emit(false);
                     return;
                 }
 
@@ -852,17 +861,13 @@ export default defineComponent({
                 }
             }
             NotificationHandler.restoreShowNotification();
-            props.viewModel.editor.events.setLoad.emit(false);
-        });
+        };
 
-        const loadFiles = async (files) => {
-            props.viewModel.editor.events.setLoad.emit(true);
-            const resolve = () => props.viewModel.editor.events.setLoad.emit(false);
+        const loadFiles = async (files) => loadingScreen(async () => {
             const notify = NotificationHandler.showToast;
 
             if (files.length > 2) {
                 notify('error', `Up to two files supported, inserted: ${files.length}`);
-                resolve();
                 return;
             }
 
@@ -872,7 +877,6 @@ export default defineComponent({
                 objects = await Promise.all(Array.from(files).map(parse));
             } catch (error) {
                 notify('error', 'Dropped file is not in JSON format');
-                resolve();
                 return;
             }
 
@@ -884,7 +888,6 @@ export default defineComponent({
             if (isInvalid.every(Boolean)) {
                 if (objects.length === 1) notify('error', 'Provided file is not of Pipeline Manager format');
                 else notify('error', 'Neither of provided files is of Pipeline Manager format');
-                resolve();
                 return;
             }
 
@@ -934,9 +937,7 @@ export default defineComponent({
             if (isValidSpec && dataflow) {
                 await updateDataflow(dataflow);
             }
-
-            resolve();
-        };
+        }, setLoad);
 
         const onDrop = async (event) => {
             event.preventDefault();
@@ -953,11 +954,6 @@ export default defineComponent({
             }
             await loadFiles(files);
         };
-
-        props.viewModel.editor.events.setLoad = new BaklavaEvent();
-        props.viewModel.editor.events.setLoad.subscribe('editor', (value) => {
-            emit('setLoad', value);
-        });
 
         const center = () => {
             editorManager.centerZoom();
