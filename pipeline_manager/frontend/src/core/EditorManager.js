@@ -6,9 +6,7 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { stringify } from 'ajv';
 import Ajv2019 from 'ajv/dist/2019.js';
-import jsonMap from 'json-source-map';
 import jsonlint from 'jsonlint-webpack';
 
 import { useBaklava, useCommandHandler, useViewModel } from '@baklavajs/renderer-vue';
@@ -30,6 +28,7 @@ import graphSchema from '../../../resources/schemas/graph_schema.json' with {typ
 import messageSchema from '../../../resources/schemas/message_schema.json' with {type: 'json'};
 import ConnectionRenderer from './ConnectionRenderer.js';
 import Specification from './Specification.js';
+import validateJSON from './validate-json.js';
 
 /* eslint-disable lines-between-class-members */
 /**
@@ -2022,76 +2021,7 @@ export default class EditorManager {
             ...additionalAjvOptions,
         });
         ajv.addKeyword('version');
-
-        ajv.addSchema(schema, 'root');
-        const validate = ajv.getSchema(`root${reference}`);
-        if (validate === undefined) {
-            return [`Invalid value of "reference" parameter: ${reference}`];
-        }
-
-        const isTextFormat = typeof data === 'string' || data instanceof String;
-        let dataJSON;
-
-        try {
-            dataJSON = isTextFormat ? jsonlint.parse(data) : data;
-        } catch (exception) {
-            return [`Not a proper JSON file: ${exception.toString()}`];
-        }
-
-        const valid = validate(dataJSON);
-
-        if (valid) {
-            return [];
-        }
-
-        // Parsing errors messages to a human readable string
-        const errors = validate.errors.map((error) => {
-            // It is assumed that the id of the schema is for example `dataflow_schema`
-            // Here a prefix is obtained
-            const nameOfEntity = schema.$id.split('_').slice(0, -1).join('_');
-            const path = `${nameOfEntity}${error.instancePath}`;
-            let errorPrefix = '';
-
-            if (isTextFormat) {
-                const result = jsonMap.parse(data);
-                // 1 is added as the lines are numbered from 0
-                const lineStart = result.pointers[error.instancePath].value.line + 1;
-                const lineEnd = result.pointers[error.instancePath].valueEnd.line + 1;
-
-                if (lineStart === lineEnd) {
-                    errorPrefix = `Line ${lineStart} -`;
-                } else {
-                    errorPrefix = `Lines ${lineStart}-${lineEnd} -`;
-                }
-            }
-
-            switch (error.keyword) {
-                case 'enum':
-                    return `${errorPrefix} ${path} ${error.message} - ${stringify(
-                        error.params.allowedValues,
-                    )}`;
-                case 'additionalProperties':
-                    return `${errorPrefix} ${path} ${error.message} - ${stringify(
-                        error.params.additionalProperty,
-                    )}`;
-                case 'const':
-                    return `${errorPrefix} ${path} ${error.message} - ${stringify(
-                        error.params.allowedValue,
-                    )}`;
-                case 'unevaluatedProperties':
-                    return `${errorPrefix} ${path} ${error.message} - ${stringify(
-                        error.params.unevaluatedProperty,
-                    )}}`;
-                // Those errors are not informative at all
-                case 'not':
-                case 'oneOf':
-                    return '';
-                default:
-                    return `${errorPrefix} ${path} ${error.message}`;
-            }
-        });
-
-        return errors.filter((err) => err !== '');
+        return validateJSON(ajv, schema, data, reference);
     }
 
     validateResolvedSpecification(specification) {
