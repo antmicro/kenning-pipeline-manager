@@ -14,6 +14,8 @@ import {
     JSONRPCServerMiddleware,
     JSONRPCServerMiddlewareNext,
     createJSONRPCErrorResponse,
+    JSONRPCErrorResponse,
+    JSONRPCID,
 } from 'json-rpc-2.0';
 import Ajv2019 from 'ajv/dist/2019.js';
 import NotificationHandler from '../notifications';
@@ -24,11 +26,19 @@ import specificationSchema from '../../../../resources/api_specification/specifi
 // eslint-disable-next-line import/no-cycle
 import * as remoteProcedures from './remoteProcedures';
 import { ClientParams, Endpoints, SpecType } from './utils';
+import validateJSON from '../validate-json';
 
 class CustomJSONRPCServerAndClient extends JSONRPCServerAndClient<void, ClientParams> {
     customMethodRegex: RegExp | null = null;
 
     customMethodReplace: string | null = null;
+}
+
+export class RPCError extends Error {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    constructor(message?: string, public data?: any) {
+        super(message);
+    }
 }
 
 const customMethodRegex = /^custom_.*$/;
@@ -40,9 +50,27 @@ const ajv = new Ajv2019({
     strict: true,
 });
 
-export const frontendEndpoints: Endpoints = specificationSchema.frontend_endpoints;
-export const backendEndpoints: Endpoints = specificationSchema.backend_endpoints;
-export const externalEndpoints: Endpoints = specificationSchema.external_endpoints;
+/**
+ * Loads endpoints schemas and assigns $id according to a corresponding key.
+ *
+ * @param group - Name of the endpoints group;
+ * @returns Loaded endpoints.
+ */
+function loadEndpoints(
+    group: 'frontend_endpoints' | 'backend_endpoints' | 'external_endpoints',
+): Endpoints {
+    const endpoints = specificationSchema[group];
+    Object.entries(endpoints).forEach(([key, value]) => {
+        const typedValue = value as { params?: { $id?: string}, returns?: { $id?: string }};
+        if (typedValue.params) typedValue.params.$id = `${key}_params`;
+        if (typedValue.returns) typedValue.returns.$id = `${key}_returns`;
+    });
+    return endpoints;
+}
+
+export const frontendEndpoints = loadEndpoints('frontend_endpoints');
+export const backendEndpoints = loadEndpoints('backend_endpoints');
+export const externalEndpoints = loadEndpoints('external_endpoints');
 
 // This should become part of the testing suite at some point
 let invalidDefinition;
@@ -58,6 +86,20 @@ try {
     throw new Error(`Procedures specification schema '${invalidDefinition}' is incorrect: ${exception}`);
 }
 
+const validateRequestResponse = (
+    schema: object,
+    data: any, // eslint-disable-line @typescript-eslint/no-explicit-any
+    id?: JSONRPCID,
+): JSONRPCErrorResponse | undefined => {
+    const errors = validateJSON(ajv, schema, data);
+
+    if (!errors.length) return undefined;
+
+    const message = `Request method does not match specification`;
+    if (id === undefined) throw new RPCError(message, errors);
+    return createJSONRPCErrorResponse(id, PMMessageType.ERROR, message, errors);
+};
+
 /**
  * Middleware that validates received requests.
  */
@@ -72,25 +114,15 @@ const validateServerRequestResponse = async (
         throw new Error('Requested method does not exist');
     }
     const schema = frontendEndpoints[request.method];
-    const valid = ajv.validate(schema.params, request.params ?? {});
-    if (!valid) {
-        if (request.id !== undefined) return createJSONRPCErrorResponse(request.id, 1, 'Request does not match specification');
-        throw new Error('Request does not match specification');
-    }
+    const requestError = validateRequestResponse(schema.params, request.params ?? {}, request.id);
+    if (requestError) return requestError;
     const response = await next(request, serverParams);
     if (request.id === undefined) return null;
 
     // response validation
     if (response?.result !== undefined && schema.returns !== null) {
-        const validResponse = ajv.validate(schema.returns, response.result);
-        if (!validResponse) {
-            if (request.id !== undefined) {
-                return createJSONRPCErrorResponse(
-                    request.id, 1, 'Response does not match specification',
-                );
-            }
-            throw new Error('Response does not match specification');
-        }
+        const responseError = validateRequestResponse(schema.returns, response.result, response.id);
+        if (responseError) return responseError;
     }
     return response;
 };
@@ -104,16 +136,13 @@ let jsonRPCServer: CustomJSONRPCServerAndClient;
 
 const validateClientResponse = (response: JSONRPCResponse) => {
     if (response.result && response.id && requestSchema.get(response.id)?.returns) {
-        const validResponse = ajv.validate(
+        const responseError = validateRequestResponse(
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             requestSchema.get(response.id)!.returns!,
             response.result,
+            response.id,
         );
-        if (!validResponse) {
-            return createJSONRPCErrorResponse(
-                response.id, PMMessageType.ERROR, 'Response does not match specification',
-            );
-        }
+        if (responseError) return responseError;
     }
     return response;
 };
@@ -147,8 +176,11 @@ function createServer() {
             const endpoints = (method in externalEndpoints) ?
                 externalEndpoints : backendEndpoints;
             const schema = endpoints[method];
-            const valid = ajv.validate(schema.params, request.params ?? {});
-            if (!valid) return Promise.reject(new Error('Request does not match specification'));
+            const requestError =
+                validateRequestResponse(schema.params, request.params ?? {}, request.id);
+            if (requestError) {
+                throw new RPCError(requestError.error.message, requestError.error.data);
+            }
             if (request.id) {
                 requestSchema.set(request.id, schema);
             }

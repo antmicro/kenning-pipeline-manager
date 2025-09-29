@@ -66,6 +66,21 @@ function showVersionError(currentVersion, usedVersion) {
     );
 }
 
+/**
+ * Formats received error and logs it.
+ *
+ * @param {string} type - Notification type.
+ * @param {Error|import('./rpcCommunication').RPCError} error - Captured error.
+ * @param {string} [message] - Custom error description.
+ */
+function RPCTerminalLog(type, error, message) {
+    const args = message !== undefined
+        ? [message, [error.message, ...(error.data ?? [])]]
+        : [error.message, error.data];
+
+    NotificationHandler.terminalLog(type, ...args);
+}
+
 class ExternalApplicationManager {
     editorManager = EditorManager.getEditorManagerInstance();
 
@@ -142,8 +157,7 @@ class ExternalApplicationManager {
                 NotificationHandler.terminalLog('error', message);
             }
         } catch (error) {
-            message = error.message;
-            NotificationHandler.terminalLog('error', message);
+            RPCTerminalLog('error', error);
         }
     }
 
@@ -253,7 +267,7 @@ class ExternalApplicationManager {
             this.appCapabilities.value = appCapabilities;
         } catch (error) {
             this.appCapabilities.value = defaultAppCapabilities;
-            NotificationHandler.terminalLog('warning', 'Application capabilities cannot be retrieved, using defaults', error.message);
+            RPCTerminalLog('warning', error, 'Application capabilities cannot be retrieved, using defaults');
         }
     }
 
@@ -269,8 +283,7 @@ class ExternalApplicationManager {
             data = await this.request('dataflow_export', { dataflow });
         } catch (error) {
             // The connection was closed.
-            data = error.message;
-            NotificationHandler.terminalLog('error', data);
+            RPCTerminalLog('error', error);
             return false;
         }
 
@@ -321,8 +334,7 @@ class ExternalApplicationManager {
                 }
             } catch (error) {
                 // The connection was closed
-                data = error.message;
-                NotificationHandler.terminalLog('error', 'Cannot create a request', data);
+                RPCTerminalLog('error', error, 'Cannot create a request');
                 runProcedureInfo.inProgress = false;
                 return;
             }
@@ -353,7 +365,7 @@ class ExternalApplicationManager {
             const response = await this.request('dataflow_stop', { method: procedureName });
             handleExternalAppResponse(response);
         } catch (error) {
-            NotificationHandler.terminalLog('error', error.message);
+            RPCTerminalLog('error', error);
         }
     }
 
@@ -409,8 +421,7 @@ class ExternalApplicationManager {
                 NotificationHandler.terminalLog('warning', `Warning: ${data.content}`, 'Imported dataflow');
             }
         } catch (error) {
-            const data = error.message;
-            NotificationHandler.terminalLog('error', data);
+            RPCTerminalLog('error', error);
         }
     }
 
@@ -426,9 +437,7 @@ class ExternalApplicationManager {
         try {
             await this.request(method, changedProperties);
         } catch (error) {
-            NotificationHandler.terminalLog(
-                'warning', 'Notifying about change failed', `${error.message} (method: ${method})`,
-            );
+            RPCTerminalLog('warning', error, `Notifying about change failed (${method})`);
         }
     }
 
@@ -443,7 +452,7 @@ class ExternalApplicationManager {
         try {
             await this.request('terminal_read', { name: terminalName, message });
         } catch (error) {
-            NotificationHandler.terminalLog('warning', 'Sending terminal input failed', error.message);
+            RPCTerminalLog('warning', error, 'Sending terminal input failed');
         }
     }
 
@@ -477,7 +486,7 @@ class ExternalApplicationManager {
         } catch (error) {
             if (error.code !== JSONRPCErrorCode.MethodNotFound &&
                 error.code !== JSONRPCCustomErrorCode.EXTERNAL_APPLICATION_NOT_CONNECTED) {
-                NotificationHandler.terminalLog('error', error.message, error.data);
+                RPCTerminalLog('error', error);
             }
         }
 

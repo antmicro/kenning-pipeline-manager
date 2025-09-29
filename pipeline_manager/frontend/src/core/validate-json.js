@@ -18,7 +18,7 @@ import jsonlint from 'jsonlint';
  * @returns {string[]} Validation errors.
  */
 export default function validateJSON(ajv, schema, data, reference = '') {
-    ajv.removeSchema('root').addSchema(schema, 'root');
+    ajv.removeSchema('root').removeSchema(schema.$id).addSchema(schema, 'root');
     const validate = ajv.getSchema(`root${reference}`);
     if (validate === undefined) {
         return [`Invalid value of "reference" parameter: ${reference}`];
@@ -43,7 +43,7 @@ export default function validateJSON(ajv, schema, data, reference = '') {
     const errors = validate.errors?.map((error) => {
         // It is assumed that the id of the schema is for example `dataflow_schema`
         // Here a prefix is obtained
-        const nameOfEntity = schema.$id.replace(/_schema(.json)?$/, '');
+        const nameOfEntity = schema.$id.replace(/((_params)|(_returns))?(_schema)?(.json)?$/, '');
         const path = `${nameOfEntity}${error.instancePath}`;
         let errorPrefix = '';
 
@@ -76,7 +76,7 @@ export default function validateJSON(ajv, schema, data, reference = '') {
             case 'unevaluatedProperties':
                 return `${errorPrefix} ${path} ${error.message} - ${stringify(
                     error.params.unevaluatedProperty,
-                )}}`;
+                )}`;
             // Those errors are not informative at all
             case 'not':
             case 'oneOf':
