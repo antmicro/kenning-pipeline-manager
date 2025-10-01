@@ -43,6 +43,11 @@
             "type": "boolean",
             "default": false
         },
+        "tryMinify": {
+            "description": "Try to minify specification if a dataflow or entry graph is provided",
+            "type": "boolean",
+            "default": false
+        },
         "dataflow_or_url": {
             "description": "JSON or link to the remote JSON with graph definition",
             "type": [

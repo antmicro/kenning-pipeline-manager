@@ -191,6 +191,7 @@ export default class EditorManager {
         this.modifiedNodeSpecificationRegistry = {};
     }
 
+    /* eslint-disable max-len */
     /**
      * Loads the dataflow specification passed in `dataflowSpecification`.
      * The specification describes what nodes are available in the editor.
@@ -203,12 +204,18 @@ export default class EditorManager {
      * @param unmarkNewNodes Decides whether to remove styling of new nodes.
      * @param urloverrides Override mapping for included URLs.
      * it and check its versioning. Can be used when loading parts of specification manually.
+     * @param {object|boolean} tryMinify If set, requests minification based resolved specification or a given dataflow.
      * @returns An object consisting of errors and warnings arrays. If any array is empty
      * the updating process was successful.
      */
     /* eslint-disable no-underscore-dangle,no-param-reassign */
+    /* eslint-enable max-len */
     async updateEditorSpecification(
-        dataflowSpecification, lazyLoad = false, unmarkNewNodes = true, urloverrides = null,
+        dataflowSpecification,
+        lazyLoad = false,
+        unmarkNewNodes = true,
+        urloverrides = null,
+        tryMinify = false,
     ) {
         if (!dataflowSpecification) return { errors: ['No specification passed'] };
 
@@ -303,6 +310,23 @@ export default class EditorManager {
             errors.push(...this.updateMetadata(metadata, false, true));
             if (errors.length) {
                 return { errors, warnings, info };
+            }
+
+            let usedGraphs;
+            if (tryMinify === true) {
+                // Specification graphs
+                usedGraphs = dataflowSpecification.graphs;
+            } else if (tryMinify) {
+                // Dataflow graphs
+                usedGraphs = tryMinify.graphs;
+            }
+
+            if (usedGraphs) {
+                // Minify nodes
+                const usedNames = EditorManager.getUsedNames(usedGraphs);
+                // eslint-disable-next-line no-param-reassign
+                dataflowSpecification.nodes =
+                    EditorManager.minifySpecificationNodes(dataflowSpecification.nodes, usedNames);
             }
 
             // Update graph specification
@@ -2276,5 +2300,45 @@ export default class EditorManager {
         return this.updatedMetadata.notifyWhenChanged ??
             this.specification.currentSpecification?.metadata?.notifyWhenChanged ??
             this.defaultMetadata.notifyWhenChanged;
+    }
+
+    /**
+     * Creates array of used node names.
+     * @param {any} dataflow - Dataflow with graphs containing target nodes.
+     * @returns {string[]} Used node names.
+     */
+    static getUsedNames(graphs) {
+        return graphs
+            ?.map((graph) => graph.nodes.map(this.getNodeName))
+            .flat() ?? [];
+    }
+
+    /**
+     * Removes unused nodes.
+     *
+     * @param {any[]} nodes - Initial nodes.
+     * @param {string[]} nodeNames - Used node names.
+     * @returns {any[]} Minified nodes.
+     */
+    static minifySpecificationNodes(nodes, nodeNames) {
+        const nameToNodeMapping =
+            Object.fromEntries(nodes.map((node) => [this.getNodeName(node), node]));
+        const nameToNode = (name) => nameToNodeMapping[name];
+
+        const resolvedNames = [];
+        const resolve = (node) => {
+            if (node === undefined) return;
+            const name = this.getNodeName(node);
+            if (resolvedNames.includes(name)) return;
+            resolvedNames.push(name);
+            node.extends?.map(nameToNode).forEach(resolve);
+        };
+        nodeNames.map(nameToNode).forEach(resolve);
+
+        nodes = resolvedNames
+            .map(nameToNode)
+            .filter((node) => node !== undefined);
+
+        return nodes;
     }
 }

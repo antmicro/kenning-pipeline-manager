@@ -162,7 +162,7 @@ class ExternalApplicationManager {
         return result;
     }
 
-    async updateSpecification(specification, urloverrides) {
+    async updateSpecification(specification, urloverrides, tryMinify) {
         if (typeof specification === 'string' || specification instanceof String) {
             const [success, specificationOrError] = await loadJsonFromRemoteLocation(specification);
             if (!success) {
@@ -187,9 +187,20 @@ class ExternalApplicationManager {
             return true;
         }
 
+        if (typeof tryMinify === 'string' || tryMinify instanceof String) {
+            const [success, dataflowOrError] = await loadJsonFromRemoteLocation(tryMinify);
+            if (!success) {
+                NotificationHandler.terminalLog('error', 'Dataflow is invalid', dataflowOrError);
+                return Promise.resolve();
+            }
+
+            // eslint-disable-next-line no-param-reassign
+            tryMinify = dataflowOrError;
+        }
+
         const error = handleSpecificationResult(
             await this.editorManager.updateEditorSpecification(
-                specification, false, true, urloverrides,
+                specification, false, true, urloverrides, tryMinify,
             ),
             'Errors when loading specification',
             'Warnings when loading specification',

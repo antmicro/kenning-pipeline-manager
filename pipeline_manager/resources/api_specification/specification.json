@@ -365,6 +365,9 @@
                     },
                     "loadingScreen": {
                         "$ref": "common_types#/$defs/loadingScreen"
+                    },
+                    "tryMinify": {
+                        "$ref": "common_types#/$defs/tryMinify"
                     }
                 },
                 "required": ["specification"]
@@ -389,6 +392,9 @@
                     },
                     "loadingScreen": {
                         "$ref": "common_types#/$defs/loadingScreen"
+                    },
+                    "tryMinify": {
+                        "$ref": "common_types#/$defs/tryMinify"
                     }
                 },
                 "required": [

@@ -447,24 +447,31 @@ export function notification_send(params: Notification) {
 }
 
 export async function specification_change(
-    params: { specification: any, urloverrides: any, loadingScreen: boolean },
+    params: { specification: any, urloverrides: any, loadingScreen: boolean, tryMinify: boolean },
 ) {
     const externalApplicationManager = getExternalApplicationManager();
     await externalApplicationManager.conditionalLoadingScreen(
         params.loadingScreen,
         async () => externalApplicationManager.updateSpecification(
-            params.specification, params.urloverrides,
+            params.specification, params.urloverrides, params.tryMinify,
         ),
     );
 }
 
 export async function specification_graph_change(
-    params: {specification: any, dataflow: any, urloverrides: any, loadingScreen: boolean},
+    params: {
+        specification: any,
+        dataflow: any,
+        urloverrides: any,
+        loadingScreen: boolean,
+        tryMinify: boolean,
+    },
 ) {
     const externalApplicationManager = getExternalApplicationManager();
+    const tryMinify = params.tryMinify ? params.dataflow : undefined;
     await externalApplicationManager.conditionalLoadingScreen(params.loadingScreen, async () => {
         const error = await externalApplicationManager.updateSpecification(
-            params.specification, params.urloverrides,
+            params.specification, params.urloverrides, tryMinify,
         );
         if (!error) {
             await externalApplicationManager.updateDataflow(params.dataflow);
