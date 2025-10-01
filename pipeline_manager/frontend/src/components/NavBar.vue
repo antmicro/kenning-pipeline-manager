@@ -1286,7 +1286,6 @@ export default {
         <GraphDetails
             v-click-outside="(ev) => clickOutside(ev, panels.graphDetails)"
             tabindex="-1"
-            :viewModel="editorManager.baklavaView"
         />
     </div>
 </template>

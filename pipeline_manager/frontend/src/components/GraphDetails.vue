@@ -39,39 +39,28 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { ref, watch } from 'vue';
+import { computed } from 'vue';
 import { getOptionName } from '../custom/CustomNode.js';
 import CustomInterface from '../custom/CustomInterface.vue';
 import { configurationState, menuState } from '../core/nodeCreation/ConfigurationState.ts';
+import EditorManager from '../core/EditorManager.js';
 
 export default {
     components: {
         CustomInterface,
     },
-    props: {
-        viewModel: {
-            required: true,
-        },
-    },
-    setup(props) {
-        const node = ref(null);
-        const graphNodeName = ref('');
-        const displayedProperties = ref([]);
-        const inSubgraph = ref(false);
-
-        watch(props.viewModel.editor.graph, () => {
-            node.value = props.viewModel.editor.graph.graphNode;
-            if (node.value) {
-                inSubgraph.value = true;
-                graphNodeName.value = node.value.title !== '' ? node.value.title : node.value.type;
-                displayedProperties.value = Object.values(node.value.inputs)
-                    .filter((intf) => !intf.port);
-            } else {
-                inSubgraph.value = false;
-                graphNodeName.value = props.viewModel.editor.graph.name;
-                displayedProperties.value = props.viewModel.editor.getExposedProperties();
-            }
-        });
+    setup() {
+        const editorManager = EditorManager.getEditorManagerInstance();
+        const viewModel = computed(() => editorManager.baklavaView);
+        const node = computed(() => viewModel.value.editor.graph.graphNode);
+        const inSubgraph = computed(() => node.value !== undefined);
+        // eslint-disable-next-line no-nested-ternary
+        const graphNodeName = computed(() => (node.value
+            ? (node.value.title !== '' ? node.value.title : node.value.type)
+            : viewModel.value.editor.graph.name));
+        const displayedProperties = computed(() => (node.value
+            ? Object.values(node.value.inputs).filter((intf) => !intf.port)
+            : viewModel.value.editor.getExposedProperties()));
 
         const toggleGroup = (intf) => {
             intf.group.forEach((name) => {
@@ -103,6 +92,7 @@ export default {
         };
 
         return {
+            viewModel,
             node,
             graphNodeName,
             displayedProperties,
