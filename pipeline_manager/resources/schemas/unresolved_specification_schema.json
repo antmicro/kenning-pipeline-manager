@@ -524,6 +524,11 @@
                             "description": "Determines whether this property should be readonly",
                             "type": "boolean",
                             "default": false
+                        },
+                        "hideOnDefault": {
+                            "description": "Determines whether this property should be kept hidden if it has default or no value assigned",
+                            "type": "boolean",
+                            "default": false
                         }
                     }
                 },

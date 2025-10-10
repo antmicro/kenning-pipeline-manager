@@ -43,7 +43,7 @@
             "name": "SaveFrame",
             "extends": ["Filesystem-base"],
             "properties": [
-                {"name": "Frame number", "type": "integer", "default": 0}
+                {"name": "Frame number", "type": "integer", "default": 0, "hideOnDefault": true}
             ],
             "interfaces": [
                 {"name": "color", "type": "Image", "direction": "input"},
