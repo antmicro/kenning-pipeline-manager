@@ -81,6 +81,12 @@ This object specifies additional editor options and contains the following optio
 * `notifyWhenChanged` - Boolean value specifying whether the frontend should send requests with information about changed values.
   This option is only effective when Pipeline Manager is run in server-app mode.
   Notifications include events from the [list of available events](project:external-app-communication.md#external-app-api) ending with `_on_change`.
+* `hideAnchors` - Boolean value determining whether anchors in all connections should be hidden and only visible on hover.
+  The default value is `false`.
+* `showIds` - Boolean value determining whether node IDs and graph IDs should be visible in the editor.
+  The default value is `false`.
+* `showHiddenProperties` - Boolean value determining whether properties marked with `hideOnDefault` should be visible regardless of their value.
+  The default value is `false`.
 
 An example:
 
@@ -474,6 +480,9 @@ Additional properties:
 * `description` - description of the property.
   In some cases, it can be displayed to the user.
 * `group` - object of type [Group](#group).
+* `override` - boolean value determining whether the property should be overridden.
+* `readonly` - boolean value determining whether the property should be read-only.
+* `hideOnDefault` - boolean value determining whether the property should be kept hidden if it has default or no value assigned.
 
 ##### Group
 
