@@ -36,6 +36,7 @@ import {
 } from 'vue';
 import showdown from 'showdown';
 import { useResizeObserver } from '@vueuse/core';
+import { useViewModel } from '@baklavajs/renderer-vue';
 
 export default defineComponent({
     props: {
@@ -53,6 +54,7 @@ export default defineComponent({
         const editMode = ref(false);
         const previousScroll = ref(0);
         const resizeHeight = 200;
+        const { viewModel } = useViewModel();
 
         const v = computed({
             get: () => props.modelValue,
@@ -124,7 +126,7 @@ export default defineComponent({
         };
 
         const enterEditMode = async () => {
-            if (props.intf.readonly) { return; }
+            if (props.intf.readonly || viewModel.value.editor.readonly) return;
 
             editMode.value = true;
             await nextTick();
@@ -151,6 +153,7 @@ export default defineComponent({
             leaveEditMode,
             handleInput,
             styles,
+            viewModel,
         };
     },
 });

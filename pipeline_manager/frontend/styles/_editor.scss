@@ -216,13 +216,20 @@
         caret-color: $white;
     }
 
-    &.__readonly > * {
-        pointer-events: none;
+    &.__readonly {
         user-select: none;
         cursor: auto;
 
-        * {
+        &, * {
             pointer-events: none;
+        }
+
+        .__markdown-content {
+            user-select: text;
+
+            &, * {
+                pointer-events: auto;
+            }
         }
     }
 
