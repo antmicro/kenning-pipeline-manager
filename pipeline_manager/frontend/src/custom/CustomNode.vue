@@ -243,8 +243,13 @@ const displayedInputs = computed(() => Object.values(props.node.inputs).filter((
 const displayedOutputs = computed(() =>
     Object.values(props.node.outputs).filter((ni) => !ni.hidden),
 );
+const sidebarProperties = computed(() =>
+    Object.values(displayedInputs.value)
+        .filter((intf) => !intf.port),
+);
 const displayedProperties = computed(() =>
-    Object.values(displayedInputs.value).filter((intf) => !intf.port),
+    sidebarProperties.value
+        .filter((intf) => !(intf.hideOnDefault && (!intf.value || intf.value === intf.default))),
 );
 
 const editorManager = EditorManager.getEditorManagerInstance();
@@ -404,7 +409,7 @@ const onContextMenuTitleClick = async (action) => {
         }));
 
         /* eslint-disable no-underscore-dangle */
-        const properties = displayedProperties.value;
+        const properties = sidebarProperties.value;
         const configuredProperties = properties?.map((prop) => ({
             name: prop?.name,
             type: prop?.type,
@@ -705,8 +710,8 @@ const getRows = (sockets) => {
 const displayedRightRows = computed(() => getRows(displayedRightSockets.value));
 const displayedLeftRows = computed(() => getRows(displayedLeftSockets.value));
 
-watch(displayedProperties, () => {
-    displayedProperties.value.forEach((prop) => {
+watch(sidebarProperties, () => {
+    sidebarProperties.value.forEach((prop) => {
         if (prop.setDefaultComponent !== undefined) {
             prop.setDefaultComponent();
         }
