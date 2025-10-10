@@ -239,6 +239,8 @@ const pillTextColor = computed(() => viewModel.value.editor.getTextColor(pillCol
 
 const displayNoResources = !viewModel.value.editor.nodeURLsEmpty();
 
+const editorManager = EditorManager.getEditorManagerInstance();
+
 const displayedInputs = computed(() => Object.values(props.node.inputs).filter((ni) => !ni.hidden));
 const displayedOutputs = computed(() =>
     Object.values(props.node.outputs).filter((ni) => !ni.hidden),
@@ -247,12 +249,14 @@ const sidebarProperties = computed(() =>
     Object.values(displayedInputs.value)
         .filter((intf) => !intf.port),
 );
-const displayedProperties = computed(() =>
-    sidebarProperties.value
-        .filter((intf) => !(intf.hideOnDefault && (!intf.value || intf.value === intf.default))),
-);
+const displayedProperties = computed(() => {
+    if (editorManager.baklavaView.settings.showHiddenProperties) {
+        return sidebarProperties.value;
+    }
+    return sidebarProperties.value
+        .filter((intf) => !(intf.hideOnDefault && (!intf.value || intf.value === intf.default)));
+});
 
-const editorManager = EditorManager.getEditorManagerInstance();
 const externalApplicationManager = getExternalApplicationManager();
 // Watch properties
 Object.entries(props.node.inputs).forEach(([name, input]) => {
