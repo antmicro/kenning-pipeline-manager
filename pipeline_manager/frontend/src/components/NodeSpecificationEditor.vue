@@ -240,8 +240,9 @@ export default defineComponent({
         };
 
         const visible = computed(
-            () =>
-                specification.value && editorManager.baklavaView.settings.editableNodeTypes,
+            () => !editorManager.baklavaView.editor.readonly
+                && specification.value
+                && editorManager.baklavaView.settings.editableNodeTypes,
         );
 
         const updateSpecification = async () => {
