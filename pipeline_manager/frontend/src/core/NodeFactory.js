@@ -160,6 +160,8 @@ export function newProperty(p, hidden = false) {
     if (intf !== undefined) {
         intf.hidden = hidden;
         intf.type = propType;
+        intf.default = propDef;
+        intf.hideOnDefault = p.hideOnDefault;
 
         if (p.interfaceMaxConnectionsCount !== undefined) {
             intf.interfaceMaxConnectionsCount = p.interfaceMaxConnectionsCount;
