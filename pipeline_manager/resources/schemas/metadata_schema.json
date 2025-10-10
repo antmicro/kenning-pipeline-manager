@@ -271,6 +271,11 @@
             "description": "Determines whether external application should be informed about changes in dataflow. Works only when Pipeline Manager is run in server-app mode",
             "default": false
         },
+        "showHiddenProperties": {
+            "type": "boolean",
+            "description": "Determines whether properties marked with 'hideOnDefault' should be visible regardless of their value",
+            "default": false
+        },
         "logLevel": {
             "description": "Verbosity of pop-up notifications",
             "enum": [
