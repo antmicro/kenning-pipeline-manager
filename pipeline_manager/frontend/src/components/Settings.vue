@@ -124,6 +124,19 @@ export default {
             return option;
         });
 
+        const showHiddenProperties = computed(() => {
+            const option = new CheckboxInterface(
+                'Show hidden properties',
+                props.viewModel.settings.showHiddenProperties,
+            ).setPort(false);
+            option.events.setValue.subscribe(this, (v) => {
+                props.viewModel.settings.showHiddenProperties = v; // eslint-disable-line vue/no-mutating-props,max-len,no-param-reassign
+                metadataChanged('showHiddenProperties', v);
+            });
+            option.componentName = 'CheckboxInterface';
+            return option;
+        });
+
         const backgroundGridSize = computed(() => {
             const option = new IntegerInterface(
                 'Background grid size',
@@ -224,6 +237,7 @@ export default {
                 randomizedOffsetOption.value,
                 hideAnchors.value,
                 showIds.value,
+                showHiddenProperties.value,
             ];
             if (props.viewModel.settings.toggleableEditableTypes) {
                 options.push(editableNodeTypes.value);
