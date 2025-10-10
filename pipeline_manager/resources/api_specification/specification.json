@@ -407,6 +407,33 @@
                 "$ref": "common_types#/$defs/null_or_empty"
             }
         },
+        "specification_preprocess": {
+            "description": "Handles preprocessor specification directives",
+            "params": {
+                "type": "object",
+                "properties": {
+                    "specification": {
+                        "$ref": "common_types#/$defs/specification"
+                    },
+                    "unmarkNewNodes": {
+                        "type": "boolean",
+                        "description": "Decides whether to remove built-in style of new nodes from specification"
+                    },
+                    "urloverrides": {
+                        "$ref": "common_types#/$defs/urloverrides"
+                    },
+                    "tryMinify": {
+                        "$ref": "common_types#/$defs/tryMinify"
+                    }
+                }
+            },
+            "returns": {
+                "anyOf": [
+                    {"$ref": "common_types#/$defs/specification_object"},
+                    {"$ref": "common_types#/$defs/null_or_empty"}
+                ]
+            }
+        },
         "nodes_highlight": {
             "description": "Procedure to highlight specified nodes in the editor",
             "params": {

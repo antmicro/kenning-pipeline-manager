@@ -176,7 +176,7 @@ class ExternalApplicationManager {
         return result;
     }
 
-    async updateSpecification(specification, urloverrides, tryMinify) {
+    async validateSpecification(specification) {
         if (typeof specification === 'string' || specification instanceof String) {
             const [success, specificationOrError] = await loadJsonFromRemoteLocation(specification);
             if (!success) {
@@ -200,6 +200,41 @@ class ExternalApplicationManager {
             );
             return true;
         }
+
+        return false;
+    }
+
+    async preprocessSpecification(specification, { urloverrides, tryMinify } = {}) {
+        const validationError = await this.validateSpecification(specification);
+        if (validationError) return Promise.resolve();
+
+        if (typeof tryMinify === 'string' || tryMinify instanceof String) {
+            const [success, dataflowOrError] = await loadJsonFromRemoteLocation(tryMinify);
+            if (!success) {
+                NotificationHandler.terminalLog('error', 'Dataflow is invalid', dataflowOrError);
+                return Promise.resolve();
+            }
+
+            // eslint-disable-next-line no-param-reassign
+            tryMinify = dataflowOrError;
+        }
+
+        const result = await this.editorManager.preprocessSpecification(specification, {
+            urloverrides, tryMinify,
+        });
+        const error = handleSpecificationResult(
+            result,
+            'Errors when preprocessing specification',
+            'Warnings when preprocessing specification',
+            'Specification preprocessed',
+        );
+        if (error) return Promise.resolve();
+        return result.specification;
+    }
+
+    async updateSpecification(specification, { urloverrides, tryMinify } = {}) {
+        const validationError = await this.validateSpecification(specification);
+        if (validationError) return Promise.resolve();
 
         if (typeof tryMinify === 'string' || tryMinify instanceof String) {
             const [success, dataflowOrError] = await loadJsonFromRemoteLocation(tryMinify);

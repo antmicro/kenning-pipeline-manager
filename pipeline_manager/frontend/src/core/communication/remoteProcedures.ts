@@ -452,9 +452,7 @@ export async function specification_change(
     const externalApplicationManager = getExternalApplicationManager();
     await externalApplicationManager.conditionalLoadingScreen(
         params.loadingScreen,
-        async () => externalApplicationManager.updateSpecification(
-            params.specification, params.urloverrides, params.tryMinify,
-        ),
+        async () => externalApplicationManager.updateSpecification(params.specification, params),
     );
 }
 
@@ -471,12 +469,29 @@ export async function specification_graph_change(
     const tryMinify = params.tryMinify ? params.dataflow : undefined;
     await externalApplicationManager.conditionalLoadingScreen(params.loadingScreen, async () => {
         const error = await externalApplicationManager.updateSpecification(
-            params.specification, params.urloverrides, tryMinify,
+            params.specification, { ...params, tryMinify },
         );
         if (!error) {
             await externalApplicationManager.updateDataflow(params.dataflow);
         }
     });
+}
+
+export async function specification_preprocess(
+    params: {
+        specification: any,
+        dataflow: any,
+        urloverrides: any,
+        loadingScreen: boolean,
+        tryMinify: boolean,
+    },
+): Promise<{ specification: any } | undefined> {
+    const externalApplicationManager = getExternalApplicationManager();
+    const tryMinify = params.tryMinify ? params.dataflow : undefined;
+    const resolveSpecification = await externalApplicationManager.preprocessSpecification(
+        params.specification, { ...params, tryMinify },
+    );
+    return resolveSpecification ? { specification: resolveSpecification } : undefined;
 }
 
 type ModifyNodesHighlightType = {

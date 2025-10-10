@@ -190,6 +190,80 @@ export default class EditorManager {
         this.modifiedNodeSpecificationRegistry = {};
     }
 
+    async preprocessSpecification(dataflowSpecification, {
+        unmarkNewNodes,
+        urloverrides,
+        tryMinify,
+    }) {
+        const errors = [];
+        const warnings = [];
+
+        this.globalVisitedSpecs = new Set();
+        const toInclude = Object.fromEntries(Object.entries({
+            include: dataflowSpecification.include,
+            urloverrides: dataflowSpecification.urloverrides,
+        }).filter(([_, value]) => value !== undefined));
+
+        const {
+            specification: includedSpecification,
+            errors: includeErrors,
+            warnings: includeWarnings,
+        } = await this.downloadNestedImports(toInclude, undefined, urloverrides);
+        errors.push(...includeErrors);
+        warnings.push(...includeWarnings);
+        if (errors.length) {
+            return { errors, warnings };
+        }
+
+        if (unmarkNewNodes) {
+            warnings.push(...EditorManager.unmarkNewNodes(includedSpecification));
+        }
+
+        // Include graphs
+        const {
+            graphs, errors: includeGraphsErrors,
+        } = await EditorManager.includeGraphs(dataflowSpecification.includeGraphs ?? []);
+        errors.push(...includeGraphsErrors);
+        if (errors.length) {
+            return { errors, warnings };
+        }
+
+        includedSpecification.graphs = (includedSpecification.graphs ?? []).concat(graphs);
+        this.specification.includedSpecification =
+            JSON.parse(JSON.stringify(includedSpecification));
+
+        // Merge included specification
+        const {
+            errors: mergeErrors, warnings: mergeWarnings,
+        } = EditorManager.mergeObjects(dataflowSpecification, includedSpecification);
+        errors.push(...mergeErrors);
+        warnings.push(...mergeWarnings);
+        if (errors.length) {
+            return { errors, warnings };
+        }
+        delete dataflowSpecification.include; // eslint-disable-line no-param-reassign
+        delete dataflowSpecification.includeGraphs; // eslint-disable-line no-param-reassign
+
+        let usedGraphs;
+        if (tryMinify === true) {
+            // Specification graphs
+            usedGraphs = dataflowSpecification.graphs;
+        } else if (tryMinify) {
+            // Dataflow graphs
+            usedGraphs = tryMinify.graphs;
+        }
+
+        if (usedGraphs) {
+            // Minify nodes
+            const usedNames = EditorManager.getUsedNames(usedGraphs);
+            // eslint-disable-next-line no-param-reassign
+            dataflowSpecification.nodes =
+                EditorManager.minifySpecificationNodes(dataflowSpecification.nodes, usedNames);
+        }
+
+        return { errors, warnings, specification: dataflowSpecification };
+    }
+
     /* eslint-disable max-len */
     /**
      * Loads the dataflow specification passed in `dataflowSpecification`.
@@ -259,50 +333,15 @@ export default class EditorManager {
             JSON.parse(JSON.stringify(dataflowSpecification)));
         this.specification.currentSpecification = dataflowSpecification;
         if (!lazyLoad) {
-            // Preprocess includes
-            this.globalVisitedSpecs = new Set();
-            const toInclude = Object.fromEntries(Object.entries({
-                include: dataflowSpecification.include,
-                urloverrides: dataflowSpecification.urloverrides,
-            }).filter(([_, value]) => value !== undefined));
-
             const {
-                specification: includedSpecification,
-                errors: includeErrors,
-                warnings: includeWarnings,
-            } = await this.downloadNestedImports(toInclude, undefined, urloverrides);
-            errors.push(...includeErrors);
-            warnings.push(...includeWarnings);
-            if (errors.length) {
-                return { errors, warnings, info };
-            }
-
-            if (unmarkNewNodes) {
-                warnings.push(...EditorManager.unmarkNewNodes(includedSpecification));
-            }
-
-            // Include graphs
-            const {
-                graphs, errors: includeGraphsErrors,
-            } = await EditorManager.includeGraphs(dataflowSpecification.includeGraphs ?? []);
-            errors.push(...includeGraphsErrors);
-            if (errors.length) {
-                return { errors, warnings, info };
-            }
-
-            includedSpecification.graphs = (includedSpecification.graphs ?? []).concat(graphs);
-            this.specification.includedSpecification =
-                JSON.parse(JSON.stringify(includedSpecification));
-
-            // Merge included specification
-            const {
-                errors: mergeErrors, warnings: mergeWarnings,
-            } = EditorManager.mergeObjects(dataflowSpecification, includedSpecification);
-            errors.push(...mergeErrors);
-            warnings.push(...mergeWarnings);
-            if (errors.length) {
-                return { errors, warnings, info };
-            }
+                errors: preprocessErrors,
+                specification: preprocessedSpecification,
+            } = await this.preprocessSpecification(dataflowSpecification, {
+                unmarkNewNodes, urloverrides, tryMinify,
+            });
+            errors.push(...preprocessErrors);
+            if (errors.length) return { errors, warnings, info };
+            dataflowSpecification = preprocessedSpecification;
 
             // Update metadata
             const { metadata } = dataflowSpecification;
@@ -310,24 +349,6 @@ export default class EditorManager {
             if (errors.length) {
                 return { errors, warnings, info };
             }
-
-            let usedGraphs;
-            if (tryMinify === true) {
-                // Specification graphs
-                usedGraphs = dataflowSpecification.graphs;
-            } else if (tryMinify) {
-                // Dataflow graphs
-                usedGraphs = tryMinify.graphs;
-            }
-
-            if (usedGraphs) {
-                // Minify nodes
-                const usedNames = EditorManager.getUsedNames(usedGraphs);
-                // eslint-disable-next-line no-param-reassign
-                dataflowSpecification.nodes =
-                    EditorManager.minifySpecificationNodes(dataflowSpecification.nodes, usedNames);
-            }
-
             // Update graph specification
             const {
                 errors: newErrors, warnings: newWarnings,
