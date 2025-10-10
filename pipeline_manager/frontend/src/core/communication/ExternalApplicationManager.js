@@ -181,7 +181,7 @@ class ExternalApplicationManager {
             const [success, specificationOrError] = await loadJsonFromRemoteLocation(specification);
             if (!success) {
                 NotificationHandler.terminalLog('error', 'Specification is invalid', specificationOrError);
-                return true;
+                return Promise.resolve();
             }
 
             // eslint-disable-next-line no-param-reassign
@@ -198,15 +198,16 @@ class ExternalApplicationManager {
                 this.editorManager.specificationVersion,
                 JSON.parse(specification).version,
             );
-            return true;
+            return Promise.resolve();
         }
 
-        return false;
+        return specification;
     }
 
     async preprocessSpecification(specification, { urloverrides, tryMinify } = {}) {
-        const validationError = await this.validateSpecification(specification);
-        if (validationError) return Promise.resolve();
+        // eslint-disable-next-line no-param-reassign
+        specification = await this.validateSpecification(specification);
+        if (!specification) return Promise.resolve();
 
         if (typeof tryMinify === 'string' || tryMinify instanceof String) {
             const [success, dataflowOrError] = await loadJsonFromRemoteLocation(tryMinify);
@@ -233,8 +234,9 @@ class ExternalApplicationManager {
     }
 
     async updateSpecification(specification, { urloverrides, tryMinify } = {}) {
-        const validationError = await this.validateSpecification(specification);
-        if (validationError) return Promise.resolve();
+        // eslint-disable-next-line no-param-reassign
+        specification = await this.validateSpecification(specification);
+        if (!specification) return Promise.resolve();
 
         if (typeof tryMinify === 'string' || tryMinify instanceof String) {
             const [success, dataflowOrError] = await loadJsonFromRemoteLocation(tryMinify);
