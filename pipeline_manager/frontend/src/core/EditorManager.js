@@ -1988,7 +1988,7 @@ export default class EditorManager {
                 } = EditorManager.mergeObjects(primaryObject[key], value);
                 errors.push(...mergeErrors);
                 warnings.push(...mergeWarnings);
-            } else {
+            } else if (primaryObject[key] === undefined) {
                 primaryObject[key] = value;
             }
         });
