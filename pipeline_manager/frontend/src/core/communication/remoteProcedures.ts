@@ -119,6 +119,13 @@ function getConnection(graph_id: string, from: string, to: string): any {
 }
 
 /**
+ * @returns status of the frontend
+ */
+export function frontend_status_get() {
+    return { status: 'ready' };
+}
+
+/**
  * @returns currently used specification
  */
 export function frontend_specification_get() {

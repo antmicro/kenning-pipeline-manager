@@ -1,5 +1,25 @@
 {
     "frontend_endpoints": {
+        "frontend_status_get": {
+            "description": "Returns status of the frontend",
+            "params": {
+                "$ref": "common_types#/$defs/null_or_empty"
+            },
+            "returns": {
+                "description": "Description of frontend status",
+                "type": "object",
+                "properties": {
+                    "status": {
+                        "description": "Status",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "status"
+                ],
+                "additionalProperties": false
+            }
+        },
         "frontend_specification_get": {
             "description": "Returns specification used by frontend",
             "params": {
