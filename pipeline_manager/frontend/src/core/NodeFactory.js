@@ -1093,8 +1093,8 @@ export function updateSubgraphInterfaces(nodes, inputs = [], outputs = []) {
 
     // Create new inputs and outputs
     const newInterfaces = [];
-    const graphId = nodes[0].graph.id;
     externalInterfaces.forEach((intf) => {
+        const graphId = nodes[0].graph.id;
         updateInterfaceRegistry(intf, graphId);
 
         const container = intf.direction === 'output' ? outputs : inputs;
@@ -1150,8 +1150,8 @@ export function updateSubgraphProperties(nodes) {
     }
 
     const newProperties = [];
-    const graphId = nodes[0].graph.id;
     externalProperties.forEach((property) => {
+        const graphId = nodes[0].graph.id;
         updateInterfaceRegistry(property, graphId);
 
         newProperties.push({
