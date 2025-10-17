@@ -91,7 +91,10 @@ export const saveSpecificationConfiguration: SaveConfiguration = {
         }
 
         if (this.minify && specification.nodes) {
-            const usedNames = EditorManager.getUsedNames(dataflow.graphs);
+            const usedNames = EditorManager.getUsedNames([
+                ...dataflow.graphs,
+                ...specification.graphs,
+            ]);
             specification.nodes =
                 EditorManager.minifySpecificationNodes(specification.nodes, usedNames);
             if (!specification.nodes.length) delete specification.nodes;
