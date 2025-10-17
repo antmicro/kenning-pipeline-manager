@@ -944,10 +944,10 @@ export default class EditorManager {
         }
 
         // Update node specification
-        const unresolvedNodeSpecification = this.specification.unresolvedSpecification.nodes.find(
+        const unresolvedNodeSpecification = this.specification.unresolvedSpecification.nodes?.find(
             (n) => EditorManager.getNodeName(n) === node.type,
         );
-        const resolvedNodeSpecification = this.specification.currentSpecification.nodes.find(
+        const resolvedNodeSpecification = this.specification.currentSpecification.nodes?.find(
             (n) => EditorManager.getNodeName(n) === node.type,
         );
         if (resolvedNodeSpecification === undefined) {
@@ -956,6 +956,9 @@ export default class EditorManager {
         } else {
             resolvedNodeSpecification.subgraphId = newGraph.id;
             if (unresolvedNodeSpecification === undefined) {
+                if (this.specification.unresolvedSpecification.nodes === undefined) {
+                    this.specification.unresolvedSpecification.nodes = [];
+                }
                 this.specification.unresolvedSpecification.nodes.push(resolvedNodeSpecification);
             } else {
                 unresolvedNodeSpecification.subgraphId = newGraph.id;
