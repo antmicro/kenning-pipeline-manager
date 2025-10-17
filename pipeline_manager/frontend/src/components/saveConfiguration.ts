@@ -45,7 +45,8 @@ export const saveSpecificationConfiguration: SaveConfiguration = {
         // Match graph IDs with subgraphId in node specification
         dataflow.graphs.forEach((graph: any) => {
             dataflow.graphs.forEach((g: any) => {
-                const subgraphNode = g.nodes.find((n: any) => n.subgraph === graph.id);
+                const checkedId = graph.id;
+                const subgraphNode = g.nodes.find((n: any) => n.subgraph === checkedId);
                 if (subgraphNode !== undefined) {
                     const nodeSpecification = specification.nodes?.find(
                         (n: any) => n.name === subgraphNode.name,
@@ -56,16 +57,79 @@ export const saveSpecificationConfiguration: SaveConfiguration = {
                         subgraphNode.subgraph = nodeSpecification.subgraphId;
                     }
                 }
-                const relatedGraphNode = g.nodes.find(
-                    (n: any) => n.relatedGraphs?.includes((entry: any) => entry.id === graph.id),
+                const relatedGraphNode = g.nodes.find((n: any) =>
+                    n.relatedGraphs?.some((entry: any) => entry.id === checkedId),
                 );
-                const graphButton = g.nodes.find(
-                    (n: any) => n.properties?.includes((prop: any) => prop.type === 'button-graph' && prop.default === graph.id),
+                const graphButton = g.nodes.find((n: any) =>
+                    n.properties?.some(
+                        (prop: any) => prop.type === 'button-graph' && prop.default === checkedId,
+                    ),
                 );
+
                 if (subgraphNode || relatedGraphNode || graphButton) {
-                    specification.graphs = specification.graphs
-                        .filter((oldGraph: any) => oldGraph.id !== graph.id);
-                    specification.graphs.push(graph);
+                    if (Array.isArray(graph.nodes) && graph.nodes.length) {
+                        specification.graphs = specification.graphs.filter(
+                            (oldGraph: any) => oldGraph.id !== graph.id,
+                        );
+                        specification.graphs.push(graph);
+                    } else {
+                        // Remove empty graphs
+                        if (subgraphNode) {
+                            const nodesIndex = specification.nodes
+                                .map((n: any) => n.name)
+                                .indexOf(subgraphNode.name);
+                            const graphsIndex = g.nodes
+                                .map((n: any) => n.name)
+                                .indexOf(subgraphNode.name);
+                            delete specification.nodes[nodesIndex].subgraphId;
+                            // eslint-disable-next-line no-param-reassign
+                            delete g.nodes[graphsIndex].subgraph;
+                        }
+                        if (relatedGraphNode) {
+                            const nodesIndex = specification.nodes
+                                .map((n: any) => n.name)
+                                .indexOf(relatedGraphNode.name);
+                            const graphsIndex = g.nodes
+                                .map((n: any) => n.name)
+                                .indexOf(relatedGraphNode.name);
+                            if (relatedGraphNode.relatedGraphs.length > 1) {
+                                specification.nodes[nodesIndex].relatedGraphs =
+                                    relatedGraphNode.relatedGraphs.filter(
+                                        (entry: any) => entry.id !== checkedId,
+                                    );
+                                // eslint-disable-next-line no-param-reassign
+                                g.nodes[graphsIndex].relatedGraphs =
+                                    relatedGraphNode.relatedGraphs.filter(
+                                        (entry: any) => entry.id !== checkedId,
+                                    );
+                            } else {
+                                delete specification.nodes[nodesIndex].relatedGraphs;
+                                // eslint-disable-next-line no-param-reassign
+                                delete g.nodes[graphsIndex].relatedGraphs;
+                            }
+                        }
+                        if (graphButton) {
+                            const nodesIndex = specification.nodes
+                                .map((n: any) => n.name)
+                                .indexOf(graphButton.name);
+                            const graphsIndex = g.nodes
+                                .map((n: any) => n.name)
+                                .indexOf(graphButton.name);
+                            specification.nodes[nodesIndex].properties =
+                                graphButton.properties.filter(
+                                    (prop: any) =>
+                                        !(
+                                            prop.type === 'button-graph' &&
+                                            prop.default === checkedId
+                                        ),
+                                );
+                            // eslint-disable-next-line no-param-reassign
+                            g.nodes[graphsIndex].properties = graphButton.properties.filter(
+                                (prop: any) =>
+                                    !(prop.type === 'button-graph' && prop.default === checkedId),
+                            );
+                        }
+                    }
                 }
             });
         });
@@ -88,6 +152,10 @@ export const saveSpecificationConfiguration: SaveConfiguration = {
                     : [specification.graphs.length, 0];
                 specification.graphs.splice(index, remove, graph);
             });
+
+            specification.graphs = specification.graphs.filter(
+                (graph: any) => Array.isArray(graph.nodes) && graph.nodes.length,
+            );
         }
 
         if (this.minify && specification.nodes) {
