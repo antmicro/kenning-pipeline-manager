@@ -683,6 +683,11 @@ abortDrag = () => {
 };
 
 stopDrag = () => {
+    const curNode = props.node;
+    const currentPosition = curNode.position;
+    curNode.position = groupDragMove.draggingStartPosition.value;
+    graph.value.editNode(curNode);
+    curNode.position = currentPosition;
     groupDragMove.onPointerUp();
     cleanEvents();
 };
