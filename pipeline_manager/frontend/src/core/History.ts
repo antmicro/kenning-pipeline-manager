@@ -103,7 +103,12 @@ class NodeStep extends Step {
 
             // restore connections
             connections.forEach((conn) => {
-                graph.value.addConnection(conn.from, conn.to);
+                const locc = graph.value.addConnection(conn.from, conn.to);
+                let pos = 0;
+                ((<any>conn).anchors ?? []).forEach((anchor: any) => {
+                    (<any>graph.value).addAnchor(anchor, locc, pos);
+                    pos += 1;
+                });
             });
         }
     }
