@@ -26,6 +26,9 @@ export default function createPipelineManagerGraph(graph) {
     // Add an event for editing node
     graph.events.editNode = new BaklavaEvent();
 
+    // Add event for moving anchors.
+    graph.events.editAnchor = new BaklavaEvent();
+
     // Graph node that represents the graph itself. Root graph does not have a node graph assigned.
     graph.graphNode = undefined;
 
@@ -530,6 +533,10 @@ export default function createPipelineManagerGraph(graph) {
         this.nodeHooks.removeTarget(node);
     };
 
+    graph.editAnchor = function editAnchor(connection, index, position, prevPos) {
+        if (connection.anchors === undefined) connection.anchors = [];
+        graph.events.editAnchor.emit([connection, (index * 3 + 1), position, prevPos]);
+    };
     graph.editNode = function editNode(node) {
         this.events.editNode.emit(node);
     };
