@@ -31,6 +31,11 @@ export default defineComponent({
             required: true,
             type: Function,
         },
+        connection: { required: true },
+        index: {
+            required: true,
+            type: Number,
+        },
     },
     setup(props) {
         // any definition is an ad-hoc solution as we don't have our graph definition
@@ -46,9 +51,11 @@ export default defineComponent({
         const dragMove = useDragMove(ref(props.position));
 
         const stopDrag = () => {
-            dragMove.onPointerUp();
             document.removeEventListener('pointermove', dragMove.onPointerMove);
             document.removeEventListener('pointerup', stopDrag);
+            // eslint-disable-next-line max-len
+            graph.value.editAnchor(props.connection, props.index, props.position, dragMove.draggingStartPosition.value);
+            dragMove.onPointerUp();
         };
 
         const startDrag = (ev: PointerEvent) => {

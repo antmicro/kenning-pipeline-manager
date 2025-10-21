@@ -31,6 +31,8 @@ Inherits from baklavajs/renderer-vue/src/connection/ConnectionView.vue
                     v-for="(anchor, index) in connection.anchors"
                     :key="anchor.id"
                     :position="anchor"
+                    :connection="connection"
+                    :index="index"
                     :rightclickCallback="() => removeAnchor(index)"
                 />
             </template>
