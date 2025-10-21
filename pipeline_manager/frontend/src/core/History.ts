@@ -164,6 +164,8 @@ class ConnectionStep extends Step {
 class AnchorStep extends Step {
     anchor: any = undefined;
 
+    prevPosition: any = undefined;
+
     constructor(type: string, topic: any, tid: string = uuidv4()) {
         if (tid === '') tid = uuidv4(); // eslint-disable-line no-param-reassign
         super(type, topic, tid);
@@ -189,6 +191,23 @@ class AnchorStep extends Step {
                 (n) => n.from === this.anchor[0].from && n.to === this.anchor[0].to,
             );
             if (conn !== undefined) (<any>conn).anchors.splice(this.anchor[2], 1);
+        }
+    }
+
+    edit(graph: Ref<Graph>) {
+        if (this.anchor !== undefined) {
+            const conn = graph.value.connections.find(
+                (n) => n.from === this.anchor[0].from && n.to === this.anchor[0].to,
+            );
+            const prevX = this.anchor[1].x;
+            const prevY = this.anchor[1].y;
+            this.anchor[1].x = this.prevPosition.x;
+            this.anchor[1].y = this.prevPosition.y;
+            this.prevPosition.x = prevX;
+            this.prevPosition.y = prevY;
+            (<any>conn).anchors.splice(
+                this.anchor[2], 1, this.anchor[1],
+            );
         }
     }
 }
@@ -223,6 +242,7 @@ export function useHistory(graph: Ref<any>, commandHandler: ICommandHandler): IH
         g.events.removeConnection.unsubscribe(tok);
         g.events.addAnchor.unsubscribe(tok);
         g.events.removeAnchor.unsubscribe(tok);
+        g.events.editAnchor.unsubscribe(tok);
     };
 
     // Switch all the events to any new graph that's displayed
@@ -310,6 +330,20 @@ export function useHistory(graph: Ref<any>, commandHandler: ICommandHandler): IH
                     const step = new AnchorStep('add', conn.anchors[idx].id.toString(), transactionId.value);
                     historyItem.push(step);
                     step.anchor = [conn, conn.anchors[idx], idx];
+                    undoneHistory.set(newGraph.id, []);
+                }
+            });
+            newGraph.events.editAnchor.subscribe(token, (tuple: any) => {
+                if (!suppressingHistory.value) {
+                    const historyItem = history.get(newGraph.id);
+                    if (!historyItem) return;
+                    const idx = Math.trunc((tuple[1] - 1) / 3);
+                    const conn = tuple[0];
+                    const prevPos = tuple[3];
+                    const step = new AnchorStep('edit', conn.anchors[idx].id.toString(), transactionId.value);
+                    historyItem.push(step);
+                    step.anchor = [conn, conn.anchors[idx], idx];
+                    step.prevPosition = prevPos;
                     undoneHistory.set(newGraph.id, []);
                 }
             });
