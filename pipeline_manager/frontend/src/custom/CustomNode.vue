@@ -322,7 +322,8 @@ const contextMenuTitleItems = computed(() => {
     const items = [];
     items.push({ value: 'sidebar', label: 'Details', icon: icons.Sidebar, endSection: true });
     if (editorManager.baklavaView.settings.editableNodeTypes &&
-        node.value.type !== DEFAULT_GRAPH_NODE_TYPE) {
+        node.value.type !== DEFAULT_GRAPH_NODE_TYPE &&
+        !viewModel.value.editor.readonly) {
         items.push(
             { value: 'configure', label: 'Configure' },
             { value: 'property', label: 'Add property' },
