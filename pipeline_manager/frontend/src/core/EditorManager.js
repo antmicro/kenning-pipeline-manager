@@ -549,16 +549,6 @@ export default class EditorManager {
             const targetGraph = dataflow.graphs[0];
             targetGraph.name = dataflowMetadata.name ?? targetGraph.name;
 
-            if (targetGraph.name === undefined) {
-                errors.push(`Included subgraph from ${dataflowMetadata.url} does not have a name defined.`);
-                continue; // eslint-disable-line no-continue
-            }
-
-            if (graphs.find((graph) => graph.name === targetGraph.name) !== undefined) {
-                errors.push(`Included graph from ${dataflowMetadata.url} has a duplicate name`);
-                continue; // eslint-disable-line no-continue
-            }
-
             graphs.push(targetGraph);
         }
 
