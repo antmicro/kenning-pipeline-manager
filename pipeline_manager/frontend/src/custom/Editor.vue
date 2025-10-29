@@ -41,7 +41,7 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
             name="palette"
             v-if="!(readonly || hideHud)"
         >
-            <NodePalette />
+            <Palette />
         </slot>
 
         <div
@@ -119,7 +119,7 @@ import usePanZoom from './panZoom';
 import CustomNode from './CustomNode.vue';
 import PipelineManagerConnection from './connection/PipelineManagerConnection.vue';
 import TemporaryConnection from './connection/TemporaryConnection.vue';
-import NodePalette from './nodepalette/NodePalette.vue';
+import Palette from '../components/Palette.vue';
 import { useTemporaryConnection } from './temporaryConnection';
 import NotificationHandler from '../core/notifications';
 import EditorManager, { loadJsonFromRemoteLocation } from '../core/EditorManager';
@@ -147,7 +147,7 @@ export default defineComponent({
         ParentMenu,
         PipelineManagerConnection,
         TemporaryConnection,
-        NodePalette,
+        Palette,
         RectangleSelection,
         WelcomeMenu,
         Zoom,

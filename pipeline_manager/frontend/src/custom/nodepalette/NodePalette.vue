@@ -11,48 +11,25 @@ Inherits from baklavajs/packages/renderer-vue/src/nodepalette/NodePalette.vue
 -->
 
 <template>
-    <!-- eslint-disable vue/no-multiple-template-root -->
-    <div
-        ref="paletteRef"
-        class="baklava-node-palette export-hidden"
-        :class="{'hidden-navbar': $isMobile}"
-    >
-        <div class="search-bar">
-            <div class="palette-title">
-                <span>Nodes browser</span>
-            </div>
-            <div class="__entry_search">
-                <Magnifier :color="'gray'" />
-                <input class="node-search" v-model="nodeSearch" placeholder="Search" />
-            </div>
-        </div>
-        <div class="nodes">
-            <PaletteCategory
-                :nodeTree="nodeTree"
-                :onDragStart="onDragStart"
-                :defaultCollapse="collapse"
-                :tooltip="tooltip"
-                :nodeSearch="nodeSearch"
-            />
-        </div>
-        <!-- Height of the sidebar is 60 so we need to subtract that -->
-        <Tooltip
-            v-show="tooltip.visible"
-            :text="tooltip.text"
-            :left="tooltip.left"
-            :top="tooltip.top - 60"
+    <div class="nodes">
+        <PaletteCategory
+            :nodeTree="nodeTree"
+            :onDragStart="onDragStart"
+            :defaultCollapse="collapse"
+            :tooltip="tooltip"
+            :nodeSearch="nodeSearch"
         />
+        <transition name="fade">
+            <div v-if="draggedNode" class="baklava-dragged-node" :style="draggedNodeStyles">
+                <PaletteEntry
+                    :title="draggedNode.nodeInformation.title"
+                    :iconPath="draggedNode.iconPath"
+                    :isDragged="true"
+                    :depth="0"
+                />
+            </div>
+        </transition>
     </div>
-    <transition name="fade">
-        <div v-if="draggedNode" class="baklava-dragged-node" :style="draggedNodeStyles">
-            <PaletteEntry
-                :title="draggedNode.nodeInformation.title"
-                :iconPath="draggedNode.iconPath"
-                :isDragged="true"
-                :depth="0"
-            />
-        </div>
-    </transition>
 </template>
 
 <script>
@@ -62,8 +39,6 @@ import { usePointer } from '@vueuse/core';
 import PaletteCategory from './PaletteCategory.vue';
 import getNodeTree from './nodeTree';
 import PaletteEntry from './PaletteEntry.vue';
-import Tooltip from '../../components/Tooltip.vue';
-import Magnifier from '../../icons/Magnifier.vue';
 import { DEFAULT_CUSTOM_NODE_TYPE } from '../../core/EditorManager';
 import { menuState, configurationState } from '../../core/nodeCreation/ConfigurationState';
 
@@ -71,17 +46,23 @@ export default defineComponent({
     components: {
         PaletteCategory,
         PaletteEntry,
-        Tooltip,
-        Magnifier,
     },
-    setup() {
+    props: {
+        paletteRef: {
+            required: true,
+        },
+        paletteSearch: {
+            required: true,
+        },
+    },
+    setup(props) {
         const { viewModel } = useViewModel();
         const { editor } = viewModel.value;
 
         const { x: mouseX, y: mouseY } = usePointer();
         const { transform } = useTransform();
 
-        const paletteRef = ref(null);
+        const nodeSearch = computed(() => props.paletteSearch);
         const editorEl = inject('editorEl');
 
         const draggedNode = ref(null);
@@ -129,7 +110,7 @@ export default defineComponent({
         const dragEndPlaceNode = (ev) => {
             const elements = document.elementsFromPoint(ev.clientX, ev.clientY);
 
-            if (!elements.includes(paletteRef.value)) {
+            if (!elements.includes(props.paletteRef)) {
                 const rect = editorEl.value.getBoundingClientRect();
                 [x.value, y.value] = transform(mouseX.value - rect.left, mouseY.value - rect.top);
 
@@ -167,7 +148,6 @@ export default defineComponent({
             document.addEventListener('pointerup', dragEndPlaceNode);
             document.addEventListener('keydown', dragEndDeselectNode);
         };
-        const nodeSearch = ref('');
         const scroll = ref(0);
         const showMenu = ref(false);
         provide('menu', showMenu);
@@ -194,7 +174,6 @@ export default defineComponent({
             collapse,
             tooltip,
             nodeSearch,
-            paletteRef,
             scroll,
         };
     },
