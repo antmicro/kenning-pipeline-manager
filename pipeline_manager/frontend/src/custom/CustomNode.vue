@@ -332,7 +332,7 @@ const contextMenuTitleItems = computed(() => {
             { value: 'delete-property', label: 'Delete property' },
             { value: 'delete-interface', label: 'Delete interface', endSection: true },
         );
-        if (!isGraphNode) {
+        if (!isGraphNode && !editorManager.editor.preview) {
             items.push(
                 { value: 'addSubgraph', label: 'Add subgraph', icon: icons.Subgraph },
                 { value: 'addAndEditSubgraph', label: 'Add and edit subgraph', icon: icons.Subgraph },
@@ -340,7 +340,7 @@ const contextMenuTitleItems = computed(() => {
         }
     }
     if (isGraphNode) {
-        items.push({ value: 'editSubgraph', label: 'Edit Subgraph', icon: icons.Subgraph });
+        items.push({ value: 'editSubgraph', label: 'Go to graph', icon: icons.Subgraph });
     }
     if (nodeHasRelatedGraphs.value) {
         const nodeInstance = node.value;

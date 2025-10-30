@@ -6,7 +6,7 @@ const countOfInitiallyExposedInterface = 3;
 async function enterSubgraph(page: Page) {
     const nodeWithSubgraph = page.getByText('Test subgraph #1').last().locator('../..');
     await nodeWithSubgraph.locator('.__title').click({ button: 'right' });
-    const contextMenuOption = page.locator('.baklava-context-menu').getByText('Edit Subgraph');
+    const contextMenuOption = page.locator('.baklava-context-menu').getByText('Go to graph');
     await contextMenuOption.click();
 }
 
