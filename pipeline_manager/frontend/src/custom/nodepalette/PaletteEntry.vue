@@ -8,7 +8,12 @@ SPDX-License-Identifier: Apache-2.0
 A single entry representing available node type in the sidebar.
 -->
 <template>
-    <div class="__entry __node-entry __dragged" :style="padding">
+    <div
+        v-show="mask === undefined || mask"
+        class="__entry __node-entry"
+        :class="{ __category: isCategory, __dragged: isDragged }"
+        :style="padding"
+    >
         <img class="__title-icon" v-if="nodeIcon !== undefined" :src="nodeIcon" draggable="false" />
         <div class="__title-label" v-html="titleSanitized"></div>
     </div>
@@ -33,6 +38,22 @@ export default defineComponent({
             type: Number,
             required: true,
         },
+        isCategory: {
+            type: Boolean,
+            required: false,
+        },
+        isDragged: {
+            type: Boolean,
+            required: false,
+        },
+        hitSubstring: {
+            type: String,
+            required: false,
+        },
+        mask: {
+            // Optional boolean
+            required: false,
+        },
     },
     setup(props) {
         const { viewModel } = useViewModel();
@@ -43,17 +64,15 @@ export default defineComponent({
         const padding = computed(
             () => `padding-left: ${minPadding + props.depth * paddingDepth}px`,
         );
+        const titleSanitized =
+            computed(() => DOMPurify.sanitize(props.hitSubstring ?? props.title));
 
         return {
             nodeIcon,
             padding,
             getIconPath,
+            titleSanitized,
         };
-    },
-    computed: {
-        titleSanitized() {
-            return DOMPurify.sanitize(this.title);
-        },
     },
 });
 </script>

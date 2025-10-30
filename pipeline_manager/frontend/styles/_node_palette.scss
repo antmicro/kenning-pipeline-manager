@@ -30,20 +30,38 @@
     & .search-bar {
         .palette-title {
             display: flex;
-            align-items: center;
             margin: 0;
             border: 1px solid #393939;
             border-right: 0;
             border-top: 0;
             border-left: 0;
 
-            padding-bottom: 1em;
-            padding-top: 1em;
-            padding-left: 2em;
+            height: 3em;
+            & .tab {
+                cursor: pointer;
+                display: flex;
+
+                align-items: center;
+                justify-content: center;
+
+                height: 100%;
+                width: 100%;
+
+                &.--active {
+                    background-color: var(--baklava-node-color-background);
+                }
+                &:not(.--active) {
+                    color: var(--baklava-control-color-hover);
+                }
+
+                &:hover {
+                    color: $green;
+                }
+            }
         }
     }
 
-    .nodes {
+    .entries {
         overflow-y: auto;
         overflow-x: hidden;
     }
@@ -52,7 +70,7 @@
         margin: 0;
     }
 
-    &>.nodes {
+    &>.entries {
         overflow-y: auto;
     }
 }

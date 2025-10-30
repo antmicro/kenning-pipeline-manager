@@ -11,7 +11,7 @@ Inherits from baklavajs/packages/renderer-vue/src/nodepalette/NodePalette.vue
 -->
 
 <template>
-    <div class="nodes">
+    <div class="nodes entries">
         <PaletteCategory
             :nodeTree="nodeTree"
             :onDragStart="onDragStart"
