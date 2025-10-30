@@ -200,7 +200,7 @@ export default class PipelineManagerEditor extends Editor {
 
     unregisterGraphs() {
         [...this.graphs]
-            .filter((graph) => graph.id !== this._graph.id)
+            .filter((graph) => graph !== this._graph)
             .forEach((graph) => this.unregisterGraph(graph));
         this.subgraphStack = [];
     }
