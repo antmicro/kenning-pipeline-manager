@@ -399,6 +399,7 @@ export default function CreateCustomGraphNodeType(template, graphNode) {
             return {
                 state: {
                     id: uuidv4(),
+                    name: this.template.name,
                     nodes: this.template.nodes.map(addNewInterfaceIds).map(addNewNodeId),
                     connections,
                     graphLoadingState,
