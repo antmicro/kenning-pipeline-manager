@@ -8,13 +8,12 @@
  * Implements custom version of baklava's Graph object
  */
 
-import {
-    GraphTemplate, DummyConnection, Connection,
-} from '@baklavajs/core';
+import { DummyConnection, Connection } from '@baklavajs/core';
 import { v4 as uuidv4 } from 'uuid';
 import { BaklavaEvent } from '@baklavajs/events';
 import { startTransaction, commitTransaction } from '../core/History.ts';
 import { updateInterfacePosition } from './CustomNode.js';
+import GraphTemplate from './CustomGraphTemplate.js';
 
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-underscore-dangle */
@@ -422,7 +421,7 @@ export default function createPipelineManagerGraph(graph) {
     graph.save = function save() {
         const state = {
             id: this.id,
-            name: this.name,
+            name: this.name !== '' ? this.name : undefined,
             nodes: this.nodes.map((n) => n.save()),
             connections: this.connections.map((c) => ({
                 id: c.id,

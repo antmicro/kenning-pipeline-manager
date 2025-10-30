@@ -6,7 +6,7 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { GraphTemplate, NodeInterface, Node } from '@baklavajs/core';
+import { NodeInterface, Node } from '@baklavajs/core';
 
 import { updateInterfacePosition } from '../custom/CustomNode.js';
 import {
@@ -28,6 +28,7 @@ import SliderInterface from '../interfaces/SliderInterface.js';
 import TextAreaInterface from '../interfaces/TextAreaInterface.js';
 import TextInterface from '../interfaces/TextInterface.js';
 import ButtonInterface from '../interfaces/ButtonInterface.js';
+import GraphTemplate from '../custom/CustomGraphTemplate.js';
 
 import { ir } from './interfaceRegistry.ts';
 
