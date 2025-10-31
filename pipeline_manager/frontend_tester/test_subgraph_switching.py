@@ -98,10 +98,11 @@ def upload_dataflow_file(
 
 def enter_subgraph_node(page: Page):
     """Navigate to a subgraph node."""
-    nodeWithSubgraph = (
-        page.get_by_text("Test subgraph #1").nth(1).locator("../..")
-    )
-    nodeWithSubgraph.locator(".__title").click(button="right")
+    page.locator(
+        ".node-container "
+        ".baklava-node[data-node-type='Test subgraph #1'] "
+        ".__title"
+    ).nth(0).click(button="right")
     contextMenuOption = page.locator(".baklava-context-menu").get_by_text(
         "Go to graph"
     )
