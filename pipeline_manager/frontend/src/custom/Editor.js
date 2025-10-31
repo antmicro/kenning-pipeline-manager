@@ -292,7 +292,12 @@ export default class PipelineManagerEditor extends Editor {
                         errors.push([`Expected exactly one template with ID ${n.name}, got ${fittingTemplate.length}`]);
                     }
                     usedSubgraphs.add(n.subgraph);
-                    [n.graphState] = fittingTemplate;
+
+                    const { subgraphId } = this.nodeTypes.get(n.name) ?? {};
+                    const isInstantiated = n.subgraph !== subgraphId;
+                    if (isInstantiated || subgraphId === undefined) {
+                        [n.graphState] = fittingTemplate;
+                    }
                 }
                 n.relatedGraphs
                     ?.filter(({ id }) => state.graphs.find((el) => el.id === id) === undefined)

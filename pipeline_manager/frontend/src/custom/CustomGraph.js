@@ -11,6 +11,7 @@
 import { DummyConnection, Connection } from '@baklavajs/core';
 import { v4 as uuidv4 } from 'uuid';
 import { BaklavaEvent } from '@baklavajs/events';
+import { toRaw } from 'vue';
 import { startTransaction, commitTransaction } from '../core/History.ts';
 import { updateInterfacePosition } from './CustomNode.js';
 import GraphTemplate from './CustomGraphTemplate.js';
@@ -313,7 +314,35 @@ export default function createPipelineManagerGraph(graph) {
                 // if needed
                 n.id ??= uuidv4();
 
-                this.addNode(node, state.graphLoadingState, n.id);
+                if (n.subgraph && n.graphState) {
+                    // Remove new graphs except current one since they become dangling after
+                    // CustomGraphNode.load
+                    const graphsBefore = new Set([...this.editor.graphs].map(toRaw));
+
+                    this.addNode(node, state.graphLoadingState, n.id);
+
+                    // TODO: Destroy graphs properly
+                    [...this.editor.graphs]
+                        .map(toRaw)
+                        .filter((g) => !graphsBefore.has(g))
+                        .filter((g) => g !== node.subgraph)
+                        .forEach((g) => this.editor.unregisterGraph(g));
+                } else if (n.subgraph && !state.graphLoadingState) {
+                    // Root graph
+                    // Preserve interfaces IDs to keep connections valid
+                    const interfacesEntries = n.interfaces
+                        .filter((intf) => intf.id)
+                        .map((intf) => [intf.name, intf.id]);
+
+                    const graphLoadingState = {
+                        newToSpecNodeIds: new Map([[n.id, n.id]]),
+                        newInterfaceIds: new Map([[n.id, new Map(interfacesEntries)]]),
+                    };
+
+                    this.addNode(node, graphLoadingState, n.id);
+                } else {
+                    this.addNode(node, state.graphLoadingState, n.id);
+                }
                 const nodeErrors = node.load(n);
                 if (Array.isArray(nodeErrors) && nodeErrors.length) {
                     errors.push(...nodeErrors);
