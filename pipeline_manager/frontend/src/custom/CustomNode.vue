@@ -968,8 +968,10 @@ const onContextMenuInterfaceClick = (action) => {
             );
 
             notifyEvents.exposedInterface.emit([chosenInterface, graph.value.id, true]);
+            graph.value.events.exposeInterface.emit([chosenInterface, viewModel.value.editor]);
             break;
         case 'UnsetExternalName':
+            graph.value.events.privatizeInterface.emit([chosenInterface, viewModel.value.editor]);
             viewModel.value.editor.privatizeInterface(
                 graph.value.id,
                 chosenInterface,
@@ -1085,8 +1087,10 @@ const onContextMenuPropertyClick = (action) => {
             );
 
             notifyEvents.exposedInterface.emit([chosenProperty, graph.value.id, true]);
+            graph.value.events.exposeInterface.emit([chosenProperty, viewModel.value.editor]);
             break;
         case 'UnsetExternalName':
+            graph.value.events.privatizeInterface.emit([chosenProperty, viewModel.value.editor]);
             viewModel.value.editor.privatizeInterface(
                 graph.value.id,
                 chosenProperty,

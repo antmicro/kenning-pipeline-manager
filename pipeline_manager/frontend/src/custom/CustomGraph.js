@@ -29,6 +29,10 @@ export default function createPipelineManagerGraph(graph) {
     // Add event for moving anchors.
     graph.events.editAnchor = new BaklavaEvent();
 
+    // Add an event for editing node
+    graph.events.exposeInterface = new BaklavaEvent();
+    graph.events.privatizeInterface = new BaklavaEvent();
+
     // Graph node that represents the graph itself. Root graph does not have a node graph assigned.
     graph.graphNode = undefined;
 
