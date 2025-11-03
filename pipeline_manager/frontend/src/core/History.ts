@@ -216,6 +216,31 @@ class AnchorStep extends Step {
         }
     }
 }
+class InterfaceStep extends Step {
+    intf: any = undefined;
+
+    externalName = '';
+
+    editor: any = undefined;
+
+    exposed = true;
+
+    constructor(type: string, topic: any, tid: string = uuidv4()) {
+        if (tid === '') tid = uuidv4(); // eslint-disable-line no-param-reassign
+        super(type, topic, tid);
+    }
+
+    edit(graph: Ref<Graph>) {
+        if (this.intf !== undefined) {
+            if (this.exposed) {
+                this.editor.privatizeInterface(graph.value.id, this.intf);
+            } else {
+                this.editor.exposeInterface(graph.value.id, this.intf, this.externalName);
+            }
+            this.exposed = !this.exposed;
+        }
+    }
+}
 
 export function suppressHistoryLogging(value: boolean) {
     suppressingHistory.value = value;
@@ -361,6 +386,36 @@ export function useHistory(graph: Ref<any>, commandHandler: ICommandHandler): IH
                     const step = new AnchorStep('rem', conn.anchors[idx].id.toString(), transactionId.value);
                     historyItem.push(step);
                     step.anchor = [conn, conn.anchors[idx], idx];
+                    undoneHistory.set(newGraph.id, []);
+                }
+            });
+            newGraph.events.exposeInterface.subscribe(token, (tuple: any) => {
+                if (!suppressingHistory.value) {
+                    const historyItem = history.get(newGraph.id);
+                    if (!historyItem) return;
+                    const intf = tuple[0];
+                    const editor = tuple[1];
+                    const step = new InterfaceStep('edit', intf.id.toString(), transactionId.value);
+                    step.externalName = intf.externalName;
+                    step.intf = intf;
+                    step.editor = editor;
+                    step.exposed = true;
+                    historyItem.push(step);
+                    undoneHistory.set(newGraph.id, []);
+                }
+            });
+            newGraph.events.privatizeInterface.subscribe(token, (tuple: any) => {
+                if (!suppressingHistory.value) {
+                    const historyItem = history.get(newGraph.id);
+                    if (!historyItem) return;
+                    const intf = tuple[0];
+                    const editor = tuple[1];
+                    const step = new InterfaceStep('edit', intf.id.toString(), transactionId.value);
+                    step.externalName = intf.externalName;
+                    step.intf = intf;
+                    step.editor = editor;
+                    step.exposed = false;
+                    historyItem.push(step);
                     undoneHistory.set(newGraph.id, []);
                 }
             });
