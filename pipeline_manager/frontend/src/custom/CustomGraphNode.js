@@ -236,7 +236,7 @@ export default function CreateCustomGraphNodeType(template, graphNode) {
         }
 
         /* eslint-disable no-param-reassign */
-        load(state) {
+        load(state, privatize = false) {
             this.hooks.beforeLoad.execute(state);
 
             const out = parseInterfaces(state.interfaces ?? [], [], []);
@@ -244,7 +244,6 @@ export default function CreateCustomGraphNodeType(template, graphNode) {
                 return out;
             }
             let { inputs, outputs } = out;
-
             inputs = Object.values(inputs);
             outputs = Object.values(outputs);
 
@@ -262,7 +261,7 @@ export default function CreateCustomGraphNodeType(template, graphNode) {
                 }
             }
 
-            this.updateExposedInterfaces(inputs, outputs);
+            this.updateExposedInterfaces(inputs, outputs, privatize);
             // Default position should be undefined instead of (0, 0) so that it can be set
             // by autolayout
             this.position = state.position;
