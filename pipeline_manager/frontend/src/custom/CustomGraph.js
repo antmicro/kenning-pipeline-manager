@@ -281,6 +281,10 @@ export default function createPipelineManagerGraph(graph) {
         // Therefore, we need to get the reactive version from the array.
         node = this.nodes.find((n) => n.id === node.id);
         node.onPlaced(graphLoadingState, nodeId);
+        node.events.propertyEdit.subscribe(this, (tuple) => {
+            const curNode = this.nodes.find((n) => n.id === tuple[0].id);
+            this.editNode(curNode);
+        });
         this.events.addNode.emit(node);
         return node; // eslint-disable-line consistent-return
     };
@@ -513,6 +517,7 @@ export default function createPipelineManagerGraph(graph) {
                 .forEach((c) => this.removeConnection(c));
             this._nodes.splice(this.nodes.indexOf(node), 1);
             this.events.removeNode.emit(node);
+            node.events.propertyEdit.unsubscribe(this);
             node.onDestroy();
             this.nodeEvents.removeTarget(node.events);
             this.nodeHooks.removeTarget(node.hooks);
