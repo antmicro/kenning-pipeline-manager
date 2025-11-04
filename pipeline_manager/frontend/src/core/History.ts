@@ -158,10 +158,12 @@ class ConnectionStep extends Step {
     }
 
     remove(graph: Ref<Graph>) {
-        const conn = graph.value.connections.find((n) => n.id === this.topic);
-        if (conn !== undefined) {
-            this.conn = conn;
-            graph.value.removeConnection(conn);
+        const connToRemove = graph.value.connections.find(
+            (n) => n.from.id === this.conn.from.id &&
+                n.to.id === this.conn.to.id);
+        if (connToRemove !== undefined) {
+            this.conn = connToRemove;
+            graph.value.removeConnection(connToRemove);
         }
     }
 }
@@ -331,7 +333,9 @@ export function useHistory(graph: Ref<any>, commandHandler: ICommandHandler): IH
                 if (!suppressingHistory.value) {
                     const historyItem = history.get(newGraph.id);
                     if (!historyItem) return;
-                    historyItem.push(new ConnectionStep('add', conn.id.toString(), transactionId.value));
+                    const step = new ConnectionStep('add', conn.id.toString(), transactionId.value);
+                    historyItem.push(step);
+                    step.conn = conn;
                     undoneHistory.set(newGraph.id, []);
                 }
             });
