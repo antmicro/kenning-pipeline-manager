@@ -7,6 +7,7 @@
 /* eslint-disable max-classes-per-file */
 
 import { NodeInterface, Node } from '@baklavajs/core';
+import { BaklavaEvent } from '@baklavajs/events';
 
 import { updateInterfacePosition } from '../custom/CustomNode.js';
 import {
@@ -574,6 +575,8 @@ export class CustomNode extends Node {
         this.relatedGraphs = relatedGraphs;
         this.simpleInherited = simpleInherited;
 
+        this.events.propertyEdit = new BaklavaEvent();
+
         Object.keys(inputs).forEach((k) => {
             const intf = inputs[k]();
             this.addInput(k, intf);
@@ -1066,6 +1069,14 @@ export class CustomNode extends Node {
             .filter(([_, intf]) => intf.componentName === 'ButtonInterface')
             .forEach(([_, intf]) => (intf.type === 'button-graph' ? intf.events.updated.subscribe(this, goToGraph) : intf.events.updated.subscribe(this, externalRequest)),
             );
+        Object.entries(this.inputs)
+            .filter(([name, _]) => name.startsWith('property_'))
+            .filter(([_, intf]) => intf.port === false)
+            .forEach(([_, intf]) => (
+                intf.events.beforeSetValue.subscribe(this, (args) => {
+                    this.events.propertyEdit.emit([this, args, intf]);
+                })
+            ));
     }
 
     onDestroy() {
