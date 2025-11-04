@@ -92,14 +92,14 @@ class NodeStep extends Step {
                 (c) => interfaces.includes(c.from) || interfaces.includes(c.to),
             );
 
+            const save = this.nodeTuple[0].save();
             // remove the current version of the node
             graph.value.removeNode(this.nodeTuple[0]);
 
             // save the current version and load the previous save
             const n = graph.value.addNode(this.nodeTuple[0]);
-            const save = this.nodeTuple[1];
-            this.nodeTuple = [this.nodeTuple[0], this.nodeTuple[0].save()];
-            n.load(save);
+            n.load(this.nodeTuple[1], true);
+            this.nodeTuple = [this.nodeTuple[0], save];
 
             // restore connections
             connections.forEach((conn) => {
