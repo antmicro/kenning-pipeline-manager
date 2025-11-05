@@ -801,6 +801,7 @@ export class CustomNode extends Node {
         savedState.instanceName = savedState.title === '' ? undefined : savedState.title;
         delete savedState.title;
 
+        savedState.position = { ...savedState.position };
         return savedState;
     }
 
