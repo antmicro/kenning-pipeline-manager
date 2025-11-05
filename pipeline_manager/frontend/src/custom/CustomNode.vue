@@ -704,7 +704,9 @@ const startDrag = (ev) => {
 };
 
 const doneRenaming = () => {
-    graph.value.findNodeById(props.node.id).title = tempName.value;
+    const curNode = graph.value.findNodeById(props.node.id);
+    graph.value.editNode(curNode);
+    curNode.title = tempName.value;
     renaming.value = false;
 };
 
