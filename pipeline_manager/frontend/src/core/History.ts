@@ -8,7 +8,7 @@
 import {
     reactive, Ref, ref, watch,
 } from 'vue';
-import { Graph } from '@baklavajs/core';
+import { Graph, AbstractNode } from '@baklavajs/core';
 
 import { v4 as uuidv4 } from 'uuid';
 
@@ -83,6 +83,11 @@ class NodeStep extends Step {
 
     edit(graph: Ref<Graph>) {
         if (this.nodeTuple[0] !== undefined) {
+            this.nodeTuple[0] = graph.value.nodes.find((n) => n.id === this.nodeTuple[0].id);
+            if (this.nodeTuple[0] === undefined) {
+                return;
+            }
+            this.nodeTuple[0] = this.nodeTuple[0] as AbstractNode;
             // save node connections
             const interfaces = [
                 ...Object.values(this.nodeTuple[0].inputs),
