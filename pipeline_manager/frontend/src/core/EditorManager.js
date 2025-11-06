@@ -1228,12 +1228,8 @@ export default class EditorManager {
                 this.baklavaView.editor.deepCleanEditor();
                 this.baklavaView.editor.unregisterGraphs();
 
-                warnings.push(
-                    ...loadingWarnings.map((warning) => `Graph '${graph.name}' is invalid: ${warning}`),
-                );
-
-                errors.push(
-                    ...loadingErrors.map((error) => `Graph '${graph.name}' is invalid: ${error}`));
+                if (loadingWarnings.length) warnings.push(`Graph '${graph.name ?? graph.id}' is invalid:`, ...loadingWarnings.map((w) => `    ${w}`));
+                if (loadingErrors.length) errors.push(`Graph '${graph.name ?? graph.id}' is invalid:`, ...loadingErrors.map((w) => `    ${w}`));
             };
 
             // eslint-disable-next-line no-restricted-syntax

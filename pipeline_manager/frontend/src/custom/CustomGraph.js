@@ -302,11 +302,17 @@ export default function createPipelineManagerGraph(graph) {
         this.id = state.id ?? uuidv4();
         this.name = state.name ?? undefined;
 
+        const specOrGenerated = (mapping, id) => {
+            if (!mapping) return id;
+            return mapping.has(id) ? `'${mapping.get(id)}'` : `'${id}' (generated)`;
+        };
+
+        const nodesErrors = [];
         state.nodes.forEach((n) => {
             const nodeInformation = this.editor.nodeTypes.get(n.name);
 
             if (!nodeInformation) {
-                errors.push(`Node type ${n.name} is not registered`);
+                nodesErrors.push(`Node type ${n.name} is not registered`);
             } else {
                 const node = new nodeInformation.type(); // eslint-disable-line new-cap
 
@@ -337,6 +343,8 @@ export default function createPipelineManagerGraph(graph) {
                     const graphLoadingState = {
                         newToSpecNodeIds: new Map([[n.id, n.id]]),
                         newInterfaceIds: new Map([[n.id, new Map(interfacesEntries)]]),
+                        newToSpecConnIds: new Map(),
+                        newToSpecIntfIds: new Map(),
                     };
 
                     this.addNode(node, graphLoadingState, n.id);
@@ -345,41 +353,53 @@ export default function createPipelineManagerGraph(graph) {
                 }
                 const nodeErrors = node.load(n);
                 if (Array.isArray(nodeErrors) && nodeErrors.length) {
-                    errors.push(...nodeErrors);
+                    nodesErrors.push(`Node '${node.type}' with id ${specOrGenerated(state.graphLoadingState?.newToSpecNodeIds, n.id)} is invalid:`, ...nodeErrors.map((e) => `    ${e}`));
                 }
             }
         });
+        if (nodesErrors.length) errors.push('Node errors:', ...nodesErrors.map((e) => `    ${e}`));
 
         // Assigning ids to connections that do not have them
         state.connections.forEach((c) => {
             c.id ??= uuidv4();
         });
 
+        const connectionsErrors = [];
         state.connections.forEach((c) => {
+            const connectionErrors = [];
             const fromIf = this.findNodeInterface(c.from);
             const toIf = this.findNodeInterface(c.to);
-            if (!fromIf) {
-                errors.push(
-                    `Connection of id '${c.id}' invalid. Could not find interface with id '${c.from}'`,
-                );
-            } else if (!fromIf.port) {
-                errors.push(
-                    `Connection of id '${c.id}' invalid. Source of the connection is not an Interface`,
-                );
-            } else if (!toIf) {
-                errors.push(
-                    `Connection of id '${c.id}' invalid. Could not find interface with id '${c.to}'`,
-                );
-            } else if (!toIf.port) {
-                errors.push(
-                    `Connection of id '${c.id}' invalid. Destination of the connection is not an Interface`,
-                );
-            } else if (
-                state.connections.some(
-                    (conn) => conn.id === c.id && (conn.from !== c.from || conn.to !== c.to),
-                )
-            ) {
-                errors.push(`Connection of id '${c.id}' invalid. ID is already taken.`);
+            const otherExists = state.connections.some(
+                (conn) => conn.id === c.id && (conn.from !== c.from || conn.to !== c.to),
+            );
+
+            if (otherExists) connectionErrors.push(`ID is already taken.`);
+
+            const reportIfMissing = (direction, intf, id) => {
+                if (intf) return;
+                connectionErrors.push(`Missing ${direction} ${specOrGenerated(state.graphLoadingState?.newToSpecIntfIds, id)}`);
+            };
+
+            reportIfMissing('src', fromIf, c.from);
+            reportIfMissing('dst', toIf, c.to);
+
+            if (connectionErrors.length) {
+                const reportIfFound = (direction, intf) => {
+                    if (!intf) return;
+                    const node = this.nodes.find(({ id }) => id === intf.nodeId);
+                    const intfIdLabel =
+                        specOrGenerated(state.graphLoadingState?.newToSpecIntfIds, intf.id);
+                    const nodeIdLabel =
+                        specOrGenerated(state.graphLoadingState?.newToSpecNodeIds, node.id);
+                    connectionErrors.push(`Found   ${direction} ${intfIdLabel} '${intf.name}' in node '${node.type}' with id ${nodeIdLabel}`);
+                };
+
+                reportIfFound('src', fromIf);
+                reportIfFound('dst', toIf);
+
+                const connIdLabel =
+                    specOrGenerated(state.graphLoadingState?.newToSpecConnIds, c.id);
+                connectionsErrors.push(`Connection ${connIdLabel} is invalid:`, ...connectionErrors.map((e) => `    ${e}`));
             } else {
                 // Manually adding connections instead of using `addConnection` from baklavajs
                 // as we want to get a feedback message from `checkConnection` function
@@ -411,6 +431,8 @@ export default function createPipelineManagerGraph(graph) {
                 }
             }
         });
+
+        if (connectionsErrors.length) errors.push('Connection errors:', ...connectionsErrors.map((e) => `    ${e}`));
 
         this.hooks.load.execute(state);
         return errors;

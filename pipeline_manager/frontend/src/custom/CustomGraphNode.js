@@ -324,6 +324,10 @@ export default function CreateCustomGraphNodeType(template, graphNode) {
                 newToSpecNodeIds: new Map(),
                 // Subgraph node ID -> (Exposed Interface name -> New Interface ID)
                 newInterfaceIds: new Map(),
+                // New connection ID -> Specification connection ID
+                newToSpecConnIds: new Map(),
+                // New interface ID -> Specification interface ID
+                newToSpecIntfIds: new Map(),
             };
 
             /* Nodes */
@@ -333,7 +337,7 @@ export default function CreateCustomGraphNodeType(template, graphNode) {
 
             const createNewNodeId = (node) => {
                 const newId = uuidv4();
-                if (node.subgraph !== undefined) newToSpecNodeIds.set(newId, node.id);
+                if (node.id) newToSpecNodeIds.set(newId, node.id);
                 return newId;
             };
 
@@ -341,7 +345,11 @@ export default function CreateCustomGraphNodeType(template, graphNode) {
 
             /* Interfaces and connections */
 
-            const connections = this.template.connections.map((c) => ({ ...c, id: uuidv4() }));
+            const connections = this.template.connections.map((c) => {
+                const newId = uuidv4();
+                if (c.id) graphLoadingState.newToSpecConnIds.set(newId, c.id);
+                return { ...c, id: newId };
+            });
             const { newInterfaceIds } = graphLoadingState;
 
             const getOrGenerate = (map, key, factory = uuidv4) => {
@@ -375,6 +383,7 @@ export default function CreateCustomGraphNodeType(template, graphNode) {
                     .find((i) => i.id === oldId);
 
                 const newId = getOrGenerateInterfaceId(node, intf);
+                if (intf.id) graphLoadingState.newToSpecIntfIds.set(newId, intf.id);
 
                 // Side-effect: modify connections to have new interface IDs
                 connections.filter((c) => c.from === oldId).forEach((c) => { c.from = newId; });
