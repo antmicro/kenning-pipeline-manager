@@ -69,13 +69,19 @@ function parseLocation(loc) {
     }
 
     let relativeurl = '{}';
+    let urlparams;
     if (typeof document !== 'undefined') {
         const urlparent = document.location.href.split('/').slice(0, -1).join('/');
         relativeurl = `${urlparent}/{}`;
+        urlparams = new URLSearchParams(window.location.search);
     }
-    const defaultsubs = `{"https": "https://{}", "http": "http://{}", "relative": "${relativeurl}"}`;
-    const jsonsubs = process.env.VUE_APP_JSON_URL_SUBSTITUTES ?? defaultsubs;
-    const subs = JSON.parse(jsonsubs);
+    const defaultsubs = { https: 'https://{}', http: 'http://{}', relative: `${relativeurl}` };
+    const parseOrEmpty = (jsonsub) => (jsonsub && JSON.parse(jsonsub)) ?? {};
+    const subs = {
+        ...defaultsubs,
+        ...parseOrEmpty(urlparams?.get('jsonsubs')),
+        ...parseOrEmpty(process.env.VUE_APP_JSON_URL_SUBSTITUTES),
+    };
     const parts = loc.split('//');
 
     if (parts.length < 2) return undefined;

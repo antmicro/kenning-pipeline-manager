@@ -13,6 +13,6 @@ export default class ExternalFrontendApp implements ExternalApp {
 
     public request(data: JSONRPCRequest, endpoint: EndpointType) {
         if (endpoint === 'backend-api') throw new Error('Frontend external app does not support backend endpoints');
-        this.source.postMessage(data);
+        this.source.postMessage(data, '*');
     }
 }

@@ -781,7 +781,7 @@ export default defineComponent({
                         externalApp: externalApplicationManager.externalApp,
                     }));
 
-                if (response) event.source.postMessage(JSON.parse(JSON.stringify(response)));
+                if (response) event.source.postMessage(JSON.parse(JSON.stringify(response)), '*');
             });
 
             NotificationHandler.setShowNotification(false);
