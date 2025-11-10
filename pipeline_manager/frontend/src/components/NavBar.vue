@@ -1,5 +1,5 @@
 <!--
-Copyright (c) 2022-2024 Antmicro <www.antmicro.com>
+Copyright (c) 2022-2026 Antmicro <www.antmicro.com>
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -11,23 +11,21 @@ Displays user interface and main details about the Pipeline Manager status.
 
 <script>
 import {
-    markRaw, ref, provide, watch, computed,
+    markRaw, ref, provide, computed,
 } from 'vue';
-import { toSvg } from 'html-to-image';
-import jsonlint from 'jsonlint';
 import { useViewModel } from '@baklavajs/renderer-vue';
 import { api as fullscreen } from 'vue-fullscreen';
-import Logo from '../icons/Logo.vue';
 import Arrow from '../icons/Arrow.vue';
 import Expand from '../icons/Expand.vue';
+import ExternalAppStatus from './ExternalAppStatus.vue';
+import ExternalAppAction from './ExternalAppAction.vue';
+import FilesContextMenu from './navbar/FilesContextMenu.vue';
 import Collapse from '../icons/Collapse.vue';
-import Run from '../icons/Run.vue';
 import Validate from '../icons/Validate.vue';
 import Backend from '../icons/Backend.vue';
 import Bell from '../icons/Bell.vue';
 import Cube from '../icons/Cube.vue';
 import CassetteStop from '../icons/CassetteStop.vue';
-import DropdownItem from './DropdownItem.vue';
 import Cogwheel from '../icons/Cogwheel.vue';
 import Magnifier from '../icons/Magnifier.vue';
 import Sidebar from '../icons/Sidebar.vue';
@@ -36,9 +34,9 @@ import NotificationHandler from '../core/notifications';
 import { notificationStore } from '../core/stores';
 import runInfo from '../core/communication/runInformation';
 import getExternalApplicationManager from '../core/communication/ExternalApplicationManager';
-import { GraphFactory } from '../core/NodeFactory.js';
 import Notifications from './Notifications.vue';
 import Settings from './Settings.vue';
+import NavBarTransitions from './NavBarTransitions.vue';
 import {
     ParentMenu, SaveMenu, ExportMenu, NodeConfigurationMenu, PropertyConfigurationMenu,
     InterfaceConfigurationMenu, LayerConfigurationMenu, ListMenu,
@@ -53,25 +51,17 @@ import { saveSpecificationConfiguration, saveGraphConfiguration, exportGraph } f
 import icons from '../icons';
 
 import InputInterface from '../interfaces/InputInterface.js';
-import { brokenImage } from '../../../resources/broken_image.js';
-import {
-    startTransaction, commitTransaction,
-} from '../core/History.ts';
-import { loadingScreen } from '../core/utils';
 
 import globalProperties from '../globalProperties.ts';
 
 /* eslint-disable no-param-reassign */
 export default {
     components: {
-        Logo,
         Arrow,
-        Run,
         CassetteStop,
         Validate,
         Backend,
         Bell,
-        DropdownItem,
         Expand,
         Collapse,
         Notifications,
@@ -91,6 +81,8 @@ export default {
         LayerConfigurationMenu,
         ListMenu,
         GraphDetails,
+        FilesContextMenu,
+        NavBarTransitions,
     },
     computed: {
         dataflowGraphName() {
@@ -331,78 +323,6 @@ export default {
         };
     },
     methods: {
-        /**
-         * Loads nodes' specification from text structure.
-         * It first validates the specification file. If the validation is successful the
-         * specification is loaded. Otherwise a proper log is printed to the user.
-         *
-         * @param {string} specText specification to validate and load.
-         * @returns {Promise} result after validation and loading.
-         */
-        async loadSpecification(specText) {
-            const validationErrors = EditorManager.validateSpecification(specText);
-            if (Array.isArray(validationErrors) && validationErrors.length) {
-                NotificationHandler.terminalLog('error', 'Specification is invalid', validationErrors);
-                let version;
-                try {
-                    version = JSON.parse(specText).version;
-                } catch { return Promise.resolve(); }
-
-                if (this.editorManager.specificationVersion !== version) {
-                    NotificationHandler.terminalLog(
-                        'error',
-                        'Mismatched specification version',
-                        `Specification version (${version}) differs from the current version (${this.editorManager.specificationVersion}). It may result in unexpected behaviour.` +
-                        ' Please refer to https://antmicro.github.io/kenning-pipeline-manager/changelogs.html to see if that is the case.',
-                    );
-                }
-                return Promise.resolve();
-            }
-            return this.editorManager.updateEditorSpecification(specText)
-                .then(({ errors, warnings, info }) => {
-                    if (Array.isArray(warnings) && warnings.length) {
-                        NotificationHandler.terminalLog(
-                            'warning',
-                            'Issue when loading specification',
-                            warnings,
-                        );
-                    }
-                    if (Array.isArray(errors) && errors.length) {
-                        NotificationHandler.terminalLog('error', 'Specification is invalid', errors);
-                        if (Array.isArray(info) && info.length) {
-                            NotificationHandler.terminalLog(
-                                'error',
-                                'Mismatched specification version',
-                                `${info} Please refer to https://antmicro.github.io/kenning-pipeline-manager/changelogs.html to see if that is the case.`,
-                            );
-                        }
-                    } else if (Array.isArray(info) && info.length) {
-                        NotificationHandler.terminalLog('info', 'Specification loaded', info);
-                    }
-                });
-        },
-
-        createNewGraphCallback() {
-            startTransaction();
-            this.editorManager.editor.addNewGraph();
-            commitTransaction();
-        },
-
-        /**
-         * Event handler that loads a specification passed by the user
-         * and tries to load it into a new environment it.
-         */
-        async loadSpecificationCallback() {
-            const file = document.getElementById('load-spec-button').files[0];
-            if (!file) return;
-
-            await loadingScreen(async () => {
-                const content = await file.text();
-                return this.loadSpecification(content);
-            }, this.editorManager.baklavaView.editor.events.setLoad);
-            document.getElementById('load-spec-button').value = '';
-        },
-
         togglePanel(panel, disable = false) {
             const panelSelector = document.querySelector(panel.class);
             const iconRef = this.$refs[panel.iconRef];
@@ -456,78 +376,6 @@ export default {
             this.$nextTick(() => this.$refs.editorTitleInput._.refs.el.focus());
         },
 
-        /**
-         * Loads nodes' specification from JSON structure.
-         *
-         * @param {string} specText specification to validate and load.
-         * @returns {Promise} result after validation and loading.
-         */
-        async loadDataflow(dataflow) {
-            return this.editorManager.loadDataflow(dataflow).then(({ errors, warnings, info }) => {
-                if (Array.isArray(warnings) && warnings.length) {
-                    NotificationHandler.terminalLog(
-                        'warning',
-                        'Issue when loading dataflow',
-                        warnings,
-                    );
-                }
-                if (Array.isArray(errors) && errors.length) {
-                    const messageTitle = globalProperties.softLoad ?
-                        'Softload enabled, errors found while loading the dataflow' :
-                        'Dataflow is invalid';
-                    NotificationHandler.terminalLog('error', messageTitle, errors);
-                    if (Array.isArray(info) && info.length) {
-                        NotificationHandler.terminalLog(
-                            'error',
-                            'Mismatched dataflow version',
-                            `${info} Please refer to https://antmicro.github.io/kenning-pipeline-manager/changelogs.html to see if that is the case.`,
-                        );
-                    }
-                } else if (Array.isArray(info) && info.length) {
-                    NotificationHandler.terminalLog('info', 'Dataflow loaded', info);
-                }
-            });
-        },
-        /**
-         * Event handler that Loads a dataflow from a file.
-         * It the loading is successful it is loaded as the current dataflow.
-         * Otherwise the user is alerted with a feedback message.
-         */
-        async loadDataflowCallback() {
-            const file = document.getElementById('load-dataflow-button').files[0];
-            if (!file) return;
-
-            await loadingScreen(async () => {
-                let dataflow = null;
-                try {
-                    dataflow = jsonlint.parse(await file.text());
-                } catch (exception) {
-                    if (exception instanceof SyntaxError) {
-                        NotificationHandler.terminalLog(
-                            'error',
-                            'Not a proper JSON file',
-                            exception.toString(),
-                        );
-                    } else {
-                        NotificationHandler.terminalLog(
-                            'error',
-                            'Unknown error',
-                            exception.toString(),
-                        );
-                    }
-                    return;
-                }
-
-                await this.externalApplicationManager.notifyAboutChange('graph_on_change', {
-                    dataflow,
-                });
-
-                await this.loadDataflow(dataflow);
-            }, this.editorManager.baklavaView.editor.events.setLoad);
-
-            document.getElementById('load-dataflow-button').value = '';
-        },
-
         async requestDataflowAction(actionItem) {
             if (!this.externalApp.available) return;
             if (
@@ -575,89 +423,6 @@ export default {
                     );
                 }
             }
-        },
-
-        importDataflow() {
-            if (!this.externalApp.available) return;
-            const file = document.getElementById('request-dataflow-button').files[0];
-            if (!file) return;
-
-            const fileReader = new FileReader();
-            fileReader.onload = async () => {
-                await this.externalApplicationManager.importDataflow(fileReader.result);
-            };
-            fileReader.readAsText(file);
-        },
-
-        exportToSvg() {
-            // Get editor with data flow
-            const nodeEditor = document.querySelector('.inner-editor');
-            // Exclude nodes hidden in export (e.g. node palette and zoom controls)
-            const filter = (node) => !node.classList?.contains('export-hidden');
-            toSvg(nodeEditor, { filter, imagePlaceholder: brokenImage })
-                .then((dataUrl) => {
-                    const downloadLink = document.createElement('a');
-                    downloadLink.download = 'dataflow.svg';
-                    downloadLink.href = dataUrl;
-                    downloadLink.dataset.downloadurl = [
-                        dataUrl,
-                        downloadLink.download,
-                        downloadLink.href,
-                    ].join(':');
-                    document.body.appendChild(downloadLink);
-                    downloadLink.click();
-                    document.body.removeChild(downloadLink);
-                })
-                .catch((error) => {
-                    NotificationHandler.showToast('error', `Export to SVG failed: ${error}`);
-                });
-        },
-
-        createGraphNodeTypeFromCurrentGraph() {
-            menuState.configurationMenu.visible = !menuState.configurationMenu.visible;
-            menuState.configurationMenu.addNode = true;
-            menuState.configurationMenu.placeNode = false;
-
-            const unwatch = watch(() =>
-                menuState.configurationMenu.visible, async (newValue, oldValue) => {
-                if (oldValue === true && newValue === false) {
-                    const nodeName = configurationState.nodeData.name;
-                    let graphNode = this.editorManager.baklavaView.editor.nodeTypes.get(nodeName);
-                    let instance = new graphNode.type(); // eslint-disable-line new-cap
-
-                    if (configurationState.success) {
-                        // Save current graph
-                        const currentGraph = this.editorManager.baklavaView.displayedGraph;
-                        const currentGraphState = currentGraph.save();
-
-                        const errors = this.editorManager.addSubgraphToNode(
-                            instance,
-                            currentGraphState.nodes,
-                            currentGraphState.connections,
-                        );
-                        if (Array.isArray(errors) && errors.length) {
-                            NotificationHandler.terminalLog('error', 'Creating subgraph failed', errors);
-                        }
-
-                        // Switch to new graph and add new node there
-                        const newGraph = GraphFactory(
-                            [], [], this.appName, this.editorManager.baklavaView.editor,
-                        );
-                        this.editorManager.baklavaView.editor.switchToGraph(newGraph, true);
-
-                        graphNode = this.editorManager.baklavaView.editor.nodeTypes.get(nodeName);
-                        instance = new graphNode.type(); // eslint-disable-line new-cap
-                        this.editorManager.baklavaView.displayedGraph.addNode(instance);
-                        instance.position.x = window.innerWidth / 2;
-                        instance.position.y = window.innerHeight / 2;
-
-                        this.editorManager.baklavaView.editor.changeTopLevelGraph(
-                            this.editorManager.baklavaView.displayedGraph.id,
-                        );
-                    }
-                }
-                unwatch();
-            });
         },
 
         onClickNodeSearch() {
@@ -894,114 +659,29 @@ export default {
             @pointerenter="$event.target.classList.add('isHovered')"
         >
             <div class="container">
-                <div :style="leftContainerStyles">
+                <div :style="leftContainerStyles" ref="leftButtons">
                     <div
-                        ref="leftButtons"
                         :class="['logo', mobileClasses]"
                         @pointerover="() => updateHoverInfo('logo')"
                         @pointerleave="() => resetHoverInfo('logo')"
                     >
-                        <Logo :hover="isHovered('logo')" />
-                        <div class="dropdown-wrapper">
-                            <template
-                                v-if="this.editorManager.specificationLoaded"
-                            >
-                                <DropdownItem
-                                    id="create-new-graph-button"
-                                    v-if="!readonly"
-                                    text="Create new graph"
-                                    type="'button'"
-                                    :eventFunction="createNewGraphCallback"
-                                />
-                                <template v-if="externalApp.backend && externalApp.connected">
-                                    <hr />
-                                    <DropdownItem
-                                        text="Load file"
-                                        id="request-dataflow-button"
-                                        :eventFunction="importDataflow"
-                                    />
-                                    <DropdownItem
-                                        text="Save file"
-                                        type="button"
-                                        :eventFunction="(async () => requestDataflowExport(false))"
-                                    />
-                                    <DropdownItem
-                                        text="Save file as..."
-                                        type="button"
-                                        :eventFunction="(async () => requestDataflowExport(true))"
-                                    />
-                                </template>
-                                <hr />
-                            </template>
-
-                            <template
-                                v-if="!externalApp.backend && !hideHud"
-                            >
-                                <DropdownItem
-                                    text="Load specification"
-                                    id="load-spec-button"
-                                    :eventFunction="loadSpecificationCallback"
-                                />
-                                <DropdownItem
-                                    v-if="this.editorManager.specificationLoaded"
-                                    text="Save specification as..."
-                                    type="'button'"
-                                    :eventFunction="() => {
-                                        saveMenuShow = !saveMenuShow
-                                        saveConfiguration = saveSpecificationConfiguration
-                                    }"
-                                />
-                                <hr />
-                            </template>
-
-                            <template v-if="this.editorManager.specificationLoaded">
-                                <DropdownItem
-                                    type="'button'"
-                                    text="Set graph name"
-                                    :eventFunction="setEditTitle"
-                                />
-                                <DropdownItem
-                                    v-if="!hideHud"
-                                    id="load-dataflow-button"
-                                    text="Load graph file"
-                                    :eventFunction="loadDataflowCallback"
-                                />
-                                <DropdownItem
-                                    type="'button'"
-                                    text="Save graph file"
-                                    :eventFunction="() => saveGraphConfiguration.saveCallback()"
-                                />
-                                <DropdownItem
-                                    type="'button'"
-                                    text="Save graph as file as..."
-                                    :eventFunction="() => {
-                                        saveMenuShow = !saveMenuShow
-                                        saveConfiguration = saveGraphConfiguration
-                                    }"
-                                />
-                                <hr />
-                            </template>
-
-                            <DropdownItem
-                                type="'button'"
-                                text="Export graph to PNG"
-                                :eventFunction="() => {
-                                    exportMenuShow = !exportMenuShow
-                                    exportGraph = exportGraph
-                                }"
-                            />
-                            <DropdownItem
-                                type="'button'"
-                                text="Export graph to HTML-based SVG"
-                                :eventFunction="exportToSvg"
-                            />
-                            <DropdownItem
-                                v-if="this.editorManager.baklavaView.settings.editableNodeTypes"
-                                type="'button'"
-                                text="Create node type from graph"
-                                :eventFunction="createGraphNodeTypeFromCurrentGraph"
-                            />
-                        </div>
+                        <FilesContextMenu ref="contextMenu"
+                            :hover="isHovered('logo')"
+                            :externalApp="externalApp"
+                            :setEditTitle="setEditTitle"
+                            :mobileClasses="mobileClasses"
+                            :hideHud="hideHud"
+                            :readonly="readonly"
+                            :saveGraphCallback="() => {
+                                saveMenuShow = !saveMenuShow;
+                                saveConfiguration = saveGraphConfiguration;
+                            }"
+                            :saveSpecificationCallback="() => {
+                                saveMenuShow = !saveMenuShow;
+                                saveConfiguration = saveSpecificationConfiguration;
+                            }"
+                            :requestDataflowExport="requestDataflowExport"
+                        />
                     </div>
 
                     <div
