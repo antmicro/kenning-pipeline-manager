@@ -196,8 +196,12 @@ export function useClipboard(
                     // If it is a subgraph node, then some interfaces have to have the same IDs
                     // as the ones in the subgraph
                     node.interfaces.forEach((intf: any) => {
-                        intf.id = idmap.get(intf.id) ?? intf.id;
-
+                        const mapped = idmap.get(intf.id);
+                        if (mapped === undefined) {
+                            mapNewId(intf);
+                        } else {
+                            intf.id = mapped;
+                        }
                         // If the node has any external interfaces, then their names have
                         // to be resolved as they cannot conflict with the existing ones.
                         if (intf.externalName !== undefined) {
