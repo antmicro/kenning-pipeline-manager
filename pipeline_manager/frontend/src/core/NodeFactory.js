@@ -252,7 +252,7 @@ function detectDiscrepancies(parsedState, inputs, outputs) {
         ) {
             if (direction === 'property') {
                 errors.push(`Property named '${name}' not found in specification!`);
-            } else if (!/\[\d+\]$/.test(name)) {
+            } else {
                 errors.push(`Interface named '${name}' of direction '${direction}' not found in specification!`);
             }
         } else if (direction === 'property') {
