@@ -332,7 +332,8 @@ export default defineComponent({
                     (prop) => !parsedProperties.some((p) => p.name === prop.name),
                 ) ?? [];
                 const removedInterfaces = oldInterfaces.filter(
-                    (intf) => !parsedInterfaces.some((i) => i.name === intf.name),
+                    (intf) => !parsedInterfaces.some((i) => i.name === intf.name
+                        && i.array === intf.array),
                 ) ?? [];
                 const addedProperties = parsedProperties.filter(
                     (prop) => !oldProperties.some((p) => p.name === prop.name),
