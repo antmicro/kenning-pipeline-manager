@@ -231,9 +231,23 @@ export function useClipboard(
                     });
                 }
             };
+            const updateInterfaces = (node: any) => {
+                if (node.subgraph !== undefined) {
+                    const { subgraph } = node;
+                    subgraph.nodes.forEach((subNode: PMNodeState) => {
+                        updateInterfaces(subNode);
+                    });
+                    if (subgraph.graphNode === undefined) {
+                        return;
+                    }
+
+                    subgraph.graphNode.updateExposedInterfaces(undefined, undefined, true);
+                }
+            };
 
             assignNewIds(parsedNodeBuffer[i]);
             copiedNode.load({ ...parsedNodeBuffer[i], id: copiedNode.id });
+            updateInterfaces(copiedNode);
 
             // If the pasted graph was inside of a graph node, then the graph node has to
             // have its exposed interfaces refreshed
