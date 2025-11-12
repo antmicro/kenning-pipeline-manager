@@ -421,7 +421,8 @@ export default class PipelineManagerEditor extends Editor {
 
         // Update all graphs that used this exposed interface
         for (let i = graphIdIdx + 1; i < graphIds.length; i += 1) {
-            graph = [...this.graphs].find((g) => g.id === graphIds[graphIdIdx]);
+            const id = graphIds[i];
+            graph = [...this.graphs].find((g) => g.id === id);
             graphNode = graph.graphNode; // eslint-disable-line prefer-destructuring
             graphNode.updateExposedInterfaces(undefined, undefined, true);
         }
