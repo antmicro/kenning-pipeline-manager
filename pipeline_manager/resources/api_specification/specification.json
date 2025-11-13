@@ -468,6 +468,20 @@
                 ]
             }
         },
+        "specification_expand": {
+            "description": "",
+            "params": {
+                "type": "object",
+                "properties": {
+                    "specification": {
+                        "$ref": "common_types#/$defs/specification"
+                    }
+                }
+            },
+            "returns": {
+                "$ref": "common_types#/$defs/specification_object"
+            }
+        },
         "nodes_highlight": {
             "description": "Procedure to highlight specified nodes in the editor",
             "params": {

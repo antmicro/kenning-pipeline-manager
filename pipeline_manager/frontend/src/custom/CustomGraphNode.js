@@ -55,6 +55,142 @@ function prepareInterfaces(graphNode) {
     return createBaklavaInterfaces(parsedInterfaces);
 }
 
+/**
+ * The function uses its internal static template to create a new graph state
+ * based on the template. It creates a new graph node ID and maps all interfaces
+ * to new IDs. The function is used to create a new graph state that can be loaded
+ * by the graph node.
+ *
+ * @param {object} template - Graph template
+ * @param {object} opts
+ * @param {object|undefined} [opts.graphLoadingState] - Information about loaded graphs.
+ * @param {string|undefined} [opts.newSubgraphNodeId] - New ID of the subgraph node.
+ * @param {'resolved'|'spec'} opts.mode - New ID of the subgraph node.
+ *
+ * @returns {any} graph state ready to be loaded
+ */
+export function prepareSubgraphInstance(
+    template,
+    { graphLoadingState, newSubgraphNodeId, mode } = {},
+) {
+    // eslint-disable-next-line no-param-reassign
+    mode ??= 'resolved';
+
+    const errors = [];
+
+    // Ensure subgraph nodes have IDs to distinguish instances in nested layers
+    const predicate = (node) => node.subgraph !== undefined && node.id === undefined;
+    if (template.nodes.some(predicate)) errors.push('Node defining a nested graph in a subgraph template should have their own ID');
+    if (errors.length) return { errors };
+
+    const isRoot = graphLoadingState === undefined;
+    // eslint-disable-next-line no-param-reassign
+    graphLoadingState ??= {
+        // New subgraph node ID -> Specification subgraph node ID
+        newToSpecNodeIds: new Map(),
+        // Subgraph node ID -> (Exposed Interface name -> New Interface ID)
+        newInterfaceIds: new Map(),
+        // New connection ID -> Specification connection ID
+        newToSpecConnIds: new Map(),
+        // New interface ID -> Specification interface ID
+        newToSpecIntfIds: new Map(),
+    };
+
+    /* Nodes */
+
+    const { newToSpecNodeIds } = graphLoadingState;
+    const specSubgraphNodeId = newToSpecNodeIds.get(newSubgraphNodeId);
+
+    const createNewNodeId = (node) => {
+        const newId = uuidv4();
+        if (node.id) newToSpecNodeIds.set(newId, node.id);
+        return newId;
+    };
+
+    const addNewNodeId = (node) => ({ ...node, id: createNewNodeId(node) });
+
+    /* Interfaces and connections */
+
+    const connections = template.connections.map((c) => {
+        const newId = uuidv4();
+        if (c.id) graphLoadingState.newToSpecConnIds.set(newId, c.id);
+        return { ...c, id: newId };
+    });
+    const { newInterfaceIds } = graphLoadingState;
+
+    const getOrGenerate = (map, key, factory = uuidv4) => {
+        if (!map.has(key)) map.set(key, factory());
+        return map.get(key);
+    };
+
+    const getOrGenerateInterfaceId = (node, intf) => {
+        // Exposed interface - generate and store
+        // Note: All interfaces in a subgraph node are treated as exposed,
+        // therefore all of them are looked up in the subgraph.
+        // This may be subject to change in future
+        const nodeId = node.subgraph !== undefined ? node.id : specSubgraphNodeId;
+        const idMap = getOrGenerate(newInterfaceIds, nodeId, () => new Map());
+
+        // Regular interface
+        const nonExposed = node.subgraph === undefined && intf.externalName === undefined;
+        // Exposed interface is not indicated in the nested subgraph node
+        const exposedNotInSubgraphNode = !isRoot
+            && intf.externalName !== undefined
+            && (specSubgraphNodeId === undefined || !idMap.has(intf.externalName));
+
+        return (nonExposed || exposedNotInSubgraphNode)
+            ? uuidv4()
+            : getOrGenerate(idMap, intf.externalName ?? intf.name);
+    };
+
+    const createNewInterfaceId = (oldId, node) => {
+        const interfaces = mode === 'resolved'
+            ? Object.values(node.inputs).concat(Object.values(node.outputs))
+            : node.interfaces;
+
+        const intf = interfaces.find((i) => i.id === oldId);
+
+        const newId = getOrGenerateInterfaceId(node, intf);
+        if (intf.id) graphLoadingState.newToSpecIntfIds.set(newId, intf.id);
+
+        // Side-effect: modify connections to have new interface IDs
+        /* eslint-disable no-param-reassign */
+        connections.filter((c) => c.from === oldId).forEach((c) => { c.from = newId; });
+        connections.filter((c) => c.to === oldId).forEach((c) => { c.to = newId; });
+        /* eslint-enable no-param-reassign */
+
+        return newId;
+    };
+
+    const addNewId = (intf, node) => ({ ...intf, id: createNewInterfaceId(intf.id, node) });
+
+    const mapNodeInterfaces = (interfaces, node) => Object.entries(interfaces)
+        .reduce((acc, [name, intf]) => ({ ...acc, [name]: addNewId(intf, node) }), {});
+
+    const addNewInterfaceIds = mode === 'resolved'
+        ? (node) => ({
+            ...node,
+            inputs: mapNodeInterfaces(node.inputs, node),
+            outputs: mapNodeInterfaces(node.outputs, node),
+        }) : (node) => ({
+            ...node,
+            interfaces: node.interfaces.map((intf) => addNewId(intf, node)),
+        });
+
+    // Apply changes
+
+    return {
+        state: {
+            id: uuidv4(),
+            name: template.name,
+            nodes: template.nodes.map(addNewInterfaceIds).map(addNewNodeId),
+            connections,
+            graphLoadingState,
+        },
+        errors,
+    };
+}
+
 export default function CreateCustomGraphNodeType(template, graphNode) {
     const [nodeInputs, newNodeOutputs] = prepareInterfaces(graphNode);
     const properties = prepareProperties(graphNode);
@@ -190,7 +326,10 @@ export default function CreateCustomGraphNodeType(template, graphNode) {
             }
             const graph = new Graph(this.template.editor);
 
-            const { state, errors } = this.prepareSubgraphInstance(graphLoadingState, nodeId);
+            const { state, errors } = prepareSubgraphInstance(
+                this.template,
+                { graphLoadingState, newSubgraphNodeId: nodeId },
+            );
             if (!errors.length) errors.push(...graph.load(state));
             if (errors.length) {
                 throw new Error(
@@ -297,124 +436,6 @@ export default function CreateCustomGraphNodeType(template, graphNode) {
                     Object.assign(foundProperty, property);
                 }
             });
-        }
-
-        /**
-         * The function uses its internal static template to create a new graph state
-         * based on the template. It creates a new graph node ID and maps all interfaces
-         * to new IDs. The function is used to create a new graph state that can be loaded
-         * by the graph node.
-         *
-         * @param {Object|undefined} graphLoadingState Information about loaded graphs.
-         * @param {string|undefined} newSubgraphNodeId New ID of the subgraph node.
-         *
-         * @returns graph state ready to be loaded
-         */
-        prepareSubgraphInstance(graphLoadingState, newSubgraphNodeId) {
-            const errors = [];
-
-            // Ensure subgraph nodes have IDs to distinguish instances in nested layers
-            const predicate = (node) => node.subgraph !== undefined && node.id === undefined;
-            if (this.template.nodes.some(predicate)) errors.push('Node defining a nested graph in a subgraph template should have their own ID');
-            if (errors.length) return { errors };
-
-            const isRoot = graphLoadingState === undefined;
-            graphLoadingState ??= {
-                // New subgraph node ID -> Specification subgraph node ID
-                newToSpecNodeIds: new Map(),
-                // Subgraph node ID -> (Exposed Interface name -> New Interface ID)
-                newInterfaceIds: new Map(),
-                // New connection ID -> Specification connection ID
-                newToSpecConnIds: new Map(),
-                // New interface ID -> Specification interface ID
-                newToSpecIntfIds: new Map(),
-            };
-
-            /* Nodes */
-
-            const { newToSpecNodeIds } = graphLoadingState;
-            const specSubgraphNodeId = newToSpecNodeIds.get(newSubgraphNodeId);
-
-            const createNewNodeId = (node) => {
-                const newId = uuidv4();
-                if (node.id) newToSpecNodeIds.set(newId, node.id);
-                return newId;
-            };
-
-            const addNewNodeId = (node) => ({ ...node, id: createNewNodeId(node) });
-
-            /* Interfaces and connections */
-
-            const connections = this.template.connections.map((c) => {
-                const newId = uuidv4();
-                if (c.id) graphLoadingState.newToSpecConnIds.set(newId, c.id);
-                return { ...c, id: newId };
-            });
-            const { newInterfaceIds } = graphLoadingState;
-
-            const getOrGenerate = (map, key, factory = uuidv4) => {
-                if (!map.has(key)) map.set(key, factory());
-                return map.get(key);
-            };
-
-            const getOrGenerateInterfaceId = (node, intf) => {
-                // Exposed interface - generate and store
-                // Note: All interfaces in a subgraph node are treated as exposed,
-                // therefore all of them are looked up in the subgraph.
-                // This may be subject to change in future
-                const nodeId = node.subgraph !== undefined ? node.id : specSubgraphNodeId;
-                const idMap = getOrGenerate(newInterfaceIds, nodeId, () => new Map());
-
-                // Regular interface
-                const nonExposed = node.subgraph === undefined && intf.externalName === undefined;
-                // Exposed interface is not indicated in the nested subgraph node
-                const exposedNotInSubgraphNode = !isRoot
-                    && intf.externalName !== undefined
-                    && (specSubgraphNodeId === undefined || !idMap.has(intf.externalName));
-
-                return (nonExposed || exposedNotInSubgraphNode)
-                    ? uuidv4()
-                    : getOrGenerate(idMap, intf.externalName ?? intf.name);
-            };
-
-            const createNewInterfaceId = (oldId, node) => {
-                const intf = Object.values(node.inputs)
-                    .concat(Object.values(node.outputs))
-                    .find((i) => i.id === oldId);
-
-                const newId = getOrGenerateInterfaceId(node, intf);
-                if (intf.id) graphLoadingState.newToSpecIntfIds.set(newId, intf.id);
-
-                // Side-effect: modify connections to have new interface IDs
-                connections.filter((c) => c.from === oldId).forEach((c) => { c.from = newId; });
-                connections.filter((c) => c.to === oldId).forEach((c) => { c.to = newId; });
-
-                return newId;
-            };
-
-            const addNewId = (intf, node) => ({ ...intf, id: createNewInterfaceId(intf.id, node) });
-
-            const mapNodeInterfaces = (interfaces, node) => Object.entries(interfaces)
-                .reduce((acc, [name, intf]) => ({ ...acc, [name]: addNewId(intf, node) }), {});
-
-            const addNewInterfaceIds = (node) => ({
-                ...node,
-                inputs: mapNodeInterfaces(node.inputs, node),
-                outputs: mapNodeInterfaces(node.outputs, node),
-            });
-
-            // Apply changes
-
-            return {
-                state: {
-                    id: uuidv4(),
-                    name: this.template.name,
-                    nodes: this.template.nodes.map(addNewInterfaceIds).map(addNewNodeId),
-                    connections,
-                    graphLoadingState,
-                },
-                errors,
-            };
         }
     };
 }

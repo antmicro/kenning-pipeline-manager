@@ -21,7 +21,7 @@ import { nextTick } from 'vue';
 import createPipelineManagerGraph from './CustomGraph.js';
 import LayoutManager from '../core/LayoutManager.js';
 import { suppressHistoryLogging } from '../core/History.ts';
-import CreateCustomGraphNodeType from './CustomGraphNode.js';
+import CreateCustomGraphNodeType, { prepareSubgraphInstance } from './CustomGraphNode.js';
 import { ir } from '../core/interfaceRegistry.ts';
 
 /* eslint-disable no-param-reassign */
@@ -327,7 +327,7 @@ export default class PipelineManagerEditor extends Editor {
                     const graphNode = new (this._nodeTypes.get(templateName)).type();
                     const {
                         state: preparedSubgraphState, errors: prepareSubgraphErrors,
-                    } = graphNode.prepareSubgraphInstance();
+                    } = prepareSubgraphInstance(graphNode.template);
                     errors.push(...prepareSubgraphErrors);
                     graphToLoad = preparedSubgraphState;
                 }

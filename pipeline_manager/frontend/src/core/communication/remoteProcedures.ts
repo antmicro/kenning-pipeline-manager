@@ -14,6 +14,7 @@
  */
 
 import { useViewModel } from '@baklavajs/renderer-vue';
+import { v4 as uuidv4 } from 'uuid';
 import runInfo from './runInformation';
 import EditorManager from '../EditorManager';
 import NotificationHandler from '../notifications';
@@ -23,6 +24,7 @@ import { saveSpecificationConfiguration } from '../../components/saveConfigurati
 // eslint-disable-next-line import/no-cycle
 import getExternalApplicationManager from './ExternalApplicationManager';
 import { checkTerminalExistence, TerminalView } from './utils';
+import { prepareSubgraphInstance } from '../../custom/CustomGraphNode';
 
 /* eslint-disable import/prefer-default-export */
 /* eslint-disable camelcase */
@@ -503,6 +505,68 @@ export async function specification_preprocess(
         params.specification, { ...params, tryMinify },
     );
     return resolveSpecification ? { specification: resolveSpecification } : undefined;
+}
+
+export async function specification_expand({ specification }: { specification: any }) {
+    const assertNoErrors = (errors: string[]) => {
+        if (errors.length > 0) {
+            throw new Error(errors.join('\n'));
+        }
+    };
+
+    // Validate
+    const validationErrors = EditorManager.validateSpecification(specification);
+    assertNoErrors(validationErrors);
+
+    // Collect specification data
+    const specGraphs = specification.graphs ?? [];
+    const specGraphMap = new Map(
+        specGraphs.map((graph: any) => [graph.id, structuredClone(graph)]),
+    );
+    const subgraphIds = specification.nodes
+        .map((node: any) => node.subgraphId)
+        .filter(Boolean);
+
+    // Initialize loop data
+    const isNotSubgraph = (graph: any) => !subgraphIds.includes(graph.id);
+    const finalGraphs = specGraphs.filter(isNotSubgraph);
+    const processingQueue = subgraphIds.map((id: string) => ({
+        subgraphId: id,
+        instanceId: id,
+    }));
+
+    while (processingQueue.length) {
+        const { subgraphId, instanceId } = processingQueue.shift();
+
+        // Prepare graph
+        const graph: any = specGraphMap.get(subgraphId);
+        const { state, errors } = prepareSubgraphInstance(graph, { mode: 'spec' });
+        assertNoErrors(errors);
+
+        // Add nested graphs to the queue
+        state.nodes
+            .filter((node: any) => node.subgraph && subgraphIds.includes(node.subgraph))
+            .forEach((node: any) => {
+                const nestedSubgraphId = node.subgraph;
+                const nestedInstanceId = uuidv4();
+                node.subgraph = nestedInstanceId; // eslint-disable-line no-param-reassign
+                processingQueue.push({
+                    subgraphId: nestedSubgraphId,
+                    instanceId: nestedInstanceId,
+                });
+            });
+
+        // Save graph
+        delete state.graphLoadingState;
+        finalGraphs.push({ ...state, id: instanceId });
+    }
+
+    return {
+        specification: {
+            ...specification,
+            graphs: finalGraphs,
+        },
+    };
 }
 
 type ModifyNodesHighlightType = {
