@@ -128,10 +128,10 @@ export default function CreateCustomGraphNodeType(template, graphNode) {
             this.position = state.position;
             this.title = state.instanceName ?? '';
 
-            super.load(state);
+            const errors = super.load(state);
 
             this.events.loaded.emit(this);
-            return [];
+            return errors;
         }
 
         /**
