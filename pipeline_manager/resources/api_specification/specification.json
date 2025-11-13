@@ -23,7 +23,21 @@
         "frontend_specification_get": {
             "description": "Returns specification used by frontend",
             "params": {
-                "$ref": "common_types#/$defs/null_or_empty"
+                "description": "Parameters for specification request",
+                "type": "object",
+                "properties": {
+                    "graph": {
+                        "description": "Specifies whether graph should be returned along with the specification.",
+                        "type": "boolean",
+                        "default": false
+                    },
+                    "minify": {
+                        "description": "Specifies whether the returned specification should be minified",
+                        "type": "boolean",
+                        "default": false
+                    }
+                },
+                "additionalProperties": false
             },
             "returns": {
                 "$ref": "common_types#/$defs/specification_object"
