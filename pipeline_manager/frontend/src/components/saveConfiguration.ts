@@ -18,6 +18,8 @@ interface SaveConfiguration {
     graphName?: string | null;
     saveName: string;
 
+    getSave: () => object;
+
     saveCallback: () => void;
     saveCallbackCustomFormat?: (blob: string) => void;
 
@@ -36,7 +38,7 @@ export const saveSpecificationConfiguration: SaveConfiguration = {
     minify: false,
     saveName: 'specification',
 
-    saveCallback() {
+    getSave() {
         const editorManager = EditorManager.getEditorManagerInstance();
         const specification = editorManager.saveSpecification();
         const dataflow = editorManager.saveDataflow();
@@ -167,7 +169,11 @@ export const saveSpecificationConfiguration: SaveConfiguration = {
                 EditorManager.minifySpecificationNodes(specification.nodes, usedNames);
             if (!specification.nodes.length) delete specification.nodes;
         }
+        return specification;
+    },
 
+    saveCallback() {
+        const specification = this.getSave();
         const blob = new Blob(
             [
                 JSON.stringify(
@@ -196,14 +202,19 @@ export const saveGraphConfiguration: SaveConfiguration = {
     graphName: null,
     saveName: 'save',
 
-    saveCallback() {
+    getSave() {
         const editorManager = EditorManager.getEditorManagerInstance();
-        const blob = new Blob([JSON.stringify(editorManager.saveDataflow({
+        return editorManager.saveDataflow({
             readonly: !!this.readonly,
             hideHud: !!this.hideHud,
             position: !!this.position,
             graphName: this.graphName,
-        }), null, 4)], {
+        });
+    },
+
+    saveCallback() {
+        const dataflow = this.getSave();
+        const blob = new Blob([JSON.stringify(dataflow, null, 4)], {
             type: 'application/json',
         });
         saveBlob(blob, this.saveName);
