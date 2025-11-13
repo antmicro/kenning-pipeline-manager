@@ -18,6 +18,7 @@ import runInfo from './runInformation';
 import EditorManager from '../EditorManager';
 import NotificationHandler from '../notifications';
 import { MAIN_TERMINAL, terminalStore } from '../stores';
+import { saveSpecificationConfiguration } from '../../components/saveConfiguration.ts';
 
 // eslint-disable-next-line import/no-cycle
 import getExternalApplicationManager from './ExternalApplicationManager';
@@ -128,8 +129,11 @@ export function frontend_status_get() {
 /**
  * @returns currently used specification
  */
-export function frontend_specification_get() {
-    return { specification: editorManager.saveSpecification() };
+export function frontend_specification_get(params: { graph: boolean, minify: boolean }) {
+    const saveConfiguration = saveSpecificationConfiguration;
+    saveConfiguration.graph = params ? params.graph : false;
+    saveConfiguration.minify = params ? params.minify : false;
+    return { specification: saveConfiguration.getSave() };
 }
 
 /**
