@@ -268,6 +268,21 @@ export default class EditorManager {
                 EditorManager.minifySpecificationNodes(dataflowSpecification.nodes, usedNames);
         }
 
+        // Ensure 'subgraph' field for subgraph node instances
+        const nameToSubgraphNode = new Map((dataflowSpecification.nodes ?? [])
+            .filter(({ subgraphId }) => subgraphId)
+            .map((nodeType) => [EditorManager.getNodeName(nodeType), nodeType]));
+
+        const subgraphFieldNotSet = (node) => !node.subgraph;
+        const isSubgraphNode = (node) => nameToSubgraphNode.has(node.name);
+
+        (dataflowSpecification.graphs ?? [])
+            .flatMap((graph) => graph.nodes)
+            .filter(subgraphFieldNotSet)
+            .filter(isSubgraphNode)
+            // eslint-disable-next-line no-param-reassign
+            .forEach((node) => { node.subgraph = nameToSubgraphNode.get(node.name).subgraphId; });
+
         return { errors, warnings, specification: dataflowSpecification };
     }
 
