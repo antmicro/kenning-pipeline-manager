@@ -78,7 +78,7 @@ export default function CreateCustomGraphNodeType(template, graphNode) {
                 graphNode.layer,
                 newNodeInputs,
                 newNodeOutputs,
-                graphNode.twoColumn ?? false,
+                graphNode.twoColumn ?? template.editor.editorManager.baklavaView.twoColumn ?? false,
                 graphNode.description ?? '',
                 graphNode.extends ?? [],
                 graphNode.extending ?? [],
