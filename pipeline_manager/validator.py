@@ -22,6 +22,7 @@ def validate(
     dataflow_paths: List[Path] = [],
     resolved_specification_path: Optional[Path] = None,
     workspace_directory: Optional[Path] = None,
+    host_json_uri_subs: Optional[str] = None,
 ) -> int:
     """
     Validates specification, and optionally a graph associated with it.
@@ -38,6 +39,8 @@ def validate(
     workspace_directory: Optional[Path]
         Tells where the sources of the frontend (used during validation) are
         stored. Equals None when workspace directory is an actual repository.
+    host_json_uri_subs : Optional[str]
+        JSON string mapping between scheme and substitution entry.
 
     Returns
     -------
@@ -79,6 +82,8 @@ def validate(
         run_command.extend(
             ["--resolvedSpecification", resolved_specification_path]
         )
+    if host_json_uri_subs:
+        run_command.extend(["--hostJsonUriSubs", host_json_uri_subs])
 
     exit_status = subprocess.run(
         run_command,

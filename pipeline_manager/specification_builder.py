@@ -13,6 +13,7 @@ import json
 import logging
 import re
 import sys
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 
@@ -44,6 +45,23 @@ class SpecificationBuilderException(Exception):
 
 class MissingInterfaceAttribute(Exception):
     """Exception raised if an interface is missing an obligatory attribute."""
+
+
+@dataclass
+class URISubEntry:
+    """
+    Substitution entry for a URI scheme.
+
+    Attributes
+    ----------
+    directory : str
+        Local directory to serve.
+    route : str
+        Serving route.
+    """
+
+    directory: Path
+    route: str
 
 
 def get_optional(
@@ -1806,9 +1824,12 @@ class SpecificationBuilder(object):
     def _get_include_graphs(
         self, sort_spec: bool, stringify: bool = False
     ) -> Union[List[Dict], str]:
-        res = list(self._includeGraphs.values())
+        res = self._includeGraphs
+
         if sort_spec:
-            res = sorted(res)
+            res = dict(sorted(res.items()))
+
+        res = list(self._includeGraphs.values())
 
         if stringify:
             res = json.dumps(res)
@@ -1866,6 +1887,7 @@ class SpecificationBuilder(object):
         sort_spec: bool = False,
         dump_spec: Optional[Path] = None,
         skip_validation: bool = False,
+        host_uri_subs: Optional[Dict[str, URISubEntry]] = None,
     ) -> Dict:
         """
         Creates a specification and validates it using schema.
@@ -1887,6 +1909,8 @@ class SpecificationBuilder(object):
             before validation and resolving for debugging purposes.
         skip_validation : bool
             Whether validation of the specification should be omitted.
+        host_uri_subs : Optional[Dict[str, URISubEntry]]
+            Mapping between scheme and substitution entry.
 
         Returns
         -------
@@ -1939,6 +1963,19 @@ class SpecificationBuilder(object):
                     specification_path=specpath,
                     workspace_directory=workspacedir,
                     resolved_specification_path=resolved_specification,
+                    host_json_uri_subs=(
+                        None
+                        if host_uri_subs is None
+                        else json.dumps(
+                            {
+                                schema: {
+                                    "directory": str(e.directory.absolute()),
+                                    "route": e.route,
+                                }
+                                for schema, e in host_uri_subs.items()
+                            }
+                        )
+                    ),
                 )
 
                 if res != 0:

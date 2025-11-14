@@ -43,6 +43,11 @@ def script_validate():
         help="Tells if the npm install should be skipped or not",
         action="store_true",
     )
+    validator_parser.add_argument(
+        "--host-json-uri-subs",
+        help="Mapping between substituted scheme and directory-route pair, "
+        'e.g. \'{"relative": {"directory": "/path/to/directory", "route": "/route/path"]}\'',  # noqa: E501
+    )
     args = validator_parser.parse_args()
 
     build_prepare(
