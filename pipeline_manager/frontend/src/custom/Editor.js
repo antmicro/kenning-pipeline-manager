@@ -333,11 +333,6 @@ export default class PipelineManagerEditor extends Editor {
                 }
                 if (!errors.length) errors.push(...this._graph.load(graphToLoad));
             }
-            this.graphs.forEach((graph) => {
-                if (graph.graphNode !== undefined) {
-                    graph.graphNode.updateExposedInterfaces(undefined, undefined, true);
-                }
-            });
         } catch (err) {
             // If anything goes wrong during dataflow loading, the editor is cleaned and an
             // appropriate error is returned.
@@ -406,6 +401,59 @@ export default class PipelineManagerEditor extends Editor {
         if (!preventCentering && scaling === undefined && panning === undefined) {
             this.centerZoom();
         }
+        this.graphs.forEach((graph) => {
+            if (graph.graphNode !== undefined) {
+                const node = graph.graphNode;
+                const inputs = { ...node.inputs };
+                const outputs = { ...node.outputs };
+
+                const interfaces = [
+                    ...Object.values(inputs),
+                    ...Object.values(outputs),
+                ];
+                const connections = node.graphInstance.connections.filter(
+                    (c) => interfaces.includes(c.from) || interfaces.includes(c.to),
+                );
+
+                node.updateExposedInterfaces(undefined, undefined, true);
+
+                const newInputs = node.inputs;
+                const newOutputs = node.outputs;
+
+                const externalNameMap = new Map();
+                const idMap = new Map();
+                Object.keys(newInputs).forEach((key) => {
+                    idMap[newInputs[key].id] = inputs[key].id ?? newInputs[key].id;
+                    externalNameMap[idMap[newInputs[key].id]] =
+                        inputs[key].externalName ?? newInputs[key].externalName;
+                });
+                Object.keys(newOutputs).forEach((key) => {
+                    idMap[newOutputs[key].id] = outputs[key].id ?? newOutputs[key].id;
+                    externalNameMap[idMap[newOutputs[key].id]] =
+                        outputs[key].externalName ?? newOutputs[key].externalName;
+                });
+                node.subgraph.nodes.forEach((n) => {
+                    Object.values(n.inputs).forEach((intf) => {
+                        intf.id = idMap[intf.id] ?? intf.id;
+                    });
+                    Object.values(n.outputs).forEach((intf) => {
+                        intf.id = idMap[intf.id] ?? intf.id;
+                    });
+                });
+                // restore ids described in configuration, not generated ones
+                node.updateExposedInterfaces(undefined, undefined, true);
+
+                // restore old external names
+                [...Object.values(node.inputs),
+                    ...Object.values(node.outputs)].forEach((intf) => {
+                    intf.externalName = externalNameMap[intf.id];
+                });
+                // restore connections that might have disconnected after the first update
+                connections.forEach((conn) => {
+                    node.graphInstance.addConnection(conn.from, conn.to);
+                });
+            }
+        });
         return errors;
     }
 
