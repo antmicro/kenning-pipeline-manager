@@ -333,6 +333,11 @@ export default class PipelineManagerEditor extends Editor {
                 }
                 if (!errors.length) errors.push(...this._graph.load(graphToLoad));
             }
+            this.graphs.forEach((graph) => {
+                if (graph.graphNode !== undefined) {
+                    graph.graphNode.updateExposedInterfaces(undefined, undefined, true);
+                }
+            });
         } catch (err) {
             // If anything goes wrong during dataflow loading, the editor is cleaned and an
             // appropriate error is returned.
