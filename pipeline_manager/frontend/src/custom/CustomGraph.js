@@ -509,6 +509,16 @@ export default function createPipelineManagerGraph(graph) {
             node.onDestroy();
             this.nodeEvents.removeTarget(node.events);
             this.nodeHooks.removeTarget(node.hooks);
+            if (this.graphNode !== undefined) {
+                const removedInterfaces =
+                    [...Object.values(node.inputs), ...Object.values(node.outputs)];
+                const keptInputs = Object.values(this.graphNode.inputs)
+                    .filter((intf) => !removedInterfaces.some((r) => r.externalName === intf.name));
+                const keptOutputs = Object.values(this.graphNode.outputs)
+                    .filter((intf) => !removedInterfaces.some((r) => r.externalName === intf.name));
+                this.graphNode.updateInterfaces(
+                    keptOutputs ?? [], keptInputs ?? [], true);
+            }
         }
     };
 
