@@ -295,7 +295,7 @@ export default function createPipelineManagerGraph(graph) {
             this.removeConnection(this.connections[i]);
         }
         for (let i = this.nodes.length - 1; i >= 0; i -= 1) {
-            this.removeNode(this.nodes[i]);
+            this.removeNode(this.nodes[i], false);
         }
 
         // Load state
@@ -495,7 +495,7 @@ export default function createPipelineManagerGraph(graph) {
         }
     };
 
-    graph.removeNode = function removeNode(node) {
+    graph.removeNode = function removeNode(node, updateInterfaces = true) {
         if (this.nodes.includes(node)) {
             if (this.events.beforeRemoveNode.emit(node).prevented) {
                 return;
@@ -509,7 +509,7 @@ export default function createPipelineManagerGraph(graph) {
             node.onDestroy();
             this.nodeEvents.removeTarget(node.events);
             this.nodeHooks.removeTarget(node.hooks);
-            if (this.graphNode !== undefined) {
+            if (this.graphNode !== undefined && updateInterfaces) {
                 const removedInterfaces =
                     [...Object.values(node.inputs), ...Object.values(node.outputs)];
                 const keptInputs = Object.values(this.graphNode.inputs)
