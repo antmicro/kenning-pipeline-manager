@@ -180,7 +180,7 @@ export function useClipboard(
                 obj.id = newId;
             };
 
-            const assignNewIds = (node: PMNodeState) => {
+            const assignNewIds = (node: PMNodeState, curGraph: any) => {
                 /* eslint-disable no-param-reassign */
 
                 // New node id
@@ -190,7 +190,7 @@ export function useClipboard(
                     mapNewId(node.graphState);
 
                     node.graphState.nodes.forEach((subNode: PMNodeState) => {
-                        assignNewIds(subNode);
+                        assignNewIds(subNode, undefined);
                     });
 
                     // If it is a subgraph node, then some interfaces have to have the same IDs
@@ -204,7 +204,7 @@ export function useClipboard(
                         }
                         // If the node has any external interfaces, then their names have
                         // to be resolved as they cannot conflict with the existing ones.
-                        if (intf.externalName !== undefined) {
+                        if (intf.externalName !== undefined && curGraph !== undefined) {
                             intf.externalName = graph.resolveNewExposedName(intf.externalName);
                         }
                     });
@@ -229,7 +229,7 @@ export function useClipboard(
 
                         // If the node has any external interfaces, then their names have
                         // to be resolved as they cannot conflict with the existing ones.
-                        if (intf.externalName !== undefined) {
+                        if (intf.externalName !== undefined && curGraph !== undefined) {
                             intf.externalName = graph.resolveNewExposedName(intf.externalName);
                         }
                     });
@@ -249,7 +249,7 @@ export function useClipboard(
                 }
             };
 
-            assignNewIds(parsedNodeBuffer[i]);
+            assignNewIds(parsedNodeBuffer[i], graph);
             copiedNode.load({ ...parsedNodeBuffer[i], id: copiedNode.id });
             updateInterfaces(copiedNode);
 
