@@ -167,6 +167,24 @@ export function alterProperties(
     if (Array.isArray(parsedProperties) && parsedProperties.length) {
         return parsedProperties;
     }
+    function removeFromSubgraph(graphNode: any, subNodes: any[], props: any[]) {
+        props.forEach((prop) => {
+            let hidden = false;
+            subNodes.forEach((node) => {
+                const toHide = Object.values(node.inputs)
+                    .find((intf: any) => intf.externalName === prop.name);
+                if (toHide !== undefined) {
+                    (<any>toHide).externalName = undefined;
+                    hidden = true;
+                }
+            });
+            if (hidden) {
+                const toUpdate = Object.values(graphNode.inputs)
+                    .filter((intf: any) => intf.name !== prop.name);
+                graphNode.privatizeInterfaces(toUpdate, graphNode.inputs);
+            }
+        });
+    }
     const createdProperties = (createProperties(parsedProperties) as CreatedInterfaces);
     nodes.forEach((node) => {
         const state = node.save();
@@ -185,6 +203,11 @@ export function alterProperties(
 
         const loadErrors = node.load(state);
         errors = [...errors, ...loadErrors];
+        // special case for subgraphs, descend downward
+        if (node.subgraph !== undefined && remove) {
+            const externalNames = Object.values(parsedProperties);
+            removeFromSubgraph(node, node.subgraph.nodes, externalNames);
+        }
     });
     return errors;
 }
