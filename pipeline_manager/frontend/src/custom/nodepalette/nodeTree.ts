@@ -58,7 +58,7 @@ const parseCategories = (categoriesNames: Set<string>) => {
 
     categoriesNames.forEach((c) => {
         const [newLabel, ...rest] = c.split('/');
-        const label = newLabel.trim();
+        const label = newLabel;
         if (!Object.keys(toParse).includes(label)) {
             toParse[label] = [];
         }
