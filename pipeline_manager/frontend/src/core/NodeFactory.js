@@ -762,7 +762,7 @@ export class CustomNode extends Node {
             parsedState = parseNodeState(state);
 
             if (Array.isArray(parsedState) && parsedState.length) {
-                return parsedState.map((error) => `Node ${this.type} of id: ${this.id} invalid. ${error}`);
+                return parsedState;
             }
         }
 
@@ -777,7 +777,6 @@ export class CustomNode extends Node {
         if (!isWebpack && process.env.VUE_APP_GRAPH_DEVELOPMENT_MODE === 'true') {
             errors = this.updateInterfaces(parsedState.inputs, parsedState.outputs);
             errors = [...errors, ...this.updateProperties(parsedState.inputs)];
-            errors = errors.map((error) => `Node ${this.type} of id: ${this.id} invalid. ${error}`);
         } else {
             Object.entries(parsedState.inputs).forEach(([name, intf]) => {
                 if (!name.startsWith('property_')) return;
@@ -789,7 +788,7 @@ export class CustomNode extends Node {
 
             errors = detectDiscrepancies(parsedState, this.inputs, this.outputs);
             if (Array.isArray(errors) && errors.length) {
-                return errors.map((error) => `Node ${this.type} of id: ${this.id} invalid. ${error}`);
+                return errors;
             }
         }
 
