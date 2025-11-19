@@ -37,73 +37,75 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
             <background />
         </slot>
 
-        <slot
-            name="palette"
-            v-if="!(readonly || hideHud)"
-        >
-            <Palette />
-        </slot>
+        <template v-if="!validating">
+            <slot
+                name="palette"
+                v-if="!(readonly || hideHud)"
+            >
+                <Palette />
+            </slot>
 
-        <div
-            class="node-container"
-            :style="nodeContainerStyle"
-            @wheel="mouseWheel"
-            @mouseenter="changeHoveredConnections"
-            @mousemove="changeHoveredConnections"
-            @mouseleave="clearHighlight"
-        >
-            <CustomNode
-                v-for="node in visibleNodes"
-                :key="node.id + counter.toString()"
-                :node="node"
-                :selected="selectedNodes.includes(node)"
-                :greyedOut="greyedOutNodes.includes(node)"
-                :interfaces="highlightInterfaces"
-                @select="(ev) => selectNode(node, ev)"
-            />
-            <CustomNode
-                v-for="node in ignoredNodes"
-                :key="node.id + counter.toString()"
-                :node="node"
-                :hidden="true"
-            />
-        </div>
+            <div
+                class="node-container"
+                :style="nodeContainerStyle"
+                @wheel="mouseWheel"
+                @mouseenter="changeHoveredConnections"
+                @mousemove="changeHoveredConnections"
+                @mouseleave="clearHighlight"
+            >
+                <CustomNode
+                    v-for="node in visibleNodes"
+                    :key="node.id + counter.toString()"
+                    :node="node"
+                    :selected="selectedNodes.includes(node)"
+                    :greyedOut="greyedOutNodes.includes(node)"
+                    :interfaces="highlightInterfaces"
+                    @select="(ev) => selectNode(node, ev)"
+                />
+                <CustomNode
+                    v-for="node in ignoredNodes"
+                    :key="node.id + counter.toString()"
+                    :node="node"
+                    :hidden="true"
+                />
+            </div>
 
-        <svg
-            class="connections-container"
-            @mouseenter="changeHoveredConnections"
-            @mousemove="changeHoveredConnections"
-            @mouseleave="clearHighlight"
-            @wheel="mouseWheel"
-        >
-            <PipelineManagerConnection
-                v-for="connection in visibleConnections"
-                :key="connection.id + counter.toString()"
-                :connection="connection"
-                ref="connRefs"
-                :isHighlighted="highlightConnections.includes(connection)"
-            />
-            <TemporaryConnection
-                name="temporaryConnection"
-                :temporary-connection="temporaryConnection"
-                v-if="temporaryConnection && temporaryConnectionRender"
-                :connection="temporaryConnection"
-            />
-        </svg>
+            <svg
+                class="connections-container"
+                @mouseenter="changeHoveredConnections"
+                @mousemove="changeHoveredConnections"
+                @mouseleave="clearHighlight"
+                @wheel="mouseWheel"
+            >
+                <PipelineManagerConnection
+                    v-for="connection in visibleConnections"
+                    :key="connection.id + counter.toString()"
+                    :connection="connection"
+                    ref="connRefs"
+                    :isHighlighted="highlightConnections.includes(connection)"
+                />
+                <TemporaryConnection
+                    name="temporaryConnection"
+                    :temporary-connection="temporaryConnection"
+                    v-if="temporaryConnection && temporaryConnectionRender"
+                    :connection="temporaryConnection"
+                />
+            </svg>
 
-        <div class="selection-container">
-            <RectangleSelection ref="rectangleSelection"/>
-        </div>
+            <div class="selection-container">
+                <RectangleSelection ref="rectangleSelection"/>
+            </div>
 
-        <Zoom @zoom-in="zoomIn" @zoom-out="zoomOut" @center="center" :floating="!hideHud" />
+            <Zoom @zoom-in="zoomIn" @zoom-out="zoomOut" @center="center" :floating="!hideHud" />
 
-        <Return v-if="preview && isInSubgraph" @click="returnFromSubgraph" />
+            <Return v-if="preview && isInSubgraph" @click="returnFromSubgraph" />
 
-        <Panel v-show="showWelcome" :blur="false" class="welcome-container-panel">
-            <ParentMenu>
-                <WelcomeMenu :loadFiles="loadFiles" />
-            </ParentMenu>
-        </Panel>
+            <Panel v-show="showWelcome" :blur="false" class="welcome-container-panel">
+                <ParentMenu>
+                    <WelcomeMenu :loadFiles="loadFiles" />
+                </ParentMenu>
+            </Panel>
+        </template>
     </div>
 </template>
 
@@ -1006,6 +1008,7 @@ export default defineComponent({
             preview,
             showWelcome,
             loadFiles,
+            validating: editorManager.validating,
         };
     },
 });

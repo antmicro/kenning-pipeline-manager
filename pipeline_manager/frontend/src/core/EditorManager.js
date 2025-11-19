@@ -136,6 +136,8 @@ export default class EditorManager {
 
     specificationLoaded = ref(false);
 
+    validating = ref(false);
+
     specification = Specification.getInstance();
 
     updatedMetadata = {};
@@ -426,6 +428,14 @@ export default class EditorManager {
             this.specificationLoaded = value;
         } else {
             this.specificationLoaded.value = value;
+        }
+    }
+
+    setValidating(value) {
+        if (typeof this.validating === 'boolean') {
+            this.validating = value;
+        } else {
+            this.validating.value = value;
         }
     }
 
@@ -1205,6 +1215,14 @@ export default class EditorManager {
         if (errors.length) {
             return { errors, warnings };
         }
+
+        if (typeof this.validating === 'boolean') {
+            this.validating = true;
+        } else {
+            this.validating.value = true;
+        }
+
+        this.setValidating(true);
         this.relatedGraphsStore = [];
         if (graphs !== undefined) {
             // eslint-disable-next-line no-restricted-syntax
@@ -1296,6 +1314,8 @@ export default class EditorManager {
             this.relatedGraphsStore.forEach((g) => this.baklavaView.editor.registerGraph(g));
             this.editor._graph.id = uuidv4();
         }
+
+        this.setValidating(false);
 
         // Removing duplicate warnings
         const uniqueWarnings = [...new Set(warnings)];
