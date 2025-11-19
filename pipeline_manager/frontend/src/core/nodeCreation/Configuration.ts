@@ -235,6 +235,27 @@ export function alterInterfaces(
     const [inputs, outputs] =
         createBaklavaInterfaces(parsedInterfaces) as [CreatedInterfaces, CreatedInterfaces];
 
+    function removeFromSubgraph(graphNode: any, subNodes: any[], subInterfaces: any[]) {
+        subInterfaces.forEach((prop) => {
+            let hidden = false;
+            subNodes.forEach((node) => {
+                const toHide = [...Object.values(node.inputs),
+                    ...Object.values(node.outputs)]
+                    .find((intf: any) => intf.externalName === prop.name);
+                if (toHide !== undefined) {
+                    (<any>toHide).externalName = undefined;
+                    hidden = true;
+                }
+            });
+            if (hidden) {
+                const allInterfaces = { ...graphNode.inputs, ...graphNode.outputs };
+                const toUpdate = Object.values(allInterfaces)
+                    .filter((intf: any) => intf.name !== prop.name);
+                graphNode.privatizeInterfaces(toUpdate, allInterfaces);
+            }
+        });
+    }
+
     nodes.forEach((node) => {
         const state = node.save();
 
@@ -259,6 +280,14 @@ export function alterInterfaces(
 
         const loadErrors = node.load(state);
         errors = [...errors, ...loadErrors];
+
+        // special case for subgraphs, hide the interfaces underneath
+        if (node.subgraph !== undefined && remove) {
+            const internalInterfaces = [...Object.values(parsedInterfaces)]
+                .map((group: any) => Object.values(group)).flat();
+
+            removeFromSubgraph(node, node.subgraph.nodes, internalInterfaces);
+        }
     });
     return errors;
 }
