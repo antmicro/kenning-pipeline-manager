@@ -499,6 +499,26 @@
             "returns": {
                 "$ref": "common_types#/$defs/null_or_empty"
             }
+        },
+        "return_from_subgraph": {
+            "description": "Returns from subgraph if currently in one",
+            "params": {
+                "$ref": "common_types#/$defs/null_or_empty"
+            },
+            "returns": {
+                "description": "Specifies whether the editor was in subgraph and returned",
+                "type": "object",
+                "properties": {
+                    "has_returned": {
+                        "description": "Has returned from subgraph",
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "has_returned"
+                ],
+                "additionalProperties": false
+            }
         }
     },
     "backend_endpoints": {
