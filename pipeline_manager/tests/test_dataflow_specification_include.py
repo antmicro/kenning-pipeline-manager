@@ -376,6 +376,32 @@ def specification_include_graphs_no_nodes(
     return specification_SaveVideo_node
 
 
+@pytest.fixture
+def specification_include_graphs_from_include(
+    specification_SaveVideo_node,
+    dataflow_one_graph_using_SaveVideo_node,
+    httpserver: HTTPServer,
+):
+    graph_req = "/dataflow.json"
+    graph_res = dataflow_one_graph_using_SaveVideo_node
+    httpserver.expect_request(graph_req).respond_with_json(graph_res)
+
+    spec_req = "/specification.json"
+    spec_res = specification_SaveVideo_node
+    spec_res["includeGraphs"] = [{"url": httpserver.url_for(graph_req)}]
+    httpserver.expect_request(spec_req).respond_with_json(spec_res)
+
+    return {
+        "include": [httpserver.url_for(spec_req)],
+        "nodes": [
+            {
+                "name": "Subgraph",
+                "subgraphId": graph_res["graphs"][0]["id"],
+            }
+        ],
+    }
+
+
 @pytest.mark.parametrize(
     "specification,expected",
     [
@@ -393,6 +419,7 @@ def specification_include_graphs_no_nodes(
         ("specification_include_one_graph", 0),
         ("specification_include_one_graph_with_exposed_interface", 0),
         ("specification_nested_repeating_include", 0),
+        ("specification_include_graphs_from_include", 0),
         ("specification_include_graphs_node_conflicting", 0),
         ("specification_include_graphs_names_repeated", 0),
         ("specification_include_graphs_no_nodes", 1),
