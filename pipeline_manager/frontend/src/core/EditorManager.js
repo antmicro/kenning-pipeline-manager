@@ -231,7 +231,10 @@ export default class EditorManager {
         // Include graphs
         const {
             graphs, errors: includeGraphsErrors,
-        } = await EditorManager.includeGraphs(dataflowSpecification.includeGraphs ?? []);
+        } = await EditorManager.includeGraphs([
+            ...(includedSpecification.includeGraphs ?? []),
+            ...(dataflowSpecification.includeGraphs ?? []),
+        ]);
         errors.push(...includeGraphsErrors);
         if (errors.length) {
             return { errors, warnings };
