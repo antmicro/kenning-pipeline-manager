@@ -21,6 +21,7 @@ PROCESS_SHUTDOWN_TIME = 5
 def rpc_server():
     """Fixture to provide a backend server."""
     startup_time = 5
+    process = None
     try:
         with build_server_app() as frontend_path:
             args = [
