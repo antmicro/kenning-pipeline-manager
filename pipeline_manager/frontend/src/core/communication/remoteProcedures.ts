@@ -600,3 +600,13 @@ export async function nodes_highlight(
 export function register_external_frontend() {
     throw new Error('Frontend registering available only through "postMessage" interface.');
 }
+
+export function return_from_subgraph() {
+    const isInSubgraph = editorManager.isInSubgraph();
+
+    if (isInSubgraph) {
+        editorManager.returnFromSubgraph();
+    }
+
+    return { has_returned: isInSubgraph };
+}
