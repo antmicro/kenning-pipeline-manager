@@ -2313,4 +2313,8 @@ export default class EditorManager {
 
         return nodes;
     }
+
+    isInSubgraph() {
+        return this.editor.isInSubgraph();
+    }
 }
