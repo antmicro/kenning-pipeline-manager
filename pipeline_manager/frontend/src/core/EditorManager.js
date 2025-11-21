@@ -362,10 +362,12 @@ export default class EditorManager {
         if (!lazyLoad) {
             const {
                 errors: preprocessErrors,
+                warnings: preprocessWarnings,
                 specification: preprocessedSpecification,
             } = await this.preprocessSpecification(dataflowSpecification, {
                 unmarkNewNodes, urloverrides, tryMinify,
             });
+            warnings.push(...preprocessWarnings);
             errors.push(...preprocessErrors);
             if (errors.length) return { errors, warnings, info };
             dataflowSpecification = preprocessedSpecification;
