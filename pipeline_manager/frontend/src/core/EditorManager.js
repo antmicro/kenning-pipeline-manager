@@ -1089,38 +1089,66 @@ export default class EditorManager {
     }
 
     /**
-     * Filters graphs that are recursively included by the graph with a given ID.
+     * Creates mapping between graph ID and its descendants.
      *
-     * @param {string} entryGraphId root graph.
-     * @param {Object[]} graphs graphs to be filtered.
-     * @param {Boolean} Whether to include the entry graph.
-     * @returns {Object[]} Filtered graphs
+     * @param {object[]} graphs - Graphs to parse.
+     * @returns {Map<string, string[]>} - Generated mapping.
      */
-    static getSubgraphs(entryGraphId, graphs, includeEntry = true) {
-        const entryGraph = graphs?.find((graph) => graph.id === entryGraphId);
-        const graphMapping = Object.fromEntries(graphs.map((graph) => [graph.id, graph]));
-        const usedGraphs = [];
-        const dfs = (subgraph) => {
-            if (usedGraphs.includes(subgraph.id)) return;
-            usedGraphs.push(subgraph.id);
+    static getGraphDependencies(graphs) {
+        const graphIds = graphs.map(({ id }) => id).filter(Boolean);
 
-            const subgraphs = subgraph.nodes
+        // Collect all dependencies for each graph
+        const idToNested = new Map();
+        const idToGraph = new Map(graphs.map((graph) => [graph.id, graph]));
+        const dfs = (graphId, visited = new Set()) => {
+            const graph = idToGraph.get(graphId);
+            if (!graphId || !graph || visited.has(graphId)) return [];
+            visited.add(graphId);
+
+            // Collect immediate dependencies
+            const subgraphs = graph.nodes
                 ?.map((node) => node.subgraph) ?? [];
-            const relatedGraphs = subgraph.nodes
+            const relatedGraphs = graph.nodes
                 ?.map((node) => node.relatedGraphs?.map(({ id }) => id) ?? [])
                 .flat() ?? [];
+            const immediateChildren = [...subgraphs, ...relatedGraphs]
+                .filter((id) => id !== undefined);
 
-            subgraphs
-                .concat(relatedGraphs)
-                .filter((id) => id !== undefined)
-                .map((id) => graphMapping[id])
-                .forEach(dfs);
+            // Collect and store dependencies
+            const nested = immediateChildren.flatMap((g) => dfs(g, visited));
+            idToNested.set(graphId, Array.from(new Set(nested)));
+
+            return [graphId, ...nested];
         };
-        dfs(entryGraph);
+        graphIds.forEach((g) => dfs(g));
+        return { idToGraph, idToNested };
+    }
 
-        return usedGraphs
-            .filter((id) => id !== entryGraphId || includeEntry)
-            .map((id) => graphMapping[id]);
+    /* eslint-disable max-len */
+    /**
+     * Sorts graphs topologically.
+     *
+     * @param {object[]} graphs Graphs to sort.
+     * @param {Map<string, string[]>} idToNested Mapping between graph ID to its nested graphs.
+     * @returns {string[]} Sorted graphs IDs.
+     */
+    /* eslint-enable max-len */
+    static sortGraphs(graphs, idToNested) {
+        const graphIds = graphs.map(({ id }) => id).filter(Boolean);
+
+        const visited = new Set();
+        const idToGraph = new Map(graphs.map((graph) => [graph.id, graph]));
+        const sortedIds = [];
+        const visit = (id) => {
+            if (visited.has(id)) return;
+            visited.add(id);
+
+            const nested = idToNested.get(id) || [];
+            nested.forEach((nestedId) => visit(nestedId));
+            sortedIds.push(id);
+        };
+        graphIds.forEach((id) => visit(id));
+        return sortedIds.map((id) => idToGraph.get(id));
     }
 
     /**
@@ -1230,8 +1258,21 @@ export default class EditorManager {
         this.setValidating(true);
         this.relatedGraphsStore = [];
         if (graphs !== undefined) {
+            const {
+                idToGraph,
+                idToNested,
+            } = EditorManager.getGraphDependencies(dataflowSpecification.graphs ?? []);
+            const sortedGraphs = EditorManager.sortGraphs(graphs, idToNested);
+
             // eslint-disable-next-line no-restricted-syntax
-            const subgraphs = nodes.filter(({ subgraphId }) => subgraphId !== undefined);
+            const subgraphNodes = nodes.filter(({ subgraphId }) => subgraphId !== undefined);
+            const subgraphIdToNodes = new Map(nodes.map((node) => [node.subgraphId, []]));
+            subgraphNodes.forEach((node) => subgraphIdToNodes.get(node.subgraphId).push(node));
+            const subgraphNodesWithGraphs = sortedGraphs
+                .map((graph) => [subgraphIdToNodes.get(graph.id), graph])
+                .filter(([graphNodes]) => graphNodes)
+                .flatMap(([graphNodes, graph]) => graphNodes.map((node) => [node, graph]));
+
             const relatedGraphIds = nodes
                 .map((node) => node.relatedGraphs?.map(({ id }) => id))
                 .filter((value) => value !== undefined)
@@ -1241,15 +1282,12 @@ export default class EditorManager {
                 // Validating the graph after it is registered to see if there are any errors
                 // by loading a graph (with nested subgraphs, if applicable)
 
-                const graphs_ = EditorManager
-                    .getSubgraphs(graph.id, graphs)
-                    .map((subgraph) => structuredClone(subgraph));
-
+                const graphs_ = idToNested.get(graph.id).map((id) => idToGraph.get(id));
                 const {
                     errors: loadingErrors,
                     warnings: loadingWarnings,
                 } = await this.loadDataflow({ // eslint-disable-line no-await-in-loop
-                    graphs: graphs_,
+                    graphs: [graph, ...graphs_],
                     version: dataflowSpecification.version,
                 }, ...loadArgs);
 
@@ -1260,14 +1298,12 @@ export default class EditorManager {
                 if (loadingErrors.length) errors.push(`Graph '${graph.name ?? graph.id}' is invalid:`, ...loadingErrors.map((w) => `    ${w}`));
             };
 
+            const visitedSubgraphs = new Set();
+
+            // Validate subgraphs
             // eslint-disable-next-line no-restricted-syntax
-            for (const node of subgraphs) {
-                const graphId = node.subgraphId;
-                const graph = graphs.find(({ id }) => id === graphId);
-                if (graph === undefined) {
-                    errors.push([`The subgraph with ID ${graphId} was not found`]);
-                    continue; // eslint-disable-line no-continue
-                }
+            for (const [node, graph] of subgraphNodesWithGraphs) {
+                visitedSubgraphs.add(graph.id);
 
                 const myGraph = GraphFactory(
                     graph.nodes,
@@ -1295,8 +1331,14 @@ export default class EditorManager {
                 this.baklavaView.editor.unregisterGraphs();
             }
 
-            // eslint-disable-next-line no-restricted-syntax
-            for (const graphId of relatedGraphIds) {
+            const subgraphNotFoundErrors = Object.entries(subgraphIdToNodes)
+                .filter(([subgraphId]) => !visitedSubgraphs.has(subgraphId))
+                .flatMap(([subgraphId, graphNodes]) => graphNodes.map((node) => [subgraphId, node]))
+                .map(([subgraphId, node]) => `The subgraph with ID ${subgraphId} for node ${node.name} was not found`);
+            errors.push(...subgraphNotFoundErrors);
+
+            // Validate related graphs
+            for (const graphId of relatedGraphIds) { // eslint-disable-line no-restricted-syntax
                 const graph = graphs.find(({ id }) => id === graphId);
                 if (graph === undefined) {
                     errors.push([`The related graph with ID ${graphId} was not found`]);
@@ -1334,6 +1376,7 @@ export default class EditorManager {
         const entryGraphId = dataflowSpecification.entryGraph;
         if (!errors.length && entryGraphId !== undefined) {
             if (graphs?.some((graph) => graph.id === entryGraphId)) {
+                graphs.flatMap((g) => g.nodes).forEach((node) => delete node.graphState);
                 const {
                     errors: entryErrors,
                 } = await this.loadDataflow({
