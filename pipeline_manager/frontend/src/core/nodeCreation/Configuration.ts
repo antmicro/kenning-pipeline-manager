@@ -158,7 +158,7 @@ export function alterProperties(
     nodes: any[],
     properties: PropertyConfiguration[],
     remove = false,
-): any[] {
+): any[]|Set<string> {
     if (properties === undefined) return [];
     let errors: any[] = [];
 
@@ -167,7 +167,9 @@ export function alterProperties(
     if (Array.isArray(parsedProperties) && parsedProperties.length) {
         return parsedProperties;
     }
-    function removeFromSubgraph(graphNode: any, subNodes: any[], props: any[]) {
+    const privatizedProperties = new Set<string>();
+    function removeFromSubgraph(graphNode: any, subNodes: any[], props: any[]): any[] {
+        const result: any[] = [];
         props.forEach((prop) => {
             let hidden = false;
             subNodes.forEach((node) => {
@@ -182,8 +184,10 @@ export function alterProperties(
                 const toUpdate = Object.values(graphNode.inputs)
                     .filter((intf: any) => intf.name !== prop.name);
                 graphNode.privatizeInterfaces(toUpdate, graphNode.inputs);
+                result.push(prop);
             }
         });
+        return result;
     }
     const createdProperties = (createProperties(parsedProperties) as CreatedInterfaces);
     nodes.forEach((node) => {
@@ -206,10 +210,12 @@ export function alterProperties(
         // special case for subgraphs, descend downward
         if (node.subgraph !== undefined && remove) {
             const externalNames = Object.values(parsedProperties);
-            removeFromSubgraph(node, node.subgraph.nodes, externalNames);
+            const hiddenIntfs = removeFromSubgraph(node, node.subgraph.nodes, externalNames);
+            hiddenIntfs.forEach((intf) => privatizedProperties.add(intf.name));
         }
     });
-    return errors;
+    return errors.length === 0 && remove && privatizedProperties.size !== 0
+        ? privatizedProperties : errors;
 }
 
 /**
@@ -223,7 +229,7 @@ export function alterInterfaces(
     nodes: any[],
     interfaces: InterfaceConfiguration[],
     remove = false,
-): any[] {
+): any[]|Set<string> {
     if (interfaces === undefined) return [];
     let errors: any[] = [];
 
@@ -236,6 +242,7 @@ export function alterInterfaces(
         createBaklavaInterfaces(parsedInterfaces) as [CreatedInterfaces, CreatedInterfaces];
 
     function removeFromSubgraph(graphNode: any, subNodes: any[], subInterfaces: any[]) {
+        const result: any[] = [];
         subInterfaces.forEach((prop) => {
             let hidden = false;
             subNodes.forEach((node) => {
@@ -252,10 +259,13 @@ export function alterInterfaces(
                 const toUpdate = Object.values(allInterfaces)
                     .filter((intf: any) => intf.name !== prop.name);
                 graphNode.privatizeInterfaces(toUpdate, allInterfaces);
+                result.push(prop);
             }
         });
+        return result;
     }
 
+    const privatizedInterfaces = new Set<string>();
     nodes.forEach((node) => {
         const state = node.save();
 
@@ -283,13 +293,15 @@ export function alterInterfaces(
 
         // special case for subgraphs, hide the interfaces underneath
         if (node.subgraph !== undefined && remove) {
-            const internalInterfaces = [...Object.values(parsedInterfaces)]
+            const intInterfaces = [...Object.values(parsedInterfaces)]
                 .map((group: any) => Object.values(group)).flat();
 
-            removeFromSubgraph(node, node.subgraph.nodes, internalInterfaces);
+            const hiddenIntfs = removeFromSubgraph(node, node.subgraph.nodes, intInterfaces);
+            hiddenIntfs.forEach((intf) => privatizedInterfaces.add(intf.name));
         }
     });
-    return errors;
+    return errors.length === 0 && remove && privatizedInterfaces.size !== 0
+        ? privatizedInterfaces : errors;
 }
 
 /**
