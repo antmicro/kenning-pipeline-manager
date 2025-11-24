@@ -305,6 +305,22 @@ export function alterInterfaces(
 }
 
 /**
+  * Notifies about privatized interfaces and returns array of errors that
+  * might have occurred.
+  *
+  * @param output - the output of alterInterfaces or alterProperties
+  * @returns void
+*/
+export function notifyChange(output: any[]|Set<string>): any[] {
+    if (Array.isArray(output)) {
+        return output;
+    }
+    const privatized = [...output.values()].join(', ');
+    NotificationHandler.showToast('warning', `Privatized: ${privatized}`);
+    return [];
+}
+
+/**
   * Adds property to the custom node. If the property is invalid, it logs an error.
   * @param property - the property to be added
   * @returns void
@@ -331,7 +347,8 @@ export function addProperty(property: PropertyConfiguration): void {
     }
 
     configurationState.properties.push(property);
-    error = alterProperties(nodes, configurationState.properties);
+    const output = alterProperties(nodes, configurationState.properties);
+    error = notifyChange(output);
 
     if (error.length) {
         NotificationHandler.terminalLog('error', 'Invalid property', error);
@@ -373,7 +390,8 @@ export function removeProperties(properties: PropertyConfiguration[]): void {
     configurationState.properties = configurationState.properties.filter(
         (item) => !properties.includes(item),
     );
-    alterProperties(nodes, properties, true);
+    const output = alterProperties(nodes, properties, true);
+    notifyChange(output);
 
     const resolvedChildNodes = editorManager.specification.currentSpecification.nodes
         .filter((n: any) => n.extends?.includes(currentType)) ?? [];
@@ -455,7 +473,8 @@ export function addInterface(intf: InterfaceConfiguration): void {
     }
 
     configurationState.interfaces.push(intf);
-    error = alterInterfaces(nodes, configurationState.interfaces);
+    const output = alterInterfaces(nodes, configurationState.interfaces);
+    error = notifyChange(output);
 
     if (error.length) {
         NotificationHandler.terminalLog('error', 'Invalid interface', error);
@@ -498,7 +517,8 @@ export function removeInterfaces(interfaces: InterfaceConfiguration[]): void {
     configurationState.interfaces = configurationState.interfaces.filter(
         (item) => !interfaces.includes(item),
     );
-    alterInterfaces(nodes, interfaces, true);
+    const output = alterInterfaces(nodes, interfaces, true);
+    notifyChange(output);
 
     const resolvedChildNodes = editorManager.specification.currentSpecification.nodes
         .filter((n: any) => n.extends?.includes(currentType)) ?? [];
