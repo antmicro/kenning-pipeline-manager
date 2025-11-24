@@ -200,6 +200,10 @@ import NotificationHandler from '../core/notifications.js';
 import getExternalApplicationManager from '../core/communication/ExternalApplicationManager';
 
 import { configurationState, menuState } from '../core/nodeCreation/ConfigurationState.ts';
+import {
+    updateSubgraphInterfaces,
+    updateSubgraphProperties,
+} from '../core/NodeFactory.js';
 
 // Baklavajs implementation
 
@@ -391,6 +395,35 @@ const openSidebar = () => {
     sidebar.visible = true;
 };
 
+const getSubgraphInterfaces = () => {
+    if (!node.value.subgraph) {
+        return [];
+    }
+    const evaluatedIntf = updateSubgraphInterfaces(
+        node.value.subgraph.nodes,
+        Object.values(node.value.inputs),
+        Object.values(node.value.outputs),
+    );
+    if (Array.isArray(evaluatedIntf) && evaluatedIntf.length) {
+        throw new Error(
+            `Internal error occurred while getting subgraph interfaces.\n` +
+            `Reason: ${evaluatedIntf.join('. ')}`,
+        );
+    }
+    return [...evaluatedIntf.inputs, ...evaluatedIntf.outputs];
+};
+
+const getSubgraphProperties = () => {
+    if (!node.value.subgraph) {
+        return [];
+    }
+    const evaluatedProp = updateSubgraphProperties(
+        node.value.subgraph.nodes,
+        Object.values(node.value.inputs),
+    );
+    return evaluatedProp;
+};
+
 /* eslint-disable default-case */
 const onContextMenuTitleClick = async (action) => {
     if (action !== 'delete' && action !== 'disconnect') {
@@ -406,11 +439,15 @@ const onContextMenuTitleClick = async (action) => {
 
         let nodeInterfaces = [...displayedInputs.value, ...displayedOutputs.value];
         nodeInterfaces = nodeInterfaces.filter((intf) => intf.direction !== undefined);
+        const subInterfaces = getSubgraphInterfaces();
+        const subProps = getSubgraphProperties();
+
         const configuredInterfaces = nodeInterfaces?.map((intf) => ({
             name: intf?.name,
             type: intf?.type,
             direction: intf?.direction,
             maxConnectionsCount: intf?.maxConnectionsCount,
+            inSubgraph: subInterfaces.some((i) => i.id === intf.id),
         }));
 
         /* eslint-disable no-underscore-dangle */
@@ -425,6 +462,7 @@ const onContextMenuTitleClick = async (action) => {
             step: prop?.step,
             readonly: prop?.readonly,
             dtype: prop?.dtype,
+            inSubgraph: subProps.some((i) => i.id === prop.id),
         }));
 
         configurationState.properties = configuredProperties;
