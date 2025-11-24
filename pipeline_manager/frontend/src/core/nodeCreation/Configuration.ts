@@ -48,6 +48,14 @@ function commitTypeToSpecification() {
         }
         style = EDITED_NODE_STYLE;
     }
+    const processedInterfaces = configurationState.interfaces
+        .filter((intf: any) => !intf.inSubgraph)
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        .map((intf: any) => (({ inSubgraph, ...o }) => o)(intf));
+    const processedProperties = configurationState.properties
+        .filter((prop: any) => !prop.inSubgraph)
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        .map((prop: any) => (({ inSubgraph, ...o }) => o)(prop));
 
     const ret = editorManager.addNodeToEditorSpecification({
         name: newNodeData.name,
@@ -55,8 +63,8 @@ function commitTypeToSpecification() {
         category: newNodeData.category,
         color: newNodeData.color,
         description: newNodeData.description,
-        interfaces: configurationState.interfaces,
-        properties: configurationState.properties,
+        interfaces: processedInterfaces,
+        properties: processedProperties,
         style,
     }, currentType, false);
 
@@ -364,7 +372,6 @@ export function addProperty(property: PropertyConfiguration): void {
         const childNodes = findNodes(n.name!);
         alterProperties(childNodes, [property]);
     });
-
     commitTypeToSpecification();
 }
 
