@@ -443,13 +443,16 @@ export default class PipelineManagerEditor extends Editor {
                 // restore ids described in configuration, not generated ones
                 node.updateExposedInterfaces(undefined, undefined, true);
 
+                const newInterfaces = [...Object.values(node.inputs),
+                    ...Object.values(node.outputs)];
                 // restore old external names
-                [...Object.values(node.inputs),
-                    ...Object.values(node.outputs)].forEach((intf) => {
+                newInterfaces.forEach((intf) => {
                     intf.externalName = externalNameMap[intf.id];
                 });
                 // restore connections that might have disconnected after the first update
                 connections.forEach((conn) => {
+                    conn.from = newInterfaces.find((intf) => intf.id === conn.from.id) ?? conn.from;
+                    conn.to = newInterfaces.find((intf) => intf.id === conn.to.id) ?? conn.to;
                     node.graphInstance.addConnection(conn.from, conn.to);
                 });
             }
