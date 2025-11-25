@@ -17,8 +17,6 @@ import { useViewModel } from '@baklavajs/renderer-vue';
 import { api as fullscreen } from 'vue-fullscreen';
 import Arrow from '../icons/Arrow.vue';
 import Expand from '../icons/Expand.vue';
-import ExternalAppStatus from './ExternalAppStatus.vue';
-import ExternalAppAction from './ExternalAppAction.vue';
 import FilesContextMenu from './navbar/FilesContextMenu.vue';
 import Collapse from '../icons/Collapse.vue';
 import Validate from '../icons/Validate.vue';
@@ -36,13 +34,7 @@ import runInfo from '../core/communication/runInformation';
 import getExternalApplicationManager from '../core/communication/ExternalApplicationManager';
 import Notifications from './Notifications.vue';
 import Settings from './Settings.vue';
-import NavBarTransitions from './NavBarTransitions.vue';
-import {
-    ParentMenu, SaveMenu, ExportMenu, NodeConfigurationMenu, PropertyConfigurationMenu,
-    InterfaceConfigurationMenu, LayerConfigurationMenu, ListMenu,
-} from './menu';
-import { menuState, configurationState } from '../core/nodeCreation/ConfigurationState.ts';
-import { removeInterfaces, removeProperties } from '../core/nodeCreation/Configuration.ts';
+import NavBarTransitions from './navbar/NavBarTransitions.vue';
 import Panel from './Panel.vue';
 import CustomSidebar from '../custom/CustomSidebar.vue';
 import GraphDetails from './GraphDetails.vue';
@@ -70,16 +62,8 @@ export default {
         Sidebar,
         Settings,
         Cube,
-        ParentMenu,
-        SaveMenu,
-        ExportMenu,
-        NodeConfigurationMenu,
-        PropertyConfigurationMenu,
-        InterfaceConfigurationMenu,
         Panel,
         CustomSidebar,
-        LayerConfigurationMenu,
-        ListMenu,
         GraphDetails,
         FilesContextMenu,
         NavBarTransitions,
@@ -237,14 +221,6 @@ export default {
             graphName,
             editorManager,
             editorTitleInterface,
-            /* Object used to pass information to ParentMenu component about
-                saving configuration. If any option is set to undefined then
-                it will be not displayed in the ParentMenu.
-            */
-            menuState,
-            configurationState,
-            removeInterfaces,
-            removeProperties,
             /* create instance of external manager to control
             connection, dataflow and specification
             */
@@ -538,117 +514,13 @@ export default {
 </script>
 
 <!-- eslint-disable vue/no-multiple-template-root -->
+<!-- eslint-disable vue/no-v-model-argument -->
 <template>
-    <Transition name="fade" @mousedown.self="saveMenuShow = false">
-        <Panel v-show="saveMenuShow">
-            <ParentMenu
-                v-show="saveMenuShow"
-                v-model="saveMenuShow"
-                :title="'Save configuration'"
-            >
-                <SaveMenu
-                    :saveConfiguration="saveConfiguration"
-                    v-model="saveMenuShow"
-                />
-            </ParentMenu>
-        </Panel>
-    </Transition>
-    <Transition name="fade" @mousedown.self="exportMenuShow = false">
-        <Panel v-show="exportMenuShow">
-            <ParentMenu
-                v-show="exportMenuShow"
-                v-model="exportMenuShow"
-                :title="'Export graph'"
-            >
-                <ExportMenu
-                    :exportGraph = "exportGraph"
-                    v-model="exportMenuShow"
-                />
-            </ParentMenu>
-        </Panel>
-    </Transition>
-    <Transition name="fade" @mousedown.self="menuState.configurationMenu.visible = false">
-        <Panel v-show="menuState.configurationMenu.visible">
-            <ParentMenu
-                v-if="menuState.configurationMenu.visible"
-                v-model="menuState.configurationMenu.visible"
-                :title="'Node configuration'"
-            >
-                <NodeConfigurationMenu/>
-            </ParentMenu>
-        </Panel>
-    </Transition>
-    <Transition name="fade" @mousedown.self="menuState.propertyMenu = false">
-        <Panel v-show="menuState.propertyMenu">
-            <ParentMenu
-                v-if="menuState.propertyMenu"
-                v-model="menuState.propertyMenu"
-                :title="'Add property'"
-            >
-                <PropertyConfigurationMenu/>
-            </ParentMenu>
-        </Panel>
-    </Transition>
-    <Transition name="fade" @mousedown.self="menuState.interfaceMenu = false">
-        <Panel v-show="menuState.interfaceMenu">
-            <ParentMenu
-                v-if="menuState.interfaceMenu"
-                v-model="menuState.interfaceMenu"
-                :title="'Add interface'"
-            >
-                <InterfaceConfigurationMenu/>
-            </ParentMenu>
-        </Panel>
-    </Transition>
-    <Transition name="fade" @mousedown.self="menuState.propertyListMenu = false">
-        <Panel v-show="menuState.propertyListMenu">
-            <ParentMenu
-                v-if="menuState.propertyListMenu"
-                v-model="menuState.propertyListMenu"
-                :title="'Remove properties'"
-            >
-                <ListMenu
-                    :componentName="'propertyListMenu'"
-                    :items=configurationState.properties
-                    :disabledItems="configurationState.properties.filter((p) =>
-                        p.inherited || p.override)"
-                    :disabledReason="'inherited'"
-                    :confirmAction="removeProperties"
-                    :confirmText="'Remove properties'"
-                />
-            </ParentMenu>
-        </Panel>
-    </Transition>
-    <Transition name="fade" @mousedown.self="menuState.interfaceListMenu = false">
-        <Panel v-show="menuState.interfaceListMenu">
-            <ParentMenu
-                v-if="menuState.interfaceListMenu"
-                v-model="menuState.interfaceListMenu"
-                :title="'Remove interfaces'"
-            >
-                <ListMenu
-                    :componentName="'interfaceListMenu'"
-                    :items=configurationState.interfaces
-                    :disabledItems="configurationState.interfaces.filter((i) =>
-                        i.inherited || i.override)"
-                    :disabledReason="'inherited'"
-                    :confirmAction="removeInterfaces"
-                    :confirmText="'Remove interfaces'"
-                />
-            </ParentMenu>
-        </Panel>
-    </Transition>
-    <Transition name="fade" @mousedown.self="menuState.layerMenu = false">
-        <Panel v-show="menuState.layerMenu">
-            <ParentMenu
-                v-if="menuState.layerMenu"
-                v-model="menuState.layerMenu"
-                :title="'Set node layer'"
-            >
-                <LayerConfigurationMenu/>
-            </ParentMenu>
-        </Panel>
-    </Transition>
+    <NavBarTransitions
+        :saveConfiguration="saveConfiguration"
+        v-model:saveMenuShow="saveMenuShow"
+        v-model:exportMenuShow="exportMenuShow"
+    />
 
     <div class="wrapper"
         v-click-outside="(ev) => handleMouseLeave(ev)"
