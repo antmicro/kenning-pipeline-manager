@@ -675,7 +675,6 @@ const onMouseDown = () => {
 
     openDoubleClick();
 };
-
 const displayedLeftSockets = computed(() =>
     Object.values([...displayedInputs.value, ...displayedOutputs.value])
         .filter((intf) => intf.side === 'left' && intf.port)
@@ -687,16 +686,14 @@ const displayedRightSockets = computed(() =>
         .filter((intf) => intf.side === 'right' && intf.port)
         .sort((intf1, intf2) => intf1.sidePosition - intf2.sidePosition),
 );
-
 const getRows = (sockets) => {
     if (!sockets.length) {
         return [];
     }
 
-    const numOfLines = Math.max(
-        displayedLeftSockets.value.at(-1)?.sidePosition ?? 0,
-        displayedRightSockets.value.at(-1)?.sidePosition ?? 0,
-    );
+    const positionArr = sockets.map((s) => s.sidePosition ?? 0);
+
+    const numOfLines = Math.max(...positionArr);
 
     let numOfSocket = 0;
     const rows = [];
@@ -711,7 +708,7 @@ const getRows = (sockets) => {
     }
     return rows;
 };
-
+// another potential source of issue
 const displayedRightRows = computed(() => getRows(displayedRightSockets.value));
 const displayedLeftRows = computed(() => getRows(displayedLeftSockets.value));
 
