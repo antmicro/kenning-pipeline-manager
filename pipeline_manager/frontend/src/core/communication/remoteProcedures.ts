@@ -479,7 +479,7 @@ export async function specification_graph_change(
     },
 ) {
     const externalApplicationManager = getExternalApplicationManager();
-    const tryMinify = params.tryMinify ? params.dataflow : undefined;
+    const tryMinify = params.tryMinify && params.dataflow ? params.dataflow : params.tryMinify;
     await externalApplicationManager.conditionalLoadingScreen(params.loadingScreen, async () => {
         const error = await externalApplicationManager.updateSpecification(
             params.specification, { ...params, tryMinify },
@@ -500,7 +500,7 @@ export async function specification_preprocess(
     },
 ): Promise<{ specification: any } | undefined> {
     const externalApplicationManager = getExternalApplicationManager();
-    const tryMinify = params.tryMinify ? params.dataflow : undefined;
+    const tryMinify = params.tryMinify && params.dataflow ? params.dataflow : params.tryMinify;
     const resolveSpecification = await externalApplicationManager.preprocessSpecification(
         params.specification, { ...params, tryMinify },
     );

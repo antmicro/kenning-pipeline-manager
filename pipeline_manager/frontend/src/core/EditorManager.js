@@ -256,23 +256,6 @@ export default class EditorManager {
         delete dataflowSpecification.include; // eslint-disable-line no-param-reassign
         delete dataflowSpecification.includeGraphs; // eslint-disable-line no-param-reassign
 
-        let usedGraphs;
-        if (tryMinify === true) {
-            // Specification graphs
-            usedGraphs = dataflowSpecification.graphs;
-        } else if (tryMinify) {
-            // Dataflow graphs
-            usedGraphs = tryMinify.graphs;
-        }
-
-        if (usedGraphs) {
-            // Minify nodes
-            const usedNames = EditorManager.getUsedNames(usedGraphs);
-            // eslint-disable-next-line no-param-reassign
-            dataflowSpecification.nodes =
-                EditorManager.minifySpecificationNodes(dataflowSpecification.nodes, usedNames);
-        }
-
         // Ensure 'subgraph' field for subgraph node instances
         const nameToSubgraphNode = new Map((dataflowSpecification.nodes ?? [])
             .filter(({ subgraphId }) => subgraphId)
@@ -288,7 +271,65 @@ export default class EditorManager {
             // eslint-disable-next-line no-param-reassign
             .forEach((node) => { node.subgraph = nameToSubgraphNode.get(node.name).subgraphId; });
 
-        return { errors, warnings, specification: dataflowSpecification };
+        const {
+            idToGraph,
+            idToNested,
+        } = EditorManager.getGraphDependencies(dataflowSpecification.graphs ?? []);
+
+        let usedGraphs;
+        if (tryMinify === true) {
+            // Specification graphs
+            if (!dataflowSpecification.graphs) {
+                warnings.push(`'tryMinify' is enabled, but no graph is found. Skipping`);
+            } else {
+                const { entryGraph } = dataflowSpecification;
+
+                // Missing 'entryGraph' is reported in 'updateGraphSpecification'
+                const existsEntryGraph = dataflowSpecification
+                    .graphs.some((g) => g.id === dataflowSpecification.entryGraph);
+
+                if (entryGraph && existsEntryGraph) {
+                    // Entry graph and its nested graphs
+                    const nested = idToNested.get(dataflowSpecification.entryGraph);
+                    usedGraphs = [entryGraph, ...nested].map((id) => idToGraph.get(id));
+                } else {
+                    // All graphs
+                    usedGraphs = dataflowSpecification.graphs;
+                }
+            }
+        } else if (tryMinify) {
+            // Dataflow graphs
+            usedGraphs = tryMinify.graphs;
+        }
+
+        if (usedGraphs) {
+            // Minify nodes
+            const usedNames = EditorManager.getUsedNames(usedGraphs);
+            // eslint-disable-next-line no-param-reassign
+            dataflowSpecification.nodes =
+                EditorManager.minifySpecificationNodes(dataflowSpecification.nodes, usedNames);
+
+            const usedGraphsIds = new Set(usedGraphs.map((g) => g.id));
+            dataflowSpecification.nodes
+                .filter(({ subgraphId }) => subgraphId)
+                // Unmatched 'subgraphId' are reported in 'updateGraphSpecification'
+                .filter(({ subgraphId }) => idToGraph.get(subgraphId))
+                .flatMap(({ subgraphId }) => [subgraphId, ...idToNested.get(subgraphId)])
+                .filter((subgraphId) => !usedGraphsIds.has(subgraphId))
+                .forEach((subgraphId) => {
+                    usedGraphsIds.add(subgraphId);
+                    usedGraphs.push(idToGraph.get(subgraphId));
+                });
+            // eslint-disable-next-line no-param-reassign
+            dataflowSpecification.graphs = usedGraphs;
+        }
+
+        return {
+            errors,
+            warnings,
+            specification: dataflowSpecification,
+            idToNested,
+        };
     }
 
     /* eslint-disable max-len */
@@ -364,6 +405,7 @@ export default class EditorManager {
                 errors: preprocessErrors,
                 warnings: preprocessWarnings,
                 specification: preprocessedSpecification,
+                idToNested,
             } = await this.preprocessSpecification(dataflowSpecification, {
                 unmarkNewNodes, urloverrides, tryMinify,
             });
@@ -378,10 +420,11 @@ export default class EditorManager {
             if (errors.length) {
                 return { errors, warnings, info };
             }
+
             // Update graph specification
             const {
                 errors: newErrors, warnings: newWarnings,
-            } = await this.updateGraphSpecification(dataflowSpecification);
+            } = await this.updateGraphSpecification(dataflowSpecification, idToNested);
             errors.push(...newErrors);
             warnings.push(...newWarnings);
         }
@@ -1153,12 +1196,13 @@ export default class EditorManager {
 
     /**
      * Reads and validates part of specification related to nodes and subgraphs
-     * @param dataflowSpecification Specification to load
-     * @param includedGraphs Graphs included in the specification
+     * @param {object?} dataflowSpecification Specification to load
+     * @param {Map<string, string[]>} idToNested Mapping between graph ID to its nested graphs.
+     *
      * @returns An object consisting of errors and warnings arrays. If any array is empty
      * the updating process was successful.
      */
-    async updateGraphSpecification(dataflowSpecification) {
+    async updateGraphSpecification(dataflowSpecification, idToNested) {
         const warnings = [];
 
         if (!dataflowSpecification) return { errors: ['No specification passed'], warnings };
@@ -1258,10 +1302,7 @@ export default class EditorManager {
         this.setValidating(true);
         this.relatedGraphsStore = [];
         if (graphs !== undefined) {
-            const {
-                idToGraph,
-                idToNested,
-            } = EditorManager.getGraphDependencies(dataflowSpecification.graphs ?? []);
+            const idToGraph = new Map(graphs.map((graph) => [graph.id, graph]));
             const sortedGraphs = EditorManager.sortGraphs(graphs, idToNested);
 
             // eslint-disable-next-line no-restricted-syntax
@@ -1375,15 +1416,19 @@ export default class EditorManager {
         // Load entry graph
         const entryGraphId = dataflowSpecification.entryGraph;
         if (!errors.length && entryGraphId !== undefined) {
-            if (graphs?.some((graph) => graph.id === entryGraphId)) {
+            const idToGraph = new Map(graphs?.map((graph) => [graph.id, graph]));
+            const graph = idToGraph.get(entryGraphId);
+            if (graph) {
                 graphs.flatMap((g) => g.nodes).forEach((node) => delete node.graphState);
+                const graphs_ = idToNested.get(graph.id).map((id) => idToGraph.get(id));
                 const {
                     errors: entryErrors,
                 } = await this.loadDataflow({
-                    graphs,
+                    graphs: [graph, ...graphs_],
                     version: dataflowSpecification.version,
                     entryGraph: entryGraphId,
                 });
+                this.relatedGraphsStore.forEach((g) => this.baklavaView.editor.registerGraph(g));
                 if (entryErrors && entryErrors.length !== 0) {
                     entryErrors.forEach((e) => errors.push(e));
                     const newGraphInstance = new Graph(this.baklavaView.editor);
