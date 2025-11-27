@@ -1,0 +1,1503 @@
+
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      <link rel="icon" href="">
+    
+    
+      
+        <title>Specification format - Pipeline Manager</title>
+      
+    
+    
+      
+        
+        
+      
+      
+
+    
+    
+    
+      
+        
+        
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+        <link rel="stylesheet" type="text/css" href="_static/sphinx_immaterial_theme.c5589c0bd87d933a4.min.css?v=eeeb54bc" />
+        <link rel="stylesheet" type="text/css" href="_static/css/styles.css?v=e5e17168" />
+    <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="deep-orange">
+  
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="index.html" title="Pipeline Manager" class="md-header__button md-logo" aria-label="Pipeline Manager" data-md-component="logo">
+      <img src="_static/white.svg" alt="logo">
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Pipeline Manager
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Specification format
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      <form class="md-header__option" data-md-component="palette">
+        
+          
+          
+          <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="deep-orange"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+          
+            <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_2" hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5c-.84 0-1.65.15-2.39.42L12 2M3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29L3.34 7m.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14L3.36 17M20.65 7l-1.77 3.79a7.023 7.023 0 0 0-2.38-4.15l4.15.36m-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29L20.64 17M12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44L12 22Z"/></svg>
+            </label>
+          
+        
+          
+          
+          <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="deep-orange"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_2">
+          
+            <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3 3.19.09m3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95 2.06.05m-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31Z"/></svg>
+            </label>
+          
+        
+      </form>
+    
+    
+    
+      <div class="md-header__button">
+        <a href="pipeline-manager.pdf" title="PDF - pipeline-manager.pdf">
+          <div class="md-icon">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M64 0C28.7 0 0 28.7 0 64v384c0 35.3 28.7 64 64 64h256c35.3 0 64-28.7 64-64V160H256c-17.7 0-32-14.3-32-32V0H64zm192 0v128h128L256 0zM64 224h24c30.9 0 56 25.1 56 56s-25.1 56-56 56h-8v32c0 8.8-7.2 16-16 16s-16-7.2-16-16V240c0-8.8 7.2-16 16-16zm24 80c13.3 0 24-10.7 24-24s-10.7-24-24-24h-8v48h8zm72-64c0-8.8 7.2-16 16-16h24c26.5 0 48 21.5 48 48v64c0 26.5-21.5 48-48 48h-24c-8.8 0-16-7.2-16-16V240zm32 112h8c8.8 0 16-7.2 16-16v-64c0-8.8-7.2-16-16-16h-8v96zm96-128h48c8.8 0 16 7.2 16 16s-7.2 16-16 16h-32v32h32c8.8 0 16 7.2 16 16s-7.2 16-16 16h-32v48c0 8.8-7.2 16-16 16s-16-7.2-16-16V240c0-8.8 7.2-16 16-16z"/></svg>
+          </div>
+        </a>
+      </div>
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/antmicro/kenning-pipeline-manager" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    antmicro/kenning-pipeline-manager
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="index.html" title="Pipeline Manager" class="md-nav__button md-logo" aria-label="Pipeline Manager" data-md-component="logo">
+      <img src="_static/white.svg" alt="logo">
+    </a>
+    Pipeline Manager
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/antmicro/kenning-pipeline-manager" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    antmicro/kenning-pipeline-manager
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="introduction.html" class="md-nav__link">
+        <span class="md-ellipsis">Introduction</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="project-readme.html" class="md-nav__link">
+        <span class="md-ellipsis">Pipeline Manager</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          <span class="md-ellipsis">Specification format</span>
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="#" class="md-nav__link md-nav__link--active">
+        <span class="md-ellipsis">Specification format</span>
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#format-description" class="md-nav__link">
+    <span class="md-ellipsis">Format description</span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Format description">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#metadata" class="md-nav__link">
+    <span class="md-ellipsis">Metadata</span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Metadata">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#layer" class="md-nav__link">
+    <span class="md-ellipsis">Layer</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#url-class" class="md-nav__link">
+    <span class="md-ellipsis">URL class</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#interface-style" class="md-nav__link">
+    <span class="md-ellipsis">Interface style</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#node-style" class="md-nav__link">
+    <span class="md-ellipsis">Node style</span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Node style">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#specificity" class="md-nav__link">
+    <span class="md-ellipsis">Specificity</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cascading" class="md-nav__link">
+    <span class="md-ellipsis">Cascading</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example" class="md-nav__link">
+    <span class="md-ellipsis">Example</span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#navbar-item" class="md-nav__link">
+    <span class="md-ellipsis">Navbar item</span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#node" class="md-nav__link">
+    <span class="md-ellipsis">Node</span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Node">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#interface" class="md-nav__link">
+    <span class="md-ellipsis">Interface</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#property" class="md-nav__link">
+    <span class="md-ellipsis">Property</span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Property">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#group" class="md-nav__link">
+    <span class="md-ellipsis">Group</span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#node-type-inheritance" class="md-nav__link">
+    <span class="md-ellipsis">Node type inheritance</span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#interface-groups" class="md-nav__link">
+    <span class="md-ellipsis">Interface Groups</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#included-graphs" class="md-nav__link">
+    <span class="md-ellipsis">Included Graphs</span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#id1" class="md-nav__link">
+    <span class="md-ellipsis">Example</span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="dataflow-format.html" class="md-nav__link">
+        <span class="md-ellipsis">Dataflow format</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="frontend-features.html" class="md-nav__link">
+        <span class="md-ellipsis">Front-<wbr>end features</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="external-app-communication.html" class="md-nav__link">
+        <span class="md-ellipsis">Communication with an external application</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="example-server.html" class="md-nav__link">
+        <span class="md-ellipsis">Sample third-<wbr>party server</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="specification-builder.html" class="md-nav__link">
+        <span class="md-ellipsis">Specification builder</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="graph-builder.html" class="md-nav__link">
+        <span class="md-ellipsis">Dataflow graph builder</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="changelogs.html" class="md-nav__link">
+        <span class="md-ellipsis">Dataflow and Specification format changelog</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="demo.html" class="md-nav__link">
+        <span class="md-ellipsis">Demonstration of the frontend</span>
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset" role="main">
+                  
+
+
+  <a href="https://github.com/antmicro/kenning-pipeline-manager/blob/main/docs/source/specification-format.md" title="Edit this page" class="md-content__button md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
+  </a>
+
+<h1 id="specification-format">Specification format<a class="headerlink" href="#specification-format" title="Link to this heading">¶</a></h1>
+<p>Pipeline Manager requires a JSON specification that defines the working environment.
+It specifies all nodes, properties, available connections, and metadata for the editor.
+It can be either provided from a file or fetched from an <a class="reference internal" href="external-app-communication.html"><span class="doc std std-doc">external application</span></a>.</p>
+<p>Such a specification defining the nodes needs to be loaded through the front end in order for you to be able to load any dataflow.</p>
+<h2 id="format-description">Format description<a class="headerlink" href="#format-description" title="Link to this heading">¶</a></h2>
+<p>The specification needs to be provided in a JSON file.
+The specification consists of:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">metadata</span></code> - object of type <a class="reference internal" href="#metadata">Metadata</a> that specifies editor styling and metadata</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">nodes</span></code> - array that specifies valid nodes, where every element is of type <a class="reference internal" href="#node">Node</a>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">graphs</span></code> - array of dataflow-like objects defining graph nodes, of type <a class="reference internal" href="dataflow-format.html#graph"><span class="std std-ref">Graph</span></a>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">include</span></code> - array of string objects pointing to a remote url to the specifications to include.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">includeGraphs</span></code> - array of objects of type <a class="reference internal" href="#included-graphs">Included Graph</a>, that specifies graph instances to be included in the specification from a remote url.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">entryGraph</span></code> - ID of the graph that should be loaded with the specification. A graph can be chosen from <code class="docutils literal notranslate"><span class="pre">include</span></code> or <code class="docutils literal notranslate"><span class="pre">includeGraphs</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">version</span></code> - string determining version of the specification.
+Should be set to the newest version described in <a class="reference internal" href="changelogs.html"><span class="doc std std-doc">Changelogs</span></a>.
+Pipeline Manager uses that value to check the compatibility of the specification with the current implementation, giving warnings about inconsistency in versions.</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Graph node named <code class="docutils literal notranslate"><span class="pre">New</span> <span class="pre">Graph</span> <span class="pre">Node</span></code> is available by default after loading a specification.
+It can be used to create new, custom graphs.
+That is why using this name for a graph will result in an error.</p>
+</div>
+<h3 id="metadata"><span id="specification-format-metadata"></span>Metadata<a class="headerlink" href="#metadata" title="Link to this heading">¶</a></h3>
+<p>This object specifies additional editor options and contains the following optional properties:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">interfaces</span></code> - a dictionary which defines interface and connection styling for particular interface types.
+The key in the dictionary is the name of the interface type, and the value is of type <a class="reference internal" href="#interface-style">Interface style</a>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">allowLoopbacks</span></code> - boolean value that determines whether connections with endpoints at the same node are allowed.
+Default value is <code class="docutils literal notranslate"><span class="pre">false</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">readonly</span></code> - boolean value determining whether the editor is in read-only mode.
+In read-only mode, the user cannot create or remove nodes and connections.
+Modification of any properties is also disabled.
+The user is only allowed to load existing dataflows.
+Default value is <code class="docutils literal notranslate"><span class="pre">false</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">twoColumn</span></code> - boolean value determining the layout of the nodes.
+If set to <code class="docutils literal notranslate"><span class="pre">true</span></code>, then input and output sockets are both rendered in the top part of the node and properties are displayed below.
+Default value is <code class="docutils literal notranslate"><span class="pre">false</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">connectionStyle</span></code> - string value that determines the connection style.
+Can choose one out of the two options: <code class="docutils literal notranslate"><span class="pre">curved</span></code> or <code class="docutils literal notranslate"><span class="pre">orthogonal</span></code>.
+Default value is <code class="docutils literal notranslate"><span class="pre">curved</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">hideHud</span></code> - boolean value determining whether UI elements should be hidden. Components affected by this flag are: popup notifications, navigation bar and terminal window.
+Default value is <code class="docutils literal notranslate"><span class="pre">false</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">layers</span></code> - layers specifying groups of interfaces and nodes that can be hidden in the viewer from settings level.
+The entries are of type <a class="reference internal" href="#layer">Layer</a>.
+By default there are no layers.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">urls</span></code> - list of URL classes present in the specification and flow.
+It is a dictionary, where key is the name of the URL class, and value is of type <a class="reference internal" href="#url-class">URL class specification</a>.
+The given URL classes can be referred to later in <a class="reference internal" href="#node">Nodes</a> with proper link suffix.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">collapseSidebar</span></code> - boolean value determining whether nodes sidebar should be collapsed by default.
+Default value is <code class="docutils literal notranslate"><span class="pre">true</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">movementStep</span></code> - Defines offset to which nodes snap in the grid.
+Default value is <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">backgroundSize</span></code> - Defines size of the background grid.
+Default value is <code class="docutils literal notranslate"><span class="pre">100</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">layout</span></code> - String specifying the name of autolayout algorithm used in placing nodes from dataflow
+Default value is <code class="docutils literal notranslate"><span class="pre">NoLayout</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">icons</span></code> - contains definition of icon classes.
+Icon classes are key-value pairs, where key is the name of the icon class, and value is the URL prefix that is used to compute the actual path.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">styles</span></code> - a dictionary that defines node styles.
+The key in the dictionary is the name of the style, and the value is of type <a class="reference internal" href="#node-style">Node style</a>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">welcome</span></code> - boolean value determining whether a welcome text should appear on empty editor. This feature is enabled by default.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">navbarItems</span></code> - list of buttons that are displayed in the navbar in <code class="docutils literal notranslate"><span class="pre">server-app</span></code> mode, that allow for calling custom procedures.
+The entries are of type <a class="reference internal" href="#navbar-item">Navbar item</a>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">logLevel</span></code> - string specifying minimum level of verbosity notification has to have to be displayed.
+It can be one of <code class="docutils literal notranslate"><span class="pre">INFO</span></code>, <code class="docutils literal notranslate"><span class="pre">WARNING</span></code>, <code class="docutils literal notranslate"><span class="pre">ERROR</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">editableTypes</span></code> - Boolean specifying whether nodes can be edited.
+It may be changed later in the UI (given that <code class="docutils literal notranslate"><span class="pre">toggleableEditableTypes</span></code> is enabled in the specification).
+The default value is <code class="docutils literal notranslate"><span class="pre">false</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">toggleableEditableTypes</span></code> - Boolean value determining whether node editibility can be toggled from the frontend.
+The default value is <code class="docutils literal notranslate"><span class="pre">true</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">newGraphNode</span></code> - Boolean value telling whether anonymous graphs should be available for the given specification or not.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">notifyWhenChanged</span></code> - Boolean value specifying whether the frontend should send requests with information about changed values.
+This option is only effective when Pipeline Manager is run in server-app mode.
+Notifications include events from the <a class="reference internal" href="external-app-communication.html#id5"><span class="std std-ref">list of available events</span></a> ending with <code class="docutils literal notranslate"><span class="pre">_on_change</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">hideAnchors</span></code> - Boolean value determining whether anchors in all connections should be hidden and only visible on hover.
+The default value is <code class="docutils literal notranslate"><span class="pre">false</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">showIds</span></code> - Boolean value determining whether node IDs and graph IDs should be visible in the editor.
+The default value is <code class="docutils literal notranslate"><span class="pre">false</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">showHiddenProperties</span></code> - Boolean value determining whether properties marked with <code class="docutils literal notranslate"><span class="pre">hideOnDefault</span></code> should be visible regardless of their value.
+The default value is <code class="docutils literal notranslate"><span class="pre">false</span></code>.</p></li>
+</ul>
+<p>An example:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><code><span class="nt">&quot;metadata&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;interfaces&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;Dataset&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;interfaceColor&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;#FF00FF&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;interfaceConnectionPattern&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;dashed&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;interfaceConnectionColor&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;#FF0000&quot;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;allowLoopbacks&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;readonly&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;connectionStyle&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;orthogonal&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;hideHud&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;layers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Example Layer&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;nodeLayers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;processing&quot;</span><span class="p">],</span>
+<span class="w">            </span><span class="nt">&quot;nodeInterfaces&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;BinaryImage&quot;</span><span class="p">]</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;layout&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;NoLayout&quot;</span>
+<span class="p">}</span>
+</code></pre></div>
+</div>
+<h4 id="layer">Layer<a class="headerlink" href="#layer" title="Link to this heading">¶</a></h4>
+<p>Layer is used to describe a set of types of nodes and interfaces.
+Layers can be used to hide nodes of given types.
+They can be also used to hide connections for given interface types.</p>
+<p>The layers can be enabled or disabled in editor settings.</p>
+<p>Every layer has three properties (at least <code class="docutils literal notranslate"><span class="pre">name</span></code> and one of <code class="docutils literal notranslate"><span class="pre">nodeLayers</span></code> or <code class="docutils literal notranslate"><span class="pre">nodeInterfaces</span></code> need to be defined):</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">name</span></code> - name of the layer displayed in the editor,</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">nodeLayers</span></code> (optional) - array of names of node types that belong to the layer,</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">nodeInterfaces</span></code> (optional) - array of names of interface types that belong to the layer.</p></li>
+</ul>
+<h4 id="url-class">URL class<a class="headerlink" href="#url-class" title="Link to this heading">¶</a></h4>
+<p>URL class provides links with additional information for a given node.
+They are represented in nodes as icons leading to a URL with additional information on nodes.</p>
+<p>The name of the URL class is specified as key in <code class="docutils literal notranslate"><span class="pre">urls</span></code> entry in metadata.</p>
+<p>The URL class parameters are following:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">name</span></code> - name of the URL class, appears as hint on hover over the icon,</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">icon</span></code> - path to the icon representing the URL class,</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">url</span></code> - base URL for URL class.
+The suffixes for URLs are present in <a class="reference internal" href="#node">Node</a> parameters.</p></li>
+</ul>
+<h4 id="interface-style">Interface style<a class="headerlink" href="#interface-style" title="Link to this heading">¶</a></h4>
+<p>Interface style describes how interfaces of a given type should look like, as well as its input or output connections.
+It consists of the following properties:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">interfaceColor</span></code> - describes the color of the interface, should be a hexadecimal number representing RGB values.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">interfaceConnectionPattern</span></code> - describes how the connection line should look like.
+The possible variants are <code class="docutils literal notranslate"><span class="pre">solid</span></code>, <code class="docutils literal notranslate"><span class="pre">dashed</span></code> and <code class="docutils literal notranslate"><span class="pre">dotted</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">interfaceConnectionColor</span></code> - describes the color of connection lines, should be a hexadecimal number representing RGB values.</p></li>
+</ul>
+<h4 id="node-style">Node style<a class="headerlink" href="#node-style" title="Link to this heading">¶</a></h4>
+<p>Node style defines how nodes of a given style should look like. Currently, the following elements are supported:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">color</span></code> - color of the node unless a node sets its own <code class="docutils literal notranslate"><span class="pre">color</span></code>,</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">icon</span></code> - secondary icon of the node, which is displayed separately from <a class="reference internal" href="#node">Node</a> <code class="docutils literal notranslate"><span class="pre">icon</span></code>,</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pill</span></code> - pill of the node unless a node sets its own <code class="docutils literal notranslate"><span class="pre">pill</span></code>.</p></li>
+</ul>
+<p>Field values are defined the same way as in <a class="reference internal" href="#node">Node</a> specification, however, <code class="docutils literal notranslate"><span class="pre">icon</span></code> can obtain <a class="reference internal" href="#navbar-item">Navbar item</a> <code class="docutils literal notranslate"><span class="pre">iconName</span></code> values as well.</p>
+<p>There exist special styles:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">__new</span></code> - managed automatically and does not persist specification saves and loads,</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">__edited</span></code> - added to the node type which was modified.</p></li>
+</ul>
+<h5 id="specificity">Specificity<a class="headerlink" href="#specificity" title="Link to this heading">¶</a></h5>
+<p><a class="reference internal" href="#node">Node type</a> can define multiple styles and styling of type-specific elements (e.g. <code class="docutils literal notranslate"><span class="pre">icon</span></code>).
+Moreover, <a class="reference internal" href="dataflow-format.html#node"><span class="std std-ref">an instance</span></a> can do this as well, although it is currently limited to the <code class="docutils literal notranslate"><span class="pre">color</span></code> option.</p>
+<p>The following order of specificity is used when evaluating the actual style of a given element (the first - the most important):</p>
+<ol class="arabic simple">
+<li><p>Node instance styling</p></li>
+<li><p>Node type styling</p></li>
+<li><p>Styles defined by the node type</p></li>
+</ol>
+<h5 id="cascading">Cascading<a class="headerlink" href="#cascading" title="Link to this heading">¶</a></h5>
+<p>Appearance of a given element is determined by the the most specific rule that defines the element.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Value <code class="docutils literal notranslate"><span class="pre">null</span></code> is a regular style value (i.e. undergoes the same merging procedure). It discards any lower-precedence styling of an element.</p>
+</div>
+<h5 id="example">Example<a class="headerlink" href="#example" title="Link to this heading">¶</a></h5>
+<p>For example, given:</p>
+<ul class="simple">
+<li><p>styles:</p></li>
+</ul>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;style1&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;options&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;color&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;#0000FF&quot;</span><span class="p">,,</span>
+<span class="w">            </span><span class="nt">&quot;icon&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Cogwheel&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;pill&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="nt">&quot;text&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;options&quot;</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;miscellaneous&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;color&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;pill&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="nt">&quot;text&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;misc&quot;</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+</div>
+<ul class="simple">
+<li><p>a node type:</p></li>
+</ul>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Node&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;style&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;options&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;miscellaneous&quot;</span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;pill&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span>
+<span class="p">}</span>
+</code></pre></div>
+</div>
+<ul class="simple">
+<li><p>a node instance:</p></li>
+</ul>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;401aff7b-fbb7-44cb-8f77-c78c80deefff&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;position&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;x&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;y&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;width&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">300</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;twoColumn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;interfaces&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">    </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">    </span><span class="nt">&quot;enabledInterfaceGroups&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Node&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;instanceName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Node&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;color&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;#000000&quot;</span>
+<span class="p">},</span>
+</code></pre></div>
+</div>
+<p>would resolve in the following way:</p>
+<table class="docutils data align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Element</p></th>
+<th class="head"><p>Style <code class="docutils literal notranslate"><span class="pre">options</span></code></p></th>
+<th class="head"><p>Style <code class="docutils literal notranslate"><span class="pre">miscellaneous</span></code></p></th>
+<th class="head"><p>Node type</p></th>
+<th class="head"><p>Node instance</p></th>
+<th class="head"><p>Resolved value</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">color</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">##0000FF</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">null</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">undefined</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">#000000</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">#000000</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">icon</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Cogwheel</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">undefined</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">undefined</span></code></p></td>
+<td><p>–</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Cogwheel</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">pill</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">{&quot;text&quot;:</span> <span class="pre">&quot;options&quot;}</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">{&quot;text&quot;:</span> <span class="pre">&quot;misc&quot;}</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">null</span></code></p></td>
+<td><p>–</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">null</span></code></p></td>
+</tr>
+</tbody>
+</table>
+<h4 id="navbar-item"><span id="metadata-navbar-item"></span>Navbar item<a class="headerlink" href="#navbar-item" title="Link to this heading">¶</a></h4>
+<p>Describes a list of custom buttons displayed in the navbar.
+Every element consists of the following properties:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">name</span></code> - displayed as a tooltip to the user when the button is hovered.
+Names have to be unique.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">stopName</span></code> - name displayed in the tooltip when the corresponding procedure is running and is stoppable.
+If not specified simply ‘Stop’ is added as a prefix to the name.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">iconName</span></code> - name of the icon that is used.
+It can be either a file in the assets directory, or an icon described in <code class="docutils literal notranslate"><span class="pre">/pipeline-manager/pipeline_manager/frontend/src/icons/index.ts</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">procedureName</span></code> - name of the procedure (either a built-in <a class="reference internal" href="external-app-communication.html#api-specification"><span class="std std-ref">API procedure</span></a> or a <a class="reference internal" href="external-app-communication.html#api-custom-procedure"><span class="std std-ref">custom procedure</span></a>) to be called.
+It is assumed that the procedure accepts a does not need any arguments, or takes one argument which is the currently displayed dataflow (similarly to [dataflow_run(#external-dataflow-run)]).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">allowToRunInParallelWith</span></code> - a list of procedure names that can be started in parallel to the currently running job.</p></li>
+</ul>
+<p>Example of a button that is used to run the current graph using a dedicated procedure <code class="docutils literal notranslate"><span class="pre">dataflow_run</span></code> looks as follows:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Run&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;stopName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Stop&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;iconName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Run&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;procedureName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;dataflow_run&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;allowToRunInParallelWith&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">&quot;dataflow_validate&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;custom_lint_files&quot;</span>
+<span class="w">    </span><span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div>
+</div>
+<p>This will create a button called Run, with the <code class="docutils literal notranslate"><span class="pre">Run</span></code> icon (available built-in icon), which upon clicking will run <code class="docutils literal notranslate"><span class="pre">dataflow_run</span></code> method.
+During execution of the <code class="docutils literal notranslate"><span class="pre">dataflow_run</span></code> method, we can run in parallel <code class="docutils literal notranslate"><span class="pre">dataflow_validate</span></code> and <code class="docutils literal notranslate"><span class="pre">custom_lint_files</span></code> procedures.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>By default, only single action can be called from NavBar at a time.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p><code class="docutils literal notranslate"><span class="pre">allowToRunInParallelWith</span></code> is a one-way relation.
+This means that if we have two actions that can be started when the other one is running, then <code class="docutils literal notranslate"><span class="pre">allowToRunInParallelWith</span></code> needs to be defined in both actions.</p>
+</div>
+<h3 id="node">Node<a class="headerlink" href="#node" title="Link to this heading">¶</a></h3>
+<p>This object specifies a single node.</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">name</span></code> - name displayed in the editor.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">layer</span></code> - layer type used for styling and toggling the node visibility in the editor.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">category</span></code> - context menu category displayed in the editor.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">icon</span></code> - name of an SVG icon that is going to be displayed next to the name of the node.
+The value of <code class="docutils literal notranslate"><span class="pre">icon</span></code> can be:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">string</span></code> containing the path to the icon relative to the <code class="docutils literal notranslate"><span class="pre">assets</span></code> directory, e.g. <code class="docutils literal notranslate"><span class="pre">filter.svg</span></code> for <code class="docutils literal notranslate"><span class="pre">pipeline_manager/frontend/dist/assets/filter.svg</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">string</span></code> containing the URL to the remote image file</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">{&quot;key&quot;:</span> <span class="pre">&quot;value&quot;}</span></code> pair, where <code class="docutils literal notranslate"><span class="pre">key</span></code> is the name of the icon class created in <code class="docutils literal notranslate"><span class="pre">icons</span></code>, in <a class="reference internal" href="#metadata">Metadata</a>, and <code class="docutils literal notranslate"><span class="pre">value</span></code> is a suffix of the URL.</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">assets</span></code> directory can be created and filled manually or added by <code class="docutils literal notranslate"><span class="pre">build</span></code> script with <code class="docutils literal notranslate"><span class="pre">--assets-directory</span> <span class="pre">&lt;path-to-directory-with-icons&gt;</span></code>, e.g.:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><code>./build<span class="w"> </span>--assets-directory<span class="w"> </span>examples/sample-assets<span class="w"> </span>static-html<span class="w"> </span>static-html<span class="w"> </span>examples/sample-specification.json
+</code></pre></div>
+</div>
+</div>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">style</span></code> - node style name described in <code class="docutils literal notranslate"><span class="pre">styles</span></code> in <a class="reference internal" href="#metadata">Metadata</a>. The value of <code class="docutils literal notranslate"><span class="pre">style</span></code> can be:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">string</span></code> - single style,</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">array</span></code> - multiple styles, each subsequent style overrides the previous one.</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">interfaces</span></code> - array representing inputs, outputs and bidirectional ports for nodes.
+The entries are of type <a class="reference internal" href="#interface">Interface</a>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">properties</span></code> - array with elements of type <a class="reference internal" href="#property">Property</a>,</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">interfaceGroups</span></code> - array with elements of type <a class="reference internal" href="#interface-groups">Interface Groups</a>,</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">defaultInterfaceGroups</span></code> - array of objects that specifies which interface groups are enabled by default.
+Every object should contain a <code class="docutils literal notranslate"><span class="pre">name</span></code> and <code class="docutils literal notranslate"><span class="pre">direction</span></code> of an <a class="reference internal" href="#interface-groups">Interface Groups</a>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">urls</span></code> - a dictionary of <a class="reference internal" href="#url-class">URL class</a> and URL suffixes pairs.
+The key should be a URL class key from <code class="docutils literal notranslate"><span class="pre">urls</span></code> in <code class="docutils literal notranslate"><span class="pre">metadata</span></code>.
+The value of the entry is appended to the URL base from the URL class.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">abstract</span></code> - boolean determining whether the node type is abstract or not.
+Abstract node types are used only for inheritance purposes, they do not appear in the final list of available nodes.
+They only have one mandatory field - <code class="docutils literal notranslate"><span class="pre">name</span></code>.
+The rest of the fields can be provided to introduce some common properties of classes inheriting from it.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">additionalData</span></code> - can be any JSON-like object (array, dictionary, number, string, …), it is only used for storing some additional, node-specific data, such as comments etc.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">description</span></code> - description of the node in markdown format that is displayed in a sidebar node.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">isCategory</span></code> - determines whether the node is both a category and a node.
+If set to true, then the <code class="docutils literal notranslate"><span class="pre">name</span></code> of the node is inferred from the last text segment in the <code class="docutils literal notranslate"><span class="pre">category</span></code> parameter.
+If any node has a node category in its <code class="docutils literal notranslate"><span class="pre">category</span></code> path then it has to extend from the nearest ancestor category node.
+Additionally, if a node extends from a category node, then it has to be in its subtree.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">color</span></code> - a hexadecimal color that will be used as the node background in the editor.
+If not provided, the default Kenning Pipeline Manager color scheme will be used.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">width</span></code> - a default width, in pixels, of a node in the editor.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">twoColumn</span></code> - boolean value.
+If set to <code class="docutils literal notranslate"><span class="pre">true</span></code>, the interfaces on opposite sides will be arranged parallel to each other.
+Otherwise, each interface will be positioned on a separate line.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pill</span></code> - a dictionary that defines an additional node tag displayed in the top right corner of the node. It has the following entries:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">text</span></code> - content of the pill,</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">color</span></code> (optional) - background color. The default color is white.</p></li>
+</ul>
+</li>
+</ul>
+<p>Some or all of the properties above (except for <code class="docutils literal notranslate"><span class="pre">name</span></code>) can be derived from existing node types using the <code class="docutils literal notranslate"><span class="pre">extends</span></code> list - check <a class="reference internal" href="#node-type-inheritance">Node type inheritance</a>.</p>
+<p>Here is an example of a node:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Filter2D&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;layer&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;filters&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;category&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Filters&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;icon&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;filter.svg&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Node that applies a *2D* filter.&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;iterations&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;integer&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;border type&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;select&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;values&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;constant&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;replicate&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;wrap&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;reflect&quot;</span><span class="p">],</span>
+<span class="w">            </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;constant&quot;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;interfaces&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;image&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Image&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;direction&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;input&quot;</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;kernel&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Image&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;direction&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;input&quot;</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;output&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Image&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;direction&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;output&quot;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;color&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;#4e096f&quot;</span>
+<span class="p">}</span>
+</code></pre></div>
+</div>
+<h4 id="interface">Interface<a class="headerlink" href="#interface" title="Link to this heading">¶</a></h4>
+<p>An object that specifies a single input, output or inout interface of node.
+Every interface object has following properties:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">name</span></code> - name of the input displayed in the editor</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">type</span></code> - type of the input used for styling and validation purposes.
+Can be either a list of strings or a single string.
+If two interfaces have at least one matching type, they can be connected.
+The first type in the list is a “base” type - it is used to color the interface based on <a class="reference internal" href="#interface-style">Interface style</a>.
+If only one type between two interfaces is matching, the connection style matches the one defined for this particular type.
+Otherwise, if multiple types are matching, a white solid line for connection is rendered.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">direction</span></code> (optional) - type of the interface in terms of direction, it can be:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">input</span></code> - interface accepts input data,</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">output</span></code> - interface returns output data.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">inout</span></code> - interface can both produce outputs and receive inputs.</p></li>
+</ul>
+<p>The default value is <code class="docutils literal notranslate"><span class="pre">inout</span></code>.</p>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">maxConnectionsCount</span></code> (optional) - specifies the maximum allowed number of connections for a given port.
+Value less than 0 means no limit for connections for a given interface.
+Value equal to 0 means default behavior - one allowed connection to inputs, many allowed connections from outputs.
+The default value is 0.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">side</span></code> (optional) - specifies the side on which the interface is rendered.
+Value can be either <code class="docutils literal notranslate"><span class="pre">left</span></code> or <code class="docutils literal notranslate"><span class="pre">right</span></code>.
+Interfaces with <code class="docutils literal notranslate"><span class="pre">direction</span></code> set to <code class="docutils literal notranslate"><span class="pre">input</span></code> or <code class="docutils literal notranslate"><span class="pre">inout</span></code> are by default rendered on the left side of the node.
+Interfaces with <code class="docutils literal notranslate"><span class="pre">direction</span></code> set to <code class="docutils literal notranslate"><span class="pre">output</span></code> are by default rendered on the right side of the node.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">dynamic</span></code> (optional) - determines whether the interface should be dynamic, which means that the number of interfaces created of this definition can be changed in the editor.
+For each dynamic interface definition, a new property is added to the node that allows the user to change the number of interfaces.
+The name of the property is determined by the <code class="docutils literal notranslate"><span class="pre">name</span></code> and <code class="docutils literal notranslate"><span class="pre">direction</span></code> of the dynamic interface.
+The format is <code class="docutils literal notranslate"><span class="pre">{name}</span> <span class="pre">{direction}</span> <span class="pre">count</span></code>, so it is important not to create conflicting properties.
+The name of the dynamic interfaces is <code class="docutils literal notranslate"><span class="pre">{name}[{i}]</span></code>, where <code class="docutils literal notranslate"><span class="pre">i</span></code> is the index of the interface.
+<code class="docutils literal notranslate"><span class="pre">dynamic</span></code> property can be either <code class="docutils literal notranslate"><span class="pre">true</span></code>, then the maximum number of interfaces is not limited, or an array in a form of <code class="docutils literal notranslate"><span class="pre">[min,</span> <span class="pre">max]</span></code> that specifies the range of interfaces.
+All created interfaces share the same <code class="docutils literal notranslate"><span class="pre">maxConnectionCount</span></code> and <code class="docutils literal notranslate"><span class="pre">type</span></code> values.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">array</span></code> (optional) - special keyword to easily define a range of interfaces.
+Value has to be a list with two integer values that specify the range of interfaces.
+For example, for an <code class="docutils literal notranslate"><span class="pre">example</span></code> interface with <code class="docutils literal notranslate"><span class="pre">array:</span> <span class="pre">[0,</span> <span class="pre">2]</span></code> two interfaces called <code class="docutils literal notranslate"><span class="pre">example[0]</span></code> and <code class="docutils literal notranslate"><span class="pre">example[1]</span></code> are created.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sidePosition</span></code> (optional) - specifies the row on which the interface is rendered.
+Values for interfaces of the same <code class="docutils literal notranslate"><span class="pre">side</span></code> value have to be unique.
+If the value is not provided then rows are automatically provided by iterating from the first upper row.
+This value does not work for <code class="docutils literal notranslate"><span class="pre">array</span></code> keyword, as it produces more than one interface.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">externalName</span></code> (optional) - used for graph nodes only, to expose an interface of a node within the graph.
+It specifies the name of the interface of the graph.
+Both the interface of the graph node and the interface of the node within the graph must have the same <code class="docutils literal notranslate"><span class="pre">id</span></code> and <code class="docutils literal notranslate"><span class="pre">direction</span></code> fields.
+Note that values of <code class="docutils literal notranslate"><span class="pre">externalName</span></code> of the graph node have to be unique.</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Only interfaces of the same <code class="docutils literal notranslate"><span class="pre">type</span></code> can be connected together.</p>
+</div>
+<h4 id="property">Property<a class="headerlink" href="#property" title="Link to this heading">¶</a></h4>
+<p>An object that specifies a single property.
+Every project object has three required base properties:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">name</span></code> - name of the property.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">type</span></code> - type of the property.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">default</span></code> - specifies a default selected value
+Its type depends on the <code class="docutils literal notranslate"><span class="pre">type</span></code> chosen.</p></li>
+</ul>
+<p>There are 13 possible values for the <code class="docutils literal notranslate"><span class="pre">type</span></code> property.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">text</span></code> - property is a string.
+A text field is displayed to the user.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">multiline</span></code> - property is a multi-line string.
+It allows to format the text in Markdown format.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">constant</span></code> - property is a string.
+A non-modifiable text field is displayed to the user.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">number</span></code> - property is a float.
+A number field is displayed to the user.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">integer</span></code> - property is an int.
+A number field that only accepts integers is displayed to the user.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">select</span></code> - property is a string with a defined range.
+It requires a <code class="docutils literal notranslate"><span class="pre">values</span></code> property.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">bool</span></code> - property is a bool.
+A bool representing boolean value</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">slider</span></code> - property is a float with a specified range.
+It requires <code class="docutils literal notranslate"><span class="pre">min</span></code> and <code class="docutils literal notranslate"><span class="pre">max</span></code> properties.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">list</span></code> - property is a list of arguments of the same type, which can be specified using <code class="docutils literal notranslate"><span class="pre">dtype</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">hex</span></code> - property is a string representing base-16 number which has to match the following regex: <code class="docutils literal notranslate"><span class="pre">/0x[a-fA-F0-9]</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">button-url</span></code> - property is a button which opens a new tab with a given URL.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">button-api</span></code> - property is a button which triggers <code class="docutils literal notranslate"><span class="pre">button_click</span></code> <a class="reference internal" href="external-app-communication.html#external-app-api"><span class="std std-ref">External App API</span></a> request, providing property <code class="docutils literal notranslate"><span class="pre">id</span></code> and <code class="docutils literal notranslate"><span class="pre">value</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">button-graph</span></code> - property is a button which opens a subgraph with a given URL.</p></li>
+</ul>
+<p>Additional properties:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">min</span></code> - specifies the left end of a range or minimal value of the base-16 number.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">max</span></code> - specifies the right end of a range or maximal value of the base-16 number.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">values</span></code> - specifies a range of possible values for <code class="docutils literal notranslate"><span class="pre">select</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">dtype</span></code> - specifies data type of elements in a <code class="docutils literal notranslate"><span class="pre">list</span></code>.
+Supported values are <code class="docutils literal notranslate"><span class="pre">string</span></code>, <code class="docutils literal notranslate"><span class="pre">number</span></code>, <code class="docutils literal notranslate"><span class="pre">integer</span></code>, <code class="docutils literal notranslate"><span class="pre">boolean</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">description</span></code> - description of the property.
+In some cases, it can be displayed to the user.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">group</span></code> - object of type <a class="reference internal" href="#group">Group</a>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">override</span></code> - boolean value determining whether the property should be overridden.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">readonly</span></code> - boolean value determining whether the property should be read-only.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">hideOnDefault</span></code> - boolean value determining whether the property should be kept hidden if it has default or no value assigned.</p></li>
+</ul>
+<h5 id="group">Group<a class="headerlink" href="#group" title="Link to this heading">¶</a></h5>
+<p>Array with elements of type <a class="reference internal" href="#property">Property</a>.
+It defines properties that are toggled by the property.
+<code class="docutils literal notranslate"><span class="pre">group</span></code> can only be used with property of type <code class="docutils literal notranslate"><span class="pre">bool</span></code>.</p>
+<p>Example group of properties:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Group&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;bool&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;group&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="p">{</span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;prop-a&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;integer&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;prop-b&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;text&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">}</span>
+<span class="w">    </span><span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div>
+</div>
+<h4 id="node-type-inheritance">Node type inheritance<a class="headerlink" href="#node-type-inheritance" title="Link to this heading">¶</a></h4>
+<p>It is possible to inherit:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">layer</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">category</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">icon</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">interfaces</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">properties</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">urls</span></code></p></li>
+</ul>
+<p>From existing node types using the <code class="docutils literal notranslate"><span class="pre">extends</span></code> parameter.
+The parameter accepts a list of node types.
+The node type is computed by iteratively updating node type definition structures, going through all node types in the <code class="docutils literal notranslate"><span class="pre">extends</span></code> list (in the specified order), and then applying parameters from the current node type.</p>
+<p>Below is a sample specification with used inheritance mechanism:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;nodes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Type A&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;layer&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;class&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;category&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Classes&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                </span><span class="p">{</span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;prop-a&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;text&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">}</span>
+<span class="w">            </span><span class="p">],</span>
+<span class="w">            </span><span class="nt">&quot;interfaces&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                </span><span class="p">{</span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;output-a&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Interface&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;direction&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;output&quot;</span><span class="p">}</span>
+<span class="w">            </span><span class="p">]</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Type B&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;extends&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;Type A&quot;</span><span class="p">],</span>
+<span class="w">            </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                </span><span class="p">{</span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;prop-b&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;text&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">}</span>
+<span class="w">            </span><span class="p">],</span>
+<span class="w">            </span><span class="nt">&quot;interfaces&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                </span><span class="p">{</span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;output-b&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Interface&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;direction&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;output&quot;</span><span class="p">}</span>
+<span class="w">            </span><span class="p">]</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Type C&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;layer&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;class&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;category&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Classes&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                </span><span class="p">{</span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;prop-c&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;text&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">}</span>
+<span class="w">            </span><span class="p">],</span>
+<span class="w">            </span><span class="nt">&quot;interfaces&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                </span><span class="p">{</span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;input-c&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Interface&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;direction&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;input&quot;</span><span class="p">}</span>
+<span class="w">            </span><span class="p">]</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Type D&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;extends&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;Type B&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Type C&quot;</span><span class="p">],</span>
+<span class="w">            </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                </span><span class="p">{</span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;prop-d&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;text&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">}</span>
+<span class="w">            </span><span class="p">],</span>
+<span class="w">            </span><span class="nt">&quot;interfaces&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                </span><span class="p">{</span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;inout-d&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Interface&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;direction&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;inout&quot;</span><span class="p">}</span>
+<span class="w">            </span><span class="p">]</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Node types can not be repeated (explicitly in list or implicitly through inheritance) in the <code class="docutils literal notranslate"><span class="pre">extends</span></code> list.</p>
+</div>
+<p>Moreover, it is possible to override inherited properties and interfaces.
+This mechanism requires using the same name and <code class="docutils literal notranslate"><span class="pre">&quot;override&quot;</span></code> attribute set to <code class="docutils literal notranslate"><span class="pre">true</span></code>.
+Only attributes used in the child node are overridden, others are inherited without change.
+For instance:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><code><span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Type D&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;extends&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;Type B&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Type C&quot;</span><span class="p">],</span>
+<span class="w">            </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                </span><span class="p">{</span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;prop-a&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;number&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1.4</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;override&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">},</span>
+<span class="w">                </span><span class="p">{</span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;prop-c&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;integer&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;override&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">},</span>
+<span class="w">                </span><span class="p">{</span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;prop-d&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;text&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">}</span>
+<span class="w">            </span><span class="p">],</span>
+<span class="w">            </span><span class="nt">&quot;interfaces&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                </span><span class="p">{</span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;inout-d&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Interface&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;direction&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;inout&quot;</span><span class="p">},</span>
+<span class="w">                </span><span class="p">{</span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;output-a&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Interface&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;direction&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;inout&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;override&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">}</span>
+<span class="w">            </span><span class="p">]</span>
+<span class="w">        </span><span class="p">}</span>
+</code></pre></div>
+</div>
+<h3 id="interface-groups">Interface Groups<a class="headerlink" href="#interface-groups" title="Link to this heading">¶</a></h3>
+<p>Object similar to a single interface but reserves a range of interfaces.
+<code class="docutils literal notranslate"><span class="pre">name</span></code>, <code class="docutils literal notranslate"><span class="pre">type</span></code>, <code class="docutils literal notranslate"><span class="pre">direction</span></code>, <code class="docutils literal notranslate"><span class="pre">maxConnectionsCount</span></code> and <code class="docutils literal notranslate"><span class="pre">side</span></code> are the same as in a regular <a class="reference internal" href="#interface">Interface</a>.
+The only difference is that a range of interfaces has to be defined which describes constraints of an interface.
+For example two interface groups can be defined that consist of common interfaces and thus cannot coexist.</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><code><span class="nt">&quot;interfaceGroups&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;test&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;direction&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;input&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;interfaces&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="p">{</span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1[1]&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;direction&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;output&quot;</span><span class="p">},</span>
+<span class="w">      </span><span class="p">{</span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;array&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">15</span><span class="p">],</span><span class="w"> </span><span class="nt">&quot;direction&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;output&quot;</span><span class="p">},</span>
+<span class="w">      </span><span class="p">{</span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;array&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">35</span><span class="p">,</span><span class="w"> </span><span class="mi">48</span><span class="p">],</span><span class="w"> </span><span class="nt">&quot;direction&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;output&quot;</span><span class="p">}</span>
+<span class="w">    </span><span class="p">]</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">]</span>
+</code></pre></div>
+</div>
+<p>The interface group called <code class="docutils literal notranslate"><span class="pre">1</span></code> consists of three ranges of interfaces: <code class="docutils literal notranslate"><span class="pre">1[1]</span></code>, interfaces <code class="docutils literal notranslate"><span class="pre">1[3],</span> <span class="pre">1[4],</span> <span class="pre">...,</span> <span class="pre">1[14]</span></code> and <code class="docutils literal notranslate"><span class="pre">1[35],</span> <span class="pre">1[36],</span> <span class="pre">...,</span> <span class="pre">1[47]</span></code>.</p>
+<h3 id="included-graphs">Included Graphs<a class="headerlink" href="#included-graphs" title="Link to this heading">¶</a></h3>
+<p>Object that specifies a graph instance to be included in the specification.
+The included graphs are available in the node palette and can be used in the editor.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Included graphs cannot consist of more than one graph.</p>
+</div>
+<p>Included graphs can be specified using the <code class="docutils literal notranslate"><span class="pre">includeGraphs</span></code> keyword.</p>
+<p>They have the following properties:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">name</span></code> - name of the included graph, if not passed, the name of the graph is inferred from the graph.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">category</span></code> - category in which the included graph is placed in the node palette, uses <code class="docutils literal notranslate"><span class="pre">/</span></code> as a delimiter.
+By default, the category is set to <code class="docutils literal notranslate"><span class="pre">default</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">url</span></code> - URL, where the graph file is located.
+The file has to be in a valid <a class="reference internal" href="dataflow-format.html"><span class="std std-doc">dataflow</span></a> format.</p></li>
+</ul>
+<p>Graphs included in the node palette can also be described directly in the specification.</p>
+<p>To do that, use the <code class="docutils literal notranslate"><span class="pre">graphs</span></code> keyword and describe the graph using the <a class="reference internal" href="dataflow-format.html"><span class="std std-doc">dataflow</span></a> format.</p>
+<p>Keep in mind that the node used to represent the graph has to be declared in the specification as well.</p>
+<p>The node needs to have <code class="docutils literal notranslate"><span class="pre">subgraphId</span></code> that matched the <code class="docutils literal notranslate"><span class="pre">id</span></code> of the graph.</p>
+<p>It is possible to attach one graph to multiple nodes.</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Test subgraph node #2&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;category&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Second Category&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;color&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;#6f091a&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;subgraphId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;129c6246-d874-48cd-a33c-2927961d42e8&quot;</span>
+<span class="p">},</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Test subgraph node #3&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;category&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Second Category&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;color&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;#4e096f&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;subgraphId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;129c6246-d874-48cd-a33c-2927961d42e8&quot;</span>
+<span class="p">}</span>
+</code></pre></div>
+</div>
+<h2 id="id1">Example<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h2>
+<p>Below, you can see a sample specification containing a hypothetical definition of nodes for image processing purposes:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;nodes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;LoadVideo&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;layer&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;filesystem&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;category&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Filesystem&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                </span><span class="p">{</span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;filename&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;text&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">}</span>
+<span class="w">            </span><span class="p">],</span>
+<span class="w">            </span><span class="nt">&quot;interfaces&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;frames&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Image&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;direction&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;output&quot;</span><span class="p">}]</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;SaveVideo&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;layer&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;filesystem&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;category&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Filesystem&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                </span><span class="p">{</span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;filename&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;text&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">}</span>
+<span class="w">            </span><span class="p">],</span>
+<span class="w">            </span><span class="nt">&quot;interfaces&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                </span><span class="p">{</span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;color&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Image&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;direction&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;input&quot;</span><span class="p">},</span>
+<span class="w">                </span><span class="p">{</span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;binary&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;BinaryImage&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;direction&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;input&quot;</span><span class="p">}</span>
+<span class="w">            </span><span class="p">]</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;GaussianKernel&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;layer&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;kernel&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;category&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Generators&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                </span><span class="p">{</span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;size&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;integer&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="p">},</span>
+<span class="w">                </span><span class="p">{</span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sigma&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;number&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1.0</span><span class="p">}</span>
+<span class="w">            </span><span class="p">],</span>
+<span class="w">            </span><span class="nt">&quot;interfaces&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;kernel&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Image&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;direction&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;output&quot;</span><span class="p">}]</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;StructuringElement&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;layer&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;kernel&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;category&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Generators&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                </span><span class="p">{</span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;size&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;integer&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="p">},</span>
+<span class="w">                </span><span class="p">{</span>
+<span class="w">                    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;shape&quot;</span><span class="p">,</span>
+<span class="w">                    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;select&quot;</span><span class="p">,</span>
+<span class="w">                    </span><span class="nt">&quot;values&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;Rectangle&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Cross&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Ellipse&quot;</span><span class="p">],</span>
+<span class="w">                    </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Cross&quot;</span>
+<span class="w">                </span><span class="p">}</span>
+<span class="w">            </span><span class="p">],</span>
+<span class="w">            </span><span class="nt">&quot;interfaces&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;kernel&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;BinaryImage&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;direction&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;output&quot;</span><span class="p">}]</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Filter2D&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;layer&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;processing&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;category&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Processing&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                </span><span class="p">{</span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;iterations&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;integer&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">},</span>
+<span class="w">                </span><span class="p">{</span>
+<span class="w">                    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;border type&quot;</span><span class="p">,</span>
+<span class="w">                    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;select&quot;</span><span class="p">,</span>
+<span class="w">                    </span><span class="nt">&quot;values&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;constant&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;replicate&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;wrap&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;reflect&quot;</span><span class="p">],</span>
+<span class="w">                    </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;constant&quot;</span>
+<span class="w">                </span><span class="p">}</span>
+<span class="w">            </span><span class="p">],</span>
+<span class="w">            </span><span class="nt">&quot;interfaces&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                </span><span class="p">{</span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;image&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Image&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;direction&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;input&quot;</span><span class="p">},</span>
+<span class="w">                </span><span class="p">{</span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;kernel&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Image&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;direction&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;input&quot;</span><span class="p">},</span>
+<span class="w">                </span><span class="p">{</span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;output&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Image&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;direction&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;output&quot;</span><span class="p">}</span>
+<span class="w">            </span><span class="p">]</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Threshold&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;layer&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;processing&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;category&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Processing&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                </span><span class="p">{</span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;threshold_value&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;integer&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">},</span>
+<span class="w">                </span><span class="p">{</span>
+<span class="w">                    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;threshold_type&quot;</span><span class="p">,</span>
+<span class="w">                    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;select&quot;</span><span class="p">,</span>
+<span class="w">                    </span><span class="nt">&quot;values&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;Binary&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Truncate&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Otsu&quot;</span><span class="p">],</span>
+<span class="w">                    </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;constant&quot;</span>
+<span class="w">                </span><span class="p">}</span>
+<span class="w">            </span><span class="p">],</span>
+<span class="w">            </span><span class="nt">&quot;interfaces&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                </span><span class="p">{</span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;image&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Image&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;direction&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;input&quot;</span><span class="p">},</span>
+<span class="w">                </span><span class="p">{</span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;output&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;BinaryImage&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;direction&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;output&quot;</span><span class="p">}</span>
+<span class="w">            </span><span class="p">]</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Morphological operation&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;layer&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;processing&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;category&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Processing&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                </span><span class="p">{</span>
+<span class="w">                    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Enable operations&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;bool&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;group&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                        </span><span class="p">{</span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;iterations&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;integer&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">},</span>
+<span class="w">                        </span><span class="p">{</span>
+<span class="w">                            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;border type&quot;</span><span class="p">,</span>
+<span class="w">                            </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;select&quot;</span><span class="p">,</span>
+<span class="w">                            </span><span class="nt">&quot;values&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;constant&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;replicate&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;wrap&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;reflect&quot;</span><span class="p">],</span>
+<span class="w">                            </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;constant&quot;</span>
+<span class="w">                        </span><span class="p">},</span>
+<span class="w">                        </span><span class="p">{</span>
+<span class="w">                            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;operation type&quot;</span><span class="p">,</span>
+<span class="w">                            </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;select&quot;</span><span class="p">,</span>
+<span class="w">                            </span><span class="nt">&quot;values&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;dilation&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;erosion&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;closing&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;opening&quot;</span><span class="p">],</span>
+<span class="w">                            </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;dilation&quot;</span>
+<span class="w">                        </span><span class="p">}</span>
+<span class="w">                    </span><span class="p">]</span>
+<span class="w">                </span><span class="p">}</span>
+<span class="w">            </span><span class="p">],</span>
+<span class="w">            </span><span class="nt">&quot;interfaces&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                </span><span class="p">{</span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;image&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;BinaryImage&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;direction&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;input&quot;</span><span class="p">},</span>
+<span class="w">                </span><span class="p">{</span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;kernel&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;BinaryImage&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;direction&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;input&quot;</span><span class="p">},</span>
+<span class="w">                </span><span class="p">{</span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;output&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;BinaryImage&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;direction&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;output&quot;</span><span class="p">}</span>
+<span class="w">            </span><span class="p">]</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;metadata&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;interfaces&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;Image&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;#00FF00&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;BinaryImage&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;#FF0000&quot;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;20230830.10&quot;</span>
+<span class="p">}</span>
+</code></pre></div>
+</div>
+<p>Thanks to the flexibility of the specification format, you can use any combination of properties and interfaces to create a custom node.
+It is also readable and divided into distinct parts, so you can implement a process of automated specification generation into an external application.
+See the <a class="reference internal" href="external-app-communication.html"><span class="doc std std-doc">External App Communication</span></a> section to find out more.</p>
+<p>A sample node created from the specification above:</p>
+<p><img alt="Sample node created from specification" src="_images/example_specification.png" /></p>
+
+
+  <hr>
+<div class="md-source-file">
+  <small>
+    
+      Last update:
+      2025-11-27
+    
+  </small>
+</div>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+    <nav class="md-footer__inner md-grid" aria-label="Footer" >
+      
+        
+        <a href="project-readme.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Pipeline Manager" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              Pipeline Manager
+            </div>
+          </div>
+        </a>
+      
+      
+        
+        <a href="dataflow-format.html" class="md-footer__link md-footer__link--next" aria-label="Next: Dataflow format" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              Dataflow format
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
+  
+  
+  
+  <div class="md-footer-meta md-typeset">
+    
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-footer-copyright__highlight">
+        Copyright &#169; Antmicro, 2025.
+        
+    </div>
+  
+      <a href="https://github.com/antmicro/kenning-pipeline-manager/tree/c20b22c6042854666cf78319e2affc882c0f1ffe">c20b22c6</a>
+        @ <a href="https://github.com/antmicro/kenning-pipeline-manager/tree/main">main</a>
+  
+</div>
+      
+        <div class="md-social">
+  
+    
+    
+      
+      
+    
+    <a href="https://github.com/antmicro" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+    </a>
+  
+    
+    
+      
+      
+    
+    <a href="https://twitter.com/antmicro" target="_blank" rel="noopener" title="twitter.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M459.37 151.716c.325 4.548.325 9.097.325 13.645 0 138.72-105.583 298.558-298.558 298.558-59.452 0-114.68-17.219-161.137-47.106 8.447.974 16.568 1.299 25.34 1.299 49.055 0 94.213-16.568 130.274-44.832-46.132-.975-84.792-31.188-98.112-72.772 6.498.974 12.995 1.624 19.818 1.624 9.421 0 18.843-1.3 27.614-3.573-48.081-9.747-84.143-51.98-84.143-102.985v-1.299c13.969 7.797 30.214 12.67 47.431 13.319-28.264-18.843-46.781-51.005-46.781-87.391 0-19.492 5.197-37.36 14.294-52.954 51.655 63.675 129.3 105.258 216.365 109.807-1.624-7.797-2.599-15.918-2.599-24.04 0-57.828 46.782-104.934 104.934-104.934 30.213 0 57.502 12.67 76.67 33.137 23.715-4.548 46.456-13.32 66.599-25.34-7.798 24.366-24.366 44.833-46.132 57.827 21.117-2.273 41.584-8.122 60.426-16.243-14.292 20.791-32.161 39.308-52.628 54.253z"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+    
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    <script id="__config" type="application/json">{"base": ".", "features": ["toc.integrate"], "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
+    
+      
+        <script src="_static/sphinx_immaterial_theme.f9d9eeeb247ace16c.min.js?v=8ec58cb5"></script>
+    
+  </body>
+</html>

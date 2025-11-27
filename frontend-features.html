@@ -1,0 +1,860 @@
+
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      <link rel="icon" href="">
+    
+    
+      
+        <title>Front-end features - Pipeline Manager</title>
+      
+    
+    
+      
+        
+        
+      
+      
+
+    
+    
+    
+      
+        
+        
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+        <link rel="stylesheet" type="text/css" href="_static/sphinx_immaterial_theme.c5589c0bd87d933a4.min.css?v=eeeb54bc" />
+        <link rel="stylesheet" type="text/css" href="_static/css/styles.css?v=e5e17168" />
+    <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="deep-orange">
+  
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="index.html" title="Pipeline Manager" class="md-header__button md-logo" aria-label="Pipeline Manager" data-md-component="logo">
+      <img src="_static/white.svg" alt="logo">
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Pipeline Manager
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Front-end features
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      <form class="md-header__option" data-md-component="palette">
+        
+          
+          
+          <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="deep-orange"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+          
+            <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_2" hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5c-.84 0-1.65.15-2.39.42L12 2M3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29L3.34 7m.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14L3.36 17M20.65 7l-1.77 3.79a7.023 7.023 0 0 0-2.38-4.15l4.15.36m-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29L20.64 17M12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44L12 22Z"/></svg>
+            </label>
+          
+        
+          
+          
+          <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="deep-orange"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_2">
+          
+            <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3 3.19.09m3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95 2.06.05m-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31Z"/></svg>
+            </label>
+          
+        
+      </form>
+    
+    
+    
+      <div class="md-header__button">
+        <a href="pipeline-manager.pdf" title="PDF - pipeline-manager.pdf">
+          <div class="md-icon">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M64 0C28.7 0 0 28.7 0 64v384c0 35.3 28.7 64 64 64h256c35.3 0 64-28.7 64-64V160H256c-17.7 0-32-14.3-32-32V0H64zm192 0v128h128L256 0zM64 224h24c30.9 0 56 25.1 56 56s-25.1 56-56 56h-8v32c0 8.8-7.2 16-16 16s-16-7.2-16-16V240c0-8.8 7.2-16 16-16zm24 80c13.3 0 24-10.7 24-24s-10.7-24-24-24h-8v48h8zm72-64c0-8.8 7.2-16 16-16h24c26.5 0 48 21.5 48 48v64c0 26.5-21.5 48-48 48h-24c-8.8 0-16-7.2-16-16V240zm32 112h8c8.8 0 16-7.2 16-16v-64c0-8.8-7.2-16-16-16h-8v96zm96-128h48c8.8 0 16 7.2 16 16s-7.2 16-16 16h-32v32h32c8.8 0 16 7.2 16 16s-7.2 16-16 16h-32v48c0 8.8-7.2 16-16 16s-16-7.2-16-16V240c0-8.8 7.2-16 16-16z"/></svg>
+          </div>
+        </a>
+      </div>
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/antmicro/kenning-pipeline-manager" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    antmicro/kenning-pipeline-manager
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="index.html" title="Pipeline Manager" class="md-nav__button md-logo" aria-label="Pipeline Manager" data-md-component="logo">
+      <img src="_static/white.svg" alt="logo">
+    </a>
+    Pipeline Manager
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/antmicro/kenning-pipeline-manager" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    antmicro/kenning-pipeline-manager
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="introduction.html" class="md-nav__link">
+        <span class="md-ellipsis">Introduction</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="project-readme.html" class="md-nav__link">
+        <span class="md-ellipsis">Pipeline Manager</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="specification-format.html" class="md-nav__link">
+        <span class="md-ellipsis">Specification format</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="dataflow-format.html" class="md-nav__link">
+        <span class="md-ellipsis">Dataflow format</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          <span class="md-ellipsis">Front-<wbr>end features</span>
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="#" class="md-nav__link md-nav__link--active">
+        <span class="md-ellipsis">Front-<wbr>end features</span>
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#graph-manipulation" class="md-nav__link">
+    <span class="md-ellipsis">Graph manipulation</span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#settings" class="md-nav__link">
+    <span class="md-ellipsis">Settings</span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#notifications" class="md-nav__link">
+    <span class="md-ellipsis">Notifications</span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#full-screen" class="md-nav__link">
+    <span class="md-ellipsis">Full screen</span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#editor-menu" class="md-nav__link">
+    <span class="md-ellipsis">Editor menu</span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#creating-new-node-types" class="md-nav__link">
+    <span class="md-ellipsis">Creating new node types</span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#working-with-the-server" class="md-nav__link">
+    <span class="md-ellipsis">Working with the server</span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#url-parameters-for-the-frontend" class="md-nav__link">
+    <span class="md-ellipsis">URL parameters for the frontend</span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#external-frontend" class="md-nav__link">
+    <span class="md-ellipsis">External frontend</span>
+  </a>
+  
+    <nav class="md-nav" aria-label="External frontend">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#making-api-requests" class="md-nav__link">
+    <span class="md-ellipsis">Making API requests</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#serving-external-application" class="md-nav__link">
+    <span class="md-ellipsis">Serving External Application</span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testing-the-front-end-features" class="md-nav__link">
+    <span class="md-ellipsis">Testing the front-<wbr>end features</span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="external-app-communication.html" class="md-nav__link">
+        <span class="md-ellipsis">Communication with an external application</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="example-server.html" class="md-nav__link">
+        <span class="md-ellipsis">Sample third-<wbr>party server</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="specification-builder.html" class="md-nav__link">
+        <span class="md-ellipsis">Specification builder</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="graph-builder.html" class="md-nav__link">
+        <span class="md-ellipsis">Dataflow graph builder</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="changelogs.html" class="md-nav__link">
+        <span class="md-ellipsis">Dataflow and Specification format changelog</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="demo.html" class="md-nav__link">
+        <span class="md-ellipsis">Demonstration of the frontend</span>
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset" role="main">
+                  
+
+
+  <a href="https://github.com/antmicro/kenning-pipeline-manager/blob/main/docs/source/frontend-features.md" title="Edit this page" class="md-content__button md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
+  </a>
+
+<h1 id="front-end-features">Front-end features<a class="headerlink" href="#front-end-features" title="Link to this heading">¶</a></h1>
+<h2 id="graph-manipulation">Graph manipulation<a class="headerlink" href="#graph-manipulation" title="Link to this heading">¶</a></h2>
+<p><img alt="Node palette" src="_images/node-palette.png" /></p>
+<p>On the left side there is a node palette (which can be turned off or on using the green icon in the upper left corner).
+To add a new node to the graph, click the node in the palette and drag it to the editor.
+You can also select existing nodes and copy and paste them using <code class="docutils literal notranslate"><span class="pre">ctrl-c</span></code> and <code class="docutils literal notranslate"><span class="pre">ctrl-v</span></code> keyboard shortcuts.</p>
+<p>After loading a specification, the palette will contain all the nodes defined in it and will be divided into hierarchical categories.
+Additionally, a graph node named <code class="docutils literal notranslate"><span class="pre">New</span> <span class="pre">Graph</span> <span class="pre">Node</span></code> is always available under a <code class="docutils literal notranslate"><span class="pre">Graphs</span></code> category and can be used to design custom graphs.</p>
+<p><img alt="Node context menu" src="_images/node-context-menu.png" /></p>
+<p>In the upper right corner of each node there is a context menu toggle. It contains the following options:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Rename</span></code> - Changes instanceName of the node. More details regarding node naming can be found in the <a class="reference internal" href="dataflow-format.html#node"><span class="std std-ref">‘instanceName’ field of dataflow format</span></a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Delete</span></code> - Deletes the node from the dataflow. Another way of deleting nodes is to select and press the <code class="docutils literal notranslate"><span class="pre">Delete</span></code> key.</p></li>
+<li><p>Additional, user defined URLs. More details in the <a class="reference internal" href="specification-format.html#url-class"><span class="std std-ref">URL specification</span></a></p></li>
+</ul>
+<p>Scroll lets you to zoom in and out.
+Left-clicking and dragging the editor background allows you to move around the editor area.</p>
+<p>Left-clicking on a node allows you to select and drag the node within the editor area. Pressing the <code class="docutils literal notranslate"><span class="pre">ctrl</span></code> key while moving a node allows you to align the node with another one along some axis.</p>
+<p>To create a connection, left-click a node’s connector and connect it to a connector (of a matching type, see <a class="reference internal" href="specification-format.html"><span class="doc std std-doc">Specification format</span></a>) on another node.
+Double left-click on an existing connection removes it.</p>
+<p>Clicking on a connection while pressing the <code class="docutils literal notranslate"><span class="pre">ctrl</span></code> key creates an anchor, which breaks up the connection into two parts, allowing to manually configure the layout.
+Right-clicking on an anchor removes it.
+Note that anchors can only be created when <code class="docutils literal notranslate"><span class="pre">Connection</span> <span class="pre">style</span></code> is set to <code class="docutils literal notranslate"><span class="pre">orthogonal</span></code> and the editor is not in read-only mode.</p>
+<h2 id="settings">Settings<a class="headerlink" href="#settings" title="Link to this heading">¶</a></h2>
+<p><img alt="Settings tab" src="_images/settings-tab.png" /></p>
+<p>On the upper right corner of Pipeline Manager window there is a gear icon toggling settings tab. In the tab the following options can be found:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Connection</span> <span class="pre">style</span></code> - Switch the style of the connection between <code class="docutils literal notranslate"><span class="pre">orthogonal</span></code> and <code class="docutils literal notranslate"><span class="pre">curved</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">AutoLayout</span> <span class="pre">algorithm</span></code> - Choose the algorithm for automatic node placement. Autolayout algorithm is triggered in the following situations:</p>
+<ul>
+<li><p>When loading the dataflow autolayout is used to place nodes without the <code class="docutils literal notranslate"><span class="pre">position</span></code> parameter set. Dataflow load can be triggered either via external application or
+choosing the <code class="docutils literal notranslate"><span class="pre">Load</span> <span class="pre">graph</span> <span class="pre">file</span></code> option. In this case autolayout is applied to both the main graph and the nodes in the subgraphs.</p></li>
+<li><p>By pressing the <code class="docutils literal notranslate"><span class="pre">Apply</span> <span class="pre">autolayout</span></code> button in the settings tab. In this case autolayout is applied to the entire graph.</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Background</span> <span class="pre">grid</span> <span class="pre">size</span></code> - Sets the size of single grid cell visible in the background</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Node</span> <span class="pre">movement</span> <span class="pre">step</span></code> - Sets the minimum step size which can be taken along each axis when moving node.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Center</span></code> - Pressing this buttons moves the viewport to the center of graph and sets the zoom level so that whole dataflow is visible</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Hide</span> <span class="pre">layers</span></code> - <a class="reference internal" href="specification-format.html#layer"><span class="std std-ref">Metadata</span></a> allows to specify layers for a certain set of interface types and connections. Toggling this checkbox allows to hide
+connections belonging to said layer</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Modify</span> <span class="pre">node</span> <span class="pre">types</span></code> - Toggling this checkbox allows editing existing nodes and adding new node types to the specification</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Hide</span> <span class="pre">anchors</span></code> - Hides anchors in all connections. The anchors are still visible (and can be edited) when hovering over the connection</p></li>
+</ul>
+<h2 id="notifications">Notifications<a class="headerlink" href="#notifications" title="Link to this heading">¶</a></h2>
+<p><img alt="Notifications" src="_images/notifications.png" /></p>
+<p>Pipeline Manager provides notifications describing errors occurring in:</p>
+<ul class="simple">
+<li><p>The front end, such as invalid input specification, or invalid dataflow</p></li>
+<li><p>The back end (see <a class="reference internal" href="external-app-communication.html"><span class="doc std std-doc">Communication with an external application</span></a>)</p></li>
+</ul>
+<p>During pipeline development or execution, notifications can display various messages to the user.</p>
+<h2 id="full-screen">Full screen<a class="headerlink" href="#full-screen" title="Link to this heading">¶</a></h2>
+<p><img alt="Full screen button" src="_images/fullscreen.png" /></p>
+<p>Near the settings tab, there is a full screen icon. Clicking it will expand the Pipeline Manager window to full screen.
+Note that this feature may be disabled during embedding Pipeline Manager in an external application, make sure to allow full screen mode.</p>
+<p>For example, in the case of embedding Pipeline Manager in an iframe, the <code class="docutils literal notranslate"><span class="pre">allow=&quot;fullscreen&quot;</span></code> attribute must be set:</p>
+<div class="highlight-html notranslate"><div class="highlight"><pre><span></span><code><span class="p">&lt;</span><span class="nt">iframe</span> <span class="na">src</span><span class="o">=</span><span class="s">&quot;https://url&quot;</span> <span class="na">allow</span><span class="o">=</span><span class="s">&quot;fullscreen&quot;</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>Your browser does not support iframes.<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">iframe</span><span class="p">&gt;</span>
+</code></pre></div>
+</div>
+<h2 id="editor-menu">Editor menu<a class="headerlink" href="#editor-menu" title="Link to this heading">¶</a></h2>
+<p><img alt="Front end menu" src="_images/frontend-menu.png" /></p>
+<p>Depending the application’s mode (<code class="docutils literal notranslate"><span class="pre">static-html</span></code> or <code class="docutils literal notranslate"><span class="pre">server-app</span></code>), the following options will be available in the Pipeline Manager menu:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">Load</span> <span class="pre">specification</span></code> - lets the user load a specification file describing the nodes that can appear in the graph (see <a class="reference internal" href="specification-format.html"><span class="doc std std-doc">Specification format</span></a>)</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>It appears only in the <code class="docutils literal notranslate"><span class="pre">static-html</span></code> build mode, where a specification is not delivered by a third-party app.</p>
+</div>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Load</span> <span class="pre">graph</span> <span class="pre">file</span></code> - lets the user load a graph specification in Pipeline Manager’s internal format (see <a class="reference internal" href="dataflow-format.html"><span class="doc std std-doc">Dataflow specification</span></a>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Save</span> <span class="pre">graph</span> <span class="pre">file</span></code> - Saves the graph currently stored in the editor into JSON using Pipeline Manager’s internal format.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Export</span> <span class="pre">graph</span> <span class="pre">to</span> <span class="pre">PNG</span></code> - Saves the graph currently stored in the editor as PNG image</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Load</span> <span class="pre">file</span></code> - lets the user load a file describing a graph in the native format supported by the third-party application using Pipeline Manager for visualization.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>It appears only in the <code class="docutils literal notranslate"><span class="pre">server-app</span></code> build mode, since the third-party app performs conversion from its native format to the <a class="reference internal" href="dataflow-format.html"><span class="doc std std-doc">Dataflow format</span></a></p>
+</div>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Save</span> <span class="pre">file</span></code> - saves the current graph in a native format supported by the third-party application using Pipeline Manager for visualization.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>It appears only in the <code class="docutils literal notranslate"><span class="pre">server-app</span></code> build mode, since the third-party app performs conversion from the <a class="reference internal" href="dataflow-format.html"><span class="doc std std-doc">Dataflow format</span></a> received from the editor to its native format.</p>
+</div>
+</li>
+</ul>
+<h2 id="creating-new-node-types">Creating new node types<a class="headerlink" href="#creating-new-node-types" title="Link to this heading">¶</a></h2>
+<p>After toggling the <code class="docutils literal notranslate"><span class="pre">Modify</span> <span class="pre">nodes</span> <span class="pre">types</span></code> checkbox in settings, the special <code class="docutils literal notranslate"><span class="pre">New</span> <span class="pre">Node</span> <span class="pre">Type</span></code> becomes available in the node palette.</p>
+<p>Drag and drop it to the editor to display the <code class="docutils literal notranslate"><span class="pre">Node</span> <span class="pre">configuration</span> <span class="pre">menu</span></code>.</p>
+<p><img alt="Node configuration menu" src="_images/node-configuration-menu.png" /></p>
+<p>After the node is created, it will be added to the editor and available in the node palette.</p>
+<p>The node type can be configured further from the editor, e.g. by adding properties and interfaces.</p>
+<h2 id="working-with-the-server">Working with the server<a class="headerlink" href="#working-with-the-server" title="Link to this heading">¶</a></h2>
+<p>When Pipeline Manager works in the <code class="docutils literal notranslate"><span class="pre">server-app</span></code> mode, it is connected to an external application, making it possible to manipulate or execute a graph as well as save and load files in the application’s native format.</p>
+<p><img alt="Server status" src="_images/frontend-server-status.png" /></p>
+<p>Status of the connection is displayed in the upper right corner of the editor.
+The color of the icon indicates the status of the connection with the server:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Red</span></code> - No connection with the server.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Green</span></code> - Connection with the server is established.</p></li>
+</ul>
+<p>External application may deliver additional features by providing additional buttons in the editor menu.
+More details can be found in the <a class="reference internal" href="specification-format.html#navbar-item"><span class="std std-ref">Specification format</span></a> section.</p>
+<h2 id="url-parameters-for-the-frontend">URL parameters for the frontend<a class="headerlink" href="#url-parameters-for-the-frontend" title="Link to this heading">¶</a></h2>
+<p>The frontend of Pipeline Manager provides a set of URL parameters that can be used to change the specification, graph or default behavior of the application.
+Those arguments need to be encoded - we need to escape all URL-specific characters.
+This can be achieved either with <code class="docutils literal notranslate"><span class="pre">urllib.parse.urlencode</span></code> in Python:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">urllib.parse</span>
+
+<span class="n">urllib</span><span class="o">.</span><span class="n">parse</span><span class="o">.</span><span class="n">urlencode</span><span class="p">({</span>
+    <span class="s2">&quot;spec&quot;</span><span class="p">:</span> <span class="s2">&quot;https://github.com/antmicro/kenning-pipeline-manager/blob/main/examples/sample-specification.json&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;graph&quot;</span><span class="p">:</span> <span class="s2">&quot;https://github.com/antmicro/kenning-pipeline-manager/blob/main/examples/sample-dataflow.json&quot;</span>
+<span class="p">})</span>
+
+<span class="c1"># RESULT: &#39;spec=https%3A%2F%2Fgithub.com%2Fantmicro%2Fkenning-pipeline-manager%2Fblob%2Fmain%2Fexamples%2Fsample-specification.json&amp;graph=https%3A%2F%2Fgithub.com%2Fantmicro%2Fkenning-pipeline-manager%2Fblob%2Fmain%2Fexamples%2Fsample-dataflow.json&#39;</span>
+</code></pre></div>
+</div>
+<p>or with <code class="docutils literal notranslate"><span class="pre">encodeURIComponent</span></code> in Javascript:</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><code><span class="nb">encodeURIComponent</span><span class="p">(</span><span class="s2">&quot;https://github.com/antmicro/kenning-pipeline-manager/blob/main/examples/sample-specification.json&quot;</span><span class="p">)</span>
+
+<span class="c1">// RESULT: &#39;https%3A%2F%2Fgithub.com%2Fantmicro%2Fkenning-pipeline-manager%2Fblob%2Fmain%2Fexamples%2Fsample-specification.json&#39;</span>
+</code></pre></div>
+</div>
+<p>Available parameters are as follows:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">spec</span></code> - URL to the specification, by default it can be a HTTP/HTTPS URL,</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">graph</span></code> - URL to the graph, by default it can be a HTTP/HTTPS URL,</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">preview</span></code> - starts Pipeline Manager in read only mode, without HUD,</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">include</span></code> - allows to provide includes for the specification,</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">backend</span></code> - connects Pipeline Manager to the specified backend regardless of the application mode.</p></li>
+</ul>
+<p>When it comes to <code class="docutils literal notranslate"><span class="pre">spec</span></code> and <code class="docutils literal notranslate"><span class="pre">graph</span></code>, by default we can use following URI schemes:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">http://</span></code>, <code class="docutils literal notranslate"><span class="pre">https://</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">relative://</span></code> - picks a path relative to the Pipeline Manager URL</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">data:application,</span></code> or <code class="docutils literal notranslate"><span class="pre">data:application;base64,</span></code> - JSON embedded as <a class="reference external" href="https://developer.mozilla.org/en-US/docs/Web/URI/Reference/Schemes/data">Data URL</a></p></li>
+</ul>
+<p>To add more URI schemes, we need to define <code class="docutils literal notranslate"><span class="pre">VUE_APP_JSON_URL_SUBSTITUTES</span></code> variable holding a dictionary mapping scheme name to appropriate template/prefix.</p>
+<p>The JSON for URL substitutes can look as follows:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;examples&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://github.com/antmicro/kenning-pipeline-manager/examples/{}&quot;</span>
+<span class="p">}</span>
+</code></pre></div>
+</div>
+<p>And be later be referred to as <code class="docutils literal notranslate"><span class="pre">examples://sample-specification.json</span></code> in URL.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The URI schemes can be passed to <code class="docutils literal notranslate"><span class="pre">pipeline_manager</span> <span class="pre">build</span></code> via <code class="docutils literal notranslate"><span class="pre">--json_url_specification</span></code> argument.</p>
+</div>
+<h2 id="external-frontend">External frontend<a class="headerlink" href="#external-frontend" title="Link to this heading">¶</a></h2>
+<p>These features are available for websites that embed Pipeline Manager using <code class="docutils literal notranslate"><span class="pre">iframe</span></code>. <a class="reference external" href="https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage">POST requests</a> are used as a communication channel.</p>
+<p>The usage example can be found in <a class="reference external" href="https://github.com/antmicro/kenning-pipeline-manager/tree/main/pipeline_manager/frontend_tester/tester_api/index.html">pipeline_manager/frontend_tester/tester_api/index.html</a>
+(see <a class="reference external" href="https://github.com/antmicro/kenning-pipeline-manager/blob/main/pipeline_manager/frontend_tester/README.md">README</a> for build instructions).
+You can check a deployed instance in <a class="reference external" href="tester_api/index.html">Frontend-to-Frontend demo</a>.</p>
+<h3 id="making-api-requests">Making API requests<a class="headerlink" href="#making-api-requests" title="Link to this heading">¶</a></h3>
+<p>There is a possibility to call Pipeline Manager <a class="reference internal" href="external-app-communication.html#api-specification"><span class="std std-ref">API</span></a> from the frontend level.</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nx">iframe</span><span class="p">;</span>
+
+<span class="nb">window</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="s1">&#39;load&#39;</span><span class="p">,</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">iframe</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="nx">pipelineManagerIframe</span><span class="p">);</span>
+<span class="p">});</span>
+
+<span class="nb">window</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="s1">&#39;message&#39;</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="nx">event</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// handling responses from Pipeline Manager</span>
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">response</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">data</span><span class="p">,</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"> </span><span class="mf">4</span><span class="p">);</span>
+<span class="w">    </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">response</span><span class="p">);</span>
+<span class="p">});</span>
+
+<span class="c1">// sending specification_change request to Pipeline Manager&#39;s iframe</span>
+<span class="nx">iframe</span><span class="p">.</span><span class="nx">contentWindow</span><span class="p">.</span><span class="nx">postMessage</span><span class="p">({</span><span class="w"> </span><span class="nx">method</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;specification_change&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">params</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">specification</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">});</span>
+</code></pre></div>
+</div>
+<p>This piece of code opens Pipeline Manager in an iframe and provides it with a JSON object containing the request body corresponding to a <code class="docutils literal notranslate"><span class="pre">specification_change</span></code> <a class="reference internal" href="external-app-communication.html#frontend-api"><span class="std std-ref">frontend endpoint</span></a>.
+Note that this method also supports <a class="reference internal" href="external-app-communication.html#backend-api"><span class="std std-ref">backend endpoints</span></a> and <a class="reference internal" href="external-app-communication.html#external-app-api"><span class="std std-ref">external app endpoints</span></a> if external application is attached to Pipeline Manager.</p>
+<p>Check <a class="reference internal" href="external-app-communication.html#external-frontend-backend-external-app"><span class="std std-ref">External Frontend Communication</span></a> for more details.</p>
+<h3 id="serving-external-application">Serving External Application<a class="headerlink" href="#serving-external-application" title="Link to this heading">¶</a></h3>
+<p>A wrapping website may implement <a class="reference internal" href="external-app-communication.html#external-app-api"><span class="std std-ref">External Application</span></a>, e.g.:</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nx">iframe</span><span class="p">;</span>
+
+<span class="nb">window</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="s1">&#39;load&#39;</span><span class="p">,</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">iframe</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="nx">pipelineManagerIframe</span><span class="p">);</span>
+<span class="w">    </span><span class="nx">iframe</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">iframe</span><span class="p">.</span><span class="nx">contentWindow</span><span class="p">.</span><span class="nx">postMessage</span><span class="p">({</span><span class="w"> </span><span class="nx">method</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;register_external_frontend&#39;</span><span class="w"> </span><span class="p">});</span>
+<span class="p">});</span>
+
+<span class="nb">window</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="s1">&#39;message&#39;</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="nx">event</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">data</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">event</span><span class="p">;</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">method</span><span class="w"> </span><span class="o">!==</span><span class="w"> </span><span class="kc">undefined</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kd">const</span><span class="w"> </span><span class="nx">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">handleExternalAppRequest</span><span class="p">(</span><span class="nx">data</span><span class="p">);</span>
+<span class="w">        </span><span class="nx">iframe</span><span class="p">.</span><span class="nx">contentWindow</span><span class="p">.</span><span class="nx">postMessage</span><span class="p">({</span><span class="w"> </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="nx">data</span><span class="p">.</span><span class="nx">id</span><span class="p">,</span><span class="w"> </span><span class="nx">result</span><span class="w"> </span><span class="p">});</span>
+<span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">handleResponse</span><span class="p">(</span><span class="nx">data</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">});</span>
+</code></pre></div>
+</div>
+<p>Here, the code registers the website as an external application, and then sets up the listener for processing corresponding requests and responses.</p>
+<p>Check <a class="reference internal" href="external-app-communication.html#external-frontend-application"><span class="std std-ref">External Frontend Application</span></a> for more details.</p>
+<h2 id="testing-the-front-end-features">Testing the front-end features<a class="headerlink" href="#testing-the-front-end-features" title="Link to this heading">¶</a></h2>
+<p>The best way to test the front-end features is to use the <code class="docutils literal notranslate"><span class="pre">pipeline_manager.frontend_tester.tester_client</span></code>, <a class="reference internal" href="example-server.html"><span class="doc std std-doc">Third-party server example</span></a>.</p>
+
+
+  <hr>
+<div class="md-source-file">
+  <small>
+    
+      Last update:
+      2025-11-27
+    
+  </small>
+</div>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+    <nav class="md-footer__inner md-grid" aria-label="Footer" >
+      
+        
+        <a href="dataflow-format.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Dataflow format" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              Dataflow format
+            </div>
+          </div>
+        </a>
+      
+      
+        
+        <a href="external-app-communication.html" class="md-footer__link md-footer__link--next" aria-label="Next: Communication with an external application" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              Communication with an external application
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
+  
+  
+  
+  <div class="md-footer-meta md-typeset">
+    
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-footer-copyright__highlight">
+        Copyright &#169; Antmicro, 2025.
+        
+    </div>
+  
+      <a href="https://github.com/antmicro/kenning-pipeline-manager/tree/c20b22c6042854666cf78319e2affc882c0f1ffe">c20b22c6</a>
+        @ <a href="https://github.com/antmicro/kenning-pipeline-manager/tree/main">main</a>
+  
+</div>
+      
+        <div class="md-social">
+  
+    
+    
+      
+      
+    
+    <a href="https://github.com/antmicro" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+    </a>
+  
+    
+    
+      
+      
+    
+    <a href="https://twitter.com/antmicro" target="_blank" rel="noopener" title="twitter.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M459.37 151.716c.325 4.548.325 9.097.325 13.645 0 138.72-105.583 298.558-298.558 298.558-59.452 0-114.68-17.219-161.137-47.106 8.447.974 16.568 1.299 25.34 1.299 49.055 0 94.213-16.568 130.274-44.832-46.132-.975-84.792-31.188-98.112-72.772 6.498.974 12.995 1.624 19.818 1.624 9.421 0 18.843-1.3 27.614-3.573-48.081-9.747-84.143-51.98-84.143-102.985v-1.299c13.969 7.797 30.214 12.67 47.431 13.319-28.264-18.843-46.781-51.005-46.781-87.391 0-19.492 5.197-37.36 14.294-52.954 51.655 63.675 129.3 105.258 216.365 109.807-1.624-7.797-2.599-15.918-2.599-24.04 0-57.828 46.782-104.934 104.934-104.934 30.213 0 57.502 12.67 76.67 33.137 23.715-4.548 46.456-13.32 66.599-25.34-7.798 24.366-24.366 44.833-46.132 57.827 21.117-2.273 41.584-8.122 60.426-16.243-14.292 20.791-32.161 39.308-52.628 54.253z"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+    
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    <script id="__config" type="application/json">{"base": ".", "features": ["toc.integrate"], "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
+    
+      
+        <script src="_static/sphinx_immaterial_theme.f9d9eeeb247ace16c.min.js?v=8ec58cb5"></script>
+    
+  </body>
+</html>

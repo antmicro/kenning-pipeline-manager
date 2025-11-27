@@ -1,0 +1,64 @@
+/*
+ * Sequence plot styles
+ */
+
+.mermaid>svg[aria-roledescription="sequence"] tspan,
+.mermaid>svg[aria-roledescription="sequence"] text {
+  fill: var(--md-typeset-color) !important;
+}
+
+.messageLine0,
+.mermaid #arrowhead path,
+.mermaid>svg[aria-roledescription="sequence"] g>line:not(.loopLine) {
+  fill: var(--md-code-hl-name-color) !important;
+  stroke: var(--md-code-hl-name-color) !important;
+}
+
+.loopLine,
+.labelBox {
+  stroke: var(--md-code-hl-function-color) !important;
+  fill: var(--md-code-hl-function-color) !important;
+}
+
+.actor {
+  fill: var(--md-primary-fg-color--dark) !important;
+  stroke: var(--md-code-hl-name-color) !important;
+}
+
+.activation0 {
+  fill: var(--md-code-hl-constant-color) !important;
+  stroke: var(--md-code-hl-name-color) !important;
+}
+
+.note {
+  fill: var(--md-primary-fg-color--light) !important;
+  stroke: var(--md-code-hl-name-color) !important;
+}
+
+/*
+ * C4 plot styles
+ */
+
+.person-man rect {
+  fill: var(--md-primary-fg-color--dark) !important;
+}
+
+.person-man>text:first-of-type {
+  display: none;
+}
+
+.person-man>text:last-of-type {
+  translate: 0 -10px;
+}
+
+.mermaid>svg[aria-roledescription="c4"] #arrowhead path {
+  fill: var(--md-code-hl-name-color) !important;
+}
+
+g:not(.person-man) rect {
+  stroke: var(--md-code-hl-name-color) !important;
+}
+
+g:not(.person-man) rect+text {
+  fill: var(--md-code-hl-name-color) !important;
+}

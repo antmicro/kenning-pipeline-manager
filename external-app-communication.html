@@ -1,0 +1,2308 @@
+
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      <link rel="icon" href="">
+    
+    
+      
+        <title>Communication with an external application - Pipeline Manager</title>
+      
+    
+    
+      
+        
+        
+      
+      
+
+    
+    
+    
+      
+        
+        
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+        <link rel="stylesheet" type="text/css" href="_static/sphinx_immaterial_theme.c5589c0bd87d933a4.min.css?v=eeeb54bc" />
+        <link rel="stylesheet" type="text/css" href="_static/css/styles.css?v=e5e17168" />
+    <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="deep-orange">
+  
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="index.html" title="Pipeline Manager" class="md-header__button md-logo" aria-label="Pipeline Manager" data-md-component="logo">
+      <img src="_static/white.svg" alt="logo">
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Pipeline Manager
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Communication with an external application
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      <form class="md-header__option" data-md-component="palette">
+        
+          
+          
+          <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="deep-orange"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+          
+            <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_2" hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5c-.84 0-1.65.15-2.39.42L12 2M3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29L3.34 7m.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14L3.36 17M20.65 7l-1.77 3.79a7.023 7.023 0 0 0-2.38-4.15l4.15.36m-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29L20.64 17M12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44L12 22Z"/></svg>
+            </label>
+          
+        
+          
+          
+          <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="deep-orange"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_2">
+          
+            <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3 3.19.09m3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95 2.06.05m-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31Z"/></svg>
+            </label>
+          
+        
+      </form>
+    
+    
+    
+      <div class="md-header__button">
+        <a href="pipeline-manager.pdf" title="PDF - pipeline-manager.pdf">
+          <div class="md-icon">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M64 0C28.7 0 0 28.7 0 64v384c0 35.3 28.7 64 64 64h256c35.3 0 64-28.7 64-64V160H256c-17.7 0-32-14.3-32-32V0H64zm192 0v128h128L256 0zM64 224h24c30.9 0 56 25.1 56 56s-25.1 56-56 56h-8v32c0 8.8-7.2 16-16 16s-16-7.2-16-16V240c0-8.8 7.2-16 16-16zm24 80c13.3 0 24-10.7 24-24s-10.7-24-24-24h-8v48h8zm72-64c0-8.8 7.2-16 16-16h24c26.5 0 48 21.5 48 48v64c0 26.5-21.5 48-48 48h-24c-8.8 0-16-7.2-16-16V240zm32 112h8c8.8 0 16-7.2 16-16v-64c0-8.8-7.2-16-16-16h-8v96zm96-128h48c8.8 0 16 7.2 16 16s-7.2 16-16 16h-32v32h32c8.8 0 16 7.2 16 16s-7.2 16-16 16h-32v48c0 8.8-7.2 16-16 16s-16-7.2-16-16V240c0-8.8 7.2-16 16-16z"/></svg>
+          </div>
+        </a>
+      </div>
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/antmicro/kenning-pipeline-manager" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    antmicro/kenning-pipeline-manager
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="index.html" title="Pipeline Manager" class="md-nav__button md-logo" aria-label="Pipeline Manager" data-md-component="logo">
+      <img src="_static/white.svg" alt="logo">
+    </a>
+    Pipeline Manager
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/antmicro/kenning-pipeline-manager" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    antmicro/kenning-pipeline-manager
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="introduction.html" class="md-nav__link">
+        <span class="md-ellipsis">Introduction</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="project-readme.html" class="md-nav__link">
+        <span class="md-ellipsis">Pipeline Manager</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="specification-format.html" class="md-nav__link">
+        <span class="md-ellipsis">Specification format</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="dataflow-format.html" class="md-nav__link">
+        <span class="md-ellipsis">Dataflow format</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="frontend-features.html" class="md-nav__link">
+        <span class="md-ellipsis">Front-<wbr>end features</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          <span class="md-ellipsis">Communication with an external application</span>
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="#" class="md-nav__link md-nav__link--active">
+        <span class="md-ellipsis">Communication with an external application</span>
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#communication-protocol" class="md-nav__link">
+    <span class="md-ellipsis">Communication protocol</span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Communication protocol">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#external-backend-application" class="md-nav__link">
+    <span class="md-ellipsis">External Backend Application</span>
+  </a>
+  
+    <nav class="md-nav" aria-label="External Backend Application">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#frontend-backend-external-application" class="md-nav__link">
+    <span class="md-ellipsis">Frontend / Backend / External application</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#external-frontend-pipeline-manager" class="md-nav__link">
+    <span class="md-ellipsis">External Frontend / Pipeline Manager</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#request-structure" class="md-nav__link">
+    <span class="md-ellipsis">Request structure</span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#external-frontend-application" class="md-nav__link">
+    <span class="md-ellipsis">External Frontend Application</span>
+  </a>
+  
+    <nav class="md-nav" aria-label="External Frontend Application">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#id1" class="md-nav__link">
+    <span class="md-ellipsis">Request structure</span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#response-messages-types-sent-by-the-external-application" class="md-nav__link">
+    <span class="md-ellipsis">Response messages types -<wbr> sent by the external application</span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Response messages types - sent by the external application">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ok" class="md-nav__link">
+    <span class="md-ellipsis">OK</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#error" class="md-nav__link">
+    <span class="md-ellipsis">ERROR</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#progress" class="md-nav__link">
+    <span class="md-ellipsis">PROGRESS</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#warning" class="md-nav__link">
+    <span class="md-ellipsis">WARNING</span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#api-specification" class="md-nav__link">
+    <span title="api-specification (reference label)" class="md-ellipsis">API Specification</span>
+  </a>
+  
+    <nav class="md-nav" aria-label="API Specification">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#frontend-api" class="md-nav__link">
+    <span title="frontend-api (reference label)" class="md-ellipsis">Frontend API</span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Frontend API">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#frontend-status-get" class="md-nav__link">
+    <span class="md-ellipsis">frontend_<wbr>status_<wbr>get</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#frontend-specification-get" class="md-nav__link">
+    <span class="md-ellipsis">frontend_<wbr>specification_<wbr>get</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#graph-get" class="md-nav__link">
+    <span class="md-ellipsis">graph_<wbr>get</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#node-get" class="md-nav__link">
+    <span class="md-ellipsis">node_<wbr>get</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#properties-get" class="md-nav__link">
+    <span class="md-ellipsis">properties_<wbr>get</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#properties-change" class="md-nav__link">
+    <span class="md-ellipsis">properties_<wbr>change</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#position-change" class="md-nav__link">
+    <span class="md-ellipsis">position_<wbr>change</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#nodes-change" class="md-nav__link">
+    <span class="md-ellipsis">nodes_<wbr>change</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#connections-change" class="md-nav__link">
+    <span class="md-ellipsis">connections_<wbr>change</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#graph-change" class="md-nav__link">
+    <span class="md-ellipsis">graph_<wbr>change</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#progress-change" class="md-nav__link">
+    <span class="md-ellipsis">progress_<wbr>change</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#metadata-change" class="md-nav__link">
+    <span class="md-ellipsis">metadata_<wbr>change</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#viewport-center" class="md-nav__link">
+    <span class="md-ellipsis">viewport_<wbr>center</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#terminal-add" class="md-nav__link">
+    <span class="md-ellipsis">terminal_<wbr>add</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#terminal-remove" class="md-nav__link">
+    <span class="md-ellipsis">terminal_<wbr>remove</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#terminal-write" class="md-nav__link">
+    <span class="md-ellipsis">terminal_<wbr>write</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#terminal-clear" class="md-nav__link">
+    <span class="md-ellipsis">terminal_<wbr>clear</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#terminal-hide" class="md-nav__link">
+    <span class="md-ellipsis">terminal_<wbr>hide</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#terminal-show" class="md-nav__link">
+    <span class="md-ellipsis">terminal_<wbr>show</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#terminal-view" class="md-nav__link">
+    <span class="md-ellipsis">terminal_<wbr>view</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#terminal-get-instances" class="md-nav__link">
+    <span class="md-ellipsis">terminal_<wbr>get_<wbr>instances</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#notification-send" class="md-nav__link">
+    <span class="md-ellipsis">notification_<wbr>send</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#specification-change" class="md-nav__link">
+    <span class="md-ellipsis">specification_<wbr>change</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#specification-graph-change" class="md-nav__link">
+    <span class="md-ellipsis">specification_<wbr>graph_<wbr>change</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#specification-preprocess" class="md-nav__link">
+    <span class="md-ellipsis">specification_<wbr>preprocess</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#specification-expand" class="md-nav__link">
+    <span class="md-ellipsis">specification_<wbr>expand</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#nodes-highlight" class="md-nav__link">
+    <span class="md-ellipsis">nodes_<wbr>highlight</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#register-external-frontend" class="md-nav__link">
+    <span class="md-ellipsis">register_<wbr>external_<wbr>frontend</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#return-from-subgraph" class="md-nav__link">
+    <span class="md-ellipsis">return_<wbr>from_<wbr>subgraph</span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#backend-api" class="md-nav__link">
+    <span title="backend-api (reference label)" class="md-ellipsis">Backend API</span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Backend API">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#status-get" class="md-nav__link">
+    <span class="md-ellipsis">status_<wbr>get</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#external-app-connect" class="md-nav__link">
+    <span class="md-ellipsis">external_<wbr>app_<wbr>connect</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#connected-frontends-get" class="md-nav__link">
+    <span class="md-ellipsis">connected_<wbr>frontends_<wbr>get</span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#external-app-api" class="md-nav__link">
+    <span title="external-app-api (reference label)" class="md-ellipsis">External App API</span>
+  </a>
+  
+    <nav class="md-nav" aria-label="External App API">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#specification-get" class="md-nav__link">
+    <span class="md-ellipsis">specification_<wbr>get</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#app-capabilities-get" class="md-nav__link">
+    <span class="md-ellipsis">app_<wbr>capabilities_<wbr>get</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dataflow-import" class="md-nav__link">
+    <span class="md-ellipsis">dataflow_<wbr>import</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dataflow-validate" class="md-nav__link">
+    <span class="md-ellipsis">dataflow_<wbr>validate</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dataflow-run" class="md-nav__link">
+    <span class="md-ellipsis">dataflow_<wbr>run</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dataflow-stop" class="md-nav__link">
+    <span class="md-ellipsis">dataflow_<wbr>stop</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dataflow-export" class="md-nav__link">
+    <span class="md-ellipsis">dataflow_<wbr>export</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#frontend-on-connect" class="md-nav__link">
+    <span class="md-ellipsis">frontend_<wbr>on_<wbr>connect</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#properties-on-change" class="md-nav__link">
+    <span class="md-ellipsis">properties_<wbr>on_<wbr>change</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#position-on-change" class="md-nav__link">
+    <span class="md-ellipsis">position_<wbr>on_<wbr>change</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#nodes-on-change" class="md-nav__link">
+    <span class="md-ellipsis">nodes_<wbr>on_<wbr>change</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#connections-on-change" class="md-nav__link">
+    <span class="md-ellipsis">connections_<wbr>on_<wbr>change</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#graph-on-change" class="md-nav__link">
+    <span class="md-ellipsis">graph_<wbr>on_<wbr>change</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#specification-on-change" class="md-nav__link">
+    <span class="md-ellipsis">specification_<wbr>on_<wbr>change</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#metadata-on-change" class="md-nav__link">
+    <span class="md-ellipsis">metadata_<wbr>on_<wbr>change</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#viewport-on-center" class="md-nav__link">
+    <span class="md-ellipsis">viewport_<wbr>on_<wbr>center</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#terminal-read" class="md-nav__link">
+    <span class="md-ellipsis">terminal_<wbr>read</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#nodes-on-highlight" class="md-nav__link">
+    <span class="md-ellipsis">nodes_<wbr>on_<wbr>highlight</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#button-click" class="md-nav__link">
+    <span class="md-ellipsis">button_<wbr>click</span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#common-types" class="md-nav__link">
+    <span class="md-ellipsis">Common Types</span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Common Types">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#empty" class="md-nav__link">
+    <span class="md-ellipsis">empty</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#null-or-empty" class="md-nav__link">
+    <span class="md-ellipsis">null_<wbr>or_<wbr>empty</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#node-object" class="md-nav__link">
+    <span class="md-ellipsis">node_<wbr>object</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#urloverrides" class="md-nav__link">
+    <span class="md-ellipsis">urloverrides</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#loadingscreen" class="md-nav__link">
+    <span class="md-ellipsis">loading<wbr>Screen</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tryminify" class="md-nav__link">
+    <span class="md-ellipsis">try<wbr>Minify</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dataflow-or-url" class="md-nav__link">
+    <span class="md-ellipsis">dataflow_<wbr>or_<wbr>url</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dataflow-object" class="md-nav__link">
+    <span class="md-ellipsis">dataflow_<wbr>object</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#specification" class="md-nav__link">
+    <span class="md-ellipsis">specification</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#specification-or-url" class="md-nav__link">
+    <span class="md-ellipsis">specification_<wbr>or_<wbr>url</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#specification-object" class="md-nav__link">
+    <span class="md-ellipsis">specification_<wbr>object</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#properties-diff" class="md-nav__link">
+    <span class="md-ellipsis">properties_<wbr>diff</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#position-diff" class="md-nav__link">
+    <span class="md-ellipsis">position_<wbr>diff</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#nodes-diff" class="md-nav__link">
+    <span class="md-ellipsis">nodes_<wbr>diff</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#connections-diff" class="md-nav__link">
+    <span class="md-ellipsis">connections_<wbr>diff</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#highlight-diff" class="md-nav__link">
+    <span class="md-ellipsis">highlight_<wbr>diff</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#metadata" class="md-nav__link">
+    <span class="md-ellipsis">metadata</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#external-endpoint-return-type" class="md-nav__link">
+    <span class="md-ellipsis">external_<wbr>endpoint_<wbr>return_<wbr>type</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#navbar-items" class="md-nav__link">
+    <span class="md-ellipsis">navbar_<wbr>items</span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#custom-procedures" class="md-nav__link">
+    <span class="md-ellipsis">Custom procedures</span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#implementing-a-python-based-client-for-pipeline-manager" class="md-nav__link">
+    <span class="md-ellipsis">Implementing a Python-<wbr>based client for Pipeline Manager</span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Implementing a Python-based client for Pipeline Manager">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sending-json-rpc-requests-to-pipeline-manager" class="md-nav__link">
+    <span class="md-ellipsis">Sending JSON-<wbr>RPC requests to Pipeline Manager</span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="example-server.html" class="md-nav__link">
+        <span class="md-ellipsis">Sample third-<wbr>party server</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="specification-builder.html" class="md-nav__link">
+        <span class="md-ellipsis">Specification builder</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="graph-builder.html" class="md-nav__link">
+        <span class="md-ellipsis">Dataflow graph builder</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="changelogs.html" class="md-nav__link">
+        <span class="md-ellipsis">Dataflow and Specification format changelog</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="demo.html" class="md-nav__link">
+        <span class="md-ellipsis">Demonstration of the frontend</span>
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset" role="main">
+                  
+
+
+  <a href="https://github.com/antmicro/kenning-pipeline-manager/blob/main/docs/source/external-app-communication.md" title="Edit this page" class="md-content__button md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
+  </a>
+
+<h1 id="communication-with-an-external-application">Communication with an external application<a class="headerlink" href="#communication-with-an-external-application" title="Link to this heading">¶</a></h1>
+<p>The communication with an external application is based on <a class="reference external" href="https://www.jsonrpc.org/specification">JSON-RPC</a> messages.</p>
+<p>Pipeline Manager supports two ways of defining external application:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#external-backend-application">External Backend Application</a></p></li>
+<li><p><a class="reference internal" href="#external-frontend-application">External Frontend Application</a></p></li>
+</ul>
+<h2 id="communication-protocol">Communication protocol<a class="headerlink" href="#communication-protocol" title="Link to this heading">¶</a></h2>
+<p>The application layer protocol specifies two blocks:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">size</span></code> - four first bytes form an unsigned integer and tell the size of the content of the message in bytes.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">content</span></code> - the rest of the message holding additional data in JSON-RPC format described in <a class="reference internal" href="#api-specification">API Specification</a>.</p></li>
+</ul>
+<p>The <code class="docutils literal notranslate"><span class="pre">size</span></code> and <code class="docutils literal notranslate"><span class="pre">content</span></code> are stored in big-endian.</p>
+<h3 id="external-backend-application">External Backend Application<a class="headerlink" href="#external-backend-application" title="Link to this heading">¶</a></h3>
+<p>This is a core concept of <code class="docutils literal notranslate"><span class="pre">server-app</span></code> Pipeline Manager mode.</p>
+<p>Pipeline Manager implements a TCP server that is listening on a specified port and waiting for the client to connect.
+Pipeline Manager frontend sends JSON-RPC requests to this server through SocketIO, which redirects messages to connected client for specific actions described in this chapter.
+External application can also request actions from Pipeline Manager in similar manner.</p>
+<h4 id="frontend-backend-external-application">Frontend / Backend / External application<a class="headerlink" href="#frontend-backend-external-application" title="Link to this heading">¶</a></h4>
+<p>By default, Pipeline Manager will wait for an external application to connect and then request the specification.
+If the connection is established successfully, Pipeline Manager frontend will check if external application is still connected every 0.5 second.
+Apart from that, both Pipeline Manager frontend and external application can send requests which pass through Pipeline Manager backend.</p>
+<div class="mermaid-diagram docutils">
+<pre class="mermaid">
+<code class="docutils literal notranslate"><span class="pre">sequenceDiagram</span>
+&#160;&#160;&#160; <span class="pre">Note</span> <span class="pre">over</span> <span class="pre">Frontend,Backend:</span> <span class="pre">Pipeline</span> <span class="pre">Manager</span> <span class="pre">(SocketIO)</span>
+&#160;&#160;&#160; <span class="pre">Note</span> <span class="pre">over</span> <span class="pre">External</span> <span class="pre">App:</span> <span class="pre">Pipeline</span> <span class="pre">Manager</span> <span class="pre">Backend</span> <span class="pre">Communication</span>
+&#160;&#160;&#160; <span class="pre">Frontend-&gt;&gt;Backend:</span> <span class="pre">status_get</span>
+&#160;&#160;&#160; <span class="pre">Backend-&gt;&gt;Frontend:</span> <span class="pre">status</span>
+&#160;&#160;&#160; <span class="pre">Frontend-&gt;&gt;+Backend:</span> <span class="pre">external_app_connect</span>
+&#160;&#160;&#160; <span class="pre">Note</span> <span class="pre">over</span> <span class="pre">Backend,External</span> <span class="pre">App:</span> <span class="pre">BSD</span> <span class="pre">socket</span>
+&#160;&#160;&#160; <span class="pre">External</span> <span class="pre">App-&gt;&gt;Backend:</span> <span class="pre">connect_socket</span>
+&#160;&#160;&#160; <span class="pre">Backend-&gt;&gt;-Frontend:</span> <span class="pre">MessageType.OK</span>
+&#160;&#160;&#160; <span class="pre">Frontend-&gt;&gt;+Backend:</span> <span class="pre">specification_get</span>
+&#160;&#160;&#160; <span class="pre">Backend-&gt;&gt;External</span> <span class="pre">App:</span> <span class="pre">specification_get</span>
+&#160;&#160;&#160; <span class="pre">External</span> <span class="pre">App-&gt;&gt;Backend:</span> <span class="pre">specification</span>
+&#160;&#160;&#160; <span class="pre">Backend-&gt;&gt;-Frontend:</span> <span class="pre">MessageType.OK</span> <span class="pre">+</span> <span class="pre">specification</span>
+&#160;&#160;&#160; <span class="pre">loop</span> <span class="pre">Every</span> <span class="pre">0.5s</span>
+&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Frontend-&gt;&gt;Backend:</span> <span class="pre">status_get</span>
+&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Backend-&gt;&gt;Frontend:</span> <span class="pre">status</span>
+&#160;&#160;&#160; <span class="pre">end</span>
+&#160;&#160;&#160; <span class="pre">par</span> <span class="pre">External</span> <span class="pre">App</span> <span class="pre">API</span>
+&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Frontend-&gt;&gt;+Backend:</span> <span class="pre">request</span>
+&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Backend-&gt;&gt;+External</span> <span class="pre">App:</span> <span class="pre">redirected</span> <span class="pre">request</span>
+&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">External</span> <span class="pre">App-&gt;&gt;-Backend:</span> <span class="pre">response</span>
+&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Backend-&gt;&gt;-Frontend:</span> <span class="pre">redirected</span> <span class="pre">response</span>
+&#160;&#160;&#160; <span class="pre">and</span> <span class="pre">Frontend</span> <span class="pre">API</span>
+&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">External</span> <span class="pre">App-&gt;&gt;+Backend:</span> <span class="pre">request</span>
+&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Backend-&gt;&gt;+Frontend:</span> <span class="pre">redirected</span> <span class="pre">request</span>
+&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Frontend-&gt;&gt;-Backend:</span> <span class="pre">response</span>
+&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Backend-&gt;&gt;-External</span> <span class="pre">App:</span> <span class="pre">redirected</span> <span class="pre">response</span>
+&#160;&#160;&#160; <span class="pre">end</span></code></pre></div>
+<p>As Pipeline Manager part of communication is done with SocketIO, it is based on events, which are precisely defined for both sides and can trigger different actions.</p>
+<p>Frontend listens to:</p>
+<ul class="simple">
+<li><p><strong>api</strong> – received messages are JSON-RPC requests, they are validated with <a class="reference internal" href="#frontend-api">specification</a>, executed and generated responds are resend,</p></li>
+<li><p><strong>api-response</strong> – received messages are JSON-RPC responses, they are also validated and returned as result of previous request.</p></li>
+</ul>
+<p>Backend implements the following events:</p>
+<ul class="simple">
+<li><p><strong>backend-api</strong> – receives all JSON-RPC requests, runs methods and responds,</p></li>
+<li><p><strong>external-api</strong> – redirects messages to external application through BSD socket.</p></li>
+</ul>
+<p>On the other hand, communication between backend and external application is done through BSD socket.
+To manage this, both sides run socket listener as separate coroutine task, which waits for messages and responds or redirects them.</p>
+<h4 id="external-frontend-pipeline-manager"><span id="external-frontend-backend-external-app"></span>External Frontend / Pipeline Manager<a class="headerlink" href="#external-frontend-pipeline-manager" title="Link to this heading">¶</a></h4>
+<p>If the Pipeline Manager is wrapped with another frontend (see <a class="reference internal" href="frontend-features.html#making-api-requests"><span class="std std-ref">Frontend Features</span></a> for details),
+the communication can be established with <a class="reference external" href="https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage">POST requests</a>.</p>
+<div class="mermaid-diagram docutils">
+<pre class="mermaid">
+<code class="docutils literal notranslate"><span class="pre">sequenceDiagram</span>
+&#160;&#160;&#160; <span class="pre">Note</span> <span class="pre">over</span> <span class="pre">External</span> <span class="pre">Frontend,Frontend:</span> <span class="pre">postMessage</span>
+&#160;&#160;&#160; <span class="pre">par</span> <span class="pre">Frontend</span> <span class="pre">API</span>
+&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">External</span> <span class="pre">Frontend-&gt;&gt;Frontend:</span> <span class="pre">request</span>
+&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Frontend-&gt;&gt;External</span> <span class="pre">Frontend:</span> <span class="pre">response</span>
+&#160;&#160;&#160; <span class="pre">and</span> <span class="pre">Backend/External</span> <span class="pre">API</span>
+&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">External</span> <span class="pre">Frontend-&gt;&gt;+Frontend:</span> <span class="pre">request</span>
+&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Note</span> <span class="pre">over</span> <span class="pre">Frontend,Backend</span> <span class="pre">&amp;</span> <span class="pre">External</span> <span class="pre">App:</span> <span class="pre">Pipeline</span> <span class="pre">Manager</span> <span class="pre">(SocketIO)</span>
+&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Frontend-&gt;&gt;+Backend</span> <span class="pre">&amp;</span> <span class="pre">External</span> <span class="pre">App:</span> <span class="pre">redirected</span> <span class="pre">request</span>
+&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Backend</span> <span class="pre">&amp;</span> <span class="pre">External</span> <span class="pre">App-&gt;&gt;-Frontend:</span> <span class="pre">response</span>
+&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Frontend-&gt;&gt;-External</span> <span class="pre">Frontend:</span> <span class="pre">redirected</span> <span class="pre">response</span>
+&#160;&#160;&#160; <span class="pre">end</span></code></pre></div>
+<h4 id="request-structure">Request structure<a class="headerlink" href="#request-structure" title="Link to this heading">¶</a></h4>
+<p>Following communication structure diagram below, we have:</p>
+<ul class="simple">
+<li><p>blue lines describing <a class="reference internal" href="#backend-api"><span class="std std-ref">Backend API</span></a> request from frontend,</p></li>
+<li><p>red lines describing <a class="reference internal" href="#external-app-api"><span class="std std-ref">External App API</span></a> request from frontend,</p></li>
+<li><p>purple lines describing <a class="reference internal" href="#frontend-api"><span class="std std-ref">Frontend API</span></a> request from external application.</p></li>
+</ul>
+<div class="mermaid-diagram docutils">
+<pre class="mermaid">
+<code class="docutils literal notranslate"><span class="pre">C4Deployment</span>
+&#160;&#160;&#160; <span class="pre">Deployment_Node(cf,</span> <span class="pre">&quot;External</span> <span class="pre">Frontend&quot;,</span> <span class="pre">&quot;&quot;)</span> <span class="pre">{</span>
+&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Container(external-post-message,</span> <span class="pre">&quot;postMessage&quot;)</span>
+&#160;&#160;&#160; <span class="pre">}</span>
+&#160;&#160;&#160; <span class="pre">Deployment_Node(pm,</span> <span class="pre">&quot;Pipeline</span> <span class="pre">Manager&quot;,</span> <span class="pre">&quot;&quot;)</span> <span class="pre">{</span>
+&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Deployment_Node(front,</span> <span class="pre">&quot;Frontend&quot;,</span> <span class="pre">&quot;&quot;)</span> <span class="pre">{</span>
+&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Container(front-post-message,</span> <span class="pre">&quot;postMessage&quot;)</span>
+&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Deployment_Node(socketio,</span> <span class="pre">&quot;SocketIO&quot;,</span> <span class="pre">&quot;&quot;)</span> <span class="pre">{</span>
+&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Container(front-socket,</span> <span class="pre">&quot;SocketIO&quot;)</span>
+&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Deployment_Node(front-event,</span> <span class="pre">&quot;Events&quot;,</span> <span class="pre">&quot;&quot;)</span> <span class="pre">{</span>
+&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Container(front-api,</span> <span class="pre">&quot;api&quot;)</span>
+&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Container(front-response-api,</span> <span class="pre">&quot;api-response&quot;)</span>
+&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">}</span>
+&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">}</span>
+&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">}</span>
+&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Deployment_Node(back,</span> <span class="pre">&quot;Backend&quot;,</span> <span class="pre">&quot;&quot;)</span> <span class="pre">{</span>
+&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Deployment_Node(flask,</span> <span class="pre">&quot;Python-SocketIO</span> <span class="pre">events&quot;,</span> <span class="pre">&quot;&quot;)</span> <span class="pre">{</span>
+&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Container(flask-backend-api,</span> <span class="pre">&quot;backend-api&quot;)</span>
+&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Container(flask-external-api,</span> <span class="pre">&quot;external-api&quot;)</span>
+&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">}</span>
+&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Deployment_Node(flask-task,</span> <span class="pre">&quot;Coroutine</span> <span class="pre">task&quot;,</span> <span class="pre">&quot;&quot;)</span> <span class="pre">{</span>
+&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Container(back-socket,</span> <span class="pre">&quot;BSD</span> <span class="pre">socket</span> <span class="pre">listener&quot;)</span>
+&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">}</span>
+&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">}</span>
+&#160;&#160;&#160; <span class="pre">}</span>
+&#160;&#160;&#160; <span class="pre">Deployment_Node(pmbc,</span> <span class="pre">&quot;Pipeline</span> <span class="pre">Manager</span> <span class="pre">Backend</span> <span class="pre">Communication&quot;,</span> <span class="pre">&quot;&quot;)</span> <span class="pre">{</span>
+&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Deployment_Node(pmbc-socket,</span> <span class="pre">&quot;Socket&quot;,</span> <span class="pre">&quot;&quot;)</span> <span class="pre">{</span>
+&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Container(pmbc-socket,</span> <span class="pre">&quot;BSD</span> <span class="pre">socket&quot;)</span>
+&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Deployment_Node(pmbc-task,</span> <span class="pre">&quot;Coroutine</span> <span class="pre">task&quot;,</span> <span class="pre">&quot;&quot;)</span> <span class="pre">{</span>
+&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Container(pmbc-listener,</span> <span class="pre">&quot;BSD</span> <span class="pre">socket</span> <span class="pre">listener&quot;)</span>
+&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">}</span>
+&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">}</span>
+&#160;&#160;&#160; <span class="pre">}</span>
+&#160;&#160;&#160; <span class="pre">%%</span> <span class="pre">frontend</span> <span class="pre">to</span> <span class="pre">frontend</span>
+&#160;&#160;&#160; <span class="pre">BiRel(external-post-message,</span> <span class="pre">front-post-message,</span> <span class="pre">&quot;JSON-RPC</span> <span class="pre">requests</span> <span class="pre">and</span> <span class="pre">frontend</span> <span class="pre">responses&quot;)</span>
+&#160;&#160;&#160; <span class="pre">Rel(front-post-message,</span> <span class="pre">front-socket,</span> <span class="pre">&quot;Redirected</span> <span class="pre">requests&quot;)</span>
+&#160;&#160;&#160; <span class="pre">Rel(front-response-api,</span> <span class="pre">external-post-message,</span> <span class="pre">&quot;Redirected</span> <span class="pre">responses&quot;)</span>
+&#160;&#160;&#160; <span class="pre">UpdateRelStyle(external-post-message,</span> <span class="pre">front-post-message,</span> <span class="pre">$offsetX=&quot;-55&quot;,</span> <span class="pre">$offsetY=&quot;-30&quot;)</span>
+&#160;&#160;&#160; <span class="pre">UpdateRelStyle(front-post-message,</span> <span class="pre">front-socket,</span> <span class="pre">front-post-message,</span> <span class="pre">$offsetX=&quot;-55&quot;,</span> <span class="pre">$offsetY=&quot;-30&quot;)</span>
+&#160;&#160;&#160; <span class="pre">%%</span> <span class="pre">frontend</span> <span class="pre">to</span> <span class="pre">backend</span> <span class="pre">request</span>
+&#160;&#160;&#160; <span class="pre">Rel(front-socket,</span> <span class="pre">flask-backend-api,</span> <span class="pre">&quot;JSON-RPC</span> <span class="pre">request&quot;)</span>
+&#160;&#160;&#160; <span class="pre">Rel(flask-backend-api,</span> <span class="pre">front-response-api,</span> <span class="pre">&quot;JSON-RPC</span> <span class="pre">response&quot;)</span>
+&#160;&#160;&#160; <span class="pre">UpdateRelStyle(front-socket,</span> <span class="pre">flask-backend-api,</span> <span class="pre">$lineColor=&quot;var(--md-code-hl-keyword-color)&quot;,</span> <span class="pre">$textColor=&quot;var(--md-code-hl-keyword-color)&quot;,</span> <span class="pre">$offsetY=&quot;-15&quot;)</span>
+&#160;&#160;&#160; <span class="pre">UpdateRelStyle(flask-backend-api,</span> <span class="pre">front-response-api,</span> <span class="pre">$lineColor=&quot;var(--md-code-hl-keyword-color)&quot;,</span> <span class="pre">$textColor=&quot;var(--md-code-hl-keyword-color)&quot;,</span> <span class="pre">$offsetX=&quot;-50&quot;,</span> <span class="pre">$offsetY=&quot;55&quot;)</span>
+&#160;&#160;&#160; <span class="pre">%%</span> <span class="pre">frontend</span> <span class="pre">to</span> <span class="pre">external</span> <span class="pre">app</span> <span class="pre">request</span>
+&#160;&#160;&#160; <span class="pre">Rel(front-socket,</span> <span class="pre">flask-external-api,</span> <span class="pre">&quot;JSON-RPC</span> <span class="pre">request&quot;)</span>
+&#160;&#160;&#160; <span class="pre">Rel(flask-external-api,</span> <span class="pre">pmbc-listener,</span> <span class="pre">&quot;Redirected</span> <span class="pre">requests</span> <span class="pre">and</span> <span class="pre">responses&quot;)</span>
+&#160;&#160;&#160; <span class="pre">Rel(pmbc-listener,</span> <span class="pre">back-socket,</span> <span class="pre">&quot;JSON-RPC</span> <span class="pre">response&quot;)</span>
+&#160;&#160;&#160; <span class="pre">Rel(back-socket,</span> <span class="pre">front-response-api,</span> <span class="pre">&quot;Redirected</span> <span class="pre">response&quot;)</span>
+&#160;&#160;&#160; <span class="pre">UpdateRelStyle(front-socket,</span> <span class="pre">flask-external-api,</span> <span class="pre">$lineColor=&quot;var(--md-code-hl-number-color)&quot;,</span> <span class="pre">$textColor=&quot;var(--md-code-hl-number-color)&quot;)</span>
+&#160;&#160;&#160; <span class="pre">UpdateRelStyle(flask-external-api,</span> <span class="pre">pmbc-listener,</span> <span class="pre">$lineColor=&quot;var(--md-code-hl-name-color)&quot;,</span> <span class="pre">$textColor=&quot;var(--md-code-hl-name-color)&quot;,</span> <span class="pre">$offsetX=&quot;-10&quot;,</span> <span class="pre">$offsetY=&quot;-10&quot;)</span>
+&#160;&#160;&#160; <span class="pre">UpdateRelStyle(pmbc-listener,</span> <span class="pre">back-socket,</span> <span class="pre">$lineColor=&quot;var(--md-code-hl-number-color)&quot;,</span> <span class="pre">$textColor=&quot;var(--md-code-hl-number-color)&quot;,</span> <span class="pre">$offsetX=&quot;25&quot;,</span> <span class="pre">$offsetY=&quot;-25&quot;)</span>
+&#160;&#160;&#160; <span class="pre">UpdateRelStyle(back-socket,</span> <span class="pre">front-response-api,</span> <span class="pre">$lineColor=&quot;var(--md-code-hl-number-color)&quot;,</span> <span class="pre">$textColor=&quot;var(--md-code-hl-number-color)&quot;,</span> <span class="pre">$offsetX=&quot;-10&quot;,</span> <span class="pre">$offsetY=&quot;20&quot;)</span>
+&#160;&#160;&#160; <span class="pre">%%</span> <span class="pre">external</span> <span class="pre">app</span> <span class="pre">to</span> <span class="pre">frontend</span> <span class="pre">request</span>
+&#160;&#160;&#160; <span class="pre">Rel(pmbc-socket,</span> <span class="pre">back-socket,</span> <span class="pre">&quot;JSON-RPC</span> <span class="pre">request&quot;)</span>
+&#160;&#160;&#160; <span class="pre">Rel(back-socket,</span> <span class="pre">front-api,</span> <span class="pre">&quot;Redirected</span> <span class="pre">request&quot;)</span>
+&#160;&#160;&#160; <span class="pre">Rel(front-api,</span> <span class="pre">flask-external-api,</span> <span class="pre">&quot;JSON-RPC</span> <span class="pre">response&quot;)</span>
+&#160;&#160;&#160; <span class="pre">Rel(pmbc-listener,</span> <span class="pre">pmbc-socket,</span> <span class="pre">&quot;Received</span> <span class="pre">response&quot;)</span>
+&#160;&#160;&#160; <span class="pre">UpdateRelStyle(pmbc-socket,</span> <span class="pre">back-socket,</span> <span class="pre">$textColor=&quot;var(--md-code-hl-function-color)&quot;,</span> <span class="pre">$lineColor=&quot;var(--md-code-hl-function-color)&quot;,</span> <span class="pre">$offsetX=&quot;-10&quot;,</span> <span class="pre">$offsetY=&quot;15&quot;)</span>
+&#160;&#160;&#160; <span class="pre">UpdateRelStyle(back-socket,</span> <span class="pre">front-api,</span> <span class="pre">$textColor=&quot;var(--md-code-hl-function-color)&quot;,</span> <span class="pre">$lineColor=&quot;var(--md-code-hl-function-color)&quot;,</span> <span class="pre">$offsetX=&quot;45&quot;)</span>
+&#160;&#160;&#160; <span class="pre">UpdateRelStyle(front-api,</span> <span class="pre">flask-external-api,</span> <span class="pre">$textColor=&quot;var(--md-code-hl-function-color)&quot;,</span> <span class="pre">$lineColor=&quot;var(--md-code-hl-function-color)&quot;,</span> <span class="pre">$offsetX=&quot;-65&quot;,</span> <span class="pre">$offsetY=&quot;-30&quot;)</span>
+&#160;&#160;&#160; <span class="pre">UpdateRelStyle(pmbc-listener,</span> <span class="pre">pmbc-socket,</span> <span class="pre">$textColor=&quot;var(--md-code-hl-function-color)&quot;,</span> <span class="pre">$lineColor=&quot;var(--md-code-hl-function-color)&quot;,</span> <span class="pre">$offsetX=&quot;5&quot;,</span> <span class="pre">$offsetY=&quot;-30&quot;)</span>
+
+&#160;&#160;&#160; <span class="pre">UpdateLayoutConfig($c4ShapeInRow=&quot;1&quot;,</span> <span class="pre">$c4BoundaryInRow=&quot;3&quot;)</span></code></pre></div>
+<h3 id="external-frontend-application">External Frontend Application<a class="headerlink" href="#external-frontend-application" title="Link to this heading">¶</a></h3>
+<p>If the Pipeline Manager is used as an <code class="docutils literal notranslate"><span class="pre">iframe</span></code>, a website that wraps it can implement an <a class="reference internal" href="#external-app-api"><span class="std std-ref">External Application</span></a>.</p>
+<p>Similartly to <a class="reference internal" href="#external-frontend-backend-external-app"><span class="std std-ref">External Frontend Communication</span></a>, data transfer relies on <a class="reference external" href="https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage">POST requests</a>:
+both requests and responses use <a class="reference external" href="https://developer.mozilla.org/en-US/docs/Web/API/Window/message_event">MessageEvent</a> (see <a class="reference internal" href="frontend-features.html#serving-external-application"><span class="std std-ref">Frontend Features</span></a> for details).</p>
+<p>This application type can be enabled dynamically via dedicated <code class="docutils literal notranslate"><span class="pre">register_external_frontend</span></code> <a class="reference internal" href="#frontend-api"><span class="std std-ref">Frontend API</span></a> request. This is possible for both <code class="docutils literal notranslate"><span class="pre">static-html</span></code> and <code class="docutils literal notranslate"><span class="pre">server-app</span></code> modes.
+Currently, in the latter case, external backend application will be overridden with the frontend one.</p>
+<h4 id="id1">Request structure<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h4>
+<div class="mermaid-diagram docutils">
+<pre class="mermaid">
+<code class="docutils literal notranslate"><span class="pre">sequenceDiagram</span>
+&#160;&#160;&#160; <span class="pre">Note</span> <span class="pre">over</span> <span class="pre">External</span> <span class="pre">Frontend,Pipeline</span> <span class="pre">Manager</span> <span class="pre">Frontend:</span> <span class="pre">postMessage</span>
+&#160;&#160;&#160; <span class="pre">par</span> <span class="pre">Frontend</span> <span class="pre">API</span>
+&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">External</span> <span class="pre">Frontend-&gt;&gt;Pipeline</span> <span class="pre">Manager</span> <span class="pre">Frontend:</span> <span class="pre">request</span>
+&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Pipeline</span> <span class="pre">Manager</span> <span class="pre">Frontend-&gt;&gt;External</span> <span class="pre">Frontend:</span> <span class="pre">response</span>
+&#160;&#160;&#160; <span class="pre">and</span> <span class="pre">External</span> <span class="pre">API</span>
+&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Pipeline</span> <span class="pre">Manager</span> <span class="pre">Frontend-&gt;&gt;External</span> <span class="pre">Frontend:</span> <span class="pre">request</span>
+&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">External</span> <span class="pre">Frontend-&gt;&gt;Pipeline</span> <span class="pre">Manager</span> <span class="pre">Frontend:</span> <span class="pre">response</span>
+&#160;&#160;&#160; <span class="pre">end</span></code></pre></div>
+<h2 id="response-messages-types-sent-by-the-external-application"><span id="message-type"></span>Response messages types - sent by the external application<a class="headerlink" href="#response-messages-types-sent-by-the-external-application" title="Link to this heading">¶</a></h2>
+<h3 id="ok"><span id="message-type-ok"></span>OK<a class="headerlink" href="#ok" title="Link to this heading">¶</a></h3>
+<p>Message of <code class="docutils literal notranslate"><span class="pre">type</span></code> <code class="docutils literal notranslate"><span class="pre">OK</span></code> (0) is used to indicate a success and optionally includes an answer to a previous request.
+Its <code class="docutils literal notranslate"><span class="pre">content</span></code> may vary depending on the request type.</p>
+<h3 id="error"><span id="message-type-error"></span>ERROR<a class="headerlink" href="#error" title="Link to this heading">¶</a></h3>
+<p>Message of <code class="docutils literal notranslate"><span class="pre">type</span></code> <code class="docutils literal notranslate"><span class="pre">ERROR</span></code> (1) is used to indicate a failure and optionally includes an answer to a previous request.
+Its <code class="docutils literal notranslate"><span class="pre">content</span></code> may vary depending on the answered request.</p>
+<h3 id="progress"><span id="message-type-progress"></span>PROGRESS<a class="headerlink" href="#progress" title="Link to this heading">¶</a></h3>
+<p>Message of optional <code class="docutils literal notranslate"><span class="pre">type</span></code> <code class="docutils literal notranslate"><span class="pre">PROGRESS</span></code> (2) is used to inform Pipeline Manager about the status of a running dataflow.
+The <code class="docutils literal notranslate"><span class="pre">PROGRESS</span></code> message type can only be used once a message of type <code class="docutils literal notranslate"><span class="pre">RUN</span></code> is received and can be sent multiple times before sending a final response message of type either <code class="docutils literal notranslate"><span class="pre">ERROR</span></code> or <code class="docutils literal notranslate"><span class="pre">OK</span></code> that indicates the end of the run.
+The progress information is conveyed in <code class="docutils literal notranslate"><span class="pre">content</span></code> using a number ranging <code class="docutils literal notranslate"><span class="pre">0</span> <span class="pre">-</span> <span class="pre">100</span></code> encoded in UTF-8 that signals the percentage of completion of the run.
+See <a class="reference internal" href="#external-dataflow-run">RUN</a> for more information.</p>
+<h3 id="warning">WARNING<a class="headerlink" href="#warning" title="Link to this heading">¶</a></h3>
+<p>Message of <code class="docutils literal notranslate"><span class="pre">type</span></code> <code class="docutils literal notranslate"><span class="pre">WARNING</span></code> (3) is used to indicate a success but also alerts of a condition that might cause a problem in the future.
+It optionally includes an answer to a previous request.
+Its <code class="docutils literal notranslate"><span class="pre">content</span></code> may vary depending on the answered request.</p>
+<h2 id="api-specification"><span id="id2"></span>API Specification<a class="headerlink" href="#api-specification" title="Link to this heading">¶</a></h2>
+<h3 id="frontend-api"><span id="id3"></span>Frontend API<a class="headerlink" href="#frontend-api" title="Link to this heading">¶</a></h3>
+<h4 id="frontend-status-get"><span id="frontend-frontend-status-get"></span>frontend_status_get<a class="headerlink" href="#frontend-status-get" title="Link to this heading">¶</a></h4>
+<p>Returns status of the frontend</p>
+<ul class="simple">
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">params</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-null-or-empty">null_or_empty</a></em>.</p></li>
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">result</span></code></strong> <em>(object)</em>: Description of frontend status. Cannot contain additional properties.</p>
+<ul>
+<li><p><a id="properties/status"></a><strong><code class="docutils literal notranslate"><span class="pre">status</span></code></strong> <em>(string, required)</em>: Status.</p></li>
+</ul>
+</li>
+</ul>
+<h4 id="frontend-specification-get"><span id="frontend-frontend-specification-get"></span>frontend_specification_get<a class="headerlink" href="#frontend-specification-get" title="Link to this heading">¶</a></h4>
+<p>Returns specification used by frontend</p>
+<ul class="simple">
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">params</span></code></strong> <em>(object)</em>: Parameters for specification request. Cannot contain additional properties.</p>
+<ul>
+<li><p><a id="properties/graph"></a><strong><code class="docutils literal notranslate"><span class="pre">graph</span></code></strong> <em>(boolean)</em>: Specifies whether graph should be returned along with the specification. Default: <code class="docutils literal notranslate"><span class="pre">false</span></code>.</p></li>
+<li><p><a id="properties/minify"></a><strong><code class="docutils literal notranslate"><span class="pre">minify</span></code></strong> <em>(boolean)</em>: Specifies whether the returned specification should be minified. Default: <code class="docutils literal notranslate"><span class="pre">false</span></code>.</p></li>
+</ul>
+</li>
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">result</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-specification-object">specification_object</a></em>.</p></li>
+</ul>
+<h4 id="graph-get"><span id="frontend-graph-get"></span>graph_get<a class="headerlink" href="#graph-get" title="Link to this heading">¶</a></h4>
+<p>Returns dataflow used by frontend</p>
+<ul class="simple">
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">params</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-null-or-empty">null_or_empty</a></em>.</p></li>
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">result</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-dataflow-object">dataflow_object</a></em>.</p></li>
+</ul>
+<h4 id="node-get"><span id="frontend-node-get"></span>node_get<a class="headerlink" href="#node-get" title="Link to this heading">¶</a></h4>
+<p>Procedure to read node state</p>
+<ul class="simple">
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">params</span></code></strong></p>
+<ul>
+<li><p><strong>All of</strong></p>
+<ul>
+<li><p><a id="allOf/0"></a>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-node-object">node_object</a></em>.</p></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">result</span></code></strong> <em>(object)</em>: Cannot contain additional properties.</p>
+<ul>
+<li><p><a id="properties/node"></a><strong><code class="docutils literal notranslate"><span class="pre">node</span></code></strong> <em>(object, required)</em>: State of the node.</p></li>
+</ul>
+</li>
+</ul>
+<h4 id="properties-get"><span id="frontend-properties-get"></span>properties_get<a class="headerlink" href="#properties-get" title="Link to this heading">¶</a></h4>
+<p>Procedure to alter values of a node</p>
+<ul class="simple">
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">params</span></code></strong> <em>(object)</em>: Cannot contain unevaluated properties.</p>
+<ul>
+<li><p><strong>All of</strong></p>
+<ul>
+<li><p><a id="allOf/0"></a>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-node-object">node_object</a></em>.</p></li>
+</ul>
+</li>
+<li><p><a id="properties/properties"></a><strong><code class="docutils literal notranslate"><span class="pre">properties</span></code></strong> <em>([array, null])</em>: Properties which values are going to be read specified by either a name of id. If undefined then all properties are returned.</p>
+<ul>
+<li><p><a id="properties/properties/items"></a><strong>Items</strong> <em>(object)</em></p>
+<ul>
+<li><p><strong>One of</strong></p>
+<ul>
+<li><p><a id="properties/properties/items/oneOf/0"></a><em>object</em>: Cannot contain additional properties.</p>
+<ul>
+<li><p><a id="properties/properties/items/oneOf/0/properties/id"></a><strong><code class="docutils literal notranslate"><span class="pre">id</span></code></strong> <em>(string, required)</em>: Id of the property to read.</p></li>
+</ul>
+</li>
+<li><p><a id="properties/properties/items/oneOf/1"></a><em>object</em>: Cannot contain additional properties.</p>
+<ul>
+<li><p><a id="properties/properties/items/oneOf/1/properties/name"></a><strong><code class="docutils literal notranslate"><span class="pre">name</span></code></strong> <em>(string, required)</em>: Name of the property to read.</p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">result</span></code></strong> <em>(array)</em></p>
+<ul>
+<li><p><a id="items"></a><strong>Items</strong> <em>(object)</em>: Values of the searched properties. Cannot contain additional properties.</p>
+<ul>
+<li><p><a id="items/properties/id"></a><strong><code class="docutils literal notranslate"><span class="pre">id</span></code></strong> <em>(string, required)</em>: Id of the property.</p></li>
+<li><p><a id="items/properties/name"></a><strong><code class="docutils literal notranslate"><span class="pre">name</span></code></strong> <em>(string, required)</em>: Name of the property.</p></li>
+<li><p><a id="items/properties/value"></a><strong><code class="docutils literal notranslate"><span class="pre">value</span></code></strong>: Value of the property. Its type depends on the property.</p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="properties-change"><span id="frontend-properties-change"></span>properties_change<a class="headerlink" href="#properties-change" title="Link to this heading">¶</a></h4>
+<p>Procedure to alter properties of a node</p>
+<ul class="simple">
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">params</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-properties-diff">properties_diff</a></em>.</p></li>
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">result</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-null-or-empty">null_or_empty</a></em>.</p></li>
+</ul>
+<h4 id="position-change"><span id="frontend-position-change"></span>position_change<a class="headerlink" href="#position-change" title="Link to this heading">¶</a></h4>
+<p>Procedure to alter position of a node</p>
+<ul class="simple">
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">params</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-position-diff">position_diff</a></em>.</p></li>
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">result</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-null-or-empty">null_or_empty</a></em>.</p></li>
+</ul>
+<h4 id="nodes-change"><span id="frontend-nodes-change"></span>nodes_change<a class="headerlink" href="#nodes-change" title="Link to this heading">¶</a></h4>
+<p>Procedure to add and delete nodes</p>
+<ul class="simple">
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">params</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-nodes-diff">nodes_diff</a></em>.</p></li>
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">result</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-null-or-empty">null_or_empty</a></em>.</p></li>
+</ul>
+<h4 id="connections-change"><span id="frontend-connections-change"></span>connections_change<a class="headerlink" href="#connections-change" title="Link to this heading">¶</a></h4>
+<p>Procedure to add and delete connections</p>
+<ul class="simple">
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">params</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-connections-diff">connections_diff</a></em>.</p></li>
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">result</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-null-or-empty">null_or_empty</a></em>.</p></li>
+</ul>
+<h4 id="graph-change"><span id="frontend-graph-change"></span>graph_change<a class="headerlink" href="#graph-change" title="Link to this heading">¶</a></h4>
+<p>Procedure to add and delete nodes</p>
+<ul class="simple">
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">params</span></code></strong> <em>(object)</em>: Cannot contain additional properties.</p>
+<ul>
+<li><p><a id="properties/dataflow"></a><strong><code class="docutils literal notranslate"><span class="pre">dataflow</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-dataflow-or-url">dataflow_or_url</a></em>.</p></li>
+<li><p><a id="properties/loadingScreen"></a><strong><code class="docutils literal notranslate"><span class="pre">loadingScreen</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-loadingscreen"><span class="std std-ref">loadingScreen</span></a></em>.</p></li>
+</ul>
+</li>
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">result</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-null-or-empty">null_or_empty</a></em>.</p></li>
+</ul>
+<h4 id="progress-change"><span id="frontend-progress-change"></span>progress_change<a class="headerlink" href="#progress-change" title="Link to this heading">¶</a></h4>
+<p>Notification with progress of job ran by external application</p>
+<ul class="simple">
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">params</span></code></strong> <em>(object)</em>: Parameters for notification. Cannot contain additional properties.</p>
+<ul>
+<li><p><a id="properties/method"></a><strong><code class="docutils literal notranslate"><span class="pre">method</span></code></strong> <em>(string, required)</em>: Name of the method used to run the job.</p></li>
+<li><p><a id="properties/progress"></a><strong><code class="docutils literal notranslate"><span class="pre">progress</span></code></strong> <em>(number, required)</em>: Progress of job ran be external application. If between 0 and 100 progress will be set and if -1, animation will ran.</p></li>
+</ul>
+</li>
+</ul>
+<h4 id="metadata-change"><span id="frontend-metadata-change"></span>metadata_change<a class="headerlink" href="#metadata-change" title="Link to this heading">¶</a></h4>
+<p>Updates the editor’s metadata</p>
+<ul class="simple">
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">params</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-metadata">metadata</a></em>.</p></li>
+</ul>
+<h4 id="viewport-center"><span id="frontend-viewport-center"></span>viewport_center<a class="headerlink" href="#viewport-center" title="Link to this heading">¶</a></h4>
+<p>Center the editor</p>
+<ul class="simple">
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">params</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-null-or-empty">null_or_empty</a></em>.</p></li>
+</ul>
+<h4 id="terminal-add"><span id="frontend-terminal-add"></span>terminal_add<a class="headerlink" href="#terminal-add" title="Link to this heading">¶</a></h4>
+<p>Create new terminal instance</p>
+<ul class="simple">
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">params</span></code></strong> <em>(object)</em>: Parameters for request.</p>
+<ul>
+<li><p><a id="properties/name"></a><strong><code class="docutils literal notranslate"><span class="pre">name</span></code></strong> <em>(string, required)</em>: Unique name for the new terminal instance. This name is used for any communication.</p></li>
+<li><p><a id="properties/readonly"></a><strong><code class="docutils literal notranslate"><span class="pre">readonly</span></code></strong> <em>(boolean)</em>: Specifies whether the terminal should be read-only, or editable by user. Default: <code class="docutils literal notranslate"><span class="pre">true</span></code>.</p></li>
+</ul>
+</li>
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">result</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-null-or-empty">null_or_empty</a></em>.</p></li>
+</ul>
+<h4 id="terminal-remove"><span id="frontend-terminal-remove"></span>terminal_remove<a class="headerlink" href="#terminal-remove" title="Link to this heading">¶</a></h4>
+<p>Create new terminal instance</p>
+<ul class="simple">
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">params</span></code></strong> <em>(object)</em>: Parameters for request.</p>
+<ul>
+<li><p><a id="properties/name"></a><strong><code class="docutils literal notranslate"><span class="pre">name</span></code></strong> <em>(string, required)</em>: Name of the terminal to remove.</p></li>
+</ul>
+</li>
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">result</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-null-or-empty">null_or_empty</a></em>.</p></li>
+</ul>
+<h4 id="terminal-write"><span id="frontend-terminal-write"></span>terminal_write<a class="headerlink" href="#terminal-write" title="Link to this heading">¶</a></h4>
+<p>Writes a message line to a terminal instance. Allows to send both text and hterm’s control sequences. For more details on available control sequences check <a class="reference external" href="https://chromium.googlesource.com/apps/libapps/+/master/hterm/doc/ControlSequences.md">hterm Control Sequences</a>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Since data is sent in JSON format, the hexadecimal values need to be escaped with <code class="docutils literal notranslate"><span class="pre">\u</span></code>, not <code class="docutils literal notranslate"><span class="pre">\x</span></code>, e.g. <code class="docutils literal notranslate"><span class="pre">\u001b[38:2:238:178:17mexample</span></code>.</p>
+</div>
+<ul class="simple">
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">params</span></code></strong> <em>(object)</em>: Parameters for request.</p>
+<ul>
+<li><p><a id="properties/name"></a><strong><code class="docutils literal notranslate"><span class="pre">name</span></code></strong> <em>(string, required)</em>: Name of the terminal to which the message is written.</p></li>
+<li><p><a id="properties/message"></a><strong><code class="docutils literal notranslate"><span class="pre">message</span></code></strong> <em>(string, required)</em>: Message to be written to the terminal.</p></li>
+</ul>
+</li>
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">result</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-null-or-empty">null_or_empty</a></em>.</p></li>
+</ul>
+<h4 id="terminal-clear"><span id="frontend-terminal-clear"></span>terminal_clear<a class="headerlink" href="#terminal-clear" title="Link to this heading">¶</a></h4>
+<p>Clears a terminal with a given name</p>
+<ul class="simple">
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">params</span></code></strong> <em>(object)</em></p>
+<ul>
+<li><p><a id="properties/name"></a><strong><code class="docutils literal notranslate"><span class="pre">name</span></code></strong> <em>(string)</em>: Name of the terminal to clear. If the name is not provided, the main terminal is cleared.</p></li>
+</ul>
+</li>
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">result</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-null-or-empty">null_or_empty</a></em>.</p></li>
+</ul>
+<h4 id="terminal-hide"><span id="frontend-terminal-hide"></span>terminal_hide<a class="headerlink" href="#terminal-hide" title="Link to this heading">¶</a></h4>
+<p>Hides a terminal panel</p>
+<ul class="simple">
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">params</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-null-or-empty">null_or_empty</a></em>.</p></li>
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">result</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-null-or-empty">null_or_empty</a></em>.</p></li>
+</ul>
+<h4 id="terminal-show"><span id="frontend-terminal-show"></span>terminal_show<a class="headerlink" href="#terminal-show" title="Link to this heading">¶</a></h4>
+<ul class="simple">
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">params</span></code></strong> <em>(object)</em>: Parameters for request.</p>
+<ul>
+<li><p><a id="properties/name"></a><strong><code class="docutils literal notranslate"><span class="pre">name</span></code></strong> <em>(string)</em>: Name of the terminal to show. If the name is not provided, the main terminal is chosen.</p></li>
+</ul>
+</li>
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">result</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-null-or-empty">null_or_empty</a></em>.</p></li>
+</ul>
+<h4 id="terminal-view"><span id="frontend-terminal-view"></span>terminal_view<a class="headerlink" href="#terminal-view" title="Link to this heading">¶</a></h4>
+<p>Configures the layout of the terminal panel</p>
+<ul class="simple">
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">params</span></code></strong> <em>(object)</em>: Parameters for request.</p>
+<ul>
+<li><p><a id="properties/names"></a><strong><code class="docutils literal notranslate"><span class="pre">names</span></code></strong> <em>(array)</em>: Names of the terminal to show. If the parameter is empty, then the terminal view is unmodified.</p>
+<ul>
+<li><p><a id="properties/names/items"></a><strong>Items</strong> <em>(string)</em>: Name of the terminal.</p></li>
+</ul>
+</li>
+<li><p><a id="properties/clearButton"></a><strong><code class="docutils literal notranslate"><span class="pre">clearButton</span></code></strong> <em>(boolean)</em>: Specifies whether to ‘Clear terminal’ button should be displayed. If not specified, the state of the clear button is not modified.</p></li>
+</ul>
+</li>
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">result</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-null-or-empty">null_or_empty</a></em>.</p></li>
+</ul>
+<h4 id="terminal-get-instances"><span id="frontend-terminal-get-instances"></span>terminal_get_instances<a class="headerlink" href="#terminal-get-instances" title="Link to this heading">¶</a></h4>
+<p>Configures the layout of the terminal panel</p>
+<ul class="simple">
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">params</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-null-or-empty">null_or_empty</a></em>.</p></li>
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">result</span></code></strong> <em>(array)</em>: Existing terminals.</p>
+<ul>
+<li><p><a id="items"></a><strong>Items</strong> <em>(string)</em>: Name of the terminal.</p></li>
+</ul>
+</li>
+</ul>
+<h4 id="notification-send"><span id="frontend-notification-send"></span>notification_send<a class="headerlink" href="#notification-send" title="Link to this heading">¶</a></h4>
+<p>Sends a notification to the frontend. It will display the message both in the notifications and in the default terminal</p>
+<ul class="simple">
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">params</span></code></strong> <em>(object)</em>: Parameters for notification.</p>
+<ul>
+<li><p><a id="properties/type"></a><strong><code class="docutils literal notranslate"><span class="pre">type</span></code></strong>: Type of the notification. Must be one of: <code class="docutils literal notranslate"><span class="pre">[&quot;error&quot;,</span> <span class="pre">&quot;warning&quot;,</span> <span class="pre">&quot;info&quot;]</span></code>.</p></li>
+<li><p><a id="properties/title"></a><strong><code class="docutils literal notranslate"><span class="pre">title</span></code></strong> <em>(string, required)</em>: Title of the notification, appearing both in the terminal and notification.</p></li>
+<li><p><a id="properties/details"></a><strong><code class="docutils literal notranslate"><span class="pre">details</span></code></strong> <em>(string, required)</em>: Details of the notification, displayed only in the terminal.</p></li>
+</ul>
+</li>
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">result</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-null-or-empty">null_or_empty</a></em>.</p></li>
+</ul>
+<h4 id="specification-change"><span id="frontend-specification-change"></span>specification_change<a class="headerlink" href="#specification-change" title="Link to this heading">¶</a></h4>
+<p>Procedure to update specification</p>
+<ul class="simple">
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">params</span></code></strong> <em>(object)</em></p>
+<ul>
+<li><p><a id="properties/specification"></a><strong><code class="docutils literal notranslate"><span class="pre">specification</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-specification-or-url">specification_or_url</a></em>.</p></li>
+<li><p><a id="properties/urloverrides"></a><strong><code class="docutils literal notranslate"><span class="pre">urloverrides</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-urloverrides">urloverrides</a></em>.</p></li>
+<li><p><a id="properties/loadingScreen"></a><strong><code class="docutils literal notranslate"><span class="pre">loadingScreen</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-loadingscreen"><span class="std std-ref">loadingScreen</span></a></em>.</p></li>
+<li><p><a id="properties/tryMinify"></a><strong><code class="docutils literal notranslate"><span class="pre">tryMinify</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-tryminify"><span class="std std-ref">tryMinify</span></a></em>.</p></li>
+</ul>
+</li>
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">result</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-null-or-empty">null_or_empty</a></em>.</p></li>
+</ul>
+<h4 id="specification-graph-change"><span id="frontend-specification-graph-change"></span>specification_graph_change<a class="headerlink" href="#specification-graph-change" title="Link to this heading">¶</a></h4>
+<p>Procedure to update specification and dataflow</p>
+<ul class="simple">
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">params</span></code></strong> <em>(object)</em>: Cannot contain additional properties.</p>
+<ul>
+<li><p><a id="properties/specification"></a><strong><code class="docutils literal notranslate"><span class="pre">specification</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-specification-or-url">specification_or_url</a></em>.</p></li>
+<li><p><a id="properties/dataflow"></a><strong><code class="docutils literal notranslate"><span class="pre">dataflow</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-dataflow-or-url">dataflow_or_url</a></em>.</p></li>
+<li><p><a id="properties/urloverrides"></a><strong><code class="docutils literal notranslate"><span class="pre">urloverrides</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-urloverrides">urloverrides</a></em>.</p></li>
+<li><p><a id="properties/loadingScreen"></a><strong><code class="docutils literal notranslate"><span class="pre">loadingScreen</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-loadingscreen"><span class="std std-ref">loadingScreen</span></a></em>.</p></li>
+<li><p><a id="properties/tryMinify"></a><strong><code class="docutils literal notranslate"><span class="pre">tryMinify</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-tryminify"><span class="std std-ref">tryMinify</span></a></em>.</p></li>
+</ul>
+</li>
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">result</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-null-or-empty">null_or_empty</a></em>.</p></li>
+</ul>
+<h4 id="specification-preprocess"><span id="frontend-specification-preprocess"></span>specification_preprocess<a class="headerlink" href="#specification-preprocess" title="Link to this heading">¶</a></h4>
+<p>Handles preprocessor specification directives</p>
+<ul class="simple">
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">params</span></code></strong> <em>(object)</em></p>
+<ul>
+<li><p><a id="properties/specification"></a><strong><code class="docutils literal notranslate"><span class="pre">specification</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-specification">specification</a></em>.</p></li>
+<li><p><a id="properties/unmarkNewNodes"></a><strong><code class="docutils literal notranslate"><span class="pre">unmarkNewNodes</span></code></strong> <em>(boolean)</em>: Decides whether to remove built-in style of new nodes from specification.</p></li>
+<li><p><a id="properties/urloverrides"></a><strong><code class="docutils literal notranslate"><span class="pre">urloverrides</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-urloverrides">urloverrides</a></em>.</p></li>
+<li><p><a id="properties/tryMinify"></a><strong><code class="docutils literal notranslate"><span class="pre">tryMinify</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-tryminify"><span class="std std-ref">tryMinify</span></a></em>.</p></li>
+</ul>
+</li>
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">result</span></code></strong></p>
+<ul>
+<li><p><strong>Any of</strong></p>
+<ul>
+<li><p><a id="anyOf/0"></a>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-specification-object">specification_object</a></em>.</p></li>
+<li><p><a id="anyOf/1"></a>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-null-or-empty">null_or_empty</a></em>.</p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="specification-expand"><span id="frontend-specification-expand"></span>specification_expand<a class="headerlink" href="#specification-expand" title="Link to this heading">¶</a></h4>
+<ul class="simple">
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">params</span></code></strong> <em>(object)</em></p>
+<ul>
+<li><p><a id="properties/specification"></a><strong><code class="docutils literal notranslate"><span class="pre">specification</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-specification">specification</a></em>.</p></li>
+</ul>
+</li>
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">result</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-specification-object">specification_object</a></em>.</p></li>
+</ul>
+<h4 id="nodes-highlight"><span id="frontend-nodes-highlight"></span>nodes_highlight<a class="headerlink" href="#nodes-highlight" title="Link to this heading">¶</a></h4>
+<p>Procedure to highlight specified nodes in the editor</p>
+<ul class="simple">
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">params</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-highlight-diff">highlight_diff</a></em>.</p></li>
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">result</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-null-or-empty">null_or_empty</a></em>.</p></li>
+</ul>
+<h4 id="register-external-frontend"><span id="frontend-register-external-frontend"></span>register_external_frontend<a class="headerlink" href="#register-external-frontend" title="Link to this heading">¶</a></h4>
+<p>Register external frontend in the Pipeline Manager frontend, available only through ‘postMessage’ interface</p>
+<ul class="simple">
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">params</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-null-or-empty">null_or_empty</a></em>.</p></li>
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">result</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-null-or-empty">null_or_empty</a></em>.</p></li>
+</ul>
+<h4 id="return-from-subgraph"><span id="frontend-return-from-subgraph"></span>return_from_subgraph<a class="headerlink" href="#return-from-subgraph" title="Link to this heading">¶</a></h4>
+<p>Returns from subgraph if currently in one</p>
+<ul class="simple">
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">params</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-null-or-empty">null_or_empty</a></em>.</p></li>
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">result</span></code></strong> <em>(object)</em>: Specifies whether the editor was in subgraph and returned. Cannot contain additional properties.</p>
+<ul>
+<li><p><a id="properties/has_returned"></a><strong><code class="docutils literal notranslate"><span class="pre">has_returned</span></code></strong> <em>(boolean, required)</em>: Has returned from subgraph.</p></li>
+</ul>
+</li>
+</ul>
+<h3 id="backend-api"><span id="id4"></span>Backend API<a class="headerlink" href="#backend-api" title="Link to this heading">¶</a></h3>
+<h4 id="status-get"><span id="backend-status-get"></span>status_get<a class="headerlink" href="#status-get" title="Link to this heading">¶</a></h4>
+<p>Returns status of connection with external application</p>
+<ul class="simple">
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">params</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-null-or-empty">null_or_empty</a></em>.</p></li>
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">result</span></code></strong> <em>(object)</em>: Description of backend status. Cannot contain additional properties.</p>
+<ul>
+<li><p><a id="properties/status"></a><strong><code class="docutils literal notranslate"><span class="pre">status</span></code></strong> <em>(object, required)</em>: Status. Cannot contain additional properties.</p>
+<ul>
+<li><p><a id="properties/status/properties/connected"></a><strong><code class="docutils literal notranslate"><span class="pre">connected</span></code></strong> <em>(boolean, required)</em>: Connection with external application.</p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="external-app-connect"><span id="backend-external-app-connect"></span>external_app_connect<a class="headerlink" href="#external-app-connect" title="Link to this heading">¶</a></h4>
+<p>Request to wait till connection with external application is established</p>
+<ul class="simple">
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">params</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-null-or-empty">null_or_empty</a></em>.</p></li>
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">result</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-empty">empty</a></em>.</p></li>
+</ul>
+<h4 id="connected-frontends-get"><span id="backend-connected-frontends-get"></span>connected_frontends_get<a class="headerlink" href="#connected-frontends-get" title="Link to this heading">¶</a></h4>
+<p>Request the number of connected fronteds</p>
+<ul class="simple">
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">params</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-null-or-empty">null_or_empty</a></em>.</p></li>
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">result</span></code></strong> <em>(object)</em>: Cannot contain additional properties.</p>
+<ul>
+<li><p><a id="properties/connections"></a><strong><code class="docutils literal notranslate"><span class="pre">connections</span></code></strong> <em>(number, required)</em>: Number of connections.</p></li>
+</ul>
+</li>
+</ul>
+<h3 id="external-app-api"><span id="id5"></span>External App API<a class="headerlink" href="#external-app-api" title="Link to this heading">¶</a></h3>
+<h4 id="specification-get"><span id="external-specification-get"></span>specification_get<a class="headerlink" href="#specification-get" title="Link to this heading">¶</a></h4>
+<p>Request specification used by external application</p>
+<ul class="simple">
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">params</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-null-or-empty">null_or_empty</a></em>.</p></li>
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">result</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-external-endpoint-return-type">external_endpoint_return_type</a></em>.</p></li>
+</ul>
+<h4 id="app-capabilities-get"><span id="external-app-capabilities-get"></span>app_capabilities_get<a class="headerlink" href="#app-capabilities-get" title="Link to this heading">¶</a></h4>
+<p>Request external application capabilities</p>
+<ul class="simple">
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">params</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-null-or-empty">null_or_empty</a></em>.</p></li>
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">result</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-navbar-items">navbar_items</a></em>.</p></li>
+</ul>
+<h4 id="dataflow-import"><span id="external-dataflow-import"></span>dataflow_import<a class="headerlink" href="#dataflow-import" title="Link to this heading">¶</a></h4>
+<p>Request to convert dataflow in external app to Pipeline Manager format and import it</p>
+<ul class="simple">
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">params</span></code></strong> <em>(object)</em>: Parameters for request. Cannot contain additional properties.</p>
+<ul>
+<li><p><a id="properties/external_application_dataflow"></a><strong><code class="docutils literal notranslate"><span class="pre">external_application_dataflow</span></code></strong> <em>(string, required)</em>: Dataflow in external application format. If loaded file cannot be represented as text, it will be sent as base64 string. To make sure received data are in readable format <code class="docutils literal notranslate"><span class="pre">convert_message_to_string</span></code> from <code class="docutils literal notranslate"><span class="pre">pipeline_manager_backend_communication.utils</span></code> can be used. Optionally, for conversion to bytes <code class="docutils literal notranslate"><span class="pre">convert_message_to_bytes</span></code> function is available.</p></li>
+<li><p><a id="properties/mime"></a><strong><code class="docutils literal notranslate"><span class="pre">mime</span></code></strong> <em>(string, required)</em>: MIME type.</p></li>
+<li><p><a id="properties/base64"></a><strong><code class="docutils literal notranslate"><span class="pre">base64</span></code></strong> <em>(boolean, required)</em>: Specifies whether <code class="docutils literal notranslate"><span class="pre">external_application_dataflow</span></code> is in byte64 format.</p></li>
+</ul>
+</li>
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">result</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-external-endpoint-return-type">external_endpoint_return_type</a></em>.</p></li>
+</ul>
+<h4 id="dataflow-validate"><span id="external-dataflow-validate"></span>dataflow_validate<a class="headerlink" href="#dataflow-validate" title="Link to this heading">¶</a></h4>
+<p>Request external application to validate dataflow</p>
+<ul class="simple">
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">params</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-dataflow-object">dataflow_object</a></em>.</p></li>
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">result</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-external-endpoint-return-type">external_endpoint_return_type</a></em>.</p></li>
+</ul>
+<h4 id="dataflow-run"><span id="external-dataflow-run"></span>dataflow_run<a class="headerlink" href="#dataflow-run" title="Link to this heading">¶</a></h4>
+<p>Request external application to run dataflow</p>
+<ul class="simple">
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">params</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-dataflow-object">dataflow_object</a></em>.</p></li>
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">result</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-external-endpoint-return-type">external_endpoint_return_type</a></em>.</p></li>
+</ul>
+<h4 id="dataflow-stop"><span id="external-dataflow-stop"></span>dataflow_stop<a class="headerlink" href="#dataflow-stop" title="Link to this heading">¶</a></h4>
+<p>Request external application to run dataflow</p>
+<ul class="simple">
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">params</span></code></strong> <em>(object)</em>: Parameters for stopping dataflow. Cannot contain additional properties.</p>
+<ul>
+<li><p><a id="properties/method"></a><strong><code class="docutils literal notranslate"><span class="pre">method</span></code></strong> <em>(string, required)</em>: Name of the method used to start run.</p></li>
+</ul>
+</li>
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">result</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-external-endpoint-return-type">external_endpoint_return_type</a></em>.</p></li>
+</ul>
+<h4 id="dataflow-export"><span id="external-dataflow-export"></span>dataflow_export<a class="headerlink" href="#dataflow-export" title="Link to this heading">¶</a></h4>
+<p>Request external application to export dataflow</p>
+<ul class="simple">
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">params</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-dataflow-object">dataflow_object</a></em>.</p></li>
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">result</span></code></strong> <em>(object)</em>: Common type returned by external app. Cannot contain additional properties.</p>
+<ul>
+<li><p><a id="properties/type"></a><strong><code class="docutils literal notranslate"><span class="pre">type</span></code></strong> <em>(number, required)</em>: <a class="reference internal" href="#message-type"><span class="std std-ref">MessageType</span></a> specifying success or error.</p></li>
+<li><p><a id="properties/content"></a><strong><code class="docutils literal notranslate"><span class="pre">content</span></code></strong> <em>([object, string])</em>: Exported dataflow, which is then saved by the frontend user. Should be either a json object, or a base64 encoded string. If any error occurred then it should contain a proper message.</p></li>
+<li><p><a id="properties/filename"></a><strong><code class="docutils literal notranslate"><span class="pre">filename</span></code></strong> <em>(string)</em>: Suggested filename used to save the file.</p></li>
+</ul>
+</li>
+</ul>
+<h4 id="frontend-on-connect"><span id="external-frontend-on-connect"></span>frontend_on_connect<a class="headerlink" href="#frontend-on-connect" title="Link to this heading">¶</a></h4>
+<p>Request sent when Pipeline Manager frontend connects to backend and <code class="docutils literal notranslate"><span class="pre">notifyWhenChanged</span></code> option is enabled in the metadata section of specification.</p>
+<ul class="simple">
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">params</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-null-or-empty">null_or_empty</a></em>.</p></li>
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">result</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-null-or-empty">null_or_empty</a></em>.</p></li>
+</ul>
+<h4 id="properties-on-change"><span id="external-properties-on-change"></span>properties_on_change<a class="headerlink" href="#properties-on-change" title="Link to this heading">¶</a></h4>
+<p>Request sent when properties of any node change and <code class="docutils literal notranslate"><span class="pre">notifyWhenChanged</span></code> option is enabled in the metadata section of specification.</p>
+<ul class="simple">
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">params</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-properties-diff">properties_diff</a></em>.</p></li>
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">result</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-null-or-empty">null_or_empty</a></em>.</p></li>
+</ul>
+<h4 id="position-on-change"><span id="external-position-on-change"></span>position_on_change<a class="headerlink" href="#position-on-change" title="Link to this heading">¶</a></h4>
+<p>Request sent when position of any node changes and <code class="docutils literal notranslate"><span class="pre">notifyWhenChanged</span></code> option is enabled in the metadata section of specification.</p>
+<ul class="simple">
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">params</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-position-diff">position_diff</a></em>.</p></li>
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">result</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-null-or-empty">null_or_empty</a></em>.</p></li>
+</ul>
+<h4 id="nodes-on-change"><span id="external-nodes-on-change"></span>nodes_on_change<a class="headerlink" href="#nodes-on-change" title="Link to this heading">¶</a></h4>
+<p>Request sent when node was added or deleted and <code class="docutils literal notranslate"><span class="pre">notifyWhenChanged</span></code> option is enabled in the metadata section of specification.</p>
+<ul class="simple">
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">params</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-nodes-diff">nodes_diff</a></em>.</p></li>
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">result</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-null-or-empty">null_or_empty</a></em>.</p></li>
+</ul>
+<h4 id="connections-on-change"><span id="external-connections-on-change"></span>connections_on_change<a class="headerlink" href="#connections-on-change" title="Link to this heading">¶</a></h4>
+<p>Request sent when connection was added or deleted and <code class="docutils literal notranslate"><span class="pre">notifyWhenChanged</span></code> option is enabled in the metadata section of specification.</p>
+<ul class="simple">
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">params</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-connections-diff">connections_diff</a></em>.</p></li>
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">result</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-null-or-empty">null_or_empty</a></em>.</p></li>
+</ul>
+<h4 id="graph-on-change"><span id="external-graph-on-change"></span>graph_on_change<a class="headerlink" href="#graph-on-change" title="Link to this heading">¶</a></h4>
+<p>Request sent when whole dataflow changed, e.g. when dataflow is loaded, and <code class="docutils literal notranslate"><span class="pre">notifyWhenChanged</span></code> option is enabled in the metadata section of specification.</p>
+<ul class="simple">
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">params</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-dataflow-object">dataflow_object</a></em>.</p></li>
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">result</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-null-or-empty">null_or_empty</a></em>.</p></li>
+</ul>
+<h4 id="specification-on-change"><span id="external-specification-on-change"></span>specification_on_change<a class="headerlink" href="#specification-on-change" title="Link to this heading">¶</a></h4>
+<p>Request sent when whole specification changed, e.g. when node type is modified, and <code class="docutils literal notranslate"><span class="pre">notifyWhenChanged</span></code> option is enabled in the metadata section of specification.</p>
+<ul class="simple">
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">params</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-specification-object">specification_object</a></em>.</p></li>
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">result</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-null-or-empty">null_or_empty</a></em>.</p></li>
+</ul>
+<h4 id="metadata-on-change"><span id="external-metadata-on-change"></span>metadata_on_change<a class="headerlink" href="#metadata-on-change" title="Link to this heading">¶</a></h4>
+<p>Request sent when metadata was changed, and <code class="docutils literal notranslate"><span class="pre">notifyWhenChanged</span></code> option is enabled in the metadata section of specification.</p>
+<ul class="simple">
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">params</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-metadata">metadata</a></em>.</p></li>
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">result</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-null-or-empty">null_or_empty</a></em>.</p></li>
+</ul>
+<h4 id="viewport-on-center"><span id="external-viewport-on-center"></span>viewport_on_center<a class="headerlink" href="#viewport-on-center" title="Link to this heading">¶</a></h4>
+<p>Request sent when editor was centered and <code class="docutils literal notranslate"><span class="pre">notifyWhenChanged</span></code> option is enabled in the metadata section of specification.</p>
+<ul class="simple">
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">params</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-null-or-empty">null_or_empty</a></em>.</p></li>
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">result</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-null-or-empty">null_or_empty</a></em>.</p></li>
+</ul>
+<h4 id="terminal-read"><span id="external-terminal-read"></span>terminal_read<a class="headerlink" href="#terminal-read" title="Link to this heading">¶</a></h4>
+<p>Request sent by the frontend when terminal received an input</p>
+<ul class="simple">
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">params</span></code></strong> <em>(object)</em>: Parameters for request.</p>
+<ul>
+<li><p><a id="properties/name"></a><strong><code class="docutils literal notranslate"><span class="pre">name</span></code></strong> <em>(string, required)</em>: Name of the terminal to which the message was written. Terminal has to be not read-only.</p></li>
+<li><p><a id="properties/message"></a><strong><code class="docutils literal notranslate"><span class="pre">message</span></code></strong> <em>(string, required)</em>: Terminal input.</p></li>
+</ul>
+</li>
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">result</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-null-or-empty">null_or_empty</a></em>.</p></li>
+</ul>
+<h4 id="nodes-on-highlight"><span id="external-nodes-on-highlight"></span>nodes_on_highlight<a class="headerlink" href="#nodes-on-highlight" title="Link to this heading">¶</a></h4>
+<p>Request sent when node was either selected or unselected and <code class="docutils literal notranslate"><span class="pre">notifyWhenChanged</span></code> option is enabled in the metadata section of specification.</p>
+<ul class="simple">
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">params</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-highlight-diff">highlight_diff</a></em>.</p></li>
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">result</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-null-or-empty">null_or_empty</a></em>.</p></li>
+</ul>
+<h4 id="button-click"><span id="external-button-click"></span>button_click<a class="headerlink" href="#button-click" title="Link to this heading">¶</a></h4>
+<p>Request send when button node property was pressed</p>
+<ul class="simple">
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">params</span></code></strong> <em>(object)</em>: Parameters for request.</p>
+<ul>
+<li><p><a id="properties/id"></a><strong><code class="docutils literal notranslate"><span class="pre">id</span></code></strong> <em>(string, required)</em>: ID of the property.</p></li>
+<li><p><a id="properties/value"></a><strong><code class="docutils literal notranslate"><span class="pre">value</span></code></strong> <em>([object, null], required)</em>: Value of the property.</p></li>
+</ul>
+</li>
+<li><p><a id=""></a><strong><code class="docutils literal notranslate"><span class="pre">result</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-null-or-empty">null_or_empty</a></em>.</p></li>
+</ul>
+<h3 id="common-types"><span id="api-common-types"></span>Common Types<a class="headerlink" href="#common-types" title="Link to this heading">¶</a></h3>
+<h4 id="empty"><span id="mmon-types-23-24defs-empty"></span>empty<a class="headerlink" href="#empty" title="Link to this heading">¶</a></h4>
+<ul class="simple">
+<li><p><a id=""></a><em>object</em>: Empty object definition. Cannot contain additional properties.</p></li>
+</ul>
+<h4 id="null-or-empty"><span id="mmon-types-23-24defs-null-or-empty"></span>null_or_empty<a class="headerlink" href="#null-or-empty" title="Link to this heading">¶</a></h4>
+<ul class="simple">
+<li><p><a id=""></a><em>[object, null]</em>: Empty or missing object definition. Cannot contain additional properties.</p></li>
+</ul>
+<h4 id="node-object"><span id="mmon-types-23-24defs-node-object"></span>node_object<a class="headerlink" href="#node-object" title="Link to this heading">¶</a></h4>
+<ul class="simple">
+<li><p><a id=""></a><em>object</em>: Schema that identifies a node in a graph.</p>
+<ul>
+<li><p><a id="properties/graph_id"></a><strong><code class="docutils literal notranslate"><span class="pre">graph_id</span></code></strong> <em>(string, required)</em>: Id of the graph.</p></li>
+<li><p><a id="properties/node_id"></a><strong><code class="docutils literal notranslate"><span class="pre">node_id</span></code></strong> <em>(string, required)</em>: Id of the node.</p></li>
+</ul>
+</li>
+</ul>
+<h4 id="urloverrides"><span id="mmon-types-23-24defs-urloverrides"></span>urloverrides<a class="headerlink" href="#urloverrides" title="Link to this heading">¶</a></h4>
+<ul class="simple">
+<li><p><a id=""></a><em>object</em>: Mapping for URL replacement.</p>
+<ul>
+<li><p><a id="patternProperties/%5E.%2A%24"></a><strong><code class="docutils literal notranslate"><span class="pre">^.*$</span></code></strong> <em>(string)</em></p></li>
+</ul>
+</li>
+</ul>
+<h4 id="loadingscreen"><span id="mmon-types-23-24defs-loadingscreen"></span>loadingScreen<a class="headerlink" href="#loadingscreen" title="Link to this heading">¶</a></h4>
+<ul class="simple">
+<li><p><a id=""></a><em>boolean</em>: Show loading screen. Default: <code class="docutils literal notranslate"><span class="pre">false</span></code>.</p></li>
+</ul>
+<h4 id="tryminify"><span id="mmon-types-23-24defs-tryminify"></span>tryMinify<a class="headerlink" href="#tryminify" title="Link to this heading">¶</a></h4>
+<ul class="simple">
+<li><p><a id=""></a><em>boolean</em>: Try to minify specification if a dataflow or entry graph is provided. Default: <code class="docutils literal notranslate"><span class="pre">false</span></code>.</p></li>
+</ul>
+<h4 id="dataflow-or-url"><span id="mmon-types-23-24defs-dataflow-or-url"></span>dataflow_or_url<a class="headerlink" href="#dataflow-or-url" title="Link to this heading">¶</a></h4>
+<ul class="simple">
+<li><p><a id=""></a><em>[object, string]</em>: JSON or link to the remote JSON with graph definition.</p></li>
+</ul>
+<h4 id="dataflow-object"><span id="mmon-types-23-24defs-dataflow-object"></span>dataflow_object<a class="headerlink" href="#dataflow-object" title="Link to this heading">¶</a></h4>
+<ul class="simple">
+<li><p><a id=""></a><em>object</em>: Definition containing <code class="docutils literal notranslate"><span class="pre">dataflow</span></code> object. Cannot contain additional properties.</p>
+<ul>
+<li><p><a id="properties/dataflow"></a><strong><code class="docutils literal notranslate"><span class="pre">dataflow</span></code></strong> <em>(object)</em>: JSON with graph definition in PM format.</p></li>
+</ul>
+</li>
+</ul>
+<h4 id="specification"><span id="mmon-types-23-24defs-specification"></span>specification<a class="headerlink" href="#specification" title="Link to this heading">¶</a></h4>
+<ul class="simple">
+<li><p><a id=""></a><em>object</em>: JSON with specification definition in PM format.</p></li>
+</ul>
+<h4 id="specification-or-url"><span id="mmon-types-23-24defs-specification-or-url"></span>specification_or_url<a class="headerlink" href="#specification-or-url" title="Link to this heading">¶</a></h4>
+<ul class="simple">
+<li><p><a id=""></a><em>[object, string]</em>: JSON or link to the remote JSON with specification.</p></li>
+</ul>
+<h4 id="specification-object"><span id="mmon-types-23-24defs-specification-object"></span>specification_object<a class="headerlink" href="#specification-object" title="Link to this heading">¶</a></h4>
+<ul class="simple">
+<li><p><a id=""></a><em>object</em>: Definition containing <code class="docutils literal notranslate"><span class="pre">specification</span></code> object. Cannot contain additional properties.</p>
+<ul>
+<li><p><a id="properties/specification"></a><strong><code class="docutils literal notranslate"><span class="pre">specification</span></code></strong>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-specification">specification</a></em>.</p></li>
+</ul>
+</li>
+</ul>
+<h4 id="properties-diff"><span id="mmon-types-23-24defs-properties-diff"></span>properties_diff<a class="headerlink" href="#properties-diff" title="Link to this heading">¶</a></h4>
+<ul class="simple">
+<li><p><a id=""></a><em>object</em>: Schema that represents differences in properties of the node. Cannot contain unevaluated properties.</p>
+<ul>
+<li><p><strong>All of</strong></p>
+<ul>
+<li><p><a id="allOf/0"></a>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-node-object">node_object</a></em>.</p></li>
+</ul>
+</li>
+<li><p><a id="properties/properties"></a><strong><code class="docutils literal notranslate"><span class="pre">properties</span></code></strong> <em>(array, required)</em>: Properties to change specified by either a name or id.</p>
+<ul>
+<li><p><a id="properties/properties/items"></a><strong>Items</strong> <em>(object)</em></p>
+<ul>
+<li><p><strong>One of</strong></p>
+<ul>
+<li><p><a id="properties/properties/items/oneOf/0"></a><em>object</em>: Cannot contain additional properties.</p>
+<ul>
+<li><p><a id="properties/properties/items/oneOf/0/properties/id"></a><strong><code class="docutils literal notranslate"><span class="pre">id</span></code></strong> <em>(string, required)</em>: Id of the property to alter.</p></li>
+<li><p><a id="properties/properties/items/oneOf/0/properties/new_value"></a><strong><code class="docutils literal notranslate"><span class="pre">new_value</span></code></strong>: New value of the property.</p></li>
+</ul>
+</li>
+<li><p><a id="properties/properties/items/oneOf/1"></a><em>object</em>: Cannot contain additional properties.</p>
+<ul>
+<li><p><a id="properties/properties/items/oneOf/1/properties/name"></a><strong><code class="docutils literal notranslate"><span class="pre">name</span></code></strong> <em>(string, required)</em>: Name of the property to alter.</p></li>
+<li><p><a id="properties/properties/items/oneOf/1/properties/new_value"></a><strong><code class="docutils literal notranslate"><span class="pre">new_value</span></code></strong>: New value of the property.</p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="position-diff"><span id="mmon-types-23-24defs-position-diff"></span>position_diff<a class="headerlink" href="#position-diff" title="Link to this heading">¶</a></h4>
+<ul class="simple">
+<li><p><a id=""></a><em>object</em>: Schema that represent differences in position of the node. Cannot contain unevaluated properties.</p>
+<ul>
+<li><p><strong>All of</strong></p>
+<ul>
+<li><p><a id="allOf/0"></a>: Refer to <em><a class="reference internal" href="#mmon-types-23-24defs-node-object">node_object</a></em>.</p></li>
+</ul>
+</li>
+<li><p><a id="properties/position"></a><strong><code class="docutils literal notranslate"><span class="pre">position</span></code></strong> <em>(object, required)</em>: Position to change specified by either a name or id.</p>
+<ul>
+<li><p><a id="properties/position/properties/x"></a><strong><code class="docutils literal notranslate"><span class="pre">x</span></code></strong> <em>(number)</em>: X coordinate.</p></li>
+<li><p><a id="properties/position/properties/y"></a><strong><code class="docutils literal notranslate"><span class="pre">y</span></code></strong> <em>(number)</em>: Y coordinate.</p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="nodes-diff"><span id="mmon-types-23-24defs-nodes-diff"></span>nodes_diff<a class="headerlink" href="#nodes-diff" title="Link to this heading">¶</a></h4>
+<ul class="simple">
+<li><p><a id=""></a><em>object</em>: Schema that represents nodes’ differences in a graph.</p>
+<ul>
+<li><p><a id="properties/graph_id"></a><strong><code class="docutils literal notranslate"><span class="pre">graph_id</span></code></strong> <em>(string, required)</em>: Id of the graph.</p></li>
+<li><p><a id="properties/nodes"></a><strong><code class="docutils literal notranslate"><span class="pre">nodes</span></code></strong> <em>(object, required)</em>: .</p>
+<ul>
+<li><p><a id="properties/nodes/properties/added"></a><strong><code class="docutils literal notranslate"><span class="pre">added</span></code></strong> <em>(array)</em>: List with created nodes.</p>
+<ul>
+<li><p><a id="properties/nodes/properties/added/items"></a><strong>Items</strong> <em>(object)</em>: JSON with node definition.</p></li>
+</ul>
+</li>
+<li><p><a id="properties/nodes/properties/deleted"></a><strong><code class="docutils literal notranslate"><span class="pre">deleted</span></code></strong> <em>(array)</em>: List with removed nodes.</p>
+<ul>
+<li><p><a id="properties/nodes/properties/deleted/items"></a><strong>Items</strong> <em>(string)</em>: ID of node to delete.</p></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><a id="properties/remove_with_connections"></a><strong><code class="docutils literal notranslate"><span class="pre">remove_with_connections</span></code></strong> <em>(boolean)</em>: Should node be removed with connections.</p></li>
+</ul>
+</li>
+</ul>
+<h4 id="connections-diff"><span id="mmon-types-23-24defs-connections-diff"></span>connections_diff<a class="headerlink" href="#connections-diff" title="Link to this heading">¶</a></h4>
+<ul class="simple">
+<li><p><a id=""></a><em>object</em>: Schema that represents connections’ differences in a graph.</p>
+<ul>
+<li><p><a id="properties/graph_id"></a><strong><code class="docutils literal notranslate"><span class="pre">graph_id</span></code></strong> <em>(string, required)</em>: Id of the graph.</p></li>
+<li><p><a id="properties/connections"></a><strong><code class="docutils literal notranslate"><span class="pre">connections</span></code></strong> <em>(object, required)</em>: .</p>
+<ul>
+<li><p><a id="properties/connections/properties/added"></a><strong><code class="docutils literal notranslate"><span class="pre">added</span></code></strong> <em>(array)</em>: List with created connections.</p>
+<ul>
+<li><p><a id="properties/connections/properties/added/items"></a><strong>Items</strong> <em>(object)</em>: JSON with connection definition.</p></li>
+</ul>
+</li>
+<li><p><a id="properties/connections/properties/deleted"></a><strong><code class="docutils literal notranslate"><span class="pre">deleted</span></code></strong> <em>(array)</em>: List with removed connections.</p>
+<ul>
+<li><p><a id="properties/connections/properties/deleted/items"></a><strong>Items</strong> <em>(object)</em>: Connection defined with its beginning and end.</p>
+<ul>
+<li><p><a id="properties/connections/properties/deleted/items/properties/from"></a><strong><code class="docutils literal notranslate"><span class="pre">from</span></code></strong> <em>(string)</em>: ID of output interface.</p></li>
+<li><p><a id="properties/connections/properties/deleted/items/properties/to"></a><strong><code class="docutils literal notranslate"><span class="pre">to</span></code></strong> <em>(string)</em>: ID of input interface.</p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="highlight-diff"><span id="mmon-types-23-24defs-highlight-diff"></span>highlight_diff<a class="headerlink" href="#highlight-diff" title="Link to this heading">¶</a></h4>
+<ul class="simple">
+<li><p><a id=""></a><em>object</em>: Schema that represents the difference in node selection in the editor.</p>
+<ul>
+<li><p><a id="properties/graph_id"></a><strong><code class="docutils literal notranslate"><span class="pre">graph_id</span></code></strong> <em>(string, required)</em>: Id of the graph.</p></li>
+<li><p><a id="properties/nodes"></a><strong><code class="docutils literal notranslate"><span class="pre">nodes</span></code></strong> <em>(object, required)</em>: .</p>
+<ul>
+<li><p><a id="properties/nodes/properties/selected"></a><strong><code class="docutils literal notranslate"><span class="pre">selected</span></code></strong> <em>(array)</em>: List with selected nodes.</p>
+<ul>
+<li><p><a id="properties/nodes/properties/selected/items"></a><strong>Items</strong> <em>(string)</em>: ID of selected node.</p></li>
+</ul>
+</li>
+<li><p><a id="properties/nodes/properties/unselected"></a><strong><code class="docutils literal notranslate"><span class="pre">unselected</span></code></strong> <em>(array)</em>: List with unselected nodes.</p>
+<ul>
+<li><p><a id="properties/nodes/properties/unselected/items"></a><strong>Items</strong> <em>(string)</em>: ID of unselected node.</p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="metadata"><span id="mmon-types-23-24defs-metadata"></span>metadata<a class="headerlink" href="#metadata" title="Link to this heading">¶</a></h4>
+<ul class="simple">
+<li><p><a id=""></a><em>object</em>: Type with PM metadata. Cannot contain additional properties.</p>
+<ul>
+<li><p><a id="properties/metadata"></a><strong><code class="docutils literal notranslate"><span class="pre">metadata</span></code></strong> <em>(object, required)</em>: JSON with metadata description in PM format.</p></li>
+</ul>
+</li>
+</ul>
+<h4 id="external-endpoint-return-type"><span id="mmon-types-23-24defs-external-endpoint-return-type"></span>external_endpoint_return_type<a class="headerlink" href="#external-endpoint-return-type" title="Link to this heading">¶</a></h4>
+<ul class="simple">
+<li><p><a id=""></a><em>object</em>: Common type returned by external app. Cannot contain additional properties.</p>
+<ul>
+<li><p><a id="properties/type"></a><strong><code class="docutils literal notranslate"><span class="pre">type</span></code></strong> <em>(number, required)</em>: <a class="reference internal" href="#message-type"><span class="std std-ref">MessageType</span></a> specifying success, error or progress.</p></li>
+<li><p><a id="properties/content"></a><strong><code class="docutils literal notranslate"><span class="pre">content</span></code></strong> <em>([object, string])</em>: Additional information, either message or dataflow.</p></li>
+</ul>
+</li>
+</ul>
+<h4 id="navbar-items"><span id="mmon-types-23-24defs-navbar-items"></span>navbar_items<a class="headerlink" href="#navbar-items" title="Link to this heading">¶</a></h4>
+<ul class="simple">
+<li><p><a id=""></a><em>array</em>: List of buttons displayed in the application navbar. Default: <code class="docutils literal notranslate"><span class="pre">[]</span></code>.</p>
+<ul>
+<li><p><a id="items"></a><strong>Items</strong> <em>(object)</em>: Description of a single button. Cannot contain additional properties.</p>
+<ul>
+<li><p><a id="items/properties/name"></a><strong><code class="docutils literal notranslate"><span class="pre">name</span></code></strong> <em>(string, required)</em>: Name displayed in the tooltip.</p></li>
+<li><p><a id="items/properties/stopName"></a><strong><code class="docutils literal notranslate"><span class="pre">stopName</span></code></strong> <em>(string)</em>: Name displayed in the tooltip when the corresponding procedure is running and is stoppable. If not specified simply Stop is added as a prefix to the name.</p></li>
+<li><p><a id="items/properties/iconName"></a><strong><code class="docutils literal notranslate"><span class="pre">iconName</span></code></strong> <em>(string, required)</em>: Name of the icon displayed in the navbar. Name should correspond to a file in the asset directory or to an icon in <code class="docutils literal notranslate"><span class="pre">frontend/src/icons</span></code>.</p></li>
+<li><p><a id="items/properties/procedureName"></a><strong><code class="docutils literal notranslate"><span class="pre">procedureName</span></code></strong> <em>(string, required)</em>: Name of the procedure used when button is pressed. The currently displayed graph is used as an argument.</p></li>
+<li><p><a id="items/properties/allowToRunInParallelWith"></a><strong><code class="docutils literal notranslate"><span class="pre">allowToRunInParallelWith</span></code></strong> <em>(array)</em>: List of procedures which can be run when this <code class="docutils literal notranslate"><span class="pre">navbarItem</span></code> is still running. Default: <code class="docutils literal notranslate"><span class="pre">[]</span></code>.</p>
+<ul>
+<li><p><a id="items/properties/allowToRunInParallelWith/items"></a><strong>Items</strong> <em>(string)</em>: <code class="docutils literal notranslate"><span class="pre">procedureName</span></code> of <code class="docutils literal notranslate"><span class="pre">navbarItem</span></code>.</p></li>
+</ul>
+</li>
+<li><p><a id="items/properties/requireResponse"></a><strong><code class="docutils literal notranslate"><span class="pre">requireResponse</span></code></strong> <em>(boolean)</em>: Flag determining whether response from external application should be awaited when running the procedure. Default: <code class="docutils literal notranslate"><span class="pre">true</span></code>.</p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="custom-procedures"><span id="api-custom-procedure"></span>Custom procedures<a class="headerlink" href="#custom-procedures" title="Link to this heading">¶</a></h3>
+<p>External application can define new remote procedures, which will be called by custom <a class="reference internal" href="specification-format.html#metadata-navbar-item"><span class="std std-ref">Navbar button</span></a>.
+To use it, procedure’s name has to start with <code class="docutils literal notranslate"><span class="pre">custom_</span></code> prefix, e.g. <code class="docutils literal notranslate"><span class="pre">custom_simulate_design</span></code>.</p>
+<p>Such remote procedures can be called from the frontend using custom Navbar buttons defined in the <a class="reference internal" href="specification-format.html#metadata-navbar-item"><span class="std std-ref">metadata’s <code class="docutils literal notranslate"><span class="pre">navbarItems</span></code> field</span></a>, e.g.:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Simulate design&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;stopName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Stop simulation&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;iconName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Run&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;procedureName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;custom_simulate_design&quot;</span>
+<span class="p">}</span>
+</code></pre></div>
+</div>
+<p>Custom procedure has the same parameters and return type as <a class="reference internal" href="#external-dataflow-run">dataflow_run</a> method.</p>
+<h2 id="implementing-a-python-based-client-for-pipeline-manager">Implementing a Python-based client for Pipeline Manager<a class="headerlink" href="#implementing-a-python-based-client-for-pipeline-manager" title="Link to this heading">¶</a></h2>
+<p>The communication described above is necessary to integrate an application with Pipeline Manager.
+The client needs to be able to read requests coming from Pipeline Manager and send proper responses.</p>
+<p>For applications written in Python, you can use the <a class="reference external" href="https://github.com/antmicro/kenning-pipeline-manager-backend-communication">pipeline-manager-backend-communication</a> library.
+It implements an easy-to-use interface that is able to communicate with Pipeline Manager along with helper structures and enumerations.</p>
+<p>The main structures provided by the <code class="docutils literal notranslate"><span class="pre">pipeline-manager-backend-communication</span></code> library are:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">CommunicationBackend</span></code> - class that implements the functionality for receiving and sending messages.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">MessageType</span></code> - enum used to easily distinguish message types.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Status</span></code> - enum that describes the current state of the client.</p></li>
+</ul>
+<p>The following code is an example of how to receive requests and send responses to Pipeline Manager:
+As Pipeline Manager communication is based on JSON-RPC, application should implement method that can be requested.
+They are described in <a class="reference internal" href="#backend-api"><span class="std std-ref">Backend API</span></a>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><code><span class="c1"># Class containing all implemented methods</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">RPCMethods</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">specification_get</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+        <span class="c1"># ...</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="n">MessageType</span><span class="o">.</span><span class="n">OK</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="s1">&#39;content&#39;</span><span class="p">:</span> <span class="n">specification</span><span class="p">}</span>
+
+    <span class="c1"># ...</span>
+</code></pre></div>
+</div>
+<p>Defined methods have to have appropriate (matching with specification) name, input and output.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><code>    <span class="c1"># Function name matches with the dataflow_import endpoint from External App API</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">dataflow_import</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">external_application_dataflow</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">mime</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">base64</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+        <span class="c1"># Function will receive one parameter, it&#39;s name has to be the same</span>
+        <span class="c1"># as the one from API specification `params`.</span>
+        <span class="c1"># Optional, but you can convert the received file to string format</span>
+        <span class="c1"># with `convert_message_to_string`</span>
+        <span class="c1"># from pipeline_manager_backend_communication.utils import (</span>
+        <span class="c1">#     convert_message_to_string</span>
+        <span class="c1"># )</span>
+        <span class="n">data_as_string</span> <span class="o">=</span> <span class="n">convert_message_to_string</span><span class="p">(</span>
+            <span class="n">external_application_dataflow</span><span class="p">,</span>
+            <span class="n">base64</span><span class="p">,</span>
+            <span class="n">mime</span>
+        <span class="p">)</span>
+        <span class="c1"># ...</span>
+        <span class="c1"># pipeline_manager_dataflow here is the converted input file to the</span>
+        <span class="c1"># Pipeline Manager&#39;s graph representation</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="n">MessageType</span><span class="o">.</span><span class="n">OK</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+            <span class="s1">&#39;content&#39;</span><span class="p">:</span> <span class="n">pipeline_manager_dataflow</span>
+        <span class="p">}</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">dataflow_validate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataflow</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+        <span class="c1"># ...</span>
+        <span class="c1"># Returned object has to match API specification `returns`</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="n">MessageType</span><span class="o">.</span><span class="n">OK</span><span class="o">.</span><span class="n">value</span><span class="p">}</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">dataflow_run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+        <span class="c1"># All params can also be retrieved as one dictionary</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;dataflow&#39;</span><span class="p">])</span>
+        <span class="c1"># ...</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="n">MessageType</span><span class="o">.</span><span class="n">OK</span><span class="o">.</span><span class="n">value</span><span class="p">}</span>
+
+    <span class="c1"># Custom procedure example</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">custom_build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataflow</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+        <span class="c1"># ...</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="n">MessageType</span><span class="o">.</span><span class="n">OK</span><span class="o">.</span><span class="n">value</span><span class="p">}</span>
+</code></pre></div>
+</div>
+<p>Moreover, every uncaught exception will be classified as error.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><code>    <span class="k">def</span><span class="w"> </span><span class="nf">dataflow_export</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataflow</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+        <span class="c1"># ...</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Something went very, very bad...&#39;</span><span class="p">)</span>
+</code></pre></div>
+</div>
+<p>RPC methods can also be asynchronous. It is automatically detected by server and awaited.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><code>    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">dataflow_stop</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+        <span class="c1"># ...</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="n">MessageType</span><span class="o">.</span><span class="n">OK</span><span class="o">.</span><span class="n">value</span><span class="p">}</span>
+</code></pre></div>
+</div>
+<p>Therefore, the following JSON-RPC error message will be returned to frontend application.</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;jsonrpc&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2.0&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;error&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">-3</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Something went very, very bad...&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;data&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+</div>
+<p>TCP client, that connects to Pipeline Manager using <code class="docutils literal notranslate"><span class="pre">host</span></code> and <code class="docutils literal notranslate"><span class="pre">port</span></code> parameters provided has to be created.
+It has to be initialized with object containing JSON-RPC methods.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><code><span class="n">host</span> <span class="o">=</span> <span class="s1">&#39;127.0.0.1&#39;</span>
+<span class="n">port</span> <span class="o">=</span> <span class="mi">5000</span>
+
+<span class="c1"># Creating a client instance with host and port specified</span>
+<span class="n">client</span> <span class="o">=</span> <span class="n">CommunicationBackend</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">)</span>
+<span class="c1"># Registering implemented methods and</span>
+<span class="c1"># connecting to Pipeline Manager</span>
+<span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">initialize_client</span><span class="p">(</span><span class="n">RPCMethods</span><span class="p">())</span>
+</code></pre></div>
+</div>
+<p>Once the connection is established, the application can start listening for the incoming requests.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><code><span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">start_json_rpc_client</span><span class="p">()</span>
+</code></pre></div>
+</div>
+<p>These methods can be wrapped into the <code class="docutils literal notranslate"><span class="pre">async</span></code> function and run with <code class="docutils literal notranslate"><span class="pre">asyncio.run</span></code> function.</p>
+<h3 id="sending-json-rpc-requests-to-pipeline-manager">Sending JSON-RPC requests to Pipeline Manager<a class="headerlink" href="#sending-json-rpc-requests-to-pipeline-manager" title="Link to this heading">¶</a></h3>
+<p>Sending requests is defined as coroutine which has to be awaited.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><code><span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s1">&#39;graph_get&#39;</span><span class="p">)</span>
+</code></pre></div>
+</div>
+<p>This method sends <a class="reference internal" href="#frontend-graph-get">graph-get</a> request to frontend application and receive following response:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;jsonrpc&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2.0&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;result&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;dataflow&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="c1">// ...</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+</div>
+
+
+  <hr>
+<div class="md-source-file">
+  <small>
+    
+      Last update:
+      2025-11-27
+    
+  </small>
+</div>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+    <nav class="md-footer__inner md-grid" aria-label="Footer" >
+      
+        
+        <a href="frontend-features.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Front-end features" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              Front-end features
+            </div>
+          </div>
+        </a>
+      
+      
+        
+        <a href="example-server.html" class="md-footer__link md-footer__link--next" aria-label="Next: Sample third-party server" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              Sample third-party server
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
+  
+  
+  
+  <div class="md-footer-meta md-typeset">
+    
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-footer-copyright__highlight">
+        Copyright &#169; Antmicro, 2025.
+        
+    </div>
+  
+      <a href="https://github.com/antmicro/kenning-pipeline-manager/tree/c20b22c6042854666cf78319e2affc882c0f1ffe">c20b22c6</a>
+        @ <a href="https://github.com/antmicro/kenning-pipeline-manager/tree/main">main</a>
+  
+</div>
+      
+        <div class="md-social">
+  
+    
+    
+      
+      
+    
+    <a href="https://github.com/antmicro" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+    </a>
+  
+    
+    
+      
+      
+    
+    <a href="https://twitter.com/antmicro" target="_blank" rel="noopener" title="twitter.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M459.37 151.716c.325 4.548.325 9.097.325 13.645 0 138.72-105.583 298.558-298.558 298.558-59.452 0-114.68-17.219-161.137-47.106 8.447.974 16.568 1.299 25.34 1.299 49.055 0 94.213-16.568 130.274-44.832-46.132-.975-84.792-31.188-98.112-72.772 6.498.974 12.995 1.624 19.818 1.624 9.421 0 18.843-1.3 27.614-3.573-48.081-9.747-84.143-51.98-84.143-102.985v-1.299c13.969 7.797 30.214 12.67 47.431 13.319-28.264-18.843-46.781-51.005-46.781-87.391 0-19.492 5.197-37.36 14.294-52.954 51.655 63.675 129.3 105.258 216.365 109.807-1.624-7.797-2.599-15.918-2.599-24.04 0-57.828 46.782-104.934 104.934-104.934 30.213 0 57.502 12.67 76.67 33.137 23.715-4.548 46.456-13.32 66.599-25.34-7.798 24.366-24.366 44.833-46.132 57.827 21.117-2.273 41.584-8.122 60.426-16.243-14.292 20.791-32.161 39.308-52.628 54.253z"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+    
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    <script id="__config" type="application/json">{"base": ".", "features": ["toc.integrate"], "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
+    
+      
+        <script src="_static/sphinx_immaterial_theme.f9d9eeeb247ace16c.min.js?v=8ec58cb5"></script>
+    
+  </body>
+</html>
