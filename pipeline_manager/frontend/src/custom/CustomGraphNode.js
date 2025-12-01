@@ -325,7 +325,6 @@ export default function CreateCustomGraphNodeType(template, graphNode) {
                 this.subgraph.destroy();
             }
             const graph = new Graph(this.template.editor);
-
             const { state, errors } = prepareSubgraphInstance(
                 this.template,
                 { graphLoadingState, newSubgraphNodeId: nodeId },
@@ -334,7 +333,8 @@ export default function CreateCustomGraphNodeType(template, graphNode) {
             const softLoad = process.env.VUE_APP_GRAPH_DEVELOPMENT_MODE === 'true';
 
             if (!errors.length) errors.push(...graph.load(state));
-            if (errors.length) {
+            // When soft load is enabled ignore it
+            if (errors.length && !softLoad) {
                 throw new Error(
                     `Internal error occurred while initializing ${graph.type} graph. ` +
                     `Reason: ${errors.join('. ')}`,
