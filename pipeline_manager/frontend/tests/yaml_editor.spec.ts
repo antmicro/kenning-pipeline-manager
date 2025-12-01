@@ -1,22 +1,5 @@
 import { test, expect, Page, FileChooser } from '@playwright/test';
-import { getPathToJsonFile, getUrl } from './config.js';
-
-async function enableEditingNodes(page: Page) {
-    // Assert that node types cannot be added.
-    const logo = page.locator('.logo');
-    await logo.hover();
-    let addNodeButton = logo.locator('#create-new-node-type-button');
-    expect(addNodeButton).toBeHidden();
-
-    // Enable modifying node types.
-    const settings = page.locator('.settings-panel');
-    expect(settings).toBeVisible();
-    await settings.hover({ force: true });
-
-    const checkbox = page.getByText('Modify node types');
-    expect(checkbox).toBeVisible();
-    await checkbox.click({ force: true });
-}
+import { getPathToJsonFile, getUrl, enableEditingNodes } from './config.js';
 
 async function openFileChooser(
     page: Page,
