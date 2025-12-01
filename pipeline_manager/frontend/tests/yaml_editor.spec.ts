@@ -41,6 +41,12 @@ async function addInterface(page: Page, nodeName: string) {
 
     await assertInputCount(page, nodeName, 2);
 }
+async function addProperty(page: Page, nodeName: string) {
+    const node = page.getByText(nodeName).last();
+    await node.click({ button: 'right', force: true });
+    await page.getByText('Add property').click();
+    await page.getByRole('button', { name: 'Add property' }).click();
+}
 
 async function openFileChooser(
     page: Page,
@@ -88,7 +94,7 @@ test('create new node type', async ({ page }) => {
     await checkIfYAMLPersists(page);
 });
 
-test('adding interface from UI reflected in YAML editor', async ({page}) => {
+test('adding interface from UI reflected in YAML editor', async ({ page }) => {
     await page.goto(getUrl());
     await loadSpecification(page, 'sample-subgraph-specification.json');
     await loadDataflow(page, 'sample-subgraph-dataflow.json');
@@ -120,4 +126,27 @@ test('adding interface from UI reflected in YAML editor', async ({page}) => {
 
     expect(initialInterfacesCount).toBe(0);
     expect(modifiedInterfacesCount).toBe(1);
+});
+test('checking inherited properties', async ({ page }) => {
+    await page.goto(getUrl());
+    await loadSpecification(page, 'sample-inheritance-specification.json');
+    await loadDataflow(page, 'sample-inheritance-dataflow.json');
+
+    await enableEditingNodes(page);
+
+    const node = page
+        .locator('div')
+        .filter({ hasText: /^Type B$/ })
+        .nth(3);
+    await node.dblclick();
+
+    const initialContent = await getYAMLEditorContent(page);
+    const parsedContent = YAML.parse(initialContent);
+    expect(parsedContent.properties.length).toBe(1);
+
+    await addProperty(page, 'Type B');
+
+    const modifiedContent = await getYAMLEditorContent(page);
+    const modifiedParsedContent = YAML.parse(modifiedContent);
+    expect(modifiedParsedContent.properties.length).toBe(2);
 });
