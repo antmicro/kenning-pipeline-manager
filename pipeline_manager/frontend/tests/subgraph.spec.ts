@@ -1,7 +1,41 @@
 import { test, expect, Page, Locator } from '@playwright/test';
-import { getPathToJsonFile, getUrl, openFileChooser } from './config.js';
+import { getPathToJsonFile, getUrl, openFileChooser, enableEditingNodes } from './config.js';
+
+import YAML from 'yaml';
 
 const countOfInitiallyExposedInterface = 3;
+
+async function addInterface(page: Page, nodeName: string) {
+    const node = page.getByText(nodeName).last();
+    await node.click({ button: 'right', force: true });
+    await page.getByText('Add interface').click();
+    await page.getByRole('button', { name: 'Add interface' }).click();
+}
+async function addProperty(page: Page, nodeName: string) {
+    const node = page.getByText(nodeName).last();
+    await node.click({ button: 'right', force: true });
+    await page.getByText('Add property').click();
+    await page.getByRole('button', { name: 'Add property' }).click();
+}
+async function deleteProperty(page: Page, nodeName: string, propName: string) {
+    const node = page.getByText(nodeName).last();
+    await node.click({ button: 'right', force: true });
+    await page.getByText('Delete property').click();
+    await page.locator('.create-menu').last().getByText(propName).click();
+    await page.getByRole('button', { name: 'Remove properties' }).click();
+}
+async function getYAML(page: Page, nodeName: string) {
+    const re = new RegExp(`^${nodeName}$`, 'g');
+    const node = page
+        .locator('div')
+        .filter({ hasText: re })
+        .nth(3);
+    await node.dblclick();
+
+    const textarea = page.locator('textarea');
+    const content = YAML.parse(await textarea.evaluate((el) => el.value));
+    return content;
+}
 
 async function enterSubgraph(page: Page) {
     const nodeWithSubgraph = page.getByText('Test subgraph #1').last().locator('../..');
@@ -96,6 +130,13 @@ async function verifyInterfaceCount(page: Page, expectedNumber: number): Promise
     expect(await exposedInterfaces.count()).toBe(expectedNumber);
     return exposedInterfaces;
 }
+async function verifyPropertyCount(page: Page, expectedNumber: number): Promise<Locator> {
+    const nodeWithSubgraph = page.getByText('Test subgraph #1').locator('../..');
+    // get all children
+    const exposedProperties = nodeWithSubgraph.locator('.__properties > *');
+    expect(await exposedProperties.count()).toBe(expectedNumber);
+    return exposedProperties;
+}
 
 test('test visibility of newly exposed subgraph interface', async ({ page }) => {
     await prepareSubgraphPage(page);
@@ -176,4 +217,41 @@ test('test renaming exposed interface', async ({ page }) => {
     await leaveSubgraph(page);
     await verifyNodeCount(page, 4);
     await expect(page.locator('#container')).toContainText(newName);
+});
+
+test('modifying subgraph interfaces correctly reflected in yaml editor', async ({ page }) => {
+    await prepareSubgraphPage(page);
+    await verifyNodeCount(page, 4);
+    await enableEditingNodes(page);
+    await addInterface(page, 'Test subgraph #1');
+    const content = await getYAML(page, 'Test subgraph #1');
+    expect(await content.interfaces.length).toBe(2);
+});
+
+test('test adding exposed property', async ({ page }) => {
+    await prepareSubgraphPage(page);
+    await verifyNodeCount(page, 4);
+    await enableEditingNodes(page);
+    await enterSubgraph(page);
+    await addProperty(page, 'Test node #1');
+
+    const exposedProperty = page
+        .getByText('New property')
+        .nth(1);
+    await exposedProperty.click({ button: 'right' });
+    const privatizeContextMenuOption = page
+        .locator('.baklava-context-menu')
+        .getByText('Expose Property');
+    await privatizeContextMenuOption.click();
+
+    await leaveSubgraph(page);
+    await expect(page.locator('#container')).toContainText('New property');
+    await verifyPropertyCount(page, 2);
+
+    await deleteProperty(page, 'Test subgraph #1', 'Sample option');
+
+    // check if YAML specification is correctly saved
+    const content = await getYAML(page, 'Test subgraph #1');
+    expect(await content.properties.find((entry) => entry.name === 'New property')).toBe(undefined);
+    expect(await content.properties.length).toBe(0);
 });
