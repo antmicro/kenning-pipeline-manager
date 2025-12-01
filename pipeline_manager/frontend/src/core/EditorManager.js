@@ -1813,10 +1813,16 @@ export default class EditorManager {
         let { notifyWhenChanged } = this;
         // Turn off notification during dataflow loading
         this.updateMetadata({ notifyWhenChanged: false }, true, true);
+
+        const enableSoftLoad = process.env.VUE_APP_GRAPH_DEVELOPMENT_MODE === 'true';
+
         try {
             const validationErrors = EditorManager.validateDataflow(dataflow);
-            if (validationErrors.length) {
+            if (validationErrors.length && !enableSoftLoad) {
                 return { errors: validationErrors, warnings: [] };
+            }
+            if (enableSoftLoad) {
+                console.warn(validationErrors.toString());
             }
 
             try {
@@ -1840,8 +1846,12 @@ export default class EditorManager {
 
                 if ('metadata' in dataflow && this.specification.currentSpecification !== undefined) {
                     const errors = EditorManager.validateMetadata(dataflow.metadata);
-                    if (Array.isArray(errors) && errors.length) {
+                    if (Array.isArray(errors) && errors.length && !enableSoftLoad) {
                         return { errors, warnings };
+                    }
+                    if (enableSoftLoad) {
+                        console.warn(warnings);
+                        console.error(errors);
                     }
                     notifyWhenChanged = dataflow.metadata.notifyWhenChanged ?? notifyWhenChanged;
 
@@ -1889,18 +1899,37 @@ export default class EditorManager {
                     });
                 }
 
+                if (enableSoftLoad) {
+                    console.warn(errors.warnings);
+                    console.error(errors.errors);
+                }
+
                 this.verifyExposedInterfaceNamesMatchExternalNames(dataflow);
 
-                return errors;
+                return ((!enableSoftLoad) ? errors : {
+                    errors: [],
+                    warnings: [],
+                    info: [],
+                });
             } catch (err) {
-                return {
+                if (enableSoftLoad) {
+                    console.warn(err.toString());
+                }
+
+                return ((!enableSoftLoad) ? {
                     errors: [
                         'Unrecognized format. Make sure that the passed dataflow is correct.',
                         err.toString(),
                     ],
                     warnings: [],
                     info: [],
-                };
+                } :
+                    {
+                        errors: [],
+                        warnings: [],
+                        info: [],
+                    }
+                );
             }
         } finally {
             // Restore previous state or use value from loaded dataflow

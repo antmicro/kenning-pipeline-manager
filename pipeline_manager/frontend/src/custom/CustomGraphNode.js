@@ -330,10 +330,17 @@ export default function CreateCustomGraphNodeType(template, graphNode) {
                 this.template,
                 { graphLoadingState, newSubgraphNodeId: nodeId },
             );
+
+            const softLoad = process.env.VUE_APP_GRAPH_DEVELOPMENT_MODE === 'true';
+
             if (!errors.length) errors.push(...graph.load(state));
             if (errors.length) {
                 throw new Error(
                     `Internal error occurred while initializing ${graph.type} graph. ` +
+                    `Reason: ${errors.join('. ')}`,
+                );
+            } else if (softLoad) {
+                console.warn(`Internal error occurred while initializing ${graph.type} graph. ` +
                     `Reason: ${errors.join('. ')}`,
                 );
             }
