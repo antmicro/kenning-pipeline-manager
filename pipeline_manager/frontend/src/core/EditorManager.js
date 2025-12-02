@@ -1075,6 +1075,7 @@ export default class EditorManager {
             node.extending ?? [],
             node.siblings ?? [],
             node.width ?? 300,
+            node.simpleInherited ?? [],
         );
 
         // If my node is any array then it is an array of errors

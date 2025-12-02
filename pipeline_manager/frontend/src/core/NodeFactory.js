@@ -228,6 +228,9 @@ export function newProperty(p, hidden = false) {
         intf.type = propType;
         intf.default = propDef;
         intf.hideOnDefault = p.hideOnDefault;
+        if (p.inherited !== undefined) {
+            intf.inherited = p.inherited;
+        }
 
         if (p.interfaceMaxConnectionsCount !== undefined) {
             intf.interfaceMaxConnectionsCount = p.interfaceMaxConnectionsCount;
@@ -554,6 +557,7 @@ export class CustomNode extends Node {
         nodeExtending = [],
         nodeSiblings = [],
         width = 300,
+        simpleInherited = [],
         relatedGraphs = undefined,
     ) {
         super();
@@ -568,6 +572,7 @@ export class CustomNode extends Node {
         this.type = name;
         this.width = width;
         this.relatedGraphs = relatedGraphs;
+        this.simpleInherited = simpleInherited;
 
         Object.keys(inputs).forEach((k) => {
             const intf = inputs[k]();
@@ -1133,6 +1138,7 @@ export function CustomNodeFactory(
     nodeExtending = [],
     nodeSiblings = [],
     width = 300,
+    simpleInherited = [],
 ) {
     const generatedProperties = generateProperties(interfaces);
     if (!generatedProperties.success) {
@@ -1171,6 +1177,7 @@ export function CustomNodeFactory(
                 nodeExtending,
                 nodeSiblings,
                 width,
+                simpleInherited,
             );
         }
     };
