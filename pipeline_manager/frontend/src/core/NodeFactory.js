@@ -30,7 +30,30 @@ import TextInterface from '../interfaces/TextInterface.js';
 import ButtonInterface from '../interfaces/ButtonInterface.js';
 import GraphTemplate from '../custom/CustomGraphTemplate.js';
 
+import globalProperties from '../globalProperties.ts';
+
 import { ir } from './interfaceRegistry.ts';
+
+import { terminalStore } from './stores.js';
+
+/**
+ * Test list values against dtype type and
+ * returns array with elements that mismatch
+ * with type
+ *
+ * @param {list} values - list of values in property list
+ * @param {*} dtype - a type to test values element against
+ * @returns List elements that are not of type dtype
+ */
+function validateList(values, dtype) {
+    return values.filter((val) => {
+        // Accept both 'integer' and 'number' for dtype 'integer'.
+        if (dtype === 'integer') {
+            return typeof val !== 'number' || !Number.isInteger(val);
+        }
+        return typeof val !== dtype;// eslint-disable-line valid-typeof
+    });
+}
 
 /**
  * @param properties coming from the specification
@@ -43,8 +66,10 @@ export function parseProperties(properties) {
     const errors = [];
 
     properties.forEach((prop) => {
-        if (prop.group !== undefined && Array.isArray(prop.group)) {
-            const parsedGroup = parseProperties(prop.group);
+        const newProp = prop;
+
+        if (newProp.group !== undefined && Array.isArray(newProp.group)) {
+            const parsedGroup = parseProperties(newProp.group);
             if (Array.isArray(parsedGroup) && parsedGroup.length) {
                 errors.push(...parsedGroup);
             }
@@ -53,27 +78,67 @@ export function parseProperties(properties) {
                 if (usedNames.has(pgroupname)) {
                     const realname = pgroupname.slice(pgroupname.indexOf('_') + 1);
                     errors.push(
-                        `Property named '${realname}' in a group property '${prop.name}' is a duplicate.`,
+                        `Property named '${realname}' in a group property '${newProp.name}' is a duplicate.`,
                     );
                 }
                 usedNames.add(pgroupname);
             });
 
-            prop.group = parsedGroup; // eslint-disable-line no-param-reassign
+            newProp.group = parsedGroup; // eslint-disable-line no-param-reassign
         }
 
-        if (usedNames.has(`property_${prop.name}`)) {
+        if (usedNames.has(`property_${newProp.name}`)) {
             errors.push(
-                `Property named '${prop.name}' is a duplicate.`,
+                `Property named '${newProp.name}' is a duplicate.`,
             );
         }
 
-        parsedProperties[`property_${prop.name}`] = { ...prop };
-        usedNames.add(`property_${prop.name}`);
+        if (globalProperties.softLoad) {
+            // validate property type
+            if (newProp.type === 'select') {
+                const items = newProp.values;
+                const defaultValue = newProp.default;
+
+                if (Array.isArray(items)) {
+                    if (defaultValue !== 'constant' && !items.map(String).includes(String(defaultValue))) {
+                        errors.push(
+                            `Default value for '${newProp.name}' mismatch. Expected '${items}' (type: ${typeof items}), got '${defaultValue}' (type: ${typeof defaultValue}).`,
+                        );
+
+                        newProp.default = items.at(0);
+                    }
+                }
+            } else if (newProp.type === 'list') {
+                const { dtype } = newProp;
+                const items = newProp.default;
+
+                const mismatchedElements = validateList(items, dtype);
+
+                if (mismatchedElements.length > 0) {
+                    errors.push(
+                        `Property '${newProp.name}' default value mismatch. ` +
+                        `Items: '${mismatchedElements.join(' ')}' are not of '${dtype}' dtype.` +
+                        `Items are of type: ${mismatchedElements.map((val) => typeof val).join(', ')} ` +
+                        `Removing them from list.`,
+                    );
+                }
+
+                const filteredItems = items.filter((val) =>
+                    mismatchedElements.indexOf(val) === -1);
+
+                newProp.default = filteredItems;
+            }
+        }
+
+        parsedProperties[`property_${newProp.name}`] = { ...newProp };
+        usedNames.add(`property_${newProp.name}`);
     });
 
-    if (errors.length) {
+    if (errors.length && !globalProperties.softLoad) {
         return errors;
+    }
+    if (errors.length) {
+        terminalStore.addParsed('Error during parse properties', errors.toString());
     }
 
     return parsedProperties;
@@ -202,6 +267,39 @@ export function createProperties(properties) {
 }
 
 /**
+ * Function check if passed value is of a type, specified in propType.
+ *
+ * @param propType property type which value is going to be check against
+ * @param value value which type is going to be checked
+ * @returns true when types match, false otherwise
+ */
+function checkType(propType, value) {
+    switch (propType) {
+        case 'constant':
+        case 'select':
+            return true;
+        case 'text':
+        case 'multiline':
+        case 'button-url':
+        case 'button-graph':
+        case 'hex':
+            return typeof value === 'string';
+        case 'number':
+        case 'integer':
+        case 'slider':
+            return typeof value === 'number';
+        case 'bool':
+            return typeof value === 'boolean';
+        case 'list':
+            return Array.isArray(value);
+        case 'button-api':
+            return typeof value === 'object';
+        default:
+            return false;
+    }
+}
+
+/**
  * Function performs sanity checking on parsed state before loading it
  * into the editor. It should throw explicit errors if any discrepancy is detected.
  *
@@ -212,32 +310,6 @@ export function createProperties(properties) {
  */
 function detectDiscrepancies(parsedState, inputs, outputs) {
     let errors = [];
-
-    const checkType = (propType, value) => {
-        switch (propType) {
-            case 'constant':
-            case 'select':
-                return true;
-            case 'text':
-            case 'multiline':
-            case 'button-url':
-            case 'button-graph':
-            case 'hex':
-                return typeof value === 'string';
-            case 'number':
-            case 'integer':
-            case 'slider':
-                return typeof value === 'number';
-            case 'bool':
-                return typeof value === 'boolean';
-            case 'list':
-                return Array.isArray(value);
-            case 'button-api':
-                return typeof value === 'object';
-            default:
-                return false;
-        }
-    };
 
     // Checking for existence of interfaces defined
     Object.keys({
@@ -277,13 +349,8 @@ function detectDiscrepancies(parsedState, inputs, outputs) {
             } else if (propertyType === 'list') {
                 const { dtype } = inputs[ioName];
 
-                const mismatchedElements = parsedValue.filter((val) => {
-                    // Accept both 'integer' and 'number' for dtype 'integer'.
-                    if (dtype === 'integer') {
-                        return typeof val !== 'number' || !Number.isInteger(val);
-                    }
-                    return typeof val !== dtype;// eslint-disable-line valid-typeof
-                });
+                const mismatchedElements = validateList(parsedValue, dtype);
+
                 if (mismatchedElements.length > 0) {
                     errors.push(
                         `Property '${name}' value mismatch. ` +
@@ -319,6 +386,107 @@ function detectDiscrepancies(parsedState, inputs, outputs) {
     );
 
     return errors;
+}
+
+/**
+ * Function performs sanity checking on parsed state before loading it
+ * into the editor and the tries to resolve found discrepancies.
+ *
+ * @param parsedState that is passed to node to load
+ * @param inputs inputs of the node
+ * @param outputs outputs of the node
+ * @returns parsed state.
+ */
+function resolveDiscrepancies(parsedState, inputs, outputs) {
+    const errors = [];
+
+    const InterfacesToRemove = [];
+    const PropertiesToRemove = [];
+
+    const newState = parsedState;
+
+    const checkProperty = (ioName) => {
+        const name = ioName.slice(ioName.indexOf('_') + 1);
+
+        const parsedValue = parsedState.inputs[ioName].value;
+        const propertyType = inputs[ioName].type;
+        const defaultValue = inputs[ioName].default;
+
+        if (propertyType === 'select') {
+            const { items } = inputs[ioName];
+            if (Array.isArray(items)) {
+                if (!items.map(String).includes(String(parsedValue))) {
+                    errors.push(
+                        `Value for '${name}' mismatch. Expected '${items}' (type: ${typeof items}), got '${parsedValue}' (type: ${typeof parsedValue}),falling back to default value`,
+                    );
+
+                    newState.inputs[ioName].value = defaultValue;
+                }
+            }
+        } else if (propertyType === 'list') {
+            const { dtype } = inputs[ioName];
+
+            const mismatchedElements = validateList(parsedValue, dtype);
+
+            if (mismatchedElements.length > 0) {
+                errors.push(
+                    `Property '${name}' value mismatch. ` +
+                    `Items: '${mismatchedElements.join(' ')}' are not of '${dtype}' dtype.` +
+                    `Items are of type: ${mismatchedElements.map((val) => typeof val).join(', ')} ` +
+                    `Removing them from list.`,
+                );
+            }
+
+            const filteredValue = parsedValue.filter((val) =>
+                mismatchedElements.indexOf(val) === -1);
+
+            newState.inputs[ioName].value = filteredValue;
+        } else if (!checkType(propertyType, parsedValue)) {
+            errors.push(`Property '${name}' type mismatch. ${propertyType} expected, ${typeof parsedValue} found, falling back to default value.`);
+            newState.inputs[ioName].value = defaultValue;
+        }
+    };
+
+    // Checking for existence of interfaces defined
+    Object.keys({
+        ...parsedState.inputs,
+        ...parsedState.outputs,
+    }).forEach((ioName) => {
+        const name = ioName.slice(ioName.indexOf('_') + 1);
+        const direction = ioName.slice(0, ioName.indexOf('_'));
+        if (
+            !Object.prototype.hasOwnProperty.call(inputs, ioName) &&
+            !Object.prototype.hasOwnProperty.call(outputs, ioName)
+        ) {
+            if (direction === 'property') {
+                PropertiesToRemove.push(ioName);
+                errors.push(`Property named '${name}' not found in specification!`);
+            } else {
+                InterfacesToRemove.push(ioName);
+                errors.push(`Interface named '${name}' of direction '${direction}' not found in specification!`);
+            }
+        } else if (direction === 'property') {
+            checkProperty(ioName);
+        }
+    });
+
+    const stateInputs = Object.entries(parsedState.inputs);
+    const stateOutputs = Object.entries(parsedState.outputs);
+
+    const parsedInputs = stateInputs.filter(([key, _]) =>
+        InterfacesToRemove.indexOf(key) === -1 && PropertiesToRemove.indexOf(key) === -1);
+
+    const parsedOutputs = stateOutputs.filter(([key, _]) =>
+        InterfacesToRemove.indexOf(key) === -1);
+
+    newState.inputs = Object.fromEntries(parsedInputs);
+    newState.outputs = Object.fromEntries(parsedOutputs);
+
+    if (errors.length) {
+        terminalStore.addParsed('Error during discrepancies resolvement', errors.toString());
+    }
+
+    return newState;
 }
 
 /**
@@ -766,30 +934,23 @@ export class CustomNode extends Node {
             }
         }
 
-        let isWebpack = true;
-        try {
-            isWebpack = window.isWebpack;
-        } catch {
-            isWebpack = false;
-        }
-
         let errors = [];
-        if (!isWebpack && process.env.VUE_APP_GRAPH_DEVELOPMENT_MODE === 'true') {
-            errors = this.updateInterfaces(parsedState.inputs, parsedState.outputs);
-            errors = [...errors, ...this.updateProperties(parsedState.inputs)];
-        } else {
-            Object.entries(parsedState.inputs).forEach(([name, intf]) => {
-                if (!name.startsWith('property_')) return;
 
-                if (name.startsWith('property_') && name.endsWith(`${DYNAMIC_INTERFACE_SUFFIX}`)) {
-                    this.updateDynamicInterfaces(intf);
-                }
-            });
+        Object.entries(parsedState.inputs).forEach(([name, intf]) => {
+            if (!name.startsWith('property_')) return;
 
+            if (name.startsWith('property_') && name.endsWith(`${DYNAMIC_INTERFACE_SUFFIX}`)) {
+                this.updateDynamicInterfaces(intf);
+            }
+        });
+
+        if (!globalProperties.softLoad) {
             errors = detectDiscrepancies(parsedState, this.inputs, this.outputs);
             if (Array.isArray(errors) && errors.length) {
                 return errors;
             }
+        } else {
+            parsedState = resolveDiscrepancies(parsedState, this.inputs, this.outputs);
         }
 
         super.load(parsedState);
