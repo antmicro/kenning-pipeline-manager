@@ -1246,6 +1246,11 @@ export default class EditorManager {
         this.specification.currentSpecification.graphs = JSON.parse(JSON.stringify(graphs));
 
         // Resolving siblings, parents and children
+        try {
+            resolvedNodes = this.markInheritance(resolvedNodes);
+        } catch (e) {
+            return { errors: [e.message], warnings };
+        }
 
         // Resolving children
         resolvedNodes.forEach((node) => {
@@ -1571,6 +1576,89 @@ export default class EditorManager {
         if (newMetadata) this.updatedMetadata = newMetadata;
 
         return [];
+    }
+    /**
+     * Nodes that have already been resolved and have gone through JSON parsing
+     * can now be marked for the editor to be able to distinguish between
+     * inherited and non-inherited properties/interfaces
+     *
+     * @param nodes
+     * @returns nodes marked as inherited
+     */
+    /* eslint-disable class-methods-use-this,no-param-reassign */
+    markInheritance(nodes) {
+        const unsortedNodes = JSON.parse(JSON.stringify(nodes));
+        const isObject = (obj) => typeof obj === 'object' && obj !== null && !Array.isArray(obj);
+        const isArray = (obj) => Array.isArray(obj);
+        const resolvedNodes = {};
+        const markNodes = (child, base) => {
+            const output = { ...structuredClone(child) };
+            const inheritedSimpleProps = [];
+            if (!base || !child) return output;
+
+            if (isObject(child) && isObject(base)) {
+                Object.keys(base).forEach((key) => {
+                    if (key === 'style') {
+                        return;
+                    }
+                    if (key === 'extends') {
+                        return;
+                    }
+                    if (key.endsWith('inherited')) {
+                        return;
+                    }
+                    if (isObject(base[key])) {
+                        if (!(key in child)) {
+                            throw new Error(`'${child.name}' must have inherited or overridden '${key}' property of '${base.name}' node`);
+                        } else {
+                            output[key] = markNodes(child[key], base[key]);
+                        }
+                    } else if (isArray(child[key]) && isArray(base[key])) {
+                        const baseNames = Object.fromEntries(
+                            base[key].map((obj, i) => [obj.name, i]),
+                        );
+
+                        child[key].forEach((obj) => {
+                            if (obj.name && obj.name in baseNames) {
+                                const index = baseNames[obj.name];
+                                output[key][index].inherited = true;
+                            }
+                        });
+                    } else if (base[key] === child[key]) {
+                        inheritedSimpleProps.push(key);
+                    }
+                });
+            }
+            if (inheritedSimpleProps.length) {
+                output.simpleInherited = inheritedSimpleProps;
+            }
+            return output;
+        };
+        const recurrentMark = (name) => {
+            // Node resolved
+            if (name in resolvedNodes) return resolvedNodes[name];
+            let node = nodes.find((n) => n.name === name);
+            if (!node) {
+                return undefined;
+            }
+            if (!node.extends) {
+                resolvedNodes[name] = node;
+                return node;
+            }
+            let base;
+            node.extends.forEach((baseName) => {
+                base = recurrentMark(baseName);
+                node = markNodes(node, base);
+            });
+            resolvedNodes[name] = node;
+            return node;
+        };
+        // Filter out abstract nodes and get merged ones
+        const markedNodes = unsortedNodes.filter(
+            (node) => !node.abstract,
+        ).map((node) => recurrentMark(node.name),
+        ).filter((node) => node !== undefined);
+        return markedNodes;
     }
 
     /**
