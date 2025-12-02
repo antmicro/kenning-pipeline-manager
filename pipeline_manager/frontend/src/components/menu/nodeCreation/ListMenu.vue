@@ -15,6 +15,13 @@ Popup menu with a list of checkboxes.
             <div v-for="option in listedOptions" :key="option.id">
                 <component :is="option.component" :intf="option" tabindex="-1"></component>
             </div>
+            <div v-for="option in disabledOptions" :key="option.id">
+                <component
+                    :is="option.component"
+                    :intf="option"
+                    class="--disabled"
+                    tabindex="-1"></component>
+            </div>
         </div>
         <div class="confirm">
             <component :is="confirmButton.component" :intf="confirmButton" />
@@ -39,6 +46,13 @@ export default defineComponent({
         items: {
             type: Array,
             required: true,
+        },
+        disabledItems: {
+            type: Array,
+            required: true,
+        },
+        disabledReason: {
+            type: String,
         },
         confirmAction: {
             type: Function,
@@ -69,11 +83,23 @@ export default defineComponent({
             const options: any = ref([]);
 
             props.items.forEach((item: any) => {
+                if (props.disabledItems.find((i) => i === item)) {
+                    return;
+                }
                 const option = new CheckboxInterface(item.name, false);
                 option.events.setValue.subscribe(this, () => toggleItem(item));
                 options.value.push(option);
             });
 
+            return options.value;
+        });
+        const disabledOptions = computed(() => {
+            const options: any = ref([]);
+            props.disabledItems.forEach((item: any) => {
+                const option = new CheckboxInterface(`${item.name} ${props.disabledReason ? `(${props.disabledReason})` : ''}`, false, true);
+                option.events.setValue.subscribe(this, () => toggleItem(item));
+                options.value.push(option);
+            });
             return options.value;
         });
 
@@ -89,6 +115,7 @@ export default defineComponent({
         return {
             selectedItems,
             listedOptions,
+            disabledOptions,
             confirmButton,
         };
     },
@@ -100,5 +127,13 @@ export default defineComponent({
         flex: 1 1 auto;
         min-height: 0;
         overflow-y: auto;
+    }
+    .--disabled {
+        pointer-events: none;
+        cursor: not-allowed;
+        opacity: 0.65;
+        filter: alpha(opacity=65);
+        -webkit-box-shadow: none;
+        box-shadow: none;
     }
 </style>

@@ -845,6 +845,8 @@ export default {
                 <ListMenu
                     :componentName="'propertyListMenu'"
                     :items=configurationState.properties
+                    :disabledItems="configurationState.properties.filter((p) => p.inherited)"
+                    :disabledReason="'inherited'"
                     :confirmAction="removeProperties"
                     :confirmText="'Remove properties'"
                 />
@@ -861,6 +863,8 @@ export default {
                 <ListMenu
                     :componentName="'interfaceListMenu'"
                     :items=configurationState.interfaces
+                    :disabledItems="configurationState.interfaces.filter((i) => i.inherited)"
+                    :disabledReason="'inherited'"
                     :confirmAction="removeInterfaces"
                     :confirmText="'Remove interfaces'"
                 />
