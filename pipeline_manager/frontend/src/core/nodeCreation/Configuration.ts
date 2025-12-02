@@ -397,6 +397,15 @@ export function removeProperties(properties: PropertyConfiguration[]): void {
     configurationState.properties = configurationState.properties.filter(
         (item) => !properties.includes(item),
     );
+    const isInherited = properties.some((p: any) => p.inherited);
+    if (isInherited) {
+        NotificationHandler.terminalLog(
+            'error',
+            'Cannot remove property',
+            'Cannot alter properties that are inherited',
+        );
+        return;
+    }
     const output = alterProperties(nodes, properties, true);
     notifyChange(output);
 
@@ -524,6 +533,15 @@ export function removeInterfaces(interfaces: InterfaceConfiguration[]): void {
     configurationState.interfaces = configurationState.interfaces.filter(
         (item) => !interfaces.includes(item),
     );
+    const isInherited = interfaces.some((i: any) => i.inherited);
+    if (isInherited) {
+        NotificationHandler.terminalLog(
+            'error',
+            'Cannot remove interface',
+            'Cannot alter interfaces that are inherited',
+        );
+        return;
+    }
     const output = alterInterfaces(nodes, interfaces, true);
     notifyChange(output);
 

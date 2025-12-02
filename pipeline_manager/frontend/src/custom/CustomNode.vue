@@ -448,6 +448,7 @@ const onContextMenuTitleClick = async (action) => {
             direction: intf?.direction,
             maxConnectionsCount: intf?.maxConnectionsCount,
             inSubgraph: subInterfaces.some((i) => i.id === intf.id),
+            inherited: intf?.inherited,
         }));
 
         /* eslint-disable no-underscore-dangle */
@@ -463,6 +464,7 @@ const onContextMenuTitleClick = async (action) => {
             readonly: prop?.readonly,
             dtype: prop?.dtype,
             inSubgraph: subProps.some((i) => i.id === prop.id),
+            inherited: prop?.inherited,
         }));
 
         configurationState.properties = configuredProperties;
