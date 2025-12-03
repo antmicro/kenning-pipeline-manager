@@ -370,7 +370,7 @@ export function addProperty(property: PropertyConfiguration): void {
         // eslint-disable-next-line no-param-reassign
         n.properties = [...(n.properties ?? []), ...[property]];
         const childNodes = findNodes(n.name!);
-        alterProperties(childNodes, [property]);
+        alterProperties(childNodes, [{ ...property, inherited: true } as PropertyConfiguration]);
     });
     commitTypeToSpecification();
 }
@@ -504,7 +504,7 @@ export function addInterface(intf: InterfaceConfiguration): void {
         // eslint-disable-next-line no-param-reassign
         n.interfaces = [...(n.interfaces ?? []), ...[intf]];
         const childNodes = findNodes(n.name!);
-        alterInterfaces(childNodes, [intf]);
+        alterInterfaces(childNodes, [{ ...intf, inherited: true } as InterfaceConfiguration]);
     });
 
     commitTypeToSpecification();
