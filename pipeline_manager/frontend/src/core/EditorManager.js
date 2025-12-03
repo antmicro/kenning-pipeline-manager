@@ -800,15 +800,25 @@ export default class EditorManager {
     addNodeToEditorSpecification(nodeSpecification, nodeToUpdate = undefined, removeUnused = true) {
         // Remove undefined fields
         Object.entries(nodeSpecification.properties ?? {}).forEach(([_, value]) => {
+            if (value.inherited) {
+                const idx = nodeSpecification.properties.indexOf(value);
+                nodeSpecification.properties.splice(idx, 1);
+                return;
+            }
             Object.keys(value).forEach((key) => {
-                if (value[key] === undefined) {
+                if (value[key] === undefined || key === 'inherited') {
                     delete value[key];
                 }
             });
         });
         Object.entries(nodeSpecification.interfaces ?? {}).forEach(([_, value]) => {
+            if (value.inherited) {
+                const idx = nodeSpecification.interfaces.indexOf(value);
+                nodeSpecification.interfaces.splice(idx, 1);
+                return;
+            }
             Object.keys(value).forEach((key) => {
-                if (value[key] === undefined) {
+                if (value[key] === undefined || key === 'inherited') {
                     delete value[key];
                 }
             });
