@@ -11,7 +11,9 @@ export type NodeDataConfiguration = {
     category: string,
     layer?: string,
     description?: string,
-    color?: string
+    color?: string,
+    isLayerInherited?: boolean,
+    isCategoryInherited?: boolean,
 }
 
 export type PropertyConfiguration = {

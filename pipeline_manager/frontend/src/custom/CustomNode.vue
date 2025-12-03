@@ -432,6 +432,8 @@ const onContextMenuTitleClick = async (action) => {
             category: nodeCategory,
             layer: props.node.layer,
             color: nodeColor,
+            isLayerInherited: props.node.simpleInherited?.includes('layer'),
+            isCategoryInherited: props.node.simpleInherited?.includes('category'),
         };
 
         configurationState.editedType = nodeData.name;
@@ -542,7 +544,14 @@ const onContextMenuTitleClick = async (action) => {
             menuState.interfaceMenu = true;
             break;
         case 'layer':
-            menuState.layerMenu = true;
+            if (props.node.simpleInherited?.includes('layer')) {
+                NotificationHandler.terminalLog(
+                    'warning',
+                    'Cannot set layer',
+                    'setting layer when one is already inherited is not allowed');
+            } else {
+                menuState.layerMenu = true;
+            }
             break;
         case 'addSubgraph': {
             const errors = editorManager.addSubgraphToNode(props.node);

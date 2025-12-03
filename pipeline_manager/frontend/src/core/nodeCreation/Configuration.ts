@@ -59,8 +59,8 @@ function commitTypeToSpecification() {
 
     const ret = editorManager.addNodeToEditorSpecification({
         name: newNodeData.name,
-        layer: newNodeData.layer,
-        category: newNodeData.category,
+        layer: newNodeData.isLayerInherited ? undefined : newNodeData.layer,
+        category: newNodeData.isCategoryInherited ? undefined : newNodeData.category,
         color: newNodeData.color,
         description: newNodeData.description,
         interfaces: processedInterfaces,
