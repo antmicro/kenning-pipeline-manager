@@ -20,6 +20,7 @@ export type PropertyConfiguration = {
     default: string | number | boolean | null,
     min?: number,
     max?: number,
+    inherited?: boolean,
 };
 
 export type InterfaceConfiguration = {
@@ -27,6 +28,7 @@ export type InterfaceConfiguration = {
     type?: string | string[],
     direction: string,
     maxConnectionsCount?: number,
+    inherited?: boolean,
 }
 
 export type ConfigurationState = {
