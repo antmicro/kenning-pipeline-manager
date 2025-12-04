@@ -20,6 +20,10 @@ import {
 } from '../core/NodeFactory.js';
 import { ir } from '../core/interfaceRegistry.ts';
 
+import globalProperties from '../globalProperties.ts';
+
+import { terminalStore } from '../core/stores.js';
+
 /**
   * Function used to update properties of the graph node based on its specification.
   *
@@ -330,19 +334,16 @@ export default function CreateCustomGraphNodeType(template, graphNode) {
                 { graphLoadingState, newSubgraphNodeId: nodeId },
             );
 
-            const softLoad = process.env.VUE_APP_GRAPH_DEVELOPMENT_MODE === 'true';
-
             if (!errors.length) errors.push(...graph.load(state));
             // When soft load is enabled ignore it
-            if (errors.length && !softLoad) {
+            if (errors.length && !globalProperties.softLoad) {
                 throw new Error(
                     `Internal error occurred while initializing ${graph.type} graph. ` +
                     `Reason: ${errors.join('. ')}`,
                 );
-            } else if (softLoad) {
-                console.warn(`Internal error occurred while initializing ${graph.type} graph. ` +
-                    `Reason: ${errors.join('. ')}`,
-                );
+            } else if (errors.length) {
+                terminalStore.addParsed(`Internal error occurred while initializing ${graph.type} graph.`,
+                    `Reason: ${errors.join('. ')}`);
             }
 
             graph.template = this.template;
