@@ -24,6 +24,8 @@ import { suppressHistoryLogging } from '../core/History.ts';
 import CreateCustomGraphNodeType, { prepareSubgraphInstance } from './CustomGraphNode.js';
 import { ir } from '../core/interfaceRegistry.ts';
 
+import globalProperties from '../globalProperties.ts';
+
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-underscore-dangle */
 export default class PipelineManagerEditor extends Editor {
@@ -290,6 +292,7 @@ export default class PipelineManagerEditor extends Editor {
                     );
                     if (fittingTemplate.length !== 1) {
                         errors.push([`Expected exactly one template with ID ${n.name}, got ${fittingTemplate.length}`]);
+                        n.subgraph = undefined;
                     }
                     usedSubgraphs.add(n.subgraph);
 
@@ -307,7 +310,7 @@ export default class PipelineManagerEditor extends Editor {
         });
 
         try {
-            if (errors.length) return errors;
+            if (errors.length && !globalProperties.softLoad) return errors;
 
             state.graphs?.forEach((graph) => {
                 if (!usedSubgraphs.has(graph.id) && entryGraph.id !== graph.id) {
@@ -317,7 +320,7 @@ export default class PipelineManagerEditor extends Editor {
                 }
             });
 
-            if (!errors.length) {
+            if (!errors.length || globalProperties.softLoad) {
                 let graphToLoad;
                 if (!templateName) {
                     state = this.hooks.load.execute(state);
@@ -331,7 +334,9 @@ export default class PipelineManagerEditor extends Editor {
                     errors.push(...prepareSubgraphErrors);
                     graphToLoad = preparedSubgraphState;
                 }
-                if (!errors.length) errors.push(...this._graph.load(graphToLoad));
+                if (!errors.length || globalProperties.softLoad) {
+                    errors.push(...this._graph.load(graphToLoad));
+                }
             }
         } catch (err) {
             // If anything goes wrong during dataflow loading, the editor is cleaned and an
@@ -340,7 +345,7 @@ export default class PipelineManagerEditor extends Editor {
             this.readonly = readonlySetting;
             return [err.toString()];
         }
-        if (Array.isArray(errors) && errors.length && process.env.VUE_APP_GRAPH_DEVELOPMENT_MODE !== 'true') {
+        if (Array.isArray(errors) && errors.length && !globalProperties.softLoad) {
             this.cleanEditor();
             this.readonly = readonlySetting;
             return errors;
