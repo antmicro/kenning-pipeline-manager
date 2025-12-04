@@ -30,6 +30,8 @@ import ConnectionRenderer from './ConnectionRenderer.js';
 import Specification from './Specification.js';
 import validateJSON from './validate-json.js';
 
+import globalProperties from '../globalProperties.ts';
+
 /* eslint-disable lines-between-class-members */
 /**
  * Readonly helper class that reads and stores default values from metadata schema.
@@ -1284,12 +1286,31 @@ export default class EditorManager {
             }
         });
 
+        if (globalProperties.softLoad) {
+            // Check if subgraph id exists
+            resolvedNodes.forEach((node) => {
+                if (node.subgraphId !== undefined) {
+                    // Find that id in graph
+
+                    const templateGraphs = graphs.filter((graph) => graph.id === node.subgraphId);
+
+                    if (templateGraphs.length !== 1) {
+                        warnings.push(`Cannot find subgraph with id ${node.subgraphId} for ` +
+                            `node ${node.name}`,
+                        );
+
+                        node.subgraphId = undefined;
+                    }
+                }
+            });
+        }
+
         resolvedNodes.forEach((node) => {
             errors.push(...this.validateNodeStyle(node));
             errors.push(...this._registerNodeType(node));
         });
 
-        if (errors.length) {
+        if (errors.length && !globalProperties.softLoad) {
             return { errors, warnings };
         }
 
@@ -1811,18 +1832,25 @@ export default class EditorManager {
         dataflow, preventCentering = false, loadOnly = false, templateName = null,
     ) {
         let { notifyWhenChanged } = this;
+
+        const status = {
+            errors: [],
+            warnings: [],
+            info: [],
+        };
+
         // Turn off notification during dataflow loading
         this.updateMetadata({ notifyWhenChanged: false }, true, true);
 
-        const enableSoftLoad = process.env.VUE_APP_GRAPH_DEVELOPMENT_MODE === 'true';
-
         try {
             const validationErrors = EditorManager.validateDataflow(dataflow);
-            if (validationErrors.length && !enableSoftLoad) {
-                return { errors: validationErrors, warnings: [] };
+            if (validationErrors.length && !globalProperties.softLoad) {
+                status.errors = validationErrors;
+
+                return status;
             }
-            if (enableSoftLoad) {
-                console.warn(validationErrors.toString());
+            if (validationErrors.length && globalProperties.softLoad) {
+                status.warnings.push(validationErrors.toString());
             }
 
             try {
@@ -1831,28 +1859,28 @@ export default class EditorManager {
                 }
 
                 const specificationVersion = dataflow.version;
-                const warnings = [];
-                const info = [];
 
                 if (specificationVersion === undefined) {
-                    warnings.push(
+                    status.warnings.push(
                         `Loaded dataflow has no version assigned. Please update the dataflow to version ${this.specificationVersion}.`,
                     );
                 } else if (specificationVersion !== this.specificationVersion) {
-                    info.push(
+                    status.info.push(
                         `Dataflow version (${specificationVersion}) differs from the current version (${this.specificationVersion}). It may result in unexpected behaviour.`,
                     );
                 }
 
                 if ('metadata' in dataflow && this.specification.currentSpecification !== undefined) {
-                    const errors = EditorManager.validateMetadata(dataflow.metadata);
-                    if (Array.isArray(errors) && errors.length && !enableSoftLoad) {
-                        return { errors, warnings };
+                    const _errors = EditorManager.validateMetadata(dataflow.metadata);
+                    if (Array.isArray(_errors) && _errors.length) {
+                        if (!globalProperties.softLoad) {
+                            status.errors.push(..._errors);
+                            return status;
+                        }
+
+                        status.warnings.push(..._errors);
                     }
-                    if (enableSoftLoad) {
-                        console.warn(warnings);
-                        console.error(errors);
-                    }
+
                     notifyWhenChanged = dataflow.metadata.notifyWhenChanged ?? notifyWhenChanged;
 
                     this.updateMetadata(
@@ -1876,60 +1904,46 @@ export default class EditorManager {
                     isWebpack = false;
                 }
 
-                const errors = {};
                 if (!isWebpack) {
-                    Object.assign(errors, {
-                        errors: await this.baklavaView.editor.load(
-                            dataflow,
-                            preventCentering,
-                            loadOnly,
-                            templateName,
-                        ),
-                        warnings,
-                        info,
-                    });
+                    const _errors = await this.baklavaView.editor.load(
+                        dataflow,
+                        preventCentering,
+                        loadOnly,
+                        templateName,
+                    );
+
+                    if (!globalProperties.softLoad) {
+                        status.errors.push(..._errors);
+                    } else {
+                        status.warnings.push(..._errors);
+                    }
+
                     this.baklavaView.history.graphSwitch(
                         this.baklavaView.displayedGraph,
                         this.baklavaView.displayedGraph,
                     );
+                }
+
+                const arr = this.verifyExposedInterfaceNamesMatchExternalNames(dataflow);
+
+                if (globalProperties.softLoad) {
+                    status.warnings.push(...arr);
                 } else {
-                    Object.assign(errors, {
-                        errors: [],
-                        warnings: [],
-                    });
+                    status.errors.push(...arr);
                 }
 
-                if (enableSoftLoad) {
-                    console.warn(errors.warnings);
-                    console.error(errors.errors);
-                }
-
-                this.verifyExposedInterfaceNamesMatchExternalNames(dataflow);
-
-                return ((!enableSoftLoad) ? errors : {
-                    errors: [],
-                    warnings: [],
-                    info: [],
-                });
+                return status;
             } catch (err) {
-                if (enableSoftLoad) {
-                    console.warn(err.toString());
+                const msg = `Unrecognized format. Make sure that the passed dataflow is correct.${
+                    err.toString()}`;
+
+                if (globalProperties.softLoad) {
+                    status.warnings.push(msg);
+                } else {
+                    status.errors.push(msg);
                 }
 
-                return ((!enableSoftLoad) ? {
-                    errors: [
-                        'Unrecognized format. Make sure that the passed dataflow is correct.',
-                        err.toString(),
-                    ],
-                    warnings: [],
-                    info: [],
-                } :
-                    {
-                        errors: [],
-                        warnings: [],
-                        info: [],
-                    }
-                );
+                return status;
             }
         } finally {
             // Restore previous state or use value from loaded dataflow
@@ -1941,9 +1955,12 @@ export default class EditorManager {
      * Verify whether exposed interfaces' names match their counterparts' external names.
      *
      * @param {object} dataflow Dataflow with external names to verify.
-     * @returns {boolean} True if all exposed interfaces' names match external names.
+     * @returns {Array} Array with errors that occurred
+     * during verification.
      */
     verifyExposedInterfaceNamesMatchExternalNames(dataflow) {
+        const errors = [];
+
         // Collect same-id interfaces to groups.
         const sameIdInterfaces = new Map();
         dataflow.graphs.forEach((graph) => {
@@ -1971,10 +1988,9 @@ export default class EditorManager {
             );
 
             if (mainInterface === undefined) {
-                throw new Error(
-                    `The interface with id = ${sharedId} seems to ` +
-                    `be exposed but lacks "externalName" property.`,
-                );
+                errors.push(`The interface with id = ${sharedId} seems to ` +
+                    `be exposed but lacks "externalName" property.`);
+                return;
             }
 
             interfaces.forEach((intf) => {
@@ -1988,9 +2004,11 @@ export default class EditorManager {
                     `for the interface with id = ${sharedId}\n` +
                     `Expected: ${mainInterface.externalName}\n` +
                     `Got: ${intf.name}`;
-                throw new Error(errorMessage);
+                errors.push(errorMessage);
             });
         });
+
+        return errors;
     }
 
     /**
