@@ -769,6 +769,7 @@ export default defineComponent({
             window.addEventListener('message', async (event) => {
                 // TODO: introduce mechanism for checking event.origin against allowed origins
                 const data = event.data ?? {};
+                if (typeof data === 'string') return;
                 data.jsonrpc ??= JSONRPC;
 
                 if (isJSONRPCResponse(data)) {
