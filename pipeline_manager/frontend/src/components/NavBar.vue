@@ -789,7 +789,7 @@ export default {
         </Panel>
     </Transition>
     <Transition name="fade" @mousedown.self="exportMenuShow = false">
-        <BlurPanel v-show="exportMenuShow">
+        <Panel v-show="exportMenuShow">
             <ParentMenu
                 v-show="exportMenuShow"
                 v-model="exportMenuShow"
@@ -800,7 +800,7 @@ export default {
                     v-model="exportMenuShow"
                 />
             </ParentMenu>
-        </BlurPanel>
+        </Panel>
     </Transition>
     <Transition name="fade" @mousedown.self="menuState.configurationMenu.visible = false">
         <Panel v-show="menuState.configurationMenu.visible">
