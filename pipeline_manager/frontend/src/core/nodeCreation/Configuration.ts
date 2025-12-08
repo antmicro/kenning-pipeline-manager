@@ -328,6 +328,50 @@ export function notifyChange(output: any[]|Set<string>): any[] {
     return [];
 }
 
+export function updateExtendedProperties(type: string,
+    addedProperties: PropertyConfiguration[],
+    removedProperties: PropertyConfiguration[],
+) {
+    const editorManager = EditorManager.getEditorManagerInstance();
+    const resolvedChildNodes = editorManager.specification.currentSpecification.nodes
+        .filter((n: any) => n.extends?.includes(type)) ?? [];
+    resolvedChildNodes.forEach((n: any) => {
+        const childNodes = findNodes(n.name!);
+        childNodes.forEach((node: any) => {
+            const toRem = removedProperties.filter((prop: any) =>
+                Object.values(node.inputs).some((inp: any) => inp.name === prop.name),
+            ).map((prop: any) => ({ ...prop, inherited: true }) as PropertyConfiguration);
+            alterProperties([node], toRem, true);
+            const toAdd = addedProperties.map((prop: any) =>
+                ({ ...prop, inherited: true }) as PropertyConfiguration);
+            alterProperties([node], toAdd);
+        });
+        updateExtendedProperties(n.name!, addedProperties, removedProperties);
+    });
+}
+export function updateExtendedInterfaces(type: string,
+    addedInterfaces: InterfaceConfiguration[],
+    removedInterfaces: InterfaceConfiguration[],
+) {
+    const editorManager = EditorManager.getEditorManagerInstance();
+    const resolvedChildNodes = editorManager.specification.currentSpecification.nodes
+        .filter((n: any) => n.extends?.includes(type)) ?? [];
+    resolvedChildNodes.forEach((n: any) => {
+        const childNodes = findNodes(n.name!);
+        childNodes.forEach((node: any) => {
+            const allInterfaces = [...Object.values(node.inputs),
+                ...Object.values(node.outputs)];
+            const toRem = removedInterfaces.filter((prop: any) =>
+                allInterfaces.some((inp: any) => inp.name === prop.name),
+            ).map((prop: any) => ({ ...prop, inherited: true }) as InterfaceConfiguration);
+            alterInterfaces([node], toRem, true);
+            const toAdd = addedInterfaces.map((prop: any) =>
+                ({ ...prop, inherited: true }) as InterfaceConfiguration);
+            alterInterfaces([node], toAdd);
+        });
+        updateExtendedInterfaces(n.name!, addedInterfaces, removedInterfaces);
+    });
+}
 /**
   * Adds property to the custom node. If the property is invalid, it logs an error.
   * @param property - the property to be added
@@ -363,15 +407,7 @@ export function addProperty(property: PropertyConfiguration): void {
         return;
     }
 
-    const resolvedChildNodes = editorManager.specification.currentSpecification.nodes
-        .filter((n: any) => n.extends?.includes(currentType)) ?? [];
-
-    resolvedChildNodes.forEach((n: any) => {
-        // eslint-disable-next-line no-param-reassign
-        n.properties = [...(n.properties ?? []), ...[property]];
-        const childNodes = findNodes(n.name!);
-        alterProperties(childNodes, [{ ...property, inherited: true } as PropertyConfiguration]);
-    });
+    updateExtendedProperties(currentType!, [property], []);
     commitTypeToSpecification();
 }
 
@@ -409,17 +445,7 @@ export function removeProperties(properties: PropertyConfiguration[]): void {
     const output = alterProperties(nodes, properties, true);
     notifyChange(output);
 
-    const resolvedChildNodes = editorManager.specification.currentSpecification.nodes
-        .filter((n: any) => n.extends?.includes(currentType)) ?? [];
-
-    resolvedChildNodes.forEach((n: any) => {
-        // eslint-disable-next-line no-param-reassign
-        n.properties = n.properties?.filter(
-            (prop: PropertyConfiguration) => !properties.some((p) => p.name === prop.name),
-        ) ?? [];
-        const childNodes = findNodes(n.name!);
-        alterProperties(childNodes, properties, true);
-    });
+    updateExtendedProperties(currentType!, [], properties);
 
     function removeFromSubgraph(graph: any, nodesToUpdate: any[], names: string[]): string[] {
         const externalNames: string[] = [];
@@ -497,15 +523,7 @@ export function addInterface(intf: InterfaceConfiguration): void {
         return;
     }
 
-    const resolvedChildNodes = editorManager.specification.currentSpecification.nodes
-        .filter((n: any) => n.extends?.includes(currentType)) ?? [];
-
-    resolvedChildNodes.forEach((n: any) => {
-        // eslint-disable-next-line no-param-reassign
-        n.interfaces = [...(n.interfaces ?? []), ...[intf]];
-        const childNodes = findNodes(n.name!);
-        alterInterfaces(childNodes, [{ ...intf, inherited: true } as InterfaceConfiguration]);
-    });
+    updateExtendedInterfaces(currentType!, [intf], []);
 
     commitTypeToSpecification();
 }
@@ -545,17 +563,7 @@ export function removeInterfaces(interfaces: InterfaceConfiguration[]): void {
     const output = alterInterfaces(nodes, interfaces, true);
     notifyChange(output);
 
-    const resolvedChildNodes = editorManager.specification.currentSpecification.nodes
-        .filter((n: any) => n.extends?.includes(currentType)) ?? [];
-
-    resolvedChildNodes.forEach((n: any) => {
-        // eslint-disable-next-line no-param-reassign
-        n.interfaces = n.interfaces?.filter(
-            (intf: InterfaceConfiguration) => !interfaces.some((i) => i.name === intf.name),
-        ) ?? [];
-        const childNodes = findNodes(n.name!);
-        alterInterfaces(childNodes, interfaces, true);
-    });
+    updateExtendedInterfaces(currentType!, [], interfaces);
 
     // Remove interfaces from uninitialized graphs
     function removeFromSubgraph(graph: any, nodesToUpdate: any[], names: string[]): string[] {
