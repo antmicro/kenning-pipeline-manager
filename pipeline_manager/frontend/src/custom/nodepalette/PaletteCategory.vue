@@ -213,6 +213,7 @@ import Cross from '../../icons/Cross.vue';
 import Bin from '../../icons/Bin.vue';
 import { TOP_LEVEL_NODES_NAMES } from './nodeTree';
 import { configurationState, menuState } from '../../core/nodeCreation/ConfigurationState.ts';
+import { prepareNodeForDuplication } from '../../core/nodeCreation/Configuration.ts';
 
 export default defineComponent({
     components: {
@@ -417,57 +418,7 @@ export default defineComponent({
 
         const onContextMenuClick = async (action) => {
             if (action === 'duplicate') {
-
-                const getNodeSpec = (nodeName) => {
-                    return editorManager.specification.unresolvedSpecification.nodes.filter((node) => {
-                        let namesToCheck;
-                        if (node.isCategory === true)
-                            namesToCheck = node.category.split("/");
-                        else
-                            namesToCheck = [node.name];
-                        return namesToCheck.includes(nodeName);
-                    })[0];
-                };
-
-                const nodeSpec = getNodeSpec(selectedNode.value)
-
-                const nodeData = {
-                    name: selectedNode.value,
-                    category: nodeSpec.category,
-                    layer: nodeSpec.layer,
-                    color: nodeSpec.color,
-                };
-
-                configurationState.editedType = selectedNode.value;
-                configurationState.nodeData = nodeData;
-
-                configurationState.pill = nodeSpec.pill;
-                configurationState.extends = nodeSpec.extends;
-
-                let nodeInterfaces = nodeSpec.interfaces;
-                nodeInterfaces = nodeInterfaces.filter((intf) => intf.direction !== undefined);
-                const configuredInterfaces = nodeInterfaces?.map((intf) => ({
-                    name: intf?.name,
-                    type: intf?.type,
-                    direction: intf?.direction,
-                }));
-
-                let nodeProperties = nodeSpec.properties;
-                /* eslint-disable no-underscore-dangle */
-                const configuredProperties = nodeProperties?.map((prop) => ({
-                    name: prop?.name,
-                    type: prop?.type,
-                    default: prop?._value,
-                    min: prop?.min,
-                    max: prop?.max,
-                    values: prop?.items,
-                    step: prop?.step,
-                    readonly: prop?.readonly,
-                    dtype: prop?.dtype,
-                }));
-
-                configurationState.properties = configuredProperties;
-                configurationState.interfaces = configuredInterfaces;
+                prepareNodeForDuplication(selectedNode.value);
             }
 
             switch (action) {
