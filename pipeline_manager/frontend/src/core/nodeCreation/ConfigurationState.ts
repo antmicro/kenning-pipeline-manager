@@ -23,6 +23,11 @@ export type PropertyConfiguration = {
     min?: number,
     max?: number,
     inherited?: boolean,
+    values?:any,
+    step?: number,
+    readonly?: boolean,
+    dtype?: any,
+    group?: string
 };
 
 export type InterfaceConfiguration = {
@@ -31,6 +36,7 @@ export type InterfaceConfiguration = {
     direction: string,
     maxConnectionsCount?: number,
     inherited?: boolean,
+    array?: []
 }
 
 export type ConfigurationState = {
@@ -41,6 +47,7 @@ export type ConfigurationState = {
     success?: boolean,
     pill?: object,
     extends?: any,
+    subgraphId?: string
 }
 
 /**

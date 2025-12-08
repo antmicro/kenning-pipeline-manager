@@ -12,6 +12,7 @@
 
 import { useViewModel } from '@baklavajs/renderer-vue';
 import { NodeInterface } from '@baklavajs/core';
+import { toRaw } from 'vue';
 import EditorManager, { NEW_NODE_STYLE, EDITED_NODE_STYLE } from '../EditorManager.js';
 import { parseInterfaces } from '../interfaceParser.js';
 import {
@@ -45,6 +46,11 @@ export function prepareNodeForDuplication(nodeType:string) : void {
         })[0];
 
     const nodeSpec = getNodeSpec(nodeType);
+
+    if (!nodeSpec) {
+        NotificationHandler.terminalLog('info', 'Node copy', 'Cannot get node specification!');
+        return;
+    }
 
     if (nodeSpec.isCategory) {
         NotificationHandler.terminalLog('error', 'Node copy error', 'Cannot copy category node!');
@@ -101,9 +107,11 @@ function commitTypeToSpecification() {
     suppressHistoryLogging(true);
     const editorManager = EditorManager.getEditorManagerInstance();
 
-    const newNodeData = configurationState.nodeData;
+    const parssedNode = editorManager.extendNodeSpecification(configurationState);
+
+    const newNodeData = parssedNode.nodeData;
     const currentType = (!menuState.configurationMenu.duplicateNode) ?
-        configurationState.editedType : undefined;
+        parssedNode.editedType : undefined;
 
     let style = NEW_NODE_STYLE;
 
@@ -116,11 +124,11 @@ function commitTypeToSpecification() {
         }
         style = EDITED_NODE_STYLE;
     }
-    const processedInterfaces = configurationState.interfaces
+    const processedInterfaces = parssedNode.interfaces
         .filter((intf: any) => !intf.inSubgraph)
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         .map((intf: any) => (({ inSubgraph, ...o }) => o)(intf));
-    const processedProperties = configurationState.properties
+    const processedProperties = parssedNode.properties
         .filter((prop: any) => !prop.inSubgraph)
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         .map((prop: any) => (({ inSubgraph, ...o }) => o)(prop));
@@ -131,10 +139,11 @@ function commitTypeToSpecification() {
         category: newNodeData.isCategoryInherited ? undefined : newNodeData.category,
         color: newNodeData.color,
         description: newNodeData.description,
-        interfaces: configurationState.interfaces,
-        properties: configurationState.properties,
+        interfaces: processedInterfaces,
+        properties: processedProperties,
         pill: configurationState.pill,
         extends: configurationState.extends,
+        subgraphId: configurationState.subgraphId,
         style,
     }, currentType, false);
 
@@ -142,7 +151,6 @@ function commitTypeToSpecification() {
         NotificationHandler.terminalLog('error', 'Error when registering the node', ret.errors);
         return;
     }
-
     suppressHistoryLogging(false);
 }
 

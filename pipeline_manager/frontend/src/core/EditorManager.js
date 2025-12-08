@@ -1167,7 +1167,7 @@ export default class EditorManager {
      * Creates mapping between graph ID and its descendants.
      *
      * @param {object[]} graphs - Graphs to parse.
-     * @returns {Map<string, string[]>} - Generated mapping.
+     * @returns - Generated mapping.
      */
     static getGraphDependencies(graphs) {
         const graphIds = graphs.map(({ id }) => id).filter(Boolean);
