@@ -55,7 +55,9 @@ import {
 import EditorManager, { EDITED_NODE_STYLE } from '../core/EditorManager';
 import NotificationHandler from '../core/notifications';
 import { menuState, configurationState } from '../core/nodeCreation/ConfigurationState.ts';
-import { alterInterfaces, alterProperties, findNodes } from '../core/nodeCreation/Configuration.ts';
+import {
+    alterInterfaces, alterProperties, updateExtendedProperties, updateExtendedInterfaces, findNodes,
+} from '../core/nodeCreation/Configuration.ts';
 
 export default defineComponent({
     props: {
@@ -344,41 +346,21 @@ export default defineComponent({
                     (intf) => !oldInterfaces.some((i) => i.name === intf.name),
                 ) ?? [];
 
-                const childNodes = findNodes(oldType, true) ?? [];
-
-                const allNodes = [...nodes, ...childNodes];
+                const allNodes = [...nodes];
                 allNodes.forEach((n) => {
-                    const isChild = childNodes.includes(n);
                     const propToRem = removedProperties.filter((p) =>
-                        isChild ||
-                            !Object.values(n.inputs).find((i) => i.name === p.name).inherited);
+                        !Object.values(n.inputs).find((i) => i.name === p.name).inherited);
                     const allIntfs = [...Object.values(n?.inputs), ...Object.values(n?.outputs)];
                     const intfToRem = removedInterfaces.filter((p) =>
-                        isChild ||
-                            !allIntfs.find((i) => i.name === p.name).inherited);
-                    const processedProps = parsedProperties
-                        .map((prop) => (isChild ? { ...prop, inherited: true } : prop));
-                    const processedIntfs = parsedInterfaces
-                        .map((intf) => (isChild ? { ...intf, inherited: true } : intf));
+                        !allIntfs?.find((i) => i.name === p.name).inherited);
 
                     alterProperties([n], propToRem, true);
                     alterInterfaces([n], intfToRem, true);
-                    alterProperties([n], processedProps);
-                    alterInterfaces([n], processedIntfs);
+                    alterProperties([n], parsedProperties);
+                    alterInterfaces([n], parsedInterfaces);
                 });
-                const resolvedChildNodes = editorManager.specification.currentSpecification.nodes
-                    .filter((n) => n.extends?.includes(oldType)) ?? [];
-
-                resolvedChildNodes.forEach((n) => {
-                    n.interfaces = n.interfaces?.filter(
-                        (intf) => !removedInterfaces.some((i) => i.name === intf.name),
-                    ) ?? [];
-                    n.properties = n.properties?.filter(
-                        (prop) => !removedProperties.some((p) => p.name === prop.name),
-                    ) ?? [];
-                    n.interfaces = [...n.interfaces, ...addedInterfaces];
-                    n.properties = [...n.properties, ...addedProperties];
-                });
+                updateExtendedProperties(oldType, addedProperties, removedProperties);
+                updateExtendedInterfaces(oldType, addedInterfaces, removedInterfaces);
 
                 // eslint-disable-next-line no-underscore-dangle
                 const errors = editorManager._unregisterNodeType(oldType);
