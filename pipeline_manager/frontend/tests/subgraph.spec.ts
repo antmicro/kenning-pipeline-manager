@@ -549,3 +549,32 @@ test('test inherited subgraph from specification', async ({ page }) => {
     await enterSubgraph(getNode(page, 'InheritedSubgraph'));
     await verifyNodeCount(page, 5);
 });
+test('test inherited subgraph', async ({ page }) => {
+    test.skip(true, 'Currently resolving inheritance for subgraphs during runtime is not supported');
+    await page.goto(getUrl());
+    const fileChooserSpec = await openFileChooser(page, 'specification');
+    await fileChooserSpec.setFiles(getPathToJsonFile('sample-inheritance-specification.json'));
+    const fileChooserData = await openFileChooser(page, 'dataflow');
+    await fileChooserData.setFiles(getPathToJsonFile('sample-inheritance-dataflow.json'));
+    await enableEditingNodes(page);
+
+    const nodeA = page.locator('[data-node-type="Type A"]');
+    await nodeA.locator('.__title').click({ button: 'right', force: true });
+    await page.getByText('Add and edit subgraph').click();
+
+    await addNode(page, 'Classes', 'Type C', 750, 80);
+    const newOutputInterface = page
+        .locator('[data-node-type="Type C"]')
+        .locator('.__content')
+        .locator('.__interfaces');
+    await newOutputInterface.click({ button: 'right' });
+    const contextMenuOption = page.locator('.baklava-context-menu').getByText('Expose Interface');
+    await contextMenuOption.click();
+    await leaveSubgraph(page);
+
+    expect(await nodeA.locator('.__interfaces').locator('[id]').count()).toBe(2);
+
+    // B inherits from A
+    const nodeB = page.locator('[data-node-type="Type B"]');
+    expect(await nodeB.locator('.__interfaces').locator('[id]').count()).toBe(3);
+});
