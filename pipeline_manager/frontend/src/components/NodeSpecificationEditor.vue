@@ -348,16 +348,23 @@ export default defineComponent({
 
                 const allNodes = [...nodes, ...childNodes];
                 allNodes.forEach((n) => {
+                    const isChild = childNodes.includes(n);
                     const propToRem = removedProperties.filter((p) =>
-                        !Object.values(n.inputs).find((i) => i.name === p.name).inherited);
+                        isChild ||
+                            !Object.values(n.inputs).find((i) => i.name === p.name).inherited);
                     const allIntfs = [...Object.values(n?.inputs), ...Object.values(n?.outputs)];
                     const intfToRem = removedInterfaces.filter((p) =>
-                        !allIntfs.find((i) => i.name === p.name).inherited);
+                        isChild ||
+                            !allIntfs.find((i) => i.name === p.name).inherited);
+                    const processedProps = parsedProperties
+                        .map((prop) => (isChild ? { ...prop, inherited: true } : prop));
+                    const processedIntfs = parsedInterfaces
+                        .map((intf) => (isChild ? { ...intf, inherited: true } : intf));
 
                     alterProperties([n], propToRem, true);
                     alterInterfaces([n], intfToRem, true);
-                    alterProperties([n], parsedProperties);
-                    alterInterfaces([n], parsedInterfaces);
+                    alterProperties([n], processedProps);
+                    alterInterfaces([n], processedIntfs);
                 });
                 const resolvedChildNodes = editorManager.specification.currentSpecification.nodes
                     .filter((n) => n.extends?.includes(oldType)) ?? [];
