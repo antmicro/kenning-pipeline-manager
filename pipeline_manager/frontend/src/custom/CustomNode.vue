@@ -201,6 +201,7 @@ import NotificationHandler from '../core/notifications.js';
 import getExternalApplicationManager from '../core/communication/ExternalApplicationManager';
 
 import { configurationState, menuState } from '../core/nodeCreation/ConfigurationState.ts';
+import { prepareNodeForDuplication } from '../core/nodeCreation/Configuration.ts';
 import {
     updateSubgraphInterfaces,
     updateSubgraphProperties,
@@ -478,12 +479,6 @@ const onContextMenuTitleClick = async (action) => {
         configurationState.interfaces = configuredInterfaces;
     }
 
-    const nodeData = {
-        name: props.node.type,
-        category: nodeCategory,
-        layer: props.node.layer,
-    };
-
     if (action.includes('gotoRelatedGraph')) {
         viewModel.value.editor.switchToRelatedGraph(action.replace(/^gotoRelatedGraph /, ''));
     }
@@ -552,7 +547,6 @@ const onContextMenuTitleClick = async (action) => {
             menuState.configurationMenu.visible = true;
             menuState.configurationMenu.addNode = false;
             menuState.configurationMenu.duplicateNode = false;
-            configurationState.nodeData = nodeData;
             break;
         case 'property':
             menuState.propertyMenu = true;
