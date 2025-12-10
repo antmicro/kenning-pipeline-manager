@@ -15,6 +15,7 @@
         "build-spec-builder": "npx webpack --config specification_builder/webpack.config.js"
     },
     "dependencies": {
+        "@types/dompurify": "^3.0.5",
         "@vue/cli-service": "^5.0.8",
         "ajv": "^8.12.0",
         "baklavajs": "^2.0.2-beta.3",
