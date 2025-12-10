@@ -13,51 +13,46 @@ from creating and deleting connections or altering nodes' values if the editor i
 
 <template>
     <transition name="slide-fade">
-        <div ref="el">
-                <a
-                    v-for="url in nodeRef.URLs"
-                    :key="url.name"
-                    :href="url.url"
-                    class="__url"
-                    target="_blank"
-                    draggable="false"
-                    @pointerdown.left.stop
-                >
-                    <div class="link_item">
-                        <img
-                            v-if="url.icon !== undefined"
-                            :src="getIconPath(url.icon)"
-                            draggable="false"
-                        />
-                        <span>{{ url.name }}</span>
-                        <br>
-                    </div>
-                </a>
+        <div v-if="URLs !== undefined">
+            <a
+                v-for="url in URLs"
+                :key="url.name"
+                :href="url.url"
+                class="__url"
+                target="_blank"
+                draggable="false"
+                @pointerdown.left.stop
+            >
+                <div class="link_item">
+                    <img
+                        v-if="url.icon !== undefined"
+                        :src="getIconPath(url.icon)"
+                        draggable="false"
+                    />
+                    <span>{{ url.name }}</span>
+                    <br>
+                </div>
+            </a>
         </div>
     </transition>
 </template>
 
-<script>
-import { defineComponent, ref } from 'vue';
+<script lang="ts">
+import { defineComponent } from 'vue';
 import { useViewModel } from '@baklavajs/renderer-vue';
+import { type CustomViewModel, type NodeURL } from '../core/palette/types';
 
 export default defineComponent({
     props: {
-        node: {
+        URLs: {
+            type: Object as () => NodeURL[],
             required: true,
         },
     },
-    setup(props) {
-        const el = ref(null);
+    setup() {
         const { viewModel } = useViewModel();
-        const getIconPath = (name) => viewModel.value.cache[`./${name}`] ?? name;
-        const nodeRef = ref(props.node);
-
-        return {
-            el,
-            getIconPath,
-            nodeRef,
-        };
+        const getIconPath = (name: string) => (viewModel.value as CustomViewModel).cache[`./${name}`] ?? name;
+        return { getIconPath };
     },
 });
 </script>

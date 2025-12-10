@@ -953,7 +953,7 @@ export default class EditorManager {
     /**
      * Removes node type from editor specification.
      *
-     * @param {object} nodeType Node type to remove
+     * @param {string} nodeType Node type to remove
      */
     removeNodeType(nodeType) {
         this._unregisterNodeType(nodeType);
