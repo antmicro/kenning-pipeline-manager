@@ -325,8 +325,10 @@ export default defineComponent({
                 );
 
                 // Deep copy properties from specification before altering nodes
-                const parsedProperties = structuredClone(parsedSpecification.properties ?? []);
-                const parsedInterfaces = structuredClone(parsedSpecification.interfaces ?? []);
+                const parsedProperties = [...structuredClone(parsedSpecification.properties ?? []),
+                    ...inheritedProperties];
+                const parsedInterfaces = [...structuredClone(parsedSpecification.interfaces ?? []),
+                    ...inheritedInterfaces];
 
                 const removedProperties = oldProperties.filter(
                     (prop) => !parsedProperties.some((p) => p.name === prop.name),
