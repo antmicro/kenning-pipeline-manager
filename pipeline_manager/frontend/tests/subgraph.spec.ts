@@ -1,5 +1,5 @@
 import { test, expect, Page, Locator } from '@playwright/test';
-import { getPathToJsonFile, getUrl, openFileChooser, enableEditingNodes } from './config.js';
+import { getPathToJsonFile, getUrl, openFileChooser, enableEditingNodes, addNode } from './config.js';
 
 import YAML from 'yaml';
 
@@ -133,6 +133,22 @@ async function placeNewNode(page, location: { x: number; y: number }) {
     await dragAndDrop(page, nodeFromBrowser, location);
 }
 
+async function createNewNode(page, location: { x: number; y: number }) {
+    const showNodesButton = page.getByText('Show node browser').locator('../..');
+    await showNodesButton.click();
+    const newNodeType = page.getByText('New Node Type').first();
+    await dragAndDrop(page, newNodeType, location);
+    const createButton = page.getByText('Create').first();
+    await createButton.click();
+}
+
+async function createNewGraphNode(page, location: { x: number; y: number }) {
+    const showNodesButton = page.getByText('Show node browser').locator('../..');
+    await showNodesButton.click();
+    const newGraphNodeType = page.getByText('New Graph Node').first();
+    await dragAndDrop(page, newGraphNodeType, location);
+}
+
 test('test preserving changes to subgraph', async ({ page }) => {
     await prepareSubgraphPage(page);
     await verifyNodeCount(page, 4);
@@ -250,6 +266,15 @@ test('modifying subgraph interfaces correctly reflected in yaml editor', async (
     await addInterface(page, 'Test subgraph #1');
     const content = await getYAML(page, 'Test subgraph #1');
     expect(await content.interfaces.length).toBe(2);
+});
+
+test('modifying subgraph properties correctly reflected in yaml editor', async ({ page }) => {
+    await prepareSubgraphPage(page);
+    await verifyNodeCount(page, 4);
+    await enableEditingNodes(page);
+    await addProperty(page, 'Test subgraph #1');
+    const content = await getYAML(page, 'Test subgraph #1');
+    expect(await content.properties.length).toBe(2);
 });
 
 test('test adding exposed property', async ({ page }) => {
@@ -390,4 +415,50 @@ test("test remove node with exposed properties", async ({ page }) => {
     await leaveSubgraph(page);
 
     expect(await exposedProperties.count()).toBe(0);
+});
+
+test("test new node type creation", async ({ page }) => {
+    await prepareSubgraphPage(page);
+    await verifyNodeCount(page, 4);
+    await enableEditingNodes(page);
+
+    await createNewNode(page,{x:400,y:400});
+
+    // check if a new node type has been added
+    await verifyNodeCount(page,5);
+});
+
+test("test new graph node creation", async ({ page }) => {
+    await prepareSubgraphPage(page);
+    await verifyNodeCount(page, 4);
+    await enableEditingNodes(page);
+
+    await createNewGraphNode(page,{x:400,y:400});
+
+    // check if a new node type has been added
+    await verifyNodeCount(page,5);
+
+    // enter into a new graph node
+    await enterSubgraph(page,'New Graph Node');
+
+    // add a node
+    await verifyNodeCount(page,0);
+    await placeNewNode(page,{x:400,y:400});
+    await verifyNodeCount(page,1);
+
+    // expose a interface
+    const newOutputInterface = page
+        .getByText('Test node #1')
+        .locator('../..')
+        .locator('.__content .__outputs .__port')
+        .first();
+    await newOutputInterface.click({ button: 'right' });
+
+    const contextMenuOption = page.locator('.baklava-context-menu').getByText('Expose Interface');
+    await contextMenuOption.click();
+
+    await leaveSubgraph(page);
+
+    await verifyInterfaceCount(page, 1,'New Graph Node');
+
 });
