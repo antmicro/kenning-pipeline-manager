@@ -98,9 +98,10 @@ export async function loadDataflow(page, dataflowFile) {
  * @param {string} nodeName - The name of the node to add.
  * @param {number} x - The x-coordinate to drop the node.
  * @param {number} y - The y-coordinate to drop the node.
+ * @param {boolean} [openCategory] - Whether to click on category entry.
  * @returns {Promise<void>} Promise that resolves when the drag-and-drop operation is complete.
  */
-export async function addNode(page, category, nodeName, x, y) {
+export async function addNode(page, category, nodeName, x, y, openCategory = true) {
     const categoryBar = page.getByText(category, { exact: true });
     const node = page.getByText(nodeName, { exact: true }).first();
 
@@ -108,7 +109,7 @@ export async function addNode(page, category, nodeName, x, y) {
     await enableNavigationBar(page);
     await categoryBar.scrollIntoViewIfNeeded();
     await expect(categoryBar).toBeVisible();
-    await categoryBar.click();
+    if (openCategory) await categoryBar.click();
 
 
     // Drag and drop to the [x, y] position.

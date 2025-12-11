@@ -67,20 +67,18 @@ async function renameNodeType(page: Page, oldName: string, newName: string) {
     await page.getByRole('button', { name: 'Configure' }).click();
 }
 
-async function addParentAndChildNode(page: Page, coord: integer) {
-    await addNode(page, 'Processing', 'Binary images', 750, 80);
+async function addParentAndChildNode(page: Page, coord: number, openCategory = true) {
+    await addNode(page, 'Processing', 'Binary images', 750, 80, openCategory);
 
     await openNodePalette(page);
     const nodePalette = page.locator('.baklava-node-palette');
-    const category = nodePalette.getByText('Processing', { exact: true });
-    await category.scrollIntoViewIfNeeded();
-    await expect(category).toBeVisible();
 
     const categoryNodeEntry = nodePalette.getByText('Binary images');
-    const categoryNodeButton = categoryNodeEntry.locator('../..').locator('svg.arrow.right.small');
+    const orient = openCategory ? 'right' : 'left';
+    const categoryNodeButton = categoryNodeEntry.locator('../..').locator(`svg.arrow.${orient}.small`);
     await categoryNodeButton.scrollIntoViewIfNeeded();
     await expect(categoryNodeButton).toBeVisible();
-    await categoryNodeButton.click();
+    if (openCategory) await categoryNodeButton.click();
 
     const childNodeEntry = nodePalette.getByText('Logical AND');
     await expect(childNodeEntry).toBeVisible();
@@ -174,12 +172,8 @@ test('rename extending node', async ({ page }) => {
 
     // assert that the node is renamed in node palette
     const nodePalette = page.locator('.baklava-node-palette');
-    const category = nodePalette.getByText('Filesystem');
 
     await openNodePalette(page);
-    await category.scrollIntoViewIfNeeded();
-    await expect(category).toBeVisible();
-    await category.click();
 
     const newNodeEntry = nodePalette.getByText('New node name');
     expect(newNodeEntry).toBeVisible();
@@ -229,7 +223,7 @@ test('add interface to category node', async ({ page }) => {
     await addInterface(page, 'Binary images');
     await assertInputCount(page, 'Logical AND', 3);
 
-    await addParentAndChildNode(page, 200);
+    await addParentAndChildNode(page, 200, false);
     await assertInputCount(page, 'Binary images', 4);
     await assertInputCount(page, 'Logical AND', 6);
 });

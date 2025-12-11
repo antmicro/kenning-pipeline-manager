@@ -50,7 +50,7 @@ test('check added inherited property in spec', async ({ page }) => {
 
     await addNode(page, 'Classes', 'Type A', 400, 200);
     await addProperty(page, page.locator('[data-node-type="Type A"]'));
-    await addNode(page, 'Classes', 'Type B', 700, 200);
+    await addNode(page, 'Classes', 'Type B', 700, 200, false);
     const nodeB = page.locator('[data-node-type="Type B"]');
     await nodeB.locator('.__title').dblclick();
     const initialContent = await getYAMLEditorContent(page);
