@@ -46,6 +46,13 @@ async function enterSubgraph(page: Page, nodeName: string) {
     await contextMenuOption.click();
 }
 
+async function deleteNode(page: Page, nodeName: string) {
+    const node = page.getByText(nodeName).last().locator('../..');
+    await node.locator('.__title').click({ button: 'right' });
+    const contextMenuOption = page.locator('.baklava-context-menu').getByText('Delete').last();
+    await contextMenuOption.dispatchEvent('click');
+}
+
 async function checkForSubgraph(page: Page, nodeName: string) {
     const nodeWithSubgraph = page.getByText(nodeName).last().locator('../..');
     await nodeWithSubgraph.locator('.__title').click({ button: 'right' });
@@ -346,4 +353,41 @@ test("test add subgraph, with sub-node", async ({ page }) => {
 
     // Check if the newly exposed interface is present.
     expect(await exposedInterfaces.count()).toBe(2);
+});
+
+
+test("test remove node with exposed interface", async ({ page }) => {
+    await prepareSubgraphPage(page);
+    await verifyNodeCount(page, 4);
+    await enableEditingNodes(page);
+    const exposedInterfaces = await verifyInterfaceCount(page, countOfInitiallyExposedInterface,'Test subgraph #1');
+
+    await enterSubgraph(page,'Test subgraph #1');
+
+    // check if a node has been removed from subgraph
+    await verifyNodeCount(page,2);
+    await deleteNode(page,"Test node #1");
+    await verifyNodeCount(page,1);
+
+    await leaveSubgraph(page);
+
+    expect(await exposedInterfaces.count()).toBe(countOfInitiallyExposedInterface-2);
+});
+
+test("test remove node with exposed properties", async ({ page }) => {
+    await prepareSubgraphPage(page);
+    await verifyNodeCount(page, 4);
+    await enableEditingNodes(page);
+    const exposedProperties = await verifyPropertyCount(page,'Test subgraph #2',1);
+
+    await enterSubgraph(page,'Test subgraph #2');
+
+    // check if a node has been removed from subgraph
+    await verifyNodeCount(page,5);
+    await deleteNode(page,"Test node #2");
+    await verifyNodeCount(page,4);
+
+    await leaveSubgraph(page);
+
+    expect(await exposedProperties.count()).toBe(0);
 });
