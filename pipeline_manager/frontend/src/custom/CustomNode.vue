@@ -77,17 +77,18 @@ from moving or deleting the nodes.
                 :style="nodePillStyle"
                 v-html="DOMPurify.sanitize(pillText)"
             />
+            <!-- disable transition to avoid rendering additional redraw for viewport adjustment -->
             <CustomContextMenu
-                v-if="showContextMenuTitle"
+                ref='contextMenuTitle'
                 v-model="showContextMenuTitle"
                 :x="contextMenuTitleX"
                 :y="contextMenuTitleY"
                 :items="contextMenuTitleItems"
                 :urls="nodeURLs"
                 :style="contextMenuStyle"
+                :transition="''"
                 @pointerdown.left.stop
                 @click="onContextMenuTitleClick"
-
                 @sizeUpdate="onContextMenuSizeUpdate"
             />
         </div>
@@ -97,7 +98,7 @@ from moving or deleting the nodes.
             @pointerdown.right="openContextMenuTitle"
             >
             <!-- Properties -->
-            <div class="__properties">
+            <div class="__properties" ref="propertiesRef">
                 <div
                     v-for="input in displayedProperties"
                     :key="input.id"
@@ -156,21 +157,23 @@ from moving or deleting the nodes.
             </div>
 
             <CustomContextMenu
-                v-if="showContextMenuInterface"
+                ref="contextMenuInterface"
                 v-model="showContextMenuInterface"
                 :x="contextMenuInterfaceX"
                 :y="contextMenuInterfaceY"
                 :items="contextMenuInterfaceItems"
-                :style="contextMenuStyle"
+                :style="contextMenuInterfaceStyle"
+                :ignore-close="[leftSocketsRefs, rightSocketsRefs]"
                 @click="onContextMenuInterfaceClick"
             />
             <CustomContextMenu
-                v-if="showContextMenuProperty"
+                ref="contextMenuProperty"
                 v-model="showContextMenuProperty"
                 :x="contextMenuPropertyX"
                 :y="contextMenuPropertyY"
                 :items="contextMenuPropertyItems"
                 :style="contextMenuStyle"
+                :ignore-close="[propertiesRef]"
                 @click="onContextMenuPropertyClick"
             />
 
@@ -180,7 +183,7 @@ from moving or deleting the nodes.
 
 <script setup>
 /* eslint-disable object-curly-newline */
-import { ref, computed, toRef, onUpdated, onMounted, nextTick, watch } from 'vue';
+import { ref, computed, toRef, onUpdated, onMounted, nextTick, watch, useTemplateRef } from 'vue';
 import { useViewModel, useGraph } from '@baklavajs/renderer-vue';
 import { AbstractNode } from '@baklavajs/core';
 import DOMPurify from 'dompurify';
@@ -229,6 +232,8 @@ const movementStep = computed(() => viewModel.value.movementStep);
 // Template refs
 const nodeRef = ref(null);
 const titleRef = ref(null);
+const contextMenuTitleRef = useTemplateRef('contextMenuTitle');
+const propertiesRef = useTemplateRef('propertiesRef');
 const renaming = ref(false);
 const renameField = ref(null);
 const tempName = ref('');
@@ -318,13 +323,10 @@ const focusOnRename = () => {
 const showContextMenuTitle = ref(false);
 const contextMenuTitleX = ref(0);
 const contextMenuTitleY = ref(0);
-const contextMenuVisibility = ref('hidden');
-const contextMenuPosition = ref(0);
 
 const contextMenuStyle = computed(() => ({
     'transform-origin': '0 0',
     transform: `scale(${1 / graph.value.scaling})`,
-    visible: contextMenuVisibility.value,
 }));
 
 const contextMenuTitleItems = computed(() => {
@@ -596,16 +598,6 @@ const onContextMenuTitleClick = async (action) => {
     }
 };
 
-const onContextMenuSizeUpdate = (size) => {
-    // Adjust context menu position to fit into the viewport
-    const offset = contextMenuPosition.value + size.height + 200 - window.innerHeight;
-    if (offset > 0) {
-        contextMenuTitleY.value -= offset;
-    }
-    // Make it visible
-    contextMenuVisibility.value = 'visible';
-};
-
 const canOpenContextMenu = computed(() =>
     (contextMenuTitleItems.value.length === 0 && displayNoResources)
         || contextMenuTitleItems.value.length > 0,
@@ -614,21 +606,30 @@ const canOpenContextMenu = computed(() =>
 const showContextMenuInterface = ref(false);
 const showContextMenuProperty = ref(false);
 
-const openContextMenuTitle = (ev) => {
+const openContextMenuTitle = async (ev) => {
     if (
         canOpenContextMenu.value &&
         showContextMenuTitle.value === false &&
         showContextMenuInterface.value === false &&
         showContextMenuProperty.value === false
     ) {
-        // Render the menu but keep it hidden
         showContextMenuTitle.value = true;
-
+        // Render the menu but keep it hidden
         // Set initial menu position
         const target = ev.currentTarget;
-        contextMenuTitleX.value = ev.offsetX;
-        contextMenuTitleY.value = ev.offsetY + target.offsetTop + 20;
-        contextMenuPosition.value = ev.clientY;
+
+        contextMenuTitleX.value = ev.offsetX + 10;
+        contextMenuTitleY.value = ev.offsetY + target.offsetTop + 10;
+
+        showContextMenuTitle.value = true;
+        await nextTick();
+        showContextMenuTitle.value = false;
+
+        const size = contextMenuTitleRef.value.el.getBoundingClientRect();
+        const offset = ev.pageY + target.offsetTop + 10 + size.height + 200 - window.innerHeight;
+        if (offset > 0) contextMenuTitleY.value -= offset;
+
+        showContextMenuTitle.value = true;
     }
 };
 
@@ -886,8 +887,7 @@ const dragInterface = (ev) => {
 
     const el = sockets.children[socket];
     interfaceCursorStyle.value = {
-        top: `${el.offsetTop + el.offsetHeight / 2 - 2.5}px`,
-        display: 'block',
+        top: `${el.offsetTop + el.offsetHeight / 2 - 2.5}px`, display: 'block',
     };
 
     if (chosenInterface.side === 'right') {
@@ -922,6 +922,11 @@ const pickInterface = (intf, ev) => {
 
 // Interface context menu
 
+const contextMenuInterfaceSide = ref('left');
+const contextMenuInterfaceStyle = computed(() => ({
+    ...contextMenuStyle.value,
+    ...(contextMenuInterfaceSide.value === 'left' && { translate: `-${100 / graph.value.scaling}%` }),
+}));
 const contextMenuInterfaceX = ref(0);
 const contextMenuInterfaceY = ref(0);
 
@@ -997,17 +1002,22 @@ const onContextMenuInterfaceClick = (action) => {
     }
 };
 
-const openContextMenuInterface = (intf, ev) => {
-    if (!viewModel.value.editor.readonly && showContextMenuInterface.value === false) {
+const openContextMenuInterface = async (intf, ev) => {
+    showContextMenuInterface.value = false;
+    await nextTick();
+    if (!viewModel.value.editor.readonly) {
         chosenInterface = intf;
         contextMenuInterfaceItems.value = createContextMenuInterfaceItems();
+        const { offsetTop } = ev.currentTarget;
+        const { offsetLeft, clientWidth } = titleRef.value;
         if (chosenInterface.side === 'right') {
-            contextMenuInterfaceX.value = ev.currentTarget.offsetLeft + 162.5;
-            contextMenuInterfaceY.value = ev.currentTarget.offsetTop + 12.5;
+            contextMenuInterfaceSide.value = 'right';
+            contextMenuInterfaceX.value = offsetLeft + clientWidth + 10;
+            contextMenuInterfaceY.value = offsetTop + 12.5 / graph.value.scaling;
         } else if (chosenInterface.side === 'left') {
-            contextMenuInterfaceX.value =
-                ev.currentTarget.offsetLeft - ev.currentTarget.offsetWidth + 162.5;
-            contextMenuInterfaceY.value = ev.currentTarget.offsetTop + 12.5;
+            contextMenuInterfaceSide.value = 'left';
+            contextMenuInterfaceX.value = offsetLeft - 10;
+            contextMenuInterfaceY.value = offsetTop + 12.5;
         }
 
         showContextMenuInterface.value = true;
@@ -1082,14 +1092,16 @@ const onContextMenuPropertyClick = (action) => {
     }
 };
 
-const openContextMenuProperty = (property, ev) => {
-    if (!viewModel.value.editor.readonly && showContextMenuProperty.value === false) {
+const openContextMenuProperty = async (property, ev) => {
+    showContextMenuProperty.value = false;
+    await nextTick();
+    if (!viewModel.value.editor.readonly) {
         chosenProperty = property;
         contextMenuPropertyItems.value = createContextMenuPropertyItems();
 
         if (contextMenuPropertyItems.value.length > 0) {
             const target = ev.currentTarget;
-            contextMenuPropertyX.value = ev.offsetX;
+            contextMenuPropertyX.value = ev.offsetX + 20;
             contextMenuPropertyY.value = ev.offsetY + target.offsetTop + 20;
             showContextMenuProperty.value = true;
         }

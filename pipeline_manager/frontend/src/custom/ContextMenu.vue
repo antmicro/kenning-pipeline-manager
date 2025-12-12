@@ -12,7 +12,7 @@ from creating and deleting connections or altering nodes' values if the editor i
 -->
 
 <template>
-    <transition name="slide-fade">
+    <transition :name="transition">
         <div
             v-show="modelValue"
             ref="el"
@@ -76,20 +76,26 @@ from creating and deleting connections or altering nodes' values if the editor i
 </template>
 
 <script>
-import {
-    defineComponent, ref, onMounted, nextTick,
-} from 'vue';
+import { defineComponent, onUnmounted, ref } from 'vue';
 import { Components, useViewModel } from '@baklavajs/renderer-vue';
 
 export default defineComponent({
     extends: Components.ContextMenu,
     props: {
         urls: {
-            required: false,
-            default: [],
+            type: Array,
+            default: () => [],
+        },
+        ignoreClose: {
+            type: Array,
+            default: () => [],
+        },
+        transition: {
+            type: String,
+            default: 'slide-fade',
         },
     },
-    emits: ['update:modelValue', 'click', 'sizeUpdate', 'onpointerover', 'onpointerleave'],
+    emits: ['update:modelValue', 'click', 'onpointerover', 'onpointerleave'],
     setup(props, context) {
         const {
             el,
@@ -102,39 +108,55 @@ export default defineComponent({
         const { viewModel } = useViewModel();
         const getIconPath = (name) => viewModel.value.cache[`./${name}`] ?? name;
 
-        const justOpened = ref(true);
-
-        onMounted(async () => {
-            await nextTick();
-            const size = el.value.getBoundingClientRect();
-            context.emit('sizeUpdate', size);
-        });
+        const opened = ref(false);
 
         const closeContextMenu = (ev) => {
             if (props.modelValue === true) {
                 // We need a counter so that this event is not fired right when the menu is opened
-                if (justOpened.value === false) {
-                    const elements = document.elementsFromPoint(ev.clientX, ev.clientY);
+                if (opened.value === true) {
+                    let current = document.elementsFromPoint(ev.clientX, ev.clientY)[0];
+                    const elements = [];
+                    while (current) {
+                        elements.push(current);
+                        current = current.parentNode;
+                    }
+
                     // We only need to fire closing event if the click was
                     // outside of the context menu. Otherwise `onClick` is fired.
-                    if (!elements.includes(el.value)) {
-                        window.removeEventListener('wheel', closeContextMenu);
-                        window.removeEventListener('pointerdown', closeContextMenu);
+                    const hasIgnoredElements = new Set(elements)
+                        .intersection(new Set([el.value, ...props.ignoreClose])).size;
+
+                    if (ev.type === 'wheel' || !(hasIgnoredElements)) {
                         context.emit('update:modelValue', false);
+                        opened.value = false;
                     }
-                    justOpened.value = true;
                 } else {
-                    justOpened.value = false;
+                    opened.value = true;
                 }
             }
         };
 
+        const onKeyDown = (ev) => {
+            if (ev.key === 'Escape') {
+                context.emit('update:modelValue', false);
+                opened.value = false;
+            }
+        };
+
+        window.addEventListener('keydown', onKeyDown);
         window.addEventListener('wheel', closeContextMenu);
         window.addEventListener('pointerdown', closeContextMenu);
+
+        onUnmounted(() => {
+            window.removeEventListener('keydown', onKeyDown);
+            window.removeEventListener('wheel', closeContextMenu);
+            window.removeEventListener('pointerdown', closeContextMenu);
+        });
 
         const onClick = (item) => {
             context.emit('click', item.value);
             context.emit('update:modelValue', false);
+            opened.value = false;
         };
 
         const onPointerOver = (item) => {
