@@ -60,6 +60,7 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
                     :selected="selectedNodes.includes(node)"
                     :greyedOut="greyedOutNodes.includes(node)"
                     :interfaces="highlightInterfaces"
+                    :ignoredInterfacesType="[...ignoredInterfacesTypes]"
                     @select="(ev) => selectNode(node, ev)"
                 />
                 <CustomNode
@@ -382,7 +383,8 @@ export default defineComponent({
                     ];
 
                     viableConnections.forEach((n) => {
-                        if (n.port && n !== temporaryConnection.temporaryConnection.value.from) {
+                        if (n.port
+                        && n !== temporaryConnection.temporaryConnectioignoredLayersn.value.from) {
                             const result = graph.value.checkConnection(
                                 temporaryConnection.temporaryConnection.value.from,
                                 n,
@@ -485,7 +487,7 @@ export default defineComponent({
         const ignorableLayers = computed(() => props.viewModel.layers);
 
         const ignoredInterfacesTypes = computed(() => {
-            const temp = new Set();
+            const temp = new Set([]);
 
             ignorableLayers.value.forEach((layer) => {
                 if (layer.nodeInterfaces && ignoredLayers.value.has(layer.name)) {
@@ -1011,6 +1013,7 @@ export default defineComponent({
             showWelcome,
             loadFiles,
             validating: editorManager.validating,
+            ignoredInterfacesTypes,
         };
     },
 });
