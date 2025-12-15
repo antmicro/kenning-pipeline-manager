@@ -1262,45 +1262,7 @@ export default class EditorManager {
         } catch (e) {
             return { errors: [e.message], warnings };
         }
-
-        // Resolving children
-        resolvedNodes.forEach((node) => {
-            (node.extends ?? []).forEach((eName) => {
-                const extended = resolvedNodes.find((n) => n.name === eName);
-
-                // The extended node could be abstract, in which way it is not in resolved nodes.
-                if (extended !== undefined) {
-                    if (extended.extending === undefined) {
-                        extended.extending = [];
-                    }
-                    extended.extending.push(node.name);
-                }
-            });
-        });
-
-        // Resolving siblings
-        resolvedNodes.forEach((node) => {
-            const siblings = new Set();
-            (node.extends ?? []).forEach((eName) => {
-                const extended = resolvedNodes.find((n) => n.name === eName);
-
-                // The extended node could be abstract, in which way it is not in resolved nodes.
-                if (extended !== undefined) {
-                    extended.extending.forEach((e) => siblings.add(e));
-                }
-            });
-            siblings.delete(node.name);
-            node.siblings = Array.from(siblings);
-        });
-
-        // Removing abstract parents
-        resolvedNodes.forEach((node) => {
-            if (node.extends) {
-                node.extends = node.extends.filter(
-                    (eName) => (resolvedNodes.find((n) => n.name === eName) !== undefined),
-                );
-            }
-        });
+        resolvedNodes.forEach((node) => this.resolveAffinities(node, resolvedNodes));
 
         if (globalProperties.softLoad) {
             // Check if subgraph id exists
@@ -1587,6 +1549,46 @@ export default class EditorManager {
         if (newMetadata) this.updatedMetadata = newMetadata;
 
         return [];
+    }
+    /**
+     * Nodes that have already been resolved and have gone through JSON parsing
+     *
+     * @param node
+     * @param resolvedNodes
+     * @returns nodes marked as inherited
+     */
+    /* eslint-disable class-methods-use-this,no-param-reassign */
+    resolveAffinities(node, resolvedNodes) {
+        // Resolving children
+        (node.extends ?? []).forEach((eName) => {
+            const extended = resolvedNodes.find((n) => n.name === eName);
+
+            // The extended node could be abstract, in which way it is not in resolved nodes.
+            if (extended !== undefined) {
+                if (extended.extending === undefined) {
+                    extended.extending = [];
+                }
+                extended.extending.push(node.name);
+            }
+        });
+
+        const siblings = new Set();
+        (node.extends ?? []).forEach((eName) => {
+            const extended = resolvedNodes.find((n) => n.name === eName);
+
+            // The extended node could be abstract, in which way it is not in resolved nodes.
+            if (extended !== undefined) {
+                extended.extending.forEach((e) => siblings.add(e));
+            }
+        });
+        siblings.delete(node.name);
+        node.siblings = Array.from(siblings);
+
+        if (node.extends) {
+            node.extends = node.extends.filter(
+                (eName) => (resolvedNodes.find((n) => n.name === eName) !== undefined),
+            );
+        }
     }
     /**
      * Nodes that have already been resolved and have gone through JSON parsing
