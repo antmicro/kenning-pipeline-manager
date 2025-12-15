@@ -213,6 +213,7 @@ const props = defineProps({
     greyedOut: Boolean,
     hidden: Boolean,
     interfaces: Array,
+    ignoredInterfacesType: Array,
 });
 
 const emit = defineEmits(['select']);
@@ -727,12 +728,14 @@ const onMouseDown = () => {
 const displayedLeftSockets = computed(() =>
     Object.values([...displayedInputs.value, ...displayedOutputs.value])
         .filter((intf) => intf.side === 'left' && intf.port)
+        .filter((intf) => !intf.type?.some((t) => props.ignoredInterfacesType.includes(t)))
         .sort((intf1, intf2) => intf1.sidePosition - intf2.sidePosition),
 );
 
 const displayedRightSockets = computed(() =>
     Object.values([...displayedInputs.value, ...displayedOutputs.value])
         .filter((intf) => intf.side === 'right' && intf.port)
+        .filter((intf) => !intf.type?.some((t) => props.ignoredInterfacesType.includes(t)))
         .sort((intf1, intf2) => intf1.sidePosition - intf2.sidePosition),
 );
 const getRows = (sockets) => {
