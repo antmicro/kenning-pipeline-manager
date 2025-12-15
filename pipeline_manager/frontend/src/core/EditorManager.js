@@ -871,6 +871,11 @@ export default class EditorManager {
                         }
                     });
                 }
+                if (removeUnused) {
+                    Object.keys(resolvedNodeSpecification)
+                        .filter((key) => !(key in nodeSpecification))
+                        .forEach((key) => { delete resolvedNodeSpecification[key]; });
+                }
                 Object.entries(nodeSpecification).forEach(([key, value]) => {
                     if (value !== undefined) {
                         resolvedNodeSpecification[key] = JSON.parse(JSON.stringify(value));
@@ -1072,11 +1077,21 @@ export default class EditorManager {
             return [`Node of type ${node.name} is already registered`];
         }
 
+        // eliminate duplicates from two 'branching' inheritance paths,
+        // probably should be checked for during validation.
+        const intfsInherited = this.findInheritedInterfaces(node.name).filter((intf) =>
+            !node.interfaces?.find((i) => i.name === intf.name))
+            ?.map((intf) => ({ ...intf, inherited: true }));
+        const propsInherited = this.findInheritedProperties(node.name).filter((prop) =>
+            !node.properties?.find((p) => p.name === prop.name))
+            ?.map((prop) => ({ ...prop, inherited: true }));
+        const inheritedAttributes = this.findSimpleInheritedAttributes(node.name);
+
         const myNode = CustomNodeFactory(
             node.name,
-            node.layer,
-            node.interfaces ?? [],
-            node.properties ?? [],
+            node.layer ?? inheritedAttributes.layer,
+            [...node.interfaces ?? [], ...intfsInherited],
+            [...node.properties ?? [], ...propsInherited],
             node.interfaceGroups ?? [],
             node.defaultInterfaceGroups ?? [],
             node.twoColumn ?? this.baklavaView.twoColumn ?? false,
@@ -1085,7 +1100,7 @@ export default class EditorManager {
             node.extending ?? [],
             node.siblings ?? [],
             node.width ?? 300,
-            node.simpleInherited ?? [],
+            Object.keys(inheritedAttributes),
         );
 
         // If my node is any array then it is an array of errors
@@ -1095,7 +1110,7 @@ export default class EditorManager {
 
         this.baklavaView.editor.registerNodeType(myNode, {
             title: node.name,
-            category: node.category,
+            category: inheritedAttributes.category ?? node.category,
             isCategory: node.isCategory ?? false,
             color: node.color,
             style: node.style,
@@ -1105,6 +1120,10 @@ export default class EditorManager {
         });
         if ('icon' in node) {
             const icon = typeof node.icon === 'string' ? node.icon : this.getMetadataIcon(node.icon);
+            this.baklavaView.editor.nodeIcons.set(node.name, icon);
+        }
+        if ('icon' in inheritedAttributes) {
+            const icon = typeof inheritedAttributes.icon === 'string' ? inheritedAttributes.icon : this.getMetadataIcon(inheritedAttributes.icon);
             this.baklavaView.editor.nodeIcons.set(node.name, icon);
         }
         if ('urls' in node) {
@@ -1233,8 +1252,7 @@ export default class EditorManager {
         });
 
         try {
-            const preprocessedNodes = EditorManager.preprocessNodes(nodes ?? []);
-            resolvedNodes = this.resolveInheritance(preprocessedNodes);
+            resolvedNodes = EditorManager.preprocessNodes(nodes ?? []);
         } catch (e) {
             return { errors: [e.message], warnings };
         }
@@ -1257,11 +1275,6 @@ export default class EditorManager {
         this.specification.currentSpecification.graphs = JSON.parse(JSON.stringify(graphs));
 
         // Resolving siblings, parents and children
-        try {
-            resolvedNodes = this.markInheritance(resolvedNodes);
-        } catch (e) {
-            return { errors: [e.message], warnings };
-        }
         resolvedNodes.forEach((node) => this.resolveAffinities(node, resolvedNodes));
 
         if (globalProperties.softLoad) {
@@ -1550,6 +1563,104 @@ export default class EditorManager {
 
         return [];
     }
+
+    /**
+     * Finds all inherited interfaces for node Type.
+     *
+     * @param nodeType type of node for which attributes should be searched
+     * @returns array of unique interfaces found in nodeType's parents.
+     */
+    findInheritedInterfaces(nodeType) {
+        const nodeSpec = this.specification.currentSpecification.nodes
+            .find((spec) => nodeType === spec.name) ?? [];
+        if ((nodeSpec.extends?.length ?? 0) === 0) {
+            return [];
+        }
+        const parentSpec = this.specification.currentSpecification.nodes
+            .filter((spec) => nodeSpec.extends?.includes(spec.name)) ?? [];
+        let interfaces = [];
+        parentSpec.forEach((p) => {
+            if (!p) {
+                return;
+            }
+            if (p?.interfaces !== undefined) {
+                interfaces = [...interfaces, ...p.interfaces];
+            }
+            const inherited = this.findInheritedInterfaces(p.name);
+            interfaces = [...interfaces, ...inherited];
+        });
+        const uniqueInterfaces = interfaces.filter((item, pos) =>
+            interfaces.findIndex((item2) => item.name === item2.name) === pos,
+        );
+        return uniqueInterfaces;
+    }
+
+    /**
+     * Finds all inherited properties for node Type.
+     *
+     * @param nodeType type of node for which attributes should be searched
+     * @returns array of unique properties found in nodeType's parents.
+     */
+    findInheritedProperties(nodeType) {
+        const nodeSpec = this.specification.currentSpecification.nodes
+            .find((spec) => nodeType === spec.name) ?? [];
+        if ((nodeSpec.extends?.length ?? 0) === 0) {
+            return [];
+        }
+        const parentSpec = this.specification.currentSpecification.nodes
+            .filter((spec) => nodeSpec.extends?.includes(spec.name)) ?? [];
+        let properties = [];
+        parentSpec.forEach((p) => {
+            if (!p) {
+                return;
+            }
+            if (p?.properties !== undefined) {
+                properties = [...properties, ...p.properties];
+            }
+            const inherited = this.findInheritedProperties(p.name);
+            properties = [...properties, ...inherited];
+        });
+        const uniqueProperties = properties.filter((item, pos) =>
+            properties.findIndex((item2) => item.name === item2.name) === pos,
+        );
+        return uniqueProperties;
+    }
+
+    /**
+     * Finds simple inherited attributes: category, layer and icon
+     *
+     * @param nodeType type of node for which attributes should be searched
+     * @param nodes optional list of nodes to search through
+     * @returns Object with properties category, layer, icon. If not set, no inherited
+     * attribute of that type was found.
+     */
+    findSimpleInheritedAttributes(nodeType, nodes = undefined) {
+        if (!nodes) {
+            nodes = this.specification.currentSpecification.nodes;
+        }
+        const simpleAttributes = ['category', 'layer', 'icon'];
+        const nodeSpec = nodes
+            .find((spec) => nodeType === spec.name) ?? [];
+        if ((nodeSpec.extends?.length ?? 0) === 0) {
+            return [];
+        }
+        const parentSpec = nodes
+            .filter((spec) => nodeSpec.extends?.includes(spec.name)) ?? [];
+        let attributes = {};
+        parentSpec.forEach((p) => {
+            if (!p) {
+                return;
+            }
+            const inherited = this.findSimpleInheritedAttributes(p.name);
+            attributes = { ...attributes, ...inherited };
+            simpleAttributes.forEach((key) => {
+                if (p[key] !== undefined) {
+                    attributes[key] = p[key];
+                }
+            });
+        });
+        return attributes;
+    }
     /**
      * Nodes that have already been resolved and have gone through JSON parsing
      *
@@ -1589,185 +1700,6 @@ export default class EditorManager {
                 (eName) => (resolvedNodes.find((n) => n.name === eName) !== undefined),
             );
         }
-    }
-    /**
-     * Nodes that have already been resolved and have gone through JSON parsing
-     * can now be marked for the editor to be able to distinguish between
-     * inherited and non-inherited properties/interfaces
-     *
-     * @param nodes
-     * @returns nodes marked as inherited
-     */
-    /* eslint-disable class-methods-use-this,no-param-reassign */
-    markInheritance(nodes) {
-        const unsortedNodes = JSON.parse(JSON.stringify(nodes));
-        const isObject = (obj) => typeof obj === 'object' && obj !== null && !Array.isArray(obj);
-        const isArray = (obj) => Array.isArray(obj);
-        const resolvedNodes = {};
-        const markNodes = (child, base) => {
-            const output = { ...structuredClone(child) };
-            const inheritedSimpleProps = [];
-            if (!base || !child) return output;
-
-            if (isObject(child) && isObject(base)) {
-                Object.keys(base).forEach((key) => {
-                    if (key === 'style') {
-                        return;
-                    }
-                    if (key === 'extends') {
-                        return;
-                    }
-                    if (key.endsWith('inherited')) {
-                        return;
-                    }
-                    if (isObject(base[key])) {
-                        if (!(key in child)) {
-                            throw new Error(`'${child.name}' must have inherited or overridden '${key}' property of '${base.name}' node`);
-                        } else {
-                            output[key] = markNodes(child[key], base[key]);
-                        }
-                    } else if (isArray(child[key]) && isArray(base[key])) {
-                        const baseNames = Object.fromEntries(
-                            base[key].map((obj, i) => [obj.name, i]),
-                        );
-
-                        child[key].forEach((obj) => {
-                            if (obj.name && obj.name in baseNames) {
-                                const index = baseNames[obj.name];
-                                output[key][index].inherited = true;
-                            }
-                        });
-                    } else if (base[key] === child[key]) {
-                        inheritedSimpleProps.push(key);
-                    }
-                });
-            }
-            if (inheritedSimpleProps.length) {
-                output.simpleInherited = inheritedSimpleProps;
-            }
-            return output;
-        };
-        const recurrentMark = (name) => {
-            // Node resolved
-            if (name in resolvedNodes) return resolvedNodes[name];
-            let node = nodes.find((n) => n.name === name);
-            if (!node) {
-                return undefined;
-            }
-            if (!node.extends) {
-                resolvedNodes[name] = node;
-                return node;
-            }
-            let base;
-            node.extends.forEach((baseName) => {
-                base = recurrentMark(baseName);
-                node = markNodes(node, base);
-            });
-            resolvedNodes[name] = node;
-            return node;
-        };
-        // Filter out abstract nodes and get merged ones
-        const markedNodes = unsortedNodes.filter(
-            (node) => !node.abstract,
-        ).map((node) => recurrentMark(node.name),
-        ).filter((node) => node !== undefined);
-        return markedNodes;
-    }
-
-    /**
-     * Given nodes resolves their inheritances and returns and array of nodes that are ready
-     * to be loaded by the editor.
-     *
-     * @param nodes
-     * @returns nodes with resolved inheritances
-     */
-    /* eslint-disable class-methods-use-this,no-param-reassign */
-    resolveInheritance(nodes) {
-        const unsortedNodes = JSON.parse(JSON.stringify(nodes));
-
-        const isObject = (obj) => typeof obj === 'object' && obj !== null && !Array.isArray(obj);
-        const isArray = (obj) => Array.isArray(obj);
-
-        // Helper function that applies base node properties to the child node
-        const mergeNodes = (child, base) => {
-            const output = { ...structuredClone(base) };
-            const nonInheritableKeys = ['abstract', 'isCategory'];
-
-            nonInheritableKeys.forEach((key) => {
-                delete output[key];
-            });
-
-            if (isObject(child) && isObject(base)) {
-                Object.keys(child).forEach((key) => {
-                    if (key === 'style') {
-                        output[key] = EditorManager.mergeStyles(base[key], child[key]);
-                    } else if (isObject(child[key])) {
-                        if (!(key in output)) {
-                            output[key] = child[key];
-                        } else {
-                            output[key] = mergeNodes(child[key], base[key]);
-                        }
-                    } else if (isArray(child[key]) && isArray(base[key])) {
-                        if (key === 'extends') {
-                            output[key] = child[key];
-                        } else {
-                            const baseNames = Object.fromEntries(
-                                base[key].map((obj, i) => [obj.name, i]),
-                            );
-                            child[key].forEach((obj) => {
-                                if (obj.name && obj.name in baseNames) {
-                                    const index = baseNames[obj.name];
-                                    if (obj.override) {
-                                        output[key][index] = {
-                                            ...base[key][index],
-                                            ...obj,
-                                        };
-                                        delete output[key][index].override;
-                                    } else {
-                                        throw new Error(`'${child.name}' node cannot override '${obj.name}' property of '${base.name}' node`);
-                                    }
-                                } else {
-                                    output[key].push(obj);
-                                }
-                            });
-                        }
-                    } else {
-                        output[key] = child[key];
-                    }
-                });
-            }
-            return output;
-        };
-
-        const resolvedNodes = {};
-        const recurrentMerge = (name) => {
-            // Node resolved
-            if (name in resolvedNodes) return resolvedNodes[name];
-            let node = nodes.find((n) => n.name === name);
-            // Node does not inherite anything
-            if (!node.extends) {
-                resolvedNodes[name] = node;
-                return node;
-            }
-            // Check if extends has unique values
-            if ((new Set(node.extends)).size !== node.extends.length) {
-                throw new Error(`Repeated class in "extends" list of "${node.name}" node`);
-            }
-            // Get base nodes and merge them
-            let base;
-            node.extends.forEach((baseName) => {
-                base = recurrentMerge(baseName);
-                node = mergeNodes(node, base);
-            });
-            resolvedNodes[name] = node;
-            return node;
-        };
-        // Filter out abstract nodes and get merged ones
-        const mergedNodes = unsortedNodes.filter(
-            (node) => !node.abstract,
-        ).map((node) => recurrentMerge(node.name));
-
-        return mergedNodes;
     }
 
     /**
@@ -2370,11 +2302,13 @@ export default class EditorManager {
             // category prefix with the category node
             for (let i = 0; i < (node.extends ?? []).length; i += 1) {
                 const extendedNode = node.extends[i];
+                const inherited = this.findSimpleInheritedAttributes(node.name);
+                const category = node.category ? node.category : (inherited.category ?? '');
                 if (extendedNode in definedCategories) {
                     const commonPrefix = definedCategories[extendedNode] !== '' ?
                         `${definedCategories[extendedNode]}/${extendedNode}` : extendedNode;
 
-                    if (!node.category.includes(commonPrefix)) {
+                    if (!category.includes(commonPrefix)) {
                         errors.push(
                             `Node '${node.name}' extends from a category node '${extendedNode}' but is not in its category`,
                         );
