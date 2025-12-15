@@ -301,63 +301,57 @@ export default defineComponent({
                         .nodes?.find((n) => EditorManager.getNodeName(n) === oldType);
                 }
 
-                let oldProperties = oldSpecification.properties ?? [];
-                let oldInterfaces = oldSpecification.interfaces ?? [];
-
-                let inheritedProperties = [];
-                let inheritedInterfaces = [];
-
-                parsedSpecification?.extends?.forEach((parentType) => {
-                    const parentSpec = editorManager.baklavaView.editor.parentNodes.get(parentType);
-                    inheritedProperties = [
-                        ...inheritedProperties,
-                        ...(parentSpec?.properties ?? []),
-                    ];
-                    inheritedInterfaces = [
-                        ...inheritedInterfaces,
-                        ...(parentSpec?.interfaces ?? []),
-                    ];
-                });
-
-                oldProperties = oldProperties.filter(
-                    (prop) => !inheritedProperties.some((p) => p.name === prop.name),
-                );
-                oldInterfaces = oldInterfaces.filter(
-                    (intf) => !inheritedInterfaces.some((i) => i.name === intf.name),
-                );
+                const oldProperties = oldSpecification.properties ?? [];
+                const oldInterfaces = oldSpecification.interfaces ?? [];
 
                 // Deep copy properties from specification before altering nodes
-                const parsedProperties = [...structuredClone(parsedSpecification.properties ?? []),
-                    ...inheritedProperties];
-                const parsedInterfaces = [...structuredClone(parsedSpecification.interfaces ?? []),
-                    ...inheritedInterfaces];
+                const parsedProperties = [...structuredClone(parsedSpecification.properties ?? [])];
+                const parsedInterfaces = [...structuredClone(parsedSpecification.interfaces ?? [])];
 
-                const removedProperties = oldProperties.filter(
-                    (prop) => !parsedProperties.some((p) => p.name === prop.name),
-                ) ?? [];
-                const removedInterfaces = oldInterfaces.filter(
-                    (intf) => !parsedInterfaces.some((i) => i.name === intf.name
-                        && i.array === intf.array),
-                ) ?? [];
-                const addedProperties = parsedProperties.filter(
+                const inheritedProperties = editorManager.findInheritedProperties(oldType);
+                const inheritedInterfaces = editorManager.findInheritedInterfaces(oldType);
+
+                const newProperties = parsedProperties.filter(
                     (prop) => !oldProperties.some((p) => p.name === prop.name),
                 ) ?? [];
-                const addedInterfaces = parsedInterfaces.filter(
+                const newInterfaces = parsedInterfaces.filter(
                     (intf) => !oldInterfaces.some((i) => i.name === intf.name),
                 ) ?? [];
 
-                const allNodes = [...nodes];
-                allNodes.forEach((n) => {
-                    const propToRem = removedProperties.filter((p) =>
-                        !Object.values(n.inputs).find((i) => i.name === p.name).inherited);
-                    const allIntfs = [...Object.values(n?.inputs), ...Object.values(n?.outputs)];
-                    const intfToRem = removedInterfaces.filter((p) =>
-                        !allIntfs?.find((i) => i.name === p.name).inherited);
+                // properties that were inherited before but are now inherited
+                const overriddenProperties = inheritedProperties.filter((p) =>
+                    newProperties.some((pp) => p.name === pp.name && pp.override));
+                const overriddenInterfaces = inheritedInterfaces.filter((intf) =>
+                    newInterfaces.some((pintf) => intf.name === pintf.name && pintf.override));
 
-                    alterProperties([n], propToRem, true);
-                    alterInterfaces([n], intfToRem, true);
-                    alterProperties([n], parsedProperties);
-                    alterInterfaces([n], parsedInterfaces);
+                const removedProperties = [...oldProperties.filter(
+                    (prop) => !parsedProperties.some((p) => p.name === prop.name
+                        && p.override === prop.override),
+                ), ...overriddenProperties] ?? [];
+                const removedInterfaces = [...oldInterfaces.filter(
+                    (intf) => !parsedInterfaces.some((i) => i.name === intf.name
+                        && i.array === intf.array && i.override === intf.override),
+                ), ...overriddenInterfaces] ?? [];
+
+                // add new properties and properties from parent that are no longer overridden
+                const addedProperties = [...newProperties, ...inheritedProperties.filter((prop) =>
+                    removedProperties.some((rp) => rp.name === prop.name && rp.override))
+                    .map((prop) => ({ ...prop, inherited: true }))] ?? [];
+                const addedInterfaces = [...newInterfaces, ...inheritedInterfaces.filter((intf) =>
+                    removedInterfaces.some((ri) => ri.name === intf.name && ri.override))
+                    .map((intf) => ({ ...intf, inherited: true }))] ?? [];
+
+                nodes.forEach((n) => {
+                    // This is needed because some of the addedProperties/Interfaces might have
+                    // been added as a result of removing 'override' flag or adding it.
+                    const allProp = [...addedProperties, ...parsedProperties.filter((pp) =>
+                        !addedProperties.some((i) => i.name === pp.name))];
+                    const allIntf = [...addedInterfaces, ...parsedInterfaces.filter((pi) =>
+                        !addedInterfaces.some((p) => p.name === pi.name))];
+                    alterProperties([n], removedProperties, true);
+                    alterInterfaces([n], removedInterfaces, true);
+                    alterProperties([n], allProp);
+                    alterInterfaces([n], allIntf);
                 });
                 updateExtendedProperties(oldType, addedProperties, removedProperties);
                 updateExtendedInterfaces(oldType, addedInterfaces, removedInterfaces);
