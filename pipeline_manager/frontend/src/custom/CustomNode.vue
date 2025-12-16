@@ -191,13 +191,13 @@ import CustomContextMenu from './ContextMenu.vue';
 import { gridSnapper } from '../core/snappers';
 import icons from '../icons/index';
 import doubleClick from '../core/doubleClick.js';
+import NotificationHandler from '../core/notifications.js';
 import { getOptionName, updateInterfacePosition, removeNode } from './CustomNode.js';
 import {
     startTransaction, commitTransaction,
 } from '../core/History.ts';
 
 import EditorManager, { DEFAULT_GRAPH_NODE_TYPE } from '../core/EditorManager';
-import NotificationHandler from '../core/notifications.js';
 import getExternalApplicationManager from '../core/communication/ExternalApplicationManager';
 
 import { configurationState, menuState } from '../core/nodeCreation/ConfigurationState.ts';
@@ -206,6 +206,8 @@ import {
     updateSubgraphInterfaces,
     updateSubgraphProperties,
 } from '../core/NodeFactory.js';
+
+import notifyEvents from './notifyEvents.js';
 
 // Baklavajs implementation
 
@@ -954,12 +956,16 @@ const onContextMenuInterfaceClick = (action) => {
                 graph.value.id,
                 chosenInterface,
             );
+
+            notifyEvents.exposedInterface.emit([chosenInterface, graph.value.id, true]);
             break;
         case 'UnsetExternalName':
             viewModel.value.editor.privatizeInterface(
                 graph.value.id,
                 chosenInterface,
             );
+
+            notifyEvents.exposedInterface.emit([chosenInterface, graph.value.id, false]);
             break;
         case 'MoveUp':
             if (chosenInterface.sidePosition === 0) {
@@ -1062,12 +1068,16 @@ const onContextMenuPropertyClick = (action) => {
                 graph.value.id,
                 chosenProperty,
             );
+
+            notifyEvents.exposedInterface.emit([chosenProperty, graph.value.id, true]);
             break;
         case 'UnsetExternalName':
             viewModel.value.editor.privatizeInterface(
                 graph.value.id,
                 chosenProperty,
             );
+
+            notifyEvents.exposedInterface.emit([chosenProperty, graph.value.id, false]);
             break;
     }
 };
