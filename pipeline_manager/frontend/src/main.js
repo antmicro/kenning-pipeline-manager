@@ -14,6 +14,8 @@ import '../styles/style.scss';
 import 'vue-toastification/dist/index.css';
 import { longPress, longPressToRight } from './custom/directives';
 
+import globalProperties from './globalProperties.ts';
+
 const options = {
     timeout: 5000,
     position: POSITION.BOTTOM_RIGHT,
@@ -26,7 +28,10 @@ app.use(vClickOutside);
 app.use(RouterVue);
 app.use(Toast, options);
 /* eslint-disable no-restricted-globals */
+globalProperties.softLoad = process.env.VUE_APP_GRAPH_DEVELOPMENT_MODE === 'true';
+
 app.config.globalProperties.$isMobile = Math.min(screen.width, screen.height) <= 800;
+app.config.globalProperties.$softLoad = globalProperties.softLoad;
 // Register custom directives
 app.directive('long-press', longPress);
 app.directive('long-press-to-right', longPressToRight);
