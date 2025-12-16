@@ -135,6 +135,7 @@ import Return from '../components/Return.vue';
 import Panel from '../components/Panel.vue';
 import { ParentMenu, WelcomeMenu } from '../components/menu';
 import { loadingScreen } from '../core/utils';
+import initNotificationEvents from './CustomNotifications.js';
 
 import globalProperties from '../globalProperties.ts';
 
@@ -170,6 +171,8 @@ export default defineComponent({
             keyDown,
             keyUp,
         } = EditorComponent.setup(props);
+
+        initNotificationEvents();
 
         const connRefs = ref([]);
         const { graph } = useGraph();

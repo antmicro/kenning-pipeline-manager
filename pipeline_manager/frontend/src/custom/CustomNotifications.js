@@ -16,8 +16,11 @@ export const exposedInterfaceNotification = (intf, graphId, exposed) => {
 
     const msg = exposed ? 'exposed' : 'privatized';
 
-    if (viewModel.value.editor.getGraphNode(graphId)) {
-        NotificationHandler.terminalLog('warning', 'Upper graph updated', `${type} ${intf.name} has been ${msg} from subgraph.`);
+    const graph = [...viewModel.value.editor.graphs].find((g) => g.id === graphId);
+    const graphNode = graph?.graphNode;
+
+    if (graphNode) {
+        NotificationHandler.terminalLog('info', 'Upper graph updated', `${type} ${intf.name} has been ${msg} from subgraph.`);
     }
 };
 
@@ -26,10 +29,11 @@ export const nodeWithExposedInterfaceNotification = (node) => {
 
     const { graph } = useGraph();
 
-    const grapNode = viewModel.value.editor.getGraphNode(graph.value.id);
+    const graphSub = [...viewModel.value.editor.graphs].find((g) => g.id === graph.value.id);
+    const graphNode = graphSub?.graphNode;
 
     // node is part of subgrap node
-    if (grapNode) {
+    if (graphNode) {
         const exposedInterfaces = [...Object.values(node.inputs), ...Object.values(node.outputs)]
             .filter((intf) => intf.externalName);
 
