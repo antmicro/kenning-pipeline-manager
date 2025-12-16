@@ -59,6 +59,8 @@ import {
 } from '../core/History.ts';
 import { loadingScreen } from '../core/utils';
 
+import globalProperties from '../globalProperties.ts';
+
 /* eslint-disable no-param-reassign */
 export default {
     components: {
@@ -102,7 +104,10 @@ export default {
                 return this.appName;
             }
             const normalizedGraphName = this.graphName.trim();
-            return normalizedGraphName === '' ? this.appName : normalizedGraphName;
+
+            const additionalMessage = this.$softLoad ? 'Soft Load Enabled' : '';
+
+            return (normalizedGraphName === '' ? this.appName : normalizedGraphName) + (additionalMessage.length ? ` ( ${additionalMessage} )` : '');
         },
         preview() {
             const urlParams = new URLSearchParams(window.location.search);
@@ -467,7 +472,7 @@ export default {
                     );
                 }
                 if (Array.isArray(errors) && errors.length) {
-                    const messageTitle = process.env.VUE_APP_GRAPH_DEVELOPMENT_MODE === 'true' ?
+                    const messageTitle = globalProperties.softLoad ?
                         'Softload enabled, errors found while loading the dataflow' :
                         'Dataflow is invalid';
                     NotificationHandler.terminalLog('error', messageTitle, errors);
