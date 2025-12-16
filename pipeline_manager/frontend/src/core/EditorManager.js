@@ -689,7 +689,6 @@ export default class EditorManager {
 
         const childNodes = [...unresolvedChildNodes, ...resolvedChildNodes];
         childNodes.forEach((node) => {
-            node.category = nodeSpecification.category;
             node.extends.forEach((parent, i) => {
                 if (parent === nodeToUpdate) {
                     node.extends[i] = EditorManager.getNodeName(nodeSpecification);
@@ -716,6 +715,7 @@ export default class EditorManager {
             });
 
             this._registerNodeType(structuredClone(toRaw(resolvedNode)));
+            this.updateExtendingNodes(structuredClone(toRaw(resolvedNode)), nodeName);
         });
     }
 
@@ -897,7 +897,7 @@ export default class EditorManager {
                     return { errors: validationErrors, warnings: [] };
                 }
 
-                if (this.baklavaView.editor.nodeTypes.get(nodeName).isCategory) {
+                if (extendingNodes !== undefined) {
                     this.updateExtendingNodes(
                         JSON.parse(JSON.stringify(nodeSpecification)),
                         nodeToUpdate,
