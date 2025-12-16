@@ -452,6 +452,7 @@ const onContextMenuTitleClick = async (action) => {
             maxConnectionsCount: intf?.maxConnectionsCount,
             inSubgraph: subInterfaces.some((i) => i.id === intf.id),
             inherited: intf?.inherited,
+            override: intf?.override,
         }));
 
         /* eslint-disable no-underscore-dangle */
@@ -468,6 +469,7 @@ const onContextMenuTitleClick = async (action) => {
             dtype: prop?.dtype,
             inSubgraph: subProps.some((i) => i.id === prop.id),
             inherited: prop?.inherited,
+            override: prop?.override,
         }));
 
         configurationState.properties = configuredProperties;
