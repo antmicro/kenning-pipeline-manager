@@ -1110,7 +1110,7 @@ export default class EditorManager {
 
         this.baklavaView.editor.registerNodeType(myNode, {
             title: node.name,
-            category: inheritedAttributes.category ?? node.category,
+            category: node.category ? node.category : inheritedAttributes.category,
             isCategory: node.isCategory ?? false,
             color: node.color,
             style: node.style,
@@ -1270,6 +1270,15 @@ export default class EditorManager {
         if (errors.length) {
             return { errors, warnings };
         }
+
+        resolvedNodes.forEach((node) => {
+            const inherited = this.findSimpleInheritedAttributes(node.name, resolvedNodes);
+            if (inherited.category && !node.category) {
+                node.category = inherited.category;
+                node.simpleInherited ??= [];
+                node.simpleInherited.push('category');
+            }
+        });
 
         this.specification.currentSpecification.nodes = JSON.parse(JSON.stringify(resolvedNodes));
         this.specification.currentSpecification.graphs = JSON.parse(JSON.stringify(graphs));
