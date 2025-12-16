@@ -10,6 +10,8 @@
 
 import { useViewModel, useGraph } from '@baklavajs/renderer-vue';
 
+import notifyEvents from './notifyEvents.js';
+
 /**
  * The function decides whether a name for the option should be displayed.
  *
@@ -119,6 +121,7 @@ export function removeNode(node, unwrapGraph = false) {
         viewModel.value.editor.unwrapSubgraph(node);
     } else {
         const { graph } = useGraph();
+        notifyEvents.removedNode.emit(node);
         graph.value.removeNode(node);
     }
 
