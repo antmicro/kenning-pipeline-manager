@@ -21,6 +21,7 @@ import FilesContextMenu from './navbar/FilesContextMenu.vue';
 import Collapse from '../icons/Collapse.vue';
 import ExternalAppStatus from './navbar/ExternalAppStatus.vue';
 import ExternalAppAction from './navbar/ExternalAppAction.vue';
+import SubgraphNavigation from './navbar/SubgraphNavigation.vue';
 import Validate from '../icons/Validate.vue';
 import Backend from '../icons/Backend.vue';
 import Bell from '../icons/Bell.vue';
@@ -71,6 +72,7 @@ export default {
         NavBarTransitions,
         ExternalAppAction,
         ExternalAppStatus,
+        SubgraphNavigation,
     },
     computed: {
         dataflowGraphName() {
@@ -483,15 +485,6 @@ export default {
             });
             this.activeNavbarItemsNames = Array.from(activeItems);
         },
-        returnFromSubgraph() {
-            this.editorManager.returnFromSubgraph();
-            this.resetHoverInfo('subgraphReturn');
-            this.togglePanel(this.panels.graphDetails, true);
-        },
-        goToParentGraph(graph) {
-            this.editorManager.switchToGraph(graph);
-            this.resetHoverInfo('parentGraph');
-        },
     },
     async mounted() {
         this.isMounted = true;
@@ -597,42 +590,16 @@ export default {
                             :isHovered="isHovered"
                         />
                     </template>
-                    <div
-                        v-if="this.editorManager.editor.isInSubgraph()"
-                        :class="['hoverbox', mobileClasses]"
-                        role="button"
-                        @click="returnFromSubgraph"
-                        @pointerover="() => updateHoverInfo('subgraphReturn')"
-                        @pointerleave="() => resetHoverInfo('subgraphReturn')"
-                    >
-                        <Arrow
-                            rotate="down"
-                            :hover="isHovered('subgraphReturn')"
-                            color="white"
-                            class="small_svg"
-                        />
-                        <div :class="['tooltip', mobileClasses]">
-                            <span>Return from subgraph editor</span>
-                        </div>
-                    </div>
-                    <div
-                        v-if="parentGraph && !this.editorManager.editor.isInSubgraph()"
-                        :class="['hoverbox', mobileClasses]"
-                        role="button"
-                        @click="goToParentGraph(parentGraph)"
-                        @pointerover="() => updateHoverInfo('parentGraph')"
-                        @pointerleave="() => resetHoverInfo('parentGraph')"
-                    >
-                        <Arrow
-                            rotate="up"
-                            :hover="isHovered('parentGraph')"
-                            color="white"
-                            class="small_svg"
-                        />
-                        <div :class="['tooltip', mobileClasses]">
-                            <span>Go to parent graph</span>
-                        </div>
-                    </div>
+                    <SubgraphNavigation
+                        :navbarItems="navbarItems"
+                        :isHovered="isHovered"
+                        :mobileClasses="mobileClasses"
+                        :resetHoverInfo="resetHoverInfo"
+                        :updateHoverInfo="updateHoverInfo"
+                        :toggleGraphDetails="(val) => {
+                            this.togglePanel(this.panels.graphDetails, val);
+                        }"
+                    />
                 </div>
                 <component
                     v-if="editTitle && !panels.nodesearch.isOpen"
