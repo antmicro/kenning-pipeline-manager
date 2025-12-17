@@ -23,6 +23,7 @@ import ExternalAppStatus from './navbar/ExternalAppStatus.vue';
 import ExternalAppAction from './navbar/ExternalAppAction.vue';
 import SubgraphNavigation from './navbar/SubgraphNavigation.vue';
 import NotificationButton from './navbar/NotificationButton.vue';
+import FullscreenButton from './navbar/FullscreenButton.vue';
 import Validate from '../icons/Validate.vue';
 import Backend from '../icons/Backend.vue';
 import Bell from '../icons/Bell.vue';
@@ -75,6 +76,7 @@ export default {
         ExternalAppStatus,
         SubgraphNavigation,
         NotificationButton,
+        FullscreenButton,
     },
     computed: {
         dataflowGraphName() {
@@ -294,7 +296,7 @@ export default {
                     isOpen: false,
                 },
                 fullscreen: {
-                    isOpen: fullscreen.isFullscreen,
+                    isOpen: false,
                 },
                 graphDetails: {
                     isOpen: false,
@@ -328,18 +330,6 @@ export default {
             }
         },
 
-        /**
-         * Toggle fullscreen mode.
-         *
-         * For iframe, the allow="fullscreen" attribute must be set.
-         */
-        toggleFullscreen() {
-            if (!fullscreen.isEnabled) {
-                NotificationHandler.showToast('error', 'Fullscreen is not supported');
-                return;
-            }
-            fullscreen.toggle();
-        },
 
         clickOutside(event, panel) {
             const icon = this.$refs[panel.iconRef];
@@ -498,9 +488,9 @@ export default {
             if (this.$refs.palette) this.buttonWidth = this.$refs.palette.offsetWidth;
         });
 
-        // Listen for fullscreen change
-        document.addEventListener('fullscreenchange', () => {
-            this.panels.fullscreen.isOpen = !fullscreen.isFullscreen;
+            if (this.$refs.palette.getRef()) {
+                this.buttonWidth = this.$refs.palette.getRef().offsetWidth;
+            }
         });
 
         this.externalApp.available = this.externalApplicationManager.isExternalAppAvailable();
@@ -658,28 +648,12 @@ export default {
                             placeholder="Search for nodes"
                         />
                     </div>
-                    <div
-                        ref="fullscreen"
-                        :class="['hoverbox', mobileClasses]"
-                        role="button"
-                        @click="toggleFullscreen"
-                        @pointerover="() => updateHoverInfo('Fullscreen')"
-                        @pointerleave="() => resetHoverInfo('Fullscreen')"
-                    >
-                        <Expand
-                            :hover="isHovered('Fullscreen')"
-                            class="small_svg"
-                            v-if="!panels.fullscreen.isOpen"
-                        />
-                        <Collapse :hover="isHovered('Fullscreen')" class="small_svg" v-else />
-                        <div :class="['tooltip', mobileClasses]">
-                            <span v-if="!panels.fullscreen.isOpen">Enable fullscreen</span>
-                            <span v-else>Disable fullscreen</span>
-                        </div>
-                    </div>
-                    <div
-                        v-if="this.editorManager.editor.getExposedProperties().length > 0
-                              || this.editorManager.editor.isInSubgraph()"
+                    <FullscreenButton ref="fullscreen"
+                        :hover="isHovered('Fullscreen')"
+                        :mobileClasses="mobileClasses"
+                        @hoverStart="() => updateHoverInfo(panels.fullscreen.iconRef)"
+                        @hoverStop="() => resetHoverInfo(panels.fullscreen.iconRef)"
+                    />
                         ref="graphDetails"
                         :class="['hoverbox', mobileClasses]"
                         role="button"
