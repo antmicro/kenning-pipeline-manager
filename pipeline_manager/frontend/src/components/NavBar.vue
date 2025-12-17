@@ -24,6 +24,7 @@ import ExternalAppAction from './navbar/ExternalAppAction.vue';
 import SubgraphNavigation from './navbar/SubgraphNavigation.vue';
 import NotificationButton from './navbar/NotificationButton.vue';
 import FullscreenButton from './navbar/FullscreenButton.vue';
+import SettingsButton from './navbar/SettingsButton.vue';
 import Validate from '../icons/Validate.vue';
 import Backend from '../icons/Backend.vue';
 import Bell from '../icons/Bell.vue';
@@ -77,6 +78,7 @@ export default {
         SubgraphNavigation,
         NotificationButton,
         FullscreenButton,
+        SettingsButton,
     },
     computed: {
         dataflowGraphName() {
@@ -107,9 +109,6 @@ export default {
         },
         readonly() {
             return this.editorManager.editor.readonly;
-        },
-        settingsOpen() {
-            return this.panels.settings.isOpen;
         },
         notificationsOpen() {
             return this.panels.notifications.isOpen;
@@ -668,20 +667,14 @@ export default {
                         </div>
                     </div>
                     <div
+                    <SettingsButton
+                        :mobileClasses="mobileClasses"
+                        :hover="isHovered('settings')"
+                        @onClicked="() => togglePanel(panels.settings)"
+                        @hover="() => updateHoverInfo(panels.settings.iconRef)"
+                        @hoverStop="() => resetHoverInfo(panels.settings.iconRef)"
+                        v-model:openPanel="panels.settings.isOpen"
                         ref="settings"
-                        :class="['hoverbox', mobileClasses]"
-                        role="button"
-                        @click="() => togglePanel(panels.settings)"
-                        @pointerover="() => updateHoverInfo('settings')"
-                        @pointerleave="() => resetHoverInfo('settings')"
-                        v-click-outside="() => panels.settings.isOpen = false"
-                    >
-                        <Cogwheel :hover="isHovered('settings')" class="small_svg" />
-                        <div :class="['tooltip', mobileClasses]">
-                            <span v-if="!panels.settings.isOpen">Show settings</span>
-                            <span v-else>Hide settings</span>
-                        </div>
-                    </div>
                     />
 
                     <ExternalAppStatus
