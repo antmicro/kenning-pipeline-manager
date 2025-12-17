@@ -27,6 +27,7 @@ import FullscreenButton from './navbar/FullscreenButton.vue';
 import SettingsButton from './navbar/SettingsButton.vue';
 import GraphDetailsButton from './navbar/GraphDetailsButton.vue';
 import NodeBrowserButton from './navbar/NodeBrowserButton.vue';
+import SearchBar from './navbar/SearchBar.vue';
 import Validate from '../icons/Validate.vue';
 import Backend from '../icons/Backend.vue';
 import Bell from '../icons/Bell.vue';
@@ -83,6 +84,7 @@ export default {
         SettingsButton,
         GraphDetailsButton,
         NodeBrowserButton,
+        SearchBar,
     },
     computed: {
         dataflowGraphName() {
@@ -221,7 +223,6 @@ export default {
         );
         editorTitleInterface.setDefaultComponent();
 
-        const searchEditorNodesQuery = ref('');
         // Setup custom hook, which is executed when procedure starts or stops running
         runInfo.setHook(this.updateActiveNavbarItems);
 
@@ -255,7 +256,6 @@ export default {
             notificationStore,
             showSearch: false,
             crossIcon: markRaw(icons.Cross),
-            searchEditorNodesQuery,
             navbarGuard: false,
             isMounted: false,
             windowWidth: 0,
@@ -405,7 +405,7 @@ export default {
         onClickNodeSearch() {
             this.togglePanel(this.panels.nodesearch);
             if (this.panels.nodesearch.isOpen) {
-                this.$nextTick(() => this.$refs.searchbarInput.focus());
+                this.$nextTick(() => this.$refs.searchBar.getInput().focus());
             }
         },
 
@@ -615,38 +615,16 @@ export default {
                         Graph ID: {{ graphId }}
                 </span>
                 <div :style="rightContainerStyles" ref="rightButtons">
-                    <div
-                        ref="searchbar"
-                        :class="['hoverbox', mobileClasses]"
-                        role="button"
-                        @pointerover="() => updateHoverInfo('search')"
-                        @pointerleave="() => {
-                            resetHoverInfo('search');
-                        }"
-                        @click="onClickNodeSearch"
-                        v-click-outside="() => panels.nodesearch.isOpen =
-                            searchEditorNodesQuery != ''"
-                    >
-                        <Magnifier
-                            :hover="isHovered('search')"
-                            class="small_svg"
-                        />
-                        <div :class="['tooltip', mobileClasses]">
-                            <span v-if="!panels.nodesearch.isOpen">Show node search bar</span>
-                            <span v-else>Hide node search bar</span>
-                        </div>
-                    </div>
-                    <div
-                        v-show="panels.nodesearch.isOpen"
-                        :style="nodesearchInputStyles"
-                        :class="['search-editor-nodes', mobileClasses]"
-                    >
-                        <input
-                            ref="searchbarInput"
-                            v-model="searchEditorNodesQuery"
-                            placeholder="Search for nodes"
-                        />
-                    </div>
+                    <SearchBar
+                        :mobileClasses="mobileClasses"
+                        :hover="isHovered('search')"
+                        :nodesearchInputStyles="nodesearchInputStyles"
+                        @hoverStart="() => updateHoverInfo('search')"
+                        @hoverStop="() => resetHoverInfo('search')"
+                        @onClicked="() => onClickNodeSearch()"
+                        v-model:openPanel="panels.nodesearch.isOpen"
+                        ref="searchBar"
+                    />
                     <FullscreenButton ref="fullscreen"
                         :hover="isHovered('Fullscreen')"
                         :mobileClasses="mobileClasses"
@@ -921,39 +899,6 @@ export default {
             }
             &.box > .small_svg {
                 filter: brightness(50%);
-            }
-
-            &.search-editor-nodes {
-                max-width: calc(3.75em * 4);
-
-                & > input {
-                    width: 100%;
-                    height: 100%;
-                    padding: 0 0.5em;
-
-                    color: $white;
-                    border: none;
-                    background-color: $gray-600;
-
-                    &:focus {
-                        outline: 1px solid $green;
-                        z-index: 12;
-                    }
-
-                    &::placeholder {
-                        opacity: 0.5;
-                    }
-                }
-
-                // on smaller screens display search bellow NavBar
-                &.compressed-mobile {
-                    position: absolute;
-                    top: calc($navbar-height + 1px);
-                    max-width: 40vw;
-
-                    border: 1px solid $gray-500;
-                    box-sizing: border-box;
-                }
             }
         }
 
