@@ -1,13 +1,10 @@
 import YAML from 'yaml';
 import {
-    test, expect, Page, FileChooser,
+    test, expect, Page, Locator,
 } from '@playwright/test';
-import { setTimeout } from 'timers/promises';
 import {
-    getPathToJsonFile, getUrl, addNode,
-    dragAndDrop, enableEditingNodes, loadSpecification, loadDataflow,
+    getUrl, addNode, enableEditingNodes, loadSpecification, loadDataflow,
 } from './config.js';
-import { parse } from 'path';
 
 async function getYAMLEditorContent(page: Page) {
     const textarea = page.locator('textarea');
@@ -19,10 +16,9 @@ async function setYAMLEditorContent(page: Page, content: string) {
     await textarea.fill(content);
 }
 
-async function addProperty(page: Page, nodeName: string) {
-    const node = page.getByText(nodeName).last();
-    await node.click({ button: 'right', force: true });
-    await page.getByText('Add property').click();
+async function addProperty(page: Page, node: Locator) {
+    await node.locator('.__title').click({ button: 'right', force: true });
+    await node.locator('.baklava-context-menu').getByText('Add property').click();
     await page.getByRole('button', { name: 'Add property' }).click();
 }
 
@@ -33,17 +29,14 @@ test('checking inherited properties', async ({ page }) => {
 
     await enableEditingNodes(page);
 
-    const node = page
-        .locator('div')
-        .filter({ hasText: /^Type B$/ })
-        .nth(3);
-    await node.dblclick();
+    const node = page.locator('[data-node-type="Type B"]');
+    await node.locator('.__title').dblclick();
 
     const initialContent = await getYAMLEditorContent(page);
     const parsedContent = YAML.parse(initialContent);
     expect(parsedContent.properties.length).toBe(1);
 
-    await addProperty(page, 'Type B');
+    await addProperty(page, node);
 
     const modifiedContent = await getYAMLEditorContent(page);
     const modifiedParsedContent = YAML.parse(modifiedContent);
@@ -56,14 +49,14 @@ test('check added inherited property in spec', async ({ page }) => {
     await enableEditingNodes(page);
 
     await addNode(page, 'Classes', 'Type A', 400, 200);
-    await addProperty(page, 'Type A');
+    await addProperty(page, page.locator('[data-node-type="Type A"]'));
     await addNode(page, 'Classes', 'Type B', 700, 200);
-    const nodeB = page.locator('[data-node-type="Type B"]').locator('.__title').first();
-    await nodeB.dblclick();
+    const nodeB = page.locator('[data-node-type="Type B"]');
+    await nodeB.locator('.__title').dblclick();
     const initialContent = await getYAMLEditorContent(page);
     const parsedContent = YAML.parse(initialContent);
     expect(parsedContent.properties.length).toBe(1);
-    const nodeBproperties = page.locator('[data-node-type="Type B"]').locator('.__content > .__properties > div');
+    const nodeBproperties = nodeB.locator('.__content > .__properties > div');
     expect(await nodeBproperties.count()).toBe(3);
 });
 test('checking renamed inherited property', async ({ page }) => {
@@ -73,11 +66,8 @@ test('checking renamed inherited property', async ({ page }) => {
 
     await enableEditingNodes(page);
 
-    const nodeA = page
-        .locator('div')
-        .filter({ hasText: /^Type A$/ })
-        .nth(3);
-    await nodeA.dblclick();
+    const nodeA = page.locator('[data-node-type="Type A"]');
+    await nodeA.locator('.__title').dblclick();
 
     const initialContent = await getYAMLEditorContent(page);
     const parsedContent = YAML.parse(initialContent);
@@ -86,11 +76,7 @@ test('checking renamed inherited property', async ({ page }) => {
     await setYAMLEditorContent(page, YAML.stringify(parsedContent));
     await page.locator('.__validate-button').click();
 
-    const nodeBproperties = page
-        .locator('div')
-        .filter({ hasText: /^Type B$/ })
-        .nth(4)
-        .locator('..')
+    const nodeBproperties = page.locator('[data-node-type="Type B"]')
         .locator('.__content > .__properties > div');
     expect(await nodeBproperties.count()).toBe(2);
 });

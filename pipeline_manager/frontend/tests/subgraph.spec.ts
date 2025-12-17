@@ -7,58 +7,51 @@ const countOfInitiallyExposedInterface = 3;
 
 const countOfInitiallyExposedProperties = 1;
 
-async function addInterface(page: Page, nodeName: string) {
-    const node = page.getByText(nodeName).last();
-    await node.click({ button: 'right', force: true });
-    await page.getByText('Add interface').click();
+function getNode(page: Page, nodeName: string) {
+    return page.locator(`.baklava-node[data-node-type="${nodeName}"]`);
+}
+
+async function addInterface(page: Page, node: Locator) {
+    await node.locator('.__title').click({ button: 'right', force: true });
+    await node.locator('.baklava-context-menu').getByText('Add interface').click();
     await page.getByRole('button', { name: 'Add interface' }).click();
 }
-async function addProperty(page: Page, nodeName: string) {
-    const node = page.getByText(nodeName).last();
-    await node.click({ button: 'right', force: true });
-    await page.getByText('Add property').click();
+async function addProperty(page: Page, node: Locator) {
+    await node.locator('.__title').click({ button: 'right', force: true });
+    await node.locator('.baklava-context-menu').getByText('Add property').click();
     await page.getByRole('button', { name: 'Add property' }).click();
 }
-async function deleteProperty(page: Page, nodeName: string, propName: string) {
-    const node = page.getByText(nodeName).last();
-    await node.click({ button: 'right', force: true });
-    await page.getByText('Delete property').click();
+async function deleteProperty(page: Page, node: Locator, propName: string) {
+    await node.locator('.__title').click({ button: 'right', force: true });
+    await node.locator('.baklava-context-menu').getByText('Delete property').click();
     await page.locator('.create-menu').last().getByText(propName).click();
     await page.getByRole('button', { name: 'Remove properties' }).click();
 }
-async function getYAML(page: Page, nodeName: string) {
-    const re = new RegExp(`^${nodeName}$`, 'g');
-    const node = page
-        .locator('div')
-        .filter({ hasText: re })
-        .nth(3);
-    await node.dblclick();
+async function getYAML(page: Page, node: Locator) {
+    await node.locator('.__title').dblclick();
 
     const textarea = page.locator('textarea');
     const content = YAML.parse(await textarea.evaluate((el) => el.value));
     return content;
 }
 
-async function enterSubgraph(page: Page, nodeName: string) {
-    const nodeWithSubgraph = page.getByText(nodeName).last().locator('../..');
-    await nodeWithSubgraph.locator('.__title').click({ button: 'right' });
-    const contextMenuOption = page.locator('.baklava-context-menu').getByText('Go to graph');
+async function enterSubgraph(node: Locator) {
+    await node.locator('.__title').click({ button: 'right' });
+    const contextMenuOption = node.locator('.baklava-context-menu').getByText('Go to graph');
     await contextMenuOption.click();
 }
 
-async function deleteNode(page: Page, nodeName: string) {
-    const node = page.getByText(nodeName).last().locator('../..');
+async function deleteNode(node: Locator) {
     await node.locator('.__title').click({ button: 'right' });
-    const contextMenuOption = page.locator('.baklava-context-menu').getByText('Delete').last();
+    const contextMenuOption = node.locator('.baklava-context-menu').getByText('Delete').last();
     await contextMenuOption.dispatchEvent('click');
 }
 
-async function checkForSubgraph(page: Page, nodeName: string) {
-    const nodeWithSubgraph = page.getByText(nodeName).last().locator('../..');
-    await nodeWithSubgraph.locator('.__title').click({ button: 'right' });
-    const contextMenuOption = page.locator('.baklava-context-menu').getByText('Go to graph');
+async function checkForSubgraph(node: Locator) {
+    await node.locator('.__title').click({ button: 'right' });
+    const contextMenuOption = node.locator('.baklava-context-menu').getByText('Go to graph');
     expect(await contextMenuOption.count()).toBe(1);
-    await nodeWithSubgraph.locator('.__title').click({ button: 'right' });
+    await node.locator('.__title').click({ button: 'right' });
 }
 
 async function loadSubgraphSpecification(page: Page) {
@@ -94,10 +87,9 @@ async function dragAndDrop(page: Page, locator: Locator, to: { x: number; y: num
     await page.mouse.up();
 }
 
-async function addSubgraph(page: Page, nodeName: string) {
-    const node = page.getByText(nodeName).last().locator('../..');
+async function addSubgraph(node: Locator) {
     await node.locator('.__title').click({ button: 'right' });
-    const contextMenuOption = page.locator('.baklava-context-menu').getByText('Add subgraph');
+    const contextMenuOption = node.locator('.baklava-context-menu').getByText('Add subgraph');
     await contextMenuOption.click();
 }
 
@@ -109,7 +101,7 @@ test('test loading subgraph dataflow', async ({ page }) => {
 test('test entering subgraph', async ({ page }) => {
     await prepareSubgraphPage(page);
     await verifyNodeCount(page, 4);
-    await enterSubgraph(page,'Test subgraph #1');
+    await enterSubgraph(getNode(page,'Test subgraph #1'));
     await verifyNodeCount(page, 2);
 });
 
@@ -117,14 +109,14 @@ test('test coming back from subgraph', async ({ page }) => {
     await prepareSubgraphPage(page);
     await verifyNodeCount(page, 4);
 
-    await enterSubgraph(page,'Test subgraph #1');
+    await enterSubgraph(getNode(page,'Test subgraph #1'));
     await verifyNodeCount(page, 2);
 
     await leaveSubgraph(page);
     await verifyNodeCount(page, 4);
 });
 
-async function placeNewNode(page, location: { x: number; y: number }) {
+async function placeNewNode(page: Page, location: { x: number; y: number }) {
     const showNodesButton = page.getByText('Show node browser').locator('../..');
     await showNodesButton.click();
     const firstCategoryLabel = page.getByText('First Category');
@@ -133,7 +125,7 @@ async function placeNewNode(page, location: { x: number; y: number }) {
     await dragAndDrop(page, nodeFromBrowser, location);
 }
 
-async function createNewNode(page, location: { x: number; y: number }) {
+async function createNewNode(page: Page, location: { x: number; y: number }) {
     const showNodesButton = page.getByText('Show node browser').locator('../..');
     await showNodesButton.click();
     const newNodeType = page.getByText('New Node Type').first();
@@ -142,7 +134,7 @@ async function createNewNode(page, location: { x: number; y: number }) {
     await createButton.click();
 }
 
-async function createNewGraphNode(page, location: { x: number; y: number }) {
+async function createNewGraphNode(page: Page, location: { x: number; y: number }) {
     const showNodesButton = page.getByText('Show node browser').locator('../..');
     await showNodesButton.click();
     const newGraphNodeType = page.getByText('New Graph Node').first();
@@ -153,47 +145,46 @@ test('test preserving changes to subgraph', async ({ page }) => {
     await prepareSubgraphPage(page);
     await verifyNodeCount(page, 4);
 
-    await enterSubgraph(page,'Test subgraph #1');
+    const subgraphNode = getNode(page, 'Test subgraph #1')
+    await enterSubgraph(subgraphNode);
     await verifyNodeCount(page, 2);
     await placeNewNode(page, { x: 400, y: 200 });
 
     await verifyNodeCount(page, 3);
 
     await leaveSubgraph(page);
-    await enterSubgraph(page,'Test subgraph #1');
+    await enterSubgraph(subgraphNode);
     await verifyNodeCount(page, 3);
 });
 
-async function verifyInterfaceCount(page: Page, expectedNumber: number, nodeName: string): Promise<Locator> {
-    const nodeWithSubgraph = page.getByText(nodeName).locator('../..');
-    const exposedInterfaces = nodeWithSubgraph.locator('.__interfaces .__outputs > div');
+async function verifyInterfaceCount(expectedNumber: number, node: Locator): Promise<Locator> {
+    const exposedInterfaces = node.locator('.__interfaces .__outputs > div');
     expect(await exposedInterfaces.count()).toBe(expectedNumber);
     return exposedInterfaces;
 }
-async function verifyPropertyCount(page: Page, nodeName:string, expectedNumber: number): Promise<Locator> {
-    const nodeWithSubgraph = page.getByText(nodeName).locator('../..');
+async function verifyPropertyCount(node: Locator, expectedNumber: number): Promise<Locator> {
     // get all children
-    const exposedProperties = nodeWithSubgraph.locator('.__properties > *');
+    const exposedProperties = node.locator('.__properties > *');
     expect(await exposedProperties.count()).toBe(expectedNumber);
     return exposedProperties;
 }
 
 test('test visibility of newly exposed subgraph interface', async ({ page }) => {
     await prepareSubgraphPage(page);
-    const exposedInterfaces = await verifyInterfaceCount(page, countOfInitiallyExposedInterface,'Test subgraph #1');
+    const subgraphNode = getNode(page, 'Test subgraph #1');
+    const exposedInterfaces = await verifyInterfaceCount(countOfInitiallyExposedInterface, subgraphNode);
 
-    await enterSubgraph(page,'Test subgraph #1');
+    await enterSubgraph(subgraphNode);
     await placeNewNode(page, { x: 400, y: 200 });
 
     // Expose a new interface: right click on an interface and choose 'Expose Interface'.
-    const newOutputInterface = page
-        .getByText('Test node #1')
-        .locator('../..')
-        .locator('.__content .__port')
-        .nth(4);
+    const node = getNode(page, 'Test node #1').last();
+    const newOutputInterface = node
+        .locator('.__content .__outputs .__port')
+        .nth(1);
     await newOutputInterface.click({ button: 'right' });
-
-    const contextMenuOption = page.locator('.baklava-context-menu').getByText('Expose Interface');
+    const menu = node.locator('.__content .baklava-context-menu').first();
+    const contextMenuOption = menu.getByText('Expose Interface');
     await contextMenuOption.click();
 
     // Get back to the main graph.
@@ -205,19 +196,19 @@ test('test visibility of newly exposed subgraph interface', async ({ page }) => 
 
 test("test hiding and exposing subgraph's interface", async ({ page }) => {
     await prepareSubgraphPage(page);
-    const exposedInterfaces = await verifyInterfaceCount(page, countOfInitiallyExposedInterface,'Test subgraph #1');
+    const subgraphNode = getNode(page, 'Test subgraph #1');
+    const exposedInterfaces = await verifyInterfaceCount(countOfInitiallyExposedInterface, subgraphNode);
 
-    await enterSubgraph(page,'Test subgraph #1');
+    await enterSubgraph(subgraphNode);
 
     // Hide an exposed interface: invoke a interface's context menu and click the option.
-    const exposedInterface = page
-        .getByText('Test node #1')
-        .locator('../..')
+    const targetNode = getNode(page, 'Test node #1').nth(1);
+    const exposedInterface = targetNode
         .locator('.__content .__port')
         .nth(1);
     await exposedInterface.click({ button: 'right' });
 
-    const privatizeContextMenuOption = page
+    const privatizeContextMenuOption = targetNode
         .locator('.baklava-context-menu')
         .getByText('Privatize Interface');
     await privatizeContextMenuOption.click();
@@ -227,9 +218,9 @@ test("test hiding and exposing subgraph's interface", async ({ page }) => {
     expect(await exposedInterfaces.count()).toBe(countOfInitiallyExposedInterface - 1);
 
     // Re-expose the currently hidden interface: invoke an interface's context menu and click the option.
-    await enterSubgraph(page,'Test subgraph #1');
+    await enterSubgraph(subgraphNode);
     await exposedInterface.click({ button: 'right' });
-    const exposeContextMenuOption = page
+    const exposeContextMenuOption = targetNode
         .locator('.baklava-context-menu')
         .getByText('Expose Interface');
     await exposeContextMenuOption.click();
@@ -243,7 +234,8 @@ test('test renaming exposed interface', async ({ page }) => {
     await prepareSubgraphPage(page);
     await verifyNodeCount(page, 4);
 
-    await enterSubgraph(page,'Test subgraph #1');
+    const subgraphNode = getNode(page, 'Test subgraph #1');
+    await enterSubgraph(subgraphNode);
     await verifyNodeCount(page, 2);
 
     // Rename an exposed interface.
@@ -263,8 +255,9 @@ test('modifying subgraph interfaces correctly reflected in yaml editor', async (
     await prepareSubgraphPage(page);
     await verifyNodeCount(page, 4);
     await enableEditingNodes(page);
-    await addInterface(page, 'Test subgraph #1');
-    const content = await getYAML(page, 'Test subgraph #1');
+    const subgraphNode = getNode(page, 'Test subgraph #1');
+    await addInterface(page, subgraphNode);
+    const content = await getYAML(page, subgraphNode);
     expect(await content.interfaces.length).toBe(2);
 });
 
@@ -272,8 +265,9 @@ test('modifying subgraph properties correctly reflected in yaml editor', async (
     await prepareSubgraphPage(page);
     await verifyNodeCount(page, 4);
     await enableEditingNodes(page);
-    await addProperty(page, 'Test subgraph #1');
-    const content = await getYAML(page, 'Test subgraph #1');
+    const subgraphNode = getNode(page, 'Test subgraph #1');
+    await addProperty(page, subgraphNode);
+    const content = await getYAML(page, subgraphNode);
     expect(await content.properties.length).toBe(2);
 });
 
@@ -281,26 +275,27 @@ test('test adding exposed property', async ({ page }) => {
     await prepareSubgraphPage(page);
     await verifyNodeCount(page, 4);
     await enableEditingNodes(page);
-    await enterSubgraph(page,'Test subgraph #1');
-    await addProperty(page, 'Test node #1');
+    const subgraphNode = getNode(page, 'Test subgraph #1');
+    await enterSubgraph(subgraphNode);
+    const node = getNode(page, 'Test node #1').first();
+    await addProperty(page, node);
 
-    const exposedProperty = page
-        .getByText('New property')
-        .nth(1);
+    const exposedProperty = node
+        .getByText('New property');
     await exposedProperty.click({ button: 'right' });
-    const privatizeContextMenuOption = page
+    const privatizeContextMenuOption = node
         .locator('.baklava-context-menu')
         .getByText('Expose Property');
     await privatizeContextMenuOption.click();
 
     await leaveSubgraph(page);
     await expect(page.locator('#container')).toContainText('New property');
-    await verifyPropertyCount(page,'Test subgraph #1', 2);
+    await verifyPropertyCount(subgraphNode, 2);
 
-    await deleteProperty(page, 'Test subgraph #1', 'Sample option');
+    await deleteProperty(page, subgraphNode, 'Sample option');
 
     // check if YAML specification is correctly saved
-    const content = await getYAML(page, 'Test subgraph #1');
+    const content = await getYAML(page, subgraphNode);
     expect(await content.properties.find((entry) => entry.name === 'New property')).toBe(undefined);
     expect(await content.properties.length).toBe(0);
 });
@@ -308,18 +303,18 @@ test('test adding exposed property', async ({ page }) => {
 test("test hiding and exposing subgrap's property", async ({ page }) => {
     await prepareSubgraphPage(page);
     await verifyNodeCount(page, 4);
-    const propertyCount = await verifyPropertyCount(page,'Test subgraph #2',countOfInitiallyExposedProperties);
+    const subgraphNode = getNode(page, 'Test subgraph #2');
+    const propertyCount = await verifyPropertyCount(subgraphNode, countOfInitiallyExposedProperties);
     await enableEditingNodes(page);
-    await enterSubgraph(page,'Test subgraph #2');
+    await enterSubgraph(subgraphNode);
 
-    const exposedProperty = page
-        .getByText('Test node #2')
-        .locator('../..')
+    const targetNode = getNode(page, 'Test node #2');
+    const exposedProperty = targetNode
         .locator('.__content .__properties')
         .last();
 
     await exposedProperty.click({ button: 'right', force: true });
-    const privatizeContextMenuOption = page
+    const privatizeContextMenuOption = targetNode
         .locator('.baklava-context-menu')
         .getByText('Privatize Property');
     await privatizeContextMenuOption.click();
@@ -327,10 +322,10 @@ test("test hiding and exposing subgrap's property", async ({ page }) => {
     await leaveSubgraph(page);
     expect(await propertyCount.count()).toBe(countOfInitiallyExposedProperties-1);
 
-    await enterSubgraph(page,'Test subgraph #2');
+    await enterSubgraph(subgraphNode);
 
     await exposedProperty.click({ button: 'right', force: true });
-    const exposeContextMenuOption = page
+    const exposeContextMenuOption = targetNode
         .locator('.baklava-context-menu')
         .getByText('Expose Property');
     await exposeContextMenuOption.click();
@@ -344,19 +339,21 @@ test("test add subgraph", async ({ page }) => {
     await verifyNodeCount(page, 4);
     await enableEditingNodes(page);
 
-    await addSubgraph(page,"Test node #1");
-    await checkForSubgraph(page,"Test node #1");
+    const node = getNode(page, 'Test node #1')
+    await addSubgraph(node);
+    await checkForSubgraph(node);
 });
 
 test("test add subgraph, with sub-node", async ({ page }) => {
     await prepareSubgraphPage(page);
     await verifyNodeCount(page, 4);
     await enableEditingNodes(page);
-    const exposedInterfaces = await verifyInterfaceCount(page, 1,"Test node #2");
+    const subgraphNode = getNode(page, 'Test node #2')
+    const exposedInterfaces = await verifyInterfaceCount(1, subgraphNode);
 
-    await addSubgraph(page,"Test node #2");
-    await checkForSubgraph(page,"Test node #2");
-    await enterSubgraph(page,"Test node #2");
+    await addSubgraph(subgraphNode);
+    await checkForSubgraph(subgraphNode);
+    await enterSubgraph(subgraphNode);
 
     // check if a new node was added to new subgraph
     await verifyNodeCount(page,0);
@@ -364,14 +361,12 @@ test("test add subgraph, with sub-node", async ({ page }) => {
     await verifyNodeCount(page,1);
 
     // Expose a new interface: right click on an interface and choose 'Expose Interface'.
-    const newOutputInterface = page
-        .getByText('Test node #1')
-        .locator('../..')
-        .locator('.__interfaces .__outputs > div')
-        .last();
-    await newOutputInterface.click({ button: 'right' });
+    const node = getNode(page, 'Test node #1')
+    await node.locator('.__interfaces .__outputs > div')
+        .last()
+        .click({ button: 'right' });
 
-    const contextMenuOption = page.locator('.baklava-context-menu').getByText('Expose Interface');
+    const contextMenuOption = node.locator('.baklava-context-menu').getByText('Expose Interface');
     await contextMenuOption.click();
 
     await leaveSubgraph(page);
@@ -385,13 +380,14 @@ test("test remove node with exposed interface", async ({ page }) => {
     await prepareSubgraphPage(page);
     await verifyNodeCount(page, 4);
     await enableEditingNodes(page);
-    const exposedInterfaces = await verifyInterfaceCount(page, countOfInitiallyExposedInterface,'Test subgraph #1');
+    const subgraphNode = getNode(page, 'Test subgraph #1');
+    const exposedInterfaces = await verifyInterfaceCount(countOfInitiallyExposedInterface, subgraphNode);
 
-    await enterSubgraph(page,'Test subgraph #1');
+    await enterSubgraph(subgraphNode);
 
     // check if a node has been removed from subgraph
     await verifyNodeCount(page,2);
-    await deleteNode(page,"Test node #1");
+    await deleteNode(getNode(page, 'Test node #1').nth(1));
     await verifyNodeCount(page,1);
 
     await leaveSubgraph(page);
@@ -403,13 +399,14 @@ test("test remove node with exposed properties", async ({ page }) => {
     await prepareSubgraphPage(page);
     await verifyNodeCount(page, 4);
     await enableEditingNodes(page);
-    const exposedProperties = await verifyPropertyCount(page,'Test subgraph #2',1);
+    const subgraphNode = getNode(page, 'Test subgraph #2');
+    const exposedProperties = await verifyPropertyCount(subgraphNode, 1);
 
-    await enterSubgraph(page,'Test subgraph #2');
+    await enterSubgraph(subgraphNode);
 
     // check if a node has been removed from subgraph
     await verifyNodeCount(page,5);
-    await deleteNode(page,"Test node #2");
+    await deleteNode(getNode(page, 'Test node #2'));
     await verifyNodeCount(page,4);
 
     await leaveSubgraph(page);
@@ -439,7 +436,8 @@ test("test new graph node creation", async ({ page }) => {
     await verifyNodeCount(page,5);
 
     // enter into a new graph node
-    await enterSubgraph(page,'New Graph Node');
+    const subgraphNode = getNode(page, 'New Graph Node');
+    await enterSubgraph(subgraphNode);
 
     // add a node
     await verifyNodeCount(page,0);
@@ -447,9 +445,7 @@ test("test new graph node creation", async ({ page }) => {
     await verifyNodeCount(page,1);
 
     // expose a interface
-    const newOutputInterface = page
-        .getByText('Test node #1')
-        .locator('../..')
+    const newOutputInterface = getNode(page, 'Test node #1')
         .locator('.__content .__outputs .__port')
         .first();
     await newOutputInterface.click({ button: 'right' });
@@ -459,6 +455,6 @@ test("test new graph node creation", async ({ page }) => {
 
     await leaveSubgraph(page);
 
-    await verifyInterfaceCount(page, 1,'New Graph Node');
+    await verifyInterfaceCount(1, subgraphNode);
 
 });

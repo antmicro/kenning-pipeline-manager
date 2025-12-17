@@ -53,7 +53,7 @@ async function assertInputCount(page: Page, nodeName: string, count: integer) {
 async function addInterface(page: Page, nodeName: string) {
     const node = page.getByText(nodeName).last();
     await node.click({ button: 'right', force: true });
-    await page.getByText('Add interface').click();
+    await node.locator('..').getByText('Add interface').click();
     await page.getByRole('button', { name: 'Add interface' }).click();
 
     await assertInputCount(page, nodeName, 2);
@@ -62,7 +62,7 @@ async function addInterface(page: Page, nodeName: string) {
 async function renameNodeType(page: Page, oldName: string, newName: string) {
     const node = page.getByText(oldName).last();
     await node.click({ button: 'right', force: true });
-    await page.getByText('Configure').click();
+    await node.locator('..').getByText('Configure').click();
     await page.getByRole('textbox').first().fill(newName);
     await page.getByRole('button', { name: 'Configure' }).click();
 }
@@ -109,7 +109,6 @@ async function saveSpecificationAs(page: Page, filenameWithoutExtension: string)
 async function verifyNodePresence(page: Page, specificationPath: string, nodeName: string) {
     const specFile = await fs.readFile(specificationPath, 'utf-8');
     const specification = JSON.parse(specFile);
-    console.log(specification);
 
     expect(
         specification.nodes.filter(
@@ -212,7 +211,7 @@ test('rename category node', async ({ page }) => {
     // check category in custom sidebar
     const node = page.getByText('Logical AND').locator('..').last();
     await node.click({ button: 'right'});
-    await page.getByText('Details', { exact: true }).click();
+    await node.getByText('Details', { exact: true }).click();
 
     const parents = page.getByText('Generalize');
     const siblings = page.getByText('Choose other type');

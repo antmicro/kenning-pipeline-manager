@@ -19,7 +19,7 @@ test('remove node', async ({ page }) => {
     await nodeTitle.click({ button: 'right' });
 
     // Delete the node.
-    const deleteButton = page.getByText('Delete', { exact: true });
+    const deleteButton = loadVideoNode.getByText('Delete', { exact: true });
     await deleteButton.click({ force: true });
 
     // Verify that the node has disappeared.
@@ -36,8 +36,8 @@ test('show menu by right-clicking on node', async ({ page }) => {
     // Right-click on the node's title.
     const nodeTitle = node.locator('.__title');
     await nodeTitle.click({ button: 'right' });
-    let menu = page.locator('.baklava-context-menu');
-    expect(page.locator('.baklava-context-menu')).toBeVisible;
+    const menu = nodeTitle.locator('.baklava-context-menu');
+    await menu.waitFor()
     expect(await menu.filter({ hasText: 'Details' }).count()).toBeGreaterThan(0);
 
     // Close the context menu.
@@ -45,10 +45,8 @@ test('show menu by right-clicking on node', async ({ page }) => {
 
     // Right-click on the node's content.
     const nodeBody = node.locator('.__content');
-    await nodeBody.click({ button: 'right' });
-    menu = page.locator('.baklava-context-menu');
-    expect(menu).toBeVisible();
-    expect(await menu.filter({ hasText: 'Details' }).count());
+    await nodeBody.click({ button: 'right' , position: { x: 0, y: 0 }});
+    expect(await menu.filter({ hasText: 'Details' }).count()).toBeGreaterThan(0);
 });
 
 test('show menu by right-clicking on interface', async ({ page }) => {
@@ -59,11 +57,11 @@ test('show menu by right-clicking on interface', async ({ page }) => {
     const node = page.locator(`#${loadVideoNodeId}`);
 
     // Right-click on a node.
-    const nodeInterface = node.getByText('frames');
+    const nodeInterface = node.getByText('frames').locator('..');
     await nodeInterface.click({ button: 'right' });
 
     // Verify presence and content of a context menu.
-    const menu = page.locator('.baklava-context-menu');
-    expect(menu).toBeVisible();
+    const menu = node.locator('.__content .baklava-context-menu').first();
+    await menu.waitFor();
     expect(await menu.filter({ hasText: 'Space Up' }).count()).toBeGreaterThan(0);
 });

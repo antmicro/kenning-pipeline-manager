@@ -34,9 +34,11 @@ async function getYAMLEditorContent(page: Page) {
     return value;
 }
 async function addInterface(page: Page, nodeName: string) {
-    const node = page.getByText(nodeName).last();
-    await node.click({ button: 'right', force: true });
-    await page.getByText('Add interface').click();
+    const node = page
+        .locator(`.baklava-node[data-node-type="${nodeName}"]`)
+        .first();
+    await node.locator('.__title').click({ button: 'right', force: true });
+    await node.locator('.baklava-context-menu').getByText('Add interface').click();
     await page.getByRole('button', { name: 'Add interface' }).click();
 
     await assertInputCount(page, nodeName, 2);
@@ -56,9 +58,8 @@ async function openFileChooser(
 async function checkIfYAMLPersists(page: Page) {
     // Open a pop-up for the first node.
     const node = page
-        .locator('div')
-        .filter({ hasText: /^Test node #1$/ })
-        .nth(3);
+        .locator(`.baklava-node[data-node-type="Test node #1"] .__title`)
+        .first();
     await node.dblclick();
 
     // Type a new text to the YAML editor.
@@ -67,11 +68,10 @@ async function checkIfYAMLPersists(page: Page) {
     await textarea.fill(newValue);
 
     // Switch to a different node.
-    const anotherNode = page
-        .locator('div')
-        .filter({ hasText: /^Test node #2$/ })
-        .nth(3);
-    await anotherNode.dblclick();
+    await page
+        .locator(`.baklava-node[data-node-type="Test node #2"] .__title`)
+        .first()
+        .dblclick();
 
     // Get back and verify if the new value persists.
     await node.dblclick();
@@ -99,7 +99,7 @@ test('adding interface from UI reflected in YAML editor', async ({ page }) => {
     const nodeName = 'Custom Node';
     await openNodePalette(page);
     await createNewNodeType(page);
-    await addNode(page, 'Default category', nodeName, 750, 80);
+    await addNode(page, 'Default category', nodeName, 500, 80);
 
     // Double click the node to open the YAML editor.
     const customNode = page.locator('[data-node-type="Custom Node"]').first();

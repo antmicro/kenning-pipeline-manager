@@ -13,7 +13,7 @@ async function deleteNode(page: Page, nodeId: string) {
     await nodeTitle.click({ button: 'right' });
 
     // Delete the node.
-    const deleteButton = page.getByText('Delete', { exact: true });
+    const deleteButton = loadVideoNode.getByText('Delete', { exact: true });
     await deleteButton.click({ force: true });
 }
 
@@ -26,6 +26,24 @@ async function loadWebsite(page: Page, requiredNodeId: string) {
 
 async function expectNode(exists: boolean, page: Page, nodeId: string, errorMessage: string) {
     expect(page.locator(`#${nodeId}`), { message: errorMessage }).toBeVisible({ visible: exists });
+}
+
+function getNode(page: Page, name: string): Locator {
+    return page.locator(`.baklava-node[data-node-type="${name}"]`);
+}
+
+function getNodeInterfaces(page: Page, name: string, side: 'input' | 'output' | 'any' = 'any'): Locator {
+    const ioClass = {
+        any: '',
+        input: '.__inputs',
+        output: '.__outputs',
+    }[side];
+
+    return getNode(page, name).locator(`.__interfaces ${ioClass}`);
+}
+
+function getContextMenuOption(page: Page, nodeName: string, optionName: string): Locator {
+    return getNode(page, nodeName).locator('.baklava-context-menu').getByText(optionName);
 }
 
 test('test history by removing node', async ({ page }) => {
@@ -58,12 +76,7 @@ test('test history by removing node', async ({ page }) => {
 });
 
 async function countSaveVideoNodes(page: Page): Promise<number> {
-    const saveVideoNodes = page
-        .getByText('SaveVideo')
-        .locator('../..')
-        .getByText('SaveVideofilename: frames')
-        .count();
-    return saveVideoNodes;
+    return getNode(page, 'SaveVideo').count();
 }
 
 test('test history by adding node', async ({ page }) => {
@@ -177,15 +190,8 @@ test('test history by adding connection', async ({ page }) => {
     await removeConnection(page, outputPort);
     await expect(connections, { message: 'Removing a connection failed.' }).toHaveCount(5);
 
-    const sourceInterface = page.getByText('LoadVideo').nth(1).locator('../..').locator('.__port');
-    const targetInterface = page
-        .getByText('Filter2D')
-        .nth(1)
-        .locator('../..')
-        .locator('.__interfaces .__inputs')
-        .getByText('input 1')
-        .locator('../..')
-        .locator('.__port');
+    const sourceInterface = getNodeInterfaces(page, 'LoadVideo').locator('.__port').first();
+    const targetInterface = getNodeInterfaces(page, 'Filter2D', 'input').locator('.__port').first();
 
     const [sourcePosition, targetPosition]: [number, number][] = await Promise.all(
         [sourceInterface, targetInterface]
@@ -220,13 +226,8 @@ test('test history by adding connection', async ({ page }) => {
 });
 
 async function firstInputInterfaceHasToBe(page: Page, value: string, errorMessage: string) {
-    const firstInputInterface = page
-        .getByText('Filter2D')
-        .nth(1)
-        .locator('../..')
-        .locator('.__interfaces .__inputs div')
-        .first();
-    await expect(await firstInputInterface.innerText(), { message: errorMessage }).toBe(value);
+    const firstInputInterface = getNodeInterfaces(page, 'Filter2D', 'input').locator('div').first();
+    expect(await firstInputInterface.innerText(), { message: errorMessage }).toBe(value);
 }
 
 test('test history by moving interface down', async ({ page }) => {
@@ -239,16 +240,10 @@ test('test history by moving interface down', async ({ page }) => {
     );
 
     // Open a context menu of an interface.
-    const filter2dNode = page.getByText('Filter2D').nth(1).locator('../..');
-    let interfaceInput1 = filter2dNode
-        .locator('.__interfaces .__inputs')
-        .getByText('input 1')
-        .locator('../..')
-        .locator('.__port');
-    await interfaceInput1.click({ button: 'right' });
+    await getNodeInterfaces(page, 'Filter2D', 'input').locator('> div').first().click({ button: 'right' });
 
     // Move the interface down.
-    const moveDownOption = page.locator('.baklava-context-menu').getByText('Move Down');
+    const moveDownOption = getContextMenuOption(page, 'Filter2D', 'Move Down');
     await moveDownOption.click();
     await firstInputInterfaceHasToBe(page, 'kernel', 'An interface `input 1` was not moved down.');
 
@@ -277,16 +272,10 @@ test('test history by moving interface up', async ({ page }) => {
     );
 
     // Open a context menu of an interface.
-    const filter2dNode = page.getByText('Filter2D').nth(1).locator('../..');
-    let interfaceInput1 = filter2dNode
-        .locator('.__interfaces .__inputs')
-        .getByText('kernel')
-        .locator('../..')
-        .locator('.__port');
-    await interfaceInput1.click({ button: 'right' });
+    await getNodeInterfaces(page, 'Filter2D', 'input').locator('> div').nth(1).click({ button: 'right' });
 
     // Move the interface up.
-    const moveUpOption = page.locator('.baklava-context-menu').getByText('Move Up');
+    const moveUpOption = getContextMenuOption(page, 'Filter2D', 'Move Up');
     await moveUpOption.click();
     await firstInputInterfaceHasToBe(page, 'kernel', 'An interface `input 1` was not moved up.');
 
@@ -306,8 +295,7 @@ test('test history by moving interface up', async ({ page }) => {
 });
 
 async function countInterfaces(page: Page, type: 'input' | 'output'): Promise<number> {
-    const filter2dNode = page.getByText('Filter2D').nth(1).locator('../..');
-    return filter2dNode.locator(`.__${type}s .__port`).count();
+    return getNodeInterfaces(page, 'Filter2D', type).locator('.__port').count();
 }
 
 test('test history by moving interface to right', async ({ page }) => {
@@ -321,13 +309,7 @@ test('test history by moving interface to right', async ({ page }) => {
     }).toBe(1);
 
     // Double click on an interface.
-    const filter2dNode = page.getByText('Filter2D').nth(1).locator('../..');
-    let interfaceInput1 = filter2dNode
-        .locator('.__interfaces .__inputs')
-        .getByText('input 1')
-        .locator('../..')
-        .locator('.__port');
-    await interfaceInput1.dblclick();
+    await getNodeInterfaces(page, 'Filter2D', 'input').locator('.__port').first().dblclick();
     expect(await countInterfaces(page, 'input'), {
         message: 'An interface was not moved to the right after double clicking it.',
     }).toBe(1);
@@ -367,13 +349,7 @@ test('test history by moving interface to left', async ({ page }) => {
     }).toBe(1);
 
     // Double click on an interface.
-    const filter2dNode = page.getByText('Filter2D').nth(1).locator('../..');
-    let interfaceOutput1 = filter2dNode
-        .locator('.__interfaces .__outputs')
-        .getByText('output 1')
-        .locator('../..')
-        .locator('.__port');
-    await interfaceOutput1.dblclick();
+    await getNodeInterfaces(page, 'Filter2D', 'output').locator('.__port').first().dblclick();
     expect(await countInterfaces(page, 'input'), {
         message: 'An interface was not moved to the left after double clicking it.',
     }).toBe(3);
@@ -442,16 +418,10 @@ test('test history by editing node with connection', async ({ page }) => {
     }).toHaveCount(6);
 
     // Open a context menu of an interface.
-    const filter2dNode = page.getByText('Filter2D').nth(1).locator('../..');
-    let interfaceInput1 = filter2dNode
-        .locator('.__interfaces .__inputs')
-        .getByText('kernel')
-        .locator('../..')
-        .locator('.__port');
-    await interfaceInput1.click({ button: 'right' });
+    await getNodeInterfaces(page, 'Filter2D', 'input').locator('.__port').nth(1).click({ button: 'right' });
 
     // Move the interface up.
-    const moveUpOption = page.locator('.baklava-context-menu').getByText('Move Up');
+    const moveUpOption = getContextMenuOption(page, 'Filter2D', 'Move Up');
     await moveUpOption.click();
     await firstInputInterfaceHasToBe(page, 'kernel', 'An interface `input 1` was not moved up.');
 
