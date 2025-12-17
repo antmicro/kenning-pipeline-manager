@@ -25,6 +25,7 @@ import SubgraphNavigation from './navbar/SubgraphNavigation.vue';
 import NotificationButton from './navbar/NotificationButton.vue';
 import FullscreenButton from './navbar/FullscreenButton.vue';
 import SettingsButton from './navbar/SettingsButton.vue';
+import GraphDetailsButton from './navbar/GraphDetailsButton.vue';
 import Validate from '../icons/Validate.vue';
 import Backend from '../icons/Backend.vue';
 import Bell from '../icons/Bell.vue';
@@ -79,6 +80,7 @@ export default {
         NotificationButton,
         FullscreenButton,
         SettingsButton,
+        GraphDetailsButton,
     },
     computed: {
         dataflowGraphName() {
@@ -653,20 +655,16 @@ export default {
                         @hoverStart="() => updateHoverInfo(panels.fullscreen.iconRef)"
                         @hoverStop="() => resetHoverInfo(panels.fullscreen.iconRef)"
                     />
+                    <GraphDetailsButton
+                        :mobileClasses="mobileClasses"
+                        :hover="isHovered('graphDetails')"
+                        :editorManager="editorManager"
+                        :openPanel="panels.graphDetails.isOpen"
+                        @onClicked="()=> togglePanel(panels.graphDetails)"
+                        @hover="() => updateHoverInfo(panels.graphDetails.iconRef)"
+                        @hoverStop="() => resetHoverInfo(panels.graphDetails.iconRef)"
                         ref="graphDetails"
-                        :class="['hoverbox', mobileClasses]"
-                        role="button"
-                        @click="togglePanel(panels.graphDetails)"
-                        @pointerover="() => updateHoverInfo('graphDetails')"
-                        @pointerleave="() => resetHoverInfo('graphDetails')"
-                    >
-                        <Sidebar :hover="isHovered('graphDetails')" class="small_svg"/>
-                        <div :class="['tooltip', mobileClasses]">
-                            <span v-if="!panels.graphDetails.isOpen">Show graph details</span>
-                            <span v-else>Hide graph details</span>
-                        </div>
-                    </div>
-                    <div
+                    />
                     <SettingsButton
                         :mobileClasses="mobileClasses"
                         :hover="isHovered('settings')"
