@@ -22,6 +22,7 @@ import Collapse from '../icons/Collapse.vue';
 import ExternalAppStatus from './navbar/ExternalAppStatus.vue';
 import ExternalAppAction from './navbar/ExternalAppAction.vue';
 import SubgraphNavigation from './navbar/SubgraphNavigation.vue';
+import NavBarTransitions from './navbar/NavBarTransitions.vue';
 import NotificationButton from './navbar/NotificationButton.vue';
 import FullscreenButton from './navbar/FullscreenButton.vue';
 import SettingsButton from './navbar/SettingsButton.vue';
@@ -314,7 +315,7 @@ export default {
     methods: {
         togglePanel(panel, disable = false) {
             const panelSelector = document.querySelector(panel.class);
-            const iconRef = this.$refs[panel.iconRef];
+            const iconRef = this.$refs[panel.iconRef]?.getRef();
 
             if (disable) {
                 panel.isOpen = false;
@@ -324,6 +325,7 @@ export default {
             const isPanelOpen = panel.isOpen;
 
             if (panelSelector) {
+                if (!iconRef) return;
                 panelSelector.style.transition = `transform ${isPanelOpen ? '0.4' : '0.2'}s`;
                 panelSelector.style.transform = `translate(${
                     isPanelOpen ? panel.showTransform : panel.hideTransform
@@ -333,9 +335,9 @@ export default {
             }
         },
 
-
         clickOutside(event, panel) {
-            const icon = this.$refs[panel.iconRef];
+            let icon = this.$refs[panel.iconRef]?.getRef();
+            if (!icon) icon = panel.refs;
             if (!icon) return;
 
             const currentElement = event.target;
@@ -425,7 +427,7 @@ export default {
                 if (this.navbarGuard) {
                     this.navbarGuard = false;
                 } else {
-                    this.togglePanel(this.panels.palette, true);
+                    this.togglePanel(this.panels.palette.getRef(), true);
                     this.$refs.navbar.classList.remove('isHovered');
                 }
             }
@@ -483,14 +485,11 @@ export default {
     },
     async mounted() {
         this.isMounted = true;
-        this.buttonWidth = this.$refs.palette.offsetWidth;
+        this.buttonWidth = this.$refs.palette.getRef().offsetWidth;
         this.windowWidth = window.innerWidth;
 
         window.addEventListener('resize', () => {
             this.windowWidth = window.innerWidth;
-            if (this.$refs.palette) this.buttonWidth = this.$refs.palette.offsetWidth;
-        });
-
             if (this.$refs.palette.getRef()) {
                 this.buttonWidth = this.$refs.palette.getRef().offsetWidth;
             }
