@@ -19,6 +19,8 @@ import Arrow from '../icons/Arrow.vue';
 import Expand from '../icons/Expand.vue';
 import FilesContextMenu from './navbar/FilesContextMenu.vue';
 import Collapse from '../icons/Collapse.vue';
+import ExternalAppStatus from './navbar/ExternalAppStatus.vue';
+import ExternalAppAction from './navbar/ExternalAppAction.vue';
 import Validate from '../icons/Validate.vue';
 import Backend from '../icons/Backend.vue';
 import Bell from '../icons/Bell.vue';
@@ -67,6 +69,8 @@ export default {
         GraphDetails,
         FilesContextMenu,
         NavBarTransitions,
+        ExternalAppAction,
+        ExternalAppStatus,
     },
     computed: {
         dataflowGraphName() {
@@ -268,19 +272,19 @@ export default {
                     showTransform: '0px, 0px',
                     hideTransform: '-450px, 0px',
                 },
-                externalAppStatus: {
-                    isOpen: false,
-                    class: '.external-app-status',
-                    iconRef: 'backend',
-                    showTransform: '-89%, 0px',
-                    hideTransform: '-89%, -180px',
-                },
                 settings: {
                     isOpen: false,
                     class: '.settings-panel',
                     iconRef: 'settings',
                     showTransform: '-495px, 0px',
                     hideTransform: '0px, 0px',
+                },
+                externalAppStatus: {
+                    isOpen: false,
+                    class: '.external-app-status',
+                    iconRef: 'backend',
+                    showTransform: '-89%, 0px',
+                    hideTransform: '-89%, -180px',
                 },
                 nodesearch: {
                     isOpen: false,
@@ -572,47 +576,18 @@ export default {
                         </div>
                     </div>
                     <template v-if="this.externalApp.available">
-                        <div
-                            v-for="actionItem in navbarItems"
-                            :key="actionItem.name"
-                            :id="`navbar-button-${actionItem.procedureName}`"
-                            :class="[
-                                (
-                                    (activeNavbarItems.includes(actionItem.procedureName)
-                                    || isInProgress(actionItem.procedureName))
-                                    ? 'hoverbox' : 'box'
-                                ),
-                                mobileClasses, {
-                                'button-in-progress': isInProgress(actionItem.procedureName),
-                            }]"
-                            role="button"
-                            @click="(async () => requestDataflowAction(actionItem))"
-                            @pointerover="() => updateHoverInfo(actionItem.procedureName, true)"
-                            @pointerleave="() => resetHoverInfo(actionItem.procedureName)"
-                        >
-                            <!-- imgURI is used for Placeholder Icon to retrieve the image -->
-                            <CassetteStop
-                                v-if="
-                                    isStoppable(actionItem.procedureName)
-                                    && isInProgress(actionItem.procedureName)
-                                "
-                                class="small_svg"
-                                :hover="isHovered(actionItem.procedureName)"
-                            />
-                            <component
-                                v-else
-                                class="small_svg"
-                                :is="actionItem.icon"
-                                :hover="isHovered(actionItem.procedureName)"
-                                :imgURI="actionItem.iconName"
-                            />
-                            <div class="progress-bar" />
-                            <div :class="['tooltip', mobileClasses]">
-                                <span>
-                                    {{ getNavbarActionTooltip(actionItem) }}
-                                </span>
-                            </div>
-                        </div>
+                        <ExternalAppAction
+                            :mobileClasses="mobileClasses"
+                            :navbarItems="navbarItems"
+                            :activeNavbarItems="activeNavbarItems"
+                            :isInProgress="isInProgress"
+                            :isStoppable="isStoppable"
+                            :requestDataflowAction="requestDataflowAction"
+                            :updateHoverInfo="updateHoverInfo"
+                            :resetHoverInfo="resetHoverInfo"
+                            :getNavbarActionTooltip="getNavbarActionTooltip"
+                            :isHovered="isHovered"
+                        />
                     </template>
                     <div
                         v-if="this.editorManager.editor.isInSubgraph()"
@@ -756,46 +731,20 @@ export default {
                             <span v-else>Hide settings</span>
                         </div>
                     </div>
-                    <div
+                    />
+
+                    <ExternalAppStatus
                         ref="backend"
-                        :class="['hoverbox', mobileClasses]"
-                        v-if="externalApp.available && externalApp.backend"
-                        @click="() => togglePanel(panels.externalAppStatus)"
-                        @pointerover="() => updateHoverInfo('externalAppStatus')"
-                        @pointerleave="() => resetHoverInfo('externalAppStatus')"
-                    >
-                        <Backend
-                            v-if="externalApp.connected"
-                            color="connected"
-                            class="small_svg"
-                            :active="externalAppStatus"
-                            :hover="isHovered('externalAppStatus')"
-                        />
-                        <Backend
-                            v-else color="disconnected"
-                            class="small_svg"
-                            :active="externalAppStatus"
-                            :hover="isHovered('externalAppStatus')"
-                        />
-                        <div :class="['tooltip', mobileClasses]">
-                            <span>External App status</span>
-                        </div>
-                        <div
-                            v-click-outside="(ev) => clickOutside(ev, panels.externalAppStatus)"
-                            class="external-app-status"
-                        >
-                            <div>
-                                <span>Client status:</span>
-                                <!-- eslint-disable-next-line max-len -->
-                                <span v-if="externalApp.connected"
-                                    class="connected"
-                                    >Connected</span
-                                >
-                                <span v-else class="disconnected">Disconnected</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div
+                        :externalApp="externalApp"
+                        :mobileClasses="mobileClasses"
+                        :hover="isHovered('externalAppStatus')"
+                        :openPanel="panels.externalAppStatus.isOpen"
+                        @hoverStart="() => updateHoverInfo('externalAppStatus')"
+                        @hoverStop="() => resetHoverInfo('externalAppStatus')"
+                        @onClicked="() => togglePanel(panels.externalAppStatus)"
+                        @onClickOutside="(ev) => clickOutside(ev, panels.externalAppStatus)"
+                     />
+                    <NotificationButton
                         ref="notifications"
                         v-if="!hideHud"
                         :class="['hoverbox', mobileClasses]"
@@ -1005,34 +954,6 @@ export default {
 
                 & > div:hover {
                     background-color: #2A2A2A;
-                }
-            }
-
-            & > .external-app-status {
-                @extend .dropdown-wrapper;
-                width: 220px;
-                display: flex;
-                /* Hide external app panel and position it
-                  to right border of backend icon
-                */
-                transform: translate(-89%, -180px);
-                padding: $spacing-l;
-                font-size: $fs-small;
-                justify-content: space-between;
-                border: none;
-                transition: transform 1s;
-
-                & > div {
-                    display: flex;
-                    justify-content: space-between;
-
-                    & > .disconnected {
-                        color: $red;
-                    }
-
-                    & > .connected {
-                        color: $green;
-                    }
                 }
             }
 
