@@ -11,14 +11,9 @@ Displays user interface and main details about the Pipeline Manager status.
 
 <script>
 import {
-    markRaw, ref, provide, computed,
+    markRaw, provide, computed,
 } from 'vue';
-import { useViewModel } from '@baklavajs/renderer-vue';
-import { api as fullscreen } from 'vue-fullscreen';
-import Arrow from '../icons/Arrow.vue';
-import Expand from '../icons/Expand.vue';
 import FilesContextMenu from './navbar/FilesContextMenu.vue';
-import Collapse from '../icons/Collapse.vue';
 import ExternalAppStatus from './navbar/ExternalAppStatus.vue';
 import ExternalAppAction from './navbar/ExternalAppAction.vue';
 import SubgraphNavigation from './navbar/SubgraphNavigation.vue';
@@ -29,14 +24,6 @@ import SettingsButton from './navbar/SettingsButton.vue';
 import GraphDetailsButton from './navbar/GraphDetailsButton.vue';
 import NodeBrowserButton from './navbar/NodeBrowserButton.vue';
 import SearchBar from './navbar/SearchBar.vue';
-import Validate from '../icons/Validate.vue';
-import Backend from '../icons/Backend.vue';
-import Bell from '../icons/Bell.vue';
-import Cube from '../icons/Cube.vue';
-import CassetteStop from '../icons/CassetteStop.vue';
-import Cogwheel from '../icons/Cogwheel.vue';
-import Magnifier from '../icons/Magnifier.vue';
-import Sidebar from '../icons/Sidebar.vue';
 import EditorManager from '../core/EditorManager';
 import NotificationHandler from '../core/notifications';
 import { notificationStore } from '../core/stores';
@@ -44,8 +31,6 @@ import runInfo from '../core/communication/runInformation';
 import getExternalApplicationManager from '../core/communication/ExternalApplicationManager';
 import Notifications from './Notifications.vue';
 import Settings from './Settings.vue';
-import NavBarTransitions from './navbar/NavBarTransitions.vue';
-import Panel from './Panel.vue';
 import CustomSidebar from '../custom/CustomSidebar.vue';
 import GraphDetails from './GraphDetails.vue';
 import { saveSpecificationConfiguration, saveGraphConfiguration, exportGraph } from './saveConfiguration.ts';
@@ -54,25 +39,11 @@ import icons from '../icons';
 
 import InputInterface from '../interfaces/InputInterface.js';
 
-import globalProperties from '../globalProperties.ts';
-
 /* eslint-disable no-param-reassign */
 export default {
     components: {
-        Arrow,
-        CassetteStop,
-        Validate,
-        Backend,
-        Bell,
-        Expand,
-        Collapse,
         Notifications,
-        Magnifier,
-        Cogwheel,
-        Sidebar,
         Settings,
-        Cube,
-        Panel,
         CustomSidebar,
         GraphDetails,
         FilesContextMenu,
@@ -117,15 +88,6 @@ export default {
         readonly() {
             return this.editorManager.editor.readonly;
         },
-        notificationsOpen() {
-            return this.panels.notifications.isOpen;
-        },
-        paletteOpen() {
-            return this.panels.palette.isOpen;
-        },
-        externalAppStatus() {
-            return this.panels.externalAppStatus.isOpen;
-        },
         leftButtonsQuantity() {
             return this.$refs.leftButtons.children.length;
         },
@@ -167,9 +129,6 @@ export default {
         activeNavbarItems() {
             return this.activeNavbarItemsNames;
         },
-        parentGraph() {
-            return this.editorManager.getParentGraph();
-        },
     },
     watch: {
         dataflowGraphName(newValue) {
@@ -185,14 +144,6 @@ export default {
             // Resetting the save configurations
             saveSpecificationConfiguration.reset();
             saveGraphConfiguration.reset();
-        },
-        searchEditorNodesQuery(newValue) {
-            const { viewModel } = useViewModel();
-            if (newValue === '') {
-                viewModel.value.editor.searchQuery = undefined;
-                return;
-            }
-            viewModel.value.editor.searchQuery = newValue.toLowerCase();
         },
         navbarItems(newValue) {
             newValue.forEach((item) => {
