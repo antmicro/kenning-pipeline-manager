@@ -253,7 +253,11 @@ export default function getNodeTree(nameFilterRef: Ref<string>) {
     const { editor } = viewModel.value;
     const editorManager = EditorManager.getEditorManagerInstance();
 
-    const nodeTypeEntries = Array.from(editor.nodeTypes.entries());
+    const nodeTypeEntries = Array.from(editor.nodeTypes.entries()).filter(([key, entry]) =>
+        !editorManager.specification.currentSpecification.nodes.some((node: any) =>
+            node.name === entry.title && node.abstract,
+        ),
+    );
     const categoryNames = new Set(nodeTypeEntries.map(([, ni]) => ni.category));
 
     const topLevelCategories: Nodes = {
