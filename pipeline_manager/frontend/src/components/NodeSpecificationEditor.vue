@@ -52,6 +52,7 @@ import YAML from 'yaml';
 import {
     computed, defineComponent, nextTick, ref, toRef, watch, onMounted,
 } from 'vue';
+import { useViewModel } from '@baklavajs/renderer-vue';
 import EditorManager, { EDITED_NODE_STYLE } from '../core/EditorManager';
 import NotificationHandler from '../core/notifications';
 import { menuState, configurationState } from '../core/nodeCreation/ConfigurationState.ts';
@@ -247,6 +248,23 @@ export default defineComponent({
                 && editorManager.baklavaView.settings.editableNodeTypes,
         );
 
+        const refreshSubgraphInterfaces = (nodeName) => {
+            const { viewModel } = useViewModel();
+            const { editor } = viewModel.value;
+
+            // get all subgraph nodes that holds edited nodes
+            const subgraphNodes = [...editor.graphs].filter((graph) => graph.graphNode)
+                .map((graph) => graph.graphNode)
+                .filter((n) => n.subgraph.nodes.some((_n) => _n.name === nodeName));
+
+            // update subgraphs
+            subgraphNodes.forEach((n) => {
+                editorManager.refreshSubgraph(n);
+
+                n.updateExposedInterfaces([], [], true);
+            });
+        };
+
         const updateSpecification = async () => {
             try {
                 const parsingErrors = validate();
@@ -390,6 +408,9 @@ export default defineComponent({
                     currentSpecification.value;
 
                 NotificationHandler.showToast('info', 'Node validated');
+
+                // update subgraph nodes associated with updated node
+                refreshSubgraphInterfaces(oldType.name);
             } catch (error) {
                 const messages = Array.isArray(error) ? error : [error];
                 NotificationHandler.terminalLog('error', 'Validation failed', messages);
