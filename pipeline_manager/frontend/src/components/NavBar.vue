@@ -22,6 +22,7 @@ import Collapse from '../icons/Collapse.vue';
 import ExternalAppStatus from './navbar/ExternalAppStatus.vue';
 import ExternalAppAction from './navbar/ExternalAppAction.vue';
 import SubgraphNavigation from './navbar/SubgraphNavigation.vue';
+import NotificationButton from './navbar/NotificationButton.vue';
 import Validate from '../icons/Validate.vue';
 import Backend from '../icons/Backend.vue';
 import Bell from '../icons/Bell.vue';
@@ -73,6 +74,7 @@ export default {
         ExternalAppAction,
         ExternalAppStatus,
         SubgraphNavigation,
+        NotificationButton,
     },
     computed: {
         dataflowGraphName() {
@@ -721,34 +723,15 @@ export default {
                      />
                     <NotificationButton
                         ref="notifications"
-                        v-if="!hideHud"
-                        :class="['hoverbox', mobileClasses]"
-                        role="button"
-                        @click="() => togglePanel(panels.notifications)"
-                        @pointerover="() => updateHoverInfo('notifications')"
-                        @pointerleave="() => resetHoverInfo('notifications')"
-                    >
-                        <Bell
-                            id="navbar-bell"
-                            :color="
-                                (this.notificationStore.notifications.length > 0) ?
-                                'green' : 'gray'
-                            "
-                            :hover="isHovered('notifications')"
-                            class="small_svg"
-                        />
-                        <div
-                            v-if="notificationsOpen"
-                            :class="['tooltip', mobileClasses]"
-                        >
-                            <span>Hide notifications</span>
-                        </div>
-                        <div
-                            v-else :class="['tooltip', mobileClasses]"
-                        >
-                            <span>Show notifications</span>
-                        </div>
-                    </div>
+                        :mobileClasses="mobileClasses"
+                        :hideHud="hideHud"
+                        :notificationCount="this.notificationStore.notifications.length"
+                        :hover="isHovered('notifications')"
+                        :openPanel="panels.notifications.isOpen"
+                        @onClicked="() => togglePanel(panels.notifications)"
+                        @hover="() => updateHoverInfo(panels.notifications.iconRef)"
+                        @hoverStop="() => resetHoverInfo(panels.notifications.iconRef)"
+                    />
                 </div>
             </div>
             <div class="progress-bar" />
