@@ -135,6 +135,8 @@ import Panel from '../components/Panel.vue';
 import { ParentMenu, WelcomeMenu } from '../components/menu';
 import { loadingScreen } from '../core/utils';
 
+import globalProperties from '../globalProperties.ts';
+
 export default defineComponent({
     extends: EditorComponent,
     props: {
@@ -738,7 +740,7 @@ export default defineComponent({
                 );
             }
             if (Array.isArray(errors) && errors.length) {
-                const messageTitle = process.env.VUE_APP_GRAPH_DEVELOPMENT_MODE === 'true' ?
+                const messageTitle = globalProperties.softLoad ?
                     'Softload enabled, errors found while loading the dataflow' :
                     'Dataflow is invalid';
                 NotificationHandler.terminalLog('error', messageTitle, errors);
