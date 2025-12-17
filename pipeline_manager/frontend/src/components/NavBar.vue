@@ -26,6 +26,7 @@ import NotificationButton from './navbar/NotificationButton.vue';
 import FullscreenButton from './navbar/FullscreenButton.vue';
 import SettingsButton from './navbar/SettingsButton.vue';
 import GraphDetailsButton from './navbar/GraphDetailsButton.vue';
+import NodeBrowserButton from './navbar/NodeBrowserButton.vue';
 import Validate from '../icons/Validate.vue';
 import Backend from '../icons/Backend.vue';
 import Bell from '../icons/Bell.vue';
@@ -81,6 +82,7 @@ export default {
         FullscreenButton,
         SettingsButton,
         GraphDetailsButton,
+        NodeBrowserButton,
     },
     computed: {
         dataflowGraphName() {
@@ -554,21 +556,17 @@ export default {
                         />
                     </div>
 
-                    <div
+                    <NodeBrowserButton
+                        :mobileClasses="mobileClasses"
+                        :hover="isHovered('palette')"
+                        :hideHud="hideHud"
+                        :readonly="readonly"
+                        :openPanel="this.panels.palette.isOpen"
+                        @onClicked="()=> togglePanel(panels.palette)"
+                        @hover="() => updateHoverInfo(panels.palette.iconRef)"
+                        @hoverStop="() => resetHoverInfo(panels.palette.iconRef)"
                         ref="palette"
-                        v-if="!hideHud && !readonly"
-                        :class="['hoverbox', mobileClasses]"
-                        role="button"
-                        @click="() => togglePanel(panels.palette)"
-                        @pointerover="() => updateHoverInfo('palette')"
-                        @pointerleave="() => resetHoverInfo('palette')"
-                    >
-                        <Cube :hover="isHovered('palette')" class="small_svg"/>
-                        <div :class="['tooltip', mobileClasses]">
-                            <span v-if="paletteOpen">Hide node browser</span>
-                            <span v-else>Show node browser</span>
-                        </div>
-                    </div>
+                    />
                     <template v-if="this.externalApp.available">
                         <ExternalAppAction
                             :mobileClasses="mobileClasses"
