@@ -49,6 +49,23 @@ test('checking inherited properties', async ({ page }) => {
     const modifiedParsedContent = YAML.parse(modifiedContent);
     expect(modifiedParsedContent.properties.length).toBe(2);
 });
+test('check added inherited property in spec', async ({ page }) => {
+    await page.goto(getUrl());
+    await loadSpecification(page, 'sample-inheritance-specification.json');
+
+    await enableEditingNodes(page);
+
+    await addNode(page, 'Classes', 'Type A', 400, 200);
+    await addProperty(page, 'Type A');
+    await addNode(page, 'Classes', 'Type B', 700, 200);
+    const nodeB = page.locator('[data-node-type="Type B"]').locator('.__title').first();
+    await nodeB.dblclick();
+    const initialContent = await getYAMLEditorContent(page);
+    const parsedContent = YAML.parse(initialContent);
+    expect(parsedContent.properties.length).toBe(1);
+    const nodeBproperties = page.locator('[data-node-type="Type B"]').locator('.__content > .__properties > div');
+    expect(await nodeBproperties.count()).toBe(3);
+});
 test('checking renamed inherited property', async ({ page }) => {
     await page.goto(getUrl());
     await loadSpecification(page, 'sample-inheritance-specification.json');
