@@ -261,7 +261,11 @@ export default class PipelineManagerEditor extends Editor {
         // and layout computation
         const readonlySetting = this.readonly;
         this.readonly = true;
-        const errors = [];
+
+        const result = {
+            errors: [],
+            warnings: [],
+        };
 
         if (!state.graphs.length) {
             return ['No graphs found'];
@@ -287,40 +291,47 @@ export default class PipelineManagerEditor extends Editor {
         state.graphs.forEach((graph) => {
             graph.nodes.forEach((n) => {
                 if (n.subgraph !== undefined) {
+                    if (!this.isGraphNode(n.name)) {
+                        result.warnings.push([`Node ${n.name} is not graph node, although it has defined subgraph property.`]);
+                        return;
+                    }
+
                     const fittingTemplate = state.graphs.filter(
                         (template) => template.id === n.subgraph,
                     );
                     if (fittingTemplate.length !== 1) {
-                        errors.push([`Expected exactly one template with ID ${n.name}, got ${fittingTemplate.length}`]);
-                        n.subgraph = undefined;
+                        console.log(fittingTemplate);
+                        result.errors.push([`Expected exactly one template with ID ${n.name}, got ${fittingTemplate.length}`]);
                     }
-                    usedSubgraphs.add(n.subgraph);
 
                     const { subgraphId } = this.nodeTypes.get(n.name) ?? {};
                     const isInstantiated = n.subgraph !== subgraphId;
+
+                    usedSubgraphs.add(n.subgraph);
+
                     if (isInstantiated || subgraphId === undefined) {
                         [n.graphState] = fittingTemplate;
                     }
                 }
                 n.relatedGraphs
                     ?.filter(({ id }) => state.graphs.find((el) => el.id === id) === undefined)
-                    .forEach(({ id }) => errors.push([`The related graph of id ${id} is not defined`]));
+                    .forEach(({ id }) => result.errors.push([`The related graph of id ${id} is not defined`]));
                 this.setNodeColor(n.id, n.color);
             });
         });
 
         try {
-            if (errors.length && !globalProperties.softLoad) return errors;
+            if (result.errors.length && !globalProperties.softLoad) return errors;
 
             state.graphs?.forEach((graph) => {
                 if (!usedSubgraphs.has(graph.id) && entryGraph.id !== graph.id) {
                     const graphObject = new Graph(this);
-                    errors.push(...graphObject.load(graph));
+                    result.errors.push(...graphObject.load(graph));
                     this.registerGraph(graphObject);
                 }
             });
 
-            if (!errors.length || globalProperties.softLoad) {
+            if (!result.errors.length || globalProperties.softLoad) {
                 let graphToLoad;
                 if (!templateName) {
                     state = this.hooks.load.execute(state);
@@ -328,14 +339,16 @@ export default class PipelineManagerEditor extends Editor {
                 } else {
                     // eslint-disable-next-line new-cap
                     const graphNode = new (this._nodeTypes.get(templateName)).type();
+
                     const {
                         state: preparedSubgraphState, errors: prepareSubgraphErrors,
                     } = prepareSubgraphInstance(graphNode.template);
-                    errors.push(...prepareSubgraphErrors);
+
+                    result.errors.push(...prepareSubgraphErrors);
                     graphToLoad = preparedSubgraphState;
                 }
-                if (!errors.length || globalProperties.softLoad) {
-                    errors.push(...this._graph.load(graphToLoad));
+                if (!result.errors.length || globalProperties.softLoad) {
+                    result.errors.push(...this._graph.load(graphToLoad));
                 }
             }
         } catch (err) {
@@ -343,12 +356,13 @@ export default class PipelineManagerEditor extends Editor {
             // appropriate error is returned.
             this.cleanEditor();
             this.readonly = readonlySetting;
-            return [err.toString()];
+            result.errors.push(err.toString());
+            return result;
         }
-        if (Array.isArray(errors) && errors.length && !globalProperties.softLoad) {
+        if (Array.isArray(result.errors) && result.errors.length && !globalProperties.softLoad) {
             this.cleanEditor();
             this.readonly = readonlySetting;
-            return errors;
+            return result;
         }
         this.events.loaded.emit();
         this.graphName = entryGraph.name;
@@ -357,7 +371,7 @@ export default class PipelineManagerEditor extends Editor {
         // If the editor is run outside of a browser, then
         // all functionality that is after this line will fail,
         // as it changes the way the graph is rendered in the browser
-        if (typeof window === 'undefined' || loadOnly) return errors;
+        if (typeof window === 'undefined' || loadOnly) return result;
 
         const dfs = (subgraph, path) => {
             if (subgraph?.nodes !== undefined) {
@@ -387,7 +401,7 @@ export default class PipelineManagerEditor extends Editor {
                 this.switchToSubgraph(node);
             });
         } catch (err) {
-            errors.push(err.toString());
+            result.errors.push(err.toString());
         }
 
         if (this.layoutManager.layoutEngine.activeAlgorithm !== 'NoLayout') {
@@ -462,7 +476,7 @@ export default class PipelineManagerEditor extends Editor {
                 });
             }
         });
-        return errors;
+        return result;
     }
 
     privatizeInterface(graphId, intf) {
