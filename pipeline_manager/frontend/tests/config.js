@@ -133,7 +133,7 @@ export async function enableEditingNodes(page) {
 
     const checkbox = page.getByText('Modify node types');
     expect(checkbox).toBeVisible();
-    await checkbox.click({ force: true });
+    await checkbox.dispatchEvent("click");
 }
 
 /**
