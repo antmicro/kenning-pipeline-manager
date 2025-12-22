@@ -248,25 +248,11 @@ export default defineComponent({
                 && editorManager.baklavaView.settings.editableNodeTypes,
         );
 
-        const refreshSubgraphInterfaces = (nodeName) => {
-            const { viewModel } = useViewModel();
-            const { editor } = viewModel.value;
-
-            // get all subgraph nodes that holds edited nodes
-            const subgraphNodes = [...editor.graphs].filter((graph) => graph.graphNode)
-                .map((graph) => graph.graphNode)
-                .filter((n) => n.subgraph.nodes.some((_n) => _n.name === nodeName));
-
-            // update subgraphs
-            subgraphNodes.forEach((n) => {
-                editorManager.refreshSubgraph(n);
-
-                n.updateExposedInterfaces([], [], true);
-            });
-        };
-
         const updateSpecification = async () => {
             try {
+                const { viewModel } = useViewModel();
+                const { editor } = viewModel.value;
+
                 const parsingErrors = validate();
                 if (parsingErrors.length > 0) {
                     throw new Error(parsingErrors);
@@ -359,7 +345,18 @@ export default defineComponent({
                     removedInterfaces.some((ri) => ri.name === intf.name && ri.override))
                     .map((intf) => ({ ...intf, inherited: true }))] ?? [];
 
-                nodes.forEach((n) => {
+                const childNodes = findNodes(oldType, true) ?? [];
+
+                const allParssedNodes = [...Object.values(nodes), ...Object.values(childNodes)];
+
+                // get all exposed interfaces to privatize
+                const exposedInterfaces = [...allParssedNodes.map((n) => Object.values(n.inputs))
+                    .flat(),
+                ...allParssedNodes.map((n) => Object.values(n.outputs)).flat()]
+                    .filter((inf) => inf?.externalName)
+                    .filter((inf) => removedInterfaces.some((i) => i.name === inf.name));
+
+                allParssedNodes.forEach((n) => {
                     // This is needed because some of the addedProperties/Interfaces might have
                     // been added as a result of removing 'override' flag or adding it.
                     const allProp = [...addedProperties, ...parsedProperties.filter((pp) =>
@@ -373,6 +370,32 @@ export default defineComponent({
                 });
                 updateExtendedProperties(oldType, addedProperties, removedProperties);
                 updateExtendedInterfaces(oldType, addedInterfaces, removedInterfaces);
+
+                // updates exposed interfaces in graph nodes
+                exposedInterfaces.forEach((inf) => {
+                    const graphNested = Array.from(editor.graphs)
+                        .filter((g) => g.nodes.some((n) => n.id === inf.nodeId));
+
+                    if (graphNested.length !== 1) {
+                        return;
+                    }
+
+                    editor.privatizeInterface(graphNested[0].id, inf);
+                });
+
+                const resolvedChildNodes = editorManager.specification.currentSpecification.nodes
+                    .filter((n) => n.extends?.includes(oldType)) ?? [];
+
+                resolvedChildNodes.forEach((n) => {
+                    n.interfaces = n.interfaces?.filter(
+                        (intf) => !removedInterfaces.some((i) => i.name === intf.name),
+                    ) ?? [];
+                    n.properties = n.properties?.filter(
+                        (prop) => !removedProperties.some((p) => p.name === prop.name),
+                    ) ?? [];
+                    n.interfaces = [...n.interfaces, ...addedInterfaces];
+                    n.properties = [...n.properties, ...addedProperties];
+                });
 
                 // eslint-disable-next-line no-underscore-dangle
                 const errors = editorManager._unregisterNodeType(oldType);
@@ -409,8 +432,32 @@ export default defineComponent({
 
                 NotificationHandler.showToast('info', 'Node validated');
 
-                // update subgraph nodes associated with updated node
-                refreshSubgraphInterfaces(oldType.name);
+                // refresh graphs connections
+                const graphs = Array.from(editor.graphs);
+
+                graphs.forEach((graph) => {
+                    let connectionsToRemove = [];
+
+                    const graphNodes = graph.nodes;
+
+                    const graphInterfaces = [...graphNodes.map((n) => Object.values(n.inputs))
+                        .flat(),
+                    ...graphNodes.map((n) => Object.values(n.outputs))
+                        .flat(),
+                    ];
+
+                    connectionsToRemove = [...connectionsToRemove, ...graph.connections
+                        .filter((conn) => {
+                            const infTo = graphInterfaces.some((inf) => inf.id === conn.to.id);
+                            const infFrom = graphInterfaces.some((inf) => inf.id === conn.from.id);
+
+                            return !infTo || !infFrom;
+                        })];
+
+                    connectionsToRemove.forEach((conn) => {
+                        graph.removeConnection(conn);
+                    });
+                });
             } catch (error) {
                 const messages = Array.isArray(error) ? error : [error];
                 NotificationHandler.terminalLog('error', 'Validation failed', messages);
