@@ -482,7 +482,9 @@ export default class PipelineManagerEditor extends Editor {
         if (intf.externalName === undefined) return;
 
         let graph = [...this.graphs].find((g) => g.id === graphId);
-        let graphNode = graph.graphNode; // eslint-disable-line prefer-destructuring
+        let graphNode = graph?.graphNode; // eslint-disable-line prefer-destructuring
+
+        const { externalName } = intf;
 
         intf.externalName = undefined;
         if (graphNode === undefined) return;
@@ -490,6 +492,27 @@ export default class PipelineManagerEditor extends Editor {
         const { graphIds, sharedInterface } = ir.getRegisteredInterface(intf.id);
         const graphIdIdx = graphIds.findIndex((id) => id === graphNode.graph.id);
         graphIds.splice(graphIdIdx, graphIds.length - graphIdIdx);
+
+        // Get associated interfaces
+
+        const interfaces = [...Object.values(graphNode.inputs),
+            ...Object.values(graphNode.outputs),
+        ];
+        const exposedInterfaces = interfaces.filter((inf) => inf.name === externalName);
+
+        // Privatize exposed interface in parent graphs
+        exposedInterfaces.forEach((inf) => {
+            // get graph id
+
+            const graphNested = Array.from(this.graphs)
+                .filter((g) => g.nodes.some((n) => n.id === inf.nodeId));
+
+            if (graphNested.length !== 1) {
+                return;
+            }
+
+            this.privatizeInterface(graphNested[0].id, inf);
+        });
 
         graphNode.updateExposedInterfaces(undefined, undefined, true);
 
