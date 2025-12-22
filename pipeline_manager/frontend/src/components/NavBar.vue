@@ -24,6 +24,7 @@ import SettingsButton from './navbar/SettingsButton.vue';
 import GraphDetailsButton from './navbar/GraphDetailsButton.vue';
 import NodeBrowserButton from './navbar/NodeBrowserButton.vue';
 import SearchBar from './navbar/SearchBar.vue';
+import TitleBar from './navbar/TitleBar.vue';
 import EditorManager from '../core/EditorManager';
 import NotificationHandler from '../core/notifications';
 import { notificationStore } from '../core/stores';
@@ -57,23 +58,11 @@ export default {
         GraphDetailsButton,
         NodeBrowserButton,
         SearchBar,
+        TitleBar,
     },
     computed: {
         dataflowGraphName() {
             return this.editorManager.editor.graphName;
-        },
-        graphId() {
-            return this.editorManager.baklavaView.displayedGraph.id;
-        },
-        editorTitle() {
-            if (this.graphName === undefined) {
-                return this.appName;
-            }
-            const normalizedGraphName = this.graphName.trim();
-
-            const additionalMessage = this.$softLoad ? 'Soft Load Enabled' : '';
-
-            return (normalizedGraphName === '' ? this.appName : normalizedGraphName) + (additionalMessage.length ? ` ( ${additionalMessage} )` : '');
         },
         preview() {
             const urlParams = new URLSearchParams(window.location.search);
@@ -161,7 +150,6 @@ export default {
     data() {
         const editorManager = EditorManager.getEditorManagerInstance();
         const graphName = editorManager.baklavaView.editor.graphName ?? '';
-        const appName = process.env.VUE_APP_EDITOR_TITLE ?? 'Pipeline Manager';
 
         const externalApplicationManager = getExternalApplicationManager();
         const navbarItems = computed(() => [
@@ -183,7 +171,6 @@ export default {
         provide('hoveredOver', () => {});
 
         return {
-            appName,
             graphName,
             editorManager,
             editorTitleInterface,
@@ -298,12 +285,6 @@ export default {
             }
 
             this.togglePanel(panel, true);
-        },
-
-        setEditTitle() {
-            if (this.readonly) return;
-            this.editTitle = true;
-            this.$nextTick(() => this.$refs.editorTitleInput._.refs.el.focus());
         },
 
         async requestDataflowAction(actionItem) {
@@ -490,7 +471,7 @@ export default {
                         <FilesContextMenu ref="contextMenu"
                             :hover="isHovered('logo')"
                             :externalApp="externalApp"
-                            :setEditTitle="setEditTitle"
+                            :setEditTitle="() => this.$refs.titleBar.setEditTitle()"
                             :mobileClasses="mobileClasses"
                             :hideHud="hideHud"
                             :readonly="readonly"
@@ -542,28 +523,13 @@ export default {
                         }"
                     />
                 </div>
-                <component
-                    v-if="editTitle && !panels.nodesearch.isOpen"
-                    ref="editorTitleInput"
-                    :is="editorTitleInterface.component"
-                    :intf="editorTitleInterface"
-                    :class="['editorTitleInput', mobileClasses]"
-                    v-model="graphName"
-                    v-click-outside="() => { editTitle = false }"
-                    @keyup.enter="() => { editTitle = false }"
+                <TitleBar
+                    v-model:graphName="graphName"
+                    :mobileClasses="mobileClasses"
+                    :openPanel="!panels.nodesearch.isOpen"
+                    :editorManager="editorManager"
+                    ref="titleBar"
                 />
-                <span
-                    v-if="!editTitle && !panels.nodesearch.isOpen"
-                    :class="['editorTitle', mobileClasses]"
-                    @dblclick="setEditTitle">
-                        {{ editorTitle }}
-                </span>
-                <span
-                    v-if="this.editorManager.baklavaView.settings.showIds &&
-                          !panels.nodesearch.isOpen"
-                    :class="['editorTitle', 'graphId', mobileClasses]">
-                        Graph ID: {{ graphId }}
-                </span>
                 <div :style="rightContainerStyles" ref="rightButtons">
                     <SearchBar
                         :mobileClasses="mobileClasses"
@@ -680,34 +646,10 @@ export default {
     border-left: 0;
     border-right: 0;
 
-    .editorTitle {
-        width: auto;
-        text-wrap: wrap;
-        flex-grow: 1;
-
-        cursor: text;
-        text-align: center;
-        padding: 0 $spacing-s;
-
-        &.compressed-mobile {
-            display: none;
-        }
-    }
-
     .graphId {
         -webkit-user-select: text;
         -ms-user-select: text;
         user-select: text;
-    }
-
-    .editorTitleInput {
-        font-size: $fs-small;
-        padding: 0 $spacing-s;
-        flex-grow: 1;
-
-        &.compressed-mobile {
-            display: none;
-        }
     }
 
     .progress-bar {
