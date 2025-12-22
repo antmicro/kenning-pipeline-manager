@@ -62,7 +62,7 @@ export default defineComponent({
 
                 // Graph entry
                 return {
-                    click: () => editor.switchToRelatedGraph(graph.id),
+                    click: () => editor.switchToRelatedGraph(graph.id, false),
                     title,
                     isCurrent: displayedGraph.id === graph.id,
                     key: graph.id,
