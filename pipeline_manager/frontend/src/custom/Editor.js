@@ -300,7 +300,6 @@ export default class PipelineManagerEditor extends Editor {
                         (template) => template.id === n.subgraph,
                     );
                     if (fittingTemplate.length !== 1) {
-                        console.log(fittingTemplate);
                         result.errors.push([`Expected exactly one template with ID ${n.name}, got ${fittingTemplate.length}`]);
                     }
 
@@ -321,7 +320,7 @@ export default class PipelineManagerEditor extends Editor {
         });
 
         try {
-            if (result.errors.length && !globalProperties.softLoad) return errors;
+            if (result.errors.length && !globalProperties.softLoad) return result.errors;
 
             state.graphs?.forEach((graph) => {
                 if (!usedSubgraphs.has(graph.id) && entryGraph.id !== graph.id) {

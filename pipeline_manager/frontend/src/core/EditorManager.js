@@ -1947,7 +1947,7 @@ export default class EditorManager {
                 }
 
                 if (!isWebpack) {
-                    const _errors = await this.baklavaView.editor.load(
+                    const result = await this.baklavaView.editor.load(
                         dataflow,
                         preventCentering,
                         loadOnly,
@@ -1955,9 +1955,10 @@ export default class EditorManager {
                     );
 
                     if (!globalProperties.softLoad) {
-                        status.errors.push(..._errors);
+                        status.errors.push(...result.errors);
+                        status.warnings.push(...result.warnings);
                     } else {
-                        status.warnings.push(..._errors);
+                        status.warnings.push(...result.errors, ...result.warnings);
                     }
 
                     this.baklavaView.history.graphSwitch(
