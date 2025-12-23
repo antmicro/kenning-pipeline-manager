@@ -404,37 +404,19 @@ export default {
 </template>
 <style lang="scss" scoped>
 .allbuttons {
-    & > .dropdown-wrapper {
-        user-select: none;
-        position: absolute;
-        flex-direction: column;
-        top: 100%;
-        left: 0;
-        display: none;
-        background-color: #181818;
-        border: 2px solid #737373;
+    flex-grow: 0;
+    display: flex;
+    width: 3.75em;
+    height: 3.75em;
 
-        & > div:hover {
-            background-color: #2A2A2A;
-        }
-    }
-
-    & > .tooltip {
-        @extend .dropdown-wrapper;
-        border-radius: 15px;
-        background-color: $gray-600;
-        border: 1px solid $gray-200;
-        padding: $spacing-s;
-        left: calc(3.75em / 2);
-        transform: translate(-50%, 25%);
-        pointer-events: none;
-        white-space: nowrap;
-    }
-    &:last-child > div:last-child .tooltip {
-        transform: translate(-75%, 25%);
-    }
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    box-sizing: border-box;
+    border-left: 1px solid $gray-500;
 }
 .hovered > .dropdown-wrapper {
     display: flex;
 }
+@import './simple_toggle_style.scss'
 </style>

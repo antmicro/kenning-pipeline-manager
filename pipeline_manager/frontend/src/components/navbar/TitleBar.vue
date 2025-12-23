@@ -100,6 +100,11 @@ export default {
 </div>
 </template>
 <style lang="scss" scoped>
+.graphId {
+    -webkit-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
+}
 .editorTitle {
     width: auto;
     text-wrap: wrap;
