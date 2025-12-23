@@ -1,5 +1,5 @@
 import { test, expect, Page, Locator } from '@playwright/test';
-import { getPathToJsonFile, getUrl, openFileChooser, enableEditingNodes, addNode } from './config.js';
+import { getPathToJsonFile, getUrl, openFileChooser, enableEditingNodes, enableNavigationBar, addNode } from './config.js';
 
 import YAML from 'yaml';
 
@@ -78,6 +78,11 @@ async function verifyNodeCount(page: Page, expectedCount: number) {
 async function leaveSubgraph(page: Page) {
     const leaveButton = page.getByText('Return from subgraph editor').locator('../..');
     await leaveButton.click();
+    try {
+        await page.locator('.zoom-center').click({ timeout: 1000 });
+    } catch {
+        // not clickable, could be hidden by node config panel
+    }
 }
 
 async function dragAndDrop(page: Page, locator: Locator, to: { x: number; y: number }) {
@@ -101,7 +106,7 @@ test('test loading subgraph dataflow', async ({ page }) => {
 test('test entering subgraph', async ({ page }) => {
     await prepareSubgraphPage(page);
     await verifyNodeCount(page, 4);
-    await enterSubgraph(getNode(page,'Test subgraph #1'));
+    await enterSubgraph(getNode(page, 'Test subgraph #1'));
     await verifyNodeCount(page, 2);
 });
 
@@ -109,7 +114,7 @@ test('test coming back from subgraph', async ({ page }) => {
     await prepareSubgraphPage(page);
     await verifyNodeCount(page, 4);
 
-    await enterSubgraph(getNode(page,'Test subgraph #1'));
+    await enterSubgraph(getNode(page, 'Test subgraph #1'));
     await verifyNodeCount(page, 2);
 
     await leaveSubgraph(page);
@@ -117,8 +122,7 @@ test('test coming back from subgraph', async ({ page }) => {
 });
 
 async function placeNewNode(page: Page, location: { x: number; y: number }) {
-    const showNodesButton = page.getByText('Show node browser').locator('../..');
-    await showNodesButton.click();
+    await enableNavigationBar(page);
     const firstCategoryLabel = page.getByText('First Category');
     await firstCategoryLabel.click();
     const nodeFromBrowser = page.getByText('Test node #1').first();
@@ -126,8 +130,7 @@ async function placeNewNode(page: Page, location: { x: number; y: number }) {
 }
 
 async function createNewNode(page: Page, location: { x: number; y: number }) {
-    const showNodesButton = page.getByText('Show node browser').locator('../..');
-    await showNodesButton.click();
+    await enableNavigationBar(page);
     const newNodeType = page.getByText('New Node Type').first();
     await dragAndDrop(page, newNodeType, location);
     const createButton = page.getByText('Create').first();
@@ -135,8 +138,7 @@ async function createNewNode(page: Page, location: { x: number; y: number }) {
 }
 
 async function createNewGraphNode(page: Page, location: { x: number; y: number }) {
-    const showNodesButton = page.getByText('Show node browser').locator('../..');
-    await showNodesButton.click();
+    await enableNavigationBar(page);
     const newGraphNodeType = page.getByText('New Graph Node').first();
     await dragAndDrop(page, newGraphNodeType, location);
 }

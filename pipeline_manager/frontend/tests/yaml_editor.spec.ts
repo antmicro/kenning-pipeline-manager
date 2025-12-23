@@ -54,7 +54,7 @@ async function setYAMLEditorContent(page: Page, content: any) {
 async function addInterface(page: Page, nodeName: string) {
     const node = page
         .locator(`.baklava-node[data-node-type="${nodeName}"]`)
-        .first();
+        .last();
     await node.locator('.__title').click({ button: 'right', force: true });
     await node.locator('.baklava-context-menu').getByText('Add interface').click();
     await page.getByRole('button', { name: 'Add interface' }).click();

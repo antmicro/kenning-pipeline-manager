@@ -153,6 +153,7 @@ test('register custom node in specification with "include" keyword', async ({ pa
     await createNewNodeType(page);
     await addNode(page, 'Default category', nodeName, 750, 80);
     const specificationPath = await saveSpecificationAs(page, 'new_specification');
+    console.log(specificationPath);
     await verifyNodePresence(page, specificationPath, nodeName);
 });
 

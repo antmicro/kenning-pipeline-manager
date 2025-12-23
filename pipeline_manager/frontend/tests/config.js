@@ -57,13 +57,16 @@ export async function openFileChooser(page, purpose) {
  */
 export async function enableNavigationBar(page) {
     await page.mouse.move(500, 0);
+    const opened = page.locator('.hoverbox').filter({ hasText: /^Hide node browser$/ });
+    if (await opened.isVisible()) {
+        return;
+    }
     await page
         .locator('.hoverbox')
         .filter({ hasText: /^Show node browser$/ })
         .first()
         .click();
 }
-
 
 /**
  * Loads specification file by using the file chooser.
@@ -98,13 +101,13 @@ export async function loadDataflow(page, dataflowFile) {
  * @param {import('@playwright/test').Page} page - The Playwright Page object to interact with.
  */
 export async function openNodePalette(page) {
-    await page.locator('div').filter({ hasText: /^Show node browser$/ }).first().click();
+    await enableNavigationBar(page);
     const nodePalette = page.locator('.baklava-node-palette');
     const addNodeButton = nodePalette.getByText('New Node Type').first();
     expect(addNodeButton).toBeVisible();
     // because sometimes the page shifts which makes the mouse hover over the logo,
     // breaking the test (hiding some nodes).
-    await page.mouse.move(100, 100);
+    await page.mouse.move(300, 300);
 }
 
 /**
@@ -127,9 +130,14 @@ export async function addNode(page, category, nodeName, x, y, openCategory = tru
     await expect(categoryBar).toBeVisible();
     if (openCategory) await categoryBar.click();
 
-
     // Drag and drop to the [x, y] position.
     await dragAndDrop(page, node, x, y);
+
+    try {
+        await page.locator('.zoom-center').click({ timeout: 1000 });
+    } catch {
+        // not clickable, could be hidden by node config panel
+    }
 }
 
 /**
