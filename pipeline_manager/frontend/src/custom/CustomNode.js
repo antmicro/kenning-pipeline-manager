@@ -108,11 +108,22 @@ export function updateInterfacePosition(
  */
 export function removeNode(node, unwrapGraph = false) {
     const { viewModel } = useViewModel();
+
+    // get graph in which node is present
+
+    const graphWithNode = Array.from(viewModel.value.editor.graphs)
+        .find((graph) => graph.nodes.some((n) => n.id === node.id));
+
     const isGraphNode = viewModel.value.editor.isGraphNode(node.type);
     if (isGraphNode && unwrapGraph) {
         viewModel.value.editor.unwrapSubgraph(node);
     } else {
         const { graph } = useGraph();
         graph.value.removeNode(node);
+    }
+
+    if (graphWithNode?.nodes.length === 0) {
+        viewModel.value.editor.unregisterGraph(graphWithNode);
+        viewModel.value.editor.backFromSubgraph();
     }
 }
