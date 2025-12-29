@@ -57,6 +57,7 @@ class GraphBuilder:
         workspace_directory: Optional[Path]
             Path to the Pipeline Manager's workspace directory
         """
+        self.save_with_specification = False
         self.specification_version = specification_version
         self.workspace_directory = workspace_directory
         self.load_specification(specification)
@@ -421,7 +422,26 @@ class GraphBuilder:
             return subgraph
         return matching_subgraphs
 
-    def save(self, json_file: Path, skip_validation: bool = False):
+    def set_save_with_specification(self, save_with_specification: bool):
+        """
+        Set whether dataflow should be saved with specification
+        or not.
+
+        Parameters
+        ----------
+        save_with_specification : bool
+            Indicate whether dataflow should be saved
+            with specification.
+        """
+        self.save_with_specification = save_with_specification
+
+    def save(
+        self,
+        json_file: Path,
+        skip_validation: bool = False,
+        save_specification: Optional[bool] = None,
+        minify: bool = False,
+    ):
         """
         Save graphs to a JSON file.
 
@@ -434,11 +454,24 @@ class GraphBuilder:
         skip_validation: bool
             Whether the validation of the script should be
             skipped or not.
+        save_specification: Optional[bool]
+            Whether to save specification with graph data.
+        minify: bool
+            Specifies whether the returned specification
+            should be minified.
         """
         if not skip_validation:
             self.validate()
+
+        if save_specification is not None:
+            last_state = self.save_with_specification
+            self.set_save_with_specification(save_specification)
+
         with open(json_file, "wt", encoding="utf-8") as fd:
-            fd.write(self.to_json(as_str=True))
+            fd.write(self.to_json(as_str=True, minify=minify))
+
+        if save_specification is not None:
+            self.set_save_with_specification(last_state)
 
         if not skip_validation:
             self.validate()
@@ -493,10 +526,21 @@ class GraphBuilder:
             )
 
     @override
-    def to_json(self, as_str: bool = True) -> Union[Dict, str]:
-        output = {
-            "version": self.specification_version,
-            "graphs": [graph.to_json(as_str=False) for graph in self.graphs],
-        }
+    def to_json(
+        self, as_str: bool = True, minify: bool = False
+    ) -> Union[Dict, str]:
+        output = {}
 
-        return convert_output(output, as_str)
+        if self.save_with_specification:
+            output = self._spec_builder._construct_specification(
+                sort_spec=True
+            )
+
+            logging.debug(output)
+
+        output["version"] = self.specification_version
+        output["graphs"] = [
+            graph.to_json(as_str=False, minify=minify) for graph in self.graphs
+        ]
+
+        return convert_output(output, as_str, minify)

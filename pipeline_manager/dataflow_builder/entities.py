@@ -46,7 +46,9 @@ class JsonConvertible(ABC):
     """
 
     @abstractmethod
-    def to_json(self, as_str: bool = True) -> Union[Dict, str]:
+    def to_json(
+        self, as_str: bool = True, minify: bool = False
+    ) -> Union[Dict, str]:
         """
         Convert a dataflow graph to the JSON format.
 
@@ -90,12 +92,14 @@ class Vector2(JsonConvertible):
         return Vector2(self.x + another.x, self.y + another.y)
 
     @override
-    def to_json(self, as_str: bool = True) -> Union[str, Dict]:
+    def to_json(
+        self, as_str: bool = True, minify: bool = False
+    ) -> Union[str, Dict]:
         output = {
             "x": self.x,
             "y": self.y,
         }
-        return convert_output(output, as_str)
+        return convert_output(output, as_str, minify)
 
 
 @dataclass
@@ -198,13 +202,15 @@ class Property(JsonConvertible):
             )
 
     @override
-    def to_json(self, as_str: bool = True) -> Union[Dict, str]:
+    def to_json(
+        self, as_str: bool = True, minify: bool = False
+    ) -> Union[Dict, str]:
         output = {
             "name": self.name,
             "value": self.value,
             "id": self.id,
         }
-        return convert_output(output, as_str)
+        return convert_output(output, as_str, minify)
 
 
 @dataclass
@@ -226,7 +232,9 @@ class Interface(JsonConvertible):
             self.side = Side(self.side)
 
     @override
-    def to_json(self, as_str: bool = True) -> Union[str, Dict]:
+    def to_json(
+        self, as_str: bool = True, minify: bool = False
+    ) -> Union[str, Dict]:
         output = {
             "name": self.name,
             "direction": self.direction.name.lower(),
@@ -244,7 +252,7 @@ class Interface(JsonConvertible):
         if self.external_name:
             output["externalName"] = self.external_name
 
-        return convert_output(output, as_str)
+        return convert_output(output, as_str, minify)
 
 
 class NodeAttributeType(Enum):
@@ -939,7 +947,7 @@ class Node(JsonConvertible):
         )
 
     @override
-    def to_json(self, as_str=True) -> Union[str, Dict]:
+    def to_json(self, as_str=True, minify=False) -> Union[str, Dict]:
         output = {}
         for field_name, _ in get_type_hints(self).items():
             if not hasattr(self, field_name):
@@ -965,20 +973,22 @@ class Node(JsonConvertible):
                 float,
                 str,
             ) and not isinstance(field_value, List):
-                field_value = field_value.to_json(as_str=False)
+                field_value = field_value.to_json(as_str=False, minify=minify)
 
             # Iterables
             if isinstance(field_value, List):
                 output_list = []
                 for item in field_value:
-                    output_list.append(item.to_json(as_str=False))
+                    output_list.append(
+                        item.to_json(as_str=False, minify=minify)
+                    )
 
                 field_value = output_list
 
             camel_cased_name = snake_case_to_camel_case(field_name)
             output[camel_cased_name] = field_value
 
-        return convert_output(output, as_str)
+        return convert_output(output, as_str, minify)
 
     @property
     def name(self) -> str:
@@ -1019,7 +1029,9 @@ class InterfaceConnection(JsonConvertible):
     anchors: Optional[List[Vector2]] = None
     id: str = field(default_factory=get_uuid)
 
-    def to_json(self, as_str: bool = True) -> Union[str, Dict]:
+    def to_json(
+        self, as_str: bool = True, minify: bool = False
+    ) -> Union[str, Dict]:
         output = {
             # Renamed to the original names.
             "id": self.id,
@@ -1032,7 +1044,10 @@ class InterfaceConnection(JsonConvertible):
 
         if as_str:
             return json.dumps(
-                output, ensure_ascii=False, indent=4, sort_keys=True
+                output,
+                ensure_ascii=False,
+                indent=None if minify else 4,
+                sort_keys=True,
             )
         return output
 
@@ -1180,7 +1195,7 @@ def clamp(value: float, minimum: float, maximum: float) -> float:
 
 
 def convert_output(
-    output: Dict[str, Any], as_str: bool
+    output: Dict[str, Any], as_str: bool, minify: bool = False
 ) -> Union[str, Dict[str, Any]]:
     """
     Convert a dictionary to either `str` or do not change,
@@ -1192,6 +1207,9 @@ def convert_output(
         Dictionary to be converted.
     as_str : bool
         Whether to convert.
+    minify: bool
+            Specifies whether the returned specification
+            should be minified.
 
     Returns
     -------
@@ -1199,5 +1217,10 @@ def convert_output(
         The converted output.
     """
     if as_str:
-        return json.dumps(output, ensure_ascii=False, indent=4, sort_keys=True)
+        return json.dumps(
+            output,
+            ensure_ascii=False,
+            indent=None if minify else 4,
+            sort_keys=True,
+        )
     return output

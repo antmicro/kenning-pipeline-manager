@@ -484,7 +484,9 @@ class DataflowGraph(JsonConvertible):
         return self._connections[connection_id]
 
     @override
-    def to_json(self, as_str: bool = True) -> Union[str, Dict]:
+    def to_json(
+        self, as_str: bool = True, minify: bool = False
+    ) -> Union[str, Dict]:
         attributes = {}
         for attr_name in get_public_attributes(self):
             key = snake_case_to_camel_case(attr_name)
@@ -495,17 +497,21 @@ class DataflowGraph(JsonConvertible):
                 continue
             # Convert non-trivial objects to str with `to_json`.
             if hasattr(attr_value, "to_json"):
-                attr_value = attr_value.to_json(as_str=False)
+                attr_value = attr_value.to_json(as_str=False, minify=minify)
 
             attributes[key] = attr_value
 
-        nodes = [node.to_json(as_str=False) for _, node in self._nodes.items()]
+        nodes = [
+            node.to_json(as_str=False, minify=minify)
+            for _, node in self._nodes.items()
+        ]
         connections = [
-            conn.to_json(as_str=False) for _, conn in self._connections.items()
+            conn.to_json(as_str=False, minify=minify)
+            for _, conn in self._connections.items()
         ]
         # Merge all attributes to a single dictionary.
         attributes |= {"nodes": nodes, "connections": connections}
-        return convert_output(attributes, as_str)
+        return convert_output(attributes, as_str, minify=minify)
 
     def get(
         self, type: AttributeType, **kwargs
