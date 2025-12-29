@@ -384,7 +384,7 @@ export default defineComponent({
 
                     viableConnections.forEach((n) => {
                         if (n.port
-                        && n !== temporaryConnection.temporaryConnectioignoredLayersn.value.from) {
+                        && n !== temporaryConnection.temporaryConnection.value.from) {
                             const result = graph.value.checkConnection(
                                 temporaryConnection.temporaryConnection.value.from,
                                 n,
