@@ -643,7 +643,7 @@ export default {
                         const newGraph = GraphFactory(
                             [], [], this.appName, this.editorManager.baklavaView.editor,
                         );
-                        this.editorManager.baklavaView.editor.switchToGraph(newGraph);
+                        this.editorManager.baklavaView.editor.switchToGraph(newGraph, true);
 
                         graphNode = this.editorManager.baklavaView.editor.nodeTypes.get(nodeName);
                         instance = new graphNode.type(); // eslint-disable-line new-cap
