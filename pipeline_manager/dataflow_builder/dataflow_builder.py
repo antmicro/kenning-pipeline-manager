@@ -527,18 +527,27 @@ class GraphBuilder:
 
     @override
     def to_json(
-        self, as_str: bool = True, minify: bool = False
+        self,
+        as_str: bool = True,
+        minify: bool = False,
+        skip_validation: bool = False,
     ) -> Union[Dict, str]:
-        output = {}
-
         if self.save_with_specification:
-            output = self._spec_builder._construct_specification(
-                sort_spec=True
+            output = self._spec_builder.create_and_validate_spec(
+                skip_validation=skip_validation
             )
+        else:
+            output = {
+                "version": self.specification_version,
+            }
 
-            logging.debug(output)
+        output["graphs"] = [
+            graph.to_json(as_str=False) for graph in self.graphs
+        ]
 
-        output["version"] = self.specification_version
+        if self.entry_graph is not None:
+            output["entryGraph"] = self.entry_graph.id
+
         output["graphs"] = [
             graph.to_json(as_str=False, minify=minify) for graph in self.graphs
         ]
