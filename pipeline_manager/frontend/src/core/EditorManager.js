@@ -1404,6 +1404,16 @@ export default class EditorManager {
             errors.push(...this.validateNodeStyle(node));
             errors.push(...this._registerNodeType(node));
         });
+        nodes.forEach((n) => {
+            if (n.subgraphId !== undefined) {
+                return;
+            }
+            const sid = this.findParentSubgraph(n.name);
+            if (sid) {
+                n.subgraphId = sid;
+                n.subgraphIdInherited = true;
+            }
+        });
 
         if (errors.length && !globalProperties.softLoad) {
             return { errors, warnings };
@@ -1428,7 +1438,10 @@ export default class EditorManager {
             const subgraphNodesWithGraphs = sortedGraphs
                 .map((graph) => [subgraphIdToNodes.get(graph.id), graph])
                 .filter(([graphNodes]) => graphNodes)
-                .flatMap(([graphNodes, graph]) => graphNodes.map((node) => [node, graph]));
+                .flatMap(([graphNodes, graph]) =>
+                    graphNodes.map((node) =>
+                        (node.subgraphIdInherited ? [node, graph, node.name] :
+                            [node, graph, graph.name])));
 
             const relatedGraphIds = nodes
                 .map((node) => node.relatedGraphs?.map(({ id }) => id))
@@ -1459,13 +1472,13 @@ export default class EditorManager {
 
             // Validate subgraphs
             // eslint-disable-next-line no-restricted-syntax
-            for (const [node, graph] of subgraphNodesWithGraphs) {
+            for (const [node, graph, graphName] of subgraphNodesWithGraphs) {
                 visitedSubgraphs.add(graph.id);
 
                 const myGraph = GraphFactory(
                     graph.nodes,
                     graph.connections,
-                    graph.name,
+                    graphName,
                     this.baklavaView.editor,
                 );
 
@@ -1768,6 +1781,31 @@ export default class EditorManager {
         });
         return attributes;
     }
+
+    /**
+     * Finds the first parent's subgraph id if it exists
+     *
+     * @param nodeType type of node for which attributes should be searched
+     * @returns subgraphId that was found first or undefined if none were found.
+     */
+    findParentSubgraph(nodeType) {
+        const nodeSpec = this.specification.currentSpecification.nodes
+            .find((spec) => nodeType === spec.name) ?? [];
+        if (nodeSpec.subgraphId !== undefined) {
+            return nodeSpec.subgraphId;
+        }
+        const parentSpec = this.specification.currentSpecification.nodes
+            .filter((spec) => nodeSpec.extends?.includes(spec.name)) ?? [];
+        let sid;
+        parentSpec.forEach((p) => {
+            if (!p || sid !== undefined) {
+                return;
+            }
+            sid = this.findParentSubgraph(p.name);
+        });
+        return sid;
+    }
+
     /**
      * Nodes that have already been resolved and have gone through JSON parsing
      *
