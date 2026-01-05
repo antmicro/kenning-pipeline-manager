@@ -508,9 +508,17 @@ export default {
             this.panels.fullscreen.isOpen = !fullscreen.isFullscreen;
         });
 
+        this.externalApp.available = this.externalApplicationManager.isExternalAppAvailable();
+        this.externalApp.backend = this.externalApplicationManager.backend === true;
+        this.externalApp.connected = false;
         this.externalApplicationManager.registerConnectionHook(() => {
             this.externalApp.available = this.externalApplicationManager.isExternalAppAvailable();
             this.externalApp.connected = this.externalApplicationManager.isConnected();
+            this.externalApp.backend = this.externalApplicationManager.backend === true;
+        });
+        this.externalApplicationManager.registerDisconnectionHook(() => {
+            this.externalApp.available = this.externalApplicationManager.isExternalAppAvailable();
+            this.externalApp.connected = false;
             this.externalApp.backend = this.externalApplicationManager.backend === true;
         });
     },
@@ -735,7 +743,7 @@ export default {
 
                     <ExternalAppStatus
                         ref="backend"
-                        :externalApp="externalApp"
+                        :externalApp="this.externalApp"
                         :mobileClasses="mobileClasses"
                         :hover="isHovered('externalAppStatus')"
                         :openPanel="panels.externalAppStatus.isOpen"

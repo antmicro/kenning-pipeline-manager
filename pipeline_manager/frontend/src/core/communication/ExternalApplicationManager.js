@@ -96,6 +96,8 @@ class ExternalApplicationManager {
 
     connectionHook = null;
 
+    disconnectionHook = null;
+
     backend = false;
 
     constructor() {
@@ -110,7 +112,10 @@ class ExternalApplicationManager {
         const resetProgress = () => runInfo.forEach((itemInfo) => { itemInfo.inProgress = false; });
         this.connectionManager = new ConnectionManager(
             (externalApp) => this.initializeConnection(externalApp),
-            resetProgress,
+            (_) => {
+                resetProgress();
+                if (this.disconnectionHook !== null) this.disconnectionHook();
+            },
         );
         this.connectionManager.poll();
     }
@@ -528,6 +533,10 @@ class ExternalApplicationManager {
 
     registerConnectionHook(connectionHook) {
         this.connectionHook = connectionHook;
+    }
+
+    registerDisconnectionHook(disconnectionHook) {
+        this.disconnectionHook = disconnectionHook;
     }
 
     /**
