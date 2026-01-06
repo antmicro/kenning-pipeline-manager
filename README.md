@@ -7,13 +7,13 @@ It does not assume any properties of the application it is working with, thanks 
 
 [Pipeline Manager documentation](https://antmicro.github.io/kenning-pipeline-manager/) | [Demo application](https://antmicro.github.io/kenning-pipeline-manager/_static/pipeline-manager.html?spec=https%3A%2F%2Fraw.githubusercontent.com%2Fantmicro%2Fkenning-pipeline-manager%2Frefs%2Fheads%2Fmain%2Fexamples%2Fsample-specification.json&graph=https%3A%2F%2Fraw.githubusercontent.com%2Fantmicro%2Fkenning-pipeline-manager%2Frefs%2Fheads%2Fmain%2Fexamples%2Fsample-dataflow.json)
 
-It provides functionality for:
+Pipeline Manager provides functionality for:
 
-* visualizing and editing dataflows,
-* saving and loading dataflows,
-* communicating with an external application to delegate advanced validation, execution of the defined graph and conversions to and from native formats of the graphs.
+* visualizing and editing dataflows
+* saving and loading dataflows
+* communicating with an external application to delegate advanced validation, execution of the defined graph and conversions to and from native graph formats
 
-Pipeline Manager aims to simplify the process of developing graph-based graphical interfaces for applications that are modular and have a graph-like nature.
+Pipeline Manager simplifies the process of developing graph-based graphical interfaces for applications that are modular and have a graph-like nature.
 
 ![Pipeline Manager](img/pipeline_manager_visualisation.png)
 
@@ -28,67 +28,66 @@ They can be installed using `pip`:
 pip install .
 ```
 
-All of `npm` modules needed for the frontend of the application are installed automatically during build.
-They can be found in the `./pipeline_manager/frontend/node_modules` directory after the application is built.
+All `npm` modules necessary for the front end of the application are installed automatically during build.
+You can find them in the `./pipeline_manager/frontend/node_modules` directory after the application is built.
 
 ## Building and running
 
-Pipeline Manager can be built in two different ways as:
+Pipeline Manager can be built in two different ways, as:
 
-* static HTML application, that can be run in a browser, without any additional backend server,
-* regular web application that is designated to communicate and cooperate with an external application (like [Kenning](https://github.com/antmicro/kenning)).
+* a static HTML application running in a browser without any additional back end server
+* a regular web application designed to communicate and cooperate with an external application (like [Kenning](https://github.com/antmicro/kenning))
 
 ### Static HTML application
 
-To build Pipeline Manager as a static HTML application, in the root directory run:
+To build Pipeline Manager as a static HTML application, run the following in the root directory:
 
 ```bash
 ./build static-html
 ```
 
-For available flags, run:
+To list available flags, run:
 
 ```bash
 ./build static-html -h
 ```
 
 To run the built application, open `./pipeline_manager/frontend/dist/index.html` in a preferred browser.
-As an example, if the browser of your choice is `firefox` you should run:
+For example, if the browser of your choice is `firefox` you should run:
 
 ```bash
 firefox ./pipeline_manager/frontend/dist/index.html
 ```
 
-After running Pipeline Manager you can use sample specification under `./examples/sample_specification.json` to check the visualization and editing of pipelines.
-Additionally, `./examples/sample_dataflow.json` can be used to see how dataflows are stored.
+With Pipeline Manager running, you can use a sample specification you can find in the `./examples/sample_specification.json` directory to explore visualization and pipeline editing capabilities.
+Additionally, you can use `./examples/sample_dataflow.json` see how dataflows are stored.
 
-The specification can be loaded in the webpage using the `Load specification` option in the main menu.
-The dataflow can be loaded in the webpage using the `Load graph file` option in the main menu.
+You can load the specification on the webpage using the `Load specification` option in the main menu.
+You can then load the dataflow on the webpage using the `Load graph file` option in the main menu.
 
-What is more, the specification and the dataflow can be provided as URL arguments:
+What is more, you can provide the specification and the dataflow as URL arguments:
 
-* `spec` - should contain URL to the specification file,
-* `graph` - should contain URL to the dataflow file,
-* `preview` - if `true`, the graph is displayed in preview mode (read only, no HUD),
-* `include` - to alter the specification from the level of URL, it is possible to provide a URL to additional includes with this field.
+* `spec` - should contain URL to the specification file
+* `graph` - should contain URL to the dataflow file
+* `preview` - if `true`, the graph is displayed in preview mode (read only, no HUD)
+* `include` - to alter the specification from within the URL, you can provide an URL to additional includes with this field
 
-For example:
+URL example:
 
 ```bash
 firefox "https://antmicro.github.io/kenning-pipeline-manager/_static/pipeline-manager.html?spec=https%3A%2F%2Fraw.githubusercontent.com%2Fantmicro%2Fkenning-pipeline-manager%2Frefs%2Fheads%2Fmain%2Fexamples%2Fsample-specification.json&graph=https%3A%2F%2Fraw.githubusercontent.com%2Fantmicro%2Fkenning-pipeline-manager%2Frefs%2Fheads%2Fmain%2Fexamples%2Fsample-dataflow.json"
 ```
 
-Will fetch and use specification and dataflow from the GitHub repository for this project.
+The URL above will fetch and use specification and dataflow from the GitHub repository for this project.
 The URLs need to be encoded.
 
-It is possible to add a default specification JSON to the generated HTML.
-It just needs to be provided as the second argument of the `./build` script:
+You can add a JSON with a default specification to the generated HTML by providing the path to your file as the second argument for the `./build` script:
 
 ```bash
 ./build static-html <path-to-specification-json>
 ```
 
-It is also possible to add a default dataflow that will be loaded on the start of the application, e.g.:
+You can also add a default dataflow that will be loaded when the application starts, for example:
 
 ```bash
 ./build static-html <path-to-specification> <path-to-dataflow>
@@ -100,26 +99,26 @@ To be able to use some additional assets, like icons for nodes, run:
 ./build --assets-directory <path-to-assets-dir> static-html <path-to-specification> <path-to-dataflow>
 ```
 
-To change the title of the editor and page, use `--editor-title` flag, e.g.:
+To change the title of the editor and page, use the `--editor-title` flag, for example:
 
 ```bash
 ./build --editor-title 'Graph editor' static-html <path-to-specification> <path-to-dataflow>
 ```
 
-For details on how to write specification, check:
+For details on how to write specifications, see:
 
 * [Pipeline Manager documentation](https://antmicro.github.io/kenning-pipeline-manager)
 * [Specification format](https://antmicro.github.io/kenning-pipeline-manager/specification-format.html)
 * [Dataflow format](https://antmicro.github.io/kenning-pipeline-manager/dataflow-format.html)
 * [Examples in `examples/` directory](https://github.com/antmicro/kenning-pipeline-manager/tree/main/examples) - in the directory you can find sample specification files (with `-specification.json` suffix), usually paired with supported dataflow files (with `-dataflow.json` suffix)
 
-For example, run:
+For example, you can run:
 
 ```bash
 ./build static-html ./examples/sample-specification.json ./examples/sample-dataflow.json --output-directory ./pipeline-manager-demo
 ```
 
-After successful build, run:
+Upon a successful build, run:
 
 ```bash
 firefox ./pipeline-manager-demo/index.html
@@ -129,7 +128,7 @@ You should get a graph view similar to the one in the [documentation's demo](htt
 
 ### Web application
 
-To build Pipeline Manager to work with an external application (like Kenning), in the root directory run:
+To build Pipeline Manager to work with an external application (like Kenning), run the following in the root directory:
 
 ```bash
 ./build server-app
@@ -141,37 +140,35 @@ For available flags, check:
 ./build server-app -h
 ```
 
-In this scenario, the backend server is expected to serve the Pipeline Manager content.
-To do that, in the root directory run:
+In this scenario, the back-end server is expected to serve the content for Pipeline Manager.
+To do that, run the following in the root directory:
 
 ```
 ./run
 ```
 
-By default, the backend server runs on `http://127.0.0.1:5000`.
-In addition to using the sample specification you can also connect the third-party application (e.g. [Kenning](https://github.com/antmicro/kenning)), edit its pipeline, validate it and run it.
+By default, the back-end server runs on `http://127.0.0.1:5000`.
+In addition to using the sample specification, you can also connect a third-party application (e.g. [Kenning](https://github.com/antmicro/kenning)), edit its pipeline, validate it and run it.
 
 ### Miscellaneous
 
 #### Development
 
-To run a development server which automatically recompiles the project after detecting any changes, in `./pipeline_manager/frontend` directory run:
+To run a development server which automatically recompiles a project after detecting any changes, in `./pipeline_manager/frontend` directory, for static mode, run:
 
 ```
 npm run serve-static
 ```
 
-in case of a static mode, and run:
+For web application mode, run:
 
 ```
 npm run serve
 ```
 
-in case of a regular web application mode.
-
 #### Validation
 
-Pipeline Manager also includes a validation tool you can use during specification and dataflow development.
+Pipeline Manager includes a validation tool you can use during specification and dataflow development.
 
 To validate an existing specification, run the following in the root directory:
 
