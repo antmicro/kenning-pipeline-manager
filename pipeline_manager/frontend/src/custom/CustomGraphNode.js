@@ -31,13 +31,12 @@ import { terminalStore } from '../core/stores.js';
   *
   * @returns properties ready to be loaded
   */
-function prepareProperties(graphNode) {
-    const properties = graphNode.properties ?? [];
-    const dynamicProperties = generateProperties(graphNode.interfaces ?? []);
+function prepareProperties(prop) {
+    const properties = prop ?? [];
 
-    const parsedProperties = parseProperties([...properties, ...dynamicProperties.value]);
+    const parsedProperties = parseProperties(properties);
     if (Array.isArray(parsedProperties) && parsedProperties.length) {
-        return parsedProperties.map((error) => `Node ${graphNode.name} invalid. ${error}`);
+        return parsedProperties.map((error) => `Graph node invalid. ${error}`);
     }
     return createProperties(parsedProperties);
 }
@@ -50,12 +49,12 @@ function prepareProperties(graphNode) {
   *
   * @returns interfaces ready to be loaded
   */
-function prepareInterfaces(graphNode) {
-    const interfaces = graphNode.interfaces ?? [];
+function prepareInterfaces(intfs) {
+    const interfaces = intfs ?? [];
 
     const parsedInterfaces = parseInterfaces(interfaces, [], []);
     if (Array.isArray(parsedInterfaces) && parsedInterfaces.length) {
-        return parsedInterfaces.map((error) => `Node ${graphNode.name} invalid. ${error}`);
+        return parsedInterfaces.map((error) => `Graph node invalid. ${error}`);
     }
     return createBaklavaInterfaces(parsedInterfaces);
 }
@@ -198,9 +197,22 @@ export function prepareSubgraphInstance(
     };
 }
 
-export default function CreateCustomGraphNodeType(template, graphNode) {
-    const [nodeInputs, newNodeOutputs] = prepareInterfaces(graphNode);
-    const properties = prepareProperties(graphNode);
+export default function CreateCustomGraphNodeType(template, graphNode, editorManager) {
+    const intfsInherited = editorManager.findInheritedInterfaces(graphNode.name).filter((intf) =>
+        !graphNode.interfaces?.find((i) => i.name === intf.name))
+        ?.map((intf) => ({ ...intf, inherited: true }));
+    const propsInherited = editorManager.findInheritedProperties(graphNode.name).filter((prop) =>
+        !graphNode.properties?.find((p) => p.name === prop.name))
+        ?.map((prop) => ({ ...prop, inherited: true }));
+
+    const [nodeInputs, newNodeOutputs] = prepareInterfaces(
+        [...graphNode.interfaces ?? [], ...intfsInherited],
+    );
+    const dynamicProperties = generateProperties(graphNode.interfaces ?? []);
+
+    const properties = prepareProperties(
+        [...graphNode.properties ?? [], ...propsInherited, ...dynamicProperties.value ?? []],
+    );
     const newNodeInputs = {
         ...nodeInputs,
         ...properties,
@@ -221,7 +233,7 @@ export default function CreateCustomGraphNodeType(template, graphNode) {
                 graphNode.layer,
                 newNodeInputs,
                 newNodeOutputs,
-                graphNode.twoColumn ?? template.editor.editorManager.baklavaView.twoColumn ?? false,
+                graphNode.twoColumn ?? editorManager.baklavaView.twoColumn ?? false,
                 graphNode.description ?? '',
                 graphNode.extends ?? [],
                 graphNode.extending ?? [],

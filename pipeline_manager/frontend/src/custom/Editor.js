@@ -806,7 +806,9 @@ export default class PipelineManagerEditor extends Editor {
             graphNode.layer = graphNode.layer ?? inheritedAttributes.layer;
         }
 
-        const customGraphNodeType = CreateCustomGraphNodeType(template, graphNode);
+        const customGraphNodeType = CreateCustomGraphNodeType(
+            template, graphNode, this.editorManager,
+        );
         this.registerNodeType(customGraphNodeType, {
             category: graphNode.category,
             title: graphNode.title,
