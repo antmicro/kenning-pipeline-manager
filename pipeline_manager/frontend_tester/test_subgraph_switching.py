@@ -5,10 +5,12 @@ import signal
 import subprocess
 import tempfile
 import time
+from datetime import datetime
 from pathlib import Path
+from typing import Optional
 
 import pytest
-from playwright.sync_api import Page, Playwright, expect, sync_playwright
+from playwright.sync_api import BrowserContext, Page, expect, sync_playwright
 
 PROTOCOL = "http"
 SERVER_ADDRESS = "127.0.0.1"
@@ -51,8 +53,16 @@ def rpc_server(build_server_app: str):
 
 
 @pytest.fixture(scope="session")
-def build_server_app():
+def build_server_app(request: pytest.FixtureRequest):
     """Context manager to build a server app in a temporary directory."""
+    frontend_directory = request.config.getoption(
+        "--frontend-directory",
+        default=None,
+    )
+    if frontend_directory:
+        yield frontend_directory
+        return
+
     process = None
     try:
         with tempfile.TemporaryDirectory() as tmp_dir:
@@ -112,19 +122,18 @@ def enter_subgraph_node(page: Page):
     contextMenuOption.click()
 
 
-def execute_enter_subgraph_scenario(playwright: Playwright):
+def execute_enter_subgraph_scenario(context: BrowserContext):
     """
     Execute a Playwright scenario, when an agents enters a subgraph,
     utilizing the frontend.
 
     Parameters
     ----------
-    playwright : Playwright
-        An instance of Playwright context manager,
+    context : BrowserContext
+        An instance of Playwright context,
         on which the scenario will be performed.
     """
-    browser = playwright.firefox.launch()
-    page = browser.new_page()
+    page = context.new_page()
     page.goto(f"{PROTOCOL}://{SERVER_ADDRESS}:{SERVER_PORT}")
     upload_dataflow_file(page)
 
@@ -134,20 +143,47 @@ def execute_enter_subgraph_scenario(playwright: Playwright):
     enter_subgraph_node(page)
 
     expect(nodes).to_have_count(2)
-    browser.close()
 
 
 @pytest.mark.flaky(retries=3, delay=1)
-def test_subgraph_switching(rpc_server, install_playwright_browser):
+def test_subgraph_switching(
+    request: pytest.FixtureRequest,
+    rpc_server,
+    install_playwright_browser,
+):
     """
     Test if switching to a subgraph while utilizing RPC communication
     works.
     """
     args = ["python3", "pipeline_manager/frontend_tester/rpc_client.py"]
+    client_process = None
+
+    trace_name: Optional[str] = None
+    tracing_path = request.config.getoption("--playwright-trace", default=None)
+    if tracing_path:
+        assert isinstance(tracing_path, str)
+        path = Path(tracing_path)
+        assert path.suffix == ".zip" or path.suffix == ""
+        trace_name = path.stem
+
     try:
         client_process = subprocess.Popen(args)
         with sync_playwright() as playwright:
-            execute_enter_subgraph_scenario(playwright)
+            browser = playwright.firefox.launch()
+            context = browser.new_context()
+            if trace_name:
+                context.tracing.start(
+                    screenshots=True,
+                    snapshots=True,
+                    sources=True,
+                )
+            try:
+                execute_enter_subgraph_scenario(context)
+            finally:
+                if trace_name:
+                    ts = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
+                    context.tracing.stop(path=f"{trace_name}-{ts}.zip")
+                    browser.close()
     except Exception as e:
         assert False, str(e)
     finally:
