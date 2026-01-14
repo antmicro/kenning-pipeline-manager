@@ -1,11 +1,10 @@
 """Module with tests of subgraph switching."""
 
 import os
-import shutil
+import signal
 import subprocess
 import tempfile
 import time
-from contextlib import contextmanager
 from pathlib import Path
 
 import pytest
@@ -18,61 +17,64 @@ PROCESS_SHUTDOWN_TIME = 5
 
 
 @pytest.fixture
-def rpc_server():
+def rpc_server(build_server_app: str):
     """Fixture to provide a backend server."""
     startup_time = 5
     process = None
     try:
-        with build_server_app() as frontend_path:
-            args = [
-                "./run",
-                "--frontend-directory",
-                str(frontend_path),
-                "--communication-server-host",
-                SERVER_ADDRESS,
-                "--communication-server-port",
-                str(SERVER_PORT),
-            ]
-            process = subprocess.Popen(args, stdout=subprocess.PIPE, text=True)
-            time.sleep(startup_time)
-            yield
+        args = [
+            "./run",
+            "--frontend-directory",
+            str(build_server_app),
+            "--backend-host",
+            SERVER_ADDRESS,
+            "--backend-port",
+            str(SERVER_PORT),
+        ]
+        process = subprocess.Popen(
+            args,
+            stdout=subprocess.PIPE,
+            text=True,
+            preexec_fn=os.setsid,
+        )
+        time.sleep(startup_time)
+        yield
     except Exception as e:
-        assert False, f"Failed to start a RPC-JSON backend: {e}"
+        pytest.fail(f"Failed to start a RPC-JSON backend: {e}")
     finally:
-        if process is None:
-            return
+        if process:
+            # process group to ensure uvicorn shutdown
+            process_group_id = os.getpgid(process.pid)
+            os.killpg(process_group_id, signal.SIGTERM)
+            time.sleep(PROCESS_SHUTDOWN_TIME)
+            os.killpg(process_group_id, signal.SIGKILL)
 
-        process.terminate()
-        time.sleep(PROCESS_SHUTDOWN_TIME)
-        process.kill()
 
-
-@contextmanager
+@pytest.fixture(scope="session")
 def build_server_app():
     """Context manager to build a server app in a temporary directory."""
+    process = None
     try:
-        tmp_dir = tempfile.mkdtemp()
-        os.sync()
-        args = [
-            "./build",
-            "server-app",
-            "--output-directory",
-            tmp_dir,
-        ]
-        process = subprocess.Popen(args)
-        return_code = process.wait(timeout=50)
-        assert not return_code, (
-            "Building a server app failed."
-            f"Return non-zero code: {return_code}"
-        )
-        yield tmp_dir
-    except Exception as e:
-        raise e
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            os.sync()
+            args = [
+                "./build",
+                "server-app",
+                "--output-directory",
+                tmp_dir,
+            ]
+            process = subprocess.Popen(args)
+            return_code = process.wait(timeout=50)
+            assert not return_code, (
+                "Building a server app failed."
+                f"Return non-zero code: {return_code}"
+            )
+            yield tmp_dir
     finally:
-        process.terminate()
-        time.sleep(PROCESS_SHUTDOWN_TIME)
-        process.kill()
-        shutil.rmtree(tmp_dir)
+        if process:
+            process.terminate()
+            time.sleep(PROCESS_SHUTDOWN_TIME)
+            process.kill()
 
 
 @pytest.fixture(scope="session")
