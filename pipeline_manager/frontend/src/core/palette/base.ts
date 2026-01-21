@@ -145,7 +145,7 @@ export default function usePalette<T extends IEntryData>(
 
         if (!isInternal(entry)) {
             entry.show = shouldShow;
-            return shouldShow;
+            return acc || shouldShow;
         }
 
         // Update children
