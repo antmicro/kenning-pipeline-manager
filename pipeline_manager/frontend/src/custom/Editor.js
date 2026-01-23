@@ -170,6 +170,17 @@ export default class PipelineManagerEditor extends Editor {
     }
 
     /**
+     *  Adds a new empty graph to the editor.
+     */
+    addNewGraph() {
+        const newGraph = new Graph(this);
+        newGraph.name = 'New Graph';
+
+        this.registerGraph(newGraph);
+        this.editorManager.baklavaView.editor.switchToGraph(newGraph, false);
+    }
+
+    /**
      * Cleans all graphs in the editor.
      * @param Determines whether the cleaning process should be stored in history
      */

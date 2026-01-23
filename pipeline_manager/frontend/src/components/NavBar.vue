@@ -384,7 +384,7 @@ export default {
 
         createNewGraphCallback() {
             startTransaction();
-            this.editorManager.editor.deepCleanEditor(false);
+            this.editorManager.editor.addNewGraph();
             commitTransaction();
         },
 
