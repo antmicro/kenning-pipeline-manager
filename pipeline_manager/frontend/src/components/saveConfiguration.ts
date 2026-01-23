@@ -143,8 +143,6 @@ export const saveSpecificationConfiguration: SaveConfiguration = {
         });
 
         if (this.graph) {
-            specification.entryGraph = dataflow.entryGraph ?? dataflow.graphs[0].id;
-
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             dataflow.graphs.forEach((graph: any) => {
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -158,6 +156,12 @@ export const saveSpecificationConfiguration: SaveConfiguration = {
             specification.graphs = specification.graphs.filter(
                 (graph: any) => Array.isArray(graph.nodes) && graph.nodes.length,
             );
+
+            if (specification.graphs.values().some((g:any) => g.id === dataflow.entryGraph)) {
+                specification.entryGraph = dataflow.entryGraph;
+            } else {
+                specification.entryGraph = specification.graphs[0]?.id;
+            }
         }
 
         if (this.minify && specification.nodes) {
