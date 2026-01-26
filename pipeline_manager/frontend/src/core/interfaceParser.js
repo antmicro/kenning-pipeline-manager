@@ -118,9 +118,13 @@ function parseSingleInterfaces(interfaces, interfaceGroup = false) {
     const filteredTempInouts = Object.fromEntries(
         Object.entries(tempParsed.inout).filter(([name, state]) => {
             const direction = state.direction ?? defaultDirection;
-            const duplicate =
-                Object.keys(tempParsed.output).includes(name) ||
-                Object.keys(tempParsed.input).includes(name);
+
+            const tempParsedInterfaces = [...Object.values(tempParsed.input),
+                ...Object.values(tempParsed.output)];
+
+            const duplicate = tempParsedInterfaces.find((intf) => intf.name === name
+                        && intf.side === state.side);
+
             if (duplicate) {
                 errors.push(
                     `Interface named '${name}' of direction '${direction}' ` +
