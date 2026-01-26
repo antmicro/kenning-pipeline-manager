@@ -1080,7 +1080,7 @@ export default class EditorManager {
         // eliminate duplicates from two 'branching' inheritance paths,
         // probably should be checked for during validation.
         const intfsInherited = this.findInheritedInterfaces(node.name).filter((intf) =>
-            !node.interfaces?.find((i) => i.name === intf.name))
+            !node.interfaces?.find((i) => i.name === intf.name && i.side === intf.side))
             ?.map((intf) => ({ ...intf, inherited: true }));
         const propsInherited = this.findInheritedProperties(node.name).filter((prop) =>
             !node.properties?.find((p) => p.name === prop.name))
