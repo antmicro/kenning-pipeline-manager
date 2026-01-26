@@ -137,14 +137,16 @@ export function prepareSubgraphInstance(
 
         // Regular interface
         const nonExposed = node.subgraph === undefined && intf.externalName === undefined;
+
+        const interfaceName = `${intf.externalName ?? intf.name}_${intf.side ?? 'left'}`;
         // Exposed interface is not indicated in the nested subgraph node
         const exposedNotInSubgraphNode = !isRoot
             && intf.externalName !== undefined
-            && (specSubgraphNodeId === undefined || !idMap.has(intf.externalName));
+            && (specSubgraphNodeId === undefined || !idMap.has(interfaceName));
 
         return (nonExposed || exposedNotInSubgraphNode)
             ? uuidv4()
-            : getOrGenerate(idMap, intf.externalName ?? intf.name);
+            : getOrGenerate(idMap, interfaceName);
     };
 
     const createNewInterfaceId = (oldId, node) => {
