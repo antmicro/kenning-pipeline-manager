@@ -277,7 +277,8 @@ export default defineComponent({
         };
 
         const updateDynamicInterfaces = (intf) => {
-            node.value.updateDynamicInterfaces(intf);
+            const nodeIntf = graph.value.nodes.find((x) => x.id === intf.nodeId);
+            nodeIntf?.value.updateDynamicInterfaces(intf);
         };
 
         const onPointerLeave = () => {
