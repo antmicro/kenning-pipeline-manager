@@ -186,6 +186,7 @@ import EditorManager from '../core/EditorManager';
 import { validateInterfaceGroupsNames } from '../core/interfaceParser';
 import { getOptionName } from './CustomNode.js';
 import NodeSpecificationEditor from '../components/NodeSpecificationEditor.vue';
+import { checkForUnsavedEditorChangesWithToast } from './node_editor/NodeSpecEditorUtils.js';
 
 export default defineComponent({
     components: {
@@ -306,7 +307,10 @@ export default defineComponent({
             width: `${width.value}px`,
         }));
 
-        const close = () => {
+        const close = async () => {
+            if (await checkForUnsavedEditorChangesWithToast()) {
+                return;
+            }
             graph.value.sidebar.visible = false;
         };
 
