@@ -25,7 +25,7 @@ SPDX-License-Identifier: Apache-2.0
                 spellcheck="false"
                 @input="handleInput"
                 @keydown.tab="handleTab"
-            />
+                />
             <button
                 class="baklava-button __validate-button"
                 :disabled="!editorStateChanged"
@@ -57,7 +57,7 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import YAML from 'yaml';
 import {
-    computed, defineComponent, nextTick, ref, toRef, watch, onMounted,
+    computed, defineComponent, nextTick, ref, toRef, watch, onMounted, onBeforeUnmount,
 } from 'vue';
 import { useViewModel } from '@baklavajs/renderer-vue';
 import EditorManager, { EDITED_NODE_STYLE } from '../core/EditorManager';
@@ -598,11 +598,16 @@ export default defineComponent({
          * @returns {boolean} `true` if the specification has been modified
          */
         const editorStateChanged = computed(() => {
-            const parsedCurrentSpecification = YAML.parse(
-                currentSpecification.value.replaceAll('\t', '  '),
-            );
-            return JSON.stringify(specification.value) !==
+            try {
+                const parsedCurrentSpecification = YAML.parse(
+                    currentSpecification.value.replaceAll('\t', '  '),
+                );
+
+                return JSON.stringify(specification.value) !==
                 JSON.stringify(parsedCurrentSpecification);
+            } catch {
+                return false;
+            }
         });
 
         /**
