@@ -213,6 +213,8 @@ import {
 
 import notifyEvents from './notifyEvents.js';
 
+import { checkForUnsavedEditorChangesWithToast } from './node_editor/NodeSpecEditorUtils.js';
+
 // Baklavajs implementation
 
 const props = defineProps({
@@ -501,6 +503,10 @@ const onContextMenuTitleClick = async (action) => {
         prepareNodeForDuplication(props.node.title);
     }
 
+    if (await checkForUnsavedEditorChangesWithToast()) {
+        return;
+    }
+
     switch (action) {
         case 'delete':
             startTransaction();
@@ -572,14 +578,7 @@ const onContextMenuTitleClick = async (action) => {
             menuState.interfaceMenu = true;
             break;
         case 'layer':
-            if (props.node.simpleInherited?.includes('layer')) {
-                NotificationHandler.terminalLog(
-                    'warning',
-                    'Cannot set layer',
-                    'setting layer when one is already inherited is not allowed');
-            } else {
-                menuState.layerMenu = true;
-            }
+            menuState.layerMenu = true;
             break;
         case 'addSubgraph': {
             const errors = editorManager.addSubgraphToNode(props.node);
@@ -724,7 +723,7 @@ stopDrag = () => {
     cleanEvents();
 };
 
-const startDrag = (ev) => {
+const startDrag = async (ev) => {
     if (!graph.value.selectedNodes.includes(props.node)) {
         select(ev);
     }
@@ -769,7 +768,10 @@ const openDoubleClick = doubleClick(700, () => {
 });
 
 /* eslint-disable vue/no-mutating-props,no-param-reassign */
-const onMouseDown = () => {
+const onMouseDown = async () => {
+    if (await checkForUnsavedEditorChangesWithToast()) {
+        return;
+    }
     const { sidebar } = viewModel.value.displayedGraph;
     if (sidebar.visible) {
         sidebar.nodeId = props.node.id;
