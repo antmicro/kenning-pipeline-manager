@@ -13,9 +13,10 @@ export default class IntegerInterface extends BaklavaIntegerInterface {
 
     componentName = 'IntegerInterface';
 
-    constructor(name, value, min, max, readonly = false) {
+    constructor(name, value, min, max, readonly = false, dynamicCounter = false) {
         super(name, value, min, max);
         this.readonly = readonly;
+        this.dynamicCounter = dynamicCounter;
         this.setPort(false);
     }
 }

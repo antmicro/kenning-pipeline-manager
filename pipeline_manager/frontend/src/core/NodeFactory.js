@@ -15,7 +15,6 @@ import {
     parseInterfaces,
     validateInterfaceGroups,
     generateProperties,
-    DYNAMIC_INTERFACE_SUFFIX,
 } from './interfaceParser.js';
 
 import CheckboxInterface from '../interfaces/CheckboxInterface.js';
@@ -173,7 +172,14 @@ export function newProperty(p, hidden = false) {
             intf = new NumberInterface(propName, propDef, p.min, p.max, p.readonly);
             break;
         case 'integer':
-            intf = new IntegerInterface(propName, propDef, p.min, p.max, p.readonly);
+            intf = new IntegerInterface(
+                propName,
+                propDef,
+                p.min,
+                p.max,
+                p.readonly,
+                p.dynamicCounter,
+            );
             break;
         case 'hex':
             intf = new HexInterface(
@@ -609,7 +615,9 @@ export class CustomNode extends Node {
         const interfaceMaxConnectionsCount = propertyInput?.interfaceMaxConnectionsCount;
 
         // Direction is obtained from property name
+        // Format: {name} {direction}
         const propName = prop.name.split(' ');
+
         // Ensure propName has enough elements
         if (propName.length < 2) {
             throw new Error(
@@ -617,10 +625,9 @@ export class CustomNode extends Node {
                 `Property name: ${prop.name}`,
             );
         }
-        const direction = propName[propName.length - 2];
-        // The DYNAMIC_INTERFACE_SUFFIX and direction are omitted
-        const interfaceName = prop.name
-            .slice(0, -1 * (DYNAMIC_INTERFACE_SUFFIX.length + 2 + direction.length));
+
+        const direction = propName.pop();
+        const interfaceName = propName.join(' ');
 
         const occupied = { left: [], right: [] };
 
@@ -949,8 +956,7 @@ export class CustomNode extends Node {
 
         Object.entries(parsedState.inputs).forEach(([name, intf]) => {
             if (!name.startsWith('property_')) return;
-
-            if (name.startsWith('property_') && name.endsWith(`${DYNAMIC_INTERFACE_SUFFIX}`)) {
+            if (intf.dynamicCounter) {
                 this.updateDynamicInterfaces(intf);
             }
         });
