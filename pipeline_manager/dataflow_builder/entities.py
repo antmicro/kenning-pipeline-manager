@@ -110,6 +110,7 @@ class Property(JsonConvertible):
     value: Any
     type: str
     id: str
+    dynamic_counter: Optional[bool] = None
 
     def __init__(
         self,
@@ -122,6 +123,7 @@ class Property(JsonConvertible):
         max: Optional[str] = None,
         dtype: Optional[str] = None,
         group: Optional[Dict[str, Any]] = None,
+        dynamic_counter: Optional[bool] = None,
         id: str = get_uuid(),
     ):
         # In a specification, property has `default`,
@@ -175,6 +177,9 @@ class Property(JsonConvertible):
         if group:
             self.group = group
 
+        if dynamic_counter:
+            self.dynamic_counter = dynamic_counter
+
     @staticmethod
     def get_first_not_none(values: List[Optional[Any]]) -> Any:
         for value in values:
@@ -210,6 +215,9 @@ class Property(JsonConvertible):
             "value": self.value,
             "id": self.id,
         }
+        if self.dynamic_counter:
+            output["dynamicCounter"] = self.dynamic_counter
+
         return convert_output(output, as_str, minify)
 
 
@@ -552,7 +560,7 @@ class Node(JsonConvertible):
     def _get_dynamic_interface_property_name(
         name: str, direction: Direction
     ) -> str:
-        return f"{name} {direction.value} count"
+        return f"{name} {direction.value}"
 
     def _create_dynamic_interfaces(self, name: str, **kwargs):
         """
@@ -616,6 +624,7 @@ class Node(JsonConvertible):
                 interface_name, direction
             ),
             value=min_interfaces,
+            dynamic_counter=True,
         )
         self.properties.append(property)
 
