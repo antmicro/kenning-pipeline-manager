@@ -60,6 +60,10 @@
                                 "externalName": {
                                     "description": "Name of the external property displayed in the node",
                                     "type": ["string", "null"]
+                                },
+                                "dynamicCounter": {
+                                    "description": "Indicates that the property controls the number of dynamic interfaces",
+                                    "type": ["boolean", "null"]
                                 }
                             },
                             "required": [
