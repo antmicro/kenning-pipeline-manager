@@ -7,12 +7,6 @@
 const defaultDirection = 'inout';
 
 /**
- * Dynamic interfaces that are controlled with a dedicated property
- * are suffixed with `DYNAMIC_INTERFACE_SUFFIX`.
-*/
-export const DYNAMIC_INTERFACE_SUFFIX = 'count';
-
-/**
  * Returns a prepared interface that is passed to baklava constructor
  *
  * @param io configuration of the interface
@@ -345,7 +339,7 @@ export function generateProperties(interfaces) {
                 ) {
                     // Property should have limits specified by 'intf.dynamic' value
                     properties.push({
-                        name: `${intf.name} ${intf.direction} ${DYNAMIC_INTERFACE_SUFFIX}`,
+                        name: `${intf.name} ${intf.direction}`,
                         type: 'integer',
                         min: intf.dynamic[0],
                         max: intf.dynamic[1],
@@ -353,17 +347,19 @@ export function generateProperties(interfaces) {
                         // The type of dynamic interfaces is stored as `interfaceType`
                         interfaceType: intf.type,
                         interfaceMaxConnectionCount: intf.maxConnectionCount,
+                        dynamicCounter: true,
                     });
                 } else if (intf.dynamic === true) {
                     // Property should not have limits
                     properties.push({
-                        name: `${intf.name} ${intf.direction} ${DYNAMIC_INTERFACE_SUFFIX}`,
+                        name: `${intf.name} ${intf.direction}`,
                         type: 'integer',
                         min: 0,
                         default: 0,
                         // The type of dynamic interfaces is stored as `interfaceType`
                         interfaceType: intf.type,
                         interfaceMaxConnectionCount: intf.maxConnectionCount,
+                        dynamicCounter: true,
                     });
                 } else {
                     errors.push(

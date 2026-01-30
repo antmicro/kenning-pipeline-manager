@@ -126,7 +126,6 @@ import {
 } from '@baklavajs/renderer-vue';
 import Arrow from '../icons/Arrow.vue';
 import doubleClick from '../core/doubleClick';
-import { DYNAMIC_INTERFACE_SUFFIX } from '../core/interfaceParser';
 import { ir } from '../core/interfaceRegistry.ts';
 
 export default defineComponent({
@@ -172,7 +171,7 @@ export default defineComponent({
             props.intf.events.setValue.subscribe(props.intf, () => props.toggleGroup(props.intf));
         }
 
-        if (props.intf.name.endsWith(DYNAMIC_INTERFACE_SUFFIX)) {
+        if (props.intf.dynamicCounter) {
             props.updateDynamicInterfaces(props.intf);
             props.intf.events.setValue.unsubscribe(props.intf);
             props.intf.events.setValue.subscribe(props.intf, () =>
