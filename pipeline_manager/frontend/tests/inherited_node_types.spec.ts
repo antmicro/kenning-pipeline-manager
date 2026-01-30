@@ -87,7 +87,7 @@ test('checking renamed inherited property', async ({ page }) => {
     expect(parsedContent.properties.length).toBe(1);
     parsedContent.properties.find((prop) => prop.name === 'prop-a').name = 'prop-new';
     await setYAMLEditorContent(page, YAML.stringify(parsedContent));
-    await page.locator('.__validate-button').click();
+    await page.locator('.__validate-button').getByText('Apply').click();
 
     const nodeBproperties = page.locator('[data-node-type="Type B"]')
         .locator('.__content > .__properties > div');
@@ -115,7 +115,7 @@ test('override interface', async ({ page }) => {
         ['side', 'right'],
     ]));
     await setYAMLEditorContent(page, YAML.stringify(parsedContent));
-    await page.locator('.__validate-button').click();
+    await page.locator('.__validate-button').getByText('Apply').click();
     const rightOutputs = page.locator('[data-node-type="Type B"]')
         .locator('.__content > .__interfaces > .__outputs > div');
     expect(await rightOutputs.count()).toBe(2);
@@ -125,7 +125,7 @@ test('override interface', async ({ page }) => {
     expect(editedParsedContent.interfaces.length).toBe(2);
     editedParsedContent.interfaces.pop();
     await setYAMLEditorContent(page, YAML.stringify(editedParsedContent));
-    await page.locator('.__validate-button').click();
+    await page.locator('.__validate-button').getByText('Apply').click();
     expect(await rightOutputs.count()).toBe(1);
 });
 test('add subgraph to child node', async ({ page }) => {
