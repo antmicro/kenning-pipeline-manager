@@ -48,14 +48,19 @@ async function setYAML(page: Page, content: string, node: Locator) {
 
 async function enterSubgraph(node: Locator) {
     await node.locator('.__title').click({ button: 'right' });
-    const contextMenuOption = node.locator('.baklava-context-menu').getByText('Go to graph');
+    const contextMenuOption = node.locator('.baklava-context-menu').getByText('Go to graph').last();
     await contextMenuOption.click();
+}
+
+async function waitForSubgraph(page: Page,graphName:string) {
+    const editorTitle = await page.locator('.editorTitle');
+    await expect(editorTitle.getByText(graphName)).toBeVisible();
 }
 
 async function deleteNode(node: Locator) {
     await node.locator('.__title').click({ button: 'right' });
-    const contextMenuOption = node.locator('.baklava-context-menu').getByText('Delete').last();
-    await contextMenuOption.dispatchEvent('click');
+    const contextMenuOption = node.locator('.baklava-context-menu').getByText('Delete',{ exact: true });
+    await contextMenuOption.click({ force: true });
 }
 
 async function checkForSubgraph(node: Locator) {
@@ -83,7 +88,7 @@ async function prepareSubgraphPage(page: Page) {
 
 async function verifyNodeCount(page: Page, expectedCount: number) {
     const nodes = page.locator('.node-container > div');
-    expect(await nodes.count()).toBe(expectedCount);
+    await expect(nodes).toHaveCount(expectedCount); //toBe(expectedCount,{timeout: 3000});
 }
 
 async function leaveSubgraph(page: Page) {
@@ -109,6 +114,11 @@ async function addSubgraph(node: Locator) {
     await contextMenuOption.click();
 }
 
+async function waitForNodeSubgraph(node: Locator) {
+    const nodeTitle = await node.locator('.__title');
+    await expect(nodeTitle.locator('.__subgraph-icon')).toBeVisible();
+}
+
 test('test loading subgraph dataflow', async ({ page }) => {
     await prepareSubgraphPage(page);
     await verifyNodeCount(page, 4);
@@ -117,7 +127,8 @@ test('test loading subgraph dataflow', async ({ page }) => {
 test('test entering subgraph', async ({ page }) => {
     await prepareSubgraphPage(page);
     await verifyNodeCount(page, 4);
-    await enterSubgraph(getNode(page, 'Test subgraph #1'));
+    await enterSubgraph(getNode(page,'Test subgraph #1'));
+    await waitForSubgraph(page,'Test subgraph #1');
     await verifyNodeCount(page, 2);
 });
 
@@ -125,7 +136,8 @@ test('test coming back from subgraph', async ({ page }) => {
     await prepareSubgraphPage(page);
     await verifyNodeCount(page, 4);
 
-    await enterSubgraph(getNode(page, 'Test subgraph #1'));
+    await enterSubgraph(getNode(page,'Test subgraph #1'));
+    await waitForSubgraph(page,'Test subgraph #1');
     await verifyNodeCount(page, 2);
 
     await leaveSubgraph(page);
@@ -160,13 +172,16 @@ test('test preserving changes to subgraph', async ({ page }) => {
 
     const subgraphNode = getNode(page, 'Test subgraph #1')
     await enterSubgraph(subgraphNode);
+    await waitForSubgraph(page,'Test subgraph #1');
     await verifyNodeCount(page, 2);
     await placeNewNode(page, { x: 400, y: 200 });
 
     await verifyNodeCount(page, 3);
 
     await leaveSubgraph(page);
+    await waitForSubgraph(page,'Example of a graph with graph nodes');
     await enterSubgraph(subgraphNode);
+    await waitForSubgraph(page,'Test subgraph #1');
     await verifyNodeCount(page, 3);
 });
 
@@ -188,6 +203,7 @@ test('test visibility of newly exposed subgraph interface', async ({ page }) => 
     const exposedInterfaces = await verifyInterfaceCount(countOfInitiallyExposedInterface, subgraphNode);
 
     await enterSubgraph(subgraphNode);
+    await waitForSubgraph(page,'Test subgraph #1');
     await placeNewNode(page, { x: 400, y: 200 });
 
     // Expose a new interface: right click on an interface and choose 'Expose Interface'.
@@ -213,6 +229,7 @@ test("test hiding and exposing subgraph's interface", async ({ page }) => {
     const exposedInterfaces = await verifyInterfaceCount(countOfInitiallyExposedInterface, subgraphNode);
 
     await enterSubgraph(subgraphNode);
+    await waitForSubgraph(page,'Test subgraph #1');
 
     // Hide an exposed interface: invoke a interface's context menu and click the option.
     const targetNode = getNode(page, 'Test node #1').nth(1);
@@ -228,10 +245,12 @@ test("test hiding and exposing subgraph's interface", async ({ page }) => {
 
     // Get back to the main graph.
     await leaveSubgraph(page);
+    await waitForSubgraph(page,'Example of a graph with graph nodes');
     expect(await exposedInterfaces.count()).toBe(countOfInitiallyExposedInterface - 1);
 
     // Re-expose the currently hidden interface: invoke an interface's context menu and click the option.
     await enterSubgraph(subgraphNode);
+    await waitForSubgraph(page,'Test subgraph #1');
     await exposedInterface.click({ button: 'right' });
     const exposeContextMenuOption = targetNode
         .locator('.baklava-context-menu')
@@ -240,6 +259,7 @@ test("test hiding and exposing subgraph's interface", async ({ page }) => {
 
     // Get back to the main graph.
     await leaveSubgraph(page);
+    await waitForSubgraph(page,'Example of a graph with graph nodes');
     expect(await exposedInterfaces.count()).toBe(countOfInitiallyExposedInterface);
 });
 
@@ -249,6 +269,7 @@ test('test renaming exposed interface', async ({ page }) => {
 
     const subgraphNode = getNode(page, 'Test subgraph #1');
     await enterSubgraph(subgraphNode);
+    await waitForSubgraph(page,'Test subgraph #1');
     await verifyNodeCount(page, 2);
 
     // Rename an exposed interface.
@@ -260,6 +281,7 @@ test('test renaming exposed interface', async ({ page }) => {
 
     // Verify if the exposed interface's name has been changed.
     await leaveSubgraph(page);
+    await waitForSubgraph(page,'Example of a graph with graph nodes');
     await verifyNodeCount(page, 4);
     await expect(page.locator('#container')).toContainText(newName);
 });
@@ -290,6 +312,7 @@ test('test adding exposed property', async ({ page }) => {
     await enableEditingNodes(page);
     const subgraphNode = getNode(page, 'Test subgraph #1');
     await enterSubgraph(subgraphNode);
+    await waitForSubgraph(page,'Test subgraph #1');
     const node = getNode(page, 'Test node #1').first();
     await addProperty(page, node);
 
@@ -302,6 +325,7 @@ test('test adding exposed property', async ({ page }) => {
     await privatizeContextMenuOption.click();
 
     await leaveSubgraph(page);
+    await waitForSubgraph(page,'Example of a graph with graph nodes');
     await expect(page.locator('#container')).toContainText('New property');
     await verifyPropertyCount(subgraphNode, 2);
 
@@ -320,6 +344,7 @@ test("test hiding and exposing subgrap's property", async ({ page }) => {
     const propertyCount = await verifyPropertyCount(subgraphNode, countOfInitiallyExposedProperties);
     await enableEditingNodes(page);
     await enterSubgraph(subgraphNode);
+    await waitForSubgraph(page,'Test subgraph #2');
 
     const targetNode = getNode(page, 'Test node #2');
     const exposedProperty = targetNode
@@ -333,9 +358,11 @@ test("test hiding and exposing subgrap's property", async ({ page }) => {
     await privatizeContextMenuOption.click();
 
     await leaveSubgraph(page);
+    await waitForSubgraph(page,'Example of a graph with graph nodes');
     expect(await propertyCount.count()).toBe(countOfInitiallyExposedProperties-1);
 
     await enterSubgraph(subgraphNode);
+    await waitForSubgraph(page,'Test subgraph #2');
 
     await exposedProperty.click({ button: 'right', force: true });
     const exposeContextMenuOption = targetNode
@@ -344,6 +371,7 @@ test("test hiding and exposing subgrap's property", async ({ page }) => {
     await exposeContextMenuOption.click();
 
     await leaveSubgraph(page);
+    await waitForSubgraph(page,'Example of a graph with graph nodes');
     expect(await propertyCount.count()).toBe(countOfInitiallyExposedProperties);
 });
 
@@ -354,6 +382,7 @@ test("test add subgraph", async ({ page }) => {
 
     const node = getNode(page, 'Test node #1')
     await addSubgraph(node);
+    await waitForNodeSubgraph(node);
     await checkForSubgraph(node);
 });
 
@@ -365,8 +394,10 @@ test("test add subgraph, with sub-node", async ({ page }) => {
     const exposedInterfaces = await verifyInterfaceCount(1, subgraphNode);
 
     await addSubgraph(subgraphNode);
+    await waitForNodeSubgraph(subgraphNode);
     await checkForSubgraph(subgraphNode);
     await enterSubgraph(subgraphNode);
+    await waitForSubgraph(page,'Test node #2');
 
     // check if a new node was added to new subgraph
     await verifyNodeCount(page,0);
@@ -383,6 +414,7 @@ test("test add subgraph, with sub-node", async ({ page }) => {
     await contextMenuOption.click();
 
     await leaveSubgraph(page);
+    await waitForSubgraph(page,'Example of a graph with graph nodes');
 
     // Check if the newly exposed interface is present.
     expect(await exposedInterfaces.count()).toBe(2);
@@ -397,13 +429,17 @@ test("test remove node with exposed interface", async ({ page }) => {
     const exposedInterfaces = await verifyInterfaceCount(countOfInitiallyExposedInterface, subgraphNode);
 
     await enterSubgraph(subgraphNode);
+    await waitForSubgraph(page,'Test subgraph #1');
 
     // check if a node has been removed from subgraph
     await verifyNodeCount(page,2);
-    await deleteNode(getNode(page, 'Test node #1').nth(1));
+    const nodeToRemove = getNode(page, 'Test node #1').nth(1);
+    await deleteNode(nodeToRemove);
+    // await page.waitForTimeout(3000);
     await verifyNodeCount(page,1);
 
     await leaveSubgraph(page);
+    await waitForSubgraph(page,'Example of a graph with graph nodes');
 
     expect(await exposedInterfaces.count()).toBe(countOfInitiallyExposedInterface-2);
 });
@@ -416,6 +452,7 @@ test("test remove node with exposed properties", async ({ page }) => {
     const exposedProperties = await verifyPropertyCount(subgraphNode, 1);
 
     await enterSubgraph(subgraphNode);
+    await waitForSubgraph(page,'Test subgraph #2');
 
     // check if a node has been removed from subgraph
     await verifyNodeCount(page,5);
@@ -423,6 +460,7 @@ test("test remove node with exposed properties", async ({ page }) => {
     await verifyNodeCount(page,4);
 
     await leaveSubgraph(page);
+    await waitForSubgraph(page,'Example of a graph with graph nodes');
 
     expect(await exposedProperties.count()).toBe(0);
 });
@@ -451,6 +489,7 @@ test("test new graph node creation", async ({ page }) => {
     // enter into a new graph node
     const subgraphNode = getNode(page, 'New Graph Node');
     await enterSubgraph(subgraphNode);
+    await waitForSubgraph(page,'New Graph Node');
 
     // add a node
     await verifyNodeCount(page,0);
@@ -467,6 +506,7 @@ test("test new graph node creation", async ({ page }) => {
     await contextMenuOption.click();
 
     await leaveSubgraph(page);
+    await waitForSubgraph(page,'Example of a graph with graph nodes');
 
     await verifyInterfaceCount(1, subgraphNode);
 });
