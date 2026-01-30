@@ -56,14 +56,16 @@
                             "value": ""
                         },
                         {
-                            "name": "test-interface-1 input count",
+                            "name": "test-interface-1 input",
                             "id": "6c15d8dd-1a1e-421c-b2a5-357dbb791c14",
-                            "value": 1
+                            "value": 1,
+                            "dynamicCounter": true
                         },
                         {
-                            "name": "test-interface-2 output count",
+                            "name": "test-interface-2 output",
                             "id": "2f2ef448-df36-44ab-90ae-44567d10c42a",
-                            "value": 3
+                            "value": 3,
+                            "dynamicCounter": true
                         }
                     ],
                     "enabledInterfaceGroups": [],
@@ -122,14 +124,16 @@
                             "value": ""
                         },
                         {
-                            "name": "test-interface-1 input count",
+                            "name": "test-interface-1 input",
                             "id": "3813b0c3-139b-425e-9b8f-a4d9ad67ceed",
-                            "value": 2
+                            "value": 2,
+                            "dynamicCounter": true
                         },
                         {
-                            "name": "test-interface-2 output count",
+                            "name": "test-interface-2 output",
                             "id": "9f953c1e-6b3d-4d3c-878a-b51aa1a58ae5",
-                            "value": 2
+                            "value": 2,
+                            "dynamicCounter": true
                         }
                     ],
                     "enabledInterfaceGroups": [],
@@ -174,14 +178,16 @@
                             "value": ""
                         },
                         {
-                            "name": "test-interface-1 input count",
+                            "name": "test-interface-1 input",
                             "id": "2559a806-c557-4b05-9b76-154a8f005afa",
-                            "value": 0
+                            "value": 0,
+                            "dynamicCounter": true
                         },
                         {
-                            "name": "test-interface-2 output count",
+                            "name": "test-interface-2 output",
                             "id": "38961a9d-9fe6-4fe9-ae55-d3fdfd045137",
-                            "value": 2
+                            "value": 2,
+                            "dynamicCounter": true
                         }
                     ],
                     "enabledInterfaceGroups": [],
