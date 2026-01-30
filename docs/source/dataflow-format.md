@@ -74,7 +74,14 @@ Each property is described by an object with three attributes:
 * `name` - name of the property
 * `value` - actual value of the property.
 
-Node having two parameters: `example_text` of value `example_value` and `example_number` of value `123` would have the following `options` value:
+Additionally, these optional attributes may be used to control specific types of properties:
+
+* `externalName` - name of the property displayed in the editor.
+  Used only for properties exposed from nested graphs.
+* `dynamicCounter` - boolean value indicating that the property controls dynamic interfaces.
+  If set to true, the property can be used to increase or decrease the number of dynamic interfaces with the same name.
+
+Two node properties: `example_text` of value `example_value` and `example_number` of value `123` would be defined as such:
 
 ```json
 [
@@ -93,13 +100,16 @@ Node having two parameters: `example_text` of value `example_value` and `example
 
 ##### Interface
 
-Each input, output, and inout is described by an object with the following attributes:
+Each input, output, and inout is described by an object with at least three attributes:
 
-* `id` - unique value assigned to the property.
+* `id` - unique value assigned to the interface.
   It is used to describe connections in the dataflow.
 * `name` - name of the interface
-* `direction` - value determining the type of the interfaces.
+* `direction` - value determining the type of the interface.
   Can be either `input`, `output`, or `inout`.
+
+Additionally, these optional attributes may be used:
+
 * `side` - tells on which side of the node the interface should be placed.
 * `sidePosition` - specifies a row on which the interface is rendered.
   Values for interfaces of the same `side` value have to be unique.
