@@ -61,7 +61,7 @@ async function renameNodeType(page: Page, oldName: string, newName: string) {
     const node = page.getByText(oldName).last();
     await node.click({ button: 'right', force: true });
     await node.locator('..').getByText('Configure').click();
-    await page.getByRole('textbox').first().fill(newName);
+    await page.locator('.create-menu').getByTitle('Node name').first().fill(newName);
     await page.getByRole('button', { name: 'Configure' }).click();
 }
 
