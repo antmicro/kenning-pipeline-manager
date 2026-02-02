@@ -11,7 +11,7 @@
             class="drop-zone"
             @dragover.prevent="isDragging = true"
             @dragleave="isDragging = false"
-            @drop.prevent="handleDrop"
+            @drop.prevent="isDragging = false"
             :class="{ dragging: isDragging }"
         >
             <svg class="drop-icon" width="40" height="40" viewBox="0 0 24 24" fill="none">
@@ -121,7 +121,7 @@ export default defineComponent({
     props: {
         loadFiles: { type: Function, required: true },
     },
-    setup(props) {
+    setup() {
         const isDragging = ref(false);
         const specificationLoaded = computed(
             () => EditorManager.getEditorManagerInstance().specificationLoaded.value,
@@ -131,19 +131,11 @@ export default defineComponent({
             () => process.env.VUE_APP_WELCOME_MESSAGE,
         );
 
-        const handleDrop = ({ dataTransfer: { files } }) => {
-            isDragging.value = false;
-            if (files.length) {
-                props.loadFiles(files);
-            }
-        };
-
         return {
             isDragging,
             specificationLoaded,
             welcomeMessage,
             links: LINKS,
-            handleDrop,
         };
     },
 });
