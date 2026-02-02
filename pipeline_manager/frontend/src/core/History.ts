@@ -298,16 +298,18 @@ export function useHistory(graph: Ref<any>, commandHandler: ICommandHandler): IH
                 const historyItem = history.get(oldId);
                 if (historyItem) history.set(currentId, historyItem);
             }
+
+            const newId = newGraph.id;
             newGraph.events.addNode.subscribe(token, (node : any) => {
                 // Suppressing node that are being created as its hard
                 // to keep the history trace consistent
                 if (configurationState.nodeData?.name === node.type) return;
 
                 if (!suppressingHistory.value) {
-                    const historyItem = history.get(newGraph.id);
+                    const historyItem = history.get(newId);
                     if (!historyItem) return;
                     historyItem.push(new NodeStep('add', node.id.toString(), transactionId.value));
-                    undoneHistory.set(newGraph.id, []);
+                    undoneHistory.set(newId, []);
                 }
             });
             newGraph.events.removeNode.subscribe(token, (node : any) => {
@@ -316,39 +318,39 @@ export function useHistory(graph: Ref<any>, commandHandler: ICommandHandler): IH
                     // to keep the history trace consistent
                     if (configurationState.nodeData?.name === node.type) return;
 
-                    const historyItem = history.get(newGraph.id);
+                    const historyItem = history.get(newId);
                     if (!historyItem) return;
                     const step = new NodeStep('rem', node.id.toString(), transactionId.value);
                     historyItem.push(step);
                     step.nodeTuple = [node, node.save()];
-                    undoneHistory.set(newGraph.id, []);
+                    undoneHistory.set(newId, []);
                 }
             });
             newGraph.events.editNode.subscribe(token, (node : any) => {
                 if (!suppressingHistory.value) {
-                    const historyItem = history.get(newGraph.id);
+                    const historyItem = history.get(newId);
                     if (!historyItem) return;
                     const step = new NodeStep('edit', node.id.toString(), transactionId.value);
                     historyItem.push(step);
                     step.nodeTuple = [node, node.save()];
-                    undoneHistory.set(newGraph.id, []);
+                    undoneHistory.set(newId, []);
                 }
             });
             newGraph.events.addConnection.subscribe(token, (conn : any) => {
                 if (!suppressingHistory.value) {
-                    const historyItem = history.get(newGraph.id);
+                    const historyItem = history.get(newId);
                     if (!historyItem) return;
                     const step = new ConnectionStep('add', conn.id.toString(), transactionId.value);
                     historyItem.push(step);
                     step.conn = conn;
-                    undoneHistory.set(newGraph.id, []);
+                    undoneHistory.set(newId, []);
                 }
             });
             newGraph.events.removeConnection.subscribe(token, (conn : any) => {
                 if (!suppressingHistory.value) {
                     const inTransaction = transactionId.value !== '';
                     if (!inTransaction) startTransaction();
-                    const historyItem = history.get(newGraph.id);
+                    const historyItem = history.get(newId);
                     if (!historyItem) return;
                     (conn.anchors ?? []).slice().reverse().forEach((anchor: any) => {
                         newGraph.events.removeAnchor.emit([conn, conn.anchors.indexOf(anchor)]);
@@ -356,25 +358,25 @@ export function useHistory(graph: Ref<any>, commandHandler: ICommandHandler): IH
                     const step = new ConnectionStep('rem', conn.id.toString(), transactionId.value);
                     historyItem.push(step);
                     step.conn = conn;
-                    undoneHistory.set(newGraph.id, []);
+                    undoneHistory.set(newId, []);
                     if (!inTransaction) commitTransaction();
                 }
             });
             newGraph.events.addAnchor.subscribe(token, (tuple: any) => {
                 if (!suppressingHistory.value) {
-                    const historyItem = history.get(newGraph.id);
+                    const historyItem = history.get(newId);
                     if (!historyItem) return;
                     const idx = Math.trunc((tuple[1] - 1) / 3);
                     const conn = tuple[0];
                     const step = new AnchorStep('add', conn.anchors[idx].id.toString(), transactionId.value);
                     historyItem.push(step);
                     step.anchor = [conn, conn.anchors[idx], idx];
-                    undoneHistory.set(newGraph.id, []);
+                    undoneHistory.set(newId, []);
                 }
             });
             newGraph.events.editAnchor.subscribe(token, (tuple: any) => {
                 if (!suppressingHistory.value) {
-                    const historyItem = history.get(newGraph.id);
+                    const historyItem = history.get(newId);
                     if (!historyItem) return;
                     const idx = Math.trunc((tuple[1] - 1) / 3);
                     const conn = tuple[0];
@@ -383,24 +385,24 @@ export function useHistory(graph: Ref<any>, commandHandler: ICommandHandler): IH
                     historyItem.push(step);
                     step.anchor = [conn, conn.anchors[idx], idx];
                     step.prevPosition = prevPos;
-                    undoneHistory.set(newGraph.id, []);
+                    undoneHistory.set(newId, []);
                 }
             });
             newGraph.events.removeAnchor.subscribe(token, (tuple: any) => {
                 if (!suppressingHistory.value) {
-                    const historyItem = history.get(newGraph.id);
+                    const historyItem = history.get(newId);
                     if (!historyItem) return;
                     const idx = tuple[1];
                     const conn = tuple[0];
                     const step = new AnchorStep('rem', conn.anchors[idx].id.toString(), transactionId.value);
                     historyItem.push(step);
                     step.anchor = [conn, conn.anchors[idx], idx];
-                    undoneHistory.set(newGraph.id, []);
+                    undoneHistory.set(newId, []);
                 }
             });
             newGraph.events.exposeInterface.subscribe(token, (tuple: any) => {
                 if (!suppressingHistory.value) {
-                    const historyItem = history.get(newGraph.id);
+                    const historyItem = history.get(newId);
                     if (!historyItem) return;
                     const intf = tuple[0];
                     const editor = tuple[1];
@@ -410,12 +412,12 @@ export function useHistory(graph: Ref<any>, commandHandler: ICommandHandler): IH
                     step.editor = editor;
                     step.exposed = true;
                     historyItem.push(step);
-                    undoneHistory.set(newGraph.id, []);
+                    undoneHistory.set(newId, []);
                 }
             });
             newGraph.events.privatizeInterface.subscribe(token, (tuple: any) => {
                 if (!suppressingHistory.value) {
-                    const historyItem = history.get(newGraph.id);
+                    const historyItem = history.get(newId);
                     if (!historyItem) return;
                     const intf = tuple[0];
                     const editor = tuple[1];
@@ -425,7 +427,7 @@ export function useHistory(graph: Ref<any>, commandHandler: ICommandHandler): IH
                     step.editor = editor;
                     step.exposed = false;
                     historyItem.push(step);
-                    undoneHistory.set(newGraph.id, []);
+                    undoneHistory.set(newId, []);
                 }
             });
         }
