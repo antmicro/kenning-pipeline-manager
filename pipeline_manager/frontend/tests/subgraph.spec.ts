@@ -1,11 +1,16 @@
 import { test, expect, Page, Locator } from '@playwright/test';
 import { getPathToJsonFile, getUrl, openFileChooser, enableEditingNodes, enableNavigationBar, addNode } from './config.js';
 
+import os from 'os';
+import fs from 'fs';
 import YAML from 'yaml';
+import path from 'path';
 
 const countOfInitiallyExposedInterface = 3;
 
 const countOfInitiallyExposedProperties = 1;
+
+const temporaryDir = os.tmpdir() + '/';
 
 function getNode(page: Page, nodeName: string) {
     return page.locator(`.baklava-node[data-node-type="${nodeName}"]`);
@@ -33,6 +38,12 @@ async function getYAML(page: Page, node: Locator) {
     const textarea = page.locator('textarea');
     const content = YAML.parse(await textarea.evaluate((el) => el.value));
     return content;
+}
+async function setYAML(page: Page, content: string, node: Locator) {
+    await node.locator('.__title').dblclick();
+
+    const textarea = page.locator('textarea');
+    await textarea.fill(YAML.stringify(content));
 }
 
 async function enterSubgraph(node: Locator) {
@@ -482,4 +493,59 @@ test('test changing node properties from upper level', async ({ page }) => {
     await page.locator('.baklava-checkbox').getByText('Sample option').click();
     await page.getByRole('button', { name: 'Remove properties' }).click();
     await verifyPropertyCount(subgraphNode, 0);
+});
+async function saveSpecificationAs(page: Page, filenameWithoutExtension: string): Promise<string> {
+    const logo = page.locator('.logo');
+    await logo.hover();
+    const saveAsMenuOption = page.getByRole('button', { name: 'Save specification as...' });
+    await saveAsMenuOption.click();
+
+    await page.getByPlaceholder('File name').first().fill(filenameWithoutExtension);
+    const saveAsButton = page.getByRole('button', { name: 'Save' });
+
+    const downloadPromise = page.waitForEvent('download');
+    await saveAsButton.click();
+    const download = await downloadPromise;
+
+    const downloadedFilePath = temporaryDir + download.suggestedFilename();
+    await download.saveAs(downloadedFilePath);
+
+    return downloadedFilePath;
+}
+test('test inherited subgraph from specification', async ({ page }) => {
+    await prepareSubgraphPage(page);
+
+    const parentIntfs = await getNode(page, 'Test subgraph #2').locator('.__interfaces').locator('[id]').count();
+    const parentProps = await getNode(page, 'Test subgraph #2').locator('.__properties').locator('[id]').count();
+
+    const specificationPath = getPathToJsonFile('sample-subgraph-specification.json');
+    const raw = fs.readFileSync(specificationPath, 'utf-8');
+    const json = JSON.parse(raw);
+    json.nodes.push({
+        name: 'InheritedSubgraph',
+        category: 'Test',
+        properties: [
+            {
+                name: 'Message',
+                type: 'text',
+                default: 'this is my prop!',
+            },
+        ],
+        extends: ['Test subgraph #2'],
+    });
+    const outputPath = path.join(temporaryDir, 'modified-specification.json');
+    fs.writeFileSync(outputPath, JSON.stringify(json, null, 2), 'utf-8');
+
+    // load the specification with inherited subgraph
+    const fileChooserSpec = await openFileChooser(page, 'specification');
+    await fileChooserSpec.setFiles(outputPath);
+    await enableEditingNodes(page);
+    await addNode(page, 'Test', 'InheritedSubgraph', 400, 160);
+    const nodeAfterLoad = getNode(page, 'InheritedSubgraph');
+    await page.waitForTimeout(3000);
+    // expect number of interfaces that subgraph #1 has
+    expect(await nodeAfterLoad.locator('.__interfaces').locator('[id]').count()).toBe(parentIntfs);
+    expect(await nodeAfterLoad.locator('.__properties').locator('[id]').count()).toBe(parentProps + 1);
+    await enterSubgraph(getNode(page, 'InheritedSubgraph'));
+    await verifyNodeCount(page, 5);
 });
