@@ -41,7 +41,11 @@ def create_socketio() -> socketio.AsyncServer:
     socketio.AsyncServer
         Returns a socketio instance
     """
-    sio = socketio.AsyncServer(async_mode="asgi", cors_allowed_origins="*")
+    sio = socketio.AsyncServer(
+        async_mode="asgi",
+        cors_allowed_origins="*",
+        max_http_buffer_size=10 * 1024 * 1024,
+    )
     CHUNKS = []
 
     def reject_old_sessions_requests(
