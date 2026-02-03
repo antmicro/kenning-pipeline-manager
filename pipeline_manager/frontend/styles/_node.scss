@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Antmicro <www.antmicro.com>
+ * Copyright (c) 2022-2026 Antmicro <www.antmicro.com>
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -31,6 +31,40 @@
     & > .__content > div > div {
         margin: 0;
     }
+
+    &.--minimal {
+        min-width: 30px !important;
+        min-height: 4em;
+        width: auto;
+        position: relative;
+
+        & > .__title {
+            position: absolute;
+            top: 0;
+            left: 5%;
+            width: 90%;
+
+            background-color: transparent;
+
+            height: 2em;
+            padding: 0 1em;
+            margin: 0;
+
+            z-index: 10;
+            pointer-events: auto;
+
+            > :not(.__title-label, .__title-icon) {
+                background-color: #{$gray-600}E6;
+            }
+
+            > .__title-label,
+            > .__title-icon {
+                display: none;
+            }
+        }
+    }
+
+
 
     & > .__title {
         height: 4em;
