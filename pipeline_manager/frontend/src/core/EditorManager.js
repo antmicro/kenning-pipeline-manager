@@ -1865,6 +1865,13 @@ export default class EditorManager {
     }
 
     /**
+     * Clears history for every graph.
+     */
+    clearHistory() {
+        this.baklavaView.history.clearHistory();
+    }
+
+    /**
      * Serializes and returns current dataflow in Pipeline Manager format.
      *
      * @param {Object} obj Parameters.

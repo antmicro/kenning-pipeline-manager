@@ -462,6 +462,7 @@ export default defineComponent({
                 const messages = Array.isArray(error) ? error : [error];
                 NotificationHandler.terminalLog('error', 'Validation failed', messages);
             }
+            editorManager.clearHistory();
         };
 
         /**

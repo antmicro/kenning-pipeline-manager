@@ -152,6 +152,7 @@ function commitTypeToSpecification() {
         return;
     }
     suppressHistoryLogging(false);
+    editorManager.clearHistory();
 }
 
 /**
@@ -251,6 +252,8 @@ export function modifyConfiguration(): string[] {
 
     commitTypeToSpecification();
     suppressHistoryLogging(false);
+    const editorManager = EditorManager.getEditorManagerInstance();
+    editorManager.clearHistory();
     return [];
 }
 

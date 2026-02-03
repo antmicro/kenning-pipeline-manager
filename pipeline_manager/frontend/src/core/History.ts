@@ -268,6 +268,10 @@ export function useHistory(graph: Ref<any>, commandHandler: ICommandHandler): IH
     let currentId = 'ThisShouldNotAppearInHistoryMaps';
     let oldId = 'ThisShouldNotAppearInHistoryMaps';
 
+    const clearHistory = () => {
+        history.forEach((arr, key) => arr.splice(0, arr.length));
+        undoneHistory.forEach((arr, key) => arr.splice(0, arr.length));
+    };
     const unsubscribeFromGraphEvents = (g: any, tok : symbol) => {
         g.events.addNode.unsubscribe(tok);
         g.events.removeNode.unsubscribe(tok);
@@ -484,5 +488,6 @@ export function useHistory(graph: Ref<any>, commandHandler: ICommandHandler): IH
         max_steps: maxSteps,
         graphSwitch,
         unsubscribeFromGraphEvents,
+        clearHistory,
     });
 }
