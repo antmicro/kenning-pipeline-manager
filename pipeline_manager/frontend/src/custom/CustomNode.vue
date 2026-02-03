@@ -603,6 +603,8 @@ const canOpenContextMenu = computed(() =>
         || contextMenuTitleItems.value.length > 0,
 );
 
+const nodeMinimal = computed(() => viewModel.value.editor.getNodeMinimal(node.value.type));
+
 const showContextMenuInterface = ref(false);
 const showContextMenuProperty = ref(false);
 
@@ -645,13 +647,14 @@ const classes = computed(() => ({
     '--two-column': !!props.node.twoColumn,
     '--greyed-out': props.greyedOut,
     '--hidden': props.hidden,
+    '--minimal': nodeMinimal.value,
     __readonly: viewModel.value.editor.readonly,
 }));
 
 const styles = computed(() => ({
     top: `${props.node.position?.y ?? 0}px`,
     left: `${props.node.position?.x ?? 0}px`,
-    width: `${props.node.width ?? 300}px`,
+    width: `${props.node.width ?? (nodeMinimal.value) ? 30 : 300}px`,
 }));
 
 const nodeTitle = computed(() => {
