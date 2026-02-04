@@ -18,6 +18,7 @@ import EditedNode from './EditedNode.vue';
 import ExclamationMark from './ExclamationMark.vue';
 import Expand from './Expand.vue';
 import Hide from './Hide.vue';
+import Visible from './Visible.vue';
 import Import from './Import.vue';
 import Indicator from './Indicator.vue';
 import Logo from './Logo.vue';
@@ -50,6 +51,7 @@ export default {
     ExclamationMark,
     Expand,
     Hide,
+    Visible,
     Import,
     Indicator,
     Logo,
