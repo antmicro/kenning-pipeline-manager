@@ -119,14 +119,14 @@ SPDX-License-Identifier: Apache-2.0
                             sidebar=true
                             class="__property-interface"
                         />
-
-                        <component
+                        <div
                             v-if="unhide !== undefined"
                             class="__property-button"
-                            :is="unhide.component"
-                            :intf="unhide"
                             tabindex="-1"
-                        />
+                            @click="unhide()"
+                        >
+                            <Visible />
+                        </div>
                     </div>
                 </div>
             </div>
@@ -179,6 +179,7 @@ import { CheckboxInterface, ButtonInterface } from '@baklavajs/renderer-vue'; //
 import showdown from 'showdown';
 import CustomInterface from './CustomInterface.vue';
 import Cross from '../icons/Cross.vue';
+import Visible from '../icons/Visible.vue';
 import Tooltip from '../components/Tooltip.vue';
 import EditorManager from '../core/EditorManager';
 
@@ -189,6 +190,7 @@ import NodeSpecificationEditor from '../components/NodeSpecificationEditor.vue';
 export default defineComponent({
     components: {
         Cross,
+        Visible,
         CustomInterface,
         CheckboxInterface,
         NodeSpecificationEditor,
@@ -336,9 +338,8 @@ export default defineComponent({
                     intf.groupProperty) return [intf, undefined];
 
                 // eslint-disable-next-line no-param-reassign
-                const button = new ButtonInterface('Unhide', () => { intf.hidden = false; });
-                button.componentName = 'ButtonInterface';
-                return [intf, button];
+                const onHide = () => { intf.hidden = false; };
+                return [intf, onHide];
             }));
 
         // Hidden components are not initialized by the node, so initialize them here
