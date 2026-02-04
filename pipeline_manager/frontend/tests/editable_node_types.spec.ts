@@ -228,6 +228,24 @@ test('add interface to category node', async ({ page }) => {
     await assertInputCount(page, 'Logical AND', 6);
 });
 
+test('hiding property', async ({ page }) => {
+    await page.goto(getUrl());
+    await loadIncludeSpecification(page);
+
+    await addNode(page, 'Generators', 'GaussianKernel', 750, 80, true);
+    const node = page.locator('[data-node-type="GaussianKernel"]').first();
+    const nodePropertiesBefore = node.locator('.__content > .__properties > div');
+
+    expect(await nodePropertiesBefore.count()).toBe(3);
+    const sigmaProp = page.getByText('sigma').first();
+    await sigmaProp.click({ button: 'right' });
+    await node.locator('.baklava-context-menu').getByText('Hide').click();
+    expect(await nodePropertiesBefore.count()).toBe(2);
+    const nodeTitle = node.locator('.__title');
+    await nodeTitle.dblclick();
+    await page.locator('.baklava-sidebar').locator('.__property-button').click();
+    expect(await nodePropertiesBefore.count()).toBe(3);
+});
 
 async function getYAMLEditorContent(page: Page) {
     const textarea = page.locator('textarea');
