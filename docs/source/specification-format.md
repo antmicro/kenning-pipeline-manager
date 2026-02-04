@@ -158,6 +158,7 @@ Node style defines how nodes of a given style should look like. Currently, the f
 * `color` - color of the node unless a node sets its own `color`,
 * `icon` - secondary icon of the node, which is displayed separately from [Node](#node) `icon`,
 * `pill` - pill of the node unless a node sets its own `pill`.
+* `minimal` - flag informing whether to use special minimized style for the node. Note that icon and title card won't be visible when this is enabled.
 
 Field values are defined the same way as in [Node](#node) specification, however, `icon` can obtain [Navbar item](#navbar-item) `iconName` values as well.
 
@@ -203,6 +204,12 @@ For example, given:
             "color": null,
             "pill": {
                 "text": "misc"
+            }
+        }
+        "constant": {
+            "minimal": true,
+            "pill": {
+                "text": "const"
             }
         }
     }
