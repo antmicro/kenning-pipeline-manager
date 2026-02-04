@@ -462,7 +462,9 @@ export default defineComponent({
                 const messages = Array.isArray(error) ? error : [error];
                 NotificationHandler.terminalLog('error', 'Validation failed', messages);
             }
-            editorManager.clearHistory();
+            editorManager.clearHistory(() => {
+                NotificationHandler.terminalLog('warning', 'Can\'t undo changes after modifying specification', 'History unavailable after changing specification');
+            });
         };
 
         /**

@@ -152,7 +152,9 @@ function commitTypeToSpecification() {
         return;
     }
     suppressHistoryLogging(false);
-    editorManager.clearHistory();
+    editorManager.clearHistory(() => {
+        NotificationHandler.terminalLog('warning', 'Can\'t undo changes after modifying specification', 'History unavailable after changing specification');
+    });
 }
 
 /**
@@ -253,7 +255,9 @@ export function modifyConfiguration(): string[] {
     commitTypeToSpecification();
     suppressHistoryLogging(false);
     const editorManager = EditorManager.getEditorManagerInstance();
-    editorManager.clearHistory();
+    editorManager.clearHistory(() => {
+        NotificationHandler.terminalLog('warning', 'Can\'t undo changes after modifying specification', 'History unavailable after changing specification');
+    });
     return [];
 }
 

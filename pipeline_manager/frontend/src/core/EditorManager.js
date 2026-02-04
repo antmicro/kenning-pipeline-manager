@@ -1867,8 +1867,8 @@ export default class EditorManager {
     /**
      * Clears history for every graph.
      */
-    clearHistory() {
-        this.baklavaView.history.clearHistory();
+    clearHistory(callback = () => undefined) {
+        this.baklavaView.history.clearHistory(callback);
     }
 
     /**

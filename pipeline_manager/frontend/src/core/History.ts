@@ -16,8 +16,6 @@ import {
     ICommandHandler, ICommand,
 } from '@baklavajs/renderer-vue';
 
-import NotificationHandler from './notifications';
-
 export const suppressingHistory: Ref<boolean> = ref(false);
 const transactionId: Ref<string> = ref('');
 
@@ -270,11 +268,13 @@ export function useHistory(graph: Ref<any>, commandHandler: ICommandHandler): IH
     let currentId = 'ThisShouldNotAppearInHistoryMaps';
     let oldId = 'ThisShouldNotAppearInHistoryMaps';
     let justCleared = false;
+    let warningCallback: () => void;
 
-    const clearHistory = () => {
+    const clearHistory = (callback = () => undefined) => {
         history.forEach((arr, key) => arr.splice(0, arr.length));
         undoneHistory.forEach((arr, key) => arr.splice(0, arr.length));
         justCleared = true;
+        warningCallback = callback;
     };
     const unsubscribeFromGraphEvents = (g: any, tok : symbol) => {
         g.events.addNode.unsubscribe(tok);
@@ -465,7 +465,9 @@ export function useHistory(graph: Ref<any>, commandHandler: ICommandHandler): IH
             }
             if (historyItem && historyItem.length === 0 && justCleared) {
                 justCleared = false;
-                NotificationHandler.showToast('warning', 'Undoing after changing specification is not possible.');
+                if (warningCallback) {
+                    warningCallback();
+                }
             }
         },
     });
@@ -480,7 +482,9 @@ export function useHistory(graph: Ref<any>, commandHandler: ICommandHandler): IH
             }
             if (undoneItem?.length === 0 && justCleared) {
                 justCleared = false;
-                NotificationHandler.showToast('warning', 'Redoing after changing specification is not possible.');
+                if (warningCallback) {
+                    warningCallback();
+                }
             }
         },
     });
