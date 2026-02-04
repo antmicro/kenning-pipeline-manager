@@ -64,6 +64,9 @@
                                 "dynamicCounter": {
                                     "description": "Indicates that the property controls the number of dynamic interfaces",
                                     "type": ["boolean", "null"]
+                                },
+                                "hidden": {
+                                    "$ref": "#/$defs/hidden"
                                 }
                             },
                             "required": [
@@ -270,6 +273,11 @@
                 "y"
             ],
             "additionalProperties": false
+        },
+        "hidden": {
+            "description": "Determines whether the property should be rendered in the node",
+            "type": "boolean",
+            "default": false
         }
     },
     "required": [

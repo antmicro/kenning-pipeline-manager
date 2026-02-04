@@ -267,7 +267,11 @@ export function createProperties(properties) {
                 return groupedProperty;
             });
             Object.entries(p.group).forEach(([pgroupname, pgroup]) => {
-                tempProperties[pgroupname] = () => newProperty(pgroup);
+                tempProperties[pgroupname] = () => {
+                    const groupedProperty = newProperty(pgroup);
+                    groupedProperty.groupProperty = tempProperties[pname];
+                    return groupedProperty;
+                };
             });
         } else {
             tempProperties[pname] = () => newProperty(p);
@@ -792,6 +796,7 @@ export class CustomNode extends Node {
                     id: ioState.id,
                     value: ioState.value === undefined ? null : ioState.value,
                     dynamicCounter: ioState.dynamicCounter,
+                    hidden: ioState.hidden,
                 });
             }
         });
@@ -1022,13 +1027,14 @@ export class CustomNode extends Node {
                 this.outputs[ioName].externalName = ioState.externalName;
                 this.outputs[ioName].direction = ioState.direction;
                 occupied[ioState.side].push(ioState.sidePosition);
-            } else {
+            } else if (ioState.direction === undefined) {
                 if (!(ioName in this.inputs)) {
-                    const baklavaIntf = new InputInterface(ioName);
+                    const baklavaIntf = new NodeInterface(ioName);
                     Object.assign(baklavaIntf, ioState);
-                    this.addInput(ioName, baklavaIntf);
+                    this.addOutput(ioName, baklavaIntf);
                 }
                 this.inputs[ioName].externalName = ioState.externalName;
+                if (ioState.hidden !== undefined) this.inputs[ioName].hidden = ioState.hidden;
             }
         });
 
