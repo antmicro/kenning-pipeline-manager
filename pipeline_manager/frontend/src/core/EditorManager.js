@@ -1926,7 +1926,11 @@ export default class EditorManager {
             .flatMap((graph) => graph.nodes ?? [])
             .flatMap((node) => node.properties
                 .map((prop) => [prop, nodeToProps[EditorManager.getNodeName(node)][prop.name]]))
-            .filter(([savedProp, specProp]) => savedProp.hidden === Boolean(specProp.hidden))
+            .filter(([savedProp, specProp]) => savedProp !== undefined && specProp !== undefined)
+            .filter(([savedProp, specProp]) =>
+                savedProp?.hidden !== undefined &&
+                specProp?.hidden !== undefined &&
+                savedProp.hidden === Boolean(specProp.hidden))
             .forEach(([savedProp, _]) => { delete savedProp.hidden; });
 
         if (save.metadata === undefined) {
