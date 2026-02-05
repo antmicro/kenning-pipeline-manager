@@ -18,6 +18,7 @@ from moving or deleting the nodes.
         :id="node.id"
         ref="nodeRef"
         class="baklava-node"
+        :data-node-id="node.id"
         :class="classes"
         :style="styles"
         :data-node-type="node.type"
