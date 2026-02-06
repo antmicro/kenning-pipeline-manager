@@ -286,6 +286,7 @@ export default defineComponent({
     transition: transform 1s;
     display: flex;
     flex-direction: column;
+    max-height: calc(100% - $navbar-height);
 }
 
 .container {
