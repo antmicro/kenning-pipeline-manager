@@ -31,6 +31,13 @@ async function expectNode(exists: boolean, page: Page, nodeId: string, errorMess
 function getNode(page: Page, name: string): Locator {
     return page.locator(`.baklava-node[data-node-type="${name}"]`);
 }
+async function renameNodeType(page: Page, oldName: string, newName: string) {
+    const node = getNode(page, oldName).locator('.__title');
+    await node.click({ button: 'right' });
+    await node.getByText('Rename').click();
+    await node.locator('.baklava-input').first().fill(newName);
+    await node.locator('.baklava-input').first().press('Enter');
+}
 
 function getNodeInterfaces(page: Page, name: string, side: 'input' | 'output' | 'any' = 'any'): Locator {
     const ioClass = {
@@ -102,7 +109,7 @@ test('test history by adding node', async ({ page }) => {
 
 // Undo & redo action triggered by Ctrl+Z and Ctrl+Y respectively,
 // do not undo and redo the move operation of a node.
-test.fixme('test history by moving node', async ({ page }) => {
+test('test history by moving node', async ({ page }) => {
     // Load a website and wait until nodes are loaded.
     await loadWebsite(page, loadVideoNodeId);
 
@@ -439,4 +446,31 @@ test('test history by editing node with connection', async ({ page }) => {
     await expect(connections, {
         message: 'Redo of node edit should restore its connections but it did not.',
     }).toHaveCount(6);
+});
+test('test history by renaming a node', async ({ page }) => {
+    await loadWebsite(page, loadVideoNodeId);
+    const movieLocator = page.locator('.__title-label').getByText('LoadMovie');
+    const videoLocator = page.locator('.__title-label').getByText('LoadVideo');
+
+    await expect(videoLocator).toBeVisible();
+    await renameNodeType(page, 'LoadVideo', 'LoadMovie');
+    await expect(movieLocator).toBeVisible();
+    await page.keyboard.press('Control+KeyZ');
+    await expect(videoLocator).toBeVisible();
+    await page.keyboard.press('Control+KeyY');
+    await expect(movieLocator).toBeVisible();
+});
+test('test history by changing property value', async ({ page }) => {
+    await loadWebsite(page, loadVideoNodeId);
+    const gaussian = getNode(page, 'GaussianKernel');
+    const sizeSection = gaussian.locator('.baklava-num-input').getByText('size').locator('..');
+    const sizeVal = await sizeSection.locator('.__value').first();
+    expect(await sizeVal.innerText()).toBe('5');
+    await sizeSection.locator('..').locator('.--dec').click();
+    await page.mouse.click(200, 200);
+    expect(await sizeVal.innerText()).toBe('4');
+    await page.keyboard.press('Control+KeyZ');
+    expect(await sizeVal.innerText()).toBe('5');
+    await page.keyboard.press('Control+KeyY');
+    expect(await sizeVal.innerText()).toBe('4');
 });
