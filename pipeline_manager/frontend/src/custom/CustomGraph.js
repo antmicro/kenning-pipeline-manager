@@ -538,6 +538,7 @@ export default function createPipelineManagerGraph(graph) {
             id: this.id,
             name: this.name !== '' ? this.name : undefined,
             nodes: this.nodes.map((n) => n.save()),
+            groups: this.groups,
             connections: this.connections.map((c) => ({
                 id: c.id,
                 from: c.from.id,
