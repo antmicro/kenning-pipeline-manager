@@ -55,8 +55,9 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
             >
                 <RectangleGrouping
                     v-for="group in visibleGroups"
-                    :key="group.name"
-                    :name="group.name"
+                    :key="group.id"
+                    :model-value="group.name"
+                    @update:modelValue="(name) => updateGroupName(group.id, name)"
                     :min="group.min"
                     :max="group.max"
                     :color="group.color"
@@ -539,6 +540,14 @@ export default defineComponent({
         const visibleNodes = computed(() =>
             nodes.value.filter((n) => !ignoredNodesTypes.value.has(n.layer)),
         );
+        const updateGroupName = (groupId, newName) => {
+            if (!readonly.value) {
+                const realGroup = graph.value.groups.find((g) => g.id === groupId);
+                if (!realGroup) return;
+
+                realGroup.name = newName;
+            }
+        };
 
         function computeGroupBoundsFromDOM(nodesInGroup) {
             if (!nodesInGroup?.length) {
@@ -593,6 +602,7 @@ export default defineComponent({
                 () =>
                     groups.value.map((g) => ({
                         id: g.id,
+                        name: g.name,
                         nodes: g.nodes.slice(),
                     })),
             ],
@@ -1103,6 +1113,7 @@ export default defineComponent({
             visibleConnections,
             visibleNodes,
             visibleGroups,
+            updateGroupName,
             ignoredNodes,
             highlightInterfaces,
             editorStyle,

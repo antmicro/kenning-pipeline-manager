@@ -13,30 +13,73 @@ SPDX-License-Identifier: Apache-2.0
             class="rectangle-grouping"
             :style="innerStyles"
         />
+
         <div
-            v-if="name"
+            v-if="!isEditing && modelValue"
             class="rectangle-grouping-name"
+            @dblclick.stop="startEditing"
         >
-            {{ name }}
+            {{ modelValue }}
         </div>
+
+        <input
+            v-else-if="isEditing"
+            ref="inputRef"
+            class="rectangle-grouping-name-input"
+            :value="localName"
+            @input="localName = $event.target.value"
+            @blur="commit"
+            @keydown.enter.prevent="commit"
+            @keydown.esc.prevent="cancel"
+        />
     </div>
 </template>
 
 <script>
-import { computed, defineComponent } from 'vue';
+import {
+    computed, defineComponent, ref, nextTick, watch,
+} from 'vue';
 
 export default defineComponent({
     name: 'RectangleGrouping',
 
     props: {
-        name: { type: String, default: '' },
-        min: { type: Object, required: true }, // { x, y }
-        max: { type: Object, required: true }, // { x, y }
+        modelValue: { type: String, default: '' },
+        min: { type: Object, required: true },
+        max: { type: Object, required: true },
         visible: { type: Boolean, default: true },
         color: { type: String, default: '#00aaff' },
     },
 
-    setup(props) {
+    emits: ['update:modelValue'],
+
+    setup(props, { emit }) {
+        const isEditing = ref(false);
+        const localName = ref(props.modelValue);
+        const inputRef = ref(null);
+
+        watch(
+            () => props.modelValue,
+            (val) => { localName.value = val; },
+        );
+
+        const startEditing = async () => {
+            isEditing.value = true;
+            await nextTick();
+            inputRef.value?.focus();
+            inputRef.value?.select();
+        };
+
+        const commit = () => {
+            isEditing.value = false;
+            emit('update:modelValue', localName.value.trim());
+        };
+
+        const cancel = () => {
+            isEditing.value = false;
+            localName.value = props.modelValue;
+        };
+
         const width = computed(() =>
             Math.max(0, (props.max?.x ?? 0) - (props.min?.x ?? 0)),
         );
@@ -70,6 +113,12 @@ export default defineComponent({
         return {
             styles,
             innerStyles,
+            isEditing,
+            localName,
+            inputRef,
+            startEditing,
+            commit,
+            cancel,
         };
     },
 });
@@ -100,6 +149,14 @@ export default defineComponent({
     background-color: #{$gray-600};
     border-radius: 4px;
     white-space: nowrap;
-    pointer-events: none;
+    pointer-events: auto;
+    cursor: text;
+}
+
+.rectangle-grouping-name-input {
+    @extend .rectangle-grouping-name;
+    border: none;
+    outline: none;
+    background-color: #{$gray-700};
 }
 </style>
