@@ -62,6 +62,7 @@ export const menuState = reactive({
         placeNode: false,
         duplicateNode: false,
     },
+    groupMenu: false,
     propertyMenu: false,
     interfaceMenu: false,
     propertyListMenu: false,

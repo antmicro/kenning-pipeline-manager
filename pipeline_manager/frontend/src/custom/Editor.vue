@@ -159,6 +159,8 @@ import initNotificationEvents from './CustomNotifications.js';
 
 import globalProperties from '../globalProperties.ts';
 
+const RECTANGLE_GROUP_PADDING = 20;
+
 export default defineComponent({
     extends: EditorComponent,
     props: {
@@ -204,7 +206,7 @@ export default defineComponent({
 
         const highlightConnections = ref([]);
         const highlightInterfaces = ref([]);
-        const groups = computed(() => graph.value.groups);
+        const groups = computed(() => graph.value.groups ?? []);
         const visibleGroups = ref([]);
 
         const readonly = computed(() => props.viewModel.editor.readonly);
@@ -578,16 +580,24 @@ export default defineComponent({
         }
 
         watch(
-            () => nodes.value.map((n) => ({
-                id: n.id,
-                x: n.position.x,
-                y: n.position.y,
-                w: n.width,
-                h: n.height,
-                nn: n.title,
-            })),
+            [
+                () =>
+                    nodes.value.map((n) => ({
+                        id: n.id,
+                        x: n.position.x,
+                        y: n.position.y,
+                        w: n.width,
+                        h: n.height,
+                        nn: n.title,
+                    })),
+                () =>
+                    groups.value.map((g) => ({
+                        id: g.id,
+                        nodes: g.nodes.slice(),
+                    })),
+            ],
             () => {
-                visibleGroups.value = groups.value.map((group) => {
+                visibleGroups.value = groups.value.filter((g) => g.nodes?.length).map((group) => {
                     const groupNodes = graph.value.nodes.filter((node) =>
                         group.nodes.includes(node.id));
                     const { min, max } = computeGroupBoundsFromDOM(groupNodes);

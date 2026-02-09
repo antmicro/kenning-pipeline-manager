@@ -386,6 +386,10 @@ const contextMenuTitleItems = computed(() => {
             { value: 'disconnect', label: 'Disconnect', icon: icons.Disconnect },
             { value: 'delete', label: 'Delete', icon: icons.Bin },
         );
+        if (graph.value.selectedNodes.length > 1) {
+            items.at(-1).endSection = true;
+            items.push({ value: 'groupNodes', label: 'Group Nodes' });
+        }
     }
 
     // NOTE: This feature is disabled for now, as it is not fully implemented
@@ -596,6 +600,9 @@ const onContextMenuTitleClick = async (action) => {
             break;
         case 'delete-interface':
             menuState.interfaceListMenu = true;
+            break;
+        case 'groupNodes':
+            menuState.groupMenu = true;
             break;
     }
 };
