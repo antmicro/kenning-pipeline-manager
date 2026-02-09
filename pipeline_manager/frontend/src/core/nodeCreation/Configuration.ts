@@ -13,6 +13,7 @@
 import { useViewModel } from '@baklavajs/renderer-vue';
 import { NodeInterface } from '@baklavajs/core';
 import { toRaw } from 'vue';
+import { v4 as uuidv4 } from 'uuid';
 import EditorManager, { NEW_NODE_STYLE, EDITED_NODE_STYLE } from '../EditorManager.js';
 import { parseInterfaces } from '../interfaceParser.js';
 import {
@@ -171,6 +172,23 @@ export function findNodes(nodeType: string, extending = false): any[] {
 
     if (extending) return allNodes.filter((n: any) => n.extends?.includes(nodeType));
     return allNodes.filter((n: any) => n.type === nodeType);
+}
+
+/**
+  * Creates a new group based on selected nodes
+  * @param name - name of the newly created group
+  * @param color - color of the group
+*/
+export function createGroupFromSelection(name: string, color: string) {
+    const { viewModel } = useViewModel();
+    const { editor } = viewModel.value;
+    const { graph } = editor;
+    (<any>graph).groups.push({
+        id: uuidv4(),
+        color,
+        name,
+        nodes: (<any>graph).selectedNodes.map((n: any) => n.id),
+    });
 }
 
 /**

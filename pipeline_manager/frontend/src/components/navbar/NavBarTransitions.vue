@@ -12,7 +12,7 @@ Defines all kinds of transitions for navbar and related components.
 import { defineModel, defineComponent } from 'vue';
 import {
     NodeConfigurationMenu, PropertyConfigurationMenu, InterfaceConfigurationMenu,
-    ListMenu, LayerConfigurationMenu, SaveMenu, ParentMenu, ExportMenu,
+    ListMenu, LayerConfigurationMenu, SaveMenu, ParentMenu, ExportMenu, GroupConfigurationMenu,
 } from '../menu';
 import { removeInterfaces, removeProperties } from '../../core/nodeCreation/Configuration.ts';
 import { menuState, configurationState } from '../../core/nodeCreation/ConfigurationState.ts';
@@ -27,6 +27,7 @@ const saveConfiguration = defineModel('saveConfiguration');
 <script>
 export default defineComponent({
     components: {
+        GroupConfigurationMenu,
         NodeConfigurationMenu,
         PropertyConfigurationMenu,
         InterfaceConfigurationMenu,
@@ -85,6 +86,17 @@ export default defineComponent({
                 :title="'Node configuration'"
             >
                 <NodeConfigurationMenu/>
+            </ParentMenu>
+        </Panel>
+    </Transition>
+    <Transition name="fade" @mousedown.self="menuState.groupMenu = false">
+        <Panel v-show="menuState.groupMenu">
+            <ParentMenu
+                v-if="menuState.groupMenu"
+                v-model="menuState.groupMenu"
+                :title="'Create group'"
+            >
+                <GroupConfigurationMenu/>
             </ParentMenu>
         </Panel>
     </Transition>
