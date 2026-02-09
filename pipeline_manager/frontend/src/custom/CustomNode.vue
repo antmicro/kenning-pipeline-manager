@@ -386,9 +386,13 @@ const contextMenuTitleItems = computed(() => {
             { value: 'disconnect', label: 'Disconnect', icon: icons.Disconnect },
             { value: 'delete', label: 'Delete', icon: icons.Bin },
         );
+        items.at(-1).endSection = true;
         if (graph.value.selectedNodes.length > 1) {
-            items.at(-1).endSection = true;
             items.push({ value: 'groupNodes', label: 'Group Nodes' });
+        }
+        const groups = (graph.value.groups ?? []).filter((g) => g.nodes.includes(node.value.id));
+        if (groups.length > 0) {
+            items.push({ value: 'ungroupNodes', label: 'Remove from group' });
         }
     }
 
@@ -603,6 +607,14 @@ const onContextMenuTitleClick = async (action) => {
             break;
         case 'groupNodes':
             menuState.groupMenu = true;
+            break;
+        case 'ungroupNodes':
+            graph.value.groups.filter((g) => g.nodes.includes(props.node.id))
+                .forEach((g) => {
+                    const index = g.nodes.indexOf(props.node.id);
+                    g.nodes.splice(index, 1);
+                });
+            graph.value.groups = graph.value.groups.filter((g) => g.nodes.length > 1);
             break;
     }
 };
