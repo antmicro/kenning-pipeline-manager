@@ -365,6 +365,10 @@ export default class PipelineManagerEditor extends Editor {
                     result.errors.push(...this._graph.load(graphToLoad, loadAll));
                 }
             }
+            this.graphs.forEach((graph) => {
+                const g = state.graphs?.find((grph) => grph.id === graph.id);
+                graph.groups = g?.groups ?? [];
+            });
         } catch (err) {
             // If anything goes wrong during dataflow loading, the editor is cleaned and an
             // appropriate error is returned.

@@ -46,6 +46,24 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
             </slot>
 
             <div
+                class="grouping-container"
+                :style="nodeContainerStyle"
+                @wheel="mouseWheel"
+                @mouseenter="changeHoveredConnections"
+                @mousemove="changeHoveredConnections"
+                @mouseleave="clearHighlight"
+            >
+                <RectangleGrouping
+                    v-for="group in visibleGroups"
+                    :key="group.name"
+                    :name="group.name"
+                    :min="group.min"
+                    :max="group.max"
+                    :color="group.color"
+                />
+            </div>
+
+            <div
                 class="node-container"
                 :style="nodeContainerStyle"
                 @wheel="mouseWheel"
@@ -78,6 +96,7 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
                 @mouseleave="clearHighlight"
                 @wheel="mouseWheel"
             >
+
                 <PipelineManagerConnection
                     v-for="connection in visibleConnections"
                     :key="connection.id + counter.toString()"
@@ -127,6 +146,7 @@ import { useTemporaryConnection } from './temporaryConnection';
 import NotificationHandler from '../core/notifications';
 import EditorManager, { loadJsonFromRemoteLocation } from '../core/EditorManager';
 import RectangleSelection from './RectangleSelection.vue';
+import RectangleGrouping from './RectangleGrouping.vue';
 import nodeInsideSelection from './rectangleSelection.js';
 import getExternalApplicationManager from '../core/communication/ExternalApplicationManager';
 import jsonRPC, { frontendEndpoints } from '../core/communication/rpcCommunication';
@@ -155,6 +175,7 @@ export default defineComponent({
         TemporaryConnection,
         Palette,
         RectangleSelection,
+        RectangleGrouping,
         WelcomeMenu,
         Zoom,
         Return,
@@ -183,6 +204,8 @@ export default defineComponent({
 
         const highlightConnections = ref([]);
         const highlightInterfaces = ref([]);
+        const groups = computed(() => graph.value.groups);
+        const visibleGroups = ref([]);
 
         const readonly = computed(() => props.viewModel.editor.readonly);
         const hideHud = computed(() => props.viewModel.editor.hideHud);
@@ -514,6 +537,70 @@ export default defineComponent({
         const visibleNodes = computed(() =>
             nodes.value.filter((n) => !ignoredNodesTypes.value.has(n.layer)),
         );
+
+        function computeGroupBoundsFromDOM(nodesInGroup) {
+            if (!nodesInGroup?.length) {
+                return { min: { x: 0, y: 0 }, max: { x: 0, y: 0 } };
+            }
+
+            const container = el.value.querySelector('.node-container');
+            const containerRect = container.getBoundingClientRect();
+
+            let minX = Infinity;
+            let minY = Infinity;
+            let maxX = -Infinity;
+            let maxY = -Infinity;
+
+            nodesInGroup.forEach((node) => {
+                const nodeEl = container.querySelector(
+                    `[data-node-id="${node.id}"]`,
+                );
+                if (!nodeEl) return;
+
+                const rect = nodeEl.getBoundingClientRect();
+
+                // viewport → container → graph
+                const x1 = (rect.left - containerRect.left) / scale.value;
+                const y1 = (rect.top - containerRect.top) / scale.value;
+                const x2 = (rect.right - containerRect.left) / scale.value;
+                const y2 = (rect.bottom - containerRect.top) / scale.value;
+
+                minX = Math.min(minX, x1);
+                minY = Math.min(minY, y1);
+                maxX = Math.max(maxX, x2);
+                maxY = Math.max(maxY, y2);
+            });
+
+            return {
+                min: { x: minX - RECTANGLE_GROUP_PADDING, y: minY - RECTANGLE_GROUP_PADDING },
+                max: { x: maxX + RECTANGLE_GROUP_PADDING, y: maxY + RECTANGLE_GROUP_PADDING },
+            };
+        }
+
+        watch(
+            () => nodes.value.map((n) => ({
+                id: n.id,
+                x: n.position.x,
+                y: n.position.y,
+                w: n.width,
+                h: n.height,
+                nn: n.title,
+            })),
+            () => {
+                visibleGroups.value = groups.value.map((group) => {
+                    const groupNodes = graph.value.nodes.filter((node) =>
+                        group.nodes.includes(node.id));
+                    const { min, max } = computeGroupBoundsFromDOM(groupNodes);
+                    return {
+                        min,
+                        max,
+                        ...group,
+                    };
+                });
+            },
+            { deep: false, flush: 'post' },
+        );
+
         const ignoredNodes = computed(() =>
             nodes.value.filter((n) => ignoredNodesTypes.value.has(n.layer)),
         );
@@ -1005,6 +1092,7 @@ export default defineComponent({
             scale,
             visibleConnections,
             visibleNodes,
+            visibleGroups,
             ignoredNodes,
             highlightInterfaces,
             editorStyle,
