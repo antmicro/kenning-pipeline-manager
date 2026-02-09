@@ -7,6 +7,38 @@
             "description": "Unique identifier of a graph",
             "type": "string"
         },
+        "groups": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "description": "Name of a group",
+                        "type": "string"
+                    },
+                    "color": {
+                        "description": "Color of the group",
+                        "type": "string"
+                    },
+                    "id": {
+                        "description": "Unique identifier of a group",
+                        "type": "string"
+                    },
+                    "nodes": {
+                        "description": "Nodes belonging to the group",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "required": [
+                    "id",
+                    "nodes"
+                ],
+                "additionalProperties": false
+            }
+        },
         "nodes": {
             "type": "array",
             "items": {
