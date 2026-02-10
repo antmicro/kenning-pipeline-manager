@@ -2114,30 +2114,36 @@ export default class EditorManager {
                 return;
             }
 
-            // Main interface is the original non-exposed interface with `externalName`.
-            const mainInterface = interfaces.find(
+            const exposedInterfaces = interfaces.filter(
                 (intf) => intf.externalName !== undefined,
             );
 
-            if (mainInterface === undefined) {
+            if (exposedInterfaces.length < interfaces.length - 1) {
                 errors.push(`The interface with id = ${sharedId} seems to ` +
                     `be exposed but lacks "externalName" property.`);
                 return;
             }
 
+            const bottomers = new Set();
+            let numMatched = 0;
             interfaces.forEach((intf) => {
-                // Skip the main_interface itself and matching interface names.
-                if (intf === mainInterface || mainInterface.externalName === intf.name) {
-                    return;
+                const found = interfaces.find((intf2) => intf2.externalName === intf.name &&
+                    intf2 !== intf && !bottomers.has(intf2));
+                if (found) {
+                    // each interface only once can be treated as 'underlying'
+                    bottomers.add(found);
+                    numMatched += 1;
                 }
+            });
+            // expect number of interfaces - 1, bottommost interface will be a leaf
+            // < for simpler logic (allowing cycles)
+            if (numMatched < interfaces.length - 1) {
                 const errorMessage =
                     `Mismatch between "externalName" of the original interface ` +
                     `and "name" of the exposed version of the interface, ` +
-                    `for the interface with id = ${sharedId}\n` +
-                    `Expected: ${mainInterface.externalName}\n` +
-                    `Got: ${intf.name}`;
+                    `for the interface with id = ${sharedId}\n`;
                 errors.push(errorMessage);
-            });
+            }
         });
 
         return errors;
