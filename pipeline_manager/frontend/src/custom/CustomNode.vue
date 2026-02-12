@@ -113,15 +113,6 @@ from moving or deleting the nodes.
                         @pointerdown.right.exact="openContextMenuProperty(input, $event)"
                     />
                 </div>
-                <CustomContextMenu
-                    v-if="showContextMenuProperty"
-                    v-model="showContextMenuProperty"
-                    :x="contextMenuPropertyX"
-                    :y="contextMenuPropertyY"
-                    :items="contextMenuPropertyItems"
-                    :style="contextMenuStyle"
-                    @click="onContextMenuPropertyClick"
-                />
             </div>
 
             <div class="__interfaces">
@@ -939,41 +930,6 @@ const pickInterface = (intf, ev) => {
     document.addEventListener('pointerup', dropInterface);
 };
 
-// Property context menu
-
-const contextMenuPropertyX = ref(0);
-const contextMenuPropertyY = ref(0);
-
-const createContextMenuPropertyItems = () => [{ value: 'Hide', label: 'Hide', icon: icons.Hide }];
-
-const onContextMenuPropertyClick = (action) => {
-    switch (action) {
-        case 'Hide':
-            if (chosenInterface !== undefined) chosenInterface.hidden = true;
-            break;
-    }
-};
-
-const contextMenuPropertyItems = ref(createContextMenuPropertyItems());
-
-const openContextMenuProperty = (intf, ev) => {
-    if (viewModel.value.editor.readonly ||
-        showContextMenuProperty.value ||
-        intf.group ||
-        intf.groupProperty) return;
-    chosenInterface = intf;
-    contextMenuPropertyX.value = ev.offsetX;
-    contextMenuPropertyY.value = ev.offsetY + ev.currentTarget.offsetTop + 20;
-    contextMenuPropertyItems.value = createContextMenuPropertyItems();
-    showContextMenuProperty.value = true;
-};
-
-watch(showContextMenuProperty, () => {
-    if (showContextMenuProperty.value === false) {
-        chosenInterface = undefined;
-    }
-});
-
 // Interface context menu
 
 const contextMenuInterfaceSide = ref('left');
@@ -1119,6 +1075,9 @@ const createContextMenuPropertyItems = () => {
             { value: 'UnsetExternalName', label: 'Privatize Property', icon: icons.Subgraph }
         );
         items.push(propertyMode);
+        if (!chosenProperty.groupProperty) {
+            items.push({ value: 'Hide', label: 'Hide', icon: icons.Hide });
+        }
     }
 
     return items;
@@ -1126,9 +1085,20 @@ const createContextMenuPropertyItems = () => {
 
 const contextMenuPropertyItems = ref(createContextMenuPropertyItems());
 
+watch(showContextMenuProperty, () => {
+    if (showContextMenuProperty.value === false) {
+        chosenProperty = undefined;
+    }
+});
+
 /* eslint-disable default-case */
 const onContextMenuPropertyClick = (action) => {
     switch (action) {
+        case 'Hide':
+            if (chosenProperty !== undefined && !chosenProperty.group) {
+                chosenProperty.hidden = true;
+            }
+            break;
         case 'SetExternalName':
             viewModel.value.editor.exposeInterface(
                 graph.value.id,
