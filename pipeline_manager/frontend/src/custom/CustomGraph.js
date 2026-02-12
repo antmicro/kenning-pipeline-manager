@@ -305,12 +305,40 @@ export default function createPipelineManagerGraph(graph) {
     };
 
     graph.destroy = function destroy() {
-        // Remove possibility of removing graphs - this ignores changes made by
-        // default switchGraph (unregistering from editor and removing nodes) and
-        // allows to later reuse this instance
-
-        // TODO: This causes memory leaks, as when reloading a graph, all non-destroyed
-        // graphs linger are are completely unnaccessible
+        for (let i = this.connections.length - 1; i >= 0; i -= 1) {
+            this.removeConnection(this.connections[i]);
+        }
+        for (let i = this.nodes.length - 1; i >= 0; i -= 1) {
+            this.removeNode(this.nodes[i], false);
+        }
+        if (this.editor) {
+            this.editor.unregisterGraph?.(this);
+        }
+        if (this.hooks) {
+            Object.values(this.hooks).forEach((hook) => {
+                hook.listeners.forEach((l) => {
+                    hook.unsubscribe(l);
+                });
+            });
+        }
+        Object.values(this.events).forEach((event) => {
+            event.listeners.forEach((l) => {
+                event.unsubscribe(l);
+            });
+        });
+        Object.values(this.nodeEvents).forEach((event) => {
+            event.listeners.forEach((l) => {
+                event.unsubscribe(l);
+            });
+        });
+        this.graphNode = undefined;
+        this.editor = undefined;
+        this.nodes.length = 0;
+        this.connections.length = 0;
+        if (this.selectedNodes) {
+            this.selectedNodes.length = 0;
+        }
+        this._nodes = [];
     };
 
     graph.load = function load(state) {
@@ -358,7 +386,10 @@ export default function createPipelineManagerGraph(graph) {
                         .map(toRaw)
                         .filter((g) => !graphsBefore.has(g))
                         .filter((g) => g !== node.subgraph)
-                        .forEach((g) => this.editor.unregisterGraph(g));
+                        .forEach((g) => {
+                            this.editor.unregisterGraph(g);
+                            g.destroy?.();
+                        });
                 } else if (n.subgraph && !state.graphLoadingState) {
                     // Root graph
                     // Preserve interfaces IDs to keep connections valid
