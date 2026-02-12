@@ -110,8 +110,18 @@ from moving or deleting the nodes.
                         :intf="input"
                         :toggleGroup="toggleGroup"
                         :updateDynamicInterfaces="updateDynamicInterfaces"
+                        @pointerdown.right.exact="openContextMenuProperty(input, $event)"
                     />
                 </div>
+                <CustomContextMenu
+                    v-if="showContextMenuProperty"
+                    v-model="showContextMenuProperty"
+                    :x="contextMenuPropertyX"
+                    :y="contextMenuPropertyY"
+                    :items="contextMenuPropertyItems"
+                    :style="contextMenuStyle"
+                    @click="onContextMenuPropertyClick"
+                />
             </div>
 
             <div class="__interfaces">
@@ -789,15 +799,12 @@ const getRows = (sockets) => {
 const displayedRightRows = computed(() => getRows(displayedRightSockets.value));
 const displayedLeftRows = computed(() => getRows(displayedLeftSockets.value));
 
-watch(sidebarProperties, () => {
-    sidebarProperties.value.forEach((prop) => {
-        if (prop.setDefaultComponent !== undefined) {
-            prop.setDefaultComponent();
-        }
-    });
-}, {
-    immediate: true,
-});
+watch(displayedProperties, () => {
+    displayedProperties.value
+        .filter((prop) => prop.component === undefined)
+        .filter((prop) => prop.setDefaultComponent !== undefined)
+        .forEach((prop) => { prop.setDefaultComponent(); });
+}, { immediate: true });
 
 const path = viewModel.value.editor.getNodeIconPath(props.node.type);
 const iconPath = viewModel.value.cache[`./${path}`] ?? path;
@@ -931,6 +938,41 @@ const pickInterface = (intf, ev) => {
     document.addEventListener('pointermove', dragInterface);
     document.addEventListener('pointerup', dropInterface);
 };
+
+// Property context menu
+
+const contextMenuPropertyX = ref(0);
+const contextMenuPropertyY = ref(0);
+
+const createContextMenuPropertyItems = () => [{ value: 'Hide', label: 'Hide', icon: icons.Hide }];
+
+const onContextMenuPropertyClick = (action) => {
+    switch (action) {
+        case 'Hide':
+            if (chosenInterface !== undefined) chosenInterface.hidden = true;
+            break;
+    }
+};
+
+const contextMenuPropertyItems = ref(createContextMenuPropertyItems());
+
+const openContextMenuProperty = (intf, ev) => {
+    if (viewModel.value.editor.readonly ||
+        showContextMenuProperty.value ||
+        intf.group ||
+        intf.groupProperty) return;
+    chosenInterface = intf;
+    contextMenuPropertyX.value = ev.offsetX;
+    contextMenuPropertyY.value = ev.offsetY + ev.currentTarget.offsetTop + 20;
+    contextMenuPropertyItems.value = createContextMenuPropertyItems();
+    showContextMenuProperty.value = true;
+};
+
+watch(showContextMenuProperty, () => {
+    if (showContextMenuProperty.value === false) {
+        chosenInterface = undefined;
+    }
+});
 
 // Interface context menu
 

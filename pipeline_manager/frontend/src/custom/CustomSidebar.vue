@@ -101,18 +101,33 @@ SPDX-License-Identifier: Apache-2.0
             </div>
             <div class="__properties" v-if="displayedProperties.length">
                 <div class="__title">Properties</div>
-                <div v-for="input in displayedProperties" :key="input.id" class="__property">
+                <div
+                    v-for="[input, unhide] in displayedProperties"
+                    :key="input.id"
+                    class="__property"
+                >
                     <div class="__property-name">
                         {{ getOptionName(input.componentName) ? `${input.name}:` : '' }}
                     </div>
-                    <CustomInterface
-                        :node="node"
-                        :intf="input"
-                        :toggleGroup="toggleGroup"
-                        :updateDynamicInterfaces="updateDynamicInterfaces"
-                        sidebar=true
-                        tabindex="-1"
-                    />
+                    <div class="__property-content">
+                        <CustomInterface
+                            :node="node"
+                            :intf="input"
+                            :toggleGroup="toggleGroup"
+                            :updateDynamicInterfaces="updateDynamicInterfaces"
+                            tabindex="-1"
+                            sidebar=true
+                            class="__property-interface"
+                        />
+
+                        <component
+                            v-if="unhide !== undefined"
+                            class="__property-button"
+                            :is="unhide.component"
+                            :intf="unhide"
+                            tabindex="-1"
+                        />
+                    </div>
                 </div>
             </div>
 
@@ -311,9 +326,29 @@ export default defineComponent({
             );
         };
 
-        const displayedProperties = computed(() =>
-            Object.values(node.value.inputs).filter((intf) => !intf.port),
-        );
+        const displayedProperties = computed(() => Object
+            .values(node.value?.inputs ?? [])
+            .filter((intf) => !intf.port)
+            .map((intf) => {
+                if (viewModel.value.editor.readonly ||
+                    !intf.hidden ||
+                    intf.group ||
+                    intf.groupProperty) return [intf, undefined];
+
+                // eslint-disable-next-line no-param-reassign
+                const button = new ButtonInterface('Unhide', () => { intf.hidden = false; });
+                button.componentName = 'ButtonInterface';
+                return [intf, button];
+            }));
+
+        // Hidden components are not initialized by the node, so initialize them here
+        watch(displayedProperties, () => {
+            displayedProperties.value
+                .map(([prop, _]) => prop)
+                .filter((prop) => prop.component === undefined)
+                .filter((prop) => prop.setDefaultComponent !== undefined)
+                .forEach((prop) => { prop.setDefaultComponent(); });
+        }, { immediate: true });
 
         const interfaceGroups = computed(() =>
             Object.values({ ...node.value.inputs, ...node.value.outputs }).filter(
@@ -465,6 +500,26 @@ export default defineComponent({
         -webkit-user-select: text; /* Safari */
         -ms-user-select: text; /* IE 10 and IE 11 */
         user-select: text; /* Standard syntax */
+    }
+    .__property-content {
+        height: 100%;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .__property-button {
+        height: 100%;
+        display: flex;
+        align-items: center;
+        background-color: $gray-500;
+        cursor: pointer;
+        opacity: 0.7;
+        padding: 0.4em;
+        border-radius: 5px;
+    }
+
+    .__property-interface {
+        flex: 1;
     }
 }
 </style>
