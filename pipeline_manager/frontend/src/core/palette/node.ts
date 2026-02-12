@@ -47,12 +47,10 @@ function placeNode(viewModel: IBaklavaViewModel, instance: AbstractNode, x: numb
     type IAbstractNode = {
         position: { x: number; y: number };
     }
+    /* eslint-disable no-param-reassign */
+    (instance as unknown as IAbstractNode).position = { x, y };
 
     viewModel.displayedGraph.addNode(instance);
-    /* eslint-disable no-param-reassign */
-    (instance as unknown as IAbstractNode).position.x = x;
-    (instance as unknown as IAbstractNode).position.y = y;
-    /* eslint-enable no-param-reassign */
 }
 
 type IEntryDataWithNodeType = IEntryData & {
