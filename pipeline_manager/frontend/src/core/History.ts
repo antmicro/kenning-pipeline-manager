@@ -67,6 +67,9 @@ class NodeStep extends Step {
         if (this.nodeTuple[0] !== undefined) {
             const n = graph.value.addNode(this.nodeTuple[0]);
             n.load(this.nodeTuple[1]);
+            if ((<any>graph.value).graphNode !== undefined) {
+                (<any>graph.value).graphNode.updateExposedInterfaces();
+            }
         }
     }
 
