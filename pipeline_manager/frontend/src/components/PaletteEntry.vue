@@ -24,16 +24,8 @@ A single entry representing available node type in the sidebar.
             @click="toggleChildren"
             :style="{
                 top: toggled ? `${depth * 4}em` : undefined,
-                zIndex: toggled ? (999 - depth).toString() : undefined
             }"
         >
-            <Arrow
-                v-if="isInternal(entry) && entry.children.length"
-                class="arrow"
-                scale="small"
-                :rotate="entry.showChildren ? 'left' : 'right'"
-                :style="{ marginLeft: entry.children?.length ? entryOffset : undefined }"
-            />
             <div
                 class="__entry-content"
                 ref="entryRef"
@@ -42,12 +34,32 @@ A single entry representing available node type in the sidebar.
                     clickable: Boolean(entry.data.onClick),
                     '--active': Boolean(entry.computed?.active),
                 }"
-                :style="{ paddingLeft: expandable ? undefined : entryOffset }"
+                :style="{
+                    paddingLeft: !(expandable || parentEntry) ? '1em' : undefined
+                }"
                 @click="onContentClick"
                 @pointerdown.left.stop="onPointerDown"
                 @pointerup.left.stop="onPointerUp"
                 @pointerdown.right="() => contextMenuToggle!(entry)"
             >
+                <div
+                    v-if="expandable || parentEntry"
+                    class="indent"
+                    :style="{
+                        width: entryOffset,
+                        'border-right': expandable ? '1px solid #393939' : 'none',
+                    }"
+                    @click.stop="() => expandable && toggleChildren()"
+                    @pointerdown.stop="() => expandable"
+                    @pointerup.stop="() => expandable"
+                >
+                    <Arrow
+                        v-if="expandable"
+                        class="arrow"
+                        scale="small"
+                        :rotate="entry.showChildren ? 'left' : 'right'"
+                    />
+                </div>
                 <img
                     class="__title-icon"
                     v-if="typeof entry.data.icon === 'string'"
@@ -143,9 +155,11 @@ const entryRef = useTemplateRef('entryRef');
 const minPadding = 10;
 const entryOffset = computed(() => {
     const parentTitleLabel = props.parentEntry
-        ?.getElementsByClassName('__title-label')[0]as HTMLElement | undefined;
+        ?.getElementsByClassName('indent')[0] as HTMLElement | undefined;
 
-    return `${parentTitleLabel?.offsetLeft || minPadding}px`;
+    const width = parentTitleLabel?.offsetWidth;
+
+    return `${(width ?? -minPadding) + minPadding}px`;
 });
 
 // Title
@@ -224,11 +238,6 @@ const contextMenuToggle = inject<(_: Reactive<Entry>) => void>('contextMenuToggl
 
     cursor: pointer;
 
-    & > .arrow {
-        margin-left: 1em;
-        min-width: 16px;
-    }
-
     & > .__entry-content {
         display: flex;
         align-items: center;
@@ -252,9 +261,17 @@ const contextMenuToggle = inject<(_: Reactive<Entry>) => void>('contextMenuToggl
 
         padding-right: 1em;
 
-        &.draggable, &.clickable, &.--active {
-            border-left: 1px solid #393939;
-            padding-left: 1em;
+        & > .indent {
+            min-width: 15px;
+            height: 100%;
+            border: none;
+            background-color: transparent;
+            display: flex;
+            align-items: center;
+            & > .arrow {
+                display: flex;
+                margin-left: auto;
+            }
         }
 
         &.draggable {
