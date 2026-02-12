@@ -70,9 +70,12 @@ Each node has:
 
 Each property is described by an object with three attributes:
 
-* `id` - unique value assigned to the property
-* `name` - name of the property
-* `value` - actual value of the property.
+* `id` - unique value assigned to the property,
+* `name` - name of the property,
+* `value` - actual value of the property,
+* `hidden` - determines whether the property should be rendered in the node.
+  This overrides a similar directive from [specification](specification-format.md#property)
+  The default value is `false`.
 
 Additionally, these optional attributes may be used to control specific types of properties:
 

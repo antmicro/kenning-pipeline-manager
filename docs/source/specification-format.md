@@ -453,6 +453,8 @@ Every project object has three required base properties:
 * `type` - type of the property.
 * `default` - specifies a default selected value
   Its type depends on the `type` chosen.
+* `hidden` - determines whether the property should be rendered in the node.
+  This can be [overridden](dataflow-format.md#property) by the node instance.
 
 There are 13 possible values for the `type` property.
 * `text` - property is a string.
