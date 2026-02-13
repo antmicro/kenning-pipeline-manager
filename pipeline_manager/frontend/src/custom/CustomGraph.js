@@ -167,7 +167,7 @@ export default function createPipelineManagerGraph(graph) {
     // All properties that are common preserve their values
     // All connections that were connected to the interfaces that are common
     // for those two nodes are preserved as well.
-    graph.replaceNode = function replaceNode(oldNode, newNodeName) {
+    graph.replaceNode = function replaceNode(oldNode, newNodeName, copyInterfaces = false) {
         const oldPosition = oldNode.position;
         const newNode = this.editor.nodeTypes.get(newNodeName);
         const newNodeInstance = new newNode.type(); // eslint-disable-line new-cap
@@ -178,36 +178,51 @@ export default function createPipelineManagerGraph(graph) {
         }
 
         // Restoring properties and interfaces
-        Object.entries({ ...oldNode.inputs, ...oldNode.outputs }).forEach(([name, intf]) => {
-            if (intf.direction !== undefined) {
-                if (Object.prototype.hasOwnProperty.call(newNodeInstance.inputs, name)) {
-                    updateInterfacePosition(
-                        newNodeInstance,
-                        newNodeInstance.inputs[name],
-                        intf.side,
-                        intf.sidePosition,
-                        false,
-                        false,
-                    );
+        if (copyInterfaces) {
+            Object.entries({ ...oldNode.inputs, ...oldNode.outputs }).forEach(([name, intf]) => {
+                if (
+                    !Object.prototype.hasOwnProperty.call(newNodeInstance.inputs, name) &&
+                    !Object.prototype.hasOwnProperty.call(newNodeInstance.outputs, name)
+                ) {
+                    if (intf.direction === undefined) {
+                        newNodeInstance.addInput(name, intf);
+                    } else {
+                        newNodeInstance.addInterface(intf.direction, name, intf);
+                    }
                 }
-                if (Object.prototype.hasOwnProperty.call(newNodeInstance.outputs, name)) {
-                    updateInterfacePosition(
-                        newNodeInstance,
-                        newNodeInstance.outputs[name],
-                        intf.side,
-                        intf.sidePosition,
-                        false,
-                        false,
-                    );
+            });
+        } else {
+            Object.entries({ ...oldNode.inputs, ...oldNode.outputs }).forEach(([name, intf]) => {
+                if (intf.direction !== undefined) {
+                    if (Object.prototype.hasOwnProperty.call(newNodeInstance.inputs, name)) {
+                        updateInterfacePosition(
+                            newNodeInstance,
+                            newNodeInstance.inputs[name],
+                            intf.side,
+                            intf.sidePosition,
+                            false,
+                            false,
+                        );
+                    }
+                    if (Object.prototype.hasOwnProperty.call(newNodeInstance.outputs, name)) {
+                        updateInterfacePosition(
+                            newNodeInstance,
+                            newNodeInstance.outputs[name],
+                            intf.side,
+                            intf.sidePosition,
+                            false,
+                            false,
+                        );
+                    }
+                    // If the new node has the same property as it could be overridden
+                } else if (
+                    Object.prototype.hasOwnProperty.call(newNodeInstance.inputs, name) &&
+                    newNodeInstance.inputs[name].componentName === intf.componentName
+                ) {
+                    newNodeInstance.inputs[name].value = intf.value;
                 }
-                // If the new node has the same property of the same type as it could be overridden
-            } else if (
-                Object.prototype.hasOwnProperty.call(newNodeInstance.inputs, name) &&
-                newNodeInstance.inputs[name].componentName === intf.componentName
-            ) {
-                newNodeInstance.inputs[name].value = intf.value;
-            }
-        });
+            });
+        }
 
         // Restoring connections
         const interfaces = [...Object.values(oldNode.inputs), ...Object.values(oldNode.outputs)];

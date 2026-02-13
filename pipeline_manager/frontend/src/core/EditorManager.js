@@ -1059,7 +1059,7 @@ export default class EditorManager {
             (n) => n.type === node.type,
         );
         nodesToReplace.forEach((n) => {
-            displayedGraph.replaceNode(n, node.type);
+            displayedGraph.replaceNode(n, node.type, true);
         });
         return [];
     }
