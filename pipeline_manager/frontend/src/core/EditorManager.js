@@ -1678,7 +1678,10 @@ export default class EditorManager {
             interfaces = [...interfaces, ...inherited];
         });
         const uniqueInterfaces = interfaces.filter((item, pos) =>
-            interfaces.findIndex((item2) => item.name === item2.name) === pos,
+            interfaces.findIndex((item2) =>
+                item.name === item2.name &&
+                item.array === item2.array &&
+                item.direction === item2.direction) === pos,
         );
         return uniqueInterfaces;
     }
