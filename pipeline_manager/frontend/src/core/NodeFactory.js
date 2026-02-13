@@ -791,6 +791,7 @@ export class CustomNode extends Node {
                     externalName: ioState.externalName,
                     id: ioState.id,
                     value: ioState.value === undefined ? null : ioState.value,
+                    dynamicCounter: ioState.dynamicCounter,
                 });
             }
         });
