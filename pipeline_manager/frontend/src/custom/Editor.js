@@ -93,82 +93,53 @@ export default class PipelineManagerEditor extends Editor {
     }
 
     /**
-     * Saves the state (nodes, connections, layout) of the current graph and its subgraphs.
-     * @return {Object} State of the current graph and its subgraphs.
+     * Saves the state (nodes, connections, layout) of all graphs in the editor.
+     * @return {Object} State of the graphs in the editor.
      * @throws {Error} Throws if there are issues switching to a subgraph.
      */
     save() {
-        const subgraphStackFrames = [];
-        while (this.isInSubgraph()) {
-            if (this._graph.graphNode === undefined) {
-                subgraphStackFrames.push({
-                    type: this.subgraphStackGraphTypeEnum.RELATEDGRAPH,
-                    frame: this._graph.id,
-                });
-            } else {
-                subgraphStackFrames.push({
-                    type: this.subgraphStackGraphTypeEnum.SUBGRAPH,
-                    frame: this._graph.graphNode,
-                });
-            }
-            this.backFromSubgraph();
-        }
+        const graphs = Array.from(this.graphs);
 
-        // Save all changes done to subgraphs before saving.
-        let currentGraphId = this._graph.id;
-        let currentGraphState = this.graph.save();
-        currentGraphState.panning = this._graph.panning;
-        currentGraphState.scaling = this._graph.scaling;
-
-        if (this.newRootGraph !== undefined) {
-            currentGraphId = this.newRootGraph.id;
-            currentGraphState = this.newRootGraph.save();
-        }
+        const graphMap = new Map(
+            graphs.map((g) => [g.id, g]),
+        );
 
         const dataflowState = { graphs: [] };
 
-        // Subgraphs are stored in state.subgraphs; there is no need to store it
-        // in nodes themselves.
-        const recurrentSubgraphSave = (node) => {
-            if (node.subgraph !== undefined) {
-                dataflowState.graphs.push(node.graphState);
-                node.graphState.nodes.forEach(recurrentSubgraphSave);
+        const visitedGraphs = new Set();
+
+        const saveGraph = (graph) => {
+            if (graph.toSave && !visitedGraphs.has(graph.id)) {
+                const currentGraphState = graph.save();
+                currentGraphState.panning = graph.panning;
+                currentGraphState.scaling = graph.scaling;
+
+                currentGraphState.nodes.forEach((node) => {
+                    node.color = this.getNodeColor(node);
+                });
+                currentGraphState.nodes.forEach((node) => {
+                    if (node.subgraph !== undefined) {
+                        const graphFound = graphMap.get(node.subgraph);
+                        graphFound.toSave = true;
+                        saveGraph(graphFound);
+                        delete node.graphState;
+                    }
+                });
+
+                visitedGraphs.add(graph.id);
+                dataflowState.graphs.push(currentGraphState);
             }
-            delete node.graphState;
         };
-        currentGraphState.nodes.forEach(recurrentSubgraphSave);
-        this.nodeTypes.forEach((node, _) => {
-            node.relatedGraphs?.forEach(({ id }) => {
-                const graphObject = Array.from(this.graphs).find((el) => id === el.id);
-                if (graphObject && !dataflowState.graphs.find((el) => el.id === graphObject.id)) {
-                    dataflowState.graphs.push(graphObject.save());
-                }
-            });
+
+        graphs.forEach((graph) => {
+            saveGraph(graph);
         });
 
-        currentGraphState.nodes.forEach((node) => {
-            node.color = this.getNodeColor(node);
-        });
-
-        /* eslint-enable no-unused-vars */
-        if (dataflowState.graphs.length) {
-            dataflowState.entryGraph = currentGraphId;
+        if (this._graph.toSave) {
+            dataflowState.entryGraph = this._graph.id;
+        } else if (dataflowState.graphs.length > 0) {
+            dataflowState.entryGraph = dataflowState.graphs[0].id;
         }
-
-        dataflowState.graphs = [currentGraphState, ...dataflowState.graphs];
-
-        subgraphStackFrames.reverse().forEach(({ frame, type }) => {
-            switch (type) {
-                case this.subgraphStackGraphTypeEnum.RELATEDGRAPH:
-                    this.switchToRelatedGraph(frame);
-                    break;
-                case this.subgraphStackGraphTypeEnum.SUBGRAPH:
-                    this.switchToSubgraph(frame);
-                    break;
-                default:
-                    break;
-            }
-        });
 
         return dataflowState;
     }
