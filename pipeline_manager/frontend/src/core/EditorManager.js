@@ -1974,7 +1974,6 @@ export default class EditorManager {
 
         if (entryGraph && graphName !== null && graphName !== undefined) {
             const rootGraph = this.getRootGraph();
-            entryGraph.name = graphName;
             rootGraph.name = graphName;
             if (rootGraph === this.editor.graph) this.baklavaView.editor.graphName = graphName;
         }
