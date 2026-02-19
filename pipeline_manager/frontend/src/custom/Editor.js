@@ -92,6 +92,10 @@ export default class PipelineManagerEditor extends Editor {
         super.registerGraph(customGraph);
     }
 
+    resetAllGraphsToSave() {
+        this.graphs.forEach((graph) => { graph.toSave = true; });
+    }
+
     /**
      * Saves the state (nodes, connections, layout) of all graphs in the editor.
      * @return {Object} State of the graphs in the editor.
@@ -117,16 +121,19 @@ export default class PipelineManagerEditor extends Editor {
                 currentGraphState.nodes.forEach((node) => {
                     node.color = this.getNodeColor(node);
                 });
+
+                visitedGraphs.add(graph.id);
                 currentGraphState.nodes.forEach((node) => {
                     if (node.subgraph !== undefined) {
                         const graphFound = graphMap.get(node.subgraph);
+                        const lastoSave = graphFound.toSave;
                         graphFound.toSave = true;
                         saveGraph(graphFound);
+                        graphFound.toSave = lastoSave;
                         delete node.graphState;
                     }
                 });
 
-                visitedGraphs.add(graph.id);
                 dataflowState.graphs.push(currentGraphState);
             }
         };
