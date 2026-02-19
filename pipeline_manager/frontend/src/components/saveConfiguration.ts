@@ -49,16 +49,7 @@ export const saveSpecificationConfiguration: SaveConfiguration = {
             dataflow.graphs.forEach((g: any) => {
                 const checkedId = graph.id;
                 const subgraphNode = g.nodes.find((n: any) => n.subgraph === checkedId);
-                if (subgraphNode !== undefined) {
-                    const nodeSpecification = specification.nodes?.find(
-                        (n: any) => n.name === subgraphNode.name,
-                    );
-                    if (nodeSpecification) {
-                        // eslint-disable-next-line no-param-reassign
-                        graph.id = nodeSpecification.subgraphId;
-                        subgraphNode.subgraph = nodeSpecification.subgraphId;
-                    }
-                }
+
                 const relatedGraphNode = g.nodes.find((n: any) =>
                     n.relatedGraphs?.some((entry: any) => entry.id === checkedId),
                 );
