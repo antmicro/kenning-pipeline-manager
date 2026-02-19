@@ -36,6 +36,7 @@ Each graph can be described with the following properties:
   Every element is of type [Node](#node).
 * `connections` - array that specifies all connections in the dataflow.
   Every element is of type [Connection](#connection).
+* `groups` - object of type [Group](#group) that allows for a visual separation of a selected set of nodes.
 * `panning` - object of type [Panning](#panning) that defines the position of the top-left corner in the rendered editor.
 * `scaling` - floating-point number that defines the zoom level in the editor.
 
@@ -219,6 +220,14 @@ Two attributes are used:
 
 * `x` - x coordinate of the anchor
 * `y` - y coordinate of the anchor.
+
+#### Group
+
+This object describes a visual-only grouping of an arbitrary set of nodes in the same graph.
+It should be used for improving readability of the graph, where using a `subgraph` would not reduce complexity.
+It has two attributes:
+* `color` - field defining a hexadecimal color that will be used as the collection background in the editor.
+* `name` - name of the grouping that will be displayed above it.
 
 #### Panning
 
