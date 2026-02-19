@@ -37,6 +37,13 @@ export default function createPipelineManagerGraph(graph) {
     // Graph node that represents the graph itself. Root graph does not have a node graph assigned.
     graph.graphNode = undefined;
 
+    // A value that indicates whether we should save the graph or not
+    graph.toSave = true;
+
+    graph.setToSave = function setToSave(save) {
+        this.toSave = save;
+    };
+
     graph.checkConnection = function checkConnection(from, to) {
         if (!from || !to) {
             return { connectionAllowed: false, error: 'Invalid from and to references.' };
