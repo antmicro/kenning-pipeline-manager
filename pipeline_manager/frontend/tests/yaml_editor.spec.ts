@@ -1,18 +1,33 @@
 import YAML from 'yaml';
 import {
     test, expect, Page, FileChooser,
+    Locator,
 } from '@playwright/test';
 import {
     getPathToJsonFile, getUrl, addNode, dragAndDrop, enableEditingNodes,
     loadSpecification, loadDataflow, openNodePalette,
 } from './config.js';
 
-async function assertInputCount(page: Page, nodeName: string, count: number) {
+async function assertOutputCount(page: Page, nodeName: string, count: number, nth = 0) {
     const inputs = await page
-        .locator(`[data-node-type="${nodeName}"]`)
+        .locator(`[data-node-type="${nodeName}"]`).nth(nth)
+        .locator('.__interfaces .__outputs > div')
+        .count();
+    expect(inputs).toBe(count);
+}
+async function assertInputCount(page: Page, nodeName: string, count: number, nth = 0) {
+    const inputs = await page
+        .locator(`[data-node-type="${nodeName}"]`).nth(nth)
         .locator('.__interfaces .__inputs > div')
         .count();
     expect(inputs).toBe(count);
+}
+async function assertPropertyCount(page: Page, nodeName: string, count: number, nth = 0) {
+    const props = await page
+        .locator(`[data-node-type="${nodeName}"]`).nth(nth)
+        .locator('.__properties > div')
+        .count();
+    expect(props).toBe(count);
 }
 
 async function createNewNodeType(page: Page) {
@@ -29,7 +44,12 @@ async function createNewNodeType(page: Page) {
 async function getYAMLEditorContent(page: Page) {
     const textarea = page.locator('textarea');
     const value = await textarea.evaluate((el) => el.value);
-    return value;
+    return YAML.parse(value);
+}
+async function setYAMLEditorContent(page: Page, content: any) {
+    const textarea = page.locator('textarea');
+    await textarea.fill(YAML.stringify(content));
+    await page.getByText('Apply', { exact: true }).click();
 }
 async function addInterface(page: Page, nodeName: string) {
     const node = page
@@ -38,8 +58,6 @@ async function addInterface(page: Page, nodeName: string) {
     await node.locator('.__title').click({ button: 'right', force: true });
     await node.locator('.baklava-context-menu').getByText('Add interface').click();
     await page.getByRole('button', { name: 'Add interface' }).click();
-
-    await assertInputCount(page, nodeName, 2);
 }
 
 async function checkIfYAMLPersists(page: Page) {
@@ -65,6 +83,18 @@ async function checkIfYAMLPersists(page: Page) {
     await expect(textarea).toHaveValue(newValue);
 }
 
+async function addAndOpenNode(page: Page, group: string, nodeName: string, x = 750, y = 180) {
+    await addNode(page, group, nodeName, x, y);
+    const node = page.locator(`[data-node-type="${nodeName}"]`).first();
+    await node.locator('.__title').dblclick();
+    const content = await getYAMLEditorContent(page);
+    return { node, content };
+}
+async function reopenNode(page: Page, node: Locator) {
+    await node.locator('.__title').dblclick();
+    return getYAMLEditorContent(page);
+}
+
 test('create new node type', async ({ page }) => {
     await page.goto(getUrl());
 
@@ -78,7 +108,6 @@ test('create new node type', async ({ page }) => {
 test('adding interface from UI reflected in YAML editor', async ({ page }) => {
     await page.goto(getUrl());
     await loadSpecification(page, 'sample-subgraph-specification.json');
-    await loadDataflow(page, 'sample-subgraph-dataflow.json');
 
     await enableEditingNodes(page);
 
@@ -93,16 +122,15 @@ test('adding interface from UI reflected in YAML editor', async ({ page }) => {
     await customNode.dblclick({ force: true });
 
     // Retrieve the initial content of the YAML editor.
-    const initialContent = await getYAMLEditorContent(page);
-    const parsedContent = YAML.parse(initialContent);
+    const parsedContent = await getYAMLEditorContent(page);
 
     // Retrieve the modified content of the YAML editor.
     await addInterface(page, nodeName);
-    const modifiedContent = await getYAMLEditorContent(page);
+    await assertInputCount(page, nodeName, 1);
+    const modifiedParsedContent = await getYAMLEditorContent(page);
 
     // Count the number of elements in the `interfaces` attribute.
     const initialInterfacesCount = parsedContent.interfaces.length;
-    const modifiedParsedContent = YAML.parse(modifiedContent);
     const modifiedInterfacesCount = modifiedParsedContent.interfaces.length;
 
     expect(initialInterfacesCount).toBe(0);
@@ -111,11 +139,170 @@ test('adding interface from UI reflected in YAML editor', async ({ page }) => {
 test('adding interface to YAML', async ({ page }) => {
     await page.goto(getUrl());
     await loadSpecification(page, 'sample-include-specification.json');
-    await addNode(page, 'Filesystem', 'LoadVideo', 750, 80);
+    const nodeName = 'LoadVideo';
+    const { content } = await addAndOpenNode(page, 'Filesystem', nodeName);
+    await assertInputCount(page, nodeName, 0);
+    content.interfaces.push({
+        name: 'new_interface',
+        type: 'unique',
+        direction: 'input',
+    });
+    await setYAMLEditorContent(page, content);
+    await assertInputCount(page, nodeName, 1, 0);
+    await assertInputCount(page, nodeName, 1, 1);
+    // check if newly added nodes have this change
+    await addNode(page, 'Filesystem', nodeName, 750, 160, false);
+    await assertInputCount(page, nodeName, 1, 2);
 });
 test('adding property to YAML', async ({ page }) => {
     await page.goto(getUrl());
     await loadSpecification(page, 'sample-include-specification.json');
+    const nodeName = 'LoadVideo';
+    const { content } = await addAndOpenNode(page, 'Filesystem', nodeName);
+    await assertPropertyCount(page, nodeName, 1);
+    content.properties = [{
+        name: 'new_property',
+        type: 'integer',
+        default: 0,
+    }];
+    await setYAMLEditorContent(page, content);
+    await assertPropertyCount(page, nodeName, 2, 0);
+    await assertPropertyCount(page, nodeName, 2, 1);
+    // check if newly added nodes have this change
+    await addNode(page, 'Filesystem', nodeName, 750, 160, false);
+    await assertPropertyCount(page, nodeName, 2, 2);
+});
+test('removing interface from YAML', async ({ page }) => {
+    await page.goto(getUrl());
+    await loadSpecification(page, 'sample-include-specification.json');
+    const nodeName = 'LoadVideo';
+    const { content } = await addAndOpenNode(page, 'Filesystem', nodeName);
+    await assertOutputCount(page, nodeName, 1, 0);
+    await assertOutputCount(page, nodeName, 1, 1);
+    content.interfaces = [];
+    await setYAMLEditorContent(page, content);
+    await assertOutputCount(page, nodeName, 0, 0);
+    await assertOutputCount(page, nodeName, 0, 1);
+    // check if newly added nodes have this change
+    await addNode(page, 'Filesystem', nodeName, 750, 160, false);
+    await assertOutputCount(page, nodeName, 0, 2);
+});
+test('editing property in YAML', async ({ page }) => {
+    await page.goto(getUrl());
+    await loadSpecification(page, 'sample-include-specification.json');
+    const nodeName = 'GaussianKernel';
+    const { node, content } = await addAndOpenNode(page, 'Generators', nodeName);
+
+    content.properties.find((p) => p.name === 'size').name = 'width';
+    Object.assign(
+        content.properties.find((p) => p.name === 'sigma'),
+        { type: 'bool', default: true },
+    );
+    await setYAMLEditorContent(page, content);
+    await assertPropertyCount(page, nodeName, 3, 0);
+    // check if newly added nodes have this change
+    await addNode(page, 'Generators', nodeName, 750, 160, false);
+    await assertPropertyCount(page, nodeName, 3, 1);
+    const changedProp = node.locator('.__properties > div').getByText('width');
+    expect(changedProp).toBeVisible();
+    const checkbox = node.locator('.__properties > div').locator('.baklava-checkbox');
+    expect(checkbox).toBeVisible();
+});
+test('editing interface in YAML', async ({ page }) => {
+    await page.goto(getUrl());
+    await loadSpecification(page, 'sample-include-specification.json');
+    const nodeName = 'LoadVideo';
+    const { node, content } = await addAndOpenNode(page, 'Filesystem', nodeName);
+    await assertInputCount(page, nodeName, 0);
+    await assertOutputCount(page, nodeName, 1);
+
+    content.interfaces.find((p) => p.name === 'frames').direction = 'input';
+    await setYAMLEditorContent(page, content);
+    await assertInputCount(page, nodeName, 1);
+    await assertOutputCount(page, nodeName, 0);
+
+    content.interfaces.find((p) => p.name === 'frames').name = 'unique_input';
+    await setYAMLEditorContent(page, content);
+    await assertInputCount(page, nodeName, 1);
+    await assertOutputCount(page, nodeName, 0);
+    expect(node.getByText('unique_input')).toBeVisible();
+
+    // check if newly added nodes have this change
+    await addNode(page, 'Filesystem', nodeName, 750, 160, false);
+    await assertInputCount(page, nodeName, 1, 2);
+    await assertOutputCount(page, nodeName, 0, 2);
+});
+test('interface maxConnectionCount YAML', async ({ page }) => {
+    await page.goto(getUrl());
+    await loadSpecification(page, 'sample-include-specification.json');
+    const nodeName = 'GaussianKernel';
+    const { node, content } = await addAndOpenNode(page, 'Generators', nodeName);
+    await assertOutputCount(page, nodeName, 1);
+    const intf = node.locator('.__interfaces .__outputs > div');
+    expect(intf).toHaveClass('baklava-node-interface --output --connected');
+
+    content.interfaces[0].maxConnectionsCount = 0;
+    await setYAMLEditorContent(page, content);
+    await assertOutputCount(page, nodeName, 1);
+    expect(intf).not.toHaveClass('baklava-node-interface --output --connected');
+});
+test('subgraph cascade interface YAML', async ({ page }) => {
+    await page.goto(getUrl());
+    await loadSpecification(page, 'sample-subgraph-specification.json');
+    await loadDataflow(page, 'sample-subgraph-dataflow.json');
+    await enableEditingNodes(page);
+    const node = page.locator(`[data-node-type="Test subgraph #1"]`).first();
+    const intf = node.getByText('Subgraph Output 2').locator('../..');
+    expect(intf).toHaveClass('baklava-node-interface --output --connected');
+
+    // enter subgraph
+    await node.locator('.__title').click({ button: 'right' });
+    const contextMenuOption = node.locator('.baklava-context-menu').getByText('Go to graph');
+    await contextMenuOption.click();
+
+    // edit interface that is exposed in the subgraph
+    const subnode = page.locator(`[data-node-type="Test node #1"]`).nth(1);
+    subnode.locator('.__title').dblclick();
+    const content = await getYAMLEditorContent(page);
+    content.interfaces.find((i) => i.name === 'Output').type = 'non-valid';
+    await setYAMLEditorContent(page, content);
+
+    // leave
+    const leaveButton = page.getByText('Return from subgraph editor').locator('../..');
+    await leaveButton.click();
+
+    expect(intf).not.toHaveClass('baklava-node-interface --output --connected');
+});
+test('subgraph cascade property YAML', async ({ page }) => {
+    await page.goto(getUrl());
+    await loadSpecification(page, 'sample-subgraph-specification.json');
+    await loadDataflow(page, 'sample-subgraph-dataflow.json');
+    await enableEditingNodes(page);
+    const node = page.locator(`[data-node-type="Test subgraph #2"]`).first();
+    const prop = node.locator('.__properties').locator('.baklava-node-interface');
+    // first property type
+    expect(prop.locator('.baklava-select')).toBeVisible();
+
+    // enter subgraph
+    await node.locator('.__title').click({ button: 'right' });
+    const contextMenuOption = node.locator('.baklava-context-menu').getByText('Go to graph');
+    await contextMenuOption.click();
+
+    // change prop
+    const subnode = page.locator(`[data-node-type="Test node #2"]`);
+    subnode.locator('.__title').dblclick();
+    const content = await getYAMLEditorContent(page);
+    const cprop = content.properties[0];
+    delete cprop.values;
+    cprop.type = 'integer';
+    cprop.default = 2137;
+    await setYAMLEditorContent(page, content);
+    // leave
+    const leaveButton = page.getByText('Return from subgraph editor').locator('../..');
+    await leaveButton.click();
+    // first property type
+    expect(prop.locator('.baklava-select')).not.toBeVisible();
+    expect(prop.locator('.baklava-num-input')).toBeVisible();
 });
 test('rename node type', async ({ page }) => {
     await page.goto(getUrl());
