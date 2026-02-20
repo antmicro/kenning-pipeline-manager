@@ -368,10 +368,27 @@ export default defineComponent({
                         !addedProperties.some((i) => i.name === pp.name))];
                     const allIntf = [...addedInterfaces, ...parsedInterfaces.filter((pi) =>
                         !addedInterfaces.some((p) => p.name === pi.name))];
+                    const nodeIntfs = [...Object.values(n.inputs), ...Object.values(n.outputs)];
+                    const toReExpose = nodeIntfs.filter(
+                        (intf) => intf.externalName
+                            && ((intf.port
+                                    && removedInterfaces.find((ii) => ii.name === intf.name)
+                                    && allIntf.find((ii) => ii.name === intf.name))
+                                || (!intf.port
+                                    && removedProperties.find((ii) => ii.name === intf.name)
+                                    && allProp.find((ii) => ii.name === intf.name))),
+                    ).map((i) => ({ name: i.name, externalName: i.externalName, port: i.port }));
                     alterProperties([n], removedProperties, true);
                     alterInterfaces([n], removedInterfaces, true);
                     alterProperties([n], allProp);
                     alterInterfaces([n], allIntf);
+
+                    [...Object.values(n.inputs), ...Object.values(n.outputs)].forEach((intf) => {
+                        const eintf = toReExpose.find((i) => i.name === intf.name);
+                        if (eintf && eintf.port === intf.port) {
+                            editor.exposeInterface(n.graphInstance.id, intf, eintf.externalName);
+                        }
+                    });
                 });
                 updateExtendedProperties(oldType, addedProperties, removedProperties);
                 updateExtendedInterfaces(oldType, addedInterfaces, removedInterfaces);
@@ -437,9 +454,12 @@ export default defineComponent({
 
                 NotificationHandler.showToast('info', 'Node validated');
                 // if in subgraph, refresh subgraph
-                if (editor.graph.graphNode !== undefined) {
-                    editor.graph.graphNode.updateExposedInterfaces(undefined, undefined, true);
-                }
+                allParsedNodes.forEach((n) => {
+                    const gnode = n.graphInstance.graphNode;
+                    if (gnode !== undefined) {
+                        gnode.updateExposedInterfaces(undefined, undefined, true);
+                    }
+                });
                 // refresh graphs connections
                 const graphs = Array.from(editor.graphs);
 
