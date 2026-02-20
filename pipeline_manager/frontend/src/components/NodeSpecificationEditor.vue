@@ -248,6 +248,257 @@ export default defineComponent({
                 && editorManager.baklavaView.settings.editableNodeTypes,
         );
 
+        /**
+         * Get the whole updated list of nodes influenced by specification.
+         * @param {Object} parsedSpecification - The node specification object to validate.
+         * @returns {Array} List of nodes that have been changed by the specification.
+         */
+        const getUpdatedNodes = (parsedSpecification) => {
+            const oldType = node.value.type;
+            const nodes = findNodes(oldType);
+
+            // Update each field if it is defined
+            /* eslint-disable no-param-reassign */
+            nodes.forEach((n) => {
+                if (n.type === n.title) {
+                    n.title = EditorManager.getNodeName(parsedSpecification);
+                } else {
+                    n.highlightedType = EditorManager.getNodeName(parsedSpecification);
+                }
+                n.type = EditorManager.getNodeName(parsedSpecification);
+
+                Object.entries(parsedSpecification).forEach(([key, value]) => {
+                    if (value !== undefined && key !== 'name') {
+                        n[key] = value;
+                    }
+                });
+            });
+            return nodes;
+        };
+        /**
+         * Get complete specification of a node type.
+         *
+         * @param {string} type - The type of node for which to fetch specification.
+         * @returns {Object} Complete specification of provided type.
+         */
+        const getCurrentSpecification = (type) => {
+            let spec = editorManager.specification.currentSpecification
+                .nodes?.find((n) => EditorManager.getNodeName(n) === type);
+
+            if (spec === undefined) {
+                spec = editorManager.specification.currentSpecification
+                    .nodes?.find(nodeMatchesSpec);
+            }
+            if (spec === undefined) {
+                spec = editorManager.specification.unresolvedSpecification
+                    .nodes?.find(nodeMatchesSpec);
+            }
+            if (spec === undefined) {
+                spec = editorManager.specification.unresolvedSpecification
+                    .nodes?.find((n) => EditorManager.getNodeName(n) === type);
+            }
+            return spec;
+        };
+        /**
+         * Process parsed and old parsed information to deduce what interfaces and properties
+         * have been removed.
+         *
+         * @param {Array} parsedProperties - list of current properties.
+         * @param {Array} oldProperties - list of old properties.
+         * @param {Array} parsedInterfaces - list of current interfaces.
+         * @param {Array} oldInterfaces - list of old interfaces.
+         * @returns {Array} An array of interfaces and properties that have been removed.
+         */
+        const getOmitted = (parsedProperties, oldProperties, parsedInterfaces, oldInterfaces) => {
+            const removedProperties = [...oldProperties.filter(
+                (prop) => !parsedProperties.some((p) => p.name === prop.name
+                    && p.override === prop.override
+                    && p.type === prop.type,
+                ),
+            )/* , ...overriddenProperties */] ?? [];
+            const removedInterfaces = [...oldInterfaces.filter(
+                (intf) => !parsedInterfaces.some((i) => i.name === intf.name
+                        && i.array === intf.array
+                        && i.type === intf.type
+                        && i.override === intf.override
+                        && i.direction === intf.direction),
+            )/* , ...overriddenInterfaces */] ?? [];
+            return [removedProperties, removedInterfaces];
+        };
+        /**
+         * Process what interfaces or properties are no longer blocked and can now be inherited.
+         *
+         * @param {Array} inheritedProps - list of all inherited properties.
+         * @param {Array} removedProps - list of removed properties.
+         * @param {Array} inheritedIntfs - list of all inherited interfaces.
+         * @param {Array} removedIntfs - list of removed interfaces.
+         * @returns {Array} An array of interfaces that once overridden can now be inherited.
+         */
+        const getReInherited = (inheritedProps, removedProps, inheritedIntfs, removedIntfs) =>
+            ([
+                inheritedProps.filter((prop) =>
+                    removedProps.some((rp) => rp.name === prop.name && rp.override),
+                ).map((prop) => ({ ...prop, inherited: true })),
+                inheritedIntfs.filter((intf) =>
+                    removedIntfs.some((ri) => ri.name === intf.name && ri.override))
+                    .map((intf) => ({ ...intf, inherited: true })),
+            ]);
+
+        /**
+         * Returns a set of interfaces that have been edited and are external interfaces.
+         * They are identified by matching the removed interface names with added interface names.
+         * This processing requires for the removed interfaces to still be present in the node.
+         *
+         * @param {Object} curNode - the node that is being processed.
+         * @param {Array} removedIntf - list of interfaces that will be removed.
+         * @param {Array} removedProp - list of properties that will be removed.
+         * @param {Array} addedIntf - list of added interfaces.
+         * @param {Array} addedProp - list of added interfaces.
+         * @returns {Array} An array containing the names and external names of interfaces edited.
+         */
+        const getEditedExternal = (curNode, addedProp, removedProp, addedIntf, removedIntf) => {
+            const nodeIntfs = [...Object.values(curNode.inputs), ...Object.values(curNode.outputs)];
+            return nodeIntfs.filter(
+                (intf) => intf.externalName && (
+                    (
+                        intf.port
+                        && removedIntf.find((ii) => ii.name === intf.name)
+                        && addedIntf.find((ii) => ii.name === intf.name)
+                    ) || (
+                        !intf.port
+                        && removedProp.find((ii) => ii.name === intf.name)
+                        && addedProp.find((ii) => ii.name === intf.name))
+                ),
+            ).map((i) => ({ name: i.name, externalName: i.externalName, port: i.port }));
+        };
+        /**
+         * Parses all nodes to find interfaces that are exposed and will have been removed.
+         * @param {Array} removedInterfaces - list of interfaces that will be removed.
+         * @returns {Array} An array of pairs - interface, graphID - of interfaces
+            that were once exposed but will be removed.
+         */
+        const getAllExposedIntfsData = (nodes, removedInterfaces) =>
+            nodes.flatMap((n) => [...Object.values(n.inputs), ...Object.values(n.outputs)]
+                .map((inf) => ([
+                    inf,
+                    n.graphInstance?.id,
+                ])))
+                .filter(([inf, _graphId]) =>
+                    inf?.externalName && removedInterfaces.some((i) => i.name === inf.name),
+                );
+        /**
+         * Parses all connections in a graph and removes any connections that are invalid.
+         * @param {Object} graph - a graph that will be processed.
+         */
+        const removeDanglingConnections = (graph) => {
+            let connectionsToRemove = [];
+
+            const graphNodes = graph.nodes;
+
+            const graphInterfaces = graphNodes.flatMap((n) =>
+                [...Object.values(n.inputs), ...Object.values(n.outputs)]);
+
+            connectionsToRemove = graph.connections.filter((conn) => {
+                const infTo = graphInterfaces.some((inf) => inf.id === conn.to.id);
+                const infFrom = graphInterfaces.some((inf) => inf.id === conn.from.id);
+                return !infTo || !infFrom;
+            });
+
+            connectionsToRemove.forEach((conn) => {
+                graph.removeConnection(conn);
+            });
+        };
+        /**
+         * Based on edited type and specification will propagate all changes through the editor.
+         * @param {string} type - type of node that was edited.
+         * @param {Object} parsedSpecification - a graph that will be processed.
+         * @param {Object} editor - opened editor in which the changes will be applied.
+         */
+        const propagateChangesInEditor = (type, parsedSpecification, editor) => {
+            const oldSpecification = getCurrentSpecification(type);
+            // Remove deleted interfaces and properties
+            // An interface was deleted if it's present in old resolved specification
+            // but not in the editor and is also not inherited.
+            const oldProperties = oldSpecification.properties ?? [];
+            const oldInterfaces = oldSpecification.interfaces ?? [];
+
+            // Deep copy properties from specification before altering nodes
+            const parsedProperties = [...structuredClone(parsedSpecification.properties ?? [])];
+            const parsedInterfaces = [...structuredClone(parsedSpecification.interfaces ?? [])];
+
+            const inheritedProperties = editorManager.findInheritedProperties(type);
+            const inheritedInterfaces = editorManager.findInheritedInterfaces(type);
+
+            const newProperties = parsedProperties.filter(
+                (prop) => !oldProperties.some((p) => p.name === prop.name),
+            ) ?? [];
+            const newInterfaces = parsedInterfaces.filter(
+                (intf) => !oldInterfaces.some((i) => i.name === intf.name),
+            ) ?? [];
+
+            // properties that were inherited before but are now inherited
+            const overriddenProperties = inheritedProperties.filter((p) =>
+                newProperties.some((pp) => p.name === pp.name && pp.override));
+            const overriddenInterfaces = inheritedInterfaces.filter((intf) =>
+                newInterfaces.some((pintf) => intf.name === pintf.name && pintf.override));
+
+            const [deletedProperties, deletedInterfaces] =
+                getOmitted(parsedProperties, oldProperties, parsedInterfaces, oldInterfaces);
+
+            // truly removed are the ones removed from YAML and the overrides
+            const removedProperties = [...deletedProperties, ...overriddenProperties];
+            const removedInterfaces = [...deletedInterfaces, ...overriddenInterfaces];
+
+            const [readdedProperties, readdedInterfaces] =
+            // eslint-disable-next-line max-len
+                getReInherited(inheritedProperties, removedProperties, inheritedInterfaces, removedInterfaces);
+            // add new properties and properties from parent that are no longer overridden
+            const addedProperties = [...newProperties, ...readdedProperties] ?? [];
+            const addedInterfaces = [...newInterfaces, ...readdedInterfaces] ?? [];
+
+            const nodes = getUpdatedNodes(parsedSpecification);
+            const childNodes = findNodes(type, true) ?? [];
+
+            const allParsedNodes = [...Object.values(nodes), ...Object.values(childNodes)];
+
+            // get all exposed interfaces to privatize
+            const exposedInterfaces = getAllExposedIntfsData(allParsedNodes, removedInterfaces);
+
+            allParsedNodes.forEach((n) => {
+                // This is needed because some of the addedProperties/Interfaces might have
+                // been added as a result of removing 'override' flag or adding it.
+                const allProp = [...addedProperties, ...parsedProperties.filter((pp) =>
+                    !addedProperties.some((i) => i.name === pp.name))];
+                const allIntf = [...addedInterfaces, ...parsedInterfaces.filter((pi) =>
+                    !addedInterfaces.some((p) => p.name === pi.name))];
+                // eslint-disable-next-line max-len
+                const toReExpose = getEditedExternal(n, allProp, removedProperties, allIntf, removedInterfaces);
+                alterProperties([n], removedProperties, true);
+                alterInterfaces([n], removedInterfaces, true);
+                alterProperties([n], allProp);
+                alterInterfaces([n], allIntf);
+
+                [...Object.values(n.inputs), ...Object.values(n.outputs)].forEach((intf) => {
+                    const eintf = toReExpose.find((i) => i.name === intf.name);
+                    if (eintf && eintf.port === intf.port) {
+                        editor.exposeInterface(n.graphInstance.id, intf, eintf.externalName);
+                    }
+                });
+            });
+            updateExtendedProperties(type, addedProperties, removedProperties);
+            updateExtendedInterfaces(type, addedInterfaces, removedInterfaces);
+            // if in subgraph, refresh subgraph
+            allParsedNodes.map((n) => n.graphInstance.graphNode).filter((g) => g)
+                .forEach((g) => {
+                    g.updateExposedInterfaces(undefined, undefined, true);
+                });
+
+            // updates exposed interfaces in graph nodes
+            exposedInterfaces.filter(([_inf, graphId]) => graphId)
+                .forEach(([inf, graphId]) => {
+                    editor.privatizeInterface(graphId, inf);
+                });
+        };
         const updateSpecification = async () => {
             try {
                 const { viewModel } = useViewModel();
@@ -267,157 +518,7 @@ export default defineComponent({
 
                 // Update all nodes of the type to match the new specification
                 const oldType = node.value.type;
-                const nodes = findNodes(oldType);
-
-                // Update each field if it is defined
-                /* eslint-disable no-param-reassign */
-                nodes.forEach((n) => {
-                    if (n.type === n.title) {
-                        n.title = EditorManager.getNodeName(parsedSpecification);
-                    } else {
-                        n.highlightedType = EditorManager.getNodeName(parsedSpecification);
-                    }
-                    n.type = EditorManager.getNodeName(parsedSpecification);
-
-                    Object.entries(parsedSpecification).forEach(([key, value]) => {
-                        if (value !== undefined && key !== 'name') {
-                            n[key] = value;
-                        }
-                    });
-                });
-
-                // Remove deleted interfaces and properties
-                // An interface was deleted if it's present in old resolved specification
-                // but not in the editor and is also not inherited.
-                let oldSpecification = editorManager.specification.currentSpecification
-                    .nodes?.find((n) => EditorManager.getNodeName(n) === oldType);
-
-                if (oldSpecification === undefined) {
-                    oldSpecification = editorManager.specification.currentSpecification
-                        .nodes?.find(nodeMatchesSpec);
-                }
-                if (oldSpecification === undefined) {
-                    oldSpecification = editorManager.specification.unresolvedSpecification
-                        .nodes?.find(nodeMatchesSpec);
-                }
-                if (oldSpecification === undefined) {
-                    oldSpecification = editorManager.specification.unresolvedSpecification
-                        .nodes?.find((n) => EditorManager.getNodeName(n) === oldType);
-                }
-
-                const oldProperties = oldSpecification.properties ?? [];
-                const oldInterfaces = oldSpecification.interfaces ?? [];
-
-                // Deep copy properties from specification before altering nodes
-                const parsedProperties = [...structuredClone(parsedSpecification.properties ?? [])];
-                const parsedInterfaces = [...structuredClone(parsedSpecification.interfaces ?? [])];
-
-                const inheritedProperties = editorManager.findInheritedProperties(oldType);
-                const inheritedInterfaces = editorManager.findInheritedInterfaces(oldType);
-
-                const newProperties = parsedProperties.filter(
-                    (prop) => !oldProperties.some((p) => p.name === prop.name),
-                ) ?? [];
-                const newInterfaces = parsedInterfaces.filter(
-                    (intf) => !oldInterfaces.some((i) => i.name === intf.name),
-                ) ?? [];
-
-                // properties that were inherited before but are now inherited
-                const overriddenProperties = inheritedProperties.filter((p) =>
-                    newProperties.some((pp) => p.name === pp.name && pp.override));
-                const overriddenInterfaces = inheritedInterfaces.filter((intf) =>
-                    newInterfaces.some((pintf) => intf.name === pintf.name && pintf.override));
-
-                const removedProperties = [...oldProperties.filter(
-                    (prop) => !parsedProperties.some((p) => p.name === prop.name
-                        && p.override === prop.override
-                        && p.type === prop.type,
-                    ),
-                ), ...overriddenProperties] ?? [];
-                const removedInterfaces = [...oldInterfaces.filter(
-                    (intf) => !parsedInterfaces.some((i) => i.name === intf.name
-                            && i.array === intf.array
-                            && i.type === intf.type
-                            && i.override === intf.override
-                            && i.direction === intf.direction),
-                ), ...overriddenInterfaces] ?? [];
-
-                // add new properties and properties from parent that are no longer overridden
-                const addedProperties = [...newProperties, ...inheritedProperties.filter((prop) =>
-                    removedProperties.some((rp) => rp.name === prop.name && rp.override))
-                    .map((prop) => ({ ...prop, inherited: true }))] ?? [];
-                const addedInterfaces = [...newInterfaces, ...inheritedInterfaces.filter((intf) =>
-                    removedInterfaces.some((ri) => ri.name === intf.name && ri.override))
-                    .map((intf) => ({ ...intf, inherited: true }))] ?? [];
-
-                const childNodes = findNodes(oldType, true) ?? [];
-
-                const allParsedNodes = [...Object.values(nodes), ...Object.values(childNodes)];
-
-                // get all exposed interfaces to privatize
-                const exposedInterfaces = [...allParsedNodes.map((n) => Object.values(n.inputs))
-                    .flat(),
-                ...allParsedNodes.map((n) => Object.values(n.outputs)).flat()]
-                    .filter((inf) => inf?.externalName)
-                    .filter((inf) => removedInterfaces.some((i) => i.name === inf.name));
-
-                allParsedNodes.forEach((n) => {
-                    // This is needed because some of the addedProperties/Interfaces might have
-                    // been added as a result of removing 'override' flag or adding it.
-                    const allProp = [...addedProperties, ...parsedProperties.filter((pp) =>
-                        !addedProperties.some((i) => i.name === pp.name))];
-                    const allIntf = [...addedInterfaces, ...parsedInterfaces.filter((pi) =>
-                        !addedInterfaces.some((p) => p.name === pi.name))];
-                    const nodeIntfs = [...Object.values(n.inputs), ...Object.values(n.outputs)];
-                    const toReExpose = nodeIntfs.filter(
-                        (intf) => intf.externalName
-                            && ((intf.port
-                                    && removedInterfaces.find((ii) => ii.name === intf.name)
-                                    && allIntf.find((ii) => ii.name === intf.name))
-                                || (!intf.port
-                                    && removedProperties.find((ii) => ii.name === intf.name)
-                                    && allProp.find((ii) => ii.name === intf.name))),
-                    ).map((i) => ({ name: i.name, externalName: i.externalName, port: i.port }));
-                    alterProperties([n], removedProperties, true);
-                    alterInterfaces([n], removedInterfaces, true);
-                    alterProperties([n], allProp);
-                    alterInterfaces([n], allIntf);
-
-                    [...Object.values(n.inputs), ...Object.values(n.outputs)].forEach((intf) => {
-                        const eintf = toReExpose.find((i) => i.name === intf.name);
-                        if (eintf && eintf.port === intf.port) {
-                            editor.exposeInterface(n.graphInstance.id, intf, eintf.externalName);
-                        }
-                    });
-                });
-                updateExtendedProperties(oldType, addedProperties, removedProperties);
-                updateExtendedInterfaces(oldType, addedInterfaces, removedInterfaces);
-
-                // updates exposed interfaces in graph nodes
-                exposedInterfaces.forEach((inf) => {
-                    const graphNested = Array.from(editor.graphs)
-                        .filter((g) => g.nodes.some((n) => n.id === inf.nodeId));
-
-                    if (graphNested.length !== 1) {
-                        return;
-                    }
-
-                    editor.privatizeInterface(graphNested[0].id, inf);
-                });
-
-                const resolvedChildNodes = editorManager.specification.currentSpecification.nodes
-                    .filter((n) => n.extends?.includes(oldType)) ?? [];
-
-                resolvedChildNodes.forEach((n) => {
-                    n.interfaces = n.interfaces?.filter(
-                        (intf) => !removedInterfaces.some((i) => i.name === intf.name),
-                    ) ?? [];
-                    n.properties = n.properties?.filter(
-                        (prop) => !removedProperties.some((p) => p.name === prop.name),
-                    ) ?? [];
-                    n.interfaces = [...n.interfaces, ...addedInterfaces];
-                    n.properties = [...n.properties, ...addedProperties];
-                });
+                propagateChangesInEditor(oldType, parsedSpecification, editor);
 
                 // eslint-disable-next-line no-underscore-dangle
                 const errors = editorManager._unregisterNodeType(oldType);
@@ -453,38 +554,10 @@ export default defineComponent({
                     currentSpecification.value;
 
                 NotificationHandler.showToast('info', 'Node validated');
-                // if in subgraph, refresh subgraph
-                allParsedNodes.forEach((n) => {
-                    const gnode = n.graphInstance.graphNode;
-                    if (gnode !== undefined) {
-                        gnode.updateExposedInterfaces(undefined, undefined, true);
-                    }
-                });
                 // refresh graphs connections
                 const graphs = Array.from(editor.graphs);
-
                 graphs.forEach((graph) => {
-                    let connectionsToRemove = [];
-
-                    const graphNodes = graph.nodes;
-
-                    const graphInterfaces = [...graphNodes.map((n) => Object.values(n.inputs))
-                        .flat(),
-                    ...graphNodes.map((n) => Object.values(n.outputs))
-                        .flat(),
-                    ];
-
-                    connectionsToRemove = [...connectionsToRemove, ...graph.connections
-                        .filter((conn) => {
-                            const infTo = graphInterfaces.some((inf) => inf.id === conn.to.id);
-                            const infFrom = graphInterfaces.some((inf) => inf.id === conn.from.id);
-
-                            return !infTo || !infFrom;
-                        })];
-
-                    connectionsToRemove.forEach((conn) => {
-                        graph.removeConnection(conn);
-                    });
+                    removeDanglingConnections(graph);
                 });
             } catch (error) {
                 const messages = Array.isArray(error) ? error : [error];
