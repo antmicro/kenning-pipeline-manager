@@ -1,5 +1,5 @@
 <!--
-Copyright (c) 2022-2025 Antmicro <www.antmicro.com>
+Copyright (c) 2022-2026 Antmicro <www.antmicro.com>
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -330,11 +330,16 @@ export default defineComponent({
 
                 const removedProperties = [...oldProperties.filter(
                     (prop) => !parsedProperties.some((p) => p.name === prop.name
-                        && p.override === prop.override),
+                        && p.override === prop.override
+                        && p.type === prop.type,
+                    ),
                 ), ...overriddenProperties] ?? [];
                 const removedInterfaces = [...oldInterfaces.filter(
                     (intf) => !parsedInterfaces.some((i) => i.name === intf.name
-                        && i.array === intf.array && i.override === intf.override),
+                            && i.array === intf.array
+                            && i.type === intf.type
+                            && i.override === intf.override
+                            && i.direction === intf.direction),
                 ), ...overriddenInterfaces] ?? [];
 
                 // add new properties and properties from parent that are no longer overridden
@@ -347,16 +352,16 @@ export default defineComponent({
 
                 const childNodes = findNodes(oldType, true) ?? [];
 
-                const allParssedNodes = [...Object.values(nodes), ...Object.values(childNodes)];
+                const allParsedNodes = [...Object.values(nodes), ...Object.values(childNodes)];
 
                 // get all exposed interfaces to privatize
-                const exposedInterfaces = [...allParssedNodes.map((n) => Object.values(n.inputs))
+                const exposedInterfaces = [...allParsedNodes.map((n) => Object.values(n.inputs))
                     .flat(),
-                ...allParssedNodes.map((n) => Object.values(n.outputs)).flat()]
+                ...allParsedNodes.map((n) => Object.values(n.outputs)).flat()]
                     .filter((inf) => inf?.externalName)
                     .filter((inf) => removedInterfaces.some((i) => i.name === inf.name));
 
-                allParssedNodes.forEach((n) => {
+                allParsedNodes.forEach((n) => {
                     // This is needed because some of the addedProperties/Interfaces might have
                     // been added as a result of removing 'override' flag or adding it.
                     const allProp = [...addedProperties, ...parsedProperties.filter((pp) =>
