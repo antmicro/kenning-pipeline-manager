@@ -436,7 +436,10 @@ export default defineComponent({
                     currentSpecification.value;
 
                 NotificationHandler.showToast('info', 'Node validated');
-
+                // if in subgraph, refresh subgraph
+                if (editor.graph.graphNode !== undefined) {
+                    editor.graph.graphNode.updateExposedInterfaces(undefined, undefined, true);
+                }
                 // refresh graphs connections
                 const graphs = Array.from(editor.graphs);
 
