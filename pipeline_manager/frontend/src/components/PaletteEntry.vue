@@ -101,6 +101,7 @@ A single entry representing available node type in the sidebar.
                 :key="entry.id"
                 :entry="entry"
                 :parent-entry="entryRef || undefined"
+                :clickable_arrow="clickable_arrow"
             />
         </div>
     </div>
@@ -138,13 +139,18 @@ const props =
     withDefaults(defineProps<{
         depth?: number,
         entry: Reactive<Entry>,
-        parentEntry?: HTMLElement
-    }>(), { depth: 0 });
+        parentEntry?: HTMLElement,
+        clickable_arrow: boolean
+    }>(), { depth: 0, clickable_arrow: false });
 
 // Children
 const expandable = computed(() => isInternal(props.entry) && props.entry.children.length);
 const toggled = computed(() => isInternal(props.entry) && props.entry.showChildren);
 const toggleChildren = () => {
+    if (props.clickable_arrow) {
+        props.entry.data.onClick?.();
+    }
+
     if (!isInternal(props.entry)) return;
     // eslint-disable-next-line vue/no-mutating-props
     props.entry.showChildren = !props.entry.showChildren;
@@ -168,8 +174,14 @@ const titleHTML = computed(() => DOMPurify.sanitize(
 ));
 
 // Icon
-const { viewModel } = useViewModel();
-const getIconSrc = (name: string) => (viewModel.value as CustomViewModel).cache[`./${name}`] ?? name;
+
+const getIconSrc = (name: string) => {
+    const { viewModel } = useViewModel();
+
+    const ret:string = (viewModel.value as CustomViewModel).cache[`./${name}`] ?? name;
+
+    return ret;
+};
 
 // Link menu
 const paletteScroll = inject<Ref<number>>('palettescroll');
