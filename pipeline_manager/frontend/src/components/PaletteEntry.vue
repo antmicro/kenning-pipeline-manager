@@ -57,7 +57,8 @@ A single entry representing available node type in the sidebar.
                         v-if="expandable"
                         class="arrow"
                         scale="small"
-                        :rotate="entry.showChildren ? 'left' : 'right'"
+                        :rotate="(entry?.computed?.showChildren
+                            ?? entry.showChildren) ? 'left' : 'right'"
                     />
                 </div>
                 <img
@@ -145,7 +146,8 @@ const props =
 
 // Children
 const expandable = computed(() => isInternal(props.entry) && props.entry.children.length);
-const toggled = computed(() => isInternal(props.entry) && props.entry.showChildren);
+const toggled = computed(() => isInternal(props.entry) &&
+    (props.entry?.computed?.showChildren ?? props.entry.showChildren));
 const toggleChildren = () => {
     if (props.clickable_arrow) {
         props.entry.data.onClick?.();
@@ -201,11 +203,15 @@ const onPointerDown = () => {
         isDragging.value = false;
         watchOnce([pointer.x, pointer.y], () => {
             isDragging.value = true;
-            dragStart!(props.entry);
+            if (dragStart) {
+                dragStart!(props.entry);
+            }
         });
     } else {
         isDragging.value = true;
-        dragStart!(props.entry);
+        if (dragStart) {
+            dragStart!(props.entry);
+        }
     }
 };
 const onPointerUp = () => {

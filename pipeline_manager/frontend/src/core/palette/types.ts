@@ -43,6 +43,7 @@ export interface IEntryData {
 
 export interface IEntryComputedData {
     active?: boolean,
+    showChildren?:boolean,
     items?: object[],
 }
 
