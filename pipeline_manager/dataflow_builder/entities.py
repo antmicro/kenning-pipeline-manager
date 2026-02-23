@@ -1,4 +1,4 @@
-# Copyright (c) 2024-2025 Antmicro <www.antmicro.com>
+# Copyright (c) 2024-2026 Antmicro <www.antmicro.com>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -414,7 +414,11 @@ class Node(JsonConvertible):
                 node_in_specification = True
                 break
 
-        if not node_in_specification and not for_subgraph_node:
+        if not node_in_specification and not (
+            for_subgraph_node
+            or "subgraph" not in kwargs
+            or "subgraph_id" not in kwargs
+        ):
             node_name = kwargs["name"]
             raise OutOfSpecificationNodeError(
                 f"Illegal name of the node `{node_name}`, "
@@ -477,6 +481,9 @@ class Node(JsonConvertible):
                             )
                         )
                 value = interfaces
+            if key == "subgraph" and value is not None:
+                Node._verify_exposed_interface_uniqueness(value)
+                value = value._id
 
             setattr(self, key, value)
 
@@ -527,27 +534,29 @@ class Node(JsonConvertible):
         RuntimeError
             Raised if `graph_id` of a non-existent graph is provided.
         """
-        node = Node(
+        return Node(
             for_subgraph_node=True,
             specification_builder=specification_builder,
             name=name,
+            id=get_uuid(),
+            interfaces=[],
+            subgraph=subgraph,
+            **kwargs,
         )
-        node.id = get_uuid()
-        node._node_name = name
-        node._subgraph = subgraph
-        node.subgraph = subgraph._id
 
-        # Node interfaces are graph interfaces with `external_name`.
-        node.interfaces = [
+    @staticmethod
+    def _verify_exposed_interface_uniqueness(graph: Any):
+        """
+        Check if exposed interfaces all have unique names.
+        """
+        all_interfaces = [
             interface
-            for interface in copy.deepcopy(node._subgraph._get_interfaces())
+            for interface in copy.deepcopy(graph._get_interfaces())
             if interface.external_name is not None
         ]
-
-        # `external_name` has to be unique among interfaces.
         external_names = [
             interface.external_name
-            for interface in node.interfaces
+            for interface in all_interfaces
             if interface.external_name is not None
         ]
         unique_external_names = set(external_names)
@@ -557,8 +566,6 @@ class Node(JsonConvertible):
                 " of `external_name`s contain repetitions: "
                 f"{', '.join(external_names)}."
             )
-
-        return node
 
     @staticmethod
     def _get_dynamic_interface_property_name(

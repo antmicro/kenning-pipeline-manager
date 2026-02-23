@@ -1,9 +1,10 @@
-# Copyright (c) 2024-2025 Antmicro <www.antmicro.com>
+# Copyright (c) 2024-2026 Antmicro <www.antmicro.com>
 #
 # SPDX-License-Identifier: Apache-2.0
 
 """Module with DataflowGraph class for representing a dataflow graph."""
 
+import logging
 from dataclasses import fields
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union
@@ -205,7 +206,9 @@ class DataflowGraph(JsonConvertible):
             f"No interface specification matches name `{interface_name}`."
         )
 
-    def create_node(self, name: str, **kwargs) -> Node:
+    def create_node(
+        self, name: str, subgraph_id: str = None, **kwargs
+    ) -> Node:
         """
         Create the node initialized with the supplied arguments.
 
@@ -218,6 +221,8 @@ class DataflowGraph(JsonConvertible):
         ----------
         name: str
             Name of a node, based on which default values will be derived.
+        subgraph_id : str
+            ID of the subgraph that contained by the node, if node is subgraph.
         kwargs
             Keyword arguments to initialise a newly created node.
             Check attributes of `Node` dataclass, to find all available keys.
@@ -240,9 +245,8 @@ class DataflowGraph(JsonConvertible):
         """
         if "subgraph" in kwargs:
             raise InvalidMethodUsedError(
-                "`DataflowGraph.create_node` method cannot be used to create "
-                "a subgraph node. Use `DataflowGraph.create_subgraph_node` "
-                "instead."
+                "`DataflowGraph.create_node` method does not take in"
+                " subgraph argument. Please provide `subgraph_id` instead"
             )
         allowed_fields = [field.name for field in fields(Node)]
         for arg_name in kwargs:
@@ -261,17 +265,25 @@ class DataflowGraph(JsonConvertible):
             if name == _node["name"]:
                 base_node = _node
 
-        if not base_node:
+        subgraph = (
+            self._graph_builder.get_graph_by_id(subgraph_id)
+            if subgraph_id
+            else None
+        )
+
+        if not base_node and not subgraph:
             raise OutOfSpecificationNodeError(
                 f"Provided name of the node `{name}` "
                 "is missing in the specification."
             )
 
-        node_id = base_node["id"] if "id" in base_node else get_uuid()
+        node_id = (
+            base_node["id"] if base_node and "id" in base_node else get_uuid()
+        )
 
         # Values for interface initialization are taken from the specification.
         interfaces = []
-        if "interfaces" in base_node:
+        if base_node and "interfaces" in base_node:
             interface_fields = [f.name for f in fields(Interface)]
             for interface in base_node["interfaces"]:
                 if isinstance(interface, Interface):
@@ -305,7 +317,7 @@ class DataflowGraph(JsonConvertible):
         # Values for properties initialization are taken
         # from the specification.
         properties = []
-        if "properties" in base_node:
+        if base_node and "properties" in base_node:
             for prop in base_node["properties"]:
                 _property = Property(
                     name=prop["name"],
@@ -316,7 +328,7 @@ class DataflowGraph(JsonConvertible):
         parameters = {
             "specification_builder": self._spec_builder,
             "id": node_id,
-            "name": base_node["name"],
+            "name": base_node["name"] if base_node else name,
             "width": getattr(
                 base_node, "width", DataflowGraph._DEFAULT_NODE_WIDTH
             ),
@@ -324,7 +336,7 @@ class DataflowGraph(JsonConvertible):
             "instance_name": None,
             "interfaces": interfaces,
             "properties": properties,
-            "subgraph": None,
+            "subgraph": subgraph,
             "two_column": self._spec_builder._metadata["twoColumn"]
             if "twoColumn" in self._spec_builder._metadata
             else True,
@@ -349,6 +361,9 @@ class DataflowGraph(JsonConvertible):
         """
         Create a node with a subgraph.
 
+        .. deprecated::
+           Use ``create_node(..., subgraph_id=...)`` instead.
+
         A graph has to exist inside `GraphBuilder` instance
         before creating a node containing it as a subgraph.
 
@@ -364,18 +379,12 @@ class DataflowGraph(JsonConvertible):
         Node
             Newly created node with a subgraph.
         """
-        if "width" not in kwargs:
-            kwargs["width"] = DataflowGraph._DEFAULT_NODE_WIDTH
-
-        subgraph = self._graph_builder.get_graph_by_id(subgraph_id)
-        node = Node.init_subgraph_node(
-            specification_builder=self._spec_builder,
-            name=name,
-            subgraph=subgraph,
-            **kwargs,
+        logging.warning(
+            "DEPRECATED: create_subgraph_node() is deprecated. "
+            "Use create_node(name, subgraph_id=...) instead."
         )
-        self._nodes[node.id] = node
-        return node
+
+        return self.create_node(name, subgraph_id=subgraph_id, **kwargs)
 
     def create_connection(
         self,
