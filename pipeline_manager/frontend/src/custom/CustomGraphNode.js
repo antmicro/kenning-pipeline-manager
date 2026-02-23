@@ -7,7 +7,7 @@
 
 import { NodeInterface, Graph } from '@baklavajs/core';
 import { v4 as uuidv4 } from 'uuid';
-import { parseInterfaces } from '../core/interfaceParser.js';
+import { parseInterfaces, generateProperties } from '../core/interfaceParser.js';
 import { updateInterfacePosition } from './CustomNode.js';
 import {
     CustomNode,
@@ -33,8 +33,9 @@ import { terminalStore } from '../core/stores.js';
   */
 function prepareProperties(graphNode) {
     const properties = graphNode.properties ?? [];
+    const dynamicProperties = generateProperties(graphNode.interfaces ?? []);
 
-    const parsedProperties = parseProperties(properties);
+    const parsedProperties = parseProperties([...properties, ...dynamicProperties.value]);
     if (Array.isArray(parsedProperties) && parsedProperties.length) {
         return parsedProperties.map((error) => `Node ${graphNode.name} invalid. ${error}`);
     }
