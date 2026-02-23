@@ -11,8 +11,8 @@ Can be either an exclamation mark or an x mark
 
 <template>
     <div :class="type">
-        <ExclamationMark v-if="type === 'info'" />
-        <ExclamationMark v-if="type === 'warning'" rotate="flip" />
+        <ExclamationMark v-if="type === 'info'" rotate="flip" />
+        <ExclamationMark v-if="type === 'warning'" />
         <Cross v-if="type === 'error'" color="white" />
     </div>
 </template>
