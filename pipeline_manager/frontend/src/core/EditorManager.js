@@ -1916,8 +1916,9 @@ export default class EditorManager {
             .map((node) => {
                 const properties = (node.properties ?? [])
                     // Unwrap groups
-                    .flatMap((prop) => (prop.group ? [prop, ...prop.group] : [prop]))
-                    .reduce((acc, prop) => ({ ...acc, [prop.name]: prop }), {});
+                    .flatMap((prop) => (
+                        prop.group ? [prop, ...Object.entries(prop.group)] : [prop]),
+                    ).reduce((acc, prop) => ({ ...acc, [prop.name]: prop }), {});
                 return [EditorManager.getNodeName(node), properties];
             })
             .reduce((acc, [name, properties]) => ({ ...acc, [name]: properties }), {});
