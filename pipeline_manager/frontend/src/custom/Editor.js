@@ -776,6 +776,23 @@ export default class PipelineManagerEditor extends Editor {
         this.graphTemplateEvents.addTarget(template.events);
         this.graphTemplateHooks.addTarget(template.hooks);
 
+        if (graphNode.extends) {
+            const intfsInherited = this.editorManager.findInheritedInterfaces(graphNode.name)
+                .filter((intf) => !graphNode.interfaces?.find(
+                    (i) => i.name === intf.name && i.side === intf.side),
+                )?.map((intf) => ({ ...intf, inherited: true }));
+            const propsInherited = this.editorManager.findInheritedProperties(graphNode.name)
+                .filter((prop) =>
+                    !graphNode.properties?.find((p) => p.name === prop.name))
+                ?.map((prop) => ({ ...prop, inherited: true }));
+            const inheritedAttributes = this.editorManager
+                .findSimpleInheritedAttributes(graphNode.name);
+
+            graphNode.interfaces = [...graphNode.interfaces ?? [], ...intfsInherited];
+            graphNode.properties = [...graphNode.properties ?? [], ...propsInherited];
+            graphNode.layer = graphNode.layer ?? inheritedAttributes.layer;
+        }
+
         const customGraphNodeType = CreateCustomGraphNodeType(template, graphNode);
         this.registerNodeType(customGraphNodeType, {
             category: graphNode.category,
