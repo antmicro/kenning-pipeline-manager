@@ -327,6 +327,9 @@ export function alterProperties(
             const hiddenIntfs = removeFromSubgraph(node, node.subgraph.nodes, externalNames);
             hiddenIntfs.forEach((intf) => privatizedProperties.add(intf.name));
         }
+        if (node.graphInstance?.graphNode !== undefined) {
+            node.graphInstance.graphNode.updateExposedInterfaces(undefined, undefined, true);
+        }
     });
     return errors.length === 0 && remove && privatizedProperties.size !== 0
         ? privatizedProperties : errors;
@@ -412,6 +415,9 @@ export function alterInterfaces(
 
             const hiddenIntfs = removeFromSubgraph(node, node.subgraph.nodes, intInterfaces);
             hiddenIntfs.forEach((intf) => privatizedInterfaces.add(intf.name));
+        }
+        if (node.graphInstance?.graphNode !== undefined) {
+            node.graphInstance.graphNode.updateExposedInterfaces(undefined, undefined, true);
         }
     });
     return errors.length === 0 && remove && privatizedInterfaces.size !== 0
