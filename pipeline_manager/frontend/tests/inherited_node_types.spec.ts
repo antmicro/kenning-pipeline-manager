@@ -22,6 +22,19 @@ async function addProperty(page: Page, node: Locator) {
     await page.getByRole('button', { name: 'Add property' }).click();
 }
 
+async function addSubgraph(node: Locator) {
+    await node.locator('.__title').click({ button: 'right' });
+    const contextMenuOption = node.locator('.baklava-context-menu').getByText('Add subgraph');
+    await contextMenuOption.click();
+}
+
+async function checkForSubgraph(node: Locator) {
+    await node.locator('.__title').click({ button: 'right' });
+    const contextMenuOption = node.locator('.baklava-context-menu').getByText('Go to graph');
+    expect(await contextMenuOption.count()).toBe(1);
+    await node.locator('.__title').click({ button: 'right' });
+}
+
 test('checking inherited properties', async ({ page }) => {
     await page.goto(getUrl());
     await loadSpecification(page, 'sample-inheritance-specification.json');
@@ -114,4 +127,18 @@ test('override interface', async ({ page }) => {
     await setYAMLEditorContent(page, YAML.stringify(editedParsedContent));
     await page.locator('.__validate-button').click();
     expect(await rightOutputs.count()).toBe(1);
+});
+test('add subgraph to child node', async ({ page }) => {
+    await page.goto(getUrl());
+    await loadSpecification(page, 'sample-inheritance-specification.json');
+    await loadDataflow(page, 'sample-inheritance-dataflow.json');
+
+    await enableEditingNodes(page);
+
+    const node = page.locator('[data-node-type="Type E"]');
+    addSubgraph(node);
+    checkForSubgraph(node);
+
+    const outputs = node.locator('.__content > .__interfaces > .__outputs > div');
+    expect(await outputs.count()).toBe(5);
 });
