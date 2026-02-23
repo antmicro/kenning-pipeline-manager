@@ -304,7 +304,7 @@ export default function CreateCustomGraphNodeType(template, graphNode) {
             );
 
             // After resolving exposed interfaces, the graph node is updated accordingly.
-            this.updateInterfaces(evaluatedIntf.inputs, evaluatedIntf.outputs, privatize);
+            this.updateGraphNodeInterfaces(evaluatedIntf.inputs, evaluatedIntf.outputs, privatize);
             this.updateProperties(evaluatedProp);
         }
 
@@ -386,7 +386,7 @@ export default function CreateCustomGraphNodeType(template, graphNode) {
          * @param {Array} newOutputs outputs to be added to the graph node
          * @param {boolean} privatize whether to check for privatized (removed) interfaces
          */
-        updateInterfaces(newInputs, newOutputs, privatize = false) {
+        updateGraphNodeInterfaces(newInputs, newOutputs, privatize = false) {
             const newInterfaces = [...newInputs, ...newOutputs];
             const currentInterfaces = { ...this.inputs, ...this.outputs };
 

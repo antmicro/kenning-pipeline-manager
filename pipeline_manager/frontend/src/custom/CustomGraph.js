@@ -543,7 +543,7 @@ export default function createPipelineManagerGraph(graph) {
                     .filter((intf) => !removedInterfaces.some((r) => r.externalName === intf.name));
                 const keptOutputs = Object.values(this.graphNode.outputs)
                     .filter((intf) => !removedInterfaces.some((r) => r.externalName === intf.name));
-                this.graphNode.updateInterfaces(
+                this.graphNode.updateGraphNodeInterfaces(
                     keptOutputs ?? [], keptInputs ?? [], true);
             }
         }
