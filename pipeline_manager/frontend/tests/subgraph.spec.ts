@@ -158,13 +158,13 @@ test('test preserving changes to subgraph', async ({ page }) => {
 });
 
 async function verifyInterfaceCount(expectedNumber: number, node: Locator): Promise<Locator> {
-    const exposedInterfaces = node.locator('.__interfaces .__outputs > div');
+    const exposedInterfaces = node.locator('.__interfaces .__outputs > div').filter({ hasText: /\S/ });
     expect(await exposedInterfaces.count()).toBe(expectedNumber);
     return exposedInterfaces;
 }
 async function verifyPropertyCount(node: Locator, expectedNumber: number): Promise<Locator> {
     // get all children
-    const exposedProperties = node.locator('.__properties > *');
+    const exposedProperties = node.locator('.__properties > *').filter({ hasText: /\S/ });
     expect(await exposedProperties.count()).toBe(expectedNumber);
     return exposedProperties;
 }
@@ -456,5 +456,28 @@ test("test new graph node creation", async ({ page }) => {
     await leaveSubgraph(page);
 
     await verifyInterfaceCount(1, subgraphNode);
-
+});
+test.only('test changing node interfaces from upper level', async ({ page }) => {
+    await prepareSubgraphPage(page);
+    await enableEditingNodes(page);
+    const subgraphNode = getNode(page, 'Test subgraph #1');
+    await verifyInterfaceCount(3, subgraphNode);
+    const testNode = getNode(page, 'Test node #1').first();
+    await testNode.locator('.__title').click({ button: 'right' });
+    await testNode.getByText('Delete interface').click();
+    await page.locator('.baklava-checkbox').getByText('Inout').click();
+    await page.getByRole('button', { name: 'Remove interfaces' }).click();
+    await verifyInterfaceCount(1, subgraphNode);
+});
+test.only('test changing node properties from upper level', async ({ page }) => {
+    await prepareSubgraphPage(page);
+    await enableEditingNodes(page);
+    const subgraphNode = getNode(page, 'Test subgraph #2');
+    await verifyPropertyCount(subgraphNode, 1);
+    const testNode = getNode(page, 'Test node #2').first();
+    await testNode.locator('.__title').click({ button: 'right' });
+    await testNode.getByText('Delete property').click();
+    await page.locator('.baklava-checkbox').getByText('Sample option').click();
+    await page.getByRole('button', { name: 'Remove properties' }).click();
+    await verifyPropertyCount(subgraphNode, 0);
 });
