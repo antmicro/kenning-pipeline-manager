@@ -288,6 +288,8 @@ export function useHistory(graph: Ref<any>, commandHandler: ICommandHandler): IH
         g.events.addAnchor.unsubscribe(tok);
         g.events.removeAnchor.unsubscribe(tok);
         g.events.editAnchor.unsubscribe(tok);
+        g.events.exposeInterface.unsubscribe(tok);
+        g.events.privatizeInterface.unsubscribe(tok);
     };
 
     // Switch all the events to any new graph that's displayed
