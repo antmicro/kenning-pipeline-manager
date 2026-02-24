@@ -457,7 +457,7 @@ test("test new graph node creation", async ({ page }) => {
 
     await verifyInterfaceCount(1, subgraphNode);
 });
-test.only('test changing node interfaces from upper level', async ({ page }) => {
+test('test changing node interfaces from upper level', async ({ page }) => {
     await prepareSubgraphPage(page);
     await enableEditingNodes(page);
     const subgraphNode = getNode(page, 'Test subgraph #1');
@@ -469,7 +469,7 @@ test.only('test changing node interfaces from upper level', async ({ page }) => 
     await page.getByRole('button', { name: 'Remove interfaces' }).click();
     await verifyInterfaceCount(1, subgraphNode);
 });
-test.only('test changing node properties from upper level', async ({ page }) => {
+test('test changing node properties from upper level', async ({ page }) => {
     await prepareSubgraphPage(page);
     await enableEditingNodes(page);
     const subgraphNode = getNode(page, 'Test subgraph #2');

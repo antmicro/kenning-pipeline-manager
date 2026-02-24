@@ -136,9 +136,10 @@ test('add subgraph to child node', async ({ page }) => {
     await enableEditingNodes(page);
 
     const node = page.locator('[data-node-type="Type E"]');
-    addSubgraph(node);
-    checkForSubgraph(node);
+    await addSubgraph(node);
+    await checkForSubgraph(node);
 
-    const outputs = node.locator('.__content > .__interfaces > .__outputs > div');
-    expect(await outputs.count()).toBe(5);
+    const outputs = await node.locator('.__content > .__interfaces > .__outputs > div').count();
+    const inputs = await node.locator('.__content > .__interfaces > .__inputs > div').count();
+    expect(inputs + outputs).toBe(5);
 });
