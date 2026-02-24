@@ -509,7 +509,25 @@ export default defineComponent({
                     throw new Error(parsingErrors);
                 }
                 const parsedSpecification = YAML.parse(currentSpecification.value.replaceAll('\t', '  '));
+                const checkSubgraphExtends = (nodeName) => {
+                    const nodeSpec = getCurrentSpecification(nodeName);
+                    if (nodeSpec.subgraphId) {
+                        return true;
+                    }
+                    return Object.values(nodeSpec.extends || {}).some((parent) =>
+                        checkSubgraphExtends(parent),
+                    );
+                };
+                if (Object.values(parsedSpecification.extends || {}).some(checkSubgraphExtends)) {
+                    throw new Error('Extending subgraphs dynamically is not currently supported.');
+                }
+                const oldType = node.value.type;
+                const oldSpec = getCurrentSpecification(oldType);
 
+                if ((oldSpec.extending?.length || node.value.extending?.length)
+                    && oldSpec.subgraphId) {
+                    throw new Error('Extending subgraphs dynamically is not currently supported.');
+                }
                 // Update style of edited node type
                 const { style } = parsedSpecification;
                 if (!Array.isArray(style) || !style.includes(EDITED_NODE_STYLE)) {
@@ -517,7 +535,6 @@ export default defineComponent({
                 }
 
                 // Update all nodes of the type to match the new specification
-                const oldType = node.value.type;
                 propagateChangesInEditor(oldType, parsedSpecification, editor);
 
                 // eslint-disable-next-line no-underscore-dangle

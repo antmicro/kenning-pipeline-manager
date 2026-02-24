@@ -42,6 +42,8 @@ export default class PipelineManagerEditor extends Editor {
         this._hideHud = val;
     }
 
+    _readonly_before_entering = undefined;
+
     _readonly = false;
 
     get readonly() {
@@ -876,6 +878,12 @@ export default class PipelineManagerEditor extends Editor {
         if (subgraphNode && subgraphNode.subgraph) {
             this.subgraphStack.push(subgraphNode.graph);
             this.switchGraph(subgraphNode);
+            if (subgraphNode.extending?.length) {
+                if (this._readonly_before_entering === undefined) {
+                    this._readonly_before_entering = this.readonly;
+                }
+                this.readonly = true;
+            }
         }
     }
 
@@ -958,6 +966,10 @@ export default class PipelineManagerEditor extends Editor {
 
         this._switchGraph(newGraph);
         this.graphName = this._graph.name;
+        if (this._readonly_before_entering !== undefined) {
+            this.readonly = this._readonly_before_entering;
+            this._readonly_before_entering = undefined;
+        }
 
         suppressHistoryLogging(false);
     }

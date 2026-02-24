@@ -846,6 +846,16 @@ export default class EditorManager {
         if (this.specification.currentSpecification === undefined) {
             return { errors: ['Current specification cannot be empty'] };
         }
+        const invalidParent = Object.values(nodeSpecification.extends ?? []).some((parent) => {
+            const nodeSpec = this.specification.currentSpecification.nodes.find(
+                (spec) => spec.name === parent,
+            );
+            return !!(nodeSpec && nodeSpec.subgraphId);
+        });
+
+        if (invalidParent) {
+            return { errors: ['Extending subgraphs dynamically is not currently supported.'] };
+        }
 
         this.specification.unresolvedSpecification.nodes ??= [];
 
