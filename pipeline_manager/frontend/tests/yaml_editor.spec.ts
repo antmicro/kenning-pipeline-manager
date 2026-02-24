@@ -51,6 +51,34 @@ test('create new node type', async ({ page }) => {
     await checkIfYAMLPersists(page);
 });
 
+test('add extends to a new node type',async ({page}) => {
+    await page.goto(getUrl());
+
+    // Insatiate a new node.
+    const nodeName = 'Custom Node';
+    await openNodePalette(page);
+    await createNewNodeType(page);
+    await addNode(page, 'Default category', nodeName, 500, 80);
+
+    // Double click the node to open the YAML editor.
+    const customNode = page.locator('[data-node-type="Custom Node"]').first();
+    await customNode.dblclick({ force: true });
+
+    // Retrieve the initial content of the YAML editor.
+    const content = await getYAMLEditorContent(page);
+    // Add extends attribute to a newly created node
+    content.extends = ["Filter2D"];
+    await setYAMLEditorContent(page, content);
+
+    // check interfaces
+    await assertOutputCount(page,nodeName,1,0);
+    await assertInputCount(page,nodeName,2,0);
+
+    // check for properties
+    await assertPropertyCount(page,nodeName,3,0)
+});
+
+
 test('adding interface from UI reflected in YAML editor', async ({ page }) => {
     await page.goto(getUrl());
     await loadSpecification(page, 'sample-subgraph-specification.json');
