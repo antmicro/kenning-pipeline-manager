@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2025 Antmicro <www.antmicro.com>
+# Copyright (c) 2022-2026 Antmicro <www.antmicro.com>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -18,7 +18,6 @@ from pipeline_manager.dataflow_builder.data_structures import (
     ExtraNodeAttributeError,
     GraphRenamingError,
     InterfaceCountError,
-    InvalidMethodUsedError,
     MultipleInterfacesSelectedError,
     OutOfSpecificationNodeError,
 )
@@ -657,9 +656,8 @@ def test_adding_subgraph_node(subgraph_specification):
 
     graph1 = builder.create_graph()
     graph2 = builder.create_graph()
-    graph1.create_subgraph_node(
-        name="New Graph Node", subgraph_id=graph2.id, width=350
-    )
+    graph1.create_node(name="New Graph Node", subgraph_id=graph2.id, width=350)
+    builder.validate()
 
 
 def test_disallowing_for_changing_graph_id(sample_specification_path):
@@ -688,21 +686,6 @@ def test_prevent_node_name_change(sample_specification_path):
 
     with pytest.raises(OutOfSpecificationNodeError):
         node.name = "Non-existent Node Name"
-
-
-def test_subgraph_node_creation_misuse_raises(sample_specification_path):
-    """
-    Test if employing `DataflowGraph.create_node` to create a subgraph node
-    raises an exception. Correct flow assumes that
-    `DataflowGraph.create_subgraph_node` should be used, instead.
-    """
-    graph_builder = GraphBuilder(
-        sample_specification_path,
-        DEFAULT_SPECIFICATION_VERSION,
-    )
-    graph = graph_builder.create_graph()
-    with pytest.raises(InvalidMethodUsedError):
-        _ = graph.create_node(name="SaveVideo", subgraph=graph.id)
 
 
 @pytest.fixture
@@ -802,7 +785,7 @@ def test_assigning_property_to_graph_node():
     outer_graph = dataflow_builder.create_graph()
     inner_graph = dataflow_builder.create_graph()
 
-    node = outer_graph.create_subgraph_node(node_name, inner_graph.id)
+    node = outer_graph.create_node(node_name, subgraph_id=inner_graph.id)
     node.set_property(
         property_name=property_name, property_value="Hello, Pipeline Manager!"
     )
