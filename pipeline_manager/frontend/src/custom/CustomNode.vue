@@ -543,6 +543,9 @@ const onContextMenuTitleClick = async (action) => {
             if (Array.isArray(errors) && errors.length) {
                 NotificationHandler.terminalLog('error', 'Dataflow is invalid', errors);
             }
+            if (props.node.extending?.length) {
+                NotificationHandler.terminalLog('warning', 'Subgraph restricted', 'Editing extending subgraph is not currently supported');
+            }
             break;
         }
         case 'unwrap':
@@ -595,6 +598,9 @@ const onContextMenuTitleClick = async (action) => {
             errors = viewModel.value.editor.switchToSubgraph(newGraphNode);
             if (Array.isArray(errors) && errors.length) {
                 NotificationHandler.terminalLog('error', 'Switching to subgraph failed', errors);
+            }
+            if (newGraphNode.extending?.length) {
+                NotificationHandler.terminalLog('warning', 'Subgraph restricted', 'Editing extending subgraph is not currently supported');
             }
             break;
         }
