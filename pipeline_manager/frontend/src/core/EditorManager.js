@@ -880,6 +880,22 @@ export default class EditorManager {
                 if (validationErrors.length) {
                     return { errors: validationErrors, warnings: [] };
                 }
+                const resolvedNodeSpec = structuredClone(nodeSpecification);
+
+                if (resolvedNodeSpec.isCategory) {
+                    this.baklavaView.editor
+                        .parentNodes.set(resolvedNodeSpec.name, resolvedNodeSpec);
+                }
+
+                const inherited = this.findSimpleInheritedAttributes(resolvedNodeSpec.name,
+                    this.specification.currentSpecification.nodes);
+
+                if (inherited.category && !resolvedNodeSpec.category) {
+                    resolvedNodeSpec.category = inherited.category;
+                    resolvedNodeSpec.simpleInherited ??= [];
+                    resolvedNodeSpec.simpleInherited.push('category');
+                }
+                this.specification.currentSpecification.nodes.add(resolvedNodeSpec);
             } else {
                 if (unresolvedNodeSpecification === undefined) {
                     // The node is included - push new spec to unresolvedSpecification to override
@@ -961,6 +977,22 @@ export default class EditorManager {
                 return { errors: validationErrors, warnings: [] };
             }
             this.specification.unresolvedSpecification.nodes.push(nodeSpecification);
+
+            const resolvedNodeSpec = structuredClone(nodeSpecification);
+
+            if (resolvedNodeSpec.isCategory) {
+                this.baklavaView.editor.parentNodes.set(resolvedNodeSpec.name, resolvedNodeSpec);
+            }
+
+            const inherited = this.findSimpleInheritedAttributes(resolvedNodeSpec.name,
+                this.specification.currentSpecification.nodes);
+
+            if (inherited.category && !resolvedNodeSpec.category) {
+                resolvedNodeSpec.category = inherited.category;
+                resolvedNodeSpec.simpleInherited ??= [];
+                resolvedNodeSpec.simpleInherited.push('category');
+            }
+            this.specification.currentSpecification.nodes.push(resolvedNodeSpec);
         }
 
         if (this.externalApplicationManager) {
