@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Antmicro <www.antmicro.com>
+ * Copyright (c) 2022-2026 Antmicro <www.antmicro.com>
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -72,22 +72,32 @@ export default function usePanZoom() {
         return Math.min(newScale, upperLimitOfScale);
     };
 
-    const onMouseWheel = (ev) => {
-        if (ev.target.type === 'textarea' && ev.target.className === 'baklava-input') {
-            return;
-        }
+    const onMouseWheel = (() => {
+        let timeout = null; // throttle timer
+        let accumulatedDelta = 0;
 
-        ev.preventDefault();
-        let scrollAmount = ev.deltaY;
-        if (ev.deltaMode === 1) {
-            scrollAmount *= 32; // Firefox fix, multiplier is trial & error
-        }
+        return (ev) => {
+            if (ev.target.type === 'textarea' && ev.target.className === 'baklava-input') return;
 
-        // Limit the zooming.
-        const newScale = calculateScale(scrollAmount);
+            ev.preventDefault();
 
-        applyZoom(ev.clientX, ev.clientY, newScale);
-    };
+            let scrollAmount = ev.deltaY;
+            if (ev.deltaMode === 1) scrollAmount *= 32; // Firefox fix, multiplier is trial & error
+
+            accumulatedDelta += scrollAmount;
+
+            if (timeout) clearTimeout(timeout);
+
+            timeout = setTimeout(() => {
+                // Limit the zooming
+                const newScale = calculateScale(accumulatedDelta);
+                applyZoom(ev.clientX, ev.clientY, newScale);
+
+                accumulatedDelta = 0;
+                timeout = null;
+            }, 10); // to batch scroll events
+        };
+    })();
 
     const getCoordsFromCache = () => ({
         ax: pointerCache[0].clientX,
