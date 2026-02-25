@@ -8,6 +8,29 @@ import {
     loadSpecification, loadDataflow, openNodePalette, getContextMenu
 } from './config.js';
 
+async function assertOutputCount(page: Page, nodeName: string, count: number, nth = 0) {
+    const inputs = await page
+        .locator(`[data-node-type="${nodeName}"]`).nth(nth)
+        .locator('.__interfaces .__outputs')
+        .locator('.__port')
+        .count();
+    expect(inputs).toBe(count);
+}
+async function assertInputCount(page: Page, nodeName: string, count: number, nth = 0) {
+    const inputs = await page
+        .locator(`[data-node-type="${nodeName}"]`).nth(nth)
+        .locator('.__interfaces .__inputs')
+        .locator('.__port')
+        .count();
+    expect(inputs).toBe(count);
+}
+async function assertPropertyCount(page: Page, nodeName: string, count: number, nth = 0) {
+    const props = await page
+        .locator(`[data-node-type="${nodeName}"]`).nth(nth)
+        .locator('.__properties > div')
+        .count();
+    expect(props).toBe(count);
+}
 
 export async function checkIfYAMLPersists(page) {
     // Open a pop-up for the first node.
@@ -78,6 +101,30 @@ test('add extends to a new node type',async ({page}) => {
     await assertPropertyCount(page,nodeName,3,0)
 });
 
+test('remove extends from a node type',async ({page}) => {
+    await page.goto(getUrl());
+
+    // Insatiate a new node.
+    const nodeName = 'Filter2D';
+
+    // check interfaces
+    await assertOutputCount(page,nodeName,1,0);
+    await assertInputCount(page,nodeName,2,0);
+
+    // Double click the node to open the YAML editor.
+    const customNode = page.locator('[data-node-type="Filter2D"]').first();
+    await customNode.locator('.__title').dblclick({ force: true });
+
+    // Retrieve the initial content of the YAML editor.
+    const content = await getYAMLEditorContent(page);
+    // Add extends attribute to a newly created node
+    content.extends = [];
+    await setYAMLEditorContent(page, content);
+
+    // check interfaces
+    await assertOutputCount(page,nodeName,0,0);
+    await assertInputCount(page,nodeName,1,0);
+});
 
 test('adding interface from UI reflected in YAML editor', async ({ page }) => {
     await page.goto(getUrl());
