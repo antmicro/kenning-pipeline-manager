@@ -1,5 +1,5 @@
 <!--
-Copyright (c) 2022-2024 Antmicro <www.antmicro.com>
+Copyright (c) 2022-2026 Antmicro <www.antmicro.com>
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -77,7 +77,9 @@ from creating and deleting connections or altering nodes' values if the editor i
 </template>
 
 <script>
-import { defineComponent, onUnmounted, ref } from 'vue';
+import {
+    defineComponent, onUnmounted, ref, watch,
+} from 'vue';
 import { Components, useViewModel } from '@baklavajs/renderer-vue';
 
 export default defineComponent({
@@ -118,27 +120,30 @@ export default defineComponent({
         const opened = ref(false);
 
         const closeContextMenu = (ev) => {
-            if (props.modelValue === true) {
-                // We need a counter so that this event is not fired right when the menu is opened
-                if (opened.value === true) {
-                    let current = document.elementsFromPoint(ev.clientX, ev.clientY)[0];
-                    const elements = [];
-                    while (current) {
-                        elements.push(current);
-                        current = current.parentNode;
-                    }
+            if (!props.modelValue) {
+                return;
+            }
+            if (!opened.value) {
+                opened.value = true;
+                return;
+            }
+            if (ev.type === 'wheel') {
+                context.emit('update:modelValue', false);
+                opened.value = false;
+            } else {
+                let current = document.elementsFromPoint(ev.clientX, ev.clientY)[0];
+                const elements = [];
+                while (current) {
+                    elements.push(current);
+                    current = current.parentNode;
+                }
 
-                    // We only need to fire closing event if the click was
-                    // outside of the context menu. Otherwise `onClick` is fired.
-                    const hasIgnoredElements = new Set(elements)
-                        .intersection(new Set([el.value, ...props.ignoreClose])).size;
+                const hasIgnoredElements = new Set(elements)
+                    .intersection(new Set([el.value, ...props.ignoreClose])).size;
 
-                    if (ev.type === 'wheel' || !(hasIgnoredElements)) {
-                        context.emit('update:modelValue', false);
-                        opened.value = false;
-                    }
-                } else {
-                    opened.value = true;
+                if (!hasIgnoredElements) {
+                    context.emit('update:modelValue', false);
+                    opened.value = false;
                 }
             }
         };
@@ -150,14 +155,22 @@ export default defineComponent({
             }
         };
 
-        window.addEventListener('keydown', onKeyDown);
-        window.addEventListener('wheel', closeContextMenu);
-        window.addEventListener('pointerdown', closeContextMenu);
+        watch(() => props.modelValue, (isOpen) => {
+            if (isOpen) {
+                window.addEventListener('keydown', onKeyDown);
+                window.addEventListener('pointerdown', closeContextMenu);
+                window.addEventListener('wheel', closeContextMenu);
+            } else {
+                window.removeEventListener('keydown', onKeyDown);
+                window.removeEventListener('pointerdown', closeContextMenu);
+                window.removeEventListener('wheel', closeContextMenu);
+            }
+        });
 
         onUnmounted(() => {
             window.removeEventListener('keydown', onKeyDown);
-            window.removeEventListener('wheel', closeContextMenu);
             window.removeEventListener('pointerdown', closeContextMenu);
+            window.removeEventListener('wheel', closeContextMenu);
         });
 
         const onClick = (item) => {
