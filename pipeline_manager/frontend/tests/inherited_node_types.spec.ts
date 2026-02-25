@@ -119,7 +119,9 @@ test('override interface', async ({ page }) => {
         .locator('.__content > .__interfaces > .__outputs > div');
     expect(await rightOutputs.count()).toBe(2);
 
-    const editedParsedContent = await getYAMLEditorContent(page);
+    await nodeB.dblclick();
+    const editedContent = await getYAMLEditorContent(page);
+    const editedParsedContent = YAML.parse(editedContent);
     expect(editedParsedContent.interfaces.length).toBe(2);
     editedParsedContent.interfaces.pop();
     await setYAMLEditorContent(page, editedParsedContent);
