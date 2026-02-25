@@ -102,6 +102,9 @@ export async function openNodePalette(page) {
     const nodePalette = page.locator('.baklava-node-palette');
     const addNodeButton = nodePalette.getByText('New Node Type').first();
     expect(addNodeButton).toBeVisible();
+    // because sometimes the page shifts which makes the mouse hover over the logo,
+    // breaking the test (hiding some nodes).
+    await page.mouse.move(100, 100);
 }
 
 /**
