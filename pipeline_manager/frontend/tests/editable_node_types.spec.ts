@@ -1,13 +1,17 @@
-import { test, expect, Page, Locator } from '@playwright/test';
-import { getUrl, getPathToJsonFile, addNode, openFileChooser, dragAndDrop, enableNavigationBar, openNodePalette } from './config.js';
-import { loadSpecification, loadDataflow, enableEditingNodes } from './config.js';
+import {
+    test, expect, Page, Locator, TestInfo,
+} from '@playwright/test';
 
 import os from 'os';
 import fs from 'fs/promises';
 import YAML from 'yaml';
 
-const temporaryDir = os.tmpdir() + '/';
+import {
+    getUrl, getPathToJsonFile, addNode, openFileChooser, dragAndDrop, openNodePalette,
+    loadSpecification, loadDataflow, enableEditingNodes,
+} from './config.js';
 
+const temporaryDir = `${os.tmpdir()}/`;
 
 async function createNewNodeType(page: Page) {
     // Open node configuration menu
@@ -21,20 +25,24 @@ async function createNewNodeType(page: Page) {
     await createButton.click();
 }
 
-async function loadIncludeSpecification(page: Page) {
+async function loadIncludeSpecification(page: Page, testInfo: TestInfo) {
     const fileChooser = await openFileChooser(page, 'specification');
     const specificationName = 'sample-include-specification.json';
-    const specification = await fs.readFile(getPathToJsonFile(specificationName), { encoding: 'utf-8' });
+    const specification = await fs.readFile(
+        getPathToJsonFile(specificationName),
+        { encoding: 'utf-8' },
+    );
     const newSpecification = specification.replaceAll(
         'https://raw.githubusercontent.com/antmicro/kenning-pipeline-manager/main/examples/',
         `http://localhost:7001/`,
     );
-    const newSpecificationPath = temporaryDir + specificationName;
+    const newSpecificationPath =
+        `${temporaryDir}sample-include-specification-worker-${testInfo.workerIndex}.json`;
     await fs.writeFile(newSpecificationPath, newSpecification);
     await fileChooser.setFiles(newSpecificationPath);
 }
 
-async function assertInputCount(page: Page, nodeName: string, count: integer) {
+async function assertInputCount(page: Page, nodeName: string, count: number) {
     const inputs = await page
         .locator(`[data-node-type="${nodeName}"]`)
         .locator('.__interfaces .__inputs > div')
@@ -112,24 +120,24 @@ async function verifyNodePresence(page: Page, specificationPath: string, nodeNam
     ).toBeTruthy();
 }
 
-test('enable editing', async ({ page }) => {
+test('enable editing', async ({ page }, testInfo) => {
     await page.goto(getUrl());
-    await loadIncludeSpecification(page);
+    await loadIncludeSpecification(page, testInfo);
     await openNodePalette(page);
 });
 
-test('create new node type', async ({ page }) => {
+test('create new node type', async ({ page }, testInfo) => {
     await page.goto(getUrl());
-    await loadIncludeSpecification(page);
+    await loadIncludeSpecification(page, testInfo);
 
     await openNodePalette(page);
     await createNewNodeType(page);
     await addNode(page, 'Default category', 'Custom Node', 750, 80);
 });
 
-test('add interface to custom node in specification with "include" keyword', async ({ page }) => {
+test('add interface to custom node in specification with "include" keyword', async ({ page }, testInfo) => {
     await page.goto(getUrl());
-    await loadIncludeSpecification(page);
+    await loadIncludeSpecification(page, testInfo);
     await openNodePalette(page);
 
     const nodeName = 'Custom Node';
@@ -138,9 +146,9 @@ test('add interface to custom node in specification with "include" keyword', asy
     await addInterface(page, nodeName);
 });
 
-test('register custom node in specification with "include" keyword', async ({ page }) => {
+test('register custom node in specification with "include" keyword', async ({ page }, testInfo) => {
     await page.goto(getUrl());
-    await loadIncludeSpecification(page);
+    await loadIncludeSpecification(page, testInfo);
     await openNodePalette(page);
 
     const nodeName = 'Custom Node';
@@ -150,9 +158,9 @@ test('register custom node in specification with "include" keyword', async ({ pa
     await verifyNodePresence(page, specificationPath, nodeName);
 });
 
-test('rename extending node', async ({ page }) => {
+test('rename extending node', async ({ page }, testInfo) => {
     await page.goto(getUrl());
-    await loadIncludeSpecification(page);
+    await loadIncludeSpecification(page, testInfo);
 
     await addNode(page, 'Filesystem', 'LoadVideo', 750, 80);
     await openNodePalette(page);
@@ -184,9 +192,9 @@ test('rename extending node', async ({ page }) => {
     expect(editedNode.nth(2).getByText('frames')).toBeVisible();
 });
 
-test('rename category node', async ({ page }) => {
+test('rename category node', async ({ page }, testInfo) => {
     await page.goto(getUrl());
-    await loadIncludeSpecification(page);
+    await loadIncludeSpecification(page, testInfo);
 
     await addParentAndChildNode(page, 200);
     await openNodePalette(page);
@@ -196,7 +204,7 @@ test('rename category node', async ({ page }) => {
 
     // check category in custom sidebar
     const node = page.getByText('Logical AND').locator('..').last();
-    await node.click({ button: 'right'});
+    await node.click({ button: 'right' });
     await node.getByText('Details', { exact: true }).click();
 
     const parents = page.getByText('Generalize');
@@ -205,12 +213,11 @@ test('rename category node', async ({ page }) => {
     await expect(siblings).toBeVisible();
 });
 
-test('add interface to category node', async ({ page }) => {
+test('add interface to category node', async ({ page }, testInfo) => {
     await page.goto(getUrl());
-    await loadIncludeSpecification(page);
+    await loadIncludeSpecification(page, testInfo);
 
     await addParentAndChildNode(page, 200);
-    await openNodePalette(page);
 
     await addInterface(page, 'Binary images');
     await assertInputCount(page, 'Logical AND', 3);
@@ -220,9 +227,9 @@ test('add interface to category node', async ({ page }) => {
     await assertInputCount(page, 'Logical AND', 6);
 });
 
-test('hiding property', async ({ page }) => {
+test('hiding property', async ({ page }, testInfo) => {
     await page.goto(getUrl());
-    await loadIncludeSpecification(page);
+    await loadIncludeSpecification(page, testInfo);
 
     await addNode(page, 'Generators', 'GaussianKernel', 750, 80, true);
     const node = page.locator('[data-node-type="GaussianKernel"]').first();
@@ -241,11 +248,10 @@ test('hiding property', async ({ page }) => {
 
 async function getYAMLEditorContent(page: Page) {
     const textarea = page.locator('textarea');
-    const value = await textarea.evaluate((el) => el.value);
-    return value;
+    return textarea.evaluate((el) => (<HTMLInputElement>el).value);
 }
 
-test('adding interface from UI reflected in YAML editor', async ({page}) => {
+test('adding interface from UI reflected in YAML editor', async ({ page }) => {
     await page.goto(getUrl());
     await loadSpecification(page, 'sample-subgraph-specification.json');
     await loadDataflow(page, 'sample-subgraph-dataflow.json');
