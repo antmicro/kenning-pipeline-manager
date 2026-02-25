@@ -209,11 +209,13 @@ test('editing interface in YAML', async ({ page }) => {
     await assertOutputCount(node, 1);
 
     content.interfaces.find((p) => p.name === 'frames').direction = 'input';
+    await reopenNode(page,node);
     await setYAMLEditorContent(page, content);
     await assertInputCount(node, 1);
     await assertOutputCount(node, 0);
 
     content.interfaces.find((p) => p.name === 'frames').name = 'unique_input';
+    await reopenNode(page,node);
     await setYAMLEditorContent(page, content);
     await assertInputCount(node, 1);
     await assertOutputCount(node, 0);
