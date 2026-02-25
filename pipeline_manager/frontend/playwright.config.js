@@ -4,7 +4,10 @@ import { defineConfig } from '@playwright/test';
 export default defineConfig({
   fullyParallel: true,
   testDir: 'tests',
-  reporter: 'html',
+  reporter: [
+              ['html',  { open: 'never' }],
+              ['json', {  outputFile: 'test-results.json' }]
+            ],
   retries: 3,
 
   webServer: {
