@@ -1,5 +1,5 @@
 <!--
-Copyright (c) 2022-2025 Antmicro <www.antmicro.com>
+Copyright (c) 2022-2026 Antmicro <www.antmicro.com>
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -90,7 +90,6 @@ from moving or deleting the nodes.
                 :transition="''"
                 @pointerdown.left.stop
                 @click="onContextMenuTitleClick"
-                @sizeUpdate="onContextMenuSizeUpdate"
             />
         </div>
 
