@@ -1,10 +1,10 @@
 import YAML from 'yaml';
 import {
-    test, expect, Page, FileChooser,
+    test, expect, Page,
     Locator,
 } from '@playwright/test';
 import {
-    getPathToJsonFile, getUrl, addNode, dragAndDrop, enableEditingNodes,
+    getUrl, addNode, dragAndDrop, enableEditingNodes,
     loadSpecification, loadDataflow, openNodePalette,
 } from './config.js';
 
@@ -43,7 +43,7 @@ async function createNewNodeType(page: Page) {
 }
 async function getYAMLEditorContent(page: Page) {
     const textarea = page.locator('textarea');
-    const value = await textarea.evaluate((el) => el.value);
+    const value = await textarea.evaluate((el) => (<HTMLInputElement>el).value);
     return YAML.parse(value);
 }
 async function setYAMLEditorContent(page: Page, content: any) {
@@ -108,7 +108,7 @@ test('create new node type', async ({ page }) => {
 test('adding interface from UI reflected in YAML editor', async ({ page }) => {
     await page.goto(getUrl());
     await loadSpecification(page, 'sample-subgraph-specification.json');
-
+    await loadDataflow(page, 'sample-subgraph-dataflow.json');
     await enableEditingNodes(page);
 
     // Insatiate a new node.
