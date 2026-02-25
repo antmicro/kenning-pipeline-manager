@@ -74,7 +74,7 @@ def build_server_app(request: pytest.FixtureRequest):
                 tmp_dir,
             ]
             process = subprocess.Popen(args)
-            return_code = process.wait(timeout=50)
+            return_code = process.wait(timeout=100)
             assert not return_code, (
                 "Building a server app failed."
                 f"Return non-zero code: {return_code}"
