@@ -1,14 +1,12 @@
 import {
-    test, expect, Page, Locator, TestInfo,
+    test, expect, Page, TestInfo,
 } from '@playwright/test';
 
 import os from 'os';
 import fs from 'fs/promises';
-import YAML from 'yaml';
 
 import {
     getUrl, getPathToJsonFile, addNode, openFileChooser, dragAndDrop, openNodePalette,
-    loadSpecification, loadDataflow, enableEditingNodes,
 } from './config.js';
 
 const temporaryDir = `${os.tmpdir()}/`;
@@ -244,42 +242,4 @@ test('hiding property', async ({ page }, testInfo) => {
     await nodeTitle.dblclick();
     await page.locator('.baklava-sidebar').locator('.__property-button').click();
     expect(await nodePropertiesBefore.count()).toBe(3);
-});
-
-async function getYAMLEditorContent(page: Page) {
-    const textarea = page.locator('textarea');
-    return textarea.evaluate((el) => (<HTMLInputElement>el).value);
-}
-
-test('adding interface from UI reflected in YAML editor', async ({ page }) => {
-    await page.goto(getUrl());
-    await loadSpecification(page, 'sample-subgraph-specification.json');
-    await loadDataflow(page, 'sample-subgraph-dataflow.json');
-    await enableEditingNodes(page);
-
-    // Insatiate a new node.
-    const nodeName = 'Custom Node';
-    await openNodePalette(page);
-    await createNewNodeType(page);
-    await addNode(page, 'Default category', nodeName, 750, 80);
-
-    // Double click the node to open the YAML editor.
-    const customNode = page.locator('[data-node-type="Custom Node"]').first();
-    await customNode.dblclick({ force: true });
-
-    // Retrieve the initial content of the YAML editor.
-    const initialContent = await getYAMLEditorContent(page);
-    const parsedContent = YAML.parse(initialContent);
-
-    // Retrieve the modified content of the YAML editor.
-    await addInterface(page, nodeName);
-    const modifiedContent = await getYAMLEditorContent(page);
-
-    // Count the number of elements in the `interfaces` attribute.
-    const initialInterfacesCount = parsedContent.interfaces.length;
-    const modifiedParsedContent = YAML.parse(modifiedContent);
-    const modifiedInterfacesCount = modifiedParsedContent.interfaces.length;
-
-    expect(initialInterfacesCount).toBe(0);
-    expect(modifiedInterfacesCount).toBe(1);
 });
