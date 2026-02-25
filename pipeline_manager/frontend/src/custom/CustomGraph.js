@@ -194,6 +194,8 @@ export default function createPipelineManagerGraph(graph) {
             newNodeInstance.title = oldNode.title;
         }
 
+        const color = this.editor.getNodeColor(oldNode);
+
         // Restoring properties and interfaces
         if (copyInterfaces) {
             Object.entries({ ...oldNode.inputs, ...oldNode.outputs }).forEach(([name, intf]) => {
@@ -220,6 +222,12 @@ export default function createPipelineManagerGraph(graph) {
                             false,
                             false,
                         );
+                        newNodeInstance.inputs[name]
+                            .id = intf.id;
+                        newNodeInstance.inputs[name]
+                            .externalName = intf?.externalName;
+                        newNodeInstance.inputs[name]
+                            .maxConnectionsCount = intf?.maxConnectionsCount;
                     }
                     if (Object.prototype.hasOwnProperty.call(newNodeInstance.outputs, name)) {
                         updateInterfacePosition(
@@ -230,13 +238,24 @@ export default function createPipelineManagerGraph(graph) {
                             false,
                             false,
                         );
+                        newNodeInstance.outputs[name]
+                            .id = intf.id;
+                        newNodeInstance.outputs[name]
+                            .externalName = intf?.externalName;
+                        newNodeInstance.outputs[name]
+                            .maxConnectionsCount = intf?.maxConnectionsCount;
                     }
                     // If the new node has the same property as it could be overridden
                 } else if (
-                    Object.prototype.hasOwnProperty.call(newNodeInstance.inputs, name) &&
-                    newNodeInstance.inputs[name].componentName === intf.componentName
+                    Object.prototype.hasOwnProperty.call(newNodeInstance.inputs, name)
                 ) {
-                    newNodeInstance.inputs[name].value = intf.value;
+                    if (newNodeInstance.inputs[name].componentName === intf.componentName) {
+                        newNodeInstance.inputs[name].value = intf.value;
+                    }
+                    newNodeInstance.inputs[name]
+                        .id = intf.id;
+                    newNodeInstance.inputs[name]
+                        .externalName = intf?.externalName;
                 }
             });
         }
@@ -256,25 +275,38 @@ export default function createPipelineManagerGraph(graph) {
             connections.forEach((conn) => {
                 if (Object.prototype.hasOwnProperty.call(newNodeInstance.inputs, name)) {
                     if (conn.from === intf) {
-                        const newConn = new Connection(newNodeInstance.inputs[name], conn.to);
-                        newConn.anchors = conn.anchors;
-                        connectionsToRestore.push(newConn);
+                        if (this.checkConnection(newNodeInstance.inputs[name], conn.to)
+                            .connectionAllowed) {
+                            const newConn = new Connection(newNodeInstance.inputs[name], conn.to);
+                            newConn.anchors = conn.anchors;
+                            connectionsToRestore.push(newConn);
+                        }
                     } else if (conn.to === intf) {
-                        const newConn = new Connection(conn.from, newNodeInstance.inputs[name]);
-                        newConn.anchors = conn.anchors;
-                        connectionsToRestore.push(newConn);
+                        if (this.checkConnection(conn.from, newNodeInstance.inputs[name])
+                            .connectionAllowed) {
+                            const newConn = new Connection(conn.from, newNodeInstance.inputs[name]);
+                            newConn.anchors = conn.anchors;
+                            connectionsToRestore.push(newConn);
+                        }
                     }
                 }
 
                 if (Object.prototype.hasOwnProperty.call(newNodeInstance.outputs, name)) {
                     if (conn.from === intf) {
-                        const newConn = new Connection(newNodeInstance.outputs[name], conn.to);
-                        newConn.anchors = conn.anchors;
-                        connectionsToRestore.push(newConn);
+                        if (this.checkConnection(newNodeInstance.outputs[name], conn.to)
+                            .connectionAllowed) {
+                            const newConn = new Connection(newNodeInstance.outputs[name], conn.to);
+                            newConn.anchors = conn.anchors;
+                            connectionsToRestore.push(newConn);
+                        }
                     } else if (conn.to === intf) {
-                        const newConn = new Connection(conn.from, newNodeInstance.outputs[name]);
-                        newConn.anchors = conn.anchors;
-                        connectionsToRestore.push(newConn);
+                        if (this.checkConnection(conn.from, newNodeInstance.outputs[name])
+                            .connectionAllowed) {
+                            const newConn = new Connection(conn.from,
+                                newNodeInstance.outputs[name]);
+                            newConn.anchors = conn.anchors;
+                            connectionsToRestore.push(newConn);
+                        }
                     }
                 }
             });
@@ -286,9 +318,15 @@ export default function createPipelineManagerGraph(graph) {
 
         this.removeNode(oldNode);
         this.addNode(newNodeInstance);
-        connectionsToRestore.forEach((conn) => this.internalAddConnection(conn));
+        connectionsToRestore.forEach((conn) => {
+            this.internalAddConnection(conn);
+        });
 
         commitTransaction();
+
+        if (color) {
+            this.editor.setNodeColor(newNodeInstance.id, color);
+        }
 
         return newNodeInstance;
     };
