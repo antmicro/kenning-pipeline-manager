@@ -61,8 +61,7 @@ test-frontend:
     script:
         - ./build static-html ./examples/sample-specification.json ./examples/sample-dataflow.json
         - cd pipeline_manager/frontend
-        - npx playwright install --with-deps
-        - npm run test
+        - ./tests/utils/test_frontend.sh
     artifacts:
         paths:
             - pipeline_manager/frontend/playwright-report
