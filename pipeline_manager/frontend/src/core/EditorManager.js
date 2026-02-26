@@ -2071,10 +2071,10 @@ export default class EditorManager {
                     );
 
                     if (!globalProperties.softLoad) {
-                        status.errors.push(...result.errors);
-                        status.warnings.push(...result.warnings);
+                        status.errors.push(...(result.errors ?? []));
+                        status.warnings.push(...(result.warnings ?? []));
                     } else {
-                        status.warnings.push(...result.errors, ...result.warnings);
+                        status.warnings.push(...(result.errors ?? []), ...(result.warnings ?? []));
                     }
 
                     this.baklavaView.history.graphSwitch(
