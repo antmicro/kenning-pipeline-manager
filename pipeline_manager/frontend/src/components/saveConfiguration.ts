@@ -248,18 +248,10 @@ export const saveGraphConfiguration: SaveConfiguration = {
     },
 
     reset() {
-        const dataflow = EditorManager.getEditorManagerInstance().saveDataflow();
-        const graphName: string | null | undefined = (dataflow.entryGraph
-            ? (dataflow.graphs
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                .find((dataflowGraph: any) => dataflowGraph.id === dataflow.entryGraph)
-                ?.name)
-            : dataflow.graphs[0]?.name) ?? null;
-
         this.readonly = false;
         this.hideHud = false;
         this.position = false;
-        this.graphName = graphName;
+        this.graphName = null;
         this.saveName = 'save';
     },
 };
