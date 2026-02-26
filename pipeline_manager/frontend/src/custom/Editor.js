@@ -814,7 +814,13 @@ export default class PipelineManagerEditor extends Editor {
     switchGraph(subgraphNode) {
         if (this._switchGraph === undefined) {
             const { switchGraph } = useGraph();
-            this._switchGraph = switchGraph;
+            this._switchGraph = (g) => {
+                const prev = this._graph;
+                prev.disableDestroy = true;
+                this._graph = g;
+                switchGraph(g);
+                prev.disableDestroy = false;
+            };
         }
         // disable history logging for the switch - don't push nodes being created here
         suppressHistoryLogging(true);
@@ -824,7 +830,6 @@ export default class PipelineManagerEditor extends Editor {
                 `Node "${subgraphNode.name}" does contain a subgraph.`,
             );
         }
-        this._graph = subgraphNode.subgraph;
         this._switchGraph(subgraphNode.subgraph);
         this.graphName = this._graph.name;
 
@@ -873,7 +878,13 @@ export default class PipelineManagerEditor extends Editor {
 
         if (this._switchGraph === undefined) {
             const { switchGraph } = useGraph();
-            this._switchGraph = switchGraph;
+            this._switchGraph = (g) => {
+                const prev = this._graph;
+                prev.disableDestroy = true;
+                this._graph = g;
+                switchGraph(g);
+                prev.disableDestroy = false;
+            };
         }
         // disable history logging for the switch - don't push nodes being created here
         suppressHistoryLogging(true);
@@ -883,8 +894,7 @@ export default class PipelineManagerEditor extends Editor {
         } else if (this.subgraphStack.length > 0) {
             this.subgraphStack.pop();
         }
-        this._graph = targetGraph;
-        this._switchGraph(this._graph);
+        this._switchGraph(targetGraph);
         this.graphName = this._graph.name;
 
         nextTick().then(() => {
@@ -934,8 +944,7 @@ export default class PipelineManagerEditor extends Editor {
 
         suppressHistoryLogging(true);
 
-        this._graph = newGraph;
-        this._switchGraph(this._graph);
+        this._switchGraph(newGraph);
         this.graphName = this._graph.name;
 
         suppressHistoryLogging(false);

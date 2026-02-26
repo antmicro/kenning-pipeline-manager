@@ -25,6 +25,7 @@ export default function createPipelineManagerGraph(graph) {
 
     // Add an event for editing node
     graph.events.editNode = new BaklavaEvent();
+    graph.disableDestroy = false;
 
     // Add event for moving anchors.
     graph.events.editAnchor = new BaklavaEvent();
@@ -305,6 +306,12 @@ export default function createPipelineManagerGraph(graph) {
     };
 
     graph.destroy = function destroy() {
+        // Needed as a workaround for in-built baklava graph handling.
+        // For example when changing graphs using switchGraphs the destroy
+        // mechanism has to be restricted.
+        if (this.disableDestroy) {
+            return;
+        }
         for (let i = this.connections.length - 1; i >= 0; i -= 1) {
             this.removeConnection(this.connections[i]);
         }
