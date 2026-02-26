@@ -374,7 +374,8 @@ export default function createPipelineManagerGraph(graph) {
                 // if needed
                 n.id ??= uuidv4();
 
-                if (n.subgraph && n.graphState) {
+                // add && n.template
+                if (n.subgraph && node.template) {
                     // Remove new graphs except current one since they become dangling after
                     // CustomGraphNode.load
                     const graphsBefore = new Set([...this.editor.graphs].map(toRaw));
@@ -583,6 +584,7 @@ export default function createPipelineManagerGraph(graph) {
     graph.removeNodeOnly = function removeNodeOnly(node) {
         this._nodes.splice(this.nodes.indexOf(node), 1);
         this.events.removeNode.emit(node);
+        node.events.propertyEdit.unsubscribe(this);
         node.onDestroy();
         this.nodeEvents.removeTarget(node);
         this.nodeHooks.removeTarget(node);

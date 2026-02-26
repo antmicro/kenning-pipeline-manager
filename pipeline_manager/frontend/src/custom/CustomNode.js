@@ -127,6 +127,7 @@ export function removeNode(node, unwrapGraph = false) {
 
     if (graphWithNode?.nodes.length === 0 && viewModel.value.editor.isInSubgraph()) {
         viewModel.value.editor.unregisterGraph(graphWithNode);
+        graphWithNode.destroy?.();
         viewModel.value.editor.backFromSubgraph();
     }
 }
