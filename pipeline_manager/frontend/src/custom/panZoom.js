@@ -126,31 +126,70 @@ export default function usePanZoom() {
         }
     };
 
-    const onPointerMove = (ev) => {
-        if (pointerCache.length === 2) {
-            for (let i = 0; i < pointerCache.length; i += 1) {
-                if (ev.pointerId === pointerCache[i].pointerId) {
-                    pointerCache[i] = ev;
-                    break;
+    const onPointerMove = (() => {
+        let timeout = null;
+        let accumulatedDX = 0;
+        let accumulatedDY = 0;
+        let lastEvent = null;
+        return (ev) => {
+            if (pointerCache.length === 2) {
+                for (let i = 0; i < pointerCache.length; i += 1) {
+                    if (ev.pointerId === pointerCache[i].pointerId) {
+                        pointerCache[i] = ev;
+                        break;
+                    }
                 }
+
+                const {
+                    ax, ay, bx, by,
+                } = getCoordsFromCache();
+                const dx = ax - bx;
+                const dy = ay - by;
+                const curDiff = Math.sqrt(dx * dx + dy * dy);
+
+                if (prevDiff > 0) {
+                    if (!timeout) {
+                        timeout = setTimeout(() => {
+                            const newScale = graph.value.scaling * (1 + (curDiff - prevDiff) / 500);
+                            applyZoom(midpoint.x, midpoint.y, newScale);
+
+                            prevDiff = curDiff;
+                            timeout = null;
+                        }, 10);
+                    }
+                }
+            } else if (pointerCache.length === 1) {
+                if (lastEvent) {
+                    accumulatedDX += ev.pageX - lastEvent.pageX;
+                    accumulatedDY += ev.pageY - lastEvent.pageY;
+                }
+
+                lastEvent = ev;
+
+                if (!timeout) {
+                    timeout = setTimeout(() => {
+                        if (lastEvent) {
+                            const syntheticEvent = {
+                                ...lastEvent,
+                                pageX: lastEvent.pageX - accumulatedDX,
+                                pageY: lastEvent.pageY - accumulatedDY,
+                            };
+
+                            dragMove.onPointerMove(syntheticEvent);
+
+                            accumulatedDX = 0;
+                            accumulatedDY = 0;
+                            lastEvent = null;
+                        }
+
+                        timeout = null;
+                    }, 5);
+                }
+            } else {
+                dragMove.onPointerMove(ev);
             }
-
-            const { ax, ay, bx, by } = getCoordsFromCache(); // eslint-disable-line object-curly-newline,max-len
-            const dx = ax - bx;
-            const dy = ay - by;
-            const curDiff = Math.sqrt(dx * dx + dy * dy);
-
-            if (prevDiff > 0) {
-                const newScale = graph.value.scaling * (1 + (curDiff - prevDiff) / 500);
-                applyZoom(midpoint.x, midpoint.y, newScale);
-            }
-
-            // Cache the distance for the next move event
-            prevDiff = curDiff;
-        } else {
-            dragMove.onPointerMove(ev);
-        }
-    };
+        };
+    })();
 
     const onPointerUp = (ev) => {
         dragMove.onPointerUp();
