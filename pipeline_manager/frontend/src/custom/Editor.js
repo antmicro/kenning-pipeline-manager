@@ -361,7 +361,8 @@ export default class PipelineManagerEditor extends Editor {
                     graphToLoad = preparedSubgraphState;
                 }
                 if (!result.errors.length || globalProperties.softLoad) {
-                    result.errors.push(...this._graph.load(graphToLoad));
+                    const loadAll = (entryGraph === graphToLoad);
+                    result.errors.push(...this._graph.load(graphToLoad, loadAll));
                 }
             }
         } catch (err) {

@@ -336,7 +336,9 @@ export default function CreateCustomGraphNodeType(template, graphNode) {
                 { graphLoadingState, newSubgraphNodeId: nodeId },
             );
 
-            if (!errors.length) errors.push(...graph.load(state));
+            if (!errors.length) {
+                errors.push(...graph.load(state, graphLoadingState?.loadAll ?? false));
+            }
             // When soft load is enabled ignore it
             if (errors.length && !globalProperties.softLoad) {
                 throw new Error(

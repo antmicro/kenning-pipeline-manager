@@ -348,7 +348,7 @@ export default function createPipelineManagerGraph(graph) {
         this._nodes = [];
     };
 
-    graph.load = function load(state) {
+    graph.load = function load(state, loadAll = false) {
         const errors = [];
 
         // Clear current state
@@ -380,39 +380,38 @@ export default function createPipelineManagerGraph(graph) {
                 // The node state may not have an id, so we it has to be assigned manually
                 // if needed
                 n.id ??= uuidv4();
-
-                // add && n.template
-                if (n.subgraph && node.template) {
-                    // Remove new graphs except current one since they become dangling after
-                    // CustomGraphNode.load
-                    const graphsBefore = new Set([...this.editor.graphs].map(toRaw));
-
-                    this.addNode(node, state.graphLoadingState, n.id);
-
-                    // TODO: Destroy graphs properly
-                    [...this.editor.graphs]
-                        .map(toRaw)
-                        .filter((g) => !graphsBefore.has(g))
-                        .filter((g) => g !== node.subgraph)
-                        .forEach((g) => {
-                            this.editor.unregisterGraph(g);
-                            g.destroy?.();
-                        });
-                } else if (n.subgraph && !state.graphLoadingState) {
-                    // Root graph
-                    // Preserve interfaces IDs to keep connections valid
+                // eslint-disable-next-line prefer-destructuring
+                let graphLoadingState = state.graphLoadingState;
+                if (!graphLoadingState) {
                     const interfacesEntries = n.interfaces
                         .filter((intf) => intf.id)
                         .map((intf) => [intf.name, intf.id]);
-
-                    const graphLoadingState = {
+                    graphLoadingState = {
                         newToSpecNodeIds: new Map([[n.id, n.id]]),
                         newInterfaceIds: new Map([[n.id, new Map(interfacesEntries)]]),
                         newToSpecConnIds: new Map(),
                         newToSpecIntfIds: new Map(),
                     };
+                }
+                graphLoadingState.loadAll = loadAll;
+
+                if (n.subgraph && node.template) {
+                    // Remove new graphs except current one since they become dangling after
+                    // CustomGraphNode.load
+                    const graphsBefore = new Set([...this.editor.graphs].map(toRaw));
 
                     this.addNode(node, graphLoadingState, n.id);
+
+                    if (!loadAll) {
+                        [...this.editor.graphs]
+                            .map(toRaw)
+                            .filter((g) => !graphsBefore.has(g))
+                            .filter((g) => g !== node.subgraph)
+                            .forEach((g) => {
+                                this.editor.unregisterGraph(g);
+                                g.destroy?.();
+                            });
+                    }
                 } else {
                     this.addNode(node, state.graphLoadingState, n.id);
                 }
