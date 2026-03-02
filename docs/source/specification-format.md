@@ -20,6 +20,7 @@ The specification consists of:
 * `version` - string determining version of the specification.
   Should be set to the newest version described in [Changelogs](#changelogs).
   {{project}} uses that value to check the compatibility of the specification with the current implementation, giving warnings about inconsistency in versions.
+* `urloverrides` - override metadata URLs in provided specification. Lets the user change the locations of icons and other items stored in the [metadata](#metadata).
 
 ```{note}
 Graph node named `New Graph Node` is available by default after loading a specification.

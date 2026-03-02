@@ -40,7 +40,7 @@
             }
         },
         "urloverrides": {
-            "description": "Mapping for string replacement",
+            "description": "Override metadata URLs in provided specification",
             "type": "object",
             "patternProperties": {
                 ".*": {

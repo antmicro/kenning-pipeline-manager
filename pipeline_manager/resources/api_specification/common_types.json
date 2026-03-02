@@ -30,7 +30,7 @@
             "required": ["graph_id", "node_id"]
         },
         "urloverrides": {
-            "description": "Mapping for URL replacement",
+            "description": "Override metadata URLs in provided specification",
             "type": "object",
             "patternProperties": {
                 "^.*$": {

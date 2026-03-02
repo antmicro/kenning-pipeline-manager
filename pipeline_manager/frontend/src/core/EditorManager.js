@@ -345,7 +345,7 @@ export default class EditorManager {
      * @param dataflowSpecification Specification to load, can be either an object or a string
      * @param lazyLoad Decides whether to actually load the specification or just store
      * @param unmarkNewNodes Decides whether to remove styling of new nodes.
-     * @param urloverrides Override mapping for included URLs.
+     * @param urloverrides Override metadata URLs in provided specification.
      * it and check its versioning. Can be used when loading parts of specification manually.
      * @param {object|boolean} tryMinify If set, requests minification based resolved specification or a given dataflow.
      * @returns An object consisting of errors and warnings arrays. If any array is empty
