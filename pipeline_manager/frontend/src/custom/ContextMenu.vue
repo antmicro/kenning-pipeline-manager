@@ -61,10 +61,11 @@ from creating and deleting connections or altering nodes' values if the editor i
                 >
                     <div class="icon">
                         <img
-                            v-if="getIconPath(item.icon) !== undefined"
+                            v-if="getIconPath(item.icon) !== undefined && !iconDisabled(item.icon)"
                             :src="getIconPath(item.icon)"
-                            :alt="item.name"
+                            :alt="item.icon"
                             draggable="false"
+                            @error="disableIcon(item.icon)"
                         />
                     </div>
                     <div class="text">{{ item.name }}</div>
@@ -107,6 +108,12 @@ export default defineComponent({
 
         const { viewModel } = useViewModel();
         const getIconPath = (name) => viewModel.value.cache[`./${name}`] ?? name;
+        const disabledIcons = ref(new Set());
+
+        const disableIcon = (icon) => {
+            disabledIcons.value.add(icon);
+        };
+        const iconDisabled = (icon) => disabledIcons.value.has(icon);
 
         const opened = ref(false);
 
@@ -180,6 +187,8 @@ export default defineComponent({
             getIconPath,
             onPointerOver,
             onPointerLeave,
+            disableIcon,
+            iconDisabled,
         };
     },
 });
