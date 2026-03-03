@@ -133,6 +133,7 @@ def execute_enter_subgraph_scenario(context: BrowserContext):
         on which the scenario will be performed.
     """
     page = context.new_page()
+    page.set_viewport_size({"width": 1920, "height": 1080})
     page.goto(f"{PROTOCOL}://{SERVER_ADDRESS}:{SERVER_PORT}")
     upload_dataflow_file(page)
 
@@ -169,7 +170,9 @@ def test_subgraph_switching(
         client_process = subprocess.Popen(args)
         with sync_playwright() as playwright:
             browser = playwright.firefox.launch()
-            context = browser.new_context()
+            context = browser.new_context(
+                viewport={"width": 1920, "height": 1080}
+            )
             if trace_name:
                 context.tracing.start(
                     screenshots=True,
