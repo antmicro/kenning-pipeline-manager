@@ -23,6 +23,7 @@ import LayoutManager from '../core/LayoutManager.js';
 import { suppressHistoryLogging } from '../core/History.ts';
 import CreateCustomGraphNodeType, { prepareSubgraphInstance } from './CustomGraphNode.js';
 import { ir } from '../core/interfaceRegistry.ts';
+import { hexToRGB } from '../core/nodeCreation/nodeColors.js';
 
 import globalProperties from '../globalProperties.ts';
 
@@ -753,8 +754,12 @@ export default class PipelineManagerEditor extends Editor {
         if (!color) {
             return 'white';
         }
+
         // calculate lightness
-        const rgb = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(color);
+        const rgb = hexToRGB(color);
+        if (rgb === null) {
+            return 'white';
+        }
         const r = parseInt(rgb[1], 16) / 255;
         const g = parseInt(rgb[2], 16) / 255;
         const b = parseInt(rgb[3], 16) / 255;
