@@ -90,6 +90,7 @@ const examples = [
     { specification: 'sample-subgraph-specification.json', dataflow: 'sample-subgraph-dataflow.json' },
     { specification: 'sample-related-graph-specification.json', dataflow: undefined },
     { specification: 'sample-dynamic-interfaces-specification.json', dataflow: 'sample-dynamic-interfaces-dataflow.json' },
+    { specification: 'sample-rectangle-grouping-specification.json', dataflow: 'sample-rectangle-grouping-dataflow.json' },
 ];
 
 examples.forEach(({ dataflow, specification }) => {
