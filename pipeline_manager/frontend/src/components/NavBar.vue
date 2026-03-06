@@ -451,6 +451,7 @@ export default {
         :saveConfiguration="saveConfiguration"
         v-model:saveMenuShow="saveMenuShow"
         v-model:exportMenuShow="exportMenuShow"
+        v-model:baklavaView="editorManager.baklavaView"
     />
 
     <div class="wrapper"
@@ -476,10 +477,12 @@ export default {
                             :hideHud="hideHud"
                             :readonly="readonly"
                             :saveGraphCallback="() => {
+                                editorManager.editor.resetAllGraphsToSave();
                                 saveMenuShow = !saveMenuShow;
                                 saveConfiguration = saveGraphConfiguration;
                             }"
                             :saveSpecificationCallback="() => {
+                                editorManager.editor.resetAllGraphsToSave();
                                 saveMenuShow = !saveMenuShow;
                                 saveConfiguration = saveSpecificationConfiguration;
                             }"
