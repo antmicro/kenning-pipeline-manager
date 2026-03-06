@@ -18,10 +18,12 @@ import { removeInterfaces, removeProperties } from '../../core/nodeCreation/Conf
 import { menuState, configurationState } from '../../core/nodeCreation/ConfigurationState.ts';
 import { exportGraph } from '../saveConfiguration.ts';
 import Panel from '../Panel.vue';
+import GraphSaveMenu from '../menu/GraphSaveMenu.vue';
 
 const saveMenuShow = defineModel('saveMenuShow');
 const exportMenuShow = defineModel('exportMenuShow');
 const saveConfiguration = defineModel('saveConfiguration');
+const baklavaView = defineModel('baklavaView');
 </script>
 
 <script>
@@ -37,6 +39,7 @@ export default defineComponent({
         ParentMenu,
         ExportMenu,
         Panel,
+        GraphSaveMenu,
     },
     data() {
         return {
@@ -60,6 +63,11 @@ export default defineComponent({
                 <SaveMenu
                     :saveConfiguration="saveConfiguration"
                     v-model="saveMenuShow"
+                />
+                <GraphSaveMenu
+                    :saveConfiguration="saveConfiguration"
+                    v-model="baklavaView"
+                    v-show="saveConfiguration.graph || saveConfiguration?.graphName !== undefined"
                 />
             </ParentMenu>
         </Panel>
