@@ -31,6 +31,7 @@ import Specification from './Specification.js';
 import validateJSON from './validate-json.js';
 
 import globalProperties from '../globalProperties.ts';
+import { textColorToHex, isTextColor, hexToRGB } from './nodeCreation/nodeColors.js';
 
 /* eslint-disable lines-between-class-members */
 /**
@@ -257,6 +258,20 @@ export default class EditorManager {
         }
         delete dataflowSpecification.include; // eslint-disable-line no-param-reassign
         delete dataflowSpecification.includeGraphs; // eslint-disable-line no-param-reassign
+
+        // Ensure proper color definition
+        dataflowSpecification.nodes?.forEach((node) => {
+            if (node.color) {
+                if (isTextColor(node.color)) {
+                    // eslint-disable-next-line no-param-reassign
+                    node.color = textColorToHex(node.color);
+                } else if (hexToRGB(node.color) === null) {
+                    warnings.push(`Invalid color value ${node.color} for node ${node.name}, setting a default color.`);
+                    // eslint-disable-next-line no-param-reassign
+                    node.color = '#343434';
+                }
+            }
+        });
 
         // Ensure 'subgraph' field for subgraph node instances
         const nameToSubgraphNode = new Map((dataflowSpecification.nodes ?? [])
