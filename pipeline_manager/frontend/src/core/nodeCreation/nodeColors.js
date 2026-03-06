@@ -154,4 +154,6 @@ const SUPPORTED_COLORS = {
 
 export const textColorToHex = (text) => SUPPORTED_COLORS[text.toLowerCase()];
 
-export const isTextColor = (text) => Object.hasOwn(SUPPORTED_COLOURS, text.toLowerCase());
+export const isTextColor = (text) => Object.hasOwn(SUPPORTED_COLORS, text.toLowerCase());
+
+export const hexToRGB = (color) => /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(color);
