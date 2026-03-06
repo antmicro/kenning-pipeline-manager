@@ -9,6 +9,7 @@ import {
     loadDataflow,
     openFileChooser,
     getPathToJsonFile,
+    enableNavigationBar
 } from './config.js';
 
 async function expectNoErrors(page: Page) {
@@ -36,12 +37,20 @@ async function saveFileAs(
     testInfo,
     purpose: 'specification' | 'dataflow',
     filenameWithoutExtension: string,
+    selectGraphs: list[string]=[]
 ): Promise<string> {
     const text = (purpose === 'specification' ? 'Save specification as...' : 'Save graph as file as...');
     const logo = page.locator('.logo');
     await logo.hover();
 
     await page.getByRole('button', { name: text }).click();
+
+    const graphList = await page.locator('.graph_list');
+
+    for(const graph of selectGraphs)
+    {
+        await graphList.getByText(graph).first().click();
+    }
 
     const uniqueName = `${filenameWithoutExtension}-${testInfo.workerIndex}-${Date.now()}`;
 
@@ -61,8 +70,8 @@ async function saveSpecificationAs(page: Page, testInfo, filename: string) {
     return saveFileAs(page, testInfo, 'specification', filename);
 }
 
-async function saveDataflowAs(page: Page, testInfo, filename: string) {
-    return saveFileAs(page, testInfo, 'dataflow', filename);
+async function saveDataflowAs(page: Page, testInfo, filename: string,graphs:list[string]=[]) {
+    return saveFileAs(page, testInfo, 'dataflow', filename, graphs);
 }
 
 async function loadIncludeSpecification(testInfo) {
@@ -197,4 +206,23 @@ examples.forEach(({ dataflow, specification }) => {
         await loadDatflowFromFile(page, filepath);
         await expectNoErrors(page);
     });
+});
+
+test('save and load graph partially', async ({page}, testInfo) =>{
+    await page.goto(getUrl());
+    await loadSpecification(page, 'sample-subgraph-specification.json');
+    await expectNoErrors(page);
+    await loadDataflow(page, 'sample-subgraph-dataflow.json');
+    const filepath = await saveDataflowAs(page,testInfo,'temp',[
+        "Example of a graph with graph nodes",
+        "Test subgraph #1"
+    ]);
+    await expectNoErrors(page);
+    await loadDatflowFromFile(page, filepath);
+    await expectNoErrors(page);
+    await enableNavigationBar(page);
+    const paletteTitle = await page.locator('.palette-title');
+    await paletteTitle.getByText('Graphs').first().click();
+    const entries = await page.locator('.entries');
+    expect(await entries.locator('.__entry').count()).toBe(1);
 });
