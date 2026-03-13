@@ -15,6 +15,7 @@ import { v4 as uuidv4 } from 'uuid';
 import {
     ICommandHandler, ICommand,
 } from '@baklavajs/renderer-vue';
+import notifyEvents from '../custom/notifyEvents.js';
 
 export const suppressingHistory: Ref<boolean> = ref(false);
 const transactionId: Ref<string> = ref('');
@@ -52,6 +53,45 @@ export class Step {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     edit(graph: Ref<Graph>) {
         throw new Error(`Method edit has thrown an error for topic: ${this.topic}`);
+    }
+}
+
+class SubgraphDestroyedStep extends Step {
+    // it holds id of graph node and state of graph
+    graphTuple: Array<any> = [];
+
+    constructor(type: string, topic: any, tid: string = uuidv4()) {
+        if (tid === '') tid = uuidv4(); // eslint-disable-line no-param-reassign
+        super(type, topic, tid);
+    }
+
+    add(graph: Ref<Graph>) {
+        if (this.graphTuple[0] !== undefined) {
+            const node:any = graph.value.findNodeById(this.topic);
+            if (node === undefined) {
+                return;
+            }
+            const graphState = this.graphTuple[1];
+
+            const { editor } = graph.value;
+            const newGraph = this.graphTuple[0];
+            newGraph.load(graphState);
+            editor.registerGraph(newGraph);
+
+        node.subgraph = newGraph;
+        newGraph.graphNode = node;
+        node.updateExposedInterfaces(undefined, undefined, true);
+        }
+    }
+
+    remove(graph: Ref<Graph>) {
+        const node : any = graph.value.findNodeById(this.topic);
+        const { subgraph } = node;
+        if (subgraph !== undefined) {
+            this.graphTuple = [subgraph, subgraph.save()];
+            subgraph.destroy();
+            node.updateExposedInterfaces(undefined, undefined, true);
+        }
     }
 }
 
@@ -290,6 +330,7 @@ export function useHistory(graph: Ref<any>, commandHandler: ICommandHandler): IH
         g.events.editAnchor.unsubscribe(tok);
         g.events.exposeInterface.unsubscribe(tok);
         g.events.privatizeInterface.unsubscribe(tok);
+        notifyEvents.subgraphDestroyed.unsubscribe(tok);
     };
 
     // Switch all the events to any new graph that's displayed
@@ -310,6 +351,19 @@ export function useHistory(graph: Ref<any>, commandHandler: ICommandHandler): IH
             }
 
             const newId = newGraph.id;
+            notifyEvents.subgraphDestroyed.subscribe(token, (data:any) => {
+                const { node, subgraph } = data;
+
+                if (!suppressingHistory.value) {
+                    const historyItem = history.get(newId);
+                    if (!historyItem) return;
+                    const step = new SubgraphDestroyedStep('rem', node.id.toString(), transactionId.value);
+                    historyItem.push(step);
+                    step.graphTuple = [subgraph, subgraph.save()];
+                    subgraph.destroy?.();
+                    undoneHistory.set(newId, []);
+                }
+            });
             newGraph.events.addNode.subscribe(token, (node : any) => {
                 if (!suppressingHistory.value) {
                     const historyItem = history.get(newId);
