@@ -338,6 +338,9 @@ export default function createPipelineManagerGraph(graph) {
                 event.unsubscribe(l);
             });
         });
+        if (this.graphNode) {
+            this.graphNode.subgraph = undefined;
+        }
         this.graphNode = undefined;
         this.editor = undefined;
         this.nodes.length = 0;
