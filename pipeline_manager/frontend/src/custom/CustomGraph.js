@@ -585,6 +585,10 @@ export default function createPipelineManagerGraph(graph) {
                 this.graphNode.updateGraphNodeInterfaces(
                     keptOutputs ?? [], keptInputs ?? [], true);
             }
+
+            if (node.subgraph) {
+                node.subgraph.destroy();
+            }
         }
     };
 
