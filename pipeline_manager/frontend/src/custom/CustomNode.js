@@ -9,6 +9,7 @@
  */
 
 import { useViewModel, useGraph } from '@baklavajs/renderer-vue';
+import { nextTick } from 'vue';
 
 import notifyEvents from './notifyEvents.js';
 
@@ -127,7 +128,14 @@ export function removeNode(node, unwrapGraph = false) {
 
     if (graphWithNode?.nodes.length === 0 && viewModel.value.editor.isInSubgraph()) {
         viewModel.value.editor.unregisterGraph(graphWithNode);
-        graphWithNode.destroy?.();
+        const { graphNode } = graphWithNode;
         viewModel.value.editor.backFromSubgraph();
+
+        nextTick().then(() => {
+            notifyEvents.subgraphDestroyed.emit({
+                node: graphNode,
+                subgraph: graphWithNode,
+            });
+        });
     }
 }
