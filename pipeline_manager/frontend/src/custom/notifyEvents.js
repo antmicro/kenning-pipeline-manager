@@ -12,4 +12,6 @@ notifyEvents.exposedInterface = new BaklavaEvent();
 
 notifyEvents.removedNode = new BaklavaEvent();
 
+notifyEvents.subgraphDestroyed = new BaklavaEvent();
+
 export default notifyEvents;
