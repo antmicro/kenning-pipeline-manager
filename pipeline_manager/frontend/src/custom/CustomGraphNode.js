@@ -245,8 +245,8 @@ export default function CreateCustomGraphNodeType(template, graphNode, editorMan
 
         save() {
             const state = super.save();
-            state.subgraph = this.subgraph.id;
-            state.graphState = this.subgraph.save();
+            state.subgraph = this.subgraph?.id;
+            state.graphState = this.subgraph?.save();
             return state;
         }
 
