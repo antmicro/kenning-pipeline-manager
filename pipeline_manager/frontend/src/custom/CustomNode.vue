@@ -247,7 +247,7 @@ const nodeURLs = viewModel.value.editor.getNodeURLs(props.node.type);
 const nodeColor = computed(() => viewModel.value.editor.getNodeColor(node.value));
 const nodeTitleColor = computed(() => viewModel.value.editor.getTextColor(nodeColor.value));
 const nodeCategory = viewModel.value.editor.getNodeCategory(props.node.type);
-const isGraphNode = viewModel.value.editor.isGraphNode(props.node.type);
+const isGraphNode = computed(() => props.node?.subgraph !== undefined);
 const nodeHasRelatedGraphs
     = computed(() => viewModel.value.editor.nodeHasRelatedGraphs(node.value));
 const pillText = computed(() => viewModel.value.editor.getPillText(node.value.type));
@@ -348,14 +348,14 @@ const contextMenuTitleItems = computed(() => {
             { value: 'delete-interface', label: 'Delete interface' },
             { value: 'duplicate', label: 'Duplicate node type', endSection: true },
         );
-        if (!isGraphNode && !editorManager.editor.preview) {
+        if (!isGraphNode.value && !editorManager.editor.preview) {
             items.push(
                 { value: 'addSubgraph', label: 'Add subgraph', icon: icons.Subgraph },
                 { value: 'addAndEditSubgraph', label: 'Add and edit subgraph', icon: icons.Subgraph },
             );
         }
     }
-    if (isGraphNode) {
+    if (isGraphNode.value) {
         items.push({ value: 'editSubgraph', label: 'Go to graph', icon: icons.Subgraph });
     }
     if (nodeHasRelatedGraphs.value) {
@@ -401,7 +401,7 @@ const contextMenuTitleItems = computed(() => {
     // NOTE: This feature is disabled for now, as it is not fully implemented
     const SUPPORT_NODE_UNWRAPPING = false;
     if (SUPPORT_NODE_UNWRAPPING) {
-        if (isGraphNode) {
+        if (isGraphNode.value) {
             items.push({ value: 'unwrap', label: 'Unwrap Subgraph', icon: icons.Unwrap });
         }
     }
