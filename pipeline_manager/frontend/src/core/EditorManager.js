@@ -1047,18 +1047,31 @@ export default class EditorManager {
      * @returns An array of errors that occurred.
      */
     addSubgraphToNode(node, nodes = [], connections = []) {
-        this._unregisterNodeType(node.type);
-
+        const isSubgraphNode = node?.template !== undefined;
+        if (!isSubgraphNode) {
+            this._unregisterNodeType(node.type);
+        }
         // Create new graph
         const newGraph = GraphFactory(nodes, connections, node.type, this.baklavaView.editor);
         if (Array.isArray(newGraph) && newGraph.length) {
             return newGraph;
         }
 
+        if (isSubgraphNode) {
+            const graph = new Graph(this.editor, newGraph);
+            graph.name = node.title;
+            this.editor.registerGraph(graph);
+            graph.graphNode = node;
+            graph.editor = this.editor;
+            node.subgraph = graph;
+
+            return [];
+        }
         // Update node specification
-        const unresolvedNodeSpecification = this.specification.unresolvedSpecification.nodes?.find(
-            (n) => EditorManager.getNodeName(n) === node.type,
-        );
+        const unresolvedNodeSpecification = this.specification
+            .unresolvedSpecification.nodes?.find(
+                (n) => EditorManager.getNodeName(n) === node.type,
+            );
         const resolvedNodeSpecification = this.specification.currentSpecification.nodes?.find(
             (n) => EditorManager.getNodeName(n) === node.type,
         );
@@ -1071,7 +1084,8 @@ export default class EditorManager {
                 if (this.specification.unresolvedSpecification.nodes === undefined) {
                     this.specification.unresolvedSpecification.nodes = [];
                 }
-                this.specification.unresolvedSpecification.nodes.push(resolvedNodeSpecification);
+                this.specification.unresolvedSpecification.nodes
+                    .push(resolvedNodeSpecification);
             } else {
                 unresolvedNodeSpecification.subgraphId = newGraph.id;
             }
