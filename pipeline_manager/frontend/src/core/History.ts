@@ -66,22 +66,24 @@ class SubgraphDestroyedStep extends Step {
     }
 
     add(graph: Ref<Graph>) {
-        if (this.graphTuple[0] !== undefined) {
-            const node:any = graph.value.findNodeById(this.topic);
-            if (node === undefined) {
-                return;
-            }
-            const graphState = this.graphTuple[1];
+        if (this.graphTuple[0] === undefined) {
+            return;
+        }
+        const node:any = graph.value.findNodeById(this.topic);
+        if (node === undefined) {
+            return;
+        }
+        const graphState = this.graphTuple[1];
 
-            const { editor } = graph.value;
-            const newGraph = this.graphTuple[0];
-            newGraph.load(graphState);
-            editor.registerGraph(newGraph);
+        const { editor } = graph.value;
+        const newGraph = this.graphTuple[0];
+        newGraph.editor = editor;
+        newGraph.load(graphState);
+        editor.registerGraph(newGraph);
 
         node.subgraph = newGraph;
         newGraph.graphNode = node;
         node.updateExposedInterfaces(undefined, undefined, true);
-        }
     }
 
     remove(graph: Ref<Graph>) {
@@ -89,7 +91,7 @@ class SubgraphDestroyedStep extends Step {
         const { subgraph } = node;
         if (subgraph !== undefined) {
             this.graphTuple = [subgraph, subgraph.save()];
-            subgraph.destroy();
+            subgraph.destroy?.();
             node.updateExposedInterfaces(undefined, undefined, true);
         }
     }
