@@ -1063,9 +1063,7 @@ export class CustomNode extends Node {
 
         // Default position should be undefined instead of (0, 0) so that it can be set
         // by autolayout
-        if (state.position === undefined) {
-            this.position = undefined;
-        }
+        this.position = state?.position;
 
         this.relatedGraphs = state.relatedGraphs;
         return errors;
