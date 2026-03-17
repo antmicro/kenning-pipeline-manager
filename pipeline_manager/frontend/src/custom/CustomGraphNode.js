@@ -299,6 +299,18 @@ export default function CreateCustomGraphNodeType(template, graphNode, editorMan
          * @param {boolean} privatize whether to check for privatized (removed) interfaces
          */
         updateExposedInterfaces(inputs = undefined, outputs = undefined, privatize = false) {
+            // when subgraph is detached remove all exposed interfaces
+            if (this.subgraph === undefined) {
+                const currentInterfaces = { ...this.inputs, ...this.outputs };
+
+                const defaultInterfaces = [
+                    ...Object.entries(newNodeInputs),
+                    ...Object.entries(newNodeOutputs),
+                ];
+                this.privatizeInterfaces(defaultInterfaces, currentInterfaces);
+                return;
+            }
+
             // Update interfaces based on subgraph interfaces and their external names
             const evaluatedIntf = updateSubgraphInterfaces(
                 this.subgraph.nodes,
