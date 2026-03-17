@@ -1,5 +1,5 @@
 import { test, expect, Page, Locator } from '@playwright/test';
-import { getUrl, loadVideoNodeId, enableNavigationBar, addNode, dragAndDrop, closeTerminal } from './config.js';
+import { getUrl, loadVideoNodeId, enableNavigationBar, addNode, dragAndDrop, closeTerminal,loadSpecification,loadDataflow } from './config.js';
 
 async function deleteNode(page: Page, nodeId: string) {
     await closeTerminal(page);
@@ -31,6 +31,38 @@ async function expectNode(exists: boolean, page: Page, nodeId: string, errorMess
 function getNode(page: Page, name: string): Locator {
     return page.locator(`.baklava-node[data-node-type="${name}"]`);
 }
+
+async function leaveSubgraph(page: Page) {
+    const leaveButton = page.getByText('Return from subgraph editor').locator('../..');
+    await leaveButton.click();
+}
+
+async function enterSubgraph(node: Locator) {
+    await node.locator('.__title').click({ button: 'right' });
+    const contextMenuOption = node.locator('.baklava-context-menu').getByText('Go to graph');
+    await contextMenuOption.click();
+}
+
+async function removeNode(node: Locator){
+    await node.locator('.__title').click({ button: 'right' });
+    const contextMenuOption = node.locator('.baklava-context-menu').getByText('Delete');
+    await contextMenuOption.click();
+}
+
+async function assertInputCount(node: Locator, count: number) {
+    const inputs = await node
+        .locator('.__interfaces .__inputs > div')
+        .count();
+    expect(inputs).toBe(count);
+}
+
+async function assertOutputCount(node: Locator, count: number) {
+    const inputs = await node
+        .locator('.__interfaces .__outputs > div')
+        .count();
+    expect(inputs).toBe(count);
+}
+
 async function renameNodeType(page: Page, oldName: string, newName: string) {
     const node = getNode(page, oldName).locator('.__title');
     await node.click({ button: 'right' });
@@ -52,6 +84,42 @@ function getNodeInterfaces(page: Page, name: string, side: 'input' | 'output' | 
 function getContextMenuOption(page: Page, nodeName: string, optionName: string): Locator {
     return getNode(page, nodeName).locator('.baklava-context-menu').getByText(optionName);
 }
+
+test('test history by removing subgraph',async ({page}) => {
+    await page.goto(getUrl());
+    await loadSpecification(page,'sample-subgraph-specification.json');
+    await loadDataflow(page,'sample-subgraph-dataflow.json');
+
+
+    const subgraphNode = getNode(page, 'Test subgraph #1');
+    // check current output count of Test subgraph #1
+    await assertOutputCount(subgraphNode,3);
+    // go to Test subgraph #1 subgraph
+    await enterSubgraph(subgraphNode);
+    // get all test nodes in subgraph
+    const nodes = getNode(page,"Test node #1");
+    // remove them
+    await removeNode(nodes.first());
+    await removeNode(nodes.last());
+    // now subgraph node should have no exposed outputs
+    await assertOutputCount(subgraphNode,0);
+
+    // Undo subgraph removal
+    await page.keyboard.press('Control+KeyZ');
+
+    await enterSubgraph(subgraphNode);
+    // Undo nodes removal
+    await page.keyboard.press('Control+KeyZ');
+    // One extra to undo connection removal
+    await page.keyboard.press('Control+KeyZ');
+    await page.keyboard.press('Control+KeyZ');
+    // Check test node count
+    expect(await getNode(page,"Test node #1").count()).toBe(2);
+
+    await leaveSubgraph(page);
+    // subgraph node should get back its exposed outputs
+    await assertOutputCount(subgraphNode,3);
+})
 
 test('test history by removing node', async ({ page }) => {
     // Load a website and wait until nodes are loaded.
