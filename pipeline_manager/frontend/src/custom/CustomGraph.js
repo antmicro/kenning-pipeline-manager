@@ -38,6 +38,7 @@ export default function createPipelineManagerGraph(graph) {
 
     // Graph node that represents the graph itself. Root graph does not have a node graph assigned.
     graph.graphNode = undefined;
+    graph.groups = [];
 
     // A value that indicates whether we should save the graph or not
     graph.toSave = true;
@@ -405,6 +406,7 @@ export default function createPipelineManagerGraph(graph) {
         }
         this.graphNode = undefined;
         this.editor = undefined;
+        this.groups = undefined;
         this.nodes.length = 0;
         this.connections.length = 0;
         if (this.selectedNodes) {
