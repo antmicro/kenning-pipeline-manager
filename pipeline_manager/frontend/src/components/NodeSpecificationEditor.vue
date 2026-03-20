@@ -63,9 +63,6 @@ import { useViewModel } from '@baklavajs/renderer-vue';
 import EditorManager, { EDITED_NODE_STYLE } from '../core/EditorManager';
 import NotificationHandler from '../core/notifications';
 import { menuState, configurationState, editorEventBus } from '../core/nodeCreation/ConfigurationState.ts';
-import {
-    alterInterfaces, alterProperties, updateExtendedProperties, updateExtendedInterfaces, findNodes,
-} from '../core/nodeCreation/Configuration.ts';
 
 export default defineComponent({
     props: {
@@ -103,18 +100,17 @@ export default defineComponent({
         };
 
         const specificationWithIncludes = ref(null);
-        watch(
-            editorManager.specification.unresolvedSpecification,
-            () => {
-                const unresolved = editorManager.specification.unresolvedSpecification;
-                const included = editorManager.specification.includedSpecification;
-                const specification = JSON.parse(JSON.stringify(unresolved));
 
-                EditorManager.mergeObjects(specification, included);
-                specificationWithIncludes.value = specification;
-            },
-            { immediate: true },
-        );
+        const getSpecificationWithIncludes = () => {
+            const unresolved = editorManager.specification.unresolvedSpecification;
+            const included = editorManager.specification.includedSpecification;
+            const specification = JSON.parse(JSON.stringify(unresolved));
+
+            EditorManager.mergeObjects(specification, included);
+            specificationWithIncludes.value = specification;
+        };
+
+        getSpecificationWithIncludes();
 
         const specification = computed(() => specificationWithIncludes
             .value
@@ -317,25 +313,7 @@ export default defineComponent({
                     throw new Error(parsingErrors);
                 }
                 const parsedSpecification = YAML.parse(currentSpecification.value.replaceAll('\t', '  '));
-                const checkSubgraphExtends = (nodeName) => {
-                    const nodeSpec = getCurrentSpecification(nodeName);
-                    if (nodeSpec.subgraphId) {
-                        return true;
-                    }
-                    return Object.values(nodeSpec.extends || {}).some((parent) =>
-                        checkSubgraphExtends(parent),
-                    );
-                };
-                if (Object.values(parsedSpecification.extends || {}).some(checkSubgraphExtends)) {
-                    throw new Error('Extending subgraphs dynamically is not currently supported.');
-                }
-                const oldType = node.value.type;
-                const oldSpec = getCurrentSpecification(oldType);
 
-                if ((oldSpec.extending?.length || node.value.extending?.length)
-                    && oldSpec.subgraphId) {
-                    throw new Error('Extending subgraphs dynamically is not currently supported.');
-                }
                 // Update style of edited node type
                 const { style } = parsedSpecification;
                 if (!Array.isArray(style) || !style.includes(EDITED_NODE_STYLE)) {
@@ -381,7 +359,8 @@ export default defineComponent({
                     currentSpecification.value;
 
                 NotificationHandler.showToast('info', 'Node validated');
-                // refresh graphs connections
+                // refresh specification
+                getSpecificationWithIncludes();
             } catch (error) {
                 const messages = Array.isArray(error) ? error : [error];
                 NotificationHandler.terminalLog('error', 'Validation failed', messages);
@@ -426,6 +405,7 @@ export default defineComponent({
          */
         const canApplyChanges = computed(() => {
             if (!editorStateChanged.value) {
+                console.log('Editor state: ', editorStateChanged.value);
                 return false;
             }
             try {
@@ -556,6 +536,7 @@ export default defineComponent({
 
         editorEventBus.addEventListener('check-validation', (event) => {
             const { resolve } = event.detail;
+            console.log('Bus event ', editorStateChanged.value);
             resolve(editorStateChanged.value);
         });
 
