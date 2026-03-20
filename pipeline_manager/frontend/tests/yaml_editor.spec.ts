@@ -95,6 +95,11 @@ async function reopenNode(page: Page, node: Locator) {
     return getYAMLEditorContent(page);
 }
 
+async function waitForSubgraph(page: Page,graphName:string) {
+    const editorTitle = await page.locator('.editorTitle');
+    await expect(editorTitle.getByText(graphName)).toBeVisible();
+}
+
 test('create new node type', async ({ page }) => {
     await page.goto(getUrl());
 
@@ -259,6 +264,7 @@ test('subgraph cascade interface YAML', async ({ page }) => {
     await node.locator('.__title').click({ button: 'right' });
     const contextMenuOption = node.locator('.baklava-context-menu').getByText('Go to graph');
     await contextMenuOption.click();
+    await waitForSubgraph(page,"Test subgraph #1");
 
     // edit interface that is exposed in the subgraph
     const subnode = page.locator(`[data-node-type="Test node #1"]`).nth(1);
@@ -287,6 +293,7 @@ test('subgraph cascade property YAML', async ({ page }) => {
     await node.locator('.__title').click({ button: 'right' });
     const contextMenuOption = node.locator('.baklava-context-menu').getByText('Go to graph');
     await contextMenuOption.click();
+    await waitForSubgraph(page,"Test subgraph #2");
 
     // change prop
     const subnode = page.locator(`[data-node-type="Test node #2"]`);
