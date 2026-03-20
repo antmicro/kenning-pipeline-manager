@@ -81,6 +81,11 @@ function getNodeInterfaces(page: Page, name: string, side: 'input' | 'output' | 
     return getNode(page, name).locator(`.__interfaces ${ioClass}`);
 }
 
+async function waitForSubgraph(page: Page,graphName:string) {
+    const editorTitle = await page.locator('.editorTitle');
+    await expect(editorTitle.getByText(graphName)).toBeVisible();
+}
+
 function getContextMenuOption(page: Page, nodeName: string, optionName: string): Locator {
     return getNode(page, nodeName).locator('.baklava-context-menu').getByText(optionName);
 }
@@ -96,18 +101,23 @@ test('test history by removing subgraph',async ({page}) => {
     await assertOutputCount(subgraphNode,3);
     // go to Test subgraph #1 subgraph
     await enterSubgraph(subgraphNode);
+    await waitForSubgraph(page,'Test subgraph #1');
     // get all test nodes in subgraph
     const nodes = getNode(page,"Test node #1");
+    expect(await nodes.count()).toBe(2);
     // remove them
     await removeNode(nodes.first());
     await removeNode(nodes.last());
     // now subgraph node should have no exposed outputs
     await assertOutputCount(subgraphNode,0);
 
+    await waitForSubgraph(page,'Example of a graph with graph nodes');
+
     // Undo subgraph removal
     await page.keyboard.press('Control+KeyZ');
 
     await enterSubgraph(subgraphNode);
+    await waitForSubgraph(page,'Test subgraph #1');
     // Undo nodes removal
     await page.keyboard.press('Control+KeyZ');
     // One extra to undo connection removal
