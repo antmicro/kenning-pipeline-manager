@@ -351,7 +351,7 @@ export default class PipelineManagerEditor extends Editor {
             }
             this.graphs.forEach((graph) => {
                 const g = state.graphs?.find((grph) => grph.id === graph.id);
-                graph.groups = g?.groups ?? [];
+                graph.groups = g?.groups ? g.groups.map((group) => ({ ...group })) : [];
             });
         } catch (err) {
             // If anything goes wrong during dataflow loading, the editor is cleaned and an

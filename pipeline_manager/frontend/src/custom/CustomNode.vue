@@ -191,7 +191,7 @@ const props = defineProps({
     ignoredInterfacesType: Array,
 });
 
-const emit = defineEmits(['select', 'openContextMenu']);
+const emit = defineEmits(['select', 'openContextMenu', 'transformed']);
 
 const { viewModel } = useViewModel();
 const { graph } = useGraph();
@@ -238,6 +238,10 @@ const displayedProperties = computed(() => {
     return sidebarProperties.value
         .filter((intf) => !(intf.hideOnDefault && (!intf.value || intf.value === intf.default)));
 });
+
+const transformed = () => {
+    emit('transformed', props.node.id);
+};
 
 const externalApplicationManager = getExternalApplicationManager();
 // Watch properties
@@ -580,6 +584,7 @@ const onContextMenuTitleClick = async (action) => {
             graph.value.selectedNodes.forEach((n) => ungroupNode(n));
             break;
     }
+    transformed();
 };
 
 const canOpenContextMenu = computed(() =>
@@ -648,6 +653,7 @@ let stopDrag;
 
 const cleanEvents = () => {
     document.removeEventListener('pointermove', groupDragMove.onPointerMove);
+    document.removeEventListener('pointermove', transformed);
     document.removeEventListener('keyboard.escape', abortDrag);
     document.removeEventListener('pointerup', stopDrag);
 };
@@ -659,6 +665,7 @@ abortDrag = () => {
 stopDrag = () => {
     groupDragMove.onPointerUp();
     cleanEvents();
+    transformed();
 };
 
 const startDrag = async (ev) => {
@@ -667,8 +674,10 @@ const startDrag = async (ev) => {
     }
     groupDragMove.onPointerDown(ev);
     document.addEventListener('pointermove', groupDragMove.onPointerMove);
+    document.addEventListener('pointermove', transformed);
     document.addEventListener('keyboard.escape', abortDrag);
     document.addEventListener('pointerup', stopDrag);
+    transformed();
 };
 
 const doneRenaming = () => {
@@ -676,6 +685,7 @@ const doneRenaming = () => {
     graph.value.editNode(curNode);
     curNode.title = tempName.value;
     renaming.value = false;
+    transformed();
 };
 
 const onRender = () => {
@@ -683,7 +693,6 @@ const onRender = () => {
         viewModel.value.hooks.renderNode.execute({ node: props.node, el: nodeRef.value });
     }
 };
-
 onMounted(onRender);
 onUpdated(onRender);
 

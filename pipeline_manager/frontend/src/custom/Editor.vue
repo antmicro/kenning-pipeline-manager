@@ -85,6 +85,7 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
                         updateContextMenu(node, open, x, y, items, ignore, onclick, urls, styles);
                     }"
                     @select="(ev) => selectNode(node, ev)"
+                    @transformed="() => updateGroupsOf(node.id)"
                 />
                 <CustomNode
                     v-for="node in ignoredNodes"
@@ -146,9 +147,12 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
 </template>
 
 <script>
-/* eslint-disable object-curly-newline */
 import { EditorComponent, useGraph } from '@baklavajs/renderer-vue';
-import { defineComponent, nextTick, ref, computed, watch, onMounted, reactive, useTemplateRef } from 'vue';
+import {
+    defineComponent, nextTick, ref, computed, watch, onMounted, reactive, useTemplateRef,
+} from 'vue';
+import { useThrottleFn } from '@vueuse/core';
+
 import fuzzysort from 'fuzzysort';
 import { BaklavaEvent } from '@baklavajs/events';
 import { isJSONRPCRequest, isJSONRPCResponse, JSONRPC } from 'json-rpc-2.0';
@@ -225,6 +229,7 @@ export default defineComponent({
         const highlightConnections = ref([]);
         const highlightInterfaces = ref([]);
         const groups = computed(() => graph.value.groups ?? []);
+        const groupsOfNode = ref({});
         const visibleGroups = ref([]);
 
         const readonly = computed(() => props.viewModel.editor.readonly);
@@ -613,15 +618,14 @@ export default defineComponent({
             let maxX = -Infinity;
             let maxY = -Infinity;
 
-            nodesInGroup.forEach((node) => {
+            nodesInGroup.forEach((nodeId) => {
                 const nodeEl = container.querySelector(
-                    `[data-node-id="${node.id}"]`,
+                    `[data-node-id="${nodeId}"]`,
                 );
                 if (!nodeEl) return;
 
                 const rect = nodeEl.getBoundingClientRect();
 
-                // viewport → container → graph
                 const x1 = (rect.left - containerRect.left) / scale.value;
                 const y1 = (rect.top - containerRect.top) / scale.value;
                 const x2 = (rect.right - containerRect.left) / scale.value;
@@ -638,38 +642,55 @@ export default defineComponent({
                 max: { x: maxX + RECTANGLE_GROUP_PADDING, y: maxY + RECTANGLE_GROUP_PADDING },
             };
         }
+        const updateGroupsOf = (nodeId) => {
+            if (!(nodeId in groupsOfNode.value)) {
+                groupsOfNode.value[nodeId] = [];
+                visibleGroups.value.filter((g) => g.nodes.some((i) => i === nodeId))
+                    .forEach((group) => {
+                        groupsOfNode.value[nodeId].push(group);
+                    });
+            }
+            groupsOfNode.value[nodeId].forEach((group) => {
+                const { min, max } = computeGroupBoundsFromDOM(group.nodes);
 
-        watch(
-            [
-                () =>
-                    nodes.value.map((n) => ({
-                        id: n.id,
-                        x: n.position?.x ?? 0,
-                        y: n.position?.y ?? 0,
-                        w: n.width,
-                        h: n.height,
-                        nn: n.title,
-                    })),
-                () =>
-                    groups.value.map((g) => ({
-                        id: g.id,
-                        name: g.name,
-                        nodes: g.nodes.slice(),
-                    })),
-            ],
-            () => {
-                visibleGroups.value = groups.value.filter((g) => g.nodes?.length).map((group) => {
-                    const groupNodes = graph.value.nodes.filter((node) =>
-                        group.nodes.includes(node.id));
-                    const { min, max } = computeGroupBoundsFromDOM(groupNodes);
-                    return {
-                        min,
-                        max,
-                        ...group,
-                    };
+                group.min = min;
+                group.max = max;
+            });
+        };
+        const updateVisibleGroups = useThrottleFn(() => {
+            groupsOfNode.value = {};
+            visibleGroups.value = groups.value.map((group) => {
+                const groupNodes = graph.value.nodes.filter((node) =>
+                    group.nodes.includes(node.id),
+                ).map((n) => n.id);
+
+                const { min, max } = computeGroupBoundsFromDOM(groupNodes);
+
+                return {
+                    min,
+                    max,
+                    ...group,
+                };
+            });
+            visibleGroups.value.forEach((group) => {
+                group.nodes.forEach((id) => {
+                    if (!(id in groupsOfNode.value)) {
+                        groupsOfNode.value[id] = [];
+                    }
+                    groupsOfNode.value[id].push(group);
                 });
-            },
-            { deep: false, flush: 'post' },
+            });
+        }, 50); // 20fps
+        watch([
+            () =>
+                groups.value.map((g) => ({
+                    id: g.id,
+                    name: g.name,
+                    nodes: g.nodes.slice(),
+                })),
+        ],
+        updateVisibleGroups,
+        { deep: false, flush: 'post' },
         );
 
         const ignoredNodes = computed(() =>
@@ -1105,6 +1126,7 @@ export default defineComponent({
             if (isValidSpec && dataflow) {
                 await updateDataflow(dataflow);
             }
+            updateVisibleGroups();
         }, setLoad);
 
         const onDrop = async (event) => {
@@ -1180,6 +1202,8 @@ export default defineComponent({
             ignoredInterfacesTypes,
             contextMenu,
             updateContextMenu,
+            updateVisibleGroups,
+            updateGroupsOf,
         };
     },
 });
