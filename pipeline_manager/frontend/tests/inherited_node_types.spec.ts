@@ -23,15 +23,18 @@ async function addProperty(page: Page, node: Locator) {
 }
 
 async function addSubgraph(node: Locator) {
-    await node.locator('.__title').click({ button: 'right' });
+    const title = node.locator('.__title');
+    await title.click({ button: 'right' });
     const contextMenuOption = node.locator('.baklava-context-menu').getByText('Add subgraph');
-    await contextMenuOption.click();
+    await contextMenuOption.click({force: true});
+    expect(await title.locator('.__subgraph-icon').first()).toBeVisible({ timeout: 5_000 });
 }
 
 async function checkForSubgraph(node: Locator) {
-    await node.locator('.__title').click({ button: 'right' });
     const contextMenuOption = node.locator('.baklava-context-menu').getByText('Go to graph');
-    expect(await contextMenuOption.count()).toBe(1);
+    expect(await contextMenuOption).toHaveCount(1,{ timeout: 10_000 });
+    await node.locator('.__title').click({ button: 'right'});
+    expect(await contextMenuOption).toBeVisible();
     await node.locator('.__title').click({ button: 'right' });
 }
 
