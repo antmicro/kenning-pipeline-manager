@@ -5,6 +5,18 @@
  */
 
 /**
+ * Function that check intersection between two bounding boxes
+ * @returns True when bboxes intersect, False otherwise
+ */
+function boundingRectIntersection(bboxA, bboxB) {
+    return !(bboxB.xBegin > bboxA.xEnd
+        || bboxB.xEnd < bboxA.xBegin
+        || bboxB.yBegin > bboxA.yEnd
+        || bboxB.yEnd < bboxA.yBegin
+    );
+}
+
+/**
  * Checks if node is present inside selection rectangle
  * @returns
  */
@@ -12,25 +24,22 @@ export default function nodeInsideSelection(graph, node, boundingRect) {
     const nodeHTMLelement = document.getElementById(node.id);
     const selectionBoundingRect = boundingRect;
 
-    const navBarHeight = 60;
     const panningX = graph.panning.x;
     const panningY = graph.panning.y;
     const { scaling } = graph;
+    const navBarHeight = 60;
 
     const nodeX = scaling * (panningX + node.position.x);
-    const nodeY = scaling * (panningY + node.position.y + navBarHeight);
+    const nodeY = scaling * (panningY + node.position.y) + navBarHeight;
     const nodeWidth = nodeHTMLelement.offsetWidth;
     const nodeHeight = nodeHTMLelement.offsetHeight;
 
-    // reduce node dimensions by this coeff so that they are easier to select
-    const nodeDimCoefficient = 0.9;
+    const nodeBoundingRect = {
+        xBegin: nodeX,
+        yBegin: nodeY,
+        xEnd: nodeX + nodeWidth * scaling,
+        yEnd: nodeY + nodeHeight * scaling,
+    };
 
-    if (nodeX + nodeX * (1 - nodeDimCoefficient) > selectionBoundingRect.xBegin
-    && nodeX + nodeWidth * scaling - nodeX * (1 - nodeDimCoefficient) < selectionBoundingRect.xEnd
-    && nodeY + nodeY * (1 - nodeDimCoefficient) > selectionBoundingRect.yBegin
-    && nodeY + nodeHeight * scaling
-        - nodeY * (1 - nodeDimCoefficient) < selectionBoundingRect.yEnd) {
-        return true;
-    }
-    return false;
+    return boundingRectIntersection(selectionBoundingRect, nodeBoundingRect);
 }
