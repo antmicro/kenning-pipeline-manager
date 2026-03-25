@@ -1078,6 +1078,63 @@ export default class PipelineManagerEditor extends Editor {
         this.updateNodesPosition(updatedGraph);
     }
 
+    getPosition(arr) {
+        const position = arr.findIndex((el, i) => el !== i);
+        return position === -1 ? arr.length : position;
+    }
+
+    swapInterfaces() {
+        const graphs = this.save();
+
+        graphs.graphs.forEach((state) => {
+            state.nodes.forEach((node) => {
+                node.interfaces.forEach((intf) => {
+                    const connections = state.connections.filter(
+                        (conn) => conn?.from === intf.id || conn?.to === intf.id,
+                    );
+                    // how many nodes are there on the left
+                    // and on the right of the current one
+                    let lefts = 0;
+                    let rights = 0;
+                    connections.forEach((connection) => {
+                        const key = connection.from === intf.id ? 'from' : 'to';
+                        const nextIntfId = key === 'from' ? connection.to : connection.from;
+                        const nextNode = state.nodes.find(
+                            (n) => n.interfaces.some((el) => el.id === nextIntfId),
+                        );
+                        if (nextNode) {
+                            if (nextNode.position.x + nextNode.width > node.position.x) {
+                                rights += 1;
+                            } else {
+                                lefts += 1;
+                            }
+                        }
+                    });
+                    const newSide = (() => {
+                        if (lefts > rights) return 'left';
+                        if (rights > lefts) return 'right';
+                        return '';
+                    })();
+                    if (['left', 'right'].includes(newSide)) {
+                        const sidePosition = this.getPosition(
+                            node.interfaces.filter(
+                                (el) => el.side === newSide &&
+                                el !== intf,
+                            ).map(
+                                (el) => el.sidePosition,
+                            ).sort(
+                                (sp1, sp2) => sp1 - sp2,
+                            ),
+                        );
+                        intf.sidePosition = sidePosition;
+                        intf.side = newSide;
+                    }
+                });
+            });
+        });
+        this.load(graphs);
+    }
+
     updateNodesPosition(updatedGraph) {
         updatedGraph.nodes.forEach((updatedState) => {
             const node = this.graph.nodes.filter(

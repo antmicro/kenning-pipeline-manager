@@ -185,6 +185,13 @@ export default {
             return button;
         });
 
+        const swapInterfaces = computed(() => {
+            const button = new ButtonInterface('Swap interfaces', () => {
+                props.viewModel.editor.swapInterfaces();
+            });
+            return button;
+        });
+
         const clearEditor = computed(() => {
             const button = new ButtonInterface('Clean editor', () => {
                 props.viewModel.editor.deepCleanEditor();
@@ -231,6 +238,7 @@ export default {
                 connectionStyleOption.value,
                 LayoutOption.value,
                 LayoutApply.value,
+                swapInterfaces.value,
                 backgroundGridSize.value,
                 clearEditor.value,
                 movementStep.value,

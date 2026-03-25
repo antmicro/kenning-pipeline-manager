@@ -187,6 +187,7 @@ export default class ConnectionRenderer {
 
     /* eslint-disable class-methods-use-this */
     curvedRender(x1, y1, x2, y2, connection) {
+        const graph = this.viewModel.displayedGraph;
         const nc = new NormalizedConnection(x1, y1, x2, y2, connection);
         const dx = 0.3 * Math.abs(nc.x1 - nc.x2);
 
@@ -202,11 +203,11 @@ export default class ConnectionRenderer {
                 } ${nc.y2}`;
             }
             if (nc.from.side === 'right' && nc.to.side === 'right') {
-                const rightmost = Math.max(nc.x1 + dx, nc.x2 + dx);
+                const rightmost = Math.max(nc.x1 + dx, nc.x2 + dx) + 50 * graph.scaling;
                 return `M ${nc.x1} ${nc.y1} C ${rightmost} ${nc.y1}, ${rightmost} ${nc.y2}, ${nc.x2} ${nc.y2}`;
             }
             if (nc.from.side === 'left' && nc.to.side === 'left') {
-                const leftmost = Math.min(nc.x1 - dx, nc.x2 - dx);
+                const leftmost = Math.min(nc.x1 - dx, nc.x2 - dx) - 50 * graph.scaling;
                 return `M ${nc.x1} ${nc.y1} C ${leftmost} ${nc.y1}, ${leftmost} ${nc.y2}, ${nc.x2} ${nc.y2}`;
             }
         }
