@@ -60,6 +60,7 @@ export default {
                 { text: 'Orthogonal', value: 'orthogonal' },
                 { text: 'Alternative orthogonal', value: 'alternativeOrthogonal' },
                 { text: 'Straight', value: 'straight' },
+                { text: 'Switchable orthogonal', value: 'switchableOrthogonal' },
             ];
             const option = new SelectInterface(
                 'Connection style',
