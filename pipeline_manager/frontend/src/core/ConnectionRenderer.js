@@ -57,6 +57,15 @@ function calculateEllipseR(x, y, cx, cy, slope) {
     return [rx, ry];
 }
 
+function getIndex(arr) {
+    const arr_sorted = arr.sort((sp1, sp2) => sp1-sp2);
+
+    for (let i = 0; i < arr_sorted.length; i++)
+        if (arr_sorted[i] != i) return i;
+
+    return arr_sorted.length;
+}
+
 class NormalizedConnection {
     /**
      * Class that makes sure that the connection is in correct order, which means that from and to
@@ -1094,46 +1103,74 @@ export default class ConnectionRenderer {
         const middlePoint = (nc.x1 + nc.x2) / 2;
 
         if (connection.to) {
+            // const shift = this.getShift(nc.from, nc.to, graph, graph.scaling);
+            const fromNode = graph.nodes.filter((node) => nc.from.nodeId === node.id)[0];
+            const fromNodeWidth = fromNode.width;
+            const fromNodeInputs = Object.values(fromNode.inputs).filter((ni) => !ni.hidden && ni.port);
+            const fromNodeOutputs = Object.values(fromNode.outputs).filter((no) => !no.hidden && no.port);
+            const toNode = graph.nodes.filter((node) => nc.to.nodeId === node.id)[0];
+            const toNodeWidth = toNode.width;
+            const toNodeInputs = Object.values(toNode.inputs).filter((ni) => !ni.hidden && ni.port);
+            const toNodeOutputs = Object.values(toNode.outputs).filter((no) => !no.hidden && no.port);
+
+            const fromNodeLefts = [...fromNodeInputs, ...fromNodeOutputs].filter((intf) => intf.side === "left");
+            const fromNodeRights = [...fromNodeInputs, ...fromNodeOutputs].filter((intf) => intf.side === "right");
+
+            const toNodeLefts = [...toNodeInputs, ...toNodeOutputs].filter((intf) => intf.side === "left");
+            const toNodeRights = [...toNodeInputs, ...toNodeOutputs].filter((intf) => intf.side === "right");
+
+            const nextFromNodeLeftIndex = getIndex(fromNodeLefts.map((intf)=>intf.sidePosition));
+            const nextFromNodeRightIndex = getIndex(fromNodeRights.map((intf)=>intf.sidePosition));
+
+            const nextToNodeLeftIndex = getIndex(toNodeLefts.map((intf)=>intf.sidePosition));
+            const nextToNodeRightIndex = getIndex(toNodeRights.map((intf)=>intf.sidePosition));
+
+
             if (nc.from.side === 'right' && nc.to.side === 'left') {
                 if (nc.x1 + minMargin < nc.x2 - minMargin) {
                     return `M ${nc.x1} ${nc.y1} H ${middlePoint} V ${nc.y2} H ${nc.x2}`;
                 }
-                if (nc.x1 - graph.nodes.filter((node) =>
-                    nc.from.nodeId === node.id)[0].width * graph.scaling - minMargin
-                    > nc.x2 + graph.nodes.filter((node) =>
-                        nc.to.nodeId === node.id)[0].width * graph.scaling + minMargin) {
+                if (nc.x1 - fromNodeWidth * graph.scaling - minMargin > nc.x2 + toNodeWidth * graph.scaling + minMargin) {
+                    nc.from.sidePosition = nextFromNodeLeftIndex;
                     nc.from.side = 'left';
+                    nc.to.sidePosition = nextToNodeRightIndex;
                     nc.to.side = 'right';
                 } else {
                     nc.from.side = 'right';
+                    nc.to.sidePosition = nextToNodeRightIndex;
                     nc.to.side = 'right';
+                    const horizontal = Math.max(nc.x1, nc.x2 + toNodeWidth * graph.scaling) + minMargin;
+                    return `M ${nc.x1} ${nc.y1} H ${horizontal} V ${nc.y2} H ${nc.x2}`;
                 }
             } else if (nc.from.side === 'left' && nc.to.side === 'right') {
                 if (nc.x2 + minMargin < nc.x1 - minMargin) {
                     return `M ${nc.x1} ${nc.y1} H ${middlePoint} V ${nc.y2} H ${nc.x2}`;
                 }
-                if (nc.x2 - graph.nodes.filter((node) =>
-                    nc.to.nodeId === node.id)[0].width * graph.scaling - minMargin
-                    > nc.x1 + graph.nodes.filter((node) =>
-                        nc.from.nodeId === node.id)[0].width * graph.scaling + minMargin) {
+                if (nc.x2 - toNodeWidth * graph.scaling - minMargin > nc.x1 + fromNodeWidth * graph.scaling + minMargin) {
+                    nc.to.sidePosition = nextToNodeLeftIndex;
                     nc.to.side = 'left';
+                    nc.from.sidePosition = nextFromNodeRightIndex;
                     nc.from.side = 'right';
                 } else {
+                    nc.from.sidePosition = nextFromNodeRightIndex;
                     nc.from.side = 'right';
                     nc.to.side = 'right';
+                    const horizontal = Math.max(nc.x1, nc.x2) + minMargin;
+                    return `M ${nc.x1} ${nc.y1} H ${horizontal} V ${nc.y2} H ${nc.x2}`;
                 }
-            } else if (nc.x1 + minMargin < nc.x2 - graph.nodes.filter((node) =>
-                nc.to.nodeId === node.id)[0].width * graph.scaling - minMargin) {
-                nc.from.side = 'left';
-                nc.to.side = 'right';
-            } else if (nc.x1 - graph.nodes.filter((node) =>
-                nc.from.nodeId === node.id)[0].width *
-                graph.scaling - minMargin > nc.x2 + minMargin) {
-                nc.from.side = 'right';
-                nc.to.side = 'left';
-            } else {
-                const horizontal = Math.max(nc.x1, nc.x2) + minMargin;
-                return `M ${nc.x1} ${nc.y1} H ${horizontal} V ${nc.y2} H ${nc.x2}`;
+            } else { // nc.from.side === "right" && nc.to.side === "right"
+                if (nc.x1 + minMargin < nc.x2 - toNodeWidth * graph.scaling - minMargin) {
+                    nc.from.sidePosition = nextFromNodeLeftIndex;
+                    nc.from.side = 'left';
+                    nc.to.side = 'right';
+                } else if (nc.x1 - fromNodeWidth * graph.scaling - minMargin > nc.x2 + minMargin) {
+                    nc.from.side = 'right';
+                    nc.to.sidePosition = nextToNodeLeftIndex;
+                    nc.to.side = 'left';
+                } else {
+                    const horizontal = Math.max(nc.x1, nc.x2) + minMargin;
+                    return `M ${nc.x1} ${nc.y1} H ${horizontal} V ${nc.y2} H ${nc.x2}`;
+                }
             }
         }
 
