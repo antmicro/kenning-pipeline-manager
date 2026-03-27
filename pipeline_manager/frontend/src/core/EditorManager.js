@@ -1494,12 +1494,15 @@ export default class EditorManager {
                 .map((node) => node.relatedGraphs?.map(({ id }) => id))
                 .filter((value) => value !== undefined)
                 .flat();
-
+            const validated = new Set([]);
             const validateGraph = async (graph, loadArgs = []) => {
                 // Validating the graph after it is registered to see if there are any errors
                 // by loading a graph (with nested subgraphs, if applicable)
 
-                const graphs_ = idToNested.get(graph.id).map((id) => idToGraph.get(id));
+                const graphIds = idToNested.get(graph.id)
+                    .filter((id) => !validated.has(id));
+                graphIds.forEach((id) => validated.add(id));
+                const graphs_ = graphIds.map((id) => idToGraph.get(id));
                 const {
                     errors: loadingErrors,
                     warnings: loadingWarnings,
@@ -1507,9 +1510,7 @@ export default class EditorManager {
                     graphs: [graph, ...graphs_],
                     version: dataflowSpecification.version,
                 }, ...loadArgs);
-
-                this.baklavaView.editor.deepCleanEditor();
-                this.baklavaView.editor.unregisterGraphs();
+                this.baklavaView.editor.cleanEditor();
 
                 if (loadingWarnings.length) warnings.push(`Graph '${graph.name ?? graph.id}' is invalid:`, ...loadingWarnings.map((w) => `    ${w}`));
                 if (loadingErrors.length) errors.push(`Graph '${graph.name ?? graph.id}' is invalid:`, ...loadingErrors.map((w) => `    ${w}`));
@@ -1542,10 +1543,9 @@ export default class EditorManager {
 
                 const loadArgs = [true, true, node.name];
 
+                this.baklavaView.editor.cleanEditor();
                 // eslint-disable-next-line no-await-in-loop
                 await validateGraph(graph, loadArgs);
-                this.baklavaView.editor.deepCleanEditor();
-                this.baklavaView.editor.unregisterGraphs();
             }
 
             const subgraphNotFoundErrors = Object.entries(subgraphIdToNodes)

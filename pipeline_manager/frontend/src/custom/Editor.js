@@ -169,7 +169,6 @@ export default class PipelineManagerEditor extends Editor {
     deepCleanEditor(suppressHistory = true) {
         this.subgraphStack.forEach(this.backFromSubgraph.bind(this));
         this.cleanEditor(suppressHistory);
-        this.graphName = undefined;
     }
 
     /**
@@ -190,6 +189,7 @@ export default class PipelineManagerEditor extends Editor {
         for (let i = graphInstance.nodes.length - 1; i >= 0; i -= 1) {
             graphInstance.removeNode(graphInstance.nodes[i]);
         }
+        this.graphName = undefined;
         suppressHistoryLogging(false);
     }
 
