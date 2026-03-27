@@ -101,6 +101,7 @@
                 "curved",
                 "orthogonal",
                 "alternativeOrthogonal",
+                "switchableOrthogonal",
                 "straight"
             ],
             "description": "Defines connection style",
