@@ -1,11 +1,50 @@
 import {
-    JSONRPCError, JSONRPCRequest, JSONRPCResponse, JSONRPCServerAndClient,
+    JSONRPC,
+    JSONRPCError, JSONRPCID, JSONRPCRequest, JSONRPCResponse, JSONRPCServerAndClient,
+    JSONRPCSuccessResponse,
 } from 'json-rpc-2.0';
 import { io, Socket } from 'socket.io-client';
+import { v4 as uuidv4 } from 'uuid';
 import { JSONRPCCustomErrorCode } from '../../utils';
 import ExternalApp, { EndpointType } from './base';
 import { ClientParams } from '../utils';
 import NotificationHandler from '../../notifications';
+
+import { MAX_CHUNK_SIZE } from '../config';
+
+interface JSONRPCMaybeChunkedResponse extends JSONRPCSuccessResponse{
+    chunk_id: string;
+    chunk?: string;
+    end?: boolean;
+}
+
+interface JSONRPCMaybeChunkedRequest extends JSONRPCRequest{
+    chunk_id: string;
+    chunk?: string;
+    end?: boolean;
+}
+
+function* splitDataIntoChunks(data: any, chunkSize: number, id: string|undefined = undefined) {
+    const chunkId = id ?? uuidv4();
+
+    const msg = JSON.stringify(data);
+    let i = 0;
+    for (; i < msg.length - chunkSize; i += chunkSize) {
+        const chunk = msg.substring(i, i + chunkSize);
+        yield {
+            chunk_id: chunkId,
+            chunk,
+        };
+    }
+
+    const lastChunk = msg.substring(i, i + chunkSize);
+
+    yield {
+        chunk_id: chunkId,
+        chunk: lastChunk,
+        end: true,
+    };
+}
 
 export default class ExternalBackendApp implements ExternalApp {
     public static commonHeaders = {
@@ -15,11 +54,13 @@ export default class ExternalBackendApp implements ExternalApp {
 
     private socket: Socket;
 
+    private chunks: Map<string, string[]>;
+
     // eslint-disable-next-line no-useless-constructor
     public constructor(
         public url: string,
         private jsonRPC: JSONRPCServerAndClient<void, ClientParams>,
-        private maxMessageLength = 256 * 1024,
+        private maxMessageLength = MAX_CHUNK_SIZE,
     ) {
         this.socket = io(url, { extraHeaders: ExternalBackendApp.commonHeaders });
 
@@ -29,20 +70,81 @@ export default class ExternalBackendApp implements ExternalApp {
             this.jsonRPC.rejectAllPendingRequests('WebSocket disconnected');
         });
 
-        this.socket.on('api', async (data: JSONRPCRequest) => {
-            const response = await this.jsonRPC.server.receive(data);
+        const shouldBeChunked = (data:any) => {
+            const stringify = JSON.stringify(data);
+
+            return new Blob([stringify]).size > maxMessageLength;
+        };
+
+        this.chunks = new Map<string, string[]>();
+
+        this.socket.on('api', async (request: JSONRPCMaybeChunkedRequest) => {
+            const msg = this.processMessage(request) as JSONRPCMaybeChunkedRequest;
+            if (msg === undefined) {
+                return;
+            }
+            const response = await this.jsonRPC.server.receive(msg);
+
             if (response) {
-                try {
+                if (shouldBeChunked(response)) {
+                    try {
+                        const id = uuidv4();
+
+                        await Promise.all(splitDataIntoChunks(response, maxMessageLength, id)
+                            .map(async (chunk) => {
+                                const ack = await this.socket.emitWithAck('external-api', chunk);
+                                if (ack !== undefined && !ack) {
+                                    NotificationHandler.terminalLog('error', 'Response to external app was not sent', null);
+                                }
+                            }));
+                    } catch (error) {
+                        NotificationHandler.terminalLog('error', `Response to ${msg.method} request cannot be sent`, error);
+                    }
+                } else {
                     const ack = await this.socket.emitWithAck('external-api', response);
                     if (ack !== undefined && !ack) {
-                        NotificationHandler.terminalLog('error', 'Response to external app was not send', null);
+                        NotificationHandler.terminalLog('error', 'Response to external app was not sent', null);
                     }
-                } catch (error) {
-                    NotificationHandler.terminalLog('error', `Response to ${data.method} request cannot be send`, error);
                 }
             }
         });
-        this.socket.on('api-response', (response: JSONRPCResponse) => { this.jsonRPC.client.receive(response); });
+        this.socket.on('api-response', (response: JSONRPCMaybeChunkedResponse) => {
+            const msg = this.processMessage(response);
+            if (msg !== undefined) {
+                this.jsonRPC.client.receive(msg as JSONRPCMaybeChunkedResponse);
+            }
+        });
+    }
+
+    public processMessage(msg: JSONRPCMaybeChunkedResponse|JSONRPCMaybeChunkedRequest) {
+        const isChunk = msg?.chunk_id !== undefined;
+        if (isChunk) {
+            const chunkId = msg.chunk_id;
+
+            const currentChunks = this.chunks.get(chunkId) ?? [];
+
+            const data = msg?.chunk;
+            if (data !== undefined) {
+                currentChunks.push(data);
+            }
+            this.chunks.set(chunkId, currentChunks);
+
+            // Is it final chunk?
+            if (msg?.end) {
+                const RawData = currentChunks.join('');
+                try {
+                    const parsed = JSON.parse(RawData) as JSONRPCResponse;
+                    this.chunks.delete(chunkId);
+                    return parsed;
+                } catch (error) {
+                    NotificationHandler.terminalLog('error', `Couldn't parse chunked response`, error);
+                }
+            }
+        } else {
+            return msg;
+        }
+
+        return undefined;
     }
 
     public async isConnected() {
@@ -73,18 +175,12 @@ export default class ExternalBackendApp implements ExternalApp {
         const stringify = JSON.stringify(data);
 
         // Emit request in chunks
-        if (stringify.length > this.maxMessageLength) {
-            const messageID = data.id ?? crypto.randomUUID();
-            for (let i = 0; i < stringify.length; i += this.maxMessageLength) {
-                this.socket.emit(endpoint, {
-                    id: messageID,
-                    chunk: stringify.substring(
-                        i, Math.min(i + this.maxMessageLength, stringify.length),
-                    ),
-                    end: i + this.maxMessageLength >= stringify.length,
-                });
-            }
-        // Emit whole request
+        if (new Blob([stringify]).size > this.maxMessageLength) {
+            const chunkId = uuidv4();
+
+            splitDataIntoChunks(data, this.maxMessageLength, chunkId).forEach((chunk) => {
+                this.socket.emit(endpoint, chunk);
+            });
         } else {
             this.socket.emit(endpoint, data);
         }
