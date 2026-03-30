@@ -86,16 +86,16 @@ export default function usePanZoom() {
 
             accumulatedDelta += scrollAmount;
 
-            if (timeout) clearTimeout(timeout);
+            if (!timeout) {
+                timeout = setTimeout(() => {
+                    // Limit the zooming
+                    const newScale = calculateScale(accumulatedDelta);
+                    applyZoom(ev.clientX, ev.clientY, newScale);
 
-            timeout = setTimeout(() => {
-                // Limit the zooming
-                const newScale = calculateScale(accumulatedDelta);
-                applyZoom(ev.clientX, ev.clientY, newScale);
-
-                accumulatedDelta = 0;
-                timeout = null;
-            }, 10); // to batch scroll events
+                    accumulatedDelta = 0;
+                    timeout = null;
+                }, 10); // to batch scroll events
+            }
         };
     })();
 
@@ -183,7 +183,7 @@ export default function usePanZoom() {
                         }
 
                         timeout = null;
-                    }, 5);
+                    }, 16);
                 }
             } else {
                 dragMove.onPointerMove(ev);
