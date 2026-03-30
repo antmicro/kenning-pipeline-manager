@@ -95,19 +95,20 @@ def create_socketio() -> socketio.AsyncServer:
         chunks = defaultdict(lambda: defaultdict(lambda: []))
         CHUNKS.append(chunks)
 
-        async def event_handler(sid, json_rpc_request):
-            if "chunk" in json_rpc_request:
-                chunks[sid][json_rpc_request["id"]].append(
+        async def event_handler(sid, json_rpc_request) -> bool:
+            if "chunk_id" in json_rpc_request:
+                chunks[sid][json_rpc_request["chunk_id"]].append(
                     json_rpc_request["chunk"]
                 )
                 if json_rpc_request.get("end", False):
+                    data = "".join(chunks[sid][json_rpc_request["id"]])
+                    del chunks[sid][json_rpc_request["id"]]
                     return await func(
                         sid,
                         json.loads(
-                            "".join(chunks[sid][json_rpc_request["id"]])
+                            data
                         ),
                     )
-                    del chunks[sid][json_rpc_request["id"]]
             else:
                 return await func(sid, json_rpc_request)
 
