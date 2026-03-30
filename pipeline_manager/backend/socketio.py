@@ -7,9 +7,10 @@ Provides methods for setting up asynchronous server for Pipeline Manager.
 """
 
 import json
+from asyncio import Future
 from collections import defaultdict
 from http import HTTPStatus
-from typing import Callable, Dict
+from typing import Awaitable, Callable, Dict
 
 import socketio
 from engineio.payload import Payload
@@ -23,6 +24,8 @@ from pipeline_manager_backend_communication.misc_structures import (
     Status,
 )
 
+from pipeline_manager.backend.chunked_com import send_chunked
+from pipeline_manager.backend.config import MAX_HTTP_BUFFER_SIZE
 from pipeline_manager.backend.state_manager import global_state_manager
 from pipeline_manager.backend.tcp_socket import (
     join_listener_task,
@@ -44,13 +47,13 @@ def create_socketio() -> socketio.AsyncServer:
     sio = socketio.AsyncServer(
         async_mode="asgi",
         cors_allowed_origins="*",
-        max_http_buffer_size=10 * 1024 * 1024,
+        max_http_buffer_size=MAX_HTTP_BUFFER_SIZE,
     )
     CHUNKS = []
 
     def reject_old_sessions_requests(
-        func: Callable[[str, Dict], bool],
-    ) -> Callable[[str, Dict], bool]:
+        func: Callable[[str, Dict], Future[bool]],
+    ) -> Callable[[str, Dict], Future[bool]]:
         """
         Decorator checking if a received message is a request
         and came from the newest session.
@@ -60,7 +63,7 @@ def create_socketio() -> socketio.AsyncServer:
         * dataflow_stop - to enable stopping long runs.
         """
 
-        async def _func(sid, json_rpc_request):
+        async def _func(sid, json_rpc_request) -> bool:
             if (
                 sid != global_state_manager.last_socket
                 and "method" in json_rpc_request
@@ -87,8 +90,8 @@ def create_socketio() -> socketio.AsyncServer:
         return _func
 
     def collect_chunks(
-        func: Callable[[str, Dict], bool],
-    ) -> Callable[[str, Dict], bool]:
+        func: Callable[[str, Dict], Awaitable[bool]],
+    ) -> Callable[[str, Dict], Awaitable[bool]]:
         """
         Decorator implementing support for chunked messages.
         """
@@ -97,17 +100,16 @@ def create_socketio() -> socketio.AsyncServer:
 
         async def event_handler(sid, json_rpc_request) -> bool:
             if "chunk_id" in json_rpc_request:
-                chunks[sid][json_rpc_request["chunk_id"]].append(
-                    json_rpc_request["chunk"]
-                )
+                data = json_rpc_request.get("chunk", None)
+
+                if data is not None:
+                    chunks[sid][json_rpc_request["chunk_id"]].append(data)
                 if json_rpc_request.get("end", False):
-                    data = "".join(chunks[sid][json_rpc_request["id"]])
-                    del chunks[sid][json_rpc_request["id"]]
+                    data = "".join(chunks[sid][json_rpc_request["chunk_id"]])
+                    del chunks[sid][json_rpc_request["chunk_id"]]
                     return await func(
                         sid,
-                        json.loads(
-                            data
-                        ),
+                        json.loads(data),
                     )
             else:
                 return await func(sid, json_rpc_request)
@@ -271,7 +273,9 @@ def create_socketio() -> socketio.AsyncServer:
         resp = await json_rpc_backend.generate_json_rpc_response(
             json_rpc_request
         )
-        await sio.emit("api-response", resp.data, to=sid)
+
+        await send_chunked(sio, "api-response", resp.data, sid)
+
         return True
 
     @sio.on("external-api")
