@@ -21,6 +21,7 @@ from pipeline_manager_backend_communication.misc_structures import (  # noqa: E5
 )
 from socketio import AsyncServer
 
+from pipeline_manager.backend.chunked_com import send_chunked
 from pipeline_manager.backend.state_manager import global_state_manager
 
 _TASK: asyncio.Task = None
@@ -81,7 +82,8 @@ async def manage_socket_messages(
             else:
                 sid = global_state_manager.last_socket
 
-            await socketio.emit(event, data, to=sid)
+            await send_chunked(socketio, event, data, sid)
+
         elif message.status == Status.CONNECTION_CLOSED:
             break
 
