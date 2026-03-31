@@ -1,5 +1,5 @@
 import { test, expect, Page, Locator } from '@playwright/test';
-import { getPathToJsonFile, getUrl, openFileChooser, enableEditingNodes, enableNavigationBar, addNode } from './config.js';
+import { waitForNodeSubgraph,disableNavigationBar,closeTerminal,addSubgraph,dragAndDrop,loadSpecification,loadDataflow,verifyNodeCount,getPathToJsonFile,checkForSubgraph,waitForSubgraph,setYAML,getYAML,deleteProperty,addProperty,addInterface,enterSubgraph,leaveSubgraph,getNode,deleteNode, getUrl, openFileChooser, enableEditingNodes, enableNavigationBar, addNode } from './config.js';
 
 import os from 'os';
 import fs from 'fs';
@@ -12,111 +12,10 @@ const countOfInitiallyExposedProperties = 1;
 
 const temporaryDir = os.tmpdir() + '/';
 
-function getNode(page: Page, nodeName: string) {
-    return page.locator(`.baklava-node[data-node-type="${nodeName}"]`);
-}
-
-async function addInterface(page: Page, node: Locator) {
-    await node.locator('.__title').click({ button: 'right', force: true });
-    await node.locator('.baklava-context-menu').getByText('Add interface').click();
-    await page.getByRole('button', { name: 'Add interface' }).click();
-}
-async function addProperty(page: Page, node: Locator) {
-    await node.locator('.__title').click({ button: 'right', force: true });
-    await node.locator('.baklava-context-menu').getByText('Add property').click();
-    await page.getByRole('button', { name: 'Add property' }).click();
-}
-async function deleteProperty(page: Page, node: Locator, propName: string) {
-    await node.locator('.__title').click({ button: 'right', force: true });
-    await node.locator('.baklava-context-menu').getByText('Delete property').click();
-    await page.locator('.create-menu').last().getByText(propName).click();
-    await page.getByRole('button', { name: 'Remove properties' }).click();
-}
-async function getYAML(page: Page, node: Locator) {
-    await node.locator('.__title').dblclick();
-
-    const textarea = page.locator('textarea');
-    const content = YAML.parse(await textarea.evaluate((el) => el.value));
-    return content;
-}
-async function setYAML(page: Page, content: string, node: Locator) {
-    await node.locator('.__title').dblclick();
-
-    const textarea = page.locator('textarea');
-    await textarea.fill(YAML.stringify(content));
-}
-
-async function enterSubgraph(node: Locator) {
-    await node.locator('.__title').click({ button: 'right' });
-    const contextMenuOption = node.locator('.baklava-context-menu').getByText('Go to graph').last();
-    await contextMenuOption.click();
-}
-
-async function waitForSubgraph(page: Page,graphName:string) {
-    const editorTitle = await page.locator('.editorTitle');
-    await expect(editorTitle.getByText(graphName)).toBeVisible();
-}
-
-async function deleteNode(node: Locator) {
-    await node.locator('.__title').click({ button: 'right' });
-    const contextMenuOption = node.locator('.baklava-context-menu').getByText('Delete',{ exact: true });
-    await contextMenuOption.click({ force: true });
-}
-
-async function checkForSubgraph(node: Locator) {
-    await node.locator('.__title').click({ button: 'right' });
-    const contextMenuOption = node.locator('.baklava-context-menu').getByText('Go to graph');
-    expect(await contextMenuOption.count()).toBe(1);
-    await node.locator('.__title').click({ button: 'right' });
-}
-
-async function loadSubgraphSpecification(page: Page) {
-    const fileChooser = await openFileChooser(page, 'specification');
-    await fileChooser.setFiles(getPathToJsonFile('sample-subgraph-specification.json'));
-}
-
-async function loadSubgraphDataflow(page: Page) {
-    const fileChooser = await openFileChooser(page, 'dataflow');
-    await fileChooser.setFiles(getPathToJsonFile('sample-subgraph-dataflow.json'));
-}
-
 async function prepareSubgraphPage(page: Page) {
     await page.goto(getUrl());
-    await loadSubgraphSpecification(page);
-    await loadSubgraphDataflow(page);
-}
-
-async function verifyNodeCount(page: Page, expectedCount: number) {
-    const nodes = page.locator('.node-container > div');
-    await expect(nodes).toHaveCount(expectedCount); //toBe(expectedCount,{timeout: 3000});
-}
-
-async function leaveSubgraph(page: Page) {
-    const leaveButton = page.getByText('Return from subgraph editor').locator('../..');
-    await leaveButton.click();
-    try {
-        await page.locator('.zoom-center').click({ timeout: 1000 });
-    } catch {
-        // not clickable, could be hidden by node config panel
-    }
-}
-
-async function dragAndDrop(page: Page, locator: Locator, to: { x: number; y: number }) {
-    await locator.hover();
-    await page.mouse.down();
-    await page.mouse.move(to.x, to.y);
-    await page.mouse.up();
-}
-
-async function addSubgraph(node: Locator) {
-    await node.locator('.__title').click({ button: 'right' });
-    const contextMenuOption = node.locator('.baklava-context-menu').getByText('Add subgraph');
-    await contextMenuOption.click();
-}
-
-async function waitForNodeSubgraph(node: Locator) {
-    const nodeTitle = await node.locator('.__title');
-    await expect(nodeTitle.locator('.__subgraph-icon')).toBeVisible();
+    await loadSpecification(page,'sample-subgraph-specification.json');
+    await loadDataflow(page,'sample-subgraph-dataflow.json');
 }
 
 test('test loading subgraph dataflow', async ({ page }) => {
@@ -149,13 +48,14 @@ async function placeNewNode(page: Page, location: { x: number; y: number }) {
     const firstCategoryLabel = page.getByText('First Category');
     await firstCategoryLabel.click();
     const nodeFromBrowser = page.getByText('Test node #1').first();
-    await dragAndDrop(page, nodeFromBrowser, location);
+    await dragAndDrop(page, nodeFromBrowser, location.x, location.y);
+    await disableNavigationBar(page);
 }
 
 async function createNewNode(page: Page, location: { x: number; y: number }) {
     await enableNavigationBar(page);
     const newNodeType = page.getByText('New Node Type').first();
-    await dragAndDrop(page, newNodeType, location);
+    await dragAndDrop(page, newNodeType, location.x, location.y);
     const createButton = page.getByText('Create').first();
     await createButton.click();
 }
@@ -163,7 +63,7 @@ async function createNewNode(page: Page, location: { x: number; y: number }) {
 async function createNewGraphNode(page: Page, location: { x: number; y: number }) {
     await enableNavigationBar(page);
     const newGraphNodeType = page.getByText('New Graph Node').first();
-    await dragAndDrop(page, newGraphNodeType, location);
+    await dragAndDrop(page, newGraphNodeType, location.x, location.y);
 }
 
 test('test preserving changes to subgraph', async ({ page }) => {

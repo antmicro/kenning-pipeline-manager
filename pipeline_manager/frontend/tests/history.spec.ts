@@ -1,78 +1,6 @@
-import {
-    test, expect, Page, Locator,
-} from '@playwright/test';
-import {
-    getUrl, loadVideoNodeId, addNode, dragAndDrop, closeTerminal, loadSpecification, loadDataflow,
-} from './config.js';
+import { test, expect, Page, Locator } from '@playwright/test';
+import { getUrl,getNodeByID,assertInputCount,assertOutputCount,waitForSubgraph,enterSubgraph,leaveSubgraph,loadWebsite,expectNode,getNode,deleteNode, loadVideoNodeId, enableNavigationBar, addNode, dragAndDrop, closeTerminal,loadSpecification,loadDataflow } from './config.js';
 
-async function deleteNode(page: Page, nodeId: string) {
-    await closeTerminal(page);
-
-    // Find the node and invoke a context menu with a right click.
-    const loadVideoNode = page.locator(`#${nodeId}`);
-    expect(loadVideoNode).toHaveCount(1);
-    expect(loadVideoNode, {
-        message: `The node with id ${nodeId} is expected to be visible before the remove operation.`,
-    }).toBeVisible();
-    const nodeTitle = loadVideoNode.locator('.__title');
-    await nodeTitle.click({ button: 'right' });
-
-    // Delete the node.
-    const deleteButton = loadVideoNode.getByText('Delete', { exact: true });
-    await deleteButton.click();
-}
-
-async function loadWebsite(page: Page, requiredNodeId: string) {
-    await page.goto(getUrl());
-    if (requiredNodeId) {
-        await page.waitForSelector(`#${requiredNodeId}`);
-    }
-}
-
-async function expectNode(exists: boolean, page: Page, nodeId: string, errorMessage: string) {
-    const loc = page.locator(`#${nodeId}`);
-    if (exists) {
-        expect(loc, { message: errorMessage }).toBeVisible();
-    } else {
-        await loc.waitFor({ state: 'hidden' });
-        expect(loc, { message: errorMessage }).not.toBeVisible();
-    }
-}
-
-function getNode(page: Page, name: string): Locator {
-    return page.locator(`.baklava-node[data-node-type="${name}"]`);
-}
-
-async function leaveSubgraph(page: Page) {
-    const leaveButton = page.getByText('Return from subgraph editor').locator('../..');
-    await leaveButton.click();
-}
-
-async function enterSubgraph(node: Locator) {
-    await node.locator('.__title').click({ button: 'right' });
-    const contextMenuOption = node.locator('.baklava-context-menu').getByText('Go to graph');
-    await contextMenuOption.click();
-}
-
-async function removeNode(node: Locator) {
-    await node.locator('.__title').click({ button: 'right' });
-    const contextMenuOption = node.locator('.baklava-context-menu').getByText('Delete');
-    await contextMenuOption.click();
-}
-
-async function assertInputCount(node: Locator, count: number) {
-    const inputs = await node
-        .locator('.__interfaces .__inputs > div')
-        .count();
-    expect(inputs).toBe(count);
-}
-
-async function assertOutputCount(node: Locator, count: number) {
-    const inputs = await node
-        .locator('.__interfaces .__outputs > div')
-        .count();
-    expect(inputs).toBe(count);
-}
 
 async function renameNodeType(page: Page, oldName: string, newName: string) {
     const node = getNode(page, oldName).locator('.__title');
@@ -90,11 +18,6 @@ function getNodeInterfaces(page: Page, name: string, side: 'input' | 'output' | 
     }[side];
 
     return getNode(page, name).locator(`.__interfaces ${ioClass}`);
-}
-
-async function waitForSubgraph(page: Page, graphName: string) {
-    const editorTitle = page.locator('.editorTitle');
-    await expect(editorTitle.getByText(graphName)).toBeVisible();
 }
 
 function getContextMenuOption(page: Page, nodeName: string, optionName: string): Locator {
@@ -116,8 +39,8 @@ test('test history by removing subgraph', async ({ page }) => {
     const nodes = getNode(page, 'Test node #1');
     expect(await nodes.count()).toBe(2);
     // remove them
-    await removeNode(nodes.first());
-    await removeNode(nodes.last());
+    await deleteNode(nodes.nth(0));
+    await deleteNode(nodes.nth(1));
     // now subgraph node should have no exposed outputs
     await assertOutputCount(subgraphNode, 0);
 
@@ -145,27 +68,26 @@ test('test history by removing node', async ({ page }) => {
     // Load a website and wait until nodes are loaded.
     await loadWebsite(page, loadVideoNodeId);
 
-    await deleteNode(page, loadVideoNodeId);
+    const node = getNodeByID(page,loadVideoNodeId);
+
+    await deleteNode(node);
     await expectNode(
         false,
-        page,
-        loadVideoNodeId,
+        node,
         'The `LoadVideo` node is visible after removing it.',
     );
 
     await page.keyboard.press('Control+KeyZ');
     await expectNode(
         true,
-        page,
-        loadVideoNodeId,
+        node,
         'The `LoadVideo` node is not visible after undoing the remove operation.',
     );
 
     await page.keyboard.press('Control+KeyY');
     await expectNode(
         false,
-        page,
-        loadVideoNodeId,
+        node,
         'The `LoadVideo` node is visible after redoing the remove operation.',
     );
 });
@@ -485,7 +407,8 @@ test('test history by removing node with connection', async ({ page }) => {
         message: 'The initial condition of six connections being present are not met.',
     }).toHaveCount(6);
 
-    await deleteNode(page, loadVideoNodeId);
+    const node = getNodeByID(page,loadVideoNodeId);
+    await deleteNode(node);
 
     // Verify that the node and its connection have disappeared.
     await expect(page.locator(`#${loadVideoNodeId}`), {

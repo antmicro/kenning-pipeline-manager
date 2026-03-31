@@ -6,22 +6,10 @@ import os from 'os';
 import fs from 'fs/promises';
 
 import {
-    getUrl, getPathToJsonFile, addNode, openFileChooser, dragAndDrop, openNodePalette,
+    createNewNodeType,addInterface, getUrl, assertInputCount, getNode, getPathToJsonFile, addNode, openFileChooser, dragAndDrop, openNodePalette,
 } from './config.js';
 
 const temporaryDir = `${os.tmpdir()}/`;
-
-async function createNewNodeType(page: Page) {
-    // Open node configuration menu
-    const nodePalette = page.locator('.baklava-node-palette');
-    const addNodeButton = nodePalette.getByText('New Node Type').first();
-    await dragAndDrop(page, addNodeButton, 750, 80);
-
-    // Create node
-    const nodeMenu = page.locator('#container').locator('.create-menu');
-    const createButton = nodeMenu.getByText('Create');
-    await createButton.click();
-}
 
 async function loadIncludeSpecification(page: Page, testInfo: TestInfo) {
     const fileChooser = await openFileChooser(page, 'specification');
@@ -40,22 +28,6 @@ async function loadIncludeSpecification(page: Page, testInfo: TestInfo) {
     await fileChooser.setFiles(newSpecificationPath);
 }
 
-async function assertInputCount(page: Page, nodeName: string, count: number) {
-    const inputs = await page
-        .locator(`[data-node-type="${nodeName}"]`)
-        .locator('.__interfaces .__inputs > div')
-        .count();
-    expect(inputs).toBe(count);
-}
-
-async function addInterface(page: Page, nodeName: string) {
-    const node = page.getByText(nodeName).last();
-    await node.click({ button: 'right', force: true });
-    await node.locator('..').getByText('Add interface').click();
-    await page.getByRole('button', { name: 'Add interface' }).click();
-
-    await assertInputCount(page, nodeName, 2);
-}
 
 async function renameNodeType(page: Page, oldName: string, newName: string) {
     const node = page.getByText(oldName).last();
@@ -141,7 +113,9 @@ test('add interface to custom node in specification with "include" keyword', asy
     const nodeName = 'Custom Node';
     await createNewNodeType(page);
     await addNode(page, 'Default category', nodeName, 750, 80);
-    await addInterface(page, nodeName);
+    const node = getNode(page,nodeName).last();
+    await addInterface(page, node);
+    await assertInputCount(node, 1);
 });
 
 test('register custom node in specification with "include" keyword', async ({ page }, testInfo) => {
@@ -199,7 +173,8 @@ test('rename category node', async ({ page }, testInfo) => {
     await openNodePalette(page);
 
     await renameNodeType(page, 'Binary images', 'New node name');
-    await assertInputCount(page, 'Logical AND', 2);
+    const and_node = getNode(page,'Logical AND');
+    await assertInputCount(and_node, 2);
 
     // check category in custom sidebar
     const node = page.getByText('Logical AND').locator('..').last();
@@ -218,12 +193,14 @@ test('add interface to category node', async ({ page }, testInfo) => {
 
     await addParentAndChildNode(page, 200);
 
-    await addInterface(page, 'Binary images');
-    await assertInputCount(page, 'Logical AND', 3);
+    const node = getNode(page,'Binary images');
+    await addInterface(page, node);
+    const and_node = getNode(page,'Logical AND');
+    await assertInputCount(and_node, 3);
 
     await addParentAndChildNode(page, 200, false);
-    await assertInputCount(page, 'Binary images', 4);
-    await assertInputCount(page, 'Logical AND', 6);
+    await assertInputCount(node, 4);
+    await assertInputCount(and_node, 6);
 });
 
 test('hiding property', async ({ page }, testInfo) => {

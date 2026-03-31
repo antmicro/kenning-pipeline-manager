@@ -4,6 +4,10 @@ import { fileURLToPath } from 'url';
 import path, { dirname, join } from 'path';
 import { expect } from 'playwright/test';
 
+import os from 'os';
+import fs from 'fs';
+import YAML from 'yaml';
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
@@ -69,6 +73,34 @@ export async function enableNavigationBar(page) {
 }
 
 /**
+ * Disable the navigation bar by simulating a mouse movement and clicking
+ * on the element with the text "Hide node browser".
+ *
+ * @async
+ * @param {import('@playwright/test').Page} page - The Playwright Page object to interact with.
+ * @returns {Promise<void>} Resolves when the navigation bar has been disabled.
+ */
+export async function disableNavigationBar(page) {
+    await page.mouse.move(500, 0);
+    const opened = page.locator('.hoverbox').filter({ hasText: /^Show node browser$/ });
+    if (await opened.isVisible()) {
+        return;
+    }
+    await page
+        .locator('.hoverbox')
+        .filter({ hasText: /^Hide node browser$/ })
+        .first()
+        .click();
+}
+
+export async function loadWebsite(page, requiredNodeId) {
+    await page.goto(getUrl());
+    if (requiredNodeId) {
+        await page.waitForSelector(`#${requiredNodeId}`);
+    }
+}
+
+/**
  * Loads specification file by using the file chooser.
  *
  * @async
@@ -93,6 +125,251 @@ export async function loadDataflow(page, dataflowFile) {
     const fileChooser = await openFileChooser(page, 'dataflow');
     await fileChooser.setFiles(getPathToJsonFile(dataflowFile));
 }
+
+/**
+ * Subgraph section
+ */
+
+/**
+ * Leave current subgraph.
+ *
+ * @async
+ * @param {import('@playwright/test').Page} page - The Playwright Page object to interact with.
+ * @returns {Promise<void>} Resolves when playwright left current subgraph.
+ */
+export async function leaveSubgraph(page) {
+    const leaveButton = page.getByText('Return from subgraph editor').locator('../..');
+    await leaveButton.click();
+}
+
+/**
+ * Enter subgraph attached to a selected node.
+ *
+ * @async
+ * @param {import('@playwright/test').Locator} node - The Playwright Locator representing a node.
+ * @returns {Promise<void>} Resolves when playwright enter subgraph of selected node.
+ */
+export async function enterSubgraph(node) {
+    await node.locator('.__title').click({ button: 'right' });
+    const contextMenuOption = node.locator('.baklava-context-menu').getByText('Go to graph');
+    await contextMenuOption.click();
+}
+
+/**
+ * Wait for subgraph to be loaded.
+ *
+ * @async
+ * @param {import('@playwright/test').Page} page - The Playwright Page object to interact with.
+ * @param {string} graphName - A name of the associated subraph.
+ * @returns {Promise<void>} Resolves when subgraph is loaded.
+ */
+export async function waitForSubgraph(page, graphName) {
+    const editorTitle = await page.locator('.editorTitle');
+    await expect(editorTitle.getByText(graphName)).toBeVisible();
+}
+
+/**
+ * Check whether a selected node has subgraph attached to it.
+ *
+ * @async
+ * @param {import('@playwright/test').Locator} node - The Playwright Locator representing a node.
+ * @returns {Promise<void>} Resolves when node has been found and has subgraph attached to it.
+ */
+export async function checkForSubgraph(node) {
+    const contextMenuOption = node.locator('.baklava-context-menu').getByText('Go to graph');
+    expect(await contextMenuOption).toHaveCount(1,{ timeout: 10_000 });
+    await node.locator('.__title').click({ button: 'right'});
+    expect(await contextMenuOption).toBeVisible();
+    await node.locator('.__title').click({ button: 'right' });
+}
+
+/**
+ * Add subgraph to selected node.
+ *
+ * @async
+ * @param {import('@playwright/test').Locator} node - The Playwright Locator representing a node.
+ * @returns {Promise<void>} Resolves when subgraph has been added to selected node.
+ */
+export async function addSubgraph(node) {
+    const title = node.locator('.__title');
+    await title.click({ button: 'right' });
+    const contextMenuOption = node.locator('.baklava-context-menu').getByText('Add subgraph');
+    await contextMenuOption.click({force: true});
+    expect(await title.locator('.__subgraph-icon').first()).toBeVisible({ timeout: 5_000 });
+}
+
+/**
+ * Wait until subgraph is added to node.
+ *
+ * @async
+ * @param {import('@playwright/test').Locator} node - The Playwright Locator representing a node.
+ * @returns {Promise<void>} Resolves when subgraph has been added to a node.
+ */
+export async function waitForNodeSubgraph(node) {
+    const nodeTitle = await node.locator('.__title');
+    await expect(nodeTitle.locator('.__subgraph-icon')).toBeVisible();
+}
+/**
+ * YAML section
+ */
+
+/**
+ * Get node specification.
+ *
+ * @async
+ * @param {import('@playwright/test').Page} page - The Playwright Page object to interact with.
+ * @param {import('@playwright/test').Locator} node - The Playwright Locator representing a node.
+ * @returns {Promise<object>} A parssed YAML settings.
+ */
+export async function getYAML(page, node) {
+    await node.locator('.__title').dblclick();
+
+    const textarea = page.locator('textarea');
+    const content = YAML.parse(await textarea.evaluate((el) => el.value));
+    return content;
+}
+
+/**
+ * Set node specification.
+ *
+ * @async
+ * @param {import('@playwright/test').Page} page - The Playwright Page object to interact with.
+ * @param {object} content - A new node specification
+ * @param {import('@playwright/test').Locator} node - The Playwright Locator representing a node.
+ * @returns {Promise<void>} Resolves when a new specification has been set for a node.
+ */
+export async function setYAML(page, content, node) {
+    await node.locator('.__title').dblclick();
+
+    const textarea = page.locator('textarea');
+    await textarea.fill(YAML.stringify(content));
+}
+
+/**
+ * Set node specification.
+ *
+ * @async
+ * @param {import('@playwright/test').Page} page - The Playwright Page object to interact with.
+ * @param {object} content - A new node specification
+ * @param {import('@playwright/test').Locator} node - The Playwright Locator representing a node.
+ * @returns {Promise<void>} Resolves when a new specification has been set for a node.
+ */
+export async function closeYAMLEditor(page) {
+    const closeButton = page.locator('.baklava-sidebar');
+    if (await closeButton.isVisible()) {
+        await closeButton.locator('.__close').click({force:true});
+    }
+}
+
+export async function getYAMLEditorContent(page) {
+    const textarea = page.locator('textarea');
+    const value = await textarea.evaluate((el) => el.value);
+    return YAML.parse(value);
+}
+
+export async function setYAMLEditorContent(page, content) {
+    const textarea = page.locator('textarea');
+    await textarea.fill(YAML.stringify(content));
+    await page.getByText('Apply', { exact: true }).click();
+}
+
+
+/**
+ * Interface and property section
+ */
+
+/**
+ * Add a new interface to a selected node.
+ *
+ * @async
+ * @param {import('@playwright/test').Page} page - The Playwright Page object to interact with.
+ * @param {import('@playwright/test').Locator} node - The Playwright Locator representing a node.
+ * @returns {Promise<void>} Resolves when a interface is added to a node.
+ */
+export async function addInterface(page, node) {
+    await node.locator('.__title').click({ button: 'right', force: true });
+    await node.locator('.baklava-context-menu').getByText('Add interface').click();
+    await page.getByRole('button', { name: 'Add interface' }).click();
+}
+
+/**
+ * Add a new property to a selected node.
+ *
+ * @async
+ * @param {import('@playwright/test').Page} page - The Playwright Page object to interact with.
+ * @param {import('@playwright/test').Locator} node - The Playwright Locator representing a node.
+ * @returns {Promise<void>} Resolves when a property is added to a node.
+ */
+export async function addProperty(page, node) {
+    await node.locator('.__title').click({ button: 'right', force: true });
+    await node.locator('.baklava-context-menu').getByText('Add property').click();
+    await page.getByRole('button', { name: 'Add property' }).click();
+}
+
+/**
+ * Remove a property with propName of selected node.
+ *
+ * @async
+ * @param {import('@playwright/test').Page} page - The Playwright Page object to interact with.
+ * @param {import('@playwright/test').Locator} node - The Playwright Locator representing a node.
+ * @param {string} propName - A property name.
+ * @returns {Promise<void>} Resolves when a property has been removed.
+ */
+export async function deleteProperty(page, node, propName) {
+    await node.locator('.__title').click({ button: 'right', force: true });
+    await node.locator('.baklava-context-menu').getByText('Delete property').click();
+    await page.locator('.create-menu').last().getByText(propName).click();
+    await page.getByRole('button', { name: 'Remove properties' }).click();
+}
+
+/**
+ * Check inputs count of a node.
+ *
+ * @async
+ * @param {import('@playwright/test').Locator} node - The Playwright Locator representing a node.
+ * @param {number} count - An expected number of inputs.
+ * @returns {Promise<void>} Resolves when inputs count match expected count.
+ */
+export async function assertInputCount(node, count) {
+    const inputs = await node
+        .locator('.__interfaces .__inputs > div')
+        .count();
+    expect(inputs).toBe(count);
+}
+
+/**
+ * Check outputs count of a node.
+ *
+ * @async
+ * @param {import('@playwright/test').Locator} node - The Playwright Locator representing a node.
+ * @param {number} count - An expected number of inputs.
+ * @returns {Promise<void>} Resolves when outputs count match expected count.
+ */
+export async function assertOutputCount(node, count) {
+    const inputs = await node
+        .locator('.__interfaces .__outputs > div')
+        .count();
+    expect(inputs).toBe(count);
+}
+
+/**
+ * Check property count of a node.
+ *
+ * @async
+ * @param {import('@playwright/test').Locator} node - The Playwright Locator representing a node.
+ * @param {number} count - An expected number of inputs.
+ * @returns {Promise<void>} Resolves when property count match expected count.
+ */
+export async function assertPropertyCount(node, count) {
+    const props = await node
+        .locator('.__properties > div')
+        .count();
+    expect(props).toBe(count);
+}
+
+/**
+ * Node section
+ */
 
 /**
  * Opens node palette
@@ -140,6 +417,100 @@ export async function addNode(page, category, nodeName, x, y, openCategory = tru
     }
 }
 
+/**
+ * Check for a node presents, show error message otherwise.
+ *
+ * @async
+ * @param {boolean} exists - Whether a node should be visible.
+ * @param {import('@playwright/test').Locator} node - The Playwright Locator representing a node.
+ * @param {string} errorMessage - An error message.
+ * @returns {Promise<void>} Resolves when node is present, show error message otherwise.
+ */
+export async function expectNode(exists, node, errorMessage) {
+    expect(node, { message: errorMessage }).toBeVisible({ visible: exists });
+}
+
+/**
+ * Open a node and get its specification.
+ *
+ * @async
+ * @param {import('@playwright/test').Page} page - The Playwright page object.
+ * @param {import('@playwright/test').Locator} node - The Playwright Locator representing a node.
+ * @returns {Promise<object>} A node specification.
+ */
+export async function reopenNode(page, node) {
+    await node.locator('.__title').dblclick();
+    return getYAMLEditorContent(page);
+}
+
+/**
+ * Check node count.
+ *
+ * @async
+ * @param {import('@playwright/test').Page} page - The Playwright page object.
+ * @param {number} count - An expected number of nodes.
+ * @returns {Promise<void>} Resolves when property count match expected count.
+ */
+export async function verifyNodeCount(page, count) {
+    const nodes = page.locator('.node-container > div');
+    await expect(nodes).toHaveCount(count); //toBe(expectedCount,{timeout: 3000});
+}
+
+/**
+ * Get a nodes with a specific name.
+ *
+ * @param {import('@playwright/test').Page} page - The Playwright page object.
+ * @param {string} name - node name to look for.
+ * @returns {import('@playwright/test').Locator} A locator pointing to a nodes with specific names.
+ */
+export function getNode(page, name) {
+    return page.locator(`.baklava-node[data-node-type="${name}"]`);
+}
+
+/**
+ * Get a node with a specific id.
+ *
+ * @param {import('@playwright/test').Page} page - The Playwright page object.
+ * @param {string} nodeId - id of desired node.
+ * @returns {import('@playwright/test').Locator} A locator pointing to a node.
+ */
+export function getNodeByID(page, nodeId) {
+    return page.locator(`#${nodeId}`);
+}
+
+/**
+ * Delete specific node.
+ *
+ * @async
+ * @param {import('@playwright/test').Locator} node - The Playwright Locator representing a node.
+ * @returns {Promise<void>} Resolves when node is deleted.
+ */
+export async function deleteNode(node) {
+    // Invoke a context menu with a right click.
+    await node.locator('.__title').click({ button: 'right' });
+
+    // Delete the node.
+    const deleteButton = node.getByText('Delete', { exact: true });
+    await deleteButton.click({ force: true });
+}
+
+/**
+ * Create a new node.
+ *
+ * @param {import('@playwright/test').Page} page - The Playwright page object.
+ * @returns {Promise<void>} Resolves when node is created.
+ */
+export async function createNewNodeType(page) {
+    // Open node configuration menu
+    const nodePalette = page.locator('.baklava-node-palette');
+    const addNodeButton = nodePalette.getByText('New Node Type').first();
+    await dragAndDrop(page, addNodeButton, 750, 80);
+
+    // Create node
+    const nodeMenu = page.locator('#container').locator('.create-menu');
+    const createButton = nodeMenu.getByText('Create');
+    await createButton.click();
+}
 /**
  * Enables the option to edit node types
  * @param {import('@playwright/test').Page} page - The Playwright page object.

@@ -4,63 +4,12 @@ import {
     Locator,
 } from '@playwright/test';
 import {
-    getUrl, addNode, dragAndDrop, enableEditingNodes,
+    closeYAMLEditor,setYAMLEditorContent,getYAMLEditorContent,createNewNodeType,waitForSubgraph,reopenNode,getUrl,assertPropertyCount,assertOutputCount,assertInputCount,addInterface, getNode, addNode, dragAndDrop, enableEditingNodes,
     loadSpecification, loadDataflow, openNodePalette,
 } from './config.js';
 
-async function assertOutputCount(page: Page, nodeName: string, count: number, nth = 0) {
-    const inputs = await page
-        .locator(`[data-node-type="${nodeName}"]`).nth(nth)
-        .locator('.__interfaces .__outputs > div')
-        .count();
-    expect(inputs).toBe(count);
-}
-async function assertInputCount(page: Page, nodeName: string, count: number, nth = 0) {
-    const inputs = await page
-        .locator(`[data-node-type="${nodeName}"]`).nth(nth)
-        .locator('.__interfaces .__inputs > div')
-        .count();
-    expect(inputs).toBe(count);
-}
-async function assertPropertyCount(page: Page, nodeName: string, count: number, nth = 0) {
-    const props = await page
-        .locator(`[data-node-type="${nodeName}"]`).nth(nth)
-        .locator('.__properties > div')
-        .count();
-    expect(props).toBe(count);
-}
 
-async function createNewNodeType(page: Page) {
-    // Open node configuration menu
-    const nodePalette = page.locator('.baklava-node-palette');
-    const addNodeButton = nodePalette.getByText('New Node Type').first();
-    await dragAndDrop(page, addNodeButton, 750, 80);
-
-    // Create node
-    const nodeMenu = page.locator('#container').locator('.create-menu');
-    const createButton = nodeMenu.getByText('Create');
-    await createButton.click();
-}
-async function getYAMLEditorContent(page: Page) {
-    const textarea = page.locator('textarea');
-    const value = await textarea.evaluate((el) => (<HTMLInputElement>el).value);
-    return YAML.parse(value);
-}
-async function setYAMLEditorContent(page: Page, content: any) {
-    const textarea = page.locator('textarea');
-    await textarea.fill(YAML.stringify(content));
-    await page.getByText('Apply', { exact: true }).click();
-}
-async function addInterface(page: Page, nodeName: string) {
-    const node = page
-        .locator(`.baklava-node[data-node-type="${nodeName}"]`)
-        .last();
-    await node.locator('.__title').click({ button: 'right', force: true });
-    await node.locator('.baklava-context-menu').getByText('Add interface').click();
-    await page.getByRole('button', { name: 'Add interface' }).click();
-}
-
-async function checkIfYAMLPersists(page: Page) {
+export async function checkIfYAMLPersists(page) {
     // Open a pop-up for the first node.
     const node = page
         .locator(`.baklava-node[data-node-type="Test node #1"] .__title`)
@@ -90,15 +39,7 @@ async function addAndOpenNode(page: Page, group: string, nodeName: string, x = 7
     const content = await getYAMLEditorContent(page);
     return { node, content };
 }
-async function reopenNode(page: Page, node: Locator) {
-    await node.locator('.__title').dblclick();
-    return getYAMLEditorContent(page);
-}
 
-async function waitForSubgraph(page: Page,graphName:string) {
-    const editorTitle = await page.locator('.editorTitle');
-    await expect(editorTitle.getByText(graphName)).toBeVisible();
-}
 
 test('create new node type', async ({ page }) => {
     await page.goto(getUrl());
@@ -128,10 +69,12 @@ test('adding interface from UI reflected in YAML editor', async ({ page }) => {
 
     // Retrieve the initial content of the YAML editor.
     const parsedContent = await getYAMLEditorContent(page);
+    await closeYAMLEditor(page);
 
     // Retrieve the modified content of the YAML editor.
-    await addInterface(page, nodeName);
-    await assertInputCount(page, nodeName, 1);
+    const node = getNode(page,nodeName).first();
+    await addInterface(page, node);
+    await assertInputCount(node, 1);
     const modifiedParsedContent = await getYAMLEditorContent(page);
 
     // Count the number of elements in the `interfaces` attribute.
@@ -146,51 +89,66 @@ test('adding interface to YAML', async ({ page }) => {
     await loadSpecification(page, 'sample-include-specification.json');
     const nodeName = 'LoadVideo';
     const { content } = await addAndOpenNode(page, 'Filesystem', nodeName);
-    await assertInputCount(page, nodeName, 0);
+    const node = getNode(page,nodeName);
+    await assertInputCount(node.first(), 0);
     content.interfaces.push({
         name: 'new_interface',
         type: 'unique',
         direction: 'input',
     });
     await setYAMLEditorContent(page, content);
-    await assertInputCount(page, nodeName, 1, 0);
-    await assertInputCount(page, nodeName, 1, 1);
+    await closeYAMLEditor(page);
+    const first = node.nth(0);
+    const second = node.nth(1);
+    await assertInputCount(first, 1);
+    await assertInputCount(second, 1);
     // check if newly added nodes have this change
     await addNode(page, 'Filesystem', nodeName, 750, 160, false);
-    await assertInputCount(page, nodeName, 1, 2);
+    const third = node.nth(2);
+    await assertInputCount(third, 1);
 });
 test('adding property to YAML', async ({ page }) => {
     await page.goto(getUrl());
     await loadSpecification(page, 'sample-include-specification.json');
     const nodeName = 'LoadVideo';
     const { content } = await addAndOpenNode(page, 'Filesystem', nodeName);
-    await assertPropertyCount(page, nodeName, 1);
+
+    const node = getNode(page,nodeName);
+    const first = node.nth(0);
+    const second = node.nth(1);
+    await assertPropertyCount(first, 1);
     content.properties = [{
         name: 'new_property',
         type: 'integer',
         default: 0,
     }];
     await setYAMLEditorContent(page, content);
-    await assertPropertyCount(page, nodeName, 2, 0);
-    await assertPropertyCount(page, nodeName, 2, 1);
+    await closeYAMLEditor(page);
+    await assertPropertyCount(first, 2);
+    await assertPropertyCount(second, 2);
     // check if newly added nodes have this change
     await addNode(page, 'Filesystem', nodeName, 750, 160, false);
-    await assertPropertyCount(page, nodeName, 2, 2);
+    const third = node.nth(2);
+    await assertPropertyCount(third, 2);
 });
 test('removing interface from YAML', async ({ page }) => {
     await page.goto(getUrl());
     await loadSpecification(page, 'sample-include-specification.json');
     const nodeName = 'LoadVideo';
     const { content } = await addAndOpenNode(page, 'Filesystem', nodeName);
-    await assertOutputCount(page, nodeName, 1, 0);
-    await assertOutputCount(page, nodeName, 1, 1);
+    const node = getNode(page,nodeName);
+    const first = node.nth(0);
+    const second = node.nth(1);
+    await assertOutputCount(first, 1);
+    await assertOutputCount(second, 1);
     content.interfaces = [];
     await setYAMLEditorContent(page, content);
-    await assertOutputCount(page, nodeName, 0, 0);
-    await assertOutputCount(page, nodeName, 0, 1);
+    await assertOutputCount(first, 0);
+    await assertOutputCount(second, 0);
     // check if newly added nodes have this change
     await addNode(page, 'Filesystem', nodeName, 750, 160, false);
-    await assertOutputCount(page, nodeName, 0, 2);
+    const third = node.nth(2);
+    await assertOutputCount(third, 0);
 });
 test('editing property in YAML', async ({ page }) => {
     await page.goto(getUrl());
@@ -204,10 +162,11 @@ test('editing property in YAML', async ({ page }) => {
         { type: 'bool', default: true },
     );
     await setYAMLEditorContent(page, content);
-    await assertPropertyCount(page, nodeName, 3, 0);
+    await assertPropertyCount(node, 3);
     // check if newly added nodes have this change
     await addNode(page, 'Generators', nodeName, 750, 160, false);
-    await assertPropertyCount(page, nodeName, 3, 1);
+    const second_node = getNode(page,nodeName).nth(1);
+    await assertPropertyCount(second_node, 3);
     const changedProp = node.locator('.__properties > div').getByText('width');
     expect(changedProp).toBeVisible();
     const checkbox = node.locator('.__properties > div').locator('.baklava-checkbox');
@@ -218,37 +177,38 @@ test('editing interface in YAML', async ({ page }) => {
     await loadSpecification(page, 'sample-include-specification.json');
     const nodeName = 'LoadVideo';
     const { node, content } = await addAndOpenNode(page, 'Filesystem', nodeName);
-    await assertInputCount(page, nodeName, 0);
-    await assertOutputCount(page, nodeName, 1);
+    await assertInputCount(node, 0);
+    await assertOutputCount(node, 1);
 
     content.interfaces.find((p) => p.name === 'frames').direction = 'input';
     await setYAMLEditorContent(page, content);
-    await assertInputCount(page, nodeName, 1);
-    await assertOutputCount(page, nodeName, 0);
+    await assertInputCount(node, 1);
+    await assertOutputCount(node, 0);
 
     content.interfaces.find((p) => p.name === 'frames').name = 'unique_input';
     await setYAMLEditorContent(page, content);
-    await assertInputCount(page, nodeName, 1);
-    await assertOutputCount(page, nodeName, 0);
+    await assertInputCount(node, 1);
+    await assertOutputCount(node, 0);
     expect(node.getByText('unique_input')).toBeVisible();
 
     // check if newly added nodes have this change
     await addNode(page, 'Filesystem', nodeName, 750, 160, false);
-    await assertInputCount(page, nodeName, 1, 2);
-    await assertOutputCount(page, nodeName, 0, 2);
+    const third = getNode(page,nodeName).nth(2);
+    await assertInputCount(third, 1);
+    await assertOutputCount(third, 0);
 });
 test('interface maxConnectionCount YAML', async ({ page }) => {
     await page.goto(getUrl());
     await loadSpecification(page, 'sample-include-specification.json');
     const nodeName = 'GaussianKernel';
     const { node, content } = await addAndOpenNode(page, 'Generators', nodeName);
-    await assertOutputCount(page, nodeName, 1);
+    await assertOutputCount(node, 1);
     const intf = node.locator('.__interfaces .__outputs > div');
     expect(intf).toHaveClass('baklava-node-interface --output --connected');
 
     content.interfaces[0].maxConnectionsCount = 0;
     await setYAMLEditorContent(page, content);
-    await assertOutputCount(page, nodeName, 1);
+    await assertOutputCount(node, 1);
     expect(intf).not.toHaveClass('baklava-node-interface --output --connected');
 });
 test('subgraph cascade interface YAML', async ({ page }) => {
