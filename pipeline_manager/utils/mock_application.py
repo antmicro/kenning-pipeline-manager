@@ -22,6 +22,10 @@ from pipeline_manager_backend_communication.utils import (
     convert_message_to_string,
 )
 
+from pipeline_manager.backend.chunked_com import (
+    send_chunked,
+)
+
 
 class MockApplicationClient(object):
     """
@@ -160,24 +164,22 @@ class MockApplicationClient(object):
         Dict
             Response to the emitted request
         """
-        CHUNK_SIZE = 256 * 1024
-        data_str = json.dumps(data)
-        if len(data_str) > CHUNK_SIZE:
-            for i in range(0, len(data_str), CHUNK_SIZE):
-                await self.sio.emit(
-                    event,
-                    {
-                        "id": data["id"],
-                        "chunk": data_str[
-                            i : min(i + CHUNK_SIZE, len(data_str))
-                        ],
-                        "end": i + CHUNK_SIZE >= len(data_str),
-                    },
-                )
-        else:
-            await self.sio.emit(event, data)
-        response = await self.sio.receive()
-        return response[1]
+        await send_chunked(self.sio, event, data)
+        chunks = []
+
+        while True:
+            response = await self.sio.receive()
+            res = response[1]
+
+            if "chunk_id" not in res.keys():
+                return res
+
+            chunks.append(res["chunk"])
+
+            if res.get("end", False):
+                msg = json.loads("".join(chunks))
+                break
+        return msg
 
     async def disconnect(self) -> None:
         """
