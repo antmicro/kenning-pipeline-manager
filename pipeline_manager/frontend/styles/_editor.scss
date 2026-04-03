@@ -190,7 +190,7 @@
         }
 
         & > .__port_name_top {
-            top: 0;
+            top: -1.5em;
             & > span,
             & > input {
                 margin-bottom: 0.15em;
@@ -200,7 +200,7 @@
         }
 
         & > .__port_name_bottom {
-            top: 100%;
+            top: 1.5em;
             & > span,
             & > input {
                 margin-top: 0;

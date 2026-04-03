@@ -633,7 +633,9 @@ export class CustomNode extends Node {
         const direction = propName.pop();
         const interfaceName = propName.join(' ');
 
-        const occupied = { left: [], right: [] };
+        const occupied = {
+            left: [], right: [], top: [], bottom: [],
+        };
 
         const stateIOs = { ...this.inputs, ...this.outputs };
 
@@ -999,7 +1001,9 @@ export class CustomNode extends Node {
             },
         );
 
-        const occupied = { left: [], right: [] };
+        const occupied = {
+            left: [], right: [], top: [], bottom: [],
+        };
 
         const stateios = { ...parsedState.inputs, ...parsedState.outputs };
 
@@ -1284,6 +1288,17 @@ export function updateSubgraphInterfaces(nodes, inputs = [], outputs = []) {
         return errorMessages;
     }
 
+    const checkInterfaceSide = (side) => {
+        if (side === 'top') {
+            return 'left';
+        }
+        if (side === 'bottom') {
+            return 'right';
+        }
+
+        return side;
+    };
+
     // Create new inputs and outputs
     const newInterfaces = [];
     externalInterfaces.forEach((intf) => {
@@ -1295,11 +1310,12 @@ export function updateSubgraphInterfaces(nodes, inputs = [], outputs = []) {
         if (idx === -1) {
             // Graph node interface should not inherit some properties that
             // are node-specific, they will be accessed using InterfaceRegistry
+
             newInterfaces.push({
                 name: intf.externalName,
                 id: intf.id,
                 externalName: undefined,
-                side: intf.side,
+                side: checkInterfaceSide(intf.side),
                 direction: intf.direction,
                 sidePosition: undefined,
             });
