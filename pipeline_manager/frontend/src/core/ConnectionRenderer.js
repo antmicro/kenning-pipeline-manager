@@ -184,10 +184,16 @@ export default class ConnectionRenderer {
         const graph = this.viewModel.displayedGraph;
         const nc = new NormalizedConnection(x1, y1, x2, y2, connection);
         const dx = 0.3 * Math.abs(nc.x1 - nc.x2);
+        const dy = 0.3 * Math.abs(nc.y1 - nc.y2);
 
         if (nc.to) {
-            if (nc.from.side === 'right' && nc.to.side === 'left') {
-                return `M ${nc.x1} ${nc.y1} C ${nc.x1 + dx} ${nc.y1}, ${nc.x2 - dx} ${nc.y2}, ${
+            if (nc.from.side === 'left' && nc.to.side === 'top') {
+                return `M ${nc.x1} ${nc.y1} C ${nc.x1 - dx} ${nc.y1}, ${nc.x2} ${nc.y2 - dy}, ${
+                    nc.x2
+                } ${nc.y2}`;
+            }
+            if (nc.from.side === 'left' && nc.to.side === 'bottom') {
+                return `M ${nc.x1} ${nc.y1} C ${nc.x1 - dx} ${nc.y1}, ${nc.x2} ${nc.y2 + dy}, ${
                     nc.x2
                 } ${nc.y2}`;
             }
@@ -196,6 +202,55 @@ export default class ConnectionRenderer {
                     nc.x2
                 } ${nc.y2}`;
             }
+
+            if (nc.from.side === 'right' && nc.to.side === 'top') {
+                return `M ${nc.x1} ${nc.y1} C ${nc.x1 + dx} ${nc.y1}, ${nc.x2} ${nc.y2 - dy}, ${
+                    nc.x2
+                } ${nc.y2}`;
+            }
+            if (nc.from.side === 'right' && nc.to.side === 'bottom') {
+                return `M ${nc.x1} ${nc.y1} C ${nc.x1 + dx} ${nc.y1}, ${nc.x2} ${nc.y2 + dy}, ${
+                    nc.x2
+                } ${nc.y2}`;
+            }
+            if (nc.from.side === 'right' && nc.to.side === 'left') {
+                return `M ${nc.x1} ${nc.y1} C ${nc.x1 + dx} ${nc.y1}, ${nc.x2 - dx} ${nc.y2}, ${
+                    nc.x2
+                } ${nc.y2}`;
+            }
+
+            if (nc.from.side === 'bottom' && nc.to.side === 'left') {
+                return `M ${nc.x1} ${nc.y1} C ${nc.x1} ${nc.y1 + dy}, ${nc.x2 - dx} ${nc.y2}, ${
+                    nc.x2
+                } ${nc.y2}`;
+            }
+            if (nc.from.side === 'bottom' && nc.to.side === 'right') {
+                return `M ${nc.x1} ${nc.y1} C ${nc.x1} ${nc.y1 + dy}, ${nc.x2 + dx} ${nc.y2}, ${
+                    nc.x2
+                } ${nc.y2}`;
+            }
+            if (nc.from.side === 'bottom' && nc.to.side === 'top') {
+                return `M ${nc.x1} ${nc.y1} C ${nc.x1} ${nc.y1 + dy}, ${nc.x2} ${nc.y2 - dy}, ${
+                    nc.x2
+                } ${nc.y2}`;
+            }
+
+            if (nc.from.side === 'top' && nc.to.side === 'left') {
+                return `M ${nc.x1} ${nc.y1} C ${nc.x1} ${nc.y1 - dy}, ${nc.x2 - dx} ${nc.y2}, ${
+                    nc.x2
+                } ${nc.y2}`;
+            }
+            if (nc.from.side === 'top' && nc.to.side === 'right') {
+                return `M ${nc.x1} ${nc.y1} C ${nc.x1} ${nc.y1 - dy}, ${nc.x2 + dx} ${nc.y2}, ${
+                    nc.x2
+                } ${nc.y2}`;
+            }
+            if (nc.from.side === 'top' && nc.to.side === 'bottom') {
+                return `M ${nc.x1} ${nc.y1} C ${nc.x1} ${nc.y1 - dy}, ${nc.x2} ${nc.y2 + dy}, ${
+                    nc.x2
+                } ${nc.y2}`;
+            }
+
             if (nc.from.side === 'right' && nc.to.side === 'right') {
                 const rightmost = Math.max(nc.x1 + dx, nc.x2 + dx) + 50;
                 return `M ${nc.x1} ${nc.y1} C ${rightmost} ${nc.y1}, ${rightmost} ${nc.y2}, ${nc.x2} ${nc.y2}`;
@@ -203,6 +258,14 @@ export default class ConnectionRenderer {
             if (nc.from.side === 'left' && nc.to.side === 'left') {
                 const leftmost = Math.min(nc.x1 - dx, nc.x2 - dx) - 50;
                 return `M ${nc.x1} ${nc.y1} C ${leftmost} ${nc.y1}, ${leftmost} ${nc.y2}, ${nc.x2} ${nc.y2}`;
+            }
+            if (nc.from.side === 'top' && nc.to.side === 'top') {
+                const topmost = Math.min(nc.y1 - dy, nc.y2 - dy);
+                return `M ${nc.x1} ${nc.y1} C ${nc.x1} ${topmost}, ${nc.x2} ${topmost}, ${nc.x2} ${nc.y2}`;
+            }
+            if (nc.from.side === 'bottom' && nc.to.side === 'bottom') {
+                const bottommost = Math.max(nc.y1 + dy, nc.y2 + dy);
+                return `M ${nc.x1} ${nc.y1} C ${nc.x1} ${bottommost}, ${nc.x2} ${bottommost}, ${nc.x2} ${nc.y2}`;
             }
         }
 
@@ -213,6 +276,16 @@ export default class ConnectionRenderer {
         }
         if (nc.from.side === 'left') {
             return `M ${nc.x1} ${nc.y1} C ${nc.x1 - dx} ${nc.y1}, ${nc.x2 + dx} ${nc.y2}, ${
+                nc.x2
+            } ${nc.y2}`;
+        }
+        if (nc.from.side === 'top') {
+            return `M ${nc.x1} ${nc.y1} C ${nc.x1} ${nc.y1 - dy}, ${nc.x2} ${nc.y2 - dy}, ${
+                nc.x2
+            } ${nc.y2}`;
+        }
+        if (nc.from.side === 'bottom') {
+            return `M ${nc.x1} ${nc.y1} C ${nc.x1} ${nc.y1 + dy}, ${nc.x2} ${nc.y2 + dy}, ${
                 nc.x2
             } ${nc.y2}`;
         }
