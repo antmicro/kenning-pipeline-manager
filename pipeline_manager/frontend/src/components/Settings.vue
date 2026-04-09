@@ -179,8 +179,9 @@ export default {
         });
 
         const LayoutApply = computed(() => {
-            const button = new ButtonInterface('Apply autolayout', () => {
-                props.viewModel.editor.applyAutolayout();
+            const button = new ButtonInterface('Apply autolayout', async () => {
+                await props.viewModel.editor.applyAutolayout();
+                props.viewModel.editor.swapInterfaces();
             });
             return button;
         });
