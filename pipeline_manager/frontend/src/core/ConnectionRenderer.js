@@ -787,6 +787,62 @@ export default class ConnectionRenderer {
                 const mid = nc.x1 + minMargin + interpolatedShift;
                 return `M ${nc.x1} ${nc.y1} H ${mid} V ${nc.y2} H ${nc.x2}`;
             }
+            if (nc.from.side === 'right' && nc.to.side === 'bottom') {
+                const midPointY = (nc.y1 + nc.y2) / 2;
+
+                const firstTurn = nc.x1 - nc.x2 > 0 ? nc.x1 + minMargin : nc.x2;
+                const lastTurn = nc.y2 + minMargin;
+
+                return `M ${nc.x1} ${nc.y1}
+                    H ${firstTurn}
+                    V ${midPointY}
+                    H ${nc.y1 - nc.y2 < 0 ? middlePoint : nc.x2}
+                    V ${lastTurn}
+                    H ${nc.x2}
+                    V ${nc.y2}`;
+            }
+            if (nc.from.side === 'left' && nc.to.side === 'bottom') {
+                const midPointY = (nc.y1 + nc.y2) / 2;
+
+                const firstTurn = nc.x1 - nc.x2 < 0 ? nc.x1 + minMargin : nc.x2;
+                const lastTurn = nc.y2 + minMargin;
+
+                return `M ${nc.x1} ${nc.y1}
+                    H ${firstTurn}
+                    V ${midPointY}
+                    H ${nc.y1 - nc.y2 < 0 ? middlePoint : nc.x2}
+                    V ${lastTurn}
+                    H ${nc.x2}
+                    V ${nc.y2}`;
+            }
+            if (nc.from.side === 'right' && nc.to.side === 'top') {
+                const midPointY = (nc.y1 + nc.y2) / 2;
+
+                const firstTurn = nc.x1 - nc.x2 > 0 ? nc.x1 + minMargin : nc.x2;
+                const lastTurn = nc.y2 - minMargin;
+
+                return `M ${nc.x1} ${nc.y1}
+                    H ${firstTurn}
+                    V ${midPointY}
+                    H ${nc.y1 - nc.y2 > 0 ? middlePoint : nc.x2}
+                    V ${lastTurn}
+                    H ${nc.x2}
+                    V ${nc.y2}`;
+            }
+            if (nc.from.side === 'left' && nc.to.side === 'top') {
+                const midPointY = (nc.y1 + nc.y2) / 2;
+
+                const firstTurn = nc.x1 - nc.x2 < 0 ? nc.x1 - minMargin : nc.x2;
+                const lastTurn = nc.y2 - minMargin;
+
+                return `M ${nc.x1} ${nc.y1}
+                    H ${firstTurn}
+                    V ${midPointY}
+                    H ${nc.y1 - nc.y2 > 0 ? middlePoint : nc.x2}
+                    V ${lastTurn}
+                    H ${nc.x2}
+                    V ${nc.y2}`;
+            }
             if (nc.from.side === 'left' && nc.to.side === 'right') {
                 // S connection
                 const nodeOverlap = nc.x2 > nc.x1;
@@ -814,6 +870,20 @@ export default class ConnectionRenderer {
                 return `M ${nc.x1} ${nc.y1} H ${
                     Math.min(nc.x1, nc.x2, middlePoint) - shift - minMargin
                 } V ${nc.y2} H ${nc.x2}`;
+            }
+            if (nc.from.side === 'top' && nc.to.side === 'top') {
+                const midPointY = (nc.y1 + nc.y2) / 2;
+
+                return `M ${nc.x1} ${nc.y1} V ${
+                    Math.min(nc.y1, nc.y2, midPointY) - minMargin
+                } H ${nc.x2} V ${nc.y2}`;
+            }
+            if (nc.from.side === 'bottom' && nc.to.side === 'bottom') {
+                const midPointY = (nc.y1 + nc.y2) / 2;
+
+                return `M ${nc.x1} ${nc.y1} V ${
+                    Math.max(nc.y1, nc.y2, midPointY) + minMargin
+                } H ${nc.x2} V ${nc.y2}`;
             }
         }
         return `M ${nc.x1} ${nc.y1} H ${middlePoint} V ${nc.y2} H ${nc.x2}`;
