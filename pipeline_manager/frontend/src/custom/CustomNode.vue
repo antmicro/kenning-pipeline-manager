@@ -46,7 +46,7 @@ from moving or deleting the nodes.
             class="__title-label" v-html="DOMPurify.sanitize(nodeTitle)">
             </div>
             <input
-                v-else
+                v-else-if="customShape === undefined"
                 type="text"
                 class="baklava-input"
                 v-model="tempName"
@@ -96,17 +96,6 @@ from moving or deleting the nodes.
                 @pointerdown.left.stop
                 @click="onContextMenuTitleClick"
             />
-
-        <img :src="customShape"
-            v-if="customShape !== undefined"
-            draggable="false"
-            ref="svgRef"
-            @pointerdown.left.exact="onMouseDown"
-            @pointerdown.left="startDragWrapper($event)"
-            @pointerdown.right="openContextMenuTitle"
-            v-long-press:500="openContextMenuTitle"
-            :style="shapeStyle"
-            >
         <!-- Positioned inputs -->
         <template v-for="input in positionedInterfaces">
             <CustomInterface
@@ -125,6 +114,30 @@ from moving or deleting the nodes.
             />
             <!-- eslint-disable-next-line vue/require-v-for-key -->
         </template>
+
+            <CustomContextMenu
+                ref='contextMenuTitle'
+                v-model="showContextMenuTitle"
+                :x="contextMenuTitleX"
+                :y="contextMenuTitleY"
+                :items="contextMenuTitleItems"
+                :urls="nodeURLs"
+                :style="contextMenuStyle"
+                :transition="''"
+                @pointerdown.left.stop
+                @click="onContextMenuTitleClick"
+            />
+
+        <img :src="customShape"
+            v-if="customShape !== undefined"
+            draggable="false"
+            ref="svgRef"
+            @pointerdown.left.exact="onMouseDown"
+            @pointerdown.left="startDragWrapper($event)"
+            @pointerdown.right="openContextMenuTitle"
+            v-long-press:500="openContextMenuTitle"
+            :style="shapeStyle"
+            >
         <div
             class="__content"
             @pointerdown.right="openContextMenuTitle"
@@ -188,9 +201,27 @@ from moving or deleting the nodes.
                     </template>
                 </div>
             </div>
-            <div>
 
-            </div>
+            <CustomContextMenu
+                ref="contextMenuInterface"
+                v-model="showContextMenuInterface"
+                :x="contextMenuInterfaceX"
+                :y="contextMenuInterfaceY"
+                :items="contextMenuInterfaceItems"
+                :style="contextMenuInterfaceStyle"
+                :ignore-close="[leftSocketsRefs, rightSocketsRefs]"
+                @click="onContextMenuInterfaceClick"
+            />
+            <CustomContextMenu
+                ref="contextMenuProperty"
+                v-model="showContextMenuProperty"
+                :x="contextMenuPropertyX"
+                :y="contextMenuPropertyY"
+                :items="contextMenuPropertyItems"
+                :style="contextMenuStyle"
+                :ignore-close="[propertiesRef]"
+                @click="onContextMenuPropertyClick"
+            />
 
         </div>
     </div>
@@ -247,6 +278,7 @@ const { graph } = useGraph();
 const movementStep = computed(() => viewModel.value.movementStep);
 
 // Template refs
+const svgRef = ref(null);
 const nodeRef = ref(null);
 const titleRef = ref(null);
 const propertiesRef = useTemplateRef('propertiesRef');
@@ -267,6 +299,8 @@ const nodeHasRelatedGraphs
 const pillText = computed(() => viewModel.value.editor.getPillText(node.value.type));
 const pillColor = computed(() => viewModel.value.editor.getPillColor(node.value.type));
 const pillTextColor = computed(() => viewModel.value.editor.getTextColor(pillColor.value));
+
+const customShape = viewModel.value.editor.getShape(node.value.type);
 
 const displayNoResources = !viewModel.value.editor.nodeURLsEmpty();
 
@@ -689,6 +723,7 @@ const classes = computed(() => ({
     '--greyed-out': props.greyedOut,
     '--hidden': props.hidden,
     '--minimal': nodeMinimal.value,
+    '--transparent': customShape !== undefined,
     __readonly: viewModel.value.editor.readonly,
 }));
 
@@ -703,11 +738,10 @@ const width = computed(() => {
 });
 
 const height = computed(() => {
-    if (props.node?.height !== undefined) {
+    if (props.node.height !== undefined) {
         return `${props.node.height}px`;
     }
-
-    return 'fit-content';
+    return 'auto';
 });
 
 const styles = computed(() => ({
@@ -1028,6 +1062,7 @@ const contextMenuInterfaceY = ref(0);
 
 const createContextMenuInterfaceItems = () => {
     const items = [];
+    const posMap = interfacePositions.value;
 
     if (chosenInterface !== undefined) {
         const intfMode = (chosenInterface.externalName === undefined ?
@@ -1037,7 +1072,7 @@ const createContextMenuInterfaceItems = () => {
         items.push(intfMode);
     }
 
-    if (chosenInterface?.x === undefined || chosenInterface?.y === undefined) {
+    if (!posMap.has(chosenInterface.name)) {
         items.push(
             { value: 'SpaceUp', label: 'Space Up' },
             { value: 'SpaceDown', label: 'Space Down' },
@@ -1105,22 +1140,15 @@ const openContextMenuInterface = async (intf, ev) => {
     await nextTick();
     if (!viewModel.value.editor.readonly) {
         chosenInterface = intf;
+        const interfaceName = intf.name;
         contextMenuInterfaceItems.value = createContextMenuInterfaceItems();
         const targetRect = ev.currentTarget.getBoundingClientRect();
         const nodeRect = nodeRef.value.getBoundingClientRect();
+        const posMap = interfacePositions.value;
 
-        if (chosenInterface?.x !== undefined &&
-            chosenInterface?.y !== undefined
-        ) {
-            const elRef = titleRef;
-            const left = elRef.value.offsetLeft;
-            const top = elRef.value.offsetTop;
-            const _width = elRef.value.offsetWidth;
-            const _height = elRef.value.offsetHeight;
-
-            contextMenuInterfaceX.value = left + _width * chosenInterface.x - 10;
-            contextMenuInterfaceY.value = top + (_height *
-                (1.0 - chosenInterface.y) + 12.5) / graph.value.scaling;
+        if (posMap.has(interfaceName)) {
+            contextMenuInterfaceX.value = targetRect.left;
+            contextMenuInterfaceY.value = targetRect.top;
         } else if (chosenInterface.side === 'right') {
             contextMenuInterfaceSide.value = 'right';
             contextMenuInterfaceX.value = nodeRect.left + nodeRect.width + 10;
