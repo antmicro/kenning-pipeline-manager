@@ -24,14 +24,20 @@ from creating and deleting connections or altering nodes' values if the editor i
             @mouseenter="startHoverWrapper"
             @mouseleave="endHoverWrapper"
             @pointerdown.left="onMouseDown"
-            no-drag="true"
-            :class="{ greyedout_arrow: highlighted, picked: picked, '__square': isExposed }"
+            :class="{
+                greyedout_arrow: highlighted,
+                picked: picked,
+                '__square': isExposed,
+                '__port_centered': positioned
+                }"
         >
             <div
                 v-if="isExposed && (hovered || editExternalName)"
                 :class="{
                     '__port_name_left': intf.side === 'left',
-                    '__port_name_right': intf.side === 'right'
+                    '__port_name_top': intf.side == 'top',
+                    '__port_name_right': intf.side === 'right',
+                    '__port_name_bottom': intf.side == 'bottom'
                 }"
             >
                 <input
@@ -71,6 +77,7 @@ from creating and deleting connections or altering nodes' values if the editor i
             no-drag="true"
             @mouseenter="startPropertyHover"
             @mouseleave="endPropertyHover"
+            :class="spanClasses"
         >
             <!-- @keydown.stop is added so that events are not bubbled up to the editor -->
             <component
@@ -135,6 +142,7 @@ export default defineComponent({
     props: {
         highlighted: Boolean,
         picked: Boolean,
+        positioned: { default: false, required: false },
         switchSides: {},
         toggleGroup: { default: () => {}, required: false },
         updateDynamicInterfaces: { default: () => {}, required: false },
@@ -152,6 +160,8 @@ export default defineComponent({
 
         const { viewModel } = useViewModel();
         const { graph } = useGraph();
+
+        const isPositionedInterface = props.intf?.x !== undefined && props.intf?.y !== undefined;
 
         props.intf.events.beforeSetValue.unsubscribe(props.intf);
         props.intf.events.beforeSetValue.subscribe(props.intf, (value, prevent) => {
@@ -222,6 +232,12 @@ export default defineComponent({
                 if (props.intf.side === 'right') {
                     return 'down';
                 }
+                if (props.intf.side === 'top') {
+                    return 'left';
+                }
+                if (props.intf.side === 'bottom') {
+                    return 'up';
+                }
             }
             if (props.intf.direction === 'output') {
                 if (props.intf.side === 'left') {
@@ -230,15 +246,30 @@ export default defineComponent({
                 if (props.intf.side === 'right') {
                     return 'right';
                 }
+                if (props.intf.side === 'top') {
+                    return 'up';
+                }
+                if (props.intf.side === 'bottom') {
+                    return 'left';
+                }
             }
             return 'down';
         });
 
         const newClasses = computed(() => ({
-            '--input': props.intf.side === 'left',
-            '--output': props.intf.side === 'right',
+            '--input': props.intf.side === 'left' && !props.positioned,
+            '--output': props.intf.side === 'right' && !props.positioned,
             '--connected': isConnected.value,
+            'baklava-node-interface-positioned': props.positioned,
             __readonly: viewModel.value.editor.readonly,
+            __node_interface_positioned: props.positioned,
+        }));
+
+        const spanClasses = computed(() => ({
+            '--top': props.intf.side === 'top' && props.positioned,
+            '--bottom': props.intf.side === 'bottom' && props.positioned,
+            '--left': props.intf.side === 'left' && props.positioned,
+            '--right': props.intf.side === 'right' && props.positioned,
         }));
 
         const isExposed = computed(() =>
@@ -336,10 +367,12 @@ export default defineComponent({
             isConnected,
             inputExternalName,
             newClasses,
+            spanClasses,
             onMouseDown,
             openSidebar,
             showComponent,
             isExposed,
+            isPositionedInterface,
             startHover,
             startHoverWrapper,
             propertyHovered,

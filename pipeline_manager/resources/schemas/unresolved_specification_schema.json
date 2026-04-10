@@ -418,7 +418,9 @@
                     "description": "Determines the side on which the socket is rendered",
                     "enum": [
                         "left",
-                        "right"
+                        "right",
+                        "top",
+                        "bottom"
                     ]
                 },
                 "maxConnectionsCount": {

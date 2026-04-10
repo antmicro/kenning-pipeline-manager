@@ -58,6 +58,13 @@ function parseSingleInterfaces(interfaces, interfaceGroup = false) {
         // Copy the interface to avoid modifying the original object
         const tempIO = JSON.parse(JSON.stringify(io));
 
+        if (tempIO?.x !== undefined) {
+            tempIO.x = Math.max(Math.min(tempIO.x / 100.0, 1.0), 0.0);
+        }
+        if (tempIO?.y !== undefined) {
+            tempIO.y = Math.max(Math.min(tempIO.y / 100.0, 1.0), 0.0);
+        }
+
         const direction = io.direction ?? defaultDirection;
         tempIO.direction = direction;
 
@@ -219,6 +226,8 @@ export function applySidePositions(inputs, outputs) {
     const tempParsedSides = {
         left: {},
         right: {},
+        top: {},
+        bottom: {},
     };
 
     const errors = [];
@@ -231,6 +240,12 @@ export function applySidePositions(inputs, outputs) {
         } else if (intf.side === 'left' || (intf.side === undefined && intf.direction !== 'output')) {
             tempParsedSides.left[name] = { ...intf };
             tempParsedSides.left[name].side = 'left';
+        } else if (intf.side === 'top') {
+            tempParsedSides.top[name] = { ...intf };
+            tempParsedSides.top[name].side = 'top';
+        } else if (intf.side === 'bottom') {
+            tempParsedSides.bottom[name] = { ...intf };
+            tempParsedSides.bottom[name].side = 'bottom';
         }
     });
 
@@ -305,11 +320,21 @@ export function applySidePositions(inputs, outputs) {
 
     return {
         inputs: Object.fromEntries(
-            Object.entries({ ...tempParsedSides.left, ...tempParsedSides.right })
+            Object.entries({
+                ...tempParsedSides.top,
+                ...tempParsedSides.bottom,
+                ...tempParsedSides.left,
+                ...tempParsedSides.right,
+            })
                 .filter(([, intf]) => intf.direction !== 'output'),
         ),
         outputs: Object.fromEntries(
-            Object.entries({ ...tempParsedSides.left, ...tempParsedSides.right })
+            Object.entries({
+                ...tempParsedSides.top,
+                ...tempParsedSides.bottom,
+                ...tempParsedSides.left,
+                ...tempParsedSides.right,
+            })
                 .filter(([, intf]) => intf.direction === 'output'),
         ),
     };

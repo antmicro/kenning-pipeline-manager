@@ -86,6 +86,12 @@
     background-color: $green;
 }
 
+.baklava-node-interface-positioned
+{
+    width: fit-content !important;
+    height: fit-content !important;
+}
+
 .baklava-node-interface {
     padding: 0.5em 0;
 
@@ -95,6 +101,27 @@
 
     .--input {
         height: 1em;
+    }
+
+    .--top {
+        top: 1.5em;
+        position: relative;
+    }
+    .--left {
+        left: 2em;
+        position: relative;
+    }
+    .--right {
+        right: 2em;
+        position: relative;
+    }
+    .--bottom {
+        bottom: 1.5em;
+        position: relative;
+    }
+
+    .__port_centered {
+        left: calc(50% - .5em);
     }
 
     & > .__port,
@@ -117,7 +144,9 @@
         border-radius: 10%;
 
         & > .__port_name_left,
-        & > .__port_name_right {
+        & > .__port_name_right,
+        & > .__port_name_top,
+        & > .__port_name_bottom {
             position: relative;
             height: 1em;
             width: fit-content;
@@ -155,6 +184,26 @@
             & > span,
             & > input {
                 margin-left: 0;
+            }
+            & > span { margin-right: 0.15em; }
+            & > input { margin-right: 0.3em; }
+        }
+
+        & > .__port_name_top {
+            top: 0;
+            & > span,
+            & > input {
+                margin-bottom: 0.15em;
+            }
+            & > span { margin-top: 0; }
+            & > input { margin-top: 0; }
+        }
+
+        & > .__port_name_bottom {
+            top: 100%;
+            & > span,
+            & > input {
+                margin-top: 0;
             }
             & > span { margin-right: 0.15em; }
             & > input { margin-right: 0.3em; }

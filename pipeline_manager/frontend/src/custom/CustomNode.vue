@@ -42,7 +42,8 @@ from moving or deleting the nodes.
                 v-if="iconPath !== undefined"
                 :src="iconPath"
             >
-            <div v-if="!renaming" class="__title-label" v-html="DOMPurify.sanitize(nodeTitle)">
+            <div v-if="!renaming"
+            class="__title-label" v-html="DOMPurify.sanitize(nodeTitle)">
             </div>
             <input
                 v-else
@@ -55,7 +56,8 @@ from moving or deleting the nodes.
                 @keydown="(ev) => ev.stopPropagation()"
                 @keydown.enter="doneRenaming"
             />
-            <template v-if="nodeStyle.name !== undefined && nodeStyle.name !== null">
+            <template v-if="nodeStyle.name !== undefined &&
+            nodeStyle.name !== null">
                 <component
                     v-if="nodeStyle.icon !== undefined"
                     class="__title-icon"
@@ -67,7 +69,7 @@ from moving or deleting the nodes.
                     class="__title-icon"
                     :src="nodeStyle.name"
                 />
-             </template>
+            </template>
             <icons.Subgraph
                 class="__subgraph-icon"
                 v-if="isGraphNode || nodeHasRelatedGraphs"
@@ -78,7 +80,28 @@ from moving or deleting the nodes.
                 :style="nodePillStyle"
                 v-html="DOMPurify.sanitize(pillText)"
             />
+            <!-- disable transition to avoid rendering additional redraw for viewport adjustment -->
+
         </div>
+
+        <!-- Positioned inputs -->
+        <template v-for="input in positionedInterfaces">
+            <CustomInterface
+                :key="input.id"
+                :ref="(e)=>positionedInterfaceElementSet.set(input.name,e)"
+                v-if="input"
+                @pointerdown.left.shift="pickInterface(input, $event)"
+                @pointerdown.right="openContextMenuInterface(input, $event)"
+                v-long-press-to-right:500
+                positioned="true"
+                :node="node"
+                :intf="input"
+                :highlighted="props.interfaces?.includes(input)"
+                :picked="isPickedInterface(input)"
+                :style="positionedInterfaceStyle(input)"
+            />
+            <!-- eslint-disable-next-line vue/require-v-for-key -->
+        </template>
 
         <div
             class="__content"
@@ -143,6 +166,10 @@ from moving or deleting the nodes.
                     </template>
                 </div>
             </div>
+            <div>
+
+            </div>
+
         </div>
     </div>
 </template>
@@ -198,7 +225,7 @@ const { graph } = useGraph();
 const movementStep = computed(() => viewModel.value.movementStep);
 
 // Template refs
-const nodeRef = useTemplateRef('nodeRef');
+const nodeRef = ref(null);
 const titleRef = ref(null);
 const propertiesRef = useTemplateRef('propertiesRef');
 const renaming = ref(false);
@@ -295,6 +322,7 @@ const focusOnRename = () => {
 const showContextMenuTitle = ref(false);
 const contextMenuTitleX = ref(0);
 const contextMenuTitleY = ref(0);
+const contextMenuInterfaceItems = ref([]);
 
 const contextMenuTitleItems = computed(() => {
     const items = [];
@@ -592,6 +620,24 @@ const canOpenContextMenu = computed(() =>
         || contextMenuTitleItems.value.length > 0,
 );
 
+const interfacePositions = computed(() => {
+    const positionMap = new Map();
+
+    const interfaces = viewModel.value.editor.getNodeInterfacePositions(node.value.type);
+
+    Object.entries(interfaces).forEach(([key, value]) => {
+        const x = Math.max(Math.min(value.x, 100), 0) / 100.0;
+        const y = Math.max(Math.min(value.y, 100), 0) / 100.0;
+
+        positionMap.set(key, {
+            x,
+            y,
+        });
+    });
+
+    return positionMap;
+});
+
 const nodeMinimal = computed(() => viewModel.value.editor.getNodeMinimal(node.value.type));
 
 const showContextMenuInterface = ref(false);
@@ -623,10 +669,19 @@ const width = computed(() => {
     return '300px';
 });
 
+const height = computed(() => {
+    if (props.node?.height !== undefined) {
+        return `${props.node.height}px`;
+    }
+
+    return 'fit-content';
+});
+
 const styles = computed(() => ({
     top: `${props.node.position?.y ?? 0}px`,
     left: `${props.node.position?.x ?? 0}px`,
     width: width.value,
+    height: height.value,
 }));
 
 const nodeTitle = computed(() => {
@@ -726,8 +781,21 @@ const onMouseDown = async () => {
 
     openDoubleClick();
 };
+
+const positionedInterfaces = computed(() => {
+    if (!nodeRef.value) {
+        return [];
+    }
+
+    return Object.values([...displayedInputs.value, ...displayedOutputs.value])
+        .filter((intf) => interfacePositions.value.has(intf.name))
+        .filter((intf) => !intf.type?.some((t) => props.ignoredInterfacesType?.includes(t)));
+},
+);
+
 const displayedLeftSockets = computed(() =>
     Object.values([...displayedInputs.value, ...displayedOutputs.value])
+        .filter((intf) => !interfacePositions.value.has(intf.name))
         .filter((intf) => intf.side === 'left' && intf.port)
         .filter((intf) => !intf.type?.some((t) => props.ignoredInterfacesType?.includes(t)))
         .sort((intf1, intf2) => intf1.sidePosition - intf2.sidePosition),
@@ -735,6 +803,7 @@ const displayedLeftSockets = computed(() =>
 
 const displayedRightSockets = computed(() =>
     Object.values([...displayedInputs.value, ...displayedOutputs.value])
+        .filter((intf) => !interfacePositions.value.has(intf.name))
         .filter((intf) => intf.side === 'right' && intf.port)
         .filter((intf) => !intf.type?.some((t) => props.ignoredInterfacesType?.includes(t)))
         .sort((intf1, intf2) => intf1.sidePosition - intf2.sidePosition),
@@ -809,27 +878,23 @@ const interfaceCursorStyle = ref({
 });
 
 const nodeTitleStyle = computed(() => {
-    if (!viewModel.value.editor.readonly) {
-        return {
-            cursor: 'drag',
-            backgroundColor: nodeColor.value,
-            color: nodeTitleColor.value,
-        };
-    }
-
-    if (canOpenContextMenu.value) {
-        return {
-            cursor: 'pointer',
-            backgroundColor: nodeColor.value,
-            color: nodeTitleColor.value,
-        };
-    }
-
-    return {
+    const style = {
         cursor: 'default',
         backgroundColor: nodeColor.value,
         color: nodeTitleColor.value,
     };
+
+    if (!viewModel.value.editor.readonly) {
+        style.cursor = 'drag';
+        return style;
+    }
+
+    if (canOpenContextMenu.value) {
+        style.cursor = 'pointer';
+        return style;
+    }
+
+    return style;
 });
 
 const nodePillStyle = computed(() => ({
@@ -837,6 +902,46 @@ const nodePillStyle = computed(() => ({
     backgroundColor: pillColor.value,
     color: pillTextColor.value,
 }));
+
+const positionedInterfaceElementSet = ref(new Map());
+
+const positionedInterfaceStyle = (inf) => {
+    if (!nodeRef.value) {
+        return {};
+    }
+    const infName = inf.name;
+
+    const posMap = interfacePositions.value;
+
+    if (!posMap?.has(infName)) {
+        return {};
+    }
+
+    const positions = posMap.get(infName);
+
+    const infX = positions?.x ?? 0;
+    const infY = positions?.y ?? 0;
+
+    const interfaceRef = positionedInterfaceElementSet.value.get(infName)?.el;
+
+    const interfaceWidth = interfaceRef?.offsetWidth ?? 0;
+    const interfaceHeight = interfaceRef?.offsetHeight ?? 0;
+
+    const offsetX = 0;
+    const offsetY = 0;
+
+    const nodeWidth = nodeRef.value.offsetWidth;
+    const nodeHeight = nodeRef.value.offsetHeight;
+
+    const x = Math.floor((nodeWidth - offsetX) * infX - interfaceWidth / 2);
+    const y = Math.floor((nodeHeight - offsetY) * infY - interfaceHeight / 2);
+
+    return {
+        position: 'absolute',
+        left: `${x}px`,
+        bottom: `${y}px`,
+    };
+};
 
 const isPickedInterface = (intf) => intf === chosenInterface;
 
@@ -922,12 +1027,14 @@ const createContextMenuInterfaceItems = () => {
         items.push(intfMode);
     }
 
-    items.push(
-        { value: 'SpaceUp', label: 'Space Up' },
-        { value: 'SpaceDown', label: 'Space Down' },
-        { value: 'MoveUp', label: 'Move Up' },
-        { value: 'MoveDown', label: 'Move Down' },
-    );
+    if (chosenInterface?.x === undefined || chosenInterface?.y === undefined) {
+        items.push(
+            { value: 'SpaceUp', label: 'Space Up' },
+            { value: 'SpaceDown', label: 'Space Down' },
+            { value: 'MoveUp', label: 'Move Up' },
+            { value: 'MoveDown', label: 'Move Down' },
+        );
+    }
 
     return items;
 };
@@ -988,9 +1095,23 @@ const openContextMenuInterface = async (intf, ev) => {
     await nextTick();
     if (!viewModel.value.editor.readonly) {
         chosenInterface = intf;
+        contextMenuInterfaceItems.value = createContextMenuInterfaceItems();
         const targetRect = ev.currentTarget.getBoundingClientRect();
         const nodeRect = nodeRef.value.getBoundingClientRect();
-        if (chosenInterface.side === 'right') {
+
+        if (chosenInterface?.x !== undefined &&
+            chosenInterface?.y !== undefined
+        ) {
+            const elRef = titleRef;
+            const left = elRef.value.offsetLeft;
+            const top = elRef.value.offsetTop;
+            const _width = elRef.value.offsetWidth;
+            const _height = elRef.value.offsetHeight;
+
+            contextMenuInterfaceX.value = left + _width * chosenInterface.x - 10;
+            contextMenuInterfaceY.value = top + (_height *
+                (1.0 - chosenInterface.y) + 12.5) / graph.value.scaling;
+        } else if (chosenInterface.side === 'right') {
             contextMenuInterfaceSide.value = 'right';
             contextMenuInterfaceX.value = nodeRect.left + nodeRect.width + 10;
             contextMenuInterfaceY.value = targetRect.top + 12.5;
