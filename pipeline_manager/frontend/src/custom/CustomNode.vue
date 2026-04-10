@@ -84,6 +84,29 @@ from moving or deleting the nodes.
 
         </div>
 
+            <CustomContextMenu
+                ref='contextMenuTitle'
+                v-model="showContextMenuTitle"
+                :x="contextMenuTitleX"
+                :y="contextMenuTitleY"
+                :items="contextMenuTitleItems"
+                :urls="nodeURLs"
+                :style="contextMenuStyle"
+                :transition="''"
+                @pointerdown.left.stop
+                @click="onContextMenuTitleClick"
+            />
+
+        <img :src="customShape"
+            v-if="customShape !== undefined"
+            draggable="false"
+            ref="svgRef"
+            @pointerdown.left.exact="onMouseDown"
+            @pointerdown.left="startDragWrapper($event)"
+            @pointerdown.right="openContextMenuTitle"
+            v-long-press:500="openContextMenuTitle"
+            :style="shapeStyle"
+            >
         <!-- Positioned inputs -->
         <template v-for="input in positionedInterfaces">
             <CustomInterface
@@ -102,7 +125,6 @@ from moving or deleting the nodes.
             />
             <!-- eslint-disable-next-line vue/require-v-for-key -->
         </template>
-
         <div
             class="__content"
             @pointerdown.right="openContextMenuTitle"
@@ -671,11 +693,11 @@ const classes = computed(() => ({
 }));
 
 const width = computed(() => {
-    if (nodeMinimal.value) {
-        return 'auto';
-    }
     if (props.node.width !== undefined) {
         return `${props.node.width}px`;
+    }
+    if (nodeMinimal.value) {
+        return 'auto';
     }
     return '300px';
 });
@@ -920,24 +942,14 @@ const positionedInterfaceStyle = (inf) => {
     const infX = positions?.x ?? 0;
     const infY = positions?.y ?? 0;
 
-    const interfaceRef = positionedInterfaceElementSet.value.get(infName)?.el;
-
-    const interfaceWidth = interfaceRef?.offsetWidth ?? 0;
-    const interfaceHeight = interfaceRef?.offsetHeight ?? 0;
-
-    const offsetX = 0;
-    const offsetY = 0;
-
-    const nodeWidth = nodeRef.value.offsetWidth;
-    const nodeHeight = nodeRef.value.offsetHeight;
-
-    const x = Math.floor((nodeWidth - offsetX) * infX - interfaceWidth / 2);
-    const y = Math.floor((nodeHeight - offsetY) * infY - interfaceHeight / 2);
+    const x = infX * 100.0;
+    const y = infY * 100.0;
 
     return {
         position: 'absolute',
-        left: `${x}px`,
-        bottom: `${y}px`,
+        transform: `translate(-50%,-50%)`,
+        left: `${x}%`,
+        top: `${y}%`,
     };
 };
 
