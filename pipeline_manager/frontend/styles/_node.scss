@@ -45,8 +45,8 @@
         min-width: 30px !important;
         min-height: 4em;
         width: auto;
-        position: relative;
         cursor: grab;
+        position: absolute;
 
         & > .__title {
             position: absolute;
