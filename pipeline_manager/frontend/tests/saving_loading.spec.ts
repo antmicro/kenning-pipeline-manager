@@ -2,6 +2,7 @@ import fs from 'fs/promises';
 import {
     test, expect, Page,
 } from '@playwright/test';
+import { readFileSync } from 'node:fs';
 import {
     getUrl,
     loadSpecification,
@@ -15,7 +16,21 @@ async function expectNoErrors(page: Page) {
         '.notifications > .panel > ul > *:not(:has(.info))',
     );
     const count = await notifications.count();
+    if (count !== 0) {
+        await page.locator('.tab').getByText('Terminal').click();
+        await page.waitForTimeout(2000);
+    }
     expect(count).toBe(0);
+}
+
+async function deepCleanEditor(page: Page) {
+    const settings = page.locator('.settings-panel');
+    expect(settings).toBeVisible();
+    await settings.hover({ force: true });
+
+    const button = page.getByText('Clean editor');
+    expect(button).toBeVisible();
+    await button.dispatchEvent('click');
 }
 
 async function saveFileAs(
@@ -52,8 +67,7 @@ async function saveDataflowAs(page: Page, testInfo, filename: string) {
     return saveFileAs(page, testInfo, 'dataflow', filename);
 }
 
-async function loadIncludeSpecification(page: Page, testInfo) {
-    const fileChooser = await openFileChooser(page, 'specification');
+async function loadIncludeSpecification(testInfo) {
     const specificationName = 'sample-include-specification.json';
     const specification = await fs.readFile(
         getPathToJsonFile(specificationName),
@@ -65,7 +79,7 @@ async function loadIncludeSpecification(page: Page, testInfo) {
     );
     const newSpecificationPath = testInfo.outputPath(specificationName);
     await fs.writeFile(newSpecificationPath, newSpecification);
-    await fileChooser.setFiles(newSpecificationPath);
+    return newSpecificationPath;
 }
 
 async function loadSpecificationFromFile(page: Page, specificationFile: string) {
@@ -93,11 +107,47 @@ const examples = [
     { specification: 'sample-rectangle-grouping-specification.json', dataflow: 'sample-rectangle-grouping-dataflow.json' },
 ];
 
+async function dragAndDropFile(page: Page, selector: string, fileName: string, testInfo) {
+    const filePath = getPathToJsonFile(fileName);
+    const buffer = readFileSync(filePath).toString('base64');
+
+    const dataTransfer = await page.evaluateHandle(
+        async ({ bufferData, localFileName, localFileType }) => {
+            const dt = new DataTransfer();
+            const blobData = await fetch(bufferData).then((res) => res.blob());
+            const file = new File([blobData],
+                localFileName,
+                { type: localFileType },
+            );
+            dt.items.add(file);
+            return dt;
+        },
+        {
+            bufferData: `data:application/octet-stream;base64,${buffer}`,
+            localFileName: testInfo.outputPath(fileName.substring(0, fileName.indexOf('.'))),
+            localFileType: 'json',
+        },
+    );
+
+    await page.waitForSelector(selector);
+    await page.dispatchEvent(selector, 'drop', { dataTransfer });
+    await page.waitForSelector('.loading-screen', { state: 'hidden' });
+
+    const bufferStr = readFileSync(filePath, 'utf8');
+    const data = JSON.parse(bufferStr);
+    if (data.entryGraph !== undefined) {
+        return false;
+    }
+    return true;
+}
+
 examples.forEach(({ dataflow, specification }) => {
     test(`save and load ${specification}`, async ({ page }, testInfo) => {
         await page.goto(getUrl());
         if (specification === 'sample-include-specification.json') {
-            await loadIncludeSpecification(page, testInfo);
+            const newSpecificationPath = await loadIncludeSpecification(testInfo);
+            const fileChooser = await openFileChooser(page, 'specification');
+            await fileChooser.setFiles(newSpecificationPath);
         } else {
             await loadSpecification(page, specification);
         }
@@ -110,11 +160,31 @@ examples.forEach(({ dataflow, specification }) => {
 
     if (!dataflow) return;
 
-    test(`loading ${dataflow}, ${specification}`, async ({ page }) => {
+    test(`context loading ${dataflow}, ${specification}`, async ({ page }) => {
         await page.goto(getUrl());
         await loadSpecification(page, specification);
         await expectNoErrors(page);
         await loadDataflow(page, dataflow);
+        await expectNoErrors(page);
+    });
+    test(`drag and drop welcome ${dataflow}, ${specification}`, async ({ page }, testInfo) => {
+        await page.goto(getUrl());
+        await deepCleanEditor(page);
+        const continueProcessing = await dragAndDropFile(page, '.welcome-container', specification, testInfo);
+        await expectNoErrors(page);
+        if (!continueProcessing) {
+            return;
+        }
+        await dragAndDropFile(page, '.welcome-container', dataflow, testInfo);
+        await expectNoErrors(page);
+    });
+
+    test(`drag and drop canvas ${dataflow}, ${specification}`, async ({ page }, testInfo) => {
+        await page.goto(getUrl());
+        await deepCleanEditor(page);
+        await dragAndDropFile(page, '.baklava-editor', specification, testInfo);
+        await expectNoErrors(page);
+        await dragAndDropFile(page, '.baklava-editor', dataflow, testInfo);
         await expectNoErrors(page);
     });
 
