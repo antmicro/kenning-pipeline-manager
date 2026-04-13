@@ -24,6 +24,7 @@ from creating and deleting connections or altering nodes' values if the editor i
             @mouseenter="startHoverWrapper"
             @mouseleave="endHoverWrapper"
             @pointerdown.left="onMouseDown"
+            no-drag="true"
             :class="{
                 greyedout_arrow: highlighted,
                 picked: picked,
@@ -217,7 +218,7 @@ export default defineComponent({
 
         /* eslint-disable vue/no-mutating-props,no-param-reassign */
         const onMouseDown = doubleClick(700, () => {
-            if (!viewModel.value.editor.readonly) {
+            if (!viewModel.value.editor.readonly && !props.positioned) {
                 props.switchSides(props.intf);
                 endHover();
             }
