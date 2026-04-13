@@ -848,7 +848,7 @@ class SpecificationBuilder(object):
             )
 
         assert direction in ["input", "output", "inout"]
-        assert side in [None, "left", "right"]
+        assert side in [None, "left", "right", "top", "bottom"]
 
         interface = {"name": interfacename, "direction": direction}
 
