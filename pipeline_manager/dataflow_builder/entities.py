@@ -481,7 +481,11 @@ class Node(JsonConvertible):
                             )
                         )
                 value = interfaces
-            if key == "subgraph" and value is not None:
+            if (
+                key == "subgraph"
+                and value is not None
+                and not isinstance(value, str)
+            ):
                 Node._verify_exposed_interface_uniqueness(value)
                 value = value._id
 
