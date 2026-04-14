@@ -23,6 +23,7 @@
 
 import CytoscapeLayoutEngine from './layoutEngines/cytoscapeEngine.js';
 import NoLayoutAlgorithm from './layoutEngines/noLayoutEngine.js';
+import D3Engine from './layoutEngines/d3Engine.js';
 
 /* eslint-disable no-param-reassign */
 function dataflowToGraph(dataflow) {
@@ -76,6 +77,7 @@ export default class LayoutManager {
     availableEngines = {
         NoLayout: new NoLayoutAlgorithm(),
         CytoscapeEngine: new CytoscapeLayoutEngine(),
+        D3Engine: new D3Engine(),
     };
 
     constructor() {
@@ -98,7 +100,7 @@ export default class LayoutManager {
     getAvailableAlgorithms() {
         return Object.entries(this.availableEngines)
             .map(([engineName, engine]) => {
-                if (engine.availableAlgorithms.length !== 1) {
+                if (engineName !== 'NoLayout') {
                     return engine.availableAlgorithms.map(
                         (algorithm) => `${engineName} - ${algorithm}`,
                     );

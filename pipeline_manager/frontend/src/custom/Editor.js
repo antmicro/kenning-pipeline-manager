@@ -1066,6 +1066,7 @@ export default class PipelineManagerEditor extends Editor {
         const graphs = this.save();
 
         graphs.graphs.forEach((state) => {
+            if (state.id !== this.editorManager?.baklavaView.displayedGraph.id) return;
             state.nodes.forEach((node) => {
                 node.interfaces.forEach((intf) => {
                     const connections = state.connections.filter(
