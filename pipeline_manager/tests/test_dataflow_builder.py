@@ -227,6 +227,52 @@ def subgraph_dataflow():
     return Path("./examples/sample-subgraph-dataflow.json")
 
 
+@pytest.fixture
+def dummy_specification():
+    """
+    Fixture to provide an "empty" specification.
+    """
+    return {"version": "20250623.14", "nodes": [{"name": "Dummy"}]}
+
+
+@pytest.fixture
+def subgraph_dataflow_alt():
+    """
+    Fixture to provide a subgraph dataflow from a file in `examples` directory.
+    """
+    return {
+        "graphs": [
+            {
+                "id": "5d19b77b-89a6-4337-9d6c-6604df9275e6",
+                "nodes": [
+                    {
+                        "id": "caddc6df-9d5c-4db9-aaed-03dd5531f9b8",
+                        "position": {"x": 480, "y": 165},
+                        "width": 300,
+                        "twoColumn": True,
+                        "interfaces": [],
+                        "properties": [],
+                        "enabledInterfaceGroups": [],
+                        "name": "New Graph Node",
+                        "instanceName": "New Graph Node",
+                        "subgraph": "6e5b3c61-63e8-4a3b-835a-6b178a2dec80",
+                    }
+                ],
+                "connections": [],
+            },
+            {
+                "id": "6e5b3c61-63e8-4a3b-835a-6b178a2dec80",
+                "name": "New Graph Node",
+                "nodes": [],
+                "connections": [],
+            },
+        ],
+        "entryGraph": "5d19b77b-89a6-4337-9d6c-6604df9275e6",
+        "version": "20250623.14",
+        "metadata": {},
+    }
+
+
 def test_adding_connection(single_connection_graph):
     """Test if adding a connection between two existing nodes succeeds."""
     _, graph, expected = single_connection_graph
@@ -432,6 +478,22 @@ def graph_builder_for_subgraphs(
         DEFAULT_SPECIFICATION_VERSION,
     )
     builder.load_graphs(subgraph_dataflow)
+    return builder
+
+
+@pytest.fixture
+def graph_builder_for_subgraphs_dataflow(
+    dummy_specification, subgraph_dataflow_alt
+) -> GraphBuilder:
+    """
+    Fixture providing an instance of GraphBuilder with subgraph specification
+    purely in dataflow.
+    """
+    builder = GraphBuilder(
+        dummy_specification,
+        DEFAULT_SPECIFICATION_VERSION,
+    )
+    builder.load_graphs(subgraph_dataflow_alt)
     return builder
 
 
@@ -645,6 +707,14 @@ def test_loading_subgraphs(graph_builder_for_subgraphs):
     """
     with tempfile.NamedTemporaryFile() as file:
         graph_builder_for_subgraphs.save(json_file=file.name)
+
+
+def test_loading_subgraphs_from_dataflow(graph_builder_for_subgraphs_dataflow):
+    """
+    Test if loading a subgraph specification purely from dataflow works.
+    """
+    with tempfile.NamedTemporaryFile() as file:
+        graph_builder_for_subgraphs_dataflow.save(json_file=file.name)
 
 
 def test_adding_subgraph_node(subgraph_specification):
