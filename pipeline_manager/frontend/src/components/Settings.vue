@@ -194,7 +194,10 @@ export default {
 
         const clearEditor = computed(() => {
             const button = new ButtonInterface('Clean editor', () => {
+                props.viewModel.editor.unregisterGraphs();
                 props.viewModel.editor.deepCleanEditor();
+                props.viewModel.editor.unregisterNodes();
+                props.viewModel.editor.editorManager.setSpecificationLoaded(false);
             });
             return button;
         });
