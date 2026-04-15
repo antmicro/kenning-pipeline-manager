@@ -24,6 +24,7 @@ import { suppressHistoryLogging } from '../core/History.ts';
 import CreateCustomGraphNodeType, { prepareSubgraphInstance } from './CustomGraphNode.js';
 import { ir } from '../core/interfaceRegistry.ts';
 import { hexToRGB } from '../core/nodeCreation/nodeColors.js';
+import GraphTemplate from './CustomGraphTemplate.js';
 
 import globalProperties from '../globalProperties.ts';
 
@@ -176,11 +177,11 @@ export default class PipelineManagerEditor extends Editor {
      *  Adds a new empty graph to the editor.
      */
     addNewGraph() {
-        const newGraph = new Graph(this);
-        newGraph.name = 'New Graph';
+        const graph = new Graph(this);
+        graph.name = 'New Graph';
 
-        this.registerGraph(newGraph);
-        this.editorManager.baklavaView.editor.switchToGraph(newGraph, false);
+        const template = new GraphTemplate(graph, this);
+        this.editorManager.baklavaView.editor.switchToGraph(template, false);
     }
 
     /**
