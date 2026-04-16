@@ -12640,13 +12640,7 @@ hterm.ScrollPort.prototype.decorate = function(div, callback) {
     }
   };
 
-  // Insert Iframe content asynchronously in FF.  Otherwise when the frame's
-  // load event fires in FF it clears out the content of the iframe.
-  if ('mozInnerScreenX' in window) { // detect a FF only property
-    onLoad();
-  } else {
-    onLoad();
-  }
+  onLoad();
 };
 
 
