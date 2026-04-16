@@ -24,6 +24,7 @@ from creating and deleting connections or altering nodes' values if the editor i
             @mouseenter="startHoverWrapper"
             @mouseleave="endHoverWrapper"
             @pointerdown.left="onMouseDown"
+            no-drag="true"
             :class="{ greyedout_arrow: highlighted, picked: picked, '__square': isExposed }"
         >
             <div

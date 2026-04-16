@@ -23,6 +23,7 @@ from moving or deleting the nodes.
         :style="styles"
         :data-node-type="node.type"
         @pointerdown.left.exact="(ev) => select(ev)"
+        @pointerdown.left="startDragWrapper($event)"
         oncontextmenu="return false;"
     >
         <div class="interface-cursor">
@@ -33,7 +34,6 @@ from moving or deleting the nodes.
             ref="titleRef"
             :style="nodeTitleStyle"
             @pointerdown.left.exact="onMouseDown"
-            @pointerdown.left="startDragWrapper($event)"
             @pointerdown.right="openContextMenuTitle"
             v-long-press:500="openContextMenuTitle"
         >
@@ -758,6 +758,7 @@ onUpdated(onRender);
  * @param ev Event
  */
 const startDragWrapper = (ev) => {
+    if (ev.target.closest('[no-drag="true"]')) return;
     if (!viewModel.value.editor.readonly) {
         startDrag(ev);
     }
