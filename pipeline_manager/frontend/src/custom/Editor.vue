@@ -73,6 +73,7 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
                 @mouseleave="clearHighlight"
             >
                 <CustomNode
+                    v-memo="[visibleNodes, ...selectedNodes]"
                     v-for="node in visibleNodes"
                     :key="node.id + counter.toString()"
                     :node="node"
@@ -101,6 +102,7 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
                 @wheel="mouseWheel"
             >
                 <PipelineManagerConnection
+                    v-memo="visibleConnections"
                     v-for="connection in visibleConnections"
                     :key="connection.id + counter.toString()"
                     :connection="connection"
