@@ -248,7 +248,26 @@
                         "type": "array",
                         "description": "Definition of anchor points that are used for orthogonal connections",
                         "items": {
-                            "$ref": "#/$defs/coordinates"
+                            "type": "object",
+                            "properties": {
+                                "x": {
+                                    "description": "x coordinate of the corner",
+                                    "type": "number"
+                                },
+                                "y": {
+                                    "description": "y coordinate of the corner",
+                                    "type": "number"
+                                },
+                                "index": {
+                                    "description": "index that the anchor corresponds to",
+                                    "type": "number"
+                                }
+                            },
+                            "required": [
+                                "x",
+                                "y"
+                            ],
+                            "additionalProperties": false
                         }
                     }
                 },
