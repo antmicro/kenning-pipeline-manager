@@ -280,7 +280,36 @@ export default class ConnectionRenderer {
         A ${leftRx} ${leftRy} 0 0 1 ${leftx} ${lefty}`;
     }
 
-    orthogonalAnchorsPath(anchors, nc) {
+    correctAnchor(anchor, anchors, nc) {
+        const path = this.orthogonalAnchorsPath(anchors, nc);
+        let minDist = Infinity;
+        let minIdx = -1;
+        const tx = anchor.x;
+        const ty = anchor.y;
+        const distance = (a, b) => Math.sqrt((a.x - b.x) ** 2 + (a.y - b.y) ** 2);
+        const between = (x, a, b) => x >= Math.min(a, b) && x <= Math.max(a, b);
+        for (let i = 0; i < path.length - 1; i += 1) {
+            const vertical = (path[i].x === path[i + 1].x);
+            let dist = vertical ? Math.abs(path[i].x - tx) : Math.abs(path[i].y - ty);
+
+            const betwix = vertical ? between(ty, path[i].y, path[i + 1].y)
+                : between(tx, path[i].x, path[i + 1].x);
+            if (!betwix) {
+                dist = Math.min(distance(anchor, path[i]), distance(anchor, path[i + 1]));
+            }
+
+            if (dist < minDist) {
+                minDist = dist;
+                minIdx = i;
+            }
+        }
+        // eslint-disable-next-line no-param-reassign
+        anchor.index = minIdx;
+    }
+
+    orthogonalAnchorsPath(anchors, nc, graph) {
+        anchors.filter((a) => a.index === -1)
+            .forEach((a, i) => this.correctAnchor(a, anchors.slice(0, i), nc, graph));
         const ogPath = this.orthogonalRender(nc.x1, nc.y1, nc.x2, nc.y2, nc);
         const anchored = Array(ogPath.length).fill(undefined);
 
