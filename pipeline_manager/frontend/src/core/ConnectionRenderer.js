@@ -715,9 +715,16 @@ export default class ConnectionRenderer {
     }
 
     straightRender(x1, y1, x2, y2, connection) {
-        return [{ x: x1, y: y1 }]
-            .concat((connection.anchors ?? []).map((a) => ({ x: a.x, y: a.y })))
-            .concat([{ x: x2, y: y2 }]);
+        if (connection.anchors?.some((a) => a.legacy)) {
+            return [{ x: x1, y: y1 }]
+                .concat(connection.anchors)
+                .concat([{ x: x2, y: y2 }]);
+        }
+        const path = [{ x: x1, y: y1 }];
+        (connection.anchors ?? []).forEach((anchor) => {
+            path.splice(anchor.index + 1, 0, { x: anchor.x, y: anchor.y });
+        });
+        return path.concat([{ x: x2, y: y2 }]);
     }
 
     straightRenderLoopback(x1, y1, x2, y2, connection) {
