@@ -158,11 +158,7 @@ export default defineComponent({
                 y: ev.offsetY,
                 id: Date.now(),
             };
-                // The index shows the connection section that was pressed -
-                // since we have an extra one at the beginning, we need a -1 and a
-                // division by 3 with no decimal to determine what anchor position
-                // corresponds
-            graph.value.addAnchor(newAnchor, props.connection, Math.trunc((index - 1) / 3));
+            graph.value.addAnchor(newAnchor, props.connection, index);
         };
 
         const newD = computed(() =>
