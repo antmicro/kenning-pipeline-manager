@@ -320,7 +320,8 @@ export default class ConnectionRenderer {
         anchored[lastMiddle] = { ...ogPath[lastMiddle] };
 
         const anchorToSeg = [];
-        const clamp = (x, a, b) => Math.min(Math.max(x, Math.min(a, b)), Math.max(a, b));
+        const clamp = (x, a, b, padding = 0) => Math.min(Math.max(x, Math.min(a, b) + padding),
+            Math.max(a, b) - padding);
         anchors.forEach((anchor) => {
             const anchorTrans = { ...anchor };
             // eslint-disable-next-line no-param-reassign
@@ -336,11 +337,6 @@ export default class ConnectionRenderer {
                 ogPath.splice(idx + 1, 0, { x: anchored[idx + 1].x, y: anchored[idx + 1].y });
                 anchored.splice(idx + 1, 0, undefined);
             }
-            if (vertical) {
-                anchorTrans.y = clamp(anchorTrans.y, ogPath[idx].y, ogPath[idx + 1].y);
-            } else {
-                anchorTrans.x = clamp(anchorTrans.x, ogPath[idx].x, ogPath[idx + 1].x);
-            }
             ogPath.splice(idx + 1, 0, anchorTrans);
             anchored.splice(idx + 1, 0, anchorTrans);
             if (vertical) {
@@ -354,7 +350,11 @@ export default class ConnectionRenderer {
                 ogPath[idx + 2].y = anchorTrans.y;
             }
             anchorToSeg.push({
-                id: anchor.id, type: vertical, a: ogPath[idx], b: ogPath[idx + 2],
+                id: anchor.id,
+                type: vertical,
+                a: ogPath[idx],
+                b: ogPath[idx + 2],
+                mid: ogPath[idx + 1],
             });
         });
         anchorToSeg.reverse().forEach((info) => {
