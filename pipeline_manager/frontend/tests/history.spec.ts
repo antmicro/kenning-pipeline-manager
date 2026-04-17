@@ -1,5 +1,9 @@
-import { test, expect, Page, Locator } from '@playwright/test';
-import { getUrl, loadVideoNodeId, enableNavigationBar, addNode, dragAndDrop, closeTerminal,loadSpecification,loadDataflow } from './config.js';
+import {
+    test, expect, Page, Locator,
+} from '@playwright/test';
+import {
+    getUrl, loadVideoNodeId, addNode, dragAndDrop, closeTerminal, loadSpecification, loadDataflow,
+} from './config.js';
 
 async function deleteNode(page: Page, nodeId: string) {
     await closeTerminal(page);
@@ -43,7 +47,7 @@ async function enterSubgraph(node: Locator) {
     await contextMenuOption.click();
 }
 
-async function removeNode(node: Locator){
+async function removeNode(node: Locator) {
     await node.locator('.__title').click({ button: 'right' });
     const contextMenuOption = node.locator('.baklava-context-menu').getByText('Delete');
     await contextMenuOption.click();
@@ -81,8 +85,8 @@ function getNodeInterfaces(page: Page, name: string, side: 'input' | 'output' | 
     return getNode(page, name).locator(`.__interfaces ${ioClass}`);
 }
 
-async function waitForSubgraph(page: Page,graphName:string) {
-    const editorTitle = await page.locator('.editorTitle');
+async function waitForSubgraph(page: Page, graphName: string) {
+    const editorTitle = page.locator('.editorTitle');
     await expect(editorTitle.getByText(graphName)).toBeVisible();
 }
 
@@ -90,46 +94,45 @@ function getContextMenuOption(page: Page, nodeName: string, optionName: string):
     return getNode(page, nodeName).locator('.baklava-context-menu').getByText(optionName);
 }
 
-test('test history by removing subgraph',async ({page}) => {
+test('test history by removing subgraph', async ({ page }) => {
     await page.goto(getUrl());
-    await loadSpecification(page,'sample-subgraph-specification.json');
-    await loadDataflow(page,'sample-subgraph-dataflow.json');
-
+    await loadSpecification(page, 'sample-subgraph-specification.json');
+    await loadDataflow(page, 'sample-subgraph-dataflow.json');
 
     const subgraphNode = getNode(page, 'Test subgraph #1');
     // check current output count of Test subgraph #1
-    await assertOutputCount(subgraphNode,3);
+    await assertOutputCount(subgraphNode, 3);
     // go to Test subgraph #1 subgraph
     await enterSubgraph(subgraphNode);
-    await waitForSubgraph(page,'Test subgraph #1');
+    await waitForSubgraph(page, 'Test subgraph #1');
     // get all test nodes in subgraph
-    const nodes = getNode(page,"Test node #1");
+    const nodes = getNode(page, 'Test node #1');
     expect(await nodes.count()).toBe(2);
     // remove them
     await removeNode(nodes.first());
     await removeNode(nodes.last());
     // now subgraph node should have no exposed outputs
-    await assertOutputCount(subgraphNode,0);
+    await assertOutputCount(subgraphNode, 0);
 
-    await waitForSubgraph(page,'Example of a graph with graph nodes');
+    await waitForSubgraph(page, 'Example of a graph with graph nodes');
 
     // Undo subgraph removal
     await page.keyboard.press('Control+KeyZ');
 
     await enterSubgraph(subgraphNode);
-    await waitForSubgraph(page,'Test subgraph #1');
+    await waitForSubgraph(page, 'Test subgraph #1');
     // Undo nodes removal
     await page.keyboard.press('Control+KeyZ');
     // One extra to undo connection removal
     await page.keyboard.press('Control+KeyZ');
     await page.keyboard.press('Control+KeyZ');
     // Check test node count
-    expect(await getNode(page,"Test node #1").count()).toBe(2);
+    expect(await getNode(page, 'Test node #1').count()).toBe(2);
 
     await leaveSubgraph(page);
     // subgraph node should get back its exposed outputs
-    await assertOutputCount(subgraphNode,3);
-})
+    await assertOutputCount(subgraphNode, 3);
+});
 
 test('test history by removing node', async ({ page }) => {
     // Load a website and wait until nodes are loaded.
@@ -194,7 +197,7 @@ test('test history by moving node', async ({ page }) => {
     const node = page.locator(`#${loadVideoNodeId}`);
     const nodeTitleArea = node.locator('.__title');
 
-    const oldPosition = await node.boundingBox();
+    const oldPosition = await node.boundingBox() ?? { x: 0, y: 0 };
     const newCoordinates = {
         x: oldPosition.x + 100, // Move 100 pixels to the right.
         y: oldPosition.y + 50, // Move 50 pixels down.
@@ -212,7 +215,7 @@ test('test history by moving node', async ({ page }) => {
 
     // Check that the position is back to the old position.
     const afterUndoBoundingBox = await node.boundingBox();
-    await expect(afterUndoBoundingBox, {
+    expect(afterUndoBoundingBox, {
         message:
             'The position of the node was expected to get back to the previous position by using an undo action.',
     }).toStrictEqual(oldPosition);
@@ -223,13 +226,13 @@ test('test history by moving node', async ({ page }) => {
 
     // Check that the position is back to the old position.
     const afterRedoBoundingBox = await node.boundingBox();
-    await expect(afterRedoBoundingBox, {
+    expect(afterRedoBoundingBox, {
         message: 'After redoing an action a node its position did not change but it should.',
     }).not.toStrictEqual(oldPosition);
 });
 
 async function removeConnection(page: Page, inputInterface: Locator) {
-    const inputInterfaceLocation = await inputInterface.boundingBox();
+    const inputInterfaceLocation = await inputInterface.boundingBox() ?? { x: 0, y: 0 };
     const shiftToConnectionInPx = 50;
     await page.mouse.dblclick(
         inputInterfaceLocation.x + shiftToConnectionInPx,
@@ -542,7 +545,7 @@ test('test history by changing property value', async ({ page }) => {
     await loadWebsite(page, loadVideoNodeId);
     const gaussian = getNode(page, 'GaussianKernel');
     const sizeSection = gaussian.locator('.baklava-num-input').getByText('size').locator('..');
-    const sizeVal = await sizeSection.locator('.__value').first();
+    const sizeVal = sizeSection.locator('.__value').first();
     expect(await sizeVal.innerText()).toBe('5');
     await sizeSection.locator('..').locator('.--dec').click();
     await page.mouse.click(200, 200);
