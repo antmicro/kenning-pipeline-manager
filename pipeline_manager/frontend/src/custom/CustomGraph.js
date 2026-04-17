@@ -152,12 +152,13 @@ export default function createPipelineManagerGraph(graph) {
      * @param connection connection to which the anchor is added
      * @param position position of the anchor in the connection
      */
-    graph.addAnchor = function addAnchor(anchor, connection, position) {
+    graph.addAnchor = function addAnchor(anchor, connection, position, legacy = undefined) {
         const anchorToAdd = {
             x: anchor.x,
             y: anchor.y,
             index: position,
             id: uuidv4(),
+            legacy,
         };
         if (connection.anchors === undefined) connection.anchors = [];
 
@@ -493,9 +494,16 @@ export default function createPipelineManagerGraph(graph) {
                         checkConnectionResult.dummyConnection.to,
                     );
 
-                    c.anchors?.forEach((anchor, index) => {
-                        graph.addAnchor(anchor, conn, index);
-                    });
+                    if (c.anchors?.some((anchor) => !anchor.index)) {
+                        // legacy anchors
+                        c.anchors?.forEach((anchor, index) => {
+                            graph.addAnchor(anchor, conn, index, true);
+                        });
+                    } else {
+                        c.anchors?.forEach((anchor) => {
+                            graph.addAnchor(anchor, conn, anchor.index);
+                        });
+                    }
                     this.internalAddConnection(conn);
                 }
             }
@@ -548,10 +556,8 @@ export default function createPipelineManagerGraph(graph) {
                 id: c.id,
                 from: c.from.id,
                 to: c.to.id,
-                anchors: c.anchors?.map((anchor) => ({
-                    x: anchor.x,
-                    y: anchor.y,
-                })),
+                // eslint-disable-next-line no-unused-vars
+                anchors: c.anchors?.map((a) => ({ x: a.x, y: a.y, index: a.index })),
             })),
             scaling: this.scaling,
             panning: this.panning,

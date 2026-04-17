@@ -525,7 +525,11 @@ export default class ConnectionRenderer {
         const nc = new NormalizedConnection(x1, y1, x2, y2, connection);
 
         if (connection.anchors !== undefined && connection.anchors.length) {
-            return this.orthogonalAnchorsPath(connection.anchors, nc, graph);
+            // legacy anchors were not identified by segment index so cannot be used intechangibly.
+            if (connection.anchors.some((a) => a.legacy)) {
+                return this.alternativeOrthogonalAnchorsPath(connection.anchors, nc);
+            }
+            return this.orthogonalAnchorsPath(connection.anchors, nc);
         }
 
         const minMargin = 30;
@@ -627,6 +631,10 @@ export default class ConnectionRenderer {
         const nc = new NormalizedConnection(x1, y1, x2, y2, connection);
 
         if (connection.anchors !== undefined && connection.anchors.length) {
+            // legacy anchors were not identified by segment index so cannot be used intechangibly.
+            if (connection.anchors.some((a) => a.legacy)) {
+                return this.alternativeOrthogonalAnchorsPath(connection.anchors, nc);
+            }
             return this.orthogonalAnchorsPath(connection.anchors, nc);
         }
 
