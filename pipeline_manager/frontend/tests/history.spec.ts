@@ -18,7 +18,7 @@ async function deleteNode(page: Page, nodeId: string) {
 
     // Delete the node.
     const deleteButton = loadVideoNode.getByText('Delete', { exact: true });
-    await deleteButton.click({ force: true });
+    await deleteButton.click();
 }
 
 async function loadWebsite(page: Page, requiredNodeId: string) {
@@ -29,7 +29,13 @@ async function loadWebsite(page: Page, requiredNodeId: string) {
 }
 
 async function expectNode(exists: boolean, page: Page, nodeId: string, errorMessage: string) {
-    expect(page.locator(`#${nodeId}`), { message: errorMessage }).toBeVisible({ visible: exists });
+    const loc = page.locator(`#${nodeId}`);
+    if (exists) {
+        expect(loc, { message: errorMessage }).toBeVisible();
+    } else {
+        await loc.waitFor({ state: 'hidden' });
+        expect(loc, { message: errorMessage }).not.toBeVisible();
+    }
 }
 
 function getNode(page: Page, name: string): Locator {
