@@ -10,6 +10,7 @@ async function deleteNode(page: Page, nodeId: string) {
 
     // Find the node and invoke a context menu with a right click.
     const loadVideoNode = page.locator(`#${nodeId}`);
+    expect(loadVideoNode).toHaveCount(1);
     expect(loadVideoNode, {
         message: `The node with id ${nodeId} is expected to be visible before the remove operation.`,
     }).toBeVisible();
@@ -253,7 +254,7 @@ test('test history by removing connection', async ({ page }) => {
     await loadWebsite(page, loadVideoNodeId);
 
     const outputPort = page.locator(`#${loadVideoNodeId} .__content .__interfaces .__outputs .__port`);
-    const connections = page.locator('.custom-connections-container').locator('g');
+    const connections = page.locator('.connections-container > g');
 
     await expect(connections, {
         message: 'The initial conditions of presence of six connections are not met.',
@@ -278,7 +279,7 @@ test('test history by adding connection', async ({ page }) => {
     await loadWebsite(page, loadVideoNodeId);
 
     const outputPort = page.locator(`#${loadVideoNodeId} .__content .__interfaces .__outputs .__port`);
-    const connections = page.locator('.custom-connections-container').locator('g');
+    const connections = page.locator('.connections-container > g');
 
     await expect(connections, {
         message: 'The initial conditions of presence of six connections are not met.',
@@ -479,7 +480,7 @@ test('test history by removing node with connection', async ({ page }) => {
     await loadWebsite(page, loadVideoNodeId);
 
     // At the beginning, six connections exist.
-    const connections = page.locator('.custom-connections-container').locator('g');
+    const connections = page.locator('.connections-container > g');
     await expect(connections, {
         message: 'The initial condition of six connections being present are not met.',
     }).toHaveCount(6);
@@ -509,7 +510,7 @@ test('test history by editing node with connection', async ({ page }) => {
     await loadWebsite(page, loadVideoNodeId);
 
     // At the beginning, six connections exist.
-    const connections = page.locator('.custom-connections-container').locator('g');
+    const connections = page.locator('.connections-container > g');
     await expect(connections, {
         message: 'The initial condition of six connections being present are not met.',
     }).toHaveCount(6);
