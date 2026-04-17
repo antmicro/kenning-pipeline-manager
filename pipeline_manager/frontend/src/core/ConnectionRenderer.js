@@ -307,9 +307,10 @@ export default class ConnectionRenderer {
         anchor.index = minIdx;
     }
 
-    orthogonalAnchorsPath(anchors, nc, graph) {
+    orthogonalAnchorsPath(anchors, nc) {
         anchors.filter((a) => a.index === -1)
-            .forEach((a, i) => this.correctAnchor(a, anchors.slice(0, i), nc, graph));
+            .forEach((a, i) => this.correctAnchor(a, anchors.slice(0, i), nc));
+
         const ogPath = this.orthogonalRender(nc.x1, nc.y1, nc.x2, nc.y2, nc);
         const anchored = Array(ogPath.length).fill(undefined);
 
@@ -318,15 +319,17 @@ export default class ConnectionRenderer {
         const lastMiddle = ogPath.length - 2;
         anchored[lastMiddle] = { ...ogPath[lastMiddle] };
 
+        const anchorToSeg = [];
         const clamp = (x, a, b) => Math.min(Math.max(x, Math.min(a, b)), Math.max(a, b));
         anchors.forEach((anchor) => {
             const anchorTrans = { ...anchor };
+            // eslint-disable-next-line no-param-reassign
+            anchor.index = clamp(anchor.index, firstMiddle, ogPath.length - 2 - 1);
             let idx = anchor.index;
-            idx = clamp(idx, firstMiddle, ogPath.length - 2 - 1);
             const vertical = (ogPath[idx].x === ogPath[idx + 1].x);
             if (anchored[idx]) {
-                ogPath.splice(idx, 0, { x: anchored[idx].x, y: anchored[idx].y });
-                anchored.splice(idx, 0, undefined);
+                ogPath.splice(idx + 1, 0, { x: anchored[idx].x, y: anchored[idx].y });
+                anchored.splice(idx + 1, 0, undefined);
                 idx += 1;
             }
             if (anchored[idx + 1]) {
@@ -335,12 +338,8 @@ export default class ConnectionRenderer {
             }
             if (vertical) {
                 anchorTrans.y = clamp(anchorTrans.y, ogPath[idx].y, ogPath[idx + 1].y);
-                // eslint-disable-next-line no-param-reassign
-                anchor.y = anchorTrans.y;
             } else {
                 anchorTrans.x = clamp(anchorTrans.x, ogPath[idx].x, ogPath[idx + 1].x);
-                // eslint-disable-next-line no-param-reassign
-                anchor.x = anchorTrans.x;
             }
             ogPath.splice(idx + 1, 0, anchorTrans);
             anchored.splice(idx + 1, 0, anchorTrans);
@@ -353,6 +352,21 @@ export default class ConnectionRenderer {
                 ogPath[idx].y = anchorTrans.y;
                 ogPath[idx + 1].y = anchorTrans.y;
                 ogPath[idx + 2].y = anchorTrans.y;
+            }
+            anchorToSeg.push({
+                id: anchor.id, type: vertical, a: ogPath[idx], b: ogPath[idx + 2],
+            });
+        });
+        anchorToSeg.reverse().forEach((info) => {
+            const anch = anchors.find((a) => a.id === info.id);
+            const isVert = info.type;
+            const { a, b, mid } = info;
+            if (isVert) {
+                anch.y = clamp(anch.y, a.y, b.y, 0.01);
+                mid.y = anch.y;
+            } else {
+                anch.x = clamp(anch.x, a.x, b.x, 0.01);
+                mid.x = anch.x;
             }
         });
         return ogPath;
