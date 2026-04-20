@@ -89,15 +89,14 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
                     :hidden="true"
                 />
             </div>
-
             <svg
-                class="connections-container"
+                class="custom-connections-container"
+                :style="nodeContainerStyle"
                 @mouseenter="changeHoveredConnections"
                 @mousemove="changeHoveredConnections"
                 @mouseleave="clearHighlight"
                 @wheel="mouseWheel"
             >
-
                 <PipelineManagerConnection
                     v-for="connection in visibleConnections"
                     :key="connection.id + counter.toString()"
