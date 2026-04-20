@@ -43,9 +43,9 @@ export default defineComponent({
         const { viewModel } = useViewModel() as { viewModel: any };
         const radius = 7.5;
         const styles = computed(() => ({
-            cx: `${(props.position.x + graph.value.panning.x) * graph.value.scaling}px`,
-            cy: `${(props.position.y + graph.value.panning.y) * graph.value.scaling}px`,
-            r: `${radius * graph.value.scaling}px`,
+            cx: `${props.position.x}px`,
+            cy: `${props.position.y}px`,
+            r: `${radius}px`,
         }));
 
         const dragMove = useDragMove(ref(props.position));

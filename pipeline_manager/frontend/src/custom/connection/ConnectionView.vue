@@ -112,8 +112,8 @@ export default defineComponent({
             ev.preventDefault();
 
             const newAnchor = {
-                x: (ev.offsetX / graph.value.scaling) - graph.value.panning.x,
-                y: (ev.offsetY / graph.value.scaling) - graph.value.panning.y,
+                x: ev.offsetX,
+                y: ev.offsetY,
                 id: Date.now(),
             };
                 // The index shows the connection section that was pressed -
