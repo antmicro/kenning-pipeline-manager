@@ -18,15 +18,13 @@
  * returns 0
  *
  * @param interfaceRef interface reference
- * @param scaling number from viewModel defining the scaling of canvas
- * @param panning (x, y) point from viewModel defining the translation of canvas
  * @returns Y coordinate of a bottom of a node, adjusted for canvas transformation
  */
 /* eslint-disable no-unused-vars */
-function nodeTopPoint(interfaceRef, scaling, panning) {
+function nodeTopPoint(interfaceRef) {
     const nodeHtml = document.getElementById(interfaceRef.nodeId);
     const nodeTop = nodeHtml ? nodeHtml.offsetTop : 0;
-    return (nodeTop + panning.y) * scaling;
+    return nodeTop;
 }
 
 /**
@@ -34,14 +32,12 @@ function nodeTopPoint(interfaceRef, scaling, panning) {
  * based on it's DOM element. If the element does not yet exists, returns 0
  *
  * @param interfaceRef interface reference
- * @param scaling number from viewModel defining the scaling of canvas
- * @param panning (x, y) point from viewModel defining the translation of canvas
  * @returns Y coordinate of a bottom of a node, adjusted for canvas transformation
  */
-function nodeBottomPoint(interfaceRef, scaling, panning) {
+function nodeBottomPoint(interfaceRef) {
     const nodeHtml = document.getElementById(interfaceRef.nodeId);
     const nodeBottom = nodeHtml ? nodeHtml.offsetTop + nodeHtml.offsetHeight : 0;
-    return (nodeBottom + panning.y) * scaling;
+    return nodeBottom;
 }
 
 /**
@@ -106,10 +102,9 @@ export default class ConnectionRenderer {
      * @param ncFrom from node reference
      * @param ncTo to node reference
      * @param graph the graph definition
-     * @param scaling number from viewModel defining the scaling of canvas
      * @returns Value the connection should shift from it's default position
      */
-    getShift(ncFrom, ncTo, graph, scaling) {
+    getShift(ncFrom, ncTo, graph) {
         const fromPosition = ncFrom.sidePosition;
         const toPosition = ncTo.sidePosition;
 
@@ -131,10 +126,10 @@ export default class ConnectionRenderer {
             fromRandomIndex = randomIndex % fromInterfaceNeighbours.length;
             toRandomIndex = randomIndex % toInterfaceNeighbours.length;
             const randomShiftIndex = (fromRandomIndex + toRandomIndex) / 2;
-            return this.shiftDistance * (randomShiftIndex / 2 + shiftIndex / 2) * scaling;
+            return this.shiftDistance * (randomShiftIndex / 2 + shiftIndex / 2);
         }
 
-        return this.shiftDistance * shiftIndex * scaling;
+        return this.shiftDistance * shiftIndex;
     }
 
     /**
@@ -143,13 +138,12 @@ export default class ConnectionRenderer {
      * @param ncFrom node from reference
      * @param ncTo to node reference
      * @param graph the graph definition
-     * @param scaling number from viewModel defining the scaling of canvas
      * @returns Maximum value of the shift that the connection can obtain
      */
-    getMaxShift(ncFrom, ncTo, graph, scaling) {
+    getMaxShift(ncFrom, ncTo, graph) {
         const maxFrom = this.getInterfaceNeighbors(ncFrom, graph).length - 1;
         const maxTo = this.getInterfaceNeighbors(ncTo, graph).length - 1;
-        return this.shiftDistance * ((maxFrom + maxTo) / 2) * scaling;
+        return this.shiftDistance * ((maxFrom + maxTo) / 2);
     }
 
     /**
@@ -178,10 +172,10 @@ export default class ConnectionRenderer {
      */
     // eslint-disable-next-line class-methods-use-this
     someAboveOrBelow(ncFrom, ncTo, graph) {
-        const nodeFromTop = nodeTopPoint(ncFrom, graph.scaling, graph.panning);
-        const nodeToTop = nodeTopPoint(ncTo, graph.scaling, graph.panning);
-        const nodeFromBottom = nodeBottomPoint(ncFrom, graph.scaling, graph.panning);
-        const nodeToBottom = nodeBottomPoint(ncTo, graph.scaling, graph.panning);
+        const nodeFromTop = nodeTopPoint(ncFrom);
+        const nodeToTop = nodeTopPoint(ncTo);
+        const nodeFromBottom = nodeBottomPoint(ncFrom);
+        const nodeToBottom = nodeBottomPoint(ncTo);
         return nodeFromBottom < nodeToTop || nodeFromTop > nodeToBottom;
     }
 
@@ -203,11 +197,11 @@ export default class ConnectionRenderer {
                 } ${nc.y2}`;
             }
             if (nc.from.side === 'right' && nc.to.side === 'right') {
-                const rightmost = Math.max(nc.x1 + dx, nc.x2 + dx) + 50 * graph.scaling;
+                const rightmost = Math.max(nc.x1 + dx, nc.x2 + dx) + 50;
                 return `M ${nc.x1} ${nc.y1} C ${rightmost} ${nc.y1}, ${rightmost} ${nc.y2}, ${nc.x2} ${nc.y2}`;
             }
             if (nc.from.side === 'left' && nc.to.side === 'left') {
-                const leftmost = Math.min(nc.x1 - dx, nc.x2 - dx) - 50 * graph.scaling;
+                const leftmost = Math.min(nc.x1 - dx, nc.x2 - dx) - 50;
                 return `M ${nc.x1} ${nc.y1} C ${leftmost} ${nc.y1}, ${leftmost} ${nc.y2}, ${nc.x2} ${nc.y2}`;
             }
         }
@@ -230,11 +224,11 @@ export default class ConnectionRenderer {
     curvedRenderLoopback(x1, y1, x2, y2, connection) {
         const graph = this.viewModel.displayedGraph;
         const nc = new NormalizedConnection(x1, y1, x2, y2, connection);
-        const sideMargin = 10 * graph.scaling;
+        const sideMargin = 10;
 
         if (nc.from.id === nc.to.id) {
             // The same interface
-            const shift = this.getShift(nc.from, nc.to, graph, graph.scaling) + 30 * graph.scaling;
+            const shift = this.getShift(nc.from, nc.to, graph) + 30;
             const x = nc.from.side === 'right' ? nc.x1 + shift : nc.x1 - shift;
             return `M ${nc.x1} ${nc.y1}
             A ${sideMargin} ${sideMargin / 2} 0 0 0 ${x} ${nc.y1}
@@ -257,14 +251,14 @@ export default class ConnectionRenderer {
             A ${leftRx} ${leftRy} 0 0 ${renderingSide} ${nc.x2} ${nc.y2}`;
         }
 
-        const shift = this.getShift(nc.from, nc.to, graph, graph.scaling) + 30 * graph.scaling;
+        const shift = this.getShift(nc.from, nc.to, graph) + 30;
 
         const leftx = nc.from.side === 'left' ? nc.x1 : nc.x2;
         const rightx = nc.to.side === 'right' ? nc.x2 : nc.x1;
 
         const lefty = nc.from.side === 'left' ? nc.y1 : nc.y2;
         const righty = nc.to.side === 'right' ? nc.y2 : nc.y1;
-        const bottomY = nodeBottomPoint(nc.from, graph.scaling, graph.panning);
+        const bottomY = nodeBottomPoint(nc.from);
 
         const y = bottomY + shift;
 
@@ -286,25 +280,15 @@ export default class ConnectionRenderer {
         A ${leftRx} ${leftRy} 0 0 1 ${leftx} ${lefty}`;
     }
 
-    orthogonalAnchorsPath(anchors, nc, graph) {
-        const calculatedAnchors = anchors.map((anchor) => {
-            const transform = (a) => {
-                const tx = (a.x + graph.panning.x) * graph.scaling;
-                const ty = (a.y + graph.panning.y) * graph.scaling;
-                return { x: tx, y: ty };
-            };
-
-            return transform(anchor);
-        });
-
+    orthogonalAnchorsPath(anchors, nc) {
         const path = [{ x: nc.x1, y: nc.y1 }];
         let direction = nc.from.side;
         let offset = 0;
         if (direction === 'left') offset = -20;
         else offset = 20;
-        path.push({ x: nc.x1 + offset * graph.scaling, y: nc.y1 });
+        path.push({ x: nc.x1 + offset, y: nc.y1 });
         direction = 'horizontal';
-        calculatedAnchors.forEach((anchor) => {
+        anchors.forEach((anchor) => {
             if (direction === 'vertical') {
                 path.push({
                     x: path[path.length - 1].x + (anchor.x - path[path.length - 1].x) / 2,
@@ -376,14 +360,14 @@ export default class ConnectionRenderer {
         const nc = new NormalizedConnection(x1, y1, x2, y2, connection);
 
         if (connection.anchors !== undefined && connection.anchors.length) {
-            return this.orthogonalAnchorsPath(connection.anchors, nc, graph);
+            return this.orthogonalAnchorsPath(connection.anchors, nc);
         }
 
-        const minMargin = 30 * graph.scaling;
+        const minMargin = 30;
         const middlePoint = (nc.x1 + nc.x2) / 2;
 
         if (connection.to) {
-            const shift = this.getShift(nc.from, nc.to, graph, graph.scaling);
+            const shift = this.getShift(nc.from, nc.to, graph);
 
             if (nc.from.side === 'right' && nc.to.side === 'left') {
                 const mid = Math.max(nc.x1, middlePoint) + shift + minMargin;
@@ -446,12 +430,12 @@ export default class ConnectionRenderer {
     orthogonalRenderLoopback(x1, y1, x2, y2, connection) {
         const graph = this.viewModel.displayedGraph;
         const nc = new NormalizedConnection(x1, y1, x2, y2, connection);
-        const shift = this.getShift(nc.from, nc.to, graph, graph.scaling) + 30 * graph.scaling;
+        const shift = this.getShift(nc.from, nc.to, graph) + 30;
 
         if (connection.anchors !== undefined && connection.anchors.length) {
             const anchors = connection.anchors.map((a) => {
-                const tx = (a.x + graph.panning.x) * graph.scaling;
-                const ty = (a.y + graph.panning.y) * graph.scaling;
+                const tx = a.x;
+                const ty = a.y;
                 return { x: tx, y: ty };
             });
 
@@ -489,7 +473,7 @@ export default class ConnectionRenderer {
             return path;
         }
 
-        const bottomY = nodeBottomPoint(nc.from, graph.scaling, graph.panning);
+        const bottomY = nodeBottomPoint(nc.from);
         const y = bottomY + shift;
 
         if (nc.from.side === 'right' && nc.to.side === 'left') {
@@ -521,18 +505,18 @@ export default class ConnectionRenderer {
         const nc = new NormalizedConnection(x1, y1, x2, y2, connection);
 
         if (connection.anchors !== undefined && connection.anchors.length) {
-            return this.orthogonalAnchorsPath(connection.anchors, nc, graph);
+            return this.orthogonalAnchorsPath(connection.anchors, nc);
         }
 
-        const minMargin = 30 * graph.scaling;
+        const minMargin = 30;
         const middlePoint = (nc.x1 + nc.x2) / 2;
 
         if (connection.to) {
-            const shift = this.getShift(nc.from, nc.to, graph, graph.scaling);
-            const maxShift = this.getMaxShift(nc.from, nc.to, graph, graph.scaling) || 1;
+            const shift = this.getShift(nc.from, nc.to, graph);
+            const maxShift = this.getMaxShift(nc.from, nc.to, graph) || 1;
 
             const turnDistance = Math.abs(nc.x1 - nc.x2) - 2 * minMargin;
-            const minTurnDistance = minMargin * (2 + maxShift / graph.scaling / 30);
+            const minTurnDistance = minMargin * (2 + maxShift / 30);
             const minTurnDistanceViolated = turnDistance < minTurnDistance;
             const maxTurnDistance = minTurnDistance * 2;
 
@@ -601,13 +585,8 @@ export default class ConnectionRenderer {
     }
 
     straightRender(x1, y1, x2, y2, connection) {
-        const graph = this.viewModel.displayedGraph;
         return [{ x: x1, y: y1 }]
-            .concat((connection.anchors ?? []).map((a) => {
-                const tx = (a.x + graph.panning.x) * graph.scaling;
-                const ty = (a.y + graph.panning.y) * graph.scaling;
-                return { x: tx, y: ty };
-            }))
+            .concat((connection.anchors ?? []).map((a) => ({ x: a.x, y: a.y })))
             .concat([{ x: x2, y: y2 }]);
     }
 
