@@ -123,17 +123,15 @@ export default defineComponent({
             graph.value.addAnchor(newAnchor, props.connection, Math.trunc((index - 1) / 3));
         };
 
-        const transform = (x, y) => {
-            const tx = (x + graph.value.panning.x) * graph.value.scaling;
-            const ty = (y + graph.value.panning.y) * graph.value.scaling;
-            return [tx, ty];
-        };
-
-        const newD = computed(() => {
-            const [tx1, ty1] = transform(props.x1, props.y1);
-            const [tx2, ty2] = transform(props.x2, props.y2);
-            return viewModel.value.connectionRenderer.render(tx1, ty1, tx2, ty2, props.connection);
-        });
+        const newD = computed(() =>
+            viewModel.value.connectionRenderer.render(
+                props.x1,
+                props.y1,
+                props.x2,
+                props.y2,
+                props.connection,
+            ),
+        );
 
         const parsedNewD = computed(() => {
             const d = newD.value;
