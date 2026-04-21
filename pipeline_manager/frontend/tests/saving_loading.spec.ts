@@ -12,6 +12,8 @@ import {
 } from './config.js';
 
 async function expectNoErrors(page: Page) {
+    const loading = page.locator('.loading-screen');
+    await expect(loading).not.toBeVisible();
     const notifications = page.locator(
         '.notifications > .panel > ul > *:not(:has(.info))',
     );

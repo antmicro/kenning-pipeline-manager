@@ -7,10 +7,6 @@
                 {
                     "name": "TestNode",
                     "id": "aba4c532-c115-4073-b467-5fc0ae278c63",
-                    "position": {
-                        "x": 700,
-                        "y": 600
-                    },
                     "width": 200,
                     "twoColumn": false,
                     "interfaces": [
@@ -53,10 +49,6 @@
                 {
                     "name": "TestNode",
                     "id": "947bdbd3-c93f-41a9-ba2a-adb7f54f0f7f",
-                    "position": {
-                        "x": 400,
-                        "y": 200
-                    },
                     "width": 200,
                     "twoColumn": false,
                     "interfaces": [
