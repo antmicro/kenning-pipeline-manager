@@ -1618,7 +1618,7 @@ export default class EditorManager {
      * @param loading resets updated metadata, should be used when loading new dataflow
      * @returns An array of errors that occurred during the metadata loading.
      */
-    updateMetadata(metadata = undefined, overriding = false, loading = false) {
+    updateMetadata(metadata = undefined, overriding = false, loading = false, resetIgnored = true) {
         if (loading) this.updatedMetadata = {};
         let newMetadata;
         if (metadata !== undefined) {
@@ -1691,7 +1691,9 @@ export default class EditorManager {
         this.baklavaView.settings.showHiddenProperties =
             metadata?.showHiddenProperties ?? this.defaultMetadata.showHiddenProperties;
 
-        this.baklavaView.ignoredLayers = new Set();
+        if (resetIgnored) {
+            this.baklavaView.ignoredLayers = new Set();
+        }
         this.baklavaView.layers = metadata?.layers ?? this.defaultMetadata.layers;
         this.baklavaView.collapseSidebar =
             metadata?.collapseSidebar ?? this.defaultMetadata.collapseSidebar;
@@ -1959,12 +1961,13 @@ export default class EditorManager {
      * @param {Boolean} obj.readonly whether the dataflow should be saved in readonly mode
      * @param {Boolean} obj.hideHud whether the dataflow should be saved in hideHud mode
      * @param {Boolean} obj.position whether the dataflow should store panning and scaling values
+     * @param {Boolean} obj.hideLayers whether the dataflow should store hidden layers
      * @param {string|null|undefined} obj.graphName graph name which is rendered to the user
      *
      * @returns Serialized dataflow.
      */
     /* eslint-disable-next-line object-curly-newline */
-    saveDataflow({ readonly, hideHud, position, graphName } = {}) {
+    saveDataflow({ readonly, hideHud, position, hideLayers, graphName } = {}) {
         const save = this.baklavaView.editor.save();
         save.version = this.specificationVersion;
 
@@ -2010,6 +2013,12 @@ export default class EditorManager {
                 specProp?.hidden !== undefined &&
                 savedProp.hidden === Boolean(specProp.hidden))
             .forEach(([savedProp, _]) => { delete savedProp.hidden; });
+
+        if (hideLayers) {
+            save.graphs.forEach((graph) => {
+                graph.disabledLayers = [...this.baklavaView.ignoredLayers];
+            });
+        }
 
         if (save.metadata === undefined) {
             save.metadata = {};
@@ -2139,6 +2148,11 @@ export default class EditorManager {
                 }
 
                 if (!isWebpack) {
+                    this.baklavaView.ignoredLayers = new Set(
+                        dataflow.graphs.flatMap(
+                            (graph) => graph.disabledLayers ?? [],
+                        ),
+                    );
                     const result = await this.baklavaView.editor.load(
                         dataflow,
                         preventCentering,
@@ -2182,7 +2196,7 @@ export default class EditorManager {
             }
         } finally {
             // Restore previous state or use value from loaded dataflow
-            this.updateMetadata({ notifyWhenChanged }, true);
+            this.updateMetadata({ notifyWhenChanged }, true, false, false);
         }
     }
 

@@ -206,7 +206,10 @@ export default {
             const options = ref([]);
 
             props.viewModel.layers.forEach((layer) => {
-                const option = new CheckboxInterface(layer.name, false);
+                const option = new CheckboxInterface(
+                    layer.name,
+                    props.viewModel.ignoredLayers.has(layer.name),
+                );
                 option.events.setValue.subscribe(this, () => {
                     if (props.viewModel.ignoredLayers.has(layer.name)) {
                         props.viewModel.ignoredLayers.delete(layer.name);

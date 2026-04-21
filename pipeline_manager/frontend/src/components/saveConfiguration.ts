@@ -13,6 +13,7 @@ interface SaveConfiguration {
     readonly?: boolean;
     hideHud?: boolean;
     position?: boolean;
+    hideLayers?: boolean;
     graph?: boolean;
     minify?: boolean;
     graphName?: string | null;
@@ -197,6 +198,7 @@ export const saveGraphConfiguration: SaveConfiguration = {
     readonly: false,
     hideHud: false,
     position: false,
+    hideLayers: false,
     graphName: null,
     saveName: 'save',
 
@@ -206,6 +208,7 @@ export const saveGraphConfiguration: SaveConfiguration = {
             readonly: !!this.readonly,
             hideHud: !!this.hideHud,
             position: !!this.position,
+            hideLayers: !!this.hideLayers,
             graphName: this.graphName,
         });
     },

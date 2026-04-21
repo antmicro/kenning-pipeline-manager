@@ -294,6 +294,12 @@
             "type": "string",
             "description": "Name of the graph"
         },
+        "disabledLayers": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        },
         "additionalData": {
             "description": "Any JSON data that provides additional information regarding the graph",
             "type": [
