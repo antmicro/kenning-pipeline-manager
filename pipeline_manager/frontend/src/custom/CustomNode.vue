@@ -158,7 +158,6 @@ from moving or deleting the nodes.
             </div>
 
             <CustomContextMenu
-                ref="contextMenuInterface"
                 v-model="showContextMenuInterface"
                 :x="contextMenuInterfaceX"
                 :y="contextMenuInterfaceY"
@@ -168,7 +167,6 @@ from moving or deleting the nodes.
                 @click="onContextMenuInterfaceClick"
             />
             <CustomContextMenu
-                ref="contextMenuProperty"
                 v-model="showContextMenuProperty"
                 :x="contextMenuPropertyX"
                 :y="contextMenuPropertyY"
@@ -329,7 +327,6 @@ const contextMenuTitleY = ref(0);
 
 const contextMenuStyle = computed(() => ({
     'transform-origin': '0 0',
-    transform: `scale(${1 / graph.value.scaling})`,
 }));
 
 const contextMenuTitleItems = computed(() => {
@@ -964,7 +961,6 @@ const pickInterface = (intf, ev) => {
 const contextMenuInterfaceSide = ref('left');
 const contextMenuInterfaceStyle = computed(() => ({
     ...contextMenuStyle.value,
-    ...(contextMenuInterfaceSide.value === 'left' && { translate: `-${100 / graph.value.scaling}%` }),
 }));
 const contextMenuInterfaceX = ref(0);
 const contextMenuInterfaceY = ref(0);
@@ -1054,7 +1050,7 @@ const openContextMenuInterface = async (intf, ev) => {
         if (chosenInterface.side === 'right') {
             contextMenuInterfaceSide.value = 'right';
             contextMenuInterfaceX.value = offsetLeft + clientWidth + 10;
-            contextMenuInterfaceY.value = offsetTop + 12.5 / graph.value.scaling;
+            contextMenuInterfaceY.value = offsetTop + 12.5;
         } else if (chosenInterface.side === 'left') {
             contextMenuInterfaceSide.value = 'left';
             contextMenuInterfaceX.value = offsetLeft - 10;
