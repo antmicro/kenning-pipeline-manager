@@ -566,6 +566,7 @@ export default defineComponent({
                     `[data-node-id="${node.id}"]`,
                 );
                 if (!nodeEl) return;
+                if (!nodeEl.position) return;
 
                 const rect = nodeEl.getBoundingClientRect();
 
@@ -592,8 +593,8 @@ export default defineComponent({
                 () =>
                     nodes.value.map((n) => ({
                         id: n.id,
-                        x: n.position.x,
-                        y: n.position.y,
+                        x: n.position?.x ?? 0,
+                        y: n.position?.y ?? 0,
                         w: n.width,
                         h: n.height,
                         nn: n.title,
