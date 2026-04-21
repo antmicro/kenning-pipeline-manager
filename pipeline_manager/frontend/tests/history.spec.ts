@@ -228,7 +228,6 @@ test('test history by moving node', async ({ page }) => {
 
     // Perform the redo action.
     await page.keyboard.press('Control+KeyY');
-    await page.waitForTimeout(1000); // Wait for the redo action to complete
 
     // Check that the position is back to the old position.
     const afterRedoBoundingBox = await node.boundingBox();
@@ -260,7 +259,6 @@ test('test history by removing connection', async ({ page }) => {
         message: 'The initial conditions of presence of six connections are not met.',
     }).toHaveCount(6);
 
-    await page.waitForTimeout(1000);
     await removeConnection(page, outputPort);
     await expect(connections, { message: 'Removing a connection failed.' }).toHaveCount(5);
 

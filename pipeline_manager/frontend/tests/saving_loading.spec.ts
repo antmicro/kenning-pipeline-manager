@@ -16,10 +16,6 @@ async function expectNoErrors(page: Page) {
         '.notifications > .panel > ul > *:not(:has(.info))',
     );
     const count = await notifications.count();
-    if (count !== 0) {
-        await page.locator('.tab').getByText('Terminal').click();
-        await page.waitForTimeout(2000);
-    }
     expect(count).toBe(0);
 }
 

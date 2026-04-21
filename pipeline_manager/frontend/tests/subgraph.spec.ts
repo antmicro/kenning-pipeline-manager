@@ -435,7 +435,6 @@ test("test remove node with exposed interface", async ({ page }) => {
     await verifyNodeCount(page,2);
     const nodeToRemove = getNode(page, 'Test node #1').nth(1);
     await deleteNode(nodeToRemove);
-    // await page.waitForTimeout(3000);
     await verifyNodeCount(page,1);
 
     await leaveSubgraph(page);
@@ -582,7 +581,6 @@ test('test inherited subgraph from specification', async ({ page }) => {
     await enableEditingNodes(page);
     await addNode(page, 'Test', 'InheritedSubgraph', 400, 160);
     const nodeAfterLoad = getNode(page, 'InheritedSubgraph');
-    await page.waitForTimeout(3000);
     // expect number of interfaces that subgraph #1 has
     expect(await nodeAfterLoad.locator('.__interfaces').locator('[id]').count()).toBe(parentIntfs);
     expect(await nodeAfterLoad.locator('.__properties').locator('[id]').count()).toBe(parentProps + 1);
