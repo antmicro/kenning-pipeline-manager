@@ -10,22 +10,23 @@ Inherits from baklavajs/renderer-vue/src/connection/ConnectionView.vue
 -->
 
 <template>
-    <g v-if="hasAnchors">
+    <g v-if="Array.isArray(parsedNewD)">
         <path :d="parsedNewD" class="connection-wrapper baklava-connection"></path>
         <!-- The connection wrapper is rendered twice, once for
             easy highlight detection, and once for creating anchor points -->
 
         <!-- eslint-disable vue/valid-v-for -->
+        <g
+            v-for="(d, index) in parsedNewD"
+            @pointerdown.left.exact="onMouseDown"
+            @pointerdown.right.exact="(ev) => onHoldStart(ev, index)"
+            @pointerdown="(ev) => { if(ev.pointerType === 'touch') onMouseDown(ev) }"
+            @pointerdown.left.ctrl.exact="(ev) => onMouseCtrlDown(ev, index)"
+        >
+        <path :d="d" class="connection-wrapper baklava-connection"></path>
+        <path :d="d" class="baklava-connection" :class="cssClasses" :style="style"></path>
+        </g>
         <template v-if="hasAnchors">
-            <g
-                v-for="(d, index) in parsedNewD"
-                @pointerdown.left.exact="onMouseDown"
-                @pointerdown="(ev) => { if(ev.pointerType === 'touch') onMouseDown(ev) }"
-                @pointerdown.left.ctrl.exact="(ev) => onMouseCtrlDown(ev, index)"
-            >
-            <path :d="d" class="connection-wrapper baklava-connection"></path>
-            <path :d="d" class="baklava-connection" :class="cssClasses" :style="style"></path>
-            </g>
             <template v-if="hover || !editorManager.baklavaView.settings.hideAnchors">
                 <Anchor
                     v-for="(anchor, index) in connection.anchors"
@@ -51,7 +52,7 @@ Inherits from baklavajs/renderer-vue/src/connection/ConnectionView.vue
 
 <script>
 import {
-    defineComponent, computed, toRef,
+    defineComponent, computed, toRef, ref,
 } from 'vue';
 import { Components, useGraph, useViewModel } from '@baklavajs/renderer-vue';
 import doubleClick from '../../core/doubleClick';
@@ -91,6 +92,48 @@ export default defineComponent({
             '--color': connectionStyle.interfaceConnectionColor,
         }));
 
+        const draggingOffset = ref({});
+        const draggingStartPoint = ref({});
+        const curAnchor = ref({});
+        const isHolding = ref(false);
+
+        const holdMove = (ev) => {
+            // eslint-disable-next-line no-bitwise
+            if (isHolding.value && (ev.buttons & 2)) {
+                const dx = ev.pageX - draggingStartPoint.value.x;
+                const dy = ev.pageY - draggingStartPoint.value.y;
+                curAnchor.value.x = draggingStartPoint.value.x + draggingOffset.value.x
+                    + dx / graph.value.scaling;
+                curAnchor.value.y = draggingStartPoint.value.y + draggingOffset.value.y
+                    + dy / graph.value.scaling;
+            }
+        };
+        const onHoldStop = () => {
+            if (isHolding.value) {
+                document.removeEventListener('mousemove', holdMove);
+                document.removeEventListener('mouseup', onHoldStop);
+                isHolding.value = false;
+            }
+        };
+        const onHoldStart = (ev, index) => {
+            if (
+                viewModel.value.editor.readonly ||
+                !viewModel.value.connectionRenderer.supportsAnchors()
+            ) return;
+
+            draggingOffset.value = { x: ev.offsetX - ev.pageX, y: ev.offsetY - ev.pageY };
+            draggingStartPoint.value = { x: ev.pageX, y: ev.pageY };
+            const newAnchor = {
+                x: ev.offsetX,
+                y: ev.offsetY,
+                id: Date.now(),
+            };
+            curAnchor.value =
+                graph.value.addAnchor(newAnchor, props.connection, index);
+            isHolding.value = true;
+            document.addEventListener('mousemove', holdMove);
+            document.addEventListener('mouseup', onHoldStop);
+        };
         const onMouseDown = doubleClick(700, (ev) => {
             if (!viewModel.value.editor.readonly) {
                 ev.preventDefault();
@@ -155,6 +198,8 @@ export default defineComponent({
             cssClasses,
             parsedNewD,
             onMouseDown,
+            onHoldStart,
+            onHoldStop,
             onMouseCtrlDown,
             style,
             hasAnchors,
