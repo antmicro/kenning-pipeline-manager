@@ -566,7 +566,6 @@ export default defineComponent({
                     `[data-node-id="${node.id}"]`,
                 );
                 if (!nodeEl) return;
-                if (!nodeEl.position) return;
 
                 const rect = nodeEl.getBoundingClientRect();
 
