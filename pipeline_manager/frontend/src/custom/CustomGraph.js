@@ -156,12 +156,14 @@ export default function createPipelineManagerGraph(graph) {
         const anchorToAdd = {
             x: anchor.x,
             y: anchor.y,
+            index: position,
             id: uuidv4(),
         };
         if (connection.anchors === undefined) connection.anchors = [];
 
-        connection.anchors.splice(position, 0, anchorToAdd);
-        graph.events.addAnchor.emit([connection, (position * 3 + 1)]);
+        connection.anchors.push(anchorToAdd);
+        graph.events.addAnchor.emit([connection, connection.anchors.length - 1]);
+        return connection.anchors[connection.anchors.length - 1];
     };
 
     // Replaces given instance of a node with a node of type `newNodeName`
@@ -603,10 +605,16 @@ export default function createPipelineManagerGraph(graph) {
         this.nodeEvents.removeTarget(node);
         this.nodeHooks.removeTarget(node);
     };
+    graph.removeAnchor = function removeAnchor(connection, index) {
+        if (connection.anchors === undefined) connection.anchors = [];
+        graph.events.removeAnchor.emit([connection, index]);
+        connection.anchors.splice(index, 1);
+        connection.anchors.slice(index).forEach((a) => { a.index = -1; });
+    };
 
     graph.editAnchor = function editAnchor(connection, index, position, prevPos) {
         if (connection.anchors === undefined) connection.anchors = [];
-        graph.events.editAnchor.emit([connection, (index * 3 + 1), position, prevPos]);
+        graph.events.editAnchor.emit([connection, index, position, prevPos]);
     };
     graph.editNode = function editNode(node) {
         this.events.editNode.emit(node);

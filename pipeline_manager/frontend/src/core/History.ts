@@ -410,8 +410,8 @@ export function useHistory(graph: Ref<any>, commandHandler: ICommandHandler): IH
                     if (!inTransaction) startTransaction();
                     const historyItem = history.get(newId);
                     if (!historyItem) return;
-                    (conn.anchors ?? []).slice().reverse().forEach((anchor: any) => {
-                        newGraph.events.removeAnchor.emit([conn, conn.anchors.indexOf(anchor)]);
+                    (conn.anchors ?? []).reverse().forEach((_: any, idx: number) => {
+                        newGraph.removeAnchor(conn, idx);
                     });
                     const step = new ConnectionStep('rem', conn.id.toString(), transactionId.value);
                     historyItem.push(step);
@@ -424,7 +424,7 @@ export function useHistory(graph: Ref<any>, commandHandler: ICommandHandler): IH
                 if (!suppressingHistory.value) {
                     const historyItem = history.get(newId);
                     if (!historyItem) return;
-                    const idx = Math.trunc((tuple[1] - 1) / 3);
+                    const idx = tuple[1];
                     const conn = tuple[0];
                     const step = new AnchorStep('add', conn.anchors[idx].id.toString(), transactionId.value);
                     historyItem.push(step);
@@ -436,7 +436,7 @@ export function useHistory(graph: Ref<any>, commandHandler: ICommandHandler): IH
                 if (!suppressingHistory.value) {
                     const historyItem = history.get(newId);
                     if (!historyItem) return;
-                    const idx = Math.trunc((tuple[1] - 1) / 3);
+                    const idx = tuple[1];
                     const conn = tuple[0];
                     const prevPos = tuple[3];
                     const step = new AnchorStep('edit', conn.anchors[idx].id.toString(), transactionId.value);

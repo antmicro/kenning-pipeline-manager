@@ -281,6 +281,55 @@ export default class ConnectionRenderer {
     }
 
     orthogonalAnchorsPath(anchors, nc) {
+        const ogPath = this.orthogonalRender(nc.x1, nc.y1, nc.x2, nc.y2, nc);
+        const anchored = Array(ogPath.length).fill(undefined);
+
+        const firstMiddle = 1;
+        anchored[firstMiddle] = { ...ogPath[firstMiddle] };
+        const lastMiddle = ogPath.length - 2;
+        anchored[lastMiddle] = { ...ogPath[lastMiddle] };
+
+        const clamp = (x, a, b) => Math.min(Math.max(x, Math.min(a, b)), Math.max(a, b));
+        anchors.forEach((anchor) => {
+            const anchorTrans = { ...anchor };
+            let idx = anchor.index;
+            idx = clamp(idx, firstMiddle, ogPath.length - 2 - 1);
+            const vertical = (ogPath[idx].x === ogPath[idx + 1].x);
+            if (anchored[idx]) {
+                ogPath.splice(idx, 0, { x: anchored[idx].x, y: anchored[idx].y });
+                anchored.splice(idx, 0, undefined);
+                idx += 1;
+            }
+            if (anchored[idx + 1]) {
+                ogPath.splice(idx + 1, 0, { x: anchored[idx + 1].x, y: anchored[idx + 1].y });
+                anchored.splice(idx + 1, 0, undefined);
+            }
+            if (vertical) {
+                anchorTrans.y = clamp(anchorTrans.y, ogPath[idx].y, ogPath[idx + 1].y);
+                // eslint-disable-next-line no-param-reassign
+                anchor.y = anchorTrans.y;
+            } else {
+                anchorTrans.x = clamp(anchorTrans.x, ogPath[idx].x, ogPath[idx + 1].x);
+                // eslint-disable-next-line no-param-reassign
+                anchor.x = anchorTrans.x;
+            }
+            ogPath.splice(idx + 1, 0, anchorTrans);
+            anchored.splice(idx + 1, 0, anchorTrans);
+            if (vertical) {
+                // changing x
+                ogPath[idx].x = anchorTrans.x;
+                ogPath[idx + 1].x = anchorTrans.x;
+                ogPath[idx + 2].x = anchorTrans.x;
+            } else {
+                ogPath[idx].y = anchorTrans.y;
+                ogPath[idx + 1].y = anchorTrans.y;
+                ogPath[idx + 2].y = anchorTrans.y;
+            }
+        });
+        return ogPath;
+    }
+
+    alternativeOrthogonalAnchorsPath(anchors, nc) {
         const path = [{ x: nc.x1, y: nc.y1 }];
         let direction = nc.from.side;
         let offset = 0;
@@ -355,78 +404,6 @@ export default class ConnectionRenderer {
         return path;
     }
 
-    orthogonalRender(x1, y1, x2, y2, connection) {
-        const graph = this.viewModel.displayedGraph;
-        const nc = new NormalizedConnection(x1, y1, x2, y2, connection);
-
-        if (connection.anchors !== undefined && connection.anchors.length) {
-            return this.orthogonalAnchorsPath(connection.anchors, nc);
-        }
-
-        const minMargin = 30;
-        const middlePoint = (nc.x1 + nc.x2) / 2;
-
-        if (connection.to) {
-            const shift = this.getShift(nc.from, nc.to, graph);
-
-            if (nc.from.side === 'right' && nc.to.side === 'left') {
-                const mid = Math.max(nc.x1, middlePoint) + shift + minMargin;
-
-                const firstTurn = mid < nc.x2 - shift - minMargin ? nc.x1 + shift + minMargin : mid;
-                const lastTurn = nc.x2 - shift - minMargin;
-
-                // S connection
-                if (
-                    mid >= nc.x2 - shift - minMargin &&
-                    (firstTurn > nc.x2 - minMargin || lastTurn < nc.x1 - minMargin)
-                ) {
-                    return `M ${nc.x1} ${nc.y1}
-                    H ${firstTurn}
-                    V ${(nc.y1 + nc.y2) / 2}
-                    H ${lastTurn}
-                    V ${nc.y2}
-                    H ${nc.x2}`;
-                }
-
-                // Z connection
-                return `M ${nc.x1} ${nc.y1} H ${mid} V ${nc.y2} H ${nc.x2}`;
-            }
-            if (nc.from.side === 'left' && nc.to.side === 'right') {
-                const mid = Math.max(nc.x2, middlePoint) + shift + minMargin;
-
-                const firstTurn = mid < nc.x1 - shift - minMargin ? nc.x2 + shift + minMargin : mid;
-                const lastTurn = nc.x1 - shift - minMargin;
-
-                // S connection
-                if (
-                    mid >= nc.x1 - shift - minMargin &&
-                    (firstTurn > nc.x1 - minMargin || lastTurn < nc.x2 - minMargin)
-                ) {
-                    return `M ${nc.x2} ${nc.y2}
-                    H ${firstTurn}
-                    V ${(nc.y1 + nc.y2) / 2}
-                    H ${lastTurn}
-                    V ${nc.y1}
-                    H ${nc.x1}`;
-                }
-
-                // Z connection
-                return `M ${nc.x2} ${nc.y2} H ${mid} V ${nc.y1} H ${nc.x1}`;
-            }
-            if (nc.from.side === 'right' && nc.to.side === 'right') {
-                return `M ${nc.x1} ${nc.y1} H ${
-                    Math.max(nc.x1, nc.x2, middlePoint) + shift + minMargin
-                } V ${nc.y2} H ${nc.x2}`;
-            }
-            if (nc.from.side === 'left' && nc.to.side === 'left') {
-                return `M ${nc.x1} ${nc.y1} H ${
-                    Math.min(nc.x1, nc.x2, middlePoint) - shift - minMargin
-                } V ${nc.y2} H ${nc.x2}`;
-            }
-        }
-        return `M ${nc.x1} ${nc.y1} H ${middlePoint} V ${nc.y2} H ${nc.x2}`;
-    }
-
     orthogonalRenderLoopback(x1, y1, x2, y2, connection) {
         const graph = this.viewModel.displayedGraph;
         const nc = new NormalizedConnection(x1, y1, x2, y2, connection);
@@ -498,6 +475,108 @@ export default class ConnectionRenderer {
         }
         // unreachable, added to make eslint happy
         return undefined;
+    }
+
+    orthogonalRender(x1, y1, x2, y2, connection) {
+        const graph = this.viewModel.displayedGraph;
+        const nc = new NormalizedConnection(x1, y1, x2, y2, connection);
+
+        if (connection.anchors !== undefined && connection.anchors.length) {
+            return this.orthogonalAnchorsPath(connection.anchors, nc, graph);
+        }
+
+        const minMargin = 30;
+        const middlePoint = (nc.x1 + nc.x2) / 2;
+        const intfPad = 20;
+
+        if (connection.to) {
+            const shift = this.getShift(nc.from, nc.to, graph);
+
+            if (nc.from.side === 'right' && nc.to.side === 'left') {
+                // S connection
+                const mid = Math.max(nc.x1, middlePoint) + shift + minMargin;
+
+                const firstTurn = mid < nc.x2 - shift - minMargin ? nc.x1 + shift + minMargin : mid;
+                const lastTurn = nc.x2 - shift - minMargin;
+
+                // S connection
+                if (
+                    mid >= nc.x2 - shift - minMargin &&
+                    (firstTurn > nc.x2 - minMargin || lastTurn < nc.x1 - minMargin)
+                ) {
+                    return [{ x: nc.x1, y: nc.y1 },
+                        { x: nc.x1 + intfPad, y: nc.y1 },
+                        { x: firstTurn, y: nc.y1 },
+                        { x: firstTurn, y: (nc.y1 + nc.y2) / 2 },
+                        { x: lastTurn, y: (nc.y1 + nc.y2) / 2 },
+                        { x: lastTurn, y: nc.y2 },
+                        { x: nc.x2 - intfPad, y: nc.y2 },
+                        { x: nc.x2, y: nc.y2 },
+                    ];
+                }
+
+                return [{ x: nc.x1, y: nc.y1 },
+                    { x: nc.x1 + intfPad, y: nc.y1 },
+                    { x: mid, y: nc.y1 },
+                    { x: mid, y: nc.y2 },
+                    { x: nc.x2 - intfPad, y: nc.y2 },
+                    { x: nc.x2, y: nc.y2 },
+                ];
+            }
+            if (nc.from.side === 'left' && nc.to.side === 'right') {
+                const mid = Math.max(nc.x2, middlePoint) + shift + minMargin;
+
+                const firstTurn = mid < nc.x1 - shift - minMargin ? nc.x2 + shift + minMargin : mid;
+                const lastTurn = nc.x1 - shift - minMargin;
+                if (
+                    mid >= nc.x1 - shift - minMargin &&
+                    (firstTurn > nc.x1 - minMargin || lastTurn < nc.x2 - minMargin)
+                ) {
+                    return [{ x: nc.x2, y: nc.y2 },
+                        { x: nc.x2 + intfPad, y: nc.y2 },
+                        { x: firstTurn, y: nc.y2 },
+                        { x: firstTurn, y: (nc.y1 + nc.y2) / 2 },
+                        { x: lastTurn, y: (nc.y1 + nc.y2) / 2 },
+                        { x: lastTurn, y: nc.y1 },
+                        { x: nc.x1 - intfPad, y: nc.y1 },
+                        { x: nc.x1, y: nc.y1 },
+                    ];
+                }
+
+                return [{ x: nc.x2, y: nc.y2 },
+                    { x: nc.x2 + intfPad, y: nc.y2 },
+                    { x: mid, y: nc.y2 },
+                    { x: mid, y: nc.y1 },
+                    { x: nc.x1 - intfPad, y: nc.y1 },
+                    { x: nc.x1, y: nc.y1 },
+                ];
+            }
+            if (nc.from.side === 'right' && nc.to.side === 'right') {
+                const mid = Math.max(nc.x1, nc.x2, middlePoint) + shift + minMargin;
+                return [{ x: nc.x1, y: nc.y1 },
+                    { x: nc.x1 + intfPad, y: nc.y1 },
+                    { x: mid, y: nc.y1 },
+                    { x: mid, y: nc.y2 },
+                    { x: nc.x2 + intfPad, y: nc.y2 },
+                    { x: nc.x2, y: nc.y2 },
+                ];
+            }
+            if (nc.from.side === 'left' && nc.to.side === 'left') {
+                const mid = Math.min(nc.x1, nc.x2, middlePoint) - shift - minMargin;
+                return [{ x: nc.x1, y: nc.y1 },
+                    { x: nc.x1 - intfPad, y: nc.y1 },
+                    { x: mid, y: nc.y1 },
+                    { x: mid, y: nc.y2 },
+                    { x: nc.x2 - intfPad, y: nc.y2 },
+                    { x: nc.x2, y: nc.y2 },
+                ];
+            }
+        }
+        return [{ x: nc.x1, y: nc.y1 },
+            { x: middlePoint, y: nc.y1 },
+            { x: middlePoint, y: nc.y2 },
+            { x: nc.x2, y: nc.y2 },
+        ];
     }
 
     alternativeOrthogonalRender(x1, y1, x2, y2, connection) {

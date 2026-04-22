@@ -100,8 +100,7 @@ export default defineComponent({
 
         const removeAnchor = (idx) => {
             if (viewModel.value.editor.readonly) return;
-            graph.value.events.removeAnchor.emit([props.connection, idx]);
-            props.connection.anchors.splice(idx, 1);
+            graph.value.removeAnchor(props.connection, idx);
         };
 
         const onMouseCtrlDown = (ev, index) => {
