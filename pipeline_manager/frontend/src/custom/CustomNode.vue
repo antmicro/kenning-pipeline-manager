@@ -657,13 +657,6 @@ abortDrag = () => {
 };
 
 stopDrag = () => {
-    const curNode = props.node;
-    const currentPosition = curNode.position;
-    curNode.position = groupDragMove.draggingStartPosition.value;
-    if (curNode.position.x !== currentPosition.x || curNode.position.y !== currentPosition.y) {
-        graph.value.editNode(curNode);
-    }
-    curNode.position = currentPosition;
     groupDragMove.onPointerUp();
     cleanEvents();
 };
@@ -672,7 +665,6 @@ const startDrag = async (ev) => {
     if (!graph.value.selectedNodes.includes(props.node)) {
         select(ev);
     }
-
     groupDragMove.onPointerDown(ev);
     document.addEventListener('pointermove', groupDragMove.onPointerMove);
     document.addEventListener('keyboard.escape', abortDrag);

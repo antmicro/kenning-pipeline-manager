@@ -21,6 +21,10 @@ export default function useGroupDragMove(
     gridSnapperInstance = undefined,
 ) {
     const { graph } = useGraph() as { graph: any };
+    const totalOffset:coordinates = {
+        x: 0,
+        y: 0,
+    };
 
     const groupDragMove = useDragMove(
         dragRootNodePosition,
@@ -29,6 +33,7 @@ export default function useGroupDragMove(
     );
 
     const groupPointerMove = groupDragMove.onPointerMove;
+    const groupPointerUp = groupDragMove.onPointerUp;
 
     const onPointerMove = (ev: PointerEvent) => {
         const groupPositionCoords = {
@@ -41,6 +46,9 @@ export default function useGroupDragMove(
         const dx = dragRootNodePosition.value.x - groupPositionCoords.x;
         const dy = dragRootNodePosition.value.y - groupPositionCoords.y;
 
+        totalOffset.x += dx;
+        totalOffset.y += dy;
+
         graph.value.selectedNodes.forEach((node: any) => {
             if (node.id !== dragRootNodeId) {
                 node.position.x += dx;
@@ -49,7 +57,27 @@ export default function useGroupDragMove(
         });
     };
 
+    const onPointerUp = () => {
+        if (Math.abs(totalOffset.x) + Math.abs(totalOffset.y) !== 0) {
+            // Call history event for multiple node dragging
+            graph.value.selectedNodes.forEach((node: any) => {
+                node.position.x -= totalOffset.x;
+                node.position.y -= totalOffset.y;
+            });
+            graph.value.dragNodes(graph.value.selectedNodes);
+            graph.value.selectedNodes.forEach((node: any) => {
+                node.position.x += totalOffset.x;
+                node.position.y += totalOffset.y;
+            });
+        }
+        totalOffset.x = 0;
+        totalOffset.y = 0;
+
+        groupPointerUp();
+    };
+
     groupDragMove.onPointerMove = onPointerMove;
+    groupDragMove.onPointerUp = onPointerUp;
 
     return groupDragMove;
 }
