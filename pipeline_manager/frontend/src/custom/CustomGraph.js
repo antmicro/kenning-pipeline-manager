@@ -29,6 +29,8 @@ export default function createPipelineManagerGraph(graph) {
 
     // Add event for moving anchors.
     graph.events.editAnchor = new BaklavaEvent();
+    // Add event for dragging multiple nodes
+    graph.events.dragNodes = new BaklavaEvent();
 
     // Add an event for editing node
     graph.events.exposeInterface = new BaklavaEvent();
@@ -42,6 +44,10 @@ export default function createPipelineManagerGraph(graph) {
 
     graph.setToSave = function setToSave(save) {
         this.toSave = save;
+    };
+
+    graph.dragNodes = function dragNodes(nodes) {
+        this.events.dragNodes.emit(nodes);
     };
 
     graph.checkConnection = function checkConnection(from, to) {
