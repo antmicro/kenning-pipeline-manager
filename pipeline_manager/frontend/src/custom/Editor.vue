@@ -518,7 +518,11 @@ export default defineComponent({
             const temp = new Set([]);
 
             ignorableLayers.value.forEach((layer) => {
-                if (layer.nodeInterfaces && ignoredLayers.value.has(layer.name)) {
+                if (layer.nodeInterfaces && (
+                    ignoredLayers.value.get(
+                        props.viewModel.displayedGraph.id,
+                    ) ?? new Set()
+                ).has(layer.name)) {
                     layer.nodeInterfaces.forEach(temp.add, temp);
                 }
             });
@@ -529,7 +533,11 @@ export default defineComponent({
             const temp = new Set();
 
             ignorableLayers.value.forEach((layer) => {
-                if (layer.nodeLayers && ignoredLayers.value.has(layer.name)) {
+                if (layer.nodeLayers && (
+                    ignoredLayers.value.get(
+                        props.viewModel.displayedGraph.id,
+                    ) ?? new Set()
+                ).has(layer.name)) {
                     layer.nodeLayers.forEach(temp.add, temp);
                 }
             });

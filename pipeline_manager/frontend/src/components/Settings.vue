@@ -204,17 +204,31 @@ export default {
 
         const disableLayersOptions = computed(() => {
             const options = ref([]);
+            const displayedGraphId = props.viewModel.displayedGraph.id;
 
             props.viewModel.layers.forEach((layer) => {
                 const option = new CheckboxInterface(
                     layer.name,
-                    props.viewModel.ignoredLayers.has(layer.name),
+                    (props.viewModel.ignoredLayers.get(
+                        displayedGraphId,
+                    ) ?? new Set()).has(layer.name),
                 );
                 option.events.setValue.subscribe(this, () => {
-                    if (props.viewModel.ignoredLayers.has(layer.name)) {
-                        props.viewModel.ignoredLayers.delete(layer.name);
+                    if (props.viewModel.ignoredLayers.get(
+                        displayedGraphId,
+                    ) === undefined) {
+                        props.viewModel.ignoredLayers.set(
+                            displayedGraphId,
+                            new Set(),
+                        );
+                    }
+                    const graphIgnoredLayers = props.viewModel.ignoredLayers.get(
+                        displayedGraphId,
+                    );
+                    if (graphIgnoredLayers.has(layer.name)) {
+                        graphIgnoredLayers.delete(layer.name);
                     } else {
-                        props.viewModel.ignoredLayers.add(layer.name);
+                        graphIgnoredLayers.add(layer.name);
                     }
                 });
                 options.value.push(option);

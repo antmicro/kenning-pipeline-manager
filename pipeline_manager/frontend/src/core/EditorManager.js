@@ -1692,7 +1692,7 @@ export default class EditorManager {
             metadata?.showHiddenProperties ?? this.defaultMetadata.showHiddenProperties;
 
         if (resetIgnored) {
-            this.baklavaView.ignoredLayers = new Set();
+            this.baklavaView.ignoredLayers = new Map();
         }
         this.baklavaView.layers = metadata?.layers ?? this.defaultMetadata.layers;
         this.baklavaView.collapseSidebar =
@@ -2016,7 +2016,7 @@ export default class EditorManager {
 
         if (hideLayers) {
             save.graphs.forEach((graph) => {
-                graph.disabledLayers = [...this.baklavaView.ignoredLayers];
+                graph.disabledLayers = [...(this.baklavaView.ignoredLayers.get(graph.id) ?? [])];
             });
         }
 
@@ -2148,9 +2148,9 @@ export default class EditorManager {
                 }
 
                 if (!isWebpack) {
-                    this.baklavaView.ignoredLayers = new Set(
-                        dataflow.graphs.flatMap(
-                            (graph) => graph.disabledLayers ?? [],
+                    this.baklavaView.ignoredLayers = new Map(
+                        dataflow.graphs.map(
+                            (graph) => [graph.id, new Set(graph.disabledLayers ?? [])],
                         ),
                     );
                     const result = await this.baklavaView.editor.load(
