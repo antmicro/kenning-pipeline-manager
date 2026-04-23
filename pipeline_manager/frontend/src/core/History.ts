@@ -161,6 +161,34 @@ class NodeStep extends Step {
     }
 }
 
+class MultipleSteps extends Step {
+    // Array of node steps
+    steps: Array<Step> = [];
+
+    constructor(type: string, topic: any, tid: string = uuidv4()) {
+        if (tid === '') tid = uuidv4(); // eslint-disable-line no-param-reassign
+        super(type, topic, tid);
+    }
+
+    remove(graph: Ref<Graph>) {
+        this.steps.forEach((step) => {
+            step.remove(graph);
+        });
+    }
+
+    add(graph: Ref<Graph>) {
+        this.steps.forEach((step) => {
+            step.add(graph);
+        });
+    }
+
+    edit(graph: Ref<Graph>) {
+        this.steps.forEach((step) => {
+            step.edit(graph);
+        });
+    }
+}
+
 class ConnectionStep extends Step {
     conn: any = undefined;
 
@@ -325,6 +353,7 @@ export function useHistory(graph: Ref<any>, commandHandler: ICommandHandler): IH
         g.events.addNode.unsubscribe(tok);
         g.events.removeNode.unsubscribe(tok);
         g.events.editNode.unsubscribe(tok);
+        g.events.dragNodes.unsubscribe(tok);
         g.events.addConnection.unsubscribe(tok);
         g.events.removeConnection.unsubscribe(tok);
         g.events.addAnchor.unsubscribe(tok);
@@ -391,6 +420,21 @@ export function useHistory(graph: Ref<any>, commandHandler: ICommandHandler): IH
                     const step = new NodeStep('edit', node.id.toString(), transactionId.value);
                     historyItem.push(step);
                     step.nodeTuple = [node, node.save()];
+                    undoneHistory.set(newId, []);
+                }
+            });
+            newGraph.events.dragNodes.subscribe(token, (nodes : any) => {
+                if (!suppressingHistory.value) {
+                    const historyItem = history.get(newId);
+                    if (!historyItem) return;
+                    const step = new MultipleSteps('edit', nodes[0].id.toString(), transactionId.value);
+                    historyItem.push(step);
+                    nodes.forEach((node:any) => {
+                        const nodeTuple = [node, node.save()];
+                        const nodeStep = new NodeStep('edit', node.id.toString(), transactionId.value);
+                        nodeStep.nodeTuple = nodeTuple;
+                        step.steps.push(nodeStep);
+                    });
                     undoneHistory.set(newId, []);
                 }
             });
