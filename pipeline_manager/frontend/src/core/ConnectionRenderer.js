@@ -12,6 +12,8 @@
  */
 
 /* eslint-disable max-classes-per-file */
+import getDomElements from '../custom/connection/domResolver.js';
+import getPortCoordinates from '../custom/connection/connectionTools.js';
 
 /**
  * Retrieves top point of a node based on it's DOM element If the element does not yet exists,
@@ -1101,8 +1103,14 @@ export default class ConnectionRenderer {
         return this.orthogonalRenderLoopback(x1, y1, x2, y2, connection);
     }
 
-    connectionRefresh(x1, y1, x2, y2, connection) {
+    connectionRefresh(connection) {
         if (this.style === 'switchableOrthogonal') {
+            const from = getDomElements(connection.from);
+            const to = getDomElements(connection.to);
+
+            const [x1, y1] = getPortCoordinates(from);
+            const [x2, y2] = getPortCoordinates(to);
+
             this.switchableConnectionRefresh(x1, y1, x2, y2, connection);
         }
     }
