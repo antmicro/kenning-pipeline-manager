@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { getUrl, loadVideoNodeId, closeTerminal } from './config.js';
+import { getUrl, loadVideoNodeId, closeTerminal, getContextMenu } from './config.js';
 
 test('has title', async ({ page }) => {
     await page.goto(getUrl());
@@ -19,7 +19,7 @@ test('remove node', async ({ page }) => {
     await nodeTitle.click({ button: 'right' });
 
     // Delete the node.
-    const deleteButton = loadVideoNode.getByText('Delete', { exact: true });
+    const deleteButton = getContextMenu(page).getByText('Delete', { exact: true });
     await deleteButton.click({ force: true });
 
     // Verify that the node has disappeared.
@@ -36,7 +36,7 @@ test('show menu by right-clicking on node', async ({ page }) => {
     // Right-click on the node's title.
     const nodeTitle = node.locator('.__title');
     await nodeTitle.click({ button: 'right' });
-    const menu = nodeTitle.locator('.baklava-context-menu');
+    const menu = getContextMenu(page);
     await menu.waitFor()
     expect(await menu.filter({ hasText: 'Details' }).count()).toBeGreaterThan(0);
 
@@ -61,7 +61,7 @@ test('show menu by right-clicking on interface', async ({ page }) => {
     await nodeInterface.click({ button: 'right' });
 
     // Verify presence and content of a context menu.
-    const menu = node.locator('.__content .baklava-context-menu').first();
+    const menu = getContextMenu(page);
     await menu.waitFor();
     expect(await menu.filter({ hasText: 'Space Up' }).count()).toBeGreaterThan(0);
 });

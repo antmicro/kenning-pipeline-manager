@@ -5,7 +5,7 @@ import {
 } from '@playwright/test';
 import {
     closeYAMLEditor,setYAMLEditorContent,getYAMLEditorContent,createNewNodeType,waitForSubgraph,reopenNode,getUrl,assertPropertyCount,assertOutputCount,assertInputCount,addInterface, getNode, addNode, dragAndDrop, enableEditingNodes,
-    loadSpecification, loadDataflow, openNodePalette,
+    loadSpecification, loadDataflow, openNodePalette, getContextMenu
 } from './config.js';
 
 
@@ -222,9 +222,9 @@ test('subgraph cascade interface YAML', async ({ page }) => {
 
     // enter subgraph
     await node.locator('.__title').click({ button: 'right' });
-    const contextMenuOption = node.locator('.baklava-context-menu').getByText('Go to graph');
+    const contextMenuOption = getContextMenu(page).getByText('Go to graph');
     await contextMenuOption.click();
-    await waitForSubgraph(page,"Test subgraph #1");
+    await waitForSubgraph(page, 'Test subgraph #1');
 
     // edit interface that is exposed in the subgraph
     const subnode = page.locator(`[data-node-type="Test node #1"]`).nth(1);
@@ -251,9 +251,9 @@ test('subgraph cascade property YAML', async ({ page }) => {
 
     // enter subgraph
     await node.locator('.__title').click({ button: 'right' });
-    const contextMenuOption = node.locator('.baklava-context-menu').getByText('Go to graph');
+    const contextMenuOption = getContextMenu(page).getByText('Go to graph');
     await contextMenuOption.click();
-    await waitForSubgraph(page,"Test subgraph #2");
+    await waitForSubgraph(page, 'Test subgraph #2');
 
     // change prop
     const subnode = page.locator(`[data-node-type="Test node #2"]`);

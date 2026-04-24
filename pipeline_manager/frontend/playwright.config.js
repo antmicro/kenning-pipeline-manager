@@ -17,5 +17,6 @@ export default defineConfig({
   use: {
     trace: 'on',
     video: 'on',
+    viewport: { width: 1920, height: 1080 },
   },
 });

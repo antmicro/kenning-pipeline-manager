@@ -99,8 +99,8 @@ test('add subgraph to child node', async ({ page }) => {
     await enableEditingNodes(page);
 
     const node = page.locator('[data-node-type="Type E"]');
-    await addSubgraph(node);
-    await checkForSubgraph(node);
+    await addSubgraph(node, page);
+    await checkForSubgraph(node, page);
 
     const outputs = await node.locator('.__content > .__interfaces > .__outputs > div').count();
     const inputs = await node.locator('.__content > .__interfaces > .__inputs > div').count();

@@ -4,7 +4,7 @@ import {
     Locator,
 } from '@playwright/test';
 import {
-    getUrl, loadSpecification, loadDataflow,
+    getUrl, loadSpecification, loadDataflow, getContextMenu,
 } from './config.js';
 
 function getNode(page: Page, name: string): Locator {
@@ -49,9 +49,9 @@ function compareRects(rect1: any, rect2: any) {
     diff = Math.max(diff, Math.abs(rect1.y + rect1.height - (rect2.y + rect2.height)));
     return diff;
 }
-async function removeFromGroup(node: Locator) {
+async function removeFromGroup(node: Locator, page: Page) {
     await node.locator('.__title').click({ button: 'right' });
-    await node.getByText('Remove from group').click();
+    await getContextMenu(page).getByText('Remove from group').click();
 }
 
 test('check for group presence', async ({ page }) => {
@@ -88,7 +88,9 @@ test('group creation', async ({ page }) => {
     await nodeA.locator('.__title').click({ modifiers: ['ControlOrMeta'] });
     await nodeB.locator('.__title').click({ modifiers: ['ControlOrMeta'] });
     await nodeA.locator('.__title').click({ button: 'right' });
-    await nodeA.locator('.baklava-context-menu').getByText('Group Nodes').click();
+    // in some cases does not fit on the screen, the test would require dragging screen
+    // or changing screen resolution. This is why instead dispatchEvent was used.
+    await getContextMenu(page).getByText('Group Nodes').dispatchEvent('click');
     await page.locator('.baklava-button').getByText('Create group').click();
     const group = page.locator('.rectangle-grouping');
 
@@ -114,7 +116,7 @@ test('remove from group', async ({ page }) => {
     const groupRect = await group.boundingBox();
     expect(compareRects(nodeRect, groupRect)).toBeLessThanOrEqual(10);
 
-    removeFromGroup(nodeC);
+    await removeFromGroup(nodeC, page);
     // wait for the group to update without waitForTimeout
     await expect(async () => {
         expect(await group.boundingBox()).not.toEqual(groupRect);
@@ -124,7 +126,7 @@ test('remove from group', async ({ page }) => {
     const groupRectPost = await group.boundingBox();
     expect(compareRects(nodeRectPost, groupRectPost)).toBeLessThanOrEqual(10);
 
-    removeFromGroup(nodeB);
+    await removeFromGroup(nodeB, page);
 
     await expect.poll(async () => group.isVisible()).toBeTruthy();
 });

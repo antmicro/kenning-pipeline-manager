@@ -1,11 +1,15 @@
 import { test, expect, Page, Locator } from '@playwright/test';
-import { getUrl,getNodeByID,assertInputCount,assertOutputCount,waitForSubgraph,enterSubgraph,leaveSubgraph,expectNode,getNode,deleteNode, loadVideoNodeId, enableNavigationBar, addNode, dragAndDrop, closeTerminal,loadSpecification,loadDataflow } from './config.js';
+import {
+    getUrl,getNodeByID,assertInputCount,assertOutputCount,waitForSubgraph,enterSubgraph,
+    leaveSubgraph,expectNode,getNode,deleteNode, loadVideoNodeId, enableNavigationBar, addNode,
+    dragAndDrop, closeTerminal,loadSpecification,loadDataflow, getContextMenu,
+} from './config.js';
 
 
 async function renameNodeType(page: Page, oldName: string, newName: string) {
     const node = getNode(page, oldName).locator('.__title');
     await node.click({ button: 'right' });
-    await node.getByText('Rename').click();
+    await getContextMenu(page).getByText('Rename').click();
     await node.locator('.baklava-input').first().fill(newName);
     await node.locator('.baklava-input').first().press('Enter');
 }
@@ -28,8 +32,8 @@ function getNodeInterfaces(page: Page, name: string, side: 'input' | 'output' | 
     return getNode(page, name).locator(`.__interfaces ${ioClass}`);
 }
 
-function getContextMenuOption(page: Page, nodeName: string, optionName: string): Locator {
-    return getNode(page, nodeName).locator('.baklava-context-menu').getByText(optionName);
+function getContextMenuOption(page: Page, optionName: string): Locator {
+    return getContextMenu(page).getByText(optionName);
 }
 
 test('test history by removing subgraph', async ({ page }) => {
@@ -41,14 +45,14 @@ test('test history by removing subgraph', async ({ page }) => {
     // check current output count of Test subgraph #1
     await assertOutputCount(subgraphNode, 3);
     // go to Test subgraph #1 subgraph
-    await enterSubgraph(subgraphNode);
+    await enterSubgraph(subgraphNode, page);
     await waitForSubgraph(page, 'Test subgraph #1');
     // get all test nodes in subgraph
     const nodes = getNode(page, 'Test node #1');
     expect(await nodes.count()).toBe(2);
     // remove them
-    await deleteNode(nodes.nth(0));
-    await deleteNode(nodes.nth(1));
+    await deleteNode(nodes.nth(0), page);
+    await deleteNode(nodes.nth(1), page);
     // now subgraph node should have no exposed outputs
     await assertOutputCount(subgraphNode, 0);
 
@@ -57,7 +61,7 @@ test('test history by removing subgraph', async ({ page }) => {
     // Undo subgraph removal
     await page.keyboard.press('Control+KeyZ');
 
-    await enterSubgraph(subgraphNode);
+    await enterSubgraph(subgraphNode, page);
     await waitForSubgraph(page, 'Test subgraph #1');
     // Undo nodes removal
     await page.keyboard.press('Control+KeyZ');
@@ -75,10 +79,9 @@ test('test history by removing subgraph', async ({ page }) => {
 test('test history by removing node', async ({ page }) => {
     // Load a website and wait until nodes are loaded.
     await loadWebsite(page, loadVideoNodeId);
-
     const node = getNodeByID(page,loadVideoNodeId);
 
-    await deleteNode(node);
+    await deleteNode(node, page);
     await expectNode(
         false,
         node,
@@ -271,7 +274,7 @@ test('test history by moving interface down', async ({ page }) => {
     await getNodeInterfaces(page, 'Filter2D', 'input').locator('> div').first().click({ button: 'right' });
 
     // Move the interface down.
-    const moveDownOption = getContextMenuOption(page, 'Filter2D', 'Move Down');
+    const moveDownOption = getContextMenuOption(page, 'Move Down');
     await moveDownOption.click();
     await firstInputInterfaceHasToBe(page, 'kernel', 'An interface `input 1` was not moved down.');
 
@@ -303,7 +306,7 @@ test('test history by moving interface up', async ({ page }) => {
     await getNodeInterfaces(page, 'Filter2D', 'input').locator('> div').nth(1).click({ button: 'right' });
 
     // Move the interface up.
-    const moveUpOption = getContextMenuOption(page, 'Filter2D', 'Move Up');
+    const moveUpOption = getContextMenuOption(page, 'Move Up');
     await moveUpOption.click();
     await firstInputInterfaceHasToBe(page, 'kernel', 'An interface `input 1` was not moved up.');
 
@@ -415,7 +418,7 @@ test('test history by removing node with connection', async ({ page }) => {
     }).toHaveCount(6);
 
     const node = getNodeByID(page,loadVideoNodeId);
-    await deleteNode(node);
+    await deleteNode(node, page);
 
     // Verify that the node and its connection have disappeared.
     await expect(node, {
@@ -449,7 +452,7 @@ test('test history by editing node with connection', async ({ page }) => {
     await getNodeInterfaces(page, 'Filter2D', 'input').locator('.__port').nth(1).click({ button: 'right' });
 
     // Move the interface up.
-    const moveUpOption = getContextMenuOption(page, 'Filter2D', 'Move Up');
+    const moveUpOption = getContextMenuOption(page, 'Move Up');
     await moveUpOption.click();
     await firstInputInterfaceHasToBe(page, 'kernel', 'An interface `input 1` was not moved up.');
 

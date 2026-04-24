@@ -20,6 +20,9 @@ const config = {
 
 export const loadVideoNodeId = 'f50b4f2a-a2e2-4409-a5c9-891a8de44a5b';
 
+export function getContextMenu(page) {
+    return page.locator('.baklava-editor > .baklava-context-menu');
+}
 /**
  * Get an URL of the main Kenning Pipeline Manager page based on the configuration.
  * @returns {string} URL of the main page.
@@ -142,9 +145,9 @@ export async function leaveSubgraph(page) {
  * @param {import('@playwright/test').Locator} node - The Playwright Locator representing a node.
  * @returns {Promise<void>} Resolves when playwright enter subgraph of selected node.
  */
-export async function enterSubgraph(node) {
+export async function enterSubgraph(node, page) {
     await node.locator('.__title').click({ button: 'right' });
-    const contextMenuOption = node.locator('.baklava-context-menu').getByText('Go to graph');
+    const contextMenuOption = getContextMenu(page).getByText('Go to graph');
     await contextMenuOption.click();
 }
 
@@ -168,8 +171,8 @@ export async function waitForSubgraph(page, graphName) {
  * @param {import('@playwright/test').Locator} node - The Playwright Locator representing a node.
  * @returns {Promise<void>} Resolves when node has been found and has subgraph attached to it.
  */
-export async function checkForSubgraph(node) {
-    const contextMenuOption = node.locator('.baklava-context-menu').getByText('Go to graph');
+export async function checkForSubgraph(node, page) {
+    const contextMenuOption = getContextMenu(page).getByText('Go to graph');
     expect(await contextMenuOption).toHaveCount(1,{ timeout: 10_000 });
     await node.locator('.__title').click({ button: 'right'});
     expect(await contextMenuOption).toBeVisible();
@@ -183,10 +186,10 @@ export async function checkForSubgraph(node) {
  * @param {import('@playwright/test').Locator} node - The Playwright Locator representing a node.
  * @returns {Promise<void>} Resolves when subgraph has been added to selected node.
  */
-export async function addSubgraph(node) {
+export async function addSubgraph(node, page) {
     const title = node.locator('.__title');
     await title.click({ button: 'right' });
-    const contextMenuOption = node.locator('.baklava-context-menu').getByText('Add subgraph');
+    const contextMenuOption = getContextMenu(page).getByText('Add subgraph');
     await contextMenuOption.click({force: true});
     expect(await title.locator('.__subgraph-icon').first()).toBeVisible({ timeout: 5_000 });
 }
@@ -280,7 +283,7 @@ export async function setYAMLEditorContent(page, content) {
  */
 export async function addInterface(page, node) {
     await node.locator('.__title').click({ button: 'right', force: true });
-    await node.locator('.baklava-context-menu').getByText('Add interface').click();
+    await getContextMenu(page).getByText('Add interface').click();
     await page.getByRole('button', { name: 'Add interface' }).click({ force: true });
 }
 
@@ -294,7 +297,7 @@ export async function addInterface(page, node) {
  */
 export async function addProperty(page, node) {
     await node.locator('.__title').click({ button: 'right', force: true });
-    await node.locator('.baklava-context-menu').getByText('Add property').click();
+    await getContextMenu(page).getByText('Add property').click();
     await page.getByRole('button', { name: 'Add property' }).click();
 }
 
@@ -309,7 +312,7 @@ export async function addProperty(page, node) {
  */
 export async function deleteProperty(page, node, propName) {
     await node.locator('.__title').click({ button: 'right', force: true });
-    await node.locator('.baklava-context-menu').getByText('Delete property').click();
+    await getContextMenu(page).getByText('Delete property').click();
     await page.locator('.create-menu').last().getByText(propName).click();
     await page.getByRole('button', { name: 'Remove properties' }).click();
 }
@@ -477,12 +480,12 @@ export function getNodeByID(page, nodeId) {
  * @param {import('@playwright/test').Locator} node - The Playwright Locator representing a node.
  * @returns {Promise<void>} Resolves when node is deleted.
  */
-export async function deleteNode(node) {
+export async function deleteNode(node, page) {
     // Invoke a context menu with a right click.
     await node.locator('.__title').click({ button: 'right', force: true });
 
     // Delete the node.
-    const deleteButton = node.getByText('Delete', { exact: true });
+    const deleteButton = getContextMenu(page).getByText('Delete', { exact: true });
     await deleteButton.click({ force: true });
 }
 

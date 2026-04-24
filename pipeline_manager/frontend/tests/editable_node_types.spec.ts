@@ -6,7 +6,8 @@ import os from 'os';
 import fs from 'fs/promises';
 
 import {
-    createNewNodeType,addInterface, getUrl, assertInputCount, getNode, getPathToJsonFile, addNode, openFileChooser, dragAndDrop, openNodePalette,
+    createNewNodeType, addInterface, getUrl, assertInputCount, getNode, getPathToJsonFile, addNode,
+    openFileChooser, dragAndDrop, openNodePalette, getContextMenu,
 } from './config.js';
 
 const temporaryDir = `${os.tmpdir()}/`;
@@ -28,11 +29,10 @@ async function loadIncludeSpecification(page: Page, testInfo: TestInfo) {
     await fileChooser.setFiles(newSpecificationPath);
 }
 
-
 async function renameNodeType(page: Page, oldName: string, newName: string) {
     const node = page.getByText(oldName).last();
     await node.click({ button: 'right', force: true });
-    await node.locator('..').getByText('Configure').click();
+    await getContextMenu(page).getByText('Configure').click();
     await page.locator('.create-menu').getByTitle('Node name').first().fill(newName);
     await page.getByRole('button', { name: 'Configure' }).click();
 }
@@ -179,7 +179,7 @@ test('rename category node', async ({ page }, testInfo) => {
     // check category in custom sidebar
     const node = page.getByText('Logical AND').locator('..').last();
     await node.click({ button: 'right' });
-    await node.getByText('Details', { exact: true }).click();
+    await getContextMenu(page).getByText('Details', { exact: true }).click();
 
     const parents = page.getByText('Generalize');
     const siblings = page.getByText('Choose other type');
@@ -214,7 +214,7 @@ test('hiding property', async ({ page }, testInfo) => {
     expect(await nodePropertiesBefore.count()).toBe(3);
     const sigmaProp = page.getByText('sigma').first();
     await sigmaProp.click({ button: 'right' });
-    await node.locator('.baklava-context-menu').getByText('Hide').click();
+    await getContextMenu(page).getByText('Hide').click();
     expect(await nodePropertiesBefore.count()).toBe(2);
     const nodeTitle = node.locator('.__title');
     await nodeTitle.dblclick();
