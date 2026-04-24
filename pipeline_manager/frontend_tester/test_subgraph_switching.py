@@ -115,9 +115,9 @@ def enter_subgraph_node(page: Page):
         ".node-container .baklava-node[data-node-type='Test subgraph #1'] ",
     ).nth(0)
     node.locator(".__title").click(button="right")
-    contextMenuOption = node.locator(".baklava-context-menu").get_by_text(
-        "Go to graph"
-    )
+    contextMenuOption = page.locator(
+        ".baklava-editor > .baklava-context-menu"
+    ).get_by_text("Go to graph")
     contextMenuOption.click()
 
 
