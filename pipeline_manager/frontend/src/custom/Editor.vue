@@ -80,6 +80,9 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
                     :greyedOut="greyedOutNodes.includes(node)"
                     :interfaces="highlightInterfaces"
                     :ignoredInterfacesType="[...ignoredInterfacesTypes]"
+                    @openContextMenu="(open, x, y, items, ignore, onclick, urls) => {
+                        updateContextMenu(node, open, x, y, items, ignore, onclick, urls);
+                    }"
                     @select="(ev) => selectNode(node, ev)"
                 />
                 <CustomNode
@@ -120,6 +123,15 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
 
             <Return v-if="preview && isInSubgraph" @click="returnFromSubgraph" />
 
+            <CustomContextMenu
+                v-model="contextMenu.open"
+                :x="contextMenu.x"
+                :y="contextMenu.y"
+                :items="contextMenu.items ?? []"
+                :ignore-close="contextMenu.ignore ?? []"
+                @click="contextMenu.onclick"
+                :transition="''"
+            />
             <Panel v-show="showWelcome" :blur="false" class="welcome-container-panel">
                 <ParentMenu>
                     <WelcomeMenu :loadFiles="loadFiles" />
@@ -132,12 +144,13 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
 <script>
 /* eslint-disable object-curly-newline */
 import { EditorComponent, useGraph } from '@baklavajs/renderer-vue';
-import { defineComponent, ref, computed, watch, onMounted } from 'vue';
+import { defineComponent, nextTick, ref, computed, watch, onMounted, reactive } from 'vue';
 import fuzzysort from 'fuzzysort';
 import { BaklavaEvent } from '@baklavajs/events';
 import { isJSONRPCRequest, isJSONRPCResponse, JSONRPC } from 'json-rpc-2.0';
 import usePanZoom from './panZoom';
 
+import CustomContextMenu from './ContextMenu.vue';
 import CustomNode from './CustomNode.vue';
 import PipelineManagerConnection from './connection/PipelineManagerConnection.vue';
 import TemporaryConnection from './connection/TemporaryConnection.vue';
@@ -181,6 +194,7 @@ export default defineComponent({
         WelcomeMenu,
         Zoom,
         Return,
+        CustomContextMenu,
     },
     emits: ['setLoad'],
     setup(props, { emit }) {
@@ -230,6 +244,29 @@ export default defineComponent({
         const isInSubgraph = computed(() => props.viewModel.editor.isInSubgraph());
 
         const preview = computed(() => props.viewModel.editor.preview);
+
+        const contextMenu = reactive({
+            open: null,
+            x: 0,
+            y: 0,
+            items: [],
+            ignore: [],
+            onclick: () => {},
+        });
+        const updateContextMenu = (_node, open, x, y, items, ignore, onclick, urls, styles) => {
+            contextMenu.open = false;
+            nextTick(() => {
+                contextMenu.x = x;
+                contextMenu.y = y;
+                contextMenu.items = items;
+                contextMenu.ignore = ignore;
+                contextMenu.onclick = onclick;
+                contextMenu.urls = urls;
+                contextMenu.styles = styles;
+                contextMenu.open = open;
+                contextMenu.open = true;
+            });
+        };
 
         const unselectAllNodes = () => {
             /* eslint-disable vue/no-mutating-props,no-param-reassign */
@@ -1134,6 +1171,8 @@ export default defineComponent({
             loadFiles,
             validating: editorManager.validating,
             ignoredInterfacesTypes,
+            contextMenu,
+            updateContextMenu,
         };
     },
 });

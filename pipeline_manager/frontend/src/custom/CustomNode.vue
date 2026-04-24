@@ -78,19 +78,6 @@ from moving or deleting the nodes.
                 :style="nodePillStyle"
                 v-html="DOMPurify.sanitize(pillText)"
             />
-            <!-- disable transition to avoid rendering additional redraw for viewport adjustment -->
-            <CustomContextMenu
-                ref='contextMenuTitle'
-                v-model="showContextMenuTitle"
-                :x="contextMenuTitleX"
-                :y="contextMenuTitleY"
-                :items="contextMenuTitleItems"
-                :urls="nodeURLs"
-                :style="contextMenuStyle"
-                :transition="''"
-                @pointerdown.left.stop
-                @click="onContextMenuTitleClick"
-            />
         </div>
 
         <div
@@ -156,40 +143,20 @@ from moving or deleting the nodes.
                     </template>
                 </div>
             </div>
-
-            <CustomContextMenu
-                v-model="showContextMenuInterface"
-                :x="contextMenuInterfaceX"
-                :y="contextMenuInterfaceY"
-                :items="contextMenuInterfaceItems"
-                :style="contextMenuInterfaceStyle"
-                :ignore-close="[leftSocketsRefs, rightSocketsRefs]"
-                @click="onContextMenuInterfaceClick"
-            />
-            <CustomContextMenu
-                v-model="showContextMenuProperty"
-                :x="contextMenuPropertyX"
-                :y="contextMenuPropertyY"
-                :items="contextMenuPropertyItems"
-                :style="contextMenuStyle"
-                :ignore-close="[propertiesRef]"
-                @click="onContextMenuPropertyClick"
-            />
-
         </div>
     </div>
 </template>
 
 <script setup>
 /* eslint-disable object-curly-newline */
-import { ref, computed, toRef, onUpdated, onMounted, nextTick, watch, useTemplateRef } from 'vue';
+import { useMouseInElement } from '@vueuse/core';
+import { ref, markRaw, computed, toRef, onUpdated, onMounted, nextTick, watch, useTemplateRef, reactive } from 'vue';
 import { useViewModel, useGraph } from '@baklavajs/renderer-vue';
 import { AbstractNode } from '@baklavajs/core';
 import DOMPurify from 'dompurify';
 
 import useGroupDragMove from './useGroupDragMove';
 import CustomInterface from './CustomInterface.vue';
-import CustomContextMenu from './ContextMenu.vue';
 import { gridSnapper } from '../core/snappers';
 import icons from '../icons/index';
 import doubleClick from '../core/doubleClick.js';
@@ -224,20 +191,20 @@ const props = defineProps({
     ignoredInterfacesType: Array,
 });
 
-const emit = defineEmits(['select']);
+const emit = defineEmits(['select', 'openContextMenu']);
 
 const { viewModel } = useViewModel();
 const { graph } = useGraph();
 const movementStep = computed(() => viewModel.value.movementStep);
 
 // Template refs
-const nodeRef = ref(null);
+const nodeRef = useTemplateRef('nodeRef');
 const titleRef = ref(null);
-const contextMenuTitleRef = useTemplateRef('contextMenuTitle');
 const propertiesRef = useTemplateRef('propertiesRef');
 const renaming = ref(false);
 const renameField = ref(null);
 const tempName = ref('');
+const mouse = reactive(useMouseInElement(nodeRef));
 
 // Reactive values
 const node = toRef(props, 'node');
@@ -324,10 +291,6 @@ const focusOnRename = () => {
 const showContextMenuTitle = ref(false);
 const contextMenuTitleX = ref(0);
 const contextMenuTitleY = ref(0);
-
-const contextMenuStyle = computed(() => ({
-    'transform-origin': '0 0',
-}));
 
 const contextMenuTitleItems = computed(() => {
     const items = [];
@@ -631,33 +594,6 @@ const nodeMinimal = computed(() => viewModel.value.editor.getNodeMinimal(node.va
 const showContextMenuInterface = ref(false);
 const showContextMenuProperty = ref(false);
 
-const openContextMenuTitle = async (ev) => {
-    if (
-        canOpenContextMenu.value &&
-        showContextMenuTitle.value === false &&
-        showContextMenuInterface.value === false &&
-        showContextMenuProperty.value === false
-    ) {
-        showContextMenuTitle.value = true;
-        // Render the menu but keep it hidden
-        // Set initial menu position
-        const target = ev.currentTarget;
-
-        contextMenuTitleX.value = ev.offsetX + 10;
-        contextMenuTitleY.value = ev.offsetY + target.offsetTop + 10;
-
-        showContextMenuTitle.value = true;
-        await nextTick();
-        showContextMenuTitle.value = false;
-
-        const size = contextMenuTitleRef.value.el.getBoundingClientRect();
-        const offset = ev.pageY + target.offsetTop + 10 + size.height + 200 - window.innerHeight;
-        if (offset > 0) contextMenuTitleY.value -= offset;
-
-        showContextMenuTitle.value = true;
-    }
-};
-
 const groupDragMove = useGroupDragMove(
     toRef(props.node, 'position'),
     props.node.id,
@@ -693,6 +629,9 @@ const nodeTitle = computed(() => {
 
 const select = (event) => {
     emit('select', event);
+};
+const openContextMenu = (isOpened, x, y, items, ignoreClose, onClick, urls = undefined) => {
+    emit('openContextMenu', isOpened, x, y, items, ignoreClose, onClick, urls);
 };
 
 let abortDrag;
@@ -959,9 +898,6 @@ const pickInterface = (intf, ev) => {
 // Interface context menu
 
 const contextMenuInterfaceSide = ref('left');
-const contextMenuInterfaceStyle = computed(() => ({
-    ...contextMenuStyle.value,
-}));
 const contextMenuInterfaceX = ref(0);
 const contextMenuInterfaceY = ref(0);
 
@@ -985,8 +921,6 @@ const createContextMenuInterfaceItems = () => {
 
     return items;
 };
-
-const contextMenuInterfaceItems = ref(createContextMenuInterfaceItems());
 
 /* eslint-disable default-case */
 const onContextMenuInterfaceClick = (action) => {
@@ -1044,7 +978,6 @@ const openContextMenuInterface = async (intf, ev) => {
     await nextTick();
     if (!viewModel.value.editor.readonly) {
         chosenInterface = intf;
-        contextMenuInterfaceItems.value = createContextMenuInterfaceItems();
         const { offsetTop } = ev.currentTarget;
         const { offsetLeft, clientWidth } = titleRef.value;
         if (chosenInterface.side === 'right') {
@@ -1058,14 +991,38 @@ const openContextMenuInterface = async (intf, ev) => {
         }
 
         showContextMenuInterface.value = true;
+        openContextMenu(
+            showContextMenuInterface,
+            contextMenuInterfaceX,
+            contextMenuInterfaceY,
+            markRaw(createContextMenuInterfaceItems()),
+            [leftSocketsRefs, rightSocketsRefs],
+            onContextMenuInterfaceClick,
+        );
     }
 };
 
-watch(showContextMenuInterface, () => {
-    if (showContextMenuInterface.value === false) {
-        chosenInterface = undefined;
+const openContextMenuTitle = async () => {
+    if (
+        canOpenContextMenu.value &&
+        showContextMenuTitle.value === false &&
+        showContextMenuInterface.value === false &&
+        showContextMenuProperty.value === false
+    ) {
+        contextMenuTitleX.value = mouse.x + 10;
+        contextMenuTitleY.value = mouse.y + 10;
+        showContextMenuTitle.value = true;
+        openContextMenu(
+            showContextMenuTitle,
+            contextMenuTitleX,
+            contextMenuTitleY,
+            markRaw(contextMenuTitleItems.value),
+            undefined,
+            onContextMenuTitleClick,
+            nodeURLs,
+        );
     }
-});
+};
 
 const toggleGroup = (intf) => {
     intf.group.forEach((name) => {
@@ -1108,14 +1065,6 @@ const createContextMenuPropertyItems = () => {
     return items;
 };
 
-const contextMenuPropertyItems = ref(createContextMenuPropertyItems());
-
-watch(showContextMenuProperty, () => {
-    if (showContextMenuProperty.value === false) {
-        chosenProperty = undefined;
-    }
-});
-
 /* eslint-disable default-case */
 const onContextMenuPropertyClick = (action) => {
     switch (action) {
@@ -1150,13 +1099,21 @@ const openContextMenuProperty = async (property, ev) => {
     await nextTick();
     if (!viewModel.value.editor.readonly) {
         chosenProperty = property;
-        contextMenuPropertyItems.value = createContextMenuPropertyItems();
+        const items = createContextMenuPropertyItems();
 
-        if (contextMenuPropertyItems.value.length > 0) {
+        if (items.length > 0) {
             const target = ev.currentTarget;
             contextMenuPropertyX.value = ev.offsetX + 20;
             contextMenuPropertyY.value = ev.offsetY + target.offsetTop + 20;
             showContextMenuProperty.value = true;
+            openContextMenu(
+                showContextMenuProperty,
+                contextMenuPropertyX,
+                contextMenuPropertyY,
+                markRaw(createContextMenuPropertyItems()),
+                [propertiesRef],
+                onContextMenuPropertyClick,
+            );
         }
     }
 };

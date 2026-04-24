@@ -280,6 +280,8 @@
     z-index: 1000;
     display: flex;
     flex-direction: column;
+    position: fixed;
+    transform-origin: 0 0;
 
     background-color: $gray-600;
     border-radius: unset;
