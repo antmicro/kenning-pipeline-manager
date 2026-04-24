@@ -786,6 +786,7 @@ abortDrag = () => {
 };
 
 stopDrag = () => {
+    graph.value.refreshConnections();
     groupDragMove.onPointerUp();
     cleanEvents();
     transformed();

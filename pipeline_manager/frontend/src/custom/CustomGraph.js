@@ -12,6 +12,7 @@ import { DummyConnection, Connection } from '@baklavajs/core';
 import { v4 as uuidv4 } from 'uuid';
 import { BaklavaEvent } from '@baklavajs/events';
 import { toRaw } from 'vue';
+import { useViewModel } from '@baklavajs/renderer-vue';
 import { startTransaction, commitTransaction } from '../core/History.ts';
 import { updateInterfacePosition } from './CustomNode.js';
 import GraphTemplate from './CustomGraphTemplate.js';
@@ -99,6 +100,16 @@ export default function createPipelineManagerGraph(graph) {
         });
         groupsToRemove.forEach((g) => this.removeGroup(g));
     };
+
+    graph.refreshConnections = function refreshConnections() {
+        const { viewModel } = useViewModel();
+        this.connections.forEach((conn) => {
+            viewModel.value.connectionRenderer.connectionRefresh(
+                conn,
+            );
+        });
+    };
+
     graph.checkConnection = function checkConnection(from, to) {
         if (!from || !to) {
             return { connectionAllowed: false, error: 'Invalid from and to references.' };
