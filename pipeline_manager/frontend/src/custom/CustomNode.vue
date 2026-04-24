@@ -630,8 +630,9 @@ const nodeTitle = computed(() => {
 const select = (event) => {
     emit('select', event);
 };
-const openContextMenu = (isOpened, x, y, items, ignoreClose, onClick, urls = undefined) => {
-    emit('openContextMenu', isOpened, x, y, items, ignoreClose, onClick, urls);
+const openContextMenu = (isOpened, x, y, items, ignoreClose, onClick,
+    urls = undefined, style = undefined) => {
+    emit('openContextMenu', isOpened, x, y, items, ignoreClose, onClick, urls, style);
 };
 
 let abortDrag;
@@ -978,16 +979,16 @@ const openContextMenuInterface = async (intf, ev) => {
     await nextTick();
     if (!viewModel.value.editor.readonly) {
         chosenInterface = intf;
-        const { offsetTop } = ev.currentTarget;
-        const { offsetLeft, clientWidth } = titleRef.value;
+        const targetRect = ev.currentTarget.getBoundingClientRect();
+        const nodeRect = nodeRef.value.getBoundingClientRect();
         if (chosenInterface.side === 'right') {
             contextMenuInterfaceSide.value = 'right';
-            contextMenuInterfaceX.value = offsetLeft + clientWidth + 10;
-            contextMenuInterfaceY.value = offsetTop + 12.5;
+            contextMenuInterfaceX.value = nodeRect.left + nodeRect.width + 10;
+            contextMenuInterfaceY.value = targetRect.top + 12.5;
         } else if (chosenInterface.side === 'left') {
             contextMenuInterfaceSide.value = 'left';
-            contextMenuInterfaceX.value = offsetLeft - 10;
-            contextMenuInterfaceY.value = offsetTop + 12.5;
+            contextMenuInterfaceX.value = nodeRect.left - 10;
+            contextMenuInterfaceY.value = targetRect.top + 12.5;
         }
 
         showContextMenuInterface.value = true;
@@ -998,6 +999,8 @@ const openContextMenuInterface = async (intf, ev) => {
             markRaw(createContextMenuInterfaceItems()),
             [leftSocketsRefs, rightSocketsRefs],
             onContextMenuInterfaceClick,
+            undefined,
+            contextMenuInterfaceSide.value === 'left' && { translate: '-100%' },
         );
     }
 };
@@ -1094,7 +1097,7 @@ const onContextMenuPropertyClick = (action) => {
     }
 };
 
-const openContextMenuProperty = async (property, ev) => {
+const openContextMenuProperty = async (property) => {
     showContextMenuProperty.value = false;
     await nextTick();
     if (!viewModel.value.editor.readonly) {
@@ -1102,9 +1105,8 @@ const openContextMenuProperty = async (property, ev) => {
         const items = createContextMenuPropertyItems();
 
         if (items.length > 0) {
-            const target = ev.currentTarget;
-            contextMenuPropertyX.value = ev.offsetX + 20;
-            contextMenuPropertyY.value = ev.offsetY + target.offsetTop + 20;
+            contextMenuPropertyX.value = mouse.x + 10;
+            contextMenuPropertyY.value = mouse.y + 10;
             showContextMenuProperty.value = true;
             openContextMenu(
                 showContextMenuProperty,
@@ -1117,12 +1119,6 @@ const openContextMenuProperty = async (property, ev) => {
         }
     }
 };
-
-watch(showContextMenuProperty, () => {
-    if (showContextMenuProperty.value === false) {
-        chosenProperty = undefined;
-    }
-});
 
 </script>
 

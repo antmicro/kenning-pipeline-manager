@@ -80,8 +80,8 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
                     :greyedOut="greyedOutNodes.includes(node)"
                     :interfaces="highlightInterfaces"
                     :ignoredInterfacesType="[...ignoredInterfacesTypes]"
-                    @openContextMenu="(open, x, y, items, ignore, onclick, urls) => {
-                        updateContextMenu(node, open, x, y, items, ignore, onclick, urls);
+                    @openContextMenu="(open, x, y, items, ignore, onclick, urls, styles) => {
+                        updateContextMenu(node, open, x, y, items, ignore, onclick, urls, styles);
                     }"
                     @select="(ev) => selectNode(node, ev)"
                 />
@@ -127,6 +127,7 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
                 v-model="contextMenu.open"
                 :x="contextMenu.x"
                 :y="contextMenu.y"
+                :style="contextMenu.styles"
                 :items="contextMenu.items ?? []"
                 :ignore-close="contextMenu.ignore ?? []"
                 @click="contextMenu.onclick"
@@ -252,10 +253,12 @@ export default defineComponent({
             items: [],
             ignore: [],
             onclick: () => {},
+            styles: {},
         });
         const updateContextMenu = (_node, open, x, y, items, ignore, onclick, urls, styles) => {
             contextMenu.open = false;
             nextTick(() => {
+                contextMenu.open = false;
                 contextMenu.x = x;
                 contextMenu.y = y;
                 contextMenu.items = items;
