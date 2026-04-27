@@ -71,6 +71,7 @@ export default defineComponent({
                 const component = new InputInterface(text);
                 component.componentName = 'InputInterface';
                 component.setComponent(markRaw(InputInterfaceComponent));
+                props.saveConfiguration[label] = ''; // eslint-disable-line vue/no-mutating-props,max-len,no-param-reassign
                 return component;
             };
 
@@ -101,7 +102,7 @@ export default defineComponent({
 
         const options = computed(() =>
             [readonly, hideHud, position, hideLayers, graph, minify, graphName, dataflowname, save]
-                .filter(([option, _]) => option.value !== undefined)
+                .filter(([option, _]) => option?.value !== undefined)
                 .map(([option, label]) => [option.value, label]));
 
         return { options, getOptionName };
