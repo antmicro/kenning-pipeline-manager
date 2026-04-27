@@ -1,5 +1,5 @@
 import { test, expect, Page, Locator } from '@playwright/test';
-import { getUrl,getNodeByID,assertInputCount,assertOutputCount,waitForSubgraph,enterSubgraph,leaveSubgraph,loadWebsite,expectNode,getNode,deleteNode, loadVideoNodeId, enableNavigationBar, addNode, dragAndDrop, closeTerminal,loadSpecification,loadDataflow } from './config.js';
+import { getUrl,getNodeByID,assertInputCount,assertOutputCount,waitForSubgraph,enterSubgraph,leaveSubgraph,expectNode,getNode,deleteNode, loadVideoNodeId, enableNavigationBar, addNode, dragAndDrop, closeTerminal,loadSpecification,loadDataflow } from './config.js';
 
 
 async function renameNodeType(page: Page, oldName: string, newName: string) {
@@ -8,6 +8,14 @@ async function renameNodeType(page: Page, oldName: string, newName: string) {
     await node.getByText('Rename').click();
     await node.locator('.baklava-input').first().fill(newName);
     await node.locator('.baklava-input').first().press('Enter');
+}
+
+async function loadWebsite(page, requiredNodeId) {
+    await page.goto(getUrl());
+    await page.locator('.editorTitle').hover();
+    if (requiredNodeId) {
+        await page.waitForSelector(`#${requiredNodeId}`);
+    }
 }
 
 function getNodeInterfaces(page: Page, name: string, side: 'input' | 'output' | 'any' = 'any'): Locator {
@@ -400,7 +408,6 @@ test('test history by moving interface to left', async ({ page }) => {
 
 test('test history by removing node with connection', async ({ page }) => {
     await loadWebsite(page, loadVideoNodeId);
-
     // At the beginning, six connections exist.
     const connections = page.locator('.custom-connections-container > g');
     await expect(connections, {
@@ -411,7 +418,7 @@ test('test history by removing node with connection', async ({ page }) => {
     await deleteNode(node);
 
     // Verify that the node and its connection have disappeared.
-    await expect(page.locator(`#${loadVideoNodeId}`), {
+    await expect(node, {
         message: 'Node should not be visible after it is removed.',
     }).not.toBeVisible();
     await expect(connections, {

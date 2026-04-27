@@ -93,13 +93,6 @@ export async function disableNavigationBar(page) {
         .click();
 }
 
-export async function loadWebsite(page, requiredNodeId) {
-    await page.goto(getUrl());
-    if (requiredNodeId) {
-        await page.waitForSelector(`#${requiredNodeId}`);
-    }
-}
-
 /**
  * Loads specification file by using the file chooser.
  *
@@ -487,7 +480,7 @@ export function getNodeByID(page, nodeId) {
  */
 export async function deleteNode(node) {
     // Invoke a context menu with a right click.
-    await node.locator('.__title').click({ button: 'right' });
+    await node.locator('.__title').click({ button: 'right', force: true });
 
     // Delete the node.
     const deleteButton = node.getByText('Delete', { exact: true });
