@@ -289,7 +289,7 @@ export async function setYAMLEditorContent(page, content) {
 export async function addInterface(page, node) {
     await node.locator('.__title').click({ button: 'right', force: true });
     await node.locator('.baklava-context-menu').getByText('Add interface').click();
-    await page.getByRole('button', { name: 'Add interface' }).click();
+    await page.getByRole('button', { name: 'Add interface' }).click({ force: true });
 }
 
 /**
