@@ -416,8 +416,8 @@ class Node(JsonConvertible):
 
         if not node_in_specification and not (
             for_subgraph_node
-            or "subgraph" not in kwargs
-            or "subgraph_id" not in kwargs
+            or "subgraph" in kwargs
+            or "subgraph_id" in kwargs
         ):
             node_name = kwargs["name"]
             raise OutOfSpecificationNodeError(
