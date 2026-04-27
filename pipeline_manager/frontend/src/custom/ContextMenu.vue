@@ -120,6 +120,11 @@ export default defineComponent({
         const opened = ref(false);
 
         const closeContextMenu = (ev) => {
+            if (ev === undefined) {
+                context.emit('update:modelValue', false);
+                opened.value = false;
+                return;
+            }
             if (!props.modelValue) {
                 return;
             }
@@ -202,6 +207,7 @@ export default defineComponent({
             onPointerLeave,
             disableIcon,
             iconDisabled,
+            closeContextMenu,
         };
     },
 });

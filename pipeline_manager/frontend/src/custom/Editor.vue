@@ -124,6 +124,7 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
             <Return v-if="preview && isInSubgraph" @click="returnFromSubgraph" />
 
             <CustomContextMenu
+                ref="contextMenuComp"
                 v-model="contextMenu.open"
                 :x="contextMenu.x"
                 :y="contextMenu.y"
@@ -145,7 +146,7 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
 <script>
 /* eslint-disable object-curly-newline */
 import { EditorComponent, useGraph } from '@baklavajs/renderer-vue';
-import { defineComponent, nextTick, ref, computed, watch, onMounted, reactive } from 'vue';
+import { defineComponent, nextTick, ref, computed, watch, onMounted, reactive, useTemplateRef } from 'vue';
 import fuzzysort from 'fuzzysort';
 import { BaklavaEvent } from '@baklavajs/events';
 import { isJSONRPCRequest, isJSONRPCResponse, JSONRPC } from 'json-rpc-2.0';
@@ -246,6 +247,7 @@ export default defineComponent({
 
         const preview = computed(() => props.viewModel.editor.preview);
 
+        const contextMenuComp = useTemplateRef('contextMenuComp');
         const contextMenu = reactive({
             open: null,
             x: 0,
@@ -256,9 +258,8 @@ export default defineComponent({
             styles: {},
         });
         const updateContextMenu = (_node, open, x, y, items, ignore, onclick, urls, styles) => {
-            contextMenu.open = false;
+            contextMenuComp.value.closeContextMenu();
             nextTick(() => {
-                contextMenu.open = false;
                 contextMenu.x = x;
                 contextMenu.y = y;
                 contextMenu.items = items;
@@ -266,8 +267,9 @@ export default defineComponent({
                 contextMenu.onclick = onclick;
                 contextMenu.urls = urls;
                 contextMenu.styles = styles;
+                // eslint-disable-next-line no-param-reassign
+                open.value = true;
                 contextMenu.open = open;
-                contextMenu.open = true;
             });
         };
 
