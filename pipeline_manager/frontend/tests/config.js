@@ -248,10 +248,9 @@ export async function setYAML(page, content, node) {
  * @returns {Promise<void>} Resolves when a new specification has been set for a node.
  */
 export async function closeYAMLEditor(page) {
-    const closeButton = page.locator('.baklava-sidebar');
-    if (await closeButton.isVisible()) {
-        await closeButton.locator('.__close').click({force:true});
-    }
+    const sidebar = page.locator('.baklava-sidebar');
+    await expect(sidebar).toBeVisible();
+    await sidebar.locator('.__close').click();
 }
 
 export async function getYAMLEditorContent(page) {
