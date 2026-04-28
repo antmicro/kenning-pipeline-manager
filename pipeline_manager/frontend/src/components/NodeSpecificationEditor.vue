@@ -336,29 +336,40 @@ export default defineComponent({
         };
         /**
          * Process parsed and old parsed information to deduce what interfaces and properties
-         * have been removed.
+         * have been removed or added.
          *
          * @param {Array} parsedProperties - list of current properties.
          * @param {Array} oldProperties - list of old properties.
          * @param {Array} parsedInterfaces - list of current interfaces.
          * @param {Array} oldInterfaces - list of old interfaces.
+         * @param Boolean removed - if set to true will return removed props.
          * @returns {Array} An array of interfaces and properties that have been removed.
          */
-        const getOmitted = (parsedProperties, oldProperties, parsedInterfaces, oldInterfaces) => {
-            const removedProperties = [...oldProperties.filter(
-                (prop) => !parsedProperties.some((p) => p.name === prop.name
+        const getChanged = (
+            parsedProperties,
+            oldProperties,
+            parsedInterfaces,
+            oldInterfaces,
+            removed = true,
+        ) => {
+            const p1 = removed ? oldProperties : parsedProperties;
+            const p2 = removed ? parsedProperties : oldProperties;
+            const changedProperties = [...p1.filter(
+                (prop) => !p2.some((p) => p.name === prop.name
                     && p.override === prop.override
                     && p.type === prop.type,
                 ),
             )/* , ...overriddenProperties */] ?? [];
-            const removedInterfaces = [...oldInterfaces.filter(
-                (intf) => !parsedInterfaces.some((i) => i.name === intf.name
+            const i1 = removed ? oldInterfaces : parsedInterfaces;
+            const i2 = removed ? parsedInterfaces : oldInterfaces;
+            const changedInterfaces = [...i1.filter(
+                (intf) => !i2.some((i) => i.name === intf.name
                         && i.array === intf.array
                         && i.type === intf.type
                         && i.override === intf.override
                         && i.direction === intf.direction),
             )/* , ...overriddenInterfaces */] ?? [];
-            return [removedProperties, removedInterfaces];
+            return [changedProperties, changedInterfaces];
         };
         /**
          * Process what interfaces or properties are no longer blocked and can now be inherited.
@@ -464,12 +475,8 @@ export default defineComponent({
             const inheritedProperties = editorManager.findInheritedProperties(type);
             const inheritedInterfaces = editorManager.findInheritedInterfaces(type);
 
-            const newProperties = parsedProperties.filter(
-                (prop) => !oldProperties.some((p) => p.name === prop.name),
-            ) ?? [];
-            const newInterfaces = parsedInterfaces.filter(
-                (intf) => !oldInterfaces.some((i) => i.name === intf.name),
-            ) ?? [];
+            const [newProperties, newInterfaces] =
+                getChanged(parsedProperties, oldProperties, parsedInterfaces, oldInterfaces, false);
 
             // properties that were inherited before but are now inherited
             const overriddenProperties = inheritedProperties.filter((p) =>
@@ -478,7 +485,7 @@ export default defineComponent({
                 newInterfaces.some((pintf) => intf.name === pintf.name && pintf.override));
 
             const [deletedProperties, deletedInterfaces] =
-                getOmitted(parsedProperties, oldProperties, parsedInterfaces, oldInterfaces);
+                getChanged(parsedProperties, oldProperties, parsedInterfaces, oldInterfaces, true);
 
             // truly removed are the ones removed from YAML and the overrides
             const removedProperties = [...deletedProperties, ...overriddenProperties];
