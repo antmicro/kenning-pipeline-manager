@@ -467,16 +467,21 @@ export function updateExtendedProperties(type: string,
         .filter((n: any) => n.extends?.includes(type)) ?? [];
     resolvedChildNodes.forEach((n: any) => {
         const childNodes = findNodes(n.name!);
+        // don't override this type's overrides, always prioritize the "closest" upward override
+        const curAddedProp = addedProperties.filter((p) =>
+            !n.properties?.find((pp: any) => pp.name === p.name && pp.override));
+        const curRemovedProp = removedProperties.filter((p) =>
+            !n.properties?.find((pp: any) => pp.name === p.name && pp.override));
         childNodes.forEach((node: any) => {
-            const toRem = removedProperties.filter((prop: any) =>
+            const toRem = curRemovedProp.filter((prop: any) =>
                 Object.values(node.inputs).some((inp: any) => inp.name === prop.name),
             ).map((prop: any) => ({ ...prop, inherited: true }) as PropertyConfiguration);
             alterProperties([node], toRem, true);
-            const toAdd = addedProperties.map((prop: any) =>
+            const toAdd = curAddedProp.map((prop: any) =>
                 ({ ...prop, inherited: true }) as PropertyConfiguration);
             alterProperties([node], toAdd);
         });
-        updateExtendedProperties(n.name!, addedProperties, removedProperties);
+        updateExtendedProperties(n.name!, curAddedProp, curRemovedProp);
     });
 }
 export function updateExtendedInterfaces(type: string,
@@ -488,18 +493,23 @@ export function updateExtendedInterfaces(type: string,
         .filter((n: any) => n.extends?.includes(type)) ?? [];
     resolvedChildNodes.forEach((n: any) => {
         const childNodes = findNodes(n.name!);
+        // don't override this type's overrides, always prioritize the "closest" upward override
+        const curAddedIntfs = addedInterfaces.filter((p) =>
+            !n.interfaces?.find((pp: any) => pp.name === p.name && pp.override));
+        const curRemovedIntfs = removedInterfaces.filter((p) =>
+            !n.interfaces?.find((pp: any) => pp.name === p.name && pp.override));
         childNodes.forEach((node: any) => {
             const allInterfaces = [...Object.values(node.inputs),
                 ...Object.values(node.outputs)];
-            const toRem = removedInterfaces.filter((prop: any) =>
+            const toRem = curRemovedIntfs.filter((prop: any) =>
                 allInterfaces.some((inp: any) => inp.name === prop.name),
             ).map((prop: any) => ({ ...prop, inherited: true }) as InterfaceConfiguration);
             alterInterfaces([node], toRem, true);
-            const toAdd = addedInterfaces.map((prop: any) =>
+            const toAdd = curAddedIntfs.map((prop: any) =>
                 ({ ...prop, inherited: true }) as InterfaceConfiguration);
             alterInterfaces([node], toAdd);
         });
-        updateExtendedInterfaces(n.name!, addedInterfaces, removedInterfaces);
+        updateExtendedInterfaces(n.name!, curAddedIntfs, curRemovedIntfs);
     });
 }
 /**
