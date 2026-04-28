@@ -631,8 +631,11 @@ export default defineComponent({
                     currentSpecification.value.replaceAll('\t', '  '),
                 );
 
-                return JSON.stringify(specification.value) !==
-                JSON.stringify(parsedCurrentSpecification);
+                const edited = specification.value;
+                const cur = parsedCurrentSpecification;
+                const sortObj = (obj) => Object.fromEntries(Object.entries(obj).sort());
+                return JSON.stringify(sortObj(edited)) !==
+                    JSON.stringify(sortObj(cur));
             } catch {
                 return false;
             }
