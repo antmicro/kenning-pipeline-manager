@@ -151,6 +151,16 @@ export default defineComponent({
                 .map(([name]) => name);
         };
 
+        const findMatching = (array1, array2, propertyName) => {
+            const matching = [];
+            array1.forEach((el1) => {
+                if (array2.find((el2) => el1[propertyName] === el2[propertyName])) {
+                    matching.push(el1[propertyName]);
+                }
+            });
+            return matching;
+        };
+
         /**
          * Validates the interfaces of a parsed node specification.
          *
@@ -163,10 +173,19 @@ export default defineComponent({
             if (!parsedSpecification?.interfaces) {
                 return;
             }
+            const type = parsedSpecification.name;
+            const intfs = parsedSpecification.interfaces;
 
-            const duplicates = findDuplicates(parsedSpecification.interfaces, 'name');
+            const duplicates = findDuplicates(intfs, 'name');
             if (duplicates.length > 0) {
                 throw new Error(`Conflicting interface names: ${duplicates.join(', ')}`);
+            }
+            const inheritedIntf = editorManager.findInheritedInterfaces(type);
+            const inheritedShadowed = findMatching(intfs, inheritedIntf, 'name');
+            const inheritedInvalid = inheritedShadowed.filter((name) =>
+                !intfs.some((intf) => intf.name === name && intf.override));
+            if (inheritedInvalid.length > 0) {
+                throw new Error(`Implicitly overriding inherited interface: ${inheritedInvalid.join(', ')}, please use 'override'`);
             }
         };
 
@@ -196,9 +215,18 @@ export default defineComponent({
                 return;
             }
 
-            const duplicates = findDuplicates(parsedSpecification.properties, 'name');
+            const type = parsedSpecification.name;
+            const prop = parsedSpecification.properties;
+            const duplicates = findDuplicates(prop, 'name');
             if (duplicates.length > 0) {
                 throw new Error(`Conflicting property names: ${duplicates.join(', ')}`);
+            }
+            const inheritedProps = editorManager.findInheritedProperties(type);
+            const inheritedShadowed = findMatching(prop, inheritedProps, 'name');
+            const inheritedInvalid = inheritedShadowed.filter((name) =>
+                !prop.some((p) => p.name === name && p.override));
+            if (inheritedInvalid.length > 0) {
+                throw new Error(`Implicitly overriding inherited property: ${inheritedInvalid.join(', ')}, please use 'override'`);
             }
         };
 
