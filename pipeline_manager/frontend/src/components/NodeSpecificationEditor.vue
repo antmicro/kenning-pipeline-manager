@@ -493,7 +493,7 @@ export default defineComponent({
 
             const [readdedProperties, readdedInterfaces] =
             // eslint-disable-next-line max-len
-                getReInherited(inheritedProperties, removedProperties, inheritedInterfaces, removedInterfaces);
+                getReInherited(inheritedProperties, deletedProperties, inheritedInterfaces, deletedInterfaces);
             // add new properties and properties from parent that are no longer overridden
             const addedProperties = [...newProperties, ...readdedProperties] ?? [];
             const addedInterfaces = [...newInterfaces, ...readdedInterfaces] ?? [];
@@ -506,18 +506,28 @@ export default defineComponent({
             // get all exposed interfaces to privatize
             const exposedInterfaces = getAllExposedIntfsData(allParsedNodes, removedInterfaces);
 
+            const allIntf = [...addedInterfaces, ...parsedInterfaces.filter((pi) =>
+                !addedInterfaces.some((p) => p.name === pi.name && !pi.override))];
+            const allProp = [...addedProperties, ...parsedProperties.filter((pp) =>
+                !addedProperties.some((i) => i.name === pp.name))];
             allParsedNodes.forEach((n) => {
+                let curSpec = getCurrentSpecification(n.type);
+                if (n.type === type) {
+                    curSpec = undefined;
+                }
                 // This is needed because some of the addedProperties/Interfaces might have
                 // been added as a result of removing 'override' flag or adding it.
-                const allProp = [...addedProperties, ...parsedProperties.filter((pp) =>
-                    !addedProperties.some((i) => i.name === pp.name))];
-                const allIntf = [...addedInterfaces, ...parsedInterfaces.filter((pi) =>
-                    !addedInterfaces.some((p) => p.name === pi.name))];
+                //
+                const remProp = removedProperties.filter((p) =>
+                    !curSpec?.properties?.find((pp) => pp.name === p.name && pp.override));
+
+                const addProp = allProp.filter((p) =>
+                    !curSpec?.properties?.find((pp) => pp.name === p.name && pp.override));
                 // eslint-disable-next-line max-len
                 const toReExpose = getEditedExternal(n, allProp, removedProperties, allIntf, removedInterfaces);
-                alterProperties([n], removedProperties, true);
+                alterProperties([n], remProp, true);
                 alterInterfaces([n], removedInterfaces, true);
-                alterProperties([n], allProp);
+                alterProperties([n], addProp);
                 alterInterfaces([n], allIntf);
 
                 [...Object.values(n.inputs), ...Object.values(n.outputs)].forEach((intf) => {
