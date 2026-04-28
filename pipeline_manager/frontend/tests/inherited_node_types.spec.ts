@@ -91,6 +91,46 @@ test('override interface', async ({ page }) => {
     await setYAMLEditorContent(page, editedParsedContent);
     expect(await rightOutputs.count()).toBe(1);
 });
+test('override property (in chain)', async ({ page }) => {
+    await page.goto(getUrl());
+    await loadSpecification(page, 'sample-inheritance-specification.json');
+    await loadDataflow(page, 'sample-inheritance-dataflow.json');
+
+    await enableEditingNodes(page);
+
+    // inherits from B but overrides prop-a to be a checkbox
+    const nodeE = page.locator('[data-node-type="Type E"]');
+    const nodeEpropA = nodeE.getByText('prop-a', { exact: true }).locator('..');
+    expect(nodeEpropA).toHaveClass('baklava-checkbox');
+    const nodeB = page.locator('[data-node-type="Type B"]')
+        .locator('.__title').first();
+    await nodeB.dblclick();
+
+    const initialContent = await getYAMLEditorContent(page);
+    const parsedContent = YAML.parse(initialContent);
+    expect(parsedContent.properties.length).toBe(1);
+    parsedContent.properties.push(Object.fromEntries([
+        ['name', 'prop-a'],
+        ['type', 'text'],
+        ['override', true],
+        ['default', '""'],
+    ]));
+    await setYAMLEditorContent(page, YAML.stringify(parsedContent));
+    await page.locator('.__validate-button').getByText('Apply').click();
+    const properties = page.locator('[data-node-type="Type B"]')
+        .locator('.__content > .__properties > div');
+    expect(await properties.count()).toBe(2);
+
+    const editedContent = await getYAMLEditorContent(page);
+    const editedParsedContent = YAML.parse(editedContent);
+    expect(editedParsedContent.properties.length).toBe(2);
+    editedParsedContent.properties.pop();
+    await setYAMLEditorContent(page, YAML.stringify(editedParsedContent));
+    await page.locator('.__validate-button').getByText('Apply').click();
+    expect(await properties.count()).toBe(2);
+    // check if child rolls back to previous state
+    expect(nodeEpropA).toHaveClass('baklava-checkbox');
+});
 test('add subgraph to child node', async ({ page }) => {
     await page.goto(getUrl());
     await loadSpecification(page, 'sample-inheritance-specification.json');
