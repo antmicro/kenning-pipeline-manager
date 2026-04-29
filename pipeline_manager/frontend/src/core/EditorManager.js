@@ -1121,10 +1121,12 @@ export default class EditorManager {
         // probably should be checked for during validation.
         const intfsInherited = this.findInheritedInterfaces(node.name).filter((intf) =>
             !node.interfaces?.find((i) => i.name === intf.name && i.side === intf.side))
-            ?.map((intf) => ({ ...intf, inherited: true }));
+            ?.map((intf) => ({ ...intf, inherited: true }))
+            ?.filter((intf) => !node.interfaces?.find((i) => i.name === intf.name && i.override));
         const propsInherited = this.findInheritedProperties(node.name).filter((prop) =>
             !node.properties?.find((p) => p.name === prop.name))
-            ?.map((prop) => ({ ...prop, inherited: true }));
+            ?.map((prop) => ({ ...prop, inherited: true }))
+            ?.filter((prop) => !node.properties?.find((p) => p.name === prop.name && p.override));
         const inheritedAttributes = this.findSimpleInheritedAttributes(node.name);
 
         const myNode = CustomNodeFactory(
@@ -1732,12 +1734,13 @@ export default class EditorManager {
             const inherited = this.findInheritedInterfaces(p.name);
             interfaces = [...interfaces, ...inherited];
         });
-        const uniqueInterfaces = interfaces.filter((item, pos) =>
-            interfaces.findIndex((item2) =>
-                item.name === item2.name &&
-                item.array === item2.array &&
-                item.direction === item2.direction) === pos,
-        );
+        const uniqueInterfaces = interfaces.filter((item, pos) => {
+            const idx = interfaces.findIndex((item2) =>
+                item.name === item2.name && (item2.override ||
+                (item.array === item2.array &&
+                item.direction === item2.direction)));
+            return idx === pos;
+        });
         return uniqueInterfaces;
     }
 
