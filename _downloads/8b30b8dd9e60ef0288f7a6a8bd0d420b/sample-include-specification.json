@@ -1,0 +1,40 @@
+{
+    "version": "20250623.14",
+    "include": [
+        {
+            "url": "https://raw.githubusercontent.com/antmicro/kenning-pipeline-manager/main/examples/sample-specification.json",
+            "style": [
+                "import",
+                "miscellaneous"
+            ]
+        },
+        "https://raw.githubusercontent.com/antmicro/kenning-pipeline-manager/main/examples/sample-loopback-specification.json",
+        "https://raw.githubusercontent.com/antmicro/kenning-pipeline-manager/main/examples/sample-multiple-io-specification.json"
+    ],
+    "nodes": [
+        {
+            "name": "UploadVideo",
+            "category": "Filesystem",
+            "properties": [
+                {"name": "Platform", "type": "text", "default": ""},
+                {"name": "API Token", "type": "text", "default": ""}
+            ],
+            "interfaces": [
+                {"name": "frames", "type": ["Image", "BinaryImage"], "direction": "input"}
+            ],
+            "style": "miscellaneous"
+        }
+    ],
+    "metadata": {
+        "styles": {
+            "import": {
+                "icon": "Import",
+                "pill": {"text": "Import", "color": "#ffffff"}
+            },
+            "miscellaneous": {
+                "color": "#000000",
+                "pill": {"text": "misc", "color": "#2271b3"}
+            }
+        }
+    }
+}
