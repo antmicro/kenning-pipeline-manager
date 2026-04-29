@@ -303,7 +303,7 @@ export default defineComponent({
                 n.type = EditorManager.getNodeName(parsedSpecification);
 
                 Object.entries(parsedSpecification).forEach(([key, value]) => {
-                    if (value !== undefined && key !== 'name') {
+                    if (value !== undefined && !['name', 'interfaces', 'properties'].includes(key)) {
                         n[key] = value;
                     }
                 });
@@ -495,8 +495,6 @@ export default defineComponent({
             // eslint-disable-next-line max-len
                 getReInherited(inheritedProperties, deletedProperties, inheritedInterfaces, deletedInterfaces);
             // add new properties and properties from parent that are no longer overridden
-            const addedProperties = [...newProperties, ...readdedProperties] ?? [];
-            const addedInterfaces = [...newInterfaces, ...readdedInterfaces] ?? [];
 
             const nodes = getUpdatedNodes(parsedSpecification);
             const childNodes = findNodes(type, true) ?? [];
@@ -506,29 +504,31 @@ export default defineComponent({
             // get all exposed interfaces to privatize
             const exposedInterfaces = getAllExposedIntfsData(allParsedNodes, removedInterfaces);
 
-            const allIntf = [...addedInterfaces, ...parsedInterfaces.filter((pi) =>
-                !addedInterfaces.some((p) => p.name === pi.name && !pi.override))];
-            const allProp = [...addedProperties, ...parsedProperties.filter((pp) =>
-                !addedProperties.some((i) => i.name === pp.name))];
+            const allIntf = [...readdedInterfaces, ...parsedInterfaces.filter((pi) =>
+                !readdedInterfaces.some((p) => p.name === pi.name && !pi.override))];
+            const allProp = [...readdedProperties, ...parsedProperties.filter((pp) =>
+                !readdedProperties.some((i) => i.name === pp.name))];
             allParsedNodes.forEach((n) => {
                 let curSpec = getCurrentSpecification(n.type);
                 if (n.type === type) {
                     curSpec = undefined;
                 }
-                // This is needed because some of the addedProperties/Interfaces might have
-                // been added as a result of removing 'override' flag or adding it.
-                //
-                const remProp = removedProperties.filter((p) =>
+                const excludeOverridesProps = (arr) => arr.filter((p) =>
                     !curSpec?.properties?.find((pp) => pp.name === p.name && pp.override));
+                const excludeOverridesIntfs = (arr) => arr.filter((p) =>
+                    !curSpec?.interfaces?.find((pp) => pp.name === p.name && pp.override));
 
-                const addProp = allProp.filter((p) =>
-                    !curSpec?.properties?.find((pp) => pp.name === p.name && pp.override));
+                const remProp = excludeOverridesProps(removedProperties);
+                const remIntf = excludeOverridesIntfs(removedInterfaces);
+                const addProp = excludeOverridesProps(allProp);
+                const addIntf = excludeOverridesIntfs(allIntf);
+
                 // eslint-disable-next-line max-len
                 const toReExpose = getEditedExternal(n, allProp, removedProperties, allIntf, removedInterfaces);
                 alterProperties([n], remProp, true);
-                alterInterfaces([n], removedInterfaces, true);
+                alterInterfaces([n], remIntf, true);
                 alterProperties([n], addProp);
-                alterInterfaces([n], allIntf);
+                alterInterfaces([n], addIntf);
 
                 [...Object.values(n.inputs), ...Object.values(n.outputs)].forEach((intf) => {
                     const eintf = toReExpose.find((i) => i.name === intf.name);
@@ -537,6 +537,8 @@ export default defineComponent({
                     }
                 });
             });
+            const addedProperties = [...newProperties, ...readdedProperties] ?? [];
+            const addedInterfaces = [...newInterfaces, ...readdedInterfaces] ?? [];
             updateExtendedProperties(type, addedProperties, removedProperties);
             updateExtendedInterfaces(type, addedInterfaces, removedInterfaces);
             // if in subgraph, refresh subgraph
