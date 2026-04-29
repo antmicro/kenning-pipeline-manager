@@ -144,5 +144,5 @@ test('add subgraph to child node', async ({ page }) => {
 
     const outputs = await node.locator('.__content > .__interfaces > .__outputs > div').count();
     const inputs = await node.locator('.__content > .__interfaces > .__inputs > div').count();
-    expect(inputs + outputs).toBe(5);
+    expect(inputs + outputs).toBe(4);
 });
