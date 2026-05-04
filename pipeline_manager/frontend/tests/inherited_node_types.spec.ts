@@ -3,9 +3,9 @@ import {
     test, expect, Page, Locator,
 } from '@playwright/test';
 import {
-    setYAMLEditorContent,getYAMLEditorContent,getUrl, addProperty, checkForSubgraph, addSubgraph, addNode, enableEditingNodes, loadSpecification, loadDataflow,
+    setYAMLEditorContent, getYAMLEditorContent, getUrl, addProperty, checkForSubgraph, addSubgraph,
+    addNode, enableEditingNodes, loadSpecification, loadDataflow, getNode,
 } from './config.js';
-
 
 test('checking inherited properties', async ({ page }) => {
     await page.goto(getUrl());
@@ -60,6 +60,41 @@ test('checking renamed inherited property', async ({ page }) => {
         .locator('.__content > .__properties > div');
     expect(await nodeBproperties.count()).toBe(2);
 });
+
+test('check override blocking', async ({ page }) => {
+    await page.goto(getUrl());
+    await loadSpecification(page, 'sample-inheritance-specification.json');
+    await loadDataflow(page, 'sample-inheritance-dataflow.json');
+    await enableEditingNodes(page);
+    const textarea = page.locator('textarea');
+    const applybutton = page.getByText('Apply', { exact: true });
+    const applicable = () => applybutton.click({ trial: true, timeout: 1000 })
+        .then(() => true).catch(() => false);
+
+    const nodeB = getNode(page, 'Type B').locator('.__title').first();
+    await nodeB.dblclick();
+    const parsedContent = await getYAMLEditorContent(page);
+    const illegalOverrideInterface = {
+        ...parsedContent,
+        ...Object.fromEntries([
+            ['name', 'output-a'],
+            ['type', 'Interface'],
+            ['direction', 'inout'],
+        ]),
+    };
+    await textarea.fill(YAML.stringify(illegalOverrideInterface));
+    expect(await applicable()).not.toBeTruthy();
+    const illegalOverrideProperty = {
+        ...parsedContent,
+        ...Object.fromEntries([
+            ['name', 'prop-a'],
+            ['type', 'text'],
+            ['default', '""'],
+        ]),
+    };
+    await textarea.fill(YAML.stringify(illegalOverrideProperty));
+    expect(await applicable()).not.toBeTruthy();
+});
 test('override interface', async ({ page }) => {
     await page.goto(getUrl());
     await loadSpecification(page, 'sample-inheritance-specification.json');
@@ -67,8 +102,7 @@ test('override interface', async ({ page }) => {
 
     await enableEditingNodes(page);
 
-    const nodeB = page.locator('[data-node-type="Type B"]')
-        .locator('.__title').first();
+    const nodeB = getNode(page, 'Type B').locator('.__title').first();
     await nodeB.dblclick();
 
     const parsedContent = await getYAMLEditorContent(page);
@@ -81,7 +115,7 @@ test('override interface', async ({ page }) => {
         ['side', 'right'],
     ]));
     await setYAMLEditorContent(page, parsedContent);
-    const rightOutputs = page.locator('[data-node-type="Type B"]')
+    const rightOutputs = getNode(page, 'Type B')
         .locator('.__content > .__interfaces > .__outputs > div');
     expect(await rightOutputs.count()).toBe(2);
 
@@ -91,7 +125,7 @@ test('override interface', async ({ page }) => {
     await setYAMLEditorContent(page, editedParsedContent);
     expect(await rightOutputs.count()).toBe(1);
 });
-test('override property (in chain)', async ({ page }) => {
+test('override property', async ({ page }) => {
     await page.goto(getUrl());
     await loadSpecification(page, 'sample-inheritance-specification.json');
     await loadDataflow(page, 'sample-inheritance-dataflow.json');
@@ -99,37 +133,71 @@ test('override property (in chain)', async ({ page }) => {
     await enableEditingNodes(page);
 
     // inherits from B but overrides prop-a to be a checkbox
-    const nodeE = page.locator('[data-node-type="Type E"]');
-    const nodeEpropA = nodeE.getByText('prop-a', { exact: true }).locator('..');
-    expect(nodeEpropA).toHaveClass('baklava-checkbox');
-    const nodeB = page.locator('[data-node-type="Type B"]')
-        .locator('.__title').first();
-    await nodeB.dblclick();
+    const nodeB = getNode(page, 'Type B');
+    const nodeBpropA = nodeB.getByTitle('prop-a');
+    expect(nodeBpropA).toHaveClass('baklava-input');
+    await nodeB.locator('.__title').dblclick();
 
-    const initialContent = await getYAMLEditorContent(page);
-    const parsedContent = YAML.parse(initialContent);
+    const parsedContent = await getYAMLEditorContent(page);
     expect(parsedContent.properties.length).toBe(1);
     parsedContent.properties.push(Object.fromEntries([
         ['name', 'prop-a'],
-        ['type', 'text'],
+        ['type', 'hex'],
         ['override', true],
-        ['default', '""'],
+        ['default', '0xffff'],
     ]));
-    await setYAMLEditorContent(page, YAML.stringify(parsedContent));
-    await page.locator('.__validate-button').getByText('Apply').click();
-    const properties = page.locator('[data-node-type="Type B"]')
+    await setYAMLEditorContent(page, parsedContent);
+    const properties = getNode(page, 'Type B')
         .locator('.__content > .__properties > div');
     expect(await properties.count()).toBe(2);
 
+    // check if prop type changed
+    expect(nodeBpropA).toHaveClass('baklava-input hex-input');
+
     const editedContent = await getYAMLEditorContent(page);
-    const editedParsedContent = YAML.parse(editedContent);
-    expect(editedParsedContent.properties.length).toBe(2);
-    editedParsedContent.properties.pop();
-    await setYAMLEditorContent(page, YAML.stringify(editedParsedContent));
-    await page.locator('.__validate-button').getByText('Apply').click();
+    editedContent.properties.pop();
+    await setYAMLEditorContent(page, editedContent);
     expect(await properties.count()).toBe(2);
-    // check if child rolls back to previous state
-    expect(nodeEpropA).toHaveClass('baklava-checkbox');
+    // check if rolls back to previous state
+    expect(nodeBpropA).toHaveClass('baklava-input');
+});
+test('override child propagation', async ({ page }) => {
+    await page.goto(getUrl());
+    await loadSpecification(page, 'sample-inheritance-specification.json');
+    await loadDataflow(page, 'sample-inheritance-dataflow.json');
+    await enableEditingNodes(page);
+    // inherits from B directly
+    await addNode(page, 'Class', 'Type D', 500, 1000);
+    const nodeD = getNode(page, 'Type D');
+    const nodeA = getNode(page, 'Type A');
+    const nodeB = getNode(page, 'Type B');
+    await nodeD.locator('.__title').dblclick();
+    const contentD = await getYAMLEditorContent(page);
+    contentD.properties = contentD.properties.filter((p) => p.name !== 'prop-a');
+    await setYAMLEditorContent(page, contentD);
+    // expect to fall back to type A property
+    const nodeDpropA = nodeD.getByTitle('prop-a', { exact: true });
+    expect(nodeDpropA).toHaveClass('baklava-input');
+
+    await nodeA.locator('.__title').dblclick();
+    const contentA = await getYAMLEditorContent(page);
+    const propA = contentA.properties.find((p) => p.name === 'prop-a');
+    propA.type = 'hex';
+    propA.default = '0xffff';
+    await setYAMLEditorContent(page, contentA);
+    // expect to inherit the new type of interface
+    expect(nodeDpropA).toHaveClass('baklava-input hex-input');
+
+    await nodeB.locator('.__title').dblclick();
+    const contentB = await getYAMLEditorContent(page);
+    contentB.properties.push({
+        name: 'prop-a',
+        type: 'button-api',
+        default: null,
+        override: true,
+    });
+    await setYAMLEditorContent(page, contentB);
+    expect(nodeDpropA).toHaveClass('baklava-button --block');
 });
 test('add subgraph to child node', async ({ page }) => {
     await page.goto(getUrl());
