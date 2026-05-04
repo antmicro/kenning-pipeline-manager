@@ -57,7 +57,7 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import YAML from 'yaml';
 import {
-    computed, defineComponent, nextTick, ref, toRef, watch, onMounted, onBeforeUnmount,
+    computed, defineComponent, nextTick, ref, toRef, watch, onMounted, onBeforeUnmount, reactive,
 } from 'vue';
 import { useViewModel } from '@baklavajs/renderer-vue';
 import EditorManager, { EDITED_NODE_STYLE } from '../core/EditorManager';
@@ -81,7 +81,7 @@ export default defineComponent({
     setup(props) {
         // State
 
-        const editorManager = EditorManager.getEditorManagerInstance();
+        const editorManager = reactive(EditorManager.getEditorManagerInstance());
         const node = toRef(props, 'node');
         const root = ref(null);
         const el = ref(null);
