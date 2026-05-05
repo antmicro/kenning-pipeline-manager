@@ -141,8 +141,11 @@ const props =
         depth?: number,
         entry: Reactive<Entry>,
         parentEntry?: HTMLElement,
-        clickable_arrow: boolean
-    }>(), { depth: 0, clickable_arrow: false });
+        clickable_arrow?: boolean
+    }>(), {
+        depth: 0,
+        clickable_arrow: false,
+    });
 
 // Children
 const expandable = computed(() => isInternal(props.entry) && props.entry.children.length);
@@ -186,15 +189,15 @@ const getIconSrc = (name: string) => {
 };
 
 // Link menu
-const paletteScroll = inject<Ref<number>>('palettescroll');
-const linkMenu = inject<Ref<string | null>>('linkmenu');
+const paletteScroll = inject<Ref<number>>('palettescroll', 0);
+const linkMenu = inject<Ref<string | null>>('linkmenu', null);
 const linkMenuWrapperStyle = computed(() => ({ translate: `0px -${paletteScroll!.value.toString()}px` }));
 const linkMenuToggle = () => {
     linkMenu!.value = (linkMenu!.value === props.entry.id) ? null : props.entry.id;
 };
 
 const pointer = usePointer();
-const dragStart = inject<(_: Reactive<Entry>) => void>('dragstart');
+const dragStart = inject<(_: Reactive<Entry>) => void>('dragstart', () => {});
 const isDragging = ref(false);
 const onPointerDown = () => {
     if (props.entry.data.onClick) {
@@ -225,8 +228,8 @@ const onContentClick = (e: Event) => {
 };
 
 // Context menu
-const contextMenuEntry = inject<Ref<Reactive<Entry>> | null>('contextMenuEntry');
-const contextMenuToggle = inject<(_: Reactive<Entry>) => void>('contextMenuToggle');
+const contextMenuEntry = inject<Ref<Reactive<Entry>> | null>('contextMenuEntry', null);
+const contextMenuToggle = inject<(_: Reactive<Entry>) => void>('contextMenuToggle', () => {});
 </script>
 
 <style lang="scss">
