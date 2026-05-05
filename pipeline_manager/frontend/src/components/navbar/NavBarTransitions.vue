@@ -65,8 +65,7 @@ export default defineComponent({
                     v-model="saveMenuShow"
                 />
                 <GraphSaveMenu
-                    :saveConfiguration="saveConfiguration"
-                    v-model="baklavaView"
+                    :graphs="baklavaView.editor.graphs"
                     v-show="saveConfiguration.graph || saveConfiguration?.graphName !== undefined"
                 />
             </ParentMenu>

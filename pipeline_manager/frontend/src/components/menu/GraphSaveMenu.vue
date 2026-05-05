@@ -8,7 +8,6 @@ SPDX-License-Identifier: Apache-2.0
 Popup menu for choosing which graphs to save.
 -->
 
-<!-- eslint-disable vue/no-mutating-props -->
 <template>
     <div>
         <div>Graphs to save:</div>
@@ -25,7 +24,7 @@ Popup menu for choosing which graphs to save.
 
 <script>
 import {
-    defineComponent, computed,
+    defineComponent, computed, ref,
 } from 'vue';
 
 import PaletteEntry from '../PaletteEntry.vue';
@@ -36,13 +35,9 @@ export default defineComponent({
         PaletteEntry,
     },
     props: {
-        modelValue: {
+        graphs: {
             type: Object,
             required: true,
-        },
-        saveConfiguration: {
-            required: true,
-            type: Object,
         },
     },
     setup(props) {
@@ -90,9 +85,10 @@ export default defineComponent({
         },
         );
 
-        const entries = computed(() => gatherGraphs(Array.from(props.modelValue.editor.graphs)));
+        const entries = computed(() => gatherGraphs(Array.from(props.graphs)));
 
-        const currentEntries = computed(() => usePalette(entries, '', undefined, false));
+        const searchRef = ref('');
+        const currentEntries = computed(() => usePalette(entries, searchRef, undefined, false));
 
         return { currentEntries };
     },
