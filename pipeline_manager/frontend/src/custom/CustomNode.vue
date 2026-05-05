@@ -758,7 +758,7 @@ const displayedLeftRows = computed(() => getRows(displayedLeftSockets.value));
 
 watch(displayedProperties, () => {
     displayedProperties.value
-        .filter((prop) => prop.component === undefined)
+        .filter((prop) => prop.component === undefined || prop.defaultComponent)
         .filter((prop) => prop.setDefaultComponent !== undefined)
         .forEach((prop) => { prop.setDefaultComponent(); });
 }, { immediate: true });
