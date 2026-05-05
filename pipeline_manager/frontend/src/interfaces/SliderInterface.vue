@@ -11,10 +11,10 @@ SPDX-License-Identifier: Apache-2.0
         :class="{ 'baklava-ignore-mouse': !editMode }"
         :style="{ cursor: intf.readonly ? 'default' : null }"
         :title="intf.name"
-        @pointerdown="mousedown"
-        @pointerup="mouseup"
-        @pointermove="mousemove"
-        @pointerleave="mouseleave"
+        @pointerdown= "e => !intf.readonly && mousedown(e)"
+        @pointerup=   "e => !intf.readonly && mouseup(e)"
+        @pointermove= "e => !intf.readonly && mousemove(e)"
+        @pointerleave="e => !intf.readonly && mouseleave(e)"
     >
         <div class="__slider" :style="{ width: percentageFixed + '%' }" />
         <div v-if="!editMode || intf.readonly" class="__content">
