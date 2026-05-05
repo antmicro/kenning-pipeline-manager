@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import webpack from 'webpack';
 import { defineConfig } from '@vue/cli-service';
 import { fileURLToPath } from 'url';
 import path, { dirname } from 'path';
@@ -24,6 +25,15 @@ export default defineConfig({
     },
     /* eslint-disable no-param-reassign */
     configureWebpack: (config) => {
+        config.plugins = config.plugins || [];
+        config.plugins.push(
+            new webpack.DefinePlugin({
+                __VUE_OPTIONS_API__: 'true',
+                __VUE_PROD_DEVTOOLS__: 'false',
+                __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: 'false',
+            }),
+        );
+
         if (process.env.NODE_ENV === 'development') {
             config.devtool = 'eval-source-map';
         } else if (process.env.NODE_ENV === 'production') {
