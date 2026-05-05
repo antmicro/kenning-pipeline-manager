@@ -7,7 +7,7 @@ import fs from 'fs/promises';
 
 import {
     createNewNodeType, addInterface, getUrl, assertInputCount, getNode, getPathToJsonFile, addNode,
-    openFileChooser, dragAndDrop, openNodePalette, getContextMenu,
+    openFileChooser, dragAndDrop, openNodePalette, setYAMLEditorContent, getContextMenu,
 } from './config.js';
 
 const temporaryDir = `${os.tmpdir()}/`;
@@ -220,4 +220,133 @@ test('hiding property', async ({ page }, testInfo) => {
     await nodeTitle.dblclick();
     await page.locator('.baklava-sidebar').locator('.__property-button').click();
     expect(await nodePropertiesBefore.count()).toBe(3);
+});
+
+test('editing properties', async ({ page }, testInfo) => {
+    await page.goto(getUrl());
+    // eslint-disable-next-line max-len
+    const TO = 500;
+    const props: any = [
+        ['constant', null, 'this is a test'],
+        ['text',
+            async (node) => {
+                const inp = node.getByTitle('text');
+                await inp.fill('edited cont', { timeout: TO });
+                await expect(inp).toHaveValue('edited cont');
+            }, 'this is a test'],
+        ['multiline',
+            async (node) => {
+                const p = node.locator('.__markdown-content');
+                await p.dblclick();
+                const inp = node.getByTitle('multiline', { timeout: TO });
+                await inp.fill('edited cont', { timeout: TO });
+                await expect(inp).toHaveValue('edited cont');
+            }, 'this is a test'],
+        ['number',
+            async (node) => {
+                const inp = node.getByTitle('number').locator('../..');
+                const val = await inp.locator('.__value').innerHTML();
+                await inp.locator('.--inc', { timeout: TO }).click({ timeout: TO });
+                const newVal = await inp.locator('.__value').innerHTML();
+                await expect(newVal).not.toBe(val);
+            }, 1234],
+        ['integer',
+            async (node) => {
+                const inp = node.getByTitle('integer').locator('../..');
+                const val = await inp.locator('.__value').innerHTML();
+                await inp.locator('.--inc', { timeout: TO }).click({ timeout: TO });
+                const newVal = await inp.locator('.__value').innerHTML();
+                await expect(newVal).not.toBe(val);
+            }, 1234],
+        ['hex',
+            async (node) => {
+                const inp = node.getByTitle('hex');
+                await inp.fill('0xffffff', { timeout: TO });
+                await expect(inp).toHaveValue('0xffffff');
+            }, '0x859'],
+        ['select',
+            async (node) => {
+                const inp = node.getByTitle('select');
+                await inp.click();
+                await inp.getByText('volition').click({ timeout: TO });
+                await expect(inp.locator('.__text')).toContainText('volition', { timeout: TO });
+            }, 'drama', {
+                values: [
+                    'drama',
+                    'conceptualization',
+                    'visual calculus',
+                    'volition',
+                    'authority',
+                ],
+            }],
+        ['bool',
+            async (node) => {
+                const inp = node.getByTitle('bool');
+                await inp.click();
+                await expect(inp).toHaveClass('baklava-checkbox --checked', { timeout: TO });
+                await inp.click();
+                await expect(inp).not.toHaveClass('baklava-checkbox --checked', { timeout: TO });
+            }, false],
+        ['slider',
+            async (node) => {
+                const inp = node.getByTitle('slider');
+                const val = await inp.locator('.__value').innerHTML();
+                const box = await inp.boundingBox();
+                const startX = box.x + box.width / 2;
+                const startY = box.y + box.height / 2;
+                await page.mouse.move(startX, startY);
+                await page.mouse.down();
+                await page.mouse.move(startX + 10, startY);
+                await page.mouse.up();
+                const newVal = await inp.locator('.__value').innerHTML();
+                await expect(newVal).not.toBe(val);
+            }, 68, {
+                min: 67,
+                max: 69,
+            }],
+        ['list',
+            async (node) => {
+                const inp = node.getByTitle('list');
+                await inp.fill('d e f g', { timeout: TO });
+                await expect(inp).toHaveValue('d e f g');
+            }, ['a', 'b', 'c'], {
+                dtype: 'string',
+            }],
+        ['button-url', null, 'https://en.wikipedia.org/wiki/Insanity'],
+        ['button-api', null, null],
+    ];
+    await openNodePalette(page);
+    await createNewNodeType(page);
+    const node = await getNode(page, 'Custom Node');
+    node.dblclick();
+    const content = (rdonly: boolean) => ({
+        name: 'Custom Node',
+        properties:
+        props.map((parr) => ({
+            readonly: rdonly,
+            name: parr[0],
+            type: parr[0],
+            default: parr[2],
+            ...(parr[3] ?? {}),
+        })),
+    });
+    await setYAMLEditorContent(page, content(false));
+    for (let i = 0; i < props.length; i += 1) {
+        if (props[i][1] !== null) {
+            const check = props[i][1] ?? (() => true);
+            // eslint-disable-next-line no-await-in-loop
+            await check(node);
+        }
+    }
+    await setYAMLEditorContent(page, { name: 'Custom Node' });
+    await setYAMLEditorContent(page, content(true));
+    for (let i = 0; i < props.length; i += 1) {
+        if (props[i][1] !== null) {
+            const check = props[i][1] ?? (() => { throw new Error(); });
+            // eslint-disable-next-line no-await-in-loop
+            const result = await check(node).then(() => false).catch(() => true);
+            // inverting actionability tests to return inverse results
+            expect(result, { message: '"'.concat(String(props[i][0]).concat('" interface is interactable when readonly')) }).toBeTruthy();
+        }
+    }
 });
