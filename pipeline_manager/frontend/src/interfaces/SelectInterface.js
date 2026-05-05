@@ -16,6 +16,7 @@ export default class SelectInterface extends BaklavaSelectInterface {
     constructor(name, value, items, readonly = false) {
         super(name, value, items);
         this.readonly = readonly;
+        this.defaultComponent = true;
         this.setPort(false);
     }
 }

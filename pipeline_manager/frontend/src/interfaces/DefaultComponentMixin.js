@@ -8,6 +8,7 @@ import { markRaw } from 'vue';
 
 const DefaultComponentMixin = {
     setDefaultComponent() {
+        delete this.defaultComponent;
         this.lazyComponent().then((module) => {
             this.setComponent(markRaw(module.default));
         });

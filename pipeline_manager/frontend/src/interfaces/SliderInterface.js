@@ -19,6 +19,7 @@ export default class SliderInterface extends NodeInterface {
         this.max = max;
         this.step = step;
         this.readonly = readonly;
+        this.defaultComponent = true;
         this.setPort(false);
     }
 }

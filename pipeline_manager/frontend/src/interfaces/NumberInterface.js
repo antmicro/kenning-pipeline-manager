@@ -16,6 +16,7 @@ export default class NumberInterface extends BaklavaNumberInterface {
     constructor(name, value, min, max, readonly = false) {
         super(name, value, min, max);
         this.readonly = readonly;
+        this.defaultComponent = true;
         this.setPort(false);
     }
 }

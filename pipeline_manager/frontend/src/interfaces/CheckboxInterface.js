@@ -16,6 +16,7 @@ export default class CheckboxInterface extends BaklavaCheckboxInterface {
     constructor(name, value, readonly = false) {
         super(name, value);
         this.setPort(false);
+        this.defaultComponent = true;
         this.readonly = readonly;
     }
 }

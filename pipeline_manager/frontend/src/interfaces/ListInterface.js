@@ -17,6 +17,7 @@ export default class ListInterface extends NodeInterface {
         super(name, value);
         this.dtype = dtype;
         this.readonly = readonly;
+        this.defaultComponent = true;
         this.setPort(false);
     }
 }
