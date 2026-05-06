@@ -146,8 +146,11 @@ export async function leaveSubgraph(page) {
  * @returns {Promise<void>} Resolves when playwright enter subgraph of selected node.
  */
 export async function enterSubgraph(node, page) {
-    await node.locator('.__title').click({ button: 'right' });
     const contextMenuOption = getContextMenu(page).getByText('Go to graph');
+    if (!await contextMenuOption.isVisible()) {
+        const title = node.locator('.__title');
+        await title.click({ button: 'right' });
+    }
     await contextMenuOption.click();
 }
 
@@ -173,6 +176,10 @@ export async function waitForSubgraph(page, graphName) {
  */
 export async function checkForSubgraph(node, page) {
     const contextMenuOption = getContextMenu(page).getByText('Go to graph');
+    if (!await contextMenuOption.isVisible()) {
+        const title = node.locator('.__title');
+        await title.click({ button: 'right' });
+    }
     expect(await contextMenuOption).toHaveCount(1,{ timeout: 10_000 });
     await node.locator('.__title').click({ button: 'right'});
     expect(await contextMenuOption).toBeVisible();
@@ -422,7 +429,11 @@ export async function addNode(page, category, nodeName, x, y, openCategory = tru
  * @returns {Promise<void>} Resolves when node is present, show error message otherwise.
  */
 export async function expectNode(exists, node, errorMessage) {
-    expect(node, { message: errorMessage }).toBeVisible({ visible: exists });
+    if (exists) {
+        expect(node, { message: errorMessage }).toBeVisible({ timeout: 5000 });
+    } else {
+        expect(node, { message: errorMessage }).not.toBeVisible({ timeout: 5000 });
+    }
 }
 
 /**

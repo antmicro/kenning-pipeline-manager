@@ -81,6 +81,11 @@ test('test history by removing node', async ({ page }) => {
     await loadWebsite(page, loadVideoNodeId);
     const node = getNodeByID(page,loadVideoNodeId);
 
+    await expectNode(
+        true,
+        node,
+        'The `LoadVideo` node is not visible after loading dataflow.',
+    );
     await deleteNode(node, page);
     await expectNode(
         false,
