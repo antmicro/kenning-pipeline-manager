@@ -707,6 +707,12 @@ export default class PipelineManagerEditor extends Editor {
         return false;
     }
 
+    getNodeInterfacePositions(nodeName) {
+        const nodeType = this.nodeTypes.get(nodeName);
+
+        return this.getNodeStyle(nodeType.style)?.positions ?? [];
+    }
+
     getStyleIcon(nodeName) {
         const nodeType = this.nodeTypes.get(nodeName);
         if (nodeType?.style !== undefined) return this.getNodeStyle(nodeType.style)?.icon;
