@@ -198,7 +198,7 @@ export async function addSubgraph(node, page) {
     await title.click({ button: 'right' });
     const contextMenuOption = getContextMenu(page).getByText('Add subgraph');
     await contextMenuOption.click({force: true});
-    expect(await title.locator('.__subgraph-icon').first()).toBeVisible({ timeout: 5_000 });
+    expect(await title.locator('.__subgraph-icon')).toHaveCount(1);
 }
 
 /**
@@ -210,7 +210,7 @@ export async function addSubgraph(node, page) {
  */
 export async function waitForNodeSubgraph(node) {
     const nodeTitle = await node.locator('.__title');
-    await expect(nodeTitle.locator('.__subgraph-icon')).toBeVisible();
+    await expect(nodeTitle.locator('.__subgraph-icon')).toHaveCount(1);
 }
 /**
  * YAML section
