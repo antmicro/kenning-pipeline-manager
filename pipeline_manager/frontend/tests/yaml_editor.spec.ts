@@ -8,30 +8,6 @@ import {
     loadSpecification, loadDataflow, openNodePalette, getContextMenu
 } from './config.js';
 
-async function assertOutputCount(page: Page, nodeName: string, count: number, nth = 0) {
-    const inputs = await page
-        .locator(`[data-node-type="${nodeName}"]`).nth(nth)
-        .locator('.__interfaces .__outputs')
-        .locator('.__port')
-        .count();
-    expect(inputs).toBe(count);
-}
-async function assertInputCount(page: Page, nodeName: string, count: number, nth = 0) {
-    const inputs = await page
-        .locator(`[data-node-type="${nodeName}"]`).nth(nth)
-        .locator('.__interfaces .__inputs')
-        .locator('.__port')
-        .count();
-    expect(inputs).toBe(count);
-}
-async function assertPropertyCount(page: Page, nodeName: string, count: number, nth = 0) {
-    const props = await page
-        .locator(`[data-node-type="${nodeName}"]`).nth(nth)
-        .locator('.__properties > div')
-        .count();
-    expect(props).toBe(count);
-}
-
 export async function checkIfYAMLPersists(page) {
     // Open a pop-up for the first node.
     const node = page
@@ -57,7 +33,7 @@ export async function checkIfYAMLPersists(page) {
 
 async function addAndOpenNode(page: Page, group: string, nodeName: string, x = 750, y = 180) {
     await addNode(page, group, nodeName, x, y);
-    const node = page.locator(`[data-node-type="${nodeName}"]`).first();
+    const node = page.locator(`[data-node-type="${nodeName}"]`).last();
     await node.locator('.__title').dblclick();
     const content = await getYAMLEditorContent(page);
     return { node, content };
@@ -93,12 +69,14 @@ test('add extends to a new node type',async ({page}) => {
     content.extends = ["Filter2D"];
     await setYAMLEditorContent(page, content);
 
+    const node = getNode(page,nodeName).nth(0);
+
     // check interfaces
-    await assertOutputCount(page,nodeName,1,0);
-    await assertInputCount(page,nodeName,2,0);
+    await assertOutputCount(node,1);
+    await assertInputCount(node,2);
 
     // check for properties
-    await assertPropertyCount(page,nodeName,3,0)
+    await assertPropertyCount(node,3)
 });
 
 test('remove extends from a node type',async ({page}) => {
@@ -107,9 +85,10 @@ test('remove extends from a node type',async ({page}) => {
     // Insatiate a new node.
     const nodeName = 'Filter2D';
 
+    const node = getNode(page,nodeName).nth(0);
     // check interfaces
-    await assertOutputCount(page,nodeName,1,0);
-    await assertInputCount(page,nodeName,2,0);
+    await assertOutputCount(node,1);
+    await assertInputCount(node,2);
 
     // Double click the node to open the YAML editor.
     const customNode = page.locator('[data-node-type="Filter2D"]').first();
@@ -122,8 +101,8 @@ test('remove extends from a node type',async ({page}) => {
     await setYAMLEditorContent(page, content);
 
     // check interfaces
-    await assertOutputCount(page,nodeName,0,0);
-    await assertInputCount(page,nodeName,1,0);
+    await assertOutputCount(node,0);
+    await assertInputCount(node,1);
 });
 
 test('adding interface from UI reflected in YAML editor', async ({ page }) => {
@@ -172,7 +151,6 @@ test('adding interface to YAML', async ({ page }) => {
         direction: 'input',
     });
     await setYAMLEditorContent(page, content);
-    await closeYAMLEditor(page);
     const first = node.nth(0);
     const second = node.nth(1);
     await assertInputCount(first, 1);
@@ -198,7 +176,6 @@ test('adding property to YAML', async ({ page }) => {
         default: 0,
     }];
     await setYAMLEditorContent(page, content);
-    await closeYAMLEditor(page);
     await assertPropertyCount(first, 2);
     await assertPropertyCount(second, 2);
     // check if newly added nodes have this change
@@ -278,7 +255,8 @@ test('interface maxConnectionCount YAML', async ({ page }) => {
     await page.goto(getUrl());
     await loadSpecification(page, 'sample-include-specification.json');
     const nodeName = 'GaussianKernel';
-    const { node, content } = await addAndOpenNode(page, 'Generators', nodeName);
+    const { _, content } = await addAndOpenNode(page, 'Generators', nodeName);
+    const node = await getNode(page,nodeName).first();
     await assertOutputCount(node, 1);
     const intf = node.locator('.__interfaces .__outputs > div');
     expect(intf).toHaveClass('baklava-node-interface --output --connected');
