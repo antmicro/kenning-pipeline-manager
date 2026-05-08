@@ -17,6 +17,8 @@ A single entry representing available node type in the sidebar.
     </div>
     <!-- eslint-disable-next-line vue/no-multiple-template-root -->
     <div v-bind="$attrs" ref="entryWrapperRef">
+        <!-- calculation of max depth would require additional traversal of the graph which -->
+        <!-- slows down when big specifications are processed -->
         <div
             v-if="entry.show"
             class="__entry"
@@ -24,6 +26,7 @@ A single entry representing available node type in the sidebar.
             @click="toggleChildren"
             :style="{
                 top: toggled ? `${depth * 4}em` : undefined,
+                'z-index': 50 - depth,
             }"
         >
             <div
