@@ -610,10 +610,20 @@ const classes = computed(() => ({
     __readonly: viewModel.value.editor.readonly,
 }));
 
+const width = computed(() => {
+    if (nodeMinimal.value) {
+        return 'auto';
+    }
+    if (props.node.width !== undefined) {
+        return `${props.node.width}px`;
+    }
+    return '300px';
+});
+
 const styles = computed(() => ({
     top: `${props.node.position?.y ?? 0}px`,
     left: `${props.node.position?.x ?? 0}px`,
-    width: (props.node.width ?? (nodeMinimal.value) ? 'auto' : '300px'),
+    width: width.value,
 }));
 
 const nodeTitle = computed(() => {
