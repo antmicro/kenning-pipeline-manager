@@ -188,6 +188,20 @@ export default {
             }, this.editorManager.baklavaView.editor.events.setLoad);
             document.getElementById('load-spec-button').value = '';
         },
+        /**
+         * Event handler that creates a specification.
+         */
+        async createEmptySpecification() {
+            this.loadSpecification({
+                version: this.editorManager.specificationVersion,
+                nodes: [
+                    { name: 'Default node', category: 'Default category' },
+                ],
+                metadata: {
+                    editableTypes: true,
+                },
+            });
+        },
         createGraphNodeTypeFromCurrentGraph() {
             menuState.configurationMenu.visible = !menuState.configurationMenu.visible;
             menuState.configurationMenu.addNode = true;
@@ -341,6 +355,13 @@ export default {
             <template
                 v-if="!externalApp.backend && !hideHud"
             >
+                <DropdownItem
+                    v-if="!editorManager.specificationLoaded"
+                    text="Create empty specification"
+                    id="create-spec-button"
+                    type="'button'"
+                    :eventFunction="createEmptySpecification"
+                />
                 <DropdownItem
                     text="Load specification"
                     id="load-spec-button"
