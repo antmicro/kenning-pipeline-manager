@@ -161,7 +161,7 @@ import { gridSnapper } from '../core/snappers';
 import icons from '../icons/index';
 import doubleClick from '../core/doubleClick.js';
 import NotificationHandler from '../core/notifications.js';
-import { getOptionName, updateInterfacePosition, removeNode } from './CustomNode.js';
+import { getOptionName, updateInterfacePosition, removeNode, ungroupNode } from './CustomNode.js';
 import {
     startTransaction, commitTransaction,
 } from '../core/History.ts';
@@ -468,16 +468,6 @@ const onContextMenuTitleClick = async (action) => {
     }
 
     switch (action) {
-        case 'delete':
-            startTransaction();
-            // If the node is not selected, select it
-            if (!graph.value.selectedNodes.includes(props.node)) {
-                graph.value.selectedNodes.push(props.node);
-            }
-            graph.value.selectedNodes.forEach((n) => removeNode(n));
-            graph.value.selectedNodes = [];
-            commitTransaction();
-            break;
         case 'rename':
             tempName.value = props.node.title;
             renaming.value = true;
@@ -573,13 +563,21 @@ const onContextMenuTitleClick = async (action) => {
         case 'groupNodes':
             menuState.groupMenu = true;
             break;
+        case 'delete':
+            startTransaction();
+            if (!graph.value.selectedNodes.includes(props.node)) {
+                graph.value.selectedNodes.push(props.node);
+            }
+            graph.value.selectedNodes.forEach((n) => removeNode(n));
+            graph.value.selectedNodes = [];
+            commitTransaction();
+            break;
+        // eslint-disable-next-line no-fallthrough
         case 'ungroupNodes':
-            graph.value.groups.filter((g) => g.nodes.includes(props.node.id))
-                .forEach((g) => {
-                    const index = g.nodes.indexOf(props.node.id);
-                    g.nodes.splice(index, 1);
-                });
-            graph.value.groups = graph.value.groups.filter((g) => g.nodes.length > 1);
+            if (!graph.value.selectedNodes.includes(props.node)) {
+                graph.value.selectedNodes.push(props.node);
+            }
+            graph.value.selectedNodes.forEach((n) => ungroupNode(n));
             break;
     }
 };
