@@ -121,10 +121,9 @@ test('override interface', async ({ page }) => {
 
     await nodeB.dblclick();
     const editedContent = await getYAMLEditorContent(page);
-    const editedParsedContent = YAML.parse(editedContent);
-    expect(editedParsedContent.interfaces.length).toBe(2);
-    editedParsedContent.interfaces.pop();
-    await setYAMLEditorContent(page, editedParsedContent);
+    expect(editedContent.interfaces.length).toBe(2);
+    editedContent.interfaces.pop();
+    await setYAMLEditorContent(page, editedContent);
     expect(await rightOutputs.count()).toBe(1);
 });
 test('override property', async ({ page }) => {
@@ -156,6 +155,7 @@ test('override property', async ({ page }) => {
     // check if prop type changed
     expect(nodeBpropA).toHaveClass('baklava-input hex-input');
 
+    await nodeB.locator('.__title').dblclick();
     const editedContent = await getYAMLEditorContent(page);
     editedContent.properties.pop();
     await setYAMLEditorContent(page, editedContent);
@@ -175,7 +175,7 @@ test('override child propagation', async ({ page }) => {
     const nodeB = getNode(page, 'Type B');
     await nodeD.locator('.__title').dblclick();
     const contentD = await getYAMLEditorContent(page);
-    contentD.properties = contentD.properties.filter((p) => p.name !== 'prop-a');
+    contentD.properties = [];
     await setYAMLEditorContent(page, contentD);
     // expect to fall back to type A property
     const nodeDpropA = nodeD.getByTitle('prop-a', { exact: true });
