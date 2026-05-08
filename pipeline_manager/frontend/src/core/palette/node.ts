@@ -116,7 +116,9 @@ const getSpecialEntries = (
         });
     }
 
-    if ((viewModel as CustomViewModel).settings.newGraphNode) {
+    const editorManager = EditorManager.getEditorManagerInstance();
+    if ((viewModel as CustomViewModel).settings.newGraphNode
+        && editorManager.isSpecificationLoaded()) {
         specialEntries.push({
             id: DEFAULT_GRAPH_NODE_TYPE,
             data: {
