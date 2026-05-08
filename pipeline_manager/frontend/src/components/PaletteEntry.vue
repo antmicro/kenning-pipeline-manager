@@ -26,7 +26,7 @@ A single entry representing available node type in the sidebar.
             @click="toggleChildren"
             :style="{
                 top: toggled ? `${depth * 4}em` : undefined,
-                'z-index': 50 - depth,
+                'z-index': 20 - depth,
             }"
         >
             <div
