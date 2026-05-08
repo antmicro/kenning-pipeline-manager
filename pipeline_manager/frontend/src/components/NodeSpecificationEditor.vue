@@ -303,6 +303,21 @@ export default defineComponent({
                 .forEach((n) => n.updateExposedInterfaces(undefined, undefined)));
         };
 
+        const findChildren = (type, children = new Set()) => {
+            if (children.has(type)) {
+                return;
+            }
+            children.add(type);
+
+            const extendingNodes = editorManager.specification
+                .currentSpecification.nodes
+                .filter((n) => n?.extends?.some((e) => e === type));
+
+            extendingNodes.forEach((n) => {
+                findChildren(n.name, children);
+            });
+        };
+
         const updateSpecification = async () => {
             try {
                 const { viewModel } = useViewModel();
@@ -337,8 +352,22 @@ export default defineComponent({
                 if (ret.errors !== undefined && ret.errors.length) {
                     throw new Error(ret.errors);
                 }
-
                 updateGraphsInEditor(oldType, parsedSpecification, editor);
+
+                const children = new Set();
+
+                findChildren(oldType, children);
+                // there is no need to update a node second time
+                children.delete(oldType);
+
+                // find nodes extending current node in specification
+                const extendingNodes = editorManager.specification
+                    .currentSpecification.nodes
+                    .filter((n) => children.has(n.name));
+                // refresh nodes extending from current node
+                extendingNodes.forEach((n) => {
+                    updateGraphsInEditor(n.name, n, editor);
+                });
 
                 validateNodeStyle(parsedSpecification);
                 validateNodeInterfaces(parsedSpecification);
@@ -405,7 +434,6 @@ export default defineComponent({
          */
         const canApplyChanges = computed(() => {
             if (!editorStateChanged.value) {
-                console.log('Editor state: ', editorStateChanged.value);
                 return false;
             }
             try {
@@ -536,7 +564,6 @@ export default defineComponent({
 
         editorEventBus.addEventListener('check-validation', (event) => {
             const { resolve } = event.detail;
-            console.log('Bus event ', editorStateChanged.value);
             resolve(editorStateChanged.value);
         });
 
