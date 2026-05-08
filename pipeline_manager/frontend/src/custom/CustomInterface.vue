@@ -68,6 +68,7 @@ from creating and deleting connections or altering nodes' values if the editor i
         </div>
 
         <div
+            no-drag="true"
             @mouseenter="startPropertyHover"
             @mouseleave="endPropertyHover"
         >
