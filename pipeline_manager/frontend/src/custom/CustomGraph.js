@@ -211,6 +211,10 @@ export default function createPipelineManagerGraph(graph) {
                 }
             });
         } else {
+            // Reset interfaces positions
+            Object.entries({ ...oldNode.inputs, ...oldNode.outputs }).forEach(([_name, intf]) => {
+                intf.sidePosition = 0;
+            });
             Object.entries({ ...oldNode.inputs, ...oldNode.outputs }).forEach(([name, intf]) => {
                 if (intf.direction !== undefined) {
                     if (Object.prototype.hasOwnProperty.call(newNodeInstance.inputs, name)) {
