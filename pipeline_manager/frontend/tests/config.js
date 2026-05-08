@@ -432,6 +432,7 @@ export async function expectNode(exists, node, errorMessage) {
     if (exists) {
         expect(node, { message: errorMessage }).toBeVisible({ timeout: 5000 });
     } else {
+        await node.waitFor({ state: 'hidden' });
         expect(node, { message: errorMessage }).not.toBeVisible({ timeout: 5000 });
     }
 }
