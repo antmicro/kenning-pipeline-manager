@@ -338,7 +338,10 @@ test('editing properties', async ({ page }, testInfo) => {
             await check(node);
         }
     }
+    const nodeTitle = node.locator('.__title').first();
+    nodeTitle.dblclick();
     await setYAMLEditorContent(page, { name: 'Custom Node' });
+    nodeTitle.dblclick();
     await setYAMLEditorContent(page, content(true));
     for (let i = 0; i < props.length; i += 1) {
         if (props[i][1] !== null) {
