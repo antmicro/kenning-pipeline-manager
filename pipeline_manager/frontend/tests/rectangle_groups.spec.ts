@@ -4,7 +4,7 @@ import {
     Locator,
 } from '@playwright/test';
 import {
-    getUrl, loadSpecification, loadDataflow, getContextMenu,
+    getUrl, loadSpecification, loadDataflow, getContextMenu, deleteNode,
 } from './config.js';
 
 function getNode(page: Page, name: string): Locator {
@@ -53,6 +53,18 @@ async function removeFromGroup(node: Locator, page: Page) {
     await node.locator('.__title').click({ button: 'right' });
     await getContextMenu(page).getByText('Remove from group').click();
 }
+async function createGroup(nodes: Locator[], page: Page) {
+    // eslint-disable-next-line no-restricted-syntax
+    for (let i = 0; i < nodes.length; i += 1) {
+        // eslint-disable-next-line no-await-in-loop
+        await nodes[i].locator('.__title').click({ modifiers: ['ControlOrMeta'] });
+    }
+    await nodes[0].locator('.__title').click({ button: 'right' });
+    // in some cases does not fit on the screen, the test would require dragging screen
+    // or changing screen resolution. This is why instead dispatchEvent was used.
+    await getContextMenu(page).getByText('Group Nodes').dispatchEvent('click');
+    await page.locator('.baklava-button').getByText('Create group').click();
+}
 
 test('check for group presence', async ({ page }) => {
     await page.goto(getUrl());
@@ -85,13 +97,7 @@ test('group creation', async ({ page }) => {
 
     const nodeA = getNode(page, 'Threshold');
     const nodeB = getNode(page, 'StructuringElement');
-    await nodeA.locator('.__title').click({ modifiers: ['ControlOrMeta'] });
-    await nodeB.locator('.__title').click({ modifiers: ['ControlOrMeta'] });
-    await nodeA.locator('.__title').click({ button: 'right' });
-    // in some cases does not fit on the screen, the test would require dragging screen
-    // or changing screen resolution. This is why instead dispatchEvent was used.
-    await getContextMenu(page).getByText('Group Nodes').dispatchEvent('click');
-    await page.locator('.baklava-button').getByText('Create group').click();
+    createGroup([nodeB, nodeA], page);
     const group = page.locator('.rectangle-grouping');
 
     const nodeRect = await getRect([nodeA, nodeB]);
@@ -100,9 +106,6 @@ test('group creation', async ({ page }) => {
 });
 test('remove from group', async ({ page }) => {
     await page.goto(getUrl());
-
-    await loadSpecification(page, 'sample-rectangle-grouping-specification.json');
-    await loadDataflow(page, 'sample-rectangle-grouping-dataflow.json');
 
     await loadSpecification(page, 'sample-rectangle-grouping-specification.json');
     await loadDataflow(page, 'sample-rectangle-grouping-dataflow.json');
@@ -125,8 +128,31 @@ test('remove from group', async ({ page }) => {
     const nodeRectPost = await getRect([nodeA, nodeB]);
     const groupRectPost = await group.boundingBox();
     expect(compareRects(nodeRectPost, groupRectPost)).toBeLessThanOrEqual(10);
+});
+test('delete group', async ({ page }) => {
+    await page.goto(getUrl());
 
-    await removeFromGroup(nodeB, page);
+    await loadSpecification(page, 'sample-rectangle-grouping-specification.json');
+    await loadDataflow(page, 'sample-rectangle-grouping-dataflow.json');
 
-    await expect.poll(async () => group.isVisible()).toBeTruthy();
+    const group = getGroup(page, 'Dataset Wrapper');
+    const nodeA = getNode(page, 'Dataset');
+    const nodeB = getNode(page, 'I/O processing - Dataset');
+    const nodeC = getNode(page, 'Model evaluation');
+
+    await removeFromGroup(nodeA, page);
+    await removeFromGroup(nodeC, page);
+
+    await expect(group).not.toBeVisible();
+
+    await createGroup([nodeA, nodeB, nodeC], page);
+
+    const newGroup = getGroup(page, 'New Group');
+    await expect(newGroup).toBeVisible();
+
+    await nodeC.click();
+    await deleteNode(nodeC, page);
+    await deleteNode(nodeB, page);
+
+    await expect(newGroup).not.toBeVisible();
 });
