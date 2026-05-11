@@ -46,8 +46,7 @@ import useGraphPalette from '../core/palette/graph.ts';
 
 const Tabs = {
     nodes: 'Nodes',
-    graphs: 'Graphs',
-    graphsTree: 'Graph Tree',
+    graphsTree: 'Graphs',
 };
 
 const paletteRef = useTemplateRef('paletteRef');
@@ -55,7 +54,6 @@ const currentTab = ref(Tabs.nodes);
 const paletteSearch = ref('');
 const paletteEntries = {
     [Tabs.nodes]: useNodePalette(paletteSearch),
-    [Tabs.graphs]: useGraphPalette(paletteSearch),
     [Tabs.graphsTree]: useGraphPalette(paletteSearch, { tree: true }),
 };
 const currentEntries = computed(() => paletteEntries[currentTab.value]);
