@@ -85,25 +85,7 @@ export default {
                 class="small_svg"
             />
             <div :class="['tooltip', mobileClasses]">
-                <span>Going to previous graph</span>
-            </div>
-        </div>
-        <div
-            v-if="parentGraph() && !editorManager.editor.isInSubgraph()"
-            :class="['hoverbox', mobileClasses]"
-            role="button"
-            @click="goToParentGraph(parentGraph())"
-            @pointerover="() => updateHoverInfo('parentGraph')"
-            @pointerleave="() => resetHoverInfo('parentGraph')"
-        >
-            <Arrow
-                rotate="up"
-                :hover="isHovered('parentGraph')"
-                color="white"
-                class="small_svg"
-            />
-            <div :class="['tooltip', mobileClasses]">
-                <span>Go to parent graph</span>
+                <span>Go to previous graph</span>
             </div>
         </div>
     </div>
