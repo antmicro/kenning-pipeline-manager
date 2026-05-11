@@ -713,65 +713,6 @@ export default class EditorManager {
         return { graphs, errors };
     }
 
-    /**
-     * Registers default nodes, that are always present in the editor.
-     * The default nodes are the graph node and the new custom node.
-     * If the nodes are already present in the editor, an error is returned.
-     *
-     * @returns {object} Object consisting of errors and warnings arrays.
-     */
-    registerDefaultNodes() {
-        const errors = [];
-        const warnings = [];
-        // Adding a default graph node to the editor so that custom graphs can be created
-        if (this.editor.nodeTypes.has(DEFAULT_GRAPH_NODE_TYPE)) {
-            errors.push(
-                `Node name '${DEFAULT_GRAPH_NODE_NAME}' is reserved by the editor, ` +
-                'but it was included in the specification. ' +
-                'Please change the name of the graph node to avoid conflicts.',
-            );
-            return { errors, warnings };
-        }
-        if (this.editor.nodeTypes.has(DEFAULT_CUSTOM_NODE_TYPE)) {
-            errors.push(
-                `Node name '${DEFAULT_CUSTOM_NODE_NAME}' is reserved by the editor, ` +
-                'but it was included in the specification. ' +
-                'Please change the name of the graph node to avoid conflicts.',
-            );
-            return { errors, warnings };
-        }
-        const customNodeType = {
-            name: DEFAULT_CUSTOM_NODE_NAME,
-            category: DEFAULT_CUSTOM_NODE_CATEGORY,
-        };
-        this._registerNodeType(customNodeType);
-
-        const defaultGraphNode = {
-            name: DEFAULT_GRAPH_NODE_NAME,
-            category: DEFAULT_GRAPH_NODE_CATEGORY,
-        };
-
-        const myGraph = GraphFactory(
-            [],
-            [],
-            DEFAULT_GRAPH_NODE_NAME,
-            this.baklavaView.editor,
-        );
-
-        defaultGraphNode.subgraphId = myGraph.id;
-
-        // If `myGraph` is any array then it is an array of errors
-        if (Array.isArray(myGraph) && myGraph.length) {
-            errors.push(...myGraph);
-        } else {
-            this.baklavaView.editor.addGraphTemplate(
-                myGraph,
-                defaultGraphNode,
-            );
-        }
-        return { errors, warnings };
-    }
-
     replaceNodeSpecificationInEditor(nodeType, nodeSpecification) {
         const errors = [];
 
@@ -1754,11 +1695,6 @@ export default class EditorManager {
 
         // Removing duplicate warnings
         const uniqueWarnings = [...new Set(warnings)];
-
-        // Registering default categories
-        const { errors: defaultErrors, warnings: defaultWarnings } = this.registerDefaultNodes();
-        errors.push(...defaultErrors);
-        uniqueWarnings.push(...defaultWarnings);
 
         // Load entry graph and specification graphs
         const entryGraphId = dataflowSpecification.entryGraph;

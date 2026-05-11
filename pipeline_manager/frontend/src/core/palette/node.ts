@@ -122,21 +122,6 @@ const getSpecialEntries = (
         });
     }
 
-    if ((viewModel as CustomViewModel).settings.newGraphNode
-        && editorManager.isSpecificationLoaded()) {
-        specialEntries.push({
-            id: DEFAULT_GRAPH_NODE_TYPE,
-            data: {
-                title: DEFAULT_GRAPH_NODE_TYPE,
-                icon: specialEntriesIcon,
-                nodeType: viewModel.editor.nodeTypes.get(
-                    DEFAULT_GRAPH_NODE_TYPE,
-                ) as CustomNodeTypeInformation,
-                onDrag: onDragPlaceNode(viewModel),
-            },
-        });
-    }
-
     return specialEntries;
 };
 
