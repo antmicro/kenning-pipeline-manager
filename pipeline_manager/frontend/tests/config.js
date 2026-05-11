@@ -173,7 +173,7 @@ export async function loadDataflow(page, dataflowFile) {
  * @returns {Promise<void>} Resolves when playwright left current subgraph.
  */
 export async function leaveSubgraph(page) {
-    const leaveButton = page.getByText('Return from subgraph editor').locator('../..');
+    const leaveButton = page.getByText('Go to previous graph').locator('../..');
     await leaveButton.click();
 }
 
@@ -207,6 +207,7 @@ export async function enterSubgraph(node, page) {
     const contextMenuOption = getContextMenu(page).getByText('Go to graph');
     if (!await contextMenuOption.isVisible()) {
         const title = await getNodeTitle(node);
+        expect(contextMenuOption).toBeVisible();
         await title.click({ button: 'right' });
     }
     await contextMenuOption.click();

@@ -322,7 +322,7 @@ test('subgraph cascade interface YAML', async ({ page }) => {
     await setYAMLEditorContent(page, content);
 
     // leave
-    const leaveButton = page.getByText('Return from subgraph editor').locator('../..');
+    const leaveButton = page.getByText('Go to previous graph').locator('../..');
     await leaveButton.click();
 
     expect(intf).not.toHaveClass('baklava-node-interface --output --connected');
@@ -353,7 +353,7 @@ test('subgraph cascade property YAML', async ({ page }) => {
     cprop.default = 2137;
     await setYAMLEditorContent(page, content);
     // leave
-    const leaveButton = page.getByText('Return from subgraph editor').locator('../..');
+    const leaveButton = page.getByText('Go to previous graph').locator('../..');
     await leaveButton.click();
     // first property type
     expect(prop.locator('.baklava-select')).not.toBeVisible();
