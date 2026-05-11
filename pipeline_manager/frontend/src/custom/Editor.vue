@@ -512,6 +512,9 @@ export default defineComponent({
                 if (element.classList?.contains('__port')) {
                     return true;
                 }
+                if (element.classList?.contains('__port-bus')) {
+                    return true;
+                }
                 if (element.classList?.contains('baklava-node-interface')) {
                     return true;
                 }

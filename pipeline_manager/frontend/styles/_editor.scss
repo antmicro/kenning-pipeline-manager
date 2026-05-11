@@ -85,6 +85,38 @@
 .baklava-slider > .__slider {
     background-color: $green;
 }
+.__port-bus {
+    width: 3em;
+    background-color: $gray-500;
+    cursor: crosshair;
+    border-radius: 1px;
+    border-color: $green;
+    border-style: dotted;
+    & > .__port-bus-stub {
+      max-height: 0px;
+    }
+}
+.__port-bus-name {
+    writing-mode: vertical-lr;
+}
+.--output {
+  & > .__port-bus {
+    margin-right: -1.25em;
+    margin-left: auto;
+    & > .__port-bus-name {
+      float: left;
+    }
+  }
+}
+.--input {
+  & > .__port-bus {
+    margin-left: -1.25em;
+    margin-right: auto;
+    & > .__port-bus-name {
+      float: right;
+    }
+  }
+}
 
 .baklava-node-interface-positioned
 {
@@ -419,4 +451,7 @@
 .rectangle-selection-border {
     border: 2px dashed $green;
     opacity: 0.7;
+}
+.baklava-ignore-mouse .__port-bus {
+    pointer-events: all !important;
 }

@@ -19,8 +19,19 @@ from creating and deleting connections or altering nodes' values if the editor i
         :class="newClasses"
     >
         <div
+            class="__port-bus"
+            v-if="intf.port && intf.busSize"
+            :style="{height: intf.busSize.toString() + 'px'}"
+            @mouseenter="startHoverWrapper"
+            @mouseleave="endHoverWrapper"
+            @pointerdown.left="onMouseDown"
+            no-drag="true"
+            :class="{ picked: picked, '__square': isExposed }"
+        >
+        </div>
+        <div
             class="__port"
-            v-if="intf.port"
+            v-if="intf.port && !intf.busSize"
             @mouseenter="startHoverWrapper"
             @mouseleave="endHoverWrapper"
             @pointerdown.left="onMouseDown"
@@ -92,7 +103,7 @@ from creating and deleting connections or altering nodes' values if the editor i
                 @click="setValue"
                 @input="setValue"
             />
-            <span v-else>
+            <span v-else-if="!intf.busSize">
                 {{ intf.name }}
             </span>
             <div

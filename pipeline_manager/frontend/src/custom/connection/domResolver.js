@@ -8,7 +8,10 @@
 
 export default function getDomElements(ni) {
     const interfaceDOM = document.getElementById(ni.id);
-    const portDOM = interfaceDOM?.getElementsByClassName('__port');
+    let portDOM = interfaceDOM?.getElementsByClassName('__port');
+    if (!portDOM.length) {
+        portDOM = interfaceDOM?.getElementsByClassName('__port-bus');
+    }
 
     return {
         node: interfaceDOM?.closest('.baklava-node') ?? null,

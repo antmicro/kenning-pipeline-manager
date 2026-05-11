@@ -43,7 +43,7 @@ export function useTemporaryConnection() {
                     hoveringOverElement = null;
                 }
                 // Hover over port, trigger pointerover
-                if (element && element.classList.contains('__port')) {
+                if (element && (element.classList.contains('__port') || element.classList.contains('__port-bus'))) {
                     element.dispatchEvent(new PointerEvent('pointerover'));
                     hoveringOverElement = element;
                 }

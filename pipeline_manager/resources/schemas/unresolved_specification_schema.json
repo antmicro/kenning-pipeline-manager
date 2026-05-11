@@ -436,6 +436,10 @@
                     "description": "Determines whether this interface can should overridden",
                     "type": "boolean",
                     "default": false
+                },
+                "busSize": {
+                    "description": "Determines the size of bus interface",
+                    "type": "number"
                 }
             },
             "required": [
