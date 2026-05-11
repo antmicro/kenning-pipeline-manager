@@ -420,6 +420,33 @@ export default function createPipelineManagerGraph(graph) {
         this._nodes = [];
     };
 
+    // eslint-disable-next-line no-unused-vars
+    graph.addConnection = function addConnection(from, to, ev) {
+        const checkConnectionResult = this.checkConnection(from, to);
+        if (!checkConnectionResult.connectionAllowed) {
+            return undefined;
+        }
+
+        if (this.events.beforeAddConnection.emit({ from, to }).prevented) {
+            return undefined;
+        }
+
+        checkConnectionResult.connectionsInDanger.forEach((connectionToRemove) => {
+            const instance = this.connections.find(
+                (conn) => conn.id === connectionToRemove.id,
+            );
+            if (instance) {
+                this.removeConnection(instance);
+            }
+        });
+
+        const conn = new Connection(
+            checkConnectionResult.dummyConnection.from,
+            checkConnectionResult.dummyConnection.to,
+        );
+        this.internalAddConnection(conn);
+        return conn;
+    };
     graph.load = function load(state, loadAll = false) {
         const errors = [];
 

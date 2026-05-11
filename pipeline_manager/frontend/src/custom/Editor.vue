@@ -357,7 +357,7 @@ export default defineComponent({
 
         const onPointerUp = (ev) => {
             panZoom.onPointerUp(ev);
-            temporaryConnection.onMouseUp();
+            temporaryConnection.onMouseUp(ev);
 
             // handle press & hold
             const currentTime = new Date();
