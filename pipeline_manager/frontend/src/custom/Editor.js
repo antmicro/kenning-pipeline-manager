@@ -1062,7 +1062,7 @@ export default class PipelineManagerEditor extends Editor {
         return position === -1 ? arr.length : position;
     }
 
-    swapInterfaces() {
+    async swapInterfaces() {
         const graphs = this.save();
 
         graphs.graphs.forEach((state) => {
@@ -1112,7 +1112,7 @@ export default class PipelineManagerEditor extends Editor {
                 });
             });
         });
-        this.load(graphs);
+        await this.load(graphs);
     }
 
     updateNodesPosition(updatedGraph) {

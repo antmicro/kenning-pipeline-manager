@@ -73,15 +73,10 @@ export default class D3Engine extends BaseLayoutEngine {
         let positions = [];
 
         while (collisions && attemptId < attempts) {
-            // I noticed that `note` nodes change their width
-            // relative to their x coordinate. The purpose of adding
-            // and offset of 2000 is thus layouting the graph
-            // in the area where nodes' width is constant, which
-            // simplifies dealing with the overlapping problem.
             const [xl, yt, xr, yb] = [
-                2000,
                 0,
-                2000 + 2.5 * (meanWidth + attemptId * step) * (graph.nodes.length) ** 0.5,
+                0,
+                2.5 * (meanWidth + attemptId * step) * (graph.nodes.length) ** 0.5,
                 2.5 * (meanHeight + attemptId * step) * (graph.nodes.length) ** 0.5,
             ];
 
