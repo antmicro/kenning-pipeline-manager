@@ -85,7 +85,7 @@ export default {
                 class="small_svg"
             />
             <div :class="['tooltip', mobileClasses]">
-                <span>Return from subgraph editor</span>
+                <span>Going to previous graph</span>
             </div>
         </div>
         <div
