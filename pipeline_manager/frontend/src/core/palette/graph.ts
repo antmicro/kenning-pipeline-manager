@@ -53,7 +53,7 @@ export default function useGraphPalette(
             id: customGraph.id,
             data: {
                 title,
-                onClick: () => editor.switchToRelatedGraph(customGraph.id, false),
+                onClick: () => editor.switchToRelatedGraph(customGraph.id),
             },
             computed: computedValue,
         };
