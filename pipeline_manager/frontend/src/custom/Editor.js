@@ -194,12 +194,14 @@ export default class PipelineManagerEditor extends Editor {
     }
 
     unregisterGraphs() {
+        this._graph.disableDestroy = true;
         [...this.graphs]
             .filter((graph) => graph !== this._graph)
             .forEach((graph) => {
                 this.unregisterGraph(graph);
                 graph.destroy?.();
             });
+        this._graph.disableDestroy = false;
         this.subgraphStack = [];
     }
 
