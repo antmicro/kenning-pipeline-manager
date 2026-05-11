@@ -24,7 +24,6 @@ import { suppressHistoryLogging } from '../core/History.ts';
 import CreateCustomGraphNodeType, { prepareSubgraphInstance } from './CustomGraphNode.js';
 import { ir } from '../core/interfaceRegistry.ts';
 import { hexToRGB } from '../core/nodeCreation/nodeColors.js';
-import GraphTemplate from './CustomGraphTemplate.js';
 
 import globalProperties from '../globalProperties.ts';
 
@@ -263,9 +262,8 @@ export default class PipelineManagerEditor extends Editor {
     addNewGraph() {
         const graph = new Graph(this);
         graph.name = 'New Graph';
-
-        const template = new GraphTemplate(graph, this);
-        this.editorManager.baklavaView.editor.switchToGraph(template, false);
+        this.registerGraph(graph);
+        this.editorManager.baklavaView.editor.switchToRelatedGraph(graph.id, false);
     }
 
     /**
@@ -1259,7 +1257,11 @@ export default class PipelineManagerEditor extends Editor {
      * and updates the graph node's interfaces accordingly.
      */
     backFromSubgraph() {
-        const newGraph = this.subgraphStack.pop(); // eslint-disable-line no-unused-vars
+        let newGraph = this.subgraphStack.pop();
+
+        while (newGraph !== undefined && newGraph?.editor === undefined) {
+            newGraph = this.subgraphStack.pop();
+        }
 
         suppressHistoryLogging(true);
 
