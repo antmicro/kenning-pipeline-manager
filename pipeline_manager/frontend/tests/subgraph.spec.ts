@@ -57,18 +57,21 @@ async function placeNewNode(page: Page, location: { x: number; y: number }) {
     await disableNavigationBar(page);
 }
 
-async function createNewNode(page: Page, location: { x: number; y: number }) {
+async function createNewNode(page: Page, location: { x: number; y: number },nodeName: string = "Custom Node") {
     await enableNavigationBar(page);
     const newNodeType = page.getByText('New Node Type').first();
     await dragAndDrop(page, newNodeType, location.x, location.y);
+    const nodeNameInput = page.getByTitle('Node name');
+    await nodeNameInput.fill(nodeName);
     const createButton = page.getByText('Create').first();
     await createButton.click();
 }
 
 async function createNewGraphNode(page: Page, location: { x: number; y: number }) {
     await enableNavigationBar(page);
-    const newGraphNodeType = page.getByText('New Graph Node').first();
-    await dragAndDrop(page, newGraphNodeType, location.x, location.y);
+    await createNewNode(page,location,'New Graph Node');
+    const newGraphNodeType = getNode(page,'New Graph Node').first();
+    await addSubgraph(newGraphNodeType,page);
 }
 
 test('test preserving changes to subgraph', async ({ page }) => {
