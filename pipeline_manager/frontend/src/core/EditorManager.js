@@ -800,6 +800,25 @@ export default class EditorManager {
         }
     }
 
+    resolveAndRegisterNode(nodeSpecification) {
+        const resolvedNodeSpec = structuredClone(nodeSpecification);
+
+        if (resolvedNodeSpec.isCategory) {
+            this.baklavaView.editor
+                .parentNodes.set(resolvedNodeSpec.name, resolvedNodeSpec);
+        }
+
+        const inherited = this.findSimpleInheritedAttributes(resolvedNodeSpec.name,
+            this.specification.currentSpecification.nodes);
+
+        if (inherited.category && !resolvedNodeSpec.category) {
+            resolvedNodeSpec.category = inherited.category;
+            resolvedNodeSpec.simpleInherited ??= [];
+            resolvedNodeSpec.simpleInherited.push('category');
+        }
+        this.specification.currentSpecification.nodes.push(resolvedNodeSpec);
+    }
+
     /**
      * Validates the node specification passed in `nodeSpecification` and if
      * it is correct adds it to the unresolved specification.
@@ -880,22 +899,7 @@ export default class EditorManager {
                 if (validationErrors.length) {
                     return { errors: validationErrors, warnings: [] };
                 }
-                const resolvedNodeSpec = structuredClone(nodeSpecification);
-
-                if (resolvedNodeSpec.isCategory) {
-                    this.baklavaView.editor
-                        .parentNodes.set(resolvedNodeSpec.name, resolvedNodeSpec);
-                }
-
-                const inherited = this.findSimpleInheritedAttributes(resolvedNodeSpec.name,
-                    this.specification.currentSpecification.nodes);
-
-                if (inherited.category && !resolvedNodeSpec.category) {
-                    resolvedNodeSpec.category = inherited.category;
-                    resolvedNodeSpec.simpleInherited ??= [];
-                    resolvedNodeSpec.simpleInherited.push('category');
-                }
-                this.specification.currentSpecification.nodes.add(resolvedNodeSpec);
+                this.resolveAndRegisterNode(nodeSpecification);
             } else {
                 if (unresolvedNodeSpecification === undefined) {
                     // The node is included - push new spec to unresolvedSpecification to override
@@ -977,22 +981,7 @@ export default class EditorManager {
                 return { errors: validationErrors, warnings: [] };
             }
             this.specification.unresolvedSpecification.nodes.push(nodeSpecification);
-
-            const resolvedNodeSpec = structuredClone(nodeSpecification);
-
-            if (resolvedNodeSpec.isCategory) {
-                this.baklavaView.editor.parentNodes.set(resolvedNodeSpec.name, resolvedNodeSpec);
-            }
-
-            const inherited = this.findSimpleInheritedAttributes(resolvedNodeSpec.name,
-                this.specification.currentSpecification.nodes);
-
-            if (inherited.category && !resolvedNodeSpec.category) {
-                resolvedNodeSpec.category = inherited.category;
-                resolvedNodeSpec.simpleInherited ??= [];
-                resolvedNodeSpec.simpleInherited.push('category');
-            }
-            this.specification.currentSpecification.nodes.push(resolvedNodeSpec);
+            this.resolveAndRegisterNode(nodeSpecification);
         }
 
         if (this.externalApplicationManager) {
