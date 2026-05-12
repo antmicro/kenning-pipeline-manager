@@ -206,7 +206,7 @@ import {
     startTransaction, commitTransaction,
 } from '../core/History.ts';
 
-import EditorManager, { DEFAULT_GRAPH_NODE_TYPE } from '../core/EditorManager';
+import EditorManager from '../core/EditorManager';
 import getExternalApplicationManager, { handleExternalAppResponse } from '../core/communication/ExternalApplicationManager';
 
 import { saveGraphConfiguration } from '../components/saveConfiguration.ts';
@@ -409,7 +409,6 @@ const contextMenuTitleItems = computed(() => {
         || (i?.bus?.type !== undefined && i?.bus?.stubs?.length === 0)));
 
     if (editorManager.baklavaView.settings.editableNodeTypes &&
-        node.value.type !== DEFAULT_GRAPH_NODE_TYPE &&
         !viewModel.value.editor.readonly &&
         !(props.node.subgraph && props.node.extending?.length)) {
         items.push(
