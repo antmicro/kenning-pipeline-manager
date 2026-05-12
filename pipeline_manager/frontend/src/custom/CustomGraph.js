@@ -194,8 +194,6 @@ export default function createPipelineManagerGraph(graph) {
             newNodeInstance.title = oldNode.title;
         }
 
-        const color = this.editor.getNodeColor(oldNode);
-
         // Restoring properties and interfaces
         if (copyInterfaces) {
             Object.entries({ ...oldNode.inputs, ...oldNode.outputs }).forEach(([name, intf]) => {
@@ -327,6 +325,8 @@ export default function createPipelineManagerGraph(graph) {
         });
 
         commitTransaction();
+
+        const color = this.editor.getNodeColor(oldNode);
 
         if (color) {
             this.editor.setNodeColor(newNodeInstance.id, color);
