@@ -160,6 +160,7 @@ Node style defines how nodes of a given style should look like. Currently, the f
 * `icon` - secondary icon of the node, which is displayed separately from [Node](#node) `icon`,
 * `pill` - pill of the node unless a node sets its own `pill`.
 * `minimal` - flag informing whether to use special minimized style for the node. Note that icon and title card won't be visible when this is enabled.
+* `shape` - a link or path to SVG file, allowing to define custom shape for node.
 
 Field values are defined the same way as in [Node](#node) specification, however, `icon` can obtain [Navbar item](#navbar-item) `iconName` values as well.
 
