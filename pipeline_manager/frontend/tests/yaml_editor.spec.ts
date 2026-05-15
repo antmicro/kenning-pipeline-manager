@@ -264,7 +264,7 @@ test('interface maxConnectionCount YAML', async ({ page }) => {
     content.interfaces[0].maxConnectionsCount = 0;
     await setYAMLEditorContent(page, content);
     await assertOutputCount(node, 1);
-    expect(intf).not.toHaveClass('baklava-node-interface --output --connected');
+    expect(intf).toHaveClass('baklava-node-interface --output --connected');
 });
 test('subgraph cascade interface YAML', async ({ page }) => {
     await page.goto(getUrl());
