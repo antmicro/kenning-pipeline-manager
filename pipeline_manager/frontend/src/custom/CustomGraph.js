@@ -268,6 +268,10 @@ export default function createPipelineManagerGraph(graph) {
             (c) => interfaces.includes(c.from) || interfaces.includes(c.to),
         );
 
+        connections.forEach((conn) => {
+            this.removeConnection(conn);
+        });
+
         const connectionsToRestore = [];
 
         Object.entries({ ...oldNode.inputs, ...oldNode.outputs }).forEach(([name, intf]) => {
