@@ -42,6 +42,8 @@ export default function createPipelineManagerGraph(graph) {
 
     // A value that indicates whether we should save the graph or not
     graph.toSave = true;
+    // A value that indicate whether graph was loaded from specification or not
+    graph.specGraph = false;
 
     graph.setToSave = function setToSave(save) {
         this.toSave = save;
@@ -49,6 +51,16 @@ export default function createPipelineManagerGraph(graph) {
 
     graph.dragNodes = function dragNodes(nodes) {
         this.events.dragNodes.emit(nodes);
+    };
+
+    graph.setSpecGraph = function setSpecGraph(spec) {
+        this.specGraph = spec;
+
+        this.nodes.forEach((n) => {
+            if (n?.subgraph !== undefined) {
+                n.subgraph.setSpecGraph(spec);
+            }
+        });
     };
 
     graph.checkConnection = function checkConnection(from, to) {
