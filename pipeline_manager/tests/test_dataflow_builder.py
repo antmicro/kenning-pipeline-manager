@@ -245,31 +245,13 @@ def subgraph_dataflow_alt():
     return {
         "graphs": [
             {
-                "id": "5d19b77b-89a6-4337-9d6c-6604df9275e6",
-                "nodes": [
-                    {
-                        "id": "caddc6df-9d5c-4db9-aaed-03dd5531f9b8",
-                        "position": {"x": 480, "y": 165},
-                        "width": 300,
-                        "twoColumn": True,
-                        "interfaces": [],
-                        "properties": [],
-                        "enabledInterfaceGroups": [],
-                        "name": "New Graph Node",
-                        "instanceName": "New Graph Node",
-                        "subgraph": "6e5b3c61-63e8-4a3b-835a-6b178a2dec80",
-                    }
-                ],
-                "connections": [],
-            },
-            {
                 "id": "6e5b3c61-63e8-4a3b-835a-6b178a2dec80",
-                "name": "New Graph Node",
+                "name": "New Graph",
                 "nodes": [],
                 "connections": [],
             },
         ],
-        "entryGraph": "5d19b77b-89a6-4337-9d6c-6604df9275e6",
+        "entryGraph": "6e5b3c61-63e8-4a3b-835a-6b178a2dec80",
         "version": "20250623.14",
         "metadata": {},
     }
