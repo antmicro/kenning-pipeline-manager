@@ -107,7 +107,6 @@ export default defineComponent({
             backgroundColor: props.color,
             opacity: '0.15',
             position: 'relative',
-            borderRadius: '15px',
         }));
 
         return {
@@ -134,7 +133,7 @@ export default defineComponent({
 .rectangle-grouping {
     width: 100%;
     height: 100%;
-    border-radius: $spacing-s;
+    border-radius: 0px;
     pointer-events: none;
 }
 
