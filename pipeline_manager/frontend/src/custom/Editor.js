@@ -196,7 +196,7 @@ export default class PipelineManagerEditor extends Editor {
     unregisterGraphs() {
         this._graph.disableDestroy = true;
         [...this.graphs]
-            .filter((graph) => graph !== this._graph)
+            .filter((graph) => graph !== this._graph && !graph.specGraph)
             .forEach((graph) => {
                 this.unregisterGraph(graph);
                 graph.destroy?.();
