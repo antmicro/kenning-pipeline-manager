@@ -1674,12 +1674,13 @@ export default class EditorManager {
         errors.push(...defaultErrors);
         uniqueWarnings.push(...defaultWarnings);
 
-        // Load entry graph
+        // Load entry graph and specification graphs
         const entryGraphId = dataflowSpecification.entryGraph;
         if (!errors.length && entryGraphId !== undefined) {
             const idToGraph = new Map(graphs?.map((graph) => [graph.id, graph]));
+
             const graph = idToGraph.get(entryGraphId);
-            if (graph) {
+            if (graph !== undefined) {
                 graphs.flatMap((g) => g.nodes).forEach((node) => delete node.graphState);
                 const graphs_ = idToNested.get(graph.id).map((id) => idToGraph.get(id));
                 const {
@@ -1689,7 +1690,8 @@ export default class EditorManager {
                     version: dataflowSpecification.version,
                     entryGraph: entryGraphId,
                 });
-                this.relatedGraphsStore.forEach((g) => this.baklavaView.editor.registerGraph(g));
+                this.relatedGraphsStore.forEach((g) =>
+                    this.baklavaView.editor.registerGraph(g));
                 if (entryErrors && entryErrors.length !== 0) {
                     entryErrors.forEach((e) => errors.push(e));
                     const newGraphInstance = new Graph(this.baklavaView.editor);
@@ -1698,6 +1700,21 @@ export default class EditorManager {
                     this.baklavaView.editor.unregisterGraphs();
                 }
             } else {
+                uniqueWarnings.push(`'entryGraph' points to undefined graph: '${entryGraphId}'`);
+            }
+
+            // preload every graphs in specification
+            graphs.flatMap((g) => g.nodes).forEach((node) => delete node.graphState);
+            if (graphs.length > 0) {
+                graphs.forEach((g) => {
+                    this.editor.addPreloadedGraph(g);
+                });
+            }
+        }
+
+        if (!errors.length) {
+            const idToGraph = new Map(graphs?.map((graph) => [graph.id, graph]));
+            if (entryGraphId !== undefined && idToGraph.get(entryGraphId) === undefined) {
                 uniqueWarnings.push(`'entryGraph' points to undefined graph: '${entryGraphId}'`);
             }
         }
