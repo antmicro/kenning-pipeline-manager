@@ -810,7 +810,7 @@ def test_adding_subgraph_node(subgraph_specification):
 
     graph1 = builder.create_graph()
     graph2 = builder.create_graph()
-    graph1.create_node(name="New Graph Node", subgraph_id=graph2.id, width=350)
+    graph1.create_node(name="Test node #1", subgraph_id=graph2.id, width=350)
     builder.validate()
 
 
