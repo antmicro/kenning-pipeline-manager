@@ -512,6 +512,7 @@ export default class EditorManager {
 
     clearEditorManagerState() {
         this.clearHistory();
+        this.baklavaView.editor.graphs.forEach((graph) => graph.setSpecGraph(false));
         this.baklavaView.editor.unregisterGraphs();
         this.baklavaView.editor.deepCleanEditor();
         this.baklavaView.editor.unregisterNodes();
