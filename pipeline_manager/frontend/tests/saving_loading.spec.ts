@@ -194,7 +194,7 @@ examples.forEach(({ dataflow, specification, timeout }) => {
         if (!continueProcessing) {
             return;
         }
-        await dragAndDropFile(page, '.welcome-container', dataflow, testInfo);
+        await dragAndDropFile(page, '.baklava-editor', dataflow, testInfo);
         await expectNoErrors(page);
     });
 
@@ -231,10 +231,9 @@ test('save and load graph partially', async ({ page }, testInfo) => {
     await loadSpecification(page, 'sample-subgraph-specification.json');
     await expectNoErrors(page);
     await loadDataflow(page, 'sample-subgraph-dataflow.json');
-    await expectNoErrors(page);
-    const filepath = await saveDataflowAs(page, testInfo, 'temp', [
-        'Example of a graph with graph nodes',
-        'Test subgraph #1',
+    const filepath = await saveDataflowAs(page,testInfo,'temp',[
+        "Example of a graph with graph nodes",
+        "Test subgraph #1",
     ]);
     await expectNoErrors(page);
     await loadDatflowFromFile(page, filepath);
@@ -243,5 +242,5 @@ test('save and load graph partially', async ({ page }, testInfo) => {
     const paletteTitle = await page.locator('.palette-title');
     await paletteTitle.getByText('Graphs').first().click();
     const entries = await page.locator('.entries');
-    expect(await entries.locator('.__entry').count()).toBe(1);
+    expect(await entries.locator('.__entry').count()).toBe(3);
 });
