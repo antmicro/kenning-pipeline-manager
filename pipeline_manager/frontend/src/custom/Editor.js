@@ -323,7 +323,7 @@ export default class PipelineManagerEditor extends Editor {
             state.graphs?.forEach((graph) => {
                 if (!usedSubgraphs.has(graph.id) && entryGraph.id !== graph.id) {
                     const graphObject = new Graph(this);
-                    result.errors.push(...graphObject.load(graph));
+                    result.errors.push(...graphObject.load(graph, true));
                     this.registerGraph(graphObject);
                 }
             });
