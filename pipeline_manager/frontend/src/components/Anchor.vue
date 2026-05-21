@@ -56,6 +56,7 @@ export default defineComponent({
             // eslint-disable-next-line max-len
             graph.value.editAnchor(props.connection, props.index, props.position, dragMove.draggingStartPosition.value);
             dragMove.onPointerUp();
+            graph.value.refreshConnections();
         };
 
         const startDrag = (ev: PointerEvent) => {
