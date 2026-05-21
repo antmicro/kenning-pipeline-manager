@@ -1300,6 +1300,6 @@ export default class ConnectionRenderer {
      * @returns True if style supports anchors.
      */
     supportsAnchors() {
-        return ['orthogonal', 'alternativeOrthogonal', 'straight'].includes(this.style);
+        return ['orthogonal', 'alternativeOrthogonal', 'straight', 'switchableOrthogonal'].includes(this.style);
     }
 }
