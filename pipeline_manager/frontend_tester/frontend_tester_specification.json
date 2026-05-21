@@ -3,7 +3,6 @@
     "graphs": [
         {
             "name": "Test subgraph #1",
-            "category": "Test Category",
             "nodes": [
                 {
                     "id": "1212de63-daad-4ace-bc4b-df562b3a6b0e",
