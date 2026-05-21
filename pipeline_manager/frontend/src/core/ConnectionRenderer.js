@@ -110,6 +110,8 @@ export default class ConnectionRenderer {
 
     randomizedOffset = false;
 
+    switchableInterfaces = false;
+
     shiftDistance = 15;
 
     /**
@@ -1103,8 +1105,12 @@ export default class ConnectionRenderer {
         return this.orthogonalRenderLoopback(x1, y1, x2, y2, connection);
     }
 
+    supportSwitchableInterfaces() {
+        return ['orthogonal', 'alternativeOrthogonal', 'straight', 'switchableOrthogonal'].includes(this.style);
+    }
+
     connectionRefresh(connection) {
-        if (this.style === 'switchableOrthogonal') {
+        if (this.switchableInterfaces && this.supportSwitchableInterfaces()) {
             const from = getDomElements(connection.from);
             const to = getDomElements(connection.to);
 

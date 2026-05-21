@@ -86,6 +86,18 @@ export default {
             return option;
         });
 
+        const switchableInterfacesOption = computed(() => {
+            const option = new CheckboxInterface(
+                'Switchable interfaces',
+                props.viewModel.connectionRenderer.switchableInterfaces,
+            );
+            option.events.setValue.subscribe(this, (v) => {
+                props.viewModel.connectionRenderer.switchableInterfaces = v; // eslint-disable-line vue/no-mutating-props,max-len,no-param-reassign
+                metadataChanged('switchableInterfaces', v);
+            });
+            return option;
+        });
+
         const editableNodeTypes = computed(() => {
             const option = new CheckboxInterface(
                 'Modify node types',
@@ -287,6 +299,7 @@ export default {
                 movementStep.value,
                 randomizedOffsetOption.value,
                 hideAnchors.value,
+                switchableInterfacesOption.value,
                 showIds.value,
                 showHiddenProperties.value,
             ];
