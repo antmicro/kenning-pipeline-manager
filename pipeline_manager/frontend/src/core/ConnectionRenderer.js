@@ -1151,41 +1151,55 @@ export default class ConnectionRenderer {
         const nextToNodeLeftIndex = getIndex(toNodeLefts.map((intf) => intf.sidePosition));
         const nextToNodeRightIndex = getIndex(toNodeRights.map((intf) => intf.sidePosition));
 
+        const toLastSide = nc.to.side;
+        const fromLastSide = nc.from.side;
+
         if (nc.to) {
-            const x = nc.x1;
-            const y = nc.y1;
+            const x = nc.x2;
+            const y = nc.y2;
             // get anchor closet to interface
-            const closetAnchor = this.getClosestAnchor(anchors, x, y);
-            console.log('To closest anchor: ', closetAnchor);
+            const anchorIndexes = anchors.map((anch) => anch.index);
 
-            const dx = x - closetAnchor.x;
-            console.log('To dx: ', dx);
+            const maxIndex = Math.max(...anchorIndexes);
+            const anchorsToCheck = anchors.filter((anch) => anch.index === maxIndex);
+            const closetAnchor = this.getClosestAnchor(anchorsToCheck, x, y);
 
-            if (dx > 0) {
+            if (x < closetAnchor.x) {
                 nc.to.side = 'right';
-                nc.to.sidePosition = nextToNodeRightIndex;
-            } else if (dx < 0) {
+
+                if (toLastSide !== 'right') {
+                    nc.to.sidePosition = nextToNodeRightIndex;
+                }
+            } else {
                 nc.to.side = 'left';
-                nc.to.sidePosition = nextToNodeLeftIndex;
+
+                if (toLastSide !== 'left') {
+                    nc.to.sidePosition = nextToNodeLeftIndex;
+                }
             }
         }
 
         if (nc.from) {
-            const x = nc.x2;
-            const y = nc.y2;
+            const x = nc.x1;
+            const y = nc.y1;
             // get anchor closet to interface
-            const closetAnchor = this.getClosestAnchor(anchors, x, y);
-            console.log('From closest anchor: ', closetAnchor);
+            const anchorIndexes = anchors.map((anch) => anch.index);
 
-            const dx = x - closetAnchor.x;
-            console.log('From dx: ', dx);
+            const minIndex = Math.min(...anchorIndexes);
+            const anchorsToCheck = anchors.filter((anch) => anch.index === minIndex);
+            const closetAnchor = this.getClosestAnchor(anchorsToCheck, x, y);
 
-            if (dx > 0) {
+            if (x < closetAnchor.x) {
                 nc.from.side = 'right';
-                nc.from.sidePosition = nextFromNodeRightIndex;
-            } else if (dx < 0) {
+
+                if (fromLastSide !== 'right') {
+                    nc.from.sidePosition = nextFromNodeRightIndex;
+                }
+            } else {
                 nc.from.side = 'left';
-                nc.from.sidePosition = nextFromNodeLeftIndex;
+                if (fromLastSide !== 'left') {
+                    nc.from.sidePosition = nextFromNodeLeftIndex;
+                }
             }
         }
     }
@@ -1272,49 +1286,7 @@ export default class ConnectionRenderer {
     }
 
     switchableOrthogonalRender(x1, y1, x2, y2, connection) {
-        const graph = this.viewModel.displayedGraph;
-        const nc = new NormalizedConnection(x1, y1, x2, y2, connection);
-
-        if (connection.anchors !== undefined && connection.anchors.length) {
-            return this.orthogonalAnchorsPath(connection.anchors, nc, graph);
-        }
-
-        const minMargin = 30 * graph.scaling;
-        const middlePoint = (nc.x1 + nc.x2) / 2;
-
-        if (connection.to) {
-            const fromNode = graph.nodes.filter((node) => nc.from.nodeId === node.id)[0];
-            const fromNodeWidth = fromNode.width;
-            const toNode = graph.nodes.filter((node) => nc.to.nodeId === node.id)[0];
-            const toNodeWidth = toNode.width;
-
-            if (nc.from.side === 'right' && nc.to.side === 'left') {
-                if (nc.x1 + minMargin < nc.x2 - minMargin) {
-                    return `M ${nc.x1} ${nc.y1} H ${middlePoint} V ${nc.y2} H ${nc.x2}`;
-                }
-                if (!(nc.x1 - fromNodeWidth * graph.scaling - minMargin
-                    > nc.x2 + toNodeWidth * graph.scaling + minMargin)) {
-                    const horizontal = Math.max(nc.x1, nc.x2 +
-                        toNodeWidth * graph.scaling) + minMargin;
-                    return `M ${nc.x1} ${nc.y1} H ${horizontal} V ${nc.y2} H ${nc.x2}`;
-                }
-            } else if (nc.from.side === 'left' && nc.to.side === 'right') {
-                if (nc.x2 + minMargin < nc.x1 - minMargin) {
-                    return `M ${nc.x1} ${nc.y1} H ${middlePoint} V ${nc.y2} H ${nc.x2}`;
-                }
-                if (!(nc.x2 - toNodeWidth * graph.scaling - minMargin
-                    > nc.x1 + fromNodeWidth * graph.scaling + minMargin)) {
-                    const horizontal = Math.max(nc.x1, nc.x2) + minMargin;
-                    return `M ${nc.x1} ${nc.y1} H ${horizontal} V ${nc.y2} H ${nc.x2}`;
-                }
-            } else if (!((nc.x1 + minMargin < nc.x2 - toNodeWidth * graph.scaling - minMargin)
-                    || (nc.x1 - fromNodeWidth * graph.scaling - minMargin > nc.x2 + minMargin))) {
-                const horizontal = Math.max(nc.x1, nc.x2) + minMargin;
-                return `M ${nc.x1} ${nc.y1} H ${horizontal} V ${nc.y2} H ${nc.x2}`;
-            }
-        }
-
-        return `M ${nc.x1} ${nc.y1} H ${middlePoint} V ${nc.y2} H ${nc.x2}`;
+        return this.orthogonalRender(x1, y1, x2, y2, connection);
     }
 
     switchableOrthogonalRenderLoopback(x1, y1, x2, y2, connection) {
