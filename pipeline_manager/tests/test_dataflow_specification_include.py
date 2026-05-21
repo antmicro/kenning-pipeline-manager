@@ -53,6 +53,7 @@ def dataflow_one_graph_using_SaveVideo_node():
                                 "name": "frames",
                                 "side": "left",
                                 "sidePosition": 0,
+                                "externalName": "frames",
                             }
                         ],
                         "properties": [
