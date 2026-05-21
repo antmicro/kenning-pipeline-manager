@@ -1115,11 +1115,88 @@ export default class ConnectionRenderer {
         }
     }
 
+    getClosestAnchor(anchors, x, y) {
+        if (!anchors?.length) {
+            return undefined;
+        }
+
+        const closetAnchor = anchors.map((anch) => [
+            anch, Math.abs(x - anch.x) + Math.abs(y - anch.y),
+        ]).sort((a, b) => a[1] - b[1]).at(0)[0];
+
+        return closetAnchor;
+    }
+
+    switchableConnectionRefreshAnchors(normalizedConnection, anchors, graph) {
+        const nc = normalizedConnection;
+
+        const fromNode = graph.nodes.filter((node) => nc.from.nodeId === node.id)[0];
+        const fromNodeInputs = Object.values(fromNode.inputs)
+            .filter((ni) => !ni.hidden);
+        const fromNodeOutputs = Object.values(fromNode.outputs)
+            .filter((no) => !no.hidden);
+        const toNode = graph.nodes.filter((node) => nc.to.nodeId === node.id)[0];
+        const toNodeInputs = Object.values(toNode.inputs).filter((ni) => !ni.hidden && ni.port);
+        const toNodeOutputs = Object.values(toNode.outputs).filter((no) => !no.hidden && no.port);
+
+        const fromNodeLefts = [...fromNodeInputs, ...fromNodeOutputs].filter((intf) => intf.side === 'left');
+        const fromNodeRights = [...fromNodeInputs, ...fromNodeOutputs].filter((intf) => intf.side === 'right');
+
+        const toNodeLefts = [...toNodeInputs, ...toNodeOutputs].filter((intf) => intf.side === 'left');
+        const toNodeRights = [...toNodeInputs, ...toNodeOutputs].filter((intf) => intf.side === 'right');
+
+        const nextFromNodeLeftIndex = getIndex(fromNodeLefts.map((intf) => intf.sidePosition));
+        const nextFromNodeRightIndex = getIndex(fromNodeRights.map((intf) => intf.sidePosition));
+
+        const nextToNodeLeftIndex = getIndex(toNodeLefts.map((intf) => intf.sidePosition));
+        const nextToNodeRightIndex = getIndex(toNodeRights.map((intf) => intf.sidePosition));
+
+        if (nc.to) {
+            const x = nc.x1;
+            const y = nc.y1;
+            // get anchor closet to interface
+            const closetAnchor = this.getClosestAnchor(anchors, x, y);
+            console.log('To closest anchor: ', closetAnchor);
+
+            const dx = x - closetAnchor.x;
+            console.log('To dx: ', dx);
+
+            if (dx > 0) {
+                nc.to.side = 'right';
+                nc.to.sidePosition = nextToNodeRightIndex;
+            } else if (dx < 0) {
+                nc.to.side = 'left';
+                nc.to.sidePosition = nextToNodeLeftIndex;
+            }
+        }
+
+        if (nc.from) {
+            const x = nc.x2;
+            const y = nc.y2;
+            // get anchor closet to interface
+            const closetAnchor = this.getClosestAnchor(anchors, x, y);
+            console.log('From closest anchor: ', closetAnchor);
+
+            const dx = x - closetAnchor.x;
+            console.log('From dx: ', dx);
+
+            if (dx > 0) {
+                nc.from.side = 'right';
+                nc.from.sidePosition = nextFromNodeRightIndex;
+            } else if (dx < 0) {
+                nc.from.side = 'left';
+                nc.from.sidePosition = nextFromNodeLeftIndex;
+            }
+        }
+    }
+
     switchableConnectionRefresh(x1, y1, x2, y2, connection) {
         const graph = this.viewModel.displayedGraph;
         const nc = new NormalizedConnection(x1, y1, x2, y2, connection);
 
         if (connection.anchors !== undefined && connection.anchors.length) {
+            // We should take anchors into account.
+            this.switchableConnectionRefreshAnchors(nc, connection.anchors, graph);
             return;
         }
 
