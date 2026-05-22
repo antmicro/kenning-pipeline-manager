@@ -10,6 +10,7 @@ import json
 from asyncio import Future
 from collections import defaultdict
 from http import HTTPStatus
+from timeit import default_timer as timer
 from typing import Awaitable, Callable, Dict
 
 import socketio
@@ -25,7 +26,10 @@ from pipeline_manager_backend_communication.misc_structures import (
 )
 
 from pipeline_manager.backend.chunked_com import send_chunked
-from pipeline_manager.backend.config import MAX_HTTP_BUFFER_SIZE
+from pipeline_manager.backend.config import (
+    CHUNKED_MESSAGE_TIMEOUT,
+    MAX_HTTP_BUFFER_SIZE,
+)
 from pipeline_manager.backend.state_manager import global_state_manager
 from pipeline_manager.backend.tcp_socket import (
     join_listener_task,
@@ -49,7 +53,7 @@ def create_socketio() -> socketio.AsyncServer:
         cors_allowed_origins="*",
         max_http_buffer_size=MAX_HTTP_BUFFER_SIZE,
     )
-    CHUNKS = []
+    CHUNKS = defaultdict(lambda: defaultdict(lambda: [0, []]))
 
     def reject_old_sessions_requests(
         func: Callable[[str, Dict], Future[bool]],
@@ -89,24 +93,42 @@ def create_socketio() -> socketio.AsyncServer:
 
         return _func
 
+    def clean_old_messages(sid):
+        current_time = timer()
+
+        chunks = CHUNKS[sid]
+
+        to_remove = []
+
+        for key, value in chunks.items():
+            if current_time - value[0] >= CHUNKED_MESSAGE_TIMEOUT:
+                to_remove.append(key)
+
+        for key in to_remove:
+            del chunks[key]
+
     def collect_chunks(
         func: Callable[[str, Dict], Awaitable[bool]],
     ) -> Callable[[str, Dict], Awaitable[bool]]:
         """
         Decorator implementing support for chunked messages.
         """
-        chunks = defaultdict(lambda: defaultdict(lambda: []))
-        CHUNKS.append(chunks)
 
         async def event_handler(sid, json_rpc_request) -> bool:
+            clean_old_messages(sid)
+
             if "chunk_id" in json_rpc_request:
                 data = json_rpc_request.get("chunk", None)
-
                 if data is not None:
-                    chunks[sid][json_rpc_request["chunk_id"]].append(data)
+                    # update time
+                    CHUNKS[sid][json_rpc_request["chunk_id"]][0] = timer()
+                    # collect data
+                    CHUNKS[sid][json_rpc_request["chunk_id"]][1].append(data)
                 if json_rpc_request.get("end", False):
-                    data = "".join(chunks[sid][json_rpc_request["chunk_id"]])
-                    del chunks[sid][json_rpc_request["chunk_id"]]
+                    data = "".join(
+                        CHUNKS[sid][json_rpc_request["chunk_id"]][1]
+                    )
+                    del CHUNKS[sid][json_rpc_request["chunk_id"]]
                     return await func(
                         sid,
                         json.loads(data),
@@ -247,9 +269,8 @@ def create_socketio() -> socketio.AsyncServer:
                 to=global_state_manager.last_socket,
             )
         # Cleanup partial messages
-        for chunks in CHUNKS:
-            if sid in chunks:
-                del chunks[sid]
+        if sid in CHUNKS:
+            del CHUNKS[sid]
 
     @sio.on("backend-api")
     @collect_chunks
