@@ -473,6 +473,33 @@ export default function createPipelineManagerGraph(graph) {
         this.internalAddConnection(conn);
         return conn;
     };
+    graph.findNodeInterface = function findNodeInterface(id) {
+        let result;
+        const findStub = (intf, id_) => {
+            if (!intf.busSize) {
+                return undefined;
+            }
+            return intf.busStubs?.find((stub) => stub.id === id_);
+        };
+        const findId = (arr) => Object.keys(arr)?.forEach((k) => {
+            const nodeInput = arr[k];
+            if (nodeInput.id === id) {
+                result = nodeInput;
+            } else {
+                const s = findStub(arr[k], id);
+                if (s) {
+                    result = s;
+                }
+            }
+        });
+        this.nodes.forEach((node) => {
+            if (result) return;
+            findId(node.inputs);
+            if (result) return;
+            findId(node.outputs);
+        });
+        return result;
+    };
     graph.load = function load(state, loadAll = false) {
         const errors = [];
 

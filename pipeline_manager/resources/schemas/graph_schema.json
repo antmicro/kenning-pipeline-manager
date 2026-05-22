@@ -145,6 +145,14 @@
                                 "externalName": {
                                     "description": "Name of the external socket displayed in the node",
                                     "type": ["string", "null"]
+                                },
+                                "busSize": {
+                                    "description": "Determines the size of bus interface",
+                                    "type": "number"
+                                },
+                                "busStubs": {
+                                    "description": "Endpoints of connections going into the bus",
+                                    "type": "array"
                                 }
                             },
                             "required": [

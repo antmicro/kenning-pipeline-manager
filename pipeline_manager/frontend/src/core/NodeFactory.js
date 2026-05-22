@@ -781,6 +781,10 @@ export class CustomNode extends Node {
                             direction: ioState.direction,
                         });
                     }
+                    const busStubs = ioState.busStubs?.map((stub) => ({
+                        id: stub.id,
+                        stubOffset: Math.floor(stub.stubOffset),
+                    }));
 
                     newInterfaces.push({
                         name: ioName.slice(ioState.direction.length + 1),
@@ -789,6 +793,8 @@ export class CustomNode extends Node {
                         direction: ioState.direction,
                         side: ioState.side,
                         sidePosition: ioState.sidePosition,
+                        ...(ioState.busSize && { busSize: ioState.busSize }),
+                        ...(ioState.busSize && busStubs && { busStubs }),
                     });
                 }
             } else {
@@ -1009,16 +1015,18 @@ export class CustomNode extends Node {
 
         // Assigning sides and sides Positions to interfaces
         Object.entries(stateios).forEach(([ioName, ioState]) => {
+            let intf;
             if (ioState.direction === 'input' || ioState.direction === 'inout') {
                 if (!(ioName in this.inputs)) {
                     const baklavaIntf = new NodeInterface(ioName);
                     Object.assign(baklavaIntf, ioState);
                     this.addInput(ioName, baklavaIntf);
                 }
-                this.inputs[ioName].side = ioState.side;
-                this.inputs[ioName].sidePosition = ioState.sidePosition;
-                this.inputs[ioName].externalName = ioState.externalName;
-                this.inputs[ioName].direction = ioState.direction;
+                intf = this.inputs[ioName];
+                intf.side = ioState.side;
+                intf.sidePosition = ioState.sidePosition;
+                intf.externalName = ioState.externalName;
+                intf.direction = ioState.direction;
                 occupied[ioState.side].push(ioState.sidePosition);
             } else if (ioState.direction === 'output') {
                 if (!(ioName in this.outputs)) {
@@ -1026,10 +1034,11 @@ export class CustomNode extends Node {
                     Object.assign(baklavaIntf, ioState);
                     this.addOutput(ioName, baklavaIntf);
                 }
-                this.outputs[ioName].side = ioState.side;
-                this.outputs[ioName].sidePosition = ioState.sidePosition;
-                this.outputs[ioName].externalName = ioState.externalName;
-                this.outputs[ioName].direction = ioState.direction;
+                intf = this.outputs[ioName];
+                intf.side = ioState.side;
+                intf.sidePosition = ioState.sidePosition;
+                intf.externalName = ioState.externalName;
+                intf.direction = ioState.direction;
                 occupied[ioState.side].push(ioState.sidePosition);
             } else if (ioState.direction === undefined) {
                 if (!(ioName in this.inputs)) {
@@ -1037,8 +1046,24 @@ export class CustomNode extends Node {
                     Object.assign(baklavaIntf, ioState);
                     this.addOutput(ioName, baklavaIntf);
                 }
-                this.inputs[ioName].externalName = ioState.externalName;
+                intf = this.inputs[ioName];
+                intf.externalName = ioState.externalName;
                 if (ioState.hidden !== undefined) this.inputs[ioName].hidden = ioState.hidden;
+            }
+            if (ioState.busStubs && intf) {
+                intf.busStubs = ioState.busStubs;
+                // eslint-disable-next-line no-restricted-syntax, guard-for-in
+                for (const stubId in intf.busStubs) {
+                    const stub = intf.busStubs[stubId];
+                    stub.nodeId = intf.nodeId;
+                    stub.direction = intf.direction;
+                    stub.maxConnectionsCount = 1;
+                    stub.type = intf.type;
+                    stub.sidePosition = 0;
+                    stub.side = intf.side;
+                    stub.parent = intf;
+                    stub.isInput = intf.isInput;
+                }
             }
         });
 
