@@ -57,11 +57,16 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import YAML from 'yaml';
 import {
-    computed, defineComponent, nextTick, ref, toRef, watch, onMounted, onBeforeUnmount, reactive,
+    toRaw, computed, defineComponent, nextTick, ref, toRef, watch, onMounted,
+    onBeforeUnmount, reactive,
 } from 'vue';
 import EditorManager, { EDITED_NODE_STYLE } from '../core/EditorManager';
 import NotificationHandler from '../core/notifications';
 import { menuState, configurationState, editorEventBus } from '../core/nodeCreation/ConfigurationState.ts';
+import {
+    alterInterfaces, alterProperties, updateExtendedProperties, updateExtendedInterfaces, findNodes,
+} from '../core/nodeCreation/Configuration.ts';
+import notifyEvents from '../custom/notifyEvents.js';
 
 export default defineComponent({
     props: {
@@ -226,6 +231,31 @@ export default defineComponent({
         };
 
         /**
+         * Get complete specification of a node type.
+         *
+         * @param {string} type - The type of node for which to fetch specification.
+         * @returns {Object} Complete specification of provided type.
+         */
+        const getCurrentSpecification = (type) => {
+            let spec = editorManager.specification.currentSpecification
+                .nodes?.find((n) => EditorManager.getNodeName(n) === type);
+
+            if (spec === undefined) {
+                spec = editorManager.specification.currentSpecification
+                    .nodes?.find(nodeMatchesSpec);
+            }
+            if (spec === undefined) {
+                spec = editorManager.specification.unresolvedSpecification
+                    .nodes?.find(nodeMatchesSpec);
+            }
+            if (spec === undefined) {
+                spec = editorManager.specification.unresolvedSpecification
+                    .nodes?.find((n) => EditorManager.getNodeName(n) === type);
+            }
+            return spec;
+        };
+
+        /**
          * Validate the style of a node.
          *
          * @param {Object} parsedSpecification - The parsed node specification object to validate.
@@ -286,6 +316,21 @@ export default defineComponent({
                     throw new Error(parsingErrors);
                 }
                 const parsedSpecification = YAML.parse(currentSpecification.value.replaceAll('\t', '  '));
+                const checkSubgraphExtends = (nodeName) => {
+                    const nodeSpec = getCurrentSpecification(nodeName);
+                    if (nodeSpec.subgraphId) {
+                        return true;
+                    }
+                    return Object.values(nodeSpec.extends || {}).some((parent) =>
+                        checkSubgraphExtends(parent),
+                    );
+                };
+                if (Object.values(parsedSpecification.extends || {}).some(checkSubgraphExtends)) {
+                    throw new Error('Extending subgraphs dynamically is not currently supported.');
+                }
+                const oldType = node.value.type;
+                const oldSpec = getCurrentSpecification(oldType);
+                const oldSpecCopied = structuredClone(toRaw(oldSpec));
 
                 // Update style of edited node type
                 const { style } = parsedSpecification;
@@ -294,7 +339,6 @@ export default defineComponent({
                 }
 
                 // Update all nodes of the type to match the new specification
-                const oldType = node.value.type;
                 // eslint-disable-next-line no-underscore-dangle
                 const errors = editorManager._unregisterNodeType(oldType);
                 if (errors.length) {
@@ -348,13 +392,21 @@ export default defineComponent({
                 NotificationHandler.showToast('info', 'Node validated');
                 // refresh specification
                 getSpecificationWithIncludes();
+                // refresh graphs connections
+                const graphs = Array.from(editor.graphs);
+                graphs.forEach((graph) => {
+                    removeDanglingConnections(graph);
+                });
+
+                // storing past specification
+                notifyEvents.specificationUpdate.emit({
+                    nodeType: oldType,
+                    specification: oldSpecCopied,
+                });
             } catch (error) {
                 const messages = Array.isArray(error) ? error : [error];
                 NotificationHandler.terminalLog('error', 'Validation failed', messages);
             }
-            editorManager.clearHistory(() => {
-                NotificationHandler.terminalLog('warning', 'Can\'t undo changes after modifying specification', 'History unavailable after changing specification');
-            });
         };
 
         /**
