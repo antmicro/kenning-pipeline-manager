@@ -25,9 +25,40 @@ from creating and deleting connections or altering nodes' values if the editor i
             @mouseenter="startHoverWrapper"
             @mouseleave="endHoverWrapper"
             @pointerdown.left="onMouseDown"
-            no-drag="true"
-            :class="{ picked: picked, '__square': isExposed }"
         >
+            <div
+                class="__port"
+                v-if="tempBusIntfOffset && intf.busSize"
+                :style="{
+                    position: 'absolute',
+                    top: tempBusIntfOffset + 'px',
+                    pointerEvents: 'none',
+                }"
+                :class="{ greyedout_arrow: highlighted, picked: picked, '__square': isExposed }"
+            />
+            <div
+                class="__port-bus-stub"
+                v-for="stub in intf.busStubs"
+                :key="stub.id"
+                :id="stub.id"
+                :class="newClasses"
+            >
+                <div
+                    class="__port"
+                    no-drag="true"
+                    :style="{
+                        position: 'absolute',
+                        top: stub.offset + 'px',
+                        pointerEvents: 'none',
+                    }"
+                >
+                </div>
+            </div>
+            <span
+                class="__port-bus-name"
+            >
+                {{ intf.name }}
+            </span>
         </div>
         <div
             class="__port"
@@ -148,6 +179,7 @@ import {
 import Arrow from '../icons/Arrow.vue';
 import doubleClick from '../core/doubleClick';
 import { ir } from '../core/interfaceRegistry.ts';
+import { useTemporaryConnection } from './temporaryConnection';
 
 export default defineComponent({
     extends: Components.NodeInterface,
@@ -160,18 +192,21 @@ export default defineComponent({
         updateDynamicInterfaces: { default: () => {}, required: false },
         sidebar: { default: false, required: false },
         tabindexValue: { default: -1, required: false },
+        showcase: { default: false, required: false },
     },
     components: {
         Arrow,
     },
     setup(props) {
         const {
-            el, isConnected, showComponent, startHover, endHover, openSidebar,
+            el, isConnected, showComponent, openSidebar,
         } =
             Components.NodeInterface.setup(props);
 
         const { viewModel } = useViewModel();
         const { graph } = useGraph();
+        const { hoveredOver, temporaryConnection } = props.showcase ?
+            { hoveredOver: null, temporaryConnection: null } : useTemporaryConnection();
 
         const isPositionedInterface = props.intf?.x !== undefined && props.intf?.y !== undefined;
 
@@ -202,19 +237,29 @@ export default defineComponent({
                 props.updateDynamicInterfaces(props.intf),
             );
         }
+        const tempBusIntfOffset = ref(undefined);
+        const onBusMove = (ev) => {
+            if (temporaryConnection.value && props.intf.busSize) {
+                temporaryConnection.value.updated = ev.offsetY;
+                tempBusIntfOffset.value = ev.offsetY;
+            }
+        };
 
         const hovered = ref(false);
         const startHoverWrapper = () => {
+            window.addEventListener('pointermove', onBusMove);
             hovered.value = true;
             if (!viewModel.value.editor.readonly) {
-                startHover();
+                hoveredOver(props.intf);
             }
         };
 
         const endHoverWrapper = () => {
+            window.removeEventListener('pointermove', onBusMove);
+            tempBusIntfOffset.value = undefined;
             hovered.value = false;
             if (!viewModel.value.editor.readonly) {
-                endHover();
+                hoveredOver(undefined);
             }
         };
 
@@ -231,7 +276,7 @@ export default defineComponent({
         const onMouseDown = doubleClick(700, () => {
             if (!viewModel.value.editor.readonly && !props.positioned) {
                 props.switchSides(props.intf);
-                endHover();
+                hoveredOver(undefined);
             }
         });
 
@@ -369,7 +414,6 @@ export default defineComponent({
             editExternalName,
             el,
             enableExternalNameEdit,
-            endHover,
             endHoverWrapper,
             externalNameInput,
             externalNameInputIncorrect,
@@ -385,12 +429,12 @@ export default defineComponent({
             showComponent,
             isExposed,
             isPositionedInterface,
-            startHover,
             startHoverWrapper,
             propertyHovered,
             startPropertyHover,
             endPropertyHover,
             setValue,
+            tempBusIntfOffset,
         };
     },
 });

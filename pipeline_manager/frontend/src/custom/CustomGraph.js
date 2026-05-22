@@ -422,6 +422,32 @@ export default function createPipelineManagerGraph(graph) {
 
     // eslint-disable-next-line no-unused-vars
     graph.addConnection = function addConnection(from, to, ev) {
+        if (!to) return undefined;
+        if (!from) return undefined;
+        // the target interface is a bus, we have to create a connection point
+        [to, from] = [to, from].map((intf) => {
+            if (!intf.busSize) {
+                return intf;
+            }
+            if (intf.busStubs === undefined) {
+                intf.busStubs = [];
+            }
+            const stub = {};
+            stub.nodeId = intf.nodeId;
+            stub.id = stubID ?? uuidv4();
+            stub.direction = intf.direction;
+            stub.isInput = intf.isInput;
+            stub.side = intf.side;
+            stub.maxConnectionsCount = 1;
+            stub.type = intf.type;
+            stub.sidePosition = 0;
+            stub.stubOffset = stubOffset ?? (intf.busSize / 2);
+            stub.parent = intf;
+
+            intf.busStubs.push(stub);
+            // for further connection creation logic
+            return stub;
+        });
         const checkConnectionResult = this.checkConnection(from, to);
         if (!checkConnectionResult.connectionAllowed) {
             return undefined;
@@ -441,8 +467,8 @@ export default function createPipelineManagerGraph(graph) {
         });
 
         const conn = new Connection(
-            checkConnectionResult.dummyConnection.from,
-            checkConnectionResult.dummyConnection.to,
+            toRaw(checkConnectionResult.dummyConnection.from),
+            toRaw(checkConnectionResult.dummyConnection.to),
         );
         this.internalAddConnection(conn);
         return conn;
