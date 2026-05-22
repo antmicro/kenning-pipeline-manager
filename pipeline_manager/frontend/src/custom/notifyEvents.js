@@ -14,4 +14,6 @@ notifyEvents.removedNode = new BaklavaEvent();
 
 notifyEvents.subgraphDestroyed = new BaklavaEvent();
 
+notifyEvents.specificationUpdate = new BaklavaEvent();
+
 export default notifyEvents;
