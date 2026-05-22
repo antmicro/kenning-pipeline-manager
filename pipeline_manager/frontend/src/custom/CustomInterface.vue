@@ -21,6 +21,7 @@ from creating and deleting connections or altering nodes' values if the editor i
         <div
             class="__port-bus"
             v-if="intf.port && intf.busSize"
+            no-drag="true"
             :style="{height: intf.busSize.toString() + 'px'}"
             @mouseenter="startHoverWrapper"
             @mouseleave="endHoverWrapper"
@@ -46,10 +47,10 @@ from creating and deleting connections or altering nodes' values if the editor i
                 <div
                     class="__port"
                     no-drag="true"
+                    @pointerdown.left.stop="(e) => onStubMouseDown(e, stub.id, stub.stubOffset )"
                     :style="{
                         position: 'absolute',
-                        top: stub.offset + 'px',
-                        pointerEvents: 'none',
+                        top: stub.stubOffset + 'px',
                     }"
                 >
                 </div>
@@ -244,6 +245,37 @@ export default defineComponent({
                 tempBusIntfOffset.value = ev.offsetY;
             }
         };
+        const mousePosStubDragStart = ref(undefined);
+        const movedStubId = ref(undefined);
+        const movedStubOffset = ref(undefined);
+        const onStubMove = (ev) => {
+            if (!viewModel.value.editor.readonly) {
+                const stub = props.intf.busStubs.find((s) => s.id === movedStubId.value);
+                const curY = ev.clientY;
+                // no recalculations on each pan since this is used in callaback
+                const dv = (curY - mousePosStubDragStart.value) / graph.value.scaling;
+                stub.stubOffset = movedStubOffset.value + dv;
+                stub.stubOffset = Math.min(Math.max(stub.stubOffset, 0), props.intf.busSize ?? 0);
+            }
+        };
+        const onStubMouseUp = () => {
+            if (!viewModel.value.editor.readonly) {
+                window.removeEventListener('pointermove', onStubMove);
+                window.removeEventListener('pointerup', onStubMouseUp);
+                mousePosStubDragStart.value = undefined;
+                movedStubId.value = undefined;
+                movedStubOffset.value = undefined;
+            }
+        };
+        const onStubMouseDown = (ev, id, off) => {
+            if (!viewModel.value.editor.readonly) {
+                window.addEventListener('pointermove', onStubMove);
+                window.addEventListener('pointerup', onStubMouseUp);
+                mousePosStubDragStart.value = ev.clientY;
+                movedStubId.value = id;
+                movedStubOffset.value = off;
+            }
+        };
 
         const hovered = ref(false);
         const startHoverWrapper = () => {
@@ -435,6 +467,8 @@ export default defineComponent({
             endPropertyHover,
             setValue,
             tempBusIntfOffset,
+            onStubMouseUp,
+            onStubMouseDown,
         };
     },
 });

@@ -72,6 +72,12 @@ export default defineComponent({
         const toNodePosition = computed(
             () => graph.value.findNodeById(props.connection.to.nodeId)?.position,
         );
+        const fromStubChange = computed(
+            () => props.connection.from.stubOffset,
+        );
+        const toStubChange = computed(
+            () => props.connection.to.stubOffset,
+        );
 
         const fromNode = computed(() => graph.value.findNodeById(props.connection.from.nodeId));
         const toNode = computed(() => graph.value.findNodeById(props.connection.to.nodeId));
@@ -121,6 +127,14 @@ export default defineComponent({
 
         watch(
             [fromNodePosition, toNodePosition],
+            async () => {
+                await nextTick();
+                updateCoords();
+            },
+            { deep: true },
+        );
+        watch(
+            [fromStubChange, toStubChange],
             async () => {
                 await nextTick();
                 updateCoords();

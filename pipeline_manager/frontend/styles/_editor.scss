@@ -94,6 +94,10 @@
     border-style: dotted;
     & > .__port-bus-stub {
       max-height: 0px;
+      z-index: 2;
+      & > .__port {
+        cursor: grab;
+      }
     }
 }
 .__port-bus-name {
@@ -453,5 +457,8 @@
     opacity: 0.7;
 }
 .baklava-ignore-mouse .__port-bus {
+    pointer-events: all !important;
+}
+.baklava-ignore-mouse .__port-bus-stub {
     pointer-events: all !important;
 }
