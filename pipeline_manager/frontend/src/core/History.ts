@@ -14,6 +14,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import {
     ICommandHandler, ICommand,
+    useViewModel,
 } from '@baklavajs/renderer-vue';
 import notifyEvents from '../custom/notifyEvents.js';
 
@@ -176,6 +177,40 @@ class NodeStep extends Step {
                 locc.id = conn.id;
             });
         }
+    }
+}
+
+class NodeSpecStep extends Step {
+    // It is used to store node specification
+    specTuple:Array<any> = [];
+
+    constructor(type: string, topic: any, tid: string = uuidv4()) {
+        if (tid === '') tid = uuidv4(); // eslint-disable-line no-param-reassign
+        super(type, topic, tid);
+    }
+
+    edit(graph: Ref<Graph>) {
+        // restore node specification
+        const nodeType = this.specTuple[0];
+        const specification = this.specTuple[1];
+        const editorManager = this.specTuple[2];
+
+        if (specification?.simpleInherited) {
+            delete specification.simpleInherited;
+        }
+        if (specification?.category) {
+            delete specification.category;
+        }
+
+        const currentSpecificationId = editorManager.specification
+            .unresolvedSpecification.nodes.findIndex((n:any) => n.name === nodeType);
+
+        editorManager.specification.unresolvedSpecification
+            .nodes[currentSpecificationId] = specification;
+
+        notifyEvents.specificationRestored.emit({
+            nodeType,
+        });
     }
 }
 
@@ -393,6 +428,7 @@ export function useHistory(graph: Ref<any>, commandHandler: ICommandHandler): IH
         g.events.exposeInterface.unsubscribe(tok);
         g.events.privatizeInterface.unsubscribe(tok);
         notifyEvents.subgraphDestroyed.unsubscribe(tok);
+        notifyEvents.specificationUpdate.unsubscribe(tok);
     };
 
     // Switch all the events to any new graph that's displayed
@@ -423,6 +459,22 @@ export function useHistory(graph: Ref<any>, commandHandler: ICommandHandler): IH
                     historyItem.push(step);
                     step.graphTuple = [subgraph, subgraph.save()];
                     subgraph.destroy?.();
+                    undoneHistory.set(newId, []);
+                }
+            });
+            notifyEvents.specificationUpdate.subscribe(token, (data:any) => {
+                const { nodeType, specification, editorManager } = data;
+
+                if (!suppressingHistory.value) {
+                    const historyItem = history.get(newId);
+                    if (!historyItem) return;
+                    const step = new NodeSpecStep('edit', nodeType, transactionId.value);
+                    step.specTuple = [
+                        nodeType,
+                        specification,
+                        editorManager,
+                    ];
+                    historyItem.push(step);
                     undoneHistory.set(newId, []);
                 }
             });
