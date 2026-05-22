@@ -163,7 +163,7 @@ import CustomNode from './CustomNode.vue';
 import PipelineManagerConnection from './connection/PipelineManagerConnection.vue';
 import TemporaryConnection from './connection/TemporaryConnection.vue';
 import Palette from '../components/Palette.vue';
-import { useTemporaryConnection } from './temporaryConnection';
+import { provideTemporaryConnection } from './temporaryConnection';
 import NotificationHandler from '../core/notifications';
 import EditorManager, { loadJsonFromRemoteLocation } from '../core/EditorManager';
 import RectangleSelection from './RectangleSelection.vue';
@@ -223,7 +223,7 @@ export default defineComponent({
         const { graph } = useGraph();
 
         const panZoom = usePanZoom();
-        const temporaryConnection = useTemporaryConnection();
+        const temporaryConnection = provideTemporaryConnection();
         const editorManager = EditorManager.getEditorManagerInstance();
 
         const highlightConnections = ref([]);

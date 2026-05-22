@@ -10,7 +10,7 @@
  * It is heavily baklava implementation based.
  */
 
-import { provide, ref } from 'vue';
+import { provide, inject, ref } from 'vue';
 import { useGraph } from '@baklavajs/renderer-vue';
 
 /**
@@ -23,7 +23,7 @@ export const TemporaryConnectionState = {
     FORBIDDEN: 2,
 };
 
-export function useTemporaryConnection() {
+export function provideTemporaryConnection() {
     const { graph } = useGraph();
 
     const temporaryConnection = ref(null);
@@ -114,13 +114,24 @@ export function useTemporaryConnection() {
         }
     };
 
-    provide('hoveredOver', hoveredOver);
+    provide('temporaryConnection', {
+        temporaryConnection,
+        hoveredOver,
+    });
 
     return {
         temporaryConnection,
         render: hoveredOut,
+        hoveredOver,
         onMouseMove,
         onMouseDown,
         onMouseUp,
     };
+}
+export function useTemporaryConnection() {
+    const temporaryConnection = inject('temporaryConnection');
+    if (!temporaryConnection) {
+        throw new Error('useTemporaryConnection must be used within a BaklavaEditor');
+    }
+    return temporaryConnection;
 }

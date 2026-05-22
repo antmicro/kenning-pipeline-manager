@@ -8,14 +8,11 @@
 
 export default function getDomElements(ni) {
     const interfaceDOM = document.getElementById(ni.id);
-    let portDOM = interfaceDOM?.getElementsByClassName('__port');
-    if (!portDOM.length) {
-        portDOM = interfaceDOM?.getElementsByClassName('__port-bus');
-    }
+    const portDOM = interfaceDOM?.getElementsByClassName('__port');
 
     return {
         node: interfaceDOM?.closest('.baklava-node') ?? null,
-        interface: interfaceDOM,
+        interface: interfaceDOM?.closest('.baklava-node-interface'),
         port: portDOM && portDOM.length > 0 ? portDOM[0] : null,
     };
 }

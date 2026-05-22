@@ -6,10 +6,10 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
     <ConnectionView
-        :x1="swappedD.input[0]"
-        :y1="swappedD.input[1]"
-        :x2="swappedD.output[0]"
-        :y2="swappedD.output[1]"
+        :x1="d.input[0]"
+        :y1="d.input[1]"
+        :x2="d.output[0]"
+        :y2="d.output[1]"
         :state="status"
         :connection="connection"
         is-temporary
@@ -20,6 +20,8 @@ SPDX-License-Identifier: Apache-2.0
 import { computed } from 'vue';
 import { Components } from '@baklavajs/renderer-vue';
 import ConnectionView from './ConnectionView.vue';
+import getPortCoordinates from './portCoordinates';
+import getDomElements from './domResolver';
 
 export default {
     extends: Components.TemporaryConnection,
@@ -27,22 +29,30 @@ export default {
         ConnectionView,
     },
     setup(props) {
-        const { d, status } = Components.TemporaryConnection.setup(props);
+        const status = computed(() => (props.connection ? props.connection.status
+            : Components.TemporaryConnectionState.NONE));
 
-        const swappedD = computed(() => {
-            let { input, output } = d.value;
-
-            // Currently, baklavajs swaps the input/output if this condition holds
-            // We want to have no discrepancy between the input output coordinates
-            // and connection from/to values.
-            if (props.connection.from.isInput) {
-                [input, output] = [output, input];
+        const d = computed(() => {
+            if (props.connection.updated) ;
+            if (!props.connection) {
+                return {
+                    input: [0, 0],
+                    output: [0, 0],
+                };
             }
 
-            return { input, output };
+            const start = getPortCoordinates(getDomElements(props.connection.from));
+            const end = props.connection.to
+                ? getPortCoordinates(getDomElements(props.connection.to))
+                : [props.connection.mx || start[0], props.connection.my || start[1]];
+
+            return {
+                input: start,
+                output: end,
+            };
         });
 
-        return { d, swappedD, status };
+        return { d, status };
     },
 };
 </script>

@@ -30,6 +30,7 @@ import { defineComponent, ref, computed, watch, nextTick, onMounted, onBeforeUnm
 import { Components, useGraph } from '@baklavajs/renderer-vue';
 import ConnectionView from './ConnectionView.vue';
 import getDomElements from './domResolver';
+import getPortCoordinates from './portCoordinates';
 import { TemporaryConnectionState } from '../temporaryConnection.js';
 
 export default defineComponent({
@@ -87,22 +88,6 @@ export default defineComponent({
                 ...Object.values(toNode.value?.outputs ?? {}),
             ].map((io) => [io.side, io.sidePosition]),
         );
-
-        const getPortCoordinates = (resolved) => {
-            if (resolved.node && resolved.interface && resolved.port) {
-                return [
-                    resolved.node.offsetLeft +
-                        resolved.interface.offsetLeft +
-                        resolved.port.offsetLeft +
-                        resolved.port.clientWidth / 2,
-                    resolved.node.offsetTop +
-                        resolved.interface.offsetTop +
-                        resolved.port.offsetTop +
-                        resolved.port.clientHeight / 2,
-                ];
-            }
-            return [0, 0];
-        };
 
         const updateCoords = () => {
             const from = getDomElements(props.connection.from);
