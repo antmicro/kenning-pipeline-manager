@@ -70,11 +70,14 @@ myst_substitutions = {
     "api_specification": generate_schema_md(),
 }
 
+EXCLUDED_EXAMPLES = ["sample-huge"]
 exampleentries = [
     "To see the work of the frontend check one of the below examples:\n"
 ]  # noqa: E501
 for graph in sorted(Path("../../examples").glob("*-dataflow.json")):
     graphname = graph.stem.replace("-dataflow", "")
+    if graphname in EXCLUDED_EXAMPLES:
+        continue
     spec = graph.parent / f"{graphname}-specification.json"
     title = graph.stem.replace("-dataflow", "")
     with open(graph, "r") as f:
