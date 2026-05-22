@@ -66,6 +66,9 @@ export function updateInterfacePosition(
     const oldSidePosition = intf.sidePosition;
 
     intf.side = newSide;
+    if (intf.busStubs !== undefined) {
+        intf.busStubs.forEach((stub) => { stub.side = newSide; });
+    }
     if (newSidePosition !== undefined) {
         intf.sidePosition = newSidePosition;
     }
