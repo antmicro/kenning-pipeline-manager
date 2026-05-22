@@ -9,8 +9,9 @@ import { JSONRPCCustomErrorCode } from '../../utils';
 import ExternalApp, { EndpointType } from './base';
 import { ClientParams } from '../utils';
 import NotificationHandler from '../../notifications';
+import MessageTracker from './message_tracker';
 
-import { MAX_CHUNK_SIZE } from '../config';
+import { CHUNKED_MESSAGE_TIMEOUT, MAX_CHUNK_SIZE } from '../config';
 
 interface JSONRPCMaybeChunkedResponse extends JSONRPCSuccessResponse{
     chunk_id: string;
@@ -54,7 +55,7 @@ export default class ExternalBackendApp implements ExternalApp {
 
     private socket: Socket;
 
-    private chunks: Map<string, string[]>;
+    private chunks: Map<string, MessageTracker>;
 
     // eslint-disable-next-line no-useless-constructor
     public constructor(
@@ -76,7 +77,7 @@ export default class ExternalBackendApp implements ExternalApp {
             return new Blob([stringify]).size > maxMessageLength;
         };
 
-        this.chunks = new Map<string, string[]>();
+        this.chunks = new Map<string, MessageTracker>();
 
         this.socket.on('api', async (request: JSONRPCMaybeChunkedRequest) => {
             const msg = this.processMessage(request) as JSONRPCMaybeChunkedRequest;
@@ -116,22 +117,41 @@ export default class ExternalBackendApp implements ExternalApp {
         });
     }
 
+    public cleanOldMessages() {
+        const currentTime = Date.now() / 1000.0;
+        const toRemove:string[] = [];
+
+        this.chunks.forEach((value:MessageTracker, key:string) => {
+            if ((currentTime - value.time) > CHUNKED_MESSAGE_TIMEOUT) {
+                toRemove.push(key);
+            }
+        });
+
+        toRemove.forEach((key:string) => {
+            this.chunks.delete(key);
+        });
+    }
+
     public processMessage(msg: JSONRPCMaybeChunkedResponse|JSONRPCMaybeChunkedRequest) {
+        this.cleanOldMessages();
+
         const isChunk = msg?.chunk_id !== undefined;
         if (isChunk) {
             const chunkId = msg.chunk_id;
 
-            const currentChunks = this.chunks.get(chunkId) ?? [];
+            const currentChunks = this.chunks.get(chunkId) ?? new MessageTracker();
 
             const data = msg?.chunk;
             if (data !== undefined) {
-                currentChunks.push(data);
+                // update time
+                currentChunks.time = Date.now() / 1000.0;
+                currentChunks.data.push(data);
             }
             this.chunks.set(chunkId, currentChunks);
 
             // Is it final chunk?
             if (msg?.end) {
-                const RawData = currentChunks.join('');
+                const RawData = currentChunks.data.join('');
                 try {
                     const parsed = JSON.parse(RawData) as JSONRPCResponse;
                     this.chunks.delete(chunkId);

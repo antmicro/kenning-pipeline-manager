@@ -5,3 +5,5 @@
  */
 // eslint-disable-next-line import/prefer-default-export
 export const MAX_CHUNK_SIZE:number = 20 * 1024;
+
+export const CHUNKED_MESSAGE_TIMEOUT:number = 60 * 60;
