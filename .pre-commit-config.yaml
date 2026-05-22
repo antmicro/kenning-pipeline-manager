@@ -18,7 +18,7 @@ repos:
   rev: v1.16.23
   hooks:
     - id: typos
-      args: [--hidden, --force-exclude]
+      args: [--hidden, --force-exclude, --exclude, examples/sample-huge-*]
 - repo: local
   hooks:
     - id: eslint

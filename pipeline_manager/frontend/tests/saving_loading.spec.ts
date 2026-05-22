@@ -14,6 +14,7 @@ import {
 
 async function expectNoErrors(page: Page) {
     const loading = page.locator('.loading-screen');
+    await loading.waitFor({ state: 'hidden' });
     await expect(loading).not.toBeVisible();
     const notifications = page.locator(
         '.notifications > .panel > ul > *:not(:has(.info))',
@@ -112,6 +113,7 @@ const examples = [
     { specification: 'sample-related-graph-specification.json', dataflow: undefined },
     { specification: 'sample-dynamic-interfaces-specification.json', dataflow: 'sample-dynamic-interfaces-dataflow.json' },
     { specification: 'sample-rectangle-grouping-specification.json', dataflow: 'sample-rectangle-grouping-dataflow.json' },
+    { specification: 'sample-huge-specification.json', dataflow: 'sample-huge-dataflow.json', timeout: 180_000 },
 ];
 
 async function dragAndDropFile(page: Page, selector: string, fileName: string, testInfo) {
@@ -138,7 +140,7 @@ async function dragAndDropFile(page: Page, selector: string, fileName: string, t
 
     await page.waitForSelector(selector);
     await page.dispatchEvent(selector, 'drop', { dataTransfer });
-    await page.waitForSelector('.loading-screen', { state: 'hidden' });
+    await page.locator('.loading-screen').waitFor({ state: 'hidden' });
 
     const bufferStr = readFileSync(filePath, 'utf8');
     const data = JSON.parse(bufferStr);
@@ -148,8 +150,11 @@ async function dragAndDropFile(page: Page, selector: string, fileName: string, t
     return true;
 }
 
-examples.forEach(({ dataflow, specification }) => {
-    test(`save and load ${specification}`, async ({ page }, testInfo) => {
+examples.forEach(({ dataflow, specification, timeout }) => {
+    test(`spec loading ${specification}`, async ({ page }, testInfo) => {
+        if (timeout) {
+            test.setTimeout(timeout);
+        }
         await page.goto(getUrl());
         if (specification === 'sample-include-specification.json') {
             const newSpecificationPath = await loadIncludeSpecification(testInfo);
@@ -168,13 +173,19 @@ examples.forEach(({ dataflow, specification }) => {
     if (!dataflow) return;
 
     test(`context loading ${dataflow}, ${specification}`, async ({ page }) => {
+        if (timeout) {
+            test.setTimeout(timeout);
+        }
         await page.goto(getUrl());
         await loadSpecification(page, specification);
         await expectNoErrors(page);
         await loadDataflow(page, dataflow);
         await expectNoErrors(page);
     });
-    test(`drag and drop welcome ${dataflow}, ${specification}`, async ({ page }, testInfo) => {
+    test(`welcome loading ${dataflow}, ${specification}`, async ({ page }, testInfo) => {
+        if (timeout) {
+            test.setTimeout(timeout);
+        }
         await page.goto(getUrl());
         await deepCleanEditor(page);
         const continueProcessing = await dragAndDropFile(page, '.welcome-container', specification, testInfo);
@@ -186,7 +197,10 @@ examples.forEach(({ dataflow, specification }) => {
         await expectNoErrors(page);
     });
 
-    test(`drag and drop canvas ${dataflow}, ${specification}`, async ({ page }, testInfo) => {
+    test(`canvas loading ${dataflow}, ${specification}`, async ({ page }, testInfo) => {
+        if (timeout) {
+            test.setTimeout(timeout);
+        }
         await page.goto(getUrl());
         await deepCleanEditor(page);
         await dragAndDropFile(page, '.baklava-editor', specification, testInfo);
@@ -195,7 +209,10 @@ examples.forEach(({ dataflow, specification }) => {
         await expectNoErrors(page);
     });
 
-    test(`save and load ${dataflow} using ${specification}`, async ({ page }, testInfo) => {
+    test(`context load+save ${dataflow}, ${specification}`, async ({ page }, testInfo) => {
+        if (timeout) {
+            test.setTimeout(timeout * 2);
+        }
         await page.goto(getUrl());
         await loadSpecification(page, specification);
         await expectNoErrors(page);
@@ -208,14 +225,15 @@ examples.forEach(({ dataflow, specification }) => {
     });
 });
 
-test('save and load graph partially', async ({page}, testInfo) =>{
+test('save and load graph partially', async ({ page }, testInfo) => {
     await page.goto(getUrl());
     await loadSpecification(page, 'sample-subgraph-specification.json');
     await expectNoErrors(page);
     await loadDataflow(page, 'sample-subgraph-dataflow.json');
-    const filepath = await saveDataflowAs(page,testInfo,'temp',[
-        "Example of a graph with graph nodes",
-        "Test subgraph #1"
+    await expectNoErrors(page);
+    const filepath = await saveDataflowAs(page, testInfo, 'temp', [
+        'Example of a graph with graph nodes',
+        'Test subgraph #1',
     ]);
     await expectNoErrors(page);
     await loadDatflowFromFile(page, filepath);
