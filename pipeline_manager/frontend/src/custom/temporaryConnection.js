@@ -80,7 +80,7 @@ export function provideTemporaryConnection() {
     const onMouseUp = (ev) => {
         if (temporaryConnection.value && hoveringOver.value && hoveredOut.value) {
             graph.value.addConnection(
-                temporaryConnection.value.from, temporaryConnection.value.to, ev);
+                temporaryConnection.value.from, temporaryConnection.value.to, ev.offsetY);
         }
         temporaryConnection.value = null;
     };

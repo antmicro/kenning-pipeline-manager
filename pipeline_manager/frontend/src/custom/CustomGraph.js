@@ -419,9 +419,28 @@ export default function createPipelineManagerGraph(graph) {
         }
         this._nodes = [];
     };
+    graph.removeConnection = function removeConnection(connection) {
+        if (!this.connections.includes(connection)) {
+            return;
+        }
+        if (this.events.beforeRemoveConnection.emit(connection).prevented) {
+            return;
+        }
+        // Handling bus endpoints
+        Object.values([connection.to, connection.from]).forEach((intf) => {
+            if (intf.stubOffset) {
+                const p = intf.parent;
+                p.busStubs.splice(p.busStubs.indexOf(intf), 1);
+            }
+        });
+        connection.destruct();
+        this._connections.splice(this.connections.indexOf(connection), 1);
+        this.events.removeConnection.emit(connection);
+        this.connectionEvents.removeTarget(connection.events);
+    };
 
     // eslint-disable-next-line no-unused-vars
-    graph.addConnection = function addConnection(from, to, ev) {
+    graph.addConnection = function addConnection(from, to, stubOffset, stubID) {
         if (!to) return undefined;
         if (!from) return undefined;
         // the target interface is a bus, we have to create a connection point
@@ -724,7 +743,10 @@ export default function createPipelineManagerGraph(graph) {
             }
             const interfaces = [...Object.values(node.inputs), ...Object.values(node.outputs)];
             this.connections
-                .filter((c) => interfaces.includes(c.from) || interfaces.includes(c.to))
+                .filter((c) =>
+                    interfaces.includes(c.from) || interfaces.includes(c.to) ||
+                        interfaces.some((i) => i.busStubs?.some((s) => [c.to, c.from].includes(s))),
+                )
                 .forEach((c) => this.removeConnection(c));
             this._nodes.splice(this.nodes.indexOf(node), 1);
             this.events.removeNode.emit(node);
