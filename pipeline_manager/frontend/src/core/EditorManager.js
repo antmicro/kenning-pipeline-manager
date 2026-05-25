@@ -224,7 +224,6 @@ export default class EditorManager {
      * @param {Object} parsedSpecification - a graph that will be processed.
      */
     updateGraphsInEditor(type, parsedSpecification) {
-        console.log('Update graphs in editor');
         const graphs = Array.from(this.editor.graphs);
         graphs.forEach((graph) => {
             graph.nodes.filter((n) => n.type === type)
@@ -906,10 +905,17 @@ export default class EditorManager {
      * @param {object} nodeSpecification Node specification to add
      * @param {string|undefined} nodeToUpdate Node type to update
      * @param {boolean} removeUnused Whether keys missing from nodeSpecification should be removed
+     * @param {boolean} override A flag that makes function override existing node specification.
      * @returns An object consisting of errors and warnings arrays. If both arrays are empty
      * the updating process was successful.
      */
-    addNodeToEditorSpecification(nodeSpecification, nodeToUpdate = undefined, removeUnused = true) {
+    addNodeToEditorSpecification(nodeSpecification,
+        nodeToUpdate = undefined,
+        removeUnused = true,
+        override = false) {
+        if (override && nodeToUpdate !== undefined) {
+            this._unregisterNodeType(nodeToUpdate);
+        }
         // Remove undefined fields
         Object.entries(nodeSpecification.properties ?? {}).forEach(([_, value]) => {
             if (value.inherited) {
