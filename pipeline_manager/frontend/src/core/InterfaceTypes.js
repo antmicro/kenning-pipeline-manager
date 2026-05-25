@@ -27,15 +27,19 @@ export default class BaklavaInterfaceTypes {
 
                 if (firstType !== undefined) {
                     const color = this.types[firstType].interfaceColor;
-                    const arrow = el.querySelector('.__port:not(.greyedout_arrow)'); // eslint-disable-line no-param-reassign
-                    if (arrow !== null) arrow.style.backgroundColor = color;
-                    else {
-                        const greyArrow = el.querySelector('.__port');
-                        if (greyArrow !== null) {
-                            greyArrow.style.backgroundColor =
-                                getComputedStyle(greyArrow).getPropertyValue('$gray-500');
+                    const arrows = el.querySelectorAll('.__port:not(.greyedout_arrow)');
+                    // iterate through all in case interface bus is used
+                    arrows.forEach((arrow) => {
+                        // eslint-disable-next-line no-param-reassign
+                        if (arrow !== null) arrow.style.backgroundColor = color;
+                        else {
+                            const greyArrow = el.querySelector('.__port');
+                            if (greyArrow !== null) {
+                                greyArrow.style.backgroundColor =
+                                    getComputedStyle(greyArrow).getPropertyValue('$gray-500');
+                            }
                         }
-                    }
+                    });
                 }
             }
 

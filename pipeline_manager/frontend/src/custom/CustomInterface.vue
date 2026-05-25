@@ -25,7 +25,7 @@ from creating and deleting connections or altering nodes' values if the editor i
             :style="{height: intf.busSize.toString() + 'px'}"
             @mouseenter="startHoverWrapper"
             @mouseleave="endHoverWrapper"
-            @pointerdown.left="onMouseDown"
+            @pointerdown.left="(e) => { onMouseDown(); e.stopPropagation() }"
         >
             <div
                 class="__port"
@@ -278,8 +278,9 @@ export default defineComponent({
         };
 
         const hovered = ref(false);
-        const startHoverWrapper = () => {
+        const startHoverWrapper = (ev) => {
             window.addEventListener('pointermove', onBusMove);
+            onBusMove(ev);
             hovered.value = true;
             if (!viewModel.value.editor.readonly) {
                 hoveredOver(props.intf);
