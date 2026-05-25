@@ -729,6 +729,44 @@ export default class EditorManager {
         return { errors, warnings };
     }
 
+    replaceNodeSpecificationInEditor(nodeType, nodeSpecification) {
+        const errors = [];
+
+        errors.push(...this._unregisterNodeType(nodeType));
+        if (errors.length) {
+            return errors;
+        }
+
+        const ret = this.addNodeToEditorSpecification(
+            nodeSpecification,
+            nodeType,
+        );
+
+        if (ret.errors !== undefined && ret.errors.length) {
+            errors.push(...ret.errors);
+            return errors;
+        }
+
+        this.updateGraphsInEditor(nodeType, nodeSpecification);
+
+        const children = new Set();
+
+        this.findChildren(nodeType, children);
+        // there is no need to update a node second time
+        children.delete(nodeType);
+
+        // find nodes extending current node in specification
+        const extendingNodes = this.specification
+            .currentSpecification.nodes
+            .filter((n) => children.has(n.name));
+        // refresh nodes extending from current node
+        extendingNodes.forEach((n) => {
+            this.updateGraphsInEditor(n.name, n);
+        });
+
+        return errors;
+    }
+
     /**
      * Propagates changes to nodes extending a category node.
      * Called when the category node type is edited.
