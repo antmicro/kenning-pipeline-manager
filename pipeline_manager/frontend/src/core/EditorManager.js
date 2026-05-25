@@ -202,6 +202,21 @@ export default class EditorManager {
         this.modifiedNodeSpecificationRegistry = {};
     }
 
+    findChildren(type, children = new Set()) {
+        if (children.has(type)) {
+            return;
+        }
+        children.add(type);
+
+        const extendingNodes = this.specification
+            .currentSpecification.nodes
+            .filter((n) => n?.extends?.some((e) => e === type));
+
+        extendingNodes.forEach((n) => {
+            this.findChildren(n.name, children);
+        });
+    }
+
     /**
      * Based on edited type and specification will propagate all changes through graphs
      * in the editor.

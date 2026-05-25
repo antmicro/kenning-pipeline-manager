@@ -278,38 +278,9 @@ export default defineComponent({
                 && editorManager.baklavaView.settings.editableNodeTypes,
         );
 
-        const findChildren = (type, children = new Set()) => {
-            if (children.has(type)) {
-                return;
-            }
-            children.add(type);
-
-            const extendingNodes = editorManager.specification
-                .currentSpecification.nodes
-                .filter((n) => n?.extends?.some((e) => e === type));
-
-            extendingNodes.forEach((n) => {
-                findChildren(n.name, children);
-            });
-        };
-
-        const findChildren = (type, children = new Set()) => {
-            if (children.has(type)) {
-                return;
-            }
-            children.add(type);
-
-            const extendingNodes = editorManager.specification
-                .currentSpecification.nodes
-                .filter((n) => n?.extends?.some((e) => e === type));
-
-            extendingNodes.forEach((n) => {
-                findChildren(n.name, children);
-            });
-        };
-
         const updateSpecification = async () => {
             try {
+                suppressHistoryLogging(true);
                 const parsingErrors = validate();
                 if (parsingErrors.length > 0) {
                     throw new Error(parsingErrors);
@@ -343,7 +314,7 @@ export default defineComponent({
 
                 const children = new Set();
 
-                findChildren(oldType, children);
+                editorManager.findChildren(oldType, children);
                 // there is no need to update a node second time
                 children.delete(oldType);
 
