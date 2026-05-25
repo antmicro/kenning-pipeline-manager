@@ -1,0 +1,147 @@
+{
+    "version":"20250623.14",
+    "nodes":[
+        {
+            "name":"I2C-master",
+            "abstract":true,
+            "category":"I2C-masters",
+            "interfaces":[
+                {
+                    "name":"sda-bus",
+                    "type":"sda",
+                    "direction":"inout",
+                    "busSize":100
+                },
+                {
+                    "name":"sclk-bus",
+                    "type":"sclk",
+                    "direction":"output",
+                    "side":"right",
+                    "busSize":100
+                }
+            ]
+        },
+        {
+            "name":"I2C-slave",
+            "abstract":true,
+            "category":"I2C-slaves",
+            "interfaces":[
+                {
+                    "name":"sda",
+                    "type":"sda",
+                    "direction":"inout"
+                },
+                {
+                    "name":"sclk",
+                    "type":"sclk",
+                    "direction":"input"
+                }
+            ]
+        },
+        {
+            "name":"ESP01",
+            "description": "Wi-Fi module built around the ESP8266 SoC",
+            "extends": ["I2C-master"],
+            "twoColumn": true,
+            "interfaces":[
+                {
+                    "name":"gpio0",
+                    "type":"digital",
+                    "direction":"inout"
+                },
+                {
+                    "name":"gpio1",
+                    "type":"digital",
+                    "direction":"inout"
+                },
+                {
+                    "name":"gpio2",
+                    "type":"digital",
+                    "direction":"inout"
+                },
+                {
+                    "name":"gpio3",
+                    "type":"digital",
+                    "direction":"inout"
+                },
+                {
+                    "name":"reset",
+                    "type":"digital",
+                    "direction":"input"
+                }
+            ]
+        },
+        {
+            "name": "SSD1306",
+            "description": "OLED screen controlled via I2C protocol",
+            "extends": ["I2C-slave"],
+            "properties": [
+                {
+                    "name": "Displayed text",
+                    "type": "text",
+                    "default": "Hello world!"
+                }
+            ]
+        },
+        {
+            "name": "MCP9808",
+            "description": "temperature sensor",
+            "extends": ["I2C-slave"],
+            "interfaces": [
+                {
+                    "name": "A0",
+                    "type": "digital",
+                    "direction": "output"
+                },
+                {
+                    "name": "A1",
+                    "type": "digital",
+                    "direction": "output"
+                },
+                {
+                    "name": "A2",
+                    "type": "digital",
+                    "direction": "output"
+                },
+                {
+                    "name": "Alert",
+                    "type": "digital",
+                    "direction": "output"
+                }
+            ]
+        },
+        {
+            "name": "BME280",
+            "description": "humidity, temperature and pressure sensor",
+            "extends": ["I2C-slave"]
+        },
+        {
+            "name": "MPU6050",
+            "description": "gyroscope",
+            "extends": ["I2C-slave"],
+            "interfaces": [
+                {
+                    "name": "int",
+                    "type": "digital",
+                    "direction": "output"
+                }
+            ]
+        }
+    ],
+    "metadata":{
+        "editableTypes":false,
+        "interfaces":{
+            "BinaryImage":{
+                "interfaceColor":"#FF00FF",
+                "interfaceConnectionPattern":"dashed",
+                "interfaceConnectionColor":"#FF0000"
+            },
+            "Image":{
+                "interfaceConnectionPattern":"dotted",
+                "interfaceConnectionColor":"#FFFF00"
+            }
+        },
+        "connectionStyle":"orthogonal",
+        "movementStep":100
+    }
+}
