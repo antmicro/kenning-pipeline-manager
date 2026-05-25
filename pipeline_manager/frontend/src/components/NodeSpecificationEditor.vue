@@ -393,6 +393,7 @@ export default defineComponent({
                 notifyEvents.specificationUpdate.emit({
                     nodeType: oldType,
                     specification: oldSpecCopied,
+                    newSpecification: structuredClone(toRaw(parsedSpecification)),
                     editorManager,
                 });
             } catch (error) {

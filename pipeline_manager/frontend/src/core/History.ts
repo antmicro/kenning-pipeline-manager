@@ -456,7 +456,9 @@ export function useHistory(graph: Ref<any>, commandHandler: ICommandHandler): IH
                 }
             });
             notifyEvents.specificationUpdate.subscribe(token, (data:any) => {
-                const { nodeType, specification, editorManager } = data;
+                const {
+                    nodeType, specification, newSpecification, editorManager,
+                } = data;
 
                 if (!suppressingHistory.value) {
                     const historyItem = history.get(newId);
@@ -467,8 +469,14 @@ export function useHistory(graph: Ref<any>, commandHandler: ICommandHandler): IH
                         specification,
                         editorManager,
                     ];
+                    const redoStep = new NodeSpecStep('edit', nodeType, transactionId.value);
+                    redoStep.specTuple = [
+                        nodeType,
+                        newSpecification,
+                        editorManager,
+                    ];
                     historyItem.push(step);
-                    undoneHistory.set(newId, []);
+                    undoneHistory.set(newId, [redoStep]);
                 }
             });
             newGraph.events.addNode.subscribe(token, (node : any) => {
