@@ -136,8 +136,9 @@ class NodeStep extends Step {
                 ...Object.values(this.nodeTuple[0].outputs),
             ];
             const connections = graph.value.connections.filter(
-                (c) => interfaces.includes(c.from) || interfaces.includes(c.to),
-            );
+                (c) => interfaces.includes(c.from) || interfaces.includes(c.to) ||
+                interfaces.some((i: any) => i.busStubs?.some((s: any) => [c.to, c.from].includes(s),
+                )));
 
             const save = this.nodeTuple[0].save();
             // remove the current version of the node
@@ -148,14 +149,28 @@ class NodeStep extends Step {
             n.load(this.nodeTuple[1], true);
             this.nodeTuple = [this.nodeTuple[0], save];
 
+            // don't save bus interface stubs
+            [
+                ...Object.values(n.inputs),
+                ...Object.values(n.outputs),
+            // eslint-disable-next-line no-param-reassign
+            ].forEach((intf: any) => delete intf.busStubs);
+
             // restore connections
             connections.forEach((conn) => {
-                const locc = graph.value.addConnection(conn.from, conn.to);
+                // if it was a stub, connect to parent
+                const to = (<any>conn.to).parent ?? conn.to;
+                const from = (<any>conn.from).parent ?? conn.from;
+                const offset = (<any>conn.to).stubOffset ?? (<any>conn.from).stubOffset;
+                const stubId = (<any>conn.to).stubOffset ? conn.to.id : conn.from.id;
+                // eslint-disable-next-line max-len
+                const locc = (<any>graph.value).addConnection(from, to, offset, stubId);
                 let pos = 0;
                 ((<any>conn).anchors ?? []).forEach((anchor: any) => {
                     (<any>graph.value).addAnchor(anchor, locc, pos);
                     pos += 1;
                 });
+                locc.id = conn.id;
             });
         }
     }
@@ -208,23 +223,33 @@ class ConnectionStep extends Step {
             const toNode = graph.value.findNodeById(this.conn.to.nodeId);
             if (!fromNode || !toNode) return;
 
+            let fromIntf = this.conn.from;
+            if (fromIntf.stubOffset) {
+                fromIntf = this.conn.from.parent;
+            }
             const from = [
                 ...Object.values(fromNode.inputs),
                 ...Object.values(fromNode.outputs),
             ].filter(
                 (iface) => iface.port,
-            ).find((iface) => iface.id === this.conn.from.id);
+            ).find((iface) => iface.id === fromIntf.id);
 
+            let toIntf = this.conn.to;
+            if (toIntf.stubOffset) {
+                toIntf = this.conn.to.parent;
+            }
             const to = [
                 ...Object.values(toNode.inputs),
                 ...Object.values(toNode.outputs),
             ].filter(
                 (iface) => iface.port,
-            ).find((iface) => iface.id === this.conn.to.id);
+            ).find((iface) => iface.id === toIntf.id);
 
             if (!from || !to) return;
+            const stubPos = this.conn.to.stubOffset ?? this.conn.from.stubOffset;
+            const stubId = this.conn.to.stubOffset ? this.conn.to.id : this.conn.from.id;
 
-            const connAdded = graph.value.addConnection(from, to);
+            const connAdded = (<any>graph).value.addConnection(from, to, stubPos, stubId);
             if (connAdded === undefined) {
                 return;
             }
@@ -260,7 +285,8 @@ class AnchorStep extends Step {
                 n.to.id === this.anchor[0].to.id &&
                 n.id === this.anchor[0].id,
             );
-            if (conn !== undefined) if ((<any>conn).anchors === undefined) (<any>conn).anchors = [];
+            if (conn === undefined) return;
+            if ((<any>conn).anchors === undefined) (<any>conn).anchors = [];
             (<any>conn).anchors.splice(
                 this.anchor[2], 0, this.anchor[1],
             );
@@ -270,7 +296,7 @@ class AnchorStep extends Step {
     remove(graph: Ref<Graph>) {
         if (this.anchor !== undefined) {
             const conn = graph.value.connections.find(
-                (n) => n.from === this.anchor[0].from && n.to === this.anchor[0].to,
+                (n) => n.from.id === this.anchor[0].from.id && n.to.id === this.anchor[0].to.id,
             );
             if (conn !== undefined) (<any>conn).anchors.splice(this.anchor[2], 1);
         }
@@ -279,8 +305,9 @@ class AnchorStep extends Step {
     edit(graph: Ref<Graph>) {
         if (this.anchor !== undefined) {
             const conn = graph.value.connections.find(
-                (n) => n.from === this.anchor[0].from && n.to === this.anchor[0].to,
+                (n) => n.from.id === this.anchor[0].from.id && n.to.id === this.anchor[0].to.id,
             );
+            if (conn === undefined) return;
             const prevX = this.anchor[1].x;
             const prevY = this.anchor[1].y;
             this.anchor[1].x = this.prevPosition.x;
