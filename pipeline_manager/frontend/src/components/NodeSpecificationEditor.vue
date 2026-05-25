@@ -326,6 +326,7 @@ export default defineComponent({
                 suppressHistoryLogging(true);
                 const parsingErrors = validate();
                 if (parsingErrors.length > 0) {
+                    suppressHistoryLogging(false);
                     throw new Error(parsingErrors);
                 }
                 const parsedSpecification = YAML.parse(currentSpecification.value.replaceAll('\t', '  '));
@@ -339,6 +340,7 @@ export default defineComponent({
                     );
                 };
                 if (Object.values(parsedSpecification.extends || {}).some(checkSubgraphExtends)) {
+                    suppressHistoryLogging(false);
                     throw new Error('Extending subgraphs dynamically is not currently supported.');
                 }
                 const oldType = node.value.type;
@@ -351,38 +353,16 @@ export default defineComponent({
                     parsedSpecification.style = EditorManager.mergeStyles(style, EDITED_NODE_STYLE);
                 }
 
+                const errors = editorManager
+                    .replaceNodeSpecificationInEditor(oldType, parsedSpecification);
+
                 // Update all nodes of the type to match the new specification
                 // eslint-disable-next-line no-underscore-dangle
-                const errors = editorManager._unregisterNodeType(oldType);
                 if (errors.length) {
-                    NotificationHandler.terminalLog('error', 'Error when registering the node', errors);
+                    NotificationHandler.terminalLog('error', 'Error when updating specification', errors);
+                    suppressHistoryLogging(false);
                     return;
                 }
-
-                const ret = editorManager.addNodeToEditorSpecification(
-                    parsedSpecification,
-                    oldType,
-                );
-                // Add type to editor and specification
-                if (ret.errors !== undefined && ret.errors.length) {
-                    throw new Error(ret.errors);
-                }
-                editorManager.updateGraphsInEditor(oldType, parsedSpecification);
-
-                const children = new Set();
-
-                editorManager.findChildren(oldType, children);
-                // there is no need to update a node second time
-                children.delete(oldType);
-
-                // find nodes extending current node in specification
-                const extendingNodes = editorManager.specification
-                    .currentSpecification.nodes
-                    .filter((n) => children.has(n.name));
-                // refresh nodes extending from current node
-                extendingNodes.forEach((n) => {
-                    editorManager.updateGraphsInEditor(n.name, n);
-                });
 
                 validateNodeStyle(parsedSpecification);
                 validateNodeInterfaces(parsedSpecification);
@@ -395,6 +375,7 @@ export default defineComponent({
                             editorManager.specification.unresolvedSpecification,
                         );
                 if (validationErrors.length) {
+                    suppressHistoryLogging(false);
                     throw new Error(validationErrors);
                 }
 
