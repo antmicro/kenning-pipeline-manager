@@ -198,19 +198,12 @@ class NodeSpecStep extends Step {
         if (specification?.simpleInherited) {
             delete specification.simpleInherited;
         }
-        if (specification?.category) {
-            delete specification.category;
+        if (specification?.extending) {
+            delete specification.extending;
         }
 
-        const currentSpecificationId = editorManager.specification
-            .unresolvedSpecification.nodes.findIndex((n:any) => n.name === nodeType);
-
-        editorManager.specification.unresolvedSpecification
-            .nodes[currentSpecificationId] = specification;
-
-        notifyEvents.specificationRestored.emit({
-            nodeType,
-        });
+        editorManager
+            .replaceNodeSpecificationInEditor(nodeType, specification);
     }
 }
 
