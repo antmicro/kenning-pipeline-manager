@@ -202,6 +202,30 @@ export default class EditorManager {
         this.modifiedNodeSpecificationRegistry = {};
     }
 
+    /**
+     * Based on edited type and specification will propagate all changes through graphs
+     * in the editor.
+     * @param {string} type - type of node that was edited.
+     * @param {Object} parsedSpecification - a graph that will be processed.
+     */
+    updateGraphsInEditor(type, parsedSpecification) {
+        console.log('Update graphs in editor');
+        const graphs = Array.from(this.editor.graphs);
+        graphs.forEach((graph) => {
+            graph.nodes.filter((n) => n.type === type)
+                .forEach((n) => {
+                    if (parsedSpecification?.isCategory) {
+                        graph.replaceNode(n, n.type);
+                    } else {
+                        graph.replaceNode(n, parsedSpecification.name);
+                    }
+                });
+        });
+
+        graphs.forEach((graph) => graph.nodes.filter((n) => n?.subgraph)
+            .forEach((n) => n.updateExposedInterfaces(undefined, undefined)));
+    }
+
     async preprocessSpecification(dataflowSpecification, {
         unmarkNewNodes,
         urloverrides,

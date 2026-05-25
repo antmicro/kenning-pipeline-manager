@@ -59,7 +59,6 @@ import YAML from 'yaml';
 import {
     computed, defineComponent, nextTick, ref, toRef, watch, onMounted, onBeforeUnmount, reactive,
 } from 'vue';
-import { useViewModel } from '@baklavajs/renderer-vue';
 import EditorManager, { EDITED_NODE_STYLE } from '../core/EditorManager';
 import NotificationHandler from '../core/notifications';
 import { menuState, configurationState, editorEventBus } from '../core/nodeCreation/ConfigurationState.ts';
@@ -279,28 +278,19 @@ export default defineComponent({
                 && editorManager.baklavaView.settings.editableNodeTypes,
         );
 
-        /**
-         * Based on edited type and specification will propagate all changes through graphs
-         * in the editor.
-         * @param {string} type - type of node that was edited.
-         * @param {Object} parsedSpecification - a graph that will be processed.
-         * @param {Object} editor - opened editor in which the changes will be applied.
-         */
-        const updateGraphsInEditor = (type, parsedSpecification, editor) => {
-            const graphs = Array.from(editor.graphs);
-            graphs.forEach((graph) => {
-                graph.nodes.filter((n) => n.type === type)
-                    .forEach((n) => {
-                        if (parsedSpecification?.isCategory) {
-                            graph.replaceNode(n, n.type);
-                        } else {
-                            graph.replaceNode(n, parsedSpecification.name);
-                        }
-                    });
-            });
+        const findChildren = (type, children = new Set()) => {
+            if (children.has(type)) {
+                return;
+            }
+            children.add(type);
 
-            graphs.forEach((graph) => graph.nodes.filter((n) => n?.subgraph)
-                .forEach((n) => n.updateExposedInterfaces(undefined, undefined)));
+            const extendingNodes = editorManager.specification
+                .currentSpecification.nodes
+                .filter((n) => n?.extends?.some((e) => e === type));
+
+            extendingNodes.forEach((n) => {
+                findChildren(n.name, children);
+            });
         };
 
         const findChildren = (type, children = new Set()) => {
@@ -320,9 +310,6 @@ export default defineComponent({
 
         const updateSpecification = async () => {
             try {
-                const { viewModel } = useViewModel();
-                const { editor } = viewModel.value;
-
                 const parsingErrors = validate();
                 if (parsingErrors.length > 0) {
                     throw new Error(parsingErrors);
@@ -352,7 +339,7 @@ export default defineComponent({
                 if (ret.errors !== undefined && ret.errors.length) {
                     throw new Error(ret.errors);
                 }
-                updateGraphsInEditor(oldType, parsedSpecification, editor);
+                editorManager.updateGraphsInEditor(oldType, parsedSpecification);
 
                 const children = new Set();
 
@@ -366,7 +353,7 @@ export default defineComponent({
                     .filter((n) => children.has(n.name));
                 // refresh nodes extending from current node
                 extendingNodes.forEach((n) => {
-                    updateGraphsInEditor(n.name, n, editor);
+                    editorManager.updateGraphsInEditor(n.name, n);
                 });
 
                 validateNodeStyle(parsedSpecification);
