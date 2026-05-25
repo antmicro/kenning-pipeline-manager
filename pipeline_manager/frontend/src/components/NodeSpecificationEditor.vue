@@ -63,10 +63,8 @@ import {
 import EditorManager, { EDITED_NODE_STYLE } from '../core/EditorManager';
 import NotificationHandler from '../core/notifications';
 import { menuState, configurationState, editorEventBus } from '../core/nodeCreation/ConfigurationState.ts';
-import {
-    alterInterfaces, alterProperties, updateExtendedProperties, updateExtendedInterfaces, findNodes,
-} from '../core/nodeCreation/Configuration.ts';
 import notifyEvents from '../custom/notifyEvents.js';
+import { suppressHistoryLogging } from '../core/History.ts';
 
 export default defineComponent({
     props: {
@@ -123,6 +121,21 @@ export default defineComponent({
 
         // We modify this value in the editor, so it's not exactly computed
         const currentSpecification = ref(maybeStringify(specification.value));
+
+        const discard = async () => {
+            currentSpecification.value = maybeStringify(specification.value);
+        };
+
+        notifyEvents.specificationRestored.subscribe(this, (data) => {
+            const { nodeType } = data;
+            if (nodeType !== node.value.type) {
+                return;
+            }
+
+            nextTick().then(() => {
+                discard();
+            });
+        });
 
         // Validation
 
@@ -392,16 +405,14 @@ export default defineComponent({
                 NotificationHandler.showToast('info', 'Node validated');
                 // refresh specification
                 getSpecificationWithIncludes();
-                // refresh graphs connections
-                const graphs = Array.from(editor.graphs);
-                graphs.forEach((graph) => {
-                    removeDanglingConnections(graph);
-                });
+
+                suppressHistoryLogging(false);
 
                 // storing past specification
                 notifyEvents.specificationUpdate.emit({
                     nodeType: oldType,
                     specification: oldSpecCopied,
+                    editorManager,
                 });
             } catch (error) {
                 const messages = Array.isArray(error) ? error : [error];
@@ -576,10 +587,6 @@ export default defineComponent({
             const { resolve } = event.detail;
             resolve(editorStateChanged.value);
         });
-
-        const discard = async () => {
-            currentSpecification.value = maybeStringify(specification.value);
-        };
 
         // Editing
 
