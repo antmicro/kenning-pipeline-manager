@@ -263,6 +263,35 @@
                                 "$ref": "#/$defs/coordinates"
                             }
                         ]
+                    },
+                    "views": {
+                        "type": "array",
+                        "description": "List of alternative ways to display the graph",
+                        "items": {
+                            "type": "object",
+                            "description": "Description of a view",
+                            "properties": {
+                                "name": {
+                                    "description": "Name of a view",
+                                    "type": "string"
+                                },
+                                "position": {
+                                    "description": "Node id, identifies node being described",
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/$defs/coordinates"
+                                        }
+                                    ]
+                                },
+                                "style": {
+                                    "description": "A style or an array of non-repeating styles defined by 'styles' in metadata",
+                                    "type": [
+                                        "string",
+                                        "array"
+                                    ]
+                                }
+                            }
+                        }
                     }
                 },
                 "required": [
