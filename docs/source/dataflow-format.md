@@ -123,6 +123,10 @@ Additionally, these optional attributes may be used:
   It is used to create multi-layer graphs, with subgraphs that can be connected to others nodes/graphs.
   Both the interface of the graph node and the interface of the node within the graph have the same `id` and `direction` fields.
   Note that values of `externalName` within the graph have to be unique.
+* `busSize` - changes interface type to bus. This is a special interface type that creates new endpoints for connections upon request.
+  Bus size itself signals how big the bus height should be in pixels.
+* `busStubs` - holds any connection endpoints that will be created. Note that these endpoints can only exist if they are connected to
+  some other interface - they must have a corresponding connection. Setting this property is not necessary to enable bus type interface behaviour.
 
 Example of graph interfaces:
 

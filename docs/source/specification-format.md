@@ -441,6 +441,9 @@ Every interface object has following properties:
   It specifies the name of the interface of the graph.
   Both the interface of the graph node and the interface of the node within the graph must have the same `id` and `direction` fields.
   Note that values of `externalName` of the graph node have to be unique.
+* `busSize` (optional) - changes interface type to bus. This is a special interface type that creates new endpoints for connections upon request.
+  Bus size itself signals how big the bus height should be in pixels.
+
 
 ```{note}
 Only interfaces of the same `type` can be connected together.
