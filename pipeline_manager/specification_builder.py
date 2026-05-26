@@ -801,6 +801,8 @@ class SpecificationBuilder(object):
         maxcount: Optional[int] = None,
         override: Optional[bool] = None,
         array: Optional[List[int]] = None,
+        busSize: Optional[int] = None,
+        busStubs: Optional[List[Dict]] = None,
     ):
         """
         Adds interface to the node type.
@@ -827,6 +829,11 @@ class SpecificationBuilder(object):
         array : Optional[List[int]]
             Creates an array of interfaces with given name.
             Accepts two integers - minimal and maximal value
+        busSize : Optional[int]
+            If interface is a bus type, bus size has to specified in pixels.
+        busStubs : Optional[List[Dict]]
+            If interface is a bus type, it may have bus stubs to which
+            connections are connected.
 
         Raises
         ------
@@ -857,6 +864,8 @@ class SpecificationBuilder(object):
         set_if_not_none(interface, "maxConnectionsCount", maxcount)
         set_if_not_none(interface, "override", override)
         set_if_not_none(interface, "array", array)
+        set_if_not_none(interface, "busSize", busSize)
+        set_if_not_none(interface, "busStubs", busStubs)
 
         if dynamic:
             assert isinstance(dynamic, bool) or isinstance(dynamic, List), (
@@ -1231,6 +1240,8 @@ class SpecificationBuilder(object):
                 maxcount=get_optional(interface, "maxConnectionsCount"),
                 override=get_optional(interface, "override"),
                 array=get_optional(interface, "array"),
+                busSize=get_optional(interface, "busSize"),
+                busStubs=get_optional(interface, "busStubs"),
             )
         for interface_group in node.get("interfaceGroups", []):
             if "name" not in interface_group:
