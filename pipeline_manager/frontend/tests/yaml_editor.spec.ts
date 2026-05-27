@@ -5,7 +5,8 @@ import {
 } from '@playwright/test';
 import {
     closeYAMLEditor,setYAMLEditorContent,getYAMLEditorContent,createNewNodeType,waitForSubgraph,reopenNode,getUrl,assertPropertyCount,assertOutputCount,assertInputCount,addInterface, getNode, addNode, dragAndDrop, enableEditingNodes,
-    loadSpecification, loadDataflow, openNodePalette, getContextMenu
+    loadSpecification, loadDataflow, openNodePalette, getContextMenu,
+    AddConnection
 } from './config.js';
 
 export async function checkIfYAMLPersists(page) {
@@ -254,17 +255,38 @@ test('editing interface in YAML', async ({ page }) => {
 test('interface maxConnectionCount YAML', async ({ page }) => {
     await page.goto(getUrl());
     await loadSpecification(page, 'sample-include-specification.json');
-    const nodeName = 'GaussianKernel';
-    const { _, content } = await addAndOpenNode(page, 'Generators', nodeName);
-    const node = await getNode(page,nodeName).first();
-    await assertOutputCount(node, 1);
-    const intf = node.locator('.__interfaces .__outputs > div');
-    expect(intf).toHaveClass('baklava-node-interface --output --connected');
 
+    const connections = page.locator('.custom-connections-container > g');
+    await expect(connections, {
+        message: 'The initial conditions of presence of six connections are not met.',
+    }).toHaveCount(6);
+
+    const firstName = 'SaveFrame';
+    await addNode(page, 'Filesystem', firstName, 0 , 0);
+    const targetNode = getNode(page,firstName).last();
+    // get SaveFrame input interface
+    const colorInterface = targetNode.locator('.__interfaces .__inputs .__port').first();
+    const secNode = 'GaussianKernel';
+    const sourceNode = getNode(page,secNode);
+    const kernelInterface = sourceNode.locator('.__interfaces .__outputs .__port').first();
+
+    const content = await reopenNode(page,sourceNode);
     content.interfaces[0].maxConnectionsCount = 0;
     await setYAMLEditorContent(page, content);
-    await assertOutputCount(node, 1);
-    expect(intf).toHaveClass('baklava-node-interface --output --connected');
+
+    await AddConnection(page,kernelInterface,colorInterface);
+
+    await expect(connections, {
+        message: 'New connections has not been added.',
+    }).toHaveCount(7);
+
+    await reopenNode(page,sourceNode);
+    content.interfaces[0].maxConnectionsCount = 1;
+    await setYAMLEditorContent(page, content);
+
+    await expect(connections, {
+        message: 'Connections has no been overrode.',
+    }).toHaveCount(6);
 });
 test('subgraph cascade interface YAML', async ({ page }) => {
     await page.goto(getUrl());
