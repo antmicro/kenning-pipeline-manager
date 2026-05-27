@@ -228,9 +228,11 @@ export default function createPipelineManagerGraph(graph) {
                         newNodeInstance.inputs[name]
                             .id = intf.id;
                         newNodeInstance.inputs[name]
-                            .externalName = intf?.externalName;
+                            .externalName = newNodeInstance
+                                .inputs[name]?.externalName ?? intf?.externalName;
                         newNodeInstance.inputs[name]
-                            .maxConnectionsCount = intf?.maxConnectionsCount;
+                            .maxConnectionsCount = newNodeInstance
+                                .inputs[name]?.maxConnectionsCount ?? intf?.maxConnectionsCount;
                     }
                     if (Object.prototype.hasOwnProperty.call(newNodeInstance.outputs, name)) {
                         updateInterfacePosition(
@@ -244,9 +246,11 @@ export default function createPipelineManagerGraph(graph) {
                         newNodeInstance.outputs[name]
                             .id = intf.id;
                         newNodeInstance.outputs[name]
-                            .externalName = intf?.externalName;
+                            .externalName = newNodeInstance
+                                .outputs[name]?.externalName ?? intf?.externalName;
                         newNodeInstance.outputs[name]
-                            .maxConnectionsCount = intf?.maxConnectionsCount;
+                            .maxConnectionsCount = newNodeInstance
+                                .outputs[name]?.maxConnectionsCount ?? intf?.maxConnectionsCount;
                     }
                     // If the new node has the same property as it could be overridden
                 } else if (
@@ -258,7 +262,8 @@ export default function createPipelineManagerGraph(graph) {
                     newNodeInstance.inputs[name]
                         .id = intf.id;
                     newNodeInstance.inputs[name]
-                        .externalName = intf?.externalName;
+                        .externalName = newNodeInstance
+                            .inputs[name]?.externalName ?? intf?.externalName;
                 }
             });
         }
