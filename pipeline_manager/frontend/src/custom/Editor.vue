@@ -73,10 +73,11 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
                 @mouseleave="clearHighlight"
             >
                 <CustomNode
-                    v-memo="[visibleNodes, ...selectedNodes]"
+                    v-memo="[visibleNodes, ...selectedNodes, currentViewName]"
                     v-for="node in visibleNodes"
                     :key="node.id + counter.toString()"
                     :node="node"
+                    :position="getNodePosition(node)"
                     :selected="selectedNodes.includes(node)"
                     :greyedOut="greyedOutNodes.includes(node)"
                     :interfaces="highlightInterfaces"
@@ -90,6 +91,7 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
                 <CustomNode
                     v-for="node in ignoredNodes"
                     :key="node.id + counter.toString()"
+                    :position="getNodePosition(node)"
                     :node="node"
                     :hidden="true"
                 />
@@ -103,7 +105,7 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
                 @wheel="mouseWheel"
             >
                 <PipelineManagerConnection
-                    v-memo="visibleConnections"
+                    v-memo="[...visibleConnections, currentViewName]"
                     v-for="connection in visibleConnections"
                     :key="connection.id + counter.toString()"
                     :connection="connection"
@@ -599,6 +601,12 @@ export default defineComponent({
         const visibleNodes = computed(() =>
             nodes.value.filter((n) => !ignoredNodesTypes.value.has(n.layer)),
         );
+        const getNodePosition =
+            (node) => {
+                const curName = props.viewModel.editor.currentView;
+                const entry = node.views?.find((v) => v.name === curName);
+                return entry ? entry.position : node.position;
+            };
         const updateGroupName = (groupId, newName) => {
             if (!readonly.value) {
                 const realGroup = graph.value.groups.find((g) => g.id === groupId);
@@ -684,6 +692,9 @@ export default defineComponent({
                 });
             });
         }, 50); // 20fps
+
+        const currentViewName = computed(() => props.viewModel.editor.currentView);
+
         watch([
             () =>
                 groups.value.map((g) => ({
@@ -691,6 +702,7 @@ export default defineComponent({
                     name: g.name,
                     nodes: g.nodes?.slice() ?? [],
                 })),
+            () => currentViewName.value,
         ],
         updateVisibleGroups,
         { deep: false, flush: 'post' },
@@ -1173,6 +1185,9 @@ export default defineComponent({
             keyDown,
             keyUp,
             selectNode,
+            currentView: editorManager.currentView,
+            currentViewName,
+            getNodePosition,
             rectangleSelection,
             greyedOutNodes,
             temporaryConnection: temporaryConnection.temporaryConnection,
