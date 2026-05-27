@@ -742,12 +742,26 @@ export default class PipelineManagerEditor extends Editor {
         return fullUrls;
     }
 
+    _getFromView(node, field) {
+        const view = this.currentView;
+        const viewEntry = node.views?.find((v) => v.name === view);
+        if (viewEntry && viewEntry.style) {
+            const val = this.getNodeStyle(viewEntry.style)?.[field];
+            if (val) {
+                return val;
+            }
+        }
+        return undefined;
+    }
+
     getNodeIconPath(nodeName) {
         return this.nodeIcons.get(nodeName) || undefined;
     }
 
-    getPillText(nodeName) {
-        const nodeType = this.nodeTypes.get(nodeName);
+    getPillText(node) {
+        const viewPill = this._getFromView(node, 'pill');
+        if (viewPill?.text) return viewPill.text;
+        const nodeType = this.nodeTypes.get(node.type);
         if (nodeType?.pill !== undefined) return nodeType.pill?.text;
         if (nodeType?.style !== undefined) return this.getNodeStyle(nodeType.style)?.pill?.text;
         return undefined;
@@ -758,6 +772,8 @@ export default class PipelineManagerEditor extends Editor {
     }
 
     getNodeColor(node) {
+        const viewColor = this._getFromView(node, 'color');
+        if (viewColor) return viewColor;
         const nodeColor = this.nodeColors.get(node.id);
         if (nodeColor !== undefined) return nodeColor;
 
@@ -773,8 +789,10 @@ export default class PipelineManagerEditor extends Editor {
         }
     }
 
-    getNodeMinimal(nodeName) {
-        const nodeType = this.nodeTypes.get(nodeName);
+    getNodeMinimal(node) {
+        const viewMin = this._getFromView(node, 'minimal');
+        if (viewMin) return viewMin;
+        const nodeType = this.nodeTypes.get(node.type);
         if (nodeType?.style !== undefined) {
             const nodeStyle = this.getNodeStyle(nodeType.style);
             const hasShape = nodeStyle?.shape !== undefined;
@@ -815,8 +833,10 @@ export default class PipelineManagerEditor extends Editor {
             .filter((value) => value !== undefined));
     }
 
-    getPillColor(nodeName) {
-        const nodeType = this.nodeTypes.get(nodeName);
+    getPillColor(node) {
+        const viewPill = this._getFromView(node, 'pill');
+        if (viewPill?.color) return viewPill.color;
+        const nodeType = this.nodeTypes.get(node.type);
         const pill = nodeType?.pill !== undefined
             ? nodeType.pill
             : this.getNodeStyle(nodeType.style).pill;

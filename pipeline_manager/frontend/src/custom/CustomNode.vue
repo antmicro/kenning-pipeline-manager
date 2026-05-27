@@ -224,6 +224,7 @@ const props = defineProps({
     hidden: Boolean,
     interfaces: Array,
     ignoredInterfacesType: Array,
+    position: Object,
 });
 
 const emit = defineEmits(['select', 'openContextMenu', 'transformed']);
@@ -251,8 +252,8 @@ const nodeCategory = viewModel.value.editor.getNodeCategory(props.node.type);
 const isGraphNode = computed(() => props.node?.subgraph !== undefined);
 const nodeHasRelatedGraphs
     = computed(() => viewModel.value.editor.nodeHasRelatedGraphs(node.value));
-const pillText = computed(() => viewModel.value.editor.getPillText(node.value.type));
-const pillColor = computed(() => viewModel.value.editor.getPillColor(node.value.type));
+const pillText = computed(() => viewModel.value.editor.getPillText(node.value));
+const pillColor = computed(() => viewModel.value.editor.getPillColor(node.value));
 const pillTextColor = computed(() => viewModel.value.editor.getTextColor(pillColor.value));
 
 const customShape = viewModel.value.editor.getShape(node.value.type);
@@ -661,7 +662,7 @@ const interfacePositions = computed(() => {
     return positionMap;
 });
 
-const nodeMinimal = computed(() => viewModel.value.editor.getNodeMinimal(node.value.type));
+const nodeMinimal = computed(() => viewModel.value.editor.getNodeMinimal(node.value));
 
 const showContextMenuInterface = ref(false);
 const showContextMenuProperty = ref(false);
@@ -713,8 +714,8 @@ const height = computed(() => {
 });
 
 const styles = computed(() => ({
-    top: `${props.node.position?.y ?? 0}px`,
-    left: `${props.node.position?.x ?? 0}px`,
+    top: `${props.position?.y ?? 0}px`,
+    left: `${props.position?.x ?? 0}px`,
     width: width.value,
     height: height.value,
 }));
