@@ -663,6 +663,7 @@ const interfacePositions = computed(() => {
 });
 
 const nodeMinimal = computed(() => viewModel.value.editor.getNodeMinimal(node.value));
+const nodeClean = computed(() => viewModel.value.editor.getNodeClean(node.value));
 
 const showContextMenuInterface = ref(false);
 const showContextMenuProperty = ref(false);
@@ -681,6 +682,7 @@ const classes = computed(() => ({
     '--hidden': props.hidden,
     '--minimal': nodeMinimal.value,
     '--transparent': customShape !== undefined,
+    '--clean': nodeClean.value,
     __readonly: viewModel.value.editor.readonly,
 }));
 
@@ -697,6 +699,9 @@ const subgraphStyle = computed(() => {
 });
 
 const width = computed(() => {
+    if (nodeMinimal.value || nodeClean.value) {
+        return 'auto';
+    }
     if (props.node.width !== undefined) {
         return `${props.node.width}px`;
     }

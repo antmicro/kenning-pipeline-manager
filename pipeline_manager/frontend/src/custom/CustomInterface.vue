@@ -167,6 +167,7 @@ from creating and deleting connections or altering nodes' values if the editor i
 
         <div
             no-drag="true"
+            class="__content-body"
             @mouseenter="startPropertyHover"
             @mouseleave="endPropertyHover"
             :class="spanClasses"

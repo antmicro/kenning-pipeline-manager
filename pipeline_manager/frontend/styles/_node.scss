@@ -73,6 +73,52 @@
             }
         }
     }
+    &.--clean {
+        min-width: 30px !important;
+        display: grid;
+        grid-template-columns: 1fr;
+        grid-template-rows: 1fr;
+        justify-items: center;
+        align-items: center;
+
+        & > .__title {
+            grid-column: 1;
+            grid-row: 1;
+            z-index: 2;
+
+            margin: 0;
+            padding: 1em 1em;
+            width: 95%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        & > .__content {
+            grid-column: 1;
+            grid-row: 1;
+            z-index: 1;
+
+            width: 100%;
+            box-sizing: border-box;
+
+            & > .__properties {
+                display: none;
+            }
+            & > .__interfaces {
+                span {
+                    display: none;
+                }
+                .__content-body {
+                    height: 0.5em;
+                }
+                baklava-node-interface {
+                    min-height: 1em;
+                }
+            }
+        }
+    }
+
 
 
 
