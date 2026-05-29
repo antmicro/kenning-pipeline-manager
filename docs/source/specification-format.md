@@ -161,6 +161,7 @@ Node style defines how nodes of a given style should look like. Currently, the f
 * `pill` - pill of the node unless a node sets its own `pill`.
 * `minimal` - flag informing whether to use special minimized style for the node. Note that icon and title card won't be visible when this is enabled.
 * `shape` - a link or path to SVG file, allowing to define custom shape for node.
+* `clean` - flag informing whether to use special clean style for the node. Only title and port endpoints will be visible in this style. Interface names and properties will be hidden.
 
 Field values are defined the same way as in [Node](#node) specification, however, `icon` can obtain [Navbar item](#navbar-item) `iconName` values as well.
 
