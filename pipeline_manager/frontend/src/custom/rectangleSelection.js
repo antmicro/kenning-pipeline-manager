@@ -20,7 +20,7 @@ function boundingRectIntersection(bboxA, bboxB) {
  * Checks if node is present inside selection rectangle
  * @returns
  */
-export default function nodeInsideSelection(graph, node, boundingRect) {
+export default function nodeInsideSelection(graph, node, position, boundingRect) {
     const nodeHTMLelement = document.getElementById(node.id);
     const selectionBoundingRect = boundingRect;
 
@@ -29,8 +29,8 @@ export default function nodeInsideSelection(graph, node, boundingRect) {
     const { scaling } = graph;
     const navBarHeight = 60;
 
-    const nodeX = scaling * (panningX + node.position.x);
-    const nodeY = scaling * (panningY + node.position.y) + navBarHeight;
+    const nodeX = scaling * (panningX + position.x);
+    const nodeY = scaling * (panningY + position.y) + navBarHeight;
     const nodeWidth = nodeHTMLelement.offsetWidth;
     const nodeHeight = nodeHTMLelement.offsetHeight;
 

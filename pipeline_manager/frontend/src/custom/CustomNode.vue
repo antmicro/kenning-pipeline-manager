@@ -669,7 +669,7 @@ const showContextMenuInterface = ref(false);
 const showContextMenuProperty = ref(false);
 
 const groupDragMove = useGroupDragMove(
-    toRef(props.node, 'position'),
+    toRef(props, 'position'),
     props.node.id,
     gridSnapper(movementStep),
 );

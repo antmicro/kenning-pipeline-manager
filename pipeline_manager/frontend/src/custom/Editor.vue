@@ -293,6 +293,12 @@ export default defineComponent({
         });
         props.viewModel.editor.events.setLoad = setLoad;
 
+        const getNodePosition = (node) => {
+            const curName = props.viewModel.editor.currentView;
+            const entry = node.views?.find((v) => v.name === curName);
+            return entry ? entry.position : node.position;
+        };
+
         const appendSelectMultipleNodes = () => {
             graph.value.nodes.forEach((node) => {
                 if (graph.value.selectedNodes.includes(node)) {
@@ -301,7 +307,8 @@ export default defineComponent({
 
                 const selectionBoundingRect = rectangleSelection.value.boundingRect;
 
-                if (nodeInsideSelection(graph.value, node, selectionBoundingRect)) {
+                // eslint-disable-next-line max-len
+                if (nodeInsideSelection(graph.value, node, getNodePosition(node), selectionBoundingRect)) {
                     graph.value.selectedNodes.push(node);
                 }
             });
@@ -322,7 +329,8 @@ export default defineComponent({
             graph.value.nodes.forEach((node) => {
                 const selectionBoundingRect = rectangleSelection.value.boundingRect;
 
-                if (nodeInsideSelection(graph.value, node, selectionBoundingRect)) {
+                // eslint-disable-next-line max-len
+                if (nodeInsideSelection(graph.value, node, getNodePosition(node), selectionBoundingRect)) {
                     graph.value.selectedNodes.push(node);
                 }
             });
@@ -601,12 +609,6 @@ export default defineComponent({
         const visibleNodes = computed(() =>
             nodes.value.filter((n) => !ignoredNodesTypes.value.has(n.layer)),
         );
-        const getNodePosition =
-            (node) => {
-                const curName = props.viewModel.editor.currentView;
-                const entry = node.views?.find((v) => v.name === curName);
-                return entry ? entry.position : node.position;
-            };
         const updateGroupName = (groupId, newName) => {
             if (!readonly.value) {
                 const realGroup = graph.value.groups.find((g) => g.id === groupId);

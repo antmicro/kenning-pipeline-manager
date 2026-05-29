@@ -66,18 +66,24 @@ export default defineComponent({
         const containsPoint = (elements) =>
             elements.includes(conn.value.$el.firstChild);
 
-        const fromNodePosition = computed(
-            () => graph.value.findNodeById(props.connection.from.nodeId)?.position,
-        );
-        const toNodePosition = computed(
-            () => graph.value.findNodeById(props.connection.to.nodeId)?.position,
-        );
         const fromStubChange = computed(
             () => props.connection.from.offset,
         );
         const toStubChange = computed(
             () => props.connection.to.offset,
         );
+        const getNodePositions = (nodeId) => {
+            const node = graph.value?.findNodeById(nodeId);
+            if (!node) return [];
+
+            return [
+                node.position,
+                ...(node.views?.filter((v) => v?.position).map((v) => v.position) ?? []),
+            ];
+        };
+
+        const fromNodePositions = computed(() => getNodePositions(props.connection.from.nodeId));
+        const toNodePositions = computed(() => getNodePositions(props.connection.to.nodeId));
 
         const fromNode = computed(() => graph.value.findNodeById(props.connection.from.nodeId));
         const toNode = computed(() => graph.value.findNodeById(props.connection.to.nodeId));
@@ -126,7 +132,7 @@ export default defineComponent({
         });
 
         watch(
-            [fromNodePosition, toNodePosition],
+            [fromNodePositions, toNodePositions],
             async () => {
                 await nextTick();
                 updateCoords();
