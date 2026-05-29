@@ -557,6 +557,8 @@ export class CustomNode extends Node {
 
     type = undefined;
 
+    views = [];
+
     constructor(
         name,
         layer,
@@ -586,6 +588,7 @@ export class CustomNode extends Node {
         this.height = height;
         this.relatedGraphs = relatedGraphs;
         this.simpleInherited = simpleInherited;
+        this.views = [];
 
         this.events.propertyEdit = new BaklavaEvent();
 
@@ -1007,6 +1010,10 @@ export class CustomNode extends Node {
             });
         }
 
+        if (parsedState.views) {
+            this.views = parsedState.views;
+        }
+
         // Enabling interface groups
         Object.entries(parsedState.enabledInterfaceGroups).forEach(
             ([groupName, groupState]) => {
@@ -1106,6 +1113,8 @@ export class CustomNode extends Node {
         // Default position should be undefined instead of (0, 0) so that it can be set
         // by autolayout
         this.position = state?.position;
+
+        this.views = state?.views;
 
         this.relatedGraphs = state.relatedGraphs;
         return errors;

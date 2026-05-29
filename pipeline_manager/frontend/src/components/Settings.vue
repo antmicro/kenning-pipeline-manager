@@ -251,6 +251,24 @@ export default {
             });
             return select;
         });
+        const viewsPresent = computed(() =>
+            props.viewModel.editor.renderViews.length > 1);
+
+        const viewSelected = computed(() => {
+            const option = new SelectInterface(
+                'Selected view',
+                props.viewModel.editor.currentView,
+                props.viewModel.editor.renderViews.map((view) =>
+                    ({ text: view, value: view })),
+            ).setPort(false);
+
+            option.events.setValue.subscribe(this, (v) => {
+                const { editor } = props.viewModel;
+                editor.currentView = v;
+            });
+
+            return option;
+        });
 
         const readonlyOptions = computed(() => {
             if (props.viewModel.editor.readonly) {
@@ -270,6 +288,9 @@ export default {
                 showIds.value,
                 showHiddenProperties.value,
             ];
+            if (viewsPresent.value) {
+                options.push(viewSelected.value);
+            }
             if (props.viewModel.settings.toggleableEditableTypes) {
                 options.push(editableNodeTypes.value);
             }

@@ -61,6 +61,10 @@ export default class PipelineManagerEditor extends Editor {
 
     nodeColors = new Map();
 
+    defaultView = 'default';
+
+    renderViews = [this.defaultView];
+
     baseURLs = new Map();
 
     baseIconUrls = new Map();
@@ -74,6 +78,8 @@ export default class PipelineManagerEditor extends Editor {
     subgraphStack = [];
 
     parentNodes = new Map();
+
+    currentView = this.defaultView;
 
     // node types created in visual-editor
     additionalNodeTypes = new Set();
@@ -349,6 +355,11 @@ export default class PipelineManagerEditor extends Editor {
         this.nodeColors.clear();
         state.graphs.forEach((graph) => {
             graph.nodes.forEach((n) => {
+                n.views?.forEach((v) => {
+                    if (!this.renderViews.find((vv) => vv === v.name)) {
+                        this.renderViews.push(v.name);
+                    }
+                });
                 if (n.subgraph !== undefined) {
                     if (!this.isGraphNode(n.name)) {
                         result.warnings.push([`Node ${n.name} is not graph node, although it has defined subgraph property.`]);
