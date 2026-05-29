@@ -67,7 +67,7 @@
                 "shape": "https://raw.githubusercontent.com/antmicro/antmicro-sphinx-utils/main/logo/white.svg"
             },
             "GNDStyle":{
-                "shape": "http://localhost:3000/svgs/gnd.svg",
+                "shape": "svgs/gnd.svg",
                 "positions": {
                     "a": {
                         "x": 49,
@@ -76,7 +76,7 @@
                 }
             },
             "ResistorStyle":{
-                "shape": "http://localhost:3000/svgs/resistor.svg",
+                "shape": "svgs/resistor.svg",
                 "positions": {
                     "a": {
                         "x": 0,
@@ -89,7 +89,7 @@
                 }
             },
             "VoltageStyle":{
-                "shape": "http://localhost:3000/svgs/voltage.svg",
+                "shape": "svgs/voltage.svg",
                 "positions": {
                     "a": {
                         "x": 50,
@@ -102,7 +102,7 @@
                 }
             },
             "SignalStyle":{
-                "shape": "http://localhost:3000/svgs/signal.svg",
+                "shape": "svgs/signal.svg",
                 "positions": {
                     "a": {
                         "x": 50,
@@ -115,7 +115,7 @@
                 }
             },
             "NPNStyle":{
-                "shape": "http://localhost:3000/svgs/npn.svg",
+                "shape": "svgs/npn.svg",
                 "positions": {
                     "c": {
                         "x": 75,
@@ -132,7 +132,7 @@
                 }
             },
             "PNPStyle":{
-                "shape": "http://localhost:3000/svgs/pnp.svg",
+                "shape": "svgs/pnp.svg",
                 "positions": {
                     "e": {
                         "x": 76,
