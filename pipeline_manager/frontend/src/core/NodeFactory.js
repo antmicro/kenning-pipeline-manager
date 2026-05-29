@@ -825,6 +825,7 @@ export class CustomNode extends Node {
         savedState.properties = newProperties;
         savedState.enabledInterfaceGroups = enabledInterfaceGroups;
         savedState.relatedGraphs = this.relatedGraphs;
+        savedState.views = this.views;
 
         savedState.name = savedState.type;
         delete savedState.type;

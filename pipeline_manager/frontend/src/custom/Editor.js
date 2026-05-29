@@ -169,7 +169,10 @@ export default class PipelineManagerEditor extends Editor {
      * @throws {Error} Throws if there are issues switching to a subgraph.
      */
     save() {
+        const lastView = this.currentView;
+        this.currentView = this.defaultView;
         const graphs = Array.from(this.graphs).filter((g) => !g.specGraph);
+
         const graphMap = new Map(
             graphs.map((g) => [g.id, g]),
         );
@@ -215,6 +218,7 @@ export default class PipelineManagerEditor extends Editor {
             dataflowState.entryGraph = dataflowState.graphs[0].id;
         }
 
+        this.currentView = lastView;
         return dataflowState;
     }
 
