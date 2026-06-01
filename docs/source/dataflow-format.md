@@ -66,6 +66,10 @@ Each node has:
 * `color` - optional field defining a hexadecimal color that will be used as the node background in the editor.
   This overrides the node color set in the specification.
   If not provided, the color set in the specification will be used instead.
+* `views` - optional field that can define alternative ways to display the node. Each element has to have assigned:
+  * `name` - name of the alternative view
+  * `position` - position of the node in alternative view
+  * `style` - style of the node in alternative view
 
 ##### Property
 

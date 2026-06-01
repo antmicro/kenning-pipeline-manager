@@ -43,6 +43,7 @@ On the upper right corner of {{project}} window there is a gear icon toggling se
 * `Background grid size` - Sets the size of single grid cell visible in the background
 * `Node movement step` - Sets the minimum step size which can be taken along each axis when moving node.
 * `Center` - Pressing this buttons moves the viewport to the center of graph and sets the zoom level so that whole dataflow is visible
+* `Selected view` - If the graph representation has at least one alternative [view](project:dataflow-format.md#node), it can be selected here.
 * `Hide layers` - [Metadata](project:specification-format.md#layer) allows to specify layers for a certain set of interface types and connections. Toggling this checkbox allows to hide
 connections belonging to said layer
 * `Modify node types` - Toggling this checkbox allows editing existing nodes and adding new node types to the specification
