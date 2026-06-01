@@ -3,6 +3,7 @@ import {
     getUrl,getNodeByID,assertInputCount,assertOutputCount,waitForSubgraph,enterSubgraph,
     leaveSubgraph,expectNode,getNode,deleteNode, loadVideoNodeId, enableNavigationBar, addNode,
     dragAndDrop, closeTerminal,loadSpecification,loadDataflow, getContextMenu,
+    AddConnection,
 } from './config.js';
 
 
@@ -229,22 +230,7 @@ test('test history by adding connection', async ({ page }) => {
     const sourceInterface = getNodeInterfaces(page, 'LoadVideo').locator('.__port').first();
     const targetInterface = getNodeInterfaces(page, 'Filter2D', 'input').locator('.__port').first();
 
-    const [sourcePosition, targetPosition]: [number, number][] = await Promise.all(
-        [sourceInterface, targetInterface]
-            .map(async (locator) => {
-                const {
-                    x, width, y, height,
-                } = await locator.boundingBox() as {
-                    x: number, y: number, width: number, height: number,
-                };
-
-                return [x + width / 2, y + height / 2];
-            }));
-
-    await page.mouse.move(...sourcePosition);
-    await page.mouse.down();
-    await page.mouse.move(...targetPosition, { steps: 2 });
-    await page.mouse.up();
+    await AddConnection(page,sourceInterface,targetInterface);
 
     await expect(connections, {
         message: 'Adding a connection (in place of a missing connection) failed.',

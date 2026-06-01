@@ -55,6 +55,34 @@ export async function openFileChooser(page, purpose) {
 }
 
 /**
+ * Add connection between source and target interface.
+ * @param {import('@playwright/test').Page} page - The Playwright Page object to interact with.
+ * @param {import('@playwright/test').Locator} sourceInterface - Source interface of connection
+ * @param {import('@playwright/test').Locator} targetInterface - Target interface of connection
+ * @returns {Promise<void>}
+ */
+export async function AddConnection(page, sourceInterface, targetInterface)
+{
+    const [sourcePosition, targetPosition] = await Promise.all(
+        [sourceInterface, targetInterface]
+            .map(async (locator) => {
+                const bbox = await locator.boundingBox();
+
+                if(bbox === null)
+                {
+                    return [0,0]
+                }
+
+                return [bbox.x + bbox.width / 2, bbox.y + bbox.height / 2];
+            }));
+
+    await page.mouse.move(sourcePosition[0], sourcePosition[1]);
+    await page.mouse.down();
+    await page.mouse.move(targetPosition[0], targetPosition[1], { steps: 2 });
+    await page.mouse.up();
+}
+
+/**
  * Enable the navigation bar by simulating a mouse movement and clicking
  * on the element with the text "Show node browser".
  *
