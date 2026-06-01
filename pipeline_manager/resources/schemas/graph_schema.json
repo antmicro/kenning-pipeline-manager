@@ -150,6 +150,13 @@
                                     "description": "Determines the size of bus interface",
                                     "type": "number"
                                 },
+                                "busType": {
+                                    "description": "Determines the type of bus interface",
+                                    "enum": [
+                                        "oneSided",
+                                        "twoSided"
+                                    ]
+                                },
                                 "busStubs": {
                                     "description": "Endpoints of connections going into the bus",
                                     "type": "array",
@@ -163,6 +170,13 @@
                                             "stubOffset": {
                                                 "description": "Offset of stub within the bus in pixels",
                                                 "type": "number"
+                                            },
+                                            "side": {
+                                                "description": "Side has to be specified in the two-sided bus variant",
+                                                "enum": [
+                                                    "left",
+                                                    "right"
+                                                ]
                                             }
                                         },
                                         "required": [
