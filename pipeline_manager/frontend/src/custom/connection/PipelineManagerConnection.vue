@@ -124,6 +124,11 @@ export default defineComponent({
             };
         };
 
+        const currentViewName = computed(() => graph.value.editor.currentView);
+        watch(currentViewName, async () => {
+            await nextTick();
+            updateCoords();
+        });
         // If any side of any interface in from or to node changes we may need to
         // Rerender connections
         watch([fromNodeInterfacesSide, toNodeInterfacesSide], async () => {
