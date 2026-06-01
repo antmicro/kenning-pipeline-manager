@@ -759,7 +759,7 @@ export default function createPipelineManagerGraph(graph) {
             return {
                 width: HTMLelement.offsetWidth,
                 height: HTMLelement.offsetHeight,
-                position: node.position,
+                position: this.editor.getNodeDisplayedPosition(node),
             };
         });
         const margin = 100;

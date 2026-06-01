@@ -265,6 +265,7 @@ export default {
             option.events.setValue.subscribe(this, (v) => {
                 const { editor } = props.viewModel;
                 editor.currentView = v;
+                editor.centerZoom();
             });
 
             return option;

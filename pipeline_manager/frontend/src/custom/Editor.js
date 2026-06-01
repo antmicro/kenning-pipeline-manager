@@ -793,6 +793,12 @@ export default class PipelineManagerEditor extends Editor {
         }
     }
 
+    getNodeDisplayedPosition(node) {
+        const curName = this.currentView;
+        const entry = node.views?.find((v) => v.name === curName);
+        return entry ? entry.position : node.position;
+    }
+
     getNodeMinimal(node) {
         const viewMin = this._getFromView(node, 'minimal');
         if (viewMin) return viewMin;
