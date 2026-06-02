@@ -16,10 +16,11 @@ from creating and deleting connections or altering nodes' values if the editor i
         :id="intf.id"
         ref="el"
         class="baklava-node-interface"
-        :class="newClasses"
+        :class="newClasses(intf)"
     >
         <div
             class="__port-bus"
+            :class="{ '__big-bus': isBigBus(intf) }"
             v-if="intf.port && intf.busSize"
             no-drag="true"
             :style="{height: intf.busSize.toString() + 'px'}"
@@ -28,21 +29,33 @@ from creating and deleting connections or altering nodes' values if the editor i
             @pointerdown.left="(e) => { onMouseDown(); e.stopPropagation() }"
         >
             <div
-                class="__port"
+                class="__port-bus-stub"
                 v-if="tempBusIntfOffset && intf.busSize"
-                :style="{
-                    position: 'absolute',
-                    top: tempBusIntfOffset + 'px',
-                    pointerEvents: 'none',
+                :class="{
+                    greyedout_arrow: highlighted,
+                    picked: picked,
+                    '__square': isExposed,
+                    '--input': intf.side === 'left',
+                    '--output': intf.side === 'right',
                 }"
-                :class="{ greyedout_arrow: highlighted, picked: picked, '__square': isExposed }"
-            />
+            >
+                <div
+                    class="__port"
+                    no-drag="true"
+                    :style="{
+                        position: 'absolute',
+                        top: tempBusIntfOffset + 'px',
+                        pointerEvents: 'none',
+                    }"
+                >
+                </div>
+            </div>
             <div
                 class="__port-bus-stub"
                 v-for="stub in intf.busStubs"
                 :key="stub.id"
                 :id="stub.id"
-                :class="newClasses"
+                :class="newClasses(stub)"
             >
                 <div
                     class="__port"
@@ -174,6 +187,7 @@ from creating and deleting connections or altering nodes' values if the editor i
 import {
     defineComponent, ref, computed, nextTick,
 } from 'vue';
+import { useElementSize } from '@vueuse/core';
 import {
     Components, useViewModel, useGraph, TextInterface,
 } from '@baklavajs/renderer-vue';
@@ -204,6 +218,8 @@ export default defineComponent({
         } =
             Components.NodeInterface.setup(props);
 
+        const { width } = useElementSize(el);
+
         const { viewModel } = useViewModel();
         const { graph } = useGraph();
         const { hoveredOver, temporaryConnection } = props.showcase ?
@@ -224,6 +240,7 @@ export default defineComponent({
                 prevent();
             }
         });
+        const isBigBus = (intf) => intf.busType === 'twoSided';
 
         if (props.intf.group) {
             props.toggleGroup(props.intf);
@@ -243,6 +260,15 @@ export default defineComponent({
             if (temporaryConnection.value && props.intf.busSize) {
                 temporaryConnection.value.updated = ev.offsetY;
                 tempBusIntfOffset.value = ev.offsetY;
+
+                const bus = props.intf;
+                if (isBigBus(props.intf)) {
+                    if (ev.offsetX > width.value / 2) {
+                        bus.side = 'right';
+                    } else {
+                        bus.side = 'left';
+                    }
+                }
             }
         };
         const mousePosStubDragStart = ref(undefined);
@@ -307,7 +333,7 @@ export default defineComponent({
 
         /* eslint-disable vue/no-mutating-props,no-param-reassign */
         const onMouseDown = doubleClick(700, () => {
-            if (!viewModel.value.editor.readonly && !props.positioned) {
+            if (!viewModel.value.editor.readonly && !isBigBus(props.intf)) {
                 props.switchSides(props.intf);
                 hoveredOver(undefined);
             }
@@ -346,15 +372,14 @@ export default defineComponent({
             return 'down';
         });
 
-        const newClasses = computed(() => ({
-            '--input': props.intf.side === 'left' && !props.positioned,
-            '--output': props.intf.side === 'right' && !props.positioned,
-            '--connected': isConnected.value,
+        const newClasses = (intf) => ({
+            '--input': intf.side === 'left' && !isBigBus(intf),
+            '--output': intf.side === 'right' && !isBigBus(intf),
+            '--connected': intf.connectionCount > 0,
             'baklava-node-interface-positioned': props.positioned,
             __readonly: viewModel.value.editor.readonly,
             __node_interface_positioned: props.positioned,
-        }));
-
+        });
         const spanClasses = computed(() => ({
             '--top': props.intf.side === 'top' && props.positioned,
             '--bottom': props.intf.side === 'bottom' && props.positioned,
@@ -470,6 +495,7 @@ export default defineComponent({
             tempBusIntfOffset,
             onStubMouseUp,
             onStubMouseDown,
+            isBigBus,
         };
     },
 });
