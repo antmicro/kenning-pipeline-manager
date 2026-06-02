@@ -254,9 +254,10 @@ const displayedInputs = computed(() => Object.values(props.node.inputs).filter((
 const displayedOutputs = computed(() =>
     Object.values(props.node.outputs).filter((ni) => !ni.hidden),
 );
+const isBigBus = (intf) => (intf.port && intf.busSize && intf.busType === 'twoSided');
 const sidebarProperties = computed(() =>
     Object.values(displayedInputs.value)
-        .filter((intf) => !intf.port),
+        .filter((intf) => !intf.port || isBigBus(intf)),
 );
 const displayedProperties = computed(() => {
     if (editorManager.baklavaView.settings.showHiddenProperties) {
@@ -782,31 +783,18 @@ const onMouseDown = async () => {
     openDoubleClick();
 };
 
-const positionedInterfaces = computed(() => {
-    if (!nodeRef.value) {
-        return [];
-    }
-
-    return Object.values([...displayedInputs.value, ...displayedOutputs.value])
-        .filter((intf) => interfacePositions.value.has(intf.name))
-        .filter((intf) => !intf.type?.some((t) => props.ignoredInterfacesType?.includes(t)));
-},
-);
+const filterIntfs = (intfs, side) =>
+    intfs.filter((intf) => intf.side === side && intf.port)
+        .filter((intf) => !intf.type?.some((t) => props.ignoredInterfacesType?.includes(t)))
+        .filter((intf) => !isBigBus(intf))
+        .sort((intf1, intf2) => intf1.sidePosition - intf2.sidePosition);
 
 const displayedLeftSockets = computed(() =>
-    Object.values([...displayedInputs.value, ...displayedOutputs.value])
-        .filter((intf) => !interfacePositions.value.has(intf.name))
-        .filter((intf) => intf.side === 'left' && intf.port)
-        .filter((intf) => !intf.type?.some((t) => props.ignoredInterfacesType?.includes(t)))
-        .sort((intf1, intf2) => intf1.sidePosition - intf2.sidePosition),
+    filterIntfs(Object.values([...displayedInputs.value, ...displayedOutputs.value]), 'left'),
 );
 
 const displayedRightSockets = computed(() =>
-    Object.values([...displayedInputs.value, ...displayedOutputs.value])
-        .filter((intf) => !interfacePositions.value.has(intf.name))
-        .filter((intf) => intf.side === 'right' && intf.port)
-        .filter((intf) => !intf.type?.some((t) => props.ignoredInterfacesType?.includes(t)))
-        .sort((intf1, intf2) => intf1.sidePosition - intf2.sidePosition),
+    filterIntfs(Object.values([...displayedInputs.value, ...displayedOutputs.value]), 'right'),
 );
 const getRows = (sockets) => {
     if (!sockets.length) {
@@ -1230,7 +1218,7 @@ const onContextMenuPropertyClick = (action) => {
 const openContextMenuProperty = async (property) => {
     showContextMenuProperty.value = false;
     await nextTick();
-    if (!viewModel.value.editor.readonly) {
+    if (!viewModel.value.editor.readonly && !property.port) {
         chosenProperty = property;
         const items = createContextMenuPropertyItems();
 
