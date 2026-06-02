@@ -784,6 +784,7 @@ export class CustomNode extends Node {
                     const busStubs = ioState.busStubs?.map((stub) => ({
                         id: stub.id,
                         stubOffset: Math.floor(stub.stubOffset),
+                        ...(ioState.busType === 'twoSided' && { side: stub.side }),
                     }));
 
                     newInterfaces.push({
@@ -792,7 +793,7 @@ export class CustomNode extends Node {
                         id: ioState.id,
                         direction: ioState.direction,
                         side: ioState.side,
-                        sidePosition: ioState.sidePosition,
+                        ...(!ioState.busSize && { sidePosition: ioState.sidePosition }),
                         ...(ioState.busSize && { busSize: ioState.busSize }),
                         ...(ioState.busSize && busStubs && { busStubs }),
                     });
@@ -1055,12 +1056,13 @@ export class CustomNode extends Node {
                 // eslint-disable-next-line no-restricted-syntax, guard-for-in
                 for (const stubId in intf.busStubs) {
                     const stub = intf.busStubs[stubId];
+                    const side = intf.busType === 'twoSided' ? stub.side : intf.side;
                     stub.nodeId = intf.nodeId;
                     stub.direction = intf.direction;
                     stub.maxConnectionsCount = 1;
                     stub.type = intf.type;
                     stub.sidePosition = 0;
-                    stub.side = intf.side;
+                    stub.side = side ?? intf.side;
                     stub.parent = intf;
                     stub.isInput = intf.isInput;
                 }
