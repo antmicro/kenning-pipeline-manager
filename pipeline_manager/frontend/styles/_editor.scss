@@ -85,6 +85,26 @@
 .baklava-slider > .__slider {
     background-color: $green;
 }
+.__big-bus {
+    width: auto !important;
+    margin-left: -0.75em !important;
+    margin-right: -0.75em !important;
+    & > .--input {
+        margin-left: -0.5em;
+        margin-right: auto;
+    }
+    & > .--output {
+        margin-right: 0em;
+        margin-left: auto;
+    }
+    & > .__port-bus-name {
+        display: block;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        writing-mode: horizontal-tb;
+    }
+}
 .__port-bus {
     width: 3em;
     background-color: $gray-500;
@@ -93,6 +113,7 @@
     border-color: $green;
     border-style: dotted;
     & > .__port-bus-stub {
+      width: 0;
       max-height: 0px;
       z-index: 2;
       & > .__port {
@@ -103,8 +124,9 @@
 .__port-bus-name {
     writing-mode: vertical-lr;
 }
+
 .--output {
-  & > .__port-bus {
+  & > .__port-bus:not(.__big-bus) {
     margin-right: -1.25em;
     margin-left: auto;
     & > .__port-bus-name {
@@ -113,7 +135,7 @@
   }
 }
 .--input {
-  & > .__port-bus {
+  & > .__port-bus:not(.__big-bus) {
     margin-left: -1.25em;
     margin-right: auto;
     & > .__port-bus-name {
