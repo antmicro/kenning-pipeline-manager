@@ -2,28 +2,7 @@
     "version":"20250623.14",
     "nodes":[
         {
-            "name":"I2C-master",
-            "abstract":true,
-            "category":"I2C-masters",
-            "interfaces":[
-                {
-                    "name":"sda-bus",
-                    "type":"sda",
-                    "direction":"inout",
-                    "busSize":100
-                },
-                {
-                    "name":"sclk-bus",
-                    "type":"sclk",
-                    "direction":"output",
-                    "side":"right",
-                    "busSize":100
-                }
-            ]
-        },
-        {
             "name":"I2C-slave",
-            "abstract":true,
             "category":"I2C-slaves",
             "interfaces":[
                 {
@@ -41,9 +20,22 @@
         {
             "name":"ESP01",
             "description": "Wi-Fi module built around the ESP8266 SoC",
-            "extends": ["I2C-master"],
             "twoColumn": true,
             "interfaces":[
+                {
+                    "name":"sda-bus",
+                    "type":"sda",
+                    "direction":"inout",
+                    "busSize":100,
+                    "busType": "twoSided"
+                },
+                {
+                    "name":"sclk-bus",
+                    "type":"sclk",
+                    "direction":"output",
+                    "side":"right",
+                    "busSize":150
+                },
                 {
                     "name":"gpio0",
                     "type":"digital",

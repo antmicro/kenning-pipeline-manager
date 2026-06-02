@@ -2,6 +2,7 @@
     "graphs": [
         {
             "id": "9c25e441-12e9-4579-a27f-610676639df8",
+            "name": "Example of a graph using BUS interface",
             "nodes": [
                 {
                     "id": "e4389fd8-1781-42a8-9d73-da069ea77249",
@@ -48,38 +49,11 @@
                             "sidePosition": 4
                         },
                         {
-                            "name": "sda-bus",
-                            "id": "f3a892e1-218e-4e27-8836-bc2861dd211f",
-                            "direction": "inout",
-                            "side": "right",
-                            "sidePosition": 1,
-                            "busSize": 100,
-                            "busStubs": [
-                                {
-                                    "id": "f195edf3-6139-4405-b6f1-141f66638e89",
-                                    "stubOffset": 20
-                                },
-                                {
-                                    "id": "c1fe2b05-3674-4845-945d-98530ea79e28",
-                                    "stubOffset": 44
-                                },
-                                {
-                                    "id": "1dfd924f-0643-42e7-b0a2-c1531c673dbc",
-                                    "stubOffset": 60
-                                },
-                                {
-                                    "id": "c837be1d-46a1-4da7-ad4a-bdcb5fb1944c",
-                                    "stubOffset": 78
-                                }
-                            ]
-                        },
-                        {
                             "name": "sclk-bus",
                             "id": "2f4f9c61-df80-41e5-96f7-8715a3aff31d",
                             "direction": "output",
                             "side": "right",
-                            "sidePosition": 0,
-                            "busSize": 100,
+                            "busSize": 150,
                             "busStubs": [
                                 {
                                     "id": "6173a06e-7de7-4f84-8ab7-6f0971314bec",
@@ -87,15 +61,44 @@
                                 },
                                 {
                                     "id": "6c71059b-f9fd-45bf-a531-25230f6ad786",
-                                    "stubOffset": 64
+                                    "stubOffset": 23
                                 },
                                 {
                                     "id": "486191bd-69bd-493f-ba11-75ff9ebce637",
-                                    "stubOffset": 41
+                                    "stubOffset": 45
                                 },
                                 {
                                     "id": "2e28aab3-3463-4978-bf8f-f9405b24e3e5",
-                                    "stubOffset": 22
+                                    "stubOffset": 64
+                                }
+                            ]
+                        },
+                        {
+                            "name": "sda-bus",
+                            "id": "f3a892e1-218e-4e27-8836-bc2861dd211f",
+                            "direction": "inout",
+                            "side": "right",
+                            "busSize": 100,
+                            "busStubs": [
+                                {
+                                    "id": "1a50f82b-e02c-4237-9c4b-b10eb97d7cab",
+                                    "stubOffset": 33,
+                                    "side": "left"
+                                },
+                                {
+                                    "id": "8975538b-5482-47c5-aea9-7de4570f9ab7",
+                                    "stubOffset": 69,
+                                    "side": "left"
+                                },
+                                {
+                                    "id": "4d9e981f-2bb3-4cb3-851b-048aead2bbb9",
+                                    "stubOffset": 32,
+                                    "side": "right"
+                                },
+                                {
+                                    "id": "85f957cd-c9e5-4aa5-9eaf-a71b6cc854a3",
+                                    "stubOffset": 67,
+                                    "side": "right"
                                 }
                             ]
                         }
@@ -108,8 +111,8 @@
                 {
                     "id": "a357c7e9-da08-43c0-85ca-c2a193847a29",
                     "position": {
-                        "x": 1100,
-                        "y": 0
+                        "x": 500,
+                        "y": -100
                     },
                     "width": 300,
                     "twoColumn": false,
@@ -118,7 +121,7 @@
                             "name": "sclk",
                             "id": "3cc46946-b28d-433e-acc9-c37d17c7c52c",
                             "direction": "input",
-                            "side": "left",
+                            "side": "right",
                             "sidePosition": 0
                         },
                         {
@@ -137,7 +140,7 @@
                 {
                     "id": "1f7b576e-0633-427a-ba10-c5d260da2d91",
                     "position": {
-                        "x": 1500,
+                        "x": 1100,
                         "y": 0
                     },
                     "width": 300,
@@ -148,14 +151,14 @@
                             "id": "6d951004-aa3d-4d13-9ee3-cfa9f25f6980",
                             "direction": "input",
                             "side": "left",
-                            "sidePosition": 0
+                            "sidePosition": 1
                         },
                         {
                             "name": "sda",
                             "id": "4584293d-768b-4115-8e4f-d80996af7226",
                             "direction": "inout",
                             "side": "left",
-                            "sidePosition": 1
+                            "sidePosition": 0
                         },
                         {
                             "name": "A0",
@@ -194,7 +197,7 @@
                 {
                     "id": "f73f077a-5f09-4246-b3f2-988a3e47ae5f",
                     "position": {
-                        "x": 1500,
+                        "x": 1200,
                         "y": 500
                     },
                     "width": 300,
@@ -205,14 +208,14 @@
                             "id": "eff0f36b-b128-4f0e-93c6-fa9b12e8dd1a",
                             "direction": "input",
                             "side": "left",
-                            "sidePosition": 0
+                            "sidePosition": 1
                         },
                         {
                             "name": "sda",
                             "id": "9de4a13e-037a-43c9-a8a3-56f6538e387f",
                             "direction": "inout",
                             "side": "left",
-                            "sidePosition": 1
+                            "sidePosition": 0
                         },
                         {
                             "name": "int",
@@ -230,7 +233,7 @@
                 {
                     "id": "5a9f14db-3914-4dbe-9fe5-5d194a0b971f",
                     "position": {
-                        "x": 1100,
+                        "x": 500,
                         "y": 700
                     },
                     "width": 300,
@@ -240,7 +243,7 @@
                             "name": "sclk",
                             "id": "2e6fe6eb-2df7-45f2-9a3c-1a43801fc898",
                             "direction": "input",
-                            "side": "left",
+                            "side": "right",
                             "sidePosition": 0
                         },
                         {
@@ -264,51 +267,52 @@
                     "instanceName": "SSD1306"
                 }
             ],
+            "groups": [],
             "connections": [
                 {
-                    "id": "421266ab-957f-4ef9-9341-8f3b80d15397",
-                    "from": "3312460f-f9c5-4be4-8b58-4551fdffe779",
-                    "to": "f195edf3-6139-4405-b6f1-141f66638e89"
-                },
-                {
-                    "id": "d42c6015-a6b9-446a-9b0a-a497dcfc4138",
-                    "from": "4584293d-768b-4115-8e4f-d80996af7226",
-                    "to": "c1fe2b05-3674-4845-945d-98530ea79e28"
-                },
-                {
-                    "id": "b71d7e65-1b45-4072-bb72-d2eb390c75b6",
-                    "from": "9de4a13e-037a-43c9-a8a3-56f6538e387f",
-                    "to": "1dfd924f-0643-42e7-b0a2-c1531c673dbc"
-                },
-                {
-                    "id": "5fff288d-bc43-4b98-b692-fa83ff9428bb",
-                    "from": "cd3bfa20-4f9d-42d1-b8be-34f47ed7f1b8",
-                    "to": "c837be1d-46a1-4da7-ad4a-bdcb5fb1944c"
-                },
-                {
-                    "id": "35efc3db-a64f-4322-bd6f-57898f831b83",
+                    "id": "9409ef8b-0903-464a-96ca-8f9ab42eaf37",
                     "from": "6173a06e-7de7-4f84-8ab7-6f0971314bec",
                     "to": "2e6fe6eb-2df7-45f2-9a3c-1a43801fc898"
                 },
                 {
-                    "id": "3b50e209-fd53-4e49-bb0c-5fd6319ecdac",
+                    "id": "0cc0b16a-52f1-4e53-9b4a-9ca025ef51f7",
                     "from": "6c71059b-f9fd-45bf-a531-25230f6ad786",
                     "to": "3cc46946-b28d-433e-acc9-c37d17c7c52c"
                 },
                 {
-                    "id": "9577caba-e589-45a7-a04a-041b496654f8",
+                    "id": "9df71bb0-be47-47b7-8848-4237bdaed52e",
                     "from": "486191bd-69bd-493f-ba11-75ff9ebce637",
                     "to": "6d951004-aa3d-4d13-9ee3-cfa9f25f6980"
                 },
                 {
-                    "id": "fcaf47c8-9ae9-4ad1-bf24-ccc767cdfb41",
+                    "id": "ad46dbff-85f6-482a-a098-c23a1ffffd7b",
                     "from": "2e28aab3-3463-4978-bf8f-f9405b24e3e5",
                     "to": "eff0f36b-b128-4f0e-93c6-fa9b12e8dd1a"
+                },
+                {
+                    "id": "3d705d21-dce1-4af7-8a7f-5b3f997c35eb",
+                    "from": "3312460f-f9c5-4be4-8b58-4551fdffe779",
+                    "to": "1a50f82b-e02c-4237-9c4b-b10eb97d7cab"
+                },
+                {
+                    "id": "70c51d21-b604-4e70-a45a-ea475d52286b",
+                    "from": "cd3bfa20-4f9d-42d1-b8be-34f47ed7f1b8",
+                    "to": "8975538b-5482-47c5-aea9-7de4570f9ab7"
+                },
+                {
+                    "id": "bcda011a-2d4d-435e-beab-141111c0a177",
+                    "from": "4584293d-768b-4115-8e4f-d80996af7226",
+                    "to": "4d9e981f-2bb3-4cb3-851b-048aead2bbb9"
+                },
+                {
+                    "id": "29d1c0a0-fad5-4880-a56b-23c9b1aa00f8",
+                    "from": "9de4a13e-037a-43c9-a8a3-56f6538e387f",
+                    "to": "85f957cd-c9e5-4aa5-9eaf-a71b6cc854a3"
                 }
-            ],
-            "name": "Example of a graph using BUS interface"
+            ]
         }
     ],
     "entryGraph": "9c25e441-12e9-4579-a27f-610676639df8",
     "version": "20250623.14"
 }
+
