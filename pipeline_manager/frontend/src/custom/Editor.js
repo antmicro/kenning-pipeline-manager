@@ -703,7 +703,15 @@ export default class PipelineManagerEditor extends Editor {
 
     getNodeMinimal(nodeName) {
         const nodeType = this.nodeTypes.get(nodeName);
-        if (nodeType?.style !== undefined) return this.getNodeStyle(nodeType.style)?.minimal;
+        if (nodeType?.style !== undefined) {
+            const nodeStyle = this.getNodeStyle(nodeType.style);
+            const hasShape = nodeStyle?.shape !== undefined;
+            if (nodeStyle?.minimal === undefined && hasShape) {
+                return true;
+            }
+
+            return nodeStyle?.minimal ?? false;
+        }
         return false;
     }
 
