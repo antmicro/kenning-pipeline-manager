@@ -347,6 +347,7 @@ class Node(JsonConvertible):
     _node_name: str
     _specification_builder: SpecificationBuilder
     width: float = 500
+    height: float = None
     properties: List[Property] = field(default_factory=list)
     interfaces: List[Interface] = field(default_factory=list)
     two_column: Optional[bool] = None

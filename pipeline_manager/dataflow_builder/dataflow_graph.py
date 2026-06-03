@@ -333,6 +333,7 @@ class DataflowGraph(JsonConvertible):
             "width": getattr(
                 base_node, "width", DataflowGraph._DEFAULT_NODE_WIDTH
             ),
+            "height": getattr(base_node, "height", None),
             "enabled_interface_groups": [],
             "instance_name": None,
             "interfaces": interfaces,
