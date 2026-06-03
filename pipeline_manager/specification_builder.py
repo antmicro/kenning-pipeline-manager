@@ -1501,6 +1501,7 @@ class SpecificationBuilder(object):
         stylename: str,
         styleicon: Optional[Union[str, Dict]] = None,
         stylecolor: Optional[str] = None,
+        styleshape: Optional[str] = None,
     ):
         """
         Adds node styling to metadata.
@@ -1513,6 +1514,9 @@ class SpecificationBuilder(object):
             Icon of the style
         stylecolor : Optional[str]
             Color of the style
+        styleshape : Optional[str]
+            Path to svg file used
+            as node shape
 
         Raises
         ------
@@ -1533,6 +1537,7 @@ class SpecificationBuilder(object):
             "icon",
             styleicon and self._get_icon_url(styleicon, f"style {stylename}"),
         )
+        set_if_not_none(style, "shape", styleshape)
         self._metadata["styles"][stylename] = style
 
     def metadata_add_interface_styling(
