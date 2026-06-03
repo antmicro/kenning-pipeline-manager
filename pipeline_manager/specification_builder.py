@@ -1502,6 +1502,7 @@ class SpecificationBuilder(object):
         styleicon: Optional[Union[str, Dict]] = None,
         stylecolor: Optional[str] = None,
         styleshape: Optional[str] = None,
+        styleminimal: Optional[bool] = None,
     ):
         """
         Adds node styling to metadata.
@@ -1517,6 +1518,8 @@ class SpecificationBuilder(object):
         styleshape : Optional[str]
             Path to svg file used
             as node shape
+        styleminimal : Optional[bool]
+            Enables minimal node type.
 
         Raises
         ------
@@ -1538,6 +1541,7 @@ class SpecificationBuilder(object):
             styleicon and self._get_icon_url(styleicon, f"style {stylename}"),
         )
         set_if_not_none(style, "shape", styleshape)
+        set_if_not_none(style, "minimal", styleminimal)
         self._metadata["styles"][stylename] = style
 
     def metadata_add_interface_styling(
