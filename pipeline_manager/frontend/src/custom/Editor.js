@@ -14,10 +14,10 @@
 /* eslint-disable max-classes-per-file */
 
 import { Editor, Graph } from '@baklavajs/core';
+import { toRaw, nextTick, reactive } from 'vue';
 
 import { useGraph } from '@baklavajs/renderer-vue';
 
-import { nextTick } from 'vue';
 import createPipelineManagerGraph from './CustomGraph.js';
 import LayoutManager from '../core/LayoutManager.js';
 import { suppressHistoryLogging } from '../core/History.ts';
@@ -87,6 +87,35 @@ export default class PipelineManagerEditor extends Editor {
 
     newRootGraph = undefined;
 
+    // We load every graph in
+    // specification
+    preloadedGraphs = reactive([]);
+
+    addPreloadedGraph(graphSpec) {
+        this.preloadedGraphs.push({
+            spec: graphSpec,
+        });
+    }
+
+    loadPreloadedGraph(graphSpec) {
+        if (graphSpec.spec?.editor !== undefined) {
+            this.switchToGraph(graphSpec.spec);
+        } else {
+            const graphObject = new Graph(this);
+            const errors = graphObject.load(graphSpec.spec, true);
+
+            if (errors.length === 0) {
+                graphObject.setSpecGraph(true);
+                graphSpec.spec = graphObject;
+                this.switchToGraph(graphSpec.spec);
+            }
+        }
+    }
+
+    removePreloadedGraphs() {
+        this.preloadedGraphs.clear();
+    }
+
     registerGraph(graph) {
         const customGraph = createPipelineManagerGraph(graph);
         super.registerGraph(customGraph);
@@ -97,13 +126,44 @@ export default class PipelineManagerEditor extends Editor {
     }
 
     /**
+     * Saves the state (nodes, connections, layout) of specification graphs.
+     * @return {Object} State of the spec graphs in the editor.
+     */
+    savePreloadedGraphsState() {
+        const NameToId = new Map(
+            this.preloadedGraphs.map((g) => [g.spec.name, g.spec.id]),
+        );
+
+        const preloadedGraphsLoaded = this.preloadedGraphs.filter((g) =>
+            g.spec?.editor !== undefined).map((g) => g.spec);
+        const preloadedGraphsNotLoaded = this.preloadedGraphs.filter((g) =>
+            g.spec?.editor === undefined).map((g) => structuredClone(toRaw(g.spec)));
+
+        const graphs = [
+            ...preloadedGraphsNotLoaded,
+            ...preloadedGraphsLoaded.map((g) => g.save()),
+        ];
+        // Assign a proper subgraph
+        graphs.forEach((g) => {
+            g.nodes.forEach((node) => {
+                if (node?.subgraph !== undefined && node?.graphState !== undefined) {
+                    const id = NameToId.get(node.graphState.name);
+                    node.subgraph = id;
+                }
+                delete node.graphState;
+            });
+        });
+
+        return graphs;
+    }
+
+    /**
      * Saves the state (nodes, connections, layout) of all graphs in the editor.
      * @return {Object} State of the graphs in the editor.
      * @throws {Error} Throws if there are issues switching to a subgraph.
      */
     save() {
-        const graphs = Array.from(this.graphs);
-
+        const graphs = Array.from(this.graphs).filter((g) => !g.specGraph);
         const graphMap = new Map(
             graphs.map((g) => [g.id, g]),
         );
@@ -124,12 +184,14 @@ export default class PipelineManagerEditor extends Editor {
 
                 visitedGraphs.add(graph.id);
                 currentGraphState.nodes.forEach((node) => {
-                    if (node.subgraph !== undefined) {
+                    if (node?.subgraph !== undefined) {
                         const graphFound = graphMap.get(node.subgraph);
-                        const lastoSave = graphFound.toSave;
-                        graphFound.toSave = true;
-                        saveGraph(graphFound);
-                        graphFound.toSave = lastoSave;
+                        if (graphFound !== undefined) {
+                            const lastoSave = graphFound.toSave;
+                            graphFound.toSave = true;
+                            saveGraph(graphFound);
+                            graphFound.toSave = lastoSave;
+                        }
                         delete node.graphState;
                     }
                 });
@@ -137,7 +199,6 @@ export default class PipelineManagerEditor extends Editor {
                 dataflowState.graphs.push(currentGraphState);
             }
         };
-
         graphs.forEach((graph) => {
             saveGraph(graph);
         });
