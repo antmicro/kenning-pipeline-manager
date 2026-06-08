@@ -37,6 +37,30 @@ A collection of palette entries.
                 :contextMenuEntry="contextMenuEntry"
                 :entriesRef="entriesRef"
             />
+
+            <!-- <PaletteEntry
+                v-for="entry in entries"
+                :key="entry.id"
+                :entry="entry"
+            />
+            <transition name="fade">
+            <div v-if="draggedEntry" class="baklava-dragged-node __dragged" :style="{
+                    width: 'unset',
+                    top: `${pointer.y}px`,
+                    left: `${pointer.x}px`,
+                }">
+                    <PaletteEntry :entry="draggedEntry" />
+                </div>
+            </transition>
+            <CustomContextMenu
+                v-model="showContextMenu"
+                :x="contextMenuPosition.x"
+                :y="contextMenuPosition.y"
+                :items="contextMenuEntry?.computed?.items ?? []"
+                :ignore-close="[entriesRef]"
+                @click="(...args) => contextMenuEntry?.data?.onContextMenu?.(...args)"
+            /> -->
+
         </div>
     </div>
 </template>
@@ -74,10 +98,14 @@ const props = defineProps<{
 }>();
 
 const editorEl = inject<Ref<HTMLElement | null>>('editorEl');
+console.log('editorEl: ', editorEl);
+console.log('editorEl.value: ', editorEl.value);
 
 const absolutePointer = usePointer();
 const pointer = computed(() => {
-    const { left, top } = editorEl?.value?.getBoundingClientRect() ?? { left: 0, top: 0 };
+    console.log('editorEl: ', editorEl);
+    console.log('editorEl.value (copmuted): ', editorEl.value);
+    const { left, top } = editorEl!.value?.getBoundingClientRect() ?? { left: 0, top: 0 };
     return {
         x: absolutePointer.x.value - left,
         y: absolutePointer.y.value - top,

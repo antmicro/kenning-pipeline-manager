@@ -40,8 +40,10 @@ Implements left sidebar containing available nodes and graphs.
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, useTemplateRef } from 'vue';
 import { useViewModel } from 'baklavajs';
+import {
+    computed, ref, useTemplateRef,
+} from 'vue';
 import Magnifier from '../icons/Magnifier.vue';
 import PaletteSection from './PaletteSection.vue';
 import { useNodePalette, createNodeListPalette } from '../core/palette/node.ts';
@@ -68,6 +70,8 @@ const visibilities = computed(() => ({
 const visibleTabs = computed(() =>
     Object.fromEntries(Object.entries(Tabs.value).filter(([key, _]) => visibilities.value[key])),
 );
+
+// update nodeListPalette in reaction to changed specification
 
 const paletteRef = useTemplateRef('paletteRef');
 const currentTab = ref(Tabs.value.nodes);
