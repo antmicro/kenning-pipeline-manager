@@ -17,6 +17,7 @@
     "dependencies": {
         "@types/dompurify": "^3.0.5",
         "@vue/cli-service": "^5.0.8",
+        "@michaelhomer/jqjs": "^1.6.0",
         "ajv": "^8.12.0",
         "baklavajs": "^2.0.2-beta.3",
         "click-outside-vue3": "^4.0.1",
