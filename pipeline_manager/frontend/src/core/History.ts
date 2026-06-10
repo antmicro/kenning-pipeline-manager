@@ -189,21 +189,33 @@ class NodeSpecStep extends Step {
         super(type, topic, tid);
     }
 
-    edit(graph: Ref<Graph>) {
-        // restore node specification
+    updateSpec(specification: any) {
         const nodeType = this.specTuple[0];
-        const specification = this.specTuple[1];
-        const editorManager = this.specTuple[2];
+        const editorManager = this.specTuple[3];
 
         if (specification?.simpleInherited) {
-            delete specification.simpleInherited;
+            delete specification.simpleInherited; // eslint-disable-line no-param-reassign
         }
         if (specification?.extending) {
-            delete specification.extending;
+            delete specification.extending; // eslint-disable-line no-param-reassign
         }
 
         editorManager
             .replaceNodeSpecificationInEditor(nodeType, specification);
+    }
+
+    remove(graph: Ref<Graph>) {
+        // restore node specification
+        const specification = this.specTuple[2];
+
+        this.updateSpec(specification);
+    }
+
+    add(graph: Ref<Graph>) {
+        // restore node specification
+        const specification = this.specTuple[1];
+
+        this.updateSpec(specification);
     }
 }
 
@@ -463,20 +475,15 @@ export function useHistory(graph: Ref<any>, commandHandler: ICommandHandler): IH
                 if (!suppressingHistory.value) {
                     const historyItem = history.get(newId);
                     if (!historyItem) return;
-                    const step = new NodeSpecStep('edit', nodeType, transactionId.value);
+                    const step = new NodeSpecStep('add', nodeType, transactionId.value);
                     step.specTuple = [
                         nodeType,
+                        newSpecification,
                         specification,
                         editorManager,
                     ];
-                    const redoStep = new NodeSpecStep('edit', nodeType, transactionId.value);
-                    redoStep.specTuple = [
-                        nodeType,
-                        newSpecification,
-                        editorManager,
-                    ];
                     historyItem.push(step);
-                    undoneHistory.set(newId, [redoStep]);
+                    undoneHistory.set(newId, []);
                 }
             });
             newGraph.events.addNode.subscribe(token, (node : any) => {
