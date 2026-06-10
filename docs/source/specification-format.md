@@ -66,6 +66,15 @@ This object specifies additional editor options and contains the following optio
   Default value is `NoLayout`
 * `icons` - contains definition of icon classes.
   Icon classes are key-value pairs, where key is the name of the icon class, and value is the URL prefix that is used to compute the actual path.
+* `nodeLists` - definitions of jq queries used to filter nodes.
+  Key in the dict represents name of a node list, and the value is a string representing jq query executed on `nodes`.
+  Example:
+  ```
+  nodeLists: {
+    "All nodes": ".",
+    "Custom nodes": "[.[] | select(.tag? == \"custom\")]"
+  }
+  ```
 * `styles` - a dictionary that defines node styles.
   The key in the dictionary is the name of the style, and the value is of type [Node style](#node-style).
 * `welcome` - boolean value determining whether a welcome text should appear on empty editor. This feature is enabled by default.
@@ -73,6 +82,7 @@ This object specifies additional editor options and contains the following optio
   The entries are of type [Navbar item](#navbar-item).
 * `logLevel` - string specifying minimum level of verbosity notification has to have to be displayed.
   It can be one of `INFO`, `WARNING`, `ERROR`.
+* `tag` - String value assigned to each node type defined in the current specification (not in included subspecifications)
 * `editableTypes` - Boolean specifying whether nodes can be edited.
   It may be changed later in the UI (given that `toggleableEditableTypes` is enabled in the specification).
   The default value is `false`.
@@ -385,6 +395,8 @@ This object specifies a single node.
   Additionally, if a node extends from a category node, then it has to be in its subtree.
 * `color` - a hexadecimal color that will be used as the node background in the editor.
   If not provided, the default Kenning Pipeline Manager color scheme will be used.
+* `tag` - Tag assigned to a node type during specification resolving.
+  Used to filter node types with queries defined in `nodeLists` object defined in [Metadata](#metadata).
 * `width` - a default width, in pixels, of a node in the editor.
 * `twoColumn` - boolean value.
   If set to `true`, the interfaces on opposite sides will be arranged parallel to each other.

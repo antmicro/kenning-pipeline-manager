@@ -35,6 +35,20 @@
                 "color": "#000000",
                 "pill": {"text": "misc", "color": "#2271b3"}
             }
-        }
+        },
+        "nodeLists": {
+            "All Nodes": ".",
+            "Custom Nodes": "[.[] | select(.tag? == \"custom\")]",
+            "Video Nodes": "[.[] | select(.name? | contains(\"Video\"))]",
+            "Frame Nodes": "[.[] | select(.name? | contains(\"Frame\"))]",
+            "Save Nodes": "[.[] | select(.name? | contains(\"Save\"))]",
+            "Load Nodes": "[.[] | select(.name? | contains(\"Load\"))]",
+            "Kernel Nodes": "[.[] | select(.name? | contains(\"Kernel\"))]",
+            "Gaussian Nodes": "[.[] | select(.name? | contains(\"Gaussian\"))]",
+            "Logical Nodes": "[.[] | select(.name? | contains(\"Logical\"))]",
+            "Miscellaneous style": "[.[] | select(((.style? == \"miscellaneous\") or (.style? | index(\"miscellaneous\"))))]",
+            "Complex query": "[.[] | select((.tag? == \"custom\") and (.name | contains(\"Video\")) and ((.style? | if type == \"array\" then . else [.] end) | index(\"miscellaneous\")))]"
+        },
+        "tag": "custom"
     }
 }

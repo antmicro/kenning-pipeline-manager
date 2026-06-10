@@ -356,6 +356,10 @@
                                 "null"
                             ]
                         },
+                        "tag": {
+                            "description": "Tag used to make a node searchable",
+                            "type": "string"
+                        },
                         "width": {
                             "description": "Width, in pixels, of the node in the visual editor. The minimum value is 300.",
                             "type": "number"

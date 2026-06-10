@@ -251,6 +251,16 @@
             },
             "default": {}
         },
+        "nodeLists": {
+            "type": "object",
+            "description": "Mapping from names of node lists to jq-like queries",
+            "patternProperties": {
+                "^.*$": {
+                    "type": "string",
+                    "description": "Jq-like query for a given list name"
+                }
+            }
+        },
         "styles": {
             "type": "object",
             "description": "Defines node styles",
@@ -362,6 +372,11 @@
                 "ERROR"
             ],
             "default": "WARNING"
+        },
+        "tag": {
+            "description": "Tag used to search specification by, assigned to all node types from the specification, excluding the ones from included subspecifications",
+            "type": "string",
+            "default": "default"
         }
     },
     "$defs": {
