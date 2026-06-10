@@ -2,8 +2,8 @@ import { test, expect, Page, Locator } from '@playwright/test';
 import {
     getUrl,getNodeByID,assertInputCount,assertOutputCount,waitForSubgraph,enterSubgraph,
     leaveSubgraph,expectNode,getNode,deleteNode, loadVideoNodeId, enableNavigationBar, addNode,
-    dragAndDrop, closeTerminal, loadSpecification,loadDataflow, getContextMenu,
-    AddConnection, enableEditingNodes,
+    dragAndDrop, closeTerminal,loadSpecification,loadDataflow, getContextMenu,
+    AddConnection, getYAMLEditorContent, setYAMLEditorContent, assertPropertyCount
 } from './config.js';
 
 
@@ -508,4 +508,130 @@ test('reconnecting bus type interface', async ({ page }) => {
     expect(bigBus).toBeVisible();
     expect(bigStubs).toHaveCount(3);
     expect(smallStubs).toHaveCount(3);
+});
+test('test history by node specification edit, change interface name', async ({ page }) => {
+    await loadWebsite(page, loadVideoNodeId);
+    const loadVideo = getNode(page, 'LoadVideo');
+
+    // Double click the node to open YAML editor
+    await loadVideo.locator('.__title').dblclick({ force: true });
+
+    // Get YAML editor content of the YAML editor
+    let content = await getYAMLEditorContent(page);
+    // Store previous name
+    const previousInterfaceName = content.interfaces[0].name;
+    // Change a interface name
+    content.interfaces[0].name = 'frames1';
+    await setYAMLEditorContent(page, content);
+    await loadVideo.click();
+
+    // Undo changes
+    await page.keyboard.press('Control+KeyZ');
+
+    // Double click the node to open YAML editor
+    await loadVideo.locator('.__title').dblclick({ force: true });
+
+    // Get YAML editor content of the YAML editor
+    content = await getYAMLEditorContent(page);
+    expect(content.interfaces[0].name).toBe(previousInterfaceName);
+
+    // Redo changes
+    await page.keyboard.press('Control+KeyY');
+
+    // Double click the node to open YAML editor
+    await loadVideo.locator('.__title').dblclick({ force: true });
+
+    // Get YAML editor content of the YAML editor
+    content = await getYAMLEditorContent(page);
+    expect(content.interfaces[0].name).toBe('frames1');
+
+});
+test('test history by node specification edit, add interface', async ({ page }) => {
+    await loadWebsite(page, loadVideoNodeId);
+    const loadVideo = getNode(page, 'LoadVideo');
+
+    // Double click the node to open YAML editor
+    await loadVideo.locator('.__title').dblclick({ force: true });
+
+    // Get YAML editor content of the YAML editor
+    let content = await getYAMLEditorContent(page);
+    // Add a new interface
+    content.interfaces.push(
+        {
+            name: 'in',
+            direction: 'input'
+        }
+    );
+    await setYAMLEditorContent(page, content);
+    await loadVideo.click();
+    await assertOutputCount(loadVideo, 1);
+    await assertInputCount(loadVideo, 1);
+
+    // Undo changes
+    await page.keyboard.press('Control+KeyZ');
+
+    await assertOutputCount(loadVideo, 1);
+    await assertInputCount(loadVideo, 0);
+
+    // Redo changes
+    await page.keyboard.press('Control+KeyY');
+
+    await assertOutputCount(loadVideo, 1);
+    await assertInputCount(loadVideo, 1);
+});
+test('test history by node specification edit, add properties', async ({ page }) => {
+    await loadWebsite(page, loadVideoNodeId);
+    const loadVideo = getNode(page, 'LoadVideo');
+
+    // Double click the node to open YAML editor
+    await loadVideo.locator('.__title').dblclick({ force: true });
+
+    // Get YAML editor content of the YAML editor
+    let content = await getYAMLEditorContent(page);
+    // Add a new property
+    content.properties = [
+        {
+            name: 'size',
+            type: 'integer',
+            default: 5
+        }
+    ];
+    await setYAMLEditorContent(page, content);
+    await loadVideo.click();
+    await assertPropertyCount(loadVideo, 2);
+
+    // Undo changes
+    await page.keyboard.press('Control+KeyZ');
+
+    await assertPropertyCount(loadVideo, 1);
+
+    // Redo changes
+    await page.keyboard.press('Control+KeyY');
+
+    await assertPropertyCount(loadVideo, 2);
+});
+test('test history by node specification edit, test extend', async ({ page }) => {
+    await loadWebsite(page, loadVideoNodeId);
+    const loadVideo = getNode(page, 'LoadVideo');
+
+    // Double click the node to open YAML editor
+    await loadVideo.locator('.__title').dblclick({ force: true });
+
+    // Get YAML editor content of the YAML editor
+    let content = await getYAMLEditorContent(page);
+    // Remove parents
+    content.extends = [];
+    await setYAMLEditorContent(page, content);
+    await loadVideo.click();
+    await assertPropertyCount(loadVideo, 0);
+
+    // Undo changes
+    await page.keyboard.press('Control+KeyZ');
+
+    await assertPropertyCount(loadVideo, 1);
+
+    // Redo changes
+    await page.keyboard.press('Control+KeyY');
+
+    await assertPropertyCount(loadVideo, 0);
 });
