@@ -262,6 +262,16 @@ export default class EditorManager {
             urloverrides: dataflowSpecification.urloverrides,
         }).filter(([_, value]) => value !== undefined));
 
+        const tag = dataflowSpecification?.metadata?.tag;
+
+        if (dataflowSpecification.nodes && tag) {
+            /* eslint-disable-next-line no-param-reassign */
+            dataflowSpecification.nodes = dataflowSpecification.nodes.map((node) => ({
+                ...node,
+                tag,
+            }));
+        }
+
         const {
             specification: includedSpecification,
             errors: includeErrors,
