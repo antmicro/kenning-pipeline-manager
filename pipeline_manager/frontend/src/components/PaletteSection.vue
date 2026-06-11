@@ -10,28 +10,34 @@ A collection of palette entries.
 
 <template>
     <div ref="entriesRef" class="entries">
-        <PaletteEntry
-            v-for="entry in entries"
-            :key="entry.id"
-            :entry="entry"
-        />
-        <transition name="fade">
-        <div v-if="draggedEntry" class="baklava-dragged-node __dragged" :style="{
-                width: 'unset',
-                top: `${pointer.y}px`,
-                left: `${pointer.x}px`,
-            }">
-                <PaletteEntry :entry="draggedEntry" />
+        <div v-if="sectionNames">
+            <div v-for="sectionName in sectionNames" :key="sectionName">
+            <PaletteSectionHeader
+                v-if="sectionName && !oneNodeList"
+                :sectionName="sectionName"
+            />
+            <PaletteSectionList
+                :entries="entries.get(sectionName)"
+                :draggedEntry="draggedEntry"
+                :pointer="pointer"
+                v-model="showContextMenu"
+                :contextMenuPosition="contextMenuPosition"
+                :contextMenuEntry="contextMenuEntry"
+                :entriesRef="entriesRef"
+            />
             </div>
-        </transition>
-        <CustomContextMenu
-            v-model="showContextMenu"
-            :x="contextMenuPosition.x"
-            :y="contextMenuPosition.y"
-            :items="contextMenuEntry?.computed?.items ?? []"
-            :ignore-close="[entriesRef]"
-            @click="(...args) => contextMenuEntry?.data?.onContextMenu?.(...args)"
-        />
+        </div>
+        <div v-else>
+            <PaletteSectionList
+                :entries="entries"
+                :draggedEntry="draggedEntry"
+                :pointer="pointer"
+                v-model="showContextMenu"
+                :contextMenuPosition="contextMenuPosition"
+                :contextMenuEntry="contextMenuEntry"
+                :entriesRef="entriesRef"
+            />
+        </div>
     </div>
 </template>
 
@@ -53,8 +59,8 @@ import { useTransform } from '@baklavajs/renderer-vue';
 import { usePointer } from '@vueuse/core';
 // eslint-disable-next-line no-unused-vars
 import { type IEntry, type IEntryData } from '../core/palette/types';
-import PaletteEntry from './PaletteEntry.vue';
-import CustomContextMenu from '../custom/ContextMenu.vue';
+import PaletteSectionHeader from './PaletteSectionHeader.vue';
+import PaletteSectionList from './PaletteSectionList.vue';
 
 // eslint-disable-next-line no-undef
 type IPaletteEntryDataT = T;
