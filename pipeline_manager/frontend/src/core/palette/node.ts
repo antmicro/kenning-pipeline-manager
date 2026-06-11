@@ -20,6 +20,7 @@ import {
     IBaklavaViewModel,
     useViewModel,
 } from 'baklavajs';
+import jq from '@michaelhomer/jqjs';
 import Cross from '../../icons/Cross.vue';
 import PipelineManagerEditor from '../../custom/Editor';
 import {
@@ -297,6 +298,109 @@ const getNodeEntries = (
     return specialEntries.concat(regularNodeEntries);
 };
 
+const getNodeListEntries = (
+    viewModel: IBaklavaViewModel,
+): Map<string, IVEntry<IEntryDataNode>[]> => {
+    const editorManager = EditorManager.getEditorManagerInstance();
+    const editor = viewModel.editor as unknown as PipelineManagerEditor;
+    const isNotAbstractNode = (entry: CustomNodeTypeInformation) => !editorManager
+        .specification
+        .currentSpecification
+        .nodes
+        .some((node: any) => node.abstract && node.name === entry.title);
+    const nodeLists = editorManager.specification.currentSpecification?.metadata?.nodeLists;
+
+    const result = new Map(Object.entries(nodeLists ?? {}).map(([sectionName, queryText]) => {
+        const query = jq.compile(queryText);
+
+        const queriedNodesData = editorManager
+            .specification
+            .currentSpecification
+            ?.nodes === undefined ?
+            undefined :
+            Array.from(
+                query(editorManager.specification.currentSpecification?.nodes),
+            )[0];
+
+        const nodeTypes = (Array.from(editor.nodeTypes.values()) as CustomNodeTypeInformation[])
+            .filter(isNotAbstractNode)
+            .filter((nodeType) => {
+                if (!Array.isArray(queriedNodesData)) return true;
+                return queriedNodesData.some((nodeData) => {
+                    if (
+                        nodeData == null ||
+                        typeof nodeData !== 'object' ||
+                        Array.isArray(nodeData) ||
+                        !('category' in nodeData) ||
+                        !('name' in nodeData)
+                    ) return false;
+                    const { category, name } = nodeData;
+                    return category === nodeType.category && name === nodeType.title;
+                });
+            });
+
+        const categoryNames = new Set(nodeTypes.map(({ category }) => category));
+        const categoryTree = parseCategories(categoryNames);
+
+        // Add node data
+        const nodeTypesWithData = nodeTypes
+            .map((nodeType) => ([
+                nodeType,
+                {
+                    title: nodeType.title,
+                    icon: editor.getNodeIconPath(nodeType.title) as string,
+                    URLs: editor.getNodeURLs(nodeType.title) as NodeURL[],
+                    nodeType,
+                    onDrag: onDragPlaceNode(viewModel),
+                    onContextMenu(action: string) {
+                        switch (action) {
+                            case 'duplicate':
+                                prepareNodeForDuplication(nodeType.title);
+                                menuState.configurationMenu.visible = true;
+                                menuState.configurationMenu.addNode = false;
+                                menuState.configurationMenu.duplicateNode = true;
+                                configurationState.nodeData.name += ' (copy)';
+                                break;
+                            case 'delete':
+                                editorManager.removeNodeType(nodeType.title);
+                                break;
+                            default:
+                                break;
+                        }
+                    },
+                },
+                computed(() => {
+                    const itemToDisable = () => !(
+                        viewModel.editor as unknown as PipelineManagerEditor
+                    ).additionalNodeTypes.has(nodeType.title);
+
+                    return {
+                        items: [
+                            {
+                                value: 'delete',
+                                label: 'Delete',
+                                icon: Bin,
+                                disabled: itemToDisable(),
+                                onPointerEmit: itemToDisable(),
+                                tooltipMsg: itemToDisable() && 'Node type can\'t be deleted',
+                            },
+                            {
+                                value: 'duplicate',
+                                label: 'Duplicate node type',
+                            },
+                        ],
+                    };
+                }),
+            ] as [typeof nodeType, IEntryDataWithNodeType, ComputedRef<IEntryComputedData>]));
+
+        const regularNodeEntries = categorizeNodes(categoryTree, nodeTypesWithData);
+
+        return [sectionName, regularNodeEntries];
+    }));
+
+    return result;
+};
+
 const compareNodeEntries = (
     a: IVEntry<IEntryDataNode> | IEntry<IEntryDataNode>,
     b: IVEntry<IEntryDataNode> | IEntry<IEntryDataNode>,
@@ -323,4 +427,34 @@ export default function useNodePalette(
     const entries = computed(() => getNodeEntries(viewModel.value));
     const defaultCollapse = Boolean((viewModel.value as CustomViewModel).collapseSidebar);
     return usePalette(entries, nameFilterRef, compareNodeEntries, defaultCollapse);
+}
+
+export function createNodeListPalette(
+    nameFilterRef: Ref<string>,
+    sectionNames: ComputedRef<string[]|undefined>,
+): Map<string, Reactive<IEntry<IEntryDataNode>[]>> {
+    const { viewModel } = useViewModel();
+
+    const paletteList = new Map<string, Reactive<IEntry<IEntryDataNode>[]>>();
+
+    const entries = computed(() => getNodeListEntries(viewModel.value));
+    const defaultCollapse = Boolean((viewModel.value as CustomViewModel).collapseSidebar);
+
+    watch(sectionNames, () => {
+        entries.value.forEach((value, key) => {
+            if (!paletteList.has(key)) {
+                paletteList.set(key, usePalette(
+                    computed(() => entries.value.get(key) ?? []),
+                    nameFilterRef,
+                    compareNodeEntries,
+                    defaultCollapse,
+                ));
+            }
+        });
+        const keysToRemove = paletteList.keys().filter((k) => !entries.value.has(k));
+        keysToRemove.forEach((key) => {
+            paletteList.delete(key);
+        });
+    });
+    return paletteList;
 }
