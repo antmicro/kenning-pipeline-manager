@@ -60,7 +60,11 @@ import CustomContextMenu from '../custom/ContextMenu.vue';
 type IPaletteEntryDataT = T;
 type Entry = IEntry<IPaletteEntryDataT>;
 
-const props = defineProps<{ palette: HTMLElement, entries: Reactive<Entry[]> }>();
+const props = defineProps<{
+  palette: HTMLElement,
+  entries: Reactive<Entry[]> | Map<string, Reactive<Entry[]>>,
+  sectionNames: string[],
+}>();
 
 const editorEl = inject<Ref<HTMLElement | null>>('editorEl');
 

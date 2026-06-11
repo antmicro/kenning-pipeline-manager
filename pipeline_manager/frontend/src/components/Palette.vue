@@ -33,33 +33,52 @@ Implements left sidebar containing available nodes and graphs.
         <PaletteSection
             :entries="currentEntries"
             :palette="paletteRef!"
+            :sectionNames="sectionNames"
         />
     </div>
 </template>
 
 <script lang="ts" setup>
 import { computed, ref, useTemplateRef } from 'vue';
+import { useViewModel } from 'baklavajs';
 import Magnifier from '../icons/Magnifier.vue';
 import PaletteSection from './PaletteSection.vue';
 import useNodePalette from '../core/palette/node.ts';
 import useGraphPalette from '../core/palette/graph.ts';
-import useSpecGraphPalette from '../core/palette/spec_graph.ts';
 
-const Tabs = {
+const { viewModel } = useViewModel();
+const nodeLists = computed(
+    () => viewModel.value.editor?.nodeLists ?? Map());
+
+const Tabs = computed(() => ({
     nodes: 'Nodes',
     specGraph: 'Spec graphs',
     graphsTree: 'Graphs',
-};
+}));
 
 const paletteRef = useTemplateRef('paletteRef');
-const currentTab = ref(Tabs.nodes);
+const currentTab = ref(Tabs.value.nodes);
 const paletteSearch = ref('');
-const paletteEntries = {
-    [Tabs.nodes]: useNodePalette(paletteSearch),
-    [Tabs.specGraph]: useSpecGraphPalette(paletteSearch),
-    [Tabs.graphsTree]: useGraphPalette(paletteSearch, { tree: true }),
-};
-const currentEntries = computed(() => paletteEntries[currentTab.value]);
+
+const sectionNames = computed(() => {
+    if (currentTab.value !== Tabs.value.nodeLists
+        || nodeLists.value == null
+        || nodeLists?.value.values().length === 0) {
+        return undefined;
+    }
+    return [...nodeLists.value.keys()];
+});
+
+const nodePalette = useNodePalette(paletteSearch);
+const graphPalette = useGraphPalette(paletteSearch, { tree: true });
+
+const paletteEntries = computed(() => ({
+    [Tabs.value.nodes]: nodePalette,
+    [Tabs.value.graphsTree]: graphPalette,
+}));
+
+const currentEntries = computed(() => paletteEntries.value[currentTab.value]);
+
 </script>
 
 <style lang="scss" scoped>
