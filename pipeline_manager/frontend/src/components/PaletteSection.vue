@@ -64,6 +64,7 @@ const props = defineProps<{
   palette: HTMLElement,
   entries: Reactive<Entry[]> | Map<string, Reactive<Entry[]>>,
   sectionNames: string[],
+  oneNodeList: boolean,
 }>();
 
 const editorEl = inject<Ref<HTMLElement | null>>('editorEl');

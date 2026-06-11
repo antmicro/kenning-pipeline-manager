@@ -34,6 +34,7 @@ Implements left sidebar containing available nodes and graphs.
             :entries="currentEntries"
             :palette="paletteRef!"
             :sectionNames="sectionNames"
+            :oneNodeList="oneNodeList"
         />
     </div>
 </template>
@@ -50,9 +51,11 @@ const { viewModel } = useViewModel();
 const nodeLists = computed(
     () => viewModel.value.editor?.nodeLists ?? Map());
 
+const oneNodeList = computed(() => nodeLists.value?.values().length === 1);
+
 const Tabs = computed(() => ({
     nodes: 'Nodes',
-    nodeLists: 'NodeLists',
+    nodeLists: (oneNodeList.value ? nodeLists.value?.keys()[0] : 'Node Lists'),
     graphsTree: 'Graphs',
 }));
 
