@@ -17,7 +17,7 @@ Implements left sidebar containing available nodes and graphs.
         <div class="search-bar">
             <div class="palette-title">
                 <div
-                    v-for="name in Object.values(Tabs)"
+                    v-for="name in Object.values(visibleTabs)"
                     :key="name"
                     :class="['tab', { '--active': name === currentTab }]"
                     @click="() => { currentTab = name }"
@@ -55,6 +55,16 @@ const Tabs = computed(() => ({
     nodeLists: 'NodeLists',
     graphsTree: 'Graphs',
 }));
+
+const visibilities = computed(() => ({
+    nodes: true,
+    nodeLists: [...(nodeLists.value?.keys() ?? [])].length !== 0,
+    graphsTree: true,
+}));
+
+const visibleTabs = computed(() =>
+    Object.fromEntries(Object.entries(Tabs.value).filter(([key, _]) => visibilities.value[key])),
+);
 
 const paletteRef = useTemplateRef('paletteRef');
 const currentTab = ref(Tabs.value.nodes);
