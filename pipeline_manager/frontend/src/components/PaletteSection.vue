@@ -77,7 +77,7 @@ const editorEl = inject<Ref<HTMLElement | null>>('editorEl');
 
 const absolutePointer = usePointer();
 const pointer = computed(() => {
-    const { left, top } = editorEl!.value!.getBoundingClientRect();
+    const { left, top } = editorEl?.value?.getBoundingClientRect() ?? { left: 0, top: 0 };
     return {
         x: absolutePointer.x.value - left,
         y: absolutePointer.y.value - top,
@@ -135,7 +135,7 @@ const scroll = ref(0);
 const entriesRef = useTemplateRef('entriesRef');
 provide('palettescroll', scroll);
 provide('linkmenu', ref<string | null>(null));
-const onMountedLinkMenu = () => entriesRef.value!.addEventListener('scroll', () => {
+const onMountedLinkMenu = () => entriesRef.value?.addEventListener('scroll', () => {
     scroll.value = entriesRef.value!.scrollTop;
 });
 
