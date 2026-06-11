@@ -43,7 +43,7 @@ import { computed, ref, useTemplateRef } from 'vue';
 import { useViewModel } from 'baklavajs';
 import Magnifier from '../icons/Magnifier.vue';
 import PaletteSection from './PaletteSection.vue';
-import useNodePalette from '../core/palette/node.ts';
+import { useNodePalette, createNodeListPalette } from '../core/palette/node.ts';
 import useGraphPalette from '../core/palette/graph.ts';
 
 const { viewModel } = useViewModel();
@@ -52,7 +52,7 @@ const nodeLists = computed(
 
 const Tabs = computed(() => ({
     nodes: 'Nodes',
-    specGraph: 'Spec graphs',
+    nodeLists: 'NodeLists',
     graphsTree: 'Graphs',
 }));
 
@@ -70,10 +70,12 @@ const sectionNames = computed(() => {
 });
 
 const nodePalette = useNodePalette(paletteSearch);
+const nodeListPalette = createNodeListPalette(paletteSearch, sectionNames);
 const graphPalette = useGraphPalette(paletteSearch, { tree: true });
 
 const paletteEntries = computed(() => ({
     [Tabs.value.nodes]: nodePalette,
+    [Tabs.value.nodeLists]: nodeListPalette,
     [Tabs.value.graphsTree]: graphPalette,
 }));
 

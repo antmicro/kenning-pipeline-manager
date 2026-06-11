@@ -420,7 +420,7 @@ const compareNodeEntries = (
     // 5. Sort lexicographically
     || a.data.title.localeCompare(b.data.title);
 
-export default function useNodePalette(
+export function useNodePalette(
     nameFilterRef: Ref<string>,
 ): Reactive<IEntry<IEntryDataNode>[]> {
     const { viewModel } = useViewModel();
