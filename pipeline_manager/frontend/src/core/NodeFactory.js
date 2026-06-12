@@ -570,6 +570,7 @@ export class CustomNode extends Node {
         width = 300,
         simpleInherited = [],
         relatedGraphs = undefined,
+        height = undefined,
     ) {
         super();
 
@@ -582,6 +583,7 @@ export class CustomNode extends Node {
         this.twoColumn = twoColumn;
         this.type = name;
         this.width = width;
+        this.height = height;
         this.relatedGraphs = relatedGraphs;
         this.simpleInherited = simpleInherited;
 
@@ -827,6 +829,8 @@ export class CustomNode extends Node {
         savedState.instanceName = savedState.title === '' ? undefined : savedState.title;
         delete savedState.title;
 
+        savedState.height = this.height;
+
         if (savedState.position) {
             savedState.position = { ...savedState.position };
         }
@@ -990,6 +994,8 @@ export class CustomNode extends Node {
         }
 
         super.load(parsedState);
+
+        this.height = parsedState?.height;
 
         // Disabling default interface groups if the node has its own state
         if (Object.keys(parsedState.enabledInterfaceGroups).length) {
@@ -1200,6 +1206,7 @@ export function CustomNodeFactory(
     nodeSiblings = [],
     width = 300,
     simpleInherited = [],
+    height = undefined,
 ) {
     const generatedProperties = generateProperties(interfaces);
     if (!generatedProperties.success) {
@@ -1239,6 +1246,8 @@ export function CustomNodeFactory(
                 nodeSiblings,
                 width,
                 simpleInherited,
+                undefined,
+                height,
             );
         }
     };
