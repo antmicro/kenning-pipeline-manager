@@ -135,7 +135,9 @@
                                     "description": "Determines side of the node the interface that the interface is placed on",
                                     "enum": [
                                         "left",
-                                        "right"
+                                        "right",
+                                        "top",
+                                        "bottom"
                                     ]
                                 },
                                 "sidePosition": {
@@ -220,6 +222,10 @@
                     },
                     "width": {
                         "description": "Width of the node",
+                        "type": "number"
+                    },
+                    "height": {
+                        "description": "Height of the node",
                         "type": "number"
                     },
                     "twoColumn": {

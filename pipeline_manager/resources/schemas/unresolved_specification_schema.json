@@ -359,6 +359,10 @@
                         "width": {
                             "description": "Width, in pixels, of the node in the visual editor. The minimum value is 300.",
                             "type": "number"
+                        },
+                        "height": {
+                            "description": "Height, in pixels, of the node in the visual editor.",
+                            "type": "number"
                         }
                     },
                     "additionalProperties": false
