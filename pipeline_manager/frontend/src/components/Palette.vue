@@ -43,9 +43,11 @@ import Magnifier from '../icons/Magnifier.vue';
 import PaletteSection from './PaletteSection.vue';
 import useNodePalette from '../core/palette/node.ts';
 import useGraphPalette from '../core/palette/graph.ts';
+import useSpecGraphPalette from '../core/palette/spec_graph.ts';
 
 const Tabs = {
     nodes: 'Nodes',
+    specGraph: 'Spec graphs',
     graphsTree: 'Graphs',
 };
 
@@ -54,6 +56,7 @@ const currentTab = ref(Tabs.nodes);
 const paletteSearch = ref('');
 const paletteEntries = {
     [Tabs.nodes]: useNodePalette(paletteSearch),
+    [Tabs.specGraph]: useSpecGraphPalette(paletteSearch),
     [Tabs.graphsTree]: useGraphPalette(paletteSearch, { tree: true }),
 };
 const currentEntries = computed(() => paletteEntries[currentTab.value]);
