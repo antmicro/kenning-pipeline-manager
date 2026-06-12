@@ -2,120 +2,96 @@
     "version":"20250623.14",
     "nodes":[
         {
-            "name":"I2C-slave",
-            "category":"I2C-slaves",
-            "interfaces":[
-                {
-                    "name":"sda",
-                    "type":"sda",
-                    "direction":"inout"
-                },
-                {
-                    "name":"sclk",
-                    "type":"sclk",
-                    "direction":"input"
-                }
-            ]
-        },
-        {
-            "name":"ESP01",
-            "description": "Wi-Fi module built around the ESP8266 SoC",
+            "name":"Motherboard",
+            "category": "Components",
             "twoColumn": true,
             "interfaces":[
                 {
-                    "name":"sda-bus",
-                    "type":"sda",
+                    "name":"control-bus",
+                    "type":"control",
                     "direction":"inout",
-                    "busSize":100,
+                    "busSize":150,
                     "busType": "twoSided"
                 },
                 {
-                    "name":"sclk-bus",
-                    "type":"sclk",
-                    "direction":"output",
+                    "name":"address-bus",
+                    "type":"address",
+                    "direction":"inout",
                     "side":"right",
-                    "busSize":150
+                    "busSize":100
                 },
                 {
-                    "name":"gpio0",
-                    "type":"digital",
+                    "name":"data-bus",
+                    "type":"data",
+                    "direction":"inout",
+                    "side":"right",
+                    "busSize":100
+                }
+            ]
+        },
+        {
+            "name": "Central Processing Unit",
+            "category":"Components",
+            "twoColumn": true,
+            "interfaces":[
+                {
+                    "name":"control-signal",
+                    "type":"control",
                     "direction":"inout"
                 },
                 {
-                    "name":"gpio1",
-                    "type":"digital",
+                    "name":"address-signal",
+                    "type":"address",
+                    "direction":"output"
+                },
+                {
+                    "name":"data-signal",
+                    "type":"data",
+                    "direction":"inout"
+                }
+            ]
+        },
+        {
+            "name": "I/O Controller",
+            "category":"Components",
+            "twoColumn": true,
+            "interfaces":[
+                {
+                    "name":"control-signal",
+                    "type":"control",
                     "direction":"inout"
                 },
                 {
-                    "name":"gpio2",
-                    "type":"digital",
+                    "name":"address-signal",
+                    "type":"address",
                     "direction":"inout"
                 },
                 {
-                    "name":"gpio3",
-                    "type":"digital",
+                    "name":"data-signal",
+                    "type":"data",
+                    "direction":"inout"
+                }
+            ]
+        },
+        {
+            "name": "Memory",
+            "category":"Components",
+            "twoColumn": true,
+            "interfaces":[
+                {
+                    "name":"control-signal",
+                    "type":"control",
                     "direction":"inout"
                 },
                 {
-                    "name":"reset",
-                    "type":"digital",
+                    "name":"address-signal",
+                    "type":"address",
                     "direction":"input"
-                }
-            ]
-        },
-        {
-            "name": "SSD1306",
-            "description": "OLED screen controlled via I2C protocol",
-            "extends": ["I2C-slave"],
-            "properties": [
-                {
-                    "name": "Displayed text",
-                    "type": "text",
-                    "default": "Hello world!"
-                }
-            ]
-        },
-        {
-            "name": "MCP9808",
-            "description": "temperature sensor",
-            "extends": ["I2C-slave"],
-            "interfaces": [
-                {
-                    "name": "A0",
-                    "type": "digital",
-                    "direction": "output"
                 },
                 {
-                    "name": "A1",
-                    "type": "digital",
-                    "direction": "output"
-                },
-                {
-                    "name": "A2",
-                    "type": "digital",
-                    "direction": "output"
-                },
-                {
-                    "name": "Alert",
-                    "type": "digital",
-                    "direction": "output"
-                }
-            ]
-        },
-        {
-            "name": "BME280",
-            "description": "humidity, temperature and pressure sensor",
-            "extends": ["I2C-slave"]
-        },
-        {
-            "name": "MPU6050",
-            "description": "gyroscope",
-            "extends": ["I2C-slave"],
-            "interfaces": [
-                {
-                    "name": "int",
-                    "type": "digital",
-                    "direction": "output"
+                    "name":"data-signal",
+                    "type":"data",
+                    "direction":"inout"
                 }
             ]
         }
@@ -123,14 +99,18 @@
     "metadata":{
         "editableTypes":false,
         "interfaces":{
-            "BinaryImage":{
+            "address":{
                 "interfaceColor":"#FF00FF",
                 "interfaceConnectionPattern":"dashed",
                 "interfaceConnectionColor":"#FF0000"
             },
-            "Image":{
+            "control":{
                 "interfaceConnectionPattern":"dotted",
                 "interfaceConnectionColor":"#FFFF00"
+            },
+            "data":{
+                "interfaceConnectionPattern":"dashed",
+                "interfaceConnectionColor":"#00FFFF"
             }
         },
         "connectionStyle":"orthogonal",

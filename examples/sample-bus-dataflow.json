@@ -5,309 +5,241 @@
             "name": "Example of a graph using BUS interface",
             "nodes": [
                 {
-                    "id": "e4389fd8-1781-42a8-9d73-da069ea77249",
+                    "id": "63344ed8-20e6-4943-94a5-10fb856ca590",
                     "position": {
-                        "x": 500,
+                        "x": 700,
+                        "y": 300
+                    },
+                    "width": 300,
+                    "twoColumn": true,
+                    "interfaces": [
+                        {
+                            "name": "control-signal",
+                            "id": "5ad202ba-31c7-4ef9-b903-c08755b77082",
+                            "direction": "inout",
+                            "side": "left",
+                            "sidePosition": 0
+                        },
+                        {
+                            "name": "data-signal",
+                            "id": "836a1bec-92b9-4147-a72f-35fb9c4006f4",
+                            "direction": "inout",
+                            "side": "right",
+                            "sidePosition": 0
+                        },
+                        {
+                            "name": "address-signal",
+                            "id": "95645b9f-b4d8-4ed5-9e03-27afb32c3982",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 1
+                        }
+                    ],
+                    "properties": [],
+                    "enabledInterfaceGroups": [],
+                    "name": "Central Processing Unit",
+                    "instanceName": "Central Processing Unit"
+                },
+                {
+                    "id": "7a70c2b7-3bf2-463b-96c9-3085086fb516",
+                    "position": {
+                        "x": 1200,
                         "y": 200
                     },
                     "width": 300,
                     "twoColumn": true,
                     "interfaces": [
                         {
-                            "name": "reset",
-                            "id": "0ad2cd6b-f3d9-423a-9fe0-46d2d7733ec9",
-                            "direction": "input",
+                            "name": "control-signal",
+                            "id": "e1b596a4-d17f-47c0-a9d6-73a0652b3532",
+                            "direction": "inout",
                             "side": "left",
                             "sidePosition": 0
                         },
                         {
-                            "name": "gpio0",
-                            "id": "9c54fa77-adec-4762-9fde-34592d6ca477",
+                            "name": "address-signal",
+                            "id": "84054afe-2d49-4e4a-9ae1-be15ea569527",
                             "direction": "inout",
                             "side": "left",
                             "sidePosition": 1
                         },
                         {
-                            "name": "gpio1",
-                            "id": "ca2e9e10-ac98-4e0e-a810-c231f9c920b0",
+                            "name": "data-signal",
+                            "id": "15499707-04d0-4efd-b63a-d3ba7e5a7cd7",
                             "direction": "inout",
                             "side": "left",
                             "sidePosition": 2
+                        }
+                    ],
+                    "properties": [],
+                    "enabledInterfaceGroups": [],
+                    "name": "I/O Controller",
+                    "instanceName": "I/O Controller"
+                },
+                {
+                    "id": "0f17ad85-8c89-4320-b490-f5e667e7b5fc",
+                    "position": {
+                        "x": 1400,
+                        "y": 700
+                    },
+                    "width": 300,
+                    "twoColumn": true,
+                    "interfaces": [
+                        {
+                            "name": "address-signal",
+                            "id": "2eb68e88-83f0-4dda-8150-4677af6040f8",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 1
                         },
                         {
-                            "name": "gpio2",
-                            "id": "007c3f8c-7369-4c49-8b93-c12a5a6ab061",
+                            "name": "control-signal",
+                            "id": "8351745d-b62a-4249-a4c8-c10481c5cb87",
                             "direction": "inout",
                             "side": "left",
-                            "sidePosition": 3
+                            "sidePosition": 0
                         },
                         {
-                            "name": "gpio3",
-                            "id": "be49fe58-8c65-4707-b3b3-bd66d09483c6",
+                            "name": "data-signal",
+                            "id": "c003cc64-ec95-441e-b5ea-cf801fa50555",
                             "direction": "inout",
                             "side": "left",
-                            "sidePosition": 4
-                        },
+                            "sidePosition": 2
+                        }
+                    ],
+                    "properties": [],
+                    "enabledInterfaceGroups": [],
+                    "name": "Memory",
+                    "instanceName": "Memory"
+                },
+                {
+                    "id": "1d912c39-146a-4316-8665-12901900adeb",
+                    "position": {
+                        "x": 700,
+                        "y": 500
+                    },
+                    "width": 300,
+                    "twoColumn": true,
+                    "interfaces": [
                         {
-                            "name": "sclk-bus",
-                            "id": "2f4f9c61-df80-41e5-96f7-8715a3aff31d",
-                            "direction": "output",
+                            "name": "control-bus",
+                            "id": "a0cc7e7c-daac-47a8-b4ce-2f087d118115",
+                            "direction": "inout",
                             "side": "right",
                             "busSize": 150,
                             "busStubs": [
                                 {
-                                    "id": "6173a06e-7de7-4f84-8ab7-6f0971314bec",
-                                    "stubOffset": 85
+                                    "id": "4c3b8687-1d48-4721-8b2c-15ceed4043b7",
+                                    "stubOffset": 118,
+                                    "side": "right"
                                 },
                                 {
-                                    "id": "6c71059b-f9fd-45bf-a531-25230f6ad786",
-                                    "stubOffset": 23
+                                    "id": "be4d03c2-a9da-4ec6-81fc-5da7a2ec2f12",
+                                    "stubOffset": 50,
+                                    "side": "right"
                                 },
                                 {
-                                    "id": "486191bd-69bd-493f-ba11-75ff9ebce637",
-                                    "stubOffset": 45
-                                },
-                                {
-                                    "id": "2e28aab3-3463-4978-bf8f-f9405b24e3e5",
-                                    "stubOffset": 64
+                                    "id": "5a8203fe-0c1c-4a69-801b-e7c11f95e74f",
+                                    "stubOffset": 77,
+                                    "side": "left"
                                 }
                             ]
                         },
                         {
-                            "name": "sda-bus",
-                            "id": "f3a892e1-218e-4e27-8836-bc2861dd211f",
+                            "name": "address-bus",
+                            "id": "30990bec-1475-44b8-a04d-4d311b6eee4a",
                             "direction": "inout",
                             "side": "right",
                             "busSize": 100,
                             "busStubs": [
                                 {
-                                    "id": "1a50f82b-e02c-4237-9c4b-b10eb97d7cab",
-                                    "stubOffset": 33,
-                                    "side": "left"
+                                    "id": "6ac994e2-d63e-4a88-8789-206cc6e6c722",
+                                    "stubOffset": 90
                                 },
                                 {
-                                    "id": "8975538b-5482-47c5-aea9-7de4570f9ab7",
-                                    "stubOffset": 69,
-                                    "side": "left"
+                                    "id": "8d1c5905-0159-4836-b950-407ffce1b7f4",
+                                    "stubOffset": 53
                                 },
                                 {
-                                    "id": "4d9e981f-2bb3-4cb3-851b-048aead2bbb9",
-                                    "stubOffset": 32,
-                                    "side": "right"
+                                    "id": "da84020e-efdc-46e8-8842-67cc8b7f1e5c",
+                                    "stubOffset": 23
+                                }
+                            ]
+                        },
+                        {
+                            "name": "data-bus",
+                            "id": "444bc6ae-8353-446a-82b2-f6e79a194cf5",
+                            "direction": "inout",
+                            "side": "right",
+                            "busSize": 100,
+                            "busStubs": [
+                                {
+                                    "id": "ff2935fe-6368-459d-aabb-db017804028c",
+                                    "stubOffset": 78
                                 },
                                 {
-                                    "id": "85f957cd-c9e5-4aa5-9eaf-a71b6cc854a3",
-                                    "stubOffset": 67,
-                                    "side": "right"
+                                    "id": "f96aaa33-dd62-4044-836c-1fcb1070add9",
+                                    "stubOffset": 52
+                                },
+                                {
+                                    "id": "cd5215d0-7f14-4475-81bb-db38370fd05f",
+                                    "stubOffset": 24
                                 }
                             ]
                         }
                     ],
                     "properties": [],
                     "enabledInterfaceGroups": [],
-                    "name": "ESP01",
-                    "instanceName": "ESP01"
-                },
-                {
-                    "id": "a357c7e9-da08-43c0-85ca-c2a193847a29",
-                    "position": {
-                        "x": 500,
-                        "y": -100
-                    },
-                    "width": 300,
-                    "twoColumn": false,
-                    "interfaces": [
-                        {
-                            "name": "sclk",
-                            "id": "3cc46946-b28d-433e-acc9-c37d17c7c52c",
-                            "direction": "input",
-                            "side": "right",
-                            "sidePosition": 0
-                        },
-                        {
-                            "name": "sda",
-                            "id": "3312460f-f9c5-4be4-8b58-4551fdffe779",
-                            "direction": "inout",
-                            "side": "left",
-                            "sidePosition": 1
-                        }
-                    ],
-                    "properties": [],
-                    "enabledInterfaceGroups": [],
-                    "name": "BME280",
-                    "instanceName": "BME280"
-                },
-                {
-                    "id": "1f7b576e-0633-427a-ba10-c5d260da2d91",
-                    "position": {
-                        "x": 1100,
-                        "y": 0
-                    },
-                    "width": 300,
-                    "twoColumn": false,
-                    "interfaces": [
-                        {
-                            "name": "sclk",
-                            "id": "6d951004-aa3d-4d13-9ee3-cfa9f25f6980",
-                            "direction": "input",
-                            "side": "left",
-                            "sidePosition": 1
-                        },
-                        {
-                            "name": "sda",
-                            "id": "4584293d-768b-4115-8e4f-d80996af7226",
-                            "direction": "inout",
-                            "side": "left",
-                            "sidePosition": 0
-                        },
-                        {
-                            "name": "A0",
-                            "id": "63ab3a14-76a5-4653-9ff0-2c6e441d8636",
-                            "direction": "output",
-                            "side": "right",
-                            "sidePosition": 0
-                        },
-                        {
-                            "name": "A1",
-                            "id": "3742f943-3bfb-4e68-b75d-db9f62d64108",
-                            "direction": "output",
-                            "side": "right",
-                            "sidePosition": 1
-                        },
-                        {
-                            "name": "A2",
-                            "id": "f8f256a9-816f-453d-a4dd-f1db96bc9d18",
-                            "direction": "output",
-                            "side": "right",
-                            "sidePosition": 2
-                        },
-                        {
-                            "name": "Alert",
-                            "id": "9a157072-e803-4c7e-9d1d-28361f4d01e2",
-                            "direction": "output",
-                            "side": "right",
-                            "sidePosition": 3
-                        }
-                    ],
-                    "properties": [],
-                    "enabledInterfaceGroups": [],
-                    "name": "MCP9808",
-                    "instanceName": "MCP9808"
-                },
-                {
-                    "id": "f73f077a-5f09-4246-b3f2-988a3e47ae5f",
-                    "position": {
-                        "x": 1200,
-                        "y": 500
-                    },
-                    "width": 300,
-                    "twoColumn": false,
-                    "interfaces": [
-                        {
-                            "name": "sclk",
-                            "id": "eff0f36b-b128-4f0e-93c6-fa9b12e8dd1a",
-                            "direction": "input",
-                            "side": "left",
-                            "sidePosition": 1
-                        },
-                        {
-                            "name": "sda",
-                            "id": "9de4a13e-037a-43c9-a8a3-56f6538e387f",
-                            "direction": "inout",
-                            "side": "left",
-                            "sidePosition": 0
-                        },
-                        {
-                            "name": "int",
-                            "id": "d27eab24-e97d-45dc-89ec-56ade85c0a04",
-                            "direction": "output",
-                            "side": "right",
-                            "sidePosition": 0
-                        }
-                    ],
-                    "properties": [],
-                    "enabledInterfaceGroups": [],
-                    "name": "MPU6050",
-                    "instanceName": "MPU6050"
-                },
-                {
-                    "id": "5a9f14db-3914-4dbe-9fe5-5d194a0b971f",
-                    "position": {
-                        "x": 500,
-                        "y": 700
-                    },
-                    "width": 300,
-                    "twoColumn": false,
-                    "interfaces": [
-                        {
-                            "name": "sclk",
-                            "id": "2e6fe6eb-2df7-45f2-9a3c-1a43801fc898",
-                            "direction": "input",
-                            "side": "right",
-                            "sidePosition": 0
-                        },
-                        {
-                            "name": "sda",
-                            "id": "cd3bfa20-4f9d-42d1-b8be-34f47ed7f1b8",
-                            "direction": "inout",
-                            "side": "left",
-                            "sidePosition": 1
-                        }
-                    ],
-                    "properties": [
-                        {
-                            "name": "Displayed text",
-                            "id": "471d6b4a-628c-457c-9385-0cfd63043b08",
-                            "value": "Hello world!",
-                            "hidden": false
-                        }
-                    ],
-                    "enabledInterfaceGroups": [],
-                    "name": "SSD1306",
-                    "instanceName": "SSD1306"
+                    "name": "Motherboard",
+                    "instanceName": "Motherboard"
                 }
             ],
             "groups": [],
             "connections": [
                 {
-                    "id": "9409ef8b-0903-464a-96ca-8f9ab42eaf37",
-                    "from": "6173a06e-7de7-4f84-8ab7-6f0971314bec",
-                    "to": "2e6fe6eb-2df7-45f2-9a3c-1a43801fc898"
+                    "id": "6130d684-15f8-4816-9830-ffeaf31a2dd2",
+                    "from": "c003cc64-ec95-441e-b5ea-cf801fa50555",
+                    "to": "ff2935fe-6368-459d-aabb-db017804028c"
                 },
                 {
-                    "id": "0cc0b16a-52f1-4e53-9b4a-9ca025ef51f7",
-                    "from": "6c71059b-f9fd-45bf-a531-25230f6ad786",
-                    "to": "3cc46946-b28d-433e-acc9-c37d17c7c52c"
+                    "id": "b51d55dc-053b-4302-a2b1-2423a5582335",
+                    "from": "8351745d-b62a-4249-a4c8-c10481c5cb87",
+                    "to": "4c3b8687-1d48-4721-8b2c-15ceed4043b7"
                 },
                 {
-                    "id": "9df71bb0-be47-47b7-8848-4237bdaed52e",
-                    "from": "486191bd-69bd-493f-ba11-75ff9ebce637",
-                    "to": "6d951004-aa3d-4d13-9ee3-cfa9f25f6980"
+                    "id": "0cf4f137-bf93-4478-b23f-410db4fe7727",
+                    "from": "6ac994e2-d63e-4a88-8789-206cc6e6c722",
+                    "to": "2eb68e88-83f0-4dda-8150-4677af6040f8"
                 },
                 {
-                    "id": "ad46dbff-85f6-482a-a098-c23a1ffffd7b",
-                    "from": "2e28aab3-3463-4978-bf8f-f9405b24e3e5",
-                    "to": "eff0f36b-b128-4f0e-93c6-fa9b12e8dd1a"
+                    "id": "805fa0a0-cd19-4e30-9214-f0e624a605fa",
+                    "from": "e1b596a4-d17f-47c0-a9d6-73a0652b3532",
+                    "to": "be4d03c2-a9da-4ec6-81fc-5da7a2ec2f12"
                 },
                 {
-                    "id": "3d705d21-dce1-4af7-8a7f-5b3f997c35eb",
-                    "from": "3312460f-f9c5-4be4-8b58-4551fdffe779",
-                    "to": "1a50f82b-e02c-4237-9c4b-b10eb97d7cab"
+                    "id": "007df326-005a-47db-bce1-224e7fd6dc96",
+                    "from": "84054afe-2d49-4e4a-9ae1-be15ea569527",
+                    "to": "8d1c5905-0159-4836-b950-407ffce1b7f4"
                 },
                 {
-                    "id": "70c51d21-b604-4e70-a45a-ea475d52286b",
-                    "from": "cd3bfa20-4f9d-42d1-b8be-34f47ed7f1b8",
-                    "to": "8975538b-5482-47c5-aea9-7de4570f9ab7"
+                    "id": "43f63e01-799a-48cf-b276-b53eae6847e6",
+                    "from": "15499707-04d0-4efd-b63a-d3ba7e5a7cd7",
+                    "to": "f96aaa33-dd62-4044-836c-1fcb1070add9"
                 },
                 {
-                    "id": "bcda011a-2d4d-435e-beab-141111c0a177",
-                    "from": "4584293d-768b-4115-8e4f-d80996af7226",
-                    "to": "4d9e981f-2bb3-4cb3-851b-048aead2bbb9"
+                    "id": "705f90f6-fe07-4a17-b19d-e36fe5e21b03",
+                    "from": "836a1bec-92b9-4147-a72f-35fb9c4006f4",
+                    "to": "cd5215d0-7f14-4475-81bb-db38370fd05f"
                 },
                 {
-                    "id": "29d1c0a0-fad5-4880-a56b-23c9b1aa00f8",
-                    "from": "9de4a13e-037a-43c9-a8a3-56f6538e387f",
-                    "to": "85f957cd-c9e5-4aa5-9eaf-a71b6cc854a3"
+                    "id": "8f8e69e6-4d45-449c-a7b7-4cf3542240a2",
+                    "from": "5ad202ba-31c7-4ef9-b903-c08755b77082",
+                    "to": "5a8203fe-0c1c-4a69-801b-e7c11f95e74f"
+                },
+                {
+                    "id": "baf75b0a-67b1-4cbf-a525-deb8b9d86445",
+                    "from": "95645b9f-b4d8-4ed5-9e03-27afb32c3982",
+                    "to": "da84020e-efdc-46e8-8842-67cc8b7f1e5c"
                 }
             ]
         }
