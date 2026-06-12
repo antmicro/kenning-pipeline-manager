@@ -115,9 +115,8 @@ SPDX-License-Identifier: Apache-2.0
                             :intf="input"
                             :toggleGroup="toggleGroup"
                             :updateDynamicInterfaces="updateDynamicInterfaces"
-                            :showcase="true"
                             tabindex="-1"
-                            sidebar=true
+                            :sidebar="true"
                             class="__property-interface"
                         />
                         <div

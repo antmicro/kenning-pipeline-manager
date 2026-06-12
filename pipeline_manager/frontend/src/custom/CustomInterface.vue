@@ -207,7 +207,6 @@ export default defineComponent({
         updateDynamicInterfaces: { default: () => {}, required: false },
         sidebar: { default: false, required: false },
         tabindexValue: { default: -1, required: false },
-        showcase: { default: false, required: false },
     },
     components: {
         Arrow,
@@ -222,7 +221,7 @@ export default defineComponent({
 
         const { viewModel } = useViewModel();
         const { graph } = useGraph();
-        const { hoveredOver, temporaryConnection } = props.showcase ?
+        const { hoveredOver, temporaryConnection } = props.sidebar ?
             { hoveredOver: null, temporaryConnection: null } : useTemporaryConnection();
 
         const isPositionedInterface = props.intf?.x !== undefined && props.intf?.y !== undefined;
