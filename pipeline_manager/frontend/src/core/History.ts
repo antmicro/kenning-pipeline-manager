@@ -163,8 +163,10 @@ class NodeStep extends Step {
                 const from = (<any>conn.from).parent ?? conn.from;
                 const offset = (<any>conn.to).stubOffset ?? (<any>conn.from).stubOffset;
                 const stubId = (<any>conn.to).stubOffset ? conn.to.id : conn.from.id;
+                const stubSide = (<any>conn.to).stubOffset ?
+                    (<any>conn.to).side : (<any>conn.from).side;
                 // eslint-disable-next-line max-len
-                const locc = (<any>graph.value).addConnection(from, to, offset, stubId);
+                const locc = (<any>graph.value).addConnection(from, to, offset, stubId, stubSide);
                 let pos = 0;
                 ((<any>conn).anchors ?? []).forEach((anchor: any) => {
                     (<any>graph.value).addAnchor(anchor, locc, pos);
@@ -248,8 +250,9 @@ class ConnectionStep extends Step {
             if (!from || !to) return;
             const stubPos = this.conn.to.stubOffset ?? this.conn.from.stubOffset;
             const stubId = this.conn.to.stubOffset ? this.conn.to.id : this.conn.from.id;
+            const stubSide = this.conn.to.stubOffset ? this.conn.to.side : this.conn.from.side;
 
-            const connAdded = (<any>graph).value.addConnection(from, to, stubPos, stubId);
+            const connAdded = (<any>graph).value.addConnection(from, to, stubPos, stubId, stubSide);
             if (connAdded === undefined) {
                 return;
             }

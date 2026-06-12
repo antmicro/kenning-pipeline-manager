@@ -458,7 +458,7 @@ export default function createPipelineManagerGraph(graph) {
     };
 
     // eslint-disable-next-line no-unused-vars
-    graph.addConnection = function addConnection(from, to, stubOffset, stubID) {
+    graph.addConnection = function addConnection(from, to, stubOffset, stubID, stubSide) {
         if (!to) return undefined;
         if (!from) return undefined;
         // the target interface is a bus, we have to create a connection point
@@ -469,7 +469,7 @@ export default function createPipelineManagerGraph(graph) {
             if (intf.busStubs === undefined) {
                 intf.busStubs = [];
             }
-            const stub = createStub(intf, stubOffset, stubID);
+            const stub = createStub(intf, stubOffset, stubID, stubSide);
 
             intf.busStubs.push(stub);
             // for further connection creation logic
