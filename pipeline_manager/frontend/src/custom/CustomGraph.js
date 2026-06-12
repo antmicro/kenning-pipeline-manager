@@ -181,6 +181,24 @@ export default function createPipelineManagerGraph(graph) {
         return connection.anchors[connection.anchors.length - 1];
     };
 
+    const createStub = (intf, stubOffset = undefined, stubID = undefined, stubSide = undefined) => {
+        if (intf.busType !== 'twoSided') {
+            stubSide = undefined;
+        }
+        const stub = {};
+        stub.nodeId = intf.nodeId;
+        stub.id = stubID ?? uuidv4();
+        stub.direction = intf.direction;
+        stub.isInput = intf.isInput;
+        stub.side = stubSide ?? intf.side;
+        stub.maxConnectionsCount = 1;
+        stub.type = intf.type;
+        stub.sidePosition = 0;
+        stub.stubOffset = stubOffset ?? (intf.busSize / 2);
+        stub.parent = intf;
+        return stub;
+    };
+
     // Replaces given instance of a node with a node of type `newNodeName`
     // All properties that are common preserve their values
     // All connections that were connected to the interfaces that are common
@@ -271,11 +289,12 @@ export default function createPipelineManagerGraph(graph) {
         // Restoring connections
         const interfaces = [...Object.values(oldNode.inputs), ...Object.values(oldNode.outputs)];
         const connections = this.connections.filter(
-            (c) => interfaces.includes(c.from) || interfaces.includes(c.to),
+            (c) => interfaces.includes(c.from) || interfaces.includes(c.to) ||
+                interfaces.some((i) => i.busStubs?.some((s) => [c.to, c.from].includes(s))),
         );
 
         connections.forEach((conn) => {
-            this.removeConnection(conn);
+            this.removeConnection(conn, false);
         });
 
         const connectionsToRestore = [];
@@ -285,42 +304,37 @@ export default function createPipelineManagerGraph(graph) {
 
             // Rewiring connections to new interfaces
             connections.forEach((conn) => {
-                if (Object.prototype.hasOwnProperty.call(newNodeInstance.inputs, name)) {
-                    if (conn.from === intf) {
-                        if (this.checkConnection(newNodeInstance.inputs[name], conn.to)
-                            .connectionAllowed) {
-                            const newConn = new Connection(newNodeInstance.inputs[name], conn.to);
-                            newConn.anchors = conn.anchors;
-                            connectionsToRestore.push(newConn);
-                        }
-                    } else if (conn.to === intf) {
-                        if (this.checkConnection(conn.from, newNodeInstance.inputs[name])
-                            .connectionAllowed) {
-                            const newConn = new Connection(conn.from, newNodeInstance.inputs[name]);
-                            newConn.anchors = conn.anchors;
-                            connectionsToRestore.push(newConn);
-                        }
-                    }
-                }
+                [newNodeInstance.inputs, newNodeInstance.outputs].forEach((arr) => {
+                    if (Object.prototype.hasOwnProperty.call(arr, name)) {
+                        const checkAndReadd = (ii, curi) => {
+                            if (conn.from === ii || conn.to === ii) {
+                                const isFrom = conn.from === ii;
+                                const fromNode = isFrom ? curi : conn.from;
+                                const toNode = isFrom ? conn.to : curi;
 
-                if (Object.prototype.hasOwnProperty.call(newNodeInstance.outputs, name)) {
-                    if (conn.from === intf) {
-                        if (this.checkConnection(newNodeInstance.outputs[name], conn.to)
-                            .connectionAllowed) {
-                            const newConn = new Connection(newNodeInstance.outputs[name], conn.to);
-                            newConn.anchors = conn.anchors;
-                            connectionsToRestore.push(newConn);
-                        }
-                    } else if (conn.to === intf) {
-                        if (this.checkConnection(conn.from, newNodeInstance.outputs[name])
-                            .connectionAllowed) {
-                            const newConn = new Connection(conn.from,
-                                newNodeInstance.outputs[name]);
-                            newConn.anchors = conn.anchors;
-                            connectionsToRestore.push(newConn);
+                                if (this.checkConnection(fromNode, toNode).connectionAllowed) {
+                                    const newConn = new Connection(fromNode, toNode);
+                                    newConn.anchors = conn.anchors;
+                                    connectionsToRestore.push(newConn);
+                                    return true;
+                                }
+                            }
+                            return false;
+                        };
+                        checkAndReadd(intf, arr[name]);
+                        if (intf.busSize && intf.busStubs) {
+                            arr[name].busStubs = arr[name].busStubs ?? [];
+                            intf.busStubs.forEach((stub) => {
+                                const scopy =
+                                    createStub(arr[name], stub.stubOffset, stub.id, stub.side);
+                                arr[name].busStubs.push(scopy);
+                                if (!checkAndReadd(stub, arr[name].busStubs.at(-1))) {
+                                    arr[name].busStubs.pop();
+                                }
+                            });
                         }
                     }
-                }
+                });
             });
         });
 
@@ -419,7 +433,7 @@ export default function createPipelineManagerGraph(graph) {
         }
         this._nodes = [];
     };
-    graph.removeConnection = function removeConnection(connection) {
+    graph.removeConnection = function removeConnection(connection, deleteOrphanStubs = true) {
         if (!this.connections.includes(connection)) {
             return;
         }
@@ -430,7 +444,11 @@ export default function createPipelineManagerGraph(graph) {
         Object.values([connection.to, connection.from]).forEach((intf) => {
             if (intf.stubOffset) {
                 const p = intf.parent;
-                p.busStubs.splice(p.busStubs.indexOf(intf), 1);
+                if (deleteOrphanStubs) {
+                    p.busStubs.splice(p.busStubs.indexOf(intf), 1);
+                } else {
+                    intf.isOrphaned = true;
+                }
             }
         });
         connection.destruct();
@@ -451,17 +469,7 @@ export default function createPipelineManagerGraph(graph) {
             if (intf.busStubs === undefined) {
                 intf.busStubs = [];
             }
-            const stub = {};
-            stub.nodeId = intf.nodeId;
-            stub.id = stubID ?? uuidv4();
-            stub.direction = intf.direction;
-            stub.isInput = intf.isInput;
-            stub.side = intf.side;
-            stub.maxConnectionsCount = 1;
-            stub.type = intf.type;
-            stub.sidePosition = 0;
-            stub.stubOffset = stubOffset ?? (intf.busSize / 2);
-            stub.parent = intf;
+            const stub = createStub(intf, stubOffset, stubID);
 
             intf.busStubs.push(stub);
             // for further connection creation logic
