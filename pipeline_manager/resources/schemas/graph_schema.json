@@ -152,7 +152,25 @@
                                 },
                                 "busStubs": {
                                     "description": "Endpoints of connections going into the bus",
-                                    "type": "array"
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "id": {
+                                                "description": "Unique id for the stub, needed for connection",
+                                                "type": "string"
+                                            },
+                                            "stubOffset": {
+                                                "description": "Offset of stub within the bus in pixels",
+                                                "type": "number"
+                                            }
+                                        },
+                                        "required": [
+                                            "id",
+                                            "stubOffset"
+                                        ],
+                                        "additionalProperties": false
+                                    }
                                 }
                             },
                             "required": [
