@@ -392,3 +392,21 @@ test('rename node type', async ({ page }) => {
     expect(editedNode.nth(2).getByText('filename')).toBeVisible();
     expect(editedNode.nth(2).getByText('frames')).toBeVisible();
 });
+test('editing bus type interface', async ({ page }) => {
+    await page.goto(getUrl());
+    await loadSpecification(page, 'sample-bus-specification.json');
+    await loadDataflow(page, 'sample-bus-dataflow.json');
+    await enableEditingNodes(page);
+    const node = getNode(page, 'Motherboard');
+    const bus = node.locator('.__big-bus');
+    const stubs = bus.locator('>div');
+    expect(bus).toBeVisible();
+    expect(stubs).toHaveCount(3);
+    node.locator('.__title').dblclick();
+    const content = await getYAMLEditorContent(page);
+    const bigBus = content.interfaces.find((i) => i.name === 'control-bus');
+    expect(bigBus).not.toBeUndefined();
+    bigBus.busSize = 200;
+    await setYAMLEditorContent(page, content);
+    expect(stubs).toHaveCount(3);
+});

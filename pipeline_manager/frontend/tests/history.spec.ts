@@ -2,8 +2,8 @@ import { test, expect, Page, Locator } from '@playwright/test';
 import {
     getUrl,getNodeByID,assertInputCount,assertOutputCount,waitForSubgraph,enterSubgraph,
     leaveSubgraph,expectNode,getNode,deleteNode, loadVideoNodeId, enableNavigationBar, addNode,
-    dragAndDrop, closeTerminal,loadSpecification,loadDataflow, getContextMenu,
-    AddConnection,
+    dragAndDrop, closeTerminal, loadSpecification,loadDataflow, getContextMenu,
+    AddConnection, enableEditingNodes,
 } from './config.js';
 
 
@@ -488,4 +488,24 @@ test('test history by changing property value', async ({ page }) => {
     expect(await sizeVal.innerText()).toBe('5');
     await page.keyboard.press('Control+KeyY');
     expect(await sizeVal.innerText()).toBe('4');
+});
+test('reconnecting bus type interface', async ({ page }) => {
+    await page.goto(getUrl());
+    await loadSpecification(page, 'sample-bus-specification.json');
+    await loadDataflow(page, 'sample-bus-dataflow.json');
+    const node = getNode(page, 'Motherboard');
+    const bigBus = node.locator('.__big-bus');
+    const smallBus = node.locator('.__port-bus').nth(1);
+    const bigStubs = bigBus.locator('>div');
+    const smallStubs = smallBus.locator('>div');
+    expect(bigBus).toBeVisible();
+    expect(bigStubs).toHaveCount(3);
+    expect(smallStubs).toHaveCount(3);
+    await deleteNode(node, page);
+    await bigBus.waitFor({ state: 'hidden' });
+    expect(bigBus).not.toBeVisible();
+    await page.keyboard.press('Control+KeyZ');
+    expect(bigBus).toBeVisible();
+    expect(bigStubs).toHaveCount(3);
+    expect(smallStubs).toHaveCount(3);
 });
