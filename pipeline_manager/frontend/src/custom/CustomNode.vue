@@ -1173,12 +1173,13 @@ const createContextMenuPropertyItems = () => {
     const items = [];
 
     if (chosenProperty !== undefined) {
+        const labels = (isBigBus(chosenProperty) ? ['Expose Interface', 'Privatize Interface'] : ['Expose Property', 'Privatize Property']);
         const propertyMode = (chosenProperty.externalName === undefined ?
-            { value: 'SetExternalName', label: 'Expose Property', icon: icons.Subgraph } :
-            { value: 'UnsetExternalName', label: 'Privatize Property', icon: icons.Subgraph }
+            { value: 'SetExternalName', label: labels[0], icon: icons.Subgraph } :
+            { value: 'UnsetExternalName', label: labels[1], icon: icons.Subgraph }
         );
         items.push(propertyMode);
-        if (!chosenProperty.groupProperty) {
+        if (!chosenProperty.groupProperty && !isBigBus(chosenProperty)) {
             items.push({ value: 'Hide', label: 'Hide', icon: icons.Hide });
         }
     }
@@ -1218,7 +1219,7 @@ const onContextMenuPropertyClick = (action) => {
 const openContextMenuProperty = async (property) => {
     showContextMenuProperty.value = false;
     await nextTick();
-    if (!viewModel.value.editor.readonly && !property.port) {
+    if (!viewModel.value.editor.readonly) {
         chosenProperty = property;
         const items = createContextMenuPropertyItems();
 
