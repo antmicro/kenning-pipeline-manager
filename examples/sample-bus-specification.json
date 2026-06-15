@@ -10,22 +10,30 @@
                     "name":"control-bus",
                     "type":"control",
                     "direction":"inout",
-                    "busSize":150,
-                    "busType": "twoSided"
+                    "bus": {
+                        "size": 150,
+                        "type": "twoSided"
+                    }
                 },
                 {
                     "name":"address-bus",
                     "type":"address",
                     "direction":"inout",
                     "side":"right",
-                    "busSize":100
+                    "bus": {
+                        "size": 100,
+                        "type": "oneSided"
+                    }
                 },
                 {
                     "name":"data-bus",
                     "type":"data",
                     "direction":"inout",
                     "side":"right",
-                    "busSize":100
+                    "bus": {
+                        "size": 100,
+                        "type": "oneSided"
+                    }
                 }
             ]
         },

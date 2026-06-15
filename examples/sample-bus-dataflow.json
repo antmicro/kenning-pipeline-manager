@@ -126,66 +126,74 @@
                             "id": "a0cc7e7c-daac-47a8-b4ce-2f087d118115",
                             "direction": "inout",
                             "side": "right",
-                            "busSize": 150,
-                            "busStubs": [
-                                {
-                                    "id": "4c3b8687-1d48-4721-8b2c-15ceed4043b7",
-                                    "stubOffset": 118,
-                                    "side": "right"
-                                },
-                                {
-                                    "id": "be4d03c2-a9da-4ec6-81fc-5da7a2ec2f12",
-                                    "stubOffset": 50,
-                                    "side": "right"
-                                },
-                                {
-                                    "id": "5a8203fe-0c1c-4a69-801b-e7c11f95e74f",
-                                    "stubOffset": 77,
-                                    "side": "left"
-                                }
-                            ]
+                            "bus":{
+                                "size": 150,
+                                "stubs": [
+                                    {
+                                        "id": "4c3b8687-1d48-4721-8b2c-15ceed4043b7",
+                                        "offset": 118,
+                                        "side": "right"
+                                    },
+                                    {
+                                        "id": "be4d03c2-a9da-4ec6-81fc-5da7a2ec2f12",
+                                        "offset": 50,
+                                        "side": "right"
+                                    },
+                                    {
+                                        "id": "5a8203fe-0c1c-4a69-801b-e7c11f95e74f",
+                                        "offset": 77,
+                                        "side": "left"
+                                    }
+                                ]
+                            }
                         },
                         {
                             "name": "address-bus",
+                            "sidePosition": 0,
                             "id": "30990bec-1475-44b8-a04d-4d311b6eee4a",
                             "direction": "inout",
                             "side": "right",
-                            "busSize": 100,
-                            "busStubs": [
-                                {
-                                    "id": "6ac994e2-d63e-4a88-8789-206cc6e6c722",
-                                    "stubOffset": 90
-                                },
-                                {
-                                    "id": "8d1c5905-0159-4836-b950-407ffce1b7f4",
-                                    "stubOffset": 53
-                                },
-                                {
-                                    "id": "da84020e-efdc-46e8-8842-67cc8b7f1e5c",
-                                    "stubOffset": 23
-                                }
-                            ]
+                            "bus": {
+                                "size": 100,
+                                "stubs": [
+                                    {
+                                        "id": "6ac994e2-d63e-4a88-8789-206cc6e6c722",
+                                        "offset": 90
+                                    },
+                                    {
+                                        "id": "8d1c5905-0159-4836-b950-407ffce1b7f4",
+                                        "offset": 53
+                                    },
+                                    {
+                                        "id": "da84020e-efdc-46e8-8842-67cc8b7f1e5c",
+                                        "offset": 23
+                                    }
+                                ]
+                            }
                         },
                         {
                             "name": "data-bus",
+                            "sidePosition": 1,
                             "id": "444bc6ae-8353-446a-82b2-f6e79a194cf5",
                             "direction": "inout",
                             "side": "right",
-                            "busSize": 100,
-                            "busStubs": [
-                                {
-                                    "id": "ff2935fe-6368-459d-aabb-db017804028c",
-                                    "stubOffset": 78
-                                },
-                                {
-                                    "id": "f96aaa33-dd62-4044-836c-1fcb1070add9",
-                                    "stubOffset": 52
-                                },
-                                {
-                                    "id": "cd5215d0-7f14-4475-81bb-db38370fd05f",
-                                    "stubOffset": 24
-                                }
-                            ]
+                            "bus": {
+                                "size": 100,
+                                "stubs": [
+                                    {
+                                        "id": "ff2935fe-6368-459d-aabb-db017804028c",
+                                        "offset": 78
+                                    },
+                                    {
+                                        "id": "f96aaa33-dd62-4044-836c-1fcb1070add9",
+                                        "offset": 52
+                                    },
+                                    {
+                                        "id": "cd5215d0-7f14-4475-81bb-db38370fd05f",
+                                        "offset": 24
+                                    }
+                                ]
+                            }
                         }
                     ],
                     "properties": [],
