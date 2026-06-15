@@ -406,7 +406,7 @@ test('editing bus type interface', async ({ page }) => {
     const content = await getYAMLEditorContent(page);
     const bigBus = content.interfaces.find((i) => i.name === 'control-bus');
     expect(bigBus).not.toBeUndefined();
-    bigBus.busSize = 200;
+    bigBus.bus.size = 200;
     await setYAMLEditorContent(page, content);
     expect(stubs).toHaveCount(3);
 });

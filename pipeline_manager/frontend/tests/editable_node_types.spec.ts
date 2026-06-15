@@ -8,6 +8,7 @@ import fs from 'fs/promises';
 import {
     createNewNodeType, addInterface, getUrl, assertInputCount, getNode, getPathToJsonFile, addNode,
     openFileChooser, dragAndDrop, openNodePalette, setYAMLEditorContent, getContextMenu,
+    loadSpecification, loadDataflow, enableEditingNodes, addProperty,
 } from './config.js';
 
 const temporaryDir = `${os.tmpdir()}/`;
@@ -352,4 +353,28 @@ test('editing properties', async ({ page }, testInfo) => {
             expect(result, { message: '"'.concat(String(props[i][0]).concat('" interface is interactable when readonly')) }).toBeTruthy();
         }
     }
+});
+test('editing bus node', async ({ page }) => {
+    await page.goto(getUrl());
+    await loadSpecification(page, 'sample-bus-specification.json');
+    await loadDataflow(page, 'sample-bus-dataflow.json');
+    // await loadDataflow(page, 'sample-bus-dataflow.json');
+    await enableEditingNodes(page);
+    const busNode = await getNode(page, 'Motherboard');
+    const ports = busNode.locator('.__port');
+    const props = busNode.locator('.__properties > div');
+    const buses = busNode.locator('.__port-bus');
+
+    expect(await buses.count()).toBe(3);
+    const prevPorts = await ports.count();
+    const prevProps = await props.count();
+    await addProperty(page, busNode);
+    expect(await buses.count()).toBe(3);
+    expect(await props.count()).toBe(prevProps + 1);
+    // Has to be hard coded, no reactivity change it just is not responsive so
+    // soon after previous edit.
+    await page.waitForTimeout(100);
+    await addInterface(page, busNode);
+    expect(await buses.count()).toBe(3);
+    expect(await ports.count()).toBe(prevPorts + 1);
 });
