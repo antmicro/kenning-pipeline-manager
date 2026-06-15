@@ -498,3 +498,40 @@ test('test inherited subgraph', async ({ page }) => {
     const nodeB = page.locator('[data-node-type="Type B"]');
     expect(await nodeB.locator('.__interfaces').locator('[id]').count()).toBe(3);
 });
+test('test exposing bus type interface', async ({ page }) => {
+    await page.goto(getUrl());
+    await loadSpecification(page, 'sample-bus-specification.json');
+    // await loadDataflow(page, 'sample-bus-dataflow.json');
+    await enableEditingNodes(page);
+    await createNewNode(page, { x: 400, y: 400 });
+    const subgraphNode = getNode(page, 'Custom Node');
+    await subgraphNode.click({ button: 'right' });
+    await getContextMenu(page).getByText('Add and edit subgraph').click();
+    // adding node with bus and exposing that bus
+    await addNode(page, 'Components', 'Motherboard', 400, 400);
+    const node = getNode(page, 'Motherboard');
+    await node.getByText('control-bus').click({ button: 'right' });
+    await getContextMenu(page).getByText('Expose Interface').click();
+    await leaveSubgraph(page);
+
+    expect(subgraphNode.getByText('control-bus')).toBeVisible();
+    expect(subgraphNode.locator('.__big-bus')).toBeVisible();
+
+    // exposing small bus (2nd one)
+    await enterSubgraph(subgraphNode, page);
+    await node.getByText('address-bus').click({ button: 'right' });
+    await getContextMenu(page).getByText('Expose Interface').click();
+    await leaveSubgraph(page);
+
+    expect(subgraphNode.getByText('address-bus')).toBeVisible();
+    expect(await subgraphNode.locator('.__port-bus').count()).toBe(2);
+
+    await enterSubgraph(subgraphNode, page);
+    await node.getByText('control-bus').click({ button: 'right' });
+    await getContextMenu(page).getByText('Privatize Interface').click();
+    await node.getByText('address-bus').click({ button: 'right' });
+    await getContextMenu(page).getByText('Privatize Interface').click();
+    await leaveSubgraph(page);
+
+    expect(await subgraphNode.locator('.__port').count()).toBe(0);
+});
