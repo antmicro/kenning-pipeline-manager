@@ -12,12 +12,13 @@ A collection of palette entries.
     <div ref="entriesRef" class="entries">
         <div v-if="sectionNames">
             <div v-for="sectionName in sectionNames" :key="sectionName">
+            <div v-if="entries.get(sectionName).show">
             <PaletteSectionHeader
                 v-if="sectionName && !oneNodeList"
                 :sectionName="sectionName"
             />
             <PaletteSectionList
-                :entries="entries.get(sectionName)"
+                :entries="entries.get(sectionName).entries"
                 :draggedEntry="draggedEntry"
                 :pointer="pointer"
                 v-model="showContextMenu"
@@ -25,6 +26,7 @@ A collection of palette entries.
                 :contextMenuEntry="contextMenuEntry"
                 :entriesRef="entriesRef"
             />
+            </div>
             </div>
         </div>
         <div v-else>

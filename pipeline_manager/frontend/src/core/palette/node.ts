@@ -12,9 +12,9 @@ import {
     computed,
     type ComputedRef,
     type Reactive,
-    ref,
     type Ref,
     watch,
+    reactive,
 } from 'vue';
 import {
     AbstractNode,
@@ -22,6 +22,7 @@ import {
     useViewModel,
 } from 'baklavajs';
 import jq from '@michaelhomer/jqjs';
+import fuzzysort from 'fuzzysort';
 import Cross from '../../icons/Cross.vue';
 import PipelineManagerEditor from '../../custom/Editor';
 import {
@@ -430,13 +431,20 @@ export function useNodePalette(
     return usePalette(entries, nameFilterRef, compareNodeEntries, defaultCollapse);
 }
 
+type SectionMetadata = {
+        entries: Reactive<IEntry<IEntryDataNode>[]>,
+        title: string,
+        target: string,
+        show: boolean
+    };
+
 export function createNodeListPalette(
     nameFilterRef: Ref<string>,
     sectionNames: ComputedRef<string[]|undefined>,
-): Map<string, Reactive<IEntry<IEntryDataNode>[]>> {
+): Reactive<Map<string, SectionMetadata>> {
     const { viewModel } = useViewModel();
 
-    const paletteList = new Map<string, Reactive<IEntry<IEntryDataNode>[]>>();
+    const paletteList = reactive(new Map<string, SectionMetadata>());
 
     const entries = computed(() => getNodeListEntries(viewModel.value));
     const defaultCollapse = Boolean((viewModel.value as CustomViewModel).collapseSidebar);
@@ -444,18 +452,53 @@ export function createNodeListPalette(
     watch(sectionNames, () => {
         entries.value.forEach((value, key) => {
             if (!paletteList.has(key)) {
-                paletteList.set(key, usePalette(
+                const entry = usePalette(
                     computed(() => entries.value.get(key) ?? []),
-                    nameFilterRef,
+                    undefined,
                     compareNodeEntries,
                     defaultCollapse,
-                ));
+                );
+
+                paletteList.set(key, {
+                    title: key,
+                    target: key,
+                    show: true,
+                    entries: entry,
+                },
+                );
             }
         });
-        const keysToRemove = paletteList.keys().filter((k) => !entries.value.has(k));
+        const keysToRemove = Array.from(paletteList.keys()).filter((k) => !entries.value.has(k));
         keysToRemove.forEach((key) => {
             paletteList.delete(key);
         });
     });
+
+    const searchUpdate = (searchValue: string, threshold = -50) => {
+        if (searchValue.length > 1) {
+            paletteList.forEach((res) => {
+                res.show = false;
+            });
+
+            const searchResults = fuzzysort.go(searchValue, Array.from(paletteList.values()), { threshold, key: 'target' });
+            searchResults.forEach((res) => {
+                const highlited = fuzzysort.highlight(res, '<span>', '</span>');
+                if (highlited !== null) {
+                    res.obj.title = highlited;
+                    res.obj.show = true;
+                }
+            });
+        } else {
+            paletteList.forEach((res) => {
+                res.show = true;
+                res.title = res.target;
+            });
+        }
+    };
+
+    watch(nameFilterRef, (searchValue) => {
+        searchUpdate(searchValue);
+    });
+
     return paletteList;
 }
