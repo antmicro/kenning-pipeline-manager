@@ -40,6 +40,11 @@ export default class BaklavaInterfaceTypes {
                             }
                         }
                     });
+                    const buses = el.querySelectorAll('.__port-bus:not(.greyedout_arrow)');
+                    buses.forEach((bus) => {
+                        // eslint-disable-next-line no-param-reassign
+                        if (bus !== null) bus.style.borderColor = color;
+                    });
                 }
             }
 
