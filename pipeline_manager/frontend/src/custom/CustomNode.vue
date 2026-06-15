@@ -254,10 +254,16 @@ const displayedInputs = computed(() => Object.values(props.node.inputs).filter((
 const displayedOutputs = computed(() =>
     Object.values(props.node.outputs).filter((ni) => !ni.hidden),
 );
-const isBigBus = (intf) => (intf.port && intf.busSize && intf.busType === 'twoSided');
+const isBigBus = (intf) => (intf.port && intf.bus?.type === 'twoSided');
+const bigBuses = computed(() =>
+    [...Object.values(displayedInputs.value)
+        .filter((intf) => isBigBus(intf)),
+    ...Object.values(displayedOutputs.value)
+        .filter((intf) => isBigBus(intf))]);
 const sidebarProperties = computed(() =>
-    Object.values(displayedInputs.value)
-        .filter((intf) => !intf.port || isBigBus(intf)),
+    [...Object.values(displayedInputs.value)
+        .filter((intf) => !intf.port),
+    ...bigBuses.value],
 );
 const displayedProperties = computed(() => {
     if (editorManager.baklavaView.settings.showHiddenProperties) {
@@ -465,10 +471,14 @@ const onContextMenuTitleClick = async (action) => {
             inSubgraph: subInterfaces.some((i) => i.id === intf.id),
             inherited: intf?.inherited,
             override: intf?.override,
+            bus: intf?.bus ? {
+                type: intf.bus.type,
+                size: intf.bus.size,
+            } : undefined,
         }));
 
         /* eslint-disable no-underscore-dangle */
-        const properties = sidebarProperties.value;
+        const properties = sidebarProperties.value.filter((prop) => !isBigBus(prop));
         const configuredProperties = properties?.map((prop) => ({
             name: prop?.name,
             type: prop?.type,
