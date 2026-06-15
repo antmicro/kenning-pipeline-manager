@@ -20,8 +20,11 @@ from creating and deleting connections or altering nodes' values if the editor i
     >
         <div
             class="__port-bus"
-            :class="{ '__big-bus': isBigBus(intf) }"
-            v-if="intf.port && intf.busSize"
+            :class="{
+                '__big-bus': isBigBus(intf),
+                greyedout_arrow: highlighted,
+            }"
+            v-if="intf.port && intf.bus?.type"
             no-drag="true"
             :style="{height: intf.bus?.size.toString() + 'px'}"
             @mouseenter="startHoverWrapper"
@@ -65,7 +68,6 @@ from creating and deleting connections or altering nodes' values if the editor i
                 class="__port-bus-stub"
                 v-if="tempBusIntfOffset && intf.bus?.size"
                 :class="{
-                    greyedout_arrow: highlighted,
                     picked: picked,
                     '__square': isExposed,
                     '--input': intf.side === 'left',

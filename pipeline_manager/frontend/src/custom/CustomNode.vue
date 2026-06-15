@@ -96,7 +96,7 @@ from moving or deleting the nodes.
                 positioned="true"
                 :node="node"
                 :intf="input"
-                :highlighted="props.interfaces?.includes(input)"
+                :highlighted="isHighlighted(input)"
                 :picked="isPickedInterface(input)"
                 :style="positionedInterfaceStyle(input)"
             />
@@ -137,7 +137,7 @@ from moving or deleting the nodes.
                             v-long-press-to-right:500
                             :node="node"
                             :intf="output"
-                            :highlighted="props.interfaces?.includes(output)"
+                            :highlighted="isHighlighted(output)"
                             :picked="isPickedInterface(output)"
                             :switchSides="switchSides"
                         />
@@ -157,7 +157,7 @@ from moving or deleting the nodes.
                             v-long-press-to-right:500
                             :node="node"
                             :intf="input"
-                            :highlighted="props.interfaces?.includes(input)"
+                            :highlighted="isHighlighted(input)"
                             :picked="isPickedInterface(input)"
                             :switchSides="switchSides"
                         />
@@ -1238,6 +1238,9 @@ const openContextMenuProperty = async (property) => {
         }
     }
 };
+
+const isHighlighted = (intf) =>
+    (!intf ? false : props.interfaces?.map((p) => p?.id).includes(intf?.id));
 
 </script>
 

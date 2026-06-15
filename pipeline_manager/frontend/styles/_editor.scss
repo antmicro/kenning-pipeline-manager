@@ -375,7 +375,10 @@
 }
 
 .baklava-node-interface .greyedout_arrow {
-    background-color: $gray-500;
+    background-color: $gray-500 !important;
+};
+.__port-bus.greyedout_arrow {
+    border-color: $gray-500 !important;
 };
 
 .baklava-node-interface .picked {
