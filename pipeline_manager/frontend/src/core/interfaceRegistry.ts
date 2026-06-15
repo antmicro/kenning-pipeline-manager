@@ -80,6 +80,24 @@ export class InterfaceRegistry {
                 return sharedInterface.sharedInterface.type;
             },
         });
+        // eslint-disable-next-line no-param-reassign
+        intf.bus = intf.bus || {};
+
+        Object.defineProperty(intf.bus, 'size', {
+            get() {
+                return sharedInterface.sharedInterface.bus?.size;
+            },
+            set(value: number) {
+                sharedInterface.sharedInterface.bus ||= {};
+                sharedInterface.sharedInterface.bus.size = value;
+            },
+        });
+
+        Object.defineProperty(intf.bus, 'type', {
+            get() {
+                return sharedInterface.sharedInterface.bus?.type;
+            },
+        });
     }
 
     /**
