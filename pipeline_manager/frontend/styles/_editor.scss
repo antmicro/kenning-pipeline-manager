@@ -200,95 +200,94 @@
 
     & > .__square {
         border-radius: 10%;
+    }
+    .__port_name_left,
+    .__port_name_right,
+    .__port_name_top,
+    .__port_name_bottom {
+        position: absolute;
+        height: 1em;
+        width: fit-content;
+        top: calc((100% - 1em) * 0.5);
 
-        & > .__port_name_left,
-        & > .__port_name_right,
-        & > .__port_name_top,
-        & > .__port_name_bottom {
-            position: relative;
-            height: 1em;
-            width: fit-content;
-            top: -0.15em;
-
-            & > span {
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                padding: 0 0.3em 0 0.3em;
-                border-radius: 5px;
-                background-color: color.adjust($green, $alpha: -0.5);
-            }
-
-            & > input {
-                color: $white;
-                background-color: color.adjust($gray-500, $alpha: -0.3);
-                position: relative;
-                outline: none;
-                border: none;
-                border-radius: 5px;
-            }
-            & > input:focus {
-                outline: solid 2px $green;
-            }
-            // Incorrect class for input with red outline
-            & > input.__error {
-                outline: solid 2px $red;
-            }
+        & > span {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            padding: 0 0.3em 0 0.3em;
+            border-radius: 5px;
+            background-color: color.adjust($green, $alpha: -0.5);
         }
 
-        & > .__port_name_left {
-            left: 0;
-            translate: -100%;
-            & > span,
-            & > input {
-                margin-left: 0;
-            }
-            & > span { margin-right: 0.15em; }
-            & > input { margin-right: 0.3em; }
-        }
-
-        & > .__port_name_top {
-            top: -1.5em;
-            & > span,
-            & > input {
-                margin-bottom: 0.15em;
-            }
-            & > span { margin-top: 0; }
-            & > input { margin-top: 0; }
-        }
-
-        & > .__port_name_bottom {
-            top: 1.5em;
-            & > span,
-            & > input {
-                margin-top: 0;
-            }
-            & > span { margin-right: 0.15em; }
-            & > input { margin-right: 0.3em; }
-        }
-
-        & > .__port_name_right {
-            left: 100%;
-            & > span,
-            & > input {
-                margin-right: 0;
-            }
-            & > span { margin-left: 0.15em; }
-            & > input { margin-left: 0.3em; }
-        }
-
-        &.__port_input {
-            position: relative;
-            top: -0.15em;
-            height: 1em;
-            width: fit-content;
-
-            background-color: #00000000;
-            border: none;
-            border-radius: 10%;
+        & > input {
             color: $white;
-            caret-color: $white;
+            background-color: color.adjust($gray-500, $alpha: -0.3);
+            position: relative;
+            outline: none;
+            border: none;
+            border-radius: 5px;
         }
+        & > input:focus {
+            outline: solid 2px $green;
+        }
+        // Incorrect class for input with red outline
+        & > input.__error {
+            outline: solid 2px $red;
+        }
+    }
+
+    .__port_name_left {
+        left: 0;
+        translate: -100%;
+        & > span,
+        & > input {
+            margin-left: 0;
+        }
+        & > span { margin-right: 0.15em; }
+        & > input { margin-right: 0.3em; }
+    }
+
+    .__port_name_top {
+        top: -1.5em;
+        & > span,
+        & > input {
+            margin-bottom: 0.15em;
+        }
+        & > span { margin-top: 0; }
+        & > input { margin-top: 0; }
+    }
+
+    .__port_name_bottom {
+        top: 1.5em;
+        & > span,
+        & > input {
+            margin-top: 0;
+        }
+        & > span { margin-right: 0.15em; }
+        & > input { margin-right: 0.3em; }
+    }
+
+    .__port_name_right {
+        left: 100%;
+        & > span,
+        & > input {
+            margin-right: 0;
+        }
+        & > span { margin-left: 0.15em; }
+        & > input { margin-left: 0.3em; }
+    }
+
+    .__port_input {
+        position: relative;
+        top: -0.15em;
+        height: 1em;
+        width: fit-content;
+
+        background-color: #00000000;
+        border: none;
+        border-radius: 10%;
+        color: $white;
+        caret-color: $white;
     }
 
     .__property_name {

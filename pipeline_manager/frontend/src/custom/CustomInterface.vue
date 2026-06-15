@@ -29,6 +29,39 @@ from creating and deleting connections or altering nodes' values if the editor i
             @pointerdown.left="(e) => { onMouseDown(); e.stopPropagation() }"
         >
             <div
+                v-if="isExposed && (hovered || editExternalName)"
+                :class="{
+                    '__port_name_left': intf.side === 'left',
+                    '__port_name_top': intf.side == 'top',
+                    '__port_name_right': intf.side === 'right',
+                    '__port_name_bottom': intf.side == 'bottom'
+                }"
+            >
+                <input
+                    v-if="editExternalName"
+                    v-model="inputExternalName"
+                    ref="externalNameInput"
+                    type="text"
+                    spellcheck="false"
+                    autocomplete="off"
+                    class="__port_input"
+                    :class="{ '__error': externalNameInputIncorrect }"
+                    placeholder="External name"
+                    @focusout="externalNameFocusOutCallback"
+                    @keydown.enter.exact.stop="(e) => { e.target.blur(); }"
+                    @input="externalNameInputCallback"
+                    @pointerdown.left.stop="(e) => e.stopPropagation()"
+                    @keydown.ctrl.stop="(e) => e.stopPropagation()"
+                />
+                <span
+                    v-else
+                    @pointerdown.left.stop="enableExternalNameEdit"
+                    @keydown.stop
+                >
+                    {{ intf.externalName }}
+                </span>
+            </div>
+            <div
                 class="__port-bus-stub"
                 v-if="tempBusIntfOffset && intf.busSize"
                 :class="{
