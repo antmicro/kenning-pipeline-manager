@@ -29,6 +29,7 @@ export default function useSpecGraphPalette(
     nameFilterRef: Ref<string>,
 ): Reactive<IEntry[]> {
     const { viewModel } = useViewModel();
+    const editor = viewModel.value.editor as unknown as PipelineManagerEditor;
 
     const gatherGraphs = (
         graphs: any[],
@@ -51,14 +52,14 @@ export default function useSpecGraphPalette(
             const title = `${titleName} ${titleId}`;
 
             const computedValue = computed(() => ({
-                active: viewModel.value.displayedGraph === graph,
+                active: viewModel.value.displayedGraph === specGraph,
             }));
 
             const baseEntry = {
                 id: specGraph.id,
                 data: {
                     title,
-                    onClick: () => console.log('Switched'),
+                    onClick: () => editor.loadPreloadedGraph(graph),
                 },
                 computed: computedValue,
             };

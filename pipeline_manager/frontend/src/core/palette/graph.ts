@@ -69,7 +69,8 @@ export default function useGraphPalette(
     });
 
     const entries = computed(() => gatherGraphs(
-        Array.from(viewModel.value.editor.graphs),
+        Array.from(viewModel.value.editor.graphs).filter((g:any) => g?.specGraph === undefined
+        || !g.specGraph),
         Boolean((viewModel.value as CustomViewModel).settings.showIds),
     ));
     return usePalette(entries, nameFilterRef, undefined, false);
