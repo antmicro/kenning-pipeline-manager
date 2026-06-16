@@ -123,10 +123,15 @@ Additionally, these optional attributes may be used:
   It is used to create multi-layer graphs, with subgraphs that can be connected to others nodes/graphs.
   Both the interface of the graph node and the interface of the node within the graph have the same `id` and `direction` fields.
   Note that values of `externalName` within the graph have to be unique.
-* `busSize` - changes interface type to bus. This is a special interface type that creates new endpoints for connections upon request.
-  Bus size itself signals how big the bus height should be in pixels.
-* `busStubs` - holds any connection endpoints that will be created. Note that these endpoints can only exist if they are connected to
-  some other interface - they must have a corresponding connection. Setting this property is not necessary to enable bus type interface behaviour.
+* `bus` - holds information about the bus-specific data used for the interface. Note that for the interface to be treated as a bus it needs to have
+  `bus.type` set in it's [specification](specification-format.md#interface). In dataflow you can define:
+    * `bus.size` - size of the bus in pixels.
+    * `bus.stubs` - holds any connection endpoints that will be used for any connections. Each stub MUST have a connection assigned otherwise it will
+      be treated as an error. Each stub has:
+      * `id` - id of the stub used to identify it when creating connections just like a normal interface
+      * `offset` - position of the stub within the parent bus
+      * `side` - (optional) used when parent bus is two-sided.
+
 
 Example of graph interfaces:
 
