@@ -471,14 +471,18 @@ export default function createPipelineManagerGraph(graph) {
             }
             const stub = createStub(intf, offset, stubID, stubSide);
 
-            intf.bus.stubs.push(stub);
-            // for further connection creation logic
             return stub;
         });
         const checkConnectionResult = this.checkConnection(from, to);
         if (!checkConnectionResult.connectionAllowed) {
             return undefined;
         }
+        // if allowed, push back stub
+        [to, from].forEach((intf) => {
+            if (intf.parent) {
+                intf.parent.bus.stubs.push(intf);
+            }
+        });
 
         if (this.events.beforeAddConnection.emit({ from, to }).prevented) {
             return undefined;

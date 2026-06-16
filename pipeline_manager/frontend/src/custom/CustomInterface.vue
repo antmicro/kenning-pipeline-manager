@@ -303,6 +303,8 @@ export default defineComponent({
                         bus.side = 'left';
                     }
                 }
+            } else {
+                tempBusIntfOffset.value = undefined;
             }
         };
         const mousePosStubDragStart = ref(undefined);
