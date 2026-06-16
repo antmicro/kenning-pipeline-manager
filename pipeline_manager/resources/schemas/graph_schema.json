@@ -146,44 +146,43 @@
                                     "description": "Name of the external socket displayed in the node",
                                     "type": ["string", "null"]
                                 },
-                                "busSize": {
-                                    "description": "Determines the size of bus interface",
-                                    "type": "number"
-                                },
-                                "busType": {
-                                    "description": "Determines the type of bus interface",
-                                    "enum": [
-                                        "oneSided",
-                                        "twoSided"
-                                    ]
-                                },
-                                "busStubs": {
-                                    "description": "Endpoints of connections going into the bus",
-                                    "type": "array",
-                                    "items": {
-                                        "type": "object",
-                                        "properties": {
-                                            "id": {
-                                                "description": "Unique id for the stub, needed for connection",
-                                                "type": "string"
-                                            },
-                                            "stubOffset": {
-                                                "description": "Offset of stub within the bus in pixels",
-                                                "type": "number"
-                                            },
-                                            "side": {
-                                                "description": "Side has to be specified in the two-sided bus variant",
-                                                "enum": [
-                                                    "left",
-                                                    "right"
-                                                ]
-                                            }
+                                "bus": {
+                                    "description": "Determines bus attributes",
+                                    "type": "object",
+                                    "properties": {
+                                        "size": {
+                                            "description": "Size of the bus in pixels",
+                                            "type": "number"
                                         },
-                                        "required": [
-                                            "id",
-                                            "stubOffset"
-                                        ],
-                                        "additionalProperties": false
+                                        "stubs": {
+                                            "description": "Endpoints of connections going into the bus",
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "id": {
+                                                        "description": "Unique id for the stub, needed for connection",
+                                                        "type": "string"
+                                                    },
+                                                    "offset": {
+                                                        "description": "Offset of stub within the bus in pixels",
+                                                        "type": "number"
+                                                    },
+                                                    "side": {
+                                                        "description": "Side has to be specified in the two-sided bus variant",
+                                                        "enum": [
+                                                            "left",
+                                                            "right"
+                                                        ]
+                                                    }
+                                                },
+                                                "required": [
+                                                    "id",
+                                                    "offset"
+                                                ],
+                                                "additionalProperties": false
+                                            }
+                                        }
                                     }
                                 }
                             },

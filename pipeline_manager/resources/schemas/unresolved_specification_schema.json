@@ -437,20 +437,26 @@
                     "type": "boolean",
                     "default": false
                 },
-                "busSize": {
-                    "description": "Determines the size of bus interface",
-                    "type": "number"
-                },
-                "busType": {
-                    "description": "Determines the type of bus interface",
-                    "enum": [
-                        "oneSided",
-                        "twoSided"
-                    ]
-                },
-                "busStubs": {
-                    "description": "Endpoints of connections going into the bus",
-                    "type": "array"
+                "bus": {
+                    "description": "Determines bus attributes",
+                    "type": "object",
+                    "properties": {
+                        "size": {
+                            "description": "Determines the size of bus interface",
+                            "type": "number"
+                        },
+                        "type": {
+                            "description": "Determines the type of bus interface",
+                            "enum": [
+                                "oneSided",
+                                "twoSided"
+                            ]
+                        }
+                    },
+                    "required": [
+                        "type"
+                    ],
+                    "additionalProperties": false
                 }
             },
             "required": [
