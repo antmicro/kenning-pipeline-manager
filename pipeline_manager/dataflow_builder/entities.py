@@ -226,6 +226,60 @@ class Property(JsonConvertible):
 
 
 @dataclass
+class InterfaceBusStub(JsonConvertible):
+    """Representation of bus stub information."""
+
+    id: str
+    offset: int
+    side: Optional[str] = None
+
+    @override
+    def to_json(
+        self, as_str: bool = True, minify: bool = False
+    ) -> Union[str, Dict]:
+        output = {
+            "id": self.id,
+            "offset": self.offset,
+        }
+        if self.side is not None:
+            output["side"] = self.side
+        if as_str:
+            indent = None if minify else 4
+            return json.dumps(output, indent=indent)
+        return output
+
+
+@dataclass
+class InterfaceBus(JsonConvertible):
+    """Representation of bus interface information."""
+
+    type: str
+    size: Optional[int]
+    stubs: List[InterfaceBusStub] = field(default_factory=list)
+
+    def __post_init__(self):
+        self.stubs = [
+            InterfaceBusStub(**s) if isinstance(s, dict) else s
+            for s in self.stubs
+        ]
+
+    @override
+    def to_json(
+        self, as_str: bool = True, minify: bool = False
+    ) -> Union[str, Dict]:
+        stubs_json = [
+            s.to_json(as_str=False) if hasattr(s, "to_json") else s
+            for s in self.stubs
+        ]
+        output = {"type": self.type, "size": self.size, "stubs": stubs_json}
+        if as_str:
+            indent = None if minify else 4
+            return json.dumps(output, indent=indent)
+
+        return output
+
+
+@dataclass
 class Interface(JsonConvertible):
     """Representation of a node's interface."""
 
@@ -236,12 +290,15 @@ class Interface(JsonConvertible):
     external_name: Optional[str] = None
     id: str = field(default_factory=get_uuid)
     type: List[str] = field(default_factory=list)
+    bus: Optional[InterfaceBus] = None
 
     def __post_init__(self):
         if isinstance(self.direction, str):
             self.direction = Direction(self.direction)
         if isinstance(self.side, str):
             self.side = Side(self.side)
+        if isinstance(self.bus, dict):
+            self.bus = InterfaceBus(**self.bus)
 
     @override
     def to_json(
@@ -253,8 +310,6 @@ class Interface(JsonConvertible):
             "id": self.id,
         }
 
-        # Notice conversion from snake_case to camelCase.
-        # Optional fields.
         if self.side:
             output["side"] = self.side.name.lower()
 
@@ -263,6 +318,14 @@ class Interface(JsonConvertible):
 
         if self.external_name:
             output["externalName"] = self.external_name
+
+        if self.bus:
+            if hasattr(self.bus, "to_json"):
+                output["bus"] = self.bus.to_json(as_str=False)
+            elif hasattr(self.bus, "__dict__"):
+                output["bus"] = self.bus.__dict__
+            else:
+                output["bus"] = self.bus
 
         return convert_output(output, as_str, minify)
 
@@ -1048,8 +1111,8 @@ class InterfaceConnection(JsonConvertible):
     """
 
     # `from` is a reserved Python keyword.
-    from_interface: Interface
-    to_interface: Interface
+    from_interface: Interface | InterfaceBusStub
+    to_interface: Interface | InterfaceBusStub
     anchors: Optional[List[Vector2]] = None
     id: str = field(default_factory=get_uuid)
 

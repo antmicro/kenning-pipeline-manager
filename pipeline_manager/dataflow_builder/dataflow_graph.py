@@ -27,6 +27,7 @@ from pipeline_manager.dataflow_builder.data_structures import (
 )
 from pipeline_manager.dataflow_builder.entities import (
     Interface,
+    InterfaceBusStub,
     InterfaceConnection,
     JsonConvertible,
     Node,
@@ -355,6 +356,52 @@ class DataflowGraph(JsonConvertible):
 
         return self._nodes[node_id]
 
+    def _create_bus_interface_stub(
+        self,
+        interface: Interface,
+        stubOffset: int,
+        stubSide: Optional[str] = None,
+        stubID: Optional[str] = None,
+    ) -> InterfaceBusStub:
+        """
+        Create a bus stub used as an endpoint when creating connections to bus
+        type interface.
+
+        An interface has to be of type Bus for stub to be successfully created.
+
+        Parameters
+        ----------
+        interface : Interface
+            The bus interface under which stub is created.
+        stubOffset: int
+            Offset of the stub in relation to the parent interface
+        stubSide: Optional[str]
+            Only used if busType of parent is 'twoSided'
+        stubID: Optional[str]
+            Id used for the stub, otherwise get_uuid() will be used
+
+        Returns
+        -------
+        InterfaceBusStub
+            Newly created stub.
+
+        Raises
+        ------
+        OutOfSpecificationInterfaceError
+            If interface passed as the first argument is not of type bus.
+        """
+        if interface.bus is None:
+            raise OutOfSpecificationInterfaceError(
+                "tried adding bus stub to interface that is not a bus"
+            )
+        if interface.bus.stubs is None:
+            interface.bus.stubs = []
+        id = stubID if stubID is not None else get_uuid()
+        interface.bus.stubs.append(
+            InterfaceBusStub(id=id, offset=stubOffset, side=stubSide)
+        )
+        return interface.bus.stubs[-1]
+
     def create_subgraph_node(
         self, name: str, subgraph_id: str, **kwargs
     ) -> Node:
@@ -391,6 +438,7 @@ class DataflowGraph(JsonConvertible):
         from_interface: Union[Interface, str],
         to_interface: Union[Interface, str],
         connection_id: Optional[str] = None,
+        stubOffset: Optional[int] = None,
     ) -> InterfaceConnection:
         """
         Create a connection between two existing interfaces.
@@ -409,6 +457,9 @@ class DataflowGraph(JsonConvertible):
         connection_id : Optional[str]
             Identifier of a connection. If not supplied,
             one will be generated.
+        stubOffset : Optional[int]
+            Offset used to create a stub if one of the interfaces is a bus
+            type interface, ignored otherwise.
 
         Returns
         -------
@@ -477,6 +528,17 @@ class DataflowGraph(JsonConvertible):
 
         if not connection_id:
             connection_id = get_uuid()
+        # handling if one of the interfaces is a stub
+        if from_interface.bus is not None:
+            offset = stubOffset if stubOffset else 0
+            from_interface = self._create_bus_interface_stub(
+                from_interface, offset, from_interface.side
+            )
+        if to_interface.bus is not None:
+            offset = stubOffset if stubOffset else 0
+            to_interface = self._create_bus_interface_stub(
+                to_interface, offset, to_interface.side
+            )
 
         connection = InterfaceConnection(
             id=connection_id,
@@ -563,6 +625,9 @@ class DataflowGraph(JsonConvertible):
         interfaces: List[Interface] = []
         for _, node in self._nodes.items():
             interfaces.extend(node.interfaces)
+            for i in node.interfaces:
+                if i.bus is not None and i.bus.stubs is not None:
+                    interfaces.extend(i.bus.stubs)
 
         return match_criteria(items=interfaces, **kwargs)
 
