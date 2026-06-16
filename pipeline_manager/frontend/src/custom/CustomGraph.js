@@ -552,6 +552,7 @@ export default function createPipelineManagerGraph(graph) {
         };
 
         const nodesErrors = [];
+        const connectedIds = state.connections.flatMap((c) => [c.to, c.from]);
         state.nodes.forEach((n) => {
             const nodeInformation = this.editor.nodeTypes.get(n.name);
 
@@ -602,6 +603,14 @@ export default function createPipelineManagerGraph(graph) {
                 if (Array.isArray(nodeErrors) && nodeErrors.length) {
                     nodesErrors.push(`Node '${node.type}' with id ${specOrGenerated(state.graphLoadingState?.newToSpecNodeIds, n.id)} is invalid:`, ...nodeErrors.map((e) => `    ${e}`));
                 }
+                // check for bus stubs not connected to anything
+                n.interfaces?.filter((i) => i.bus).forEach((intf) => {
+                    intf.bus?.stubs?.forEach((stub) => {
+                        if (!connectedIds.includes(stub.id)) {
+                            errors.push(`Interface bus stub ${stub.id} in interface ${intf.id} is not connected to anything`);
+                        }
+                    });
+                });
             }
         });
         if (nodesErrors.length) errors.push('Node errors:', ...nodesErrors.map((e) => `    ${e}`));
