@@ -781,11 +781,16 @@ export class CustomNode extends Node {
                             direction: ioState.direction,
                         });
                     }
-                    const busStubs = ioState.busStubs?.map((stub) => ({
+                    const busStubs = ioState.bus?.stubs?.map((stub) => ({
                         id: stub.id,
-                        stubOffset: Math.floor(stub.stubOffset),
-                        ...(ioState.busType === 'twoSided' && { side: stub.side }),
+                        offset: Math.floor(stub.offset),
+                        ...(ioState.bus?.type === 'twoSided' && { side: stub.side }),
                     }));
+                    const bus = {
+                        size: ioState.bus?.size,
+                        type: ioState.bus?.type,
+                        stubs: busStubs,
+                    };
 
                     newInterfaces.push({
                         name: ioName.slice(ioState.direction.length + 1),
@@ -793,9 +798,8 @@ export class CustomNode extends Node {
                         id: ioState.id,
                         direction: ioState.direction,
                         side: ioState.side,
-                        ...(!ioState.busSize && { sidePosition: ioState.sidePosition }),
-                        ...(ioState.busSize && { busSize: ioState.busSize }),
-                        ...(ioState.busSize && busStubs && { busStubs }),
+                        ...(!ioState.bus && { sidePosition: ioState.sidePosition }),
+                        ...(ioState.bus && { bus }),
                     });
                 }
             } else {
@@ -1051,12 +1055,13 @@ export class CustomNode extends Node {
                 intf.externalName = ioState.externalName;
                 if (ioState.hidden !== undefined) this.inputs[ioName].hidden = ioState.hidden;
             }
-            if (ioState.busStubs && intf) {
-                intf.busStubs = ioState.busStubs;
+            if (ioState.bus?.stubs && intf) {
+                intf.bus = intf.bus ?? {};
+                intf.bus.stubs = ioState.bus.stubs;
                 // eslint-disable-next-line no-restricted-syntax, guard-for-in
-                for (const stubId in intf.busStubs) {
-                    const stub = intf.busStubs[stubId];
-                    const side = intf.busType === 'twoSided' ? stub.side : intf.side;
+                for (const stubId in intf.bus.stubs) {
+                    const stub = intf.bus.stubs[stubId];
+                    const side = intf.bus.type === 'twoSided' ? stub.side : intf.side;
                     stub.nodeId = intf.nodeId;
                     stub.direction = intf.direction;
                     stub.maxConnectionsCount = 1;

@@ -137,8 +137,9 @@ class NodeStep extends Step {
             ];
             const connections = graph.value.connections.filter(
                 (c) => interfaces.includes(c.from) || interfaces.includes(c.to) ||
-                interfaces.some((i: any) => i.busStubs?.some((s: any) => [c.to, c.from].includes(s),
-                )));
+                    interfaces.some((i: any) =>
+                        i.bus?.stubs?.some((s: any) => [c.to, c.from].includes(s),
+                        )));
 
             const save = this.nodeTuple[0].save();
             // remove the current version of the node
@@ -154,16 +155,16 @@ class NodeStep extends Step {
                 ...Object.values(n.inputs),
                 ...Object.values(n.outputs),
             // eslint-disable-next-line no-param-reassign
-            ].forEach((intf: any) => delete intf.busStubs);
+            ].filter((intf: any) => intf.bus).forEach((intf: any) => delete intf.bus.stubs);
 
             // restore connections
             connections.forEach((conn) => {
                 // if it was a stub, connect to parent
                 const to = (<any>conn.to).parent ?? conn.to;
                 const from = (<any>conn.from).parent ?? conn.from;
-                const offset = (<any>conn.to).stubOffset ?? (<any>conn.from).stubOffset;
-                const stubId = (<any>conn.to).stubOffset ? conn.to.id : conn.from.id;
-                const stubSide = (<any>conn.to).stubOffset ?
+                const offset = (<any>conn.to).offset ?? (<any>conn.from).offset;
+                const stubId = (<any>conn.to).offset ? conn.to.id : conn.from.id;
+                const stubSide = (<any>conn.to).offset ?
                     (<any>conn.to).side : (<any>conn.from).side;
                 // eslint-disable-next-line max-len
                 const locc = (<any>graph.value).addConnection(from, to, offset, stubId, stubSide);
@@ -226,7 +227,7 @@ class ConnectionStep extends Step {
             if (!fromNode || !toNode) return;
 
             let fromIntf = this.conn.from;
-            if (fromIntf.stubOffset) {
+            if (fromIntf.offset) {
                 fromIntf = this.conn.from.parent;
             }
             const from = [
@@ -237,7 +238,7 @@ class ConnectionStep extends Step {
             ).find((iface) => iface.id === fromIntf.id);
 
             let toIntf = this.conn.to;
-            if (toIntf.stubOffset) {
+            if (toIntf.offset) {
                 toIntf = this.conn.to.parent;
             }
             const to = [
@@ -248,9 +249,9 @@ class ConnectionStep extends Step {
             ).find((iface) => iface.id === toIntf.id);
 
             if (!from || !to) return;
-            const stubPos = this.conn.to.stubOffset ?? this.conn.from.stubOffset;
-            const stubId = this.conn.to.stubOffset ? this.conn.to.id : this.conn.from.id;
-            const stubSide = this.conn.to.stubOffset ? this.conn.to.side : this.conn.from.side;
+            const stubPos = this.conn.to.offset ?? this.conn.from.offset;
+            const stubId = this.conn.to.offset ? this.conn.to.id : this.conn.from.id;
+            const stubSide = this.conn.to.offset ? this.conn.to.side : this.conn.from.side;
 
             const connAdded = (<any>graph).value.addConnection(from, to, stubPos, stubId, stubSide);
             if (connAdded === undefined) {
