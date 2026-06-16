@@ -73,10 +73,10 @@ export default defineComponent({
             () => graph.value.findNodeById(props.connection.to.nodeId)?.position,
         );
         const fromStubChange = computed(
-            () => props.connection.from.stubOffset,
+            () => props.connection.from.offset,
         );
         const toStubChange = computed(
-            () => props.connection.to.stubOffset,
+            () => props.connection.to.offset,
         );
 
         const fromNode = computed(() => graph.value.findNodeById(props.connection.from.nodeId));

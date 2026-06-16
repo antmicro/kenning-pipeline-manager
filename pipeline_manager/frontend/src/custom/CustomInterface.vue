@@ -23,7 +23,7 @@ from creating and deleting connections or altering nodes' values if the editor i
             :class="{ '__big-bus': isBigBus(intf) }"
             v-if="intf.port && intf.busSize"
             no-drag="true"
-            :style="{height: intf.busSize.toString() + 'px'}"
+            :style="{height: intf.bus?.size.toString() + 'px'}"
             @mouseenter="startHoverWrapper"
             @mouseleave="endHoverWrapper"
             @pointerdown.left="(e) => { onMouseDown(); e.stopPropagation() }"
@@ -63,7 +63,7 @@ from creating and deleting connections or altering nodes' values if the editor i
             </div>
             <div
                 class="__port-bus-stub"
-                v-if="tempBusIntfOffset && intf.busSize"
+                v-if="tempBusIntfOffset && intf.bus?.size"
                 :class="{
                     greyedout_arrow: highlighted,
                     picked: picked,
@@ -85,7 +85,7 @@ from creating and deleting connections or altering nodes' values if the editor i
             </div>
             <div
                 class="__port-bus-stub"
-                v-for="stub in intf.busStubs"
+                v-for="stub in intf.bus?.stubs"
                 :key="stub.id"
                 :id="stub.id"
                 :class="newClasses(stub)"
@@ -93,10 +93,10 @@ from creating and deleting connections or altering nodes' values if the editor i
                 <div
                     class="__port"
                     no-drag="true"
-                    @pointerdown.left.stop="(e) => onStubMouseDown(e, stub.id, stub.stubOffset )"
+                    @pointerdown.left.stop="(e) => onStubMouseDown(e, stub.id, stub.offset )"
                     :style="{
                         position: 'absolute',
-                        top: stub.stubOffset + 'px',
+                        top: stub.offset + 'px',
                     }"
                 >
                 </div>
@@ -109,7 +109,7 @@ from creating and deleting connections or altering nodes' values if the editor i
         </div>
         <div
             class="__port"
-            v-if="intf.port && !intf.busSize"
+            v-if="intf.port && !intf.bus?.size"
             @mouseenter="startHoverWrapper"
             @mouseleave="endHoverWrapper"
             @pointerdown.left="onMouseDown"
@@ -181,7 +181,7 @@ from creating and deleting connections or altering nodes' values if the editor i
                 @click="setValue"
                 @input="setValue"
             />
-            <span v-else-if="!intf.busSize">
+            <span v-else-if="!intf.bus?.size">
                 {{ intf.name }}
             </span>
             <div
@@ -272,7 +272,7 @@ export default defineComponent({
                 prevent();
             }
         });
-        const isBigBus = (intf) => intf.busType === 'twoSided';
+        const isBigBus = (intf) => intf.bus?.type === 'twoSided';
 
         if (props.intf.group) {
             props.toggleGroup(props.intf);
@@ -289,7 +289,7 @@ export default defineComponent({
         }
         const tempBusIntfOffset = ref(undefined);
         const onBusMove = (ev) => {
-            if (temporaryConnection.value && props.intf.busSize) {
+            if (temporaryConnection.value && props.intf.bus?.type) {
                 temporaryConnection.value.updated = ev.offsetY;
                 tempBusIntfOffset.value = ev.offsetY;
 
@@ -308,12 +308,12 @@ export default defineComponent({
         const movedStubOffset = ref(undefined);
         const onStubMove = (ev) => {
             if (!viewModel.value.editor.readonly) {
-                const stub = props.intf.busStubs.find((s) => s.id === movedStubId.value);
+                const stub = props.intf.bus?.stubs.find((s) => s.id === movedStubId.value);
                 const curY = ev.clientY;
                 // no recalculations on each pan since this is used in callaback
                 const dv = (curY - mousePosStubDragStart.value) / graph.value.scaling;
-                stub.stubOffset = movedStubOffset.value + dv;
-                stub.stubOffset = Math.min(Math.max(stub.stubOffset, 0), props.intf.busSize ?? 0);
+                stub.offset = movedStubOffset.value + dv;
+                stub.offset = Math.min(Math.max(stub.offset, 0), props.intf.bus?.size ?? 0);
             }
         };
         const onStubMouseUp = () => {

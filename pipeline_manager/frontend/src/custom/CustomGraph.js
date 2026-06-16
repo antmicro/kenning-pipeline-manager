@@ -181,8 +181,8 @@ export default function createPipelineManagerGraph(graph) {
         return connection.anchors[connection.anchors.length - 1];
     };
 
-    const createStub = (intf, stubOffset = undefined, stubID = undefined, stubSide = undefined) => {
-        if (intf.busType !== 'twoSided') {
+    const createStub = (intf, offset = undefined, stubID = undefined, stubSide = undefined) => {
+        if (intf.bus?.type !== 'twoSided') {
             stubSide = undefined;
         }
         const stub = {};
@@ -194,7 +194,7 @@ export default function createPipelineManagerGraph(graph) {
         stub.maxConnectionsCount = 1;
         stub.type = intf.type;
         stub.sidePosition = 0;
-        stub.stubOffset = stubOffset ?? (intf.busSize / 2);
+        stub.offset = offset ?? ((intf.bus?.size ?? 0) / 2);
         stub.parent = intf;
         return stub;
     };
@@ -290,7 +290,7 @@ export default function createPipelineManagerGraph(graph) {
         const interfaces = [...Object.values(oldNode.inputs), ...Object.values(oldNode.outputs)];
         const connections = this.connections.filter(
             (c) => interfaces.includes(c.from) || interfaces.includes(c.to) ||
-                interfaces.some((i) => i.busStubs?.some((s) => [c.to, c.from].includes(s))),
+                interfaces.some((i) => i.bus?.stubs?.some((s) => [c.to, c.from].includes(s))),
         );
 
         connections.forEach((conn) => {
@@ -322,14 +322,14 @@ export default function createPipelineManagerGraph(graph) {
                             return false;
                         };
                         checkAndReadd(intf, arr[name]);
-                        if (intf.busSize && intf.busStubs) {
-                            arr[name].busStubs = arr[name].busStubs ?? [];
-                            intf.busStubs.forEach((stub) => {
+                        if (intf.bus?.size && intf.bus?.stubs) {
+                            arr[name].bus.stubs = arr[name].bus.stubs ?? [];
+                            intf.bus.stubs.forEach((stub) => {
                                 const scopy =
-                                    createStub(arr[name], stub.stubOffset, stub.id, stub.side);
-                                arr[name].busStubs.push(scopy);
-                                if (!checkAndReadd(stub, arr[name].busStubs.at(-1))) {
-                                    arr[name].busStubs.pop();
+                                    createStub(arr[name], stub.offset, stub.id, stub.side);
+                                arr[name].bus.stubs.push(scopy);
+                                if (!checkAndReadd(stub, arr[name].bus.stubs.at(-1))) {
+                                    arr[name].bus.stubs.pop();
                                 }
                             });
                         }
@@ -442,10 +442,10 @@ export default function createPipelineManagerGraph(graph) {
         }
         // Handling bus endpoints
         Object.values([connection.to, connection.from]).forEach((intf) => {
-            if (intf.stubOffset) {
+            if (intf.parent) {
                 const p = intf.parent;
                 if (deleteOrphanStubs) {
-                    p.busStubs.splice(p.busStubs.indexOf(intf), 1);
+                    p.bus.stubs.splice(p.bus.stubs.indexOf(intf), 1);
                 } else {
                     intf.isOrphaned = true;
                 }
@@ -458,20 +458,20 @@ export default function createPipelineManagerGraph(graph) {
     };
 
     // eslint-disable-next-line no-unused-vars
-    graph.addConnection = function addConnection(from, to, stubOffset, stubID, stubSide) {
+    graph.addConnection = function addConnection(from, to, offset, stubID, stubSide) {
         if (!to) return undefined;
         if (!from) return undefined;
         // the target interface is a bus, we have to create a connection point
         [to, from] = [to, from].map((intf) => {
-            if (!intf.busSize) {
+            if (!intf.bus?.type) {
                 return intf;
             }
-            if (intf.busStubs === undefined) {
-                intf.busStubs = [];
+            if (intf.bus.stubs === undefined) {
+                intf.bus.stubs = [];
             }
-            const stub = createStub(intf, stubOffset, stubID, stubSide);
+            const stub = createStub(intf, offset, stubID, stubSide);
 
-            intf.busStubs.push(stub);
+            intf.bus.stubs.push(stub);
             // for further connection creation logic
             return stub;
         });
@@ -503,10 +503,10 @@ export default function createPipelineManagerGraph(graph) {
     graph.findNodeInterface = function findNodeInterface(id) {
         let result;
         const findStub = (intf, id_) => {
-            if (!intf.busSize) {
+            if (!intf.bus?.size) {
                 return undefined;
             }
-            return intf.busStubs?.find((stub) => stub.id === id_);
+            return intf.bus.stubs?.find((stub) => stub.id === id_);
         };
         const findId = (arr) => Object.keys(arr)?.forEach((k) => {
             const nodeInput = arr[k];
@@ -753,7 +753,8 @@ export default function createPipelineManagerGraph(graph) {
             this.connections
                 .filter((c) =>
                     interfaces.includes(c.from) || interfaces.includes(c.to) ||
-                        interfaces.some((i) => i.busStubs?.some((s) => [c.to, c.from].includes(s))),
+                        interfaces.some((i) =>
+                            i.bus?.stubs?.some((s) => [c.to, c.from].includes(s))),
                 )
                 .forEach((c) => this.removeConnection(c));
             this._nodes.splice(this.nodes.indexOf(node), 1);
