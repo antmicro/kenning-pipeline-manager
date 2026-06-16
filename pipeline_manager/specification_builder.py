@@ -801,8 +801,8 @@ class SpecificationBuilder(object):
         maxcount: Optional[int] = None,
         override: Optional[bool] = None,
         array: Optional[List[int]] = None,
+        busType: Optional[str] = None,
         busSize: Optional[int] = None,
-        busStubs: Optional[List[Dict]] = None,
     ):
         """
         Adds interface to the node type.
@@ -829,11 +829,10 @@ class SpecificationBuilder(object):
         array : Optional[List[int]]
             Creates an array of interfaces with given name.
             Accepts two integers - minimal and maximal value
+        busType : Optional[str]
+            If interface is a bus, specify the bus type (twoSided or oneSided)
         busSize : Optional[int]
-            If interface is a bus type, bus size has to specified in pixels.
-        busStubs : Optional[List[Dict]]
-            If interface is a bus type, it may have bus stubs to which
-            connections are connected.
+            If interface is a bus type, bus size specified in pixels.
 
         Raises
         ------
@@ -856,28 +855,23 @@ class SpecificationBuilder(object):
 
         assert direction in ["input", "output", "inout"]
         assert side in [None, "left", "right", "top", "bottom"]
+        assert busType in [None, "twoSided", "oneSided"]
+        assert busSize is None or busSize >= 0
 
         interface = {"name": interfacename, "direction": direction}
 
-        if busSize and busStubs is not None:
-            for stub in busStubs:
-                self.add_node_type_interface_bus_stub(
-                    name, interfacename, stub.stubOffset, stub.id
-                )
+        if busType is not None:
+            interface["bus"] = {}
+            interface["bus"]["type"] = busType
 
-        if busStubs is not None and busSize is None:
-            raise SpecificationBuilderException(
-                f"Bus stubs declared without declaring bus size"
-                f"for interface {interfacename}"
-            )
+        if busSize is not None:
+            interface["bus"]["size"] = busSize
 
         set_if_not_none(interface, "type", interfacetype)
         set_if_not_none(interface, "side", side)
         set_if_not_none(interface, "maxConnectionsCount", maxcount)
         set_if_not_none(interface, "override", override)
         set_if_not_none(interface, "array", array)
-        set_if_not_none(interface, "busSize", busSize)
-        set_if_not_none(interface, "busStubs", busStubs)
 
         if dynamic:
             assert isinstance(dynamic, bool) or isinstance(dynamic, List), (
@@ -889,71 +883,6 @@ class SpecificationBuilder(object):
             interface["dynamic"] = dynamic
 
         self._nodes[name]["interfaces"].append(interface)
-
-    def add_node_type_interface_bus_stub(
-        self,
-        name: str,
-        interfacename: str,
-        stubOffset: int,
-        stubID: int,
-    ):
-        """
-        Adds bus stubs to an interface. The interface has to have the bus type
-        already (must have Bus Size set).
-
-        Parameters
-        ----------
-        name: str
-            Name of the node type
-        interfacename: str
-            Name of the interface
-        stubOffset : int
-            Offset of the stub within the bus interface
-        stubID : int
-            ID of the stub being added
-
-        Raises
-        ------
-        SpecificationBuilderException
-            Raised when an error occurs during validation of the added stub.
-        """
-        intf = None
-        if stubOffset < 0:
-            raise SpecificationBuilderException(
-                f"Negative stub offset is not allowed"
-                f"in interface: {interfacename}"
-            )
-
-        for interface in self._nodes[name]["interfaces"]:
-            if interface["name"] == interfacename:
-                intf = interface
-                break
-        if intf is None:
-            raise SpecificationBuilderException(
-                f"No interface named {interfacename} found in {name}"
-                f"when trying to add interface bus stub"
-            )
-        if intf["busSize"] is None:
-            raise SpecificationBuilderException(
-                f"Bus stubs declared without declaring bus size"
-                f"for interface {interfacename}"
-            )
-
-        if intf["busStubs"] is None:
-            intf["busStubs"] = []
-        for stub in intf["busStubs"]:
-            if stub.id == stubID:
-                raise SpecificationBuilderException(
-                    f"Stub has a duplicate ID as another one"
-                    f"within {interfacename}"
-                )
-            for interface in self._nodes[name]["interfaces"]:
-                if interface["id"] == stubID:
-                    raise SpecificationBuilderException(
-                        f"Stub has conflicting id with {interface[name]}"
-                        f"of id: {stubID} within {interfacename}"
-                    )
-        intf["busStubs"].append({"id": stubID, "stubOffset": stubOffset})
 
     def remove_node_type_interface_bus_stub(
         self,
@@ -989,21 +918,21 @@ class SpecificationBuilder(object):
                 f"No interface named {interfacename} found in {name}"
                 f"when trying to add interface bus stub"
             )
-        if intf["busSize"] is None:
+        if intf["bus"] is None:
             raise SpecificationBuilderException(
-                f"Bus stubs declared without declaring bus size"
+                f"Bus stubs declared without declaring bus type"
                 f"for interface {interfacename}"
             )
 
-        if intf["busStubs"] is None:
+        if intf["bus"]["stubs"] is None:
             raise SpecificationBuilderException(
                 f"No bus stubs in interface so nothing to remove"
                 f"for interface {interfacename}"
             )
 
         found = None
-        for i in range(len(intf["busStubs"])):
-            if intf["busStubs"][i].id == stubID:
+        for i in range(len(intf["bus"]["stubs"])):
+            if intf["bus"]["stubs"][i].id == stubID:
                 found = i
                 break
         if found is None:
@@ -1011,7 +940,7 @@ class SpecificationBuilder(object):
                 f"No bus stubs of id {stubID} could not be found"
                 f"for interface {interfacename}"
             )
-        del intf["busStubs"][found]
+        del intf["bus"]["stubs"][found]
 
     def remove_node_type_interface(
         self,
@@ -1365,6 +1294,13 @@ class SpecificationBuilder(object):
                     iface = [typ for typ in interface["type"]]
                 else:
                     iface = interface["type"]
+            busSize = None
+            busType = None
+            bus = get_optional(interface, "bus")
+            if bus is not None:
+                busType = get_optional(bus, "type")
+                busSize = get_optional(bus, "size")
+
             self.add_node_type_interface(
                 name=nodename,
                 interfacename=interface["name"],
@@ -1375,8 +1311,8 @@ class SpecificationBuilder(object):
                 maxcount=get_optional(interface, "maxConnectionsCount"),
                 override=get_optional(interface, "override"),
                 array=get_optional(interface, "array"),
-                busSize=get_optional(interface, "busSize"),
-                busStubs=get_optional(interface, "busStubs"),
+                busType=busType,
+                busSize=busSize,
             )
         for interface_group in node.get("interfaceGroups", []):
             if "name" not in interface_group:
