@@ -758,6 +758,91 @@ def test_prevent_node_name_change(sample_specification_path):
         node.name = "Non-existent Node Name"
 
 
+def test_create_bus_interface(sample_specification_path):
+    """
+    Test if adding bus-type interface works.
+    """
+    with tempfile.TemporaryDirectory() as temporary_directory:
+        specification_path = Path(temporary_directory) / "spec.json"
+        dataflow_path = Path(temporary_directory) / "dataflow.json"
+        node_name = "Driver"
+
+        spec_builder = SpecificationBuilder(DEFAULT_SPECIFICATION_VERSION)
+        spec_builder.add_node_type(node_name, category="Unit")
+        spec_builder.add_node_type_interface(
+            node_name,
+            "i2c-bus",
+            busType="twoSided",
+            busSize=100,
+            direction=Direction.INPUT.value,
+        )
+        spec_builder.create_and_validate_spec(dump_spec=specification_path)
+
+        graph_builder = GraphBuilder(
+            specification_path, DEFAULT_SPECIFICATION_VERSION
+        )
+        graph = graph_builder.create_graph()
+        g_id = graph.id
+        old_node = graph.create_node(node_name)
+        graph_builder.save(dataflow_path)
+
+        another_builder = GraphBuilder(
+            specification_path, DEFAULT_SPECIFICATION_VERSION
+        )
+        another_builder.load_graphs(dataflow_path)
+        new_graph = another_builder.get_graph_by_id(g_id)
+        new_node = new_graph.get_by_id(AttributeType.NODE, old_node.id)
+        interface = new_node.interfaces[0]
+        assert (
+            interface.bus is not None
+            and interface.bus.size == 100
+            and interface.bus.type == "twoSided"
+        )
+        another_builder.validate()
+
+
+def test_connect_to_bus_interface(sample_specification_path):
+    """
+    Test if adding bus-type interface works.
+    """
+    with tempfile.TemporaryDirectory() as temporary_directory:
+        specification_path = Path(temporary_directory) / "spec.json"
+        dataflow_path = Path(temporary_directory) / "dataflow.json"
+        node_name1 = "Driver"
+        node_name2 = "Pedestrian"
+
+        spec_builder = SpecificationBuilder(DEFAULT_SPECIFICATION_VERSION)
+        spec_builder.add_node_type(node_name1, category="Unit")
+        spec_builder.add_node_type_interface(
+            node_name1,
+            "i2c-bus",
+            busType="twoSided",
+            busSize=100,
+            direction=Direction.OUTPUT.value,
+        )
+
+        spec_builder.add_node_type(node_name2, category="Unit")
+        spec_builder.add_node_type_interface(
+            node_name2, "i2c-signal", direction=Direction.INPUT.value
+        )
+        spec_builder.create_and_validate_spec(dump_spec=specification_path)
+
+        graph_builder = GraphBuilder(
+            specification_path, DEFAULT_SPECIFICATION_VERSION
+        )
+        graph = graph_builder.create_graph()
+        n1 = graph.create_node(node_name1)
+        n2 = graph.create_node(node_name2)
+        graph.create_connection(n1.interfaces[0], n2.interfaces[0])
+        graph_builder.save(dataflow_path)
+
+        another_builder = GraphBuilder(
+            specification_path, DEFAULT_SPECIFICATION_VERSION
+        )
+        another_builder.load_graphs(dataflow_path)
+        another_builder.validate()
+
+
 @pytest.fixture
 def graph_with_all_attributes(sample_specification_path) -> DataflowGraph:
     """
