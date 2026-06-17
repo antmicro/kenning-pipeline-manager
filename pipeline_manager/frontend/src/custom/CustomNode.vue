@@ -96,6 +96,16 @@ from moving or deleting the nodes.
                 @pointerdown.left.stop
                 @click="onContextMenuTitleClick"
             />
+        <img :src="customShape"
+            v-if="customShape !== undefined"
+            draggable="false"
+            ref="svgRef"
+            @pointerdown.left.exact="onMouseDown"
+            @pointerdown.left="startDragWrapper($event)"
+            @pointerdown.right="openContextMenuTitle"
+            v-long-press:500="openContextMenuTitle"
+            :style="shapeStyle"
+        />
         <!-- Positioned inputs -->
         <template v-for="input in positionedInterfaces">
             <CustomInterface
@@ -128,16 +138,6 @@ from moving or deleting the nodes.
                 @click="onContextMenuTitleClick"
             />
 
-        <img :src="customShape"
-            v-if="customShape !== undefined"
-            draggable="false"
-            ref="svgRef"
-            @pointerdown.left.exact="onMouseDown"
-            @pointerdown.left="startDragWrapper($event)"
-            @pointerdown.right="openContextMenuTitle"
-            v-long-press:500="openContextMenuTitle"
-            :style="shapeStyle"
-            >
         <div
             class="__content"
             @pointerdown.right="openContextMenuTitle"
@@ -849,8 +849,20 @@ const onMouseDown = async () => {
     openDoubleClick();
 };
 
+const positionedInterfaces = computed(() => {
+    if (!nodeRef.value) {
+        return [];
+    }
+
+    return Object.values([...displayedInputs.value, ...displayedOutputs.value])
+        .filter((intf) => interfacePositions.value.has(intf.name))
+        .filter((intf) => !intf.type?.some((t) => props.ignoredInterfacesType?.includes(t)));
+},
+);
+
 const filterIntfs = (intfs, side) =>
     intfs.filter((intf) => intf.side === side && intf.port)
+        .filter((intf) => !interfacePositions.value.has(intf.name))
         .filter((intf) => !intf.type?.some((t) => props.ignoredInterfacesType?.includes(t)))
         .filter((intf) => !isBigBus(intf))
         .sort((intf1, intf2) => intf1.sidePosition - intf2.sidePosition);
@@ -971,6 +983,18 @@ const positionedInterfaceStyle = (inf) => {
         return {};
     }
 
+    let offsetX = 0;
+    let offsetY = 0;
+
+    const infRef = positionedInterfaceElementSet.value.get(infName);
+
+    if (infRef !== undefined) {
+        if (infRef.el !== null) {
+            offsetX = infRef.el.offsetWidth;
+            offsetY = infRef.el.offsetHeight;
+        }
+    }
+
     const positions = posMap.get(infName);
 
     const infX = positions?.x ?? 0;
@@ -981,9 +1005,9 @@ const positionedInterfaceStyle = (inf) => {
 
     return {
         position: 'absolute',
-        transform: `translate(-50%,-50%)`,
-        left: `${x}%`,
-        top: `${y}%`,
+        // transform: `translate(-50%,-50%)`,
+        left: `calc(${x}% - ${offsetX}px/2)`,
+        top: `calc(${y}% - ${offsetY}px/2)`,
     };
 };
 

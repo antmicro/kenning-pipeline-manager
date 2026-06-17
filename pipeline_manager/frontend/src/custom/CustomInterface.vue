@@ -409,8 +409,8 @@ export default defineComponent({
         });
 
         const newClasses = (intf) => ({
-            '--input': intf.side === 'left' && !isBigBus(intf),
-            '--output': intf.side === 'right' && !isBigBus(intf),
+            '--input': intf.side === 'left' && !isBigBus(intf) && !props.positioned,
+            '--output': intf.side === 'right' && !isBigBus(intf) && !props.positioned,
             '--connected': intf.connectionCount > 0,
             'baklava-node-interface-positioned': props.positioned,
             __readonly: viewModel.value.editor.readonly,
