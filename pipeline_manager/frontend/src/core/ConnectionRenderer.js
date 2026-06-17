@@ -598,17 +598,22 @@ export default class ConnectionRenderer {
         const nc = new NormalizedConnection(x1, y1, x2, y2, connection);
 
         if (connection.anchors !== undefined && connection.anchors.length) {
+            if (connection.anchors.some((a) => a.legacy)) {
+                return this.alternativeOrthogonalAnchorsPath(connection.anchors, nc);
+            }
             return this.orthogonalAnchorsPath(connection.anchors, nc);
         }
 
         const minMargin = 30;
-        const middlePoint = (nc.x1 + nc.x2) / 2;
+        const middlePointX = (nc.x1 + nc.x2) / 2;
+        const middlePointY = (nc.y1 + nc.y2) / 2;
+        const intfPad = 20;
 
         if (connection.to) {
             const shift = this.getShift(nc.from, nc.to, graph);
 
             if (nc.from.side === 'right' && nc.to.side === 'left') {
-                const mid = Math.max(nc.x1, middlePoint) + shift + minMargin;
+                const mid = Math.max(nc.x1, middlePointX) + shift + minMargin;
 
                 const firstTurn = mid < nc.x2 - shift - minMargin ? nc.x1 + shift + minMargin : mid;
                 const lastTurn = nc.x2 - shift - minMargin;
@@ -618,75 +623,28 @@ export default class ConnectionRenderer {
                     mid >= nc.x2 - shift - minMargin &&
                     (firstTurn > nc.x2 - minMargin || lastTurn < nc.x1 - minMargin)
                 ) {
-                    return `M ${nc.x1} ${nc.y1}
-                    H ${firstTurn}
-                    V ${(nc.y1 + nc.y2) / 2}
-                    H ${lastTurn}
-                    V ${nc.y2}
-                    H ${nc.x2}`;
+                    return [{ x: nc.x1, y: nc.y1 },
+                        { x: nc.x1 + intfPad, y: nc.y1 },
+                        { x: firstTurn, y: nc.y1 },
+                        { x: firstTurn, y: (nc.y1 + nc.y2) / 2 },
+                        { x: lastTurn, y: (nc.y1 + nc.y2) / 2 },
+                        { x: lastTurn, y: nc.y2 },
+                        { x: nc.x2 - intfPad, y: nc.y2 },
+                        { x: nc.x2, y: nc.y2 },
+                    ];
                 }
 
                 // Z connection
-                return `M ${nc.x1} ${nc.y1} H ${mid} V ${nc.y2} H ${nc.x2}`;
-            }
-            if (nc.from.side === 'right' && nc.to.side === 'bottom') {
-                const midPointY = (nc.y1 + nc.y2) / 2;
-
-                const firstTurn = nc.x1 - nc.x2 > 0 ? nc.x1 + minMargin : middlePoint;
-                const lastTurn = nc.y1 - nc.y2 < 0 ? nc.y2 + minMargin : midPointY;
-
-                return `M ${nc.x1} ${nc.y1}
-                    H ${firstTurn}
-                    V ${midPointY}
-                    H ${middlePoint}
-                    V ${lastTurn}
-                    H ${nc.x2}
-                    V ${nc.y2}`;
-            }
-            if (nc.from.side === 'left' && nc.to.side === 'bottom') {
-                const midPointY = (nc.y1 + nc.y2) / 2;
-
-                const firstTurn = nc.x1 - nc.x2 < 0 ? nc.x1 - minMargin : middlePoint;
-                const lastTurn = nc.y1 - nc.y2 < 0 ? nc.y2 + minMargin : midPointY;
-
-                return `M ${nc.x1} ${nc.y1}
-                    H ${firstTurn}
-                    V ${midPointY}
-                    H ${middlePoint}
-                    V ${lastTurn}
-                    H ${nc.x2}
-                    V ${nc.y2}`;
-            }
-            if (nc.from.side === 'right' && nc.to.side === 'top') {
-                const midPointY = (nc.y1 + nc.y2) / 2;
-
-                const firstTurn = nc.x1 - nc.x2 > 0 ? nc.x1 + minMargin : middlePoint;
-                const lastTurn = nc.y1 - nc.y2 > 0 ? nc.y2 - minMargin : midPointY;
-
-                return `M ${nc.x1} ${nc.y1}
-                    H ${firstTurn}
-                    V ${midPointY}
-                    H ${middlePoint}
-                    V ${lastTurn}
-                    H ${nc.x2}
-                    V ${nc.y2}`;
-            }
-            if (nc.from.side === 'left' && nc.to.side === 'top') {
-                const midPointY = (nc.y1 + nc.y2) / 2;
-
-                const firstTurn = nc.x1 - nc.x2 < 0 ? nc.x1 - minMargin : middlePoint;
-                const lastTurn = nc.y1 - nc.y2 > 0 ? nc.y2 - minMargin : midPointY;
-
-                return `M ${nc.x1} ${nc.y1}
-                    H ${firstTurn}
-                    V ${midPointY}
-                    H ${middlePoint}
-                    V ${lastTurn}
-                    H ${nc.x2}
-                    V ${nc.y2}`;
+                return [{ x: nc.x1, y: nc.y1 },
+                    { x: nc.x1 + intfPad, y: nc.y1 },
+                    { x: mid, y: nc.y1 },
+                    { x: mid, y: nc.y2 },
+                    { x: nc.x2 - intfPad, y: nc.y2 },
+                    { x: nc.x2, y: nc.y2 },
+                ];
             }
             if (nc.from.side === 'left' && nc.to.side === 'right') {
-                const mid = Math.max(nc.x2, middlePoint) + shift + minMargin;
+                const mid = Math.max(nc.x2, middlePointX) + shift + minMargin;
 
                 const firstTurn = mid < nc.x1 - shift - minMargin ? nc.x2 + shift + minMargin : mid;
                 const lastTurn = nc.x1 - shift - minMargin;
@@ -696,43 +654,196 @@ export default class ConnectionRenderer {
                     mid >= nc.x1 - shift - minMargin &&
                     (firstTurn > nc.x1 - minMargin || lastTurn < nc.x2 - minMargin)
                 ) {
-                    return `M ${nc.x2} ${nc.y2}
-                    H ${firstTurn}
-                    V ${(nc.y1 + nc.y2) / 2}
-                    H ${lastTurn}
-                    V ${nc.y1}
-                    H ${nc.x1}`;
+                    return [{ x: nc.x2, y: nc.y2 },
+                        { x: nc.x2 + intfPad, y: nc.y2 },
+                        { x: firstTurn, y: nc.y2 },
+                        { x: firstTurn, y: (nc.y1 + nc.y2) / 2 },
+                        { x: lastTurn, y: (nc.y1 + nc.y2) / 2 },
+                        { x: lastTurn, y: nc.y1 },
+                        { x: nc.x1 - intfPad, y: nc.y1 },
+                        { x: nc.x1, y: nc.y1 },
+                    ];
                 }
 
                 // Z connection
-                return `M ${nc.x2} ${nc.y2} H ${mid} V ${nc.y1} H ${nc.x1}`;
+                return [{ x: nc.x2, y: nc.y2 },
+                    { x: nc.x2 + intfPad, y: nc.y2 },
+                    { x: mid, y: nc.y2 },
+                    { x: mid, y: nc.y1 },
+                    { x: nc.x1 - intfPad, y: nc.y1 },
+                    { x: nc.x1, y: nc.y1 },
+                ];
+            }
+            if (nc.from.side === 'bottom' && nc.to.side === 'right') {
+                const mid = middlePointY + minMargin;
+
+                if (nc.x2 > nc.x1) {
+                    return [{ x: nc.x1, y: nc.y1 },
+                        { x: nc.x1, y: nc.y1 + intfPad },
+                        { x: nc.x1, y: mid },
+                        { x: nc.x2 + intfPad, y: mid },
+                        { x: nc.x2 + intfPad, y: nc.y2 },
+                        { x: nc.x2, y: nc.y2 },
+                    ];
+                }
+
+                // Z connection
+                return [{ x: nc.x1, y: nc.y1 },
+                    { x: nc.x1, y: nc.y1 + intfPad },
+                    { x: nc.x1, y: nc.y2 },
+                    { x: nc.x2 + intfPad, y: nc.y2 },
+                    { x: nc.x2, y: nc.y2 },
+                ];
+            }
+            if (nc.from.side === 'right' && nc.to.side === 'bottom') {
+                const mid = middlePointY + minMargin;
+
+                if (nc.x2 > nc.x1) {
+                    return [
+                        { x: nc.x1, y: nc.y1 },
+                        { x: nc.x1 + intfPad, y: nc.y1 },
+                        { x: nc.x1 + intfPad, y: mid },
+                        { x: nc.x2, y: mid },
+                        { x: nc.x2, y: nc.y2 + intfPad },
+                        { x: nc.x2, y: nc.y2 },
+                    ];
+                }
+
+                // Z connection
+                return [{ x: nc.x1, y: nc.y1 },
+                    { x: nc.x1 + intfPad, y: nc.y1 },
+                    { x: nc.x1 + intfPad, y: nc.y2 + intfPad },
+                    { x: nc.x2, y: nc.y2 + intfPad },
+                    { x: nc.x2, y: nc.y2 },
+                ];
+            }
+            if (nc.from.side === 'left' && nc.to.side === 'bottom') {
+                const mid = middlePointY + minMargin;
+
+                if (nc.x2 > nc.x1) {
+                    return [
+                        { x: nc.x1, y: nc.y1 },
+                        { x: nc.x1 - intfPad, y: nc.y1 },
+                        { x: nc.x1 - intfPad, y: mid },
+                        { x: nc.x2, y: mid },
+                        { x: nc.x2, y: nc.y2 + intfPad },
+                        { x: nc.x2, y: nc.y2 },
+                    ];
+                }
+
+                // Z connection
+                return [{ x: nc.x1, y: nc.y1 },
+                    { x: nc.x1 - intfPad, y: nc.y1 },
+                    { x: nc.x1 - intfPad, y: nc.y2 + intfPad },
+                    { x: nc.x2, y: nc.y2 + intfPad },
+                    { x: nc.x2, y: nc.y2 },
+                ];
+            }
+            if (nc.from.side === 'bottom' && nc.to.side === 'left') {
+                const mid = middlePointY + minMargin;
+
+                if (nc.x2 > nc.x1) {
+                    return [{ x: nc.x1, y: nc.y1 },
+                        { x: nc.x1, y: nc.y1 + intfPad },
+                        { x: nc.x1, y: mid },
+                        { x: nc.x2 - intfPad, y: mid },
+                        { x: nc.x2 - intfPad, y: nc.y2 },
+                        { x: nc.x2, y: nc.y2 },
+                    ];
+                }
+
+                // Z connection
+                return [{ x: nc.x1, y: nc.y1 },
+                    { x: nc.x1, y: nc.y1 + intfPad },
+                    { x: nc.x1, y: nc.y2 },
+                    { x: nc.x2 - intfPad, y: nc.y2 },
+                    { x: nc.x2, y: nc.y2 },
+                ];
+            }
+            if (nc.from.side === 'top' && nc.to.side === 'right') {
+                // Z connection
+                return [{ x: nc.x1, y: nc.y1 },
+                    { x: nc.x1, y: nc.y1 - intfPad },
+                    { x: nc.x1, y: nc.y2 },
+                    { x: nc.x2 + intfPad, y: nc.y2 },
+                    { x: nc.x2, y: nc.y2 },
+                ];
+            }
+            if (nc.from.side === 'right' && nc.to.side === 'top') {
+                // Z connection
+                return [{ x: nc.x1, y: nc.y1 },
+                    { x: nc.x1 + intfPad, y: nc.y1 },
+                    { x: nc.x1 + intfPad, y: nc.y2 - intfPad },
+                    { x: nc.x2, y: nc.y2 - intfPad },
+                    { x: nc.x2, y: nc.y2 },
+                ];
+            }
+            if (nc.from.side === 'left' && nc.to.side === 'top') {
+                // Z connection
+                return [{ x: nc.x1, y: nc.y1 },
+                    { x: nc.x1 - intfPad, y: nc.y1 },
+                    { x: nc.x1 - intfPad, y: nc.y2 - intfPad },
+                    { x: nc.x2, y: nc.y2 - intfPad },
+                    { x: nc.x2, y: nc.y2 },
+                ];
+            }
+            if (nc.from.side === 'top' && nc.to.side === 'left') {
+                // Z connection
+                return [{ x: nc.x1, y: nc.y1 },
+                    { x: nc.x1, y: nc.y1 - intfPad },
+                    { x: nc.x1, y: nc.y2 },
+                    { x: nc.x2 - intfPad, y: nc.y2 },
+                    { x: nc.x2, y: nc.y2 },
+                ];
             }
             if (nc.from.side === 'right' && nc.to.side === 'right') {
-                return `M ${nc.x1} ${nc.y1} H ${
-                    Math.max(nc.x1, nc.x2, middlePoint) + shift + minMargin
-                } V ${nc.y2} H ${nc.x2}`;
+                const mid = Math.max(nc.x1, nc.x2, middlePointX) + shift + minMargin;
+                return [{ x: nc.x1, y: nc.y1 },
+                    { x: nc.x1 + intfPad, y: nc.y1 },
+                    { x: mid, y: nc.y1 },
+                    { x: mid, y: nc.y2 },
+                    { x: nc.x2 + intfPad, y: nc.y2 },
+                    { x: nc.x2, y: nc.y2 },
+                ];
             }
             if (nc.from.side === 'left' && nc.to.side === 'left') {
-                return `M ${nc.x1} ${nc.y1} H ${
-                    Math.min(nc.x1, nc.x2, middlePoint) - shift - minMargin
-                } V ${nc.y2} H ${nc.x2}`;
+                const mid = Math.min(nc.x1, nc.x2, middlePointX) - shift - minMargin;
+                return [{ x: nc.x1, y: nc.y1 },
+                    { x: nc.x1 - intfPad, y: nc.y1 },
+                    { x: mid, y: nc.y1 },
+                    { x: mid, y: nc.y2 },
+                    { x: nc.x2 - intfPad, y: nc.y2 },
+                    { x: nc.x2, y: nc.y2 },
+                ];
             }
             if (nc.from.side === 'top' && nc.to.side === 'top') {
-                const midPointY = (nc.y1 + nc.y2) / 2;
+                const mid = Math.min(nc.y1, nc.y2, middlePointY) - minMargin;
 
-                return `M ${nc.x1} ${nc.y1} V ${
-                    Math.min(nc.y1, nc.y2, midPointY) - minMargin
-                } H ${nc.x2} V ${nc.y2}`;
+                return [{ x: nc.x1, y: nc.y1 },
+                    { x: nc.x1, y: nc.y1 - intfPad },
+                    { x: nc.x1, y: mid },
+                    { x: nc.x2, y: mid },
+                    { x: nc.x2, y: nc.y2 - intfPad },
+                    { x: nc.x2, y: nc.y2 },
+                ];
             }
             if (nc.from.side === 'bottom' && nc.to.side === 'bottom') {
-                const midPointY = (nc.y1 + nc.y2) / 2;
+                const mid = Math.max(nc.y1, nc.y2, middlePointY) + minMargin;
 
-                return `M ${nc.x1} ${nc.y1} V ${
-                    Math.max(nc.y1, nc.y2, midPointY) + minMargin
-                } H ${nc.x2} V ${nc.y2}`;
+                return [{ x: nc.x1, y: nc.y1 },
+                    { x: nc.x1, y: nc.y1 + intfPad },
+                    { x: nc.x1, y: mid },
+                    { x: nc.x2, y: mid },
+                    { x: nc.x2, y: nc.y2 + intfPad },
+                    { x: nc.x2, y: nc.y2 },
+                ];
             }
         }
-        return `M ${nc.x1} ${nc.y1} H ${middlePoint} V ${nc.y2} H ${nc.x2}`;
+        return [{ x: nc.x1, y: nc.y1 },
+            { x: middlePointX, y: nc.y1 },
+            { x: middlePointX, y: nc.y2 },
+            { x: nc.x2, y: nc.y2 },
+        ];
     }
 
     alternativeOrthogonalRender(x1, y1, x2, y2, connection) {
