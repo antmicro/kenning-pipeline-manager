@@ -185,6 +185,8 @@ export default function createPipelineManagerGraph(graph) {
         if (intf.bus?.type !== 'twoSided') {
             stubSide = undefined;
         }
+        const maxConnReached = (intf.maxConnectionsCount &&
+            intf.maxConnectionsCount < intf.connectionCount + 1);
         const stub = {};
         stub.nodeId = intf.nodeId;
         stub.id = stubID ?? uuidv4();
@@ -192,6 +194,7 @@ export default function createPipelineManagerGraph(graph) {
         stub.isInput = intf.isInput;
         stub.side = stubSide ?? intf.side;
         stub.maxConnectionsCount = 1;
+        stub.connectionCount = maxConnReached ? 1 : 0;
         stub.type = intf.type;
         stub.sidePosition = 0;
         stub.offset = offset ?? ((intf.bus?.size ?? 0) / 2);
@@ -480,6 +483,7 @@ export default function createPipelineManagerGraph(graph) {
         // if allowed, push back stub
         [to, from].forEach((intf) => {
             if (intf.parent) {
+                intf.parent.connectionCount += 1;
                 intf.parent.bus.stubs.push(intf);
             }
         });
