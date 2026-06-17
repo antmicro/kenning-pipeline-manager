@@ -47,9 +47,24 @@ from pipeline_manager.tests.conftest import check_validation
             0,
         ),
         (
+            "dataflow_specification_node_with_bus",
+            "dataflow_node_with_bus_connection",
+            0,
+        ),
+        (
             "dataflow_specification_node_and_graph_node_maxConnectionsCount_equal_three",
             "dataflow_three_layer_graph_interfaces_connected_graph_node",
             0,
+        ),
+        (
+            "dataflow_specification_node_with_bus_notype",
+            "dataflow_node_with_bus_connection",
+            1,
+        ),
+        (
+            "dataflow_specification_node_with_bus",
+            "dataflow_node_with_direct_bus_connection",
+            2,
         ),
         (
             "dataflow_specification_node_no_properties",
@@ -160,6 +175,107 @@ def specification_without_explicit_direction(
         }
     )
     return dataflow_specification_node_no_properties
+
+
+@pytest.fixture
+def dataflow_specification_node_with_bus(
+    dataflow_specification_node_no_properties
+):
+    dataflow_specification_node_no_properties["nodes"].append(
+        {
+            "name": "BusMaster",
+            "category": "Filesystem",
+            "interfaces": [
+                {
+                    "name": "example-bus",
+                    "direction": "inout",
+                    "type": ["Image", "BinaryImage"],
+                    "bus": {
+                        "size": 100,
+                        "type": "twoSided",
+                    },
+                }
+            ],
+        }
+    )
+    return dataflow_specification_node_no_properties
+
+
+@pytest.fixture
+def dataflow_specification_node_with_bus_notype(
+    dataflow_specification_node_no_properties
+):
+    dataflow_specification_node_no_properties["nodes"].append(
+        {
+            "name": "BusMaster",
+            "category": "Filesystem",
+            "interfaces": [
+                {
+                    "name": "example-bus",
+                    "direction": "inout",
+                    "bus": {
+                        "size": 100,
+                    },
+                }
+            ],
+        }
+    )
+    return dataflow_specification_node_no_properties
+
+
+@pytest.fixture
+def dataflow_node_with_bus_connection(dataflow_node_base):
+    to_id = dataflow_node_base["graphs"][0]["nodes"][0]["interfaces"][0]["id"]
+    from_id = "4c3b8687-1d48-4721-8b2c-15ceed4043b7"
+    dataflow_node_base["graphs"][0]["nodes"].append(
+        {
+            "name": "BusMaster",
+            "id": "3039e744-9941-47c5-8902-f260e6c29a35",
+            "position": {"x": 1100, "y": 200},
+            "interfaces": [
+                {
+                    "direction": "inout",
+                    "id": "40adf4d9-bf08-40ee-82f3-c95b4588dc32",
+                    "name": "example-bus",
+                    "side": "left",
+                    "sidePosition": 0,
+                    "bus": {
+                        "size": 100,
+                        "stubs": [
+                            {
+                                "id": from_id,
+                                "offset": 50,
+                            }
+                        ],
+                    },
+                }
+            ],
+            "properties": [],
+            "twoColumn": True,
+        }
+    )
+    dataflow_node_base["graphs"][0]["connections"] = []
+    dataflow_node_base["graphs"][0]["connections"].append(
+        {
+            "id": "6130d684-15f8-4816-9830-ffeaf31a2dd2",
+            "from": from_id,
+            "to": to_id,
+        }
+    )
+    return dataflow_node_base
+
+
+@pytest.fixture
+def dataflow_node_with_direct_bus_connection(
+    dataflow_node_with_bus_connection
+):
+    bus_id = dataflow_node_with_bus_connection["graphs"][0]["nodes"][1][
+        "interfaces"
+    ][0]["id"]
+    dataflow_node_with_bus_connection["graphs"][0]["connections"][0][
+        "from"
+    ] = bus_id
+    return dataflow_node_with_bus_connection
 
 
 @pytest.fixture
