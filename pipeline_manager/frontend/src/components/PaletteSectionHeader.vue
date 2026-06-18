@@ -28,10 +28,9 @@ const titleHTML = computed(() => DOMPurify.sanitize(
     padding: 10px;
     text-align: center;
     border-bottom: 1px solid $gray-500;
-}
-
-.palette-section-header > span
-{
-    color:$green;
+    > :deep(span)
+    {
+        color: $green;
+    }
 }
 </style>

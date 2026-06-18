@@ -15,7 +15,7 @@ A collection of palette entries.
             <div v-if="entries.get(sectionName).show">
             <PaletteSectionHeader
                 v-if="sectionName && !oneNodeList"
-                :sectionName="sectionName"
+                :sectionName="entries.get(sectionName).title"
             />
             <PaletteSectionList
                 :entries="entries.get(sectionName).entries"
