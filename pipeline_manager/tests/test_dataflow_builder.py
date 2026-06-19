@@ -17,6 +17,7 @@ from pipeline_manager.dataflow_builder.data_structures import (
     ConnectionExistsError,
     ExtraNodeAttributeError,
     GraphRenamingError,
+    GroupTooSmallError,
     InterfaceCountError,
     MultipleInterfacesSelectedError,
     OutOfSpecificationNodeError,
@@ -384,6 +385,65 @@ def test_getting_connection_from_graph_by_id(single_connection_graph):
     assert (
         retrieved_connection == original_connection
     ), "Retrieved a different connection than expected with id."
+
+
+def test_adding_node_group(single_connection_graph):
+    """Test if adding a node group succeeds."""
+    _, graph, expected = single_connection_graph
+    all_nodes = graph.get(AttributeType.NODE)
+    all_node_ids = [n.id for n in all_nodes]
+    graph.create_group(name="This is a new group", nodes=all_nodes)
+    graph.create_group(name="This is another group", nodes=all_node_ids)
+
+    assert (
+        len(graph.get(AttributeType.GROUP)) == 2
+    ), "Retrieved less groups than the number created."
+
+    assert all(
+        [len(g.nodes) == 2 for g in graph.get(AttributeType.GROUP)]
+    ), "Retrieved nodes in groups than specified."
+
+
+def test_adding_single_node_group(single_connection_graph):
+    """Test if adding a single node group fails."""
+    _, graph, expected = single_connection_graph
+    node = graph.get(AttributeType.NODE)[0]
+    with pytest.raises(GroupTooSmallError):
+        graph.create_group(name="This is a new group", nodes=[node])
+
+
+def test_node_group_visible_from_dataflow(single_connection_graph, builder):
+    """Test if loading graph from dataflow loads groups also."""
+    _, graph, expected = single_connection_graph
+    id = "01ff7d26-3a40-41b0-97ca-fd33423a7beb"
+    name = "Example Group"
+    expected["groups"] = [
+        {
+            "name": name,
+            "nodes": [
+                expected["nodes"][0]["id"],
+                expected["nodes"][1]["id"],
+            ],
+            "id": id,
+        }
+    ]
+    graph = DataflowGraph(builder._spec_builder, builder, expected)
+    assert len(graph.get(AttributeType.GROUP)) == 1
+    assert graph.get_by_id(AttributeType.GROUP, id).name == name
+
+
+def test_node_group_created_visible_in_dataflow(
+    single_connection_graph, builder
+):
+    """Test if group created in python will be included in dataflow."""
+    _, graph, expected = single_connection_graph
+    nodes = graph.get(AttributeType.NODE)
+    name = "This is a new group"
+    graph.create_group(name=name, nodes=nodes)
+    dic = graph.to_json(as_str=False)
+
+    assert len(dic["groups"]) == 1
+    assert dic["groups"][0]["name"] == name
 
 
 # LoadVideo starts at (0, 0).
