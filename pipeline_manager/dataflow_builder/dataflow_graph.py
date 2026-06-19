@@ -15,11 +15,14 @@ from pipeline_manager.dataflow_builder.data_structures import (
     Direction,
     ExtraNodeAttributeError,
     GraphRenamingError,
+    GroupExistsError,
+    GroupTooSmallError,
     InvalidDirectionError,
     InvalidMethodUsedError,
     InvalidPanningError,
     MismatchingInterfaceTypesError,
     MissingInterfaceError,
+    MissingNodeError,
     NodeLacksInterfacesError,
     OutOfSpecificationInterfaceError,
     OutOfSpecificationNodeError,
@@ -31,6 +34,7 @@ from pipeline_manager.dataflow_builder.entities import (
     InterfaceConnection,
     JsonConvertible,
     Node,
+    NodeGroup,
     Property,
     Vector2,
     camel_case_to_snake_case,
@@ -43,6 +47,7 @@ from pipeline_manager.dataflow_builder.entities import (
 from pipeline_manager.dataflow_builder.utils import (
     ensure_connection_is_absent,
     get_interface_if_present,
+    get_node_if_present,
     get_public_attributes,
 )
 from pipeline_manager.specification_builder import SpecificationBuilder
@@ -57,6 +62,7 @@ class AttributeType(Enum):
     NODE = "_nodes"
     CONNECTION = "_connections"
     INTERFACE = "interfaces"
+    GROUP = "_groups"
 
 
 class DataflowGraph(JsonConvertible):
@@ -91,6 +97,8 @@ class DataflowGraph(JsonConvertible):
         ------
         MissingInterfaceError
             Raised if either source or target interface is missing.
+        MissingNodeError
+            Raised if node included in group is missing
         """
         from pipeline_manager.dataflow_builder.dataflow_builder import (
             GraphBuilder,
@@ -103,6 +111,7 @@ class DataflowGraph(JsonConvertible):
         self._nodes: Dict[str, Node] = {}
         self._connections: Dict[str, InterfaceConnection] = {}
         self._spec_builder = builder_with_spec
+        self._groups: Dict[str, NodeGroup] = {}
 
         self.name: Optional[str] = None
         self.additional_data: Optional[Dict] = None
@@ -163,6 +172,25 @@ class DataflowGraph(JsonConvertible):
                 id=connection["id"],
                 from_interface=source,
                 to_interface=target,
+            )
+        for group in dataflow.setdefault("groups", []):
+            nodes = []
+            if "nodes" not in group:
+                continue
+
+            for node_id in group["nodes"]:
+                node = self.get_by_id(AttributeType.NODE, node_id)
+                if node is None:
+                    raise MissingNodeError(
+                        f"Cannot create group {group['id']} because "
+                        f"node of id {node_id} is not present in the graph."
+                    )
+                nodes.append(node)
+            self._groups[group["id"]] = NodeGroup(
+                id=group["id"],
+                color=group["color"] if "color" in group else None,
+                nodes=nodes,
+                name=group["name"],
             )
 
     def _get_interface_specification(
@@ -555,6 +583,70 @@ class DataflowGraph(JsonConvertible):
         self._connections[connection_id] = connection
         return self._connections[connection_id]
 
+    def create_group(
+        self,
+        name: str,
+        nodes: List[Union[Node, str]],
+        id: str = None,
+        color: str = None,
+    ) -> NodeGroup:
+        """
+        Create a group of existing nodes.
+
+        The function checks if nodes exist to verify validity of added group.
+
+        Parameters
+        ----------
+        name : str
+            Source interface, where data will flow from.
+        nodes : Union[Node, str]
+            List of nodes that should be contained in the group created.
+        id : Optional[str]
+            Identifier of a group. If not supplied, one will be generated.
+        color : Optional[str]
+            Color of the group in the hex format. If not supplied will be
+            randomly assigned when rendering the graph.
+
+        Returns
+        -------
+        NodeGroup
+            Created node group.
+
+        Raises
+        ------
+        MissingNodeError
+            if error included in group is not present in the graph.
+        GroupExistsError
+            if ids of two groups collide.
+        GroupTooSmallError
+            if ids of two groups collide.
+        """
+        nodes_in_group = []
+        for node in nodes:
+            n = get_node_if_present(node, self._nodes, "groupMember")
+            if n is None:
+                raise MissingNodeError(
+                    "Node is not present in the dataflow graph."
+                    f"{node}. Aborted group creation"
+                )
+            nodes_in_group.append(n)
+        if not id:
+            id = get_uuid()
+
+        if len(nodes_in_group) < 2:
+            raise GroupTooSmallError(
+                f"Group of id {id} would be created with 2 or less nodes"
+            )
+        if id in self._groups:
+            raise GroupExistsError(f"Group of id {id} already in graph.")
+
+        self._groups[id] = NodeGroup(
+            id=id,
+            color=color,
+            nodes=nodes_in_group,
+            name=name,
+        )
+
     @override
     def to_json(
         self, as_str: bool = True, minify: bool = False
@@ -581,8 +673,15 @@ class DataflowGraph(JsonConvertible):
             conn.to_json(as_str=False, minify=minify)
             for _, conn in self._connections.items()
         ]
+        groups = [
+            group.to_json(as_str=False, minify=minify)
+            for _, group in self._groups.items()
+        ]
         # Merge all attributes to a single dictionary.
         attributes |= {"nodes": nodes, "connections": connections}
+        if len(groups) > 0:
+            attributes |= {"groups": groups}
+
         return convert_output(attributes, as_str, minify=minify)
 
     def get(
