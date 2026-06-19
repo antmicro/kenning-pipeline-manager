@@ -12,6 +12,7 @@ external-app-communication
 example-server
 specification-builder
 graph-builder
+sphinx-extension
 changelogs
 demo
 ```
