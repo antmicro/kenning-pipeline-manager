@@ -14,7 +14,7 @@ from typing import Optional
 from urllib.parse import urlencode
 
 from docutils import nodes
-from docutils.parsers.rst.directives import path
+from docutils.parsers.rst.directives import flag, path, unchanged
 from sphinx.addnodes import download_reference
 from sphinx.application import Sphinx
 from sphinx.errors import ExtensionError
@@ -62,7 +62,7 @@ class KPMNode(nodes.container):
         self.spec_node = spec_node
         self.graph_node = graph_node
         self.rel_pfx = "../" * depth
-        self.preview = preview
+        self.preview = preview if preview is not None else False
         self.height = height
         self.alt = alt if alt is not None else DEFAULT_ALT_TEXT
 
@@ -85,11 +85,12 @@ class KPMNode(nodes.container):
         if node.graph_node:
             params["graph"] = node._node_to_target(node.graph_node)
         if node.preview:
-            params["preview"] = str(node.preview).lower()
+            params["preview"] = str(bool(node.preview)).lower()
 
         trans.body.append(
             f"""
 <iframe src='{node.rel_pfx}{KPM_PATH}?{urlencode(params)}'
+    alt='{node.alt}'
     allow='fullscreen'
         style='
             width:100%;
@@ -109,12 +110,12 @@ class KPMDirective(SphinxDirective):
     Sphinx directive for pipeline_manager.
     """
 
-    option_spec = {
+    option_spec: dict[str, type] = {
         "spec": path,
         "graph": path,
-        "preview": bool,
-        "height": str,
-        "alt": str,
+        "preview": flag,
+        "height": unchanged,
+        "alt": unchanged,
     }
 
     def run(self) -> list[nodes.Node]:
@@ -122,6 +123,10 @@ class KPMDirective(SphinxDirective):
         Creates nodes for the directive.
         """
         if self.env.app.builder.name in ["html", "linkcheck"]:
+            if (
+                "preview" in self.options
+            ):  # by default None is returned if flag is correct
+                self.options["preview"] = True
             return [KPMNode(depth=self.env.docname.count("/"), **self.options)]
 
         from tempfile import NamedTemporaryFile
