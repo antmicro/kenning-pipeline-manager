@@ -210,6 +210,23 @@ class MismatchingInterfaceTypesError(ConnectionError):
     """
 
 
+# Group exceptions
+
+
+class GroupError(DataflowBuilderError):
+    """
+    General exception associated with a problem with a group.
+    """
+
+
+class GroupExistsError(GroupError):
+    """Raised if a group already exists."""
+
+
+class GroupTooSmallError(GroupError):
+    """Raised if group would be created with less than 2 nodes."""
+
+
 # Graph builder exceptions
 
 
