@@ -1140,6 +1140,38 @@ class InterfaceConnection(JsonConvertible):
         return output
 
 
+@dataclass
+class NodeGroup(JsonConvertible):
+    """
+    Representation of a the visual group in the GUI editor.
+    """
+
+    name: str
+    nodes: List[Node] = field(default_factory=list)
+    color: Optional[str] = None
+    id: str = field(default_factory=get_uuid)
+
+    @override
+    def to_json(self, as_str=True, minify=False) -> Union[str, Dict]:
+        output = {
+            # Renamed to the original names.
+            "id": self.id,
+            "name": self.name,
+            "nodes": [n.id for n in self.nodes],
+        }
+        if self.color:
+            output["color"] = self.color
+
+        if as_str:
+            return json.dumps(
+                output,
+                ensure_ascii=False,
+                indent=None if minify else 4,
+                sort_keys=True,
+            )
+        return output
+
+
 # Defining this in utils causes circular dependency.
 def snake_case_to_camel_case(name: str) -> str:
     """
