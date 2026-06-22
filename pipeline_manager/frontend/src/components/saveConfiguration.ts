@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { toPng, toSvg } from 'html-to-image';
+import { toPng } from 'html-to-image';
 import EditorManager from '../core/EditorManager';
 import NotificationHandler from '../core/notifications';
 import { brokenImage } from '../../../resources/broken_image.js';
@@ -45,71 +45,72 @@ export const saveSpecificationConfiguration: SaveConfiguration = {
         const dataflow = editorManager.saveDataflow();
         specification.graphs ??= [];
 
+        if (this.graph) {
         // Match graph IDs with subgraphId in node specification
-        dataflow.graphs.forEach((graph: any) => {
-            dataflow.graphs.forEach((g: any) => {
-                const checkedId = graph.id;
-                const subgraphNode = g.nodes.find((n: any) => n.subgraph === checkedId);
+            dataflow.graphs.forEach((graph: any) => {
+                dataflow.graphs.forEach((g: any) => {
+                    const checkedId = graph.id;
+                    const subgraphNode = g.nodes.find((n: any) => n.subgraph === checkedId);
 
-                const relatedGraphNode = g.nodes.find((n: any) =>
-                    n.relatedGraphs?.some((entry: any) => entry.id === checkedId),
-                );
-                const graphButton = g.nodes.find((n: any) =>
-                    n.properties?.some(
-                        (prop: any) => prop.type === 'button-graph' && prop.default === checkedId,
-                    ),
-                );
+                    const relatedGraphNode = g.nodes.find((n: any) =>
+                        n.relatedGraphs?.some((entry: any) => entry.id === checkedId),
+                    );
+                    const graphButton = g.nodes.find((n: any) =>
+                        n.properties?.some(
+                            (prop: any) => prop.type === 'button-graph' && prop.default === checkedId,
+                        ),
+                    );
 
-                if (subgraphNode || relatedGraphNode || graphButton) {
-                    if (Array.isArray(graph.nodes) && graph.nodes.length) {
-                        specification.graphs = specification.graphs.filter(
-                            (oldGraph: any) => oldGraph.id !== graph.id,
-                        );
-                        specification.graphs.push(graph);
-                    } else {
+                    if (subgraphNode || relatedGraphNode || graphButton) {
+                        if (Array.isArray(graph.nodes) && graph.nodes.length) {
+                            specification.graphs = specification.graphs.filter(
+                                (oldGraph: any) => oldGraph.id !== graph.id,
+                            );
+                            specification.graphs.push(graph);
+                        } else {
                         // Remove empty graphs
-                        if (subgraphNode) {
-                            const nodesIndex = specification.nodes
-                                .map((n: any) => n.name)
-                                .indexOf(subgraphNode.name);
-                            const graphsIndex = g.nodes
-                                .map((n: any) => n.name)
-                                .indexOf(subgraphNode.name);
-                            delete specification.nodes[nodesIndex].subgraphId;
-                            // eslint-disable-next-line no-param-reassign
-                            delete g.nodes[graphsIndex].subgraph;
-                        }
-                        if (relatedGraphNode) {
-                            const nodesIndex = specification.nodes
-                                .map((n: any) => n.name)
-                                .indexOf(relatedGraphNode.name);
-                            const graphsIndex = g.nodes
-                                .map((n: any) => n.name)
-                                .indexOf(relatedGraphNode.name);
-                            if (relatedGraphNode.relatedGraphs.length > 1) {
-                                specification.nodes[nodesIndex].relatedGraphs =
-                                    relatedGraphNode.relatedGraphs.filter(
-                                        (entry: any) => entry.id !== checkedId,
-                                    );
+                            if (subgraphNode) {
+                                const nodesIndex = specification.nodes
+                                    .map((n: any) => n.name)
+                                    .indexOf(subgraphNode.name);
+                                const graphsIndex = g.nodes
+                                    .map((n: any) => n.name)
+                                    .indexOf(subgraphNode.name);
+                                delete specification.nodes[nodesIndex].subgraphId;
                                 // eslint-disable-next-line no-param-reassign
-                                g.nodes[graphsIndex].relatedGraphs =
-                                    relatedGraphNode.relatedGraphs.filter(
-                                        (entry: any) => entry.id !== checkedId,
-                                    );
-                            } else {
-                                delete specification.nodes[nodesIndex].relatedGraphs;
-                                // eslint-disable-next-line no-param-reassign
-                                delete g.nodes[graphsIndex].relatedGraphs;
+                                delete g.nodes[graphsIndex].subgraph;
                             }
-                        }
-                        if (graphButton) {
-                            const nodesIndex = specification.nodes
-                                .map((n: any) => n.name)
-                                .indexOf(graphButton.name);
-                            const graphsIndex = g.nodes
-                                .map((n: any) => n.name)
-                                .indexOf(graphButton.name);
-                            specification.nodes[nodesIndex].properties =
+                            if (relatedGraphNode) {
+                                const nodesIndex = specification.nodes
+                                    .map((n: any) => n.name)
+                                    .indexOf(relatedGraphNode.name);
+                                const graphsIndex = g.nodes
+                                    .map((n: any) => n.name)
+                                    .indexOf(relatedGraphNode.name);
+                                if (relatedGraphNode.relatedGraphs.length > 1) {
+                                    specification.nodes[nodesIndex].relatedGraphs =
+                                    relatedGraphNode.relatedGraphs.filter(
+                                        (entry: any) => entry.id !== checkedId,
+                                    );
+                                    // eslint-disable-next-line no-param-reassign
+                                    g.nodes[graphsIndex].relatedGraphs =
+                                    relatedGraphNode.relatedGraphs.filter(
+                                        (entry: any) => entry.id !== checkedId,
+                                    );
+                                } else {
+                                    delete specification.nodes[nodesIndex].relatedGraphs;
+                                    // eslint-disable-next-line no-param-reassign
+                                    delete g.nodes[graphsIndex].relatedGraphs;
+                                }
+                            }
+                            if (graphButton) {
+                                const nodesIndex = specification.nodes
+                                    .map((n: any) => n.name)
+                                    .indexOf(graphButton.name);
+                                const graphsIndex = g.nodes
+                                    .map((n: any) => n.name)
+                                    .indexOf(graphButton.name);
+                                specification.nodes[nodesIndex].properties =
                                 graphButton.properties.filter(
                                     (prop: any) =>
                                         !(
@@ -117,27 +118,16 @@ export const saveSpecificationConfiguration: SaveConfiguration = {
                                             prop.default === checkedId
                                         ),
                                 );
-                            // eslint-disable-next-line no-param-reassign
-                            g.nodes[graphsIndex].properties = graphButton.properties.filter(
-                                (prop: any) =>
-                                    !(prop.type === 'button-graph' && prop.default === checkedId),
-                            );
+                                // eslint-disable-next-line no-param-reassign
+                                g.nodes[graphsIndex].properties = graphButton.properties.filter(
+                                    (prop: any) =>
+                                        !(prop.type === 'button-graph' && prop.default === checkedId),
+                                );
+                            }
                         }
                     }
-                }
+                });
             });
-        });
-
-        Object.entries(dataflow.metadata).forEach(([key, value]) => {
-            if (specification.metadata === undefined) {
-                specification.metadata = {};
-            }
-            if (value !== undefined) {
-                specification.metadata[key] = value;
-            }
-        });
-
-        if (this.graph) {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             dataflow.graphs.forEach((graph: any) => {
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -158,6 +148,15 @@ export const saveSpecificationConfiguration: SaveConfiguration = {
                 specification.entryGraph = specification.graphs[0]?.id;
             }
         }
+
+        Object.entries(dataflow.metadata).forEach(([key, value]) => {
+            if (specification.metadata === undefined) {
+                specification.metadata = {};
+            }
+            if (value !== undefined) {
+                specification.metadata[key] = value;
+            }
+        });
 
         if (this.minify && specification.nodes) {
             const usedNames = EditorManager.getUsedNames([
