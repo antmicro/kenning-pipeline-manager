@@ -2032,6 +2032,9 @@ export default class EditorManager {
         const specification =
             JSON.parse(JSON.stringify(this.specification.unresolvedSpecification));
 
+        // Save spec graphs
+        const graphs = this.editor.savePreloadedGraphsState();
+        specification.graphs = graphs;
         EditorManager.unmarkNewNodes(specification);
         return specification;
     }
