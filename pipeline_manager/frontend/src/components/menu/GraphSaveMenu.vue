@@ -55,6 +55,7 @@ export default defineComponent({
             graphs,
             visited = new Set(),
         ) => graphs.flatMap((graph) => {
+            if (graph.specGraph) return [];
             if (visited.has(graph.id)) return [];
             visited.add(graph.id);
 
