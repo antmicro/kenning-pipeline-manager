@@ -5,35 +5,40 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-    <div
-        ref="el"
-        class="baklava-select"
-        :class="{ '--open': open }"
-        :title="intf.name" @click="open = !open"
-    >
-        <div class="__selected">
-            <div class="__text">
-                {{ selectedText }}
-            </div>
-            <div class="__icon">
-                <i-arrow />
-            </div>
+    <div>
+        <div class="__label">
+            {{ intf.name }}:
         </div>
-        <transition name="slide-fade">
-        <div v-show="open" class="__dropdown" :class="{ 'readonly': intf.readonly}">
-                <div class="item --header">
-                    {{ intf.name }}
+        <div
+            ref="el"
+            class="baklava-select"
+            :class="{ '--open': open }"
+            :title="intf.name" @click="open = !open"
+        >
+            <div class="__selected">
+                <div class="__text">
+                    {{ selectedText }}
                 </div>
-                <div
-                    v-for="(item, i) in intf.items"
-                    :key="i"
-                    :class="['item', { '--active': item === selectedItem }]"
-                    @click="setSelected(item)"
-                >
-                    {{ typeof item === "string" ? item : item.text }}
+                <div class="__icon">
+                    <i-arrow />
                 </div>
             </div>
-        </transition>
+            <transition name="slide-fade">
+            <div v-show="open" class="__dropdown" :class="{ 'readonly': intf.readonly}">
+                    <div class="item --header">
+                        {{ intf.name }}
+                    </div>
+                    <div
+                        v-for="(item, i) in intf.items"
+                        :key="i"
+                        :class="['item', { '--active': item === selectedItem }]"
+                        @click="setSelected(item)"
+                    >
+                        {{ typeof item === "string" ? item : item.text }}
+                    </div>
+                </div>
+            </transition>
+        </div>
     </div>
 </template>
 

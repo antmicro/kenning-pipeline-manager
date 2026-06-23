@@ -6,6 +6,9 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
     <div>
+        <div class="__label">
+            {{ intf.name }}:
+        </div>
         <textarea
             ref="el"
             v-if="editMode"
