@@ -12,14 +12,10 @@ Popup menu for choosing save options.
 <template>
     <div class="create-menu">
         <div v-for="[option, label] in options" :key="option.id" class="option">
-            <div class="option-label" v-if="getOptionName(option.componentName)">
-                {{ option.name }}
-            </div>
             <component
                 :is="option.component"
                 :intf="option"
                 v-model="saveConfiguration[label]"
-                :class="{ '__name-option': getOptionName(option.componentName)}"
             />
         </div>
     </div>
@@ -34,7 +30,6 @@ import InputInterface from '../../interfaces/InputInterface.js';
 import InputInterfaceComponent from '../../interfaces/InputInterface.vue';
 import ButtonInterface from '../../interfaces/ButtonInterface.js';
 import CheckboxInterface from '../../interfaces/CheckboxInterface.js';
-import { getOptionName } from '../../custom/CustomNode.js';
 
 export default defineComponent({
     props: {
@@ -105,7 +100,7 @@ export default defineComponent({
                 .filter(([option, _]) => option?.value !== undefined)
                 .map(([option, label]) => [option.value, label]));
 
-        return { options, getOptionName };
+        return { options };
     },
 });
 </script>

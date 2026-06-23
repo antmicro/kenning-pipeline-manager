@@ -13,9 +13,6 @@ SPDX-License-Identifier: Apache-2.0
             <div class="__properties" v-if="displayedProperties.length">
                 <div class="__title">Properties</div>
                 <div v-for="input in displayedProperties" :key="input.id" class="__property">
-                    <div class="__property-name">
-                        {{ getOptionName(input.componentName) ? `${input.name}:` : '' }}
-                    </div>
                     <CustomInterface
                         :node="node"
                         :intf="input"
@@ -40,7 +37,6 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { computed } from 'vue';
-import { getOptionName } from '../custom/CustomNode.js';
 import CustomInterface from '../custom/CustomInterface.vue';
 import { configurationState, menuState } from '../core/nodeCreation/ConfigurationState.ts';
 import EditorManager from '../core/EditorManager.js';
@@ -96,7 +92,6 @@ export default {
             node,
             graphNodeName,
             displayedProperties,
-            getOptionName,
             toggleGroup,
             updateDynamicInterfaces,
             addProperties,

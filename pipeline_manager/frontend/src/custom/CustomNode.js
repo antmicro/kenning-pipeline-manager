@@ -14,31 +14,6 @@ import { nextTick } from 'vue';
 import notifyEvents from './notifyEvents.js';
 
 /**
- * The function decides whether a name for the option should be displayed.
- *
- * @param optionType Name of the option component
- * @returns True if the name should be displayed, false otherwise.
- */
-export function getOptionName(optionType) {
-    switch (optionType) {
-        case 'InputInterface':
-        case 'TextAreaInterface':
-        case 'SelectInterface':
-        case 'ListInterface':
-        case 'TextInterface':
-        case 'HexInterface':
-            return true;
-        case 'NumberInterface':
-        case 'IntegerInterface':
-        case 'CheckboxInterface':
-        case 'SliderInterface':
-        case 'NodeInterface':
-        default:
-            return false;
-    }
-}
-
-/**
  * Updates a side and optionally a sidePosition of an interface
  *
  * @param node in which the interface is updated

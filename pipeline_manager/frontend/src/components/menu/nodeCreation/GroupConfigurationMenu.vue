@@ -12,9 +12,6 @@ Popup menu for group creation.
 <template>
     <div class="create-menu">
         <div v-for="option in configurationOptions" :key="option.id">
-            <div class="option-label">
-                {{ getOptionName(option.componentName) ? `${option.name}:` : '' }}
-            </div>
             <component
                 :is="option.component"
                 :intf="option"
@@ -31,7 +28,6 @@ import {
     ButtonInterface,
 } from '@baklavajs/renderer-vue'; // eslint-disable-line object-curly-newline
 
-import { getOptionName } from '../../../custom/CustomNode.js';
 import { menuState, NodeDataConfiguration } from '../../../core/nodeCreation/ConfigurationState.ts';
 import { createGroupFromSelection } from '../../../core/nodeCreation/Configuration.ts';
 
@@ -85,7 +81,6 @@ export default defineComponent({
 
         return {
             configurationOptions,
-            getOptionName,
             newGroup,
         };
     },

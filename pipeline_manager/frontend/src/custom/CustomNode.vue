@@ -124,7 +124,6 @@ from moving or deleting the nodes.
                     :key="input.id"
                     @pointerdown.right.exact="openContextMenuProperty(input, $event)"
                 >
-                    {{ getOptionName(input.componentName) ? `${input.name}:` : '' }}
                     <CustomInterface
                         :node="node"
                         :intf="input"
@@ -195,7 +194,7 @@ import { gridSnapper } from '../core/snappers';
 import icons from '../icons/index';
 import doubleClick from '../core/doubleClick.js';
 import NotificationHandler from '../core/notifications.js';
-import { getOptionName, updateInterfacePosition, removeNode } from './CustomNode.js';
+import { updateInterfacePosition, removeNode } from './CustomNode.js';
 import {
     startTransaction, commitTransaction,
 } from '../core/History.ts';

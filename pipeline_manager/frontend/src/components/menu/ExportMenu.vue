@@ -12,14 +12,10 @@ Popup menu for choosing export options.
 <template>
     <div class="create-menu">
         <div v-for="[option, label] in options" :key="option.id" class="option">
-            <div class="option-label" v-if="getOptionName(option.componentName)">
-                {{ option.name }}
-            </div>
             <component
                 :is="option.component"
                 :intf="option"
                 v-model="exportGraph[label]"
-                :class="{ '__name-option': getOptionName(option.componentName)}"
             />
         </div>
     </div>
@@ -34,7 +30,6 @@ import IntegerInterface from '../../interfaces/IntegerInterface.js';
 import ButtonInterface from '../../interfaces/ButtonInterface.js';
 import InputInterface from '../../interfaces/InputInterface.js';
 import InputInterfaceComponent from '../../interfaces/InputInterface.vue';
-import { getOptionName } from '../../custom/CustomNode.js';
 
 export default defineComponent({
     props: {
@@ -85,7 +80,7 @@ export default defineComponent({
                 .filter(([option, _]) => option.value !== undefined)
                 .map(([option, label]) => [option.value, label]));
 
-        return { options, getOptionName };
+        return { options };
     },
 });
 </script>

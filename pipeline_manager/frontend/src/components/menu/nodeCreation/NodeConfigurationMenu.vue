@@ -12,9 +12,6 @@ Popup menu for configuring node data.
 <template>
     <div class="create-menu">
         <div v-for="option in configurationOptions" :key="option.id">
-            <div class="option-label">
-                {{ getOptionName(option.componentName) ? `${option.name}:` : '' }}
-            </div>
             <component
                 :is="option.component"
                 :intf="option"
@@ -34,7 +31,6 @@ import {
     ButtonInterface,
 } from '@baklavajs/renderer-vue'; // eslint-disable-line object-curly-newline
 
-import { getOptionName } from '../../../custom/CustomNode.js';
 import { createNode, duplicateNode, modifyConfiguration } from '../../../core/nodeCreation/Configuration.ts';
 import { menuState, NodeDataConfiguration, configurationState } from '../../../core/nodeCreation/ConfigurationState.ts';
 
@@ -118,7 +114,6 @@ export default defineComponent({
         return {
             configurationOptions,
             create,
-            getOptionName,
             newNode,
         };
     },

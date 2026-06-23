@@ -11,9 +11,6 @@ SPDX-License-Identifier: Apache-2.0
         </div>
         <div class="panel">
             <div v-for="option in settingOptions" :key="option.id">
-                <div class="option-label">
-                    {{ getOptionName(option.componentName) ? `${option.name}:` : '' }}
-                </div>
                 <component :is="option.component" :intf="option" tabindex="-1"></component>
             </div>
 
@@ -29,7 +26,6 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { computed, ref } from 'vue';
-import { getOptionName } from '../custom/CustomNode.js';
 import getExternalApplicationManager from '../core/communication/ExternalApplicationManager';
 import { LOG_LEVEL } from '../core/notifications';
 
@@ -311,7 +307,7 @@ export default {
             return options;
         });
 
-        return { getOptionName, settingOptions: readonlyOptions, disableLayersOptions };
+        return { settingOptions: readonlyOptions, disableLayersOptions };
     },
 };
 </script>

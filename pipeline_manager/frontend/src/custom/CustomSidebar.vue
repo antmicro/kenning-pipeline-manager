@@ -106,9 +106,6 @@ SPDX-License-Identifier: Apache-2.0
                     :key="input.id"
                     class="__property"
                 >
-                    <div class="__property-name">
-                        {{ getOptionName(input.componentName) ? `${input.name}:` : '' }}
-                    </div>
                     <div class="__property-content">
                         <CustomInterface
                             :node="node"
@@ -184,7 +181,6 @@ import Tooltip from '../components/Tooltip.vue';
 import EditorManager from '../core/EditorManager';
 
 import { validateInterfaceGroupsNames } from '../core/interfaceParser';
-import { getOptionName } from './CustomNode.js';
 import NodeSpecificationEditor from '../components/NodeSpecificationEditor.vue';
 import { checkForUnsavedEditorChangesWithToast } from './node_editor/NodeSpecEditorUtils.js';
 
@@ -480,7 +476,6 @@ export default defineComponent({
             tooltipRef,
             sidebarRef,
             toggleGroup,
-            getOptionName,
             prettyCategory,
             replacementParents,
             replacementChildren,

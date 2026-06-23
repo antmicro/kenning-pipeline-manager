@@ -12,9 +12,6 @@ Popup menu for configuring node properties.
 <template>
     <div class="create-menu">
         <div v-for="option in configurationOptions" :key="option.id">
-            <div class="option-label">
-                {{ getOptionName(option.componentName) ? `${option.name}:` : '' }}
-            </div>
             <component
                 v-if="option.componentName === 'InputInterface'"
                 :is="option.component"
@@ -44,7 +41,6 @@ import {
     CheckboxInterface,
 } from '@baklavajs/renderer-vue'; // eslint-disable-line object-curly-newline
 
-import { getOptionName } from '../../../custom/CustomNode.js';
 import { addProperty } from '../../../core/nodeCreation/Configuration.ts';
 import { menuState } from '../../../core/nodeCreation/ConfigurationState.ts';
 
@@ -224,7 +220,6 @@ export default defineComponent({
         return {
             configurationOptions,
             addPropertyMenu,
-            getOptionName,
             newProperty,
         };
     },
