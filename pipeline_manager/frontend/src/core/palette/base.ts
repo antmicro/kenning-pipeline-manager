@@ -29,7 +29,7 @@ import {
 
 export default function usePalette<T extends IEntryData>(
     vEntries: Ref<IVEntry<T>[]>,
-    searchValueRef: Ref<string>,
+    searchValueRef?: Ref<string>,
     comparator?: (a: IVEntry<T> | IEntry<T>, b: IVEntry | IEntry<T>) => number,
     defaultCollapse?: boolean,
 ): Reactive<IEntry<T>[]> {
@@ -201,7 +201,9 @@ export default function usePalette<T extends IEntryData>(
     const entries = reactive<IEntry<T>[]>([]);
     entryUpdate(vEntries.value, entries);
     watch(vEntries, (vEntriesValue) => entryUpdate(vEntriesValue, entries));
-    watch(searchValueRef, (searchValue) => searchUpdate(searchValue, entries));
+    if (searchValueRef !== undefined) {
+        watch(searchValueRef, (searchValue) => searchUpdate(searchValue, entries));
+    }
 
     return entries;
 }
