@@ -46,6 +46,8 @@ export default function createPipelineManagerGraph(graph) {
     graph.graphNode = undefined;
     graph.groups = [];
 
+    graph._idToType = {};
+
     // A value that indicates whether we should save the graph or not
     graph.toSave = true;
     // A value that indicate whether graph was loaded from specification or not
@@ -456,7 +458,18 @@ export default function createPipelineManagerGraph(graph) {
             this.editNode(curNode);
         });
         this.events.addNode.emit(node);
+        this._idToType[node.id] = node.type;
         return node; // eslint-disable-line consistent-return
+    };
+
+    graph.getTypeOfNode = function getTypeOfNode(nodeId) {
+        if (this._idToType[nodeId] === undefined) {
+            const node = this._nodes.find((n) => n.id === nodeId);
+            if (node) {
+                this._idToType[node.id] = node.type;
+            }
+        }
+        return this._idToType[nodeId];
     };
 
     graph.destroy = function destroy() {
@@ -503,6 +516,7 @@ export default function createPipelineManagerGraph(graph) {
         if (this.selectedNodes) {
             this.selectedNodes.length = 0;
         }
+        this._idToType = {};
         this._nodes = [];
     };
     graph.removeConnection = function removeConnection(connection, deleteOrphanStubs = true) {
@@ -862,6 +876,9 @@ export default function createPipelineManagerGraph(graph) {
 
             if (node.subgraph) {
                 node.subgraph.destroy();
+            }
+            if (this._idToType[node.id]) {
+                delete this._idToType[node.id];
             }
         }
     };
