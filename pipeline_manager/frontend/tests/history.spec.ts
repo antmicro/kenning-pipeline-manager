@@ -340,7 +340,7 @@ test('test history by moving interface to right', async ({ page }) => {
     }).toBe(2);
 
     // Click on another node to enable undo.
-    const node = page.locator(`#${loadVideoNodeId}`);
+    const node = page.locator(`#${loadVideoNodeId}`).locator('.__title');
     await node.click();
 
     await page.keyboard.press('Control+KeyZ');
@@ -380,7 +380,7 @@ test('test history by moving interface to left', async ({ page }) => {
     }).toBe(0);
 
     // Click on another node to enable undo.
-    const node = page.locator(`#${loadVideoNodeId}`);
+    const node = page.locator(`#${loadVideoNodeId}`).locator('.__title');
     await node.click();
 
     await page.keyboard.press('Control+KeyZ');
@@ -523,7 +523,7 @@ test('test history by node specification edit, change interface name', async ({ 
     // Change a interface name
     content.interfaces[0].name = 'frames1';
     await setYAMLEditorContent(page, content);
-    await loadVideo.click();
+    await loadVideo.locator('.__title').click();
 
     // Undo changes
     await page.keyboard.press('Control+KeyZ');
@@ -563,7 +563,7 @@ test('test history by node specification edit, add interface', async ({ page }) 
         }
     );
     await setYAMLEditorContent(page, content);
-    await loadVideo.click();
+    await loadVideo.locator('.__title').click();
     await assertOutputCount(loadVideo, 1);
     await assertInputCount(loadVideo, 1);
 
@@ -597,7 +597,7 @@ test('test history by node specification edit, add properties', async ({ page })
         }
     ];
     await setYAMLEditorContent(page, content);
-    await loadVideo.click();
+    await loadVideo.locator('.__title').click();
     await assertPropertyCount(loadVideo, 2);
 
     // Undo changes
@@ -622,7 +622,7 @@ test('test history by node specification edit, test extend', async ({ page }) =>
     // Remove parents
     content.extends = [];
     await setYAMLEditorContent(page, content);
-    await loadVideo.click();
+    await loadVideo.locator('.__title').click();
     await assertPropertyCount(loadVideo, 0);
 
     // Undo changes
