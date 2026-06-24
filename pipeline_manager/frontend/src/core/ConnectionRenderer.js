@@ -675,87 +675,89 @@ export default class ConnectionRenderer {
                 ];
             }
             if (nc.from.side === 'bottom' && nc.to.side === 'right') {
-                const mid = middlePointY + minMargin;
-
-                if (nc.x2 > nc.x1) {
+                if (nc.x2 - intfPad > nc.x1) {
+                // S connection
                     return [{ x: nc.x1, y: nc.y1 },
                         { x: nc.x1, y: nc.y1 + intfPad },
-                        { x: nc.x1, y: mid },
-                        { x: nc.x2 + intfPad, y: mid },
+                        { x: middlePointX, y: nc.y1 + intfPad },
+                        { x: nc.x2 + intfPad, y: nc.y1 + intfPad },
                         { x: nc.x2 + intfPad, y: nc.y2 },
                         { x: nc.x2, y: nc.y2 },
                     ];
                 }
 
-                // Z connection
+                const midX = nc.y2 > middlePointY ? nc.x1 : middlePointX + minMargin;
+
                 return [{ x: nc.x1, y: nc.y1 },
                     { x: nc.x1, y: nc.y1 + intfPad },
-                    { x: nc.x1, y: nc.y2 },
+                    { x: midX, y: nc.y1 + intfPad },
+                    { x: midX, y: nc.y2 },
                     { x: nc.x2 + intfPad, y: nc.y2 },
                     { x: nc.x2, y: nc.y2 },
                 ];
             }
             if (nc.from.side === 'right' && nc.to.side === 'bottom') {
-                const mid = middlePointY + minMargin;
-
-                if (nc.x2 > nc.x1) {
-                    return [
-                        { x: nc.x1, y: nc.y1 },
+                if (nc.x1 - intfPad > nc.x2) {
+                // S connection
+                    return [{ x: nc.x1, y: nc.y1 },
                         { x: nc.x1 + intfPad, y: nc.y1 },
-                        { x: nc.x1 + intfPad, y: mid },
-                        { x: nc.x2, y: mid },
+                        { x: nc.x1 + intfPad, y: nc.y2 + intfPad },
+                        { x: middlePointX, y: nc.y2 + intfPad },
                         { x: nc.x2, y: nc.y2 + intfPad },
                         { x: nc.x2, y: nc.y2 },
                     ];
                 }
 
-                // Z connection
+                const midX = nc.y1 > middlePointY ? nc.x2 : middlePointX + minMargin;
+
                 return [{ x: nc.x1, y: nc.y1 },
                     { x: nc.x1 + intfPad, y: nc.y1 },
-                    { x: nc.x1 + intfPad, y: nc.y2 + intfPad },
+                    { x: midX, y: nc.y1 },
+                    { x: midX, y: nc.y2 + intfPad },
                     { x: nc.x2, y: nc.y2 + intfPad },
                     { x: nc.x2, y: nc.y2 },
                 ];
             }
             if (nc.from.side === 'left' && nc.to.side === 'bottom') {
-                const mid = middlePointY + minMargin;
-
-                if (nc.x2 > nc.x1) {
-                    return [
-                        { x: nc.x1, y: nc.y1 },
+                if (nc.x1 - intfPad < nc.x2) {
+                // S connection
+                    return [{ x: nc.x1, y: nc.y1 },
                         { x: nc.x1 - intfPad, y: nc.y1 },
-                        { x: nc.x1 - intfPad, y: mid },
-                        { x: nc.x2, y: mid },
+                        { x: nc.x1 - intfPad, y: nc.y2 + intfPad },
+                        { x: middlePointX, y: nc.y2 + intfPad },
                         { x: nc.x2, y: nc.y2 + intfPad },
                         { x: nc.x2, y: nc.y2 },
                     ];
                 }
 
-                // Z connection
+                const midX = nc.y1 > middlePointY ? nc.x2 : middlePointX + minMargin;
+
                 return [{ x: nc.x1, y: nc.y1 },
                     { x: nc.x1 - intfPad, y: nc.y1 },
-                    { x: nc.x1 - intfPad, y: nc.y2 + intfPad },
+                    { x: midX, y: nc.y1 },
+                    { x: midX, y: nc.y2 + intfPad },
                     { x: nc.x2, y: nc.y2 + intfPad },
                     { x: nc.x2, y: nc.y2 },
                 ];
             }
             if (nc.from.side === 'bottom' && nc.to.side === 'left') {
-                const mid = middlePointY + minMargin;
-
-                if (nc.x2 > nc.x1) {
+                if (nc.x2 - intfPad < nc.x1) {
+                // S connection
                     return [{ x: nc.x1, y: nc.y1 },
                         { x: nc.x1, y: nc.y1 + intfPad },
-                        { x: nc.x1, y: mid },
-                        { x: nc.x2 - intfPad, y: mid },
+                        { x: middlePointX, y: nc.y1 + intfPad },
+                        { x: nc.x2 - intfPad, y: nc.y1 + intfPad },
                         { x: nc.x2 - intfPad, y: nc.y2 },
                         { x: nc.x2, y: nc.y2 },
                     ];
                 }
 
-                // Z connection
+                const midX = nc.y2 > middlePointY ? nc.x1 : middlePointX + minMargin;
+
                 return [{ x: nc.x1, y: nc.y1 },
                     { x: nc.x1, y: nc.y1 + intfPad },
-                    { x: nc.x1, y: nc.y2 },
+                    { x: midX, y: nc.y1 + intfPad },
+                    { x: midX, y: nc.y2 },
                     { x: nc.x2 - intfPad, y: nc.y2 },
                     { x: nc.x2, y: nc.y2 },
                 ];
