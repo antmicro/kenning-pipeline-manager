@@ -267,6 +267,69 @@
                         },
                         "pill": {
                             "$ref": "#/$defs/pill"
+                        },
+                        "properties": {
+                            "description": "Styling of properties.",
+                            "type": "object",
+                            "patternProperties": {
+                                "^.*$": {
+                                    "type": "object",
+                                    "description": "Name of the style affected.",
+                                    "properties": {
+                                        "^.*$": {
+                                            "description": "Types of properties with CSS attributes inside"
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "interfaces": {
+                            "description": "Styling of interfaces.",
+                            "type": "object",
+                            "patternProperties": {
+                                "^.*$": {
+                                    "type": "object",
+                                    "description": "Name of the style affected.",
+                                    "properties": {
+                                        "^.*$": {
+                                            "description": "Types of interfaces with CSS attributes inside"
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "nodes": {
+                            "description": "Styling of the nodes",
+                            "type": "object",
+                            "properties": {
+                                "title": {
+                                    "description": "Definition of title styles",
+                                    "type": "object",
+                                    "patternProperties": {
+                                        "^.*$": {
+                                            "description": "List of css attributes."
+                                        }
+                                    }
+                                },
+                                "content": {
+                                    "description": "Definition of content styles",
+                                    "type": "object",
+                                    "patternProperties": {
+                                        "^.*$": {
+                                            "description": "List of css attributes."
+                                        }
+                                    }
+                                },
+                                "body": {
+                                    "description": "Definition of body styles",
+                                    "type": "object",
+                                    "patternProperties": {
+                                        "^.*$": {
+                                            "description": "List of css attributes."
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }
