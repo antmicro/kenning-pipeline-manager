@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Antmicro <www.antmicro.com>
+ * Copyright (c) 2022-2026 Antmicro <www.antmicro.com>
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -18,6 +18,9 @@ import { useClipboard } from './Clipboard.ts';
 
 import PipelineManagerEditor from '../custom/Editor.js';
 import InterfaceTypes from './InterfaceTypes.js';
+import PropertyStyler from './PropertyStyler.js';
+import NodeStyler from './NodeStyler.js';
+import InterfaceStyler from './InterfaceStyler.js';
 
 import { CustomNodeFactory, GraphFactory } from './NodeFactory.js';
 import unresolvedSpecificationSchema from '../../../resources/schemas/unresolved_specification_schema.json' with {type: 'json'};
@@ -171,6 +174,9 @@ export default class EditorManager {
 
         this.baklavaView.editor.layoutManager.useAlgorithm(this.defaultMetadata.layout);
         this.baklavaView.interfaceTypes = new InterfaceTypes(this.baklavaView);
+        this.baklavaView.propertyStyler = new PropertyStyler(this.baklavaView);
+        this.baklavaView.nodeStyler = new NodeStyler(this.baklavaView);
+        this.baklavaView.interfaceStyler = new InterfaceStyler(this.baklavaView);
 
         // need to be set here as settings try to use this value
         // before this value can be loaded from specification
@@ -1768,6 +1774,9 @@ export default class EditorManager {
         }
 
         this.baklavaView.interfaceTypes.readInterfaceTypes(metadata);
+        this.baklavaView.propertyStyler.readPropertyStyles(metadata);
+        this.baklavaView.nodeStyler.readNodeStyles(metadata);
+        this.baklavaView.interfaceStyler.readInterfaceStyles(metadata);
 
         if (metadata && 'urls' in metadata) {
             Object.entries(metadata.urls).forEach(([urlName, state]) => {
