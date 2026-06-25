@@ -5,7 +5,7 @@
  */
 
 .baklava-node {
-    min-width: 300px !important;
+    min-width: 300px;
     width: auto;
     display: table;
     max-width: none;
@@ -37,40 +37,26 @@
         filter: none;
     }
 
-    & > .__content > div > div {
-        margin: 0;
+    & > .__content {
+        & > .__properties {
+          .__label {
+            display: var(--kpm-property-display-label);
+          }
+        }
+        & > div > div {
+          margin: 0;
+        }
     }
 
     &.--minimal {
-        min-width: 30px !important;
+        min-width: 30px;
         min-height: 4em;
         width: auto;
         cursor: grab;
         position: absolute;
 
         & > .__title {
-            position: absolute;
-            top: 0;
-            left: 5%;
-            width: 90%;
-
-            background-color: transparent;
-
-            height: 2em;
-            padding: 0 1em;
-            margin: 0;
-
-            z-index: 10;
-            pointer-events: auto;
-
-            > :not(.__title-label, .__title-icon) {
-                background-color: #{$gray-600}E6;
-            }
-
-            > .__title-label,
-            > .__title-icon {
-                display: none;
-            }
+            display: none;
         }
     }
     &.--clean {
@@ -123,8 +109,8 @@
 
 
     & > .__title {
-        height: 4em;
         display: flex;
+        height: var(--kpm-node-title-height);
         align-items: center;
         gap: 1em;
         padding: 0 1em;
@@ -140,7 +126,7 @@
         }
 
         & > .__title-label {
-            flex-grow: 1;
+            flex-grow: 0;
 
             & > .subtitle {
                 margin: 0;
