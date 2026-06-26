@@ -763,37 +763,89 @@ export default class ConnectionRenderer {
                 ];
             }
             if (nc.from.side === 'top' && nc.to.side === 'right') {
-                // Z connection
+                if (nc.x2 - intfPad > nc.x1) {
+                    // S connection
+                    return [{ x: nc.x1, y: nc.y1 },
+                        { x: nc.x1, y: nc.y1 - intfPad },
+                        { x: middlePointX, y: nc.y1 - intfPad },
+                        { x: nc.x2 + intfPad, y: nc.y1 - intfPad },
+                        { x: nc.x2 + intfPad, y: nc.y2 },
+                        { x: nc.x2, y: nc.y2 },
+                    ];
+                }
+
+                const midX = middlePointX + minMargin;
+
                 return [{ x: nc.x1, y: nc.y1 },
                     { x: nc.x1, y: nc.y1 - intfPad },
-                    { x: nc.x1, y: nc.y2 },
+                    { x: midX, y: nc.y1 - intfPad },
+                    { x: midX, y: nc.y2 },
                     { x: nc.x2 + intfPad, y: nc.y2 },
                     { x: nc.x2, y: nc.y2 },
                 ];
             }
             if (nc.from.side === 'right' && nc.to.side === 'top') {
-                // Z connection
+                if (nc.x2 - intfPad < nc.x1) {
+                    // S connection
+                    return [{ x: nc.x1, y: nc.y1 },
+                        { x: nc.x1 + intfPad, y: nc.y1 },
+                        { x: nc.x1 + intfPad, y: nc.y2 - intfPad },
+                        { x: middlePointX, y: nc.y2 - intfPad },
+                        { x: nc.x2, y: nc.y2 - intfPad },
+                        { x: nc.x2, y: nc.y2 },
+                    ];
+                }
+
+                const midX = middlePointX + minMargin;
+
                 return [{ x: nc.x1, y: nc.y1 },
                     { x: nc.x1 + intfPad, y: nc.y1 },
-                    { x: nc.x1 + intfPad, y: nc.y2 - intfPad },
+                    { x: midX, y: nc.y1 },
+                    { x: midX, y: nc.y2 - intfPad },
                     { x: nc.x2, y: nc.y2 - intfPad },
                     { x: nc.x2, y: nc.y2 },
                 ];
             }
             if (nc.from.side === 'left' && nc.to.side === 'top') {
-                // Z connection
+                if (nc.x2 - intfPad > nc.x1) {
+                    // S connection
+                    return [{ x: nc.x1, y: nc.y1 },
+                        { x: nc.x1 - intfPad, y: nc.y1 },
+                        { x: nc.x1 - intfPad, y: nc.y2 - intfPad },
+                        { x: middlePointX, y: nc.y2 - intfPad },
+                        { x: nc.x2, y: nc.y2 - intfPad },
+                        { x: nc.x2, y: nc.y2 },
+                    ];
+                }
+
+                const midX = middlePointX + minMargin;
+
                 return [{ x: nc.x1, y: nc.y1 },
                     { x: nc.x1 - intfPad, y: nc.y1 },
-                    { x: nc.x1 - intfPad, y: nc.y2 - intfPad },
+                    { x: midX, y: nc.y1 },
+                    { x: midX, y: nc.y2 - intfPad },
                     { x: nc.x2, y: nc.y2 - intfPad },
                     { x: nc.x2, y: nc.y2 },
                 ];
             }
             if (nc.from.side === 'top' && nc.to.side === 'left') {
-                // Z connection
+                if (nc.x2 - intfPad < nc.x1) {
+                    // S connection
+                    return [{ x: nc.x1, y: nc.y1 },
+                        { x: nc.x1, y: nc.y1 - intfPad },
+                        { x: middlePointX, y: nc.y1 - intfPad },
+                        { x: nc.x2 - intfPad, y: nc.y1 - intfPad },
+                        { x: nc.x2 - intfPad, y: nc.y2 },
+                        { x: nc.x2, y: nc.y2 },
+                    ];
+                }
+
+                const midX = middlePointX + minMargin;
+
                 return [{ x: nc.x1, y: nc.y1 },
                     { x: nc.x1, y: nc.y1 - intfPad },
-                    { x: nc.x1, y: nc.y2 },
+                    { x: midX, y: nc.y1 - intfPad },
+                    { x: midX, y: nc.y2 },
                     { x: nc.x2 - intfPad, y: nc.y2 },
                     { x: nc.x2, y: nc.y2 },
                 ];
