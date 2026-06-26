@@ -318,6 +318,7 @@ Object.entries(props.node.inputs).forEach(([name, input]) => {
 
 // Send message about changed position
 const notifyPositionChanged = (position) => {
+    nextTick(() => transformed());
     if (!externalApplicationManager.isConnected()) return;
     externalApplicationManager.notifyAboutChange('position_on_change', {
         graph_id: props.node.graphInstance.id,
@@ -329,7 +330,7 @@ const notifyPositionChanged = (position) => {
     });
 };
 // Create watcher for position
-watch(props.node.position, notifyPositionChanged);
+watch(() => props.node.position, notifyPositionChanged);
 
 const focusOnRename = () => {
     renameField.value.focus();
