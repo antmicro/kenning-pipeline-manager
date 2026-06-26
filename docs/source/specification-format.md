@@ -165,6 +165,46 @@ Node style defines how nodes of a given style should look like. Currently, the f
 * `shape` - a link or path to SVG file, allowing to define custom shape for node.
 * `clean` - flag informing whether to use special clean style for the node. Only title and port endpoints will be visible in this style. Interface names and properties will be hidden.
 
+There are also entries that allow for further customization of specific node elements:
+* `nodes` - specifies custom CSS attributes for node as a whole. Top-most key value must be one of:
+  * `title` - object with CSS attributes for title of node only.
+  * `content` - object with CSS attributes for content of a node.
+  * `body` - object with CSS attributes for the whole node.
+* `interfaces` - is a dictionary of objects. Each key signals type of interface (within a node that has this specific style) and the value is a dictionary of CSS
+  properties for this specific interface.
+* `properties` - is a dictionary of objects. Each key represents type of property (see [Property](#property)) and the value is a dictionary of CSS attributes for
+  the specified property within a node of that style.
+
+Note that when specifying `interface` or `property` type above a star `*` may be used to match all other (non specified) types.
+
+Example of a valid style using CSS attribute setting:
+
+```json
+"experimental": {
+    "interfaces": {
+        "*": {
+            "--baklava-control-color-foreground": "transparent"
+        }
+    },
+    "properties": {
+        "text": {
+            "--baklava-control-color-hover": "olive",
+            "--baklava-control-color-background": "green",
+            "--baklava-control-color-foreground": "lime"
+        }
+    },
+    "nodes": {
+        "title": {
+            "justify-content": "center"
+        },
+        "body": {
+            "min-width": "0px",
+            "width": "auto"
+        }
+    }
+}
+```
+
 Field values are defined the same way as in [Node](#node) specification, however, `icon` can obtain [Navbar item](#navbar-item) `iconName` values as well.
 
 There exist special styles:
