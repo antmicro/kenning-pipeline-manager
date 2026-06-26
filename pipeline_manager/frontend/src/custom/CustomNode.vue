@@ -84,18 +84,6 @@ from moving or deleting the nodes.
 
         </div>
 
-            <CustomContextMenu
-                ref='contextMenuTitle'
-                v-model="showContextMenuTitle"
-                :x="contextMenuTitleX"
-                :y="contextMenuTitleY"
-                :items="contextMenuTitleItems"
-                :urls="nodeURLs"
-                :style="contextMenuStyle"
-                :transition="''"
-                @pointerdown.left.stop
-                @click="onContextMenuTitleClick"
-            />
         <img :src="customShape"
             v-if="customShape !== undefined"
             draggable="false"
@@ -124,19 +112,6 @@ from moving or deleting the nodes.
             />
             <!-- eslint-disable-next-line vue/require-v-for-key -->
         </template>
-
-            <CustomContextMenu
-                ref='contextMenuTitle'
-                v-model="showContextMenuTitle"
-                :x="contextMenuTitleX"
-                :y="contextMenuTitleY"
-                :items="contextMenuTitleItems"
-                :urls="nodeURLs"
-                :style="contextMenuStyle"
-                :transition="''"
-                @pointerdown.left.stop
-                @click="onContextMenuTitleClick"
-            />
 
         <div
             class="__content"
@@ -201,27 +176,6 @@ from moving or deleting the nodes.
                     </template>
                 </div>
             </div>
-
-            <CustomContextMenu
-                ref="contextMenuInterface"
-                v-model="showContextMenuInterface"
-                :x="contextMenuInterfaceX"
-                :y="contextMenuInterfaceY"
-                :items="contextMenuInterfaceItems"
-                :style="contextMenuInterfaceStyle"
-                :ignore-close="[leftSocketsRefs, rightSocketsRefs]"
-                @click="onContextMenuInterfaceClick"
-            />
-            <CustomContextMenu
-                ref="contextMenuProperty"
-                v-model="showContextMenuProperty"
-                :x="contextMenuPropertyX"
-                :y="contextMenuPropertyY"
-                :items="contextMenuPropertyItems"
-                :style="contextMenuStyle"
-                :ignore-close="[propertiesRef]"
-                @click="onContextMenuPropertyClick"
-            />
 
         </div>
     </div>
