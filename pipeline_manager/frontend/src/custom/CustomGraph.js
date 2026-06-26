@@ -36,6 +36,11 @@ export default function createPipelineManagerGraph(graph) {
     graph.events.exposeInterface = new BaklavaEvent();
     graph.events.privatizeInterface = new BaklavaEvent();
 
+    // group events
+    graph.events.addGroup = new BaklavaEvent();
+    graph.events.removeGroup = new BaklavaEvent();
+    graph.events.editGroup = new BaklavaEvent();
+
     // Graph node that represents the graph itself. Root graph does not have a node graph assigned.
     graph.graphNode = undefined;
     graph.groups = [];
@@ -63,6 +68,19 @@ export default function createPipelineManagerGraph(graph) {
         });
     };
 
+    graph.addGroup = function addGroup(name, color, nodeIds, id = uuidv4()) {
+        if (this.events.addGroup.emit({
+            id, name, color, nodeIds,
+        }).prevented) {
+            return;
+        }
+        this.groups.push({
+            id,
+            color,
+            name,
+            nodes: nodeIds,
+        });
+    };
     graph.checkConnection = function checkConnection(from, to) {
         if (!from || !to) {
             return { connectionAllowed: false, error: 'Invalid from and to references.' };
