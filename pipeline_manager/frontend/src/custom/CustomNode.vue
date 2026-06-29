@@ -72,6 +72,7 @@ from moving or deleting the nodes.
             </template>
             <icons.Subgraph
                 class="__subgraph-icon"
+                :style="subgraphStyle"
                 v-if="isGraphNode || nodeHasRelatedGraphs"
             />
             <div
@@ -680,6 +681,18 @@ const classes = computed(() => ({
     '--transparent': customShape !== undefined,
     __readonly: viewModel.value.editor.readonly,
 }));
+
+const subgraphStyle = computed(() => {
+    if (customShape !== undefined) {
+        return {
+            position: 'absolute',
+            left: '-14px',
+            top: '-20px',
+        };
+    }
+
+    return {};
+});
 
 const width = computed(() => {
     if (props.node.width !== undefined) {
