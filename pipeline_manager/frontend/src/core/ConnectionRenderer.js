@@ -1126,11 +1126,11 @@ export default class ConnectionRenderer {
             return undefined;
         }
 
-        const closetAnchor = anchors.map((anch) => [
+        const closestAnchor = anchors.map((anch) => [
             anch, Math.abs(x - anch.x) + Math.abs(y - anch.y),
         ]).sort((a, b) => a[1] - b[1]).at(0)[0];
 
-        return closetAnchor;
+        return closestAnchor;
     }
 
     switchableConnectionRefreshAnchors(normalizedConnection, anchors, graph) {
@@ -1163,14 +1163,14 @@ export default class ConnectionRenderer {
         if (nc.to) {
             const x = nc.x2;
             const y = nc.y2;
-            // get anchor closet to interface
+            // get anchor closest to interface
             const anchorIndexes = anchors.map((anch) => anch.index);
 
             const maxIndex = Math.max(...anchorIndexes);
             const anchorsToCheck = anchors.filter((anch) => anch.index === maxIndex);
-            const closetAnchor = this.getClosestAnchor(anchorsToCheck, x, y);
+            const closestAnchor = this.getClosestAnchor(anchorsToCheck, x, y);
 
-            if (x < closetAnchor.x) {
+            if (x < closestAnchor.x) {
                 nc.to.side = 'right';
 
                 if (toLastSide !== 'right') {
@@ -1188,14 +1188,14 @@ export default class ConnectionRenderer {
         if (nc.from) {
             const x = nc.x1;
             const y = nc.y1;
-            // get anchor closet to interface
+            // get anchor closest to interface
             const anchorIndexes = anchors.map((anch) => anch.index);
 
             const minIndex = Math.min(...anchorIndexes);
             const anchorsToCheck = anchors.filter((anch) => anch.index === minIndex);
-            const closetAnchor = this.getClosestAnchor(anchorsToCheck, x, y);
+            const closestAnchor = this.getClosestAnchor(anchorsToCheck, x, y);
 
-            if (x < closetAnchor.x) {
+            if (x < closestAnchor.x) {
                 nc.from.side = 'right';
 
                 if (fromLastSide !== 'right') {
@@ -1220,15 +1220,24 @@ export default class ConnectionRenderer {
             return;
         }
 
+        // ignore interfaces with top and bottom sides
+        if (nc.from.side === 'top' || nc.from.side === 'bottom' ||
+            nc.to.side === 'top' || nc.to.side === 'bottom'
+        ) {
+            return;
+        }
+
         const minMargin = 30 * graph.scaling;
 
         const fromNode = graph.nodes.filter((node) => nc.from.nodeId === node.id)[0];
+        const fromNodePosInterfaces = graph.editor.getNodeInterfacePositions(fromNode.type);
         const fromNodeWidth = fromNode.width;
         const fromNodeInputs = Object.values(fromNode.inputs)
             .filter((ni) => !ni.hidden);
         const fromNodeOutputs = Object.values(fromNode.outputs)
             .filter((no) => !no.hidden);
         const toNode = graph.nodes.filter((node) => nc.to.nodeId === node.id)[0];
+        const toNodePosInterfaces = graph.editor.getNodeInterfacePositions(toNode.type);
         const toNodeWidth = toNode.width;
         const toNodeInputs = Object.values(toNode.inputs).filter((ni) => !ni.hidden && ni.port);
         const toNodeOutputs = Object.values(toNode.outputs).filter((no) => !no.hidden && no.port);
@@ -1244,6 +1253,12 @@ export default class ConnectionRenderer {
 
         const nextToNodeLeftIndex = getIndex(toNodeLefts.map((intf) => intf.sidePosition));
         const nextToNodeRightIndex = getIndex(toNodeRights.map((intf) => intf.sidePosition));
+
+        // ignore positioned interfaces
+        if (Object.hasOwn(fromNodePosInterfaces, nc.from.name)
+            || Object.hasOwn(toNodePosInterfaces, nc.to.name)) {
+            return;
+        }
 
         if (connection.to) {
             if (nc.from.side === 'right' && nc.to.side === 'left') {
