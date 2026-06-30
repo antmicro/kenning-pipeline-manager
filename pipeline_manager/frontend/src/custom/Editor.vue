@@ -689,7 +689,7 @@ export default defineComponent({
                 groups.value.map((g) => ({
                     id: g.id,
                     name: g.name,
-                    nodes: g.nodes.slice(),
+                    nodes: g.nodes?.slice() ?? [],
                 })),
         ],
         updateVisibleGroups,

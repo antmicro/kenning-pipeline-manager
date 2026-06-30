@@ -196,7 +196,7 @@ import { gridSnapper } from '../core/snappers';
 import icons from '../icons/index';
 import doubleClick from '../core/doubleClick.js';
 import NotificationHandler from '../core/notifications.js';
-import { getOptionName, updateInterfacePosition, removeNode, ungroupNode } from './CustomNode.js';
+import { getOptionName, updateInterfacePosition, removeNode } from './CustomNode.js';
 import {
     startTransaction, commitTransaction,
 } from '../core/History.ts';
@@ -632,7 +632,7 @@ const onContextMenuTitleClick = async (action) => {
             if (!graph.value.selectedNodes.includes(props.node)) {
                 graph.value.selectedNodes.push(props.node);
             }
-            graph.value.selectedNodes.forEach((n) => ungroupNode(n));
+            graph.value.selectedNodes.forEach((n) => graph.value.ungroupNode(n));
             break;
     }
     transformed();

@@ -69,17 +69,35 @@ export default function createPipelineManagerGraph(graph) {
     };
 
     graph.addGroup = function addGroup(name, color, nodeIds, id = uuidv4()) {
-        if (this.events.addGroup.emit({
-            id, name, color, nodeIds,
-        }).prevented) {
-            return;
-        }
         this.groups.push({
             id,
             color,
             name,
             nodes: nodeIds,
         });
+        this.events.addGroup.emit(this.groups[this.groups.length - 1]);
+        return this.groups[this.groups.length - 1];
+    };
+    graph.removeGroup = function removeGroup(group) {
+        if (!this.groups.includes(group)) {
+            return;
+        }
+        this.events.removeGroup.emit(group);
+        this.groups.splice(this.groups.indexOf(group), 1);
+    };
+    graph.ungroupNode = function ungroupNode(node) {
+        const associated = this.groups?.filter((g) => g.nodes.includes(node.id));
+        const groupsToRemove = [];
+        associated.forEach((g) => {
+            const index = g.nodes.indexOf(node.id);
+            if (g.nodes.length > 2) {
+                this.events.editGroup.emit(g);
+                g.nodes.splice(index, 1);
+            } else {
+                groupsToRemove.push(g);
+            }
+        });
+        groupsToRemove.forEach((g) => this.removeGroup(g));
     };
     graph.checkConnection = function checkConnection(from, to) {
         if (!from || !to) {

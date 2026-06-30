@@ -106,22 +106,6 @@ export function updateInterfacePosition(
 }
 
 /**
- * Wrapper for ungrouping a node.
- *
- * @param node node to ungroup.
- */
-export function ungroupNode(node) {
-    const { viewModel } = useViewModel();
-    const graphWithNode = Array.from(viewModel.value.editor.graphs)
-        .find((graph) => graph.nodes.some((n) => n.id === node.id));
-    graphWithNode.groups?.filter((g) => g.nodes.includes(node.id))
-        .forEach((g) => {
-            const index = g.nodes.indexOf(node.id);
-            g.nodes.splice(index, 1);
-        });
-    graphWithNode.groups = graphWithNode.groups?.filter((g) => g.nodes.length > 1);
-}
-/**
  * Wrapper for nodes removal
  *
  * @param node node to remove. Can be either a graph node or a regular node
@@ -132,7 +116,6 @@ export function removeNode(node, unwrapGraph = false) {
     const { viewModel } = useViewModel();
 
     // get graph in which node is present
-    ungroupNode(node);
     const graphWithNode = Array.from(viewModel.value.editor.graphs)
         .find((graph) => graph.nodes.some((n) => n.id === node.id));
 
@@ -142,6 +125,7 @@ export function removeNode(node, unwrapGraph = false) {
     } else {
         const { graph } = useGraph();
         notifyEvents.removedNode.emit(node);
+        graph.value.ungroupNode(node);
         graph.value.removeNode(node);
     }
 

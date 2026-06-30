@@ -183,12 +183,11 @@ export function createGroupFromSelection(name: string, color: string) {
     const { viewModel } = useViewModel();
     const { editor } = viewModel.value;
     const { graph } = editor;
-    (<any>graph).groups.push({
-        id: uuidv4(),
-        color,
+    (<any>graph).addGroup(
         name,
-        nodes: (<any>graph).selectedNodes.map((n: any) => n.id),
-    });
+        color,
+        (<any>graph).selectedNodes.map((n: any) => n.id),
+    );
 }
 
 /**
