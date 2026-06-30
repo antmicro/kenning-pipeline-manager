@@ -97,11 +97,21 @@ test('group creation', async ({ page }) => {
 
     const nodeA = getNode(page, 'Threshold');
     const nodeB = getNode(page, 'StructuringElement');
-    createGroup([nodeB, nodeA], page);
+    await createGroup([nodeB, nodeA], page);
     const group = page.locator('.rectangle-grouping');
+    expect(group).toBeVisible();
+
+    await nodeB.locator('.__title').click(); // move focus
 
     const nodeRect = await getRect([nodeA, nodeB]);
     const groupRect = await group.boundingBox();
+    expect(compareRects(nodeRect, groupRect)).toBeLessThanOrEqual(10);
+    await page.keyboard.press('Control+KeyZ');
+
+    await group.waitFor({ state: 'hidden' });
+    expect(group).not.toBeVisible();
+    await page.keyboard.press('Control+KeyY');
+
     expect(compareRects(nodeRect, groupRect)).toBeLessThanOrEqual(10);
 });
 test('remove from group', async ({ page }) => {
@@ -120,10 +130,20 @@ test('remove from group', async ({ page }) => {
     expect(compareRects(nodeRect, groupRect)).toBeLessThanOrEqual(10);
 
     await removeFromGroup(nodeC, page);
-    // wait for the group to update without waitForTimeout
     await expect(async () => {
-        expect(await group.boundingBox()).not.toEqual(groupRect);
-    }).toPass();
+        const newGroupRect = await group.boundingBox();
+        expect(newGroupRect).not.toEqual(groupRect);
+    }).toPass({ timeout: 5000 });
+    await page.keyboard.press('Control+KeyZ');
+    await expect(async () => {
+        const revertedGroupRect = await group.boundingBox();
+        expect(compareRects(nodeRect, revertedGroupRect)).toBeLessThanOrEqual(10);
+    }).toPass({ timeout: 5000 });
+    await page.keyboard.press('Control+KeyY');
+    await expect(async () => {
+        const redoneGroupRect = await group.boundingBox();
+        expect(redoneGroupRect).not.toEqual(groupRect);
+    }).toPass({ timeout: 5000 });
 
     const nodeRectPost = await getRect([nodeA, nodeB]);
     const groupRectPost = await group.boundingBox();
