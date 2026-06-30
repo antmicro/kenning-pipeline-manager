@@ -390,6 +390,45 @@ class InterfaceStep extends Step {
     }
 }
 
+class GroupStep extends Step {
+    group: any = undefined;
+
+    g: any = undefined;
+
+    constructor(type: string, topic: any, tid: string = uuidv4()) {
+        if (tid === '') tid = uuidv4(); // eslint-disable-line no-param-reassign
+        super(type, topic, tid);
+    }
+
+    remove(graph: Ref<Graph>) {
+        const toRem = (<any>graph.value).groups.find((g: any) => g.id === this.group.id);
+        (<any>graph.value).removeGroup(toRem);
+        this.g = { ...toRem };
+        this.g.nodes = [...toRem.nodes];
+        this.group = undefined;
+    }
+
+    add(graph: Ref<Graph>) {
+        this.group = (<any>graph.value).addGroup(
+            this.g.name,
+            this.g.color,
+            this.g.nodes,
+            this.g.id,
+        );
+    }
+
+    edit(graph: Ref<Graph>) {
+        const index = (<any>graph.value).groups.findIndex((g: any) => g.id === this.group.id);
+        if (index === -1) return;
+        const tmp = { ...(<any>graph.value).groups[index] };
+        tmp.nodes = [...tmp.nodes];
+        // eslint-disable-next-line no-param-reassign
+        (<any>graph.value).groups[index] = this.g;
+        this.g = tmp;
+        this.group = (<any>graph.value).groups[index];
+    }
+}
+
 export function suppressHistoryLogging(value: boolean) {
     suppressingHistory.value = value;
 }
@@ -432,6 +471,9 @@ export function useHistory(graph: Ref<any>, commandHandler: ICommandHandler): IH
         g.events.editAnchor.unsubscribe(tok);
         g.events.exposeInterface.unsubscribe(tok);
         g.events.privatizeInterface.unsubscribe(tok);
+        g.events.addGroup.unsubscribe(tok);
+        g.events.removeGroup.unsubscribe(tok);
+        g.events.editGroup.unsubscribe(tok);
         notifyEvents.subgraphDestroyed.unsubscribe(tok);
         notifyEvents.specificationUpdate.unsubscribe(tok);
     };
@@ -483,6 +525,46 @@ export function useHistory(graph: Ref<any>, commandHandler: ICommandHandler): IH
                         editorManager,
                     ];
                     historyItem.push(step);
+                    undoneHistory.set(newId, []);
+                }
+            });
+
+            newGraph.events.addGroup.subscribe(token, (group: any) => {
+                if (!suppressingHistory.value) {
+                    const historyItem = history.get(newId);
+                    if (!historyItem) return;
+                    const step = new GroupStep('add', group.id.toString(), transactionId.value);
+                    historyItem.push(step);
+                    step.group = group;
+                    const g = { ...group };
+                    g.nodes = [...g.nodes];
+                    step.g = g;
+                    undoneHistory.set(newId, []);
+                }
+            });
+            newGraph.events.removeGroup.subscribe(token, (group: any) => {
+                if (!suppressingHistory.value) {
+                    const historyItem = history.get(newId);
+                    if (!historyItem) return;
+                    const step = new GroupStep('rem', group.id.toString(), transactionId.value);
+                    historyItem.push(step);
+                    step.group = group;
+                    const g = { ...group };
+                    g.nodes = [...g.nodes];
+                    step.g = g;
+                    undoneHistory.set(newId, []);
+                }
+            });
+            newGraph.events.editGroup.subscribe(token, (group: any) => {
+                if (!suppressingHistory.value) {
+                    const historyItem = history.get(newId);
+                    if (!historyItem) return;
+                    const step = new GroupStep('edit', group.id.toString(), transactionId.value);
+                    historyItem.push(step);
+                    step.group = group;
+                    const g = { ...group };
+                    g.nodes = [...g.nodes];
+                    step.g = g;
                     undoneHistory.set(newId, []);
                 }
             });
