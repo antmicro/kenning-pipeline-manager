@@ -957,10 +957,14 @@ const positionedInterfaceStyle = (inf) => {
         return {};
     }
 
+    const infRef = positionedInterfaceElementSet.value.get(infName);
+
+    if (infRef === null) {
+        return {};
+    }
+
     let offsetX = 0;
     let offsetY = 0;
-
-    const infRef = positionedInterfaceElementSet.value.get(infName);
 
     if (infRef !== undefined) {
         if (infRef.el !== null) {
@@ -979,7 +983,6 @@ const positionedInterfaceStyle = (inf) => {
 
     return {
         position: 'absolute',
-        // transform: `translate(-50%,-50%)`,
         left: `calc(${x}% - ${offsetX}px/2)`,
         top: `calc(${y}% - ${offsetY}px/2)`,
     };
