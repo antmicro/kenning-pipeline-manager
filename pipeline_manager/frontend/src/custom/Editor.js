@@ -802,9 +802,10 @@ export default class PipelineManagerEditor extends Editor {
     getNodeMinimal(node) {
         const viewMin = this._getFromView(node, 'minimal');
         if (viewMin) return viewMin;
-        const nodeType = this.nodeTypes.get(node.type);
-        if (nodeType?.style !== undefined) {
-            const nodeStyle = this.getNodeStyle(nodeType.style);
+        const nodeName = node.type;
+        const nodeTypeStyle = this.getNodeTypeStyle(nodeName);
+        if (nodeTypeStyle !== undefined) {
+            const nodeStyle = this.getNodeStyle(nodeTypeStyle);
             const hasShape = nodeStyle?.shape !== undefined;
             if (nodeStyle?.minimal === undefined && hasShape) {
                 return true;
@@ -816,14 +817,12 @@ export default class PipelineManagerEditor extends Editor {
     }
 
     getNodeInterfacePositions(nodeName) {
-        const nodeType = this.nodeTypes.get(nodeName);
-
-        return this.getNodeStyle(nodeType.style)?.positions ?? [];
+        return this.getNodeStyle(this.getNodeTypeStyle(nodeName))?.positions ?? {};
     }
 
     getShape(nodeName) {
-        const nodeType = this.nodeTypes.get(nodeName);
-        if (nodeType?.style !== undefined) return this.getNodeStyle(nodeType.style)?.shape;
+        const nodeStyle = this.getNodeTypeStyle(nodeName);
+        if (nodeStyle !== undefined) return this.getNodeStyle(nodeStyle)?.shape;
         return undefined;
     }
 
@@ -836,9 +835,13 @@ export default class PipelineManagerEditor extends Editor {
     }
 
     getStyleIcon(nodeName) {
-        const nodeType = this.nodeTypes.get(nodeName);
-        if (nodeType?.style !== undefined) return this.getNodeStyle(nodeType.style)?.icon;
+        const nodeStyle = this.getNodeTypeStyle(nodeName);
+        if (nodeStyle !== undefined) return this.getNodeStyle(nodeStyle)?.icon;
         return undefined;
+    }
+
+    getNodeTypeStyle(nodeType) {
+        return this.nodeTypes.get(nodeType)?.style;
     }
 
     getNodeStyle(style) {
