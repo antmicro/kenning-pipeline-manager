@@ -111,10 +111,9 @@ function commitTypeToSpecification() {
     const parssedNode = editorManager.extendNodeSpecification(configurationState);
 
     const newNodeData = parssedNode.nodeData;
-    const currentType = (!menuState.configurationMenu.duplicateNode) ?
+    const currentType = !menuState.configurationMenu.duplicateNode ?
         parssedNode.editedType : undefined;
-    const currentNodeStyle = editorManager.editor.getNodeTypeStyle(currentType);
-
+    const currentNodeStyle = editorManager.editor.getNodeTypeStyle(parssedNode.editedType);
     let style = currentNodeStyle ?? NEW_NODE_STYLE;
 
     if (currentType !== undefined) {
@@ -127,14 +126,14 @@ function commitTypeToSpecification() {
 
         style = currentNodeStyle ?? EDITED_NODE_STYLE;
     }
-    const processedInterfaces = parssedNode.interfaces
-        .filter((intf: any) => !intf.inSubgraph)
+    const processedInterfaces = parssedNode?.interfaces
+        ?.filter((intf: any) => !intf.inSubgraph)
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        .map((intf: any) => (({ inSubgraph, ...o }) => o)(intf));
-    const processedProperties = parssedNode.properties
-        .filter((prop: any) => !prop.inSubgraph)
+        ?.map((intf: any) => (({ inSubgraph, ...o }) => o)(intf)) ?? [];
+    const processedProperties = parssedNode?.properties
+        ?.filter((prop: any) => !prop.inSubgraph)
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        .map((prop: any) => (({ inSubgraph, ...o }) => o)(prop));
+        ?.map((prop: any) => (({ inSubgraph, ...o }) => o)(prop)) ?? [];
 
     const ret = editorManager.addNodeToEditorSpecification({
         name: newNodeData.name,
