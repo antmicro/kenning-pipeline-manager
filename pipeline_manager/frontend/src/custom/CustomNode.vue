@@ -46,7 +46,7 @@ from moving or deleting the nodes.
             class="__title-label" v-html="DOMPurify.sanitize(nodeTitle)">
             </div>
             <input
-                v-else-if="customShape === undefined"
+                v-else
                 type="text"
                 class="baklava-input"
                 v-model="tempName"
