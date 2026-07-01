@@ -113,8 +113,9 @@ function commitTypeToSpecification() {
     const newNodeData = parssedNode.nodeData;
     const currentType = (!menuState.configurationMenu.duplicateNode) ?
         parssedNode.editedType : undefined;
+    const currentNodeStyle = editorManager.editor.getNodeTypeStyle(currentType);
 
-    let style = NEW_NODE_STYLE;
+    let style = currentNodeStyle ?? NEW_NODE_STYLE;
 
     if (currentType !== undefined) {
         // eslint-disable-next-line no-underscore-dangle
@@ -123,7 +124,8 @@ function commitTypeToSpecification() {
             NotificationHandler.terminalLog('error', 'Error when registering the node', errors);
             return;
         }
-        style = EDITED_NODE_STYLE;
+
+        style = currentNodeStyle ?? EDITED_NODE_STYLE;
     }
     const processedInterfaces = parssedNode.interfaces
         .filter((intf: any) => !intf.inSubgraph)
