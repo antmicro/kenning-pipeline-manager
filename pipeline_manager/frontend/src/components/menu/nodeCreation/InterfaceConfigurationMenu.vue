@@ -40,15 +40,17 @@ import {
 } from '@baklavajs/renderer-vue'; // eslint-disable-line object-curly-newline
 
 import { addInterface } from '../../../core/nodeCreation/Configuration.ts';
-import { menuState } from '../../../core/nodeCreation/ConfigurationState.ts';
+import { menuState, configurationState } from '../../../core/nodeCreation/ConfigurationState.ts';
 
 import InputInterface from '../../../interfaces/InputInterface.js';
 import IntegerInterface from '../../../interfaces/IntegerInterface.js';
 import newInputInterface from './utils.ts';
+import EditorManager from '../../../core/EditorManager.js';
 
 interface CurrentInterface {
     name: string,
     type: string,
+    side: Ref<string>,
     direction: Ref<string>,
     maxConnectionsCount: Ref<number>,
 }
@@ -63,6 +65,7 @@ export default defineComponent({
         const newInterface: CurrentInterface = {
             name: 'New interface',
             type: '',
+            side: ref('left'),
             direction: ref('inout'),
             maxConnectionsCount: ref(0),
         };
@@ -73,6 +76,21 @@ export default defineComponent({
 
         const interfaceName = newInputInterface<InterfaceInterface>('Interface name', newInterface.name, 'name');
         const interfaceType = newInputInterface<InterfaceInterface>('Interface type', newInterface.type, 'type');
+
+        const interfaceSide = computed(() => {
+            const option: any = new SelectInterface(
+                'Interface side',
+                newInterface.side.value,
+                ['left', 'right', 'top', 'bottom'],
+            ).setPort(false);
+
+            option.events.setValue.subscribe(this, (v: string) => {
+                newInterface.side.value = v;
+            });
+
+            option.componentName = 'SelectInterface';
+            return option as InterfaceInterface;
+        });
 
         const interfaceDirection = computed(() => {
             const option: any = new SelectInterface(
@@ -105,26 +123,67 @@ export default defineComponent({
             return option as InterfaceInterface;
         });
 
+        const addNewInterface = () => {
+            if (newInterface.type === '') {
+                const intf = {
+                    name: newInterface.name,
+                    direction: newInterface.direction.value,
+                    maxConnectionsCount: newInterface.maxConnectionsCount.value,
+                };
+                addInterface(intf);
+            } else {
+                const typesList = newInterface.type.split(',');
+
+                const intf = {
+                    name: newInterface.name,
+                    type: typesList.length === 1 ? newInterface.type : typesList,
+                    direction: newInterface.direction.value,
+                    maxConnectionsCount: newInterface.maxConnectionsCount.value,
+                };
+                addInterface(intf);
+            }
+        };
+
+        const waitForMousePosition = (event: MouseEvent) => {
+            console.log('Mouse clicked');
+
+            const editorManager = EditorManager.getEditorManagerInstance();
+
+            const x = event.clientX;
+            const y = event.clientY;
+
+            const infX = x - (configurationState?.nodeRect?.x ?? 0);
+            const infY = y - (configurationState?.nodeRect?.y ?? 0);
+
+            const nodeWidth = configurationState?.nodeRect?.width ?? 1;
+            const nodeHeight = configurationState?.nodeRect?.height ?? 1;
+
+            const nodeName = configurationState.nodeData.name;
+
+            // get node style
+            const nodeTypeStyle = (editorManager.editor.nodeTypes.get(nodeName) as any)?.style;
+            const nodeStyle = editorManager.editor.getNodeStyle(nodeTypeStyle);
+
+            // Add a style for new interface
+            nodeStyle.positions[newInterface.name] = {
+                x: Math.max(Math.min((infX / nodeWidth) * 100.0, 100.0), 0),
+                y: Math.max(Math.min((infY / nodeHeight) * 100.0, 100.0), 0),
+            };
+            addNewInterface();
+            editorManager.updateNodeStyle(nodeTypeStyle, nodeStyle);
+            window.removeEventListener('mousedown', waitForMousePosition);
+        };
+
         const addInterfaceMenu = computed(() => {
             const button: any = new ButtonInterface('Add interface', () => {
-                if (newInterface.type === '') {
-                    const intf = {
-                        name: newInterface.name,
-                        direction: newInterface.direction.value,
-                        maxConnectionsCount: newInterface.maxConnectionsCount.value,
-                    };
-                    addInterface(intf);
-                } else {
-                    const typesList = newInterface.type.split(',');
-
-                    const intf = {
-                        name: newInterface.name,
-                        type: typesList.length === 1 ? newInterface.type : typesList,
-                        direction: newInterface.direction.value,
-                        maxConnectionsCount: newInterface.maxConnectionsCount.value,
-                    };
-                    addInterface(intf);
+                // Check for custom shape
+                if (configurationState.nodeData.isShaped) {
+                    console.log('Node has a shape!');
+                    close();
+                    window.addEventListener('mousedown', waitForMousePosition);
+                    return;
                 }
+                addNewInterface();
                 close();
             });
             button.componentName = 'ButtonInterface';
@@ -132,12 +191,20 @@ export default defineComponent({
         });
 
         const configurationOptions = computed(
-            () => [
-                interfaceName.value,
-                interfaceType.value,
-                interfaceDirection.value,
-                interfaceConnectionCount.value,
-            ],
+            () => {
+                const options = [
+                    interfaceName.value,
+                    interfaceType.value,
+                    interfaceDirection.value,
+                    interfaceConnectionCount.value,
+                ];
+
+                if (configurationState.nodeData.isShaped) {
+                    options.push(interfaceSide.value);
+                }
+
+                return options;
+            },
         );
 
         return {
