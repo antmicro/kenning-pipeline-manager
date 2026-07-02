@@ -130,23 +130,20 @@ export default defineComponent({
                     direction: newInterface.direction.value,
                     maxConnectionsCount: newInterface.maxConnectionsCount.value,
                 };
-                addInterface(intf);
-            } else {
-                const typesList = newInterface.type.split(',');
-
-                const intf = {
-                    name: newInterface.name,
-                    type: typesList.length === 1 ? newInterface.type : typesList,
-                    direction: newInterface.direction.value,
-                    maxConnectionsCount: newInterface.maxConnectionsCount.value,
-                };
-                addInterface(intf);
+                return addInterface(intf);
             }
+            const typesList = newInterface.type.split(',');
+
+            const intf = {
+                name: newInterface.name,
+                type: typesList.length === 1 ? newInterface.type : typesList,
+                direction: newInterface.direction.value,
+                maxConnectionsCount: newInterface.maxConnectionsCount.value,
+            };
+            return addInterface(intf);
         };
 
         const waitForMousePosition = (event: MouseEvent) => {
-            console.log('Mouse clicked');
-
             const editorManager = EditorManager.getEditorManagerInstance();
 
             const x = event.clientX;
@@ -163,14 +160,19 @@ export default defineComponent({
             // get node style
             const nodeTypeStyle = (editorManager.editor.nodeTypes.get(nodeName) as any)?.style;
             const nodeStyle = editorManager.editor.getNodeStyle(nodeTypeStyle);
-
-            // Add a style for new interface
-            nodeStyle.positions[newInterface.name] = {
-                x: Math.max(Math.min((infX / nodeWidth) * 100.0, 100.0), 0),
-                y: Math.max(Math.min((infY / nodeHeight) * 100.0, 100.0), 0),
-            };
-            addNewInterface();
-            editorManager.updateNodeStyle(nodeTypeStyle, nodeStyle);
+            const result = addNewInterface();
+            // Check whether interface has been added
+            if (result.length === 0) {
+                if (nodeStyle?.positions === undefined) {
+                    nodeStyle.positions = {};
+                }
+                // Add a style for new interface
+                nodeStyle.positions[newInterface.name] = {
+                    x: Math.max(Math.min((infX / nodeWidth) * 100.0, 100.0), 0),
+                    y: Math.max(Math.min((infY / nodeHeight) * 100.0, 100.0), 0),
+                };
+                editorManager.updateNodeStyle(nodeTypeStyle, nodeStyle);
+            }
             window.removeEventListener('mousedown', waitForMousePosition);
         };
 
