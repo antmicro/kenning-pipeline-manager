@@ -78,6 +78,7 @@ export function prepareNodeForDuplication(nodeType:string) : void {
     const configuredInterfaces = nodeInterfaces?.map((intf:InterfaceConfiguration) => ({
         name: intf?.name,
         type: intf?.type,
+        side: intf?.side,
         direction: intf?.direction,
         array: intf?.array,
     }));
@@ -640,16 +641,16 @@ export function removeProperties(properties: PropertyConfiguration[]): void {
 /**
   * Adds interface to the custom node. If the interface is invalid, it logs an error.
   * @param intf - the interface to be added
-  * @returns void
+  * @returns string[]
 */
-export function addInterface(intf: InterfaceConfiguration): void {
+export function addInterface(intf: InterfaceConfiguration): string[] {
     const currentType = configurationState.editedType;
     const editorManager = EditorManager.getEditorManagerInstance();
     let error = editorManager.validateNodeInterface(intf);
 
     if (error.length) {
         NotificationHandler.terminalLog('error', 'Invalid interface', error);
-        return;
+        return error;
     }
 
     const nodes = findNodes(currentType!);
@@ -659,7 +660,7 @@ export function addInterface(intf: InterfaceConfiguration): void {
             'Node not found',
             `Node of type ${currentType} not found`,
         );
-        return;
+        return error;
     }
 
     configurationState.interfaces.push(intf);
@@ -668,12 +669,14 @@ export function addInterface(intf: InterfaceConfiguration): void {
 
     if (error.length) {
         NotificationHandler.terminalLog('error', 'Invalid interface', error);
-        return;
+        return error;
     }
 
     updateExtendedInterfaces(currentType!, [intf], []);
 
     commitTypeToSpecification();
+
+    return [];
 }
 
 /**

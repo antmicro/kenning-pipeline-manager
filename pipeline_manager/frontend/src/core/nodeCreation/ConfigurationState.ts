@@ -14,6 +14,7 @@ export type NodeDataConfiguration = {
     color?: string,
     isLayerInherited?: boolean,
     isCategoryInherited?: boolean,
+    isShaped?: boolean
 }
 
 export type PropertyConfiguration = {
@@ -33,21 +34,30 @@ export type PropertyConfiguration = {
 export type InterfaceConfiguration = {
     name: string,
     type?: string | string[],
+    side?: string,
     direction: string,
     maxConnectionsCount?: number,
     inherited?: boolean,
     array?: []
 }
 
+export type NodeRect = {
+    x: number,
+    y: number,
+    width: number,
+    height: number
+};
+
 export type ConfigurationState = {
     editedType?: string,
     nodeData: NodeDataConfiguration,
     properties: PropertyConfiguration[],
     interfaces: InterfaceConfiguration[],
+    nodeRect?: NodeRect
     success?: boolean,
     pill?: object,
     extends?: any,
-    subgraphId?: string
+    subgraphId?: string,
 }
 
 /**
@@ -67,6 +77,7 @@ export const menuState = reactive({
     interfaceMenu: false,
     propertyListMenu: false,
     interfaceListMenu: false,
+    addingPositionedInterface: false,
     layerMenu: false,
 });
 
