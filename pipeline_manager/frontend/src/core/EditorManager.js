@@ -254,6 +254,18 @@ export default class EditorManager {
             .forEach((n) => n.updateExposedInterfaces(undefined, undefined)));
     }
 
+    /**
+     * Function which updates node style in editor and specification.
+     * @param {string} styleName - a style class which should be updated.
+     * @param {Object} newStyle - a new style.
+     */
+    updateNodeStyle(styleName, newStyle) {
+        this.editor.nodeStyles.set(styleName, newStyle);
+        // Update specifications metadata
+        this.specification.unresolvedSpecification.metadata.styles[styleName] = newStyle;
+        this.specification.currentSpecification.metadata.styles[styleName] = newStyle;
+    }
+
     async preprocessSpecification(dataflowSpecification, {
         unmarkNewNodes,
         urloverrides,
