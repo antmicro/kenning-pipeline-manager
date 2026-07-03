@@ -869,7 +869,7 @@ const subgraphStyle = computed(() => {
         return {
             position: 'absolute',
             left: '-14px',
-            top: '-20px',
+            top: '0px',
         };
     }
 
