@@ -169,6 +169,8 @@ It consists of the following properties:
 * `interfaceConnectionPattern` - describes how the connection line should look like.
   The possible variants are `solid`, `dashed` and `dotted`.
 * `interfaceConnectionColor` - describes the color of connection lines, should be a hexadecimal number representing RGB values.
+* `x` - relative x position to node width, in percentages used with `shape` node style attribute.
+* `y` - relative y position to node width, in percentages used with `shape` node style attribute.
 
 #### Node style
 Node style defines how nodes of a given style should look like. Currently, the following elements are supported:
