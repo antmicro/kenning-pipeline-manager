@@ -9,7 +9,7 @@ import {
     createNewNodeType, addInterface, getUrl, assertInputCount, getNode, getPathToJsonFile, addNode,
     openFileChooser, dragAndDrop, openNodePalette, setYAMLEditorContent, getContextMenu,
     loadSpecification, loadDataflow, enableEditingNodes, addProperty,addOutputInterface,
-    assertOutputCount, addInputInterface
+    assertOutputCount, addInputInterface, assertInoutCount
 } from './config.js';
 
 const temporaryDir = `${os.tmpdir()}/`;
@@ -242,6 +242,18 @@ test('add interface to category node', async ({ page }, testInfo) => {
     await addParentAndChildNode(page, 200, false);
     await assertInputCount(node, 4);
     await assertInputCount(and_node, 6);
+});
+
+test('add inout interface to custom shape node', async ({ page }, testInfo) => {
+    await page.goto(getUrl());
+    await loadSpecification(page, 'sample-with-shape-specification.json');
+    await loadDataflow(page, 'sample-with-shape-dataflow.json');
+
+    const node = getNode(page,'Voltage');
+    await assertInoutCount(node, 2);
+    await addInterface(page, node);
+    await page.mouse.click(370,360);
+    await assertInoutCount(node, 3);
 });
 
 test('add input interface to custom shape node', async ({ page }, testInfo) => {
