@@ -434,6 +434,9 @@ export default defineComponent({
             '--bottom': props.intf.side === 'bottom' && props.positioned,
             '--left': props.intf.side === 'left' && props.positioned,
             '--right': props.intf.side === 'right' && props.positioned,
+            '--input': props.intf.direction === 'input' && props.positioned,
+            '--output': props.intf.direction === 'output' && props.positioned,
+            '--inout': props.intf.direction === 'inout' && props.positioned,
         }));
 
         const isExposed = computed(() =>
