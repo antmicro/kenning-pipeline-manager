@@ -318,6 +318,14 @@ export function applySidePositions(inputs, outputs) {
         intf.sidePosition = getRightSidePos(intf); // eslint-disable-line no-param-reassign,max-len
     });
 
+    Object.entries(tempParsedSides.top).forEach(([, intf]) => {
+        intf.sidePosition = 0; // eslint-disable-line no-param-reassign,max-len
+    });
+
+    Object.entries(tempParsedSides.bottom).forEach(([, intf]) => {
+        intf.sidePosition = 0; // eslint-disable-line no-param-reassign,max-len
+    });
+
     return {
         inputs: Object.fromEntries(
             Object.entries({
