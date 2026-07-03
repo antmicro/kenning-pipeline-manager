@@ -433,6 +433,9 @@ export default defineComponent({
             __node_interface_positioned: props.positioned,
         });
         const spanClasses = computed(() => ({
+            highlighted: props.positioned,
+            hidden: props.positioned && !hovered.value,
+            '--positioned': props.positioned,
             '--top': props.intf.side === 'top' && props.positioned,
             '--bottom': props.intf.side === 'bottom' && props.positioned,
             '--left': props.intf.side === 'left' && props.positioned,
