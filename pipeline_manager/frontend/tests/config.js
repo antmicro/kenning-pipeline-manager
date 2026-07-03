@@ -417,6 +417,24 @@ export async function assertInputCount(node, count) {
 }
 
 /**
+ * Check inout count of a node.
+ *
+ * @async
+ * @param {import('@playwright/test').Locator} node - The Playwright Locator representing a node.
+ * @param {number} count - An expected number of inputs.
+ * @returns {Promise<void>} Resolves when inputs count match expected count.
+ */
+export async function assertInoutCount(node, count) {
+    const inputs = await node
+        .locator('.__interfaces .__inputs > div')
+        .count();
+    const positionedInputs = await node.
+        locator('.baklava-node-interface-positioned > .--inout')
+        .count();
+    expect(inputs+positionedInputs).toBe(count);
+}
+
+/**
  * Check outputs count of a node.
  *
  * @async
