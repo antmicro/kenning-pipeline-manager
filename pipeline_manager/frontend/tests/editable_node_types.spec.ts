@@ -256,6 +256,18 @@ test('add input interface to custom shape node', async ({ page }, testInfo) => {
     await assertInputCount(node, 1);
 });
 
+test('add output interface to custom shape node', async ({ page }, testInfo) => {
+    await page.goto(getUrl());
+    await loadSpecification(page, 'sample-with-shape-specification.json');
+    await loadDataflow(page, 'sample-with-shape-dataflow.json');
+
+    const node = getNode(page,'Voltage');
+    await assertOutputCount(node, 0);
+    await addOutputInterface(page, node);
+    await page.mouse.click(370,360);
+    await assertOutputCount(node, 1);
+});
+
 test('hiding property', async ({ page }, testInfo) => {
     await page.goto(getUrl());
     await loadIncludeSpecification(page, testInfo);
