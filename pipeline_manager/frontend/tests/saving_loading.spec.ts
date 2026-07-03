@@ -114,6 +114,7 @@ const examples = [
     { specification: 'sample-dynamic-interfaces-specification.json', dataflow: 'sample-dynamic-interfaces-dataflow.json' },
     { specification: 'sample-with-shape-specification.json', dataflow: 'sample-with-shape-dataflow.json' },
     { specification: 'sample-rectangle-grouping-specification.json', dataflow: 'sample-rectangle-grouping-dataflow.json' },
+    { specification: 'sample-styling-specification.json', dataflow: 'sample-styling-dataflow.json' },
     { specification: 'sample-huge-specification.json', dataflow: 'sample-huge-dataflow.json', timeout: 180_000 },
 ];
 
