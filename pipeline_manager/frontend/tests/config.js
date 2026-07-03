@@ -334,6 +334,41 @@ export async function addInterface(page, node) {
 }
 
 /**
+ * Add a new output interface to a selected node.
+ *
+ * @async
+ * @param {import('@playwright/test').Page} page - The Playwright Page object to interact with.
+ * @param {import('@playwright/test').Locator} node - The Playwright Locator representing a node.
+ * @returns {Promise<void>} Resolves when a interface is added to a node.
+ */
+export async function addOutputInterface(page, node) {
+    await node.locator('.__title').click({ button: 'right', force: true });
+    await getContextMenu(page).getByText('Add interface').click();
+    const select = page.getByTitle('Interface direction');
+    await select.click();
+    await select.locator('.__dropdown').getByText('output').click();
+    await page.getByRole('button', { name: 'Add interface' }).click({ force: true });
+}
+
+/**
+ * Add a new input interface to a selected node.
+ *
+ * @async
+ * @param {import('@playwright/test').Page} page - The Playwright Page object to interact with.
+ * @param {import('@playwright/test').Locator} node - The Playwright Locator representing a node.
+ * @returns {Promise<void>} Resolves when a interface is added to a node.
+ */
+export async function addInputInterface(page, node) {
+    await node.locator('.__title').click({ button: 'right', force: true });
+    await getContextMenu(page).getByText('Add interface').click();
+    const select = page.getByTitle('Interface direction');
+    await select.click();
+    await select.locator('.__dropdown').getByText('input').click();
+    await page.getByRole('button', { name: 'Add interface' }).click({ force: true });
+}
+
+
+/**
  * Add a new property to a selected node.
  *
  * @async
