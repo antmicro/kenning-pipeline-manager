@@ -375,7 +375,10 @@ export async function assertInputCount(node, count) {
     const inputs = await node
         .locator('.__interfaces .__inputs > div')
         .count();
-    expect(inputs).toBe(count);
+    const positionedInputs = await node.
+        locator('.baklava-node-interface-positioned > .--input')
+        .count();
+    expect(inputs+positionedInputs).toBe(count);
 }
 
 /**
@@ -390,7 +393,10 @@ export async function assertOutputCount(node, count) {
     const inputs = await node
         .locator('.__interfaces .__outputs > div')
         .count();
-    expect(inputs).toBe(count);
+    const positionedOutputs = await node.
+        locator('.baklava-node-interface-positioned > .--output')
+        .count();
+    expect(inputs+positionedOutputs).toBe(count);
 }
 
 /**
