@@ -594,6 +594,7 @@ const onContextMenuTitleClick = async (action) => {
         const configuredInterfaces = nodeInterfaces?.map((intf) => ({
             name: intf?.name,
             type: intf?.type,
+            side: intf?.side,
             direction: intf?.direction,
             maxConnectionsCount: intf?.maxConnectionsCount,
             inSubgraph: subInterfaces.some((i) => i.id === intf.id),

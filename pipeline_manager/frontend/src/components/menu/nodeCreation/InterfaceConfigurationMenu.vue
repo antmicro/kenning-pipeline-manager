@@ -128,6 +128,7 @@ export default defineComponent({
                 const intf = {
                     name: newInterface.name,
                     direction: newInterface.direction.value,
+                    side: newInterface.side.value,
                     maxConnectionsCount: newInterface.maxConnectionsCount.value,
                 };
                 return addInterface(intf);
@@ -180,7 +181,6 @@ export default defineComponent({
             const button: any = new ButtonInterface('Add interface', () => {
                 // Check for custom shape
                 if (configurationState.nodeData.isShaped) {
-                    console.log('Node has a shape!');
                     close();
                     window.addEventListener('mousedown', waitForMousePosition);
                     return;
