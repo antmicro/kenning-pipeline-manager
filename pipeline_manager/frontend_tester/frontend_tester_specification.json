@@ -39,6 +39,14 @@
             "properties": [
                 {"name": "Property 1", "type": "text", "default": ""},
                 {"name": "Property 2", "type": "text", "default": ""}
+            ],
+            "contextMenuActions": [
+                {
+                    "name": "Test Node info",
+                    "iconName": "Cogwheel",
+                    "procedureName": "custom_test_node_info",
+                    "requireResponse": true
+                }
             ]
         },
         {
@@ -280,6 +288,14 @@
             "Effect": {
                 "interfaceColor": "#FF0000"
             }
-        }
+        },
+        "contextMenuActions": [
+            {
+                "name": "Show node info",
+                "iconName": "Magnifier",
+                "procedureName": "custom_node_info",
+                "requireResponse": true
+            }
+        ]
     }
 }

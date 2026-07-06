@@ -527,6 +527,77 @@ class SpecificationBuilder(object):
 
         self._nodes[name]["urls"][urlgroup] = suffix
 
+    def add_node_type_context_menu_action(
+        self,
+        name: str,
+        action_name: str,
+        procedure_name: str,
+        icon: Optional[str] = None,
+        require_response: bool = True,
+    ) -> None:
+        """
+        Adds a custom context menu action for the given node type.
+
+        The action is displayed only in the context menu of nodes of
+        this type, in addition to any global actions added with
+        `metadata_add_context_menu_action`.
+
+        Parameters
+        ----------
+        name: str
+            Name of the node type
+        action_name: str
+            Label of the action, displayed in the context menu
+        procedure_name: str
+            Name of the JSON-RPC procedure requested from the external
+            application when the action is clicked. The id of the
+            clicked node is sent as an argument. Unless this name is
+            one of the built-in endpoints known to
+            `pipeline_manager_backend_communication`, it must start
+            with `custom_`, otherwise the external application will
+            silently refuse to register it.
+        icon: Optional[str]
+            Path in assets directory or URL to the icon
+        require_response: bool
+            Tells whether the response from the external application
+            should be awaited when running the procedure
+
+        Raises
+        ------
+        SpecificationBuilderException
+            Raised when an action with the given procedure_name is
+            already registered for this node type and differs in
+            format with the existing entry.
+        """
+        if "contextMenuActions" not in self._nodes[name]:
+            self._nodes[name]["contextMenuActions"] = []
+
+        entry = {
+            "name": action_name,
+            "procedureName": procedure_name,
+            "requireResponse": require_response,
+        }
+        set_if_not_none(entry, "iconName", icon)
+
+        existing = next(
+            (
+                e
+                for e in self._nodes[name]["contextMenuActions"]
+                if e["procedureName"] == procedure_name
+            ),
+            None,
+        )
+        if existing is not None:
+            if existing != entry:
+                raise SpecificationBuilderException(
+                    f"Context menu action {procedure_name} already exists for "
+                    f"node type {name} and is different:\n"
+                    f"Current:\n{existing}\nNew:\n{entry}"
+                )
+            return
+
+        self._nodes[name]["contextMenuActions"].append(entry)
+
     def add_node_type_additional_data(self, name: str, additionaldata: Any):
         """
         Adds additional data to the node, in JSON-like format.
@@ -1659,6 +1730,71 @@ class SpecificationBuilder(object):
             )
 
         self._metadata["urls"][groupname] = entry
+
+    def metadata_add_context_menu_action(
+        self,
+        name: str,
+        procedure_name: str,
+        icon: Optional[str] = None,
+        require_response: bool = True,
+    ) -> None:
+        """
+        Adds a custom context menu action to metadata.
+
+        The action is displayed in the context menu of every node in
+        the specification, in addition to any node-type-specific
+        actions added with `add_node_type_context_menu_action`.
+
+        Parameters
+        ----------
+        name: str
+            Label of the action, displayed in the context menu
+        procedure_name: str
+            Name of the JSON-RPC procedure requested from the external
+            application when the action is clicked. The id of the
+            clicked node is sent as an argument. Unless this name is
+            one of the built-in endpoints known to
+            `pipeline_manager_backend_communication`, it must start
+            with `custom_`.
+        icon: Optional[str]
+            Path in assets directory or URL to the icon
+        require_response: bool
+            Tells whether the response from the external application
+            should be awaited when running the procedure
+
+        Raises
+        ------
+        SpecificationBuilderException
+            Raised when an action with the given procedure_name already
+            exists and differs in format with the existing entry.
+        """
+        if "contextMenuActions" not in self._metadata:
+            self._metadata["contextMenuActions"] = []
+
+        entry = {
+            "name": name,
+            "procedureName": procedure_name,
+            "requireResponse": require_response,
+        }
+        set_if_not_none(entry, "iconName", icon)
+
+        existing = next(
+            (
+                e
+                for e in self._metadata["contextMenuActions"]
+                if e["procedureName"] == procedure_name
+            ),
+            None,
+        )
+        if existing is not None:
+            if existing != entry:
+                raise SpecificationBuilderException(
+                    f"Context menu action {procedure_name} already exists and "
+                    f"is different:\nCurrent:\n{existing}\nNew:\n{entry}"
+                )
+            return
+
+        self._metadata["contextMenuActions"].append(entry)
 
     def metadata_add_param(
         self, paramname: str, paramvalue: Any, metadata: Optional[Dict] = None

@@ -81,6 +81,14 @@
             },
             "default": []
         },
+        "contextMenuActions": {
+            "type": "array",
+            "description": "List of custom actions displayed in the context menu of every node, in addition to any node-type-specific actions declared for that node in its `contextMenuActions` list",
+            "items": {
+                "$ref": "#/$defs/contextMenuAction"
+            },
+            "default": []
+        },
         "allowLoopbacks": {
             "type": "boolean",
             "description": "Flag allowing connections with endpoints at the same node",
@@ -405,6 +413,34 @@
                 "string",
                 "null"
             ]
+        },
+        "contextMenuAction": {
+            "description": "Description of a single custom context menu action.",
+            "type": "object",
+            "properties": {
+                "name": {
+                    "description": "Label displayed in the context menu",
+                    "type": "string"
+                },
+                "iconName": {
+                    "description": "Name of the icon displayed next to the action. Name should correspond to a file in the asset directory or to an icon in `frontend/src/icons`",
+                    "type": "string"
+                },
+                "procedureName": {
+                    "description": "Name of the JSON-RPC procedure requested from the external application when the action is clicked. The id of the node that was right-clicked is sent as an argument. Unless this is one of the built-in endpoints known to pipeline_manager_backend_communication, it must start with `custom_`",
+                    "type": "string"
+                },
+                "requireResponse": {
+                    "description": "Flag determining whether response from external application should be awaited when running the procedure",
+                    "type": "boolean",
+                    "default": true
+                }
+            },
+            "required": [
+                "name",
+                "procedureName"
+            ],
+            "additionalProperties": false
         }
     },
     "additionalProperties": false

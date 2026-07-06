@@ -506,6 +506,48 @@ class RPCMethods:
             self.custom_api_test.__name__,
         )
 
+    def custom_node_info(self, node_id: str) -> Dict:
+        """
+        RPC method for the global "Show node info" context menu action.
+
+        Parameters
+        ----------
+        node_id : str
+            Id of the clicked node.
+
+        Returns
+        -------
+        Dict
+            Method's response
+        """
+        return {
+            "type": MessageType.OK.value,
+            "content": f"Show node info requested for node: {node_id}",
+        }
+
+    def custom_test_node_info(self, node_id: str) -> Dict:
+        """
+        RPC method for the "Test Node info" context menu action,
+        available only on `Test Node` instances.
+
+        Parameters
+        ----------
+        node_id : str
+            Id of the clicked node.
+
+        Returns
+        -------
+        Dict
+            Method's response
+        """
+        return {
+            "type": MessageType.OK.value,
+            "content": (
+                "This action is only available on Test Node "
+                f"instances (triggered from node {node_id})"
+            ),
+        }
+
     async def button_click(self, id: str, value: Optional[Dict]):
         message = ""
         response = await self.client.request("graph_get")

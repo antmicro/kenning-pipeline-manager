@@ -71,6 +71,8 @@ export default class PipelineManagerEditor extends Editor {
 
     nodeURLs = new Map();
 
+    nodeContextMenuActions = new Map();
+
     nodeStyles = new Map();
 
     nodeLists = new Map();
@@ -758,6 +760,10 @@ export default class PipelineManagerEditor extends Editor {
             }
         }
         return undefined;
+    }
+
+    getNodeContextMenuActions(nodeName) {
+        return this.nodeContextMenuActions.get(nodeName) || [];
     }
 
     getNodeIconPath(nodeName) {

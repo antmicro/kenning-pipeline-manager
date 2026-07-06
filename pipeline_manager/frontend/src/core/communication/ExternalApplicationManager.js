@@ -26,7 +26,7 @@ const defaultAppCapabilities = [];
 /**
  * Creates notifications based on response received from external application.
  */
-function handleExternalAppResponse(response) {
+export function handleExternalAppResponse(response) {
     // Status is HTTPCodes.OK so a message from the application is received.
     if (response.type === PMMessageType.OK) {
         NotificationHandler.terminalLog('info', response.content);

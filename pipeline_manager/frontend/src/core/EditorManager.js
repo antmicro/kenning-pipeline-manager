@@ -185,6 +185,7 @@ export default class EditorManager {
         this.baklavaView.movementStep = this.defaultMetadata.movementStep;
         this.baklavaView.editor.allowLoopbacks = this.defaultMetadata.allowLoopbacks;
         this.baklavaView.navbarItems = this.defaultMetadata.navbarItems;
+        this.baklavaView.contextMenuActions = this.defaultMetadata.contextMenuActions;
         this.baklavaView.cache = {};
         this.baklavaView.logLevel = this.defaultMetadata.logLevel;
         this.baklavaView.settings.editableNodeTypes = this.defaultMetadata.editableNodeTypes;
@@ -1301,6 +1302,9 @@ export default class EditorManager {
                 this.baklavaView.editor.nodeURLs.get(node.name)[urlName] = url;
             });
         }
+        if ('contextMenuActions' in node) {
+            this.baklavaView.editor.nodeContextMenuActions.set(node.name, node.contextMenuActions);
+        }
         return [];
     }
 
@@ -1803,6 +1807,12 @@ export default class EditorManager {
 
         if (metadata && 'navbarItems' in metadata) {
             this.baklavaView.navbarItems = JSON.parse(JSON.stringify(metadata.navbarItems));
+        }
+
+        if (metadata && 'contextMenuActions' in metadata) {
+            this.baklavaView.contextMenuActions = JSON.parse(
+                JSON.stringify(metadata.contextMenuActions),
+            );
         }
 
         this.baklavaView.editor.readonly = metadata?.readonly ?? this.defaultMetadata.readonly;

@@ -200,7 +200,7 @@ import {
 } from '../core/History.ts';
 
 import EditorManager, { DEFAULT_GRAPH_NODE_TYPE } from '../core/EditorManager';
-import getExternalApplicationManager from '../core/communication/ExternalApplicationManager';
+import getExternalApplicationManager, { handleExternalAppResponse } from '../core/communication/ExternalApplicationManager';
 
 import { configurationState, menuState } from '../core/nodeCreation/ConfigurationState.ts';
 import { prepareNodeForDuplication } from '../core/nodeCreation/Configuration.ts';
@@ -416,6 +416,23 @@ const contextMenuTitleItems = computed(() => {
 
     items.push(...nodeURLs);
 
+    const customContextMenuActions = [
+        ...(viewModel.value.contextMenuActions ?? []),
+        ...viewModel.value.editor.getNodeContextMenuActions(node.value.type),
+    ];
+    if (customContextMenuActions.length > 0) {
+        if (items.length > 0) {
+            items.at(-1).endSection = true;
+        }
+        customContextMenuActions.forEach((customAction) => {
+            items.push({
+                value: `custom:${customAction.procedureName}`,
+                label: customAction.name,
+                icon: customAction.iconName ? icons[customAction.iconName] : undefined,
+            });
+        });
+    }
+
     if (!viewModel.value.editor.readonly) {
         if (items.length > 1) {
             items.at(-1).endSection = true;
@@ -481,8 +498,28 @@ const getSubgraphProperties = () => {
     return evaluatedProp;
 };
 
+const runCustomContextMenuAction = async (procedureName) => {
+    const actionDef = [
+        ...(viewModel.value.contextMenuActions ?? []),
+        ...viewModel.value.editor.getNodeContextMenuActions(node.value.type),
+    ].find((customAction) => customAction.procedureName === procedureName);
+
+    const params = { node_id: props.node.id };
+    if (actionDef?.requireResponse ?? true) {
+        const response = await externalApplicationManager.request(procedureName, params);
+        handleExternalAppResponse(response);
+    } else {
+        externalApplicationManager.request(procedureName, params);
+    }
+};
+
 /* eslint-disable default-case */
 const onContextMenuTitleClick = async (action) => {
+    if (action.startsWith('custom:')) {
+        await runCustomContextMenuAction(action.replace(/^custom:/, ''));
+        return;
+    }
+
     if (action !== 'delete' && action !== 'disconnect') {
         const nodeData = {
             name: props.node.type,

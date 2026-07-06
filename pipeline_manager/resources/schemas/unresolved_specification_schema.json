@@ -334,6 +334,13 @@
                                 }
                             }
                         },
+                        "contextMenuActions": {
+                            "type": "array",
+                            "description": "List of custom actions displayed in the context menu of nodes of this type, in addition to the global actions declared in specification metadata",
+                            "items": {
+                                "$ref": "metadata_schema.json#/$defs/contextMenuAction"
+                            }
+                        },
                         "extends": {
                             "type": "array",
                             "description": "Node names to extend",

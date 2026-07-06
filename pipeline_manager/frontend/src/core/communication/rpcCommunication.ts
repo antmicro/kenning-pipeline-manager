@@ -166,8 +166,8 @@ function createServer() {
             if (!externalApp) {
                 throw new Error('Missing backend.');
             }
-            const method = (customMethodRegex.test(request.method)) ?
-                customMethodReplace : request.method;
+            const isCustomMethod = customMethodRegex.test(request.method);
+            const method = isCustomMethod ? customMethodReplace : request.method;
             // request validation
             if (!(method in externalEndpoints) && !(method in backendEndpoints)) {
                 throw new Error('Requested method not known');
@@ -176,10 +176,13 @@ function createServer() {
             const endpoints = (method in externalEndpoints) ?
                 externalEndpoints : backendEndpoints;
             const schema = endpoints[method];
-            const requestError =
-                validateRequestResponse(schema.params, request.params ?? {}, request.id);
-            if (requestError) {
-                throw new RPCError(requestError.error.message, requestError.error.data);
+            // TODO: Improve validation for custom methods
+            if (!isCustomMethod) {
+                const requestError =
+                    validateRequestResponse(schema.params, request.params ?? {}, request.id);
+                if (requestError) {
+                    throw new RPCError(requestError.error.message, requestError.error.data);
+                }
             }
             if (request.id) {
                 requestSchema.set(request.id, schema);
