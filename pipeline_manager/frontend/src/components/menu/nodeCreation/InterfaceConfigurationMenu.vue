@@ -46,6 +46,7 @@ import InputInterface from '../../../interfaces/InputInterface.js';
 import IntegerInterface from '../../../interfaces/IntegerInterface.js';
 import newInputInterface from './utils.ts';
 import EditorManager from '../../../core/EditorManager.js';
+import NotificationHandler from '../../../core/notifications.js';
 
 interface CurrentInterface {
     name: string,
@@ -182,6 +183,7 @@ export default defineComponent({
                 // Check for custom shape
                 if (configurationState.nodeData.isShaped) {
                     close();
+                    NotificationHandler.showToast('info', 'Click on the node to add interface.',null, true);
                     window.addEventListener('mousedown', waitForMousePosition);
                     return;
                 }
