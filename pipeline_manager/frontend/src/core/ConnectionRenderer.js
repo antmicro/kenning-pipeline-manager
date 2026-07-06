@@ -892,6 +892,30 @@ export default class ConnectionRenderer {
                     { x: nc.x2, y: nc.y2 },
                 ];
             }
+            if (nc.from.side === 'bottom' && nc.to.side === 'top') {
+                const mid = Math.min(nc.y2, middlePointY);
+
+                return [{ x: nc.x1, y: nc.y1 },
+                    { x: nc.x1, y: nc.y1 + intfPad },
+                    { x: middlePointX, y: nc.y1 + intfPad },
+                    { x: middlePointX, y: mid - intfPad },
+                    { x: nc.x2, y: mid - intfPad },
+                    { x: nc.x2, y: nc.y2 - intfPad },
+                    { x: nc.x2, y: nc.y2 },
+                ];
+            }
+            if (nc.from.side === 'top' && nc.to.side === 'bottom') {
+                const mid = Math.min(nc.y1, middlePointY);
+
+                return [{ x: nc.x1, y: nc.y1 },
+                    { x: nc.x1, y: nc.y1 - intfPad },
+                    { x: nc.x1, y: mid - intfPad },
+                    { x: middlePointX, y: mid - intfPad },
+                    { x: middlePointX, y: nc.y2 + intfPad },
+                    { x: nc.x2, y: nc.y2 + intfPad },
+                    { x: nc.x2, y: nc.y2 },
+                ];
+            }
         }
         return [{ x: nc.x1, y: nc.y1 },
             { x: middlePointX, y: nc.y1 },
