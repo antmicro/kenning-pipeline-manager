@@ -93,7 +93,6 @@ from moving or deleting the nodes.
             @pointerdown.left="startDragWrapper($event)"
             @pointerdown.right="openContextMenuTitle"
             v-long-press:500="openContextMenuTitle"
-            :style="shapeStyle"
         />
         <!-- Positioned inputs -->
         <template v-for="input in positionedInterfaces">
@@ -723,6 +722,7 @@ const styles = computed(() => ({
     left: `${props.position?.x ?? 0}px`,
     width: width.value,
     height: height.value,
+    display: customShape === undefined ? 'inherit' : 'block',
 }));
 
 const nodeTitle = computed(() => {
