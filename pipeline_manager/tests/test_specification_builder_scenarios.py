@@ -145,6 +145,36 @@ def test_node_style(
         spec.create_and_validate_spec(fail_on_warnings=True)
 
 
+def test_adding_positioned_interfaces(specification_builder):
+    NODE_NAME = "TestNode"
+    INTERFACE_NAME = "1"
+    STYLE_NAME = "TestStyle"
+
+    spec: SpecificationBuilder = specification_builder
+
+    spec.add_node_type(NODE_NAME)
+    spec.add_node_type_interface(NODE_NAME, INTERFACE_NAME)
+
+    spec.metadata_add_node_style(STYLE_NAME, styleshape="test.svg")
+    spec.add_position_to_interface(STYLE_NAME, INTERFACE_NAME, 0.0, 0.0)
+
+    spec.create_and_validate_spec(fail_on_warnings=True)
+
+
+def test_adding_positioned_interfaces_with_no_style(specification_builder):
+    NODE_NAME = "TestNode"
+    INTERFACE_NAME = "1"
+    STYLE_NAME = "TestStyle"
+
+    spec: SpecificationBuilder = specification_builder
+
+    spec.add_node_type(NODE_NAME)
+    spec.add_node_type_interface(NODE_NAME, INTERFACE_NAME)
+
+    with pytest.raises(SpecificationBuilderException):
+        spec.add_position_to_interface(STYLE_NAME, INTERFACE_NAME, 0.0, 0.0)
+
+
 def test_node_style_absent(specification_builder):
     """
     Verify whether node styling fails if the provided node style does not exist
