@@ -70,7 +70,7 @@ export default class NotificationHandler {
         return `${hours}:${minutes}:${seconds}`;
     }
 
-    static showToast(type, message, timestamp = null) {
+    static showToast(type, message, timestamp = null, showPopUp = false) {
         const timestampCurrent = timestamp ?? this.#currentTimestamp();
 
         const content = {
@@ -83,9 +83,9 @@ export default class NotificationHandler {
         };
 
         if (
-            LOG_LEVEL[type] >= LOG_LEVEL[
+            (LOG_LEVEL[type] >= LOG_LEVEL[
                 EditorManager.getEditorManagerInstance().baklavaView.logLevel?.toLowerCase()
-            ] && NotificationHandler.showNotifications
+            ] && NotificationHandler.showNotifications) || showPopUp
         ) {
             toast(content);
         } else {
