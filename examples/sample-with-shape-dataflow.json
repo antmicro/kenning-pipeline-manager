@@ -10,7 +10,6 @@
                         "x": 486,
                         "y": 193
                     },
-                    "width": 298,
                     "twoColumn": false,
                     "interfaces": [
                         {
@@ -31,8 +30,7 @@
                     "properties": [],
                     "enabledInterfaceGroups": [],
                     "name": "Resistor",
-                    "instanceName": "Resistor",
-                    "height": 98
+                    "instanceName": "Resistor"
                 },
                 {
                     "id": "f70452bc-2bf4-4de1-9eef-9a27cc2386a1",
@@ -40,7 +38,6 @@
                         "x": 918,
                         "y": -228
                     },
-                    "width": 300,
                     "twoColumn": true,
                     "interfaces": [
                         {
@@ -74,7 +71,6 @@
                         "x": 916,
                         "y": 372
                     },
-                    "width": 300,
                     "twoColumn": true,
                     "interfaces": [
                         {
@@ -108,7 +104,6 @@
                         "x": 1331,
                         "y": 178
                     },
-                    "width": 298,
                     "twoColumn": true,
                     "interfaces": [
                         {
@@ -137,7 +132,6 @@
                         "x": 995,
                         "y": 979
                     },
-                    "width": 298,
                     "twoColumn": true,
                     "interfaces": [
                         {
@@ -158,7 +152,6 @@
                         "x": -254,
                         "y": 266
                     },
-                    "width": 300,
                     "twoColumn": true,
                     "interfaces": [
                         {
@@ -185,7 +178,6 @@
                         "x": -250,
                         "y": 1014
                     },
-                    "width": 298,
                     "twoColumn": true,
                     "interfaces": [
                         {
@@ -206,7 +198,6 @@
                         "x": 1716,
                         "y": 971
                     },
-                    "width": 298,
                     "twoColumn": true,
                     "interfaces": [
                         {
@@ -227,7 +218,6 @@
                         "x": 140,
                         "y": 242
                     },
-                    "width": 300,
                     "twoColumn": true,
                     "interfaces": [
                         {
@@ -254,7 +244,6 @@
                         "x": 144,
                         "y": 1001
                     },
-                    "width": 298,
                     "twoColumn": true,
                     "interfaces": [
                         {
