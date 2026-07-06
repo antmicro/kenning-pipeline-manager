@@ -139,6 +139,30 @@ specification_builder.add_node_description(
 )
 ```
 
+### Adding positioned interfaces.
+
+To add custom position to node you need to specify node style with node shape.
+
+```python
+spec.metadata_add_node_style(
+    stylename='SaveNodeStyle',
+    styleshape="floppy.svg"
+)
+```
+
+Then you can specify interface name and positions:
+
+```python
+spec.add_position_to_interface(
+    stylename='SaveNodeStyle',
+    interfacename='save',
+    x=50.0,
+    y=50.0
+)
+```
+
+This will move interface named `save` to a center of the node.
+
 ### Creating interface groups
 
 All interfaces belonging to a group must exist.
