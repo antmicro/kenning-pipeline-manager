@@ -179,6 +179,12 @@ class SpecificationBuilder(object):
 
         self.reset()
 
+    def _is_custom_shaped_node(self, name: str) -> bool:
+        node = self._nodes[name]
+        style = node["style"]
+
+        return "shape" in style.keys()
+
     def reset(self):
         """
         Resets all fields for the specification.
@@ -869,6 +875,50 @@ class SpecificationBuilder(object):
             node["defaultInterfaceGroups"].append(new_group)
         else:
             node["defaultInterfaceGroups"] = [new_group]
+
+    def add_position_to_interface(
+        self, stylename: str, interfacename: str, x: float, y: float
+    ):
+        """
+        Adds position to interface
+        in node style.
+
+        Parameters
+        ----------
+        stylename: str
+            Name of the node style
+        interfacename: str
+            Name of the interface
+        x: float
+            x coordinate of the interface
+        y: float
+            y coordinate of the interface
+
+        Raises
+        ------
+        SpecificationBuilderException
+            Raised when style doesn't exist.
+        """
+        if "styles" not in self._metadata:
+            raise SpecificationBuilderException(
+                "Style not defined in metadata."
+            )
+        if stylename not in self._metadata["styles"]:
+            raise SpecificationBuilderException(
+                f"Style {stylename} not exits."
+            )
+
+        styles = self._metadata["styles"][stylename]
+
+        x = max(min(x, 100.0), 0.0)
+        y = max(min(y, 100, 0), 0.0)
+
+        if "positions" not in styles.keys():
+            styles["positions"] = {}
+
+        styles["positions"][interfacename] = {"x": x, "y": y}
+
+        self._metadata["styles"][stylename] = styles
 
     def add_node_type_interface(
         self,
