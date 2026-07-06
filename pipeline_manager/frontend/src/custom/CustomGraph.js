@@ -264,6 +264,10 @@ export default function createPipelineManagerGraph(graph) {
             newNodeInstance.title = oldNode.title;
         }
 
+        // Restoring width and height
+        newNodeInstance.width = oldNode.width;
+        newNodeInstance.height = oldNode?.height;
+
         // Restoring properties and interfaces
         if (copyInterfaces) {
             Object.entries({ ...oldNode.inputs, ...oldNode.outputs }).forEach(([name, intf]) => {
