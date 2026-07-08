@@ -7,6 +7,18 @@
 export function validateCssObject(obj: any) {
     if (!obj || Object.keys(obj).length === 0) return false;
 
+    if (typeof CSS === 'undefined' || !CSS || !CSS.supports) {
+        if (typeof document === 'undefined') return true;
+        const { style } = document.createElement('div');
+        return Object.entries(obj).every(([property, value]) => {
+            const camelProperty = property.replace(/-([a-z])/g, (g) => g.toUpperCase());
+            if (!(camelProperty in style)) return false;
+            style.setProperty(camelProperty, String(value));
+            const isValid = style.getPropertyValue(camelProperty) !== '';
+            style.setProperty(camelProperty, '');
+            return isValid;
+        });
+    }
     return Object.entries(obj).every(([property, value]) => CSS.supports(property, String(value)));
 }
 
