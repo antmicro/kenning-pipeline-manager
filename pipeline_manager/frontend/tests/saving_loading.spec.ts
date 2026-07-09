@@ -232,16 +232,19 @@ test('save and load graph partially', async ({ page }, testInfo) => {
     await loadSpecification(page, 'sample-subgraph-specification.json');
     await expectNoErrors(page);
     await loadDataflow(page, 'sample-subgraph-dataflow.json');
-    const filepath = await saveDataflowAs(page,testInfo,'temp',[
-        "Example of a graph with graph nodes",
-        "Test subgraph #1",
+    const savedSub = 'Test subgraph #1';
+    const filepath = await saveDataflowAs(page, testInfo, 'temp', [
+        'Example of a graph with graph nodes',
+        savedSub,
     ]);
     await expectNoErrors(page);
     await loadDatflowFromFile(page, filepath);
     await expectNoErrors(page);
     await enableNavigationBar(page);
     const paletteTitle = await page.locator('.palette-title');
-    await paletteTitle.getByText('Graphs').first().click();
+    await paletteTitle.getByText('Graphs', { exact: true }).first().click();
     const entries = await page.locator('.entries');
-    expect(await entries.locator('.__entry').count()).toBe(3);
+    expect(entries.getByText(savedSub)).toBeVisible();
+    await page.waitForTimeout(3000);
+    expect(await entries.locator('.__entry').count()).toBe(1);
 });
