@@ -75,8 +75,10 @@ const getSpecialEntries = (
 ): IVEntry<IEntryDataNode>[] => {
     const specialEntries: IVEntry<IEntryDataNode>[] = [];
     const specialEntriesIcon = { component: Cross, props: { rotate: 45, color: 'white' }, classes: ['cross'] };
+    const editorManager = EditorManager.getEditorManagerInstance();
 
-    if ((viewModel as CustomViewModel).settings.editableNodeTypes) {
+    if ((viewModel as CustomViewModel).settings.editableNodeTypes &&
+        (viewModel as CustomViewModel).settings.newNodeType) {
         specialEntries.push({
             id: DEFAULT_CUSTOM_NODE_TYPE,
             data: {
@@ -116,7 +118,6 @@ const getSpecialEntries = (
         });
     }
 
-    const editorManager = EditorManager.getEditorManagerInstance();
     if ((viewModel as CustomViewModel).settings.newGraphNode
         && editorManager.isSpecificationLoaded()) {
         specialEntries.push({
