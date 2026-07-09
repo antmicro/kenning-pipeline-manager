@@ -144,6 +144,7 @@ export interface CustomNodeTypeInformation extends INodeTypeInformation {
 }
 
 export interface CustomViewSettings extends IViewSettings {
+    newNodeType?: boolean,
     newGraphNode?: boolean,
     editableNodeTypes?: boolean,
     showIds?: boolean,
