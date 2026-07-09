@@ -535,6 +535,7 @@ export default class EditorManager {
         this.baklavaView.editor.deepCleanEditor();
         this.baklavaView.editor.unregisterNodes();
         this.baklavaView.editor.nodeStyles.clear();
+        this.baklavaView.editor.nodeLists.clear();
         this.setSpecificationLoaded(false);
         this.specification.currentSpecification = {};
         this.specification.includedSpecification = {};
@@ -1811,6 +1812,9 @@ export default class EditorManager {
         this.baklavaView.editor.nodeStyles.set(EDITED_NODE_STYLE, { icon: 'EditedNode' });
         Object.entries(metadata?.styles ?? {}).forEach(([key, value]) => {
             this.baklavaView.editor.nodeStyles.set(key, value);
+        });
+        Object.entries(metadata?.nodeLists ?? {}).forEach(([key, value]) => {
+            this.baklavaView.editor.nodeLists.set(key, value);
         });
 
         this.editor.allowLoopbacks =

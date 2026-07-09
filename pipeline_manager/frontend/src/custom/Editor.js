@@ -73,6 +73,8 @@ export default class PipelineManagerEditor extends Editor {
 
     nodeStyles = new Map();
 
+    nodeLists = new Map();
+
     layoutManager = new LayoutManager();
 
     subgraphStack = [];
