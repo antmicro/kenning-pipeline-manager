@@ -22,6 +22,9 @@
     "metadata": {
         "connectionStyle": "orthogonal",
         "allowLoopbacks": true,
-        "twoColumn": true
+        "twoColumn": true,
+        "editableTypes": true,
+        "newNodeType": false,
+        "newGraphNode": false
     }
 }
