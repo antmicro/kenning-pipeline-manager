@@ -426,10 +426,8 @@ export default defineComponent({
 
             (list ?? []).forEach((eName) => {
                 const button = new ButtonInterface(eName, () => {
-                    if (editorManager.baklavaView.editor.parentNodes.has(eName)) {
-                        const newNode = graph.value.replaceNode(node.value, eName);
-                        graph.value.sidebar.nodeId = newNode.id;
-                    }
+                    const newNode = graph.value.replaceNode(node.value, eName);
+                    graph.value.sidebar.nodeId = newNode.id;
                 });
                 button.componentName = 'ButtonInterface';
                 buttons.value.push(button);
