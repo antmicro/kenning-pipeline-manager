@@ -133,6 +133,54 @@
             "unevaluatedProperties": false,
             "required": ["properties"]
         },
+        "interfaces_diff": {
+            "description": "Schema that represents differences in interfaces of the node",
+            "allOf": [{ "$ref": "common_types#/$defs/node_object" }],
+            "type": "object",
+            "properties": {
+                "interfaces": {
+                    "type": "array",
+                    "description": "Interfaces to change specified by either a name or id",
+                    "items": {
+                        "type": "object",
+                        "oneOf": [
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "id": {
+                                        "description": "Id of the interface to alter",
+                                        "type": "string"
+                                    },
+                                    "externalName": {
+                                        "description": "New external name of the interface",
+                                        "type": "string"
+                                    }
+                                },
+                                "required": ["id"],
+                                "additionalProperties": false
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "description": "Name of the interface to alter",
+                                        "type": "string"
+                                    },
+                                    "externalName": {
+                                        "description": "New external name of the interface",
+                                        "type": "string"
+                                    }
+                                },
+                                "required": ["name"],
+                                "additionalProperties": false
+                            }
+                        ]
+                    }
+                }
+            },
+            "unevaluatedProperties": false,
+            "required": ["interfaces"]
+        },
         "position_diff": {
             "description": "Schema that represent differences in position of the node",
             "allOf": [{ "$ref": "common_types#/$defs/node_object" }],
