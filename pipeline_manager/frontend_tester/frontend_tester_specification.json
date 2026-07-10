@@ -46,6 +46,12 @@
                     "iconName": "Cogwheel",
                     "procedureName": "custom_test_node_info",
                     "requireResponse": true
+                },
+                {
+                    "name": "Test Node Download",
+                    "iconName": "Cogwheel",
+                    "procedureName": "custom_download_test_node",
+                    "requireResponse": true
                 }
             ]
         },

@@ -35,6 +35,7 @@ import logging
 import random
 import string
 import sys
+from base64 import b64encode
 from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
@@ -546,6 +547,31 @@ class RPCMethods:
                 "This action is only available on Test Node "
                 f"instances (triggered from node {node_id})"
             ),
+        }
+
+    def custom_download_test_node(self, node_id: str) -> Dict:
+        """RPC method for the "Test Node download" context menu action.
+
+        It is available only on `Test Node` instances. This action
+        downloads a file named "hello.txt" with content "Hello world!"
+
+        Parameters
+        ----------
+        node_id : str
+            Id of the clicked node.
+
+        Returns
+        -------
+        Dict
+            Method's response
+        """
+        content_b64encoded = b64encode("Hello world!".encode("utf-8")).decode(
+            "utf-8"
+        )
+        return {
+            "type": MessageType.OK.value,
+            "content": content_b64encoded,
+            "filename": "hello.txt",
         }
 
     async def button_click(self, id: str, value: Optional[Dict]):

@@ -542,6 +542,10 @@ class SpecificationBuilder(object):
         this type, in addition to any global actions added with
         `metadata_add_context_menu_action`.
 
+        The client response to the action has to follow either
+        the `dataflow_run` or `dataflow_export` schemas (see procedure_name).
+        The request is not currently verified.
+
         Parameters
         ----------
         name: str
@@ -556,6 +560,11 @@ class SpecificationBuilder(object):
             `pipeline_manager_backend_communication`, it must start
             with `custom_`, otherwise the external application will
             silently refuse to register it.
+
+            If this name starts with `custom_download`, the response
+            will be verified against the `dataflow_export` schema.
+            Otherwise the response will be verified against the
+            `dataflow_run` schema.
         icon: Optional[str]
             Path in assets directory or URL to the icon
         require_response: bool

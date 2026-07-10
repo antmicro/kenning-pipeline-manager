@@ -32,6 +32,10 @@ class CustomJSONRPCServerAndClient extends JSONRPCServerAndClient<void, ClientPa
     customMethodRegex: RegExp | null = null;
 
     customMethodReplace: string | null = null;
+
+    customDownloadMethodRegex: RegExp | null = null;
+
+    customDownloadMethodReplace: string | null = null;
 }
 
 export class RPCError extends Error {
@@ -43,6 +47,8 @@ export class RPCError extends Error {
 
 const customMethodRegex = /^custom_.*$/;
 const customMethodReplace = 'dataflow_run';
+const customDownloadMethodRegex = /^custom_download.*$/;
+const customDownloadMethodReplace = 'dataflow_export';
 
 const ajv = new Ajv2019({
     schemas: [commonTypesSchema],
@@ -167,7 +173,13 @@ function createServer() {
                 throw new Error('Missing backend.');
             }
             const isCustomMethod = customMethodRegex.test(request.method);
-            const method = isCustomMethod ? customMethodReplace : request.method;
+            const isCustomDownloadMethod = customDownloadMethodRegex.test(request.method);
+            let { method } = request;
+            if (isCustomDownloadMethod) {
+                method = customDownloadMethodReplace;
+            } else if (isCustomMethod) {
+                method = customMethodReplace;
+            }
             // request validation
             if (!(method in externalEndpoints) && !(method in backendEndpoints)) {
                 throw new Error('Requested method not known');
@@ -211,6 +223,8 @@ function createServer() {
 
     jsonRPCServer.customMethodRegex = customMethodRegex;
     jsonRPCServer.customMethodReplace = customMethodReplace;
+    jsonRPCServer.customDownloadMethodRegex = customDownloadMethodRegex;
+    jsonRPCServer.customDownloadMethodReplace = customDownloadMethodReplace;
 }
 
 const obj = {

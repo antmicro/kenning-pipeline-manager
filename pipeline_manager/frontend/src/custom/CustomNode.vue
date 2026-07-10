@@ -202,6 +202,7 @@ import {
 import EditorManager, { DEFAULT_GRAPH_NODE_TYPE } from '../core/EditorManager';
 import getExternalApplicationManager, { handleExternalAppResponse } from '../core/communication/ExternalApplicationManager';
 
+import { saveGraphConfiguration } from '../components/saveConfiguration.ts';
 import { configurationState, menuState } from '../core/nodeCreation/ConfigurationState.ts';
 import { prepareNodeForDuplication } from '../core/nodeCreation/Configuration.ts';
 import {
@@ -507,6 +508,14 @@ const runCustomContextMenuAction = async (procedureName) => {
     const params = { node_id: props.node.id };
     if (actionDef?.requireResponse ?? true) {
         const response = await externalApplicationManager.request(procedureName, params);
+        // if the response contains a 'filename' field, save 'content' to a file named 'filename'
+        if (response?.filename !== undefined) {
+            const saveConfiguration = { ...saveGraphConfiguration };
+            saveConfiguration.saveName = response.filename;
+            saveConfiguration.saveCallbackCustomFormat(
+                response.content,
+            );
+        }
         handleExternalAppResponse(response);
     } else {
         externalApplicationManager.request(procedureName, params);
