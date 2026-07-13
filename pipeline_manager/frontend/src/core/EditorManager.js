@@ -32,6 +32,7 @@ import messageSchema from '../../../resources/schemas/message_schema.json' with 
 import ConnectionRenderer from './ConnectionRenderer.js';
 import Specification from './Specification.js';
 import validateJSON from './validate-json.js';
+import { updateInterfacePosition } from '../custom/CustomNode.js';
 
 import globalProperties from '../globalProperties.ts';
 import { textColorToHex, isTextColor, hexToRGB } from './nodeCreation/nodeColors.js';
@@ -1395,6 +1396,113 @@ export default class EditorManager {
         };
         graphIds.forEach((id) => visit(id));
         return sortedIds.map((id) => idToGraph.get(id));
+    }
+
+    /* eslint-disable max-len */
+    /**
+     * Get basic layout from provided graph.
+     *
+     * @param {object} graph Graph to get layout from.
+     * @returns {object} A basic layout of the graph.
+     */
+    /* eslint-enable max-len */
+    extractGraphLayout(graph) {
+        const layout = new Map();
+        const { currentView } = this.editor;
+
+        graph.nodes.forEach((node) => {
+            const nodeType = this.editor.nodeTypes.get(node.name);
+            const nodeView = node?.views?.find((v) => v.name === currentView);
+            const position = nodeView?.position ?? node?.position ?? { x: 0.0, y: 0.0 };
+            const { id } = node;
+            const style = nodeView?.style ?? nodeType?.style;
+            const interfaces = {};
+            node.interfaces.forEach((inf) => {
+                interfaces[inf.name] =
+                    {
+                        side: inf.side,
+                        sidePosition: inf?.sidePosition ?? 0,
+                    };
+            },
+            );
+
+            layout.set(id, {
+                position,
+                style,
+                interfaces,
+            });
+        });
+
+        const objectLayout = Object.fromEntries(layout);
+
+        return {
+            layout: objectLayout,
+        };
+    }
+
+    /* eslint-disable max-len */
+    /**
+     * Import basic layout to provided graph.
+     *
+     * @param {object} graph Graph to get layout from.
+     * @param {object} content Layout which is applied to graph.
+     * @returns list with errors occurred during import.
+     */
+    /* eslint-enable max-len */
+    static importGraphLayout(graph, content) {
+        const { viewModel } = useViewModel();
+        const { currentView } = viewModel.value.editor;
+        const errors = [];
+
+        const layout = content?.layout;
+
+        if (layout === undefined) {
+            return [
+                'Invalid format, no layout section.',
+            ];
+        }
+
+        Object.entries(layout).forEach(([key, value]) => {
+            const node = graph.nodes.find((n) => n.id === key);
+            if (node !== undefined) {
+                const nodeView = node?.views?.find((v) => v.name === currentView);
+                if (nodeView !== undefined) {
+                    nodeView.position.x = value.position.x;
+                    nodeView.position.y = value.position.y;
+                    nodeView.style = value.style;
+                } else {
+                    node.position.x = value.position.x;
+                    node.position.y = value.position.y;
+                    node.style = value.style;
+                }
+                const { interfaces } = value;
+                Object.entries(interfaces).forEach(([infName, inf]) => {
+                    const inputName = `input_${infName}`;
+                    const outputName = `output_${infName}`;
+
+                    if (Object.hasOwn(node.inputs, inputName)) {
+                        updateInterfacePosition(
+                            node,
+                            node.inputs[inputName],
+                            inf.side,
+                            inf.sidePosition,
+                        );
+                    }
+                    if (Object.hasOwn(node.outputs, outputName)) {
+                        updateInterfacePosition(
+                            node,
+                            node.outputs[outputName],
+                            inf.side,
+                            inf.sidePosition,
+                        );
+                    }
+                });
+            } else {
+                errors.push(`Cannot find node with id ${key}.`);
+            }
+        });
+
+        return errors;
     }
 
     /**
