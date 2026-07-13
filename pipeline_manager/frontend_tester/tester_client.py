@@ -574,6 +574,29 @@ class RPCMethods:
             "filename": "hello.txt",
         }
 
+    def custom_subgraph_node_info(self, node_id: str) -> Dict:
+        """
+        RPC method for the "Subgraph Node Info" context menu action,
+        available only on subgraph nodes.
+
+        Parameters
+        ----------
+        node_id : str
+            Id of the clicked node.
+
+        Returns
+        -------
+        Dict
+            Method's response
+        """
+        return {
+            "type": MessageType.OK.value,
+            "content": (
+                "This action is only available on subgraph nodes "
+                f"instances (triggered from node {node_id})"
+            ),
+        }
+
     async def button_click(self, id: str, value: Optional[Dict]):
         message = ""
         response = await self.client.request("graph_get")

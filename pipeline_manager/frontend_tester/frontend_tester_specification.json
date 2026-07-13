@@ -302,6 +302,14 @@
                 "procedureName": "custom_node_info",
                 "requireResponse": true
             }
+        ],
+        "subgraphContextMenuActions": [
+            {
+                "name": "Subgraph Node Info",
+                "iconName": "Magnifier",
+                "procedureName": "custom_subgraph_node_info",
+                "requireResponse": true
+            }
         ]
     }
 }

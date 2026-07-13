@@ -186,6 +186,8 @@ export default class EditorManager {
         this.baklavaView.editor.allowLoopbacks = this.defaultMetadata.allowLoopbacks;
         this.baklavaView.navbarItems = this.defaultMetadata.navbarItems;
         this.baklavaView.contextMenuActions = this.defaultMetadata.contextMenuActions;
+        this.baklavaView.subgraphContextMenuActions =
+            this.defaultMetadata.subgraphContextMenuActions;
         this.baklavaView.cache = {};
         this.baklavaView.logLevel = this.defaultMetadata.logLevel;
         this.baklavaView.settings.editableNodeTypes = this.defaultMetadata.editableNodeTypes;
@@ -1812,6 +1814,12 @@ export default class EditorManager {
         if (metadata && 'contextMenuActions' in metadata) {
             this.baklavaView.contextMenuActions = JSON.parse(
                 JSON.stringify(metadata.contextMenuActions),
+            );
+        }
+
+        if (metadata && 'subgraphContextMenuActions' in metadata) {
+            this.baklavaView.subgraphContextMenuActions = JSON.parse(
+                JSON.stringify(metadata.subgraphContextMenuActions),
             );
         }
 

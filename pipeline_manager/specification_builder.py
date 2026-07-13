@@ -1754,6 +1754,10 @@ class SpecificationBuilder(object):
         the specification, in addition to any node-type-specific
         actions added with `add_node_type_context_menu_action`.
 
+        The client response to the action has to follow either
+        the `dataflow_run` or `dataflow_export` schemas (see procedure_name).
+        The request is not currently verified.
+
         Parameters
         ----------
         name: str
@@ -1804,6 +1808,76 @@ class SpecificationBuilder(object):
             return
 
         self._metadata["contextMenuActions"].append(entry)
+
+    def metadata_add_subgraph_context_menu_action(
+        self,
+        name: str,
+        procedure_name: str,
+        icon: Optional[str] = None,
+        require_response: bool = True,
+    ) -> None:
+        """
+        Adds a custom context menu action to subgraph nodes.
+
+        The action is displayed only in the context menu
+        of subgraph nodes, in addition to any global actions
+        added with `metadata_add_context_menu_action`.
+
+        The client response to the action has to follow either
+        the `dataflow_run` or `dataflow_export` schemas (see procedure_name).
+        The request is not currently verified.
+
+        Parameters
+        ----------
+        name: str
+            Label of the action, displayed in the context menu
+        procedure_name: str
+            Name of the JSON-RPC procedure requested from the external
+            application when the action is clicked. The id of the
+            clicked node is sent as an argument. Unless this name is
+            one of the built-in endpoints known to
+            `pipeline_manager_backend_communication`, it must start
+            with `custom_`.
+        icon: Optional[str]
+            Path in assets directory or URL to the icon
+        require_response: bool
+            Tells whether the response from the external application
+            should be awaited when running the procedure
+
+        Raises
+        ------
+        SpecificationBuilderException
+            Raised when an action with the given procedure_name already
+            exists and differs in format with the existing entry.
+        """
+        if "subgraphContextMenuActions" not in self._metadata:
+            self._metadata["subgraphContextMenuActions"] = []
+
+        entry = {
+            "name": name,
+            "procedureName": procedure_name,
+            "requireResponse": require_response,
+        }
+        set_if_not_none(entry, "iconName", icon)
+
+        existing = next(
+            (
+                e
+                for e in self._metadata["subgraphContextMenuActions"]
+                if e["procedureName"] == procedure_name
+            ),
+            None,
+        )
+        if existing is not None:
+            if existing != entry:
+                raise SpecificationBuilderException(
+                    f"Context menu action {procedure_name} already exists for"
+                    f"subgraph nodes and is different:\nCurrent:\n{existing}"
+                    f"\nNew:\n{entry}"
+                )
+            return
+
+        self._metadata["subgraphContextMenuActions"].append(entry)
 
     def metadata_add_param(
         self, paramname: str, paramvalue: Any, metadata: Optional[Dict] = None

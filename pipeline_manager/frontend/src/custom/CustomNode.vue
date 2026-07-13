@@ -420,6 +420,10 @@ const contextMenuTitleItems = computed(() => {
     const customContextMenuActions = [
         ...(viewModel.value.contextMenuActions ?? []),
         ...viewModel.value.editor.getNodeContextMenuActions(node.value.type),
+        // Add subgraph node actions if the node is a subgraph node
+        ...(isGraphNode.value
+            ? (viewModel.value.subgraphContextMenuActions ?? [])
+            : []),
     ];
     if (customContextMenuActions.length > 0) {
         if (items.length > 0) {
@@ -503,6 +507,10 @@ const runCustomContextMenuAction = async (procedureName) => {
     const actionDef = [
         ...(viewModel.value.contextMenuActions ?? []),
         ...viewModel.value.editor.getNodeContextMenuActions(node.value.type),
+        // Add subgraph node actions if the node is a subgraph node
+        ...(isGraphNode.value
+            ? (viewModel.value.subgraphContextMenuActions ?? [])
+            : []),
     ].find((customAction) => customAction.procedureName === procedureName);
 
     const params = { node_id: props.node.id };

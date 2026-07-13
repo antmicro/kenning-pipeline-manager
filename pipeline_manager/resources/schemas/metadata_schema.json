@@ -89,6 +89,14 @@
             },
             "default": []
         },
+        "subgraphContextMenuActions": {
+            "type": "array",
+            "description": "List of custom actions displayed in the context menu of every subgraph node",
+            "items": {
+                "$ref": "#/$defs/contextMenuAction"
+            },
+            "default": []
+        },
         "allowLoopbacks": {
             "type": "boolean",
             "description": "Flag allowing connections with endpoints at the same node",
