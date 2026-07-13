@@ -216,6 +216,10 @@ class RPCMethodsOriginal(RPCMethodsBase):
     async def properties_on_change(self, **kwargs) -> Dict:
         return await self._redirect_changed("properties_change", **kwargs)
 
+    # Methods receiving and redirecting requests with changed values
+    async def interfaces_on_change(self, **kwargs) -> Dict:
+        return await self._redirect_changed("interfaces_change", **kwargs)
+
     async def position_on_change(self, **kwargs) -> Dict:
         return await self._redirect_changed("position_change", **kwargs)
 
