@@ -1536,7 +1536,12 @@ export default class EditorManager {
         this.specification.currentSpecification.graphs = JSON.parse(JSON.stringify(graphs));
 
         // Resolving siblings, parents and children
-        resolvedNodes.forEach((node) => this.resolveAffinities(node, resolvedNodes));
+        resolvedNodes.forEach((node) => errors.push(
+            ...this.resolveAffinities(node, resolvedNodes),
+        ));
+        if (errors.length) {
+            return { errors, warnings };
+        }
 
         if (globalProperties.softLoad) {
             // Check if subgraph id exists
@@ -2016,6 +2021,7 @@ export default class EditorManager {
      */
     /* eslint-disable class-methods-use-this,no-param-reassign */
     resolveAffinities(node, resolvedNodes) {
+        const errors = [];
         // Resolving children
         (node.extends ?? []).forEach((eName) => {
             const extended = resolvedNodes.find((n) => n.name === eName);
@@ -2042,10 +2048,19 @@ export default class EditorManager {
         node.siblings = Array.from(siblings);
 
         if (node.extends) {
-            node.extends = node.extends.filter(
-                (eName) => (resolvedNodes.find((n) => n.name === eName) !== undefined),
-            );
+            const copyExtends = [...node.extends];
+            node.extends = [];
+            copyExtends.forEach((eName) => {
+                if (resolvedNodes.find((n) => n.name === eName) !== undefined) {
+                    node.extends.push(eName);
+                } else {
+                    errors.push(
+                        `No parent node of type ${eName} found for node type ${node.name}`,
+                    );
+                }
+            });
         }
+        return errors;
     }
 
     /**
