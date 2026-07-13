@@ -315,6 +315,33 @@ Object.entries(props.node.inputs).forEach(([name, input]) => {
         });
     }
 });
+// Watch interfaces
+[...Object.entries(props.node.inputs), ...Object.entries(props.node.outputs)]
+    .forEach(([name, intf]) => {
+        if (!name.startsWith('property_')) {
+            let firstWatch = true;
+            watch(intf, async (value) => {
+                if (!externalApplicationManager.isConnected()) {
+                    firstWatch = true;
+                    return;
+                }
+                if (firstWatch || !editorManager.notifyWhenChanged) {
+                    firstWatch = false;
+                    return;
+                }
+                const data = {
+                    graph_id: props.node.graphInstance.id,
+                    node_id: props.node.id,
+                    interfaces: [],
+                };
+                data.interfaces.push({
+                    id: value.id,
+                    externalName: value.externalName,
+                });
+                await externalApplicationManager.notifyAboutChange('interfaces_on_change', data);
+            });
+        }
+    });
 
 // Send message about changed position
 const notifyPositionChanged = (position) => {
