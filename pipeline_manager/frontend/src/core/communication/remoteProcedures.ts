@@ -103,6 +103,40 @@ function getProperty(node: any, id?: string, name?: string) {
 }
 
 /**
+ * Finds interface of id `id` or name `name` in node.
+ * One of those values has to be defined.
+ * An error with appropriate message is thrown if any error occurs.
+ *
+ * @param node Node instance that is searched
+ * @param id id of the interface
+ * @param name name of the interface
+ * @returns found interface
+ */
+function getInterface(node: any, id?: string, name?: string) {
+    let intf;
+
+    if (id !== undefined) {
+        intf = [...Object.values(node.inputs), ...Object.values(node.outputs)]
+            .find((p : any) => p.id === id) as any;
+
+        // If not interface found or it is not an interface, but a property
+        if (intf === undefined || intf.side === undefined) {
+            throw new Error(`Interface with id '${id}' does not exist.`);
+        }
+    } else {
+        intf = [...Object.values(node.inputs), ...Object.values(node.outputs)]
+            .find((p : any) => p.name === name) as any;
+
+        // If not interface found or it is not an interface, but a property
+        if (intf === undefined || intf.side === undefined) {
+            throw new Error(`Interface with name '${name}' does not exist.`);
+        }
+    }
+
+    return intf;
+}
+
+/**
  * Finds connection between interfaces with id `from` and `to` in graph of id `graph_id`.
  * An error with appropriate message is thrown if any error occurs.
  *
@@ -154,6 +188,11 @@ type ModifyPropertiesParamsType = {
         id?: string,
         name?: string,
         new_value: any,
+    }[],
+    interfaces: {
+        id?: string,
+        name?: string,
+        externalName: any,
     }[]
 };
 
@@ -177,6 +216,22 @@ export function properties_change(
     for (const property of params.properties) {
         const prop = getProperty(node, property.id, property.name);
         prop.value = property.new_value;
+    }
+}
+
+export function interfaces_change(
+    params: ModifyPropertiesParamsType,
+) {
+    const node = getNode(params.graph_id, params.node_id);
+    // eslint-disable-next-line no-restricted-syntax
+    for (const intf of params.interfaces) {
+        getInterface(node, intf.id, intf.name);
+    }
+
+    // eslint-disable-next-line no-restricted-syntax
+    for (const intfInfo of params.interfaces) {
+        const intf = getInterface(node, intfInfo.id, intfInfo.name);
+        intf.externalName = intfInfo.externalName;
     }
 }
 
