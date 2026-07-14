@@ -1262,46 +1262,51 @@ export default class ConnectionRenderer {
 
         if (connection.to) {
             if (nc.from.side === 'right' && nc.to.side === 'left') {
-                if (nc.x1 + minMargin >= nc.x2 - minMargin) {
-                    if (nc.x1 - fromNodeWidth * graph.scaling - minMargin
-                > nc.x2 + toNodeWidth * graph.scaling + minMargin) {
-                        nc.from.sidePosition = nextFromNodeLeftIndex;
-                        nc.from.side = 'left';
-                        nc.to.sidePosition = nextToNodeRightIndex;
-                        nc.to.side = 'right';
-                        nc.to.sidePosition = nextToNodeRightIndex;
-                    } else {
-                        nc.from.side = 'right';
-                        nc.to.sidePosition = nextToNodeRightIndex;
-                        nc.to.side = 'right';
-                        nc.to.sidePosition = nextToNodeRightIndex;
-                    }
+                const dx = nc.x1 - nc.x2;
+
+                if (dx > minMargin * 2 + fromNodeWidth) {
+                    nc.from.side = 'left';
+                    nc.from.sidePosition = nextFromNodeLeftIndex;
+                    nc.to.side = 'left';
+                    nc.to.sidePosition = nextToNodeLeftIndex;
                 }
             } else if (nc.from.side === 'left' && nc.to.side === 'right') {
-                if (nc.x2 + minMargin >= nc.x1 - minMargin) {
-                    if (nc.x2 - toNodeWidth * graph.scaling - minMargin
-                > nc.x1 + fromNodeWidth * graph.scaling + minMargin) {
-                        nc.to.sidePosition = nextToNodeLeftIndex;
-                        nc.to.side = 'left';
-                        nc.from.sidePosition = nextFromNodeRightIndex;
-                        nc.from.side = 'right';
-                    } else {
-                        nc.from.sidePosition = nextFromNodeRightIndex;
-                        nc.from.side = 'right';
-                        nc.to.side = 'right';
-                        nc.to.sidePosition = nextToNodeRightIndex;
-                    }
+                const dx = nc.x1 - nc.x2;
+
+                if (dx < -minMargin * 2 - fromNodeWidth) {
+                    nc.to.side = 'right';
+                    nc.to.sidePosition = nextToNodeRightIndex;
+                    nc.from.side = 'right';
+                    nc.from.sidePosition = nextFromNodeRightIndex;
                 }
-            } else if (nc.x1 + minMargin < nc.x2 - toNodeWidth * graph.scaling - minMargin) {
-                nc.from.sidePosition = nextFromNodeLeftIndex;
-                nc.from.side = 'left';
-                nc.to.side = 'right';
-                nc.to.sidePosition = nextToNodeRightIndex;
-            } else if (nc.x1 - fromNodeWidth * graph.scaling - minMargin > nc.x2 + minMargin) {
-                nc.from.side = 'right';
-                nc.to.sidePosition = nextToNodeLeftIndex;
-                nc.to.side = 'left';
-                nc.to.sidePosition = nextToNodeLeftIndex;
+            }
+
+            if (nc.from.side === 'left' && nc.to.side === 'left') {
+                const dx = nc.x1 - nc.x2;
+                if (dx < -minMargin * 2 - fromNodeWidth) {
+                    nc.from.side = 'right';
+                    nc.from.sidePosition = nextFromNodeRightIndex;
+                    nc.to.side = 'left';
+                    nc.to.sidePosition = nextToNodeLeftIndex;
+                } else if (dx > minMargin * 2 + fromNodeWidth + toNodeWidth) {
+                    nc.from.side = 'left';
+                    nc.from.sidePosition = nextFromNodeLeftIndex;
+                    nc.to.side = 'right';
+                    nc.to.sidePosition = nextToNodeRightIndex;
+                }
+            } else if (nc.from.side === 'right' && nc.to.side === 'right') {
+                const dx = nc.x1 - nc.x2;
+                if (dx > minMargin * 2 + fromNodeWidth) {
+                    nc.from.side = 'right';
+                    nc.from.sidePosition = nextFromNodeRightIndex;
+                    nc.to.side = 'left';
+                    nc.to.sidePosition = nextToNodeLeftIndex;
+                } else if (dx < -minMargin * 2 - fromNodeWidth + toNodeWidth) {
+                    nc.from.side = 'right';
+                    nc.from.sidePosition = nextFromNodeRightIndex;
+                    nc.to.side = 'left';
+                    nc.to.sidePosition = nextToNodeLeftIndex;
+                }
             }
         }
     }
