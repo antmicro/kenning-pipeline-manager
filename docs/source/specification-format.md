@@ -80,6 +80,10 @@ This object specifies additional editor options and contains the following optio
 * `welcome` - boolean value determining whether a welcome text should appear on empty editor. This feature is enabled by default.
 * `navbarItems` - list of buttons that are displayed in the navbar in `server-app` mode, that allow for calling custom procedures.
   The entries are of type [Navbar item](#navbar-item).
+* `contextMenuActions` - list of actions that are displayed in the context menu of every node, that allow for calling custom procedure.
+  The entries are of type [Context menu item](#context-menu-item).
+* `subgraphContextMenuActions` - list of actions that are displayed in the context menu of subgraph nodes, that allow for calling custom procedure.
+  The entries are of type [Context menu item](#context-menu-item).
 * `logLevel` - string specifying minimum level of verbosity notification has to have to be displayed.
   It can be one of `INFO`, `WARNING`, `ERROR`.
 * `tag` - String value assigned to each node type defined in the current specification (not in included subspecifications)
@@ -352,6 +356,35 @@ By default, only single action can be called from NavBar at a time.
 This means that if we have two actions that can be started when the other one is running, then `allowToRunInParallelWith` needs to be defined in both actions.
 ```
 
+(metadata-context-menu-item)=
+#### Context menu item
+Describes a list of custom actions available for nodes in the custom menu (depending on where
+the item is specified either all nodes, only subgraph nodes or only nodes of given type).
+Every element consists of the following properties:
+
+* `name` - displayed as a tooltip to the user when the node is clicked.
+  Names have to be unique,
+* `iconName` - name of the icon that is used.
+  It can be either a file in the assets directory, or an icon described in `/pipeline-manager/pipeline_manager/frontend/src/icons/index.ts`.
+* `procedureName` - name of the [custom procedure](#api-context-menu-custom-procedure) to be called.
+  It is assumed that the procedure takes one argument, which is the id of the clicked node.
+  The response is validated against [dataflow_export](#external-dataflow-export) if  `procedureName` starts with `custom_download` or [dataflow_run](#external-dataflow-run) otherwise
+* `requiredResponse` - whether the response from the external application should be awaited when running the procedure
+
+An example of an action that is used to run a dedicated `custom_show_info` procedure looks as follows:
+
+```json
+{
+    "name": "Show Info",
+    "iconName": "Magnifier",
+    "procedureName": "custom_show_info",
+    "requireResponse": true
+}
+```
+
+This will create a button called Show Info, with the `Magnifier` icon (available built-in icon), which upon clicking will run `custom_show_info` method and pass the id of the clicked node to it.
+
+(specification-node)=
 ### Node
 
 This object specifies a single node.
@@ -387,6 +420,9 @@ This object specifies a single node.
   Abstract node types are used only for inheritance purposes, they do not appear in the final list of available nodes.
   They only have one mandatory field - `name`.
   The rest of the fields can be provided to introduce some common properties of classes inheriting from it.
+* `contextMenuActions` - list of actions that are displayed in the context menu of every node of this type, that allow for calling custom procedures.
+  The entries are of type [Context menu item](#context-menu-item).
+
 * `additionalData` - can be any JSON-like object (array, dictionary, number, string, ...), it is only used for storing some additional, node-specific data, such as comments etc.
 * `description` - description of the node in markdown format that is displayed in a sidebar node.
 * `isCategory` - determines whether the node is both a category and a node.

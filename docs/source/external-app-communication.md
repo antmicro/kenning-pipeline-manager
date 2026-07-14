@@ -234,6 +234,8 @@ Its `content` may vary depending on the answered request.
 (api-custom-procedure)=
 ### Custom procedures
 
+#### Navbar
+
 External application can define new remote procedures, which will be called by custom [Navbar button](#metadata-navbar-item).
 To use it, procedure's name has to start with `custom_` prefix, e.g. `custom_simulate_design`.
 
@@ -249,6 +251,19 @@ Such remote procedures can be called from the frontend using custom Navbar butto
 ```
 
 Custom procedure has the same parameters and return type as [dataflow_run](#external-dataflow-run) method.
+
+(api-context-menu-custom-procedure)=
+#### Context menus
+
+An external application can also define custom remote procedures to be called in the context menu of node.
+There are three scopes for such an action: all nodes, subgraph nodes and a given node type.
+They are specified by including a [Context menu item](#metadata-context-menu-item) in, respectively,
+`customMenuActions` or `subgraphCustomMenuActions` fields of [metadata](#metadata) or in the `contextMenuActions`
+field of a given [node](#specification-node).
+
+Context menu procedures have only one parameter: `node_id`, which is the id of the clicked node.
+The expected return type is [dataflow_export](#external-dataflow-export) for procedures with
+the `custom_download` prefix in their name, and [dataflow_run](#external-dataflow-run) for all other procedures.
 
 ## Implementing a Python-based client for {{project}}
 

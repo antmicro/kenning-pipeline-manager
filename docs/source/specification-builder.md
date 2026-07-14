@@ -248,6 +248,37 @@ json.dumps(spec, sort_keys=True, indent=4)
 ```
 `````
 
+### Adding custom actions to node context menus
+
+This function will add a custom action named `My Action` to the context menu of every node.
+The action will be executed by sending a `custom_my_action` request to the RPC client,
+with the id of the clicked node as the only argument.
+```python
+specification_builder.metadata_add_context_menu_action(
+    name="My Action",
+    procedure_name="custom_my_action",
+    icon=None,
+    require_response=True
+)
+```
+To register an action only for nodes of type `Test Node`, use
+```python
+specification_builder.add_node_type_context_menu_action(
+    name="Test Node",
+    action_name="Download Action",
+    procedure_name="custom_download_action",
+    icon=None,
+    require_response=True
+)
+```
+
+To register an action for subgraph nodes, use `specification_builder.metadata_add_subgraph_context_menu_action`
+with the same format as above.
+
+The `procedure_name` has to start with `custom_`. If it starts with `custom_download`,
+the expected response schema will expect a file (see: [dataflow_export](#external-dataflow-export)). Otherwise the expected schema
+will be [dataflow_run](#external-dataflow-run), which allows for sending notifications.
+
 ## `SpecificationBuilder` documentation
 
 ```{eval-rst}
