@@ -1106,7 +1106,7 @@ export default class ConnectionRenderer {
     }
 
     supportSwitchableInterfaces() {
-        return ['orthogonal', 'alternativeOrthogonal', 'straight', 'switchableOrthogonal'].includes(this.style);
+        return ['orthogonal', 'alternativeOrthogonal', 'straight'].includes(this.style);
     }
 
     connectionRefresh(connection) {
@@ -1306,14 +1306,6 @@ export default class ConnectionRenderer {
         }
     }
 
-    switchableOrthogonalRender(x1, y1, x2, y2, connection) {
-        return this.orthogonalRender(x1, y1, x2, y2, connection);
-    }
-
-    switchableOrthogonalRenderLoopback(x1, y1, x2, y2, connection) {
-        return this.orthogonalRenderLoopback(x1, y1, x2, y2, connection);
-    }
-
     straightRender(x1, y1, x2, y2, connection) {
         if (connection.anchors?.some((a) => a.legacy)) {
             return [{ x: x1, y: y1 }]
@@ -1370,6 +1362,6 @@ export default class ConnectionRenderer {
      * @returns True if style supports anchors.
      */
     supportsAnchors() {
-        return ['orthogonal', 'alternativeOrthogonal', 'straight', 'switchableOrthogonal'].includes(this.style);
+        return ['orthogonal', 'alternativeOrthogonal', 'straight'].includes(this.style);
     }
 }
