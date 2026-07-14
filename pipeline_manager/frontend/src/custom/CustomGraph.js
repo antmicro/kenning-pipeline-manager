@@ -103,7 +103,13 @@ export default function createPipelineManagerGraph(graph) {
 
     graph.refreshConnections = function refreshConnections() {
         const { viewModel } = useViewModel();
-        this.connections.forEach((conn) => {
+        // get connections from selected nodes
+        const connectionsToUpdate = this.connections.filter(
+            (conn) => this.selectedNodes.some((n) => n.id === conn.from.nodeId
+                || n.id === conn.to.nodeId),
+        );
+
+        connectionsToUpdate.forEach((conn) => {
             viewModel.value.connectionRenderer.connectionRefresh(
                 conn,
             );
