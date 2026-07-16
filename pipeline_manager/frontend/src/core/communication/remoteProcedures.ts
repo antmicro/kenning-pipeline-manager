@@ -227,12 +227,15 @@ export function interfaces_change(
     for (const intf of params.interfaces) {
         getInterface(node, intf.id, intf.name);
     }
-
     // eslint-disable-next-line no-restricted-syntax
     for (const intfInfo of params.interfaces) {
         const intf = getInterface(node, intfInfo.id, intfInfo.name);
         intf.externalName = intfInfo.externalName;
     }
+    const graph = getGraph(params.graph_id);
+    // eslint-disable-next-line prefer-destructuring
+    const graphNode = graph.graphNode;
+    graphNode.updateExposedInterfaces(undefined, undefined, true);
 }
 
 type ModifyPositionParamsType = {
