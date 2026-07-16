@@ -103,6 +103,29 @@ class Vector2(JsonConvertible):
 
 
 @dataclass
+class View(JsonConvertible):
+    """The view of a node."""
+
+    name: str
+    position: Vector2
+    style: Union[str, List[str]]
+
+    @override
+    def to_json(
+        self, as_str: bool = True, minify: bool = False
+    ) -> Union[str, Dict]:
+        output = {
+            "name": self.name,
+            "position": self.position.to_json(False, False),
+            "style": self._style_to_list(self.style),
+        }
+        return convert_output(output, as_str, minify)
+
+    def _style_to_list(style: Union[str, List[str]]):
+        return style if isinstance(style, list) else [style]
+
+
+@dataclass
 class Property(JsonConvertible):
     """A property of a node."""
 
@@ -358,6 +381,7 @@ class Node(JsonConvertible):
     description: Optional[str] = None
     _subgraph: Any = None  # Optional[DataflowGraph]
     enabled_interface_groups: List[Interface] = field(default_factory=list)
+    views: List[View] = field(default_factory=list)
 
     def set_property(self, property_name: str, property_value: Any) -> None:
         """
