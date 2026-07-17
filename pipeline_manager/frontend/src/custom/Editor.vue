@@ -439,7 +439,14 @@ export default defineComponent({
         watch(connections.value, () => {
             clearHighlight();
         });
-
+        const backgroundSettings = computed(() => props.viewModel.settings.background);
+        watch(backgroundSettings.value, () => {
+            // eslint-disable-next-line prefer-destructuring
+            const color = backgroundSettings.value.color;
+            if (color && el.value.style) {
+                el.value.style.setProperty('--baklava-editor-background-pattern-default', color, 'important');
+            }
+        });
         const addHighlight = (connection) => {
             if (!highlightConnections.value.includes(connection)) {
                 highlightConnections.value.push(connection);

@@ -186,6 +186,10 @@
             "description": "Defines offset to which nodes snap in the grid",
             "default": 1
         },
+        "backgroundColor": {
+            "type": "string",
+            "description": "Color of the background"
+        },
         "backgroundSize": {
             "type": "number",
             "description": "Defines size of the background grid",

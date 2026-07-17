@@ -1812,6 +1812,8 @@ export default class EditorManager {
         this.baklavaView.movementStep = metadata?.movementStep ?? this.defaultMetadata.movementStep;
         this.baklavaView.settings.background.gridSize =
             metadata?.backgroundSize ?? this.defaultMetadata.backgroundSize;
+        this.baklavaView.settings.background.color =
+            metadata?.backgroundColor ?? this.defaultMetadata.backgroundColor;
         this.baklavaView.connectionRenderer.randomizedOffset =
             metadata?.randomizedOffset ?? this.defaultMetadata.randomizedOffset;
         this.baklavaView.settings.toggleableEditableTypes =
@@ -2176,6 +2178,7 @@ export default class EditorManager {
             [this.baklavaView.connectionRenderer.style, 'connectionStyle'],
             [this.baklavaView.movementStep, 'movementStep'],
             [this.baklavaView.settings.background.gridSize, 'backgroundSize'],
+            [this.baklavaView.settings.background.color, 'backgroundColor'],
             [this.baklavaView.connectionRenderer.randomizedOffset, 'randomizedOffset'],
             [this.baklavaView.settings.editableNodeTypes, 'editableTypes'],
             [this.baklavaView.settings.toggleableEditableTypes, 'toggleableEditableTypes'],
