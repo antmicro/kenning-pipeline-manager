@@ -104,7 +104,10 @@ export function removeNode(node, unwrapGraph = false) {
         graph.value.removeNode(node);
     }
 
-    if (graphWithNode?.nodes.length === 0 && viewModel.value.editor.isInSubgraph()) {
+    const { removeEmptySubgraphs } = viewModel.value.settings;
+
+    if (graphWithNode?.nodes.length === 0 && viewModel.value.editor.isInSubgraph()
+        && removeEmptySubgraphs) {
         viewModel.value.editor.unregisterGraph(graphWithNode);
         const { graphNode } = graphWithNode;
         viewModel.value.editor.backFromSubgraph();
