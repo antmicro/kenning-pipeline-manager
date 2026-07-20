@@ -216,6 +216,11 @@
             "description": "Hides anchors in all connections. The anchors are still visible on hover",
             "default": false
         },
+        "switchableInterfaces": {
+            "type": "boolean",
+            "description": "Enables automatic interfaces side switching for optimal layout",
+            "default": false
+        },
         "showIds": {
             "type": "boolean",
             "description": "Displays node ID in the node details view",
