@@ -166,6 +166,7 @@ export default class EditorManager {
             this.baklavaView,
             this.defaultMetadata.connectionStyle,
             this.defaultMetadata.randomizedOffset,
+            this.defaultMetadata.switchableInterfaces,
         );
 
         this.baklavaView.editor.layoutManager.useAlgorithm(this.defaultMetadata.layout);
@@ -1818,6 +1819,8 @@ export default class EditorManager {
             metadata?.newNodeType ?? this.defaultMetadata.newNodeType;
         this.baklavaView.settings.showHiddenProperties =
             metadata?.showHiddenProperties ?? this.defaultMetadata.showHiddenProperties;
+        this.baklavaView.connectionRenderer.switchableInterfaces =
+            metadata?.switchableInterfaces ?? this.defaultMetadata.switchableInterfaces;
 
         if (resetIgnored) {
             this.baklavaView.ignoredLayers = new Map();
