@@ -796,6 +796,8 @@ export class CustomNode extends Node {
                         type: ioState.bus?.type,
                         stubs: busStubs,
                     };
+                    const isBusEmpty = (!bus.size || !bus.type
+                        || busStubs.length === 0);
 
                     newInterfaces.push({
                         name: ioName.slice(ioState.direction.length + 1),
@@ -804,7 +806,7 @@ export class CustomNode extends Node {
                         direction: ioState.direction,
                         side: ioState.side,
                         ...(!ioState.bus && { sidePosition: ioState.sidePosition }),
-                        ...(ioState.bus && { bus }),
+                        ...(!isBusEmpty && { bus }),
                     });
                 }
             } else {
