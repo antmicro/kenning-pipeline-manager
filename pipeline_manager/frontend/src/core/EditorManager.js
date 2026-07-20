@@ -198,6 +198,7 @@ export default class EditorManager {
         this.baklavaView.settings.showHiddenProperties = this.defaultMetadata.showHiddenProperties;
         this.baklavaView.settings.disableInterfaceExpose = this.defaultMetadata
             .disableInterfaceExpose;
+        this.baklavaView.settings.removeEmptySubgraphs = this.defaultMetadata.removeEmptySubgraphs;
 
         this.specificationVersion = unresolvedSpecificationSchema.version;
         this.baklavaView.commandHandler = useCommandHandler();
@@ -1877,6 +1878,8 @@ export default class EditorManager {
             metadata?.disableInterfaceExpose ?? this.defaultMetadata.disableInterfaceExpose;
         this.baklavaView.connectionRenderer.switchableInterfaces =
             metadata?.switchableInterfaces ?? this.defaultMetadata.switchableInterfaces;
+        this.baklavaView.settings.removeEmptySubgraphs =
+            metadata?.removeEmptySubgraphs ?? this.defaultMetadata.removeEmptySubgraphs;
 
         if (resetIgnored) {
             this.baklavaView.ignoredLayers = new Map();
