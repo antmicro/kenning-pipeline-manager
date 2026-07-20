@@ -3,7 +3,8 @@ import {
     getUrl,getNodeByID,assertInputCount,assertOutputCount,waitForSubgraph,enterSubgraph,
     leaveSubgraph,expectNode,getNode,deleteNode, loadVideoNodeId, enableNavigationBar, addNode,
     dragAndDrop, closeTerminal,loadSpecification,loadDataflow, getContextMenu,
-    AddConnection, getYAMLEditorContent, setYAMLEditorContent, assertPropertyCount
+    AddConnection, getYAMLEditorContent, setYAMLEditorContent, assertPropertyCount,
+    enableSubgraphRemoval
 } from './config.js';
 
 
@@ -41,6 +42,8 @@ test('test history by removing subgraph', async ({ page }) => {
     await page.goto(getUrl());
     await loadSpecification(page, 'sample-subgraph-specification.json');
     await loadDataflow(page, 'sample-subgraph-dataflow.json');
+
+    await enableSubgraphRemoval(page);
 
     const subgraphNode = getNode(page, 'Test subgraph #1');
     // check current output count of Test subgraph #1
