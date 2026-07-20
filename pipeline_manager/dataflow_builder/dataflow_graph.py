@@ -370,6 +370,7 @@ class DataflowGraph(JsonConvertible):
             "two_column": self._spec_builder._metadata["twoColumn"]
             if "twoColumn" in self._spec_builder._metadata
             else True,
+            "views": None,
         }
 
         # Override the default parameters with `kwargs`.
