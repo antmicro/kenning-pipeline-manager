@@ -568,6 +568,27 @@ export async function enableEditingNodes(page) {
 }
 
 /**
+ * Enables the option to auto remove subgraphs
+ * @param {import('@playwright/test').Page} page - The Playwright page object.
+ */
+export async function enableSubgraphRemoval(page) {
+    // Assert that node types cannot be added.
+    const logo = page.locator('.logo');
+    await logo.hover();
+    const addNodeButton = logo.locator('#create-new-node-type-button');
+    expect(addNodeButton).toBeHidden();
+
+    // Enable modifying node types.
+    const settings = page.locator('.settings-panel');
+    expect(settings).toBeVisible();
+    await settings.hover({ force: true });
+
+    const checkbox = page.getByText('Remove empty subgraphs');
+    expect(checkbox).toBeVisible();
+    await checkbox.dispatchEvent("click");
+}
+
+/**
  * Drag-and-drop operation on the specified locator element.
  *
  * @async
