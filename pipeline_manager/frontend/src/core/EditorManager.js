@@ -1247,7 +1247,7 @@ export default class EditorManager {
             node.extends ?? [],
             node.extending ?? [],
             node.siblings ?? [],
-            node.width ?? 300,
+            node.width ?? 0,
             Object.keys(inheritedAttributes),
             node?.height,
         );
