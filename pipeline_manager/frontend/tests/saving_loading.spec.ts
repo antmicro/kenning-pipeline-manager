@@ -1,8 +1,9 @@
+import os from 'os';
 import fs from 'fs/promises';
 import {
     test, expect, Page,
 } from '@playwright/test';
-import { readFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 import {
     getUrl,
     loadSpecification,
@@ -11,6 +12,7 @@ import {
     getPathToJsonFile,
     enableNavigationBar
 } from './config.js';
+import path from 'path';
 
 async function expectNoErrors(page: Page) {
     const loading = page.locator('.loading-screen');
@@ -247,4 +249,37 @@ test('save and load graph partially', async ({ page }, testInfo) => {
     expect(entries.getByText(savedSub)).toBeVisible();
     await page.waitForTimeout(3000);
     expect(await entries.locator('.__entry').count()).toBe(1);
+});
+
+const temporaryDir = os.tmpdir() + '/';
+
+const exampleToFail = {
+    specification: "sample-specification.json"
+}
+
+async function expectErrors(page: Page) {
+    const loading = page.locator('.loading-screen');
+    await loading.waitFor({ state: 'hidden' });
+    await expect(loading).not.toBeVisible();
+    const notifications = page.locator(
+        '.notifications > .panel > ul > *:not(:has(.info))',
+    );
+    const count = await notifications.count();
+    expect(count).toBeGreaterThan(0);
+}
+
+test(`spec loading ${exampleToFail.specification} (check for fail)`, async ({ page }, testInfo) => {
+    const json = JSON.parse(readFileSync(getPathToJsonFile(exampleToFail.specification), 'utf-8'));
+
+    json.nodes[1].extends[0] = "NonexistentType";
+
+    const outputPath = path.join(temporaryDir, 'failing-specification.json');
+    writeFileSync(outputPath, JSON.stringify(json, null, 2), 'utf-8');
+
+    await page.goto(getUrl());
+
+    const fileChooserSpec = await openFileChooser(page, 'specification');
+    await fileChooserSpec.setFiles(outputPath);
+
+    await expectErrors(page);
 });
