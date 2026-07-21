@@ -569,7 +569,7 @@ export class CustomNode extends Node {
         nodeExtends = [],
         nodeExtending = [],
         nodeSiblings = [],
-        width = 300,
+        width = 0,
         simpleInherited = [],
         relatedGraphs = undefined,
         height = undefined,
@@ -1214,7 +1214,7 @@ export function CustomNodeFactory(
     nodeExtends = [],
     nodeExtending = [],
     nodeSiblings = [],
-    width = 300,
+    width = 0,
     simpleInherited = [],
     height = undefined,
 ) {
