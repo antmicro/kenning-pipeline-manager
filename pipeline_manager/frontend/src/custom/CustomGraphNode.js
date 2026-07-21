@@ -238,7 +238,7 @@ export default function CreateCustomGraphNodeType(template, graphNode, editorMan
                 graphNode.extends ?? [],
                 graphNode.extending ?? [],
                 graphNode.siblings ?? [],
-                graphNode.width ?? 300,
+                graphNode.width ?? 0,
                 graphNode.relatedGraphs,
             );
         }
