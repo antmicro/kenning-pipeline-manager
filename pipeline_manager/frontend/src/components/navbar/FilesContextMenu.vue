@@ -11,6 +11,7 @@ Defines the editor context menu, the menu for saving/opening/exporting current g
 import { watch } from 'vue';
 import jsonlint from 'jsonlint';
 import { toSvg } from 'html-to-image';
+import { useViewModel } from 'baklavajs';
 import DropdownItem from '../DropdownItem.vue';
 import Logo from '../../icons/Logo.vue';
 import NotificationHandler from '../../core/notifications';
@@ -191,6 +192,25 @@ export default {
                 return this.loadSpecification(content);
             }, this.editorManager.baklavaView.editor.events.setLoad);
             document.getElementById('load-spec-button').value = '';
+        },
+        /**
+         * Event handler that loads a layout passed by the user
+         * and tries to load it into a new environment it.
+         */
+        async loadLayoutCallback() {
+            const file = document.getElementById('load-layout-button').files[0];
+            if (!file) return;
+
+            await loadingScreen(async () => {
+                const content = jsonlint.parse(await file.text());
+                const { viewModel } = useViewModel();
+                const { editor } = viewModel.value;
+                EditorManager.importGraphLayout(
+                    editor.graph,
+                    content,
+                );
+            }, this.editorManager.baklavaView.editor.events.setLoad);
+            document.getElementById('load-layout-button').value = '';
         },
         /**
          * Event handler that creates a specification.

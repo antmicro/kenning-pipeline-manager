@@ -5,6 +5,7 @@
  */
 
 import { toPng } from 'html-to-image';
+import { useViewModel } from 'baklavajs';
 import EditorManager from '../core/EditorManager';
 import NotificationHandler from '../core/notifications';
 import { brokenImage } from '../../../resources/broken_image.js';
@@ -32,6 +33,31 @@ const saveBlob = (blob: Blob, filename: string) => {
     linkElement.href = window.URL.createObjectURL(blob);
     linkElement.download = filename;
     linkElement.click();
+};
+
+export const saveLayoutConfiguration: SaveConfiguration = {
+    saveName: 'layout',
+
+    getSave() {
+        const { viewModel } = useViewModel();
+        const editorManager = EditorManager.getEditorManagerInstance();
+        const { editor } = viewModel.value;
+        const graph = editor.graph.save();
+        return editorManager.extractGraphLayout(graph);
+    },
+
+    saveCallback() {
+        const layout = this.getSave();
+        const blob = new Blob([JSON.stringify(layout, null, 4)], {
+            type: 'application/json',
+        });
+        saveBlob(blob, this.saveName);
+        NotificationHandler.showToast('info', 'Layout saved');
+    },
+
+    reset() {
+        this.saveName = 'layout';
+    },
 };
 
 export const saveSpecificationConfiguration: SaveConfiguration = {
