@@ -726,6 +726,9 @@ const subgraphStyle = computed(() => {
 
 const width = computed(() => {
     if (props.node.width !== undefined) {
+        if (props.node.width === 0) {
+            return 'auto';
+        }
         return `${props.node.width}px`;
     }
     if (nodeMinimal.value || nodeClean.value) {
