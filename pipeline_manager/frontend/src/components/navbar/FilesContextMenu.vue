@@ -20,7 +20,7 @@ import { loadingScreen } from '../../core/utils';
 import { GraphFactory } from '../../core/NodeFactory.js';
 import { menuState, configurationState } from '../../core/nodeCreation/ConfigurationState.ts';
 import EditorManager from '../../core/EditorManager';
-import { saveGraphConfiguration } from '../saveConfiguration.ts';
+import { saveGraphConfiguration, saveLayoutConfiguration } from '../saveConfiguration.ts';
 import getExternalApplicationManager from '../../core/communication/ExternalApplicationManager';
 import {
     startTransaction, commitTransaction,
@@ -205,10 +205,13 @@ export default {
                 const content = jsonlint.parse(await file.text());
                 const { viewModel } = useViewModel();
                 const { editor } = viewModel.value;
-                EditorManager.importGraphLayout(
+                const errors = EditorManager.importGraphLayout(
                     editor.graph,
                     content,
                 );
+                if (errors.length > 0) {
+                    NotificationHandler.terminalLog('error', 'Import layout', errors);
+                }
             }, this.editorManager.baklavaView.editor.events.setLoad);
             document.getElementById('load-layout-button').value = '';
         },
@@ -334,6 +337,7 @@ export default {
         return {
             editorManager,
             saveGraphConfiguration,
+            saveLayoutConfiguration,
             externalApplicationManager,
         };
     },
@@ -421,6 +425,17 @@ export default {
                     type="'button'"
                     text="Save graph as file as..."
                     :eventFunction="saveGraphCallback"
+                />
+                <hr />
+                <DropdownItem
+                    type="'button'"
+                    text="Save layout"
+                    :eventFunction="() => saveLayoutConfiguration.saveCallback()"
+                />
+                <DropdownItem
+                    id="load-layout-button"
+                    text="Load layout"
+                    :eventFunction="loadLayoutCallback"
                 />
                 <hr />
             </template>
