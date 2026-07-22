@@ -1218,6 +1218,98 @@ export class CustomNode extends Node {
     }
 }
 
+const createViewInterface = (newInf) => {
+    const { viewModel } = useViewModel();
+    const { editor } = viewModel.value;
+
+    const getInterfaceFromView = (intf) => {
+        const { graph } = editor;
+        const views = graph?.getNodeViews(intf.nodeId);
+        const { currentView } = editor;
+        const view = views?.find((v) => v.name === currentView);
+
+        if (view !== undefined &&
+            Object.hasOwn(view, 'interfaces') &&
+            Object.hasOwn(view.interfaces, intf.name)
+        ) {
+            return view.interfaces[intf.name];
+        }
+
+        return undefined;
+    };
+
+    const extractInterfaceFromView = (intf) => {
+        const { graph } = editor;
+        const views = graph?.getNodeViews(intf.nodeId);
+        const { currentView } = editor;
+        const view = views?.find((v) => v.name === currentView);
+
+        if (view === undefined) {
+            return undefined;
+        }
+
+        if (!Object.hasOwn(view, 'interfaces')) {
+            view.interfaces = {};
+        }
+
+        if (!Object.hasOwn(view.interfaces, intf.name)) {
+            view.interfaces[intf.name] = {
+                sidePosition: intf.sidePositionDef,
+                side: intf.sideDef,
+            };
+        }
+
+        return view.interfaces[intf.name];
+    };
+
+    Object.defineProperty(newInf, 'sidePosition', {
+        set(value) {
+            const viewInf = extractInterfaceFromView(this);
+
+            if (viewInf === undefined) {
+                /* eslint-disable no-param-reassign */
+                newInf.sidePositionDef = value;
+                return;
+            }
+
+            viewInf.sidePosition = value;
+        },
+        get() {
+            const viewInf = getInterfaceFromView(this);
+
+            if (viewInf !== undefined) {
+                return viewInf.sidePosition;
+            }
+
+            return newInf.sidePositionDef;
+        },
+    });
+    Object.defineProperty(newInf, 'side', {
+        set(value) {
+            const viewInf = extractInterfaceFromView(this);
+
+            if (viewInf === undefined) {
+                /* eslint-disable no-param-reassign */
+                newInf.sideDef = value;
+                return;
+            }
+
+            viewInf.side = value;
+        },
+        get() {
+            const viewInf = getInterfaceFromView(this);
+
+            if (viewInf !== undefined) {
+                return viewInf.side;
+            }
+
+            return newInf.sideDef;
+        },
+    });
+
+    return newInf;
+};
+
 /**
  * @param parsedInterfaces that are validated and parsed. The format
  * should be the same as the one returned by parseInterfaces.
@@ -1228,7 +1320,11 @@ export const createBaklavaInterfaces = (parsedInterfaces) => {
         return () => {
             const baklavaIntf = new NodeInterface(intf.name);
             Object.assign(baklavaIntf, intf);
-            return baklavaIntf;
+
+            baklavaIntf.sidePositionDef = intf.sidePosition;
+            baklavaIntf.sideDef = intf.side;
+
+            return createViewInterface(baklavaIntf);
         };
     }
 
