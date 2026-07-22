@@ -1398,6 +1398,13 @@ export default class EditorManager {
         return sortedIds.map((id) => idToGraph.get(id));
     }
 
+    getNodeView(nodeId) {
+        const allNodes = Array.from(this.editor.graphs).map((graph) => graph.nodes).flat();
+        const node = allNodes.find((n) => n.id === nodeId);
+
+        return node?.views;
+    }
+
     /* eslint-disable max-len */
     /**
      * Get basic layout from provided graph.
