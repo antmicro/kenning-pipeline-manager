@@ -49,8 +49,12 @@
         }
     }
 
+    &.--minimal:not(.--shaped)
+    {
+        min-width: 30px !important;
+    }
+
     &.--minimal {
-        min-width: 30px;
         min-height: 4em;
         width: auto;
         cursor: grab;

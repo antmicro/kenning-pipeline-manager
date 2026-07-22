@@ -799,6 +799,7 @@ const classes = computed(() => ({
     '--hidden': props.hidden,
     '--minimal': nodeMinimal.value,
     '--transparent': customShape.value !== undefined,
+    '--shaped': customShape !== undefined,
     '--clean': nodeClean.value,
     __readonly: viewModel.value.editor.readonly,
 }));
