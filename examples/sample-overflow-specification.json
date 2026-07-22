@@ -1,0 +1,84 @@
+{
+    "version": "20250623.14",
+    "metadata": {
+        "allowLoopbacks": true,
+        "layers": [],
+        "interfaces": {
+            "Connection-1": {
+                "interfaceColor": "#FF00FF"
+            },
+            "Connection-2": {
+                "interfaceColor": "#FF0000"
+
+            }
+        }
+    },
+    "nodes": [
+        {
+            "name": "Test node #1",
+            "category": "First Category",
+            "properties": [],
+            "interfaces": [
+                {
+                    "name": "Input with very long name",
+                    "type": "Connection-2",
+                    "direction": "input",
+                    "maxConnectionsCount": 1
+                },
+                {
+                    "name": "Output with very long name",
+                    "type": "Connection-2",
+                    "direction": "output",
+                    "maxConnectionsCount": 1
+                },
+                {
+                    "name": "Inout with very long name",
+                    "type": "Connection-2",
+                    "direction": "inout",
+                    "side": "right",
+                    "maxConnectionsCount": 1
+                }
+            ],
+            "twoColumn": true
+        },
+        {
+            "name": "Test node #2",
+            "category": "Second Category",
+            "properties": [
+                {
+                    "name": "Sample option",
+                    "type": "select",
+                    "values": [
+                        "Option 1",
+                        "Option 2",
+                        "Option 3",
+                        "Option 4"
+                    ],
+                    "default": "Option 2"
+                }
+            ],
+            "interfaces": [
+                {
+                    "name": "Input with very long name",
+                    "type": "Connection-2",
+                    "direction": "input",
+                    "maxConnectionsCount": 3
+                },
+                {
+                    "name": "Output with very long name",
+                    "type": "Connection-2",
+                    "direction": "output",
+                    "maxConnectionsCount": 1
+
+                },
+                {
+                    "name": "Inout with very long name",
+                    "type": "Connection-1",
+                    "direction": "inout",
+                    "maxConnectionsCount": 1
+                }
+            ],
+            "twoColumn": true
+        }
+    ]
+}
