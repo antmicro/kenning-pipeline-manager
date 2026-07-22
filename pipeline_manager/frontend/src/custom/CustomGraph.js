@@ -54,6 +54,22 @@ export default function createPipelineManagerGraph(graph) {
     graph.toSave = true;
     // A value that indicate whether graph was loaded from specification or not
     graph.specGraph = false;
+    // Stores views of nodes stored inside graph
+    graph.nodeViews = new Map();
+
+    graph.addNodeViews = function addNodeViews(nodeId, views) {
+        if (views !== undefined) {
+            this.nodeViews.set(nodeId, views);
+        }
+    };
+
+    graph.getNodeViews = function getNodeViews(nodeId) {
+        return this.nodeViews.get(nodeId);
+    };
+
+    graph.clearNodeViews = function clearNodeViews() {
+        this.nodeViews = new Map();
+    };
 
     graph.setToSave = function setToSave(save) {
         this.toSave = save;
@@ -529,6 +545,7 @@ export default function createPipelineManagerGraph(graph) {
         }
         this._idToNode = {};
         this._nodes = [];
+        this.clearNodeViews();
     };
     graph.removeConnection = function removeConnection(connection, deleteOrphanStubs = true) {
         if (!this.connections.includes(connection)) {
@@ -715,6 +732,8 @@ export default function createPipelineManagerGraph(graph) {
                         }
                     });
                 });
+
+                this.addNodeViews(n.id, n.views);
             }
         });
         if (nodesErrors.length) errors.push('Node errors:', ...nodesErrors.map((e) => `    ${e}`));
