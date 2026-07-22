@@ -11,7 +11,15 @@
                 "interfaceColor": "#FF0000"
 
             }
-        }
+        },
+        "subgraphContextMenuActions": [
+            {
+                "iconName": "Mangnifier",
+                "name": "Is the graph empty?",
+                "procedureName": "custom_subgraph_nonempty",
+                "requireResponse": true
+            }
+        ]
     },
     "nodes": [
         {

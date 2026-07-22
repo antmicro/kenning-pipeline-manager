@@ -60,6 +60,14 @@
                 {"name": "sigma", "type": "number", "default": 1.0},
                 {"name": "tags", "type": "list", "dtype": "string", "default": []}
             ],
+            "contextMenuActions": [
+                {
+                    "name": "Save kernel",
+                    "iconName": "Save",
+                    "procedureName": "custom_download_kernel",
+                    "requireResponse": true
+                }
+            ],
             "interfaces": [{"name": "kernel", "type": "Image", "direction": "output"}],
             "color": "#6f091a",
             "pill": {"text": "kernel", "color": "#999999"}
@@ -127,6 +135,14 @@
                     "name": "Wiki",
                     "type": "button-url",
                     "default": "https://en.wikipedia.org/wiki/Two-dimensional_filter"
+                }
+            ],
+            "contextMenuActions": [
+                {
+                    "name": "Node info",
+                    "iconName": "Cogwheel",
+                    "procedureName": "custom_filter_info",
+                    "requireResponse": false
                 }
             ],
             "interfaces": [
@@ -278,6 +294,14 @@
                 "name": "Both",
                 "nodeLayers": ["processing"],
                 "nodeInterfaces": ["BinaryImage"]
+            }
+        ],
+        "contextMenuActions": [
+            {
+                "name": "Show node info",
+                "iconName": "Magnifier",
+                "procedureName": "custom_node_info",
+                "requireResponse": true
             }
         ]
     }
