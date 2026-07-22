@@ -724,34 +724,6 @@ const subgraphStyle = computed(() => {
     return {};
 });
 
-const width = computed(() => {
-    if (props.node.width !== undefined) {
-        if (props.node.width === 0) {
-            return 'auto';
-        }
-        return `${props.node.width}px`;
-    }
-    if (nodeMinimal.value || nodeClean.value) {
-        return 'auto';
-    }
-    return '300px';
-});
-
-const height = computed(() => {
-    if (props.node.height !== undefined) {
-        return `${props.node.height}px`;
-    }
-    return 'auto';
-});
-
-const styles = computed(() => ({
-    top: `${props.position?.y ?? 0}px`,
-    left: `${props.position?.x ?? 0}px`,
-    width: width.value,
-    height: height.value,
-    display: customShape === undefined ? 'inherit' : 'block',
-}));
-
 const nodeTitle = computed(() => {
     const title = props.node.highlightedTitle ?? props.node.title;
     const type = props.node.highlightedType ?? props.node.type;
@@ -898,6 +870,57 @@ const getRows = (sockets) => {
     }
     return rows;
 };
+
+const minimalWidth = computed(() => {
+    const fontSize = 9;
+
+    const leftNames = displayedLeftSockets.value.map((sock) => sock.name.length);
+    const rightNames = displayedRightSockets.value.map((sock) => sock.name.length);
+
+    const maxLeftTextLength = Math.max(
+        ...leftNames, 0,
+    );
+    const maxRightTextLength = Math.max(
+        ...rightNames, 0,
+    );
+
+    const LeftInterfaceSize = fontSize * 2 + maxLeftTextLength * fontSize;
+    const RightInterfaceSize = fontSize * 2 + maxRightTextLength * fontSize;
+
+    const nodeRequiredSize = 2 * Math.max(LeftInterfaceSize, RightInterfaceSize);
+
+    return nodeRequiredSize;
+});
+
+const width = computed(() => {
+    if (props.node.width !== undefined) {
+        console.log('minimalWidth: ', minimalWidth.value);
+        if (props.node.width < minimalWidth.value) {
+            return `${minimalWidth.value}px`;
+        }
+        return `${props.node.width}px`;
+    }
+    if (nodeMinimal.value || nodeClean.value) {
+        return 'auto';
+    }
+    return '300px';
+});
+
+const height = computed(() => {
+    if (props.node.height !== undefined) {
+        return `${props.node.height}px`;
+    }
+    return 'auto';
+});
+
+const styles = computed(() => ({
+    top: `${props.position?.y ?? 0}px`,
+    left: `${props.position?.x ?? 0}px`,
+    width: width.value,
+    height: height.value,
+    display: customShape === undefined ? 'inherit' : 'block',
+}));
+
 // another potential source of issue
 const displayedRightRows = computed(() => getRows(displayedRightSockets.value));
 const displayedLeftRows = computed(() => getRows(displayedLeftSockets.value));
