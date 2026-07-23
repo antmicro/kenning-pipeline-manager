@@ -1,4 +1,4 @@
-# Copyright (c) 2020-2025 Antmicro <www.antmicro.com>
+# Copyright (c) 2020-2026 Antmicro <www.antmicro.com>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -1172,16 +1172,17 @@ class SpecificationBuilder(object):
             )
 
         prop = self.create_property(
-            propname,
-            proptype,
-            default,
-            description,
-            min,
-            max,
-            values,
-            dtype,
-            override,
-            hidden,
+            propname=propname,
+            proptype=proptype,
+            default=default,
+            description=description,
+            min=min,
+            max=max,
+            values=values,
+            dtype=dtype,
+            override=override,
+            stringify=False,
+            hidden=hidden,
         )
         self._nodes[name]["properties"].append(prop)
 
