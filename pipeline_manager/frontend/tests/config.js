@@ -32,6 +32,55 @@ export function getUrl() {
 }
 
 /**
+ * Save file to specified file path
+ * @param {import('@playwright/test').Page} page
+ * @param {import('@playwright/test').TestInfo} testInfo
+ * @param {'specification' | 'dataflow' | 'layout'} purpose
+ * @param {string} filenameWithoutExtension
+ * @param {list[string]} selectGraphs
+ * @returns {Promise<string>} A file path of the saved file
+ */
+export async function saveFileAs(
+    page,
+    testInfo,
+    purpose,
+    filenameWithoutExtension,
+    selectGraphs=[]
+) {
+    const optionSelection = {
+        'specification': 'Save specification as...',
+        'dataflow': 'Save graph as file as...',
+        'layout': 'Save layout as file as...'
+    };
+
+    const text = optionSelection[purpose];
+    const logo = page.locator('.logo');
+    await logo.hover();
+
+    await page.getByRole('button', { name: text }).click();
+
+    const graphList = await page.locator('.graph_list');
+
+    for(const graph of selectGraphs)
+    {
+        await graphList.getByText(graph).first().click();
+    }
+
+    const uniqueName = `${filenameWithoutExtension}-${testInfo.workerIndex}-${Date.now()}`;
+
+    await page.getByPlaceholder('File name').first().fill(uniqueName);
+
+    const downloadPromise = page.waitForEvent('download');
+    await page.getByRole('button', { name: 'Save' }).click();
+    const download = await downloadPromise;
+
+    const filePath = testInfo.outputPath(download.suggestedFilename());
+    await download.saveAs(filePath);
+
+    return filePath;
+}
+
+/**
  * Get the URL to either a dataflow or specification JSON file from `examples` directory.
  * @param {string} filename
  * @returns {string} Path to the JSON file.
@@ -133,6 +182,24 @@ export async function disableNavigationBar(page) {
         .filter({ hasText: /^Hide node browser$/ })
         .first()
         .click();
+}
+
+/**
+ * Checks whether any errors is present in terminal.
+ *
+ * @async
+ * @param {import('@playwright/test').Page} page - The Playwright Page object to interact with.
+ * @returns {Promise<void>} Succeed when there is no error found.
+ */
+export async function expectNoErrors(page) {
+    const loading = page.locator('.loading-screen');
+    await loading.waitFor({ state: 'hidden' });
+    await expect(loading).not.toBeVisible();
+    const notifications = page.locator(
+        '.notifications > .panel > ul > *:not(:has(.info))',
+    );
+    const count = await notifications.count();
+    expect(count).toBe(0);
 }
 
 /**

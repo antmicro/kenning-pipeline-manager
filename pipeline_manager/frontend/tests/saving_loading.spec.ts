@@ -14,18 +14,9 @@ import {
     enableNavigationBar,
     getNode,
     openNodePalette,
+    expectNoErrors,
+    saveFileAs
 } from './config.js';
-
-async function expectNoErrors(page: Page) {
-    const loading = page.locator('.loading-screen');
-    await loading.waitFor({ state: 'hidden' });
-    await expect(loading).not.toBeVisible();
-    const notifications = page.locator(
-        '.notifications > .panel > ul > *:not(:has(.info))',
-    );
-    const count = await notifications.count();
-    expect(count).toBe(0);
-}
 
 async function deepCleanEditor(page: Page) {
     const settings = page.locator('.settings-panel');
@@ -37,42 +28,7 @@ async function deepCleanEditor(page: Page) {
     await button.dispatchEvent('click');
 }
 
-async function saveFileAs(
-    page: Page,
-    testInfo: TestInfo,
-    purpose: 'specification' | 'dataflow',
-    filenameWithoutExtension: string,
-    selectGraphs: string[] = [],
-): Promise<string> {
-    const text = (purpose === 'specification' ? 'Save specification as...' : 'Save graph as file as...');
-    const logo = page.locator('.logo');
-    await logo.hover();
-
-    await page.getByRole('button', { name: text }).click();
-
-    const graphList = await page.locator('.graph_list');
-
-    // eslint-disable-next-line no-restricted-syntax
-    for (const graph of selectGraphs) {
-        // eslint-disable-next-line no-await-in-loop
-        await graphList.getByText(graph).first().click();
-    }
-
-    const uniqueName = `${filenameWithoutExtension}-${testInfo.workerIndex}-${Date.now()}`;
-
-    await page.getByPlaceholder('File name').first().fill(uniqueName);
-
-    const downloadPromise = page.waitForEvent('download');
-    await page.getByRole('button', { name: 'Save' }).click();
-    const download = await downloadPromise;
-
-    const filePath = testInfo.outputPath(download.suggestedFilename());
-    await download.saveAs(filePath);
-
-    return filePath;
-}
-
-async function saveSpecificationAs(page: Page, testInfo: TestInfo, filename: string) {
+async function saveSpecificationAs(page: Page, testInfo, filename: string) {
     return saveFileAs(page, testInfo, 'specification', filename);
 }
 
