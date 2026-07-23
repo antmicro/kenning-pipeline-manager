@@ -348,10 +348,13 @@ class DataflowGraph(JsonConvertible):
         properties = []
         if base_node and "properties" in base_node:
             for prop in base_node["properties"]:
+                _property = None
                 _property = Property(
                     name=prop["name"],
                     value=prop["default"],
                 )
+                if "hidden" in prop:
+                    _property.hidden = prop["hidden"]
                 properties.append(_property)
 
         parameters = {

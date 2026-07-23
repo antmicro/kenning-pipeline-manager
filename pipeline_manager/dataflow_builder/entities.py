@@ -242,6 +242,8 @@ class Property(JsonConvertible):
             "value": self.value,
             "id": self.id,
         }
+        if self.hidden:
+            output["hidden"] = self.hidden
         if self.dynamic_counter:
             output["dynamicCounter"] = self.dynamic_counter
 
