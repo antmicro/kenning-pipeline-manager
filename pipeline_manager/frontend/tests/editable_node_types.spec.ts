@@ -378,3 +378,27 @@ test('editing bus node', async ({ page }) => {
     expect(await buses.count()).toBe(3);
     expect(await ports.count()).toBe(prevPorts + 1);
 });
+
+test('generalize and specialize node', async ({page}) => {
+    await page.goto(getUrl());
+    const node = getNode(page,"Filter2D");
+    await node.locator('.__title').dblclick();
+
+    // Generalize selected node
+    const replacePanel = page.locator('.baklava-sidebar .__content .__replace');
+    await replacePanel.getByText("Color images").click();
+    // It should be replaced by Color images so it should not be visible
+    await expect(node).not.toBeVisible();
+    // Check for Color images
+    const generalizedNode = getNode(page,"Color images");
+    await expect(generalizedNode).toBeVisible();
+
+    // Specialize color images node
+    await generalizedNode.locator('.__title').dblclick();
+    await replacePanel.getByText("Filter2D").click();
+
+    // It should be replaced by Filter2D so it should not be visible
+    await expect(generalizedNode).not.toBeVisible();
+    // Check for Filter2D
+    await expect(node).toBeVisible();
+});
