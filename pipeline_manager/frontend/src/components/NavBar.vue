@@ -34,7 +34,9 @@ import Notifications from './Notifications.vue';
 import Settings from './Settings.vue';
 import CustomSidebar from '../custom/CustomSidebar.vue';
 import GraphDetails from './GraphDetails.vue';
-import { saveSpecificationConfiguration, saveGraphConfiguration, exportGraph } from './saveConfiguration.ts';
+import {
+    saveSpecificationConfiguration, saveGraphConfiguration, exportGraph, saveLayoutConfiguration,
+} from './saveConfiguration.ts';
 
 import icons from '../icons';
 
@@ -188,6 +190,7 @@ export default {
             saveConfiguration: saveGraphConfiguration,
             saveGraphConfiguration,
             saveSpecificationConfiguration,
+            saveLayoutConfiguration,
             exportGraph,
             saveMenuShow: false,
             exportMenuShow: false,
@@ -489,6 +492,10 @@ export default {
                                 editorManager.editor.resetAllGraphsToSave();
                                 saveMenuShow = !saveMenuShow;
                                 saveConfiguration = saveSpecificationConfiguration;
+                            }"
+                            :saveLayoutCallback="()=>{
+                                saveMenuShow = !saveMenuShow;
+                                saveConfiguration = saveLayoutConfiguration;
                             }"
                             :requestDataflowExport="requestDataflowExport"
                         />

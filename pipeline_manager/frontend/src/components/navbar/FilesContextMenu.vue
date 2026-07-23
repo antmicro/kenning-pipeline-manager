@@ -64,6 +64,10 @@ export default {
             required: true,
             type: Function,
         },
+        saveLayoutCallback: {
+            required: true,
+            type: Function,
+        },
         requestDataflowExport: {
             required: true,
             type: Function,
@@ -428,14 +432,19 @@ export default {
                 />
                 <hr />
                 <DropdownItem
+                    id="load-layout-button"
+                    text="Load layout"
+                    :eventFunction="loadLayoutCallback"
+                />
+                <DropdownItem
                     type="'button'"
                     text="Save layout"
                     :eventFunction="() => saveLayoutConfiguration.saveCallback()"
                 />
                 <DropdownItem
-                    id="load-layout-button"
-                    text="Load layout"
-                    :eventFunction="loadLayoutCallback"
+                    type="'button'"
+                    text="Save layout as file as..."
+                    :eventFunction="saveLayoutCallback"
                 />
                 <hr />
             </template>
