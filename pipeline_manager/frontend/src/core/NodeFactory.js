@@ -1219,10 +1219,21 @@ export class CustomNode extends Node {
 }
 
 const createViewInterface = (newInf) => {
-    const { viewModel } = useViewModel();
-    const { editor } = viewModel.value;
+    const getEditor = () => {
+        try {
+            const { viewModel } = useViewModel();
+            const { editor } = viewModel.value;
+            return editor;
+        } catch {
+            return undefined;
+        }
+    };
 
     const getInterfaceFromView = (intf) => {
+        const editor = getEditor();
+        if (editor === undefined) {
+            return undefined;
+        }
         const { graph } = editor;
         const views = graph?.getNodeViews(intf.nodeId);
         const { currentView } = editor;
@@ -1239,6 +1250,10 @@ const createViewInterface = (newInf) => {
     };
 
     const extractInterfaceFromView = (intf) => {
+        const editor = getEditor();
+        if (editor === undefined) {
+            return undefined;
+        }
         const { graph } = editor;
         const views = graph?.getNodeViews(intf.nodeId);
         const { currentView } = editor;
