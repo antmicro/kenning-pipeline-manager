@@ -577,40 +577,15 @@ export default defineComponent({
             });
         };
 
-        const ignoredLayers = computed(() => props.viewModel.ignoredLayers);
-        const ignorableLayers = computed(() => props.viewModel.layers);
+        const ignoredLayers = computed(() => props.viewModel.editor.getIgnoredLayers());
 
         const ignoredInterfacesRef = ref([]);
 
-        const ignoredInterfacesTypes = computed(() => {
-            const temp = new Set([]);
+        const ignoredInterfacesTypes = computed(() =>
+            props.viewModel.editor.getIgnoredInterfaces(undefined, ignoredLayers.value));
 
-            ignorableLayers.value.forEach((layer) => {
-                if (layer.nodeInterfaces && (
-                    ignoredLayers.value.get(
-                        props.viewModel.displayedGraph.id,
-                    ) ?? new Set()
-                ).has(layer.name)) {
-                    layer.nodeInterfaces.forEach(temp.add, temp);
-                }
-            });
-            return temp;
-        });
-
-        const ignoredNodesTypes = computed(() => {
-            const temp = new Set();
-
-            ignorableLayers.value.forEach((layer) => {
-                if (layer.nodeLayers && (
-                    ignoredLayers.value.get(
-                        props.viewModel.displayedGraph.id,
-                    ) ?? new Set()
-                ).has(layer.name)) {
-                    layer.nodeLayers.forEach(temp.add, temp);
-                }
-            });
-            return temp;
-        });
+        const ignoredNodesTypes = computed(() =>
+            props.viewModel.editor.getIgnoredNodes(undefined, ignoredLayers.value));
 
         const visibleNodes = computed(() =>
             nodes.value.filter((n) => !ignoredNodesTypes.value.has(n.layer)),
