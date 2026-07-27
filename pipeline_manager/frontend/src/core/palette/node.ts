@@ -15,6 +15,7 @@ import {
     type Ref,
     watch,
     reactive,
+    ref,
 } from 'vue';
 import {
     AbstractNode,
@@ -435,7 +436,8 @@ type SectionMetadata = {
         entries: Reactive<IEntry<IEntryDataNode>[]>,
         title: string,
         target: string,
-        show: boolean
+        show: boolean,
+        showAll: boolean
     };
 
 export function createNodeListPalette(
@@ -454,9 +456,10 @@ export function createNodeListPalette(
             if (!paletteList.has(key)) {
                 const entry = usePalette(
                     computed(() => entries.value.get(key) ?? []),
-                    undefined,
+                    nameFilterRef,
                     compareNodeEntries,
                     defaultCollapse,
+                    computed(() => paletteList.get(key)?.showAll ?? false),
                 );
 
                 paletteList.set(key, {
@@ -464,6 +467,7 @@ export function createNodeListPalette(
                     target: key,
                     show: true,
                     entries: entry,
+                    showAll: false,
                 },
                 );
             }
@@ -486,6 +490,34 @@ export function createNodeListPalette(
                 if (highlited !== null) {
                     res.obj.title = highlited;
                     res.obj.show = true;
+                }
+            });
+
+            // check for search results in nodes list
+            paletteList.forEach((res) => {
+                if (res.title !== res.target) {
+                    res.showAll = true;
+                } else {
+                    res.showAll = false;
+                    const entriesList:any[] = [];
+
+                    const gatherEntries = (entryList:any) => {
+                        entryList.forEach((en:any) => {
+                            if (en?.children !== undefined) {
+                                gatherEntries(en.children);
+                            }
+
+                            if (en.titleAnnotated !== undefined) {
+                                entriesList.push(en);
+                            }
+                        });
+                    };
+
+                    gatherEntries(res.entries);
+
+                    if (entriesList.length > 0) {
+                        res.show = true;
+                    }
                 }
             });
         } else {
