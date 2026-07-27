@@ -16,7 +16,7 @@
 import { Editor, Graph } from '@baklavajs/core';
 import { toRaw, nextTick, reactive } from 'vue';
 
-import { useGraph } from '@baklavajs/renderer-vue';
+import { useGraph, useViewModel } from '@baklavajs/renderer-vue';
 
 import createPipelineManagerGraph from './CustomGraph.js';
 import LayoutManager from '../core/LayoutManager.js';
@@ -675,6 +675,44 @@ export default class PipelineManagerEditor extends Editor {
             editorHeight,
             sideBarWidth,
         };
+    }
+
+    getIgnoredLayers(graphId = undefined) {
+        const { viewModel } = useViewModel();
+        const { layers } = viewModel.value;
+        const { ignoredLayers } = viewModel.value;
+
+        const _graphId = graphId ?? this.graph.id;
+
+        const outputLayers = [];
+
+        layers.forEach((layer) => {
+            if ((ignoredLayers.get(_graphId) ?? new Set()).has(layer.name)) {
+                outputLayers.push(layer);
+            }
+        });
+
+        return outputLayers;
+    }
+
+    getIgnoredNodes(graphId = undefined, layers = undefined) {
+        const _layers = (layers ?? this.getIgnoredLayers(graphId))
+            .filter((layer) => layer.nodeLayers);
+        const temp = new Set();
+        _layers.forEach((layer) => {
+            layer.nodeLayers.forEach(temp.add, temp);
+        });
+        return temp;
+    }
+
+    getIgnoredInterfaces(graphId = undefined, layers = undefined) {
+        const _layers = (layers ?? this.getIgnoredLayers(graphId))
+            .filter((layer) => layer.nodeInterfaces);
+        const temp = new Set();
+        _layers.forEach((layer) => {
+            layer.nodeInterfaces.forEach(temp.add, temp);
+        });
+        return temp;
     }
 
     /**
