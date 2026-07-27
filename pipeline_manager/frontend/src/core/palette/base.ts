@@ -14,6 +14,7 @@ import {
     type Ref,
     type Reactive,
     computed,
+    ComputedRef,
 } from 'vue';
 import fuzzysort from 'fuzzysort';
 import {
@@ -32,6 +33,7 @@ export default function usePalette<T extends IEntryData>(
     searchValueRef?: Ref<string>,
     comparator?: (a: IVEntry<T> | IEntry<T>, b: IVEntry | IEntry<T>) => number,
     defaultCollapse?: boolean,
+    showNotMatchedNodes?: ComputedRef<boolean>,
 ): Reactive<IEntry<T>[]> {
     const showChildren = (vEntry: IVEntryInternal<T>) => vEntry.showChildren ?? !defaultCollapse;
 
@@ -192,7 +194,8 @@ export default function usePalette<T extends IEntryData>(
                 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                 { result, title: fuzzysort.highlight(result, '<span>', '</span>')! },
             ] as [string, SearchResult]);
-            applySearch(new Map(searchEntries), entries, threshold);
+            const showNodes = showNotMatchedNodes !== undefined ? showNotMatchedNodes.value : false;
+            applySearch(new Map(searchEntries), entries, threshold, showNodes);
         } else {
             resetSearch(entries);
         }
