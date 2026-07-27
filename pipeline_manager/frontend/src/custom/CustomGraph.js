@@ -16,7 +16,6 @@ import { useViewModel } from '@baklavajs/renderer-vue';
 import { startTransaction, commitTransaction } from '../core/History.ts';
 import { updateInterfacePosition } from './CustomNode.js';
 import GraphTemplate from './CustomGraphTemplate.js';
-import EditorManager from '../core/EditorManager.js';
 
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-underscore-dangle */
@@ -796,10 +795,9 @@ export default function createPipelineManagerGraph(graph) {
     };
 
     graph.size = function size() {
-        
-        const ignoredNodeSet = EditorManager.getIgnoredNodes(this.id);
+        const ignoredNodeSet = this.editor.getIgnoredNodes(this.id);
 
-        const nodes = this.nodes.filter((n)=>!ignoredNodeSet.has(n.layer));
+        const nodes = this.nodes.filter((n) => !ignoredNodeSet.has(n.layer));
 
         const sizes = nodes.map((node) => {
             const HTMLelement = document.getElementById(node.id);
