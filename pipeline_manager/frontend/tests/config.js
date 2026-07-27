@@ -178,6 +178,25 @@ export async function leaveSubgraph(page) {
 }
 
 /**
+ * Get node title if not, fallback to node itself.
+ *
+ * @async
+ * @param {import('@playwright/test').Locator} node - The Playwright Locator representing a node.
+ * @returns {Promise<import('@playwright/test').Locator>} Locator of node title or node itself.
+ */
+async function getNodeTitle(node)
+{
+    const title = node.locator('.__title');
+
+    if(await title.isVisible())
+    {
+        return title;
+    }
+
+    return node;
+}
+
+/**
  * Enter subgraph attached to a selected node.
  *
  * @async
@@ -187,7 +206,7 @@ export async function leaveSubgraph(page) {
 export async function enterSubgraph(node, page) {
     const contextMenuOption = getContextMenu(page).getByText('Go to graph');
     if (!await contextMenuOption.isVisible()) {
-        const title = node.locator('.__title');
+        const title = await getNodeTitle(node);
         await title.click({ button: 'right' });
     }
     await contextMenuOption.click();
@@ -216,13 +235,13 @@ export async function waitForSubgraph(page, graphName) {
 export async function checkForSubgraph(node, page) {
     const contextMenuOption = getContextMenu(page).getByText('Go to graph');
     if (!await contextMenuOption.isVisible()) {
-        const title = node.locator('.__title');
+        const title = await getNodeTitle(node);
         await title.click({ button: 'right' });
     }
     expect(await contextMenuOption).toHaveCount(1,{ timeout: 10_000 });
-    await node.locator('.__title').click({ button: 'right'});
+    await (await getNodeTitle(node)).click({ button: 'right'});
     expect(await contextMenuOption).toBeVisible();
-    await node.locator('.__title').click({ button: 'right' });
+    await (await getNodeTitle(node)).click({ button: 'right' });
 }
 
 /**
@@ -233,7 +252,7 @@ export async function checkForSubgraph(node, page) {
  * @returns {Promise<void>} Resolves when subgraph has been added to selected node.
  */
 export async function addSubgraph(node, page) {
-    const title = node.locator('.__title');
+    const title = await getNodeTitle(node);
     await title.click({ button: 'right' });
     const contextMenuOption = getContextMenu(page).getByText('Add subgraph');
     await contextMenuOption.click({force: true});
@@ -248,7 +267,7 @@ export async function addSubgraph(node, page) {
  * @returns {Promise<void>} Resolves when subgraph has been added to a node.
  */
 export async function waitForNodeSubgraph(node) {
-    const nodeTitle = await node.locator('.__title');
+    const nodeTitle = await getNodeTitle(node);
     await expect(nodeTitle.locator('.__subgraph-icon')).toHaveCount(1);
 }
 /**
@@ -264,7 +283,7 @@ export async function waitForNodeSubgraph(node) {
  * @returns {Promise<object>} A parssed YAML settings.
  */
 export async function getYAML(page, node) {
-    await node.locator('.__title').dblclick();
+    await (await getNodeTitle(node)).dblclick();
 
     const textarea = page.locator('textarea');
     const content = YAML.parse(await textarea.evaluate((el) => el.value));
@@ -281,7 +300,7 @@ export async function getYAML(page, node) {
  * @returns {Promise<void>} Resolves when a new specification has been set for a node.
  */
 export async function setYAML(page, content, node) {
-    await node.locator('.__title').dblclick();
+    await (await getNodeTitle(node)).dblclick();
 
     const textarea = page.locator('textarea');
     await textarea.fill(YAML.stringify(content));
@@ -328,7 +347,7 @@ export async function setYAMLEditorContent(page, content) {
  * @returns {Promise<void>} Resolves when a interface is added to a node.
  */
 export async function addInterface(page, node) {
-    await node.locator('.__title').click({ button: 'right', force: true });
+    await (await getNodeTitle(node)).click({ button: 'right', force: true });
     await getContextMenu(page).getByText('Add interface').click();
     await page.getByRole('button', { name: 'Add interface' }).click({ force: true });
 }
@@ -342,7 +361,7 @@ export async function addInterface(page, node) {
  * @returns {Promise<void>} Resolves when a interface is added to a node.
  */
 export async function addOutputInterface(page, node) {
-    await node.locator('.__title').click({ button: 'right', force: true });
+    await (await getNodeTitle(node)).click({ button: 'right', force: true });
     await getContextMenu(page).getByText('Add interface').click();
     const select = page.getByTitle('Interface direction');
     await select.click();
@@ -359,7 +378,7 @@ export async function addOutputInterface(page, node) {
  * @returns {Promise<void>} Resolves when a interface is added to a node.
  */
 export async function addInputInterface(page, node) {
-    await node.locator('.__title').click({ button: 'right', force: true });
+    await (await getNodeTitle(node)).click({ button: 'right', force: true });
     await getContextMenu(page).getByText('Add interface').click();
     const select = page.getByTitle('Interface direction');
     await select.click();
@@ -377,7 +396,7 @@ export async function addInputInterface(page, node) {
  * @returns {Promise<void>} Resolves when a property is added to a node.
  */
 export async function addProperty(page, node) {
-    await node.locator('.__title').click({ button: 'right', force: true });
+    await (await getNodeTitle(node)).click({ button: 'right', force: true });
     await getContextMenu(page).getByText('Add property').click();
     await page.getByRole('button', { name: 'Add property' }).click();
 }
@@ -392,7 +411,7 @@ export async function addProperty(page, node) {
  * @returns {Promise<void>} Resolves when a property has been removed.
  */
 export async function deleteProperty(page, node, propName) {
-    await node.locator('.__title').click({ button: 'right', force: true });
+    await (await getNodeTitle(node)).click({ button: 'right', force: true });
     await getContextMenu(page).getByText('Delete property').click();
     await page.locator('.create-menu').last().getByText(propName).click();
     await page.getByRole('button', { name: 'Remove properties' }).click();
@@ -544,7 +563,7 @@ export async function expectNode(exists, node, errorMessage) {
  * @returns {Promise<object>} A node specification.
  */
 export async function reopenNode(page, node) {
-    await node.locator('.__title').dblclick();
+    await (await getNodeTitle(node)).dblclick();
     return getYAMLEditorContent(page);
 }
 
@@ -592,7 +611,7 @@ export function getNodeByID(page, nodeId) {
  */
 export async function deleteNode(node, page) {
     // Invoke a context menu with a right click.
-    await node.locator('.__title').click({ button: 'right', force: true });
+    await (await getNodeTitle(node)).click({ button: 'right', force: true });
 
     // Delete the node.
     const deleteButton = getContextMenu(page).getByText('Delete', { exact: true });
