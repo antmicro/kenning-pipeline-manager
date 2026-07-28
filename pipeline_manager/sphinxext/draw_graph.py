@@ -97,7 +97,8 @@ class KPMNode(nodes.container):
         allow='fullscreen'
             style='
                 width:{node.width if node.width else "100%"};
-                {"height:" + node.height if node.height else "aspect-ratio:3/2"};
+                {"height:" + node.height if node.height
+                else "aspect-ratio:3/2"};
                 border:none;
                 display: block;
             '

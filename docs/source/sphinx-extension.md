@@ -37,6 +37,7 @@ The `pipeline_manager` directive allows for following parameters:
 * `graph` - optional, points to dataflow that should be used for the graph.
 * `preview` - optional, if set, the graph is displayed in preview mode (read only, no HUD).
 * `height` - optional, specifies height of the graph in chosen units, `px`/`%`/`em` etc. Unit has to be specified. If height was not set, aspect ratio of 3/2 will be assumed.
+* `width` - optional, specifies width of the graph in chosen units, `px`/`%`/`em` etc. Unit has to be specified. If width was not set, 100% will be assumed.
 * `alt` - optional, changes alternative text of the graph.
 
 So for example this is a valid directive usage:
