@@ -7,6 +7,7 @@ introduction
 project-readme
 specification-format
 dataflow-format
+layouts
 frontend-features
 external-app-communication
 example-server
