@@ -247,6 +247,36 @@ test('add interface to category node', async ({ page }, testInfo) => {
     await assertInputCount(and_node, 6);
 });
 
+test('check custom shape node interface popup', async ({ page }) => {
+    await page.goto(getUrl());
+    await loadSpecification(page, 'sample-with-shape-specification.json');
+    await loadDataflow(page, 'sample-with-shape-dataflow.json');
+
+    const signalNode = getNode(page,'Signal');
+    await assertInoutCount(signalNode, 2);
+    const interfaces = signalNode.locator('.baklava-node-interface-positioned');
+
+    const topInterfaces = interfaces.first();
+    await topInterfaces.locator('.__port').hover();
+    await expect(topInterfaces.locator('.__port-name')).toBeVisible();
+
+    const downInterface = interfaces.nth(1);
+    await downInterface.locator('.__port').hover();
+    await expect(downInterface.locator('.__port-name')).toBeVisible();
+
+    const resistorNode = getNode(page,'Resistor');
+    await assertInoutCount(signalNode, 2);
+    const interfacesResistor = resistorNode.locator('.baklava-node-interface-positioned');
+
+    const leftInterfaces = interfacesResistor.first();
+    await leftInterfaces.locator('.__port').hover();
+    await expect(leftInterfaces.locator('.__port-name')).toBeVisible();
+
+    const rightInterface = interfacesResistor.nth(1);
+    await rightInterface.locator('.__port').hover();
+    await expect(rightInterface.locator('.__port-name')).toBeVisible();
+});
+
 test('add inout interface to custom shape node', async ({ page }, testInfo) => {
     await page.goto(getUrl());
     await loadSpecification(page, 'sample-with-shape-specification.json');
