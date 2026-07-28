@@ -43,6 +43,21 @@
                 "$ref": "common_types#/$defs/specification_object"
             }
         },
+        "open_dialog_request": {
+            "description": "Request opening dialog box by frontend.",
+            "params": {
+                "type": "object",
+                "properties": {
+                    "title": {
+                        "description": "Name of the dialog box",
+                        "type": "string"
+                    }
+                }
+            },
+            "returns": {
+                "$ref": "common_types#/$defs/null_or_empty"
+            }
+        },
         "graph_get": {
             "description": "Returns dataflow used by frontend",
             "params": {

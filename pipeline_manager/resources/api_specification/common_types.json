@@ -14,6 +14,46 @@
             ],
             "additionalProperties": false
         },
+        "dialog_box": {
+            "description": "Schema that defines dialog box template",
+            "type": "object",
+            "properties": {
+                "title": {
+                    "description": "Title of the dialog box",
+                    "type": "string"
+                },
+                "confirmName": {
+                    "description": "Name of confirmation button",
+                    "type": "string"
+                },
+                "template": {
+                    "description": "A template of the dialog box",
+                    "type": "object"
+                }
+            }
+        },
+        "dialog_boxes": {
+            "description": "Schema that defines dialog boxes template",
+            "type": "object",
+            "allOf": [{"$ref": "common_types#/$defs/dialog_box"}],
+            "properties": {
+            }
+        },
+        "dialog_box_output": {
+            "description": "Parameters for request",
+            "type": "object",
+            "properties": {
+                "data": {
+                    "description": "Data read by user dialog.",
+                    "type": "object"
+                },
+                "msg": {
+                    "description": "Optional message with request status.",
+                    "type": "string"
+                }
+            },
+            "required": ["data"]
+        },
         "node_object": {
             "description": "Schema that identifies a node in a graph",
             "type": "object",
