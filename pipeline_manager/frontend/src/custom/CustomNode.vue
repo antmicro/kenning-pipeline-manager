@@ -947,7 +947,6 @@ const minimalWidth = computed(() => {
 
 const width = computed(() => {
     if (props.node.width !== undefined) {
-        console.log('minimalWidth: ', minimalWidth.value);
         if (props.node.width < minimalWidth.value) {
             return `${minimalWidth.value}px`;
         }
