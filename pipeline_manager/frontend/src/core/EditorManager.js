@@ -1925,8 +1925,8 @@ export default class EditorManager {
         const uniqueInterfaces = interfaces.filter((item, pos) => {
             const idx = interfaces.findIndex((item2) =>
                 item.name === item2.name && (item2.override ||
-                (item.array === item2.array &&
-                item.direction === item2.direction)));
+                    (item.array === item2.array &&
+                        item.direction === item2.direction)));
             return idx === pos;
         });
         return uniqueInterfaces;
@@ -2389,8 +2389,7 @@ export default class EditorManager {
 
                 return status;
             } catch (err) {
-                const msg = `Unrecognized format. Make sure that the passed dataflow is correct.${
-                    err.toString()}`;
+                const msg = `Unrecognized format. Make sure that the passed dataflow is correct.${err.toString()}`;
 
                 if (globalProperties.softLoad) {
                     status.warnings.push(msg);

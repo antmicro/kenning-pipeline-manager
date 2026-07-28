@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Antmicro <www.antmicro.com>
+ * Copyright (c) 2022-2026 Antmicro <www.antmicro.com>
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -411,7 +411,6 @@ export default class PipelineManagerEditor extends Editor {
             if (!result.errors.length || globalProperties.softLoad) {
                 let graphToLoad;
                 if (!templateName) {
-                    state = this.hooks.load.execute(state);
                     graphToLoad = entryGraph;
                 } else {
                     // eslint-disable-next-line new-cap
@@ -489,6 +488,7 @@ export default class PipelineManagerEditor extends Editor {
         if (this.layoutManager.layoutEngine.activeAlgorithm !== 'NoLayout') {
             await nextTick();
             await this.applyAutolayout(false);
+            state = this.hooks.load.execute(state);
         }
 
         // We need graph switched and sidebar rendered for autozoom
@@ -1272,7 +1272,7 @@ export default class PipelineManagerEditor extends Editor {
                     );
                     const busHasId = (i, id) =>
                         i.bus?.type !== undefined &&
-                            i.bus.stubs?.find((s) => s.id === id) !== undefined;
+                        i.bus.stubs?.find((s) => s.id === id) !== undefined;
                     if (intf.bus?.type === 'oneSided') {
                         const stubConnections = state.connections.filter(
                             (conn) => busHasId(intf, conn?.from) || busHasId(intf, conn?.to),
@@ -1307,7 +1307,7 @@ export default class PipelineManagerEditor extends Editor {
                         const sidePosition = this.getPosition(
                             node.interfaces.filter(
                                 (el) => el.side === newSide &&
-                                el !== intf,
+                                    el !== intf,
                             ).map(
                                 (el) => el.sidePosition,
                             ).sort(
@@ -1320,7 +1320,7 @@ export default class PipelineManagerEditor extends Editor {
                 });
             });
         });
-        await this.load(graphs);
+        await this.load(graphs, false, true);
     }
 
     updateNodesPosition(updatedGraph) {
