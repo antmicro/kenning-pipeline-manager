@@ -39,6 +39,7 @@ class KPMNode(nodes.container):
         graph: Optional[str] = None,
         height: Optional[str] = None,
         alt: Optional[str] = None,
+        width: Optional[str] = None,
     ) -> None:
         """Constructor for KPMNode."""
         # we're leveraging the builtin download_reference node
@@ -64,6 +65,7 @@ class KPMNode(nodes.container):
         self.rel_pfx = "../" * depth
         self.preview = preview if preview is not None else False
         self.height = height
+        self.width = width
         self.alt = alt if alt is not None else DEFAULT_ALT_TEXT
 
     def _node_to_target(self, node: download_reference) -> str:
@@ -89,15 +91,18 @@ class KPMNode(nodes.container):
 
         trans.body.append(
             f"""
-<iframe src='{node.rel_pfx}{KPM_PATH}?{urlencode(params)}'
-    alt='{node.alt}'
-    allow='fullscreen'
-        style='
-            width:100%;
-            {"height:" + node.height if node.height else "aspect-ratio:3/2"};
-            border:none;
-        '
-></iframe>"""
+<p align='center'>
+    <iframe src='{node.rel_pfx}{KPM_PATH}?{urlencode(params)}'
+        alt='{node.alt}'
+        allow='fullscreen'
+            style='
+                width:{node.width if node.width else "100%"};
+                {"height:" + node.height if node.height else "aspect-ratio:3/2"};
+                border:none;
+                display: block;
+            '
+    ></iframe>
+</p>"""
         )
 
     @staticmethod
@@ -116,6 +121,7 @@ class KPMDirective(SphinxDirective):
         "preview": flag,
         "height": unchanged,
         "alt": unchanged,
+        "width": unchanged,
     }
 
     def run(self) -> list[nodes.Node]:
