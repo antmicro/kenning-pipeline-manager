@@ -13,6 +13,7 @@ import { defineModel, defineComponent } from 'vue';
 import {
     NodeConfigurationMenu, PropertyConfigurationMenu, InterfaceConfigurationMenu,
     ListMenu, LayerConfigurationMenu, SaveMenu, ParentMenu, ExportMenu, GroupConfigurationMenu,
+    UserMenu,
 } from '../menu';
 import { removeInterfaces, removeProperties } from '../../core/nodeCreation/Configuration.ts';
 import { menuState, configurationState } from '../../core/nodeCreation/ConfigurationState.ts';
@@ -40,6 +41,7 @@ export default defineComponent({
         ExportMenu,
         Panel,
         GraphSaveMenu,
+        UserMenu,
     },
     data() {
         return {
@@ -53,6 +55,24 @@ export default defineComponent({
 </script>
 <!-- eslint-disable vue/no-multiple-template-root -->
 <template>
+    <Transition name="fade" @mousedown.self="
+    baklavaView.editor.userMenus.showCustomDialogWithReset = false
+    ">
+        <Panel v-show="baklavaView.editor.userMenus.showCustomDialog">
+            <ParentMenu
+                v-show="baklavaView.editor.userMenus.showCustomDialog"
+                v-model="baklavaView.editor.userMenus.showCustomDialogWithReset"
+                :title="baklavaView.editor.userMenus.userDialogTitle"
+            >
+                <UserMenu
+                    :buttonTitle="baklavaView.editor.userMenus.confirmText"
+                    :saveConfigurationTemplate="baklavaView.editor.userMenus.dialogTemplate"
+                    :saveConfiguration="baklavaView.editor.userMenus.userDialogData"
+                    v-model="baklavaView.editor.userMenus.showCustomDialog"
+                />
+            </ParentMenu>
+        </Panel>
+    </Transition>
     <Transition name="fade" @mousedown.self="saveMenuShow = false">
         <Panel v-show="saveMenuShow">
             <ParentMenu
