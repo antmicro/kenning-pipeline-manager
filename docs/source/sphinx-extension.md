@@ -39,6 +39,7 @@ The `pipeline_manager` directive allows for following parameters:
 * `height` - optional, specifies height of the graph in chosen units, `px`/`%`/`em` etc. Unit has to be specified. If height was not set, aspect ratio of 3/2 will be assumed.
 * `width` - optional, specifies width of the graph in chosen units, `px`/`%`/`em` etc. Unit has to be specified. If width was not set, 100% will be assumed.
 * `alt` - optional, changes alternative text of the graph.
+* `center_at_origin` - optional, if set, the editor is centered around origin (0,0) and not zoomed to fit the whole graph.
 
 So for example this is a valid directive usage:
 

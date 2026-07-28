@@ -911,8 +911,14 @@ export default defineComponent({
          *
          * @param dataflow The object holding the parsed dataflow file
          */
-        async function updateDataflow(dataflow) {
-            const { errors, warnings, info } = await editorManager.loadDataflow(dataflow);
+        async function updateDataflow(dataflow, centerAtOrigin = false) {
+            const { errors, warnings, info } = await editorManager.loadDataflow(
+                dataflow,
+                false,
+                false,
+                null,
+                centerAtOrigin,
+            );
 
             if (Array.isArray(warnings) && warnings.length) {
                 NotificationHandler.terminalLog(
@@ -986,6 +992,12 @@ export default defineComponent({
                 props.viewModel.editor.preview = setting;
             }
 
+            let centerAtOrigin = false;
+            if (urlParams.has('center_at_origin')) {
+                const setting = urlParams.get('center_at_origin') === 'true';
+                centerAtOrigin = setting;
+            }
+
             let specText;
             // Try loading default specification and/or dataflow from URLs provided in an
             if (urlParams.has('spec')) {
@@ -1044,7 +1056,7 @@ export default defineComponent({
                     dataflow = require(process.env.VUE_APP_DATAFLOW_PATH); // eslint-disable-line global-require,max-len,import/no-dynamic-require
                 }
                 if (dataflow) {
-                    await updateDataflow(dataflow);
+                    await updateDataflow(dataflow, centerAtOrigin);
                 }
             }
             NotificationHandler.restoreShowNotification();

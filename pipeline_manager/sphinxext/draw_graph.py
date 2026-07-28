@@ -40,6 +40,7 @@ class KPMNode(nodes.container):
         height: Optional[str] = None,
         alt: Optional[str] = None,
         width: Optional[str] = None,
+        center_at_origin: Optional[bool] = None,
     ) -> None:
         """Constructor for KPMNode."""
         # we're leveraging the builtin download_reference node
@@ -67,6 +68,7 @@ class KPMNode(nodes.container):
         self.height = height
         self.width = width
         self.alt = alt if alt is not None else DEFAULT_ALT_TEXT
+        self.center_at_origin = center_at_origin
 
     def _node_to_target(self, node: download_reference) -> str:
         if "filename" in node:
@@ -88,6 +90,10 @@ class KPMNode(nodes.container):
             params["graph"] = node._node_to_target(node.graph_node)
         if node.preview:
             params["preview"] = str(bool(node.preview)).lower()
+        if node.center_at_origin:
+            params["center_at_origin"] = str(
+                bool(node.center_at_origin)
+            ).lower()
 
         trans.body.append(
             f"""
@@ -123,6 +129,7 @@ class KPMDirective(SphinxDirective):
         "height": unchanged,
         "alt": unchanged,
         "width": unchanged,
+        "center_at_origin": unchanged,
     }
 
     def run(self) -> list[nodes.Node]:
@@ -134,6 +141,10 @@ class KPMDirective(SphinxDirective):
                 "preview" in self.options
             ):  # by default None is returned if flag is correct
                 self.options["preview"] = True
+            if (
+                "center_at_origin" in self.options
+            ):  # by default None is returned if flag is correct
+                self.options["center_at_origin"] = True
             return [KPMNode(depth=self.env.docname.count("/"), **self.options)]
 
         from tempfile import NamedTemporaryFile

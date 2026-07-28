@@ -319,14 +319,17 @@ export default class PipelineManagerEditor extends Editor {
      * @returns list of errors that occurred during loading
      */
     async load(
-        state, preventCentering = false, loadOnly = false, templateName = null,
+        state,
+        preventCentering = false,
+        loadOnly = false,
+        templateName = null,
+        centerAtOrigin = false,
     ) {
         // All subgraphs should be unregistered to avoid conflicts later when trying to
         // load into subgraph (in that case there may be two subgraphs with the same ID, one
         // of them from the previous session).
         this.unregisterGraphs();
         ir.clearRegistry();
-
         // Load the node state as it is, wait until vue renders new nodes so that
         // node dimensions can be retrieved from DOM elements and then update the
         // location based on autolayout results. The editor is set to readonly
@@ -499,8 +502,20 @@ export default class PipelineManagerEditor extends Editor {
         if (scaling !== undefined) {
             this._graph.scaling = scaling;
         }
-        if (!preventCentering && scaling === undefined && panning === undefined) {
+        if (!preventCentering &&
+            scaling === undefined &&
+            panning === undefined &&
+            !centerAtOrigin) {
             this.centerZoom();
+        }
+        if (centerAtOrigin) {
+            const { editorWidth } = PipelineManagerEditor.editorSize();
+
+            this._graph.scaling = 0.5;
+            this._graph.panning = {
+                x: editorWidth / 2 / this._graph.scaling,
+                y: 50,
+            };
         }
         this.graphs.forEach((graph) => {
             if (graph.graphNode !== undefined) {
