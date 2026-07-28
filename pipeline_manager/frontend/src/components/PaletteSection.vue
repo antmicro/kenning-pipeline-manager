@@ -100,13 +100,9 @@ const props = defineProps<{
 }>();
 
 const editorEl = inject<Ref<HTMLElement | null>>('editorEl');
-console.log('editorEl: ', editorEl);
-console.log('editorEl.value: ', editorEl.value);
 
 const absolutePointer = usePointer();
 const pointer = computed(() => {
-    console.log('editorEl: ', editorEl);
-    console.log('editorEl.value (copmuted): ', editorEl.value);
     const { left, top } = editorEl!.value?.getBoundingClientRect() ?? { left: 0, top: 0 };
     return {
         x: absolutePointer.x.value - left,
