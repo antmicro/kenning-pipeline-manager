@@ -53,11 +53,11 @@ const { viewModel } = useViewModel();
 const nodeLists = computed(
     () => viewModel.value.editor?.nodeLists ?? Map());
 
-const oneNodeList = computed(() => nodeLists.value?.values().length === 1);
+const oneNodeList = computed(() => nodeLists.value?.size === 1);
 
 const Tabs = computed(() => ({
     nodes: 'Nodes',
-    nodeLists: (oneNodeList.value ? nodeLists.value?.keys()[0] : 'Node Lists'),
+    nodeLists: (oneNodeList.value ? nodeLists.value?.keys().next().value : 'Node Lists'),
     graphsTree: 'Graphs',
 }));
 
