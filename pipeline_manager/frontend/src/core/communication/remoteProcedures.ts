@@ -25,6 +25,8 @@ import { saveSpecificationConfiguration } from '../../components/saveConfigurati
 import getExternalApplicationManager from './ExternalApplicationManager';
 import { checkTerminalExistence, TerminalView } from './utils';
 import { prepareSubgraphInstance } from '../../custom/CustomGraphNode';
+import PipelineManagerEditor from '../../custom/Editor.js';
+import { sleep } from '../utils.ts';
 
 /* eslint-disable import/prefer-default-export */
 /* eslint-disable camelcase */
@@ -153,6 +155,32 @@ function getConnection(graph_id: string, from: string, to: string): any {
         throw new Error(`Connection from ${from} to ${to} does not exist.`);
     }
     return connection;
+}
+
+/**
+ * @returns open file dialog to get file path
+ *
+ * @param title
+ */
+export async function open_dialog_request(params: { title: string, wait: boolean }) {
+    const { viewModel } = useViewModel();
+    const { userMenus } = viewModel.value.editor as unknown as PipelineManagerEditor;
+
+    if (!userMenus.selectDialogBox(params.title)) {
+        throw new Error(`Cannot find dialog box with name ${params.title}.`);
+    }
+
+    if (!params.wait) {
+        return {
+            data: {},
+        };
+    }
+
+    await userMenus.waitForDialogBoxClosed();
+
+    return {
+        data: userMenus.userDialogData,
+    };
 }
 
 /**

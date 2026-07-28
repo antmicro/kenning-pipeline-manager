@@ -51,11 +51,16 @@
                     "title": {
                         "description": "Name of the dialog box",
                         "type": "string"
+                    },
+                    "wait": {
+                        "description": "Wait for data from dialog box",
+                        "type": "boolean",
+                        "default": false
                     }
                 }
             },
             "returns": {
-                "$ref": "common_types#/$defs/null_or_empty"
+               "$ref": "common_types#/$defs/dialog_box_output"
             }
         },
         "graph_get": {
@@ -838,15 +843,7 @@
         "user_dialog_read": {
             "description": "Request sent by the frontend when custom user dialog is closed",
             "params": {
-                "description": "Parameters for request",
-                "type": "object",
-                "properties": {
-                    "data": {
-                        "description": "Data read by user dialog.",
-                        "type": "object"
-                    }
-                },
-                "required": ["data"]
+                "$ref": "common_types#/$defs/dialog_box_output"
             },
             "returns": {
                 "$ref": "common_types#/$defs/null_or_empty"
