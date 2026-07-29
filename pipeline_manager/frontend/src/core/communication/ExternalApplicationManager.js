@@ -517,6 +517,22 @@ class ExternalApplicationManager {
     }
 
     /**
+     * Send config got from custom user dialog.
+     *
+     * @param userData User data to send
+     */
+    async requestUserDialogRead(userData) {
+        if (!this.isConnected()) return;
+        try {
+            this.editorManager.editor.userMenus.dialogBoxClosed.emit(userData);
+            this.editorManager.editor.userMenus.resetUserDialog();
+            await this.request('user_dialog_read', { data: userData });
+        } catch (error) {
+            RPCTerminalLog('warning', error, 'Sending user dialog data failed');
+        }
+    }
+
+    /**
      * Function used to initialize connection with the external application and request
      * specification. Should be called after DOM is created.
      *

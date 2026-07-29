@@ -820,6 +820,23 @@
                 "$ref": "common_types#/$defs/null_or_empty"
             }
         },
+        "user_dialog_read": {
+            "description": "Request sent by the frontend when custom user dialog is closed",
+            "params": {
+                "description": "Parameters for request",
+                "type": "object",
+                "properties": {
+                    "data": {
+                        "description": "Data read by user dialog.",
+                        "type": "object"
+                    }
+                },
+                "required": ["data"]
+            },
+            "returns": {
+                "$ref": "common_types#/$defs/null_or_empty"
+            }
+        },
         "terminal_read": {
             "description": "Request sent by the frontend when terminal received an input",
             "params": {
