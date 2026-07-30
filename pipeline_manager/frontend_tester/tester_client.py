@@ -250,6 +250,14 @@ class RPCMethods:
         )
         return {"type": MessageType.OK.value, "content": "Terminal created"}
 
+    async def user_dialog_read(self, data: object) -> None:
+        taskName = data["taskName"]
+        logging.info(f"Got task name: {taskName}")
+        await self.client.request(
+            "terminal_write",
+            {"message": f"{taskName} has been executed.", "name": "Terminal"},
+        )
+
     def terminal_read(
         self,
         name: str,
@@ -269,6 +277,39 @@ class RPCMethods:
             logging.warn("Input from readonly terminal!")
             return
         self.input_queue.put(message)
+
+    def dialog_boxes_get(self) -> object:
+        """
+        RPC method that responses to dialog boxes request.
+
+        Returns
+        -------
+        object
+            Dialog boxes definition
+        """
+        return {
+            "optimizationTask": {
+                "title": "Optimization task",
+                "confirmText": "Ok",
+                "template": {
+                    "taskName": {
+                        "name": "task",
+                        "type": "text",
+                        "default": "Foo",
+                    },
+                    "numberOfIterations": {
+                        "name": "iterations",
+                        "type": "int",
+                        "default": 10,
+                    },
+                    "earlyStopping": {
+                        "name": "early stopping",
+                        "type": "bool",
+                        "default": False,
+                    },
+                },
+            }
+        }
 
     def app_capabilities_get(self) -> List:
         """
@@ -317,6 +358,11 @@ class RPCMethods:
                 "name": "Create writable terminal",
                 "iconName": "Backend",
                 "procedureName": "custom_create_writable_terminal",
+            },
+            {
+                "name": "Open user dialog",
+                "iconName": "Run",
+                "procedureName": "custom_open_user_dialog_box",
             },
         ]
 
@@ -470,6 +516,27 @@ class RPCMethods:
             dataflow,
             self.custom_terminal_stress_test.__name__,
         )
+
+    async def custom_open_user_dialog_box(self, dataflow: Dict) -> Dict:
+        """
+        RPC method that open custom user dialog box.
+
+        Parameters
+        ----------
+        dataflow : Dict
+            Content of the request.
+
+        Returns
+        -------
+        Dict
+            Method's response
+        """
+        output = await self.client.request(
+            "open_dialog_request",
+            {"title": "optimizationTask", "wait": True},
+        )
+        logging.info(f"Got user dialog data: {output}")
+        return {"type": MessageType.OK.value, "content": "Dialog box open"}
 
     async def custom_create_writable_terminal(self, dataflow: Dict) -> Dict:
         """
