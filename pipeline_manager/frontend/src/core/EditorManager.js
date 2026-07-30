@@ -196,6 +196,8 @@ export default class EditorManager {
         this.baklavaView.settings.newGraphNode = this.defaultMetadata.newGraphNode;
         this.baklavaView.settings.newNodeType = this.defaultMetadata.newNodeType;
         this.baklavaView.settings.showHiddenProperties = this.defaultMetadata.showHiddenProperties;
+        this.baklavaView.settings.disableInterfaceExpose = this.defaultMetadata
+            .disableInterfaceExpose;
 
         this.specificationVersion = unresolvedSpecificationSchema.version;
         this.baklavaView.commandHandler = useCommandHandler();
@@ -1871,6 +1873,8 @@ export default class EditorManager {
             metadata?.newNodeType ?? this.defaultMetadata.newNodeType;
         this.baklavaView.settings.showHiddenProperties =
             metadata?.showHiddenProperties ?? this.defaultMetadata.showHiddenProperties;
+        this.baklavaView.settings.disableInterfaceExpose =
+            metadata?.disableInterfaceExpose ?? this.defaultMetadata.disableInterfaceExpose;
         this.baklavaView.connectionRenderer.switchableInterfaces =
             metadata?.switchableInterfaces ?? this.defaultMetadata.switchableInterfaces;
 
