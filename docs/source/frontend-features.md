@@ -155,6 +155,7 @@ Available parameters are as follows:
 * `preview` - starts {{project}} in read only mode, without HUD,
 * `include` - allows to provide includes for the specification,
 * `backend` - connects {{project}} to the specified backend regardless of the application mode.
+* `center_at_top` - determines whether to center the editor at the topmost node after loading.
 
 When it comes to `spec` and `graph`, by default we can use following URI schemes:
 

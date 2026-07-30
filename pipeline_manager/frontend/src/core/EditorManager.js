@@ -2273,13 +2273,15 @@ export default class EditorManager {
      * @param loadOnly determines whether to load the graph only without adjusting
      * @param templateName {string|null} name of the template, if the graph is a template
      * the graph rendering. Can be used when validating graphs without their browser
-     * representation.
+     * representation
+     * @param centerAtTop determines whether to center the editor at the topmost node
+     * after loading.
      * @returns An array of errors that occurred during the dataflow loading.
      * If the array is empty, the loading was successful.
      */
     async loadDataflow(
         dataflow, preventCentering = false, loadOnly = false, templateName = null,
-        centerAtOrigin = false,
+        centerAtTop = false,
     ) {
         let { notifyWhenChanged } = this;
 
@@ -2365,7 +2367,7 @@ export default class EditorManager {
                         preventCentering,
                         loadOnly,
                         templateName,
-                        centerAtOrigin,
+                        centerAtTop,
                     );
 
                     if (!globalProperties.softLoad) {

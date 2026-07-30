@@ -316,6 +316,8 @@ export default class PipelineManagerEditor extends Editor {
      * the graph rendering. Can be used when validating graphs without their browser
      * representation.
      * @param templateName {string|null} name of the template, if the graph is a template
+     * @param centerAtTop determines whether to center the editor at the topmost node
+     * after loading
      * @returns list of errors that occurred during loading
      */
     async load(
@@ -323,7 +325,7 @@ export default class PipelineManagerEditor extends Editor {
         preventCentering = false,
         loadOnly = false,
         templateName = null,
-        centerAtOrigin = false,
+        centerAtTop = false,
     ) {
         // All subgraphs should be unregistered to avoid conflicts later when trying to
         // load into subgraph (in that case there may be two subgraphs with the same ID, one
@@ -505,16 +507,28 @@ export default class PipelineManagerEditor extends Editor {
         if (!preventCentering &&
             scaling === undefined &&
             panning === undefined &&
-            !centerAtOrigin) {
+            !centerAtTop) {
             this.centerZoom();
         }
-        if (centerAtOrigin) {
-            const { editorWidth } = PipelineManagerEditor.editorSize();
+        if (centerAtTop) {
+            let topY = this.graph.nodes[0].position.y;
+            let topNode = this.graph.nodes[0];
+            this.graph.nodes.forEach((node) => {
+                if (node.position.y < topY) {
+                    topY = node.position.y;
+                    topNode = node;
+                }
+            });
+
+            const { editorWidth, sideBarWidth } = PipelineManagerEditor.editorSize();
+
+            // Due to scaling editor coordinates are also scaled (in this case by a factor of 2)
+            const editorCenter = editorWidth;
 
             this._graph.scaling = 0.5;
             this._graph.panning = {
-                x: editorWidth / 2 / this._graph.scaling,
-                y: 50,
+                x: -topNode.position.x + editorCenter + sideBarWidth,
+                y: -topNode.position.y + 75,
             };
         }
         this.graphs.forEach((graph) => {

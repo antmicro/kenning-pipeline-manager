@@ -910,14 +910,16 @@ export default defineComponent({
          * and provides error messages for erroneous content.
          *
          * @param dataflow The object holding the parsed dataflow file
+         * @param centerAtTop determines whether to center the editor
+         * at the topmost node after loading
          */
-        async function updateDataflow(dataflow, centerAtOrigin = false) {
+        async function updateDataflow(dataflow, centerAtTop = false) {
             const { errors, warnings, info } = await editorManager.loadDataflow(
                 dataflow,
                 false,
                 false,
                 null,
-                centerAtOrigin,
+                centerAtTop,
             );
 
             if (Array.isArray(warnings) && warnings.length) {
@@ -992,10 +994,10 @@ export default defineComponent({
                 props.viewModel.editor.preview = setting;
             }
 
-            let centerAtOrigin = false;
-            if (urlParams.has('center_at_origin')) {
-                const setting = urlParams.get('center_at_origin') === 'true';
-                centerAtOrigin = setting;
+            let centerAtTop = false;
+            if (urlParams.has('center_at_top')) {
+                const setting = urlParams.get('center_at_top') === 'true';
+                centerAtTop = setting;
             }
 
             let specText;
@@ -1056,7 +1058,7 @@ export default defineComponent({
                     dataflow = require(process.env.VUE_APP_DATAFLOW_PATH); // eslint-disable-line global-require,max-len,import/no-dynamic-require
                 }
                 if (dataflow) {
-                    await updateDataflow(dataflow, centerAtOrigin);
+                    await updateDataflow(dataflow, centerAtTop);
                 }
             }
             NotificationHandler.restoreShowNotification();
