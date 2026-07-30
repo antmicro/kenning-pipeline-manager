@@ -102,6 +102,11 @@
             "description": "Flag allowing connections with endpoints at the same node",
             "default": false
         },
+        "disableInterfaceExpose": {
+            "type": "boolean",
+            "description": "Flag that disables ability to expose node's interfaces.",
+            "default": false
+        },
         "readonly": {
             "type": "boolean",
             "description": "Flag determining whether the editor is in readonly mode",
