@@ -57,10 +57,14 @@
                         "type": "boolean",
                         "default": false
                     }
-                }
+                },
+                "required": [
+                    "title"
+                ],
+                "additionalProperties": false
             },
             "returns": {
-               "$ref": "common_types#/$defs/dialog_box_output"
+                "$ref": "common_types#/$defs/dialog_box_output"
             }
         },
         "graph_get": {
@@ -75,7 +79,11 @@
         "node_get": {
             "description": "Procedure to read node state",
             "params": {
-                "allOf": [{ "$ref": "common_types#/$defs/node_object" }]
+                "allOf": [
+                    {
+                        "$ref": "common_types#/$defs/node_object"
+                    }
+                ]
             },
             "returns": {
                 "type": "object",
@@ -86,17 +94,26 @@
                     }
                 },
                 "additionalProperties": false,
-                "required": ["node"]
+                "required": [
+                    "node"
+                ]
             }
         },
         "properties_get": {
             "description": "Procedure to alter values of a node",
             "params": {
-                "allOf": [{ "$ref": "common_types#/$defs/node_object" }],
+                "allOf": [
+                    {
+                        "$ref": "common_types#/$defs/node_object"
+                    }
+                ],
                 "type": "object",
                 "properties": {
                     "properties": {
-                        "type": ["array", "null"],
+                        "type": [
+                            "array",
+                            "null"
+                        ],
                         "description": "Properties which values are going to be read specified by either a name of id. If undefined then all properties are returned",
                         "items": {
                             "type": "object",
@@ -109,7 +126,9 @@
                                             "type": "string"
                                         }
                                     },
-                                    "required": ["id"],
+                                    "required": [
+                                        "id"
+                                    ],
                                     "additionalProperties": false
                                 },
                                 {
@@ -120,7 +139,9 @@
                                             "type": "string"
                                         }
                                     },
-                                    "required": ["name"],
+                                    "required": [
+                                        "name"
+                                    ],
                                     "additionalProperties": false
                                 }
                             ]
@@ -147,7 +168,11 @@
                             "description": "Value of the property. Its type depends on the property"
                         }
                     },
-                    "required": ["id", "name", "value"],
+                    "required": [
+                        "id",
+                        "name",
+                        "value"
+                    ],
                     "additionalProperties": false
                 }
             }
@@ -218,7 +243,9 @@
                         "$ref": "common_types#/$defs/loadingScreen"
                     }
                 },
-                "required": ["dataflow"],
+                "required": [
+                    "dataflow"
+                ],
                 "additionalProperties": false
             },
             "returns": {
@@ -241,7 +268,8 @@
                     }
                 },
                 "required": [
-                    "progress", "method"
+                    "progress",
+                    "method"
                 ],
                 "additionalProperties": false
             },
@@ -277,7 +305,9 @@
                         "default": true
                     }
                 },
-                "required": ["name"]
+                "required": [
+                    "name"
+                ]
             },
             "returns": {
                 "$ref": "common_types#/$defs/null_or_empty"
@@ -294,7 +324,9 @@
                         "type": "string"
                     }
                 },
-                "required": ["name"]
+                "required": [
+                    "name"
+                ]
             },
             "returns": {
                 "$ref": "common_types#/$defs/null_or_empty"
@@ -314,9 +346,11 @@
                         "description": "Message to be written to the terminal",
                         "type": "string"
                     }
-
                 },
-                "required": ["name", "message"]
+                "required": [
+                    "name",
+                    "message"
+                ]
             },
             "returns": {
                 "$ref": "common_types#/$defs/null_or_empty"
@@ -407,7 +441,11 @@
                 "properties": {
                     "type": {
                         "description": "Type of the notification.",
-                        "enum": ["error", "warning", "info"]
+                        "enum": [
+                            "error",
+                            "warning",
+                            "info"
+                        ]
                     },
                     "title": {
                         "description": "Title of the notification, appearing both in the terminal and notification",
@@ -422,7 +460,11 @@
                         "type": "string"
                     }
                 },
-                "required": ["type", "title", "details"]
+                "required": [
+                    "type",
+                    "title",
+                    "details"
+                ]
             },
             "returns": {
                 "$ref": "common_types#/$defs/null_or_empty"
@@ -446,7 +488,9 @@
                         "$ref": "common_types#/$defs/tryMinify"
                     }
                 },
-                "required": ["specification"]
+                "required": [
+                    "specification"
+                ]
             },
             "returns": {
                 "$ref": "common_types#/$defs/null_or_empty"
@@ -505,8 +549,12 @@
             },
             "returns": {
                 "anyOf": [
-                    {"$ref": "common_types#/$defs/specification_object"},
-                    {"$ref": "common_types#/$defs/null_or_empty"}
+                    {
+                        "$ref": "common_types#/$defs/specification_object"
+                    },
+                    {
+                        "$ref": "common_types#/$defs/null_or_empty"
+                    }
                 ]
             }
         },
@@ -640,6 +688,15 @@
             },
             "returns": {
                 "$ref": "common_types#/$defs/navbar_items"
+            }
+        },
+        "dialog_boxes_get": {
+            "description": "Request external application dialog boxes",
+            "params": {
+                "$ref": "common_types#/$defs/null_or_empty"
+            },
+            "returns": {
+                "$ref": "common_types#/$defs/dialog_boxes"
             }
         },
         "dataflow_import": {
@@ -864,7 +921,10 @@
                         "type": "string"
                     }
                 },
-                "required": ["name", "message"]
+                "required": [
+                    "name",
+                    "message"
+                ]
             },
             "returns": {
                 "$ref": "common_types#/$defs/null_or_empty"
@@ -891,10 +951,16 @@
                     },
                     "value": {
                         "description": "Value of the property",
-                        "type": ["object", "null"]
+                        "type": [
+                            "object",
+                            "null"
+                        ]
                     }
                 },
-                "required": ["id", "value"]
+                "required": [
+                    "id",
+                    "value"
+                ]
             },
             "returns": {
                 "$ref": "common_types#/$defs/null_or_empty"
