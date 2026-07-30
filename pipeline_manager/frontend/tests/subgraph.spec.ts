@@ -103,6 +103,23 @@ async function verifyPropertyCount(node: Locator, expectedNumber: number): Promi
     return exposedProperties;
 }
 
+test('test disable expose interfaces metadata option',async ({page}) => {
+    await page.goto(getUrl());
+
+    const node = getNode(page,'LoadVideo');
+    const interfacePort = node.locator('.__interfaces .__outputs .__port').first();
+    await interfacePort.click({button: 'right'});
+
+    await expect(page.getByText('Expose interface')).toBeVisible();
+
+    // Load specification with disabled expose interface option
+    await loadSpecification(page, 'test-disabled-interface-expose.json');
+    await loadDataflow(page, 'sample-dataflow.json');
+
+    await interfacePort.click({button: 'right'});
+    await expect(page.getByText('Expose interface')).not.toBeVisible();
+});
+
 test('test visibility of newly exposed subgraph interface', async ({ page }) => {
     await prepareSubgraphPage(page);
     const subgraphNode = getNode(page, 'Test subgraph #1');
