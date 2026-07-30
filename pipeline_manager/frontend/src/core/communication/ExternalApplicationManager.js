@@ -7,6 +7,7 @@
 import { createJSONRPCErrorResponse, createJSONRPCSuccessResponse, JSONRPCErrorCode } from 'json-rpc-2.0';
 import { charset } from 'mime-types';
 import { ref } from 'vue';
+import { useViewModel } from '@baklavajs/renderer-vue';
 import {
     backendApiUrl, PMMessageType, JSONRPCCustomErrorCode, loadingScreen,
 } from '../utils';
@@ -335,6 +336,26 @@ class ExternalApplicationManager {
     }
 
     /**
+    * Provides custom dialog boxes of the third-party app connected via server
+    * to Pipeline Manager's frontend.
+    */
+    async requestDialogBoxes() {
+        try {
+            const dialogBoxes = await this.request('dialog_boxes_get');
+
+            Object.entries(dialogBoxes).forEach(([key, options]) => {
+                this.editorManager.editor.userMenus.registerDialogTemplate(
+                    key,
+                    options.title,
+                    options.template,
+                );
+            });
+        } catch (error) {
+            RPCTerminalLog('warning', error, 'Dialog boxes cannot be retrieved.');
+        }
+    }
+
+    /**
     * Handles dataflow export.
     */
     async requestDataflowExport() {
@@ -524,8 +545,8 @@ class ExternalApplicationManager {
     async requestUserDialogRead(userData) {
         if (!this.isConnected()) return;
         try {
-            this.editorManager.editor.userMenus.dialogBoxClosed.emit(userData);
-            this.editorManager.editor.userMenus.resetUserDialog();
+            const { viewModel } = useViewModel();
+            viewModel.value.editor.userMenus.showCustomDialog = false;
             await this.request('user_dialog_read', { data: userData });
         } catch (error) {
             RPCTerminalLog('warning', error, 'Sending user dialog data failed');
@@ -555,6 +576,7 @@ class ExternalApplicationManager {
         await Promise.all([
             this.requestSpecification(),
             this.requestAppCapabilities(),
+            this.requestDialogBoxes(),
         ]);
 
         try {
