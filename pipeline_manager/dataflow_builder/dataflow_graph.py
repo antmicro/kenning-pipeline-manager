@@ -466,6 +466,21 @@ class DataflowGraph(JsonConvertible):
 
         return self.create_node(name, subgraph_id=subgraph_id, **kwargs)
 
+    def add_additional_data(self, additionalData: Dict) -> None:
+        """
+        Add additional data to graph.
+        Function appends graph's additional
+        data with items from additionalData
+        parameter.
+
+        Parameters
+        ----------
+        additionalData : Dict
+            Dictionary with additional data.
+        """
+        for key, value in additionalData.items():
+            self.additional_data[key] = value
+
     def create_connection(
         self,
         from_interface: Union[Interface, str],
