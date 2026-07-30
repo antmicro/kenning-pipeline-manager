@@ -36,14 +36,14 @@ export default class CustomMenusManager {
     * @param {boolean} val Whether to close user dialog box,
     * when it is false dialog box is closed.
     */
-    set closeCustomDialog(val) {
+    set showCustomDialogWithReset(val) {
         if (!val) {
             this.resetUserDialog();
             this.showCustomDialog = false;
         }
     }
 
-    get closeCustomDialog() {
+    get showCustomDialogWithReset() {
         return this.showCustomDialog;
     }
 

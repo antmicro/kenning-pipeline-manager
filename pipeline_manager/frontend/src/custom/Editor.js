@@ -24,6 +24,7 @@ import { suppressHistoryLogging } from '../core/History.ts';
 import CreateCustomGraphNodeType, { prepareSubgraphInstance } from './CustomGraphNode.js';
 import { ir } from '../core/interfaceRegistry.ts';
 import { hexToRGB } from '../core/nodeCreation/nodeColors.js';
+import CustomMenusManager from './CustomMenus.js';
 
 import globalProperties from '../globalProperties.ts';
 
@@ -53,6 +54,8 @@ export default class PipelineManagerEditor extends Editor {
     set readonly(val) {
         this._readonly = val;
     }
+
+    userMenus = new CustomMenusManager();
 
     allowLoopbacks = false;
 
@@ -132,6 +135,12 @@ export default class PipelineManagerEditor extends Editor {
 
     resetAllGraphsToSave() {
         this.graphs.forEach((graph) => { graph.toSave = true; });
+    }
+
+    resetUserDialog() {
+        this.userDialogEntriesTemplate = new Map();
+        this.userDialogData = {};
+        this.userDialogTitle = 'Pipeline Manager Dialog';
     }
 
     /**
