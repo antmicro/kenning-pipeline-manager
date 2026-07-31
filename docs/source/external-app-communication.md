@@ -265,6 +265,93 @@ Context menu procedures have only one parameter: `node_id`, which is the id of t
 The expected return type is [dataflow_export](#external-dataflow-export) for procedures with
 the `custom_download` prefix in their name, and [dataflow_run](#external-dataflow-run) for all other procedures.
 
+## Custom dialog box
+
+### Custom dialog box definition
+An external application can also define custom dialog boxes for various different use cases.
+When connection with {{project}} server is established it sends [dialog_boxes_get](#dialog_boxes_get) request to get user credentials with all custom dialog boxes used by application.
+Example dictionary defines simple form:
+```json
+ {
+    "optimizationTask": {
+        "title": "Optimization task",
+        "confirmText": "Ok",
+        "template": {
+            "taskName": {
+                "name": "task",
+                "type": "text",
+                "default": "Foo"
+            },
+            "numberOfIterations": {
+                "name": "iterations",
+                "type": "int",
+                "default": 10
+            },
+            "earlyStopping": {
+                "name": "early stopping",
+                "type": "bool",
+                "default": false
+            }
+        },
+    }
+}
+```
+Every entry in dictionary defines an internal with the name later used to open the dialog box, in this case it is a dialog box with name `optimizationTask`.
+Each dialog definition consists of:
+- `title` - which is a name of the dialog box's window
+- `confirmText` - a title of the dialog box's confirm button
+- `template` - it holds definition for every input in dialog box.
+
+User dialog box `template` allows for defining input's name and it's type.
+Object name represents internal name of the input in which it will be returned, see [Read data from custom dialog box](#read-data-from-custom-dialog-box).
+Nested `name` property represents a name of the input it will be shown in a dialog box's form and `type` represents type of the input, current supported types:
+* `text` - a standard text input
+* `number` - a numerical input
+* `int` - an integer input
+* `bool` - a checkbox with two states true or false
+
+`default` properties in the template allows for setting a initial value in user data form.
+
+The resulting specification gives us dialog box that looks like that:
+
+![Example custom dialog box](img/example_custom_user_dialog.png)
+
+### Custom dialog input types description
+
+* **Text** - Represents a standard input that accepts text data.
+* **Number** - Represents a numerical input that supports float based data.
+    It allows for settings optional `max` and `min` value which define range of supported input numbers.
+* **Int** - Represents a numerical input that supports integer based data.
+    It allows for settings optional `max` and `min` value which define range of supported input numbers.
+* **Bool** - Represents a input that accepts only two states `true` and `false`.
+    It is defined as a checkbox in dialog box.
+
+### Open custom dialog box
+
+To open this dialog box, external application sends [open_dialog_request](#open_dialog_request) request with a payload:
+``` json
+{
+    "title": "optimizationTask",
+    "wait": true
+}
+```
+in which `title` parameter is a name of the dialog box to open and `wait` is an optional parameter that allows for a synchronous call.
+When it is set to `true` the request will wait for user inputs and send them back in the same call, otherwise `user_dialog_read` callback needs to be used to get user's inputs.
+
+### Read data from custom dialog box
+
+When confirm button, `OK` button in this case, is pressed, {{project}} sends [user_dialog_read](#user_dialog_read) request with data read from dialog box in form of simple json-like format:
+``` json
+{
+    "taskName": "Foo"
+}
+```
+in which `taskName` corresponds to text input defined in `template` section of the dialog box.
+
+Example usage of custom dialog box is defined in script [tester_client](https://github.com/antmicro/kenning-pipeline-manager/blob/main/pipeline_manager/frontend_tester/tester_client.py).
+
+You can also test custom dialog box using [Custom dialog box](resource:tester_api/index.html) demo which uses {{project}} embedded into html page.
+
 ## Implementing a Python-based client for {{project}}
 
 The communication described above is necessary to integrate an application with {{project}}.

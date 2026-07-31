@@ -347,6 +347,7 @@ class ExternalApplicationManager {
                 this.editorManager.editor.userMenus.registerDialogTemplate(
                     key,
                     options.title,
+                    options.confirmText,
                     options.template,
                 );
             });
