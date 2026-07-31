@@ -104,6 +104,7 @@ This object specifies additional editor options and contains the following optio
   The default value is `false`.
 * `showHiddenProperties` - Boolean value determining whether properties marked with `hideOnDefault` should be visible regardless of their value.
   The default value is `false`.
+* `disableInterfaceExpose` - Boolean value which blocks option to expose node's interfaces. The default value is `false`.
 
 An example:
 
