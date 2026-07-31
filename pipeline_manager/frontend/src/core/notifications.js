@@ -107,9 +107,10 @@ export default class NotificationHandler {
      * Preferably without any punctuation marks at the end
      * @param {Array[string] | string | undefined} messages messages that are displayed in
      * the terminal
+     * @param {string | null} timestamp timestamp that is displayed alongside messages
      */
-    static terminalLog(type, title, messages) {
-        NotificationHandler.showToast(type, title);
+    static terminalLog(type, title, messages, timestamp = null) {
+        NotificationHandler.showToast(type, title, timestamp);
         terminalStore.addParsed(title, messages);
     }
 }

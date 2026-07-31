@@ -396,6 +396,10 @@
                     "details": {
                         "description": "Details of the notification, displayed only in the terminal",
                         "type": "string"
+                    },
+                    "timestamp": {
+                        "description": "Timestamp that will be displayed alongside the message.",
+                        "type": "string"
                     }
                 },
                 "required": ["type", "title", "details"]

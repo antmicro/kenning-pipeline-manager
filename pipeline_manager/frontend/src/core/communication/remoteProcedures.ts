@@ -526,12 +526,13 @@ export function terminal_get_instances() {
 
 type Notification = {
     type: string,
-    title: string
-    details: string
+    title: string,
+    details: string,
+    timestamp?: string
 };
 
 export function notification_send(params: Notification) {
-    NotificationHandler.terminalLog(params.type, params.title, params.details);
+    NotificationHandler.terminalLog(params.type, params.title, params.details, params.timestamp);
 }
 
 export async function specification_change(
