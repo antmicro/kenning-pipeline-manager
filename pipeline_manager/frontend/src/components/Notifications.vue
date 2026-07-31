@@ -24,6 +24,7 @@ List of notitications that creates a `Notification` component for each message r
                     <Notification
                         :type="notifications[notificationsLength - index].type"
                         :message="`${notifications[notificationsLength - index].message}`"
+                        :timestamp="`${notifications[notificationsLength - index].timestamp}`"
                         :index="notificationsLength - index"
                         border="border"
                     />

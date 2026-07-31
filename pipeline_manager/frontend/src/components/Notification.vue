@@ -14,9 +14,12 @@ Single notification.
             <NotificationBadge :type="type" />
         </div>
         <div class="notification-message">
-            <span v-if="type === 'info'" :class="type">Info</span>
-            <span v-if="type === 'warning'" :class="type">Warning</span>
-            <span v-if="type === 'error'" :class="type">Error</span>
+            <div class="header">
+                <span v-if="type === 'info'" :class="type">Info</span>
+                <span v-if="type === 'warning'" :class="type">Warning</span>
+                <span v-if="type === 'error'" :class="type">Error</span>
+                <span v-if="timestamp" class="timestamp">{{ timestamp }}</span>
+            </div>
             <span class="message">{{ message }}</span>
         </div>
         <button @click="remove" tabindex="-1"><Cross color="white"  tabindex="-1"/></button>
@@ -42,6 +45,11 @@ export default {
         type: {
             type: String,
             required: true,
+        },
+
+        timestamp: {
+            type: [String, null],
+            default: null,
         },
 
         border: {
@@ -95,23 +103,34 @@ export default {
         font-size: $fs-small;
         min-width: 0;
 
+        & > .header {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+
+            & > .timestamp {
+                font-size: $fs-tiny;
+                color: $gray-100;
+            }
+
+            & > .info {
+                color: $green;
+            }
+
+            & > .warning {
+                color: $gold;
+            }
+
+            & > .error {
+                color: $red;
+            }
+        }
+
         & > .message {
             overflow: hidden;
             display: -webkit-box;
             -webkit-line-clamp: 1;
             -webkit-box-orient: vertical;
-        }
-
-        & > .info {
-            color: $green;
-        }
-
-        & > .warning {
-            color: $gold;
-        }
-
-        & > .error {
-            color: $red;
         }
 
         & > span:last-child {
