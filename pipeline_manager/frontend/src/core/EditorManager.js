@@ -1192,7 +1192,7 @@ export default class EditorManager {
             graph.editor = this.editor;
             node.subgraph = graph;
 
-            return [];
+            return node;
         }
         // Update node specification
         const unresolvedNodeSpecification = this.specification
@@ -1225,10 +1225,14 @@ export default class EditorManager {
         const nodesToReplace = displayedGraph.nodes.filter(
             (n) => n.type === node.type,
         );
+        let result;
         nodesToReplace.forEach((n) => {
-            displayedGraph.replaceNode(n, node.type, true);
+            const newNode = displayedGraph.replaceNode(n, node.type, true);
+            if (n === node) {
+                result = newNode;
+            }
         });
-        return [];
+        return result;
     }
 
     /**

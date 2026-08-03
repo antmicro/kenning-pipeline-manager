@@ -429,8 +429,9 @@ export default function createPipelineManagerGraph(graph) {
         if (color) {
             this.editor.setNodeColor(newNodeInstance.id, color);
         }
+        const res = this.nodes.find((n) => n.id === newNodeInstance.id);
 
-        return newNodeInstance;
+        return res;
     };
 
     graph.addNode = function addNode(node, graphLoadingState, nodeId) {

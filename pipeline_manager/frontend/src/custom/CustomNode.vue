@@ -674,17 +674,18 @@ const onContextMenuTitleClick = async (action) => {
         }
         case 'addAndEditSubgraph': {
             let errors = editorManager.addSubgraphToNode(props.node);
+            let newNode;
             if (Array.isArray(errors) && errors.length) {
                 NotificationHandler.terminalLog('error', 'Creating subgraph failed', errors);
+            } else {
+                newNode = errors;
             }
-            const newGraphNode = viewModel.value.displayedGraph.nodes.filter(
-                (n) => n.type === props.node.type,
-            )[0];
-            errors = viewModel.value.editor.switchToSubgraph(newGraphNode);
+            await nextTick();
+            errors = viewModel.value.editor.switchToSubgraph(newNode);
             if (Array.isArray(errors) && errors.length) {
                 NotificationHandler.terminalLog('error', 'Switching to subgraph failed', errors);
             }
-            if (newGraphNode.extending?.length) {
+            if (newNode.extending?.length) {
                 NotificationHandler.terminalLog('warning', 'Subgraph restricted', 'Editing extending subgraph is not currently supported');
             }
             break;
