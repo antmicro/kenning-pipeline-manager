@@ -135,7 +135,7 @@ An example:
 
 Layer is used to describe a set of types of nodes and interfaces.
 Layers can be used to hide nodes of given types.
-They can be also used to hide connections for given interface types.
+They can be also used to hide interfaces with given types.
 
 The layers can be enabled or disabled in editor settings.
 
