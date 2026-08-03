@@ -8,10 +8,10 @@
     pointer-events: visibleStroke;
 
     stroke: var(--color);
-    stroke-width: 0.3%;
+    stroke-width: 5px;
 
     &.--hover {
-        stroke-width: 0.375%;
+        stroke-width: 6px;
         stroke: $green;
     }
 
