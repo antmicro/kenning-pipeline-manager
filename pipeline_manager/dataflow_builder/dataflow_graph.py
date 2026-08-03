@@ -112,6 +112,7 @@ class DataflowGraph(JsonConvertible):
         self._connections: Dict[str, InterfaceConnection] = {}
         self._spec_builder = builder_with_spec
         self._groups: Dict[str, NodeGroup] = {}
+        self._disabled_layers: List[str] = []
 
         self.name: Optional[str] = None
         self.additional_data: Optional[Dict] = None
@@ -129,6 +130,10 @@ class DataflowGraph(JsonConvertible):
             self.scaling = dataflow["scaling"]
         if "panning" in dataflow:
             self.panning = dataflow["panning"]
+        if "disabledLayers" in dataflow and isinstance(
+            self._disabled_layers, List[str]
+        ):
+            self._disabled_layers = dataflow["disabledLayers"]
 
         for node in dataflow.setdefault("nodes", []):
             node_arguments = {
@@ -666,6 +671,30 @@ class DataflowGraph(JsonConvertible):
             name=name,
         )
 
+    def disable_layer(self, layer_name: str):
+        """
+        Disabled layer for this graph.
+
+        Parameters
+        ----------
+        layer_name : str
+            Name of the layer to be disabled.
+        """
+        if layer_name not in self._disabled_layers:
+            self._disabled_layers.append(layer_name)
+
+    def enable_layer(self, layer_name: str):
+        """
+        Enable previously disabled layer.
+
+        Parameters
+        ----------
+        layer_name : str
+            Name of the layer to be re-enabled.
+        """
+        if layer_name in self._disabled_layers:
+            self._disabled_layers.remove(layer_name)
+
     @override
     def to_json(
         self, as_str: bool = True, minify: bool = False
@@ -700,6 +729,9 @@ class DataflowGraph(JsonConvertible):
         attributes |= {"nodes": nodes, "connections": connections}
         if len(groups) > 0:
             attributes |= {"groups": groups}
+
+        if len(self._disabled_layers) > 0:
+            attributes |= {"disabledLayers": self._disabled_layers}
 
         return convert_output(attributes, as_str, minify=minify)
 

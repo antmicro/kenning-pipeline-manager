@@ -525,6 +525,30 @@ class GraphBuilder:
                 "provided by the validator."
             )
 
+    def disable_layers(self, layer_name: str):
+        """
+        Disabled layer for every graph in dataflow.
+
+        Parameters
+        ----------
+        layer_name : str
+            Name of the layer to be disabled.
+        """
+        for g in self.graphs:
+            g.disable_layer(layer_name)
+
+    def enable_layers(self, layer_name: str):
+        """
+        Enable layer for every graph in dataflow.
+
+        Parameters
+        ----------
+        layer_name : str
+            Name of the layer to be re-enabled.
+        """
+        for g in self.graphs:
+            g.enable_layer(layer_name)
+
     @override
     def to_json(
         self,
