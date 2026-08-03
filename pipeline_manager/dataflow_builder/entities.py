@@ -322,8 +322,10 @@ class Interface(JsonConvertible):
             self.direction = Direction(self.direction)
         if isinstance(self.side, str):
             self.side = Side(self.side)
-        if isinstance(self.bus, dict):
+        if isinstance(self.bus, dict) and "type" in self.bus:
             self.bus = InterfaceBus(**self.bus)
+        else:
+            self.bus = None
 
     @override
     def to_json(
