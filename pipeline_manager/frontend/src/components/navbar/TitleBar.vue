@@ -58,7 +58,7 @@ export default {
     data() {
         const appName = process.env.VUE_APP_EDITOR_TITLE ?? 'Pipeline Manager';
         const editorTitleInterface = new InputInterface(
-            'Graph name',
+            null,
             '',
         );
         editorTitleInterface.setDefaultComponent();
