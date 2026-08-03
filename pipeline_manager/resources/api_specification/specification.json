@@ -398,7 +398,7 @@
                         "type": "string"
                     },
                     "timestamp": {
-                        "description": "Timestamp that will be displayed alongside the message.",
+                        "description": "Notification timestamp, if not provided, timestamp will be automatically generated (pass non-null falsy value to disable).",
                         "type": "string"
                     }
                 },
