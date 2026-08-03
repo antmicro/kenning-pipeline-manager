@@ -14,21 +14,21 @@
                     "twoColumn": true,
                     "interfaces": [
                         {
-                            "name": "Input with very long name",
+                            "name": "Input-with-very-long-name",
                             "id": "44374d9c-c4c0-4660-af89-4b2cddfd7a04",
                             "direction": "input",
                             "side": "left",
                             "sidePosition": 0
                         },
                         {
-                            "name": "Inout with very long name",
+                            "name": "Inout-with-very-long-name",
                             "id": "c43753ab-e88e-46d9-bc8b-d22dd3cd2e5f",
                             "direction": "inout",
                             "side": "right",
                             "sidePosition": 0
                         },
                         {
-                            "name": "Output with very long name",
+                            "name": "Output-with-very-long-name",
                             "id": "8e12508f-e935-44bd-872e-6b1db7767a9f",
                             "direction": "output",
                             "side": "right",
@@ -51,21 +51,21 @@
                     "twoColumn": true,
                     "interfaces": [
                         {
-                            "name": "Input with very long name",
+                            "name": "Input-with-very-long-name",
                             "id": "b62e692c-5148-4c8d-bfe5-e476205bb5a5",
                             "direction": "input",
                             "side": "left",
                             "sidePosition": 0
                         },
                         {
-                            "name": "Inout with very long name",
+                            "name": "Inout-with-very-long-name",
                             "id": "ea3b540f-825c-4f8b-bdc5-19fedd3da351",
                             "direction": "inout",
                             "side": "left",
                             "sidePosition": 1
                         },
                         {
-                            "name": "Output with very long name",
+                            "name": "Output-with-very-long-name",
                             "id": "4b4d2a68-f3de-4021-8468-57c9af22c02e",
                             "direction": "output",
                             "side": "right",
@@ -95,21 +95,21 @@
                     "twoColumn": true,
                     "interfaces": [
                         {
-                            "name": "Input with very long name",
+                            "name": "Input-with-very-long-name",
                             "id": "818d52d9-3723-44fd-875a-c96eaadf42fe",
                             "direction": "input",
                             "side": "left",
                             "sidePosition": 0
                         },
                         {
-                            "name": "Inout with very long name",
+                            "name": "Inout-with-very-long-name",
                             "id": "e68e15dc-775f-4d4d-b82a-5b769b1e2c70",
                             "direction": "inout",
                             "side": "left",
                             "sidePosition": 1
                         },
                         {
-                            "name": "Output with very long name",
+                            "name": "Output-with-very-long-name",
                             "id": "abba6dc4-1d61-4bda-8253-11f8ddf3ef71",
                             "direction": "output",
                             "side": "right",

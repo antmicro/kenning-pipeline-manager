@@ -20,19 +20,19 @@
             "properties": [],
             "interfaces": [
                 {
-                    "name": "Input with very long name",
+                    "name": "Input-with-very-long-name",
                     "type": "Connection-2",
                     "direction": "input",
                     "maxConnectionsCount": 1
                 },
                 {
-                    "name": "Output with very long name",
+                    "name": "Output-with-very-long-name",
                     "type": "Connection-2",
                     "direction": "output",
                     "maxConnectionsCount": 1
                 },
                 {
-                    "name": "Inout with very long name",
+                    "name": "Inout-with-very-long-name",
                     "type": "Connection-2",
                     "direction": "inout",
                     "side": "right",
@@ -59,20 +59,20 @@
             ],
             "interfaces": [
                 {
-                    "name": "Input with very long name",
+                    "name": "Input-with-very-long-name",
                     "type": "Connection-2",
                     "direction": "input",
                     "maxConnectionsCount": 3
                 },
                 {
-                    "name": "Output with very long name",
+                    "name": "Output-with-very-long-name",
                     "type": "Connection-2",
                     "direction": "output",
                     "maxConnectionsCount": 1
 
                 },
                 {
-                    "name": "Inout with very long name",
+                    "name": "Inout-with-very-long-name",
                     "type": "Connection-1",
                     "direction": "inout",
                     "maxConnectionsCount": 1
