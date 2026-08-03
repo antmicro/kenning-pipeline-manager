@@ -31,7 +31,7 @@ graph = builder.create_graph()
 
 To load an existing specification from a file:
 ```python
-builder.load_graphs(dataflow_path='examples/sample-dataflow.json')
+builder.load_graphs(dataflow_source='examples/sample-dataflow.json')
 graph = builder.graphs[0]
 ```
 
