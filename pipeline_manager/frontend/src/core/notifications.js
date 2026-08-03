@@ -111,6 +111,10 @@ export default class NotificationHandler {
      */
     static terminalLog(type, title, messages, timestamp = null) {
         NotificationHandler.showToast(type, title, timestamp);
-        terminalStore.addParsed(title, messages);
+        let timestampCurrent = timestamp ?? `[${this.#currentTimestamp()}]`;
+        if (timestampCurrent) {
+            timestampCurrent += ' ';
+        }
+        terminalStore.addParsed(timestampCurrent + title, messages);
     }
 }
