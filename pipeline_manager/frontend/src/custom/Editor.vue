@@ -73,7 +73,8 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
                 @mouseleave="clearHighlight"
             >
                 <CustomNode
-                    v-memo="[visibleNodes, ...selectedNodes, currentViewName]"
+                    v-memo="[visibleNodes, ...selectedNodes,
+                    currentViewName, ignoredInterfacesTypes]"
                     v-for="node in visibleNodes"
                     :key="node.id + counter.toString()"
                     :node="node"
@@ -578,6 +579,8 @@ export default defineComponent({
 
         const ignoredLayers = computed(() => props.viewModel.ignoredLayers);
         const ignorableLayers = computed(() => props.viewModel.layers);
+
+        const ignoredInterfacesRef = ref([]);
 
         const ignoredInterfacesTypes = computed(() => {
             const temp = new Set([]);
@@ -1227,6 +1230,7 @@ export default defineComponent({
             updateContextMenu,
             updateVisibleGroups,
             updateGroupsOf,
+            ignoredInterfacesRef,
         };
     },
 });
