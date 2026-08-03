@@ -928,8 +928,11 @@ const getRows = (sockets) => {
 const minimalWidth = computed(() => {
     const fontSize = 9;
 
-    const leftNames = displayedLeftSockets.value.map((sock) => sock.name.length);
-    const rightNames = displayedRightSockets.value.map((sock) => sock.name.length);
+    // search for the longest word, allow wrapping of words
+    const leftNames = displayedLeftSockets.value.flatMap((sock) =>
+        sock.name.split(' ')).map((s) => s.length);
+    const rightNames = displayedRightSockets.value.flatMap((sock) =>
+        sock.name.split(' ')).map((s) => s.length);
 
     const maxLeftTextLength = Math.max(
         ...leftNames, 0,
@@ -941,8 +944,11 @@ const minimalWidth = computed(() => {
     const LeftInterfaceSize = fontSize * 2 + maxLeftTextLength * fontSize;
     const RightInterfaceSize = fontSize * 2 + maxRightTextLength * fontSize;
 
-    const nodeRequiredSize = 2 * Math.max(LeftInterfaceSize, RightInterfaceSize);
-
+    if (props.node.twoColumn) {
+        const nodeRequiredSize = 2 * Math.max(LeftInterfaceSize, RightInterfaceSize);
+        return nodeRequiredSize;
+    }
+    const nodeRequiredSize = Math.max(LeftInterfaceSize, RightInterfaceSize);
     return nodeRequiredSize;
 });
 
