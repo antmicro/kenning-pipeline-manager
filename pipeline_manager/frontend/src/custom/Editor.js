@@ -848,6 +848,20 @@ export default class PipelineManagerEditor extends Editor {
         return undefined;
     }
 
+    getNodeInstanceStyle(node) {
+        const nodeType = this.nodeTypes.get(node.type);
+        let val;
+        const view = this.currentView;
+        const viewEntry = node.views?.find((v) => v.name === view);
+        if (viewEntry && viewEntry.style) {
+            val = viewEntry.style;
+        }
+        if (val === undefined) {
+            val = nodeType.style;
+        }
+        return val;
+    }
+
     getNodeTypeStyle(nodeType) {
         return this.nodeTypes.get(nodeType)?.style;
     }
