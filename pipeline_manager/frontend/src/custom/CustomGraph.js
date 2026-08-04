@@ -46,7 +46,7 @@ export default function createPipelineManagerGraph(graph) {
     graph.graphNode = undefined;
     graph.groups = [];
 
-    graph._idToType = {};
+    graph._idToNode = {};
 
     // A value that indicates whether we should save the graph or not
     graph.toSave = true;
@@ -459,18 +459,18 @@ export default function createPipelineManagerGraph(graph) {
             this.editNode(curNode);
         });
         this.events.addNode.emit(node);
-        this._idToType[node.id] = node.type;
+        this._idToNode[node.id] = node;
         return node; // eslint-disable-line consistent-return
     };
 
-    graph.getTypeOfNode = function getTypeOfNode(nodeId) {
-        if (this._idToType[nodeId] === undefined) {
+    graph.getNode = function getNode(nodeId) {
+        if (this._idToNode[nodeId] === undefined) {
             const node = this._nodes.find((n) => n.id === nodeId);
             if (node) {
-                this._idToType[node.id] = node.type;
+                this._idToNode[node.id] = node;
             }
         }
-        return this._idToType[nodeId];
+        return this._idToNode[nodeId];
     };
 
     graph.destroy = function destroy() {
@@ -517,7 +517,7 @@ export default function createPipelineManagerGraph(graph) {
         if (this.selectedNodes) {
             this.selectedNodes.length = 0;
         }
-        this._idToType = {};
+        this._idToNode = {};
         this._nodes = [];
     };
     graph.removeConnection = function removeConnection(connection, deleteOrphanStubs = true) {
@@ -878,8 +878,8 @@ export default function createPipelineManagerGraph(graph) {
             if (node.subgraph) {
                 node.subgraph.destroy();
             }
-            if (this._idToType[node.id]) {
-                delete this._idToType[node.id];
+            if (this._idToNode[node.id]) {
+                delete this._idToNode[node.id];
             }
         }
     };
