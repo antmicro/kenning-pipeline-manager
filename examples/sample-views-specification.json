@@ -80,8 +80,27 @@
                 }
             },
             "horseStyle": {
-                "clean": true,
-                "color":"#11111100"
+                "color":"#11111100",
+                "interfaces": {
+                    "*": {
+                        "--baklava-control-color-foreground": "transparent"
+                    }
+                },
+                "properties": {
+                    "*": {
+                        "display": "none"
+                    }
+                },
+                "nodes": {
+                    "title": {
+                        "justify-content": "center",
+                        "margin-bottom": "calc(var(--kpm-node-title-height) * -1)"
+                    },
+                    "body": {
+                        "min-width": "150px",
+                        "width": "auto"
+                    }
+                }
             }
         }
     },
