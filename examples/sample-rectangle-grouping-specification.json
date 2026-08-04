@@ -129,7 +129,6 @@
                     "type": "host_ready_model"
                 }
             ],
-            "width": 300,
             "name": "SaveModel"
         },
         {

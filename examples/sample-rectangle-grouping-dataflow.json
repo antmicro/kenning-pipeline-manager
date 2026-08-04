@@ -616,7 +616,6 @@
                         "x": 659,
                         "y": 299
                     },
-                    "width": 300,
                     "twoColumn": false,
                     "interfaces": [
                         {
@@ -638,7 +637,6 @@
                         "x": 1266,
                         "y": 1823
                     },
-                    "width": 300,
                     "twoColumn": false,
                     "interfaces": [
                         {
