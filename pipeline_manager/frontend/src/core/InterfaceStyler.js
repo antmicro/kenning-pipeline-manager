@@ -29,10 +29,15 @@ export default class BaklavaInterfaceStyler {
         this.editor = viewPlugin.editor;
         viewPlugin.hooks.renderInterface.subscribe(this, ({ intf, el }) => {
             if (!intf.port) return { intf, el };
+            if (intf.changedStyle !== undefined) {
+                Object.entries(intf.changedStyle).forEach(([p, _]) => el.style.removeProperty(p));
+                // eslint-disable-next-line no-param-reassign
+                delete intf.changedStyle;
+            }
             // eslint-disable-next-line no-underscore-dangle
-            const nodeType = this.editor._graph.getTypeOfNode(intf.nodeId);
-            if (!nodeType) return { intf, el };
-            const styleName = this.editor.getNodeTypeStyle(nodeType);
+            const node = this.editor._graph.getNode(intf.nodeId);
+            if (!node) return { intf, el };
+            const styleName = this.editor.getNodeInstanceStyle(node);
             const style = this.styles[styleName];
             if (!style) return { intf, el };
 
@@ -43,6 +48,8 @@ export default class BaklavaInterfaceStyler {
                 if (firstType !== undefined) {
                     if (!el) return { intf, el };
                     Object.entries(firstType).forEach(([p, v]) => el.style.setProperty(p, v, 'important'));
+                    // eslint-disable-next-line no-param-reassign
+                    intf.changedStyle = firstType;
                 }
             }
             return { intf, el };

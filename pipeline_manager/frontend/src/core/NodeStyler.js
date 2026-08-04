@@ -25,20 +25,37 @@ export default class BaklavaNodeStyler {
      * Initialize Node styler instance used to manage styles of nodes.
      */
     constructor(viewPlugin) {
+        const changeStyle = (styling, selectors, reset) => {
+            ['title', 'content', 'body'].forEach((attr) => {
+                if (!selectors[attr]) return;
+                if (!styling[attr]) return;
+                Object.entries(styling[attr]).forEach(([p, v]) => {
+                    if (reset) {
+                        selectors[attr].style.removeProperty(p);
+                    } else {
+                        selectors[attr].style.setProperty(p, v);
+                    }
+                });
+            });
+        };
+
         this.editor = viewPlugin.editor;
         viewPlugin.hooks.renderNode.subscribe(this, ({ node, el }) => {
             // eslint-disable-next-line prefer-destructuring
-            const style = this.editor.getNodeTypeStyle(node.type);
+            const style = this.editor.getNodeInstanceStyle(node);
             const firstType = this.nodeStyles[style];
-            if (!firstType) return { node, el };
             const title = el.querySelector('.__title');
             const content = el.querySelector('.__content');
             const selectors = { title, content, body: el };
-            ['title', 'content', 'body'].forEach((attr) => {
-                if (!selectors[attr]) return;
-                if (!firstType[attr]) return;
-                Object.entries(firstType[attr]).forEach(([p, v]) => selectors[attr].style.setProperty(p, v, 'important'));
-            });
+            if (node.styleChanged !== undefined) {
+                changeStyle(node.styleChanged, selectors, true);
+                // eslint-disable-next-line no-param-reassign
+                delete node.styleChanged;
+            }
+            if (!firstType) return { node, el };
+            changeStyle(firstType, selectors, false);
+            // eslint-disable-next-line no-param-reassign
+            node.styleChanged = firstType;
             return { node, el };
         });
     }
