@@ -1241,12 +1241,34 @@ export default class PipelineManagerEditor extends Editor {
     }
 
     async applyAutolayout(resetLocations = true) {
+        const nodeToLayers = new Map();
+        const infToType = new Map();
+        this.graph.nodes.forEach((n) => {
+            if (nodeToLayers.has(n.type)) return;
+            nodeToLayers.set(n.type, n.layer);
+            const interfaces = Object.entries({ ...n.inputs, ...n.outputs })
+                .filter((inf) => inf[1]?.direction !== undefined);
+
+            interfaces.forEach((inf) => {
+                infToType.set(inf[1].name, inf[1].type);
+            });
+        });
+
         const state = this.graph.save();
         if (resetLocations) {
             state.nodes.forEach((node) => {
                 node.position = undefined;
             });
         }
+        const ignoredNodeSet = this.getIgnoredNodes(this.graph.id);
+        const ignoredInterfacesSet = this.getIgnoredInterfaces(this.graph.id);
+
+        state.nodes = state.nodes.filter((n) => !ignoredNodeSet.has(nodeToLayers.get(n.name)));
+        state.nodes.forEach((n) => {
+            n.interfaces = n.interfaces.filter((inf) => !ignoredInterfacesSet
+                .has(infToType.get(inf.name)));
+        });
+
         this.layoutManager.registerGraph(state);
         const updatedGraph = await this.layoutManager.computeLayout(state);
         this.updateNodesPosition(updatedGraph);
