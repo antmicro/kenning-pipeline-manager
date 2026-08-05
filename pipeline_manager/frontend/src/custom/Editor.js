@@ -1211,14 +1211,17 @@ export default class PipelineManagerEditor extends Editor {
         graphs.graphs.forEach((state) => {
             if (state.id !== this.editorManager?.baklavaView.displayedGraph.id) return;
             state.nodes.forEach((node) => {
-                node.interfaces.forEach((intf) => {
+                const toSidedStubs = node.interfaces.filter((i) =>
+                    i.bus?.type === 'twoSided').flatMap((i) => i.bus.stubs ?? []);
+                const movableInterfaces = node.interfaces.concat(toSidedStubs);
+                movableInterfaces.forEach((intf) => {
                     let connections = state.connections.filter(
                         (conn) => conn?.from === intf.id || conn?.to === intf.id,
                     );
                     const busHasId = (i, id) =>
                         i.bus?.type !== undefined &&
                             i.bus.stubs?.find((s) => s.id === id) !== undefined;
-                    if (intf.bus?.type !== undefined) {
+                    if (intf.bus?.type === 'oneSided') {
                         const stubConnections = state.connections.filter(
                             (conn) => busHasId(intf, conn?.from) || busHasId(intf, conn?.to),
                         );
