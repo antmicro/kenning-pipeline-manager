@@ -330,14 +330,27 @@ export default defineComponent({
                 movedStubOffset.value = undefined;
             }
         };
-        const onStubMouseDown = (ev, id, off) => {
-            if (!viewModel.value.editor.readonly) {
-                window.addEventListener('pointermove', onStubMove);
-                window.addEventListener('pointerup', onStubMouseUp);
-                mousePosStubDragStart.value = ev.clientY;
-                movedStubId.value = id;
-                movedStubOffset.value = off;
+        const stubSideSwitch = doubleClick(700, (id) => {
+            if (isBigBus(props.intf)) {
+                const stub = props.intf.bus?.stubs.find((s) => s.id === id);
+                if (stub.side === 'left') {
+                    stub.side = 'right';
+                } else {
+                    stub.side = 'left';
+                }
             }
+        });
+
+        const onStubMouseDown = (ev, id, off) => {
+            if (viewModel.value.editor.readonly) {
+                return;
+            }
+            window.addEventListener('pointermove', onStubMove);
+            window.addEventListener('pointerup', onStubMouseUp);
+            mousePosStubDragStart.value = ev.clientY;
+            movedStubId.value = id;
+            movedStubOffset.value = off;
+            stubSideSwitch(id);
         };
 
         const hovered = ref(false);

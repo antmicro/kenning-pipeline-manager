@@ -88,18 +88,16 @@ export default defineComponent({
         const fromNode = computed(() => graph.value.findNodeById(props.connection.from.nodeId));
         const toNode = computed(() => graph.value.findNodeById(props.connection.to.nodeId));
 
-        const fromNodeInterfacesSide = computed(() =>
-            [
-                ...Object.values(fromNode.value?.inputs ?? {}),
-                ...Object.values(fromNode.value?.outputs ?? {}),
-            ].map((io) => [io.side, io.sidePosition]),
-        );
-        const toNodeInterfacesSide = computed(() =>
-            [
-                ...Object.values(toNode.value?.inputs ?? {}),
-                ...Object.values(toNode.value?.outputs ?? {}),
-            ].map((io) => [io.side, io.sidePosition]),
-        );
+        const getBuses = (intfs) => intfs.flatMap((i) => i.bus?.stubs ?? []);
+        const getNodeSides = (node) => [
+            ...Object.values(node.value?.inputs ?? {}),
+            ...Object.values(node.value?.outputs ?? {}),
+            ...getBuses(Object.values(node.value?.inputs ?? {})),
+            ...getBuses(Object.values(node.value?.outputs ?? {})),
+        ].map((io) => [io.side, io.sidePosition]);
+
+        const fromNodeInterfacesSide = computed(() => getNodeSides(fromNode));
+        const toNodeInterfacesSide = computed(() => getNodeSides(toNode));
 
         const updateCoords = () => {
             const from = getDomElements(props.connection.from);
