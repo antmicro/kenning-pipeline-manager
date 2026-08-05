@@ -1093,6 +1093,8 @@ const nodeTitleStyle = computed(() => {
         style.top = `${position.y}%`;
         style.display = 'block';
         style.backgroundColor = 'transparent';
+        style.width = 'fit-content';
+        style.height = 'fit-content';
     }
 
     if (!viewModel.value.editor.readonly) {
