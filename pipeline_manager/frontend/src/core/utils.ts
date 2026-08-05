@@ -50,6 +50,9 @@ export const JSONRPCCustomErrorCode = {
     EXTERNAL_APPLICATION_NOT_CONNECTED: -2,
     NEWER_SESSION_AVAILABLE: -3,
 };
+/* eslint-disable no-promise-executor-return */
+export const sleep = (milliseconds:number) => new Promise((resolve) =>
+    setTimeout(resolve, milliseconds));
 
 export const loadingScreen = async (
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -60,6 +63,7 @@ export const loadingScreen = async (
     if (show) {
         loadEvent.emit(true);
         await nextTick();
+        await sleep(0);
     }
     try {
         await callback();
@@ -70,5 +74,6 @@ export const loadingScreen = async (
     } finally {
         loadEvent.emit(false);
         await nextTick();
+        await sleep(0);
     }
 };
