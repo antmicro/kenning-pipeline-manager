@@ -785,12 +785,19 @@ const subgraphStyle = computed(() => {
     return {};
 });
 
+const hideSubTitle = computed(() => viewModel.value.editor
+    .getNodeStyleHideSubTitle(props.node.type));
+
 const nodeTitle = computed(() => {
     const title = props.node.highlightedTitle ?? props.node.title;
     const type = props.node.highlightedType ?? props.node.type;
 
     if (title === '' || props.node.title === props.node.type) {
         return type;
+    }
+
+    if (hideSubTitle.value) {
+        return `${title}`;
     }
 
     return `${title} <pre class="subtitle">${type}</pre>`;
