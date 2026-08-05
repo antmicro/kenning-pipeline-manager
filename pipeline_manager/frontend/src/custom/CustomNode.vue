@@ -1069,8 +1069,8 @@ const customShapeTitlePosition = computed(() => {
         return undefined;
     }
 
-    const x = Math.max(Math.min(titlePos?.x ?? 0.0, 100.0), 0);
-    const y = Math.max(Math.min(titlePos?.y ?? 0.0, 100.0), 0);
+    const x = titlePos?.x ?? 0.0;
+    const y = titlePos?.y ?? 0.0;
 
     return {
         x,
