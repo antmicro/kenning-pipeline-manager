@@ -1212,18 +1212,28 @@ export default class PipelineManagerEditor extends Editor {
             if (state.id !== this.editorManager?.baklavaView.displayedGraph.id) return;
             state.nodes.forEach((node) => {
                 node.interfaces.forEach((intf) => {
-                    const connections = state.connections.filter(
+                    let connections = state.connections.filter(
                         (conn) => conn?.from === intf.id || conn?.to === intf.id,
                     );
+                    const busHasId = (i, id) =>
+                        i.bus?.type !== undefined &&
+                            i.bus.stubs?.find((s) => s.id === id) !== undefined;
+                    if (intf.bus?.type !== undefined) {
+                        const stubConnections = state.connections.filter(
+                            (conn) => busHasId(intf, conn?.from) || busHasId(intf, conn?.to),
+                        );
+                        connections = connections.concat(stubConnections);
+                    }
                     // how many nodes are there on the left
                     // and on the right of the current one
                     let lefts = 0;
                     let rights = 0;
                     connections.forEach((connection) => {
-                        const key = connection.from === intf.id ? 'from' : 'to';
+                        const key = (connection.from === intf.id || busHasId(intf, connection.from)) ? 'from' : 'to';
                         const nextIntfId = key === 'from' ? connection.to : connection.from;
                         const nextNode = state.nodes.find(
-                            (n) => n.interfaces.some((el) => el.id === nextIntfId),
+                            (n) => n.interfaces.some((el) => el.id === nextIntfId
+                                || busHasId(el, nextIntfId)),
                         );
                         if (nextNode) {
                             if (nextNode.position.x + nextNode.width > node.position.x) {
