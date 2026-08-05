@@ -33,6 +33,7 @@ import SelectInterface from '../interfaces/SelectInterface.js';
 import CheckboxInterface from '../interfaces/CheckboxInterface.js';
 import IntegerInterface from '../interfaces/IntegerInterface.js';
 import ButtonInterface from '../interfaces/ButtonInterface.js';
+import { loadingScreen } from '../core/utils';
 
 export default {
     props: {
@@ -201,9 +202,12 @@ export default {
 
         const LayoutApply = computed(() => {
             const button = new ButtonInterface('Apply autolayout', async () => {
-                await props.viewModel.editor.applyAutolayout();
-                await props.viewModel.editor.swapInterfaces();
-                props.viewModel.editor.editorManager.centerZoom();
+                const apply = async () => {
+                    await props.viewModel.editor.applyAutolayout();
+                    await props.viewModel.editor.swapInterfaces();
+                    props.viewModel.editor.editorManager.centerZoom();
+                };
+                await loadingScreen(apply, props.viewModel.editor.events.setLoad);
             });
             return button;
         });
