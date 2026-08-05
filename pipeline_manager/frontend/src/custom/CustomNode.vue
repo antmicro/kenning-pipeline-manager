@@ -84,7 +84,6 @@ from moving or deleting the nodes.
             <!-- disable transition to avoid rendering additional redraw for viewport adjustment -->
 
         </div>
-
         <img :src="customShape"
             v-if="customShape !== undefined"
             draggable="false"
@@ -1036,12 +1035,38 @@ const interfaceCursorStyle = ref({
     display: 'none',
 });
 
+const customShapeTitlePosition = computed(() => {
+    const titlePos = viewModel.value.editor.getCustomNodeTitlePosition(node.value.type);
+
+    if (titlePos === undefined) {
+        return undefined;
+    }
+
+    const x = Math.max(Math.min(titlePos?.x ?? 0.0, 100.0), 0);
+    const y = Math.max(Math.min(titlePos?.y ?? 0.0, 100.0), 0);
+
+    return {
+        x,
+        y,
+    };
+});
+
 const nodeTitleStyle = computed(() => {
     const style = {
         cursor: 'default',
         backgroundColor: nodeColor.value,
         color: nodeTitleColor.value,
     };
+
+    const position = customShapeTitlePosition.value;
+
+    if (position !== undefined && customShape !== undefined) {
+        style.position = 'absolute';
+        style.left = `${position.x}%`;
+        style.top = `${position.y}%`;
+        style.display = 'block';
+        style.backgroundColor = 'transparent';
+    }
 
     if (!viewModel.value.editor.readonly) {
         style.cursor = 'drag';
