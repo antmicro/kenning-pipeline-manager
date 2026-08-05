@@ -114,6 +114,10 @@
         width: auto;
         white-space: nowrap;
 
+        & > .baklava-input {
+            width: fit-content;
+        }
+
         & > .__title-icon {
             flex-grow: 0;
             padding: 0;
@@ -124,7 +128,6 @@
 
         & > .__title-label {
             flex-grow: 0;
-
             & > .subtitle {
                 margin: 0;
                 font-size: $fs-small;
