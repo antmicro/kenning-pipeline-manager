@@ -932,6 +932,18 @@ const getRows = (sockets) => {
     return rows;
 };
 
+const fitTitle = computed(() => viewModel.value.editor.getNodeStyleFitTitle(props.node.type));
+
+const titleSize = computed(() => {
+    const width = titleRef.value?.offsetWidth ?? 0;
+    const height = titleRef.value?.offsetHeight ?? 0;
+
+    return {
+        width,
+        height,
+    };
+});
+
 const minimalWidth = computed(() => {
     const fontSize = 9;
 
@@ -960,6 +972,9 @@ const minimalWidth = computed(() => {
 });
 
 const width = computed(() => {
+    if (fitTitle.value) {
+        return `${titleSize.value.width}px`;
+    }
     if (props.node.width !== undefined) {
         if (props.node.width < minimalWidth.value) {
             return `${minimalWidth.value}px`;
@@ -973,6 +988,9 @@ const width = computed(() => {
 });
 
 const height = computed(() => {
+    if (fitTitle.value) {
+        return `${titleSize.value.height}px`;
+    }
     if (props.node.height !== undefined) {
         return `${props.node.height}px`;
     }
@@ -982,6 +1000,8 @@ const height = computed(() => {
 const styles = computed(() => ({
     top: `${props.position?.y ?? 0}px`,
     left: `${props.position?.x ?? 0}px`,
+    'min-width': fitTitle.value ? '0' : undefined,
+    'min-height': fitTitle.value ? '0' : undefined,
     width: width.value,
     height: height.value,
     display: customShape === undefined ? 'inherit' : 'block',
