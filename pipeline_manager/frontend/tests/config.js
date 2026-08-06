@@ -41,6 +41,17 @@ export function getPathToJsonFile(filename) {
 }
 
 /**
+ * Get CSS property value from element.
+ * @param {import('@playwright/test').Locator} element - DOM element
+ * @param {string} name - Name of the target CSS property
+ * @returns {Promise<string>}
+ */
+export async function getElementStyleAttribute(element,name)
+{
+    return await element.evaluate((el,_name)=> window.getComputedStyle(el).getPropertyValue(_name),name);
+}
+
+/**
  * Open the file chooser dialog for loading either a specification or dataflow file.
  * @param {import('@playwright/test').Page} page
  * @param {'specification' | 'dataflow'} purpose
