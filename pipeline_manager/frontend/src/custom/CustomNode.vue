@@ -31,7 +31,6 @@ from moving or deleting the nodes.
         </div>
         <div
             class="__title"
-            ref="titleRef"
             :style="nodeTitleStyle"
             @pointerdown.left.exact="onMouseDown"
             @pointerdown.right="openContextMenuTitle"
@@ -42,8 +41,12 @@ from moving or deleting the nodes.
                 v-if="iconPath !== undefined"
                 :src="iconPath"
             >
-            <div v-if="!renaming"
-            class="__title-label" v-html="DOMPurify.sanitize(nodeTitle)">
+            <div
+            v-if="!renaming"
+            ref="titleTextRef"
+            class="__title-label"
+            v-html="DOMPurify.sanitize(nodeTitle)"
+            >
             </div>
             <input
                 v-else
@@ -234,7 +237,7 @@ const movementStep = computed(() => viewModel.value.movementStep);
 // Template refs
 const svgRef = ref(null);
 const nodeRef = ref(null);
-const titleRef = ref(null);
+const titleTextRef = ref(null);
 const propertiesRef = useTemplateRef('propertiesRef');
 const renaming = ref(false);
 const renameField = ref(null);
@@ -942,9 +945,9 @@ const getRows = (sockets) => {
 const fitTitle = computed(() => viewModel.value.editor.getNodeStyleFitTitle(props.node.type));
 
 const titleSize = computed(() => {
-    const width = titleRef.value?.offsetWidth ?? 0;
-    const height = titleRef.value?.offsetHeight ?? 0;
-
+    const width = (titleTextRef.value?.offsetWidth ?? 0);
+    const height = (titleTextRef.value?.offsetHeight ?? 0);
+    console.log('Title size: ', width, ' ', height);
     return {
         width,
         height,
@@ -1095,6 +1098,7 @@ const nodeTitleStyle = computed(() => {
         style.backgroundColor = 'transparent';
         style.width = 'fit-content';
         style.height = 'fit-content';
+        style.padding = 0;
     }
 
     if (!viewModel.value.editor.readonly) {
