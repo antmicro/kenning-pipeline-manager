@@ -1,0 +1,146 @@
+{
+    "graphs": [
+        {
+            "id": "11b05eac-c230-4b9f-b692-15e325ed0e86",
+            "name": "Example of a graph with different node width",
+            "nodes": [
+                {
+                    "id": "5fc6a994-401a-45e8-9e0e-860f6b9482b7",
+                    "position": {
+                        "x": 527,
+                        "y": -32
+                    },
+                    "width": 100,
+                    "twoColumn": true,
+                    "interfaces": [
+                        {
+                            "name": "Input-with-very-long-name",
+                            "id": "44374d9c-c4c0-4660-af89-4b2cddfd7a04",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 0
+                        },
+                        {
+                            "name": "Inout-with-very-long-name",
+                            "id": "c43753ab-e88e-46d9-bc8b-d22dd3cd2e5f",
+                            "direction": "inout",
+                            "side": "right",
+                            "sidePosition": 0
+                        },
+                        {
+                            "name": "Output-with-very-long-name",
+                            "id": "8e12508f-e935-44bd-872e-6b1db7767a9f",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 1
+                        }
+                    ],
+                    "properties": [],
+                    "enabledInterfaceGroups": [],
+                    "views": [],
+                    "name": "Test node #1",
+                    "instanceName": "Node too small"
+                },
+                {
+                    "id": "6202b6b9-7785-4062-a1d2-059e9ce07dc7",
+                    "position": {
+                        "x": 1251,
+                        "y": 185
+                    },
+                    "width": 0,
+                    "twoColumn": true,
+                    "interfaces": [
+                        {
+                            "name": "Input-with-very-long-name",
+                            "id": "b62e692c-5148-4c8d-bfe5-e476205bb5a5",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 0
+                        },
+                        {
+                            "name": "Inout-with-very-long-name",
+                            "id": "ea3b540f-825c-4f8b-bdc5-19fedd3da351",
+                            "direction": "inout",
+                            "side": "left",
+                            "sidePosition": 1
+                        },
+                        {
+                            "name": "Output-with-very-long-name",
+                            "id": "4b4d2a68-f3de-4021-8468-57c9af22c02e",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 0
+                        }
+                    ],
+                    "properties": [
+                        {
+                            "name": "Sample option",
+                            "id": "67f08fa6-28ba-4fa8-ad00-59d9d2d757ec",
+                            "value": "Option 2",
+                            "hidden": false
+                        }
+                    ],
+                    "enabledInterfaceGroups": [],
+                    "views": [],
+                    "name": "Test node #2",
+                    "instanceName": "Node with auto width"
+                },
+                {
+                    "id": "9f1f8390-210a-4e82-b72f-89d682d8644a",
+                    "position": {
+                        "x": 560,
+                        "y": 477
+                    },
+                    "width": 800,
+                    "twoColumn": true,
+                    "interfaces": [
+                        {
+                            "name": "Input-with-very-long-name",
+                            "id": "818d52d9-3723-44fd-875a-c96eaadf42fe",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 0
+                        },
+                        {
+                            "name": "Inout-with-very-long-name",
+                            "id": "e68e15dc-775f-4d4d-b82a-5b769b1e2c70",
+                            "direction": "inout",
+                            "side": "left",
+                            "sidePosition": 1
+                        },
+                        {
+                            "name": "Output-with-very-long-name",
+                            "id": "abba6dc4-1d61-4bda-8253-11f8ddf3ef71",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 0
+                        }
+                    ],
+                    "properties": [
+                        {
+                            "name": "Sample option",
+                            "id": "52c1d7b3-7ac8-4244-9b47-43600c221bfc",
+                            "value": "Option 2",
+                            "hidden": false
+                        }
+                    ],
+                    "enabledInterfaceGroups": [],
+                    "views": [],
+                    "name": "Test node #2",
+                    "instanceName": "Node with set width"
+                }
+            ],
+            "groups": [],
+            "connections": [
+                {
+                    "id": "a89f6776-e883-44b5-9237-2460a74a431f",
+                    "from": "c43753ab-e88e-46d9-bc8b-d22dd3cd2e5f",
+                    "to": "b62e692c-5148-4c8d-bfe5-e476205bb5a5"
+                }
+            ]
+        }
+    ],
+    "entryGraph": "11b05eac-c230-4b9f-b692-15e325ed0e86",
+    "version": "20250623.14",
+    "metadata": {}
+}

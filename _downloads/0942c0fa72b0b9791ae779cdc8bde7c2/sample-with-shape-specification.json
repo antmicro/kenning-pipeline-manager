@@ -1,0 +1,154 @@
+{
+    "version": "20250623.14",
+    "nodes": [
+        {
+            "name": "LOGO",
+            "style": "AntmicroStyle"
+        },
+        {
+            "name": "GND",
+            "interfaces": [
+                {"name": "a", "direction": "inout", "side": "top"}
+            ],
+            "style": "GNDStyle"
+        },
+        {
+            "name": "Voltage",
+            "interfaces": [
+                {"name": "a", "direction": "inout", "side": "top"},
+                {"name": "b", "direction": "inout", "side": "bottom"}
+            ],
+            "style": "VoltageStyle"
+        },
+        {
+            "name": "Signal",
+            "interfaces": [
+                {"name": "a", "direction": "inout", "side": "top"},
+                {"name": "b", "direction": "inout", "side": "bottom"}
+            ],
+            "style": "SignalStyle"
+        },
+        {
+            "name": "Resistor",
+            "interfaces": [
+                {"name": "a", "direction": "inout", "side": "left"},
+                {"name": "b", "direction": "inout", "side": "right"}
+            ],
+            "width": 298,
+            "height": 98,
+            "style": "ResistorStyle"
+        },
+        {
+            "name": "NPN",
+            "interfaces": [
+                {"name": "c", "direction": "inout", "side": "top"},
+                {"name": "b", "direction": "inout", "side": "left"},
+                {"name": "e", "direction": "inout", "side": "bottom"}
+            ],
+            "style": "NPNStyle"
+        },
+        {
+            "name": "PNP",
+            "interfaces": [
+                {"name": "c", "direction": "inout", "side": "bottom"},
+                {"name": "b", "direction": "inout", "side": "left"},
+                {"name": "e", "direction": "inout", "side": "top"}
+            ],
+            "style": "PNPStyle"
+        }
+    ],
+    "metadata": {
+        "editableTypes": true,
+        "toggleableEditableTypes": false,
+        "twoColumn": true,
+        "newGraphNode": false,
+        "styles":{
+            "AntmicroStyle": {
+                "shape": "https://raw.githubusercontent.com/antmicro/antmicro-sphinx-utils/main/logo/white.svg"
+            },
+            "GNDStyle":{
+                "shape": "svgs/gnd.svg",
+                "positions": {
+                    "a": {
+                        "x": 49,
+                        "y": 0
+                    }
+                }
+            },
+            "ResistorStyle":{
+                "shape": "svgs/resistor.svg",
+                "positions": {
+                    "a": {
+                        "x": 0,
+                        "y": 39
+                    },
+                    "b": {
+                        "x": 100,
+                        "y": 39
+                    }
+                }
+            },
+            "VoltageStyle":{
+                "shape": "svgs/voltage.svg",
+                "positions": {
+                    "a": {
+                        "x": 50,
+                        "y": 0
+                    },
+                    "b": {
+                        "x": 50,
+                        "y": 95
+                    }
+                }
+            },
+            "SignalStyle":{
+                "shape": "svgs/signal.svg",
+                "positions": {
+                    "a": {
+                        "x": 50,
+                        "y": 0
+                    },
+                    "b": {
+                        "x": 50,
+                        "y": 95
+                    }
+                }
+            },
+            "NPNStyle":{
+                "shape": "svgs/npn.svg",
+                "positions": {
+                    "c": {
+                        "x": 75,
+                        "y": 0
+                    },
+                    "b": {
+                        "x": 0,
+                        "y": 46
+                    },
+                    "e": {
+                        "x": 75,
+                        "y": 93
+                    }
+                }
+            },
+            "PNPStyle":{
+                "shape": "svgs/pnp.svg",
+                "positions": {
+                    "e": {
+                        "x": 76,
+                        "y": 3
+                    },
+                    "b": {
+                        "x": 2,
+                        "y": 46
+                    },
+                    "c": {
+                        "x": 76,
+                        "y": 91
+                    }
+                }
+            }
+        },
+        "connectionStyle": "orthogonal"
+    }
+}

@@ -1,0 +1,319 @@
+{
+    "graphs": [
+        {
+            "id": "cc9e70c2-2357-4368-b36c-f1a8058a5a74",
+            "name": "Example of a graph with custom shape node",
+            "nodes": [
+                {
+                    "id": "b17d5150-c159-471e-a1e7-a84f7c5eadc1",
+                    "position": {
+                        "x": 486,
+                        "y": 193
+                    },
+                    "twoColumn": false,
+                    "interfaces": [
+                        {
+                            "name": "a",
+                            "id": "df96941e-546a-4e09-9f84-7ecb56e3116d",
+                            "direction": "inout",
+                            "side": "left",
+                            "sidePosition": 0
+                        },
+                        {
+                            "name": "b",
+                            "id": "44c89910-452d-4104-9725-49041a14553b",
+                            "direction": "inout",
+                            "side": "right",
+                            "sidePosition": 0
+                        }
+                    ],
+                    "properties": [],
+                    "enabledInterfaceGroups": [],
+                    "name": "Resistor",
+                    "instanceName": "Resistor"
+                },
+                {
+                    "id": "f70452bc-2bf4-4de1-9eef-9a27cc2386a1",
+                    "position": {
+                        "x": 918,
+                        "y": -228
+                    },
+                    "twoColumn": true,
+                    "interfaces": [
+                        {
+                            "name": "c",
+                            "id": "99849cfc-6ea3-466d-8dff-6a21d3131318",
+                            "direction": "inout",
+                            "side": "top"
+                        },
+                        {
+                            "name": "e",
+                            "id": "fc831e7b-bd64-4e96-b742-73294af8337a",
+                            "direction": "inout",
+                            "side": "bottom"
+                        },
+                        {
+                            "name": "b",
+                            "id": "8286e319-4538-4ee0-a957-9ec7dae42bbe",
+                            "direction": "inout",
+                            "side": "left",
+                            "sidePosition": 0
+                        }
+                    ],
+                    "properties": [],
+                    "enabledInterfaceGroups": [],
+                    "name": "NPN",
+                    "instanceName": "NPN"
+                },
+                {
+                    "id": "ce2bd945-b217-42d0-be45-a796f608b5ba",
+                    "position": {
+                        "x": 916,
+                        "y": 372
+                    },
+                    "twoColumn": true,
+                    "interfaces": [
+                        {
+                            "name": "e",
+                            "id": "59f114f8-e0b6-4cba-b756-a2e4f95e95ed",
+                            "direction": "inout",
+                            "side": "top"
+                        },
+                        {
+                            "name": "c",
+                            "id": "77b6a308-1bbd-42c5-bca3-ec64f75124e9",
+                            "direction": "inout",
+                            "side": "bottom"
+                        },
+                        {
+                            "name": "b",
+                            "id": "9be482e7-b316-4244-9020-aaae6334f64c",
+                            "direction": "inout",
+                            "side": "left",
+                            "sidePosition": 0
+                        }
+                    ],
+                    "properties": [],
+                    "enabledInterfaceGroups": [],
+                    "name": "PNP",
+                    "instanceName": "PNP"
+                },
+                {
+                    "id": "f07be7de-1167-45ec-9183-b4ba7ded04e7",
+                    "position": {
+                        "x": 1331,
+                        "y": 178
+                    },
+                    "twoColumn": true,
+                    "interfaces": [
+                        {
+                            "name": "a",
+                            "id": "90f8f111-b560-4a71-a7b4-953c06f11dbd",
+                            "direction": "inout",
+                            "side": "left",
+                            "sidePosition": 0
+                        },
+                        {
+                            "name": "b",
+                            "id": "55aee22f-61b3-4119-9435-20b054b959a8",
+                            "direction": "inout",
+                            "side": "right",
+                            "sidePosition": 0
+                        }
+                    ],
+                    "properties": [],
+                    "enabledInterfaceGroups": [],
+                    "name": "Resistor",
+                    "instanceName": "Resistor"
+                },
+                {
+                    "id": "83353ef9-e382-4fdd-aa39-d2a7cda22199",
+                    "position": {
+                        "x": 995,
+                        "y": 979
+                    },
+                    "twoColumn": true,
+                    "interfaces": [
+                        {
+                            "name": "a",
+                            "id": "0e91cb27-31d5-4a90-a7ad-da81ee59f004",
+                            "direction": "inout",
+                            "side": "top"
+                        }
+                    ],
+                    "properties": [],
+                    "enabledInterfaceGroups": [],
+                    "name": "GND",
+                    "instanceName": "GND"
+                },
+                {
+                    "id": "3e21c8f2-ff12-4ecb-92cf-bfb6727bbf17",
+                    "position": {
+                        "x": -254,
+                        "y": 266
+                    },
+                    "twoColumn": true,
+                    "interfaces": [
+                        {
+                            "name": "a",
+                            "id": "6afc9438-45d4-4e37-910f-52588dee739d",
+                            "direction": "inout",
+                            "side": "top"
+                        },
+                        {
+                            "name": "b",
+                            "id": "d233542e-3e8d-47a2-bcb8-1c3780d39f4e",
+                            "direction": "inout",
+                            "side": "bottom"
+                        }
+                    ],
+                    "properties": [],
+                    "enabledInterfaceGroups": [],
+                    "name": "Voltage",
+                    "instanceName": "Voltage"
+                },
+                {
+                    "id": "840697b7-2d60-4fc8-bd4d-c3a27874d35d",
+                    "position": {
+                        "x": -250,
+                        "y": 1014
+                    },
+                    "twoColumn": true,
+                    "interfaces": [
+                        {
+                            "name": "a",
+                            "id": "748cb302-b3b9-4c49-bdd1-61068bde7cd6",
+                            "direction": "inout",
+                            "side": "top"
+                        }
+                    ],
+                    "properties": [],
+                    "enabledInterfaceGroups": [],
+                    "name": "GND",
+                    "instanceName": "GND"
+                },
+                {
+                    "id": "8e4eb0eb-34cc-496a-a550-5e5b2a6b194d",
+                    "position": {
+                        "x": 1716,
+                        "y": 971
+                    },
+                    "twoColumn": true,
+                    "interfaces": [
+                        {
+                            "name": "a",
+                            "id": "e6ff877d-6d1a-4b23-b747-c29f579ff695",
+                            "direction": "inout",
+                            "side": "top"
+                        }
+                    ],
+                    "properties": [],
+                    "enabledInterfaceGroups": [],
+                    "name": "GND",
+                    "instanceName": "GND"
+                },
+                {
+                    "id": "94fa8ee3-9183-4f87-bf7d-7e3672e60acc",
+                    "position": {
+                        "x": 140,
+                        "y": 242
+                    },
+                    "twoColumn": true,
+                    "interfaces": [
+                        {
+                            "name": "a",
+                            "id": "442d89f4-a761-4582-b418-b89e43d806b8",
+                            "direction": "inout",
+                            "side": "top"
+                        },
+                        {
+                            "name": "b",
+                            "id": "6c8cd8ab-dfd1-44a3-9604-7f2ae078ea8e",
+                            "direction": "inout",
+                            "side": "bottom"
+                        }
+                    ],
+                    "properties": [],
+                    "enabledInterfaceGroups": [],
+                    "name": "Signal",
+                    "instanceName": "Signal"
+                },
+                {
+                    "id": "9585b492-eb4c-4892-a2db-e8bceac7be6c",
+                    "position": {
+                        "x": 144,
+                        "y": 1001
+                    },
+                    "twoColumn": true,
+                    "interfaces": [
+                        {
+                            "name": "a",
+                            "id": "80dfb8c9-6139-45ad-bc8b-065855cdfcb7",
+                            "direction": "inout",
+                            "side": "top"
+                        }
+                    ],
+                    "properties": [],
+                    "enabledInterfaceGroups": [],
+                    "name": "GND",
+                    "instanceName": "GND"
+                }
+            ],
+            "groups": [],
+            "connections": [
+                {
+                    "id": "02314e65-c7bb-4ca1-8c16-0b671203fe04",
+                    "from": "44c89910-452d-4104-9725-49041a14553b",
+                    "to": "8286e319-4538-4ee0-a957-9ec7dae42bbe"
+                },
+                {
+                    "id": "0d0b7bd1-75f2-468d-87fe-1e223eabd915",
+                    "from": "44c89910-452d-4104-9725-49041a14553b",
+                    "to": "9be482e7-b316-4244-9020-aaae6334f64c"
+                },
+                {
+                    "id": "98757500-bed5-4c00-b7a2-3640cc012ded",
+                    "from": "fc831e7b-bd64-4e96-b742-73294af8337a",
+                    "to": "90f8f111-b560-4a71-a7b4-953c06f11dbd"
+                },
+                {
+                    "id": "f032fa04-cddd-4508-b972-64f56b146c96",
+                    "from": "90f8f111-b560-4a71-a7b4-953c06f11dbd",
+                    "to": "59f114f8-e0b6-4cba-b756-a2e4f95e95ed"
+                },
+                {
+                    "id": "74122763-b8a0-4896-8c0a-b87cf0e86594",
+                    "from": "77b6a308-1bbd-42c5-bca3-ec64f75124e9",
+                    "to": "0e91cb27-31d5-4a90-a7ad-da81ee59f004"
+                },
+                {
+                    "id": "27de857c-8f98-4f1d-ab2a-0c37d7c94128",
+                    "from": "99849cfc-6ea3-466d-8dff-6a21d3131318",
+                    "to": "6afc9438-45d4-4e37-910f-52588dee739d"
+                },
+                {
+                    "id": "1198cd67-53d2-4ff4-9b36-a4516cda826e",
+                    "from": "d233542e-3e8d-47a2-bcb8-1c3780d39f4e",
+                    "to": "748cb302-b3b9-4c49-bdd1-61068bde7cd6"
+                },
+                {
+                    "id": "ae6c2ea4-b5c9-4e5a-b5e5-af8b46ba0dbe",
+                    "from": "55aee22f-61b3-4119-9435-20b054b959a8",
+                    "to": "e6ff877d-6d1a-4b23-b747-c29f579ff695"
+                },
+                {
+                    "id": "5d0624a3-4d1a-4805-93a7-4ab5a5f4cb2f",
+                    "from": "442d89f4-a761-4582-b418-b89e43d806b8",
+                    "to": "df96941e-546a-4e09-9f84-7ecb56e3116d"
+                },
+                {
+                    "id": "fafe9c03-29bd-4b7c-baaa-1701ea22d0ba",
+                    "from": "80dfb8c9-6139-45ad-bc8b-065855cdfcb7",
+                    "to": "6c8cd8ab-dfd1-44a3-9604-7f2ae078ea8e"
+                }
+            ]
+        }
+    ],
+    "entryGraph": "cc9e70c2-2357-4368-b36c-f1a8058a5a74",
+    "version": "20250623.14"
+}

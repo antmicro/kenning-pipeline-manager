@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   fill="#ffffff"
+   height="98"
+   width="298"
+   version="1.1"
+   id="svg48"
+   sodipodi:docname="resistor.svg"
+   inkscape:version="1.2.2 (b0a8486541, 2022-12-01)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs52" />
+  <sodipodi:namedview
+     id="namedview50"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     showgrid="false"
+     inkscape:zoom="4.5536913"
+     inkscape:cx="111.66765"
+     inkscape:cy="87.840825"
+     inkscape:window-width="2560"
+     inkscape:window-height="1371"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="g46" />
+  <g
+     id="g46"
+     transform="translate(0,-100)">
+    <path
+       d="M 298,141 H 248 V 100 H 50 v 41 H 0 v 16 h 50 v 41 h 198 v -41 h 50 z M 66,182 v -66 h 166 v 66 z"
+       id="path44" />
+  </g>
+</svg>
