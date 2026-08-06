@@ -131,7 +131,7 @@ class DataflowGraph(JsonConvertible):
         if "panning" in dataflow:
             self.panning = dataflow["panning"]
         if "disabledLayers" in dataflow and isinstance(
-            self._disabled_layers, List[str]
+            self._disabled_layers, list
         ):
             self._disabled_layers = dataflow["disabledLayers"]
 
@@ -671,29 +671,39 @@ class DataflowGraph(JsonConvertible):
             name=name,
         )
 
-    def disable_layer(self, layer_name: str):
+    def disable_layers(self, layer_name: Union[str, List[str]]):
         """
-        Disabled layer for this graph.
+        Disable layers for this graph.
 
         Parameters
         ----------
-        layer_name : str
-            Name of the layer to be disabled.
+        layer_name : Union[str, List[str]]
+            Name of the layer/layers to be disabled.
         """
-        if layer_name not in self._disabled_layers:
-            self._disabled_layers.append(layer_name)
+        if isinstance(layer_name, list):
+            for layer in layer_name:
+                if layer not in self._disabled_layers:
+                    self._disabled_layers.append(layer)
+        else:
+            if layer_name not in self._disabled_layers:
+                self._disabled_layers.append(layer_name)
 
-    def enable_layer(self, layer_name: str):
+    def enable_layers(self, layer_name: Union[str, List[str]]):
         """
-        Enable previously disabled layer.
+        Enable previously disabled layers.
 
         Parameters
         ----------
-        layer_name : str
-            Name of the layer to be re-enabled.
+        layer_name : Union[str, List[str]]
+            Name of the layer/layers to be re-enabled.
         """
-        if layer_name in self._disabled_layers:
-            self._disabled_layers.remove(layer_name)
+        if isinstance(layer_name, list):
+            for layer in layer_name:
+                if layer in self._disabled_layers:
+                    self._disabled_layers.remove(layer)
+        else:
+            if layer_name in self._disabled_layers:
+                self._disabled_layers.remove(layer_name)
 
     @override
     def to_json(
