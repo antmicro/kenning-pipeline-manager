@@ -4,6 +4,7 @@
 
 """Module with tests for dataflow building process."""
 
+import json
 import subprocess
 import tempfile
 from itertools import zip_longest
@@ -619,6 +620,29 @@ def test_raising_error_when_using_non_existent_keyword_argument(
     graph = builder.graphs[0]
     with pytest.raises(ExtraNodeAttributeError):
         graph.create_node(name="LoadVideo", non_existent_keyword_arg=123)
+
+
+def test_disabling_layers(sample_specification_path, sample_dataflow_path):
+    """
+    Test if an KeyError is raised when a non-existent
+    keyword argument is used.
+    """
+    builder = GraphBuilder(
+        specification=sample_specification_path,
+        specification_version=DEFAULT_SPECIFICATION_VERSION,
+    )
+    builder.load_graphs(dataflow_source=sample_dataflow_path)
+    LAYER1 = "IOs"
+    LAYER2 = "Binary imaging"
+    builder.disable_layers([LAYER1, LAYER2])
+    builder.graphs[0].enable_layers(LAYER2)
+    with tempfile.TemporaryDirectory() as temporary_directory:
+        dataflow_path = Path(temporary_directory) / "dataflow.json"
+        builder.save(json_file=dataflow_path, skip_validation=True)
+        with open(dataflow_path) as f:
+            dataflow = json.load(f)
+        assert LAYER1 in dataflow["graphs"][0]["disabledLayers"]
+    builder.validate()
 
 
 @pytest.fixture
