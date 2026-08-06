@@ -1118,12 +1118,20 @@ const assignNewPosition = () => {
     );
 };
 
+const lastDragX = ref(null);
+const firstDragX = ref(null);
 const dragInterface = (ev) => {
+    if (firstDragX.value === null) {
+        firstDragX.value = ev.clientX;
+    }
+
     let sockets;
-    if (chosenInterface.value.side === 'right') {
-        sockets = rightSocketsRefs.value;
-    } else if (chosenInterface.value.side === 'left') {
+    if ((lastDragX.value ?? -1000000) > ev.clientX) {
         sockets = leftSocketsRefs.value;
+        chosenInterface.side = 'left';
+    } else {
+        sockets = rightSocketsRefs.value;
+        chosenInterface.side = 'right';
     }
 
     // Finding the first interface that is lower than the cursor
@@ -1136,6 +1144,9 @@ const dragInterface = (ev) => {
     if (socket === -1) {
         socket = sockets.children.length - 1;
         newSocketIndex = sockets.children.length - 1;
+    }
+    if (socket === -1) {
+        return;
     }
 
     const el = sockets.children[socket];
@@ -1151,6 +1162,8 @@ const dragInterface = (ev) => {
 };
 
 const dropInterface = () => {
+    lastDragX.value = firstDragX.value;
+    firstDragX.value = null;
     assignNewPosition();
 
     chosenInterface.value = undefined;
