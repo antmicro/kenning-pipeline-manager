@@ -1065,6 +1065,12 @@ const interfaceCursorStyle = ref({
     display: 'none',
 });
 
+const customTitleOffset = computed(() => viewModel.value.editor
+    .getNodeStyleTitleOffset(node.value.type) ?? {
+    x: 0,
+    y: 0,
+});
+
 const customShapeTitlePosition = computed(() => {
     const titlePos = viewModel.value.editor.getCustomNodeTitlePosition(node.value.type);
 
@@ -1092,8 +1098,8 @@ const nodeTitleStyle = computed(() => {
 
     if (position !== undefined && customShape !== undefined) {
         style.position = 'absolute';
-        style.left = `${position.x}%`;
-        style.top = `${position.y}%`;
+        style.left = `calc(${position.x}% + ${customTitleOffset.value.x}px)`;
+        style.top = `calc(${position.y}% + ${customTitleOffset.value.y}px)`;
         style.display = 'block';
         style.backgroundColor = 'transparent';
         style.width = 'fit-content';
