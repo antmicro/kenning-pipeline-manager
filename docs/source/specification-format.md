@@ -179,6 +179,12 @@ Node style defines how nodes of a given style should look like. Currently, the f
 * `minimal` - flag informing whether to use special minimized style for the node. Note that icon and title card won't be visible when this is enabled.
 * `shape` - a link or path to SVG file, allowing to define custom shape for node.
 * `clean` - flag informing whether to use special clean style for the node. Only title and port endpoints will be visible in this style. Interface names and properties will be hidden.
+* `title` - a section that allows for settings node title behaviour.
+  * `fit` - a node width depends on title length
+  * `hideSubTitle` - when set, sub title remains hidden
+  * `position` - allows to set arbitrary position of title relative to node top-left corner, defined by `x` and `y` attributes with percentage values related to node's size.
+  * `offset` - allows to set a offset position of title relative to node top-left corner, defined by `x` and `y` attributes in pixels.
+  * `padding` - allows to set shape size offset, defined by `x` and `y` attributes in pixels.
 
 There are also entries that allow for further customization of specific node elements:
 * `nodes` - specifies custom CSS attributes for node as a whole. Top-most key value must be one of:
