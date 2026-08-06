@@ -942,6 +942,12 @@ const getRows = (sockets) => {
     return rows;
 };
 
+const customTitlePadding = computed(() => viewModel.value.editor
+    .getNodeStyleTitlePadding(node.value.type) ?? {
+    x: 0,
+    y: 0,
+});
+
 const fitTitle = computed(() => viewModel.value.editor.getNodeStyleFitTitle(props.node.type));
 
 const titleSize = computed(() => {
@@ -983,7 +989,7 @@ const minimalWidth = computed(() => {
 
 const width = computed(() => {
     if (fitTitle.value) {
-        return `${titleSize.value.width}px`;
+        return `${titleSize.value.width + customTitlePadding.value.x}px`;
     }
     if (props.node.width !== undefined) {
         if (props.node.width < minimalWidth.value) {
@@ -999,7 +1005,7 @@ const width = computed(() => {
 
 const height = computed(() => {
     if (fitTitle.value) {
-        return `${titleSize.value.height}px`;
+        return `${titleSize.value.height + customTitlePadding.value.y}px`;
     }
     if (props.node.height !== undefined) {
         return `${props.node.height}px`;
