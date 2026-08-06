@@ -39,6 +39,7 @@ export function updateInterfacePosition(
     }
 
     const oldSidePosition = intf.sidePosition;
+    const oldSide = intf.side;
 
     intf.side = newSide;
     if (intf.bus?.stubs !== undefined) {
@@ -60,6 +61,7 @@ export function updateInterfacePosition(
     if (found !== undefined) {
         if (newSidePosition !== undefined && swap) {
             found.sidePosition = oldSidePosition;
+            found.side = oldSide;
         } else {
             const intfToMove = newSidePosition === undefined ? intf : found;
 

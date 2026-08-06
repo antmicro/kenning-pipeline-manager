@@ -1023,6 +1023,7 @@ const nodeStyle = computed(() => {
 // Interface modification
 
 let newSocketIndex;
+let newSocketSide = null;
 const chosenInterface = ref(undefined);
 let chosenProperty;
 
@@ -1109,29 +1110,36 @@ const positionedInterfaceStyle = (inf) => {
 const isPickedInterface = (intf) => intf === chosenInterface.value;
 
 const assignNewPosition = () => {
+    if (newSocketSide === null) {
+        newSocketSide = chosenInterface.value.side;
+    }
     updateInterfacePosition(
         props.node,
         chosenInterface.value,
-        chosenInterface.value.side,
+        newSocketSide,
         newSocketIndex,
         true,
     );
+    newSocketSide = null;
 };
 
-const lastDragX = ref(null);
-const firstDragX = ref(null);
+const interfaceDragThreshold = ref(null);
 const dragInterface = (ev) => {
-    if (firstDragX.value === null) {
-        firstDragX.value = ev.clientX;
+    if (interfaceDragThreshold.value === null) {
+        const rect = nodeRef.value.getBoundingClientRect();
+        interfaceDragThreshold.value = rect.left + rect.width / 2;
     }
 
     let sockets;
-    if ((lastDragX.value ?? -1000000) > ev.clientX) {
+    let otherSockets;
+    if (interfaceDragThreshold.value > ev.clientX) {
         sockets = leftSocketsRefs.value;
-        chosenInterface.side = 'left';
-    } else {
+        otherSockets = rightSocketsRefs.value;
+        newSocketSide = 'left';
+    } else if (interfaceDragThreshold.value < ev.clientX) {
         sockets = rightSocketsRefs.value;
-        chosenInterface.side = 'right';
+        otherSockets = leftSocketsRefs.value;
+        newSocketSide = 'right';
     }
 
     // Finding the first interface that is lower than the cursor
@@ -1144,26 +1152,46 @@ const dragInterface = (ev) => {
     if (socket === -1) {
         socket = sockets.children.length - 1;
         newSocketIndex = sockets.children.length - 1;
-    }
-    if (socket === -1) {
-        return;
+        let el = sockets.children[socket];
+        let bottom = 0;
+        if (el === undefined) {
+            // eslint-disable-next-line prefer-destructuring
+            el = otherSockets.children[0];
+            newSocketIndex = 0;
+        }
+        // eslint-disable-next-line prefer-destructuring
+        bottom = el.getBoundingClientRect().bottom;
+        const style = window.getComputedStyle(el);
+        const marginTop = parseFloat(style.marginTop) || 0;
+        const marginBottom = parseFloat(style.marginBottom) || 0;
+        const totalHeight = el.getBoundingClientRect().height + marginTop + marginBottom;
+        let offset = 0;
+        let idxAdded = 0;
+
+        while (bottom + offset < ev.clientY) {
+            offset += totalHeight;
+            newSocketIndex += 1;
+            idxAdded += 1;
+        }
+        interfaceCursorStyle.value = {
+            width: '5em', top: `${el.offsetTop + (el.offsetHeight * idxAdded) + el.offsetHeight / 2 - 2.5}px`, position: 'absolute', display: 'block',
+        };
+    } else {
+        const el = sockets.children[socket];
+        interfaceCursorStyle.value = {
+            top: `${el.offsetTop + el.offsetHeight / 2 - 2.5}px`, display: 'block',
+        };
     }
 
-    const el = sockets.children[socket];
-    interfaceCursorStyle.value = {
-        top: `${el.offsetTop + el.offsetHeight / 2 - 2.5}px`, display: 'block',
-    };
-
-    if (chosenInterface.value.side === 'right') {
+    if (newSocketSide === 'right') {
         interfaceCursorStyle.value.right = '-0.7em';
-    } else if (chosenInterface.value.side === 'left') {
+    } else if (newSocketSide === 'left') {
         interfaceCursorStyle.value.left = '-0.7em';
     }
 };
 
 const dropInterface = () => {
-    lastDragX.value = firstDragX.value;
-    firstDragX.value = null;
+    interfaceDragThreshold.value = null;
     assignNewPosition();
 
     chosenInterface.value = undefined;
