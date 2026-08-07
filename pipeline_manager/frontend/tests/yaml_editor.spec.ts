@@ -4,12 +4,24 @@ import {
     Locator,
 } from '@playwright/test';
 import {
-    closeYAMLEditor,setYAMLEditorContent,getYAMLEditorContent,createNewNodeType,waitForSubgraph,reopenNode,getUrl,assertPropertyCount,assertOutputCount,assertInputCount,addInterface, getNode, addNode, dragAndDrop, enableEditingNodes,
-    loadSpecification, loadDataflow, openNodePalette, getContextMenu,
-    AddConnection
+    closeYAMLEditor, setYAMLEditorContent, getYAMLEditorContent, createNewNodeType,
+    waitForSubgraph, reopenNode, getUrl, assertPropertyCount, assertOutputCount,
+    assertInputCount, addInterface, getNode, addNode, dragAndDrop, enableEditingNodes,
+    loadSpecification, loadDataflow, openNodePalette, getContextMenu, AddConnection,
 } from './config.js';
 
-export async function checkIfYAMLPersists(page) {
+async function expectNoErrors(page: Page) {
+    const loading = page.locator('.loading-screen');
+    await loading.waitFor({ state: 'hidden' });
+    await expect(loading).not.toBeVisible();
+    const notifications = page.locator(
+        '.notifications > .panel > ul > *:not(:has(.info))',
+    );
+    const count = await notifications.count();
+    expect(count).toBe(0);
+}
+
+async function checkIfYAMLPersists(page: any) {
     // Open a pop-up for the first node.
     const node = page
         .locator(`.baklava-node[data-node-type="Test node #1"] .__title`)
@@ -40,7 +52,6 @@ async function addAndOpenNode(page: Page, group: string, nodeName: string, x = 7
     return { node, content };
 }
 
-
 test('create new node type', async ({ page }) => {
     await page.goto(getUrl());
 
@@ -51,7 +62,7 @@ test('create new node type', async ({ page }) => {
     await checkIfYAMLPersists(page);
 });
 
-test('add extends to a new node type',async ({page}) => {
+test('add extends to a new node type', async ({ page }) => {
     await page.goto(getUrl());
 
     // Insatiate a new node.
@@ -409,4 +420,21 @@ test('editing bus type interface', async ({ page }) => {
     bigBus.bus.size = 200;
     await setYAMLEditorContent(page, content);
     expect(stubs).toHaveCount(3);
+});
+test('check yaml desync', async ({ page }) => {
+    await page.goto(getUrl());
+    await loadSpecification(page, 'sample-bus-specification.json');
+    await loadDataflow(page, 'sample-bus-dataflow.json');
+    await enableEditingNodes(page);
+    const node = getNode(page, 'Memory');
+    const title = node.locator('.__title');
+    await title.dblclick();
+    await title.click({ button: 'right' });
+    const contextMenuOption = getContextMenu(page).getByText('Add property');
+    await contextMenuOption.click();
+    await page.locator('.create-menu').getByText('Add property').click();
+    const sidebar = page.locator('.baklava-sidebar');
+    await sidebar.locator('.__close').click();
+    // wait for animation to finish
+    await expectNoErrors(page);
 });
