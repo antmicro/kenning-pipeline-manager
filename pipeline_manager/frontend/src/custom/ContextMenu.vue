@@ -98,7 +98,7 @@ export default defineComponent({
             default: 'slide-fade',
         },
     },
-    emits: ['update:modelValue', 'click', 'onpointerover', 'onpointerleave'],
+    emits: ['update:modelValue', 'click', 'onpointerover', 'onpointerleave', 'close'],
     setup(props, context) {
         const {
             el,
@@ -135,6 +135,7 @@ export default defineComponent({
             if (ev.type === 'wheel') {
                 context.emit('update:modelValue', false);
                 opened.value = false;
+                context.emit('close');
             } else {
                 let current = document.elementsFromPoint(ev.clientX, ev.clientY)[0];
                 const elements = [];
@@ -149,6 +150,7 @@ export default defineComponent({
                 if (!hasIgnoredElements) {
                     context.emit('update:modelValue', false);
                     opened.value = false;
+                    context.emit('close');
                 }
             }
         };
@@ -157,6 +159,7 @@ export default defineComponent({
             if (ev.key === 'Escape') {
                 context.emit('update:modelValue', false);
                 opened.value = false;
+                context.emit('close');
             }
         };
 
@@ -182,6 +185,7 @@ export default defineComponent({
             context.emit('click', item.value);
             context.emit('update:modelValue', false);
             opened.value = false;
+            context.emit('close');
         };
 
         const onPointerOver = (item) => {
