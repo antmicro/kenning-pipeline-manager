@@ -525,14 +525,16 @@
                             "description": "Minimum value of a range for slider, number, integer and hex type",
                             "type": [
                                 "number",
-                                "string"
+                                "string",
+                                "null"
                             ]
                         },
                         "max": {
                             "description": "Maximum value of a range for slider, number, integer and hex type",
                             "type": [
                                 "number",
-                                "string"
+                                "string",
+                                "null"
                             ]
                         },
                         "step": {
@@ -679,11 +681,11 @@
                                     "format": "hex"
                                 },
                                 "min": {
-                                    "type": "string",
+                                    "type": [ "string", "null" ],
                                     "format": "hex"
                                 },
                                 "max": {
-                                    "type": "string",
+                                    "type": [ "string", "null" ],
                                     "format": "hex"
                                 }
                             }
