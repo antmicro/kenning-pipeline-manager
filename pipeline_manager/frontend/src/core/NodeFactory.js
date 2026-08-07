@@ -9,6 +9,7 @@
 import { NodeInterface, Node } from '@baklavajs/core';
 import { BaklavaEvent } from '@baklavajs/events';
 
+import { useViewModel } from '@baklavajs/renderer-vue';
 import { updateInterfacePosition } from '../custom/CustomNode.js';
 import {
     applySidePositions,
@@ -589,6 +590,7 @@ export class CustomNode extends Node {
         this.relatedGraphs = relatedGraphs;
         this.simpleInherited = simpleInherited;
         this.views = [];
+        this.internalPosition = undefined;
 
         this.events.propertyEdit = new BaklavaEvent();
 
@@ -601,6 +603,35 @@ export class CustomNode extends Node {
             const intf = outputs[k]();
             this.addOutput(k, intf);
         });
+    }
+
+    set position(pos) {
+        try {
+            const { viewModel } = useViewModel();
+            const { editor } = viewModel.value;
+            const curName = editor.currentView;
+            const entry = this.views?.find((v) => v.name === curName);
+
+            if (entry === undefined) {
+                this.internalPosition = pos;
+            } else {
+                entry.internalPosition = pos;
+            }
+        } catch {
+            this.internalPosition = pos;
+        }
+    }
+
+    get position() {
+        try {
+            const { viewModel } = useViewModel();
+            const { editor } = viewModel.value;
+            const curName = editor.currentView;
+            const entry = this.views?.find((v) => v.name === curName);
+            return entry ? entry.position : this.internalPosition;
+        } catch {
+            return this.internalPosition;
+        }
     }
 
     /**
