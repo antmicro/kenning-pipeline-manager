@@ -185,8 +185,8 @@ export function newProperty(p, hidden = false) {
             intf = new HexInterface(
                 propName,
                 propDef.toLowerCase(),
-                p.min ? BigInt(p.min) : NaN,
-                p.max ? BigInt(p.max) : NaN,
+                p.min ? p.min : undefined,
+                p.max ? p.max : undefined,
                 p.readonly,
             );
             break;

@@ -80,28 +80,31 @@ export default defineComponent({
             },
         });
 
+        // eslint-disable-next-line no-self-compare
+        const toBN = (x) => ((x === undefined) ? NaN : BigInt(x));
+
         const invalid = computed(() => {
             let value;
             try {
-                value = BigInt(props.intf.value);
+                value = toBN(props.intf.value);
             } catch (SyntaxError) {
                 return true;
             }
-            return value < props.intf.min || value > props.intf.max;
+            return value < toBN(props.intf.min) || value > toBN(props.intf.max);
         });
 
         const handleBlur = () => {
             let value;
             try {
-                value = BigInt(props.intf.value);
+                value = toBN(props.intf.value);
             } catch (SyntaxError) {
                 emit('update:modelValue', props.modelValue.toLowerCase());
                 return;
             }
-            if (value > props.intf.max) {
-                emit('update:modelValue', `0x${props.intf.max.toString(16)}`);
-            } else if (value < props.intf.min) {
-                emit('update:modelValue', `0x${props.intf.min.toString(16)}`);
+            if (value > toBN(props.intf.max)) {
+                emit('update:modelValue', `0x${toBN(props.intf.max).toString(16)}`);
+            } else if (value < toBN(props.intf.min)) {
+                emit('update:modelValue', `0x${toBN(props.intf.min).toString(16)}`);
             } else {
                 emit('update:modelValue', props.modelValue.toLowerCase());
             }
