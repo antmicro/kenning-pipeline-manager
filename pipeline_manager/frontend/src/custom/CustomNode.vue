@@ -226,7 +226,6 @@ const props = defineProps({
     hidden: Boolean,
     interfaces: Array,
     ignoredInterfacesType: Array,
-    position: Object,
 });
 
 const emit = defineEmits(['select', 'openContextMenu', 'transformed']);
@@ -773,7 +772,7 @@ const showContextMenuInterface = ref(false);
 const showContextMenuProperty = ref(false);
 
 const groupDragMove = useGroupDragMove(
-    toRef(props, 'position'),
+    toRef(props.node, 'position'),
     props.node.id,
     gridSnapper(movementStep),
 );
@@ -1049,15 +1048,16 @@ const height = computed(() => {
     return 'auto';
 });
 
-const styles = computed(() => ({
-    top: `${props.position?.y ?? 0}px`,
-    left: `${props.position?.x ?? 0}px`,
-    'min-width': fitTitle.value ? '0' : undefined,
-    'min-height': fitTitle.value ? '0' : undefined,
-    width: width.value,
-    height: height.value,
-    display: customShape.value === undefined ? 'inherit' : 'block',
-}));
+const styles = computed(() =>
+    ({
+        top: `${props.node.position?.y ?? 0}px`,
+        left: `${props.node.position?.x ?? 0}px`,
+        'min-width': fitTitle.value ? '0' : undefined,
+        'min-height': fitTitle.value ? '0' : undefined,
+        width: width.value,
+        height: height.value,
+        display: customShape.value === undefined ? 'inherit' : 'block',
+    }));
 
 // another potential source of issue
 const displayedRightRows = computed(() => getRows(displayedRightSockets.value));

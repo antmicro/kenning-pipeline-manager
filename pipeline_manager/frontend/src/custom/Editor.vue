@@ -78,7 +78,6 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
                     v-for="node in visibleNodes"
                     :key="node.id + counter.toString()"
                     :node="node"
-                    :position="getNodePosition(node)"
                     :selected="selectedNodes.includes(node)"
                     :greyedOut="greyedOutNodes.includes(node)"
                     :interfaces="highlightInterfaces"
@@ -94,7 +93,6 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
                 <CustomNode
                     v-for="node in ignoredNodes"
                     :key="node.id + counter.toString()"
-                    :position="getNodePosition(node)"
                     :node="node"
                     :hidden="true"
                 />
@@ -300,8 +298,6 @@ export default defineComponent({
         });
         props.viewModel.editor.events.setLoad = setLoad;
 
-        const getNodePosition = (node) => props.viewModel.editor.getNodeDisplayedPosition(node);
-
         const appendSelectMultipleNodes = () => {
             graph.value.nodes.forEach((node) => {
                 if (graph.value.selectedNodes.includes(node)) {
@@ -311,7 +307,7 @@ export default defineComponent({
                 const selectionBoundingRect = rectangleSelection.value.boundingRect;
 
                 // eslint-disable-next-line max-len
-                if (nodeInsideSelection(graph.value, node, getNodePosition(node), selectionBoundingRect)) {
+                if (nodeInsideSelection(graph.value, node, node.position, selectionBoundingRect)) {
                     graph.value.selectedNodes.push(node);
                 }
             });
@@ -333,7 +329,7 @@ export default defineComponent({
                 const selectionBoundingRect = rectangleSelection.value.boundingRect;
 
                 // eslint-disable-next-line max-len
-                if (nodeInsideSelection(graph.value, node, getNodePosition(node), selectionBoundingRect)) {
+                if (nodeInsideSelection(graph.value, node, node.position, selectionBoundingRect)) {
                     graph.value.selectedNodes.push(node);
                 }
             });
@@ -1190,7 +1186,6 @@ export default defineComponent({
             selectNode,
             currentView: editorManager.currentView,
             currentViewName,
-            getNodePosition,
             rectangleSelection,
             greyedOutNodes,
             temporaryConnection: temporaryConnection.temporaryConnection,
