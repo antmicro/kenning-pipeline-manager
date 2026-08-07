@@ -801,8 +801,8 @@ const select = (event) => {
     emit('select', event);
 };
 const openContextMenu = (isOpened, x, y, items, ignoreClose, onClick,
-    urls = undefined, style = undefined) => {
-    emit('openContextMenu', isOpened, x, y, items, ignoreClose, onClick, urls, style);
+    urls = undefined, style = undefined, onClose = () => {}) => {
+    emit('openContextMenu', isOpened, x, y, items, ignoreClose, onClick, urls, style, onClose);
 };
 
 let abortDrag;
@@ -1023,7 +1023,7 @@ const nodeStyle = computed(() => {
 // Interface modification
 
 let newSocketIndex;
-let chosenInterface;
+const chosenInterface = ref(undefined);
 let chosenProperty;
 
 const leftSocketsRefs = ref(null);
@@ -1106,13 +1106,13 @@ const positionedInterfaceStyle = (inf) => {
     };
 };
 
-const isPickedInterface = (intf) => intf === chosenInterface;
+const isPickedInterface = (intf) => intf === chosenInterface.value;
 
 const assignNewPosition = () => {
     updateInterfacePosition(
         props.node,
-        chosenInterface,
-        chosenInterface.side,
+        chosenInterface.value,
+        chosenInterface.value.side,
         newSocketIndex,
         true,
     );
@@ -1120,9 +1120,9 @@ const assignNewPosition = () => {
 
 const dragInterface = (ev) => {
     let sockets;
-    if (chosenInterface.side === 'right') {
+    if (chosenInterface.value.side === 'right') {
         sockets = rightSocketsRefs.value;
-    } else if (chosenInterface.side === 'left') {
+    } else if (chosenInterface.value.side === 'left') {
         sockets = leftSocketsRefs.value;
     }
 
@@ -1143,9 +1143,9 @@ const dragInterface = (ev) => {
         top: `${el.offsetTop + el.offsetHeight / 2 - 2.5}px`, display: 'block',
     };
 
-    if (chosenInterface.side === 'right') {
+    if (chosenInterface.value.side === 'right') {
         interfaceCursorStyle.value.right = '-0.7em';
-    } else if (chosenInterface.side === 'left') {
+    } else if (chosenInterface.value.side === 'left') {
         interfaceCursorStyle.value.left = '-0.7em';
     }
 };
@@ -1153,7 +1153,7 @@ const dragInterface = (ev) => {
 const dropInterface = () => {
     assignNewPosition();
 
-    chosenInterface = undefined;
+    chosenInterface.value = undefined;
     interfaceCursorStyle.value = {
         top: '0px',
         left: '0px',
@@ -1166,7 +1166,7 @@ const dropInterface = () => {
 };
 
 const pickInterface = (intf, ev) => {
-    chosenInterface = intf;
+    chosenInterface.value = intf;
     dragInterface(ev);
 
     document.addEventListener('pointermove', dragInterface);
@@ -1183,15 +1183,15 @@ const createContextMenuInterfaceItems = () => {
     const items = [];
     const posMap = interfacePositions.value;
 
-    if (chosenInterface !== undefined && !viewModel.value.settings.disableInterfaceExpose) {
-        const intfMode = (chosenInterface.externalName === undefined ?
+    if (chosenInterface.value !== undefined && !viewModel.value.settings.disableInterfaceExpose) {
+        const intfMode = (chosenInterface.value.externalName === undefined ?
             { value: 'SetExternalName', label: 'Expose Interface', icon: icons.Subgraph } :
             { value: 'UnsetExternalName', label: 'Privatize Interface', icon: icons.Subgraph }
         );
         items.push(intfMode);
     }
 
-    if (!posMap.has(chosenInterface.name)) {
+    if (!posMap.has(chosenInterface.value.name)) {
         items.push(
             { value: 'SpaceUp', label: 'Space Up' },
             { value: 'SpaceDown', label: 'Space Down' },
@@ -1200,8 +1200,8 @@ const createContextMenuInterfaceItems = () => {
         );
     }
 
-    if (chosenInterface !== undefined && chosenInterface.side) {
-        switch (chosenInterface.side) {
+    if (chosenInterface.value !== undefined && chosenInterface.value.side) {
+        switch (chosenInterface.value.side) {
             case 'left':
                 items.push({ value: 'MoveRight', label: 'Move Right' });
                 break;
@@ -1220,53 +1220,55 @@ const onContextMenuInterfaceClick = (action) => {
         case 'SetExternalName':
             viewModel.value.editor.exposeInterface(
                 graph.value.id,
-                chosenInterface,
+                chosenInterface.value,
             );
 
-            notifyEvents.exposedInterface.emit([chosenInterface, graph.value.id, true]);
-            graph.value.events.exposeInterface.emit([chosenInterface, viewModel.value.editor]);
+            notifyEvents.exposedInterface.emit([chosenInterface.value, graph.value.id, true]);
+            graph.value.events.exposeInterface
+                .emit([chosenInterface.value, viewModel.value.editor]);
             break;
         case 'UnsetExternalName':
-            graph.value.events.privatizeInterface.emit([chosenInterface, viewModel.value.editor]);
+            graph.value.events.privatizeInterface
+                .emit([chosenInterface.value, viewModel.value.editor]);
             viewModel.value.editor.privatizeInterface(
                 graph.value.id,
-                chosenInterface,
+                chosenInterface.value,
             );
 
-            notifyEvents.exposedInterface.emit([chosenInterface, graph.value.id, false]);
+            notifyEvents.exposedInterface.emit([chosenInterface.value, graph.value.id, false]);
             break;
         case 'MoveUp':
-            if (chosenInterface.sidePosition === 0) {
-                chosenInterface = undefined;
+            if (chosenInterface.value.sidePosition === 0) {
+                chosenInterface.value = undefined;
                 break;
             }
-            newSocketIndex = chosenInterface.sidePosition - 1;
+            newSocketIndex = chosenInterface.value.sidePosition - 1;
             dropInterface();
             break;
         case 'MoveDown':
-            newSocketIndex = chosenInterface.sidePosition + 1;
+            newSocketIndex = chosenInterface.value.sidePosition + 1;
             dropInterface();
             break;
         case 'SpaceUp':
         case 'SpaceDown': {
             const sockets =
-                chosenInterface.side === 'right'
+                chosenInterface.value.side === 'right'
                     ? displayedRightRows.value
                     : displayedLeftRows.value;
             const comparison = action === 'SpaceDown' ? (a, b) => a > b : (a, b) => a >= b;
             Object.values(sockets).forEach((intf) => {
                 if (intf !== undefined &&
-                comparison(intf.sidePosition, chosenInterface.sidePosition)) {
+                comparison(intf.sidePosition, chosenInterface.value.sidePosition)) {
                     intf.sidePosition += 1; // eslint-disable-line no-param-reassign
                 }
             });
             break;
         }
         case 'MoveLeft':
-            chosenInterface.side = 'left';
+            chosenInterface.value.side = 'left';
             break;
         case 'MoveRight':
-            chosenInterface.side = 'right';
+            chosenInterface.value.side = 'right';
             break;
     }
 };
@@ -1275,7 +1277,7 @@ const openContextMenuInterface = async (intf, ev) => {
     showContextMenuInterface.value = false;
     await nextTick();
     if (!viewModel.value.editor.readonly) {
-        chosenInterface = intf;
+        chosenInterface.value = intf;
         const interfaceName = intf.name;
         contextMenuInterfaceItems.value = createContextMenuInterfaceItems();
         const targetRect = ev.currentTarget.getBoundingClientRect();
@@ -1283,13 +1285,13 @@ const openContextMenuInterface = async (intf, ev) => {
         const posMap = interfacePositions.value;
 
         if (posMap.has(interfaceName)) {
-            contextMenuInterfaceX.value = targetRect.left;
-            contextMenuInterfaceY.value = targetRect.top;
-        } else if (chosenInterface.side === 'right') {
+            contextMenuInterfaceX.value = ev.clientX + 10;
+            contextMenuInterfaceY.value = ev.clientY + 12.5;
+        } else if (chosenInterface.value.side === 'right') {
             contextMenuInterfaceSide.value = 'right';
             contextMenuInterfaceX.value = nodeRect.left + nodeRect.width + 10;
             contextMenuInterfaceY.value = targetRect.top + 12.5;
-        } else if (chosenInterface.side === 'left') {
+        } else if (chosenInterface.value.side === 'left') {
             contextMenuInterfaceSide.value = 'left';
             contextMenuInterfaceX.value = nodeRect.left - 10;
             contextMenuInterfaceY.value = targetRect.top + 12.5;
@@ -1305,6 +1307,9 @@ const openContextMenuInterface = async (intf, ev) => {
             onContextMenuInterfaceClick,
             undefined,
             contextMenuInterfaceSide.value === 'left' && { translate: '-100%' },
+            () => {
+                chosenInterface.value = undefined;
+            },
         );
     }
 };
