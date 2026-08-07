@@ -83,8 +83,10 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
                     :greyedOut="greyedOutNodes.includes(node)"
                     :interfaces="highlightInterfaces"
                     :ignoredInterfacesType="[...ignoredInterfacesTypes]"
-                    @openContextMenu="(open, x, y, items, ignore, onclick, urls, styles) => {
-                        updateContextMenu(node, open, x, y, items, ignore, onclick, urls, styles);
+                    @openContextMenu="(open, x, y, items, ignore, onclick,
+                    urls, styles, onclose) => {
+                        updateContextMenu(node, open, x, y, items, ignore, onclick, urls,
+                        styles, onclose);
                     }"
                     @select="(ev) => selectNode(node, ev)"
                     @transformed="() => updateGroupsOf(node.id)"
@@ -138,6 +140,7 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
                 :items="contextMenu.items ?? []"
                 :ignore-close="contextMenu.ignore ?? []"
                 @click="contextMenu.onclick"
+                @close="contextMenu.onclose"
                 :transition="''"
             />
             <Panel v-show="showWelcome" :blur="false" class="welcome-container-panel">
@@ -266,8 +269,10 @@ export default defineComponent({
             ignore: [],
             onclick: () => {},
             styles: {},
+            onclose: () => {},
         });
-        const updateContextMenu = (_node, open, x, y, items, ignore, onclick, urls, styles) => {
+        const updateContextMenu = (_node, open, x, y, items, ignore, onclick,
+            urls, styles, onclose) => {
             contextMenuComp.value.closeContextMenu();
             nextTick(() => {
                 contextMenu.x = x;
@@ -280,6 +285,7 @@ export default defineComponent({
                 // eslint-disable-next-line no-param-reassign
                 open.value = true;
                 contextMenu.open = open;
+                contextMenu.onclose = onclose;
             });
         };
 
