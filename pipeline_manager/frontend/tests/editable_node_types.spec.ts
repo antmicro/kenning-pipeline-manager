@@ -353,6 +353,10 @@ test('editing properties', async ({ page }, testInfo) => {
             expect(result, { message: '"'.concat(String(props[i][0]).concat('" interface is interactable when readonly')) }).toBeTruthy();
         }
     }
+    addInterface(page, node);
+    // takes some time for the interface to show up, otherwise fails
+    await page.waitForTimeout(250);
+    await assertInputCount(node, 1);
 });
 test('editing bus node', async ({ page }) => {
     await page.goto(getUrl());
