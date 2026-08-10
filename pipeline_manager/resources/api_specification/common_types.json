@@ -181,6 +181,19 @@
             "unevaluatedProperties": false,
             "required": ["interfaces"]
         },
+        "name_diff": {
+            "description": "Schema that represent differences in title change",
+            "allOf": [{ "$ref": "common_types#/$defs/node_object" }],
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "Name of the node to change"
+                }
+            },
+            "unevaluatedProperties": false,
+            "required": ["name"]
+        },
         "position_diff": {
             "description": "Schema that represent differences in position of the node",
             "allOf": [{ "$ref": "common_types#/$defs/node_object" }],

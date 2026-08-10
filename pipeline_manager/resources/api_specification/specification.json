@@ -150,6 +150,15 @@
                 "$ref": "common_types#/$defs/null_or_empty"
             }
         },
+        "name_change": {
+            "description": "Procedure to alter the name of the node.",
+            "params": {
+                "$ref": "common_types#/$defs/name_diff"
+            },
+            "returns": {
+                "$ref": "common_types#/$defs/null_or_empty"
+            }
+        },
         "position_change": {
             "description": "Procedure to alter position of a node",
             "params": {
@@ -730,6 +739,15 @@
             "description": "Request sent when interface of any node changes and `notifyWhenChanged` option is enabled in the metadata section of specification.",
             "params": {
                 "$ref": "common_types#/$defs/interfaces_diff"
+            },
+            "returns": {
+                "$ref": "common_types#/$defs/null_or_empty"
+            }
+        },
+        "name_on_change": {
+            "description": "Request sent when node name was changed and `notifyWhenChanged` option is enabled in the metadata section of specification.",
+            "params": {
+                "$ref": "common_types#/$defs/name_diff"
             },
             "returns": {
                 "$ref": "common_types#/$defs/null_or_empty"
