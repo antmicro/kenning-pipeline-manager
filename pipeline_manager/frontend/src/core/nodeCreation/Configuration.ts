@@ -16,6 +16,7 @@ import { toRaw } from 'vue';
 import { v4 as uuidv4 } from 'uuid';
 import EditorManager, { NEW_NODE_STYLE, EDITED_NODE_STYLE } from '../EditorManager.js';
 import { parseInterfaces } from '../interfaceParser.js';
+import notifyEvents from '../../custom/notifyEvents.js';
 import {
     menuState, configurationState, PropertyConfiguration, InterfaceConfiguration,
 } from './ConfigurationState.ts';
@@ -107,6 +108,7 @@ export function prepareNodeForDuplication(nodeType:string) : void {
 function commitTypeToSpecification() {
     suppressHistoryLogging(true);
     const editorManager = EditorManager.getEditorManagerInstance();
+    const { viewModel } = useViewModel();
 
     const parssedNode = editorManager.extendNodeSpecification(configurationState);
 
@@ -135,6 +137,7 @@ function commitTypeToSpecification() {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         ?.map((prop: any) => (({ inSubgraph, ...o }) => o)(prop)) ?? [];
 
+    const oldSpec = structuredClone(editorManager.getCurrentNodeSpecification(currentType));
     const ret = editorManager.addNodeToEditorSpecification({
         name: newNodeData.name,
         layer: newNodeData.isLayerInherited ? undefined : newNodeData.layer,
@@ -148,14 +151,19 @@ function commitTypeToSpecification() {
         subgraphId: configurationState.subgraphId,
         style,
     }, currentType, false);
+    const newSpec = structuredClone(editorManager.getCurrentNodeSpecification(currentType));
 
     if (ret.errors !== undefined && ret.errors.length) {
         NotificationHandler.terminalLog('error', 'Error when registering the node', ret.errors);
         return;
     }
     suppressHistoryLogging(false);
-    editorManager.clearHistory(() => {
-        NotificationHandler.terminalLog('warning', 'Can\'t undo changes after modifying specification', 'History unavailable after changing specification');
+    const editorManagerReactive = (<any>viewModel.value.editor).editorManager;
+    notifyEvents.specificationUpdate.emit({
+        nodeType: currentType,
+        specification: oldSpec,
+        newSpecification: newSpec,
+        editorManager: editorManagerReactive ?? editorManager,
     });
 }
 
