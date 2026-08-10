@@ -4,7 +4,7 @@ import {
     leaveSubgraph,expectNode,getNode,deleteNode, loadVideoNodeId, enableNavigationBar, addNode,
     dragAndDrop, closeTerminal,loadSpecification,loadDataflow, getContextMenu,
     AddConnection, getYAMLEditorContent, setYAMLEditorContent, assertPropertyCount,
-    enableSubgraphRemoval
+    enableSubgraphRemoval, addProperty,
 } from './config.js';
 
 
@@ -637,4 +637,18 @@ test('test history by node specification edit, test extend', async ({ page }) =>
     await page.keyboard.press('Control+KeyY');
 
     await assertPropertyCount(loadVideo, 0);
+});
+test('spec edit from GUI', async ({ page }) => {
+    await loadWebsite(page, loadVideoNodeId);
+    const loadVideo = getNode(page, 'LoadVideo');
+
+    await addProperty(page, loadVideo);
+    const other = getNode(page, 'Filter2D');
+    // change focus
+    await other.locator('.__title').click();
+    await assertPropertyCount(loadVideo, 2);
+    await page.keyboard.press('Control+KeyZ');
+    await assertPropertyCount(loadVideo, 1);
+    await page.keyboard.press('Control+KeyY');
+    await assertPropertyCount(loadVideo, 2);
 });
