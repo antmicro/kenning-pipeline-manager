@@ -35,7 +35,7 @@ async function renameNodeType(page: Page, oldName: string, newName: string) {
     await node.click({ button: 'right', force: true });
     await getContextMenu(page).getByText('Configure').click();
     await page.locator('.create-menu').getByTitle('Node name').first().fill(newName);
-    await page.getByRole('button', { name: 'Configure' }).click();
+    await page.getByRole('button', { name: 'Configure' }).dblclick();
 }
 
 async function addParentAndChildNode(page: Page, coord: number, openCategory = true) {
@@ -171,7 +171,6 @@ test('rename category node', async ({ page }, testInfo) => {
     await loadIncludeSpecification(page, testInfo);
 
     await addParentAndChildNode(page, 200);
-    await openNodePalette(page);
 
     await renameNodeType(page, 'Binary images', 'New node name');
     const and_node = getNode(page,'Logical AND');
