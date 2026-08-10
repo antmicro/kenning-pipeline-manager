@@ -358,6 +358,14 @@ const notifyPositionChanged = (position) => {
 };
 // Create watcher for position
 watch(() => props.node.position, notifyPositionChanged);
+watch(() => props.node.title, async (value) => {
+    const data = {
+        graph_id: props.node.graphInstance.id,
+        node_id: props.node.id,
+        name: value,
+    };
+    await externalApplicationManager.notifyAboutChange('name_on_change', data);
+});
 
 const focusOnRename = () => {
     renameField.value.focus();
