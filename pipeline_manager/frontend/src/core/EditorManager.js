@@ -1103,7 +1103,39 @@ export default class EditorManager {
         // Keep track of additional node types
         this.editor.additionalNodeTypes.add(nodeSpecification.name);
 
-        return { errors: [], warnings: [] };
+        return { errors: [], warnings: [], spec: nodeSpecification };
+    }
+    /**
+     * Get complete specification of a node type.
+     *
+     * @param {string} type - The type of node for which to fetch specification.
+     * @returns {Object} Complete specification of provided type.
+     */
+    getCurrentNodeSpecification(type) {
+        const nodeMatchesSpec = (specNode) => {
+            const isCategory = specNode.isCategory ?? false;
+            const nodeType = type;
+            const specNodeType = isCategory
+                ? specNode.category?.split('/').slice(-1)[0]
+                : specNode.name;
+            return nodeType === specNodeType;
+        };
+        let spec = this.specification.currentSpecification
+            .nodes?.find((n) => EditorManager.getNodeName(n) === type);
+
+        if (spec === undefined) {
+            spec = this.specification.currentSpecification
+                .nodes?.find(nodeMatchesSpec);
+        }
+        if (spec === undefined) {
+            spec = this.specification.unresolvedSpecification
+                .nodes?.find(nodeMatchesSpec);
+        }
+        if (spec === undefined) {
+            spec = this.specification.unresolvedSpecification
+                .nodes?.find((n) => EditorManager.getNodeName(n) === type);
+        }
+        return spec;
     }
 
     /**

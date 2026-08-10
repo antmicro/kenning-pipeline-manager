@@ -244,31 +244,6 @@ export default defineComponent({
         };
 
         /**
-         * Get complete specification of a node type.
-         *
-         * @param {string} type - The type of node for which to fetch specification.
-         * @returns {Object} Complete specification of provided type.
-         */
-        const getCurrentSpecification = (type) => {
-            let spec = editorManager.specification.currentSpecification
-                .nodes?.find((n) => EditorManager.getNodeName(n) === type);
-
-            if (spec === undefined) {
-                spec = editorManager.specification.currentSpecification
-                    .nodes?.find(nodeMatchesSpec);
-            }
-            if (spec === undefined) {
-                spec = editorManager.specification.unresolvedSpecification
-                    .nodes?.find(nodeMatchesSpec);
-            }
-            if (spec === undefined) {
-                spec = editorManager.specification.unresolvedSpecification
-                    .nodes?.find((n) => EditorManager.getNodeName(n) === type);
-            }
-            return spec;
-        };
-
-        /**
          * Validate the style of a node.
          *
          * @param {Object} parsedSpecification - The parsed node specification object to validate.
@@ -331,7 +306,7 @@ export default defineComponent({
                 }
                 const parsedSpecification = YAML.parse(currentSpecification.value.replaceAll('\t', '  '));
                 const checkSubgraphExtends = (nodeName) => {
-                    const nodeSpec = getCurrentSpecification(nodeName);
+                    const nodeSpec = editorManager.getCurrentNodeSpecification(nodeName);
                     if (nodeSpec.subgraphId) {
                         return true;
                     }
@@ -344,7 +319,7 @@ export default defineComponent({
                     throw new Error('Extending subgraphs dynamically is not currently supported.');
                 }
                 const oldType = node.value.type;
-                const oldSpec = getCurrentSpecification(oldType);
+                const oldSpec = editorManager.getCurrentNodeSpecification(oldType);
                 const oldSpecCopied = structuredClone(toRaw(oldSpec));
 
                 // Update style of edited node type
