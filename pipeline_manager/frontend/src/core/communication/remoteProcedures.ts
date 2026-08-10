@@ -260,6 +260,23 @@ export function position_change(
     node.position.y = params.position.y;
 }
 
+type ModifyTitleParamsType = {
+    graph_id: string,
+    node_id: string,
+    name: string,
+};
+
+/**
+ * Changes node title.
+ */
+export function name_change(
+    params: ModifyTitleParamsType,
+) {
+    const node = getNode(params.graph_id, params.node_id);
+
+    node.title = params.name;
+}
+
 type ModifyNodesParamsType = {
     graph_id: string,
     nodes: {
