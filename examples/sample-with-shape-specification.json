@@ -10,6 +10,7 @@
             "interfaces": [
                 {"name": "a", "direction": "inout", "side": "top"}
             ],
+            "width": 200,
             "style": "GNDStyle"
         },
         {
@@ -18,6 +19,7 @@
                 {"name": "a", "direction": "inout", "side": "top"},
                 {"name": "b", "direction": "inout", "side": "bottom"}
             ],
+            "width": 200,
             "style": "VoltageStyle"
         },
         {
@@ -26,6 +28,7 @@
                 {"name": "a", "direction": "inout", "side": "top"},
                 {"name": "b", "direction": "inout", "side": "bottom"}
             ],
+            "width": 200,
             "style": "SignalStyle"
         },
         {
@@ -34,8 +37,7 @@
                 {"name": "a", "direction": "inout", "side": "left"},
                 {"name": "b", "direction": "inout", "side": "right"}
             ],
-            "width": 298,
-            "height": 98,
+            "width": 200,
             "style": "ResistorStyle"
         },
         {
@@ -45,6 +47,7 @@
                 {"name": "b", "direction": "inout", "side": "left"},
                 {"name": "e", "direction": "inout", "side": "bottom"}
             ],
+            "width": 200,
             "style": "NPNStyle"
         },
         {
@@ -54,6 +57,7 @@
                 {"name": "b", "direction": "inout", "side": "left"},
                 {"name": "e", "direction": "inout", "side": "top"}
             ],
+            "width": 200,
             "style": "PNPStyle"
         }
     ],
@@ -80,11 +84,11 @@
                 "positions": {
                     "a": {
                         "x": 0,
-                        "y": 43
+                        "y": 37
                     },
                     "b": {
                         "x": 100,
-                        "y": 43
+                        "y": 37
                     }
                 }
             },
