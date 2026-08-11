@@ -19,7 +19,7 @@ The entrypoint of the application.
                 @setLoad="handleLoad"
                 :loading="loading"
             />
-            <TerminalPanel v-show="(!loading && !hideHud) || terminalStore.show" />
+            <TerminalPanel v-show="!hideHud || terminalStore.show" />
         </div>
     </div>
 </template>
