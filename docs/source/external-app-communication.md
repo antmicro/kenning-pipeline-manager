@@ -268,9 +268,9 @@ the `custom_download` prefix in their name, and [dataflow_run](#external-dataflo
 ## Custom dialog box
 
 ### Custom dialog box definition
-An external application can also define custom dialog boxes for various different use cases.
-When connection with {{project}} server is established it sends [dialog_boxes_get](#dialog_boxes_get) request to get user credentials with all custom dialog boxes used by application.
-Example dictionary defines simple form:
+An external application can also define custom dialog boxes for various use cases.
+When connection with {{project}} server is established it sends [dialog_boxes_get](#dialog_boxes_get) request to get user credentials with all custom dialog boxes used by the application.
+Example dictionary defining simple form:
 ```json
  {
     "optimizationTask": {
@@ -291,66 +291,175 @@ Example dictionary defines simple form:
                 "name": "early stopping",
                 "type": "bool",
                 "default": false
+            },
+            "algorithmsSelect": {
+                "name": "algorithms",
+                "type": "select",
+                "items": {
+                    "CG": "cg",
+                    "BFGS": "bfgs",
+                    "Newton-CG": "newton"
+                },
+                "default": "newton"
+            },
+            "portDynamic": {
+                "name": "dynamo",
+                "type": "dynamic",
+                "template": {
+                    "intPort": {"name": "port", "type": "int"}
+                }
+            },
+            "attrNested": {
+                "name": "Additional attributes",
+                "type": "nested",
+                "template": {
+                    "userName": {"name": "name", "type": "text"},
+                    "userId": {"name": "id", "type": "int"}
+                }
             }
-        },
+        }
     }
 }
 ```
-Every entry in dictionary defines an internal with the name later used to open the dialog box, in this case it is a dialog box with name `optimizationTask`.
+Every entry in the dictionary defines an object with the name later used to open a dialog box, in this case it is the dialog box with name `optimizationTask`.
 Each dialog definition consists of:
-- `title` - which is a name of the dialog box's window
+- `title` - a name of the dialog box's window
 - `confirmText` - a title of the dialog box's confirm button
-- `template` - it holds definition for every input in dialog box.
+- `template` - a definition for every input in the dialog box.
 
-User dialog box `template` allows for defining input's name and it's type.
+The user dialog box `template` allows for defining input's name and its type.
 Object name represents internal name of the input in which it will be returned, see [Read data from custom dialog box](#read-data-from-custom-dialog-box).
-Nested `name` property represents a name of the input it will be shown in a dialog box's form and `type` represents type of the input, current supported types:
+Nested `name` property represents a name of the input it will be shown in a dialog box's form and `type` represents type of the input, supported types:
 * `text` - a standard text input
 * `number` - a numerical input
 * `int` - an integer input
 * `bool` - a checkbox with two states true or false
+* `select` - a dropdown selection input
+* `nested` - a nested form
+* `dynamic` - a dynamic form
 
-`default` properties in the template allows for setting a initial value in user data form.
+`default` properties in the template allows for setting an initial value in user data form.
 
-The resulting specification gives us dialog box that looks like that:
+The resulting specification gives us the dialog box that looks like that:
 
 ![Example custom dialog box](img/example_custom_user_dialog.png)
 
-### Custom dialog input types description
+In case of an error with the provided template, an error message will be sent through `requestTerminalRead` on `dialogErrors` terminal, it can be handy for debugging purposes.
 
-* **Text** - Represents a standard input that accepts text data.
-* **Number** - Represents a numerical input that supports float based data.
-    It allows for settings optional `max` and `min` value which define range of supported input numbers.
-* **Int** - Represents a numerical input that supports integer based data.
-    It allows for settings optional `max` and `min` value which define range of supported input numbers.
-* **Bool** - Represents a input that accepts only two states `true` and `false`.
-    It is defined as a checkbox in dialog box.
+## Custom dialog input types description
+
+* `text` - Represents a standard input that accepts text data.
+* `number` - Represents a numerical input that supports float numbers and allows for settings maximum and minimum value through optional `max` and `min` parameters.
+* `int` - Represents a numerical input that supports integer based data and allows for settings maximum and minimum value through optional `max` and `min` parameters.
+* `bool` - Represents an input that accepts only two states `true` and `false` and is displayed as a checkbox in the dialog box.
+* `select` - Represents an input as a dropdown selection list with options defined in `items` option.
+    Defined as a simple dictionary in which the key represents a name of the entry, visible by user, and item's value is an internal value used by the application.
+* `nested` - Represents a nested form input, which allows defining form inside other form, using `template` property which accepts the same generic template format like normal custom dialog's form.
+    `default` parameter allows setting default values for each form in the nested form.
+* `dynamic` - Represents a dynamic form, which allows defining virtually infinite number of forms defined in `template` property, which accepts standard generic template format for custom dialog's form.
+    The number of forms is defined with additional integer input in the form.
+    For dynamic form, `default` parameter have two functions:
+    * when an integer value higher than 0 is set as default value, it is used to define initial amount of dynamic inputs.
+    * when the default value is an array, it creates dynamic inputs based on values defined in the array.
+    It allows for setting default value for each element in form.
+
+Example usage of a default value in the dynamic input, based on a dialog box template presented below:
+
+``` json
+{
+    "optimizationTask": {
+        "title": "Power simulation",
+        "confirmText": "OK",
+        "template": {
+            "parameters": {
+                "name": "Parameters",
+                "type": "dynamic",
+                "default": [
+                    {
+                        "paramName": "Voltage",
+                        "paramVal": "1800mV"
+                    },
+                    {
+                        "paramName": "Current",
+                        "paramVal": "500mA"
+                    }
+                ],
+                "template": {
+                        "paramName": {
+                            "name": "Name",
+                            "type": "text"
+                        },
+                        "paramVal": {
+                            "name": "Value",
+                            "type": "text"
+                        }
+                }
+            }
+        }
+    }
+}
+```
+
+This template will create the dialog box with two dynamic inputs with default values:
+
+![Example custom dialog box with default values](img/dynamic_form_with_default_values.png)
+
+It is also possible to add, overwrite or remove the dialog box during application execution, using `dialog_template_add` requests. Example input data used with request:
+``` json
+{
+    "name": "optimizationTask",
+    "box": {
+        "title": "Task form",
+        "confirmText": "Send",
+        "template": {
+            "taskName": {
+                "name": "task",
+                "type": "text",
+                "default": "Foo"
+            }
+        }
+    }
+}
+```
+
+- `name` - a name of dialog box we wish to add or modify
+- `box` - a template used to define custom dialog box
+
+In this case it will create a dialog box with a single text input.
+If `optimizationTask` is already registered, its template will be overridden with a new one.
+When `optimizationTask` is registered but the provided template or a `box` parameter is empty, `optimizationTask` will be removed.
+As a response `dialog_template_add` returns arrays with showing added, removed or overridden dialog boxes:
+``` json
+{
+    "added": [ "optimizationTask" ],
+    "removed": [],
+    "overridden": []
+}
+```
 
 ### Open custom dialog box
 
-To open this dialog box, external application sends [open_dialog_request](#open_dialog_request) request with a payload:
+To open this dialog box, external application sends [dialog_open](#dialog_open) request with a payload:
 ``` json
 {
-    "title": "optimizationTask",
-    "wait": true
+    "name": "optimizationTask"
 }
 ```
-in which `title` parameter is a name of the dialog box to open and `wait` is an optional parameter that allows for a synchronous call.
-When it is set to `true` the request will wait for user inputs and send them back in the same call, otherwise `user_dialog_read` callback needs to be used to get user's inputs.
+In which `name` parameter is a name of the dialog box to open.
 
 ### Read data from custom dialog box
 
-When confirm button, `OK` button in this case, is pressed, {{project}} sends [user_dialog_read](#user_dialog_read) request with data read from dialog box in form of simple json-like format:
+When confirm button, `OK` button in this case, is pressed, {{project}} sends [dialog_on_submit](#dialog_on_submit) request with data read from the dialog box in a form of simple json-like format:
 ``` json
 {
     "taskName": "Foo"
 }
 ```
-in which `taskName` corresponds to text input defined in `template` section of the dialog box.
+In which `taskName` corresponds to `input_name` defined in `template` section of the dialog box.
 
-Example usage of custom dialog box is defined in script [tester_client](https://github.com/antmicro/kenning-pipeline-manager/blob/main/pipeline_manager/frontend_tester/tester_client.py).
+Example usage of the custom dialog box is defined in a script [tester_client](https://github.com/antmicro/kenning-pipeline-manager/blob/main/pipeline_manager/frontend_tester/tester_client.py).
 
-You can also test custom dialog box using [Custom dialog box](resource:tester_api/index.html) demo which uses {{project}} embedded into html page.
+You can also test the custom dialog box using [Custom dialog box](resource:tester_api/index.html) demo which uses {{project}} embedded into HTML page.
 
 ## Implementing a Python-based client for {{project}}
 
