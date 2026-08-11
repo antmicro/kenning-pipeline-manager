@@ -38,6 +38,7 @@ with specification and graph are being downloaded and loaded.
 
   z-index: 99;
   background-color: #{$gray-600}80;
+  animation: fade-in 0.5s;
 }
 
 .self-building-square-spinner, .self-building-square-spinner * {
@@ -101,6 +102,15 @@ with specification and graph are being downloaded and loaded.
 
     .self-building-square-spinner .clear{
       clear: both;
+    }
+
+    @keyframes fade-in {
+      0% {
+        opacity: 0;
+      }
+      100% {
+        opacity: 1;
+      }
     }
 
     @keyframes self-building-square-spinner {
