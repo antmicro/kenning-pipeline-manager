@@ -250,13 +250,17 @@ class RPCMethods:
         )
         return {"type": MessageType.OK.value, "content": "Terminal created"}
 
-    async def user_dialog_read(self, data: object) -> None:
-        taskName = data["taskName"]
-        logging.info(f"Got task name: {taskName}")
-        await self.client.request(
-            "terminal_write",
-            {"message": f"{taskName} has been executed.", "name": "Terminal"},
-        )
+    async def dialog_on_submit(self, name: str, data: object) -> None:
+        if "taskName" in data:
+            taskName = data["taskName"]
+            logging.info(f"Got task name: {taskName}")
+            await self.client.request(
+                "terminal_write",
+                {
+                    "message": f"{taskName} has been executed.",
+                    "name": "Terminal",
+                },
+            )
 
     def terminal_read(
         self,
@@ -306,6 +310,31 @@ class RPCMethods:
                         "name": "early stopping",
                         "type": "bool",
                         "default": False,
+                    },
+                    "algorithmsSelect": {
+                        "name": "algorithms",
+                        "type": "select",
+                        "items": {
+                            "CG": "cg",
+                            "BFGS": "bfgs",
+                            "Newton-CG": "newton",
+                        },
+                        "default": "newton",
+                    },
+                    "portDynamic": {
+                        "name": "dynamo",
+                        "type": "dynamic",
+                        "template": {
+                            "intPort": {"name": "port", "type": "int"}
+                        },
+                    },
+                    "attrNested": {
+                        "name": "Additional attributes",
+                        "type": "nested",
+                        "template": {
+                            "attrName": {"name": "name", "type": "text"},
+                            "attrId": {"name": "id", "type": "int"},
+                        },
                     },
                 },
             }
@@ -537,11 +566,10 @@ class RPCMethods:
         Dict
             Method's response
         """
-        output = await self.client.request(
-            "open_dialog_request",
-            {"title": "optimizationTask", "wait": True},
+        await self.client.request(
+            "dialog_open",
+            {"name": "optimizationTask"},
         )
-        logging.info(f"Got user dialog data: {output}")
         return {"type": MessageType.OK.value, "content": "Dialog box open"}
 
     async def custom_create_writable_terminal(self, dataflow: Dict) -> Dict:

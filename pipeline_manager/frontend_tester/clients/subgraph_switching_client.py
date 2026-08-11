@@ -44,17 +44,39 @@ class RPCMethods:
                 "name": "Open user dialog",
                 "iconName": "Run",
                 "procedureName": "custom_open_user_dialog_box",
-            }
+            },
+            {
+                "name": "Change user dialog",
+                "iconName": "Run",
+                "procedureName": "custom_change_user_dialog_box",
+            },
         ]
 
     async def custom_open_user_dialog_box(self, dataflow: Dict) -> Dict:
         await self.client.request(
-            "open_dialog_request",
-            {"title": "userDialog"},
+            "dialog_open",
+            {"name": "userDialog"},
         )
         return {"type": MessageType.OK.value, "content": "Dialog box open"}
 
-    def user_dialog_read(self, data: object) -> None:
+    async def custom_change_user_dialog_box(self, dataflow: Dict) -> Dict:
+        await self.client.request(
+            "dialog_template_add",
+            {
+                "name": "userDialog",
+                "box": {
+                    "title": "Task init",
+                    "confirmText": "Ok",
+                    "template": {
+                        "taskName": {"name": "new task", "type": "text"},
+                        "taskCount": {"name": "count", "type": "int"},
+                    },
+                },
+            },
+        )
+        return {"type": MessageType.OK.value, "content": "Dialog box updated."}
+
+    def dialog_on_submit(self, name: str, data: object) -> None:
         taskName = data["taskName"]
         sys.stdout.write(f"Task: {taskName}")
         sys.stdout.flush()
