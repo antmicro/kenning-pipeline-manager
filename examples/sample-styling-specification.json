@@ -299,9 +299,11 @@
                     "title": {
                         "display": "flex",
                         "justify-content": "center",
-                        "margin-bottom": "calc(var(--kpm-node-title-height) * -1 - 20px)",
+                        "align-items": "center",
+                        "margin-bottom": "calc(var(--kpm-node-title-height) * -1.0)",
                         "color": "#FFFFFF",
-                        "background-color": "transparent"
+                        "background-color": "transparent",
+                        "padding-bottom": "15px"
                     }
                 }
             },
