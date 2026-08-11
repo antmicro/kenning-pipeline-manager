@@ -27,6 +27,7 @@ import {
 } from 'vue';
 
 import InputInterface from '../../interfaces/InputInterface.js';
+import SelectInterface from '../../interfaces/SelectInterface.js';
 import InputInterfaceComponent from '../../interfaces/InputInterface.vue';
 import ButtonInterface from '../../interfaces/ButtonInterface.js';
 import getExternalApplicationManager from '../../core/communication/ExternalApplicationManager.js';
@@ -54,6 +55,24 @@ export default defineComponent({
 
         const saveConfigurationTemplate = toRef(props, 'saveConfigurationTemplate');
         const saveConfiguration = toRef(props, 'saveConfiguration');
+        const createSelectOption = (params, label) => {
+            const { name, items } = params;
+
+            const selectItems = Object.entries(items).map(([key, value]) =>
+                ({ text: key, value }),
+            );
+
+            return [computed(() => {
+                const option = new SelectInterface(name,
+                    props.saveConfiguration[label],
+                    selectItems);
+                option.events.setValue.subscribe(this, (v) => {
+                    props.saveConfiguration[label] = v; // eslint-disable-line vue/no-mutating-props,max-len,no-param-reassign
+                });
+                option.setDefaultComponent();
+                return option;
+            }), label];
+        };
         const createCheckboxOption = (params, label) => {
             const { name } = params;
 
@@ -108,6 +127,7 @@ export default defineComponent({
                 ['number', createNumberOption],
                 ['int', createIntOption],
                 ['bool', createCheckboxOption],
+                ['select', createSelectOption],
             ],
         );
 

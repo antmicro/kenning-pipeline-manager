@@ -28,6 +28,7 @@ export default class CustomMenusManager {
             ['number', 0.0],
             ['int', 0],
             ['bool', false],
+            ['select', ''],
         ],
     );
 
@@ -120,6 +121,12 @@ export default class CustomMenusManager {
 
         templateEntries.forEach(([key, value]) => {
             const { type } = value;
+            if (type === 'select') {
+                const items = value?.items ?? {};
+                this.userDialogData[key] = value?.default ?? Object.entries(items)?.[0]?.[1] ?? '';
+                return;
+            }
+
             this.userDialogData[key] = value?.default ?? this.defaultValuesForTypes.get(type);
         });
 
