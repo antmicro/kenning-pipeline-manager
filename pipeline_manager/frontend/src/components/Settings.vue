@@ -213,8 +213,11 @@ export default {
         });
 
         const swapInterfaces = computed(() => {
-            const button = new ButtonInterface('Swap interfaces', () => {
-                props.viewModel.editor.swapInterfaces();
+            const button = new ButtonInterface('Swap interfaces', async () => {
+                const apply = async () => {
+                    props.viewModel.editor.swapInterfaces();
+                };
+                await loadingScreen(apply, props.viewModel.editor.events.setLoad);
             });
             return button;
         });
