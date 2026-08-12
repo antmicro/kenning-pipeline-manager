@@ -125,6 +125,8 @@ const PointType = Object.freeze({
  * Parameters used in A* pathfinding algorithm during rendering.
  */
 const aStarConfig = {
+    /** Time in ms after which A* cache entries are considered expired. */
+    cacheInvalidationPeriod: 50,
     /** Function used to compute the distance metric in the A* algorithm. */
     distanceType: (x1, y1, x2, y2) => Math.abs(x1 - x2) + Math.abs(y1 - y2),
     /** Function used to compute the grid step size for each path. */
@@ -151,6 +153,8 @@ export default class ConnectionRenderer {
     switchableInterfaces = false;
 
     shiftDistance = 15;
+
+    aStarCache = new Map();
 
     /**
      * Defines the shift the connection should have compared to the default position based on the
@@ -655,6 +659,12 @@ export default class ConnectionRenderer {
     }
 
     aStarRender(x1, y1, x2, y2, connection) {
+        const cached = this.aStarCache.get(connection.id);
+
+        if (cached && Date.now() - cached.lastRun < aStarConfig.cacheInvalidationPeriod) {
+            return cached.path;
+        }
+
         const nc = new NormalizedConnection(x1, y1, x2, y2, connection);
 
         const graph = this.viewModel.displayedGraph;
@@ -755,6 +765,11 @@ export default class ConnectionRenderer {
                 y: point.y,
             }));
 
+            this.aStarCache.set(connection.id, {
+                path: result,
+                lastRun: Date.now(),
+            });
+
             return result;
         }
         const middlePoint = (nc.x1 + nc.x2) / 2;
@@ -764,6 +779,11 @@ export default class ConnectionRenderer {
             { x: middlePoint, y: nc.y2 },
             { x: nc.x2, y: nc.y2 },
         ];
+
+        this.aStarCache.set(connection.id, {
+            path: result,
+            lastRun: Date.now(),
+        });
 
         return result;
     }
