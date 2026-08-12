@@ -133,6 +133,12 @@ const aStarConfig = {
         Math.abs(x1 - x2) / 10,
         Math.abs(y1 - y2) / 10,
     ),
+    /** Zone size used in spatial hashing. */
+    zoneStep: 500,
+    /** Function used when accessing zoneInfo map. */
+    zoneInfoKey: (idx, idy) => `${idx}:${idy}`,
+    /** Factor by which segment cost is multiplied when it intersects a node. */
+    intersectionFactor: 10,
 };
 
 export default class ConnectionRenderer {
@@ -667,6 +673,45 @@ export default class ConnectionRenderer {
 
         const regGridStep = aStarConfig.gridStepFunc(nc.x1, nc.y1, nc.x2, nc.y2);
 
+        // Map addressed with formatted strings,
+        // with lists of nodeInfo instances as values
+        const zoneInfo = new Map();
+
+        // Initialization of spatial hashing data and zones
+        // In the end, each zone entry contains a list of node object,
+        // each represented by its id, position, width and height
+        nodesInfo.forEach((nInfo) => {
+            const initIdx = Math.floor((nInfo.position.x - minMargin) / aStarConfig.zoneStep);
+            const initIdy = Math.floor((nInfo.position.y - minMargin) / aStarConfig.zoneStep);
+
+            const finalIdx = Math.floor(
+                (nInfo.position.x + nInfo.width + minMargin) / aStarConfig.zoneStep,
+            );
+            const finalIdy = Math.floor(
+                (nInfo.position.y + nInfo.height + minMargin) / aStarConfig.zoneStep,
+            );
+
+            for (
+                let i = Math.min(initIdx, finalIdx);
+                i <= Math.max(initIdx, finalIdx);
+                i += 1
+            ) {
+                for (
+                    let j = Math.min(initIdy, finalIdy);
+                    j <= Math.max(initIdy, finalIdy);
+                    j += 1
+                ) {
+                    const zoneKey = aStarConfig.zoneInfoKey(i, j);
+                    const zList = zoneInfo.get(zoneKey);
+                    const newList = [];
+                    if (zList === undefined) {
+                        zoneInfo.set(zoneKey, newList);
+                    }
+                    zoneInfo.get(zoneKey).push(nInfo);
+                }
+            }
+        });
+
         if (connection.to) {
             const shift = this.getShift(nc.from, nc.to, graph);
 
@@ -704,6 +749,7 @@ export default class ConnectionRenderer {
                 shift,
                 minMargin,
                 nodesInfo,
+                zoneInfo,
             ).map((point) => ({
                 x: point.x,
                 y: point.y,
@@ -736,9 +782,7 @@ export default class ConnectionRenderer {
      * @param minMargin Minimum margin around nodes within which
      *                  segments are considered to intersect the node
      * @param nodesInfo Array containing exact positions and sizes of nodes
-     * @param zoneInfo Map indexed by zoneInfoKey, used in spatial hashing
-     * @param zoneStep Step size of zones used in spatial hashing
-     * @param zoneInfoKey Function used to compute index of a zone
+     * @param zoneInfo Map used in spatial hashing
      * @returns Array of objects with x and y coordinates,
      *          representing consecutive points along the path
      */
@@ -749,6 +793,7 @@ export default class ConnectionRenderer {
         shift,
         minMargin,
         nodesInfo,
+        zoneInfo,
     ) {
         // helper function returning key to index `pointsToIndex` map
         const key = (point) => `${point.x}:${point.y}:${point.type}`;
@@ -902,6 +947,34 @@ export default class ConnectionRenderer {
                 neighbour.x,
                 neighbour.y,
             );
+
+            // Iterate only over nodes from the same zones
+            // as processed segment
+
+            const initIdx = Math.floor(current.x / aStarConfig.zoneStep);
+            const initIdy = Math.floor(current.y / aStarConfig.zoneStep);
+
+            const finalIdx = Math.floor(neighbour.x / aStarConfig.zoneStep);
+            const finalIdy = Math.floor(neighbour.y / aStarConfig.zoneStep);
+
+            for (let i = Math.min(initIdx, finalIdx); i <= Math.max(initIdx, finalIdx); i += 1) {
+                for (
+                    let j = Math.min(initIdy, finalIdy);
+                    j <= Math.max(initIdy, finalIdy);
+                    j += 1
+                ) {
+                    const zoneKey = aStarConfig.zoneInfoKey(i, j);
+                    const zList = zoneInfo.get(zoneKey) ?? [];
+
+                    if (zList.some(
+                        (nInfo) => checkIntersection(
+                            current, neighbour, nInfo,
+                        ),
+                    )) {
+                        return aStarConfig.intersectionFactor * manhattanDist;
+                    }
+                }
+            }
             return manhattanDist;
         }
 
