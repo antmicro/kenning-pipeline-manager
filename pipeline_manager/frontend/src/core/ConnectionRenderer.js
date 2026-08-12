@@ -1809,8 +1809,18 @@ export default class ConnectionRenderer {
      * @param connection BaklavaJS-defined connection to render
      * @returns String defining connection path in SVG format
      */
-    render(x1, y1, x2, y2, connection) {
+    render(x1, y1, x2, y2, connection, draggedNode) {
         const loopback = this.isLoopback(connection) ? 'Loopback' : '';
+        if (
+            this.style === 'aStar' &&
+            draggedNode &&
+            (
+                connection.from.nodeId === draggedNode.id ||
+                connection.to.nodeId === draggedNode.id
+            )
+        ) {
+            return this[`orthogonalRender${loopback}`](x1, y1, x2, y2, connection);
+        }
         return this[`${this.style}Render${loopback}`](x1, y1, x2, y2, connection);
     }
 

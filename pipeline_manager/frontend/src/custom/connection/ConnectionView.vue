@@ -1,5 +1,5 @@
 <!--
-Copyright (c) 2022-2024 Antmicro <www.antmicro.com>
+Copyright (c) 2022-2026 Antmicro <www.antmicro.com>
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -65,6 +65,7 @@ export default defineComponent({
     props: {
         isHighlighted: { default: false },
         connection: { required: true },
+        draggedNode: { required: true },
         hover: { default: false },
     },
     components: { Anchor },
@@ -168,7 +169,9 @@ export default defineComponent({
                 props.x2,
                 props.y2,
                 props.connection,
+                props.draggedNode,
             ),
+
         );
 
         const parsedNewD = computed(() => {

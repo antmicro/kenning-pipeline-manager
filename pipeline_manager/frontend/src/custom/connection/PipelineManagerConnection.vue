@@ -1,5 +1,5 @@
 <!--
-Copyright (c) 2022-2023 Antmicro <www.antmicro.com>
+Copyright (c) 2022-2026 Antmicro <www.antmicro.com>
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -19,6 +19,7 @@ Inherits from baklavajs/renderer-vue/src/connection/ConnectionView.vue
         :state="state"
         :connection="connection"
         :isHighlighted="isHighlighted"
+        :draggedNode="props.draggedNode"
         :hover="hover"
         @mouseover="hover = true"
         @mouseleave="hover = false"
@@ -35,7 +36,11 @@ import { TemporaryConnectionState } from '../temporaryConnection.js';
 
 export default defineComponent({
     extends: Components.ConnectionWrapper,
-    props: { connection: { required: true }, isHighlighted: { default: false } },
+    props: {
+        connection: { required: true },
+        isHighlighted: { default: false },
+        draggedNode: { required: true },
+    },
     components: { ConnectionView },
     setup(props) {
         const conn = ref(null);
@@ -168,6 +173,7 @@ export default defineComponent({
             containsPoint,
             conn,
             hover,
+            props,
         };
     },
 });

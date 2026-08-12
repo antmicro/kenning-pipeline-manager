@@ -228,7 +228,7 @@ const props = defineProps({
     ignoredInterfacesType: Array,
 });
 
-const emit = defineEmits(['select', 'openContextMenu', 'transformed']);
+const emit = defineEmits(['select', 'openContextMenu', 'transformed', 'startDrag', 'stopDrag']);
 
 const { viewModel } = useViewModel();
 const { graph } = useGraph();
@@ -852,6 +852,7 @@ stopDrag = () => {
     groupDragMove.onPointerUp();
     cleanEvents();
     transformed();
+    emit('stopDrag');
 };
 
 const startDrag = async (ev) => {
@@ -864,6 +865,7 @@ const startDrag = async (ev) => {
     document.addEventListener('keyboard.escape', abortDrag);
     document.addEventListener('pointerup', stopDrag);
     transformed();
+    emit('startDrag');
 };
 
 const doneRenaming = () => {

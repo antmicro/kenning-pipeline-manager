@@ -1,5 +1,5 @@
 <!--
-Copyright (c) 2022-2025 Antmicro <www.antmicro.com>
+Copyright (c) 2022-2026 Antmicro <www.antmicro.com>
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -89,6 +89,8 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
                     }"
                     @select="(ev) => selectNode(node, ev)"
                     @transformed="() => updateGroupsOf(node.id)"
+                    @startDrag="() => handleStartDrag(node)"
+                    @stopDrag="handleStopDrag"
                 />
                 <CustomNode
                     v-for="node in ignoredNodes"
@@ -106,12 +108,13 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
                 @wheel="mouseWheel"
             >
                 <PipelineManagerConnection
-                    v-memo="[...visibleConnections, currentViewName]"
+                    v-memo="[...visibleConnections, currentViewName, draggedNode]"
                     v-for="connection in visibleConnections"
                     :key="connection.id + counter.toString()"
                     :connection="connection"
                     ref="connRefs"
                     :isHighlighted="highlightConnections.includes(connection)"
+                    :draggedNode="draggedNode"
                 />
                 <TemporaryConnection
                     name="temporaryConnection"
@@ -235,6 +238,7 @@ export default defineComponent({
         const groups = computed(() => graph.value.groups ?? []);
         const groupsOfNode = ref({});
         const visibleGroups = ref([]);
+        const draggedNode = ref(null);
 
         const readonly = computed(() => props.viewModel.editor.readonly);
         const hideHud = computed(() => props.viewModel.editor.hideHud);
@@ -311,6 +315,14 @@ export default defineComponent({
                     graph.value.selectedNodes.push(node);
                 }
             });
+        };
+
+        const handleStartDrag = (node) => {
+            draggedNode.value = node;
+        };
+
+        const handleStopDrag = () => {
+            draggedNode.value = null;
         };
 
         const selectNode = (node, event) => {
@@ -1221,6 +1233,9 @@ export default defineComponent({
             updateVisibleGroups,
             updateGroupsOf,
             ignoredInterfacesRef,
+            handleStartDrag,
+            handleStopDrag,
+            draggedNode,
         };
     },
 });
