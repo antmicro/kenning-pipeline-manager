@@ -10,8 +10,34 @@
     gap: 1em;
 
     height: max-content;
-    max-height: 85vh;
     box-sizing: border-box;
+
+    & > .dynamic-list {
+        border-width: 1px;
+        border-radius: 10px;
+        border-color: $green;
+        border-style: solid;
+        padding: 10px;
+
+        .dynamic-element {
+            margin-bottom: 10px;
+
+            > div
+            {
+                margin-bottom: 10px;
+            }
+        }
+
+        & > .dynamic-list-view {
+            overflow-y: auto;
+            overflow-x: hidden;
+            max-height: 30vh;
+        }
+
+        & > .baklava-num-input {
+            margin-top: 25px;
+        }
+    }
 
     & > div {
         & > .__name-option > .baklava-input {

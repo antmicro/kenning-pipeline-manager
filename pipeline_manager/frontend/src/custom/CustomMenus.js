@@ -22,13 +22,14 @@ export default class CustomMenusManager {
 
     showCustomDialog = false;
 
-    defaultValuesForTypes = new Map(
+    static defaultValuesForTypes = new Map(
         [
             ['text', ''],
             ['number', 0.0],
             ['int', 0],
             ['bool', false],
             ['select', ''],
+            ['dynamic', []],
         ],
     );
 
@@ -116,22 +117,23 @@ export default class CustomMenusManager {
 
         this.selectedUserDialog = name;
 
-        const templateEntries = Object.entries(this.userDialogTemplate
-            .get(this.selectedUserDialog).template);
-
-        templateEntries.forEach(([key, value]) => {
-            const { type } = value;
-            if (type === 'select') {
-                const items = value?.items ?? {};
-                this.userDialogData[key] = value?.default ?? Object.entries(items)?.[0]?.[1] ?? '';
-                return;
-            }
-
-            this.userDialogData[key] = value?.default ?? this.defaultValuesForTypes.get(type);
-        });
-
         this.showCustomDialog = true;
         return true;
+    }
+
+    static getDefaultValues(name, template) {
+        const value = template[name];
+        const { type } = value;
+        if (type === 'select') {
+            const items = value?.items ?? {};
+            const ret = value?.default ?? Object.entries(items)?.[0]?.[1] ?? '';
+            return structuredClone(ret);
+        }
+
+        const ret = value?.default ??
+        CustomMenusManager.defaultValuesForTypes.get(type);
+
+        return structuredClone(ret);
     }
 
     /**

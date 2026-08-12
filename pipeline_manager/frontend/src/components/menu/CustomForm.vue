@@ -32,6 +32,7 @@ import InputInterfaceComponent from '../../interfaces/InputInterface.vue';
 import CheckboxInterface from '../../interfaces/CheckboxInterface.js';
 import NumberInterface from '../../interfaces/NumberInterface.js';
 import IntegerInterface from '../../interfaces/IntegerInterface.js';
+import DynamicFormInterface from './DynamicForm.js';
 
 export default defineComponent({
     props: {
@@ -47,6 +48,17 @@ export default defineComponent({
     setup(props) {
         const saveConfigurationTemplate = toRef(props, 'saveConfigurationTemplate');
 
+        // Lets create dedicated component for it
+        const createDynamicOption = (params, label) => {
+            const { name, template } = params;
+            return [computed(() =>
+                new DynamicFormInterface(
+                    name,
+                    template,
+                    props.saveConfiguration[label],
+                )),
+            label];
+        };
         const createSelectOption = (params, label) => {
             const { name, items } = params;
 
@@ -128,11 +140,13 @@ export default defineComponent({
                 ['int', createIntOption],
                 ['bool', createCheckboxOption],
                 ['select', createSelectOption],
+                ['dynamic', createDynamicOption],
             ],
         );
 
         const formOptions = computed(() => {
             const labels = [];
+            console.log('Config template: ', saveConfigurationTemplate.value);
             Object.entries(saveConfigurationTemplate.value).forEach(([key, value]) => {
                 const type = value?.type;
 
@@ -146,14 +160,18 @@ export default defineComponent({
                     inputConstructor(value, key),
                 );
             });
-
+            console.log('Labels: ', labels);
             return labels;
         });
 
-        const options = computed(() =>
-            [...formOptions.value]
+        const options = computed(() => {
+            console.log(formOptions.value);
+            const ret = [...formOptions.value]
                 .filter(([option, _]) => option?.value !== undefined)
-                .map(([option, label]) => [option.value, label]));
+                .map(([option, label]) => [option.value, label]);
+            console.log('Options: ', ret);
+            return ret;
+        });
 
         return { options };
     },
