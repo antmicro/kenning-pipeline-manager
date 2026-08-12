@@ -273,7 +273,8 @@
                                     "description": "Name of the style affected.",
                                     "properties": {
                                         "^.*$": {
-                                            "description": "Types of properties with CSS attributes inside"
+                                            "description": "Types of properties with CCS attributes inside",
+                                            "type": "string"
                                         }
                                     }
                                 }
@@ -288,7 +289,8 @@
                                     "description": "Name of the style affected.",
                                     "properties": {
                                         "^.*$": {
-                                            "description": "Types of interfaces with CSS attributes inside"
+                                            "description": "Types of interfaces with CCS attributes inside",
+                                            "type": "string"
                                         }
                                     }
                                 }
@@ -303,7 +305,8 @@
                                     "type": "object",
                                     "patternProperties": {
                                         "^.*$": {
-                                            "description": "List of css attributes."
+                                            "description": "List of CCS attributes.",
+                                            "type": "string"
                                         }
                                     }
                                 },
@@ -312,7 +315,8 @@
                                     "type": "object",
                                     "patternProperties": {
                                         "^.*$": {
-                                            "description": "List of css attributes."
+                                            "description": "List of CCS attributes.",
+                                            "type": "string"
                                         }
                                     }
                                 },
@@ -321,7 +325,8 @@
                                     "type": "object",
                                     "patternProperties": {
                                         "^.*$": {
-                                            "description": "List of css attributes."
+                                            "description": "List of CCS attributes.",
+                                            "type": "string"
                                         }
                                     }
                                 }
