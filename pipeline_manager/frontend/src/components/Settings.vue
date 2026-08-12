@@ -1,5 +1,5 @@
 <!--
-Copyright (c) 2022-2024 Antmicro <www.antmicro.com>
+Copyright (c) 2022-2026 Antmicro <www.antmicro.com>
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -57,6 +57,7 @@ export default {
                 { text: 'Orthogonal', value: 'orthogonal' },
                 { text: 'Alternative orthogonal', value: 'alternativeOrthogonal' },
                 { text: 'Straight', value: 'straight' },
+                { text: 'A*-based', value: 'aStar' },
             ];
             const option = new SelectInterface(
                 'Connection style',

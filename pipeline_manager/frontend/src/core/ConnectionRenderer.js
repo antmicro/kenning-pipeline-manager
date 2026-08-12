@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Antmicro <www.antmicro.com>
+ * Copyright (c) 2022-2026 Antmicro <www.antmicro.com>
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -127,6 +127,12 @@ const PointType = Object.freeze({
 const aStarConfig = {
     /** Function used to compute the distance metric in the A* algorithm. */
     distanceType: (x1, y1, x2, y2) => Math.abs(x1 - x2) + Math.abs(y1 - y2),
+    /** Function used to compute the grid step size for each path. */
+    gridStepFunc: (x1, y1, x2, y2) => Math.max(
+        50,
+        Math.abs(x1 - x2) / 10,
+        Math.abs(y1 - y2) / 10,
+    ),
 };
 
 export default class ConnectionRenderer {
@@ -640,6 +646,84 @@ export default class ConnectionRenderer {
         }
         // unreachable, added to make eslint happy
         return undefined;
+    }
+
+    aStarRender(x1, y1, x2, y2, connection) {
+        const nc = new NormalizedConnection(x1, y1, x2, y2, connection);
+
+        const graph = this.viewModel.displayedGraph;
+
+        const nodesInfo = graph.nodes.map((node) => {
+            const HTMLelement = document.getElementById(node.id);
+            return {
+                id: node.id,
+                position: node.position,
+                width: HTMLelement.offsetWidth,
+                height: HTMLelement.offsetHeight,
+            };
+        });
+
+        const minMargin = 30;
+
+        const regGridStep = aStarConfig.gridStepFunc(nc.x1, nc.y1, nc.x2, nc.y2);
+
+        if (connection.to) {
+            const shift = this.getShift(nc.from, nc.to, graph);
+
+            const fromNode = graph.nodes.filter((node) => node.id === nc.from.nodeId)[0];
+            const fromNodeWidth = document.getElementById(fromNode.id).offsetWidth;
+            const toNode = graph.nodes.filter((node) => node.id === nc.to.nodeId)[0];
+            const toNodeWidth = document.getElementById(toNode.id).offsetWidth;
+
+            const fromPoints = [
+                {
+                    x: nc.from.side === 'left' ?
+                        fromNode.position.x - minMargin :
+                        fromNode.position.x + fromNodeWidth + minMargin,
+                    y: nc.y1,
+                    type: PointType.FROM_HELPER,
+                },
+                { x: nc.x1, y: nc.y1, type: PointType.FROM_INT },
+            ];
+
+            const toPoints = [
+                {
+                    x: nc.to.side === 'left' ?
+                        toNode.position.x - minMargin :
+                        toNode.position.x + toNodeWidth + minMargin,
+                    y: nc.y2,
+                    type: PointType.TO_HELPER,
+                },
+                { x: nc.x2, y: nc.y2, type: PointType.TO_INT },
+            ];
+
+            const result = this.astar(
+                fromPoints,
+                toPoints,
+                regGridStep,
+                shift,
+                minMargin,
+                nodesInfo,
+            ).map((point) => ({
+                x: point.x,
+                y: point.y,
+            }));
+
+            return result;
+        }
+        const middlePoint = (nc.x1 + nc.x2) / 2;
+
+        const result = [{ x: nc.x1, y: nc.y1 },
+            { x: middlePoint, y: nc.y1 },
+            { x: middlePoint, y: nc.y2 },
+            { x: nc.x2, y: nc.y2 },
+        ];
+
+        return result;
+    }
+
+    aStarRenderLoopback(x1, y1, x2, y2, connection) {
+        return this.aStarRender(x1, y1, x2, y2, connection);
     }
 
     /**
