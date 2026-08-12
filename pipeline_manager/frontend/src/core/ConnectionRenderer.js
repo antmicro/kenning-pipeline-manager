@@ -15,6 +15,8 @@
 import getDomElements from '../custom/connection/domResolver.js';
 import getPortCoordinates from '../custom/connection/connectionTools.js';
 
+import PriorityQueue from './PriorityQueue.ts';
+
 /**
  * Retrieves top point of a node based on it's DOM element If the element does not yet exists,
  * returns 0
@@ -102,6 +104,30 @@ class NormalizedConnection {
         }
     }
 }
+
+/**
+ * Defines the type of a point in the graph.
+ */
+const PointType = Object.freeze({
+    /** Point representing the `from` interface of the connection. */
+    FROM_INT: 'fromInt',
+    /** Auxiliary point used between the `from` interface and regular grid. */
+    FROM_HELPER: 'fromHelper',
+    /** Regular point - an element of the grid. */
+    REG: 'reg',
+    /** Auxiliary point used between regular grid and `to` interface. */
+    TO_HELPER: 'toHelper',
+    /** Point representing `to` interface of the connection. */
+    TO_INT: 'toInt',
+});
+
+/**
+ * Parameters used in A* pathfinding algorithm during rendering.
+ */
+const aStarConfig = {
+    /** Function used to compute the distance metric in the A* algorithm. */
+    distanceType: (x1, y1, x2, y2) => Math.abs(x1 - x2) + Math.abs(y1 - y2),
+};
 
 export default class ConnectionRenderer {
     style = 'curved';
@@ -614,6 +640,268 @@ export default class ConnectionRenderer {
         }
         // unreachable, added to make eslint happy
         return undefined;
+    }
+
+    /**
+     * Computes a path between two points using A* algorithm.
+     *
+     * @param fromPoints Array of points related to `from` interface
+     * @param toPoints Array of points related to `to` interface
+     * @param regGridStep Grid step size used by A* to find paths
+     * @param shift Offset by which grid is translated
+     * @param minMargin Minimum margin around nodes within which
+     *                  segments are considered to intersect the node
+     * @param nodesInfo Array containing exact positions and sizes of nodes
+     * @param zoneInfo Map indexed by zoneInfoKey, used in spatial hashing
+     * @param zoneStep Step size of zones used in spatial hashing
+     * @param zoneInfoKey Function used to compute index of a zone
+     * @returns Array of objects with x and y coordinates,
+     *          representing consecutive points along the path
+     */
+    astar(
+        fromPoints,
+        toPoints,
+        regGridStep,
+        shift,
+        minMargin,
+        nodesInfo,
+    ) {
+        // helper function returning key to index `pointsToIndex` map
+        const key = (point) => `${point.x}:${point.y}:${point.type}`;
+
+        /**
+         * Reconstructs a path by following predecessors from the current point.
+         *
+         * @param pointsToIndex Mapping from point keys to their indices
+         * @param predecessors Mapping from point index to its direct predecessor
+         * @param cur Current point
+         * @returns Array of consecutive points from the start to the `cur` point
+         */
+        function reconstructPath(pointsToIndex, predecessors, cur) {
+            let current = cur;
+            const totalPath = [current];
+            while (true) {
+                const currentIndex = pointsToIndex.get(key(current));
+                if (!predecessors.has(currentIndex)) break;
+                current = predecessors.get(currentIndex);
+                totalPath.unshift(current);
+            }
+            return totalPath;
+        }
+
+        /**
+         * Computes the neighbours of the current point, taking into account its type
+         * and points near the `from` and `to` interfaces.
+         *
+         * @param current Point whose neighbours are to be found
+         * @param fromP Array of points related to `from` interface
+         * @param toP Array of points related to `to` interface
+         * @returns Array of point objects containing x and y coordinates and their type
+         */
+        function getNeighbours(current, fromP, toP) {
+            switch (current.type) {
+                case PointType.FROM_INT:
+                    return fromP.slice(0, -1);
+                case PointType.FROM_HELPER: {
+                    const baseX = current.x - (current.x % regGridStep);
+                    const baseY = current.y - (current.y % regGridStep);
+                    return fromP.slice(0, -1).concat([
+                        {
+                            x: baseX + shift,
+                            y: baseY - shift,
+                            type: PointType.REG,
+                        },
+                        {
+                            x: baseX + regGridStep + shift,
+                            y: baseY - shift,
+                            type: PointType.REG,
+                        },
+                        {
+                            x: baseX + shift,
+                            y: baseY + regGridStep - shift,
+                            type: PointType.REG,
+                        },
+                        {
+                            x: baseX + regGridStep + shift,
+                            y: baseY + regGridStep - shift,
+                            type: PointType.REG,
+                        },
+                    ]);
+                }
+                case PointType.REG:
+                    return [
+                        {
+                            x: current.x + regGridStep,
+                            y: current.y,
+                            type: PointType.REG,
+                        },
+                        {
+                            x: current.x - regGridStep,
+                            y: current.y,
+                            type: PointType.REG,
+                        },
+                        {
+                            x: current.x,
+                            y: current.y - regGridStep,
+                            type: PointType.REG,
+                        },
+                        {
+                            x: current.x,
+                            y: current.y + regGridStep,
+                            type: PointType.REG,
+                        },
+                    ].concat(toP.slice(0, -1).filter((point) =>
+                        point.x <= current.x + regGridStep &&
+                        point.x >= current.x - regGridStep &&
+                        point.y <= current.y + regGridStep &&
+                        point.y >= current.y - regGridStep,
+                    ));
+                case PointType.TO_HELPER:
+                    return toP;
+                default:
+                    return [];
+            }
+        }
+
+        /**
+         * Checks whether segment whose endpoints are `current` and `neighbour`
+         * intersects node described by `nInfo`.
+         *
+         * @param current First endpoint of the segment
+         * @param neighbour Second endpoint of the segment
+         * @param nInfo Node info object, containing position and size of a node
+         * @returns Whether the segment intersects the node
+         */
+        function checkIntersection(current, neighbour, nInfo) {
+            if (current.x === neighbour.x) {
+                if (
+                    !(
+                        current.x < nInfo.position.x - minMargin / 2 ||
+                         current.x > nInfo.position.x + nInfo.width + minMargin / 2 ||
+                         Math.min(
+                             current.y,
+                             neighbour.y,
+                         ) > nInfo.position.y + nInfo.height + minMargin / 2 ||
+                         Math.max(current.y, neighbour.y) < nInfo.position.y - minMargin / 2
+                    )
+                ) {
+                    return true;
+                }
+            } else if (
+                !(
+                    current.y < nInfo.position.y - minMargin / 2 ||
+                        current.y > nInfo.position.y + nInfo.height + minMargin / 2 ||
+                        Math.min(
+                            current.x,
+                            neighbour.x,
+                        ) > nInfo.position.x + nInfo.width + minMargin / 2 ||
+                        Math.max(current.x, neighbour.x) < nInfo.position.x - minMargin / 2
+                )
+            ) {
+                return true;
+            }
+            return false;
+        }
+
+        /**
+         * Computes the weight used by A* as the cost of the segment
+         * whose endpoints are `current` and `neighbour`.
+         *
+         * @param current First endpoint of the segment
+         * @param neighbour Second endpoint of the segment
+         * @returns Weight of the segment
+         */
+        function computeWeight(current, neighbour) {
+            const manhattanDist = aStarConfig.distanceType(
+                current.x,
+                current.y,
+                neighbour.x,
+                neighbour.y,
+            );
+            return manhattanDist;
+        }
+
+        const fromPoint = fromPoints.at(-1);
+        const toPoint = toPoints.at(-1);
+
+        const pointsEqual = (v1) => (v2) => v1.x === v2.x && v1.y === v2.y;
+
+        const openSet = new PriorityQueue();
+        openSet.enqueue(
+            fromPoint,
+            aStarConfig.distanceType(
+                fromPoint.x,
+                fromPoint.y,
+                toPoint.x,
+                toPoint.y,
+            ),
+        );
+
+        const visited = [fromPoint];
+        const pointsToIndex = new Map();
+        pointsToIndex.set(key(fromPoint), 0);
+
+        // Map from index of node in `visited` array to its predecessor
+        const predecessors = new Map();
+
+        // Map containing the costs of the best paths found so far for each point
+        const gScores = new Map();
+        gScores.set(0, 0); // fromPoint has index 0 in `visited` and a gScore of 0
+
+        while (!openSet.isEmpty()) {
+            const peeked = openSet.peek();
+            if (pointsEqual(peeked)(toPoint)) {
+                return reconstructPath(pointsToIndex, predecessors, peeked);
+            }
+            const current = openSet.dequeue();
+
+            const neighbours = getNeighbours(current, fromPoints, toPoints);
+
+            neighbours.forEach((neighbour) => {
+                // need to check, whether neighbour is not already at the visited list
+                const neighbourKey = key(neighbour);
+                const neighbourIndex = pointsToIndex.get(neighbourKey) ?? pointsToIndex.size;
+
+                if (neighbourIndex >= pointsToIndex.size) {
+                    visited.push(neighbour);
+                    pointsToIndex.set(neighbourKey, neighbourIndex);
+                }
+
+                const newGScore = (
+                    gScores.get(
+                        pointsToIndex.get(key(current)),
+                    ) ?? Infinity
+                ) + computeWeight(current, neighbour);
+
+                if (newGScore < (gScores.get(neighbourIndex) ?? Infinity)) {
+                    predecessors.set(neighbourIndex, current);
+                    gScores.set(neighbourIndex, newGScore);
+
+                    // Lower bound of the remaining path length
+                    const hScore = aStarConfig.distanceType(
+                        neighbour.x,
+                        neighbour.y,
+                        toPoint.x,
+                        toPoint.y,
+                    );
+
+                    const newFScore = newGScore + hScore;
+                    if (openSet.contains(visited[neighbourIndex])) {
+                        openSet.updatePrio(visited[neighbourIndex], newFScore);
+                    } else {
+                        openSet.enqueue(visited[neighbourIndex], newFScore);
+                    }
+                }
+            });
+        }
+
+        // fallback, if path not found for some reason
+        const middlePoint = (fromPoint.x + toPoint.x) / 2;
+        return [{ x: fromPoint.x, y: fromPoint.y },
+            { x: middlePoint, y: fromPoint.y },
+            { x: middlePoint, y: toPoint.y },
+            { x: toPoint.x, y: toPoint.y },
+        ];
     }
 
     orthogonalRender(x1, y1, x2, y2, connection) {
