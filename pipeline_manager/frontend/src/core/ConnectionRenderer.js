@@ -837,7 +837,24 @@ export default class ConnectionRenderer {
             while (true) {
                 const currentIndex = pointsToIndex.get(key(current));
                 if (!predecessors.has(currentIndex)) break;
-                current = predecessors.get(currentIndex);
+                const newCurrent = predecessors.get(currentIndex);
+
+                if (newCurrent.x !== current.x && newCurrent.y !== current.y) {
+                    if (totalPath.find((point) => point?.type === PointType.REG)) {
+                        // handle `from` connection
+                        totalPath.unshift({
+                            x: current.x,
+                            y: newCurrent.y,
+                        });
+                    } else {
+                        // handle `to` connection
+                        totalPath.unshift({
+                            x: newCurrent.x,
+                            y: current.y,
+                        });
+                    }
+                }
+                current = newCurrent;
                 totalPath.unshift(current);
             }
             return totalPath;
