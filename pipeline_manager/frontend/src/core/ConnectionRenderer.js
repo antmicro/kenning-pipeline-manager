@@ -928,26 +928,26 @@ export default class ConnectionRenderer {
             if (current.x === neighbour.x) {
                 if (
                     !(
-                        current.x < nInfo.position.x - minMargin / 2 ||
-                         current.x > nInfo.position.x + nInfo.width + minMargin / 2 ||
-                         Math.min(
-                             current.y,
-                             neighbour.y,
-                         ) > nInfo.position.y + nInfo.height + minMargin / 2 ||
-                         Math.max(current.y, neighbour.y) < nInfo.position.y - minMargin / 2
+                        current.x <= nInfo.position.x - minMargin ||
+                        current.x >= nInfo.position.x + nInfo.width + minMargin ||
+                        Math.min(
+                            current.y,
+                            neighbour.y,
+                        ) >= nInfo.position.y + nInfo.height + minMargin ||
+                        Math.max(current.y, neighbour.y) <= nInfo.position.y - minMargin
                     )
                 ) {
                     return true;
                 }
             } else if (
                 !(
-                    current.y < nInfo.position.y - minMargin / 2 ||
-                        current.y > nInfo.position.y + nInfo.height + minMargin / 2 ||
-                        Math.min(
-                            current.x,
-                            neighbour.x,
-                        ) > nInfo.position.x + nInfo.width + minMargin / 2 ||
-                        Math.max(current.x, neighbour.x) < nInfo.position.x - minMargin / 2
+                    current.y <= nInfo.position.y - minMargin ||
+                    current.y >= nInfo.position.y + nInfo.height + minMargin ||
+                    Math.min(
+                        current.x,
+                        neighbour.x,
+                    ) >= nInfo.position.x + nInfo.width + minMargin ||
+                    Math.max(current.x, neighbour.x) <= nInfo.position.x - minMargin
                 )
             ) {
                 return true;
