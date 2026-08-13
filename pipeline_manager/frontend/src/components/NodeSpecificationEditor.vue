@@ -410,7 +410,7 @@ export default defineComponent({
         const editorStateChanged = computed(() => {
             try {
                 const parsedCurrentSpecification = YAML.parse(
-                    currentSpecification.value.replaceAll('\t', '  '),
+                    currentSpecification.value,
                 );
 
                 const edited = specification.value;
