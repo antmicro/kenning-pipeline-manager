@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2025 Antmicro <www.antmicro.com>
+# Copyright (c) 2022-2026 Antmicro <www.antmicro.com>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -76,6 +76,7 @@ EXCLUDED_EXAMPLES = ["sample-huge"]
 CUSTOM_DATAFLOW_SPECS_PAIRS = {
     "sample-shape-add-interface": "sample-with-shape"
 }
+EXAMPLES_ADDITIONAL_PARAMS = {"sample-network": [":center_at_top:"]}
 exampleentries = [
     "To see the work of the frontend check one of the below examples:\n"
 ]  # noqa: E501
@@ -108,6 +109,7 @@ for graph in sorted(Path("../../examples").glob("*-dataflow.json")):
             "```{pipeline_manager}",
             f":spec: {spec}",
             f":graph: {graph}",
+            *EXAMPLES_ADDITIONAL_PARAMS.get(graphname, []),
             "```",
         ]
     )
