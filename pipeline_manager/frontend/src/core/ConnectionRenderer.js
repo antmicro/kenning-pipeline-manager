@@ -741,7 +741,9 @@ export default class ConnectionRenderer {
                     y: nc.y1,
                     type: PointType.FROM_HELPER,
                 },
-                { x: nc.x1, y: nc.y1, type: PointType.FROM_INT },
+                {
+                    x: nc.x1, y: nc.y1, type: PointType.FROM_INT, side: nc.from.side,
+                },
             ];
 
             const toPoints = [
@@ -855,30 +857,32 @@ export default class ConnectionRenderer {
                 case PointType.FROM_INT:
                     return fromP.slice(0, -1);
                 case PointType.FROM_HELPER: {
-                    const baseX = current.x - (current.x % regGridStep);
-                    const baseY = current.y - (current.y % regGridStep);
-                    return fromP.slice(0, -1).concat([
+                    const leftSide = fromP.at(-1).side === 'left';
+                    const modShift = shift % regGridStep;
+                    const baseX = leftSide ?
+                        Math.floor(
+                            (current.x + modShift) / regGridStep,
+                        ) * regGridStep - modShift :
+                        Math.floor(
+                            (current.x - modShift) / regGridStep,
+                        ) * regGridStep + modShift + regGridStep;
+                    const baseY = Math.floor(
+                        (current.y - modShift) / regGridStep,
+                    ) * regGridStep + modShift;
+
+                    const additionalRegs = [
                         {
-                            x: baseX + shift,
-                            y: baseY - shift,
+                            x: baseX,
+                            y: baseY,
                             type: PointType.REG,
                         },
                         {
-                            x: baseX + regGridStep + shift,
-                            y: baseY - shift,
+                            x: baseX,
+                            y: baseY + regGridStep,
                             type: PointType.REG,
                         },
-                        {
-                            x: baseX + shift,
-                            y: baseY + regGridStep - shift,
-                            type: PointType.REG,
-                        },
-                        {
-                            x: baseX + regGridStep + shift,
-                            y: baseY + regGridStep - shift,
-                            type: PointType.REG,
-                        },
-                    ]);
+                    ];
+                    return fromP.slice(0, -1).concat(additionalRegs);
                 }
                 case PointType.REG:
                     return [
