@@ -30,6 +30,7 @@ export default class CustomMenusManager {
             ['bool', false],
             ['select', ''],
             ['dynamic', []],
+            ['nested', {}],
         ],
     );
 

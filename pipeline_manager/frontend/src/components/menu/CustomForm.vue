@@ -33,6 +33,8 @@ import CheckboxInterface from '../../interfaces/CheckboxInterface.js';
 import NumberInterface from '../../interfaces/NumberInterface.js';
 import IntegerInterface from '../../interfaces/IntegerInterface.js';
 import DynamicFormInterface from './DynamicForm.js';
+import NestedFormInterface from './NestedForm.js';
+import CustomMenusManager from '../../custom/CustomMenus.js';
 
 export default defineComponent({
     props: {
@@ -49,13 +51,38 @@ export default defineComponent({
         const saveConfigurationTemplate = toRef(props, 'saveConfigurationTemplate');
 
         // Lets create dedicated component for it
+        /* eslint-disable vue/no-mutating-props, max-len, no-param-reassign */
+        const createNestedOption = (params, label) => {
+            const { name, template } = params;
+            if (!Object.hasOwn(props.saveConfiguration, label)) {
+                props.saveConfiguration[label] = CustomMenusManager
+                    .getDefaultValues(label, saveConfigurationTemplate.value);
+            }
+            return [computed(() =>
+                new NestedFormInterface(
+                    name,
+                    label,
+                    template,
+                    props.saveConfiguration[label],
+                )),
+            label];
+        };
         const createDynamicOption = (params, label) => {
             const { name, template } = params;
+            const min = params?.min ?? 1;
+            const max = params?.max ?? Number.MAX_SAFE_INTEGER;
+
+            if (!Object.hasOwn(props.saveConfiguration, label)) {
+                props.saveConfiguration[label] = CustomMenusManager
+                    .getDefaultValues(label, saveConfigurationTemplate.value);
+            }
             return [computed(() =>
                 new DynamicFormInterface(
                     name,
                     template,
                     props.saveConfiguration[label],
+                    min,
+                    max,
                 )),
             label];
         };
@@ -65,6 +92,11 @@ export default defineComponent({
             const selectItems = Object.entries(items).map(([key, value]) =>
                 ({ text: key, value }),
             );
+
+            if (!Object.hasOwn(props.saveConfiguration, label)) {
+                props.saveConfiguration[label] = CustomMenusManager
+                    .getDefaultValues(label, saveConfigurationTemplate.value);
+            }
 
             return [computed(() => {
                 const option = new SelectInterface(name,
@@ -80,6 +112,11 @@ export default defineComponent({
         const createCheckboxOption = (params, label) => {
             const { name } = params;
 
+            if (!Object.hasOwn(props.saveConfiguration, label)) {
+                props.saveConfiguration[label] = CustomMenusManager
+                    .getDefaultValues(label, saveConfigurationTemplate.value);
+            }
+
             return [computed(() => {
                 const option = new CheckboxInterface(name, props.saveConfiguration[label]);
                 option.events.setValue.subscribe(this, (v) => {
@@ -89,27 +126,21 @@ export default defineComponent({
                 return option;
             }), label];
         };
-        const createNumberOption = (params, label) => {
+        const generateNumericalOption = (params, label, floating) => {
             const { name } = params;
             const min = params?.min ?? Number.MIN_VALUE;
             const max = params?.max ?? Number.MAX_VALUE;
 
-            return [computed(() => {
-                const option = new NumberInterface(name, props.saveConfiguration[label], min, max);
-                option.events.setValue.subscribe(this, (v) => {
-                    props.saveConfiguration[label] = Math.max(Math.min(v, max), min); // eslint-disable-line vue/no-mutating-props,max-len,no-param-reassign
-                });
-                option.setDefaultComponent();
-                return option;
-            }), label];
-        };
-        const createIntOption = (params, label) => {
-            const { name } = params;
-            const min = params?.min ?? Number.MIN_SAFE_INTEGER;
-            const max = params?.max ?? Number.MAX_SAFE_INTEGER;
+            if (!Object.hasOwn(props.saveConfiguration, label) ||
+                Number.isNaN(Number.parseFloat(props.saveConfiguration[label]))
+            ) {
+                props.saveConfiguration[label] = CustomMenusManager
+                    .getDefaultValues(label, saveConfigurationTemplate.value);
+            }
+            const NumericalType = floating ? NumberInterface : IntegerInterface;
 
             return [computed(() => {
-                const option = new IntegerInterface(name, props.saveConfiguration[label], min, max);
+                const option = new NumericalType(name, props.saveConfiguration[label], min, max);
                 option.events.setValue.subscribe(this, (v) => {
                     props.saveConfiguration[label] = Math.max(Math.min(v, max), min); // eslint-disable-line vue/no-mutating-props,max-len,no-param-reassign
                 });
@@ -117,13 +148,19 @@ export default defineComponent({
                 return option;
             }), label];
         };
+
+        const createNumberOption = (params, label) => generateNumericalOption(params, label, true);
+        const createIntOption = (params, label) => generateNumericalOption(params, label, false);
+        
         const createInputOption = (params, label) => {
             const { name } = params;
             const createComponent = () => {
                 const component = new InputInterface(name);
                 component.componentName = 'InputInterface';
-                props.saveConfiguration[label] = CustomMenusManager
-                    .getDefaultValues(label, saveConfigurationTemplate.value); // eslint-disable-line vue/no-mutating-props,max-len,no-param-reassign
+                if (!Object.hasOwn(props.saveConfiguration, label)) {
+                    props.saveConfiguration[label] = CustomMenusManager
+                        .getDefaultValues(label, saveConfigurationTemplate.value); // eslint-disable-line vue/no-mutating-props,max-len,no-param-reassign
+                }
                 component.setComponent(markRaw(InputInterfaceComponent));
                 return component;
             };
@@ -141,12 +178,12 @@ export default defineComponent({
                 ['bool', createCheckboxOption],
                 ['select', createSelectOption],
                 ['dynamic', createDynamicOption],
+                ['nested', createNestedOption],
             ],
         );
 
         const formOptions = computed(() => {
             const labels = [];
-            console.log('Config template: ', saveConfigurationTemplate.value);
             Object.entries(saveConfigurationTemplate.value).forEach(([key, value]) => {
                 const type = value?.type;
 
@@ -160,16 +197,13 @@ export default defineComponent({
                     inputConstructor(value, key),
                 );
             });
-            console.log('Labels: ', labels);
             return labels;
         });
 
         const options = computed(() => {
-            console.log(formOptions.value);
             const ret = [...formOptions.value]
                 .filter(([option, _]) => option?.value !== undefined)
                 .map(([option, label]) => [option.value, label]);
-            console.log('Options: ', ret);
             return ret;
         });
 
