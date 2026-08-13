@@ -14,8 +14,8 @@
             ],
             "additionalProperties": false
         },
-        "dialog_box_template": {
-            "description": "A template that defines dialog box inputs",
+        "unnested_dialog_box_template": {
+            "description": "A template that defines unnested dialog box inputs",
             "type": "object",
             "properties": {
                 "name": {
@@ -51,19 +51,32 @@
                 "max": {
                     "description": "A maximum value for numerical types",
                     "type": "number"
-                },
-                "template": {
-                    "description": "A generic dialog box template used with dynamic and nested type.",
-                    "type": "object",
-                    "additionalProperties": {
-                        "$ref": "common_types#/$defs/dialog_box_template"
-                    },
-                    "properties": {}
                 }
             },
             "required": [
                 "name",
                 "type"
+            ]
+        },
+        "dialog_box_template": {
+            "description": "A template that defines dialog box inputs",
+            "allOf": [
+                {
+                    "$ref": "common_types#/$defs/unnested_dialog_box_template"
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "template": {
+                            "description": "A generic dialog box template used with dynamic and nested type.",
+                            "type": "object",
+                            "additionalProperties": {
+                                "$ref": "common_types#/$defs/unnested_dialog_box_template"
+                            },
+                            "properties": {}
+                        }
+                    }
+                }
             ]
         },
         "dialog_box": {
