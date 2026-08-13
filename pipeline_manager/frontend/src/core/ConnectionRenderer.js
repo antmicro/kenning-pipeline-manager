@@ -752,7 +752,9 @@ export default class ConnectionRenderer {
                     y: nc.y2,
                     type: PointType.TO_HELPER,
                 },
-                { x: nc.x2, y: nc.y2, type: PointType.TO_INT },
+                {
+                    x: nc.x2, y: nc.y2, type: PointType.TO_INT, side: nc.to.side,
+                },
             ];
 
             const result = this.astar(
@@ -882,7 +884,20 @@ export default class ConnectionRenderer {
                     ];
                     return fromP.slice(0, -1).concat(additionalRegs);
                 }
-                case PointType.REG:
+                case PointType.REG: {
+                    const toHelperPredicate = (toHelper) => {
+                        if (toP.at(-1).side === 'left') {
+                            return toHelper.x <= current.x + regGridStep &&
+                                toHelper.x >= current.x &&
+                                toHelper.y <= current.y + regGridStep &&
+                                toHelper.y >= current.y - regGridStep;
+                        }
+                        return toHelper.x <= current.x &&
+                                toHelper.x >= current.x - regGridStep &&
+                                toHelper.y <= current.y + regGridStep &&
+                                toHelper.y >= current.y - regGridStep;
+                    };
+
                     return [
                         {
                             x: current.x + regGridStep,
@@ -904,12 +919,8 @@ export default class ConnectionRenderer {
                             y: current.y + regGridStep,
                             type: PointType.REG,
                         },
-                    ].concat(toP.slice(0, -1).filter((point) =>
-                        point.x <= current.x + regGridStep &&
-                        point.x >= current.x - regGridStep &&
-                        point.y <= current.y + regGridStep &&
-                        point.y >= current.y - regGridStep,
-                    ));
+                    ].concat(toP.slice(0, -1).filter(toHelperPredicate));
+                }
                 case PointType.TO_HELPER:
                     return toP;
                 default:
