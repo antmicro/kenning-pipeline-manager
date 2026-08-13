@@ -14,7 +14,7 @@
         },
         "subgraphContextMenuActions": [
             {
-                "iconName": "Mangnifier",
+                "iconName": "Magnifier",
                 "name": "Is the graph empty?",
                 "procedureName": "custom_subgraph_nonempty",
                 "requireResponse": true
