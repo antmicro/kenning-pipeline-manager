@@ -39,30 +39,6 @@ A collection of palette entries.
                 :contextMenuEntry="contextMenuEntry"
                 :entriesRef="entriesRef"
             />
-
-            <!-- <PaletteEntry
-                v-for="entry in entries"
-                :key="entry.id"
-                :entry="entry"
-            />
-            <transition name="fade">
-            <div v-if="draggedEntry" class="baklava-dragged-node __dragged" :style="{
-                    width: 'unset',
-                    top: `${pointer.y}px`,
-                    left: `${pointer.x}px`,
-                }">
-                    <PaletteEntry :entry="draggedEntry" />
-                </div>
-            </transition>
-            <CustomContextMenu
-                v-model="showContextMenu"
-                :x="contextMenuPosition.x"
-                :y="contextMenuPosition.y"
-                :items="contextMenuEntry?.computed?.items ?? []"
-                :ignore-close="[entriesRef]"
-                @click="(...args) => contextMenuEntry?.data?.onContextMenu?.(...args)"
-            /> -->
-
         </div>
     </div>
 </template>
