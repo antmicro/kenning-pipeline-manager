@@ -14,6 +14,45 @@ import { nextTick } from 'vue';
 import notifyEvents from './notifyEvents.js';
 
 /**
+ * Hides unconnected interfaces from the list
+ *
+ * @param interfaces list of interfaces to search for unconnected.
+ */
+export function hideUnconnectedInterfaces(interfaces) {
+    const buses = interfaces.filter((intf) => (typeof intf?.bus !== 'undefined' && intf.bus.stubs !== undefined));
+    buses.forEach((bus) => {
+        if (bus.bus.stubs !== undefined && bus.bus.stubs.length === 0) {
+            bus.hidden = true; // eslint-disable-line no-param-reassign
+        }
+    });
+    interfaces = interfaces.filter((intf) => (typeof intf?.bus) === 'undefined' || !(typeof intf?.bus !== 'undefined' && intf.bus.stubs !== undefined)); // eslint-disable-line no-param-reassign
+    interfaces.forEach(
+        (i) => {
+            if (i.connectionCount === 0 && i.port === true) {
+                i.hidden = true; // eslint-disable-line no-param-reassign
+            }
+        },
+    );
+}
+
+/**
+ * Unhides unconnected interfaces from the list and checks
+ * if they are not properties
+ *
+ * @param interfaces list of interfaces to show.
+ */
+export function showHiddenInterfaces(interfaces) {
+    interfaces.forEach(
+        (i) => {
+            if (i.port === true) {
+                i.hidden = false; // eslint-disable-line no-param-reassign
+            } else if (i?.bus?.type !== undefined && i?.bus?.stubs.length === 0) {
+                i.hidden = false; // eslint-disable-line no-param-reassign
+            }
+        },
+    );
+}
+/**
  * Updates a side and optionally a sidePosition of an interface
  *
  * @param node in which the interface is updated

@@ -202,7 +202,7 @@ import { gridSnapper } from '../core/snappers';
 import icons from '../icons/index';
 import doubleClick from '../core/doubleClick.js';
 import NotificationHandler from '../core/notifications.js';
-import { updateInterfacePosition, removeNode } from './CustomNode.js';
+import { updateInterfacePosition, removeNode, hideUnconnectedInterfaces, showHiddenInterfaces } from './CustomNode.js';
 import {
     startTransaction, commitTransaction,
 } from '../core/History.ts';
@@ -284,6 +284,10 @@ const displayNoResources = !viewModel.value.editor.nodeURLsEmpty();
 const displayedInputs = computed(() => Object.values(props.node.inputs).filter((ni) => !ni.hidden));
 const displayedOutputs = computed(() =>
     Object.values(props.node.outputs).filter((ni) => !ni.hidden),
+);
+const hiddenInputs = computed(() => Object.values(props.node.inputs).filter((ni) => ni.hidden));
+const hiddenOutputs = computed(() =>
+    Object.values(props.node.outputs).filter((ni) => ni.hidden),
 );
 const isBigBus = (intf) => (intf.port && intf.bus?.type === 'twoSided');
 const bigBuses = computed(() =>
@@ -401,6 +405,27 @@ const contextMenuInterfaceItems = ref([]);
 const contextMenuTitleItems = computed(() => {
     const items = [];
     items.push({ value: 'sidebar', label: 'Details', icon: icons.Sidebar, endSection: true });
+
+    let shownUnconnected = false;
+    let hiddenInterfacesPresent = false;
+    let interfaces = [...displayedInputs.value,
+        ...displayedOutputs.value,
+        ...hiddenInputs.value,
+        ...hiddenOutputs.value];
+    graph.value.selectedNodes.forEach((n) => {
+        interfaces = interfaces.concat(
+            Object.entries(n.inputs).filter(([name, _ni]) => !name.startsWith('property_')).map(([, _ni]) => _ni),
+            Object.values(n.outputs),
+        );
+    });
+    hiddenInterfacesPresent = interfaces.some((i) => (i.hidden === true
+        && (i.port === true || i?.bus?.type !== undefined)));
+
+    shownUnconnected = interfaces.some((i) => !i.hidden &&
+        ((i.connectionCount === 0 && i.port === true && i?.bus?.type === undefined)
+        || (i?.bus?.type !== undefined && i?.bus?.stubs === undefined)
+        || (i?.bus?.type !== undefined && i?.bus?.stubs?.length === 0)));
+
     if (editorManager.baklavaView.settings.editableNodeTypes &&
         node.value.type !== DEFAULT_GRAPH_NODE_TYPE &&
         !viewModel.value.editor.readonly &&
@@ -466,12 +491,22 @@ const contextMenuTitleItems = computed(() => {
         });
     }
 
+    if (items.length > 1) {
+        items.at(-1).endSection = true;
+    }
     if (!viewModel.value.editor.readonly) {
-        if (items.length > 1) {
-            items.at(-1).endSection = true;
-        }
         items.push(
-            { value: 'rename', label: 'Rename', icon: icons.Pencil },
+            { value: 'rename', label: 'Rename', icon: icons.Pencil });
+    }
+    if (hiddenInterfacesPresent) {
+        items.push({ value: 'show-hidden-interfaces', label: 'Show hidden interfaces', icon: icons.Visible });
+    }
+    if (shownUnconnected) {
+        items.push({ value: 'hide-unconnected-interfaces', label: 'Hide unconnected interfaces', icon: icons.Hide });
+    }
+
+    if (!viewModel.value.editor.readonly) {
+        items.push(
             { value: 'disconnect', label: 'Disconnect', icon: icons.Disconnect },
             { value: 'delete', label: 'Delete', icon: icons.Bin },
         );
@@ -733,6 +768,31 @@ const onContextMenuTitleClick = async (action) => {
         case 'delete-interface':
             menuState.interfaceListMenu = true;
             break;
+        case 'hide-unconnected-interfaces': {
+            let interfaces = [...displayedInputs.value, ...displayedOutputs.value];
+            graph.value.selectedNodes.forEach((n) => {
+                interfaces = interfaces.concat(
+                    Object.entries(n.inputs).filter(([name, ni]) => !ni.hidden && !name.startsWith('property_')).map(([, ni]) => ni),
+                    Object.values(n.outputs).filter((ni) => !ni.hidden),
+                );
+            });
+            hideUnconnectedInterfaces(interfaces);
+            break;
+        }
+        case 'show-hidden-interfaces': {
+            startTransaction();
+            let hiddenInterfaces = [...hiddenInputs.value, ...hiddenOutputs.value];
+            hiddenInterfaces.filter((intf) => intf.port || intf.bus !== undefined);
+            graph.value.selectedNodes.forEach((n) => {
+                hiddenInterfaces = hiddenInterfaces.concat(
+                    Object.entries(n.inputs).filter(([name, ni]) => ni.hidden && !name.startsWith('property_')).map(([, ni]) => ni),
+                    Object.values(n.outputs).filter((ni) => ni.hidden),
+                );
+            });
+            showHiddenInterfaces(hiddenInterfaces);
+            commitTransaction();
+            break;
+        }
         case 'groupNodes':
             menuState.groupMenu = true;
             break;
@@ -1369,7 +1429,11 @@ const createContextMenuInterfaceItems = () => {
         );
         items.push(intfMode);
     }
-
+    if ((chosenInterface.value.connectionCount === 0 && typeof chosenInterface.value.bus === 'undefined')
+        || (typeof chosenInterface.value.bus !== 'undefined' && typeof chosenInterface.value.bus.stubs === 'undefined')
+        || (typeof chosenInterface.value.bus !== 'undefined' && chosenInterface.value.bus.stubs.length === 0)) {
+        items.push({ value: 'HideInterface', label: 'Hide interface', icon: icons.Hide });
+    }
     if (!posMap.has(chosenInterface.value.name)) {
         items.push(
             { value: 'SpaceUp', label: 'Space Up' },
@@ -1449,6 +1513,8 @@ const onContextMenuInterfaceClick = (action) => {
         case 'MoveRight':
             chosenInterface.value.side = 'right';
             break;
+        case 'HideInterface':
+            chosenInterface.value.hidden = true;
     }
 };
 
@@ -1552,6 +1618,9 @@ const createContextMenuPropertyItems = () => {
         if (!chosenProperty.groupProperty && !isBigBus(chosenProperty)) {
             items.push({ value: 'Hide', label: 'Hide', icon: icons.Hide });
         }
+        if ((typeof chosenProperty.bus !== 'undefined' && chosenProperty.bus.stubs.length === 0) && isBigBus(chosenProperty)) {
+            items.push({ value: 'HideInterface', label: 'Hide interface', icon: icons.Hide });
+        }
     }
 
     return items;
@@ -1582,6 +1651,9 @@ const onContextMenuPropertyClick = (action) => {
             );
 
             notifyEvents.exposedInterface.emit([chosenProperty, graph.value.id, false]);
+            break;
+        case 'HideInterface':
+            chosenProperty.hidden = true;
             break;
     }
 };
