@@ -148,17 +148,21 @@
             }
         }
 
+        & > .__hidden-interfaces > .__property, & > .__properties > .__property {
+              padding: 0 1.25em 0 1.25em;
+
+              & > .__property-name {
+                  font-size: 0.9em;
+              }
+
+              & * {
+                  box-sizing: border-box;
+              }
+        }
+
         & > .__properties {
             & > .__property {
                 padding: 0.625em 1.25em 0 1.25em;
-
-                & > .__property-name {
-                    font-size: 0.9em;
-                }
-
-                & * {
-                    box-sizing: border-box;
-                }
             }
 
             & > .__property:last-child {

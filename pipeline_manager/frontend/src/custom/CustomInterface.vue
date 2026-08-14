@@ -77,6 +77,7 @@ from creating and deleting connections or altering nodes' values if the editor i
                 <div
                     class="__port"
                     no-drag="true"
+                    v-if="!hidePort"
                     :style="{
                         position: 'absolute',
                         top: tempBusIntfOffset + 'px',
@@ -94,6 +95,7 @@ from creating and deleting connections or altering nodes' values if the editor i
             >
                 <div
                     class="__port"
+                    v-if="!hidePort"
                     no-drag="true"
                     @pointerdown.left.stop="(e) => onStubMouseDown(e, stub.id, stub.offset )"
                     :style="{
@@ -111,7 +113,7 @@ from creating and deleting connections or altering nodes' values if the editor i
         </div>
         <div
             class="__port"
-            v-if="intf.port && !intf.bus?.size"
+            v-if="intf.port && !intf.bus?.size && !hidePort"
             @mouseenter="startHoverWrapper"
             @mouseleave="endHoverWrapper"
             @pointerdown.left="onMouseDown"
@@ -242,6 +244,7 @@ export default defineComponent({
         toggleGroup: { default: () => {}, required: false },
         updateDynamicInterfaces: { default: () => {}, required: false },
         sidebar: { default: false, required: false },
+        hidePort: { default: false, required: false },
         tabindexValue: { default: -1, required: false },
     },
     components: {

@@ -127,6 +127,29 @@ SPDX-License-Identifier: Apache-2.0
                     </div>
                 </div>
             </div>
+            <div class="__hidden-interfaces" v-if="hiddenInterfaces.length">
+                <div class="__title">Hidden interfaces</div>
+                <div
+                    v-for="[input, unhide] in hiddenInterfaces"
+                    :key="input.id"
+                    class="__property"
+                >
+                    <div class="__property-content">
+                        <span class="baklava-node-interface --output __interface"
+                        style="width: 100%;text-align: left;overflow: hidden;">
+                            {{input.name}}
+                        </span>
+                        <div
+                            v-if="unhide !== undefined"
+                            class="__property-button"
+                            tabindex="-1"
+                            @click="unhide()"
+                        >
+                            <Visible />
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <div v-show="desc">
                 <div class="__title">
@@ -351,6 +374,25 @@ export default defineComponent({
                 .forEach((prop) => { prop.setDefaultComponent(); });
         }, { immediate: true });
 
+        const hiddenInterfaces = computed(() => Object
+            .values(node.value?.inputs ?? [])
+            .concat(Object.values(node.value?.outputs ?? []))
+            .filter((intf) => intf.port)
+            .filter((intf) => intf.hidden)
+            .map((intf) => {
+                // eslint-disable-next-line no-param-reassign
+                const onHide = () => { intf.hidden = false; };
+                return [intf, onHide];
+            }));
+
+        watch(hiddenInterfaces, () => {
+            hiddenInterfaces.value
+                .map(([prop, _]) => prop)
+                .filter((prop) => prop.component === undefined)
+                .filter((prop) => prop.setDefaultComponent !== undefined)
+                .forEach((prop) => { prop.setDefaultComponent(); });
+        }, { immediate: true });
+
         const interfaceGroups = computed(() =>
             Object.values({ ...node.value.inputs, ...node.value.outputs }).filter(
                 (ni) => ni.interfaces !== undefined,
@@ -461,6 +503,7 @@ export default defineComponent({
             startResize,
             close,
             displayedProperties,
+            hiddenInterfaces,
             interfaceGroups,
             interfaceGroupsCheckboxes,
             interfaceGroupsButton,
