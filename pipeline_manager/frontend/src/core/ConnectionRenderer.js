@@ -729,6 +729,8 @@ export default class ConnectionRenderer {
             const fromNodeWidth = document.getElementById(fromNode.id).offsetWidth;
             const toNode = graph.nodes.filter((node) => node.id === nc.to.nodeId)[0];
             const toNodeWidth = document.getElementById(toNode.id).offsetWidth;
+            const direction = nc.from.side;
+            const xShift = direction === 'right' ? shift : -shift;
 
             const fromPoints = [
                 {
@@ -756,7 +758,7 @@ export default class ConnectionRenderer {
                 fromPoints,
                 toPoints,
                 regGridStep,
-                shift,
+                xShift,
                 minMargin,
                 nodesInfo,
                 zoneInfo,
