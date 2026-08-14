@@ -79,11 +79,6 @@
         linear-gradient(90deg, $gray-700 2%, transparent 2%);
 }
 
-.baklava-editor {
-    position: relative;
-    z-index: 1;
-}
-
 .baklava-slider > .__slider {
     background-color: var(--baklava-control-color-primary);
 }
