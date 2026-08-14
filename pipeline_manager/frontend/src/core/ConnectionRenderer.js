@@ -1827,6 +1827,10 @@ export default class ConnectionRenderer {
      * @returns String defining connection path in SVG format
      */
     render(x1, y1, x2, y2, connection, draggedNode) {
+        // Invalid connection
+        if (x1 === x2 && y1 === y2) {
+            return undefined;
+        }
         const loopback = this.isLoopback(connection) ? 'Loopback' : '';
         if (
             this.style === 'aStar' &&
