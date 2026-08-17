@@ -1065,16 +1065,16 @@ const height = computed(() => {
     return 'auto';
 });
 
-const styles = computed(() =>
-    ({
-        top: `${props.node.position?.y ?? 0}px`,
-        left: `${props.node.position?.x ?? 0}px`,
-        'min-width': fitTitle.value ? '0' : undefined,
-        'min-height': fitTitle.value ? '0' : undefined,
-        width: width.value,
-        height: height.value,
-        display: customShape.value === undefined ? 'inherit' : 'block',
-    }));
+const styles = computed(() => ({
+    top: `${props.node.position?.y ?? 0}px`,
+    left: `${props.node.position?.x ?? 0}px`,
+    'min-width': fitTitle.value ? '0' : undefined,
+    'min-height': fitTitle.value ? '0' : undefined,
+    width: width.value,
+    height: height.value,
+    display: customShape === undefined ? 'inherit' : 'block',
+    cursor: menuState.addingPositionedInterface ? 'default' : undefined,
+}));
 
 // another potential source of issue
 const displayedRightRows = computed(() => getRows(displayedRightSockets.value));
