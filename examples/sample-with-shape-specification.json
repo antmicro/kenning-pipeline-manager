@@ -67,6 +67,31 @@
             "width": 150,
             "height": 150,
             "style": "PNPStyle"
+        },
+        {
+            "name": "Box",
+            "interfaces": [
+                {
+                    "name": "a1",
+                    "side": "left",
+                    "direction": "inout",
+                    "maxConnectionsCount": 0
+                },
+                {
+                    "name": "b1",
+                    "side": "right",
+                    "direction": "inout",
+                    "maxConnectionsCount": 0
+                },
+                {
+                    "name": "c1",
+                    "direction": "inout",
+                    "side": "bottom",
+                    "maxConnectionsCount": 0
+                }
+            ],
+            "width": 300,
+            "style": "BoxStyle"
         }
     ],
     "metadata": {
@@ -77,6 +102,23 @@
         "styles":{
             "AntmicroStyle": {
                 "shape": "https://raw.githubusercontent.com/antmicro/antmicro-sphinx-utils/main/logo/white.svg"
+            },
+            "BoxStyle":{
+                "shape": "svgs/box.svg",
+                "positions": {
+                    "a1": {
+                        "x": 0.38576938553557877,
+                        "y": 55.23436094278765
+                    },
+                    "b1": {
+                        "x": 98.62837290192964,
+                        "y": 46.25444737520576
+                    },
+                    "c1": {
+                        "x": 48.81070292884815,
+                        "y": 68.3335776499612
+                    }
+                }
             },
             "GNDStyle":{
                 "shape": "svgs/gnd.svg",
