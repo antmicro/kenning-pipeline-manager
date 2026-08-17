@@ -47,6 +47,7 @@ import IntegerInterface from '../../../interfaces/IntegerInterface.js';
 import newInputInterface from './utils.ts';
 import EditorManager from '../../../core/EditorManager.js';
 import NotificationHandler from '../../../core/notifications.js';
+import { parseInterfaces } from '../../../core/interfaceParser.js';
 
 interface CurrentInterface {
     name: string,
@@ -124,6 +125,50 @@ export default defineComponent({
             return option as InterfaceInterface;
         });
 
+        const validateInterface = () => {
+            const editorManager = EditorManager.getEditorManagerInstance();
+            if (newInterface.type === '') {
+                const intf = {
+                    name: newInterface.name,
+                    direction: newInterface.direction.value,
+                    side: newInterface.side.value,
+                    maxConnectionsCount: newInterface.maxConnectionsCount.value,
+                };
+                const results = editorManager.validateNodeInterface(intf);
+                if (results.length > 0) {
+                    return results;
+                }
+                const interfaces = [...configurationState.interfaces, intf];
+
+                const parsedInterfaces = parseInterfaces(interfaces, [], []);
+                if (Array.isArray(parsedInterfaces) && parsedInterfaces.length > 0) {
+                    return parsedInterfaces;
+                }
+
+                return [];
+            }
+            const typesList = newInterface.type.split(',');
+
+            const intf = {
+                name: newInterface.name,
+                type: typesList.length === 1 ? newInterface.type : typesList,
+                direction: newInterface.direction.value,
+                maxConnectionsCount: newInterface.maxConnectionsCount.value,
+            };
+            const results = editorManager.validateNodeInterface(intf);
+            if (results.length > 0) {
+                return results;
+            }
+            const interfaces = [...configurationState.interfaces, intf];
+
+            const parsedInterfaces = parseInterfaces(interfaces, [], []);
+            if (Array.isArray(parsedInterfaces) && parsedInterfaces.length > 0) {
+                return parsedInterfaces;
+            }
+
+            return [];
+        };
+
         const addNewInterface = () => {
             if (newInterface.type === '') {
                 const intf = {
@@ -175,6 +220,7 @@ export default defineComponent({
                 };
                 editorManager.updateNodeStyle(nodeTypeStyle, nodeStyle);
             }
+            menuState.addingPositionedInterface = false;
             window.removeEventListener('mousedown', waitForMousePosition);
         };
 
@@ -183,7 +229,13 @@ export default defineComponent({
                 // Check for custom shape
                 if (configurationState.nodeData.isShaped) {
                     close();
-                    NotificationHandler.showToast('info', 'Click on the node to add interface.',null, true);
+                    const result = validateInterface();
+                    if (result.length > 0) {
+                        NotificationHandler.terminalLog('error', 'Invalid interface', result);
+                        return;
+                    }
+                    NotificationHandler.showToast('info', 'Click on the node to add interface.', null, true);
+                    menuState.addingPositionedInterface = true;
                     window.addEventListener('mousedown', waitForMousePosition);
                     return;
                 }
