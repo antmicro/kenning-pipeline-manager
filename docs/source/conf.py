@@ -71,6 +71,9 @@ myst_substitutions = {
 }
 
 EXCLUDED_EXAMPLES = ["sample-huge"]
+CUSTOM_DATAFLOW_SPECS_PAIRS = {
+    "sample-shape-add-interface": "sample-with-shape"
+}
 exampleentries = [
     "To see the work of the frontend check one of the below examples:\n"
 ]  # noqa: E501
@@ -78,6 +81,9 @@ for graph in sorted(Path("../../examples").glob("*-dataflow.json")):
     graphname = graph.stem.replace("-dataflow", "")
     if graphname in EXCLUDED_EXAMPLES:
         continue
+    if graphname in CUSTOM_DATAFLOW_SPECS_PAIRS.keys():
+        graphname = CUSTOM_DATAFLOW_SPECS_PAIRS[graphname]
+    spec_filename = f"{graphname}-specification.json"
     spec = graph.parent / f"{graphname}-specification.json"
     title = graph.stem.replace("-dataflow", "")
     with open(graph, "r") as f:
