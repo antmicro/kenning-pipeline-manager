@@ -1,0 +1,150 @@
+{
+    "graphs": [
+        {
+            "id": "cc9e70c2-2357-4368-b36c-f1a8058a5a74",
+            "name": "Example of a graph with positioned interfaces added manually",
+            "nodes": [
+                {
+                    "id": "01f6cc89-4fe4-41c9-8979-98accdb44373",
+                    "position": {
+                        "x": 558,
+                        "y": -354
+                    },
+                    "width": 300,
+                    "twoColumn": true,
+                    "interfaces": [
+                        {
+                            "name": "a1",
+                            "id": "a3b40ac9-9579-4d90-9659-1a24e388150b",
+                            "direction": "inout",
+                            "side": "left",
+                            "sidePosition": 0
+                        },
+                        {
+                            "name": "b1",
+                            "id": "cc618f46-d967-4b4b-8cb8-bbba0fa6e4b0",
+                            "direction": "inout",
+                            "side": "right",
+                            "sidePosition": 0
+                        },
+                        {
+                            "name": "c1",
+                            "id": "666fc34e-0b23-448f-b188-61fe445c64f3",
+                            "direction": "inout",
+                            "side": "bottom",
+                            "sidePosition": 0
+                        }
+                    ],
+                    "properties": [],
+                    "enabledInterfaceGroups": [],
+                    "views": [],
+                    "name": "Box",
+                    "instanceName": "Box"
+                },
+                {
+                    "id": "c847d0f4-77c1-4ec9-9ba1-ee266388fa42",
+                    "position": {
+                        "x": 1085,
+                        "y": -545
+                    },
+                    "width": 200,
+                    "twoColumn": true,
+                    "interfaces": [
+                        {
+                            "name": "a",
+                            "id": "d4fa16e1-6c5a-4b5f-9b87-54e3505c56dd",
+                            "direction": "inout",
+                            "side": "left",
+                            "sidePosition": 0
+                        },
+                        {
+                            "name": "b",
+                            "id": "2b8d7344-444d-4b2e-98b2-bdf0fde0e96e",
+                            "direction": "inout",
+                            "side": "right",
+                            "sidePosition": 0
+                        }
+                    ],
+                    "properties": [],
+                    "enabledInterfaceGroups": [],
+                    "views": [],
+                    "name": "Resistor",
+                    "instanceName": "Resistor"
+                },
+                {
+                    "id": "872b6c19-f546-43fd-83d7-3c686cd7be41",
+                    "position": {
+                        "x": 49,
+                        "y": 122
+                    },
+                    "width": 200,
+                    "twoColumn": true,
+                    "interfaces": [
+                        {
+                            "name": "a",
+                            "id": "bd0cf16e-2c3f-4b50-b3d3-aa370e61e2c3",
+                            "direction": "inout",
+                            "side": "left",
+                            "sidePosition": 0
+                        },
+                        {
+                            "name": "b",
+                            "id": "ed702851-42f8-4ccb-ba4d-ef2ed580780d",
+                            "direction": "inout",
+                            "side": "right",
+                            "sidePosition": 0
+                        }
+                    ],
+                    "properties": [],
+                    "enabledInterfaceGroups": [],
+                    "views": [],
+                    "name": "Resistor",
+                    "instanceName": "Resistor"
+                },
+                {
+                    "id": "55c269f8-c470-4e26-aafd-a047ea9d5210",
+                    "position": {
+                        "x": 554,
+                        "y": 560
+                    },
+                    "width": 200,
+                    "twoColumn": true,
+                    "interfaces": [
+                        {
+                            "name": "a",
+                            "id": "3538e5ee-6238-4317-a5e2-a73582fd42ec",
+                            "direction": "inout",
+                            "side": "top",
+                            "sidePosition": 0
+                        }
+                    ],
+                    "properties": [],
+                    "enabledInterfaceGroups": [],
+                    "views": [],
+                    "name": "GND",
+                    "instanceName": "GND"
+                }
+            ],
+            "groups": [],
+            "connections": [
+                {
+                    "id": "e4d2e68a-64a5-448b-8cbe-d626264d867d",
+                    "from": "cc618f46-d967-4b4b-8cb8-bbba0fa6e4b0",
+                    "to": "d4fa16e1-6c5a-4b5f-9b87-54e3505c56dd"
+                },
+                {
+                    "id": "de0c25e2-de28-4e62-a80c-9e06fa8542b3",
+                    "from": "a3b40ac9-9579-4d90-9659-1a24e388150b",
+                    "to": "ed702851-42f8-4ccb-ba4d-ef2ed580780d"
+                },
+                {
+                    "id": "1afcc24f-e037-4914-a30e-e89f350f0562",
+                    "from": "666fc34e-0b23-448f-b188-61fe445c64f3",
+                    "to": "3538e5ee-6238-4317-a5e2-a73582fd42ec"
+                }
+            ]
+        }
+    ],
+    "entryGraph": "cc9e70c2-2357-4368-b36c-f1a8058a5a74",
+    "version": "20250623.14"
+}
