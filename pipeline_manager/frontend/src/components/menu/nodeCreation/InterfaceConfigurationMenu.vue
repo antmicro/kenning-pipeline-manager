@@ -190,7 +190,20 @@ export default defineComponent({
             return addInterface(intf);
         };
 
+        let cleanAddInterface = () => {};
+
+        const onKeyDown = (event: KeyboardEvent) => {
+            if (event.key === 'Escape') {
+                cleanAddInterface();
+            }
+        };
+
         const waitForMousePosition = (event: MouseEvent) => {
+            // right or middle button click cancel it
+            if (event.button !== 0) {
+                cleanAddInterface();
+                return;
+            }
             const editorManager = EditorManager.getEditorManagerInstance();
 
             const x = event.clientX;
@@ -220,7 +233,12 @@ export default defineComponent({
                 };
                 editorManager.updateNodeStyle(nodeTypeStyle, nodeStyle);
             }
+            cleanAddInterface();
+        };
+
+        cleanAddInterface = () => {
             menuState.addingPositionedInterface = false;
+            window.removeEventListener('keydown', onKeyDown);
             window.removeEventListener('mousedown', waitForMousePosition);
         };
 
@@ -237,6 +255,7 @@ export default defineComponent({
                     NotificationHandler.showToast('info', 'Click on the node to add interface.', null, true);
                     menuState.addingPositionedInterface = true;
                     window.addEventListener('mousedown', waitForMousePosition);
+                    window.addEventListener('keydown', onKeyDown);
                     return;
                 }
                 addNewInterface();
