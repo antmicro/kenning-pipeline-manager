@@ -1573,7 +1573,7 @@ export default class ConnectionRenderer {
     }
 
     supportSwitchableInterfaces() {
-        return ['orthogonal', 'alternativeOrthogonal', 'straight'].includes(this.style);
+        return ['orthogonal', 'alternativeOrthogonal', 'straight', 'aStar'].includes(this.style);
     }
 
     connectionRefresh(connection) {
