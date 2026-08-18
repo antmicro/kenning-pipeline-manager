@@ -78,7 +78,7 @@ from creating and deleting connections or altering nodes' values if the editor i
 
 <script>
 import {
-    defineComponent, onUnmounted, ref, watch,
+    defineComponent, onUnmounted, ref, watch, nextTick,
 } from 'vue';
 import { Components, useViewModel } from '@baklavajs/renderer-vue';
 
@@ -162,12 +162,41 @@ export default defineComponent({
                 context.emit('close');
             }
         };
+        /* eslint-disable vue/no-mutating-props, no-param-reassign */
+        const moveInsideTheWindow = () => {
+            // adjust context menu position based on editor viewport and
+            // context menu size
+            const width = el.value.offsetWidth;
+            const height = el.value.offsetHeight;
+
+            const vw = Math.max(document.documentElement.clientWidth
+                || 0, window.innerWidth || 0);
+            const vh = Math.max(document.documentElement.clientHeight
+                || 0, window.innerHeight || 0);
+
+            let offsetX = 0;
+            let offsetY = 0;
+
+            const contextYSpan = props.y + height;
+
+            offsetY = Math.max(0, contextYSpan - vh);
+            props.y -= offsetY;
+
+            const contextXSpan = props.x + width;
+
+            offsetX = Math.max(0, contextXSpan - vw);
+            props.x -= offsetX;
+        };
 
         watch(() => props.modelValue, (isOpen) => {
             if (isOpen) {
                 window.addEventListener('keydown', onKeyDown);
                 window.addEventListener('pointerdown', closeContextMenu);
                 window.addEventListener('wheel', closeContextMenu);
+
+                nextTick(() => {
+                    moveInsideTheWindow();
+                });
             } else {
                 window.removeEventListener('keydown', onKeyDown);
                 window.removeEventListener('pointerdown', closeContextMenu);
