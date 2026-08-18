@@ -70,6 +70,8 @@ export default defineComponent({
         border-radius: 10px;
         color: white;
         user-select: none;
+        max-height: 90vh;
+        overflow-y: auto;
 
         left: 50vw;
         top: 50vh;
