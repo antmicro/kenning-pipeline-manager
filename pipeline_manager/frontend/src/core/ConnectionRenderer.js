@@ -1296,18 +1296,15 @@ export default class ConnectionRenderer {
 
         if (connection.to) {
             const shift = this.getShift(nc.from, nc.to, graph);
-
             if (nc.from.side === 'right' && nc.to.side === 'left') {
-                const mid = Math.max(nc.x1, middlePointX) + shift + minMargin;
+                const mid = middlePointX + shift;
 
-                const firstTurn = mid < nc.x2 - shift - minMargin ? nc.x1 + shift + minMargin : mid;
+                const firstTurn = nc.x1 + shift + minMargin;
                 const lastTurn = nc.x2 - shift - minMargin;
 
                 // S connection
-                if (
-                    mid >= nc.x2 - shift - minMargin &&
-                    (firstTurn > nc.x2 - minMargin || lastTurn < nc.x1 - minMargin)
-                ) {
+                if ((firstTurn > mid && firstTurn < nc.x2 - minMargin)
+                    || (nc.x1 + minMargin > nc.x2 - minMargin)) {
                     return [{ x: nc.x1, y: nc.y1 },
                         { x: nc.x1 + intfPad, y: nc.y1 },
                         { x: firstTurn, y: nc.y1 },
@@ -1318,43 +1315,59 @@ export default class ConnectionRenderer {
                         { x: nc.x2, y: nc.y2 },
                     ];
                 }
-
                 // Z connection
+                if (mid < nc.x2 - minMargin) {
+                    return [{ x: nc.x1, y: nc.y1 },
+                        { x: nc.x1 + intfPad, y: nc.y1 },
+                        { x: mid, y: nc.y1 },
+                        { x: mid, y: nc.y2 },
+                        { x: nc.x2 - intfPad, y: nc.y2 },
+                        { x: nc.x2, y: nc.y2 },
+                    ];
+                }
+                const zConnectionTurn = firstTurn < nc.x2 - minMargin ? firstTurn : middlePointX;
                 return [{ x: nc.x1, y: nc.y1 },
                     { x: nc.x1 + intfPad, y: nc.y1 },
-                    { x: mid, y: nc.y1 },
-                    { x: mid, y: nc.y2 },
+                    { x: zConnectionTurn, y: nc.y1 },
+                    { x: zConnectionTurn, y: nc.y2 },
                     { x: nc.x2 - intfPad, y: nc.y2 },
                     { x: nc.x2, y: nc.y2 },
                 ];
             }
             if (nc.from.side === 'left' && nc.to.side === 'right') {
-                const mid = Math.max(nc.x2, middlePointX) + shift + minMargin;
+                const mid = middlePointX + shift;
 
-                const firstTurn = mid < nc.x1 - shift - minMargin ? nc.x2 + shift + minMargin : mid;
+                const firstTurn = nc.x2 + shift + minMargin;
                 const lastTurn = nc.x1 - shift - minMargin;
 
                 // S connection
-                if (
-                    mid >= nc.x1 - shift - minMargin &&
-                    (firstTurn > nc.x1 - minMargin || lastTurn < nc.x2 - minMargin)
-                ) {
+                if ((firstTurn > mid && firstTurn < nc.x1 - minMargin)
+                    || (nc.x2 + minMargin > nc.x1 - minMargin)) {
                     return [{ x: nc.x2, y: nc.y2 },
                         { x: nc.x2 + intfPad, y: nc.y2 },
                         { x: firstTurn, y: nc.y2 },
-                        { x: firstTurn, y: (nc.y1 + nc.y2) / 2 },
-                        { x: lastTurn, y: (nc.y1 + nc.y2) / 2 },
+                        { x: firstTurn, y: (nc.y2 + nc.y1) / 2 },
+                        { x: lastTurn, y: (nc.y2 + nc.y1) / 2 },
                         { x: lastTurn, y: nc.y1 },
                         { x: nc.x1 - intfPad, y: nc.y1 },
                         { x: nc.x1, y: nc.y1 },
                     ];
                 }
-
                 // Z connection
+                if (mid < nc.x1 - minMargin) {
+                    return [{ x: nc.x2, y: nc.y2 },
+                        { x: nc.x2 + intfPad, y: nc.y2 },
+                        { x: mid, y: nc.y2 },
+                        { x: mid, y: nc.y1 },
+                        { x: nc.x1 - intfPad, y: nc.y1 },
+                        { x: nc.x1, y: nc.y1 },
+                    ];
+                }
+                const zConnectionTurn = firstTurn < nc.x1 - minMargin ? firstTurn : middlePointX;
                 return [{ x: nc.x2, y: nc.y2 },
                     { x: nc.x2 + intfPad, y: nc.y2 },
-                    { x: mid, y: nc.y2 },
-                    { x: mid, y: nc.y1 },
+                    { x: zConnectionTurn, y: nc.y2 },
+                    { x: zConnectionTurn, y: nc.y1 },
                     { x: nc.x1 - intfPad, y: nc.y1 },
                     { x: nc.x1, y: nc.y1 },
                 ];
