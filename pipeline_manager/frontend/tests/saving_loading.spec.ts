@@ -10,7 +10,8 @@ import {
     loadDataflow,
     openFileChooser,
     getPathToJsonFile,
-    enableNavigationBar
+    enableNavigationBar,
+    getNode
 } from './config.js';
 import path from 'path';
 
@@ -251,8 +252,6 @@ test('save and load graph partially', async ({ page }, testInfo) => {
     expect(await entries.locator('.__entry').count()).toBe(1);
 });
 
-const temporaryDir = os.tmpdir() + '/';
-
 const exampleToFail = {
     specification: "sample-specification.json"
 }
@@ -273,7 +272,7 @@ test(`spec loading ${exampleToFail.specification} (check for fail)`, async ({ pa
 
     json.nodes[1].extends[0] = "NonexistentType";
 
-    const outputPath = path.join(temporaryDir, 'failing-specification.json');
+    const outputPath = testInfo.outputPath('failing-specification.json');
     writeFileSync(outputPath, JSON.stringify(json, null, 2), 'utf-8');
 
     await page.goto(getUrl());
@@ -282,4 +281,25 @@ test(`spec loading ${exampleToFail.specification} (check for fail)`, async ({ pa
     await fileChooserSpec.setFiles(outputPath);
 
     await expectErrors(page);
+});
+
+const exampleNested = {
+    specification: 'sample-include-subgraph-specification.json',
+    dataflow: 'sample-include-subgraph-dataflow.json',
+};
+test(`entryGraph ${exampleNested.specification} in middle of structure`, async ({ page }, testInfo) => {
+    const json = JSON.parse(readFileSync(getPathToJsonFile(exampleNested.dataflow), 'utf-8'));
+    json.entryGraph = '1185eb1c-6dad-4c9d-98ff-dc31da9c8624';
+    const outputPath = testInfo.outputPath('nested-subgraph-entry-specification.json');
+    writeFileSync(outputPath, JSON.stringify(json, null, 2), 'utf-8');
+
+    await page.goto(getUrl());
+    await loadSpecification(page, exampleNested.specification);
+    await expectNoErrors(page);
+    const fileChooserSpec = await openFileChooser(page, 'dataflow');
+    await fileChooserSpec.setFiles(outputPath);
+    expect(getNode(page, 'MultipleIOGraphNode')).not.toBeVisible();
+    await page.locator('span').getByText('Graphs').click();
+    const entryCount = await page.locator('.entries').locator('.__entry').count();
+    expect(entryCount).toBe(2);
 });
