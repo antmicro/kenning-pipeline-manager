@@ -122,6 +122,18 @@ const PointType = Object.freeze({
 });
 
 /**
+ * Defines the possible types of direction changes.
+ */
+const DirectionChange = Object.freeze({
+    /** Path continues in the same direction. */
+    STRAIGHT: 'straight',
+    /** Path makes a 90-degree turn. */
+    TURN: 'turn',
+    /** Path reverses direction. */
+    REVERSE: 'reverse',
+});
+
+/**
  * Parameters used in A* pathfinding algorithm during rendering.
  */
 const aStarConfig = {
@@ -141,6 +153,16 @@ const aStarConfig = {
     zoneInfoKey: (idx, idy) => `${idx}:${idy}`,
     /** Factor by which segment cost is multiplied when it intersects a node. */
     intersectionFactor: 10,
+    /** Adds a direction-change-dependent penalty to the segment cost. */
+    adjustCost: (prevCost, directionChange) => {
+        if (directionChange === DirectionChange.TURN) {
+            return prevCost + 1000;
+        }
+        if (directionChange === DirectionChange.REVERSE) {
+            return prevCost + 20000;
+        }
+        return prevCost;
+    },
 };
 
 export default class ConnectionRenderer {
@@ -824,6 +846,59 @@ export default class ConnectionRenderer {
         const key = (point) => `${point.x}:${point.y}:${point.type}`;
 
         /**
+         * Determines the direction between two points on an orthogonal path.
+         *
+         * @param {Object} p1 The starting point.
+         * @param {Object} p2 The ending point.
+         * @returns {{axis: 'x'|'y', sign: number}|null} Direction of the segment,
+         * or null if the points do not form a horizontal or vertical segment.
+         */
+        function getDirection(p1, p2) {
+            if (p1.x === p2.x) {
+                return { axis: 'y', sign: Math.sign(p2.y - p1.y) };
+            }
+
+            if (p1.y === p2.y) {
+                return { axis: 'x', sign: Math.sign(p2.x - p1.x) };
+            }
+
+            return null;
+        }
+
+        /**
+         * Determines how the path direction changes at the middle point.
+         *
+         * @param {Object} p1 The point before the middle point.
+         * @param {Object} p2 The middle point.
+         * @param {Object} p3 The point after the middle point.
+         * @returns {'straight'|'reverse'|'turn'|null} Direction change:
+         * 'straight' if the path continues in the same direction,
+         * 'reverse' if it makes a 180 deg turn,
+         * 'turn' if it makes a 90 deg turn,
+         * or null, if either segment is not orthogonal.
+         */
+        function getDirectionChange(p1, p2, p3) {
+            const incoming = getDirection(p1, p2);
+            const outcoming = getDirection(p2, p3);
+
+            if (!incoming || !outcoming) {
+                return null;
+            }
+
+            if (incoming.axis === outcoming.axis &&
+                incoming.sign === outcoming.sign) {
+                return DirectionChange.STRAIGHT;
+            }
+
+            if (incoming.axis === outcoming.axis &&
+                incoming.sign !== outcoming.sign) {
+                return DirectionChange.REVERSE;
+            }
+
+            return DirectionChange.TURN;
+        }
+
+        /**
          * Reconstructs a path by following predecessors from the current point.
          *
          * @param pointsToIndex Mapping from point keys to their indices
@@ -991,9 +1066,27 @@ export default class ConnectionRenderer {
          *
          * @param current First endpoint of the segment
          * @param neighbour Second endpoint of the segment
+         * @param prev Previous point in the path, used to apply an additional
+         *             penalty for changing direction
          * @returns Weight of the segment
          */
-        function computeWeight(current, neighbour) {
+        function computeWeight(current, neighbour, prev) {
+            /**
+             * Computes additional penalty for changing direction.
+             *
+             * @param prevCost Previous cost to adjust
+             * @param c Current point
+             * @param n Neighbour point
+             * @param pr Previous point
+             * @returns Adjusted cost taking the direction change into account
+             */
+            const dirChangePenalty = (prevCost, c, n, pr) => {
+                if (pr && pr.type === PointType.REG) {
+                    return aStarConfig.adjustCost(prevCost, getDirectionChange(pr, c, n));
+                }
+                return prevCost;
+            };
+
             const manhattanDist = aStarConfig.distanceType(
                 current.x,
                 current.y,
@@ -1024,11 +1117,21 @@ export default class ConnectionRenderer {
                             current, neighbour, nInfo,
                         ),
                     )) {
-                        return aStarConfig.intersectionFactor * manhattanDist;
+                        return dirChangePenalty(
+                            aStarConfig.intersectionFactor * manhattanDist,
+                            current,
+                            neighbour,
+                            prev,
+                        );
                     }
                 }
             }
-            return manhattanDist;
+            return dirChangePenalty(
+                manhattanDist,
+                current,
+                neighbour,
+                prev,
+            );
         }
 
         const fromPoint = fromPoints.at(-1);
@@ -1058,6 +1161,8 @@ export default class ConnectionRenderer {
         const gScores = new Map();
         gScores.set(0, 0); // fromPoint has index 0 in `visited` and a gScore of 0
 
+        let prev = null;
+
         while (!openSet.isEmpty()) {
             const peeked = openSet.peek();
             if (pointsEqual(peeked)(toPoint)) {
@@ -1066,6 +1171,10 @@ export default class ConnectionRenderer {
             const current = openSet.dequeue();
 
             const neighbours = getNeighbours(current, fromPoints, toPoints);
+
+            prev = predecessors.get(pointsToIndex.get(key(current)));
+
+            const previous = prev;
 
             neighbours.forEach((neighbour) => {
                 // need to check, whether neighbour is not already at the visited list
@@ -1081,7 +1190,7 @@ export default class ConnectionRenderer {
                     gScores.get(
                         pointsToIndex.get(key(current)),
                     ) ?? Infinity
-                ) + computeWeight(current, neighbour);
+                ) + computeWeight(current, neighbour, previous);
 
                 if (newGScore < (gScores.get(neighbourIndex) ?? Infinity)) {
                     predecessors.set(neighbourIndex, current);
