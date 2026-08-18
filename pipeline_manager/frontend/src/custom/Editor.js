@@ -364,6 +364,7 @@ export default class PipelineManagerEditor extends Editor {
         const { panning, scaling } = entryGraph;
 
         const usedSubgraphs = new Set();
+        const usedSubgraphParent = {};
 
         this.nodeColors.clear();
         state.graphs.forEach((graph) => {
@@ -390,6 +391,7 @@ export default class PipelineManagerEditor extends Editor {
                     const isInstantiated = n.subgraph !== subgraphId;
 
                     usedSubgraphs.add(n.subgraph);
+                    usedSubgraphParent[n.subgraph] = graph.id;
 
                     if (isInstantiated || subgraphId === undefined) {
                         [n.graphState] = fittingTemplate;
@@ -401,12 +403,19 @@ export default class PipelineManagerEditor extends Editor {
                 this.setNodeColor(n.id, n.color);
             });
         });
+        let graphRootLoad = entryGraph;
+        while (usedSubgraphParent[graphRootLoad.id] !== undefined) {
+            const searchedId = usedSubgraphParent[graphRootLoad.id];
+            graphRootLoad = state.graphs?.find((g) =>
+                g.id === searchedId);
+        }
+        graphRootLoad ??= entryGraph;
 
         try {
             if (result.errors.length && !globalProperties.softLoad) return result.errors;
 
             state.graphs?.forEach((graph) => {
-                if (!usedSubgraphs.has(graph.id) && entryGraph.id !== graph.id) {
+                if (!usedSubgraphs.has(graph.id) && graphRootLoad.id !== graph.id) {
                     const graphObject = new Graph(this);
                     result.errors.push(...graphObject.load(graph, true));
                     this.registerGraph(graphObject);
@@ -416,7 +425,7 @@ export default class PipelineManagerEditor extends Editor {
             if (!result.errors.length || globalProperties.softLoad) {
                 let graphToLoad;
                 if (!templateName) {
-                    graphToLoad = entryGraph;
+                    graphToLoad = graphRootLoad;
                 } else {
                     // eslint-disable-next-line new-cap
                     const graphNode = new (this._nodeTypes.get(templateName)).type();
@@ -428,8 +437,9 @@ export default class PipelineManagerEditor extends Editor {
                     result.errors.push(...prepareSubgraphErrors);
                     graphToLoad = preparedSubgraphState;
                 }
-                if (!result.errors.length || globalProperties.softLoad) {
-                    const loadAll = (entryGraph === graphToLoad);
+                const noErrors = !result.errors.length || globalProperties.softLoad;
+                if (noErrors && !usedSubgraphs.has(graphToLoad.id)) {
+                    const loadAll = (graphRootLoad === graphToLoad);
                     result.errors.push(...this._graph.load(graphToLoad, loadAll));
                 }
             }
@@ -476,16 +486,18 @@ export default class PipelineManagerEditor extends Editor {
                     }
                 }
             }
-            return [];
+            return [...path];
         };
 
         // Finding a path to the defined entry and switching to it sequentially
         const path = dfs(this._graph, []);
 
         try {
-            path.forEach((node) => {
-                this.switchToSubgraph(node);
-            });
+            if (this._graph.id !== entryGraph.id) {
+                path.forEach((node) => {
+                    this.switchToSubgraph(node);
+                });
+            }
         } catch (err) {
             result.errors.push(err.toString());
         }
