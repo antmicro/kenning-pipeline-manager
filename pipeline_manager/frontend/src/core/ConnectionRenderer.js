@@ -899,6 +899,29 @@ export default class ConnectionRenderer {
         }
 
         /**
+         * Removes points where the path makes a 180-degrees turn.
+         *
+         * @param path Array of points
+         * @returns Filtered path
+         */
+        function polish(path) {
+            const newPath = [path.at(0)];
+
+            path.slice(0, -2).forEach((el0, i) => {
+                const el1 = path[i + 1];
+                const el2 = path[i + 2];
+                // check whether el0-el1-el2 does not form a 180deg turn at el1
+                if (getDirectionChange(el0, el1, el2) !== DirectionChange.REVERSE) {
+                    newPath.push(el1);
+                }
+            });
+
+            newPath.push(path.at(-1));
+
+            return newPath;
+        }
+
+        /**
          * Reconstructs a path by following predecessors from the current point.
          *
          * @param pointsToIndex Mapping from point keys to their indices
@@ -932,7 +955,7 @@ export default class ConnectionRenderer {
                 current = newCurrent;
                 totalPath.unshift(current);
             }
-            return totalPath;
+            return polish(totalPath);
         }
 
         /**
@@ -1014,7 +1037,7 @@ export default class ConnectionRenderer {
                     ].concat(toP.slice(0, -1).filter(toHelperPredicate));
                 }
                 case PointType.TO_HELPER:
-                    return toP;
+                    return [toP.at(-1)];
                 default:
                     return [];
             }
