@@ -106,6 +106,23 @@ test('create new node type', async ({ page }, testInfo) => {
     await addNode(page, 'Default category', 'Custom Node', 750, 80);
 });
 
+test('check node resize with long title', async ({ page }) => {
+    await page.goto(getUrl());
+
+    await openNodePalette(page);
+    await addNode(page, 'Filesystem', 'LoadVideo', 750, 80);
+    const node = getNode(page, 'LoadVideo').last();
+
+    await node.locator('.__title').click({ button: 'right'});
+    await page.getByText('Rename').click();
+    await node.locator('.__title .baklava-input').first().fill('Load Video AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA');
+    await page.keyboard.press('Enter');
+
+    const titleBox = await node.locator('.__title .__title-label').boundingBox();
+    const nodeBox = await node.boundingBox();
+    expect(nodeBox.width >= titleBox.width).toBeTruthy();
+});
+
 test('add interface to custom node in specification with "include" keyword', async ({ page }, testInfo) => {
     await page.goto(getUrl());
     await loadIncludeSpecification(page, testInfo);
