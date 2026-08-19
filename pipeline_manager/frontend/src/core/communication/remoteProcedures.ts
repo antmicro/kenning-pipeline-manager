@@ -178,11 +178,49 @@ export async function dialog_open(params: { title: string, wait: boolean }) {
         };
     }
 
+    // wait for answer from user form
     await userMenus.waitForDialogBoxClosed();
-
+    
+    const data = structuredClone(toRaw(userMenus.userDialogData));
     return {
-        data: userMenus.userDialogData,
+        data,
     };
+}
+
+/**
+ * @returns register a new dialog box or override existing dialog box template
+ *
+ * @param name
+ * @param box
+ *
+ * @returns status message
+ */
+export async function dialog_template_add(params: {
+    name: string,
+    box: {
+        title: string,
+        confirmName: string,
+        template: object
+        }
+    }) {
+    if (params?.name === undefined) {
+        return {
+            msg: 'No dialog box name was specified.',
+        };
+    }
+    const { viewModel } = useViewModel();
+    const { userMenus } = viewModel.value.editor as unknown as PipelineManagerEditor;
+
+    const { box } = params;
+
+    const ret = userMenus.registerDialogTemplate(
+        params.name,
+        box?.title ?? '',
+        box?.confirmName ?? 'OK',
+        box?.template ?? {},
+    );
+
+    return ret;
 }
 
 /**
