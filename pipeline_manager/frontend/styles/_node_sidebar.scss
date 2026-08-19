@@ -137,6 +137,14 @@
                 & > .__replace_title {
                     padding: 0 0.75em;
                 }
+                & > .__replace_button {
+                    & > .baklava-button {
+                        white-space: nowrap;
+                        word-break: break-all;
+                        text-wrap: wrap;
+                        max-width: 200px;
+                    }
+                }
             }
         }
 
