@@ -4,14 +4,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { markRaw } from 'vue';
+import { defineAsyncComponent } from 'vue';
 
 const DefaultComponentMixin = {
     setDefaultComponent() {
         delete this.defaultComponent;
-        this.lazyComponent().then((module) => {
-            this.setComponent(markRaw(module.default));
-        });
+        this.setComponent(
+            defineAsyncComponent(() => this.lazyComponent()),
+        );
     },
 };
 
