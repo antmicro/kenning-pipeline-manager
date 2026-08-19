@@ -89,18 +89,41 @@ export default class CustomMenusManager {
     }
 
     /**
-     * Registers a new dialog menu template with selected name.
+     * Registers a new dialog menu template with selected name. Removes dialog box when
+     * provided template is empty.
      * @param {string} templateName Name of the dialog box
      * @param {string} title A title of dialog box.
      * @param {string} confirmText A name of confirmation button.
      * @param {object} template Object holding dialog box entries.
+     *
+     * @returns {string} Status message.
      */
     registerDialogTemplate(templateName, title, confirmText, template) {
+        const ret = {
+            added: [],
+            removed: [],
+            overridden: [],
+        };
+
+        if (Object.entries(template).length === 0) {
+            this.userDialogTemplate.delete(templateName);
+            ret.removed = [templateName];
+            return ret;
+        }
+
+        if (this.userDialogTemplate.has(templateName)) {
+            ret.overridden = [templateName];
+        } else {
+            ret.added = [templateName];
+        }
+
         this.userDialogTemplate.set(templateName, {
             title,
             confirmText,
             template,
         });
+
+        return ret;
     }
 
     /**
