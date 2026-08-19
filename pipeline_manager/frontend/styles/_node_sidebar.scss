@@ -65,7 +65,7 @@
         }
 
         & > .__header {
-            height: 4em;
+            min-height: 4em;
             display: flex;
             gap: 1em;
             padding: 0 1em;
@@ -90,6 +90,8 @@
                 margin: 0;
                 flex-grow: 1;
                 white-space: nowrap;
+                word-break: break-all;
+                text-wrap: wrap;
             }
 
             & > .__url {
