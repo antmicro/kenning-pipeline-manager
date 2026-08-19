@@ -31,6 +31,7 @@ from moving or deleting the nodes.
         </div>
         <div
             class="__title"
+            ref="titleRef"
             :style="nodeTitleStyle"
             @pointerdown.left.exact="onMouseDown"
             @pointerdown.right="openContextMenuTitle"
@@ -42,10 +43,10 @@ from moving or deleting the nodes.
                 :src="iconPath"
             >
             <div
-            v-if="!renaming"
-            ref="titleTextRef"
-            class="__title-label"
-            v-html="DOMPurify.sanitize(nodeTitle)"
+                v-if="!renaming"
+                class="__title-label" v-html="DOMPurify.sanitize(nodeTitle)"
+                ref="titleTextRef"
+                :style="nodeTitleLabelStyle"
             >
             </div>
             <input
@@ -238,6 +239,7 @@ const movementStep = computed(() => viewModel.value.movementStep);
 const svgRef = ref(null);
 const nodeRef = ref(null);
 const titleTextRef = ref(null);
+const titleRef = ref(null);
 const propertiesRef = useTemplateRef('propertiesRef');
 const renaming = ref(false);
 const renameField = ref(null);
@@ -815,7 +817,13 @@ const nodeTitle = computed(() => {
         return `${title}`;
     }
 
-    return `${title} <pre class="subtitle">${type}</pre>`;
+    let styles = '';
+
+    if (props.node.width !== 0 && props.node.width !== undefined) {
+        styles = 'overflow: hidden; text-overflow: ellipsis;';
+    }
+
+    return `${title} <pre class="subtitle" style="${styles}">${type}</pre>`;
 });
 
 const select = (event) => {
@@ -963,9 +971,8 @@ const customTitlePadding = computed(() => viewModel.value.editor
 const fitTitle = computed(() => viewModel.value.editor.getNodeStyleFitTitle(props.node.type));
 
 const titleSize = computed(() => {
-    const width = (titleTextRef.value?.offsetWidth ?? 0);
-    const height = (titleTextRef.value?.offsetHeight ?? 0);
-    console.log('Title size: ', width, ' ', height);
+    const width = (titleTextRef?.value?.offsetWidth ?? 0);
+    const height = (titleTextRef?.value?.offsetHeight ?? 0);
     return {
         width,
         height,
@@ -973,6 +980,22 @@ const titleSize = computed(() => {
 });
 
 const minimalWidth = computed(() => {
+    // check title size
+    const getTitleSize = () => {
+        if (props.node.width > 0) {
+            return props.node.width;
+        }
+        if (titleTextRef.value === null || titleRef.value === null) {
+            return 0;
+        }
+        const titleStyle = getComputedStyle(titleRef.value);
+        const paddingLeft = Number.parseInt(titleStyle?.paddingLeft ?? 0, 10);
+        const paddingRight = Number.parseInt(titleStyle?.paddingRight ?? 0, 10);
+
+        return titleSize.value.width + paddingLeft + paddingRight;
+    };
+    const titleWidth = getTitleSize();
+
     const fontSize = 9;
 
     // search for the longest word, allow wrapping of words
@@ -993,10 +1016,11 @@ const minimalWidth = computed(() => {
 
     if (props.node.twoColumn) {
         const nodeRequiredSize = 2 * Math.max(LeftInterfaceSize, RightInterfaceSize);
-        return nodeRequiredSize;
+        return Math.max(nodeRequiredSize, titleWidth);
     }
     const nodeRequiredSize = Math.max(LeftInterfaceSize, RightInterfaceSize);
-    return nodeRequiredSize;
+
+    return Math.max(nodeRequiredSize, titleWidth);
 });
 
 const width = computed(() => {
@@ -1103,6 +1127,18 @@ const customShapeTitlePosition = computed(() => {
         x,
         y,
     };
+});
+
+const nodeTitleLabelStyle = computed(() => {
+    if (props.node.width !== 0 && props.node.width !== undefined) {
+        return {
+            // maxWidth: width.value
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+        };
+    }
+
+    return {};
 });
 
 const nodeTitleStyle = computed(() => {
