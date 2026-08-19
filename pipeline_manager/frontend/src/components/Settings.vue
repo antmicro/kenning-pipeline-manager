@@ -316,14 +316,24 @@ export default {
             });
             return select;
         });
+
+        const displayedGraphId = computed(
+            () => props.viewModel.displayedGraph.id,
+        );
+
         const viewsPresent = computed(() =>
-            props.viewModel.editor.renderViews.length > 1);
+            (props.viewModel.editor.renderViews.get(
+                displayedGraphId.value,
+            )?.length ?? 0) > 1,
+        );
 
         const viewSelected = computed(() => {
             const option = new SelectInterface(
                 'Selected view',
                 props.viewModel.editor.currentView,
-                props.viewModel.editor.renderViews.map((view) =>
+                props.viewModel.editor.renderViews.get(
+                    displayedGraphId.value,
+                ).map((view) =>
                     ({ text: view, value: view })),
             ).setPort(false);
 

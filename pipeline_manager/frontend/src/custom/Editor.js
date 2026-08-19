@@ -65,7 +65,7 @@ export default class PipelineManagerEditor extends Editor {
 
     defaultView = 'default';
 
-    renderViews = [this.defaultView];
+    renderViews = new Map();
 
     baseURLs = new Map();
 
@@ -408,9 +408,10 @@ export default class PipelineManagerEditor extends Editor {
         this.nodeColors.clear();
         state.graphs.forEach((graph) => {
             graph.nodes.forEach((n) => {
+                this.renderViews.set(graph.id, [this.defaultView]);
                 n.views?.forEach((v) => {
-                    if (!this.renderViews.find((vv) => vv === v.name)) {
-                        this.renderViews.push(v.name);
+                    if (!this.renderViews.get(graph.id).find((vv) => vv === v.name)) {
+                        this.renderViews.get(graph.id).push(v.name);
                     }
                 });
                 if (n.subgraph !== undefined) {
