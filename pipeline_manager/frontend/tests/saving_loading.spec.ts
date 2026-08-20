@@ -13,6 +13,7 @@ import {
     getPathToJsonFile,
     enableNavigationBar,
     getNode,
+    openNodePalette,
 } from './config.js';
 
 async function expectNoErrors(page: Page) {
@@ -110,21 +111,25 @@ async function loadDatflowFromFile(page: Page, dataflowFile: string) {
 }
 
 const examples = [
-    { specification: 'sample-specification.json',                    dataflow: 'sample-dataflow.json'                        },
-    { specification: 'sample-include-specification.json',            dataflow: 'sample-include-dataflow.json'                },
-    { specification: 'sample-include-subgraph-specification.json',   dataflow: 'sample-include-subgraph-dataflow.json'       },
-    { specification: 'sample-inheritance-specification.json',        dataflow: 'sample-inheritance-dataflow.json'            },
-    { specification: 'sample-inout-specification.json',              dataflow: 'sample-inout-dataflow.json'                  },
-    { specification: 'sample-interface-groups-specification.json',   dataflow: 'sample-interface-groups-dataflow.json'       },
-    { specification: 'sample-loopback-specification.json',           dataflow: 'sample-loopback-dataflow.json'               },
-    { specification: 'sample-multiple-io-specification.json',        dataflow: 'sample-multiple-io-dataflow.json'            },
-    { specification: 'sample-subgraph-specification.json',           dataflow: 'sample-subgraph-dataflow.json'               },
-    { specification: 'sample-related-graph-specification.json',      dataflow: undefined                                     },
-    { specification: 'sample-dynamic-interfaces-specification.json', dataflow: 'sample-dynamic-interfaces-dataflow.json'     },
-    { specification: 'sample-with-shape-specification.json',         dataflow: 'sample-with-shape-dataflow.json'             },
-    { specification: 'sample-rectangle-grouping-specification.json', dataflow: 'sample-rectangle-grouping-dataflow.json'     },
-    { specification: 'sample-styling-specification.json',            dataflow: 'sample-styling-dataflow.json'                },
-    { specification: 'sample-huge-specification.json',               dataflow: 'sample-huge-dataflow.json', timeout: 180_000 },
+    { specification: 'sample-specification.json',                    dataflow: 'sample-dataflow.json'                     },
+    { specification: 'sample-include-specification.json',            dataflow: 'sample-include-dataflow.json'             },
+    { specification: 'sample-include-subgraph-specification.json',   dataflow: 'sample-include-subgraph-dataflow.json',   graphCount: 2 },
+    { specification: 'sample-inheritance-specification.json',        dataflow: 'sample-inheritance-dataflow.json'         },
+    { specification: 'sample-inout-specification.json',              dataflow: 'sample-inout-dataflow.json'               },
+    { specification: 'sample-interface-groups-specification.json',   dataflow: 'sample-interface-groups-dataflow.json'    },
+    { specification: 'sample-loopback-specification.json',           dataflow: 'sample-loopback-dataflow.json'            },
+    { specification: 'sample-multiple-io-specification.json',        dataflow: 'sample-multiple-io-dataflow.json'         },
+    { specification: 'sample-subgraph-specification.json',           dataflow: 'sample-subgraph-dataflow.json',           graphCount: 6 },
+    { specification: 'sample-related-graph-specification.json',      dataflow: undefined,                                 graphCount: 3 },
+    { specification: 'sample-dynamic-interfaces-specification.json', dataflow: 'sample-dynamic-interfaces-dataflow.json'  },
+    { specification: 'sample-with-shape-specification.json',         dataflow: 'sample-with-shape-dataflow.json'          },
+    { specification: 'sample-rectangle-grouping-specification.json', dataflow: 'sample-rectangle-grouping-dataflow.json'  },
+    { specification: 'sample-styling-specification.json',            dataflow: 'sample-styling-dataflow.json'             },
+    {
+        specification: 'sample-huge-specification.json',
+        dataflow: 'sample-huge-dataflow.json',
+        timeout: 180_000,
+    },
 ];
 
 async function dragAndDropFile(page: Page, selector: string, fileName: string, testInfo: TestInfo) {
@@ -161,7 +166,7 @@ async function dragAndDropFile(page: Page, selector: string, fileName: string, t
     return true;
 }
 
-examples.forEach(({ dataflow, specification, timeout }) => {
+examples.forEach(({ dataflow, specification, timeout, graphCount }) => {
     test(`spec loading ${specification}`, async ({ page }, testInfo) => {
         if (timeout) {
             test.setTimeout(timeout);
@@ -192,6 +197,12 @@ examples.forEach(({ dataflow, specification, timeout }) => {
         await expectNoErrors(page);
         await loadDataflow(page, dataflow);
         await expectNoErrors(page);
+        if (graphCount) {
+            await enableNavigationBar(page);
+            await page.locator('.tab').getByText('Graphs').click();
+            await expect(page.locator('.entries').locator('.__entry-content')).toHaveCount(graphCount);
+            await page.waitForTimeout(2000);
+        }
     });
     test(`welcome loading ${dataflow}, ${specification}`, async ({ page }, testInfo) => {
         if (timeout) {
