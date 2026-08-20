@@ -259,6 +259,42 @@
                     "to": "c8c51300-5e4b-4c0b-9caa-3cf00f07ba56"
                 }
             ]
+        },
+        {
+            "name": "Unrelated graph",
+            "id": "08fc2d15-1126-4bb6-a6a2-117fc3f0131a",
+            "nodes": [
+                {
+                    "name": "Test node #2",
+                    "instanceName": "Lone wolf",
+                    "interfaces": [
+                        {
+                            "id": "593eed96-9c40-4b3c-94b5-32de4304989e",
+                            "name": "Input",
+                            "direction": "input"
+                        },
+                        {
+                            "id": "6c637a84-2e04-4be7-838a-66ed676111e4",
+                            "name": "Output",
+                            "direction": "output"
+                        },
+                        {
+                            "id": "97075026-6a60-4e7f-b18d-9134ac4b8b3f",
+                            "name": "Inout",
+                            "direction": "inout",
+                            "side": "right"
+                        }
+                    ],
+                    "position": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "width": 200,
+                    "twoColumn": false,
+                    "properties": []
+                }
+            ],
+            "connections": []
         }
     ],
     "entryGraph": "7a0f4b8d-438b-4699-8631-a3fffeba520e"
