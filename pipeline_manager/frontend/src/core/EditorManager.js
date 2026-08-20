@@ -1628,6 +1628,7 @@ export default class EditorManager {
 
         this.setValidating(true);
         this.relatedGraphsStore = [];
+        const visitedSubgraphs = new Set();
         if (graphs !== undefined) {
             const idToGraph = new Map(graphs.map((graph) => [graph.id, graph]));
             const sortedGraphs = EditorManager.sortGraphs(graphs, idToNested);
@@ -1669,8 +1670,6 @@ export default class EditorManager {
                 if (loadingWarnings.length) warnings.push(`Graph '${graph.name ?? graph.id}' is invalid:`, ...loadingWarnings.map((w) => `    ${w}`));
                 if (loadingErrors.length) errors.push(`Graph '${graph.name ?? graph.id}' is invalid:`, ...loadingErrors.map((w) => `    ${w}`));
             };
-
-            const visitedSubgraphs = new Set();
 
             // Validate subgraphs
             // eslint-disable-next-line no-restricted-syntax
@@ -1752,10 +1751,12 @@ export default class EditorManager {
             if (graph !== undefined) {
                 graphs.flatMap((g) => g.nodes).forEach((node) => delete node.graphState);
                 const graphs_ = idToNested.get(graph.id).map((id) => idToGraph.get(id));
+                const standaloneGraphs = graphs.filter((g) =>
+                    !visitedSubgraphs.has(g.id) && !graphs_.includes(g) && graph !== g);
                 const {
                     errors: entryErrors,
                 } = await this.loadDataflow({
-                    graphs: [graph, ...graphs_],
+                    graphs: [graph, ...graphs_, ...standaloneGraphs],
                     version: dataflowSpecification.version,
                     entryGraph: entryGraphId,
                 });
