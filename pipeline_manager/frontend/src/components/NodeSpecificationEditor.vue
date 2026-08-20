@@ -385,9 +385,8 @@ export default defineComponent({
         const editorStateChanged = computed(() => {
             try {
                 const parsedCurrentSpecification = YAML.parse(
-                    currentSpecification.value,
+                    currentSpecification.value.replaceAll('\t', '  '),
                 );
-
                 const edited = specification.value;
                 const cur = parsedCurrentSpecification;
                 const sortObj = (obj) => Object.fromEntries(Object.entries(obj).sort());
@@ -419,7 +418,6 @@ export default defineComponent({
                 validateNode(parsedSpecForValidation);
                 validateNodeProperties(parsedSpecForValidation);
                 validateNodeInterfaces(parsedSpecForValidation);
-
                 return true;
             } catch (error) {
                 return false;
