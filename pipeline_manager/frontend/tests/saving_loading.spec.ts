@@ -1,7 +1,8 @@
-import os from 'os';
+/* eslint-disable no-multi-spaces */
 import fs from 'fs/promises';
 import {
     test, expect, Page,
+    TestInfo,
 } from '@playwright/test';
 import { readFileSync, writeFileSync } from 'node:fs';
 import {
@@ -11,9 +12,8 @@ import {
     openFileChooser,
     getPathToJsonFile,
     enableNavigationBar,
-    getNode
+    getNode,
 } from './config.js';
-import path from 'path';
 
 async function expectNoErrors(page: Page) {
     const loading = page.locator('.loading-screen');
@@ -38,10 +38,10 @@ async function deepCleanEditor(page: Page) {
 
 async function saveFileAs(
     page: Page,
-    testInfo,
+    testInfo: TestInfo,
     purpose: 'specification' | 'dataflow',
     filenameWithoutExtension: string,
-    selectGraphs: list[string]=[]
+    selectGraphs: string[] = [],
 ): Promise<string> {
     const text = (purpose === 'specification' ? 'Save specification as...' : 'Save graph as file as...');
     const logo = page.locator('.logo');
@@ -51,8 +51,9 @@ async function saveFileAs(
 
     const graphList = await page.locator('.graph_list');
 
-    for(const graph of selectGraphs)
-    {
+    // eslint-disable-next-line no-restricted-syntax
+    for (const graph of selectGraphs) {
+        // eslint-disable-next-line no-await-in-loop
         await graphList.getByText(graph).first().click();
     }
 
@@ -70,15 +71,20 @@ async function saveFileAs(
     return filePath;
 }
 
-async function saveSpecificationAs(page: Page, testInfo, filename: string) {
+async function saveSpecificationAs(page: Page, testInfo: TestInfo, filename: string) {
     return saveFileAs(page, testInfo, 'specification', filename);
 }
 
-async function saveDataflowAs(page: Page, testInfo, filename: string,graphs:list[string]=[]) {
+async function saveDataflowAs(
+    page: Page,
+    testInfo: TestInfo,
+    filename: string,
+    graphs: string[] = [],
+) {
     return saveFileAs(page, testInfo, 'dataflow', filename, graphs);
 }
 
-async function loadIncludeSpecification(testInfo) {
+async function loadIncludeSpecification(testInfo: TestInfo) {
     const specificationName = 'sample-include-specification.json';
     const specification = await fs.readFile(
         getPathToJsonFile(specificationName),
@@ -104,24 +110,24 @@ async function loadDatflowFromFile(page: Page, dataflowFile: string) {
 }
 
 const examples = [
-    { specification: 'sample-specification.json', dataflow: 'sample-dataflow.json' },
-    { specification: 'sample-include-specification.json', dataflow: 'sample-include-dataflow.json' },
-    { specification: 'sample-include-subgraph-specification.json', dataflow: 'sample-include-subgraph-dataflow.json' },
-    { specification: 'sample-inheritance-specification.json', dataflow: 'sample-inheritance-dataflow.json' },
-    { specification: 'sample-inout-specification.json', dataflow: 'sample-inout-dataflow.json' },
-    { specification: 'sample-interface-groups-specification.json', dataflow: 'sample-interface-groups-dataflow.json' },
-    { specification: 'sample-loopback-specification.json', dataflow: 'sample-loopback-dataflow.json' },
-    { specification: 'sample-multiple-io-specification.json', dataflow: 'sample-multiple-io-dataflow.json' },
-    { specification: 'sample-subgraph-specification.json', dataflow: 'sample-subgraph-dataflow.json' },
-    { specification: 'sample-related-graph-specification.json', dataflow: undefined },
-    { specification: 'sample-dynamic-interfaces-specification.json', dataflow: 'sample-dynamic-interfaces-dataflow.json' },
-    { specification: 'sample-with-shape-specification.json', dataflow: 'sample-with-shape-dataflow.json' },
-    { specification: 'sample-rectangle-grouping-specification.json', dataflow: 'sample-rectangle-grouping-dataflow.json' },
-    { specification: 'sample-styling-specification.json', dataflow: 'sample-styling-dataflow.json' },
-    { specification: 'sample-huge-specification.json', dataflow: 'sample-huge-dataflow.json', timeout: 180_000 },
+    { specification: 'sample-specification.json',                    dataflow: 'sample-dataflow.json'                        },
+    { specification: 'sample-include-specification.json',            dataflow: 'sample-include-dataflow.json'                },
+    { specification: 'sample-include-subgraph-specification.json',   dataflow: 'sample-include-subgraph-dataflow.json'       },
+    { specification: 'sample-inheritance-specification.json',        dataflow: 'sample-inheritance-dataflow.json'            },
+    { specification: 'sample-inout-specification.json',              dataflow: 'sample-inout-dataflow.json'                  },
+    { specification: 'sample-interface-groups-specification.json',   dataflow: 'sample-interface-groups-dataflow.json'       },
+    { specification: 'sample-loopback-specification.json',           dataflow: 'sample-loopback-dataflow.json'               },
+    { specification: 'sample-multiple-io-specification.json',        dataflow: 'sample-multiple-io-dataflow.json'            },
+    { specification: 'sample-subgraph-specification.json',           dataflow: 'sample-subgraph-dataflow.json'               },
+    { specification: 'sample-related-graph-specification.json',      dataflow: undefined                                     },
+    { specification: 'sample-dynamic-interfaces-specification.json', dataflow: 'sample-dynamic-interfaces-dataflow.json'     },
+    { specification: 'sample-with-shape-specification.json',         dataflow: 'sample-with-shape-dataflow.json'             },
+    { specification: 'sample-rectangle-grouping-specification.json', dataflow: 'sample-rectangle-grouping-dataflow.json'     },
+    { specification: 'sample-styling-specification.json',            dataflow: 'sample-styling-dataflow.json'                },
+    { specification: 'sample-huge-specification.json',               dataflow: 'sample-huge-dataflow.json', timeout: 180_000 },
 ];
 
-async function dragAndDropFile(page: Page, selector: string, fileName: string, testInfo) {
+async function dragAndDropFile(page: Page, selector: string, fileName: string, testInfo: TestInfo) {
     const filePath = getPathToJsonFile(fileName);
     const buffer = readFileSync(filePath).toString('base64');
 
@@ -253,8 +259,8 @@ test('save and load graph partially', async ({ page }, testInfo) => {
 });
 
 const exampleToFail = {
-    specification: "sample-specification.json"
-}
+    specification: 'sample-specification.json',
+};
 
 async function expectErrors(page: Page) {
     const loading = page.locator('.loading-screen');
@@ -270,7 +276,7 @@ async function expectErrors(page: Page) {
 test(`spec loading ${exampleToFail.specification} (check for fail)`, async ({ page }, testInfo) => {
     const json = JSON.parse(readFileSync(getPathToJsonFile(exampleToFail.specification), 'utf-8'));
 
-    json.nodes[1].extends[0] = "NonexistentType";
+    json.nodes[1].extends[0] = 'NonexistentType';
 
     const outputPath = testInfo.outputPath('failing-specification.json');
     writeFileSync(outputPath, JSON.stringify(json, null, 2), 'utf-8');
