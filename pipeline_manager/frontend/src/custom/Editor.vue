@@ -88,9 +88,9 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
                         styles, onclose);
                     }"
                     @select="(ev) => selectNode(node, ev)"
-                    @transformed="() => updateGroupsOf(node.id)"
                     @startDrag="() => handleStartDrag(node)"
                     @stopDrag="handleStopDrag"
+                    @transformed="() => updateSelectedNodesGroup(node.id)"
                 />
                 <CustomNode
                     v-for="node in ignoredNodes"
@@ -658,12 +658,16 @@ export default defineComponent({
                         groupsOfNode.value[nodeId].push(group);
                     });
             }
+            let updatedNodes = [];
             groupsOfNode.value[nodeId].forEach((group) => {
                 const { min, max } = computeGroupBoundsFromDOM(group.nodes);
 
                 group.min = min;
                 group.max = max;
+                updatedNodes = [...updatedNodes, ...group.nodes];
             });
+
+            return updatedNodes;
         };
         const updateVisibleGroups = useThrottleFn(() => {
             groupsOfNode.value = {};
@@ -725,6 +729,22 @@ export default defineComponent({
                 (n) => props.viewModel.displayedGraph.selectedNodes.includes(n),
             ),
         );
+
+        const updateSelectedNodesGroup = (nodeId) => {
+            if (highlightedNodes.value.length < 2) {
+                updateGroupsOf(nodeId);
+                return;
+            }
+            const visitiedNodes = new Set();
+            highlightedNodes.value.forEach((node) => {
+                if (visitiedNodes.has(node.id)) {
+                    // omitts nodes that has been updated.
+                    return;
+                }
+                const updatedNodes = updateGroupsOf(node.id);
+                updatedNodes.forEach((n) => visitiedNodes.add(n.id));
+            });
+        };
 
         const externalApplicationManager = getExternalApplicationManager();
 
@@ -1197,6 +1217,7 @@ export default defineComponent({
             keyDown,
             keyUp,
             selectNode,
+            updateSelectedNodesGroup,
             currentView: editorManager.currentView,
             currentViewName,
             rectangleSelection,
