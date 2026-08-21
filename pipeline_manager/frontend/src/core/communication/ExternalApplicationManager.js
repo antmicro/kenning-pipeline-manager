@@ -4,7 +4,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { createJSONRPCErrorResponse, createJSONRPCSuccessResponse, JSONRPCErrorCode } from 'json-rpc-2.0';
+import {
+    createJSONRPCErrorResponse, createJSONRPCSuccessResponse, JSONRPCErrorCode,
+    JSONRPCErrorException,
+} from 'json-rpc-2.0';
 import { charset } from 'mime-types';
 import { ref } from 'vue';
 import { useViewModel } from '@baklavajs/renderer-vue';
@@ -351,8 +354,14 @@ class ExternalApplicationManager {
                     options.template,
                 );
             });
-        } catch (error) {
-            RPCTerminalLog('warning', error, 'Dialog boxes cannot be retrieved.');
+        } catch (e) {
+            if (e instanceof JSONRPCErrorException) {
+                await this.requestTerminalRead(
+                    'dialogErrors',
+                    `Dialog box validation: ${e.data}`,
+                );
+            }
+            RPCTerminalLog('warning', e, 'Dialog boxes cannot be retrieved.');
         }
     }
 
