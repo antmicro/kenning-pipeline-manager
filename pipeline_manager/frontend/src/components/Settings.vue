@@ -330,7 +330,9 @@ export default {
         const viewSelected = computed(() => {
             const option = new SelectInterface(
                 'Selected view',
-                props.viewModel.editor.currentView,
+                props.viewModel.editor.currentViews.get(
+                    displayedGraphId.value,
+                ) ?? props.viewModel.editor.defaultView,
                 props.viewModel.editor.renderViews.get(
                     displayedGraphId.value,
                 ).map((view) =>
@@ -339,7 +341,10 @@ export default {
 
             option.events.setValue.subscribe(this, (v) => {
                 const { editor } = props.viewModel;
-                editor.currentView = v;
+                editor.currentViews.set(
+                    displayedGraphId.value,
+                    v,
+                );
                 editor.centerZoom();
             });
 

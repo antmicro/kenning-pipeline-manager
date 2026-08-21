@@ -134,7 +134,13 @@ export default defineComponent({
             };
         };
 
-        const currentViewName = computed(() => graph.value.editor.currentView);
+        const currentViewName = computed(() => {
+            const { editorManager } = graph.value.editor;
+            const displayedGraphId = editorManager?.baklavaView.displayedGraph.id;
+            return graph.value.editor.currentViews?.value?.get(
+                displayedGraphId,
+            ) ?? graph.value.editor.defaultView;
+        });
         watch(currentViewName, async () => {
             await nextTick();
             updateCoords();

@@ -620,7 +620,8 @@ export class CustomNode extends Node {
         try {
             const { viewModel } = useViewModel();
             const { editor } = viewModel.value;
-            const curName = editor.currentView;
+            const displayedGraphId = editor.editorManager?.baklavaView.displayedGraph.id;
+            const curName = editor.currentViews.get(displayedGraphId) ?? editor.defaultView;
             const entry = this.views?.find((v) => v.name === curName);
 
             if (entry === undefined) {
@@ -637,7 +638,8 @@ export class CustomNode extends Node {
         try {
             const { viewModel } = useViewModel();
             const { editor } = viewModel.value;
-            const curName = editor.currentView;
+            const displayedGraphId = editor.editorManager?.baklavaView.displayedGraph.id;
+            const curName = editor.currentViews.get(displayedGraphId) ?? editor.defaultView;
             const entry = this.views?.find((v) => v.name === curName);
             return entry ? entry.position : this.internalPosition;
         } catch {
@@ -1157,8 +1159,10 @@ const createViewInterface = (newInf) => {
         }
         const { graph } = editor;
         const views = graph?.getNodeViews(intf.nodeId);
-        const { currentView } = editor;
-        const view = views?.find((v) => v.name === currentView);
+        const { currentViews } = editor;
+        const displayedGraphId = editor.editorManager?.baklavaView.displayedGraph.id;
+        const curName = currentViews.get(displayedGraphId) ?? editor.defaultView;
+        const view = views?.find((v) => v.name === curName);
 
         if (view !== undefined &&
             Object.hasOwn(view, 'interfaces') &&
@@ -1177,8 +1181,10 @@ const createViewInterface = (newInf) => {
         }
         const { graph } = editor;
         const views = graph?.getNodeViews(intf.nodeId);
-        const { currentView } = editor;
-        const view = views?.find((v) => v.name === currentView);
+        const { currentViews } = editor;
+        const displayedGraphId = editor.editorManager?.baklavaView.displayedGraph.id;
+        const curName = currentViews.get(displayedGraphId) ?? editor.defaultView;
+        const view = views?.find((v) => v.name === curName);
 
         if (view === undefined) {
             return undefined;

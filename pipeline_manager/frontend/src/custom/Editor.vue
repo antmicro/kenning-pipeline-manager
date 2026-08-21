@@ -665,7 +665,15 @@ export default defineComponent({
             });
         }, 50); // 20fps
 
-        const currentViewName = computed(() => props.viewModel.editor.currentView);
+        const currentViewName = computed(() => {
+            const displayedGraphId = props.viewModel.editor
+                .editorManager
+                ?.baklavaView
+                .displayedGraph.id;
+            return props.viewModel.editor.currentViews?.value?.get(
+                displayedGraphId,
+            ) ?? props.viewModel.editor.defaultView;
+        });
 
         watch([
             () =>
@@ -1220,7 +1228,6 @@ export default defineComponent({
             keyUp,
             selectNode,
             updateSelectedNodesGroup,
-            currentView: editorManager.currentView,
             currentViewName,
             rectangleSelection,
             greyedOutNodes,

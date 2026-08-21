@@ -85,7 +85,7 @@ export default class PipelineManagerEditor extends Editor {
 
     parentNodes = new Map();
 
-    currentView = this.defaultView;
+    currentViews = new Map();
 
     // node types created in visual-editor
     additionalNodeTypes = new Set();
@@ -181,8 +181,9 @@ export default class PipelineManagerEditor extends Editor {
      * @throws {Error} Throws if there are issues switching to a subgraph.
      */
     save() {
-        const lastView = this.currentView;
-        this.currentView = this.defaultView;
+        const displayedGraphId = this.editorManager?.baklavaView.displayedGraph.id;
+        const lastView = this.currentViews.get(displayedGraphId) ?? this.defaultView;
+        this.currentViews.set(displayedGraphId, this.defaultView);
         const graphs = Array.from(this.graphs)
             .filter((g) => !g.specGraph)
             .filter((g) => g.toSave);
@@ -261,7 +262,7 @@ export default class PipelineManagerEditor extends Editor {
             dataflowState.entryGraph = dataflowState.graphs[0].id;
         }
 
-        this.currentView = lastView;
+        this.currentViews.set(displayedGraphId, lastView);
         return dataflowState;
     }
 
@@ -898,7 +899,9 @@ export default class PipelineManagerEditor extends Editor {
     }
 
     _getFromView(node, field) {
-        const view = this.currentView;
+        const view = this.currentViews.get(
+            this.editorManager?.baklavaView.displayedGraph.id,
+        ) ?? this.defaultView;
         const viewEntry = node?.views?.find((v) => v.name === view);
         if (viewEntry && viewEntry.style) {
             const val = this.getNodeStyle(viewEntry.style)?.[field];
@@ -955,7 +958,9 @@ export default class PipelineManagerEditor extends Editor {
     }
 
     getNodeDisplayedPosition(node) {
-        const curName = this.currentView;
+        const curName = this.currentViews.get(
+            this.editorManager?.baklavaView.displayedGraph.id,
+        ) ?? this.defaultView;
         const entry = node.views?.find((v) => v.name === curName);
         return entry ? entry.position : node.position;
     }
@@ -1044,7 +1049,9 @@ export default class PipelineManagerEditor extends Editor {
     getNodeInstanceStyle(node) {
         const nodeType = this.nodeTypes.get(node.type);
         let val;
-        const view = this.currentView;
+        const view = this.currentViews.get(
+            this.editorManager?.baklavaView.displayedGraph.id,
+        ) ?? this.defaultView;
         const viewEntry = node.views?.find((v) => v.name === view);
         if (viewEntry && viewEntry.style) {
             val = viewEntry.style;

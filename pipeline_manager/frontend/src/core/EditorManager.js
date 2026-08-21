@@ -1428,11 +1428,13 @@ export default class EditorManager {
     /* eslint-enable max-len */
     extractGraphLayout(graph) {
         const layout = new Map();
-        const { currentView } = this.editor;
+        const { currentViews } = this.editor;
+        const displayedGraphId = this.editor.editorManager?.baklavaView.displayedGraph.id;
+        const curName = currentViews.get(displayedGraphId) ?? this.editor.defaultView;
 
         graph.nodes.forEach((node) => {
             const nodeType = this.editor.nodeTypes.get(node.name);
-            const nodeView = node?.views?.find((v) => v.name === currentView);
+            const nodeView = node?.views?.find((v) => v.name === curName);
             const position = nodeView?.position ?? node?.position ?? { x: 0.0, y: 0.0 };
             const { id } = node;
             const style = nodeView?.style ?? nodeType?.style;
@@ -1471,7 +1473,11 @@ export default class EditorManager {
     /* eslint-enable max-len */
     static importGraphLayout(graph, content) {
         const { viewModel } = useViewModel();
-        const { currentView } = viewModel.value.editor;
+        const { currentViews } = viewModel.value.editor;
+        const displayedGraphId =
+            viewModel.value.editor.editorManager?.baklavaView.displayedGraph.id;
+        const curName = currentViews.get(displayedGraphId) ?? viewModel.value.editor.defaultView;
+
         const errors = [];
 
         const layout = content?.layout;
@@ -1485,7 +1491,7 @@ export default class EditorManager {
         Object.entries(layout).forEach(([key, value]) => {
             const node = graph.nodes.find((n) => n.id === key);
             if (node !== undefined) {
-                const nodeView = node?.views?.find((v) => v.name === currentView);
+                const nodeView = node?.views?.find((v) => v.name === curName);
                 if (nodeView !== undefined) {
                     nodeView.position.x = value.position.x;
                     nodeView.position.y = value.position.y;
