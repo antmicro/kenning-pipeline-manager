@@ -574,7 +574,7 @@ const onContextMenuTitleClick = async (action) => {
             color: nodeColor,
             isLayerInherited: props.node.simpleInherited?.includes('layer'),
             isCategoryInherited: props.node.simpleInherited?.includes('category'),
-            isShaped: customShape !== undefined,
+            isShaped: customShape.value !== undefined,
         };
 
         configurationState.editedType = nodeData.name;
@@ -799,7 +799,7 @@ const classes = computed(() => ({
     '--hidden': props.hidden,
     '--minimal': nodeMinimal.value,
     '--transparent': customShape.value !== undefined,
-    '--shaped': customShape !== undefined,
+    '--shaped': customShape.value !== undefined,
     '--clean': nodeClean.value,
     __readonly: viewModel.value.editor.readonly,
 }));
@@ -1072,7 +1072,7 @@ const styles = computed(() => ({
     'min-height': fitTitle.value ? '0' : undefined,
     width: width.value,
     height: height.value,
-    display: customShape === undefined ? 'inherit' : 'block',
+    display: customShape.value === undefined ? 'inherit' : 'block',
     cursor: menuState.addingPositionedInterface ? 'default' : undefined,
 }));
 
@@ -1377,16 +1377,16 @@ const createContextMenuInterfaceItems = () => {
             { value: 'MoveUp', label: 'Move Up' },
             { value: 'MoveDown', label: 'Move Down' },
         );
-    }
 
-    if (chosenInterface.value !== undefined && chosenInterface.value.side) {
-        switch (chosenInterface.value.side) {
-            case 'left':
-                items.push({ value: 'MoveRight', label: 'Move Right' });
-                break;
-            case 'right':
-                items.push({ value: 'MoveLeft', label: 'Move Left' });
-                break;
+        if (chosenInterface.value !== undefined && chosenInterface.value.side) {
+            switch (chosenInterface.value.side) {
+                case 'left':
+                    items.push({ value: 'MoveRight', label: 'Move Right' });
+                    break;
+                case 'right':
+                    items.push({ value: 'MoveLeft', label: 'Move Left' });
+                    break;
+            }
         }
     }
 
