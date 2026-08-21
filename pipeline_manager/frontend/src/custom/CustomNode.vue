@@ -257,11 +257,23 @@ const pillText = computed(() => viewModel.value.editor.getPillText(node.value));
 const pillColor = computed(() => viewModel.value.editor.getPillColor(node.value));
 const pillTextColor = computed(() => viewModel.value.editor.getTextColor(pillColor.value));
 
-const customShape = viewModel.value.editor.getShape(node.value.type);
+const editorManager = EditorManager.getEditorManagerInstance();
+
+const customShape = computed(() => {
+    const shapeLink = viewModel.value.editor.getShape(node.value.type);
+    if (shapeLink === undefined) {
+        return undefined;
+    }
+    const cacheName = `./${shapeLink}`;
+
+    if (Object.hasOwn(editorManager.baklavaView.cache, cacheName)) {
+        return editorManager.baklavaView.cache[cacheName];
+    }
+
+    return shapeLink;
+});
 
 const displayNoResources = !viewModel.value.editor.nodeURLsEmpty();
-
-const editorManager = EditorManager.getEditorManagerInstance();
 
 const displayedInputs = computed(() => Object.values(props.node.inputs).filter((ni) => !ni.hidden));
 const displayedOutputs = computed(() =>
@@ -771,13 +783,13 @@ const classes = computed(() => ({
     '--greyed-out': props.greyedOut,
     '--hidden': props.hidden,
     '--minimal': nodeMinimal.value,
-    '--transparent': customShape !== undefined,
+    '--transparent': customShape.value !== undefined,
     '--clean': nodeClean.value,
     __readonly: viewModel.value.editor.readonly,
 }));
 
 const subgraphStyle = computed(() => {
-    if (customShape !== undefined) {
+    if (customShape.value !== undefined) {
         return {
             position: 'absolute',
             left: '-14px',
@@ -1020,7 +1032,7 @@ const styles = computed(() => ({
     'min-height': fitTitle.value ? '0' : undefined,
     width: width.value,
     height: height.value,
-    display: customShape === undefined ? 'inherit' : 'block',
+    display: customShape.value === undefined ? 'inherit' : 'block',
 }));
 
 // another potential source of issue
@@ -1102,7 +1114,7 @@ const nodeTitleStyle = computed(() => {
 
     const position = customShapeTitlePosition.value;
 
-    if (position !== undefined && customShape !== undefined) {
+    if (position !== undefined && customShape.value !== undefined) {
         style.position = 'absolute';
         style.left = `calc(${position.x}% + ${customTitleOffset.value.x}px)`;
         style.top = `calc(${position.y}% + ${customTitleOffset.value.y}px)`;
