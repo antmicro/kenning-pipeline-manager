@@ -1618,7 +1618,7 @@ const createContextMenuPropertyItems = () => {
         if (!chosenProperty.groupProperty && !isBigBus(chosenProperty)) {
             items.push({ value: 'Hide', label: 'Hide', icon: icons.Hide });
         }
-        if ((typeof chosenProperty.bus !== 'undefined' && chosenProperty.bus.stubs.length === 0) && isBigBus(chosenProperty)) {
+        if (((typeof chosenProperty.bus !== 'undefined' && chosenProperty.bus.stubs === undefined) || (typeof chosenProperty.bus !== 'undefined' && chosenProperty.bus.stubs.length === 0)) && isBigBus(chosenProperty)) {
             items.push({ value: 'HideInterface', label: 'Hide interface', icon: icons.Hide });
         }
     }

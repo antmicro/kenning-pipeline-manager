@@ -339,7 +339,6 @@ export default class PipelineManagerEditor extends Editor {
         // and layout computation
         const readonlySetting = this.readonly;
         this.readonly = true;
-
         const result = {
             errors: [],
             warnings: [],
@@ -421,7 +420,6 @@ export default class PipelineManagerEditor extends Editor {
                     this.registerGraph(graphObject);
                 }
             });
-
             if (!result.errors.length || globalProperties.softLoad) {
                 let graphToLoad;
                 if (!templateName) {
@@ -553,6 +551,7 @@ export default class PipelineManagerEditor extends Editor {
                     ...Object.values(inputs),
                     ...Object.values(outputs),
                 ];
+
                 const connections = node.graphInstance.connections.filter(
                     (c) => interfaces.includes(c.from) || interfaces.includes(c.to),
                 );
@@ -596,6 +595,29 @@ export default class PipelineManagerEditor extends Editor {
                     conn.from = newInterfaces.find((intf) => intf.id === conn.from.id) ?? conn.from;
                     conn.to = newInterfaces.find((intf) => intf.id === conn.to.id) ?? conn.to;
                     node.graphInstance.addConnection(conn.from, conn.to);
+                });
+            }
+            const stateGraph = state.graphs.find((grph) => grph.id === graph.id);
+            if (stateGraph !== undefined) {
+                graph._nodes.forEach((node) => {
+                    const outputs = Object.values(node.outputs);
+                    let stateNode = stateGraph.nodes.find((sNode) => sNode.id === node.id);
+                    outputs.forEach((intf) => {
+                        const stateInterface = stateNode.interfaces.find((inter) =>
+                            inter.id === intf.id);
+                        if (stateInterface !== undefined) {
+                            intf.hidden = stateInterface.hidden;
+                        }
+                    });
+                    const inputs = Object.entries(node.inputs).filter(([name, _]) => !name.startsWith('property_')).map(([, ni]) => ni);
+                    stateNode = stateGraph.nodes.find((sNode) => sNode.id === node.id);
+                    inputs.forEach((intf) => {
+                        const stateInterface = stateNode.interfaces.find((inter) =>
+                            inter.id === intf.id);
+                        if (stateInterface !== undefined) {
+                            intf.hidden = stateInterface.hidden;
+                        }
+                    });
                 });
             }
         });

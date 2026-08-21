@@ -148,6 +148,9 @@
                                     "description": "Name of the external socket displayed in the node",
                                     "type": ["string", "null"]
                                 },
+                                "hidden": {
+                                    "$ref": "#/$defs/hidden"
+                                },
                                 "bus": {
                                     "description": "Determines bus attributes",
                                     "type": "object",
