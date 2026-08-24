@@ -383,3 +383,30 @@ test(`entryGraph ${exampleNestedEntry.dataflow} nested after dead-end subgraph`,
     await waitForSubgraph(page, 'Nested entry graph');
     await verifyNodeCount(page, 2);
 });
+
+const exampleSubgraphStyles = {
+    specification: 'sample-hifive-specification.json',
+    dataflow: 'sample-hifive-dataflow.json',
+};
+
+test('test loading of sample with styles defined for subgraph', async ({ page }, testInfo) => {
+    await page.goto(getUrl());
+    await loadSpecification(page, exampleSubgraphStyles.specification);
+    await expectNoErrors(page);
+    await loadDataflow(page, exampleSubgraphStyles.dataflow);
+    await expectNoErrors(page);
+});
+
+test('test loading of sample with absent style', async ({ page }, testInfo) => {
+    await page.goto(getUrl());
+
+    const specification = JSON.parse(readFileSync(getPathToJsonFile(exampleSubgraphStyles.specification), 'utf-8'));
+    delete specification.metadata.styles.renodeStyle;
+    const outputPath = testInfo.outputPath('sample-hifive-modified-specification.json');
+    writeFileSync(outputPath, JSON.stringify(specification, null, 2), 'utf-8');
+
+    const fileChooserSpec = await openFileChooser(page, 'specification');
+    await fileChooserSpec.setFiles(outputPath);
+
+    await expectErrors(page);
+});
