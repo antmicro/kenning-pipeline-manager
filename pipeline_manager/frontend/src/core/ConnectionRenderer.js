@@ -662,7 +662,15 @@ export default class ConnectionRenderer {
         const cached = this.aStarCache.get(connection.id);
 
         if (cached && Date.now() - cached.lastRun < aStarConfig.cacheInvalidationPeriod) {
-            return cached.path;
+            // Check whether path starts from the same point
+            const firstPoint = cached.path.at(0);
+            const lastPoint = cached.path.at(-1);
+
+            if (firstPoint.x === x1 && firstPoint.y === y1 &&
+                lastPoint.x === x2 && lastPoint.y === y2
+            ) {
+                return cached.path;
+            }
         }
 
         const nc = new NormalizedConnection(x1, y1, x2, y2, connection);
@@ -1727,6 +1735,9 @@ export default class ConnectionRenderer {
             return;
         }
 
+        const lastFromSide = nc.from.side;
+        const lastToSide = nc.to.side;
+
         if (connection.to) {
             if (nc.from.side === 'right' && nc.to.side === 'left') {
                 const dx = nc.x1 - nc.x2;
@@ -1774,6 +1785,10 @@ export default class ConnectionRenderer {
                     nc.to.side = 'left';
                     nc.to.sidePosition = nextToNodeLeftIndex;
                 }
+            }
+
+            if (lastFromSide !== nc.from.side || lastToSide !== nc.to.side) {
+                this.aStarCache.delete(connection.id);
             }
         }
     }
