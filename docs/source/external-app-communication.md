@@ -313,8 +313,8 @@ Example dictionary defining simple form:
                 "name": "Additional attributes",
                 "type": "nested",
                 "template": {
-                    "userName": {"name": "name", "type": "text"},
-                    "userId": {"name": "id", "type": "int"}
+                    "attrName": {"name": "name", "type": "text"},
+                    "attrId": {"name": "id", "type": "int"}
                 }
             }
         }

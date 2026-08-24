@@ -53,7 +53,14 @@
                         "type": "string"
                     },
                     "box": {
-                        "$ref": "common_types#/$defs/dialog_box"
+                        "oneOf": [
+                            {
+                                "$ref": "common_types#/$defs/dialog_box"
+                            },
+                            {
+                                "$ref": "common_types#/$defs/empty"
+                            }
+                        ]
                     }
                 }
             },
