@@ -553,6 +553,8 @@ export default function createPipelineManagerGraph(graph) {
     graph.addConnection = function addConnection(from, to, offset, stubID, stubSide) {
         if (!to) return undefined;
         if (!from) return undefined;
+        to.hidden = false;
+        from.hidden = false;
         // the target interface is a bus, we have to create a connection point
         [to, from] = [to, from].map((intf) => {
             if (!intf.bus?.type) {

@@ -818,7 +818,7 @@ export class CustomNode extends Node {
                         });
                     }
                 }
-                if(!ioName.startsWith('property')) {
+                if (!ioName.startsWith('property')) {
                     const busStubs = ioState.bus?.stubs?.map((stub) => ({
                         id: stub.id,
                         offset: Math.floor(stub.offset),
@@ -840,7 +840,7 @@ export class CustomNode extends Node {
                         side: ioState.side,
                         ...(!ioState.bus && { sidePosition: ioState.sidePosition }),
                         ...(!isBusEmpty && { bus }),
-                        hidden: ioState.hidden
+                        hidden: ioState.hidden,
                     });
                 }
             } else {
