@@ -1,7 +1,7 @@
 [project]
 name = "schema-fuzzer"
 version = "0.1.0"
-description = "Add your description here"
+description = "JSON Schema Fuzzer"
 readme = "README.md"
 dependencies = [
     "cyclopts>=5.2.0",
