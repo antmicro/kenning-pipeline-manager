@@ -1,0 +1,17 @@
+[project]
+name = "schema-fuzzer"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+dependencies = [
+    "hypothesis>=6.165.0",
+    "jsonschema>=4.26.0",
+    "pydantic>=2.13.4",
+    "rich>=15.0.0",
+    "typer>=0.27.1",
+]
+
+[tool.setuptools.packages.find]
+include = [
+    "schema_fuzzer*"
+]
