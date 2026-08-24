@@ -196,8 +196,8 @@ export default class ConnectionRenderer {
      * @returns Value the connection should shift from it's default position
      */
     getShift(ncFrom, ncTo, graph) {
-        const fromPosition = ncFrom.sidePosition;
-        const toPosition = ncTo.sidePosition;
+        const fromPosition = ncFrom.sidePosition ?? 0;
+        const toPosition = ncTo.sidePosition ?? 0;
 
         const shiftIndex = (fromPosition + toPosition) / 2;
 
@@ -754,17 +754,49 @@ export default class ConnectionRenderer {
         if (connection.to) {
             const shift = this.getShift(nc.from, nc.to, graph);
 
-            const fromNode = graph.nodes.filter((node) => node.id === nc.from.nodeId)[0];
-            const fromNodeWidth = this.maxNodeWidths.get(fromNode.id);
-            const toNode = graph.nodes.filter((node) => node.id === nc.to.nodeId)[0];
-            const toNodeWidth = this.maxNodeWidths.get(toNode.id);
+            const calculateOffsets = (inf, x, y) => {
+                if (inf.side === 'left') {
+                    // Positioned interfaces have sidePosition set to undefined
+                    const xl = inf.sidePosition !== undefined ? x - minMargin :
+                        x;
+                    return {
+                        x: xl,
+                        y,
+                    };
+                }
+                if (inf.side === 'right') {
+                    // Positioned interfaces have sidePosition set to undefined
+                    const xr = inf.sidePosition !== undefined ? x + minMargin :
+                        x;
+                    return {
+                        x: xr,
+                        y,
+                    };
+                }
+                if (inf.side === 'top') {
+                    const yt = y - minMargin;
+                    return {
+                        x,
+                        y: yt,
+                    };
+                }
+                if (inf.side === 'bottom') {
+                    const yb = y + minMargin;
+                    return {
+                        x,
+                        y: yb,
+                    };
+                }
+
+                return {
+                    x: 0,
+                    y: 0,
+                };
+            };
 
             const fromPoints = [
                 {
-                    x: nc.from.side === 'left' ?
-                        fromNode.position.x - minMargin :
-                        fromNode.position.x + fromNodeWidth + minMargin,
-                    y: nc.y1,
+                    ...calculateOffsets(nc.from, nc.x1, nc.y1),
                     type: PointType.FROM_HELPER,
                 },
                 {
@@ -774,10 +806,7 @@ export default class ConnectionRenderer {
 
             const toPoints = [
                 {
-                    x: nc.to.side === 'left' ?
-                        toNode.position.x - minMargin :
-                        toNode.position.x + toNodeWidth + minMargin,
-                    y: nc.y2,
+                    ...calculateOffsets(nc.to, nc.x2, nc.y2),
                     type: PointType.TO_HELPER,
                 },
                 {
