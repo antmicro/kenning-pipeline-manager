@@ -163,6 +163,11 @@
             },
             "NPNStyle":{
                 "shape": "svgs/npn.svg",
+                "hiddenNames": [
+                    "c",
+                    "b",
+                    "e"
+                ],
                 "positions": {
                     "c": {
                         "x": 81,
@@ -180,6 +185,7 @@
             },
             "PNPStyle":{
                 "shape": "svgs/pnp.svg",
+                "hiddenNames": "all",
                 "positions": {
                     "e": {
                         "x": 73,
