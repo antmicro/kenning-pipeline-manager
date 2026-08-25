@@ -14,9 +14,10 @@
     transition: box-shadow var(--baklava-visual-transition) !important;
     filter: none;
 
-    img {
+    .--shape {
         width: 100%;
         height: 100%;
+        position: absolute;
     }
 
     &.--selected {

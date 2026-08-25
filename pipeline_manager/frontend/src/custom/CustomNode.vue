@@ -88,15 +88,19 @@ from moving or deleting the nodes.
             <!-- disable transition to avoid rendering additional redraw for viewport adjustment -->
 
         </div>
-        <img :src="customShape"
+        <svg
             v-if="customShape !== undefined"
+            class="--shape"
             draggable="false"
             ref="svgRef"
             @pointerdown.left.exact="onMouseDown"
             @pointerdown.left="startDragWrapper($event)"
             @pointerdown.right="openContextMenuTitle"
             v-long-press:500="openContextMenuTitle"
-        />
+            preserveAspectRatio="none"
+        >
+            <image :href="customShape" preserveAspectRatio="none" width="100%" height="100%"/>
+        </svg>
         <!-- Positioned inputs -->
         <template v-for="input in positionedInterfaces">
             <CustomInterface
