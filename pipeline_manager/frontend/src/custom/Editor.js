@@ -963,6 +963,10 @@ export default class PipelineManagerEditor extends Editor {
         return false;
     }
 
+    getNodeHiddenNames(nodeName) {
+        return this.getNodeStyle(this.getNodeTypeStyle(nodeName))?.hiddenNames ?? [];
+    }
+
     getNodeInterfacePositions(nodeName) {
         return this.getNodeStyle(this.getNodeTypeStyle(nodeName))?.positions ?? {};
     }
