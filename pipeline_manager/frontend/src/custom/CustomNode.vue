@@ -114,6 +114,7 @@ from moving or deleting the nodes.
                 :highlighted="isHighlighted(input)"
                 :picked="isPickedInterface(input)"
                 :style="positionedInterfaceStyle(input)"
+                :hidden-name="isInterfaceHasHiddenName(input)"
             />
             <!-- eslint-disable-next-line vue/require-v-for-key -->
         </template>
@@ -841,6 +842,11 @@ const interfacePositions = computed(() => {
 
 const nodeMinimal = computed(() => viewModel.value.editor.getNodeMinimal(node.value));
 const nodeClean = computed(() => viewModel.value.editor.getNodeClean(node.value));
+
+const hiddenNames = computed(() => viewModel.value.editor.getNodeHiddenNames(node.value.type));
+
+const isInterfaceHasHiddenName = (inf) => hiddenNames.value === 'all' ||
+    hiddenNames.value.find((n) => n === inf.name) !== undefined;
 
 const showContextMenuInterface = ref(false);
 const showContextMenuProperty = ref(false);
