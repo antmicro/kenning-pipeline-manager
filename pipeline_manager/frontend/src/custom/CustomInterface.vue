@@ -240,6 +240,7 @@ export default defineComponent({
         highlighted: Boolean,
         picked: Boolean,
         positioned: { default: false, required: false },
+        hiddenName: { default: false, required: false },
         switchSides: {},
         toggleGroup: { default: () => {}, required: false },
         updateDynamicInterfaces: { default: () => {}, required: false },
@@ -433,7 +434,7 @@ export default defineComponent({
         });
         const spanClasses = computed(() => ({
             highlighted: props.positioned,
-            hidden: props.positioned && !hovered.value,
+            hidden: (props.positioned && !hovered.value) || props.hiddenName,
             '--positioned': props.positioned,
             '--top': props.intf.side === 'top' && props.positioned,
             '--bottom': props.intf.side === 'bottom' && props.positioned,
