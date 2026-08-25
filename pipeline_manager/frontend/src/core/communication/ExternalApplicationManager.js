@@ -557,7 +557,9 @@ class ExternalApplicationManager {
         try {
             const { viewModel } = useViewModel();
             viewModel.value.editor.userMenus.showCustomDialog = false;
-            await this.request('dialog_on_submit', { data: userData });
+            const name = viewModel.value.editor.userMenus.selectedUserDialog;
+            await this.request('dialog_on_submit', { name, data: userData });
+            viewModel.value.editor.userMenus.resetUserDialog();
         } catch (error) {
             RPCTerminalLog('warning', error, 'Sending user dialog data failed');
         }
