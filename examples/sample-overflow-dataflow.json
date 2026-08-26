@@ -128,12 +128,42 @@
                     "views": [],
                     "name": "Test node #2",
                     "instanceName": "Node with set width"
+                },
+                {
+                    "id": "2318099f-cf17-4087-bafc-d611e01d47d9",
+                    "position": {
+                        "x": 533,
+                        "y": 250
+                    },
+                    "width": 0,
+                    "twoColumn": true,
+                    "interfaces": [],
+                    "properties": [],
+                    "enabledInterfaceGroups": [],
+                    "views": [],
+                    "name": "Test node with very long name #4560395402495030492039",
+                    "instanceName": "Test node with very long name #4560395402495030492039"
+                },
+                {
+                    "id": "7ccbe2b9-01e8-42a4-a4d6-0bbb0997c648",
+                    "position": {
+                        "x": 1074,
+                        "y": -122
+                    },
+                    "width": 0,
+                    "twoColumn": true,
+                    "interfaces": [],
+                    "properties": [],
+                    "enabledInterfaceGroups": [],
+                    "views": [],
+                    "name": "Test node with very long name #4560395402495030492039",
+                    "instanceName": "Test node with"
                 }
             ],
             "groups": [],
             "connections": [
                 {
-                    "id": "a89f6776-e883-44b5-9237-2460a74a431f",
+                    "id": "298b0361-482c-45d7-8081-b305cfc3b4ef",
                     "from": "c43753ab-e88e-46d9-bc8b-d22dd3cd2e5f",
                     "to": "b62e692c-5148-4c8d-bfe5-e476205bb5a5"
                 }

@@ -15,6 +15,13 @@
     },
     "nodes": [
         {
+            "name": "Test node with very long name #4560395402495030492039",
+            "category": "First Category",
+            "properties": [],
+            "interfaces": [],
+            "twoColumn": true
+        },
+        {
             "name": "Test node #1",
             "category": "First Category",
             "properties": [],
