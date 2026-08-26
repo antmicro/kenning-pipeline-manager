@@ -112,7 +112,8 @@ export default defineComponent({
         const createCheckboxOption = (params, label) => {
             const { name } = params;
 
-            if (!Object.hasOwn(props.saveConfiguration, label)) {
+            if (!Object.hasOwn(props.saveConfiguration, label) ||
+                !(typeof props.saveConfiguration[label] === 'boolean')) {
                 props.saveConfiguration[label] = CustomMenusManager
                     .getDefaultValues(label, saveConfigurationTemplate.value);
             }
@@ -151,7 +152,7 @@ export default defineComponent({
 
         const createNumberOption = (params, label) => generateNumericalOption(params, label, true);
         const createIntOption = (params, label) => generateNumericalOption(params, label, false);
-        
+
         const createInputOption = (params, label) => {
             const { name } = params;
             const createComponent = () => {
