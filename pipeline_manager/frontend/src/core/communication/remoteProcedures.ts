@@ -162,27 +162,35 @@ function getConnection(graph_id: string, from: string, to: string): any {
 /**
  * @returns open file dialog to get file path
  *
- * @param title
+ * @param name
  */
-export async function dialog_open(params: { title: string, wait: boolean }) {
+export async function dialog_open(params: { name: string, wait: boolean }) {
     const { viewModel } = useViewModel();
     const { userMenus } = viewModel.value.editor as unknown as PipelineManagerEditor;
 
-    if (!userMenus.selectDialogBox(params.title)) {
-        throw new Error(`Cannot find dialog box with name ${params.title}.`);
+    if (params?.name === undefined) {
+        throw new Error(`No valid title has been provided.`);
+    }
+
+    if (!userMenus.selectDialogBox(params.name)) {
+        throw new Error(`Cannot find dialog box with name ${params.name}.`);
     }
 
     if (!params.wait) {
         return {
+            name: params.name,
             data: {},
         };
     }
 
     // wait for answer from user form
     await userMenus.waitForDialogBoxClosed();
-    
+
     const data = structuredClone(toRaw(userMenus.userDialogData));
+    userMenus.resetUserDialog();
+
     return {
+        name: params.name,
         data,
     };
 }

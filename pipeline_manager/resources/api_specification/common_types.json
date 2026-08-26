@@ -103,10 +103,6 @@
                 "data": {
                     "description": "Data read by user dialog.",
                     "type": "object"
-                },
-                "msg": {
-                    "description": "Optional message with request status.",
-                    "type": "string"
                 }
             },
             "required": [
