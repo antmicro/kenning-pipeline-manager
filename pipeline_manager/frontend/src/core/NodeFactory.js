@@ -874,6 +874,29 @@ export class CustomNode extends Node {
         return savedState;
     }
 
+    updateInterfaceKey(type, intf, oldKey, newKey) {
+        const afterEvent = type === 'output' ? this.events.addOutput : this.events.addInput;
+        const ioObject = type === 'output' ? this.outputs[oldKey] : this.inputs[oldKey];
+
+        // remove old key
+        ioObject.events.setValue.unsubscribe(this);
+        if (type === 'output') {
+            delete this.outputs[oldKey];
+        } else {
+            delete this.inputs[oldKey];
+        }
+        afterEvent.emit(ioObject);
+
+        // add a new key
+        if (type === 'output') {
+            this.outputs[newKey] = intf;
+        } else {
+            this.inputs[newKey] = intf;
+        }
+        this.initializeIntf(type, newKey, intf);
+        afterEvent.emit(intf);
+    }
+
     /**
      * Function used to update interfaces of a node when loading a dataflow
      * in a development mode.

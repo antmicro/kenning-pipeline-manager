@@ -415,7 +415,7 @@ export default function CreateCustomGraphNodeType(template, graphNode, editorMan
          */
         updateGraphNodeInterfaces(newInputs, newOutputs, privatize = false) {
             const newInterfaces = [...newInputs, ...newOutputs];
-            const currentInterfaces = { ...this.inputs, ...this.outputs };
+            let currentInterfaces = { ...this.inputs, ...this.outputs };
 
             if (privatize) {
                 this.privatizeInterfaces(newInterfaces, currentInterfaces);
@@ -437,9 +437,16 @@ export default function CreateCustomGraphNodeType(template, graphNode, editorMan
                     const container = nodeIntf.direction === 'output' ? 'output' : 'input';
                     this.addInterface(container, `${nodeIntf.direction}_${nodeIntf.name}`, ni);
                 } else {
+                    const nodeKey = Object.entries(currentInterfaces)
+                        .find(([, intf]) => intf.id === nodeIntf.id)?.[0];
+
                     Object.assign(foundIntf, nodeIntf);
+
+                    const key = `${nodeIntf.direction}_${nodeIntf.name}`;
+                    this.updateInterfaceKey(nodeIntf.direction, foundIntf, nodeKey, key);
                 }
             });
+            currentInterfaces = { ...this.inputs, ...this.outputs };
 
             Object.values(currentInterfaces).forEach((nodeIntf) => {
                 updateInterfacePosition(this, nodeIntf, nodeIntf.side, undefined, false, false);

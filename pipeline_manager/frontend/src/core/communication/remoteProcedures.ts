@@ -223,10 +223,13 @@ export function interfaces_change(
     params: ModifyPropertiesParamsType,
 ) {
     const node = getNode(params.graph_id, params.node_id);
+    // First iteration to validate that every property exists
     // eslint-disable-next-line no-restricted-syntax
     for (const intf of params.interfaces) {
         getInterface(node, intf.id, intf.name);
     }
+
+    // Second iteration to actually alter the values
     // eslint-disable-next-line no-restricted-syntax
     for (const intfInfo of params.interfaces) {
         const intf = getInterface(node, intfInfo.id, intfInfo.name);
