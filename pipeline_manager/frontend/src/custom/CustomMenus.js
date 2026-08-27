@@ -8,6 +8,8 @@
  * Holds definition for User Dialog boxes created using API calls.
  */
 
+import { toRaw } from 'vue';
+
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-underscore-dangle */
 export default class CustomMenusManager {
@@ -151,13 +153,13 @@ export default class CustomMenusManager {
         if (type === 'select') {
             const items = value?.items ?? {};
             const ret = value?.default ?? Object.entries(items)?.[0]?.[1] ?? '';
-            return structuredClone(ret);
+            return structuredClone(toRaw(ret));
         }
 
         const ret = value?.default ??
         CustomMenusManager.defaultValuesForTypes.get(type);
 
-        return structuredClone(ret);
+        return structuredClone(toRaw(ret));
     }
 
     /**

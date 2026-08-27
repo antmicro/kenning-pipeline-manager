@@ -71,16 +71,29 @@ export default defineComponent({
             const { name, template } = params;
             const min = params?.min ?? 1;
             const max = params?.max ?? Number.MAX_SAFE_INTEGER;
+            let value = min;
 
             if (!Object.hasOwn(props.saveConfiguration, label)) {
-                props.saveConfiguration[label] = CustomMenusManager
+                const defaultValue = CustomMenusManager
                     .getDefaultValues(label, saveConfigurationTemplate.value);
+
+                if (Array.isArray(defaultValue)) {
+                    props.saveConfiguration[label] = defaultValue;
+                    value = Math.max(props.saveConfiguration[label].length, min);
+                } else {
+                    value = defaultValue;
+                    props.saveConfiguration[label] = [];
+                }
+            } else {
+                value = props.saveConfiguration[label].length;
             }
+
             return [computed(() =>
                 new DynamicFormInterface(
                     name,
                     template,
                     props.saveConfiguration[label],
+                    value,
                     min,
                     max,
                 )),

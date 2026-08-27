@@ -55,12 +55,13 @@ export default defineComponent({
     setup(props) {
         const dynamicTemplates = ref([]);
         const config = toRef(props.intf, 'config');
+        const defValue = toRef(props.intf, 'value');
 
         const resizeArray = (size) => {
             if (config.value.length > size) {
-                config.value.splice(size - 1, config.value.length - size);
+                config.value.splice(size);
             } else if (config.value.length < size) {
-                const toAppend = (new Array(size - config.value.length)).fill({});
+                const toAppend = Array.from({ length: size - config.value.length }, () => ({}));
                 config.value.push(...toAppend);
             }
         };
@@ -82,7 +83,7 @@ export default defineComponent({
             }
         };
         // add first element
-        update(1);
+        update(defValue.value);
         /* eslint-disable vue/no-mutating-props */
         /* eslint-disable no-param-reassign */
         const amountOfProp = computed(() => {
