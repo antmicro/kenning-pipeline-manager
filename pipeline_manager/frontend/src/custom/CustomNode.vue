@@ -123,6 +123,7 @@ from moving or deleting the nodes.
         <div
             class="__content"
             @pointerdown.right="openContextMenuTitle"
+            v-if="customShape === undefined"
             >
             <!-- Properties -->
             <div class="__properties" ref="propertiesRef">
