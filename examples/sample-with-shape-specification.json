@@ -3,6 +3,8 @@
     "nodes": [
         {
             "name": "LOGO",
+            "width": 300,
+            "height": 100,
             "style": "AntmicroStyle"
         },
         {
@@ -10,7 +12,8 @@
             "interfaces": [
                 {"name": "a", "direction": "inout", "side": "top"}
             ],
-            "width": 200,
+            "width": 150,
+            "height": 200,
             "style": "GNDStyle"
         },
         {
@@ -20,6 +23,7 @@
                 {"name": "b", "direction": "inout", "side": "bottom"}
             ],
             "width": 200,
+            "height": 250,
             "style": "VoltageStyle"
         },
         {
@@ -29,6 +33,7 @@
                 {"name": "b", "direction": "inout", "side": "bottom"}
             ],
             "width": 200,
+            "height": 250,
             "style": "SignalStyle"
         },
         {
@@ -38,6 +43,7 @@
                 {"name": "b", "direction": "inout", "side": "right"}
             ],
             "width": 200,
+            "height": 50,
             "style": "ResistorStyle"
         },
         {
@@ -47,7 +53,8 @@
                 {"name": "b", "direction": "inout", "side": "left"},
                 {"name": "e", "direction": "inout", "side": "bottom"}
             ],
-            "width": 200,
+            "width": 150,
+            "height": 150,
             "style": "NPNStyle"
         },
         {
@@ -57,7 +64,8 @@
                 {"name": "b", "direction": "inout", "side": "left"},
                 {"name": "e", "direction": "inout", "side": "top"}
             ],
-            "width": 200,
+            "width": 150,
+            "height": 150,
             "style": "PNPStyle"
         }
     ],
@@ -74,7 +82,7 @@
                 "shape": "svgs/gnd.svg",
                 "positions": {
                     "a": {
-                        "x": 49,
+                        "x": 50,
                         "y": 0
                     }
                 }
@@ -84,11 +92,11 @@
                 "positions": {
                     "a": {
                         "x": 0,
-                        "y": 37
+                        "y": 50
                     },
                     "b": {
                         "x": 100,
-                        "y": 37
+                        "y": 50
                     }
                 }
             },
@@ -101,7 +109,7 @@
                     },
                     "b": {
                         "x": 50,
-                        "y": 93
+                        "y": 100
                     }
                 }
             },
@@ -114,7 +122,7 @@
                     },
                     "b": {
                         "x": 50,
-                        "y": 93
+                        "y": 100
                     }
                 }
             },
@@ -127,11 +135,11 @@
                     },
                     "b": {
                         "x": 0,
-                        "y": 45
+                        "y": 50
                     },
                     "e": {
                         "x": 81,
-                        "y": 91
+                        "y": 100
                     }
                 }
             },
@@ -143,12 +151,12 @@
                         "y": 0
                     },
                     "b": {
-                        "x": 2,
-                        "y": 45
+                        "x": 0,
+                        "y": 50
                     },
                     "c": {
                         "x": 73,
-                        "y": 85
+                        "y": 100
                     }
                 }
             }

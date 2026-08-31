@@ -31,7 +31,8 @@
                     "properties": [],
                     "enabledInterfaceGroups": [],
                     "name": "Resistor",
-                    "instanceName": "Resistor"
+                    "instanceName": "Resistor",
+                    "height": 50
                 },
                 {
                     "id": "f70452bc-2bf4-4de1-9eef-9a27cc2386a1",
@@ -39,7 +40,7 @@
                         "x": 918,
                         "y": -228
                     },
-                    "width": 200,
+                    "width": 150,
                     "twoColumn": true,
                     "interfaces": [
                         {
@@ -65,7 +66,8 @@
                     "properties": [],
                     "enabledInterfaceGroups": [],
                     "name": "NPN",
-                    "instanceName": "NPN"
+                    "instanceName": "NPN",
+                    "height": 150
                 },
                 {
                     "id": "ce2bd945-b217-42d0-be45-a796f608b5ba",
@@ -73,7 +75,7 @@
                         "x": 916,
                         "y": 372
                     },
-                    "width": 200,
+                    "width": 150,
                     "twoColumn": true,
                     "interfaces": [
                         {
@@ -99,7 +101,8 @@
                     "properties": [],
                     "enabledInterfaceGroups": [],
                     "name": "PNP",
-                    "instanceName": "PNP"
+                    "instanceName": "PNP",
+                    "height": 150
                 },
                 {
                     "id": "f07be7de-1167-45ec-9183-b4ba7ded04e7",
@@ -128,15 +131,16 @@
                     "properties": [],
                     "enabledInterfaceGroups": [],
                     "name": "Resistor",
-                    "instanceName": "Resistor"
+                    "instanceName": "Resistor",
+                    "height": 50
                 },
                 {
                     "id": "83353ef9-e382-4fdd-aa39-d2a7cda22199",
                     "position": {
-                        "x": 966,
-                        "y": 814
+                        "x": 950,
+                        "y": 719
                     },
-                    "width": 200,
+                    "width": 150,
                     "twoColumn": true,
                     "interfaces": [
                         {
@@ -149,7 +153,8 @@
                     "properties": [],
                     "enabledInterfaceGroups": [],
                     "name": "GND",
-                    "instanceName": "GND"
+                    "instanceName": "GND",
+                    "height": 200
                 },
                 {
                     "id": "3e21c8f2-ff12-4ecb-92cf-bfb6727bbf17",
@@ -176,15 +181,16 @@
                     "properties": [],
                     "enabledInterfaceGroups": [],
                     "name": "Voltage",
-                    "instanceName": "Voltage"
+                    "instanceName": "Voltage",
+                    "height": 250
                 },
                 {
                     "id": "840697b7-2d60-4fc8-bd4d-c3a27874d35d",
                     "position": {
-                        "x": -250,
-                        "y": 1014
+                        "x": -228,
+                        "y": 758
                     },
-                    "width": 200,
+                    "width": 150,
                     "twoColumn": true,
                     "interfaces": [
                         {
@@ -197,15 +203,16 @@
                     "properties": [],
                     "enabledInterfaceGroups": [],
                     "name": "GND",
-                    "instanceName": "GND"
+                    "instanceName": "GND",
+                    "height": 200
                 },
                 {
                     "id": "8e4eb0eb-34cc-496a-a550-5e5b2a6b194d",
                     "position": {
-                        "x": 1494,
-                        "y": 680
+                        "x": 1518,
+                        "y": 717
                     },
-                    "width": 200,
+                    "width": 150,
                     "twoColumn": true,
                     "interfaces": [
                         {
@@ -218,7 +225,8 @@
                     "properties": [],
                     "enabledInterfaceGroups": [],
                     "name": "GND",
-                    "instanceName": "GND"
+                    "instanceName": "GND",
+                    "height": 200
                 },
                 {
                     "id": "94fa8ee3-9183-4f87-bf7d-7e3672e60acc",
@@ -245,15 +253,16 @@
                     "properties": [],
                     "enabledInterfaceGroups": [],
                     "name": "Signal",
-                    "instanceName": "Signal"
+                    "instanceName": "Signal",
+                    "height": 250
                 },
                 {
                     "id": "9585b492-eb4c-4892-a2db-e8bceac7be6c",
                     "position": {
-                        "x": 144,
-                        "y": 1001
+                        "x": 164,
+                        "y": 757
                     },
-                    "width": 200,
+                    "width": 150,
                     "twoColumn": true,
                     "interfaces": [
                         {
@@ -266,58 +275,59 @@
                     "properties": [],
                     "enabledInterfaceGroups": [],
                     "name": "GND",
-                    "instanceName": "GND"
+                    "instanceName": "GND",
+                    "height": 200
                 }
             ],
             "groups": [],
             "connections": [
                 {
-                    "id": "9097168e-ec95-4ae9-9de8-ea2e3cf07a87",
+                    "id": "5bb5b846-2a24-4e06-b9e6-28c80980ea8a",
                     "from": "44c89910-452d-4104-9725-49041a14553b",
                     "to": "8286e319-4538-4ee0-a957-9ec7dae42bbe"
                 },
                 {
-                    "id": "3a70b711-6327-4a34-8940-12ca05119af0",
+                    "id": "4a357730-1672-4935-850f-48f8741b1281",
                     "from": "44c89910-452d-4104-9725-49041a14553b",
                     "to": "9be482e7-b316-4244-9020-aaae6334f64c"
                 },
                 {
-                    "id": "71645743-4c8f-42b2-a7aa-8b3b63e7130f",
+                    "id": "d6f1e16a-ec0c-40ce-8a35-788fdbcd8c95",
                     "from": "fc831e7b-bd64-4e96-b742-73294af8337a",
                     "to": "90f8f111-b560-4a71-a7b4-953c06f11dbd"
                 },
                 {
-                    "id": "264cb00f-5f77-454d-9b8c-3a39d3f602be",
+                    "id": "07a71435-485c-40fd-8969-ed134d268565",
                     "from": "77b6a308-1bbd-42c5-bca3-ec64f75124e9",
                     "to": "0e91cb27-31d5-4a90-a7ad-da81ee59f004"
                 },
                 {
-                    "id": "730c0537-9b68-40ae-936a-1e35e56ec50f",
+                    "id": "04d5a4e9-4bc0-4cfa-8b66-aae3b4f62745",
                     "from": "99849cfc-6ea3-466d-8dff-6a21d3131318",
                     "to": "6afc9438-45d4-4e37-910f-52588dee739d"
                 },
                 {
-                    "id": "389d186f-2529-4739-b8db-3c94d1b6c593",
+                    "id": "d1339d16-cbbc-4689-a27d-65a4bf463fb1",
                     "from": "d233542e-3e8d-47a2-bcb8-1c3780d39f4e",
                     "to": "748cb302-b3b9-4c49-bdd1-61068bde7cd6"
                 },
                 {
-                    "id": "e98d5ee6-727a-406e-9b2e-af5772e4dd84",
+                    "id": "4b5216f7-6f58-42d4-82df-610ecf4ad233",
                     "from": "55aee22f-61b3-4119-9435-20b054b959a8",
                     "to": "e6ff877d-6d1a-4b23-b747-c29f579ff695"
                 },
                 {
-                    "id": "3e565b5a-8ff8-41ee-87b7-80c1acdffa2c",
+                    "id": "dc5d2399-1f6f-4724-879b-604ad1be7eee",
                     "from": "442d89f4-a761-4582-b418-b89e43d806b8",
                     "to": "df96941e-546a-4e09-9f84-7ecb56e3116d"
                 },
                 {
-                    "id": "fb392eb6-5536-43ea-b288-1c1d90fedd0a",
+                    "id": "e6e4d9ec-535a-49ba-95dd-d82c5b8b066a",
                     "from": "80dfb8c9-6139-45ad-bc8b-065855cdfcb7",
                     "to": "6c8cd8ab-dfd1-44a3-9604-7f2ae078ea8e"
                 },
                 {
-                    "id": "c5fe0dce-a09b-4e1d-9793-463c8dba27e2",
+                    "id": "66992536-2f65-4061-bc8e-c7c35561bedd",
                     "from": "90f8f111-b560-4a71-a7b4-953c06f11dbd",
                     "to": "59f114f8-e0b6-4cba-b756-a2e4f95e95ed"
                 }
