@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Antmicro <www.antmicro.com>
+#
+# SPDX-License-Identifier: Apache-2.0
 """
 Module that provides implementation of the BaseGenerator, that handles the
 `enum` syntax.

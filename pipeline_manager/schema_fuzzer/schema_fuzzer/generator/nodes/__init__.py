@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Antmicro <www.antmicro.com>
+#
+# SPDX-License-Identifier: Apache-2.0
 """
 Module that contains a library of classes that implement `BaseGenerator`. Each
 of them represents one node in the generation tree. Each of them handles
