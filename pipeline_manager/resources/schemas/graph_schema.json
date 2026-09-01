@@ -371,6 +371,25 @@
                 "array",
                 "null"
             ]
+        },
+        "defaultStyle": {
+            "description": "Default global styles for each graph",
+            "type": "object",
+            "properties": {
+                "backgroundSize": {
+                    "description": "Background size for graph",
+                    "type": "number"
+                },
+                "backgroundColor": {
+                    "description": "Background color for graph",
+                    "type": "string"
+                },
+                "connectionStyle": {
+                    "description": "Connection style for graph",
+                    "type": "string"
+                }
+            },
+            "additionalProperties": true
         }
     },
     "$defs": {
