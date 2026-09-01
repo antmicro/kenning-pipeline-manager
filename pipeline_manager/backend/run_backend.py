@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2024 Antmicro <www.antmicro.com>
+# Copyright (c) 2022-2026 Antmicro <www.antmicro.com>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -19,7 +19,10 @@ from pipeline_manager_backend_communication.misc_structures import (
 from uvicorn import run
 from uvicorn.protocols.websockets.websockets_impl import WebSocketProtocol
 
-from pipeline_manager.backend.fastapi import create_app, dist_path
+from pipeline_manager.backend.fastapi import (
+    create_app,
+    get_default_frontend_path,
+)
 from pipeline_manager.backend.socketio import create_socketio
 from pipeline_manager.backend.state_manager import global_state_manager
 from pipeline_manager.utils.logger import string_to_verbosity
@@ -86,7 +89,7 @@ def create_backend(argv):  # noqa: D103
 
     if (
         not args.skip_frontend
-        and not dist_path.exists()
+        and not get_default_frontend_path().exists()
         and not args.frontend_directory
     ):
         logging.log(
