@@ -40,6 +40,30 @@ jobs:
         - name: Build server-app
           run: ./build server-app
 
+  TestWheel:
+    runs-on: ubuntu-latest
+    steps:
+        - name: Checkout sources
+          uses: actions/checkout@v4
+        - name: Setup npm
+          uses: actions/setup-node@v3
+          with:
+            node-version: 20
+        - name: Setup Python
+          uses: actions/setup-python@v4
+          with:
+            python-version: 3.11
+        - name: Install build dependencies
+          run: |
+            pip install build
+        - name: Build the wheel
+          run: |
+            python3 -m build --wheel
+        - uses: actions/upload-artifact@v4
+          with:
+            name: wheels
+            path: dist/*.whl
+
   DeployDocs:
     runs-on: ubuntu-latest
     steps:
