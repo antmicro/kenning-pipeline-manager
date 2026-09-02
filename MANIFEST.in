@@ -1,0 +1,5 @@
+graft pipeline_manager/frontend
+graft pipeline_manager/prebuilt_frontend
+prune pipeline_manager/tests
+prune pipeline_manager/frontend/node_modules
+prune pipeline_manager/frontend/dist

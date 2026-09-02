@@ -79,8 +79,6 @@ exclude = [
 ]
 namespaces = false
 
-[tool.setuptools.package-data]
-pipeline_manager = ["**/*.*", "frontend/.env.static"]
 
 [tool.pydoclint]
 style = "numpy"
