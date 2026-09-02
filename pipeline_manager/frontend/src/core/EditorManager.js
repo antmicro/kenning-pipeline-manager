@@ -546,6 +546,10 @@ export default class EditorManager {
         return { errors, warnings, info };
     }
 
+    resetEditorMetadata() {
+        this.updateMetadata({});
+    }
+
     clearEditorManagerState() {
         this.clearHistory();
         this.baklavaView.editor.graphs.forEach((graph) => graph.setSpecGraph(false));
@@ -554,6 +558,7 @@ export default class EditorManager {
         this.baklavaView.editor.unregisterNodes();
         this.baklavaView.editor.nodeStyles.clear();
         this.baklavaView.editor.nodeLists.clear();
+        this.resetEditorMetadata();
         this.setSpecificationLoaded(false);
         this.specification.currentSpecification = {};
         this.specification.includedSpecification = {};
