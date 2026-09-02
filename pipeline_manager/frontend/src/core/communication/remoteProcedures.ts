@@ -207,16 +207,15 @@ export function properties_change(
 
     // First iteration to validate that every property exists
     // eslint-disable-next-line no-restricted-syntax
-    for (const property of params.properties) {
-        getProperty(node, property.id, property.name);
-    }
+    const propertyList = params.properties.map(
+        (property) => [property, getProperty(node, property.id, property.name)],
+    );
 
     // Second iteration to actually alter the values
-    // eslint-disable-next-line no-restricted-syntax
-    for (const property of params.properties) {
-        const prop = getProperty(node, property.id, property.name);
+    propertyList.forEach(([property, prop]) => {
+        /* eslint-disable no-param-reassign */
         prop.value = property.new_value;
-    }
+    });
 }
 
 export function interfaces_change(
