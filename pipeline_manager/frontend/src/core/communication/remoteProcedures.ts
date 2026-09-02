@@ -224,16 +224,14 @@ export function interfaces_change(
     const node = getNode(params.graph_id, params.node_id);
     // First iteration to validate that every property exists
     // eslint-disable-next-line no-restricted-syntax
-    for (const intf of params.interfaces) {
-        getInterface(node, intf.id, intf.name);
-    }
+    const interfaceList = params.interfaces.map(
+        (intf) => [intf, getInterface(node, intf.id, intf.name)],
+    );
 
-    // Second iteration to actually alter the values
-    // eslint-disable-next-line no-restricted-syntax
-    for (const intfInfo of params.interfaces) {
-        const intf = getInterface(node, intfInfo.id, intfInfo.name);
+    interfaceList.forEach(([intfInfo, intf]) => {
+        /* eslint-disable no-param-reassign */
         intf.externalName = intfInfo.externalName;
-    }
+    });
     const graph = getGraph(params.graph_id);
     // eslint-disable-next-line prefer-destructuring
     const graphNode = graph.graphNode;
