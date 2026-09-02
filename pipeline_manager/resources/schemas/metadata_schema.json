@@ -209,7 +209,8 @@
         },
         "backgroundColor": {
             "type": "string",
-            "description": "Color of the background"
+            "description": "Color of the background",
+            "default": "#0f0f0f"
         },
         "backgroundSize": {
             "type": "number",
