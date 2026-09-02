@@ -265,6 +265,7 @@ export default {
                 props.viewModel.editor.deepCleanEditor();
                 props.viewModel.editor.unregisterNodes();
                 props.viewModel.editor.editorManager.setSpecificationLoaded(false);
+                props.viewModel.editor.editorManager.resetEditorMetadata();
             });
             return button;
         });
