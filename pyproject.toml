@@ -27,7 +27,7 @@ dependencies = [
     "fastapi[all]>=0.104.1",
     "orjson<3.11.5",
     "Jinja2==3.1.2",
-    "jsonschema @ git+https://github.com/python-jsonschema/jsonschema@eb8255a473b4f6e9439322f9ec93e345bc7f17d6",
+    "jsonschema>=4.26.0",
     "json-rpc==1.15.0",
     "MarkupSafe==2.1.1",
     "pyrsistent==0.18.1",
