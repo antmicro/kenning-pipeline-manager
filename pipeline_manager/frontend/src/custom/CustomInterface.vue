@@ -427,7 +427,6 @@ export default defineComponent({
             '--output': intf.side === 'right' && !isBigBus(intf) && !props.positioned,
             '--connected': intf.connectionCount > 0,
             'baklava-node-interface-positioned': props.positioned,
-            __readonly: viewModel.value.editor.readonly,
             __node_interface_positioned: props.positioned,
         });
         const spanClasses = computed(() => ({

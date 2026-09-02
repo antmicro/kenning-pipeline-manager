@@ -1325,6 +1325,9 @@ const dropInterface = () => {
 };
 
 const pickInterface = (intf, ev) => {
+    if (viewModel.value.editor.readonly) {
+        return;
+    }
     chosenInterface.value = intf;
     dragInterface(ev);
 
