@@ -3,19 +3,20 @@
 # SPDX-License-Identifier: Apache-2.0
 
 [build-system]
-requires = ["setuptools>=40.8.0", "wheel", "requests>=2.28.2"]
+requires = ["setuptools>=80", "setuptools-scm[simple]>=9.2", "wheel", "requests>=2.28.2"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "pipeline-manager"
-version = "0.0.5"
+dynamic = ["version"]
 description = "Pipeline Manager - data-based, application-agnostic web application for creating, visualizing and managing dataflows in various applications."
 authors = [
     {name = "Antmicro Ltd.", email = "contact@antmicro.com"},
 ]
+license = "Apache-2.0"
+license-files = ["LICENSE"]
 classifiers = [
     "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: Apache Software License",
     "Operating System :: OS Independent",
 ]
 readme = "README.md"
