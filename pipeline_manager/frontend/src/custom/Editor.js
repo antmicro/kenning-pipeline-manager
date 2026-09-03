@@ -1287,6 +1287,7 @@ export default class PipelineManagerEditor extends Editor {
         if (this.editorManager?.baklavaView.displayedGraph.id === relatedGraphID) return;
         const relatedGraph = Array.from(this.graphs).find((item) => item.id === relatedGraphID);
         this.switchToGraph(relatedGraph, graphStack);
+        this.editorManager.updateDefaultStyles(relatedGraphID);
     }
 
     /**

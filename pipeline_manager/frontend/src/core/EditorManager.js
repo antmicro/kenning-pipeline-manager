@@ -153,6 +153,9 @@ export default class EditorManager {
 
     relatedGraphsStore = [];
 
+    // Map with graphIDs as keys, objects of global styles as values
+    defaultStyles = new Map();
+
     /**
      * 'externalApplicationManager' property is set when ExternalApplicationManager
      * is initialized, in its constructor, to avoid the cycle problem if it were
@@ -1974,12 +1977,15 @@ export default class EditorManager {
             metadata?.allowLoopbacks ?? this.defaultMetadata.allowLoopbacks;
         this.baklavaView.twoColumn = metadata?.twoColumn ?? this.defaultMetadata.twoColumn;
         this.baklavaView.connectionRenderer.style =
+            this.defaultStyles.get(this.baklavaView.displayedGraph.id)?.connectionStyle ??
             metadata?.connectionStyle ?? this.defaultMetadata.connectionStyle;
 
         this.baklavaView.movementStep = metadata?.movementStep ?? this.defaultMetadata.movementStep;
         this.baklavaView.settings.background.gridSize =
+            this.defaultStyles.get(this.baklavaView.displayedGraph.id)?.backgroundSize ??
             metadata?.backgroundSize ?? this.defaultMetadata.backgroundSize;
         this.baklavaView.settings.background.color =
+            this.defaultStyles.get(this.baklavaView.displayedGraph.id)?.backgroundColor ??
             metadata?.backgroundColor ?? this.defaultMetadata.backgroundColor;
         this.baklavaView.connectionRenderer.randomizedOffset =
             metadata?.randomizedOffset ?? this.defaultMetadata.randomizedOffset;
@@ -2385,6 +2391,42 @@ export default class EditorManager {
     }
 
     /**
+     * Loads default styles defined for each graph.
+     *
+     * @param {Object} dataflow Dataflow containing graphs with styles
+     */
+    loadDefaultStyles(dataflow) {
+        this.defaultStyles.clear();
+        dataflow?.graphs.forEach(
+            (graph) => this.defaultStyles.set(
+                graph.id, graph.defaultStyle,
+            ),
+        );
+    }
+
+    /**
+     * Applies the default styles of the selected graph to the editor.
+     *
+     * @param {string} graphId ID of the selected graph
+     */
+    updateDefaultStyles(graphId) {
+        this.baklavaView.settings.background.color =
+            this.defaultStyles.get(graphId)?.backgroundColor ??
+            this.specification.currentSpecification.metadata.backgroundColor ??
+            this.defaultMetadata.backgroundColor;
+
+        this.baklavaView.settings.background.gridSize =
+            this.defaultStyles.get(graphId)?.backgroundSize ??
+            this.specification.currentSpecification.metadata?.backgroundSize ??
+            this.defaultMetadata.backgroundSize;
+
+        this.baklavaView.connectionRenderer.style =
+            this.defaultStyles.get(graphId)?.connectionStyle ??
+            this.specification.currentSpecification.metadata?.connectionStyle ??
+            this.defaultMetadata.connectionStyle;
+    }
+
+    /**
      * Loads the dataflow passed in `dataflow` and renders it.
      * If the dataflow is not compatible with the currently loaded specification or is not
      * in the dataflow format, then some of the dataflow may be not loaded and an
@@ -2432,6 +2474,8 @@ export default class EditorManager {
                 if (typeof dataflow === 'string' || dataflow instanceof String) {
                     dataflow = parseJSON(dataflow);
                 }
+
+                this.loadDefaultStyles(dataflow);
 
                 const specificationVersion = dataflow.version;
 
