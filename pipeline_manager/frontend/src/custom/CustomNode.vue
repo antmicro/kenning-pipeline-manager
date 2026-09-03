@@ -1508,10 +1508,10 @@ const onContextMenuInterfaceClick = (action) => {
             break;
         }
         case 'MoveLeft':
-            chosenInterface.value.side = 'left';
+            updateInterfacePosition(props.node, chosenInterface.value, 'left');
             break;
         case 'MoveRight':
-            chosenInterface.value.side = 'right';
+            updateInterfacePosition(props.node, chosenInterface.value, 'right');
             break;
         case 'HideInterface':
             chosenInterface.value.hidden = true;
