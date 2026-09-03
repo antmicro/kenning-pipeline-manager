@@ -181,6 +181,10 @@ export default class ConnectionRenderer {
     aStarCache = new Map();
 
     maxNodeWidths = new Map();
+    
+    aStarZoneInfo = undefined;
+
+    minMargin = 30;
 
     /**
      * Defines the shift the connection should have compared to the default position based on the
@@ -677,6 +681,133 @@ export default class ConnectionRenderer {
         return undefined;
     }
 
+    dumpNodeData(node) {
+        const HTMLelement = document.getElementById(node.id);
+        const curMaxWidth = this.maxNodeWidths.get(node.id) ?? aStarConfig.defaultNodeMaxWidth;
+        this.maxNodeWidths.set(node.id, Math.max(curMaxWidth, HTMLelement.offsetWidth));
+        return {
+            id: node.id,
+            position: node.position,
+            width: HTMLelement.offsetWidth,
+            height: HTMLelement.offsetHeight,
+        };
+    }
+
+    getNodeZoneIds(node, minMargin) {
+        const initIdx = Math.floor((node.position.x - minMargin) / aStarConfig.zoneStep);
+        const initIdy = Math.floor((node.position.y - minMargin) / aStarConfig.zoneStep);
+
+        const finalIdx = Math.floor(
+            (node.position.x + node.width + minMargin) / aStarConfig.zoneStep,
+        );
+        const finalIdy = Math.floor(
+            (node.position.y + node.height + minMargin) / aStarConfig.zoneStep,
+        );
+
+        return {
+            initIdx,
+            initIdy,
+            finalIdx,
+            finalIdy,
+        };
+    }
+
+    updateZoneInfo(nInfo, minMargin) {
+        // Map addressed with formatted strings,
+        // with lists of nodeInfo instances as values
+        const { zoneInfo } = this.aStarZoneInfo;
+        // Map for reverse searching, assign node id to
+        // zone key
+        const { rZoneInfo } = this.aStarZoneInfo;
+
+        // Initialization of spatial hashing data and zones
+        // In the end, each zone entry contains a list of node object,
+        // each represented by its id, position, width and height
+        const {
+            initIdx,
+            initIdy,
+            finalIdx,
+            finalIdy,
+        } = this.getNodeZoneIds(nInfo, minMargin);
+
+        for (
+            let i = Math.min(initIdx, finalIdx);
+            i <= Math.max(initIdx, finalIdx);
+            i += 1
+        ) {
+            for (
+                let j = Math.min(initIdy, finalIdy);
+                j <= Math.max(initIdy, finalIdy);
+                j += 1
+            ) {
+                const zoneKey = aStarConfig.zoneInfoKey(i, j);
+                const zList = zoneInfo.get(zoneKey);
+                const newList = [];
+                if (zList === undefined) {
+                    zoneInfo.set(zoneKey, newList);
+                }
+                zoneInfo.get(zoneKey).push(nInfo);
+                const rList = rZoneInfo.get(nInfo.id);
+                if (rList === undefined) {
+                    rZoneInfo.set(nInfo.id, []);
+                }
+                rZoneInfo.get(nInfo.id).push(zoneKey);
+            }
+        }
+    }
+
+    refreshZoneInfo(node) {
+        if (this.aStarZoneInfo === undefined) {
+            return;
+        }
+
+        const minMargin = 30;
+        const nInfo = this.dumpNodeData(node);
+
+        // Check whether node is already in zone
+        const zoneKeys = this.aStarZoneInfo.rZoneInfo.get(nInfo.id);
+        // Remove it from zones
+        zoneKeys.forEach((key) => {
+            const zList = this.aStarZoneInfo.zoneInfo.get(key);
+
+            const index = zList.findIndex((n) => n.id === nInfo.id);
+
+            zList.splice(index, 1);
+
+            this.aStarZoneInfo.zoneInfo.set(key, zList);
+        });
+
+        this.aStarZoneInfo.rZoneInfo.set(nInfo.id, []);
+
+        this.updateZoneInfo(nInfo, minMargin);
+    }
+
+    generateZoneInfo(graph, minMargin) {
+        if (this.aStarZoneInfo !== undefined) {
+            return;
+        }
+
+        const nodesInfo = graph.nodes.map((node) => this.dumpNodeData(node));
+
+        // Map addressed with formatted strings,
+        // with lists of nodeInfo instances as values
+        const zoneInfo = new Map();
+        // Map for reverse searching, assign node id to
+        // zone key
+        const rZoneInfo = new Map();
+
+        this.aStarZoneInfo = {
+            nodesInfo,
+            zoneInfo,
+            rZoneInfo,
+        };
+
+        // Initialization of spatial hashing data and zones
+        // In the end, each zone entry contains a list of node object,
+        // each represented by its id, position, width and height
+        nodesInfo.forEach((nInfo) => this.updateZoneInfo(nInfo, minMargin));
+    }
+
     aStarRender(x1, y1, x2, y2, connection) {
         const cached = this.aStarCache.get(connection.id);
 
@@ -692,64 +823,17 @@ export default class ConnectionRenderer {
             }
         }
 
-        const nc = new NormalizedConnection(x1, y1, x2, y2, connection);
-
         const graph = this.viewModel.displayedGraph;
 
-        const nodesInfo = graph.nodes.map((node) => {
-            const HTMLelement = document.getElementById(node.id);
-            const curMaxWidth = this.maxNodeWidths.get(node.id) ?? aStarConfig.defaultNodeMaxWidth;
-            this.maxNodeWidths.set(node.id, Math.max(curMaxWidth, HTMLelement.offsetWidth));
-            return {
-                id: node.id,
-                position: node.position,
-                width: this.maxNodeWidths.get(node.id),
-                height: HTMLelement.offsetHeight,
-            };
-        });
+        const nc = new NormalizedConnection(x1, y1, x2, y2, connection);
 
         const minMargin = 30;
 
         const regGridStep = aStarConfig.gridStepFunc(nc.x1, nc.y1, nc.x2, nc.y2);
 
-        // Map addressed with formatted strings,
-        // with lists of nodeInfo instances as values
-        const zoneInfo = new Map();
+        this.generateZoneInfo(graph, minMargin);
 
-        // Initialization of spatial hashing data and zones
-        // In the end, each zone entry contains a list of node object,
-        // each represented by its id, position, width and height
-        nodesInfo.forEach((nInfo) => {
-            const initIdx = Math.floor((nInfo.position.x - minMargin) / aStarConfig.zoneStep);
-            const initIdy = Math.floor((nInfo.position.y - minMargin) / aStarConfig.zoneStep);
-
-            const finalIdx = Math.floor(
-                (nInfo.position.x + nInfo.width + minMargin) / aStarConfig.zoneStep,
-            );
-            const finalIdy = Math.floor(
-                (nInfo.position.y + nInfo.height + minMargin) / aStarConfig.zoneStep,
-            );
-
-            for (
-                let i = Math.min(initIdx, finalIdx);
-                i <= Math.max(initIdx, finalIdx);
-                i += 1
-            ) {
-                for (
-                    let j = Math.min(initIdy, finalIdy);
-                    j <= Math.max(initIdy, finalIdy);
-                    j += 1
-                ) {
-                    const zoneKey = aStarConfig.zoneInfoKey(i, j);
-                    const zList = zoneInfo.get(zoneKey);
-                    const newList = [];
-                    if (zList === undefined) {
-                        zoneInfo.set(zoneKey, newList);
-                    }
-                    zoneInfo.get(zoneKey).push(nInfo);
-                }
-            }
-        });
+        const { zoneInfo, nodesInfo } = this.aStarZoneInfo;
 
         if (connection.to) {
             const shift = this.getShift(nc.from, nc.to, graph);
