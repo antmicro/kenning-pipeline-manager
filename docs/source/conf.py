@@ -70,6 +70,8 @@ myst_substitutions = {
     "api_specification": generate_schema_md(),
 }
 
+pipeline_manager_assets_directory = str(Path("./_static").absolute())
+
 EXCLUDED_EXAMPLES = ["sample-huge"]
 CUSTOM_DATAFLOW_SPECS_PAIRS = {
     "sample-shape-add-interface": "sample-with-shape"
