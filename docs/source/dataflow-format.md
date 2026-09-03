@@ -40,6 +40,7 @@ Each graph can be described with the following properties:
 * `panning` - object of type [Panning](#panning) that defines the position of the top-left corner in the rendered editor.
 * `scaling` - floating-point number that defines the zoom level in the editor.
 * `disabledLayers` - array of strings containing names of layers disabled by default for a particular graph.
+* `defaultStyle` - object of type [DefaultStyle](#defaultstyle) that defines the default editor styles for the graph.
 
 #### Node
 
@@ -256,6 +257,17 @@ Two attributes are used:
 
 * `x` - x coordinate of the corner
 * `y` - y coordinate of the corner.
+
+#### DefaultStyle
+
+This object describes style properties that can be set individually for each graph.
+All properties are optional.
+
+Currently supported properties include:
+
+* `backgroundColor` - Color of the editor background
+* `backgroundSize` - Size of the background grid
+* `connectionStyle` - Rendering style used for connections.
 
 #### Enabled Interface Groups
 
