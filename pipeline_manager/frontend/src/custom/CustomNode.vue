@@ -350,9 +350,12 @@ const externalApplicationManager = getExternalApplicationManager();
     });
 
 // Send message about changed position
-const notifyPositionChanged = ([x, y]) => {
+const notifyPositionChanged = ({ x, y }) => {
     nextTick(() => transformed());
     if (x === undefined || y === undefined) return;
+
+    viewModel.value.connectionRenderer.refreshZoneInfo(props.node);
+
     if (!externalApplicationManager.isConnected()) return;
     externalApplicationManager.notifyAboutChange('position_on_change', {
         graph_id: props.node.graphInstance.id,
@@ -361,7 +364,7 @@ const notifyPositionChanged = ([x, y]) => {
     });
 };
 // Create watcher for position
-watch(() => [props.node.position?.x, props.node.position?.y], notifyPositionChanged);
+watch(() => props.node.position, notifyPositionChanged, { deep: true });
 watch(() => props.node.title, async (value) => {
     const data = {
         graph_id: props.node.graphInstance.id,
