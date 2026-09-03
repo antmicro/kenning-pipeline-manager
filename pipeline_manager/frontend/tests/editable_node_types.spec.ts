@@ -488,3 +488,32 @@ test('generalize and specialize node', async ({page}) => {
     // Check for Filter2D
     await expect(node).toBeVisible();
 });
+
+test('move left and move right interfaces', async ({page}) => {
+    await page.goto(getUrl());
+    await loadSpecification(page, 'sample-multiple-io-specification.json');
+    await loadDataflow(page, 'sample-multiple-io-dataflow.json');
+
+    const node = await getNode(page,"MultipleIO").first();
+
+    const leftInterfaces = await node.locator('.__interfaces .__inputs .baklava-node-interface .__port');
+    const rightInterfaces = await node.locator('.__interfaces .__outputs .baklava-node-interface .__port');
+
+    const initialLeftInterfacesCount = await leftInterfaces.count();
+    const initialRightInterfacesCount = await rightInterfaces.count();
+
+    // switch from left to right
+    const leftInf = await leftInterfaces.nth(4);
+    await leftInf.click({button: 'right'});
+
+    await page.getByText('Move right').click();
+    expect(await rightInterfaces.count()).toBe(initialRightInterfacesCount+1);
+
+    // switch from right to left
+    const rightInf = await rightInterfaces.nth(4);
+    await rightInf.click({button: 'right'});
+
+    await page.getByText('Move left').click();
+    expect(await rightInterfaces.count()).toBe(initialLeftInterfacesCount);
+
+});
