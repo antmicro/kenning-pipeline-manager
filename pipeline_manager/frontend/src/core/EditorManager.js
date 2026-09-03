@@ -24,7 +24,7 @@ import NodeStyler from './NodeStyler.js';
 import InterfaceStyler from './InterfaceStyler.js';
 
 import { CustomNodeFactory, GraphFactory } from './NodeFactory.js';
-import CombinedError from './errors.js';
+import CombinedError, { CyclicSubgraphError } from './errors.js';
 import unresolvedSpecificationSchema from '../../../resources/schemas/unresolved_specification_schema.json' with {type: 'json'};
 import specificationSchema from '../../../resources/schemas/specification_schema.json' with {type: 'json'};
 import metadataSchema from '../../../resources/schemas/metadata_schema.json' with {type: 'json'};
@@ -3049,7 +3049,66 @@ export default class EditorManager {
      * @return An array of errors. If the array is empty, the validation was successful.
      */
     static validateDataflow(dataflow) {
-        return EditorManager.validateJSONWithSchema(dataflow, dataflowSchema);
+        const errors = EditorManager.validateJSONWithSchema(dataflow, dataflowSchema);
+        if (errors.length) {
+            return errors;
+        }
+
+        // Construct dependency graph.
+        if (typeof dataflow === 'string') {
+            dataflow = JSON.parse(dataflow);
+        }
+        const dependencies = new Map();
+        dataflow.graphs.forEach((graph) => {
+            dependencies.set(graph.id, []);
+        });
+        dataflow.graphs.forEach((graph) => {
+            graph.nodes.forEach((node) => {
+                if (!Object.hasOwn(node, 'subgraph')) {
+                    return;
+                }
+                dependencies.get(graph.id).push(node.subgraph);
+            });
+        });
+
+        // Detect cycles in the dependency graph using a non-recursive DFS.
+        const stack = [];
+        const onStack = new Set();
+        const visited = new Set();
+
+        try {
+            dependencies.keys().forEach((start) => {
+                if (visited.has(start)) {
+                    return;
+                }
+
+                stack.push(start);
+
+                while (stack.length) {
+                    const current = stack.at(-1);
+
+                    if (!visited.has(current)) {
+                        visited.add(current);
+                        onStack.add(current);
+                    } else {
+                        onStack.delete(current);
+                        stack.pop();
+                    }
+
+                    dependencies.get(current).forEach((neighbor) => {
+                        if (!visited.has(neighbor) && dependencies.has(neighbor)) {
+                            stack.push(neighbor);
+                        } else if (onStack.has(neighbor)) {
+                            throw new CyclicSubgraphError(`Recursive subgraphs are not allowed.`);
+                        }
+                    });
+                }
+            });
+        } catch (e) {
+            errors.push(e);
+        }
+
+        return errors;
     }
 
     /**

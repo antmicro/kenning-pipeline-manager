@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+/* eslint-disable max-classes-per-file */
+
 /**
  * An error that combines multiple errors into a single one.
  *
@@ -52,5 +54,18 @@ export default class CombinedError extends Error {
                 : error.message
         ) : (error) => error;
         return [this.message, ...this.errors.map(render)].join('\n    ');
+    }
+}
+
+/**
+ * An error that indicates an cyclic dependency between subgraphs.
+ */
+export class CyclicSubgraphError extends Error {
+    /**
+     * @param {string} message - summary message describing error
+     */
+    constructor(message) {
+        super(message);
+        this.name = 'CyclicSubgraphError';
     }
 }
