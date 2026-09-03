@@ -476,6 +476,10 @@ export default {
                             :mobileClasses="mobileClasses"
                             :hideHud="hideHud"
                             :readonly="readonly"
+                            :exportGraphCallback="()=>{
+                                exportMenuShow = !exportMenuShow
+                                exportGraph = !exportGraph
+                            }"
                             :saveGraphCallback="() => {
                                 editorManager.editor.resetAllGraphsToSave();
                                 saveMenuShow = !saveMenuShow;

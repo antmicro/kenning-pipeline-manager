@@ -51,6 +51,10 @@ export default {
             required: true,
             type: Function,
         },
+        exportGraphCallback: {
+            required: true,
+            type: Function,
+        },
         readonly: {
             required: true,
             type: Boolean,
@@ -404,10 +408,7 @@ export default {
             <DropdownItem
                 type="'button'"
                 text="Export graph to PNG"
-                :eventFunction="() => {
-                    exportMenuShow = !exportMenuShow
-                    exportGraph = exportGraph
-                }"
+                :eventFunction="exportGraphCallback"
             />
             <DropdownItem
                 type="'button'"
