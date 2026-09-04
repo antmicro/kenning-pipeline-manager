@@ -541,6 +541,17 @@ export async function deleteNode(node, page) {
 }
 
 /**
+ * Opens settings panel
+ * @param {import('@playwright/test').Page} page - The Playwright page object.
+ */
+export async function openSettingsPanel(page) {
+    const settings = page.getByText('Show settings').locator('..').locator('..');
+    await settings.hover({ force: true });
+    expect(settings).toBeVisible();
+    await settings.click();
+}
+
+/**
  * Create a new node.
  *
  * @param {import('@playwright/test').Page} page - The Playwright page object.
@@ -568,13 +579,7 @@ export async function enableEditingNodes(page) {
     const addNodeButton = logo.locator('#create-new-node-type-button');
     expect(addNodeButton).toBeHidden();
 
-    // Enable modifying node types.
-    const settings = page.locator('.settings-panel');
-    expect(settings).toBeVisible();
-    await settings.hover({ force: true });
-
     const checkbox = page.getByText('Modify node types');
-    expect(checkbox).toBeVisible();
     await checkbox.dispatchEvent("click");
 }
 
