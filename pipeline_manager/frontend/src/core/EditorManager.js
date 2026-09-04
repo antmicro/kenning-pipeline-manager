@@ -2427,6 +2427,33 @@ export default class EditorManager {
     }
 
     /**
+     * Checks whether styles referenced by node views are defined in the specification.
+     *
+     * @param {Object} dataflow Dataflow being loaded.
+     * @returns {string[]} Errors for styles that are not defined in the specification.
+     */
+    checkViewStyles(dataflow) {
+        const viewErrors = [];
+
+        dataflow.graphs.forEach((graph) => {
+            graph.nodes.filter((node) => node.views).forEach((node) => {
+                node.views.forEach((view) => {
+                    if (view?.style && !Object.keys(
+                        this.specification.currentSpecification.metadata.styles,
+                    ).includes(view.style)) {
+                        viewErrors.push(
+                            `Style ${view.style} from node ${node.id}, ` +
+                            `graph ${graph.id} not defined in the specification.`,
+                        );
+                    }
+                });
+            });
+        });
+
+        return viewErrors;
+    }
+
+    /**
      * Loads the dataflow passed in `dataflow` and renders it.
      * If the dataflow is not compatible with the currently loaded specification or is not
      * in the dataflow format, then some of the dataflow may be not loaded and an
@@ -2473,6 +2500,12 @@ export default class EditorManager {
             try {
                 if (typeof dataflow === 'string' || dataflow instanceof String) {
                     dataflow = parseJSON(dataflow);
+                }
+
+                const viewStylesErrors = this.checkViewStyles(dataflow);
+                if (viewStylesErrors.length) {
+                    status.errors = viewStylesErrors;
+                    return status;
                 }
 
                 this.loadDefaultStyles(dataflow);
