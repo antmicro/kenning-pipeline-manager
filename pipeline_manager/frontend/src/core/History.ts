@@ -529,182 +529,122 @@ export function useHistory(graph: Ref<any>, commandHandler: ICommandHandler): IH
                 }
             });
 
-            newGraph.events.addGroup.subscribe(token, (group: any) => {
-                if (!suppressingHistory.value) {
-                    const historyItem = history.get(newId);
-                    if (!historyItem) return;
-                    const step = new GroupStep('add', group.id.toString(), transactionId.value);
-                    historyItem.push(step);
-                    step.group = group;
-                    const g = { ...group };
-                    g.nodes = [...g.nodes];
-                    step.g = g;
-                    undoneHistory.set(newId, []);
-                }
-            });
-            newGraph.events.removeGroup.subscribe(token, (group: any) => {
-                if (!suppressingHistory.value) {
-                    const historyItem = history.get(newId);
-                    if (!historyItem) return;
-                    const step = new GroupStep('rem', group.id.toString(), transactionId.value);
-                    historyItem.push(step);
-                    step.group = group;
-                    const g = { ...group };
-                    g.nodes = [...g.nodes];
-                    step.g = g;
-                    undoneHistory.set(newId, []);
-                }
-            });
-            newGraph.events.editGroup.subscribe(token, (group: any) => {
-                if (!suppressingHistory.value) {
-                    const historyItem = history.get(newId);
-                    if (!historyItem) return;
-                    const step = new GroupStep('edit', group.id.toString(), transactionId.value);
-                    historyItem.push(step);
-                    step.group = group;
-                    const g = { ...group };
-                    g.nodes = [...g.nodes];
-                    step.g = g;
-                    undoneHistory.set(newId, []);
-                }
-            });
-            newGraph.events.addNode.subscribe(token, (node : any) => {
-                if (!suppressingHistory.value) {
-                    const historyItem = history.get(newId);
-                    if (!historyItem) return;
-                    historyItem.push(new NodeStep('add', node.id.toString(), transactionId.value));
-                    undoneHistory.set(newId, []);
-                }
-            });
-            newGraph.events.removeNode.subscribe(token, (node : any) => {
-                if (!suppressingHistory.value) {
-                    const historyItem = history.get(newId);
-                    if (!historyItem) return;
-                    const step = new NodeStep('rem', node.id.toString(), transactionId.value);
-                    historyItem.push(step);
-                    step.nodeTuple = [node, node.save()];
-                    undoneHistory.set(newId, []);
-                }
-            });
-            newGraph.events.editNode.subscribe(token, (node : any) => {
-                if (!suppressingHistory.value) {
-                    const historyItem = history.get(newId);
-                    if (!historyItem) return;
-                    const step = new NodeStep('edit', node.id.toString(), transactionId.value);
-                    historyItem.push(step);
-                    step.nodeTuple = [node, node.save()];
-                    undoneHistory.set(newId, []);
-                }
-            });
-            newGraph.events.dragNodes.subscribe(token, (nodes : any) => {
-                if (!suppressingHistory.value) {
-                    const historyItem = history.get(newId);
-                    if (!historyItem) return;
-                    const step = new MultipleSteps('edit', nodes[0].id.toString(), transactionId.value);
-                    historyItem.push(step);
-                    nodes.forEach((node:any) => {
-                        const nodeTuple = [node, node.save()];
-                        const nodeStep = new NodeStep('edit', node.id.toString(), transactionId.value);
-                        nodeStep.nodeTuple = nodeTuple;
-                        step.steps.push(nodeStep);
-                    });
-                    undoneHistory.set(newId, []);
-                }
-            });
-            newGraph.events.addConnection.subscribe(token, (conn : any) => {
-                if (!suppressingHistory.value) {
-                    const historyItem = history.get(newId);
-                    if (!historyItem) return;
-                    const step = new ConnectionStep('add', conn.id.toString(), transactionId.value);
-                    historyItem.push(step);
-                    step.conn = conn;
-                    undoneHistory.set(newId, []);
-                }
-            });
-            newGraph.events.removeConnection.subscribe(token, (conn : any) => {
-                if (!suppressingHistory.value) {
-                    const inTransaction = transactionId.value !== '';
-                    if (!inTransaction) startTransaction();
-                    const historyItem = history.get(newId);
-                    if (!historyItem) return;
-                    (conn.anchors ?? []).reverse().forEach((_: any, idx: number) => {
-                        newGraph.removeAnchor(conn, idx);
-                    });
-                    const step = new ConnectionStep('rem', conn.id.toString(), transactionId.value);
-                    historyItem.push(step);
-                    step.conn = conn;
-                    undoneHistory.set(newId, []);
-                    if (!inTransaction) commitTransaction();
-                }
-            });
-            newGraph.events.addAnchor.subscribe(token, (tuple: any) => {
-                if (!suppressingHistory.value) {
-                    const historyItem = history.get(newId);
-                    if (!historyItem) return;
-                    const idx = tuple[1];
-                    const conn = tuple[0];
-                    const step = new AnchorStep('add', conn.anchors[idx].id.toString(), transactionId.value);
-                    historyItem.push(step);
-                    step.anchor = [conn, conn.anchors[idx], idx];
-                    undoneHistory.set(newId, []);
-                }
-            });
-            newGraph.events.editAnchor.subscribe(token, (tuple: any) => {
-                if (!suppressingHistory.value) {
-                    const historyItem = history.get(newId);
-                    if (!historyItem) return;
-                    const idx = tuple[1];
-                    const conn = tuple[0];
-                    const prevPos = tuple[3];
-                    const step = new AnchorStep('edit', conn.anchors[idx].id.toString(), transactionId.value);
-                    historyItem.push(step);
-                    step.anchor = [conn, conn.anchors[idx], idx];
-                    step.prevPosition = prevPos;
-                    undoneHistory.set(newId, []);
-                }
-            });
-            newGraph.events.removeAnchor.subscribe(token, (tuple: any) => {
-                if (!suppressingHistory.value) {
-                    const historyItem = history.get(newId);
-                    if (!historyItem) return;
-                    const idx = tuple[1];
-                    const conn = tuple[0];
-                    const step = new AnchorStep('rem', conn.anchors[idx].id.toString(), transactionId.value);
-                    historyItem.push(step);
-                    step.anchor = [conn, conn.anchors[idx], idx];
-                    undoneHistory.set(newId, []);
-                }
-            });
-            newGraph.events.exposeInterface.subscribe(token, (tuple: any) => {
-                if (!suppressingHistory.value) {
-                    const historyItem = history.get(newId);
-                    if (!historyItem) return;
-                    const intf = tuple[0];
-                    const editor = tuple[1];
-                    const step = new InterfaceStep('edit', intf.id.toString(), transactionId.value);
-                    step.externalName = intf.externalName;
-                    step.intf = intf;
-                    step.editor = editor;
-                    step.exposed = true;
-                    historyItem.push(step);
-                    undoneHistory.set(newId, []);
-                }
-            });
-            newGraph.events.privatizeInterface.subscribe(token, (tuple: any) => {
-                if (!suppressingHistory.value) {
-                    const historyItem = history.get(newId);
-                    if (!historyItem) return;
-                    const intf = tuple[0];
-                    const editor = tuple[1];
-                    const step = new InterfaceStep('edit', intf.id.toString(), transactionId.value);
-                    step.externalName = intf.externalName;
-                    step.intf = intf;
-                    step.editor = editor;
-                    step.exposed = false;
-                    historyItem.push(step);
-                    undoneHistory.set(newId, []);
-                }
-            });
+            const subscribeEvent = (callback: any, eventName: string) => {
+                newGraph.events[eventName].subscribe(token, (...args: any[]) => {
+                    if (!suppressingHistory.value) {
+                        const historyItem = history.get(newId);
+                        if (!historyItem) return;
+                        const step = callback(...args);
+                        historyItem.push(step);
+                        undoneHistory.set(newId, []);
+                    }
+                });
+            };
+            subscribeEvent((group: any) => {
+                const step = new GroupStep('add', group.id.toString(), transactionId.value);
+                step.group = group;
+                const g = { ...group };
+                g.nodes = [...g.nodes];
+                step.g = g;
+                return step;
+            }, 'addGroup');
+            subscribeEvent((group: any) => {
+                const step = new GroupStep('rem', group.id.toString(), transactionId.value);
+                step.group = group;
+                const g = { ...group };
+                g.nodes = [...g.nodes];
+                step.g = g;
+                return step;
+            }, 'removeGroup');
+            subscribeEvent((group: any) => {
+                const step = new GroupStep('edit', group.id.toString(), transactionId.value);
+                step.group = group;
+                const g = { ...group };
+                g.nodes = [...g.nodes];
+                step.g = g;
+                return step;
+            }, 'editGroup');
+            subscribeEvent((node : any) => new NodeStep('add', node.id.toString(), transactionId.value),
+                'addNode');
+            subscribeEvent((node : any) => {
+                const step = new NodeStep('rem', node.id.toString(), transactionId.value);
+                step.nodeTuple = [node, node.save()];
+                return step;
+            }, 'removeNode');
+            subscribeEvent((node : any) => {
+                const step = new NodeStep('edit', node.id.toString(), transactionId.value);
+                step.nodeTuple = [node, node.save()];
+                return step;
+            }, 'editNode');
+            subscribeEvent((nodes : any) => {
+                const step = new MultipleSteps('edit', nodes[0].id.toString(), transactionId.value);
+                nodes.forEach((node:any) => {
+                    const nodeTuple = [node, node.save()];
+                    const nodeStep = new NodeStep('edit', node.id.toString(), transactionId.value);
+                    nodeStep.nodeTuple = nodeTuple;
+                    step.steps.push(nodeStep);
+                });
+                return step;
+            }, 'dragNodes');
+            subscribeEvent((conn : any) => {
+                const step = new ConnectionStep('add', conn.id.toString(), transactionId.value);
+                step.conn = conn;
+                return step;
+            }, 'addConnection');
+            subscribeEvent((conn : any) => {
+                const inTransaction = transactionId.value !== '';
+                if (!inTransaction) startTransaction();
+                (conn.anchors ?? []).reverse().forEach((_: any, idx: number) => {
+                    newGraph.removeAnchor(conn, idx);
+                });
+                const step = new ConnectionStep('rem', conn.id.toString(), transactionId.value);
+                step.conn = conn;
+                if (!inTransaction) commitTransaction();
+                return step;
+            }, 'removeConnection');
+            subscribeEvent((tuple: any) => {
+                const idx = tuple[1];
+                const conn = tuple[0];
+                const step = new AnchorStep('add', conn.anchors[idx].id.toString(), transactionId.value);
+                step.anchor = [conn, conn.anchors[idx], idx];
+                return step;
+            }, 'addAnchor');
+            subscribeEvent((tuple: any) => {
+                const idx = tuple[1];
+                const conn = tuple[0];
+                const prevPos = tuple[3];
+                const step = new AnchorStep('edit', conn.anchors[idx].id.toString(), transactionId.value);
+                step.anchor = [conn, conn.anchors[idx], idx];
+                step.prevPosition = prevPos;
+                return step;
+            }, 'editAnchor');
+            subscribeEvent((tuple: any) => {
+                const idx = tuple[1];
+                const conn = tuple[0];
+                const step = new AnchorStep('rem', conn.anchors[idx].id.toString(), transactionId.value);
+                step.anchor = [conn, conn.anchors[idx], idx];
+                return step;
+            }, 'removeAnchor');
+            subscribeEvent((tuple: any) => {
+                const intf = tuple[0];
+                const editor = tuple[1];
+                const step = new InterfaceStep('edit', intf.id.toString(), transactionId.value);
+                step.externalName = intf.externalName;
+                step.intf = intf;
+                step.editor = editor;
+                step.exposed = true;
+                return step;
+            }, 'exposeInterface');
+            subscribeEvent((tuple: any) => {
+                const intf = tuple[0];
+                const editor = tuple[1];
+                const step = new InterfaceStep('edit', intf.id.toString(), transactionId.value);
+                step.externalName = intf.externalName;
+                step.intf = intf;
+                step.editor = editor;
+                step.exposed = false;
+                return step;
+            }, 'privatizeInterface');
         }
     };
 
