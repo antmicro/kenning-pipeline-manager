@@ -175,7 +175,9 @@ export default class PipelineManagerEditor extends Editor {
     save() {
         const lastView = this.currentView;
         this.currentView = this.defaultView;
-        const graphs = Array.from(this.graphs).filter((g) => !g.specGraph);
+        const graphs = Array.from(this.graphs)
+            .filter((g) => !g.specGraph)
+            .filter((g) => g.toSave);
 
         const graphMap = new Map(
             graphs.map((g) => [g.id, g]),
@@ -184,6 +186,12 @@ export default class PipelineManagerEditor extends Editor {
         const dataflowState = { graphs: [] };
 
         const visitedGraphs = new Set();
+
+        const isSavable = (g) =>
+            g.isEdited ||
+            g.template === undefined ||
+            (g === this._graph) ||
+            (!this._graph.toSave && g === graphs[0]);
 
         const saveGraph = (graph) => {
             if (graph.toSave && !visitedGraphs.has(graph.id)) {
@@ -209,7 +217,7 @@ export default class PipelineManagerEditor extends Editor {
                     }
                 });
                 // if subgraph was not edited, use the one from specification
-                if (!graph.isEdited && graph.template !== undefined) {
+                if (!isSavable(graph)) {
                     return;
                 }
                 dataflowState.graphs.push(currentGraphState);
