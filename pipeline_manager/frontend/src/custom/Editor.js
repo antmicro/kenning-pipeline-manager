@@ -208,7 +208,10 @@ export default class PipelineManagerEditor extends Editor {
                         delete node.graphState;
                     }
                 });
-
+                // if subgraph was not edited, use the one from specification
+                if (!graph.isEdited && graph.template !== undefined) {
+                    return;
+                }
                 dataflowState.graphs.push(currentGraphState);
             }
         };

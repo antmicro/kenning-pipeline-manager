@@ -42,6 +42,8 @@ export default function createPipelineManagerGraph(graph) {
     graph.events.removeGroup = new BaklavaEvent();
     graph.events.editGroup = new BaklavaEvent();
 
+    graph.isEdited = false;
+
     // Graph node that represents the graph itself. Root graph does not have a node graph assigned.
     graph.graphNode = undefined;
     graph.groups = [];

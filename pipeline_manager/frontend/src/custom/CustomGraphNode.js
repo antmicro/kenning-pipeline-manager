@@ -245,8 +245,11 @@ export default function CreateCustomGraphNodeType(template, graphNode, editorMan
 
         save() {
             const state = super.save();
-            state.subgraph = this.subgraph?.id;
-            state.graphState = this.subgraph?.save();
+            // if subgraph was not edited, use the id from type specification
+            if (this?.subgraph?.isEdited ?? true) {
+                state.subgraph = this.subgraph?.id;
+                state.graphState = this.subgraph?.save();
+            }
             return state;
         }
 

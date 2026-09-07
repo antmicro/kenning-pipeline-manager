@@ -537,6 +537,8 @@ export function useHistory(graph: Ref<any>, commandHandler: ICommandHandler): IH
                         const step = callback(...args);
                         historyItem.push(step);
                         undoneHistory.set(newId, []);
+                        // eslint-disable-next-line no-param-reassign
+                        newGraph.isEdited = true;
                     }
                 });
             };
