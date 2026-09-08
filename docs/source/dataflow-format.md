@@ -39,6 +39,7 @@ Each graph can be described with the following properties:
 * `groups` - object of type [Group](#group) that allows for a visual separation of a selected set of nodes.
 * `panning` - object of type [Panning](#panning) that defines the position of the top-left corner in the rendered editor.
 * `scaling` - floating-point number that defines the zoom level in the editor.
+* `disabledLayers` - array of strings containing names of layers disabled by default for a particular graph.
 
 #### Node
 
