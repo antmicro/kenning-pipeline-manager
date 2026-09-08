@@ -182,6 +182,9 @@ export default class PipelineManagerEditor extends Editor {
         const graphMap = new Map(
             graphs.map((g) => [g.id, g]),
         );
+        const parentMap = new Map(
+            graphs.map((g) => [g.id, undefined]),
+        );
 
         const dataflowState = { graphs: [] };
 
@@ -191,7 +194,24 @@ export default class PipelineManagerEditor extends Editor {
             g.isEdited ||
             g.template === undefined ||
             (g === this._graph) ||
-            (!this._graph.toSave && g === graphs[0]);
+            (parentMap.get(g.id) === undefined);
+
+        const checkParents = (graph) => {
+            if (graph.toSave) {
+                graph.nodes.forEach((node) => {
+                    if (node?.subgraph !== undefined) {
+                        const graphFound = graphMap.get(node.subgraph.id);
+                        if (graphFound !== undefined) {
+                            parentMap.set(node.subgraph.id, graph.id);
+                            checkParents(graphFound);
+                        }
+                    }
+                });
+            }
+        };
+        graphs.forEach((graph) => {
+            checkParents(graph);
+        });
 
         const saveGraph = (graph) => {
             if (graph.toSave && !visitedGraphs.has(graph.id)) {

@@ -2294,7 +2294,7 @@ export default class EditorManager {
             const m = this.specification.currentSpecification?.metadata ?? {};
             const dm = this.defaultMetadata;
 
-            if (currVal !== (m[name] ?? dm[name])) {
+            if (currVal !== (m[name] ?? dm[name]) && currVal !== undefined) {
                 save.metadata[name] = currVal;
             }
         });
