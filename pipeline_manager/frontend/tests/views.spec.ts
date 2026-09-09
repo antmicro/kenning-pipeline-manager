@@ -1,6 +1,18 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, Locator } from '@playwright/test';
 import { getUrl, loadVideoNodeId, closeTerminal, getContextMenu,
     getNode, getElementStyleAttribute, loadSpecification, loadDataflow, openSettingsPanel } from './config.js';
+
+
+async function getNodePositions(node: Locator)
+{
+    const left = await getElementStyleAttribute(node,'left');
+    const top = await getElementStyleAttribute(node,'top');
+
+    return {
+        x: left,
+        y: top
+    }
+}
 
 test('test node position across views', async ({ page }) => {
     await page.goto(getUrl());
@@ -8,7 +20,6 @@ test('test node position across views', async ({ page }) => {
     await loadDataflow(page, 'sample-views-dataflow.json');
 
     const zoomButton = page.locator('.zoom-center');
-    const editor = await page.locator('.baklava-editor');
 
     // get node position
     const node = await getNode(page,"Source").first();
@@ -22,7 +33,7 @@ test('test node position across views', async ({ page }) => {
 
     await zoomButton.dispatchEvent('click');
     // get current node position
-    const nodeBoxDefaultView = await node.boundingBox();
+    const nodeBoxDefaultView = await getNodePositions(node);
 
     // Switch views.
     await openSettingsPanel(page);
@@ -34,7 +45,7 @@ test('test node position across views', async ({ page }) => {
     await dropdown.getByText('tree').click({ force: true });
     await zoomButton.dispatchEvent('click');
 
-    const nodeTreePosition = await node.boundingBox();
+    const nodeTreePosition = await getNodePositions(node);
 
     expect((nodeBoxDefaultView.x !== nodeTreePosition.x) &&
         (nodeBoxDefaultView.y !== nodeTreePosition.y)).toBeTruthy();
@@ -44,7 +55,7 @@ test('test node position across views', async ({ page }) => {
     await dropdown.getByText('default').click({ force: true });
     await zoomButton.dispatchEvent('click');
 
-    const nodeCurrentPosition = await node.boundingBox();
+    const nodeCurrentPosition = await getNodePositions(node);
 
     expect((nodeBoxDefaultView.x === nodeCurrentPosition.x) &&
         (nodeBoxDefaultView.y === nodeCurrentPosition.y)).toBeTruthy();
