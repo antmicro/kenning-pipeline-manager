@@ -59,6 +59,11 @@
                     "name": "Out 5",
                     "type": "Connector",
                     "direction": "output"
+                },
+                {
+                    "name": "Out 6",
+                    "type": "Connector",
+                    "direction": "inout"
                 }
             ]
         }
