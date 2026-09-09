@@ -97,6 +97,29 @@ test('enable editing', async ({ page }, testInfo) => {
     await openNodePalette(page);
 });
 
+test('check loopback connections', async ({ page }) => {
+    await page.goto(getUrl());
+    await loadSpecification(page, 'sample-loopback-specification.json');
+    await loadDataflow(page, 'sample-loopback-dataflow.json');
+
+    async function checkPathIsLoopback(path)
+    {
+        const d = await path.locator('.baklava-connection').first().getAttribute('d');
+        const points = d.split(/\s/).filter((c)=> c !== '');
+        return points.at(1) === points.at(-2) && points.at(2) === points.at(-1)
+    }
+
+    // Get connections in graph
+    const connections = await page.locator('.custom-connections-container .baklava-connection').locator('..');
+    expect(await connections.count()).toBe(6);
+    const firstLoopback = await connections.nth(4);
+    const secondLoopback = await connections.nth(5);
+
+    // check loopback
+    expect(await checkPathIsLoopback(firstLoopback)).toBeTruthy();
+    expect(await checkPathIsLoopback(secondLoopback)).toBeTruthy();
+});
+
 test('create new node type', async ({ page }, testInfo) => {
     await page.goto(getUrl());
     await loadIncludeSpecification(page, testInfo);
