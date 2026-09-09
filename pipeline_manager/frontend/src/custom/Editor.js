@@ -1403,7 +1403,7 @@ export default class PipelineManagerEditor extends Editor {
                 });
             });
         });
-        await this.load(graphs, false, true);
+        await this.load(graphs);
     }
 
     updateNodesPosition(updatedGraph) {
