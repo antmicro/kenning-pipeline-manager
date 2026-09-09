@@ -644,15 +644,8 @@ export default class ConnectionRenderer {
             h ${shift}
             V ${y} H ${nc.x1 - shift} V ${nc.y1} H ${nc.x1}`;
         }
-        if (nc.from.side === 'right' && nc.to.side === 'right') {
-            return `M ${nc.x2} ${nc.y2}
-            h ${shift}
-            V ${nc.y1} H ${nc.x1}`;
-        }
-        if (nc.from.side === 'left' && nc.to.side === 'left') {
-            return `M ${nc.x2} ${nc.y2}
-            h ${-shift}
-            V ${nc.y1} H ${nc.x1}`;
+        if (nc.from.side === nc.to.side) {
+            return this.curvedRenderLoopback(nc.x1, nc.y1, nc.x2, nc.y2, connection);
         }
         // unreachable, added to make eslint happy
         return undefined;
@@ -1828,7 +1821,8 @@ export default class ConnectionRenderer {
      */
     render(x1, y1, x2, y2, connection, draggedNode) {
         // Invalid connection
-        if (x1 === x2 && y1 === y2) {
+        if ((x1 === x2 && y1 === y2) &&
+            !this.isLoopback(connection)) {
             return undefined;
         }
         const loopback = this.isLoopback(connection) ? 'Loopback' : '';
