@@ -1109,8 +1109,8 @@ export default defineComponent({
         const loadFiles = async (files) => loadingScreen(async () => {
             const notify = NotificationHandler.showToast;
 
-            if (files.length > 2) {
-                notify('error', `Up to two files supported, inserted: ${files.length}`);
+            if (files.length > 3) {
+                notify('error', `Up to three files supported, inserted: ${files.length}`);
                 return;
             }
 
@@ -1125,7 +1125,9 @@ export default defineComponent({
 
             const isSpecificationFunc = (o) => Boolean(o.nodes || o.include || o.includeGraphs);
             const isDataflowFunc = (o) => Boolean(o.graphs && !isSpecificationFunc(o));
-            const isInvalid = objects.map((o) => !isSpecificationFunc(o) && !isDataflowFunc(o));
+            const isLayoutFunc = (o) => Boolean(o.layout);
+            const isInvalid = objects.map((o) => !isSpecificationFunc(o) &&
+                !isDataflowFunc(o) && !isLayoutFunc(o));
 
             // [invalid, invalid]
             if (isInvalid.every(Boolean)) {
@@ -1142,25 +1144,45 @@ export default defineComponent({
 
             const isSpecification = objects.map(isSpecificationFunc);
             const isDataflow = objects.map(isDataflowFunc);
+            const isLayout = objects.map(isLayoutFunc);
+            const getValidElement = (arr, obj) => {
+                const valid = [...arr.keys()].filter((i) => arr[i]);
+                const index = valid[0];
+
+                if (index === undefined) {
+                    return undefined;
+                }
+
+                return obj[index];
+            };
             let specification;
             let dataflow;
+            let layout;
 
             if (isSpecification.every(Boolean)) {
                 // [spec], [spec, spec]
                 if (objects.length > 1) {
-                    notify('warning', 'Two specifications provided, using the first one.');
+                    notify('warning', 'Two or more specifications provided, using the first one.');
                 }
                 [specification] = objects;
             } else if (isDataflow.every(Boolean)) {
                 // [dataflow], [dataflow, dataflow]
                 if (objects.length > 1) {
-                    notify('warning', 'Two dataflows provided, using the first one.');
+                    notify('warning', 'Two or more dataflows provided, using the first one.');
                 }
                 [dataflow] = objects;
+            } else if (isLayout.every(Boolean)) {
+                // [layout], [layout, layout]
+                if (objects.length > 1) {
+                    notify('warning', 'Two or more layout provided, using the first one.');
+                }
+                [layout] = objects;
             } else if (isSpecification.some(Boolean) && isDataflow.some(Boolean)) {
-                // [spec, dataflow], [dataflow, spec]
-                if (isSpecification[0]) [specification, dataflow] = objects;
-                else [dataflow, specification] = objects;
+                specification = getValidElement(isSpecification, objects);
+                dataflow = getValidElement(isDataflow, objects);
+            }
+            if (isLayout.some(Boolean)) {
+                layout = getValidElement(isLayout, objects);
             }
 
             let isValidSpec = true;
@@ -1179,6 +1201,10 @@ export default defineComponent({
 
             if (isValidSpec && dataflow) {
                 await updateDataflow(dataflow);
+            }
+
+            if (isValidSpec && layout) {
+                EditorManager.importGraphLayout(props.viewModel.editor.graph, layout);
             }
             updateVisibleGroups();
         }, setLoad);
