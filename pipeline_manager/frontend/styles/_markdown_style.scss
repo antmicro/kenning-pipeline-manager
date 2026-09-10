@@ -12,18 +12,21 @@
     min-height: fit-content;
     overflow-y: scroll;
 }
-.__markdown-content  {
-    & > div {
+
+.__markdown-content {
+    &>div {
         display: block;
-        vertical-align: bottom;
         width: 30%;
     }
+
     span {
-        max-width: 30vh;
-    }
-    & > .node_description {
         display: block;
-        vertical-align: bottom;
+        max-width: 30vh;
+        width: max-content;
+    }
+
+    &>.node_description {
+        display: block;
         margin-left: 1em;
         margin-right: 1em;
         margin-bottom: 1em;
