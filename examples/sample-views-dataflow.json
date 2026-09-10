@@ -50,6 +50,24 @@
                             "position": {
                                 "x": 622,
                                 "y": 403
+                            },
+                            "interfaces": {
+                                "In 1": {
+                                    "side": "right",
+                                    "sidePosition": 1
+                                },
+                                "In 2": {
+                                    "side": "right",
+                                    "sidePosition": 0
+                                },
+                                "Out 1": {
+                                    "side": "left",
+                                    "sidePosition": 1
+                                },
+                                "Out 2": {
+                                    "side": "left",
+                                    "sidePosition": 0
+                                }
                             }
                         },
                         {
