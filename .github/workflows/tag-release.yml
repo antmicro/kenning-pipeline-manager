@@ -1,0 +1,37 @@
+name: Latest release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  ReleaseTag:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+      - name: Setup npm
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+      - name: Install build dependencies
+        run: |
+          pip install build
+      - name: Build the wheel
+        run: |
+          python -m build --wheel
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${GITHUB_REF_NAME}" dist/*.whl \
+            --title "Release ${GITHUB_REF_NAME}" \
+            --notes "Release from ${{ github.sha }}."
