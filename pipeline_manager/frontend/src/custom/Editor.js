@@ -357,6 +357,7 @@ export default class PipelineManagerEditor extends Editor {
         loadOnly = false,
         templateName = null,
         centerAtTop = false,
+        markEdited = false,
     ) {
         // All subgraphs should be unregistered to avoid conflicts later when trying to
         // load into subgraph (in that case there may be two subgraphs with the same ID, one
@@ -476,6 +477,9 @@ export default class PipelineManagerEditor extends Editor {
             this.graphs.forEach((graph) => {
                 const g = state.graphs?.find((grph) => grph.id === graph.id);
                 graph.groups = g?.groups ? g.groups.map((group) => ({ ...group })) : [];
+                if (markEdited && g) {
+                    graph.isEdited = true;
+                }
             });
             suppressHistoryLogging(false);
         } catch (err) {

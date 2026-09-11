@@ -934,6 +934,7 @@ export default defineComponent({
                 false,
                 null,
                 centerAtTop,
+                true, // Mark that this is dataflow specifically
             );
 
             if (Array.isArray(warnings) && warnings.length) {

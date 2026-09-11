@@ -2326,7 +2326,7 @@ export default class EditorManager {
      */
     async loadDataflow(
         dataflow, preventCentering = false, loadOnly = false, templateName = null,
-        centerAtTop = false,
+        centerAtTop = false, isDataflowOnly = false,
     ) {
         let { notifyWhenChanged } = this;
 
@@ -2413,6 +2413,7 @@ export default class EditorManager {
                         loadOnly,
                         templateName,
                         centerAtTop,
+                        isDataflowOnly,
                     );
 
                     if (!globalProperties.softLoad) {
