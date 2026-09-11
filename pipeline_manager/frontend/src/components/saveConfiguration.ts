@@ -159,14 +159,16 @@ export const saveSpecificationConfiguration: SaveConfiguration = {
             }
         }
 
-        Object.entries(dataflow.metadata).forEach(([key, value]) => {
-            if (specification.metadata === undefined) {
-                specification.metadata = {};
-            }
-            if (value !== undefined) {
-                specification.metadata[key] = value;
-            }
-        });
+        if (dataflow?.metadata) {
+            Object.entries(dataflow.metadata).forEach(([key, value]) => {
+                if (specification.metadata === undefined) {
+                    specification.metadata = {};
+                }
+                if (value !== undefined) {
+                    specification.metadata[key] = value;
+                }
+            });
+        }
 
         if (this.minify && specification.nodes) {
             const usedNames = EditorManager.getUsedNames([
