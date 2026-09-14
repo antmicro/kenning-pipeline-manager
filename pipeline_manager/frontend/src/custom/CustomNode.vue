@@ -295,17 +295,17 @@ const bigBuses = computed(() =>
         .filter((intf) => isBigBus(intf)),
     ...Object.values(displayedOutputs.value)
         .filter((intf) => isBigBus(intf))]);
-const sidebarProperties = computed(() =>
-    [...Object.values(displayedInputs.value)
-        .filter((intf) => !intf.port),
-    ...bigBuses.value],
+const sidebarProperties = computed(() => [...Object.values((props.node.inputs))
+    .filter((intf) => !intf.port),
+...bigBuses.value],
 );
 const displayedProperties = computed(() => {
     if (editorManager.baklavaView.settings.showHiddenProperties) {
         return sidebarProperties.value;
     }
     return sidebarProperties.value
-        .filter((intf) => !(intf.hideOnDefault && (!intf.value || intf.value === intf.default)));
+        .filter((intf) => !(intf.hideOnDefault &&
+        (!intf.value || intf.value === intf.default)) && !intf.hidden);
 });
 
 const transformed = () => {
