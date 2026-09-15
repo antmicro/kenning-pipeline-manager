@@ -170,6 +170,7 @@ def copy_frontend_to_workspace(
                 ".env.local",
                 ".env.static.local",
                 "node_modules",
+                "dist",
             ]
             changed_sources = list(
                 filter(lambda x: x not in ignored_files, diff.diff_files)
@@ -179,7 +180,7 @@ def copy_frontend_to_workspace(
                 dst = workspace_directory / "frontend" / current_path / i
                 shutil.copy(src, dst)
                 changed |= True
-            if diff.subdirs is not {}:
+            if diff.subdirs != {}:
                 for name, subdir in diff.subdirs.items():
                     if name not in ignored_files:
                         changed |= _check_subdir(subdir, current_path / name)

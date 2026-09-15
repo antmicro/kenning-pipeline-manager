@@ -143,6 +143,9 @@ class KPMDirective(SphinxDirective):
                 "center_at_top" in self.options
             ):  # by default None is returned if flag is correct
                 self.options["center_at_top"] = True
+
+            build_pipeline_manager(self.env.app)
+
             return [KPMNode(depth=self.env.docname.count("/"), **self.options)]
 
         from tempfile import NamedTemporaryFile
@@ -216,7 +219,6 @@ def build_pipeline_manager(app):
     static_dir = Path(app.builder.outdir) / "_static"
 
     static_dir.mkdir(parents=True, exist_ok=True)
-
     frontend_changed = True
     if workspace_dir.exists():
         frontend_changed = copy_frontend_to_workspace(
@@ -258,8 +260,6 @@ def setup(app: Sphinx):
         html=(KPMNode.visit_html, KPMNode.depart_node),
     )
     app.add_directive("pipeline_manager", KPMDirective)
-
-    app.connect("builder-inited", build_pipeline_manager)
 
     return {
         "version": "0.1",
