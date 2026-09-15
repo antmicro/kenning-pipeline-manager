@@ -98,7 +98,7 @@ export default defineComponent({
             default: 'slide-fade',
         },
     },
-    emits: ['update:modelValue', 'click', 'onpointerover', 'onpointerleave', 'close'],
+    emits: ['update:modelValue', 'update:x', 'update:y', 'click', 'onpointerover', 'onpointerleave', 'close'],
     setup(props, context) {
         const {
             el,
@@ -168,6 +168,8 @@ export default defineComponent({
             // context menu size
             const width = el.value.offsetWidth;
             const height = el.value.offsetHeight;
+            const { x } = props;
+            const { y } = props;
 
             const vw = Math.max(document.documentElement.clientWidth
                 || 0, window.innerWidth || 0);
@@ -177,15 +179,16 @@ export default defineComponent({
             let offsetX = 0;
             let offsetY = 0;
 
-            const contextYSpan = props.y + height;
+            const contextYSpan = y + height;
 
             offsetY = Math.max(0, contextYSpan - vh);
-            props.y -= offsetY;
 
-            const contextXSpan = props.x + width;
+            const contextXSpan = x + width;
 
             offsetX = Math.max(0, contextXSpan - vw);
-            props.x -= offsetX;
+
+            context.emit('update:x', x - offsetX);
+            context.emit('update:y', y - offsetY);
         };
 
         watch(() => props.modelValue, (isOpen) => {
