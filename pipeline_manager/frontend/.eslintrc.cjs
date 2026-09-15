@@ -34,6 +34,7 @@ module.exports = {
         quotes: ['error', 'single', { allowTemplateLiterals: true }],
         'import/extensions': ['error', { js: 'ignorePackages', json: 'ignorePackages', ts: 'ignorePackages' }],
         'no-unused-vars': ['error', {'vars': 'all', 'args': 'all', 'argsIgnorePattern': '^_'}],
+        'no-console': ["error", { allow: ["warn", "error"] }],
     },
     ignorePatterns: ["src/third-party/hterm_all.js", "specification_builder/specification_builder.js"],
 };
