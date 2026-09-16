@@ -39,7 +39,9 @@ def get_default_frontend_path() -> Path:
 
 
 def create_app(
-    frontend_dir: Optional[Path] = None, relative_pm_url: Optional[Path] = None
+    frontend_dir: Optional[Path] = None,
+    relative_pm_url: Optional[Path] = None,
+    follow_symlink: bool = False,
 ) -> FastAPI:
     """
     Hosts frontend application.
@@ -50,6 +52,10 @@ def create_app(
         Path where the built frontend is stored.
     relative_pm_url : Optional[Path]
         Path in URL where Pipeline Manager should be served
+    follow_symlink : bool
+        Whether StaticFiles should follow symlinks when resolving files
+        under frontend_dir. Needed when frontend_dir, or files within it,
+        are only reachable through symlinks.
 
     Returns
     -------
@@ -80,7 +86,11 @@ def create_app(
             dirs_exist_ok=True,
         )
     app.mount(
-        "/", StaticFiles(directory=frontend_dir, html=True), name="static"
+        "/",
+        StaticFiles(
+            directory=frontend_dir, html=True, follow_symlink=follow_symlink
+        ),
+        name="static",
     )
 
     app.add_middleware(

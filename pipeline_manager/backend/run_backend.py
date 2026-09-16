@@ -72,6 +72,13 @@ def create_backend(argv):  # noqa: D103
         help="Creates server without frontend",
     )
     parser.add_argument(
+        "--follow-symlink",
+        action="store_true",
+        help="Follow symlinks when serving the frontend's static files. "
+        "Needed when the frontend directory, or files within it, are "
+        "only reachable through symlinks.",
+    )
+    parser.add_argument(
         "--lazy-server-init",
         action="store_true",
         help="Connects to the third-party application after the first "
@@ -106,7 +113,9 @@ def create_backend(argv):  # noqa: D103
     sio = create_socketio()
     app = None
     if not args.skip_frontend:
-        app = create_app(args.frontend_directory, args.relative_pm_url)
+        app = create_app(
+            args.frontend_directory, args.relative_pm_url, args.follow_symlink
+        )
 
     return sio, app, args
 
