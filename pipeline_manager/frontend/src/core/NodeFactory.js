@@ -1128,9 +1128,9 @@ export class CustomNode extends Node {
                 intf.externalName = ioState.externalName;
                 if (ioState.hidden !== undefined) this.inputs[ioName].hidden = ioState.hidden;
             }
-            if (ioState.bus?.stubs && intf) {
+            if (intf?.bus?.type) {
                 intf.bus = intf.bus ?? {};
-                intf.bus.stubs = ioState.bus.stubs;
+                intf.bus.stubs = ioState?.bus?.stubs ?? [];
                 // eslint-disable-next-line no-restricted-syntax, guard-for-in
                 for (const stubId in intf.bus.stubs) {
                     const stub = intf.bus.stubs[stubId];
