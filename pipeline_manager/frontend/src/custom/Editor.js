@@ -411,6 +411,7 @@ export default class PipelineManagerEditor extends Editor {
         graphRootLoad ??= entryGraph;
 
         try {
+            suppressHistoryLogging(true);
             if (result.errors.length && !globalProperties.softLoad) return result.errors;
 
             state.graphs?.forEach((graph) => {
@@ -445,6 +446,7 @@ export default class PipelineManagerEditor extends Editor {
                 const g = state.graphs?.find((grph) => grph.id === graph.id);
                 graph.groups = g?.groups ? g.groups.map((group) => ({ ...group })) : [];
             });
+            suppressHistoryLogging(false);
         } catch (err) {
             // If anything goes wrong during dataflow loading, the editor is cleaned and an
             // appropriate error is returned.
@@ -1368,9 +1370,9 @@ export default class PipelineManagerEditor extends Editor {
         graphs.graphs.forEach((state) => {
             if (state.id !== this.editorManager?.baklavaView.displayedGraph.id) return;
             state.nodes.forEach((node) => {
-                const toSidedStubs = node.interfaces.filter((i) =>
+                const twoSidedStubs = node.interfaces.filter((i) =>
                     i.bus?.type === 'twoSided').flatMap((i) => i.bus.stubs ?? []);
-                const movableInterfaces = node.interfaces.concat(toSidedStubs);
+                const movableInterfaces = node.interfaces.concat(twoSidedStubs);
                 movableInterfaces.forEach((intf) => {
                     let connections = state.connections.filter(
                         (conn) => conn?.from === intf.id || conn?.to === intf.id,
