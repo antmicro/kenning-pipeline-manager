@@ -52,6 +52,11 @@ from pipeline_manager.tests.conftest import check_validation
             0,
         ),
         (
+            "dataflow_specification_node_with_bus",
+            "dataflow_node_with_bus_connection_and_property",
+            0,
+        ),
+        (
             "dataflow_specification_node_and_graph_node_maxConnectionsCount_equal_three",
             "dataflow_three_layer_graph_interfaces_connected_graph_node",
             0,
@@ -196,6 +201,13 @@ def dataflow_specification_node_with_bus(
                     },
                 }
             ],
+            "properties": [
+                {
+                    "name": "Note",
+                    "type": "multiline",
+                    "default": "Test",
+                }
+            ],
         }
     )
     return dataflow_specification_node_no_properties
@@ -263,6 +275,22 @@ def dataflow_node_with_bus_connection(dataflow_node_base):
         }
     )
     return dataflow_node_base
+
+
+@pytest.fixture
+def dataflow_node_with_bus_connection_and_property(
+    dataflow_node_with_bus_connection
+):
+    dataflow_node_with_bus_connection["graphs"][0]["nodes"][-1][
+        "properties"
+    ].append(
+        {
+            "name": "Note",
+            "id": "note-property",
+            "value": "trigger",
+        }
+    )
+    return dataflow_node_with_bus_connection
 
 
 @pytest.fixture
