@@ -76,20 +76,23 @@ async function saveSpecificationAs(page: Page, filenameWithoutExtension: string)
     return downloadedFilePath;
 }
 
-async function verifyNodePresence(page: Page, specificationPath: string, nodeName: string) {
+async function verifyNodePresence(page: Page,
+    specificationPath: string,
+    nodeName: string,
+    intflen = 0,
+    proplen = 0,
+) {
     const specFile = await fs.readFile(specificationPath, 'utf-8');
     const specification = JSON.parse(specFile);
-
-    expect(
-        specification.nodes.filter(
-            (node: any) =>
-                node.name === nodeName &&
-                Array.isArray(node.interfaces) &&
-                node.interfaces.length === 0 &&
-                Array.isArray(node.properties) &&
-                node.properties.length === 0,
-        ).length === 1,
-    ).toBeTruthy();
+    const node = specification.nodes.find(
+            (node: any) => node.name === nodeName);
+    expect(node).toBeTruthy();
+    if (intflen !== -1) {
+        expect(node.interfaces.length).toBe(intflen);
+    }
+    if (proplen !== -1) {
+        expect(node.properties.length).toBe(proplen);
+    }
 }
 
 test('enable editing', async ({ page }, testInfo) => {
@@ -440,7 +443,8 @@ test('editing bus node', async ({ page }) => {
     await loadDataflow(page, 'sample-bus-dataflow.json');
     // await loadDataflow(page, 'sample-bus-dataflow.json');
     await enableEditingNodes(page);
-    const busNode = await getNode(page, 'Motherboard');
+    const nodeName = 'Motherboard';
+    const busNode = await getNode(page, nodeName);
     const ports = busNode.locator('.__port');
     const props = busNode.locator('.__properties > div');
     const buses = busNode.locator('.__port-bus');
@@ -457,6 +461,8 @@ test('editing bus node', async ({ page }) => {
     await addInterface(page, busNode);
     expect(await buses.count()).toBe(3);
     expect(await ports.count()).toBe(prevPorts + 1);
+    const specificationPath = await saveSpecificationAs(page, 'new_specification_bussin');
+    await verifyNodePresence(page, specificationPath, nodeName, -1, -1);
 });
 
 test('generalize and specialize node', async ({page}) => {
