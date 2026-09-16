@@ -830,7 +830,7 @@ export class CustomNode extends Node {
                         stubs: busStubs,
                     };
                     const isBusEmpty = (!bus.size || !bus.type
-                        || busStubs.length === 0);
+                        || (busStubs?.length ?? 0) === 0);
 
                     newInterfaces.push({
                         name: ioName.slice(ioState.direction.length + 1),
