@@ -1370,9 +1370,14 @@ export default class PipelineManagerEditor extends Editor {
         graphs.graphs.forEach((state) => {
             if (state.id !== this.editorManager?.baklavaView.displayedGraph.id) return;
             state.nodes.forEach((node) => {
+                const nodeType = this.nodeTypes.get(node.name);
+                const nodeStyle = this.getNodeStyle(nodeType?.style);
+                const positionedInterfaces = Object.keys(nodeStyle?.positions || {});
+
                 const twoSidedStubs = node.interfaces.filter((i) =>
                     i.bus?.type === 'twoSided').flatMap((i) => i.bus.stubs ?? []);
-                const movableInterfaces = node.interfaces.concat(twoSidedStubs);
+                const movableInterfaces = node.interfaces.filter((i) =>
+                    !positionedInterfaces?.includes(i.name)).concat(twoSidedStubs);
                 movableInterfaces.forEach((intf) => {
                     let connections = state.connections.filter(
                         (conn) => conn?.from === intf.id || conn?.to === intf.id,
