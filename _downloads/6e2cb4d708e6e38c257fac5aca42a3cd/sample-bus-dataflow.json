@@ -1,0 +1,258 @@
+{
+    "graphs": [
+        {
+            "id": "9c25e441-12e9-4579-a27f-610676639df8",
+            "name": "Example of a graph using BUS interface",
+            "nodes": [
+                {
+                    "id": "63344ed8-20e6-4943-94a5-10fb856ca590",
+                    "position": {
+                        "x": 700,
+                        "y": 300
+                    },
+                    "width": 300,
+                    "twoColumn": true,
+                    "interfaces": [
+                        {
+                            "name": "control-signal",
+                            "id": "5ad202ba-31c7-4ef9-b903-c08755b77082",
+                            "direction": "inout",
+                            "side": "left",
+                            "sidePosition": 0
+                        },
+                        {
+                            "name": "data-signal",
+                            "id": "836a1bec-92b9-4147-a72f-35fb9c4006f4",
+                            "direction": "inout",
+                            "side": "right",
+                            "sidePosition": 0
+                        },
+                        {
+                            "name": "address-signal",
+                            "id": "95645b9f-b4d8-4ed5-9e03-27afb32c3982",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 1
+                        }
+                    ],
+                    "properties": [],
+                    "enabledInterfaceGroups": [],
+                    "name": "Central Processing Unit",
+                    "instanceName": "Central Processing Unit"
+                },
+                {
+                    "id": "7a70c2b7-3bf2-463b-96c9-3085086fb516",
+                    "position": {
+                        "x": 1200,
+                        "y": 200
+                    },
+                    "width": 300,
+                    "twoColumn": true,
+                    "interfaces": [
+                        {
+                            "name": "control-signal",
+                            "id": "e1b596a4-d17f-47c0-a9d6-73a0652b3532",
+                            "direction": "inout",
+                            "side": "left",
+                            "sidePosition": 0
+                        },
+                        {
+                            "name": "address-signal",
+                            "id": "84054afe-2d49-4e4a-9ae1-be15ea569527",
+                            "direction": "inout",
+                            "side": "left",
+                            "sidePosition": 1
+                        },
+                        {
+                            "name": "data-signal",
+                            "id": "15499707-04d0-4efd-b63a-d3ba7e5a7cd7",
+                            "direction": "inout",
+                            "side": "left",
+                            "sidePosition": 2
+                        }
+                    ],
+                    "properties": [],
+                    "enabledInterfaceGroups": [],
+                    "name": "I/O Controller",
+                    "instanceName": "I/O Controller"
+                },
+                {
+                    "id": "0f17ad85-8c89-4320-b490-f5e667e7b5fc",
+                    "position": {
+                        "x": 1400,
+                        "y": 700
+                    },
+                    "width": 300,
+                    "twoColumn": true,
+                    "interfaces": [
+                        {
+                            "name": "address-signal",
+                            "id": "2eb68e88-83f0-4dda-8150-4677af6040f8",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 1
+                        },
+                        {
+                            "name": "control-signal",
+                            "id": "8351745d-b62a-4249-a4c8-c10481c5cb87",
+                            "direction": "inout",
+                            "side": "left",
+                            "sidePosition": 0
+                        },
+                        {
+                            "name": "data-signal",
+                            "id": "c003cc64-ec95-441e-b5ea-cf801fa50555",
+                            "direction": "inout",
+                            "side": "left",
+                            "sidePosition": 2
+                        }
+                    ],
+                    "properties": [],
+                    "enabledInterfaceGroups": [],
+                    "name": "Memory",
+                    "instanceName": "Memory"
+                },
+                {
+                    "id": "1d912c39-146a-4316-8665-12901900adeb",
+                    "position": {
+                        "x": 700,
+                        "y": 500
+                    },
+                    "width": 300,
+                    "twoColumn": true,
+                    "interfaces": [
+                        {
+                            "name": "control-bus",
+                            "id": "a0cc7e7c-daac-47a8-b4ce-2f087d118115",
+                            "direction": "inout",
+                            "side": "right",
+                            "bus":{
+                                "size": 150,
+                                "stubs": [
+                                    {
+                                        "id": "4c3b8687-1d48-4721-8b2c-15ceed4043b7",
+                                        "offset": 118,
+                                        "side": "right"
+                                    },
+                                    {
+                                        "id": "be4d03c2-a9da-4ec6-81fc-5da7a2ec2f12",
+                                        "offset": 50,
+                                        "side": "right"
+                                    },
+                                    {
+                                        "id": "5a8203fe-0c1c-4a69-801b-e7c11f95e74f",
+                                        "offset": 77,
+                                        "side": "left"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "name": "address-bus",
+                            "sidePosition": 0,
+                            "id": "30990bec-1475-44b8-a04d-4d311b6eee4a",
+                            "direction": "inout",
+                            "side": "right",
+                            "bus": {
+                                "size": 100,
+                                "stubs": [
+                                    {
+                                        "id": "6ac994e2-d63e-4a88-8789-206cc6e6c722",
+                                        "offset": 90
+                                    },
+                                    {
+                                        "id": "8d1c5905-0159-4836-b950-407ffce1b7f4",
+                                        "offset": 53
+                                    },
+                                    {
+                                        "id": "da84020e-efdc-46e8-8842-67cc8b7f1e5c",
+                                        "offset": 23
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "name": "data-bus",
+                            "sidePosition": 1,
+                            "id": "444bc6ae-8353-446a-82b2-f6e79a194cf5",
+                            "direction": "inout",
+                            "side": "right",
+                            "bus": {
+                                "size": 100,
+                                "stubs": [
+                                    {
+                                        "id": "ff2935fe-6368-459d-aabb-db017804028c",
+                                        "offset": 78
+                                    },
+                                    {
+                                        "id": "f96aaa33-dd62-4044-836c-1fcb1070add9",
+                                        "offset": 52
+                                    },
+                                    {
+                                        "id": "cd5215d0-7f14-4475-81bb-db38370fd05f",
+                                        "offset": 24
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "properties": [],
+                    "enabledInterfaceGroups": [],
+                    "name": "Motherboard",
+                    "instanceName": "Motherboard"
+                }
+            ],
+            "groups": [],
+            "connections": [
+                {
+                    "id": "6130d684-15f8-4816-9830-ffeaf31a2dd2",
+                    "from": "c003cc64-ec95-441e-b5ea-cf801fa50555",
+                    "to": "ff2935fe-6368-459d-aabb-db017804028c"
+                },
+                {
+                    "id": "b51d55dc-053b-4302-a2b1-2423a5582335",
+                    "from": "8351745d-b62a-4249-a4c8-c10481c5cb87",
+                    "to": "4c3b8687-1d48-4721-8b2c-15ceed4043b7"
+                },
+                {
+                    "id": "0cf4f137-bf93-4478-b23f-410db4fe7727",
+                    "from": "6ac994e2-d63e-4a88-8789-206cc6e6c722",
+                    "to": "2eb68e88-83f0-4dda-8150-4677af6040f8"
+                },
+                {
+                    "id": "805fa0a0-cd19-4e30-9214-f0e624a605fa",
+                    "from": "e1b596a4-d17f-47c0-a9d6-73a0652b3532",
+                    "to": "be4d03c2-a9da-4ec6-81fc-5da7a2ec2f12"
+                },
+                {
+                    "id": "007df326-005a-47db-bce1-224e7fd6dc96",
+                    "from": "84054afe-2d49-4e4a-9ae1-be15ea569527",
+                    "to": "8d1c5905-0159-4836-b950-407ffce1b7f4"
+                },
+                {
+                    "id": "43f63e01-799a-48cf-b276-b53eae6847e6",
+                    "from": "15499707-04d0-4efd-b63a-d3ba7e5a7cd7",
+                    "to": "f96aaa33-dd62-4044-836c-1fcb1070add9"
+                },
+                {
+                    "id": "705f90f6-fe07-4a17-b19d-e36fe5e21b03",
+                    "from": "836a1bec-92b9-4147-a72f-35fb9c4006f4",
+                    "to": "cd5215d0-7f14-4475-81bb-db38370fd05f"
+                },
+                {
+                    "id": "8f8e69e6-4d45-449c-a7b7-4cf3542240a2",
+                    "from": "5ad202ba-31c7-4ef9-b903-c08755b77082",
+                    "to": "5a8203fe-0c1c-4a69-801b-e7c11f95e74f"
+                },
+                {
+                    "id": "baf75b0a-67b1-4cbf-a525-deb8b9d86445",
+                    "from": "95645b9f-b4d8-4ed5-9e03-27afb32c3982",
+                    "to": "da84020e-efdc-46e8-8842-67cc8b7f1e5c"
+                }
+            ]
+        }
+    ],
+    "entryGraph": "9c25e441-12e9-4579-a27f-610676639df8",
+    "version": "20250623.14"
+}
+

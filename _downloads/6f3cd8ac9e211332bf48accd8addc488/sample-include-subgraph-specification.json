@@ -1,0 +1,17 @@
+{
+    "version": "20250623.14",
+    "nodes" : [
+        {
+            "name": "MultipleIOGraphNode",
+            "category": "Test/Graphs",
+            "subgraphId": "79040424-1464-40a0-ba97-cc0ba6a1944f"
+        }
+    ],
+    "includeGraphs": [
+        {
+            "name": "MultipleIOGraphs",
+            "url": "https://raw.githubusercontent.com/antmicro/kenning-pipeline-manager/main/examples/sample-multiple-io-dataflow.json"
+        }
+    ],
+    "include": ["https://raw.githubusercontent.com/antmicro/kenning-pipeline-manager/main/examples/sample-multiple-io-specification.json"]
+}

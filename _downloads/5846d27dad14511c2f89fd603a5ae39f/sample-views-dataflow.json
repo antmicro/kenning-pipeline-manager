@@ -1,0 +1,831 @@
+{
+    "graphs": [
+        {
+            "id": "8282a458-a6b4-444e-908e-2032528f15d3",
+            "nodes": [
+                {
+                    "id": "41a0be61-99bf-408c-b225-5d8586636f33",
+                    "position": {
+                        "x": 2189.534933584324,
+                        "y": 454.24055465805145
+                    },
+                    "width": 300,
+                    "twoColumn": false,
+                    "interfaces": [
+                        {
+                            "name": "In 1",
+                            "id": "a20b67fd-4a0b-4d5b-a523-3b81b0374c06",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 0
+                        },
+                        {
+                            "name": "In 2",
+                            "id": "e91ebef2-2a36-4077-b7de-c7ea8e53f222",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 1
+                        },
+                        {
+                            "name": "Out 1",
+                            "id": "7c43fe85-b2b5-48cc-a672-ba779669d96f",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 0
+                        },
+                        {
+                            "name": "Out 2",
+                            "id": "0f32f08b-cb5a-4cf0-9499-ab35920bc289",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 1
+                        }
+                    ],
+                    "properties": [],
+                    "enabledInterfaceGroups": [],
+                    "views": [
+                        {
+                            "name": "tree",
+                            "style": "treeStyle",
+                            "position": {
+                                "x": 622,
+                                "y": 403
+                            }
+                        },
+                        {
+                            "name": "horse",
+                            "style": "horseStyle",
+                            "position": {
+                                "x": 440,
+                                "y": 763
+                            }
+                        },
+                        {
+                            "name": "heart",
+                            "style": "heartStyle",
+                            "position": {
+                                "x": 1698,
+                                "y": 86
+                            }
+                        }
+                    ],
+                    "name": "Node",
+                    "instanceName": "Node"
+                },
+                {
+                    "id": "f9751b7a-a553-42ee-bde9-50576a1840d8",
+                    "position": {
+                        "x": 202.6777708777656,
+                        "y": 589.2633018870085
+                    },
+                    "width": 300,
+                    "twoColumn": false,
+                    "interfaces": [
+                        {
+                            "name": "Input",
+                            "id": "5759f4a9-50e3-40e5-a3ea-7d8dcb06311d",
+                            "direction": "input",
+                            "side": "right",
+                            "sidePosition": 0
+                        }
+                    ],
+                    "properties": [],
+                    "enabledInterfaceGroups": [],
+                    "views": [
+                        {
+                            "name": "tree",
+                            "style": "treeStyle",
+                            "position": {
+                                "x": 500,
+                                "y": 1500
+                            }
+                        },
+                        {
+                            "name": "horse",
+                            "style": "horseStyle",
+                            "position": {
+                                "x": 533,
+                                "y": 1540
+                            }
+                        },
+                        {
+                            "name": "heart",
+                            "style": "heartStyle",
+                            "position": {
+                                "x": 597,
+                                "y": 1840
+                            }
+                        }
+                    ],
+                    "name": "Sink",
+                    "instanceName": "Sink"
+                },
+                {
+                    "id": "8ba91504-0160-43be-831d-c64ec054e9cc",
+                    "position": {
+                        "x": 361,
+                        "y": 186
+                    },
+                    "width": 300,
+                    "twoColumn": false,
+                    "interfaces": [
+                        {
+                            "name": "Output",
+                            "id": "c8ebace4-41fb-4f4a-be44-13788c91a43d",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 0
+                        }
+                    ],
+                    "properties": [],
+                    "enabledInterfaceGroups": [],
+                    "views": [
+                        {
+                            "name": "tree",
+                            "style": "treeStyle",
+                            "position": {
+                                "x": 29,
+                                "y": 558
+                            }
+                        },
+                        {
+                            "name": "horse",
+                            "style": "horseStyle",
+                            "position": {
+                                "x": 140,
+                                "y": 1606
+                            }
+                        },
+                        {
+                            "name": "heart",
+                            "style": "heartStyle",
+                            "position": {
+                                "x": 900,
+                                "y": 600
+                            }
+                        }
+                    ],
+                    "name": "Source",
+                    "instanceName": "Source"
+                },
+                {
+                    "id": "b174166d-7062-4e76-9201-59ee15bea8b1",
+                    "position": {
+                        "x": 1989.0187906643691,
+                        "y": 1013.8636053557423
+                    },
+                    "width": 300,
+                    "twoColumn": false,
+                    "interfaces": [
+                        {
+                            "name": "Input",
+                            "id": "8f1c2777-1f33-42a2-a856-363112d63897",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 0
+                        }
+                    ],
+                    "properties": [],
+                    "enabledInterfaceGroups": [],
+                    "views": [
+                        {
+                            "name": "tree",
+                            "style": "treeStyle",
+                            "position": {
+                                "x": 1754,
+                                "y": 578
+                            }
+                        },
+                        {
+                            "name": "horse",
+                            "style": "horseStyle",
+                            "position": {
+                                "x": 1523,
+                                "y": 558
+                            }
+                        },
+                        {
+                            "name": "heart",
+                            "style": "heartStyle",
+                            "position": {
+                                "x": 1445,
+                                "y": 597
+                            }
+                        }
+                    ],
+                    "name": "Sink",
+                    "instanceName": "Sink"
+                },
+                {
+                    "id": "5d2ab1b2-c6b1-4d31-886f-398782579332",
+                    "position": {
+                        "x": 1470.0388014808946,
+                        "y": 511.2140799488096
+                    },
+                    "width": 300,
+                    "twoColumn": false,
+                    "interfaces": [
+                        {
+                            "name": "In 1",
+                            "id": "b616e454-4202-47ed-9162-7cc92870c79b",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 0
+                        },
+                        {
+                            "name": "In 2",
+                            "id": "fcd45100-20b7-4deb-ac94-c7b6e90bb013",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 1
+                        },
+                        {
+                            "name": "Out 1",
+                            "id": "3ae288b3-f24d-4ad0-8f2f-861ad9033433",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 0
+                        },
+                        {
+                            "name": "Out 2",
+                            "id": "7f1f57e9-db9d-4b1d-b7ec-de8830aeab0e",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 1
+                        }
+                    ],
+                    "properties": [],
+                    "enabledInterfaceGroups": [],
+                    "views": [
+                        {
+                            "name": "tree",
+                            "style": "treeStyle",
+                            "position": {
+                                "x": 1104,
+                                "y": 414
+                            }
+                        },
+                        {
+                            "name": "horse",
+                            "style": "horseStyle",
+                            "position": {
+                                "x": 873,
+                                "y": 762
+                            }
+                        },
+                        {
+                            "name": "heart",
+                            "style": "heartStyle",
+                            "position": {
+                                "x": 646,
+                                "y": 125
+                            }
+                        }
+                    ],
+                    "name": "Node",
+                    "instanceName": "Node"
+                },
+                {
+                    "id": "5fab0b7a-1ecf-48d7-a2d6-c186ff7b40d7",
+                    "position": {
+                        "x": 1515.2607872005774,
+                        "y": 1100.1238428185457
+                    },
+                    "width": 300,
+                    "twoColumn": false,
+                    "interfaces": [
+                        {
+                            "name": "Output",
+                            "id": "e1fa89e2-6e40-4084-b925-67017cb86207",
+                            "direction": "output",
+                            "side": "left",
+                            "sidePosition": 0
+                        }
+                    ],
+                    "properties": [],
+                    "enabledInterfaceGroups": [],
+                    "views": [
+                        {
+                            "name": "tree",
+                            "style": "treeStyle",
+                            "position": {
+                                "x": 1200,
+                                "y": 1500
+                            }
+                        },
+                        {
+                            "name": "horse",
+                            "style": "horseStyle",
+                            "position": {
+                                "x": 1100,
+                                "y": 591
+                            }
+                        },
+                        {
+                            "name": "heart",
+                            "style": "heartStyle",
+                            "position": {
+                                "x": 1801,
+                                "y": 1832
+                            }
+                        }
+                    ],
+                    "name": "Source",
+                    "instanceName": "Source"
+                },
+                {
+                    "id": "189ebb17-700e-4bf2-b6d0-148f62a12931",
+                    "position": {
+                        "x": 2535.265324154588,
+                        "y": 1030.410367745606
+                    },
+                    "width": 300,
+                    "twoColumn": false,
+                    "interfaces": [
+                        {
+                            "name": "In 1",
+                            "id": "61317d2d-62c2-49c3-8a62-a53fea4bbdf3",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 0
+                        },
+                        {
+                            "name": "In 2",
+                            "id": "384d186c-2ce8-4098-9123-1e1fb7b967d1",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 1
+                        },
+                        {
+                            "name": "Out 1",
+                            "id": "2dba54ca-632e-4b9e-a5a4-0e3b76f3de2e",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 0
+                        },
+                        {
+                            "name": "Out 2",
+                            "id": "d5db7231-8687-4de0-b4ab-75d37094e82a",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 1
+                        }
+                    ],
+                    "properties": [],
+                    "enabledInterfaceGroups": [],
+                    "views": [
+                        {
+                            "name": "tree",
+                            "style": "treeStyle",
+                            "position": {
+                                "x": 1592,
+                                "y": -151
+                            }
+                        },
+                        {
+                            "name": "horse",
+                            "style": "horseStyle",
+                            "position": {
+                                "x": 1675,
+                                "y": 688
+                            }
+                        },
+                        {
+                            "name": "heart",
+                            "style": "heartStyle",
+                            "position": {
+                                "x": 1446,
+                                "y": 773
+                            }
+                        }
+                    ],
+                    "name": "Node",
+                    "instanceName": "Node"
+                },
+                {
+                    "id": "8d6a6e8c-da34-4c55-bfc6-d2d0e3668e66",
+                    "position": {
+                        "x": 1803.2917682167295,
+                        "y": 200.61927773004834
+                    },
+                    "width": 300,
+                    "twoColumn": false,
+                    "interfaces": [
+                        {
+                            "name": "In 1",
+                            "id": "38fe79c8-0ae9-4cc4-b42d-28077f2f41b7",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 0
+                        },
+                        {
+                            "name": "In 2",
+                            "id": "c592970d-8fe2-4920-bcfb-ae9906ad4e1e",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 1
+                        },
+                        {
+                            "name": "Out 1",
+                            "id": "41e2b6fe-5519-4e60-bd1d-40d2f9dbe5d8",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 0
+                        },
+                        {
+                            "name": "Out 2",
+                            "id": "97374909-be1c-4fb0-a1d1-d9ce0b5ed8a8",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 1
+                        }
+                    ],
+                    "properties": [],
+                    "enabledInterfaceGroups": [],
+                    "views": [
+                        {
+                            "name": "tree",
+                            "style": "treeStyle",
+                            "position": {
+                                "x": 161,
+                                "y": -33
+                            }
+                        },
+                        {
+                            "name": "horse",
+                            "style": "horseStyle",
+                            "position": {
+                                "x": -69,
+                                "y": 134
+                            }
+                        },
+                        {
+                            "name": "heart",
+                            "style": "heartStyle",
+                            "position": {
+                                "x": 866,
+                                "y": 829
+                            }
+                        }
+                    ],
+                    "name": "Node",
+                    "instanceName": "Node"
+                },
+                {
+                    "id": "79abc929-3e46-45a2-a70d-4c96fe810d6c",
+                    "position": {
+                        "x": 686.5594783037988,
+                        "y": 1145.0450785719072
+                    },
+                    "width": 300,
+                    "twoColumn": false,
+                    "interfaces": [
+                        {
+                            "name": "Output",
+                            "id": "aeb87ef2-3459-4b05-850b-38f4cc115612",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 0
+                        }
+                    ],
+                    "properties": [],
+                    "enabledInterfaceGroups": [],
+                    "views": [
+                        {
+                            "name": "tree",
+                            "style": "treeStyle",
+                            "position": {
+                                "x": -329,
+                                "y": 187
+                            }
+                        },
+                        {
+                            "name": "horse",
+                            "style": "horseStyle",
+                            "position": {
+                                "x": -377,
+                                "y": 237
+                            }
+                        },
+                        {
+                            "name": "heart",
+                            "style": "heartStyle",
+                            "position": {
+                                "x": 485,
+                                "y": 865
+                            }
+                        }
+                    ],
+                    "name": "Source",
+                    "instanceName": "Source"
+                },
+                {
+                    "id": "50cb1cee-32ca-4e67-ad74-f59e757647e0",
+                    "position": {
+                        "x": 1023.5711345264541,
+                        "y": 234.29475212374354
+                    },
+                    "width": 300,
+                    "twoColumn": false,
+                    "interfaces": [
+                        {
+                            "name": "Output",
+                            "id": "57dc6f38-88bf-4271-a0be-8ba999632aaf",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 0
+                        }
+                    ],
+                    "properties": [],
+                    "enabledInterfaceGroups": [],
+                    "views": [
+                        {
+                            "name": "tree",
+                            "style": "treeStyle",
+                            "position": {
+                                "x": -357,
+                                "y": -144
+                            }
+                        },
+                        {
+                            "name": "horse",
+                            "style": "horseStyle",
+                            "position": {
+                                "x": -374,
+                                "y": 368
+                            }
+                        },
+                        {
+                            "name": "heart",
+                            "style": "heartStyle",
+                            "position": {
+                                "x": 508,
+                                "y": 502
+                            }
+                        }
+                    ],
+                    "name": "Source",
+                    "instanceName": "Source"
+                },
+                {
+                    "id": "135a3a71-e3c3-4dbe-a723-42f70a0597c6",
+                    "position": {
+                        "x": 2592.8308495207534,
+                        "y": 314.390600097273
+                    },
+                    "width": 300,
+                    "twoColumn": false,
+                    "interfaces": [
+                        {
+                            "name": "Input",
+                            "id": "bbdfa042-39aa-4d76-9a11-7902a0553375",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 0
+                        }
+                    ],
+                    "properties": [],
+                    "enabledInterfaceGroups": [],
+                    "views": [
+                        {
+                            "name": "tree",
+                            "style": "treeStyle",
+                            "position": {
+                                "x": 2182,
+                                "y": 150
+                            }
+                        },
+                        {
+                            "name": "horse",
+                            "style": "horseStyle",
+                            "position": {
+                                "x": 2044,
+                                "y": 1523
+                            }
+                        },
+                        {
+                            "name": "heart",
+                            "style": "heartStyle",
+                            "position": {
+                                "x": 1858,
+                                "y": 790
+                            }
+                        }
+                    ],
+                    "name": "Sink",
+                    "instanceName": "Sink"
+                },
+                {
+                    "id": "e3eda099-a120-4090-b59a-aa90a43e44a3",
+                    "position": {
+                        "x": 1096.2380213051956,
+                        "y": 968.1528801490625
+                    },
+                    "width": 300,
+                    "twoColumn": false,
+                    "interfaces": [
+                        {
+                            "name": "Input",
+                            "id": "c3a59bb4-5315-44c9-bcea-adc6018baa17",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 0
+                        }
+                    ],
+                    "properties": [],
+                    "enabledInterfaceGroups": [],
+                    "views": [
+                        {
+                            "name": "tree",
+                            "style": "treeStyle",
+                            "position": {
+                                "x": 2164,
+                                "y": -364
+                            }
+                        },
+                        {
+                            "name": "horse",
+                            "style": "horseStyle",
+                            "position": {
+                                "x": 2282,
+                                "y": 894
+                            }
+                        },
+                        {
+                            "name": "heart",
+                            "style": "heartStyle",
+                            "position": {
+                                "x": 1866,
+                                "y": 508
+                            }
+                        }
+                    ],
+                    "name": "Sink",
+                    "instanceName": "Sink"
+                },
+                {
+                    "id": "64e12e36-a9fc-4fb9-9ac6-e16b7eb3c563",
+                    "position": {
+                        "x": 689.2179882361489,
+                        "y": 633.854235546686
+                    },
+                    "width": 300,
+                    "twoColumn": false,
+                    "interfaces": [
+                        {
+                            "name": "Output",
+                            "id": "88775349-2e0f-4738-b2d2-be95ff7c8953",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 0
+                        }
+                    ],
+                    "properties": [],
+                    "enabledInterfaceGroups": [],
+                    "views": [
+                        {
+                            "name": "tree",
+                            "style": "treeStyle",
+                            "position": {
+                                "x": 950,
+                                "y": 108
+                            }
+                        },
+                        {
+                            "name": "horse",
+                            "style": "horseStyle",
+                            "position": {
+                                "x": 1321,
+                                "y": 1511
+                            }
+                        },
+                        {
+                            "name": "heart",
+                            "style": "heartStyle",
+                            "position": {
+                                "x": 812,
+                                "y": 1283
+                            }
+                        }
+                    ],
+                    "name": "Source",
+                    "instanceName": "Source"
+                },
+                {
+                    "id": "d43fabb7-8989-4587-ae08-b56eee65c6e2",
+                    "position": {
+                        "x": 227.32653613939948,
+                        "y": 1088.4002633057073
+                    },
+                    "width": 300,
+                    "twoColumn": false,
+                    "interfaces": [
+                        {
+                            "name": "Input",
+                            "id": "75c52a55-2852-4de7-b693-c1660282c4c4",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 0
+                        }
+                    ],
+                    "properties": [],
+                    "enabledInterfaceGroups": [],
+                    "views": [
+                        {
+                            "name": "tree",
+                            "style": "treeStyle",
+                            "position": {
+                                "x": 900,
+                                "y": -400
+                            }
+                        },
+                        {
+                            "name": "horse",
+                            "style": "horseStyle",
+                            "position": {
+                                "x": 615,
+                                "y": 630
+                            }
+                        },
+                        {
+                            "name": "heart",
+                            "style": "heartStyle",
+                            "position": {
+                                "x": 1507,
+                                "y": 1283
+                            }
+                        }
+                    ],
+                    "name": "Sink",
+                    "instanceName": "Sink"
+                }
+            ],
+            "groups": [],
+            "connections": [
+                {
+                    "id": "9b721ca8-da57-48b2-96cb-e4b988b64936",
+                    "from": "c8ebace4-41fb-4f4a-be44-13788c91a43d",
+                    "to": "a20b67fd-4a0b-4d5b-a523-3b81b0374c06"
+                },
+                {
+                    "id": "92995db1-4479-418e-aa4b-5fbca1c9bde4",
+                    "from": "0f32f08b-cb5a-4cf0-9499-ab35920bc289",
+                    "to": "5759f4a9-50e3-40e5-a3ea-7d8dcb06311d"
+                },
+                {
+                    "id": "6e89f26b-9b93-4bd4-aa67-a54cb389682b",
+                    "from": "3ae288b3-f24d-4ad0-8f2f-861ad9033433",
+                    "to": "8f1c2777-1f33-42a2-a856-363112d63897"
+                },
+                {
+                    "id": "e0fb7add-d64e-4148-86c5-6b15c962ce75",
+                    "from": "e1fa89e2-6e40-4084-b925-67017cb86207",
+                    "to": "fcd45100-20b7-4deb-ac94-c7b6e90bb013"
+                },
+                {
+                    "id": "6106215c-7d54-4d1a-85cc-f5f06af64231",
+                    "from": "7f1f57e9-db9d-4b1d-b7ec-de8830aeab0e",
+                    "to": "61317d2d-62c2-49c3-8a62-a53fea4bbdf3"
+                },
+                {
+                    "id": "e3408b50-bce4-4dc7-80e8-8cafdc0c288f",
+                    "from": "41e2b6fe-5519-4e60-bd1d-40d2f9dbe5d8",
+                    "to": "e91ebef2-2a36-4077-b7de-c7ea8e53f222"
+                },
+                {
+                    "id": "17f4ed2b-ac8c-461e-b721-7e08a3dcd3e3",
+                    "from": "aeb87ef2-3459-4b05-850b-38f4cc115612",
+                    "to": "c592970d-8fe2-4920-bcfb-ae9906ad4e1e"
+                },
+                {
+                    "id": "83b9fdcc-be8f-4429-94e7-4c0947802d17",
+                    "from": "57dc6f38-88bf-4271-a0be-8ba999632aaf",
+                    "to": "38fe79c8-0ae9-4cc4-b42d-28077f2f41b7"
+                },
+                {
+                    "id": "37fff375-b170-47d1-afb2-0e21a7f2544b",
+                    "from": "2dba54ca-632e-4b9e-a5a4-0e3b76f3de2e",
+                    "to": "c3a59bb4-5315-44c9-bcea-adc6018baa17"
+                },
+                {
+                    "id": "7b87ccbe-4f55-45ff-8ba7-34c77663f66a",
+                    "from": "d5db7231-8687-4de0-b4ab-75d37094e82a",
+                    "to": "bbdfa042-39aa-4d76-9a11-7902a0553375"
+                },
+                {
+                    "id": "623ceac8-12b6-4ba5-b14a-ec6bec7b9e62",
+                    "from": "88775349-2e0f-4738-b2d2-be95ff7c8953",
+                    "to": "384d186c-2ce8-4098-9123-1e1fb7b967d1"
+                },
+                {
+                    "id": "fe55df54-52ed-4675-b207-5ad125fd564b",
+                    "from": "97374909-be1c-4fb0-a1d1-d9ce0b5ed8a8",
+                    "to": "75c52a55-2852-4de7-b693-c1660282c4c4"
+                }
+            ],
+            "name": "Example of a graph with alternative views"
+        }
+    ],
+    "entryGraph": "8282a458-a6b4-444e-908e-2032528f15d3",
+    "version": "20250623.14"
+}
