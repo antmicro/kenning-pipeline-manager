@@ -785,7 +785,6 @@ export default class ConnectionRenderer {
                 regGridStep,
                 shift,
                 minMargin,
-                nodesInfo,
                 zoneInfo,
             ).map((point) => ({
                 x: point.x,
@@ -828,7 +827,6 @@ export default class ConnectionRenderer {
      * @param shift Offset by which grid is translated
      * @param minMargin Minimum margin around nodes within which
      *                  segments are considered to intersect the node
-     * @param nodesInfo Array containing exact positions and sizes of nodes
      * @param zoneInfo Map used in spatial hashing
      * @returns Array of objects with x and y coordinates,
      *          representing consecutive points along the path
@@ -839,7 +837,6 @@ export default class ConnectionRenderer {
         regGridStep,
         shift,
         minMargin,
-        nodesInfo,
         zoneInfo,
     ) {
         // helper function returning key to index `pointsToIndex` map
