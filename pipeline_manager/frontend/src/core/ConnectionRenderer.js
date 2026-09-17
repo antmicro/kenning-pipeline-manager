@@ -163,6 +163,8 @@ const aStarConfig = {
         }
         return prevCost;
     },
+    /** Default maximum width used for nodes when their width has not been measured yet. */
+    defaultNodeMaxWidth: 300,
 };
 
 export default class ConnectionRenderer {
@@ -177,6 +179,8 @@ export default class ConnectionRenderer {
     shiftDistance = 15;
 
     aStarCache = new Map();
+
+    maxNodeWidths = new Map();
 
     /**
      * Defines the shift the connection should have compared to the default position based on the
@@ -694,10 +698,12 @@ export default class ConnectionRenderer {
 
         const nodesInfo = graph.nodes.map((node) => {
             const HTMLelement = document.getElementById(node.id);
+            const curMaxWidth = this.maxNodeWidths.get(node.id) ?? aStarConfig.defaultNodeMaxWidth;
+            this.maxNodeWidths.set(node.id, Math.max(curMaxWidth, HTMLelement.offsetWidth));
             return {
                 id: node.id,
                 position: node.position,
-                width: HTMLelement.offsetWidth,
+                width: this.maxNodeWidths.get(node.id),
                 height: HTMLelement.offsetHeight,
             };
         });
@@ -749,9 +755,9 @@ export default class ConnectionRenderer {
             const shift = this.getShift(nc.from, nc.to, graph);
 
             const fromNode = graph.nodes.filter((node) => node.id === nc.from.nodeId)[0];
-            const fromNodeWidth = document.getElementById(fromNode.id).offsetWidth;
+            const fromNodeWidth = this.maxNodeWidths.get(fromNode.id);
             const toNode = graph.nodes.filter((node) => node.id === nc.to.nodeId)[0];
-            const toNodeWidth = document.getElementById(toNode.id).offsetWidth;
+            const toNodeWidth = this.maxNodeWidths.get(toNode.id);
 
             const fromPoints = [
                 {
