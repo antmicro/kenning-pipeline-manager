@@ -99,6 +99,12 @@ from moving or deleting the nodes.
             @pointerdown.right="openContextMenuTitle"
             v-long-press:500="openContextMenuTitle"
         />
+        <!-- Preview of where the interface will be placed -->
+        <div
+            v-if="menuState.previewInterface && node.type === configurationState.editedType"
+            class="interface-preview"
+            :style="previewInterfaceStyle"
+        />
         <!-- Positioned inputs -->
         <template v-for="input in positionedInterfaces">
             <CustomInterface
@@ -185,6 +191,7 @@ from moving or deleting the nodes.
 
         </div>
     </div>
+
 </template>
 
 <script setup>
@@ -1727,6 +1734,21 @@ const openContextMenuProperty = async (property) => {
 const isHighlighted = (intf) =>
     (!intf ? false : props.interfaces?.map((p) => p?.id).includes(intf?.id));
 
+const previewInterfaceStyle = () => {
+    const preview = menuState.previewInterface;
+    if (!preview) {
+        return { display: 'none' };
+    }
+
+    return {
+        position: 'absolute',
+        left: `${preview.x * 100}%`,
+        top: `${preview.y * 100}%`,
+        transform: 'translate(-50%, -50%)',
+        zIndex: 100,
+    };
+};
+
 </script>
 
 <style lang="scss" scoped>
@@ -1755,6 +1777,13 @@ const isHighlighted = (intf) =>
     position: absolute;
     top: 0;
     right: 0;
+}
+
+.interface-preview {
+    width: 1em;
+    height: 1em;
+    border-radius: 50%;
+    background: $gold;
 }
 
 </style>

@@ -78,6 +78,11 @@ export const menuState = reactive({
     propertyListMenu: false,
     interfaceListMenu: false,
     addingPositionedInterface: false,
+    previewInterface: null as null | {
+        name: string,
+        x: number,
+        y: number,
+    },
     layerMenu: false,
 });
 

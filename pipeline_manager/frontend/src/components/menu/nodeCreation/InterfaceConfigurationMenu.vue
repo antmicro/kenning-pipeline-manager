@@ -239,10 +239,22 @@ export default defineComponent({
             cleanAddInterface();
         };
 
+        const prerenderInterface = (event: MouseEvent) => {
+            const x = event.clientX;
+            const y = event.clientY;
+            menuState.previewInterface = {
+                name: newInterface.name,
+                x,
+                y,
+            };
+        };
+
         cleanAddInterface = () => {
             menuState.addingPositionedInterface = false;
+            menuState.previewInterface = null;
             window.removeEventListener('keydown', onKeyDown);
             window.removeEventListener('mousedown', waitForMousePosition);
+            window.removeEventListener('mousemove', prerenderInterface);
         };
 
         const addInterfaceMenu = computed(() => {
@@ -258,6 +270,12 @@ export default defineComponent({
                     NotificationHandler.showToast('info', 'Click on the node to add interface.', null, true);
                     menuState.addingPositionedInterface = true;
                     window.addEventListener('mousedown', waitForMousePosition);
+                    menuState.previewInterface = {
+                        name: newInterface.name,
+                        x: 0.5,
+                        y: 0.5,
+                    };
+                    window.addEventListener('mousemove', prerenderInterface);
                     window.addEventListener('keydown', onKeyDown);
                     return;
                 }
