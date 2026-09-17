@@ -386,7 +386,7 @@ export default defineComponent({
 
         /* eslint-disable vue/no-mutating-props,no-param-reassign */
         const onMouseDown = doubleClick(700, () => {
-            if (!viewModel.value.editor.readonly && !isBigBus(props.intf)) {
+            if (!viewModel.value.editor.readonly && !isBigBus(props.intf) && !props.positioned) {
                 props.switchSides(props.intf);
                 hoveredOver(undefined);
             }
