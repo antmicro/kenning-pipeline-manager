@@ -28,7 +28,7 @@ Inherits from baklavajs/renderer-vue/src/connection/ConnectionView.vue
 
 <script>
 import { defineComponent, ref, computed, watch, nextTick, onMounted, onBeforeUnmount } from 'vue'; // eslint-disable-line object-curly-newline
-import { Components, useGraph } from '@baklavajs/renderer-vue';
+import { Components, useGraph, useViewModel } from '@baklavajs/renderer-vue';
 import ConnectionView from './ConnectionView.vue';
 import getDomElements from './domResolver';
 import getPortCoordinates from './portCoordinates';
@@ -45,6 +45,7 @@ export default defineComponent({
     setup(props) {
         const conn = ref(null);
         const { graph } = useGraph();
+        const { viewModel } = useViewModel();
 
         let resizeObserver;
         const d = ref({
@@ -104,6 +105,13 @@ export default defineComponent({
         const fromNodeInterfacesSide = computed(() => getNodeSides(fromNode));
         const toNodeInterfacesSide = computed(() => getNodeSides(toNode));
 
+        const fromInterfacePositions = computed(
+            () => viewModel.value.editor.getNodeInterfacePositions(fromNode.value?.type),
+        );
+        const toInterfacePositions = computed(
+            () => viewModel.value.editor.getNodeInterfacePositions(toNode.value?.type),
+        );
+
         const updateCoords = () => {
             const from = getDomElements(props.connection.from);
             const to = getDomElements(props.connection.to);
@@ -149,6 +157,14 @@ export default defineComponent({
         );
         watch(
             [fromStubChange, toStubChange],
+            async () => {
+                await nextTick();
+                updateCoords();
+            },
+            { deep: true },
+        );
+        watch(
+            [fromInterfacePositions, toInterfacePositions],
             async () => {
                 await nextTick();
                 updateCoords();
