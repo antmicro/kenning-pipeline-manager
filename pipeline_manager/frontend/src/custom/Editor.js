@@ -73,7 +73,7 @@ export default class PipelineManagerEditor extends Editor {
 
     nodeContextMenuActions = new Map();
 
-    nodeStyles = new Map();
+    nodeStyles = reactive(new Map());
 
     nodeLists = new Map();
 
