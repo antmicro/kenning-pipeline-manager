@@ -260,6 +260,9 @@ const nodeHasRelatedGraphs
 const pillText = computed(() => viewModel.value.editor.getPillText(node.value));
 const pillColor = computed(() => viewModel.value.editor.getPillColor(node.value));
 const pillTextColor = computed(() => viewModel.value.editor.getTextColor(pillColor.value));
+const nodeInterfacePositions = computed(
+    () => viewModel.value.editor.getNodeInterfacePositions(props.node.type),
+);
 
 const editorManager = EditorManager.getEditorManagerInstance();
 
@@ -821,8 +824,7 @@ const canOpenContextMenu = computed(() =>
 
 const interfacePositions = computed(() => {
     const positionMap = new Map();
-
-    const interfaces = viewModel.value.editor.getNodeInterfacePositions(node.value.type);
+    const interfaces = nodeInterfacePositions.value;
 
     Object.entries(interfaces).forEach(([key, value]) => {
         const x = Math.max(Math.min(value.x, 100), 0) / 100.0;
@@ -1327,6 +1329,44 @@ const assignNewPosition = () => {
     newSocketSide = null;
 };
 
+let positionedMoveHandler = null;
+const dragPositionedInterface = (intf, ev) => {
+    const x = ev.clientX;
+    const y = ev.clientY;
+
+    const rect = nodeRef.value.getBoundingClientRect();
+    const infX = x - rect.x;
+    const infY = y - rect.y;
+
+    const nodeTypeStyle = editorManager.editor.nodeTypes.get(props.node.type)?.style;
+    const dragNodeStyle = editorManager.editor.getNodeStyle(nodeTypeStyle);
+
+    dragNodeStyle.positions[intf.name] = {
+        x: Math.max(Math.min((infX / rect.width) * 100.0, 100.0), 0),
+        y: Math.max(Math.min((infY / rect.height) * 100.0, 100.0), 0),
+    };
+    editorManager.updateNodeStyle(nodeTypeStyle, dragNodeStyle);
+};
+
+const dropPositionedInterface = () => {
+    graph.value.refreshConnections();
+    transformed();
+
+    chosenInterface.value = undefined;
+    interfaceCursorStyle.value = {
+        top: '0px',
+        left: '0px',
+        right: '0px',
+        display: 'none',
+    };
+
+    if (positionedMoveHandler) {
+        document.removeEventListener('pointermove', positionedMoveHandler);
+        positionedMoveHandler = null;
+    }
+    document.removeEventListener('pointerup', dropPositionedInterface);
+};
+
 const interfaceDragThreshold = ref(null);
 const dragInterface = (ev) => {
     if (interfaceDragThreshold.value === null) {
@@ -1415,10 +1455,17 @@ const pickInterface = (intf, ev) => {
         return;
     }
     chosenInterface.value = intf;
-    dragInterface(ev);
 
-    document.addEventListener('pointermove', dragInterface);
-    document.addEventListener('pointerup', dropInterface);
+    if (leftSocketsRefs.value === null && rightSocketsRefs.value === null) {
+        positionedMoveHandler = (moveEv) => dragPositionedInterface(intf, moveEv);
+        dragPositionedInterface(intf, ev);
+        document.addEventListener('pointermove', positionedMoveHandler);
+        document.addEventListener('pointerup', dropPositionedInterface);
+    } else {
+        dragInterface(ev);
+        document.addEventListener('pointermove', dragInterface);
+        document.addEventListener('pointerup', dropInterface);
+    }
 };
 
 // Interface context menu
