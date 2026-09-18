@@ -442,8 +442,10 @@ export default function createPipelineManagerGraph(graph) {
         oldGroups.forEach((g) => {
             g.nodes[g.nodes.findIndex((id) => id === oldNode.id)] = newNodeInstance.id;
         });
+        delete this._idToNode[oldNode.id];
         this.removeNode(oldNode);
         this.addNode(newNodeInstance);
+        this._idToNode[newNodeInstance.id] = newNodeInstance;
 
         connectionsToRestore.forEach((conn) => {
             this.internalAddConnection(conn);
@@ -491,13 +493,11 @@ export default function createPipelineManagerGraph(graph) {
     };
 
     graph.getNode = function getNode(nodeId) {
-        if (this._idToNode[nodeId] === undefined) {
-            const node = this._nodes.find((n) => n.id === nodeId);
-            if (node) {
-                this._idToNode[node.id] = node;
-            }
+        const nodeCached = this._idToNode[nodeId];
+        if (!nodeCached) {
+            return this._nodes.find((n) => n.id === nodeId);
         }
-        return this._idToNode[nodeId];
+        return nodeCached;
     };
 
     graph.destroy = function destroy() {
@@ -929,6 +929,7 @@ export default function createPipelineManagerGraph(graph) {
 
     graph.removeNodeOnly = function removeNodeOnly(node) {
         this._nodes.splice(this.nodes.indexOf(node), 1);
+        delete this._idToNode[node.id];
         this.events.removeNode.emit(node);
         node.events.propertyEdit.unsubscribe(this);
         node.onDestroy();
