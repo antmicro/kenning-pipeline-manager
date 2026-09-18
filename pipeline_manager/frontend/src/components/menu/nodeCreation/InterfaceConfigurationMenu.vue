@@ -194,6 +194,7 @@ export default defineComponent({
 
         const onKeyDown = (event: KeyboardEvent) => {
             if (event.key === 'Escape') {
+                NotificationHandler.showToast('info', 'Canceled adding interface.', null, true);
                 cleanAddInterface();
             }
         };
