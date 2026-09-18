@@ -242,10 +242,15 @@ export default defineComponent({
         const prerenderInterface = (event: MouseEvent) => {
             const x = event.clientX;
             const y = event.clientY;
+            const infX = x - (configurationState?.nodeRect?.x ?? 0);
+            const infY = y - (configurationState?.nodeRect?.y ?? 0);
+
+            const nodeWidth = configurationState?.nodeRect?.width ?? 1;
+            const nodeHeight = configurationState?.nodeRect?.height ?? 1;
             menuState.previewInterface = {
                 name: newInterface.name,
-                x,
-                y,
+                x: Math.max(Math.min((infX / nodeWidth) * 100.0, 100.0), 0),
+                y: Math.max(Math.min((infY / nodeHeight) * 100.0, 100.0), 0),
             };
         };
 

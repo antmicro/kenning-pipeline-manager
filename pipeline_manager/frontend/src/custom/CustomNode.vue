@@ -1734,20 +1734,22 @@ const openContextMenuProperty = async (property) => {
 const isHighlighted = (intf) =>
     (!intf ? false : props.interfaces?.map((p) => p?.id).includes(intf?.id));
 
-const previewInterfaceStyle = () => {
+const previewInterfaceStyle = computed(() => {
     const preview = menuState.previewInterface;
     if (!preview) {
         return { display: 'none' };
     }
 
-    return {
+    const result = {
         position: 'absolute',
-        left: `${preview.x * 100}%`,
-        top: `${preview.y * 100}%`,
+        left: `${preview.x}%`,
+        top: `${preview.y}%`,
         transform: 'translate(-50%, -50%)',
         zIndex: 100,
     };
-};
+
+    return result;
+});
 
 </script>
 
