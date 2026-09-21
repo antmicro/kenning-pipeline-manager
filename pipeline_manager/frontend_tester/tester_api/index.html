@@ -1,7 +1,7 @@
 <html>
-<head>
-    <style>
 
+<head>
+  <style>
     * {
       font-family: 'Montserrat', sans-serif
     }
@@ -59,131 +59,131 @@
     }
 
     .io-container {
-        display: flex;
-        flex-direction: column;
+      display: flex;
+      flex-direction: column;
     }
 
     .io-container div {
       color: white;
     }
-
-    </style>
+  </style>
 </head>
+
 <body>
-    <script>
-        let defaultSpecification;
-        let defaultDataflow;
+  <script>
+    let defaultSpecification;
+    let defaultDataflow;
 
-        const load = async (path) => fetch(path).then((response) => response.json())
+    const load = async (path) => fetch(path).then((response) => response.json())
 
-        load('sample-specification.json')
-          .then((data) => {
-            data.metadata.notifyWhenChanged = true;
-            defaultSpecification = data;
-          });
-        load('sample-dataflow.json').then((data) => { defaultDataflow = data; });
+    load('sample-specification.json')
+      .then((data) => {
+        data.metadata.notifyWhenChanged = true;
+        defaultSpecification = data;
+      });
+    load('sample-dataflow.json').then((data) => { defaultDataflow = data; });
 
 
-        const logJson = (containerId, content) => {
-          document.getElementById(containerId).innerHTML = JSON.stringify(content, null, 4);
-        };
+    const logJson = (containerId, content) => {
+      document.getElementById(containerId).innerHTML = JSON.stringify(content, null, 4);
+    };
 
-        // Pipeline Manager communication
+    // Pipeline Manager communication
 
-        let PM;
-        window.addEventListener('load', () => {
-          PM = document.getElementById('pm');
-          sendPM({ method: 'register_external_frontend' });
+    let PM;
+    window.addEventListener('load', () => {
+      PM = document.getElementById('pm');
+      sendPM({ method: 'register_external_frontend' });
 
-          ['frontend-endpoint-responses', 'external-endpoint-requests']
-            .map((id) => document.getElementById(id))
-            .forEach((e) => {
-                e.addEventListener('focus', (ev) => ev.target.blur());
-                e.addEventListener('drop', (ev) => ev.preventDefault());
-            });
+      ['frontend-endpoint-responses', 'external-endpoint-requests']
+        .map((id) => document.getElementById(id))
+        .forEach((e) => {
+          e.addEventListener('focus', (ev) => ev.target.blur());
+          e.addEventListener('drop', (ev) => ev.preventDefault());
         });
-        const sendPM = (data) => PM.contentWindow.postMessage(data);
-        const createJSONRPCResponse = (id, response) => ({ jsonrpc: "2.0", id, result: response });
+    });
+    const sendPM = (data) => PM.contentWindow.postMessage(data);
+    const createJSONRPCResponse = (id, response) => ({ jsonrpc: "2.0", id, result: response });
 
-        window.addEventListener('message', (event) => {
-          const data = event.data;
-          if (data.method !== undefined) {
-            const response = handleExternalRequest(data);
-            sendPM(createJSONRPCResponse(data.id, response));
-          } else {
-            logJson('frontend-endpoint-responses', data);
-          }
-        });
+    window.addEventListener('message', (event) => {
+      const data = event.data;
+      if (data.method !== undefined) {
+        const response = handleExternalRequest(data);
+        sendPM(createJSONRPCResponse(data.id, response));
+      } else {
+        logJson('frontend-endpoint-responses', data);
+      }
+    });
 
-        // Frontend requests
+    // Frontend requests
 
-        const getInput = () => JSON.parse(document.getElementById('input').value);
+    const getInput = () => JSON.parse(document.getElementById('input').value);
 
-        const graph_get = () => sendPM({ method: 'graph_get' });
-        const specification_change = () => sendPM({ method: 'specification_change', params: { specification: getInput() } });
-        const graph_change = () => sendPM({ method: 'graph_change', params: { dataflow: getInput() } });
-        const any_request = () => sendPM(getInput());
+    const graph_get = () => sendPM({ method: 'graph_get' });
+    const specification_change = () => sendPM({ method: 'specification_change', params: { specification: getInput() } });
+    const graph_change = () => sendPM({ method: 'graph_change', params: { dataflow: getInput() } });
+    const any_request = () => sendPM(getInput());
 
-        // External requests
+    // External requests
 
-        const handleExternalRequest = (request) => {
-          const { method } = request;
-          logJson('external-endpoint-requests', request)
+    const handleExternalRequest = (request) => {
+      const { method } = request;
+      logJson('external-endpoint-requests', request)
 
-          let response;
-          switch (method) {
-            case 'specification_get':
-              response = { type: 0, content: defaultSpecification };
-              break;
-            case 'app_capabilities':
-              response = {};
-              break
-            case 'frontend_on_connect':
-              sendPM({ method: "graph_change", params: { dataflow: defaultDataflow } })
-              response = null;
-              break
-            case 'dataflow_run':
-              break
-            case 'dataflow_import':
-              const { params: { external_application_dataflow } } = request;
-              response = { type: 0, content: JSON.parse(external_application_dataflow) }
-              break
-            case 'dataflow_export':
-              const { params: { dataflow } } = request;
-              response = { type: 0, content: dataflow, filename: 'pipeline.json' }
-              break;
-            default:
-              response = null;
-          }
+      let response;
+      switch (method) {
+        case 'specification_get':
+          response = { type: 0, content: defaultSpecification };
+          break;
+        case 'app_capabilities_get':
+          response = {};
+          break
+        case 'frontend_on_connect':
+          sendPM({ method: "graph_change", params: { dataflow: defaultDataflow } })
+          response = null;
+          break
+        case 'dataflow_run':
+          break
+        case 'dataflow_import':
+          const { params: { external_application_dataflow } } = request;
+          response = { type: 0, content: JSON.parse(external_application_dataflow) }
+          break
+        case 'dataflow_export':
+          const { params: { dataflow } } = request;
+          response = { type: 0, content: dataflow, filename: 'pipeline.json' }
+          break;
+        default:
+          response = null;
+      }
 
-          return response;
-        };
-    </script>
-    <div class="wrapper">
-        <iframe id="pm" src="/pipeline-manager"></iframe>
-        <div>
-            <div id="controls">
-                <div id="buttons">
-                    <button onclick="graph_get()">Get graph</button>
-                    <button onclick="specification_change()">Set specification</button>
-                    <button onclick="graph_change()">Set graph</button>
-                    <button onclick="any_request()">Handle provided request</button>
-                </div>
-                <div class="io-container">
-                    <div>Specification/Dataflow/Custom request</div>
-                    <textarea id="input" placeholder="Write here specification or dataflow" spellcheck="false"></textarea>
-                </div>
-                <div class="io-container">
-                    <div>Responses</div>
-                    <textarea id="frontend-endpoint-responses" readonly">Make a request.</textarea>
-                </div>
-                <div class="io-container">
-                    <div>Requests</div>
-                    <textarea id="external-endpoint-requests" readonly"></textarea>
-                </div>
-            </div>
+      return response;
+    };
+  </script>
+  <div class="wrapper">
+    <iframe id="pm" src="/pipeline-manager"></iframe>
+    <div>
+      <div id="controls">
+        <div id="buttons">
+          <button onclick="graph_get()">Get graph</button>
+          <button onclick="specification_change()">Set specification</button>
+          <button onclick="graph_change()">Set graph</button>
+          <button onclick="any_request()">Handle provided request</button>
         </div>
+        <div class="io-container">
+          <div>Specification/Dataflow/Custom request</div>
+          <textarea id="input" placeholder="Write here specification or dataflow" spellcheck="false"></textarea>
+        </div>
+        <div class="io-container">
+          <div>Responses</div>
+          <textarea id="frontend-endpoint-responses" readonly">Make a request.</textarea>
+        </div>
+        <div class="io-container">
+          <div>Requests</div>
+          <textarea id="external-endpoint-requests" readonly"></textarea>
+        </div>
+      </div>
     </div>
+  </div>
 </body>
-</html>
 
+</html>
