@@ -11,7 +11,6 @@
 
 set -ex
 
-npx playwright install --with-deps
 npx playwright test --list
 TOTAL_NUM_TESTS=$(python3 tests/utils/read_total_tests.py test-results.json)
 echo "Found $TOTAL_NUM_TESTS tests"
