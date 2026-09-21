@@ -70,6 +70,22 @@ export default class CustomMenusManager {
     }
 
     /**
+     * Function that waits asynchronously until dialog box is closed.
+     *
+     * @returns {Promise} promise that resolve when dialog box is closed.
+     */
+    async waitForDialogBoxClosed() {
+        return new Promise((resolve) => {
+            const inv = setInterval(() => {
+                if (!this.showCustomDialog) {
+                    clearInterval(inv);
+                    resolve();
+                }
+            });
+        }, 10);
+    }
+
+    /**
      * Registers a new dialog menu template with selected name.
      * @param {string} templateName Name of the dialog box
      * @param {string} title A title of dialog box.
