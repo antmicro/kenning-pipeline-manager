@@ -1,10 +1,5 @@
 {
     "version": "20250623.14",
-    "metadata": {
-        "allowLoopbacks": true,
-        "connectionStyle": "curved",
-        "editableTypes": true
-    },
     "nodes": [
         {
             "name": "Node",
@@ -68,19 +63,22 @@
         }
     ],
     "metadata": {
+        "allowLoopbacks": true,
+        "connectionStyle": "curved",
+        "editableTypes": true,
         "styles": {
             "heartStyle": {
-                "color":"#ff1122"
+                "color": "#ff1122"
             },
             "treeStyle": {
-                "color":"#725C42",
-                "pill":{
-                    "text":"branching node",
-                    "color":"#3d860b"
+                "color": "#725C42",
+                "pill": {
+                    "text": "branching node",
+                    "color": "#3d860b"
                 }
             },
             "horseStyle": {
-                "color":"#11111100",
+                "color": "#11111100",
                 "interfaces": {
                     "*": {
                         "--baklava-control-color-foreground": "transparent"
