@@ -359,6 +359,7 @@ export default class PipelineManagerEditor extends Editor {
         centerAtTop = false,
         markEdited = false,
     ) {
+        this.editorManager.baklavaView.connectionRenderer.maxNodeWidths.clear();
         // All subgraphs should be unregistered to avoid conflicts later when trying to
         // load into subgraph (in that case there may be two subgraphs with the same ID, one
         // of them from the previous session).
