@@ -873,6 +873,11 @@ export class CustomNode extends Node {
         if (savedState.position) {
             savedState.position = { ...savedState.position };
         }
+
+        if (this?.style !== undefined) {
+            savedState.style = this.style;
+        }
+
         return savedState;
     }
 
@@ -1177,6 +1182,10 @@ export class CustomNode extends Node {
         }
 
         this.views = state?.views;
+
+        if (state?.style !== undefined) {
+            this.style = state.style;
+        }
 
         this.relatedGraphs = state.relatedGraphs;
         return errors;

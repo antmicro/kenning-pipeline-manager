@@ -896,6 +896,12 @@ export default class PipelineManagerEditor extends Editor {
                 return val;
             }
         }
+        if (node?.style !== undefined) {
+            const val = this.getNodeStyle(node.style)?.[field];
+            if (val) {
+                return val;
+            }
+        }
         return undefined;
     }
 
@@ -965,32 +971,46 @@ export default class PipelineManagerEditor extends Editor {
         return this.getNodeStyle(this.getNodeTypeStyle(nodeName))?.hiddenNames ?? [];
     }
 
-    getNodeInterfacePositions(nodeName) {
-        return this.getNodeStyle(this.getNodeTypeStyle(nodeName))?.positions ?? {};
+    getNodeInterfacePositions(node) {
+        const viewPos = this._getFromView(node, 'positions');
+        if (viewPos) return viewPos;
+        return this.getNodeStyle(this.getNodeTypeStyle(node.type))?.positions ?? {};
     }
 
-    getCustomNodeTitlePosition(nodeName) {
-        return this.getNodeStyle(this.getNodeTypeStyle(nodeName))?.title?.position;
+    getCustomNodeTitlePosition(node) {
+        const viewTitle = this._getFromView(node, 'title');
+        if (viewTitle?.position) return viewTitle.position;
+        return this.getNodeStyle(this.getNodeTypeStyle(node.type))?.title?.position;
     }
 
-    getNodeStyleFitTitle(nodeName) {
-        return this.getNodeStyle(this.getNodeTypeStyle(nodeName))?.title?.fit ?? false;
+    getNodeStyleFitTitle(node) {
+        const viewTitle = this._getFromView(node, 'title');
+        if (viewTitle?.fit) return viewTitle.fit;
+        return this.getNodeStyle(this.getNodeTypeStyle(node.type))?.title?.fit ?? false;
     }
 
-    getNodeStyleHideSubTitle(nodeName) {
-        return this.getNodeStyle(this.getNodeTypeStyle(nodeName))?.title?.hideSubTitle ?? false;
+    getNodeStyleHideSubTitle(node) {
+        const viewTitle = this._getFromView(node, 'title');
+        if (viewTitle?.hideSubTitle) return viewTitle.hideSubTitle;
+        return this.getNodeStyle(this.getNodeTypeStyle(node.type))?.title?.hideSubTitle ?? false;
     }
 
-    getNodeStyleTitleOffset(nodeName) {
-        return this.getNodeStyle(this.getNodeTypeStyle(nodeName))?.title?.offset;
+    getNodeStyleTitleOffset(node) {
+        const viewTitle = this._getFromView(node, 'title');
+        if (viewTitle?.offset) return viewTitle.offset;
+        return this.getNodeStyle(this.getNodeTypeStyle(node.type))?.title?.offset;
     }
 
-    getNodeStyleTitlePadding(nodeName) {
-        return this.getNodeStyle(this.getNodeTypeStyle(nodeName))?.title?.padding;
+    getNodeStyleTitlePadding(node) {
+        const viewTitle = this._getFromView(node, 'title');
+        if (viewTitle?.padding) return viewTitle.padding;
+        return this.getNodeStyle(this.getNodeTypeStyle(node.type))?.title?.padding;
     }
 
-    getShape(nodeName) {
-        const nodeStyle = this.getNodeTypeStyle(nodeName);
+    getShape(node) {
+        const viewShape = this._getFromView(node, 'shape');
+        if (viewShape) return viewShape;
+        const nodeStyle = this.getNodeTypeStyle(node.type);
         if (nodeStyle !== undefined) return this.getNodeStyle(nodeStyle)?.shape;
         return undefined;
     }
@@ -1003,8 +1023,10 @@ export default class PipelineManagerEditor extends Editor {
         return false;
     }
 
-    getStyleIcon(nodeName) {
-        const nodeStyle = this.getNodeTypeStyle(nodeName);
+    getStyleIcon(node) {
+        const viewIcon = this._getFromView(node, 'icon');
+        if (viewIcon) return viewIcon;
+        const nodeStyle = this.getNodeTypeStyle(node.type);
         if (nodeStyle !== undefined) return this.getNodeStyle(nodeStyle)?.icon;
         return undefined;
     }
@@ -1016,6 +1038,9 @@ export default class PipelineManagerEditor extends Editor {
         const viewEntry = node.views?.find((v) => v.name === view);
         if (viewEntry && viewEntry.style) {
             val = viewEntry.style;
+        }
+        if (val === undefined) {
+            val = node?.style;
         }
         if (val === undefined) {
             val = nodeType.style;

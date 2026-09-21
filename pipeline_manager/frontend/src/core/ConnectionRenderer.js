@@ -1892,14 +1892,14 @@ export default class ConnectionRenderer {
         const minMargin = 30 * graph.scaling;
 
         const fromNode = graph.nodes.filter((node) => nc.from.nodeId === node.id)[0];
-        const fromNodePosInterfaces = graph.editor.getNodeInterfacePositions(fromNode.type);
+        const fromNodePosInterfaces = graph.editor.getNodeInterfacePositions(fromNode);
         const fromNodeWidth = fromNode.width;
         const fromNodeInputs = Object.values(fromNode.inputs)
             .filter((ni) => !ni.hidden);
         const fromNodeOutputs = Object.values(fromNode.outputs)
             .filter((no) => !no.hidden);
         const toNode = graph.nodes.filter((node) => nc.to.nodeId === node.id)[0];
-        const toNodePosInterfaces = graph.editor.getNodeInterfacePositions(toNode.type);
+        const toNodePosInterfaces = graph.editor.getNodeInterfacePositions(toNode);
         const toNodeWidth = toNode.width;
         const toNodeInputs = Object.values(toNode.inputs).filter((ni) => !ni.hidden && ni.port);
         const toNodeOutputs = Object.values(toNode.outputs).filter((no) => !no.hidden && no.port);

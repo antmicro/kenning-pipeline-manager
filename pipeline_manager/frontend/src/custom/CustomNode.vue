@@ -261,14 +261,11 @@ const nodeHasRelatedGraphs
 const pillText = computed(() => viewModel.value.editor.getPillText(node.value));
 const pillColor = computed(() => viewModel.value.editor.getPillColor(node.value));
 const pillTextColor = computed(() => viewModel.value.editor.getTextColor(pillColor.value));
-const nodeInterfacePositions = computed(
-    () => viewModel.value.editor.getNodeInterfacePositions(props.node.type),
-);
 
 const editorManager = EditorManager.getEditorManagerInstance();
 
 const customShape = computed(() => {
-    const shapeLink = viewModel.value.editor.getShape(node.value.type);
+    const shapeLink = viewModel.value.editor.getShape(node.value);
     if (shapeLink === undefined) {
         return undefined;
     }
@@ -804,7 +801,8 @@ const canOpenContextMenu = computed(() =>
 
 const interfacePositions = computed(() => {
     const positionMap = new Map();
-    const interfaces = nodeInterfacePositions.value;
+
+    const interfaces = viewModel.value.editor.getNodeInterfacePositions(node.value);
 
     Object.entries(interfaces).forEach(([key, value]) => {
         const x = Math.max(Math.min(value.x, 100), 0) / 100.0;
@@ -862,7 +860,7 @@ const subgraphStyle = computed(() => {
 });
 
 const hideSubTitle = computed(() => viewModel.value.editor
-    .getNodeStyleHideSubTitle(props.node.type));
+    .getNodeStyleHideSubTitle(props.node));
 
 const nodeTitle = computed(() => {
     const title = props.node.highlightedTitle ?? props.node.title;
@@ -1140,7 +1138,7 @@ const iconPath = viewModel.value.cache[`./${path}`] ?? path;
 // Metadata ("icon" is not a string) > Predefined > Cached > Arbitrary URI
 const nodeStyle = computed(() => {
     let icon;
-    let name = viewModel.value.editor.getStyleIcon(node.value.type);
+    let name = viewModel.value.editor.getStyleIcon(node.value);
 
     if (typeof name === 'object' && name !== null) {
         name = editorManager.getMetadataIcon(name);
@@ -1172,13 +1170,13 @@ const interfaceCursorStyle = ref({
 });
 
 const customTitleOffset = computed(() => viewModel.value.editor
-    .getNodeStyleTitleOffset(node.value.type) ?? {
+    .getNodeStyleTitleOffset(node.value) ?? {
     x: 0,
     y: 0,
 });
 
 const customShapeTitlePosition = computed(() => {
-    const titlePos = viewModel.value.editor.getCustomNodeTitlePosition(node.value.type);
+    const titlePos = viewModel.value.editor.getCustomNodeTitlePosition(node.value);
 
     if (titlePos === undefined) {
         return undefined;

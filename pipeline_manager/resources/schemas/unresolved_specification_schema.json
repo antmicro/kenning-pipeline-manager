@@ -455,7 +455,6 @@
                 "hidden": {
                     "$ref": "graph_schema.json#/$defs/hidden"
                 },
-
                 "bus": {
                     "description": "Determines bus attributes",
                     "type": "object",
@@ -543,7 +542,10 @@
                         },
                         "step": {
                             "description": "Step value for slider type",
-                            "type": ["number", "string"]
+                            "type": [
+                                "number",
+                                "string"
+                            ]
                         },
                         "values": {
                             "description": "Range of values for the select type",
@@ -685,11 +687,17 @@
                                     "format": "hex"
                                 },
                                 "min": {
-                                    "type": [ "string", "null" ],
+                                    "type": [
+                                        "string",
+                                        "null"
+                                    ],
                                     "format": "hex"
                                 },
                                 "max": {
-                                    "type": [ "string", "null" ],
+                                    "type": [
+                                        "string",
+                                        "null"
+                                    ],
                                     "format": "hex"
                                 }
                             }
@@ -700,7 +708,10 @@
                                     "const": "list"
                                 },
                                 "default": {
-                                    "type": ["array", "null"]
+                                    "type": [
+                                        "array",
+                                        "null"
+                                    ]
                                 }
                             },
                             "required": [
@@ -733,7 +744,10 @@
                                     "const": "button-api"
                                 },
                                 "default": {
-                                    "type": ["object", "null"]
+                                    "type": [
+                                        "object",
+                                        "null"
+                                    ]
                                 }
                             }
                         }
