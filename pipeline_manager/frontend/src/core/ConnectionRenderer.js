@@ -181,7 +181,7 @@ export default class ConnectionRenderer {
     aStarCache = new Map();
 
     maxNodeWidths = new Map();
-    
+
     aStarZoneInfo = undefined;
 
     minMargin = 30;
@@ -688,20 +688,20 @@ export default class ConnectionRenderer {
         return {
             id: node.id,
             position: node.position,
-            width: HTMLelement.offsetWidth,
+            width: this.maxNodeWidths.get(node.id),
             height: HTMLelement.offsetHeight,
         };
     }
 
-    getNodeZoneIds(node, minMargin) {
-        const initIdx = Math.floor((node.position.x - minMargin) / aStarConfig.zoneStep);
-        const initIdy = Math.floor((node.position.y - minMargin) / aStarConfig.zoneStep);
+    getNodeZoneIds(node) {
+        const initIdx = Math.floor((node.position.x - this.minMargin) / aStarConfig.zoneStep);
+        const initIdy = Math.floor((node.position.y - this.minMargin) / aStarConfig.zoneStep);
 
         const finalIdx = Math.floor(
-            (node.position.x + node.width + minMargin) / aStarConfig.zoneStep,
+            (node.position.x + node.width + this.minMargin) / aStarConfig.zoneStep,
         );
         const finalIdy = Math.floor(
-            (node.position.y + node.height + minMargin) / aStarConfig.zoneStep,
+            (node.position.y + node.height + this.minMargin) / aStarConfig.zoneStep,
         );
 
         return {
@@ -712,7 +712,7 @@ export default class ConnectionRenderer {
         };
     }
 
-    updateZoneInfo(nInfo, minMargin) {
+    updateZoneInfo(nInfo) {
         // Map addressed with formatted strings,
         // with lists of nodeInfo instances as values
         const { zoneInfo } = this.aStarZoneInfo;
@@ -728,7 +728,7 @@ export default class ConnectionRenderer {
             initIdy,
             finalIdx,
             finalIdy,
-        } = this.getNodeZoneIds(nInfo, minMargin);
+        } = this.getNodeZoneIds(nInfo);
 
         for (
             let i = Math.min(initIdx, finalIdx);
@@ -761,7 +761,6 @@ export default class ConnectionRenderer {
             return;
         }
 
-        const minMargin = 30;
         const nInfo = this.dumpNodeData(node);
 
         // Check whether node is already in zone
@@ -779,10 +778,10 @@ export default class ConnectionRenderer {
 
         this.aStarZoneInfo.rZoneInfo.set(nInfo.id, []);
 
-        this.updateZoneInfo(nInfo, minMargin);
+        this.updateZoneInfo(nInfo);
     }
 
-    generateZoneInfo(graph, minMargin) {
+    generateZoneInfo(graph) {
         if (this.aStarZoneInfo !== undefined) {
             return;
         }
@@ -805,7 +804,7 @@ export default class ConnectionRenderer {
         // Initialization of spatial hashing data and zones
         // In the end, each zone entry contains a list of node object,
         // each represented by its id, position, width and height
-        nodesInfo.forEach((nInfo) => this.updateZoneInfo(nInfo, minMargin));
+        nodesInfo.forEach((nInfo) => this.updateZoneInfo(nInfo));
     }
 
     aStarRender(x1, y1, x2, y2, connection) {
@@ -827,11 +826,9 @@ export default class ConnectionRenderer {
 
         const nc = new NormalizedConnection(x1, y1, x2, y2, connection);
 
-        const minMargin = 30;
-
         const regGridStep = aStarConfig.gridStepFunc(nc.x1, nc.y1, nc.x2, nc.y2);
 
-        this.generateZoneInfo(graph, minMargin);
+        this.generateZoneInfo(graph);
 
         const { zoneInfo, nodesInfo } = this.aStarZoneInfo;
 
@@ -841,7 +838,7 @@ export default class ConnectionRenderer {
             const calculateOffsets = (inf, x, y) => {
                 if (inf.side === 'left') {
                     // Positioned interfaces have sidePosition set to undefined
-                    const xl = inf.sidePosition !== undefined ? x - minMargin :
+                    const xl = inf.sidePosition !== undefined ? x - this.minMargin :
                         x;
                     return {
                         x: xl,
@@ -850,7 +847,7 @@ export default class ConnectionRenderer {
                 }
                 if (inf.side === 'right') {
                     // Positioned interfaces have sidePosition set to undefined
-                    const xr = inf.sidePosition !== undefined ? x + minMargin :
+                    const xr = inf.sidePosition !== undefined ? x + this.minMargin :
                         x;
                     return {
                         x: xr,
@@ -858,14 +855,14 @@ export default class ConnectionRenderer {
                     };
                 }
                 if (inf.side === 'top') {
-                    const yt = y - minMargin;
+                    const yt = y - this.minMargin;
                     return {
                         x,
                         y: yt,
                     };
                 }
                 if (inf.side === 'bottom') {
-                    const yb = y + minMargin;
+                    const yb = y + this.minMargin;
                     return {
                         x,
                         y: yb,
@@ -903,7 +900,6 @@ export default class ConnectionRenderer {
                 toPoints,
                 regGridStep,
                 shift,
-                minMargin,
                 zoneInfo,
             ).map((point) => ({
                 x: point.x,
@@ -944,8 +940,7 @@ export default class ConnectionRenderer {
      * @param toPoints Array of points related to `to` interface
      * @param regGridStep Grid step size used by A* to find paths
      * @param shift Offset by which grid is translated
-     * @param minMargin Minimum margin around nodes within which
-     *                  segments are considered to intersect the node
+     * @param nodesInfo Array containing exact positions and sizes of nodes
      * @param zoneInfo Map used in spatial hashing
      * @returns Array of objects with x and y coordinates,
      *          representing consecutive points along the path
@@ -955,11 +950,11 @@ export default class ConnectionRenderer {
         toPoints,
         regGridStep,
         shift,
-        minMargin,
         zoneInfo,
     ) {
         // helper function returning key to index `pointsToIndex` map
         const key = (point) => `${point.x}:${point.y}:${point.type}`;
+        const { minMargin } = this;
 
         /**
          * Determines the direction between two points on an orthogonal path.
@@ -1373,7 +1368,6 @@ export default class ConnectionRenderer {
             return this.orthogonalAnchorsPath(connection.anchors, nc);
         }
 
-        const minMargin = 30;
         const middlePointX = (nc.x1 + nc.x2) / 2;
         const middlePointY = (nc.y1 + nc.y2) / 2;
         const intfPad = 20;
@@ -1381,14 +1375,17 @@ export default class ConnectionRenderer {
         if (connection.to) {
             const shift = this.getShift(nc.from, nc.to, graph);
             if (nc.from.side === 'right' && nc.to.side === 'left') {
-                const mid = middlePointX + shift;
+                const mid = Math.max(nc.x1, middlePointX) + shift + this.minMargin;
 
-                const firstTurn = nc.x1 + shift + minMargin;
-                const lastTurn = nc.x2 - shift - minMargin;
+                const firstTurn = mid < nc.x2 - shift - this.minMargin ?
+                    nc.x1 + shift + this.minMargin : mid;
+                const lastTurn = nc.x2 - shift - this.minMargin;
 
                 // S connection
-                if ((firstTurn > mid && firstTurn < nc.x2 - minMargin)
-                    || (nc.x1 + minMargin > nc.x2 - minMargin)) {
+                if (
+                    mid >= nc.x2 - shift - this.minMargin &&
+                    (firstTurn > nc.x2 - this.minMargin || lastTurn < nc.x1 - this.minMargin)
+                ) {
                     return [{ x: nc.x1, y: nc.y1 },
                         { x: nc.x1 + intfPad, y: nc.y1 },
                         { x: firstTurn, y: nc.y1 },
@@ -1400,7 +1397,7 @@ export default class ConnectionRenderer {
                     ];
                 }
                 // Z connection
-                if (mid < nc.x2 - minMargin) {
+                if (mid < nc.x2 - this.minMargin) {
                     return [{ x: nc.x1, y: nc.y1 },
                         { x: nc.x1 + intfPad, y: nc.y1 },
                         { x: mid, y: nc.y1 },
@@ -1409,7 +1406,8 @@ export default class ConnectionRenderer {
                         { x: nc.x2, y: nc.y2 },
                     ];
                 }
-                const zConnectionTurn = firstTurn < nc.x2 - minMargin ? firstTurn : middlePointX;
+                const zConnectionTurn = firstTurn < nc.x2 - this.minMargin
+                    ? firstTurn : middlePointX;
                 return [{ x: nc.x1, y: nc.y1 },
                     { x: nc.x1 + intfPad, y: nc.y1 },
                     { x: zConnectionTurn, y: nc.y1 },
@@ -1419,14 +1417,17 @@ export default class ConnectionRenderer {
                 ];
             }
             if (nc.from.side === 'left' && nc.to.side === 'right') {
-                const mid = middlePointX + shift;
+                const mid = Math.max(nc.x2, middlePointX) + shift + this.minMargin;
 
-                const firstTurn = nc.x2 + shift + minMargin;
-                const lastTurn = nc.x1 - shift - minMargin;
+                const firstTurn = mid < nc.x1 - shift - this.minMargin ?
+                    nc.x2 + shift + this.minMargin : mid;
+                const lastTurn = nc.x1 - shift - this.minMargin;
 
                 // S connection
-                if ((firstTurn > mid && firstTurn < nc.x1 - minMargin)
-                    || (nc.x2 + minMargin > nc.x1 - minMargin)) {
+                if (
+                    mid >= nc.x1 - shift - this.minMargin &&
+                    (firstTurn > nc.x1 - this.minMargin || lastTurn < nc.x2 - this.minMargin)
+                ) {
                     return [{ x: nc.x2, y: nc.y2 },
                         { x: nc.x2 + intfPad, y: nc.y2 },
                         { x: firstTurn, y: nc.y2 },
@@ -1438,7 +1439,7 @@ export default class ConnectionRenderer {
                     ];
                 }
                 // Z connection
-                if (mid < nc.x1 - minMargin) {
+                if (mid < nc.x1 - this.minMargin) {
                     return [{ x: nc.x2, y: nc.y2 },
                         { x: nc.x2 + intfPad, y: nc.y2 },
                         { x: mid, y: nc.y2 },
@@ -1447,7 +1448,8 @@ export default class ConnectionRenderer {
                         { x: nc.x1, y: nc.y1 },
                     ];
                 }
-                const zConnectionTurn = firstTurn < nc.x1 - minMargin ? firstTurn : middlePointX;
+                const zConnectionTurn = firstTurn < nc.x1 - this.minMargin
+                    ? firstTurn : middlePointX;
                 return [{ x: nc.x2, y: nc.y2 },
                     { x: nc.x2 + intfPad, y: nc.y2 },
                     { x: zConnectionTurn, y: nc.y2 },
@@ -1468,7 +1470,7 @@ export default class ConnectionRenderer {
                     ];
                 }
 
-                const midX = nc.y2 > middlePointY ? nc.x1 : middlePointX + minMargin;
+                const midX = nc.y2 > middlePointY ? nc.x1 : middlePointX + this.minMargin;
 
                 return [{ x: nc.x1, y: nc.y1 },
                     { x: nc.x1, y: nc.y1 + intfPad },
@@ -1490,7 +1492,7 @@ export default class ConnectionRenderer {
                     ];
                 }
 
-                const midX = nc.y1 > middlePointY ? nc.x2 : middlePointX + minMargin;
+                const midX = nc.y1 > middlePointY ? nc.x2 : middlePointX + this.minMargin;
 
                 return [{ x: nc.x1, y: nc.y1 },
                     { x: nc.x1 + intfPad, y: nc.y1 },
@@ -1512,7 +1514,7 @@ export default class ConnectionRenderer {
                     ];
                 }
 
-                const midX = nc.y1 > middlePointY ? nc.x2 : middlePointX + minMargin;
+                const midX = nc.y1 > middlePointY ? nc.x2 : middlePointX + this.minMargin;
 
                 return [{ x: nc.x1, y: nc.y1 },
                     { x: nc.x1 - intfPad, y: nc.y1 },
@@ -1534,7 +1536,7 @@ export default class ConnectionRenderer {
                     ];
                 }
 
-                const midX = nc.y2 > middlePointY ? nc.x1 : middlePointX + minMargin;
+                const midX = nc.y2 > middlePointY ? nc.x1 : middlePointX + this.minMargin;
 
                 return [{ x: nc.x1, y: nc.y1 },
                     { x: nc.x1, y: nc.y1 + intfPad },
@@ -1556,7 +1558,7 @@ export default class ConnectionRenderer {
                     ];
                 }
 
-                const midX = middlePointX + minMargin;
+                const midX = middlePointX + this.minMargin;
 
                 return [{ x: nc.x1, y: nc.y1 },
                     { x: nc.x1, y: nc.y1 - intfPad },
@@ -1578,7 +1580,7 @@ export default class ConnectionRenderer {
                     ];
                 }
 
-                const midX = middlePointX + minMargin;
+                const midX = middlePointX + this.minMargin;
 
                 return [{ x: nc.x1, y: nc.y1 },
                     { x: nc.x1 + intfPad, y: nc.y1 },
@@ -1600,7 +1602,7 @@ export default class ConnectionRenderer {
                     ];
                 }
 
-                const midX = middlePointX + minMargin;
+                const midX = middlePointX + this.minMargin;
 
                 return [{ x: nc.x1, y: nc.y1 },
                     { x: nc.x1 - intfPad, y: nc.y1 },
@@ -1622,7 +1624,7 @@ export default class ConnectionRenderer {
                     ];
                 }
 
-                const midX = middlePointX + minMargin;
+                const midX = middlePointX + this.minMargin;
 
                 return [{ x: nc.x1, y: nc.y1 },
                     { x: nc.x1, y: nc.y1 - intfPad },
@@ -1633,7 +1635,7 @@ export default class ConnectionRenderer {
                 ];
             }
             if (nc.from.side === 'right' && nc.to.side === 'right') {
-                const mid = Math.max(nc.x1, nc.x2, middlePointX) + shift + minMargin;
+                const mid = Math.max(nc.x1, nc.x2, middlePointX) + shift + this.minMargin;
                 return [{ x: nc.x1, y: nc.y1 },
                     { x: nc.x1 + intfPad, y: nc.y1 },
                     { x: mid, y: nc.y1 },
@@ -1643,7 +1645,7 @@ export default class ConnectionRenderer {
                 ];
             }
             if (nc.from.side === 'left' && nc.to.side === 'left') {
-                const mid = Math.min(nc.x1, nc.x2, middlePointX) - shift - minMargin;
+                const mid = Math.min(nc.x1, nc.x2, middlePointX) - shift - this.minMargin;
                 return [{ x: nc.x1, y: nc.y1 },
                     { x: nc.x1 - intfPad, y: nc.y1 },
                     { x: mid, y: nc.y1 },
@@ -1653,7 +1655,7 @@ export default class ConnectionRenderer {
                 ];
             }
             if (nc.from.side === 'top' && nc.to.side === 'top') {
-                const mid = Math.min(nc.y1, nc.y2, middlePointY) - minMargin;
+                const mid = Math.min(nc.y1, nc.y2, middlePointY) - this.minMargin;
 
                 return [{ x: nc.x1, y: nc.y1 },
                     { x: nc.x1, y: nc.y1 - intfPad },
@@ -1664,7 +1666,7 @@ export default class ConnectionRenderer {
                 ];
             }
             if (nc.from.side === 'bottom' && nc.to.side === 'bottom') {
-                const mid = Math.max(nc.y1, nc.y2, middlePointY) + minMargin;
+                const mid = Math.max(nc.y1, nc.y2, middlePointY) + this.minMargin;
 
                 return [{ x: nc.x1, y: nc.y1 },
                     { x: nc.x1, y: nc.y1 + intfPad },
@@ -1718,15 +1720,14 @@ export default class ConnectionRenderer {
             return this.orthogonalAnchorsPath(connection.anchors, nc);
         }
 
-        const minMargin = 30;
         const middlePoint = (nc.x1 + nc.x2) / 2;
 
         if (connection.to) {
             const shift = this.getShift(nc.from, nc.to, graph);
             const maxShift = this.getMaxShift(nc.from, nc.to, graph) || 1;
 
-            const turnDistance = Math.abs(nc.x1 - nc.x2) - 2 * minMargin;
-            const minTurnDistance = minMargin * (2 + maxShift / 30);
+            const turnDistance = Math.abs(nc.x1 - nc.x2) - 2 * this.minMargin;
+            const minTurnDistance = this.minMargin * (2 + maxShift / 30);
             const minTurnDistanceViolated = turnDistance < minTurnDistance;
             const maxTurnDistance = minTurnDistance * 2;
 
@@ -1744,8 +1745,10 @@ export default class ConnectionRenderer {
                 // S connection
                 const nodeOverlap = nc.x1 > nc.x2;
                 if ((differentLevels && minTurnDistanceViolated) || nodeOverlap) {
-                    const firstTurn = nc.x1 + minMargin + (shift / maxShift) * minTurnDistance;
-                    const lastTurn = nc.x2 - minMargin + (shift / maxShift - 1) * minTurnDistance;
+                    const firstTurn = nc.x1 + this.minMargin +
+                        (shift / maxShift) * minTurnDistance;
+                    const lastTurn = nc.x2 - this.minMargin +
+                        (shift / maxShift - 1) * minTurnDistance;
                     return `M ${nc.x1} ${nc.y1}
                     H ${firstTurn}
                     V ${(nc.y1 + nc.y2) / 2}
@@ -1755,14 +1758,14 @@ export default class ConnectionRenderer {
                 }
 
                 // Z connection
-                const mid = nc.x1 + minMargin + interpolatedShift;
+                const mid = nc.x1 + this.minMargin + interpolatedShift;
                 return `M ${nc.x1} ${nc.y1} H ${mid} V ${nc.y2} H ${nc.x2}`;
             }
             if (nc.from.side === 'right' && nc.to.side === 'bottom') {
                 const midPointY = (nc.y1 + nc.y2) / 2;
 
-                const firstTurn = nc.x1 - nc.x2 > 0 ? nc.x1 + minMargin : nc.x2;
-                const lastTurn = nc.y2 + minMargin;
+                const firstTurn = nc.x1 - nc.x2 > 0 ? nc.x1 + this.minMargin : nc.x2;
+                const lastTurn = nc.y2 + this.minMargin;
 
                 return `M ${nc.x1} ${nc.y1}
                     H ${firstTurn}
@@ -1775,8 +1778,8 @@ export default class ConnectionRenderer {
             if (nc.from.side === 'left' && nc.to.side === 'bottom') {
                 const midPointY = (nc.y1 + nc.y2) / 2;
 
-                const firstTurn = nc.x1 - nc.x2 < 0 ? nc.x1 + minMargin : nc.x2;
-                const lastTurn = nc.y2 + minMargin;
+                const firstTurn = nc.x1 - nc.x2 < 0 ? nc.x1 + this.minMargin : nc.x2;
+                const lastTurn = nc.y2 + this.minMargin;
 
                 return `M ${nc.x1} ${nc.y1}
                     H ${firstTurn}
@@ -1789,8 +1792,8 @@ export default class ConnectionRenderer {
             if (nc.from.side === 'right' && nc.to.side === 'top') {
                 const midPointY = (nc.y1 + nc.y2) / 2;
 
-                const firstTurn = nc.x1 - nc.x2 > 0 ? nc.x1 + minMargin : nc.x2;
-                const lastTurn = nc.y2 - minMargin;
+                const firstTurn = nc.x1 - nc.x2 > 0 ? nc.x1 + this.minMargin : nc.x2;
+                const lastTurn = nc.y2 - this.minMargin;
 
                 return `M ${nc.x1} ${nc.y1}
                     H ${firstTurn}
@@ -1803,8 +1806,8 @@ export default class ConnectionRenderer {
             if (nc.from.side === 'left' && nc.to.side === 'top') {
                 const midPointY = (nc.y1 + nc.y2) / 2;
 
-                const firstTurn = nc.x1 - nc.x2 < 0 ? nc.x1 - minMargin : nc.x2;
-                const lastTurn = nc.y2 - minMargin;
+                const firstTurn = nc.x1 - nc.x2 < 0 ? nc.x1 - this.minMargin : nc.x2;
+                const lastTurn = nc.y2 - this.minMargin;
 
                 return `M ${nc.x1} ${nc.y1}
                     H ${firstTurn}
@@ -1818,8 +1821,9 @@ export default class ConnectionRenderer {
                 // S connection
                 const nodeOverlap = nc.x2 > nc.x1;
                 if ((differentLevels && minTurnDistanceViolated) || nodeOverlap) {
-                    const firstTurn = nc.x2 + minMargin + (shift / maxShift) * minTurnDistance;
-                    const lastTurn = nc.x1 - minMargin + (shift / maxShift - 1) * minTurnDistance;
+                    const firstTurn = nc.x2 + this.minMargin + (shift / maxShift) * minTurnDistance;
+                    const lastTurn = nc.x1 - this.minMargin +
+                        (shift / maxShift - 1) * minTurnDistance;
                     return `M ${nc.x2} ${nc.y2}
                     H ${firstTurn}
                     V ${(nc.y1 + nc.y2) / 2}
@@ -1829,31 +1833,31 @@ export default class ConnectionRenderer {
                 }
 
                 // Z connection
-                const mid = nc.x2 + minMargin + interpolatedShift;
+                const mid = nc.x2 + this.minMargin + interpolatedShift;
                 return `M ${nc.x2} ${nc.y2} H ${mid} V ${nc.y1} H ${nc.x1}`;
             }
             if (nc.from.side === 'right' && nc.to.side === 'right') {
                 return `M ${nc.x1} ${nc.y1} H ${
-                    Math.max(nc.x1, nc.x2, middlePoint) + shift + minMargin
+                    Math.max(nc.x1, nc.x2, middlePoint) + shift + this.minMargin
                 } V ${nc.y2} H ${nc.x2}`;
             }
             if (nc.from.side === 'left' && nc.to.side === 'left') {
                 return `M ${nc.x1} ${nc.y1} H ${
-                    Math.min(nc.x1, nc.x2, middlePoint) - shift - minMargin
+                    Math.min(nc.x1, nc.x2, middlePoint) - shift - this.minMargin
                 } V ${nc.y2} H ${nc.x2}`;
             }
             if (nc.from.side === 'top' && nc.to.side === 'top') {
                 const midPointY = (nc.y1 + nc.y2) / 2;
 
                 return `M ${nc.x1} ${nc.y1} V ${
-                    Math.min(nc.y1, nc.y2, midPointY) - minMargin
+                    Math.min(nc.y1, nc.y2, midPointY) - this.minMargin
                 } H ${nc.x2} V ${nc.y2}`;
             }
             if (nc.from.side === 'bottom' && nc.to.side === 'bottom') {
                 const midPointY = (nc.y1 + nc.y2) / 2;
 
                 return `M ${nc.x1} ${nc.y1} V ${
-                    Math.max(nc.y1, nc.y2, midPointY) + minMargin
+                    Math.max(nc.y1, nc.y2, midPointY) + this.minMargin
                 } H ${nc.x2} V ${nc.y2}`;
             }
         }
@@ -1986,7 +1990,7 @@ export default class ConnectionRenderer {
             return;
         }
 
-        const minMargin = 30 * graph.scaling;
+        const minMargin = this.minMargin * graph.scaling;
 
         const fromNode = graph.nodes.filter((node) => nc.from.nodeId === node.id)[0];
         const fromNodePosInterfaces = graph.editor.getNodeInterfacePositions(fromNode);
