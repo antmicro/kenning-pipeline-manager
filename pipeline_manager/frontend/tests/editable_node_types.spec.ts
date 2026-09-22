@@ -254,7 +254,7 @@ test('check custom shape node interface popup', async ({ page }) => {
 
     const signalNode = getNode(page,'Signal');
     await assertInoutCount(signalNode, 2);
-    const interfaces = signalNode.locator('.baklava-node-interface-positioned');
+    const interfaces = signalNode.locator('.baklava-node-interface.--positioned');
 
     const topInterfaces = interfaces.first();
     await topInterfaces.locator('.__port').hover();
@@ -266,7 +266,7 @@ test('check custom shape node interface popup', async ({ page }) => {
 
     const resistorNode = getNode(page,'Resistor');
     await assertInoutCount(signalNode, 2);
-    const interfacesResistor = resistorNode.locator('.baklava-node-interface-positioned');
+    const interfacesResistor = resistorNode.locator('.baklava-node-interface.--positioned');
 
     const leftInterfaces = interfacesResistor.first();
     await leftInterfaces.locator('.__port').hover();

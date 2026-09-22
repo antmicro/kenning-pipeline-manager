@@ -147,14 +147,14 @@
   }
 }
 
-.baklava-node-interface-positioned
-{
-    width: fit-content !important;
-    height: fit-content !important;
-}
-
 .baklava-node-interface {
     padding: 0.5em 0;
+
+    &.--positioned {
+        padding: 0;
+        width: fit-content;
+        height: fit-content;
+    }
 
     .--output {
         height: 1em;
