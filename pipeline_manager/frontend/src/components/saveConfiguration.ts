@@ -215,13 +215,22 @@ export const saveGraphConfiguration: SaveConfiguration = {
 
     getSave() {
         const editorManager = EditorManager.getEditorManagerInstance();
-        return editorManager.saveDataflow({
+        const specification = editorManager.saveSpecification();
+        const dataflow = editorManager.saveDataflow({
             readonly: !!this.readonly,
             hideHud: !!this.hideHud,
             position: !!this.position,
             hideLayers: !!this.hideLayers,
             graphName: this.graphName,
         });
+
+        if (Object.hasOwn(specification, 'metadata') && Object.hasOwn(specification.metadata, 'styles')) {
+            if (!Object.hasOwn(dataflow, 'metadata')) {
+                dataflow.metadata = {};
+            }
+            dataflow.metadata.styles = specification.metadata.styles;
+        }
+        return dataflow;
     },
 
     saveCallback() {
