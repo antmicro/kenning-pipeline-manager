@@ -82,18 +82,21 @@ from moving or deleting the nodes.
             <!-- disable transition to avoid rendering additional redraw for viewport adjustment -->
 
         </div>
-        <img :src="customShape + '#svgView(preserveAspectRatio(none))'"
-            v-if="customShape !== undefined"
-            class="--shape"
-            draggable="false"
-            ref="svgRef"
-            :style="customShapeStyle"
+        <div
             @pointerdown.left.exact="onMouseDown"
             @pointerdown.left="startDragWrapper($event)"
             @pointerdown.right="openContextMenuTitle"
             v-long-press:500="openContextMenuTitle"
-        />
-        <!-- Preview of where the interface will be placed -->
+            class="--shape"
+            draggable="false"
+        >
+            <img :src="customShape + '#svgView(preserveAspectRatio(none))'"
+                ref="svgRef"
+                v-if="customShape !== undefined"
+                :style="customShapeStyle"
+                @error="()=>{customShapeUnavailable(nodeRef, svgRef)}"/>
+        </div>
+                <!-- Preview of where the interface will be placed -->
         <div
             v-if="menuState.previewInterface && node.type === configurationState.editedType"
             class="interface-preview"
@@ -895,6 +898,20 @@ const select = (event) => {
 const openContextMenu = (isOpened, x, y, items, ignoreClose, onClick,
     urls = undefined, style = undefined, onClose = () => {}) => {
     emit('openContextMenu', isOpened, x, y, items, ignoreClose, onClick, urls, style, onClose);
+};
+
+const customShapeUnavailable = (nodeElement, svgElement) => {
+    if (nodeElement === null) return;
+    nodeElement.style.border = '2px dashed #FF0000'; // eslint-disable-line no-param-reassign
+    svgElement.remove();
+    if (!editorManager.editor.noShapeToast) {
+        editorManager.editor.noShapeToast = true;
+        NotificationHandler.showToast('warning', `Custom node shape is unavailable`, null, true);
+    }
+    if (!editorManager.editor.noShapeNotified.includes(props.node.type)) {
+        NotificationHandler.terminalLog('warning', 'Custom node shape is unavailable', `Image unavailable for node type: ${props.node.type}`, null, true);
+        editorManager.editor.noShapeNotified.push(props.node.type);
+    }
 };
 
 let abortDrag;

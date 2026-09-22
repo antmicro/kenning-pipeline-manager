@@ -108,6 +108,20 @@ export default class PipelineManagerEditor extends Editor {
     // specification
     preloadedGraphs = reactive([]);
 
+    /**
+     * Stores custom shape node types of nodes
+     * which were not loaded correctly.
+     * @type {string[]}
+     */
+    noShapeNotified = [];
+
+    /**
+     * Stores information whether toast about
+     * missing custom node shapes was already displayed.
+     * @type {boolean}
+     */
+    noShapeToast = false;
+
     addPreloadedGraph(graphSpec) {
         this.preloadedGraphs.push({
             spec: graphSpec,
@@ -381,6 +395,8 @@ export default class PipelineManagerEditor extends Editor {
         centerAtTop = false,
         markEdited = false,
     ) {
+        this.noShapeNotified = [];
+        this.noShapeToast = false;
         this.editorManager.baklavaView.connectionRenderer.maxNodeWidths.clear();
         // All subgraphs should be unregistered to avoid conflicts later when trying to
         // load into subgraph (in that case there may be two subgraphs with the same ID, one

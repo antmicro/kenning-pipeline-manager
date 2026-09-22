@@ -111,14 +111,16 @@ export default class NotificationHandler {
      * @param {Array[string | Error] | string | Error | undefined}
      * messages messages that are displayed in the terminal
      * @param {string | null} timestamp timestamp that is displayed alongside messages
+     * @param {boolean} disableToast flag to disable the toast notification associated with the log
      */
-    static terminalLog(type, title, messages = undefined, timestamp = null) {
+    static terminalLog(type, title, messages = undefined, timestamp = null, disableToast = false) {
         function flatten(arr) {
             return arr.reduce((flat, toFlatten) =>
                 flat.concat(Array.isArray(toFlatten) ? flatten(toFlatten) : toFlatten), []);
         }
-
-        NotificationHandler.showToast(type, title, timestamp);
+        if (!disableToast) {
+            NotificationHandler.showToast(type, title, timestamp);
+        }
         let timestampCurrent = timestamp ?? `[${NotificationHandler.#currentTimestamp()}]`;
         if (timestampCurrent) {
             timestampCurrent += ' ';
