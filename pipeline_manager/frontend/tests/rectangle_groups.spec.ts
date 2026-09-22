@@ -4,12 +4,9 @@ import {
     Locator,
 } from '@playwright/test';
 import {
-    deleteNode, getContextMenu, getUrl, loadDataflow, loadSpecification, openSettingsPanel,
+    getUrl, loadSpecification, loadDataflow, getContextMenu, deleteNode, getNode, openSettingsPanel
 } from './config.js';
 
-function getNode(page: Page, name: string): Locator {
-    return page.locator(`.baklava-node[data-node-type="${name}"]`);
-}
 function getGroup(page: Page, name: string): Locator {
     return page.locator('.grouping-container').getByText(name).locator('..');
 }
@@ -191,4 +188,50 @@ test('groups are preserved after swapping interfaces', async ({ page }) => {
     groupsCount = await page.locator('.grouping-container > div').count();
     await expect(groupsCount).toBe(6);
     await expect(selectedGroup).toBeVisible();
+});
+test('move multiple groups', async ({page}) => {
+    await page.goto(getUrl());
+
+    await loadSpecification(page, 'sample-rectangle-grouping-specification.json');
+    await loadDataflow(page, 'sample-rectangle-grouping-dataflow.json');
+
+    const groupA = getGroup(page,'Runtime - Target');
+    const groupB = getGroup(page,'Runtime Protocol - Target');
+    const nodeA = getNode(page,'Model loading').first();
+
+    const groupABBoxBefore = await groupA.boundingBox();
+    const groupBBBoxBefore = await groupB.boundingBox();
+
+    const left = Math.min(groupBBBoxBefore?.x ?? 0, groupABBoxBefore?.x ?? 0);
+    const top = Math.min(groupBBBoxBefore?.y ?? 0, groupABBoxBefore?.y ?? 0);
+    const right = Math.max((groupBBBoxBefore?.x ?? 0) + ( groupBBBoxBefore?.width ?? 0 ),(groupABBoxBefore?.x ?? 0) + ( groupABBoxBefore?.width ?? 0 ));
+    const bottom = Math.max((groupBBBoxBefore?.y ?? 0) + ( groupBBBoxBefore?.height ?? 0 ),(groupABBoxBefore?.y ?? 0) + ( groupABBoxBefore?.height ?? 0 ));
+
+    await page.mouse.move(left, top);
+
+    // select groups
+    await page.keyboard.down('Shift');
+    await page.mouse.down({ button: 'right' });
+    await page.mouse.move(
+        right,
+        bottom
+    );
+    await page.mouse.up({ button: 'right' });
+    await page.keyboard.up('Shift');
+
+    const nodeABBox = await nodeA.boundingBox();
+    // move groups around
+    await page.keyboard.down('Control');
+    await nodeA.click({force: true});
+    await page.mouse.move(nodeABBox.x + 10 ,nodeABBox.y + 10);
+    await page.mouse.down();
+    await page.mouse.move(nodeABBox.x + 200,nodeABBox.y);
+    await page.keyboard.up('Control');
+    await page.mouse.up();
+
+    const groupABBoxAfter = await groupA.boundingBox();
+    const groupBBBoxAfter = await groupB.boundingBox();
+
+    expect(Math.abs( groupABBoxAfter.x - groupABBoxBefore.x - 200) < 25).toBeTruthy();
+    expect(Math.abs( groupBBBoxAfter.x - groupBBBoxBefore.x - 200) < 25).toBeTruthy();
 });
